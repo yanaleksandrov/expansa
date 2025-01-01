@@ -1,7 +1,7 @@
 # Введение
 
-Хуки Grafema позволяют создавать и отслеживать различные события, происходящие в приложении.
-Такое поведение в программировании иногда называется перехват. Но в рамках экосистемы Grafema 
+Хуки Expansa позволяют создавать и отслеживать различные события, происходящие в приложении.
+Такое поведение в программировании иногда называется перехват. Но в рамках экосистемы Expansa 
 их принято называть хуками. Другими совами, хуки, — это участки кода которые позволяют 
 переопределить или расширить стандартное поведение приложения.
 
@@ -18,7 +18,7 @@
 
 ```php
 <?php
-use Grafema\Hook;
+use Expansa\Hook;
 
 Hook::call('testHook', $var1, $var2, ...);
 ```
@@ -30,7 +30,7 @@ Hook::call('testHook', $var1, $var2, ...);
 ### #1. Добавление через обычную callback функцию
 
 ```php
-use Grafema\Hook;
+use Expansa\Hook;
 
 function applyTestHook($var) {
     $var = 'foo';
@@ -43,8 +43,8 @@ Hook::add('testHook', 'applyTestHook');
 ### #2. Добавление через анонимную функцию
 
 ```php
-use Grafema\Hook;
-use Grafema\Hooks\HookListenerAlias;
+use Expansa\Hook;
+use Expansa\Hooks\HookListenerAlias;
 
 Hook::add('testHook', fn(&$var) => $var = 'foo');
 // или
@@ -57,13 +57,13 @@ Hook::add('testHook', #[HookListenerAlias('applyTestHook')] fn(&$var) => $var = 
 
 ### #3. Добавление через сканирование каталога с PHP классами
 
-По умолчанию Grafema автоматически ищет и регистрирует ваши слушатели событий, просканировав 
-каталог Listeners. Когда Grafema находит (!внимание) **публичный метод класса** слушателя, Grafema 
+По умолчанию Expansa автоматически ищет и регистрирует ваши слушатели событий, просканировав 
+каталог Listeners. Когда Expansa находит (!внимание) **публичный метод класса** слушателя, Expansa 
 регистрирует эти методы как слушатели для хука. При этом, название метода должно соответствовать
 названию хука.
 
 ```php
-Grafema\Hook::configure(GRFM_CORE . 'Listeners');
+Expansa\Hook::configure(GRFM_CORE . 'Listeners');
 
 // file app/Listeners/Test.php
 <?php
@@ -99,8 +99,8 @@ TODO: вероятно этот механизм следует исправит
 
 ```php
 <?php
-use Grafema\Hook;
-use Grafema\Hooks\Priority;
+use Expansa\Hook;
+use Expansa\Hooks\Priority;
 
 Hook::add('testHook', 'commerceProductUpdate', Priority::BASE);
 Hook::add('testHook', 'commerceProductCreate', Priority::HIGH + 1);
@@ -110,7 +110,7 @@ Hook::add('testHook', 'commerceProductCreate', Priority::HIGH + 1);
 аттрибут `HookListenerPriority`, где 400 - число приоритета:
 
 ```php
-use Grafema\Hooks\HookListenerPriority;
+use Expansa\Hooks\HookListenerPriority;
 
 class Test
 {
@@ -126,7 +126,7 @@ class Test
 
 В рамках разработки плагинов и тем, рекомендуется придерживаться соглашения об именовании хуков: 
 использовать `префикс` + `название метода` в camelCase формате. Например: `commerceBeforeCreateOrder`.
-Именование без префикса допускается только в рамках использования ядра Grafema. Не используйте 
+Именование без префикса допускается только в рамках использования ядра Expansa. Не используйте 
 однословные названия хуков. Пусть название отражает его целевое назначение.
 
 Такой подход предотвращает конфликты имен в крупных проектах, упрощает работу для инструментов
@@ -136,10 +136,10 @@ class Test
 
 ```php
 // правильно:
-Grafema\Hook::call("commerceUpdate{$status}{$post}");
+Expansa\Hook::call("commerceUpdate{$status}{$post}");
 
 // неправильно:
-Grafema\Hook::call('commerceUpdate' . $status . $post);
+Expansa\Hook::call('commerceUpdate' . $status . $post);
 ```
 
 Также, в PHP комментариях к динамическому хуку рекомендуется писать возможные варианты 
@@ -153,5 +153,5 @@ Grafema\Hook::call('commerceUpdate' . $status . $post);
  *  - `commerceUpdateOldOrder`
  *  - `commerceUpdateDraftPage`
  */
-Grafema\Hook::call("commerceUpdate{$status}{$post}");
+Expansa\Hook::call("commerceUpdate{$status}{$post}");
 ```

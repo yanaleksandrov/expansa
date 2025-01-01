@@ -11,7 +11,7 @@ document.addEventListener( 'alpine:init', () => {
 		document.addEventListener(route, ({detail: {data, resolve}}) => resolve(data));
 
 		return new Promise(resolve => {
-			xhr.open(el.getAttribute('method')?.toUpperCase() ?? 'POST', grafema?.apiurl + route);
+			xhr.open(el.getAttribute('method')?.toUpperCase() ?? 'POST', expansa?.apiurl + route);
 
 			xhr.withCredentials = true;
 			xhr.responseType    = 'json';
