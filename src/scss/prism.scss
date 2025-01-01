@@ -4,14 +4,14 @@
  * https://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript+javadoclike+json&plugins=line-numbers
  */
 pre[class*="language-"] {
-	background: var(--grafema-bg-universal, hsla(0, 0%, 0%, 0.02));
+	background: var(--expansa-bg-universal, hsla(0, 0%, 0%, 0.02));
 	color: #383A42;
 	overflow: auto;
 	position: relative;
 }
 
 pre[class*="language-"]:before {
-	background: var(--grafema-bg-universal, hsla(0, 0%, 0%, 0.04));
+	background: var(--expansa-bg-universal, hsla(0, 0%, 0%, 0.04));
 	border-radius: 4px;
 	content: attr(data-lang);
 	font-size: 85%;

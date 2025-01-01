@@ -1,10 +1,10 @@
 .ss {
   --ss-primary-color: #5897fb;
-  --ss-bg-color: var(--grafema-bg);
+  --ss-bg-color: var(--expansa-bg);
   --ss-font-color: #4d4d4d;
   --ss-font-placeholder-color: #8d8d8d;
   --ss-disabled-color: #dcdee2;
-  --ss-border-color: var(--grafema-border);
+  --ss-border-color: var(--expansa-border);
   --ss-highlight-color: #fffb8c;
   --ss-success-color: #00b755;
   --ss-error-color: #dc3545;
@@ -14,7 +14,7 @@
   --ss-spacing-m: 5px;
   --ss-spacing-s: 3px;
   --ss-animation-timing: 0.2s;
-  --ss-border-radius: var(--grafema-border-radius);
+  --ss-border-radius: var(--expansa-border-radius);
 
   &-main {
     display: flex;
@@ -30,13 +30,13 @@
     width: 100%;
     position: relative;
     outline: 0;
-    border: 1px solid var(--grafema-border);
-    border-radius: var(--grafema-border-radius);
+    border: 1px solid var(--expansa-border);
+    border-radius: var(--expansa-border-radius);
     transition: color, box-shadow 0.2s ease;
     height: 1.875rem;
     padding-inline: 0.85em 2.25em;
     white-space: nowrap;
-    background: var(--grafema-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 54%;
+    background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 54%;
     background-size: 0.8em;
 
     select[multiple] + & {
@@ -47,13 +47,13 @@
       color: inherit;
       outline: 0;
       background-color: #fff;
-      border-color: var(--grafema-link);
-      box-shadow: 0 0 0 1px var(--grafema-link);
+      border-color: var(--expansa-link);
+      box-shadow: 0 0 0 1px var(--expansa-link);
     }
 
     &.ss-open-above,
     &.ss-open-below {
-      border-radius: var(--grafema-border-radius);
+      border-radius: var(--expansa-border-radius);
     }
 
     .ss-arrow {
@@ -64,7 +64,7 @@
       gap: 3px;
 
       .ss-placeholder {
-        color: var(--grafema-text-muted);
+        color: var(--expansa-text-muted);
       }
 
       .ss-single {
@@ -100,7 +100,7 @@
         display: flex;
         align-items: baseline;
         gap: 0.5rem;
-        color: var(--grafema-dark);
+        color: var(--expansa-dark);
 
         .ss-description {
           font-size: 0.85em;
@@ -118,7 +118,7 @@
           padding: 0.4rem;
           border: 0;
           font-size: 13px;
-          color: var(--grafema-primary);
+          color: var(--expansa-primary);
         }
 
         .ss-value-text {
@@ -136,7 +136,7 @@
           }
 
           svg path {
-            stroke: var(--grafema-primary);
+            stroke: var(--expansa-primary);
           }
         }
       }
@@ -145,7 +145,7 @@
 
   &-content {
     background-color: #fafafa;
-    border: solid 1px var(--grafema-border);
+    border: solid 1px var(--expansa-border);
     opacity: 0;
     position: absolute;
     transform: translateY(0.5rem);
@@ -156,7 +156,7 @@
 
     &.ss-open-above,
     &.ss-open-below {
-      border-radius: var(--grafema-border-radius);
+      border-radius: var(--expansa-border-radius);
       visibility: visible;
     }
 
@@ -174,7 +174,7 @@
       input {
         -webkit-appearance: textfield;
         -webkit-box-sizing: border-box;
-        background-color: var(--grafema-white);
+        background-color: var(--expansa-white);
         border-radius: 0.3rem;
         box-sizing: border-box;
         color: inherit;
@@ -201,12 +201,12 @@
     }
 
     .ss-list .ss-optgroup .ss-optgroup-label {
-      background-color: var(--grafema-bg-universal);
-      border-bottom: 1px solid var(--grafema-border);
-      border-top: 1px solid var(--grafema-border);
+      background-color: var(--expansa-bg-universal);
+      border-bottom: 1px solid var(--expansa-border);
+      border-top: 1px solid var(--expansa-border);
       padding: 0.45rem 0.85rem;
       font-size: 0.95em;
-      color: var(--grafema-text-muted);
+      color: var(--expansa-text-muted);
 
       .ss-optgroup-label-text {
         font-weight: 400;
@@ -219,13 +219,13 @@
     .ss-list .ss-option {
       padding: 0.45rem 0.85rem;
       font-size: 0.95em;
-      color: var(--grafema-dark);
-      background-color: var(--grafema-white);
+      color: var(--expansa-dark);
+      background-color: var(--expansa-white);
     }
 
     .ss-list .ss-option:hover {
-      background-color: var(--grafema-link);
-      color: var(--grafema-white);
+      background-color: var(--expansa-link);
+      color: var(--expansa-white);
     }
 
     .ss-list .ss-option * {
@@ -276,19 +276,19 @@
 
     .ss-list .ss-option.ss-highlighted,
     .ss-list .ss-option:not(.ss-disabled).ss-selected {
-      color: var(--grafema-dark);
-      background-color: var(--grafema-bg-active);
+      color: var(--expansa-dark);
+      background-color: var(--expansa-bg-active);
       cursor: no-drop;
     }
 
     .ss-list .ss-option.ss-disabled {
       background-color: rgb(255 255 255 / 50%);
-      color: var(--grafema-text-muted);
+      color: var(--expansa-text-muted);
       cursor: not-allowed;
     }
 
     .ss-list .ss-option .ss-search-highlight {
-      background-color: var(--grafema-white);
+      background-color: var(--expansa-white);
     }
   }
 }

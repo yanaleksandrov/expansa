@@ -42,8 +42,8 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  border: 1px solid var(--grafema-border);
-  border-radius: var(--grafema-border-radius);
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius);
   transform-origin: inherit;
 }
 
@@ -142,8 +142,8 @@
   height: 10px;
   position: absolute;
   width: 10px;
-  border-right: 1px solid var(--grafema-border);
-  border-bottom: 1px solid var(--grafema-border);
+  border-right: 1px solid var(--expansa-border);
+  border-bottom: 1px solid var(--expansa-border);
   border-bottom-right-radius: 3px;
   border-top-left-radius: 8px;
   background-color: #fff;

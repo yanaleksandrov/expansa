@@ -10,8 +10,8 @@
     flex: 1;
     min-width: 15rem;
     position: relative;
-    background-color: var(--grafema-bg);
-    border-inline-end: 1px solid var(--grafema-border);
+    background-color: var(--expansa-bg);
+    border-inline-end: 1px solid var(--expansa-border);
     margin-inline-end: -1px;
     padding: 1.5rem 0;
 
@@ -23,7 +23,7 @@
   &-main {
     flex: 1;
     min-width: 45%;
-    border-inline-end: 1px solid var(--grafema-border);
+    border-inline-end: 1px solid var(--expansa-border);
   }
 
   &-tools {
@@ -39,15 +39,15 @@
   > .nav-editor-list {
     overflow: hidden;
     border-radius: 0.5rem !important;
-    border: 1px solid var(--grafema-border) !important;
-    border-inline-end: 1px solid var(--grafema-border) !important;
+    border: 1px solid var(--expansa-border) !important;
+    border-inline-end: 1px solid var(--expansa-border) !important;
   }
 
   &-list {
     display: grid;
 
     &:has(*) {
-      border: 1px solid var(--grafema-border);
+      border: 1px solid var(--expansa-border);
       background: linear-gradient(to right, hsla(0,0%,0%,0.03) 0%, hsla(0,0%,100%,1) 100%);
       border-radius: 0.25rem 0 0 0.25rem;
       border-inline-end: 0;

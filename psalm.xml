@@ -10,6 +10,6 @@
     findUnusedVariablesAndParams="true"
 >
     <projectFiles>
-        <directory name="grafema"/>
+        <directory name="expansa"/>
     </projectFiles>
 </psalm>

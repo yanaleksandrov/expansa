@@ -1,10 +1,10 @@
 {
-    "name": "grafema-team/grafema",
-    "description": "Grafema CMS",
+    "name": "expansa-team/expansa",
+    "description": "Expansa CMS",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "grafema/Yan",
+            "name": "expansa/Yan",
             "email": "yanalexandrov@gmail.com"
         }
     ],

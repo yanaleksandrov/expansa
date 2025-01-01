@@ -23,16 +23,16 @@ body {
 }
 
 .errors {
-  background-color: var(--grafema-bg);
-  color: var(--grafema-dark);
+  background-color: var(--expansa-bg);
+  color: var(--expansa-dark);
   padding-block: 1.5rem;
   padding-inline: clamp(1rem, calc(50vw - 34rem), 68rem);
 
   &-wrapper {
     width: 100%;
     background-color: #fff;
-    border-radius: var(--grafema-border-radius-lg);
-    border: 1px solid var(--grafema-border);
+    border-radius: var(--expansa-border-radius-lg);
+    border: 1px solid var(--expansa-border);
     overflow: hidden;
     word-break: break-all;
 
@@ -49,12 +49,12 @@ body {
     }
 
     u {
-      color: var(--grafema-success);
+      color: var(--expansa-success);
       text-decoration: none;
     }
 
     em {
-      color: var(--grafema-primary);
+      color: var(--expansa-primary);
       font-style: normal;
     }
 
@@ -64,7 +64,7 @@ body {
 
     code {
       font-size: 0.8rem;
-      font-family: var(--grafema-font-code, ui-monospace);
+      font-family: var(--expansa-font-code, ui-monospace);
       letter-spacing: -0.03em;
     }
 
@@ -74,7 +74,7 @@ body {
 
     dd {
       margin-left: 2em;
-      color: var(--grafema-text-muted);
+      color: var(--expansa-text-muted);
       margin-bottom: 0.25rem;
 
       &:last-child {
@@ -87,7 +87,7 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--grafema-error);
+    color: var(--expansa-error);
     width: 100%;
     margin-bottom: 1rem;
   }
@@ -107,7 +107,7 @@ body {
   &-description {
     background-color: #fff;
     padding: 1.5rem 1.75rem;
-    border-bottom: 1px solid var(--grafema-border);
+    border-bottom: 1px solid var(--expansa-border);
   }
 
   &-data {
@@ -116,7 +116,7 @@ body {
   }
 
   &-navigation {
-    border-inline-end: 1px solid var(--grafema-border);
+    border-inline-end: 1px solid var(--expansa-border);
     padding: 1rem 0;
     width: 20rem;
     display: grid;
@@ -129,7 +129,7 @@ body {
     &.active,
     &:hover {
       transition: all 0.25s;
-      background-color: var(--grafema-bg);
+      background-color: var(--expansa-bg);
     }
   }
 
@@ -138,6 +138,6 @@ body {
     flex: 1;
     min-width: 20rem;
     white-space: pre;
-    background-color: var(--grafema-bg) !important;
+    background-color: var(--expansa-bg) !important;
   }
 }

@@ -2,7 +2,7 @@
   "author": "Ian Aleksandrov",
   "name": "webpack-starter",
   "version": "1.0.0",
-  "description": "Grafema CMS builder",
+  "description": "Expansa CMS builder",
   "main": "src/index.js",
   "keywords": [],
   "scripts": {

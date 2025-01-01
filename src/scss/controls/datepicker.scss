@@ -31,7 +31,7 @@
   &__wrapper {
     color: #333;
     margin-top: 2px;
-    border-radius: var(--grafema-border-radius);
+    border-radius: var(--expansa-border-radius);
     position: relative;
     z-index: 1;
     background: white;
@@ -151,7 +151,7 @@
   }
 
   &__timebox select {
-    border-radius: var(--grafema-border-radius);
+    border-radius: var(--expansa-border-radius);
     font: inherit;
     margin: 0 3px;
     padding: 7px 20px 7px 7px;
@@ -167,7 +167,7 @@
 
   &__timebox input{
     font: inherit;
-    border-radius: var(--grafema-border-radius);
+    border-radius: var(--expansa-border-radius);
     padding: 5px 8px;
     line-height: 1;
     outline: none;
@@ -178,8 +178,8 @@
   }
 
   &__timebox input:focus {
-    box-shadow: 0 0 0 1px var(--grafema-primary);
-    border: 1px solid var(--grafema-primary);
+    box-shadow: 0 0 0 1px var(--expansa-primary);
+    border: 1px solid var(--expansa-primary);
   }
 
   &__day {
@@ -201,7 +201,7 @@
 
   &__day > span:hover{
     background: #6190e81a;
-    border-radius: var(--grafema-border-radius);
+    border-radius: var(--expansa-border-radius);
   }
 
   &__day.is-today > span {
@@ -214,18 +214,18 @@
 
   &__day.is-start > span,
   &__day.is-end > span {
-    background-color: var(--grafema-primary);
+    background-color: var(--expansa-primary);
     color: #fff;
   }
 
   &__day.is-start > span {
-    border-top-left-radius: var(--grafema-border-radius);
-    border-bottom-left-radius: var(--grafema-border-radius);
+    border-top-left-radius: var(--expansa-border-radius);
+    border-bottom-left-radius: var(--expansa-border-radius);
   }
 
   &__day.is-end > span {
-    border-top-right-radius: var(--grafema-border-radius);
-    border-bottom-right-radius: var(--grafema-border-radius);
+    border-top-right-radius: var(--expansa-border-radius);
+    border-bottom-right-radius: var(--expansa-border-radius);
   }
 
   &__day.is-disabled,

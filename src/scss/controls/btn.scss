@@ -31,12 +31,12 @@
   }
 
   &:hover {
-    background-color: var(--grafema-bg-universal);
+    background-color: var(--expansa-bg-universal);
   }
 
   &:active {
     border-color: rgb(27 31 36 / 15%);
-    background-color: var(--grafema-bg-hover);
+    background-color: var(--expansa-bg-hover);
   }
 
   @each $suffix, $properties in $btnSizes {
@@ -48,67 +48,67 @@
   }
 
   &--primary {
-    border-color: var(--grafema-primary);
-    background-color: var(--grafema-primary);
-    color: var(--grafema-white);
+    border-color: var(--expansa-primary);
+    background-color: var(--expansa-primary);
+    color: var(--expansa-white);
 
     &:hover {
-      background-color: var(--grafema-primary-hover);
-      border-color: var(--grafema-primary-hover);
-      color: var(--grafema-white);
+      background-color: var(--expansa-primary-hover);
+      border-color: var(--expansa-primary-hover);
+      color: var(--expansa-white);
     }
 
     &:active {
-      background-color: var(--grafema-primary-active);
-      border-color: var(--grafema-primary-active);
+      background-color: var(--expansa-primary-active);
+      border-color: var(--expansa-primary-active);
     }
   }
 
   &--success {
-    border-color: var(--grafema-success);
-    background-color: var(--grafema-success);
-    color: var(--grafema-white);
+    border-color: var(--expansa-success);
+    background-color: var(--expansa-success);
+    color: var(--expansa-white);
 
     &:hover {
-      background-color: var(--grafema-success-hover);
-      border-color: var(--grafema-success-hover);
-      color: var(--grafema-white);
+      background-color: var(--expansa-success-hover);
+      border-color: var(--expansa-success-hover);
+      color: var(--expansa-white);
     }
 
     &:active {
-      background-color: var(--grafema-success-active);
-      border-color: var(--grafema-success-active);
+      background-color: var(--expansa-success-active);
+      border-color: var(--expansa-success-active);
     }
   }
 
   &--danger {
-    border-color: var(--grafema-danger);
-    background-color: var(--grafema-danger);
-    color: var(--grafema-white);
+    border-color: var(--expansa-danger);
+    background-color: var(--expansa-danger);
+    color: var(--expansa-white);
 
     &:hover {
-      background-color: var(--grafema-danger-hover);
-      border-color: var(--grafema-danger-hover);
-      color: var(--grafema-white);
+      background-color: var(--expansa-danger-hover);
+      border-color: var(--expansa-danger-hover);
+      color: var(--expansa-white);
     }
 
     &:active {
-      background-color: var(--grafema-danger-active);
-      border-color: var(--grafema-danger-active);
+      background-color: var(--expansa-danger-active);
+      border-color: var(--expansa-danger-active);
     }
   }
 
   &--outline {
-    border: 1px solid var(--grafema-border);
-    background-color: var(--grafema-white) !important;
+    border: 1px solid var(--expansa-border);
+    background-color: var(--expansa-white) !important;
 
     &:hover {
-      background-color: var(--grafema-bg);
+      background-color: var(--expansa-bg);
     }
 
     &:active {
       border-color: rgb(27 31 36 / 15%);
-      background-color: var(--grafema-bg-hover);
+      background-color: var(--expansa-bg-hover);
     }
   }
 
@@ -132,7 +132,7 @@
     }
 
     &:hover:before {
-      color: var(--grafema-dark);
+      color: var(--expansa-dark);
       opacity: 1;
       transform: scale(1);
       transition: color 0.2s, transform 0.4s, opacity 0.5s, background-color 0.15s;
@@ -141,7 +141,7 @@
     &[class*="primary"]:hover:before,
     &[class*="success"]:hover:before,
     &[class*="danger"]:hover:before {
-      color: var(--grafema-white);
+      color: var(--expansa-white);
     }
   }
 
@@ -163,7 +163,7 @@
       border: 1.5px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
-      color: var(--grafema-secondary);
+      color: var(--expansa-secondary);
       position: absolute;
       width: 1em;
       height: 1em;
@@ -175,7 +175,7 @@
     &[class*="primary"]:after,
     &[class*="success"]:after,
     &[class*="danger"]:after {
-      color: var(--grafema-white);
+      color: var(--expansa-white);
     }
   }
 
@@ -192,7 +192,7 @@
   &[disabled]:active,
   &[disabled]:hover {
     background-color: #f7f7f7;
-    color: var(--grafema-border-hover);
+    color: var(--expansa-border-hover);
     pointer-events: none;
     transition: none;
   }

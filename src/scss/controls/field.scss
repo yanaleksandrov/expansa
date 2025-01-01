@@ -9,8 +9,8 @@
     display: flex;
     flex-wrap: wrap;
     padding: 0.25rem;
-    background-color: var(--grafema-bg);
-    border-radius: var(--grafema-border-radius-xl);
+    background-color: var(--expansa-bg);
+    border-radius: var(--expansa-border-radius-xl);
   }
 
   &--grid {
@@ -34,7 +34,7 @@
     line-height: 1.2em;
     font-size: 0.92857142857em;
     min-width: 8rem;
-    color: var(--grafema-text-muted);
+    color: var(--expansa-text-muted);
     font-weight: 400;
   }
 
@@ -43,9 +43,9 @@
     display: flex;
     align-items: center;
     gap: 0.5em;
-    border: 1px solid var(--grafema-border);
-    border-radius: var(--grafema-border-radius);
-    background-color: var(--grafema-bg);
+    border: 1px solid var(--expansa-border);
+    border-radius: var(--expansa-border-radius);
+    background-color: var(--expansa-bg);
     transition: background-color 0.2s;
 
     @each $suffix, $properties in $fieldSizes {
@@ -64,12 +64,12 @@
     }
 
     .field--outline & {
-      border: 1px solid var(--grafema-border);
-      background-color: var(--grafema-white);
+      border: 1px solid var(--expansa-border);
+      background-color: var(--expansa-white);
 
       .ss-content {
-        background-color: var(--grafema-white) !important;
-        border: 1px solid var(--grafema-border);
+        background-color: var(--expansa-white) !important;
+        border: 1px solid var(--expansa-border);
       }
     }
 
@@ -128,13 +128,13 @@
       }
 
       &[type="checkbox"] {
-        border: 1px solid var(--grafema-border);
-        border-radius: calc(var(--grafema-border-radius) / 1.5);
+        border: 1px solid var(--expansa-border);
+        border-radius: calc(var(--expansa-border-radius) / 1.5);
         margin: 0 0 auto;
         height: auto;
 
         &:checked {
-          border-color: var(--grafema-primary);
+          border-color: var(--expansa-primary);
         }
       }
 
@@ -195,7 +195,7 @@
       }
 
       .field-icon {
-        background-color: var(--grafema-bg);
+        background-color: var(--expansa-bg);
         border-radius: 100%;
         display: flex;
         height: 2.5rem;
@@ -216,28 +216,28 @@
         border: none;
         gap: 0.65rem;
         margin: 0;
-        background-color: var(--grafema-bg);
+        background-color: var(--expansa-bg);
         transition: background-color 0.3s;
 
         &:focus-within {
-          border-radius: 0 0 var(--grafema-border-radius) var(--grafema-border-radius);
-          border-color: var(--grafema-border) !important;
+          border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+          border-color: var(--expansa-border) !important;
           box-shadow: none !important;
-          background-color: var(--grafema-bg) !important;
+          background-color: var(--expansa-bg) !important;
         }
 
         &:not(:first-child) {
           border-radius: 0;
-          border-top: 1px dotted var(--grafema-border);
+          border-top: 1px dotted var(--expansa-border);
           margin-top: -0.25rem;
         }
 
         &:not(:only-child):first-child {
-          border-radius: var(--grafema-border-radius) var(--grafema-border-radius) 0 0;
+          border-radius: var(--expansa-border-radius) var(--expansa-border-radius) 0 0;
         }
 
         &:not(:only-child):last-child {
-          border-radius: 0 0 var(--grafema-border-radius) var(--grafema-border-radius);
+          border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
         }
 
         &:hover {
@@ -251,12 +251,12 @@
           &:checked ~ {
 
             .field-switcher {
-              background: var(--grafema-success);
-              border: 1px solid var(--grafema-success);
+              background: var(--expansa-success);
+              border: 1px solid var(--expansa-success);
 
               &:before {
                 left: calc(100% - #{$height - $gap});
-                background: var(--grafema-white);
+                background: var(--expansa-white);
               }
             }
           }
@@ -273,8 +273,8 @@
           width: $width;
           height: $height;
           border-radius: $width;
-          background: var(--grafema-bg-universal);
-          border: 1px solid var(--grafema-border);
+          background: var(--expansa-bg-universal);
+          border: 1px solid var(--expansa-border);
           transition: background 0.25s;
           margin: 0 0 auto;
           order: 2;
@@ -288,14 +288,14 @@
             margin: auto 0;
             width: #{$height - $gap * 2};
             height: #{$height - $gap * 2};
-            background: var(--grafema-border-hover);
+            background: var(--expansa-border-hover);
             border-radius: 50%;
             transition: all 0.25s;
           }
         }
 
         .field-icon {
-          background-color: var(--grafema-white);
+          background-color: var(--expansa-white);
         }
 
         .field-instruction {
@@ -317,12 +317,12 @@
 
       &:hover,
       &:has([type="radio"]:checked) {
-        background-color: var(--grafema-white);
-        border: 1px solid var(--grafema-border);
+        background-color: var(--expansa-white);
+        border: 1px solid var(--expansa-border);
         box-shadow: 0 5px 5px -3px rgba(0, 0, 0, .05) !important;
 
         .field-icon {
-          background-color: var(--grafema-bg);
+          background-color: var(--expansa-bg);
         }
       }
 
@@ -345,18 +345,18 @@
       color: inherit;
       outline: 0;
       background-color: #fff;
-      border-color: var(--grafema-link);
-      box-shadow: 0 0 0 1px var(--grafema-link);
+      border-color: var(--expansa-link);
+      box-shadow: 0 0 0 1px var(--expansa-link);
       z-index: 1;
     }
 
     &:has(.ss-main:not(.ss-open-below)):focus-within {
       box-shadow: none;
-      border-color: var(--grafema-border);
-      background-color: var(--grafema-bg);
+      border-color: var(--expansa-border);
+      background-color: var(--expansa-bg);
 
       .field--outline & {
-        background-color: var(--grafema-white);
+        background-color: var(--expansa-white);
       }
     }
 
@@ -378,8 +378,8 @@
     }
 
     &:has([x-datepicker][readonly]):focus-within {
-      border-color: var(--grafema-link);
-      box-shadow: 0 0 0 1px var(--grafema-link);
+      border-color: var(--expansa-link);
+      box-shadow: 0 0 0 1px var(--expansa-link);
     }
 
     &:has([type="radio"]) {
@@ -397,7 +397,7 @@
       }
 
       .field-icon {
-        background-color: var(--grafema-white);
+        background-color: var(--expansa-white);
       }
 
       .field--ui & {
@@ -410,9 +410,9 @@
         border-width: 6px;
 
         &:not(:checked) {
-          border-color: var(--grafema-white);
-          background-color: var(--grafema-white);
-          outline: 1px solid var(--grafema-border);
+          border-color: var(--expansa-white);
+          background-color: var(--expansa-white);
+          outline: 1px solid var(--expansa-border);
         }
 
         &:checked {
@@ -429,11 +429,11 @@
       flex: 1;
       margin: 0;
       padding: 0.875rem;
-      background-color: var(--grafema-bg);
-      border-color: var(--grafema-border) !important;
+      background-color: var(--expansa-bg);
+      border-color: var(--expansa-border) !important;
 
       &:focus-within {
-        background-color: var(--grafema-bg);
+        background-color: var(--expansa-bg);
       }
 
       .field-label {

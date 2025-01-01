@@ -19,13 +19,13 @@
   &-content {
     position: absolute;
     z-index: 99;
-    border-radius: var(--grafema-border-radius-lg);
-    border: 1px solid var(--grafema-border);
-    background-color: var(--grafema-white);
+    border-radius: var(--expansa-border-radius-lg);
+    border: 1px solid var(--expansa-border);
+    background-color: var(--expansa-white);
     top: calc(100% + 0.125rem);
     right: 0;
     font-size: 0.8125rem;
-    box-shadow: var(--grafema-box-shadow);
+    box-shadow: var(--expansa-box-shadow);
     animation: contextMenu .3s cubic-bezier(0, 0.1, 0.1, 1) backwards;
     min-width: 14rem;
   }
@@ -33,7 +33,7 @@
   &-head {
     padding: 0.75rem 1.25rem;
     font-weight: 500;
-    border-bottom: 1px solid var(--grafema-border);
+    border-bottom: 1px solid var(--expansa-border);
   }
 
   &-summary {

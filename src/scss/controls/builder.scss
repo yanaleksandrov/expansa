@@ -30,12 +30,12 @@
     display: grid;
     gap: 0.2rem;
     position: relative;
-    border-inline-start: 1px solid var(--grafema-border);
+    border-inline-start: 1px solid var(--expansa-border);
     margin-left: 2rem;
     padding-inline-start: 0.5rem;
 
     &:before {
-      border: 1px solid var(--grafema-border);
+      border: 1px solid var(--expansa-border);
       border-inline-end: none;
       bottom: -1.25rem;
       top: 50%;
@@ -51,10 +51,10 @@
       padding: 0.4em 0;
       text-transform: uppercase;
       margin-inline-end: auto;
-      border-radius: var(--grafema-border-radius);
-      color: var(--grafema-secondary);
-      border: 1px solid var(--grafema-border);
-      background: var(--grafema-bg);
+      border-radius: var(--expansa-border-radius);
+      color: var(--expansa-secondary);
+      border: 1px solid var(--expansa-border);
+      background: var(--expansa-bg);
       line-height: initial;
       font-weight: 500;
       font-size: 0.6rem;

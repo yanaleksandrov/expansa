@@ -25,15 +25,15 @@
 }
 
 *::-webkit-input-placeholder {
-  color: var(--grafema-placeholder);
+  color: var(--expansa-placeholder);
 }
 
 *::-moz-placeholder {
-  color: var(--grafema-placeholder);
+  color: var(--expansa-placeholder);
 }
 
 *::placeholder {
-  color: var(--grafema-placeholder);
+  color: var(--expansa-placeholder);
 }
 
 *:focus::-webkit-input-placeholder {
@@ -58,7 +58,7 @@ html {
 
 body {
   line-height: 1.4;
-  font-family: var(--grafema-font-text, system-ui);
+  font-family: var(--expansa-font-text, system-ui);
   font-feature-settings: "liga" 0;
   touch-action: manipulation;
   text-rendering: optimizeLegibility;
@@ -102,7 +102,7 @@ p {
 }
 
 a:not(.btn) {
-  color: var(--grafema-link);
+  color: var(--expansa-link);
   cursor: pointer;
   text-decoration: none;
   outline: 0;
@@ -128,7 +128,7 @@ samp,
 code,
 pre {
   font-weight: 400;
-  font-family: var(--grafema-font-code);
+  font-family: var(--expansa-font-code);
   font-size: 0.9125em;
   outline: none;
   unicode-bidi: bidi-override;
@@ -151,20 +151,20 @@ samp {
 
 code {
   width: fit-content;
-  border-radius: var(--grafema-border-radius);
+  border-radius: var(--expansa-border-radius);
   padding: 0.25rem 0.5rem;
   line-height: 1.45;
-  background: var(--grafema-bg-universal, hsla(244, 52%, 14%, 0.02));
+  background: var(--expansa-bg-universal, hsla(244, 52%, 14%, 0.02));
 }
 
 pre {
   color: hsl(230, 8%, 24%);
   box-shadow: 0 -1px 0 0 rgb(0 0 0 / 5%) inset;
-  border-radius: var(--grafema-border-radius);
+  border-radius: var(--expansa-border-radius);
   margin: 0.5em 0;
   padding: 1.25rem 1.5em;
   padding-inline-start: 4.5em;
-  background: var(--grafema-bg-universal, hsla(244, 52%, 14%, 0.02));
+  background: var(--expansa-bg-universal, hsla(244, 52%, 14%, 0.02));
   white-space: pre-wrap;
   line-height: 1.4;
   tab-size: 0;
@@ -184,29 +184,29 @@ h3,
 h4,
 h5,
 h6 {
-  --grafema-multiplier: 1.1;
-  font-size: calc(var(--grafema-font-ratio) * 1rem);
+  --expansa-multiplier: 1.1;
+  font-size: calc(var(--expansa-font-ratio) * 1rem);
   line-height: 1.2em;
   font-weight: 500;
   margin: 0;
 }
 h1 {
-  --grafema-font-ratio: calc(var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier));
+  --expansa-font-ratio: calc(var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier));
 }
 h2 {
-  --grafema-font-ratio: calc(var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier));
+  --expansa-font-ratio: calc(var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier));
 }
 h3 {
-  --grafema-font-ratio: calc(var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier));
+  --expansa-font-ratio: calc(var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier));
 }
 h4 {
-  --grafema-font-ratio: calc(var(--grafema-multiplier) * var(--grafema-multiplier) * var(--grafema-multiplier));
+  --expansa-font-ratio: calc(var(--expansa-multiplier) * var(--expansa-multiplier) * var(--expansa-multiplier));
 }
 h5 {
-  --grafema-font-ratio: calc(var(--grafema-multiplier) * var(--grafema-multiplier));
+  --expansa-font-ratio: calc(var(--expansa-multiplier) * var(--expansa-multiplier));
 }
 h6 {
-  --grafema-font-ratio: var(--grafema-multiplier);
+  --expansa-font-ratio: var(--expansa-multiplier);
 }
 
 input,
@@ -220,7 +220,7 @@ textarea {
   position: relative;
   font-size: 0.875rem;
   outline: 0;
-  background-color: var(--grafema-white);
+  background-color: var(--expansa-white);
   transition: color, box-shadow 0.2s ease;
   overflow: auto;
   height: 1.875rem;
@@ -233,8 +233,8 @@ textarea {
     color: inherit;
     outline: 0;
     background-color: #fff;
-    border-color: var(--grafema-link);
-    box-shadow: 0 0 0 1px var(--grafema-link);
+    border-color: var(--expansa-link);
+    box-shadow: 0 0 0 1px var(--expansa-link);
     z-index: 1;
   }
 
@@ -248,7 +248,7 @@ textarea {
 
     &:not([x-autocomplete]) {
       cursor: initial;
-      color: var(--grafema-text-muted) !important;
+      color: var(--expansa-text-muted) !important;
     }
   }
 
@@ -275,14 +275,14 @@ button {
   border-radius: 0.5em;
 
   &:hover {
-    background-color: var(--grafema-bg);
+    background-color: var(--expansa-bg);
   }
 
   &[readonly],
   &[disabled] {
     background-color: #f7f7f7;
-    border-color: var(--grafema-border) !important;
-    color: var(--grafema-text-muted) !important;
+    border-color: var(--expansa-border) !important;
+    color: var(--expansa-text-muted) !important;
     cursor: not-allowed;
     pointer-events: none;
     resize: none;
@@ -299,12 +299,12 @@ select {
   line-height: 1.5;
 
   &:not([multiple]) {
-    background: var(--grafema-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 55%;
+    background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 55%;
     background-size: 0.8em;
   }
 
   &[x-select] {
-    border-radius: var(--grafema-border-radius);
+    border-radius: var(--expansa-border-radius);
   }
 
   &[multiple][x-select] {

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="Grafema Standards">
-    <description>PSR-12 The Grafema conventions</description>
+<ruleset name="Expansa Standards">
+    <description>PSR-12 The Expansa conventions</description>
 
     <rule ref="PSR12"/>
 
