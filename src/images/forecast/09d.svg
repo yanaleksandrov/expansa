@@ -1,0 +1,50 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+	<style type="text/css">
+		<![CDATA[
+		.am-weather-rain-1 {
+			-webkit-animation: am-weather-rain 8s linear 0s infinite;
+			   -moz-animation: am-weather-rain 8s linear 0s infinite;
+				 -o-animation: am-weather-rain 8s linear 0s infinite;
+					animation: am-weather-rain 8s linear 0s infinite;
+		}
+		.am-weather-rain-2 {
+			-webkit-animation: am-weather-rain 8s linear 0.26s infinite;
+			   -moz-animation: am-weather-rain 8s linear 0.26s infinite;
+				 -o-animation: am-weather-rain 8s linear 0.26s infinite;
+					animation: am-weather-rain 8s linear 0.26s infinite;
+		}
+		.am-weather-rain-3 {
+			-webkit-animation: am-weather-rain 8s linear 0.13s infinite;
+			   -moz-animation: am-weather-rain 8s linear 0.13s infinite;
+				 -o-animation: am-weather-rain 8s linear 0.13s infinite;
+					animation: am-weather-rain 8s linear 0.13s infinite;
+		}
+		@-webkit-keyframes am-weather-rain {
+			0% {
+				stroke-dashoffset: 0;
+			}
+			100% {
+				stroke-dashoffset: -100;
+			}
+		}
+		@keyframes am-weather-rain {
+			0% {
+				stroke-dashoffset: 0;
+			}
+			100% {
+				stroke-dashoffset: -100;
+			}
+		}
+    ]]>
+	</style>
+    </defs>
+	<g>
+		<path fill="#8B8B8B" stroke="#fff" stroke-linejoin="round" stroke-width="1.5" d="M29 12.9a7 7 0 00-9.4-6.6C19.3 3.4 17 1 14 1a5.7 5.7 0 00-5.4 7.7h-.9A5.7 5.7 0 007.6 20h14.7a7.4 7.4 0 006.7-7.2z"/>
+	</g>
+	<g transform="translate(15,25), rotate(10)">
+		<line class="am-weather-rain-1" fill="none" stroke="#dbdbdb" stroke-dasharray="4,4" stroke-linecap="round" stroke-width="2" transform="translate(-4,1)" x1="0" x2="0" y1="0" y2="8" />
+		<line class="am-weather-rain-2" fill="none" stroke="#dbdbdb" stroke-dasharray="4,4" stroke-linecap="round" stroke-width="2" transform="translate(0,-1)" x1="0" x2="0" y1="0" y2="8" />
+		<line class="am-weather-rain-3" fill="none" stroke="#dbdbdb" stroke-dasharray="4,4" stroke-linecap="round" stroke-width="2" transform="translate(4,0)" x1="0" x2="0" y1="0" y2="8" />
+	</g>
+</svg>

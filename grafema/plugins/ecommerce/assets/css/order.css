@@ -1,0 +1,60 @@
+.order {
+
+}
+
+.order-payment {
+
+}
+
+.products {
+
+}
+
+.payment {
+    gap: 0.5rem;
+    display: grid;
+}
+
+.payment-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.payment-label {
+    font-weight: 400;
+    color: var(--grafema-text-muted);
+    font-size: 0.75rem;
+}
+
+.payment-action {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.payment-table {
+    gap: 0.5rem;
+    display: grid;
+    padding: 0.85rem 1rem;
+    border-radius: var(--grafema-border-radius-xl);
+    border: 1px solid var(--grafema-border);
+}
+
+.payment-table-row {
+    display: grid;
+    grid-template-columns: minmax(auto, 33%) 1fr max-content;
+    width: 100%;
+    gap: 1rem;
+    color: var(--grafema-text-muted);
+}
+
+.payment-table-row:first-child,
+.payment-table-row:last-child {
+    color: var(--grafema-dark);
+}
+
+.payment-table-col {
+
+}

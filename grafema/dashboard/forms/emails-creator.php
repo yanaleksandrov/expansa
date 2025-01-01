@@ -1,0 +1,288 @@
+<?php
+use Grafema\I18n;
+use Grafema\Sanitizer;
+
+/**
+ * Form for create & edit emails.
+ *
+ * @since 2025.1
+ */
+return Dashboard\Form::enqueue(
+	'emails-creator',
+	[
+		'@submit.window' => '$ajax("import-email")',
+		'x-data'         => sprintf( "tab('%s')", Sanitizer::prop( $_GET['tab'] ?? 'general' ) ),
+	],
+	[
+		[
+			'type'          => 'tab',
+			'label'         => I18n::_t( 'General' ),
+			'name'          => 'general',
+			'class_menu'    => '',
+			'class_button'  => '',
+			'class_content' => 'p-7',
+			'instruction'   => '',
+			'caption'       => '',
+			'icon'          => 'ph ph-envelope-simple-open',
+			'fields'        => [
+				[
+					'type'        => 'select',
+					'name'        => 'event',
+					'label'       => I18n::_t( 'Events' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'    => '',
+						'required' => true,
+					],
+					'options' => [
+						''                => I18n::_t( 'Select an event' ),
+						'user-registered' => I18n::_t( 'New user registered' ),
+					],
+				],
+				[
+					'type'        => 'text',
+					'name'        => 'subject',
+					'label'       => I18n::_t( 'Email subject' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'       => '',
+						'required'    => true,
+						'placeholder' => I18n::_t( 'Email subject' ),
+					],
+				],
+				[
+					'type'        => 'text',
+					'name'        => 'title',
+					'label'       => I18n::_t( 'Title' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'       => I18n::_t( 'Your are registered' ),
+						'required'    => true,
+						'placeholder' => I18n::_t( 'Mail title...' ),
+					],
+				],
+				[
+					'type'        => 'text',
+					'name'        => 'subtitle',
+					'label'       => I18n::_t( 'Subtitle' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'       => I18n::_t( 'We have received a new registration request. Read the instructions.' ),
+						'required'    => true,
+						'placeholder' => I18n::_t( 'Subtitle' ),
+					],
+				],
+				[
+					'type'        => 'textarea',
+					'name'        => 'content',
+					'label'       => I18n::_t( 'Content' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'       => '',
+						'rows'        => 1,
+						'required'    => true,
+						'placeholder' => I18n::_t( 'N/A' ),
+					],
+				],
+				[
+					'type'        => 'textarea',
+					'name'        => 'recipients',
+					'label'       => I18n::_t( 'Recipient(s)' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => I18n::_t( 'Enter recipients for this email. Each recipient email from a new line.' ),
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'       => '',
+						'rows'        => 1,
+						'required'    => true,
+						'placeholder' => I18n::_t( 'N/A' ),
+					],
+				],
+			],
+		],
+		[
+			'type'          => 'tab',
+			'label'         => I18n::_t( 'Global' ),
+			'name'          => 'global',
+			'class_menu'    => '',
+			'class_button'  => '',
+			'class_content' => '',
+			'instruction'   => '',
+			'caption'       => '',
+			'icon'          => 'ph ph-faders',
+			'fields'        => [
+				[
+					'type'        => 'textarea',
+					'name'        => 'bottom',
+					'label'       => I18n::_t( 'Mail bottom content' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'       => I18n::_t( 'Team, PO Box 16122, Collins Street West, <a href="#" target="_blank">Victoria 8007, Australia</a>' ),
+						'placeholder' => I18n::_t( 'N/A' ),
+					],
+				],
+				[
+					'type'        => 'textarea',
+					'name'        => 'footer',
+					'label'       => I18n::_t( 'Footer content' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'value'       => I18n::_t( 'This message is generated automatically. Don\'t reply it. All rights reserved © 2024' ),
+						'placeholder' => I18n::_t( 'N/A' ),
+					],
+				],
+			],
+		],
+		[
+			'type'          => 'tab',
+			'label'         => I18n::_t( 'Test' ),
+			'name'          => 'test',
+			'class_menu'    => '',
+			'class_button'  => '',
+			'class_content' => '',
+			'instruction'   => '',
+			'caption'       => '',
+			'icon'          => 'ph ph-test-tube',
+			'fields'        => [
+				[
+					'type'        => 'email',
+					'name'        => 'email',
+					'label'       => I18n::_t( 'Send To' ),
+					'class'       => '',
+					'label_class' => 'df aic fs-12 t-muted',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => I18n::_t( 'Enter recipients for this email. Each recipient email from a new line.' ),
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [],
+				],
+				[
+					'type'        => 'submit',
+					'name'        => 'check',
+					'label'       => I18n::_t( 'Send a test email' ),
+					'class'       => '',
+					'label_class' => '',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => '',
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'type'      => 'button',
+						'class'     => 'btn',
+						'@click'    => '$ajax("email/send", {email: email})',
+						':disabled' => '!email',
+					],
+				],
+			],
+		],
+		[
+			'type'          => 'tab',
+			'label'         => I18n::_t( 'Placeholders' ),
+			'name'          => 'placeholders',
+			'class_menu'    => '',
+			'class_button'  => '',
+			'class_content' => '',
+			'instruction'   => '',
+			'caption'       => '',
+			'icon'          => 'ph ph-brackets-curly',
+			'fields'        => [
+				[
+					'name'     => 'instructions',
+					'type'     => 'custom',
+					'callback' => function() {
+						?>
+						<div class="dg g-2">
+							<div><code>:name</code> <?php I18n::t( 'User display name if email found in users' ); ?></div>
+							<div><code>:link</code> <?php I18n::t( 'Link to page' ); ?></div>
+							<div><code>:admin_email</code> <?php I18n::t( 'The site admin email' ); ?></div>
+							<div><code>:site_title</code> <?php I18n::t( 'The site title' ); ?></div>
+							<div><code>:unsubscribe_url</code> <?php I18n::t( 'Url to unsubscribe from emails' ); ?></div>
+							<div><code>:unsubscribe_link</code> <?php I18n::t( 'Clickable link to unsubscribe from emails' ); ?></div>
+							<div><code>:year</code> <?php I18n::t( 'Current year' ); ?></div>
+							<div><code>:date</code> <?php I18n::t( 'Current date in "24 August, 2024" format' ); ?></div>
+						</div>
+						<?php
+					},
+				],
+			],
+		],
+	]
+);

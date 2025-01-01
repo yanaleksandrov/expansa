@@ -1,0 +1,205 @@
+@import '../constants/index.scss';
+
+.btn {
+  color: inherit;
+  font: inherit;
+  font-weight: 500;
+  overflow: hidden;
+  position: relative;
+  padding: 0 1em;
+  outline: 0;
+  gap: 0.3em !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  min-width: fit-content;
+  width: fit-content;
+  border-radius: 0.5em;
+  background-color: transparent;
+  background-image: radial-gradient(100% 100% at 15% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  text-decoration: none;
+  transition: background-color 0.15s;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+
+  > * {
+    font-size: inherit;
+  }
+
+  &:hover {
+    background-color: var(--grafema-bg-universal);
+  }
+
+  &:active {
+    border-color: rgb(27 31 36 / 15%);
+    background-color: var(--grafema-bg-hover);
+  }
+
+  @each $suffix, $properties in $btnSizes {
+    &#{$suffix} {
+      @each $property, $value in $properties {
+        #{$property}: #{$value};
+      }
+    }
+  }
+
+  &--primary {
+    border-color: var(--grafema-primary);
+    background-color: var(--grafema-primary);
+    color: var(--grafema-white);
+
+    &:hover {
+      background-color: var(--grafema-primary-hover);
+      border-color: var(--grafema-primary-hover);
+      color: var(--grafema-white);
+    }
+
+    &:active {
+      background-color: var(--grafema-primary-active);
+      border-color: var(--grafema-primary-active);
+    }
+  }
+
+  &--success {
+    border-color: var(--grafema-success);
+    background-color: var(--grafema-success);
+    color: var(--grafema-white);
+
+    &:hover {
+      background-color: var(--grafema-success-hover);
+      border-color: var(--grafema-success-hover);
+      color: var(--grafema-white);
+    }
+
+    &:active {
+      background-color: var(--grafema-success-active);
+      border-color: var(--grafema-success-active);
+    }
+  }
+
+  &--danger {
+    border-color: var(--grafema-danger);
+    background-color: var(--grafema-danger);
+    color: var(--grafema-white);
+
+    &:hover {
+      background-color: var(--grafema-danger-hover);
+      border-color: var(--grafema-danger-hover);
+      color: var(--grafema-white);
+    }
+
+    &:active {
+      background-color: var(--grafema-danger-active);
+      border-color: var(--grafema-danger-active);
+    }
+  }
+
+  &--outline {
+    border: 1px solid var(--grafema-border);
+    background-color: var(--grafema-white) !important;
+
+    &:hover {
+      background-color: var(--grafema-bg);
+    }
+
+    &:active {
+      border-color: rgb(27 31 36 / 15%);
+      background-color: var(--grafema-bg-hover);
+    }
+  }
+
+  &--animated {
+    transition: color 0.4s ease 0.05s, background-color 0.15s;
+
+    &:before {
+      content: attr(data-txt);
+      position: absolute;
+      margin: auto;
+      width: 100%;
+      text-align: center;
+      opacity: 0;
+      transform: scale(1.05);
+      transition: color 0.5s, transform 0.5s, opacity 0.25s, background-color 0.15s;
+    }
+
+    &:hover {
+      color: transparent;
+      transition: color 0.2s, background-color 0.15s;
+    }
+
+    &:hover:before {
+      color: var(--grafema-dark);
+      opacity: 1;
+      transform: scale(1);
+      transition: color 0.2s, transform 0.4s, opacity 0.5s, background-color 0.15s;
+    }
+
+    &[class*="primary"]:hover:before,
+    &[class*="success"]:hover:before,
+    &[class*="danger"]:hover:before {
+      color: var(--grafema-white);
+    }
+  }
+
+  &--full {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  &--load {
+    position: relative;
+    color: transparent !important;
+    text-shadow: none !important;
+    pointer-events: none;
+
+    &:after {
+      content: '';
+      display: inline-block;
+      vertical-align: text-bottom;
+      border: 1.5px solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      color: var(--grafema-secondary);
+      position: absolute;
+      width: 1em;
+      height: 1em;
+      inset: 0;
+      margin: auto;
+      animation: spinner-border .5s linear infinite;
+    }
+
+    &[class*="primary"]:after,
+    &[class*="success"]:after,
+    &[class*="danger"]:after {
+      color: var(--grafema-white);
+    }
+  }
+
+  &--icon {
+    padding: 0;
+    aspect-ratio: 1 / 1;
+  }
+
+  &--rounded {
+    border-radius: 3rem;
+  }
+
+  &[disabled],
+  &[disabled]:active,
+  &[disabled]:hover {
+    background-color: #f7f7f7;
+    color: var(--grafema-border-hover);
+    pointer-events: none;
+    transition: none;
+  }
+}
+
+@keyframes spinner-border {
+  to {
+    transform: rotate(360deg)
+  }
+}

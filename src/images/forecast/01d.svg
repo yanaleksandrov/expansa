@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 32 32">
+    <defs>
+	<style type="text/css">
+	<![CDATA[
+	.am-weather-sun {
+		-webkit-animation: am-weather-sun 9s ease-in-out 0s infinite;
+		   -moz-animation: am-weather-sun 9s ease-in-out 0s infinite;
+			 -o-animation: am-weather-sun 9s ease-in-out 0s infinite;
+				animation: am-weather-sun 9s ease-in-out 0s infinite;
+	}
+	.am-weather-sun-shiny line {
+		-webkit-animation: am-weather-sun-shiny 2s linear 0s infinite;
+		   -moz-animation: am-weather-sun-shiny 2s linear 0s infinite;
+			 -o-animation: am-weather-sun-shiny 2s linear 0s infinite;
+				animation: am-weather-sun-shiny 2s linear 0s infinite;
+	}
+	@-webkit-keyframes am-weather-sun {
+		0% {
+			-webkit-transform: rotate(0deg);
+				-ms-transform: rotate(0deg);
+					transform: rotate(0deg);
+		}
+		100% {
+			-webkit-transform: rotate(360deg);
+				-ms-transform: rotate(360deg);
+					transform: rotate(360deg);
+		}
+	}
+	@keyframes am-weather-sun {
+		0% {
+			-webkit-transform: rotate(0deg);
+				-ms-transform: rotate(0deg);
+					transform: rotate(0deg);
+		}
+		100% {
+			-webkit-transform: rotate(360deg);
+				-ms-transform: rotate(360deg);
+					transform: rotate(360deg);
+		}
+	}
+	@-webkit-keyframes am-weather-sun-shiny {
+		0% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+		50% {
+			stroke-dasharray: 0.1px 10px;
+			stroke-dashoffset: -1px;
+		}
+		100% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+	}
+	@keyframes am-weather-sun-shiny {
+		0% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+		50% {
+			stroke-dasharray: 0.1px 10px;
+			stroke-dashoffset: -1px;
+		}
+		100% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+	} ]]>
+	</style>
+    </defs>
+	<g id="sun" transform="translate(16,16)">
+		<g class="am-weather-sun am-weather-sun-shiny">
+			<g>
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+			<g transform="rotate(45)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+			<g transform="rotate(90)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+			<g transform="rotate(135)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+			<g transform="rotate(180)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+			<g transform="rotate(225)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+			<g transform="rotate(270)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+			<g transform="rotate(315)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3" />
+			</g>
+		</g>
+		<path transform="translate(-16,-16)" fill="#FFC107" stroke="#FFC107" stroke-width="2" d="M16 22.2a6.2 6.2 0 100-12.4 6.2 6.2 0 000 12.4z"/>
+	</g>
+</svg>

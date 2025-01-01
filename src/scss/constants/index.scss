@@ -1,0 +1,63 @@
+$sizes: (
+	'': (
+		height: 30,
+		font: 13,
+	),
+	'xl': (
+		height: 40,
+		font: 15,
+	),
+	'lg': (
+		height: 34,
+		font: 14,
+	),
+	'sm': (
+		height: 28,
+		font: 12,
+	),
+	'xs': (
+		height: 26,
+		font: 11,
+	),
+);
+
+$btnSizes: ();
+@each $suffix, $value in $sizes {
+	@if $suffix != '' {
+		$suffix: '--' + #{$suffix};
+	}
+	$btnSizes: map-merge($btnSizes, (
+		#{$suffix}: (
+			'padding-inline': #{map-get($value, 'height') / 16 / 2.22222222222}rem,
+			'font-size': #{map-get($value, 'font') / 16}rem,
+			'height': #{map-get($value, 'height') / 16}rem,
+		)
+	));
+}
+
+$fieldSizes: ();
+@each $suffix, $value in $sizes {
+	@if $suffix != '' {
+		$suffix: '--' + #{$suffix};
+	}
+	$fieldSizes: map-merge($fieldSizes, (
+		#{$suffix}: (
+			'font-size': #{map-get($value, 'font') / 16}rem,
+			'height': #{map-get($value, 'height') / 16}rem,
+		)
+	));
+}
+
+$colors: (
+	dark: #151d26,
+	muted: #71777F,
+	gray: #8E8E8E,
+	white: #ffffff,
+	red: #d63939,
+	amber: #f76707,
+	orange: #f59f00,
+	green: #2fb344,
+	royal: #4299e1,
+	blue: #206bc4,
+	purple: #6a20c5,
+);

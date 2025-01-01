@@ -1,0 +1,179 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" viewBox="0 0 32 32">
+    <defs>
+	<style type="text/css">
+	<![CDATA[
+	.am-weather-sun {
+		-webkit-animation: am-weather-sun 9s ease-in-out 0s infinite;
+		   -moz-animation: am-weather-sun 9s ease-in-out 0s infinite;
+			 -o-animation: am-weather-sun 9s ease-in-out 0s infinite;
+				animation: am-weather-sun 9s ease-in-out 0s infinite;
+	}
+	.am-weather-sun-shiny line {
+		-webkit-animation: am-weather-sun-shiny 2s linear 0s infinite;
+		   -moz-animation: am-weather-sun-shiny 2s linear 0s infinite;
+			 -o-animation: am-weather-sun-shiny 2s linear 0s infinite;
+				animation: am-weather-sun-shiny 2s linear 0s infinite;
+	}
+	@-webkit-keyframes am-weather-sun {
+		0% {
+			-webkit-transform: rotate(0deg);
+				-ms-transform: rotate(0deg);
+					transform: rotate(0deg);
+		}
+		100% {
+			-webkit-transform: rotate(360deg);
+				-ms-transform: rotate(360deg);
+					transform: rotate(360deg);
+		}
+	}
+	@keyframes am-weather-sun {
+		0% {
+			-webkit-transform: rotate(0deg);
+				-ms-transform: rotate(0deg);
+					transform: rotate(0deg);
+		}
+		100% {
+			-webkit-transform: rotate(360deg);
+				-ms-transform: rotate(360deg);
+					transform: rotate(360deg);
+		}
+	}
+	@-webkit-keyframes am-weather-sun-shiny {
+		0% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+		50% {
+			stroke-dasharray: 0.1px 10px;
+			stroke-dashoffset: -1px;
+		}
+		100% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+	}
+	@keyframes am-weather-sun-shiny {
+		0% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+		50% {
+			stroke-dasharray: 0.1px 10px;
+			stroke-dashoffset: -1px;
+		}
+		100% {
+			stroke-dasharray: 3px 10px;
+			stroke-dashoffset: 0px;
+		}
+	}
+	
+	
+	.am-weather-cloud-2 {
+		-webkit-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
+		   -moz-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
+			 -o-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
+				animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
+	}
+	@keyframes am-weather-cloud-2 {
+		0% {
+			-webkit-transform: translate(0px,2px);
+				-ms-transform: translate(0px,2px);
+					transform: translate(0px,2px);
+		}
+		50% {
+			-webkit-transform: translate(2px,2px);
+				-ms-transform: translate(2px,2px);
+					transform: translate(2px,2px);
+		}
+		100% {
+			-webkit-transform: translate(0px,2px);
+				-ms-transform: translate(0px,2px);
+					transform: translate(0px,2px);
+		}
+	}
+	@-webkit-keyframes am-weather-cloud-2 {
+		0% {
+			-webkit-transform: translate(0px,2px);
+				-ms-transform: translate(0px,2px);
+					transform: translate(0px,2px);
+		}
+		50% {
+			-webkit-transform: translate(2px,2px);
+				-ms-transform: translate(2px,2px);
+					transform: translate(2px,2px);
+		}
+		100% {
+			-webkit-transform: translate(0px,2px);
+				-ms-transform: translate(0px,2px);
+					transform: translate(0px,2px);
+		}
+	}
+	
+		.am-weather-rain-1 {
+			-webkit-animation: am-weather-rain 8s linear 0s infinite;
+			   -moz-animation: am-weather-rain 8s linear 0s infinite;
+				 -o-animation: am-weather-rain 8s linear 0s infinite;
+					animation: am-weather-rain 8s linear 0s infinite;
+		}
+		.am-weather-rain-2 {
+			-webkit-animation: am-weather-rain 8s linear 0.26s infinite;
+			   -moz-animation: am-weather-rain 8s linear 0.26s infinite;
+				 -o-animation: am-weather-rain 8s linear 0.26s infinite;
+					animation: am-weather-rain 8s linear 0.26s infinite;
+		}
+		@-webkit-keyframes am-weather-rain {
+			0% {
+				stroke-dashoffset: 0;
+			}
+			100% {
+				stroke-dashoffset: -100;
+			}
+		}
+		@keyframes am-weather-rain {
+			0% {
+				stroke-dashoffset: 0;
+			}
+			100% {
+				stroke-dashoffset: -100;
+			}
+		}
+	]]>
+	</style>
+    </defs>
+	<g transform="translate(13,15)">
+		<g class="am-weather-sun am-weather-sun-shiny">
+			<g>
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+			<g transform="rotate(45)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+			<g transform="rotate(90)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+			<g transform="rotate(135)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+			<g transform="rotate(180)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+			<g transform="rotate(225)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+			<g transform="rotate(270)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+			<g transform="rotate(315)">
+				<line fill="none" stroke="#FFC107" stroke-linecap="round" stroke-width="2" transform="translate(0,9)" x1="0" x2="0" y1="0" y2="3"/>
+			</g>
+		</g>
+		<circle cx="0" cy="0" fill="#FFC107" r="5" stroke="#FFC107" stroke-width="2"/>
+	</g>
+	<g class="am-weather-cloud-2">
+		<path fill="#DBDBDB" stroke="#fff" stroke-linejoin="round" stroke-width="1.5" d="M29 18c0-3.3-2.4-5.8-4.9-5.8-.7 0-1-.2-1.6 0-.2-2.4-2.9-4.2-5.3-4.2-2.6 0-5.1 2.2-5.1 4.8 0 .6.1 1.2.3 1.7l-.7-.1A4.7 4.7 0 007 19.2c0 2.6 2 4.7 4.5 4.8h12c3-.4 5.5-2.9 5.5-6z"/>
+	</g>
+	<g transform="translate(21,29), rotate(10)">
+		<line class="am-weather-rain-1" fill="none" stroke="#dbdbdb" stroke-dasharray="4,7" stroke-linecap="round" stroke-width="2" transform="translate(-6,1)" x1="0" x2="0" y1="0" y2="8" />
+		<line class="am-weather-rain-2" fill="none" stroke="#dbdbdb" stroke-dasharray="4,7" stroke-linecap="round" stroke-width="2" transform="translate(0,-1)" x1="0" x2="0" y1="0" y2="8" />
+	</g>
+</svg>

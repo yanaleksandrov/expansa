@@ -1,0 +1,193 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  opacity: 0;
+  z-index: 9989;
+  top: 0;
+  overflow: hidden;
+  overflow-y: auto;
+  outline: 0;
+  padding: 0;
+  pointer-events: auto;
+  margin: 0 auto;
+  min-height: 100%;
+  width: 100%;
+  visibility: hidden;
+  height: fit-content;
+
+  &.active {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+    background-color: rgb(0 0 0 / 0.05);
+    backdrop-filter: blur(5px);
+
+    .dialog-wrapper {
+      top: -20px;
+      animation: openTop 0.25s forwards;
+    }
+  }
+
+
+  &--xs .dialog-wrapper {
+    max-width: 360px;
+  }
+
+  &--sm .dialog-wrapper {
+    max-width: 480px;
+  }
+
+  &--md .dialog-wrapper {
+    max-width: 768px;
+  }
+
+  &--lg .dialog-wrapper {
+    max-width: 1024px;
+  }
+
+  &--xl .dialog-wrapper {
+    max-width: 1200px;
+  }
+
+  &--left .dialog-wrapper {
+    animation: openLeft 0.25s forwards;
+  }
+
+  &--right .dialog-wrapper {
+    animation: openRight 0.25s forwards;
+  }
+
+  &--left,
+  &--right {
+    border-radius: 0;
+    border: 0;
+    height: 100dvh;
+    overflow-y: auto;
+    top: 0 !important;
+    padding: 0;
+  }
+
+  &-wrapper {
+    background-color: var(--grafema-white);
+    background-clip: padding-box;
+    border-radius: var(--grafema-border-radius);
+    width: calc(100% - 3rem);
+    //min-height: calc(100% - 3rem);
+    //margin: 1.5rem auto;
+    margin: auto;
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    display: grid;
+    grid-template-rows: 3.5rem 1fr;
+    position: relative;
+    top: 0;
+
+    @media (max-width: 640px) {
+      min-height: 100%;
+      width: 100%;
+      border-radius: 0;
+      margin: 0;
+    }
+  }
+
+  &-content {
+    cursor: initial;
+  }
+
+  &-header {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--grafema-border);
+    border-top-left-radius: var(--grafema-border-radius);
+    border-top-right-radius: var(--grafema-border-radius);
+    height: 3.5rem;
+    padding: 0 0 0 1.75rem;
+    cursor: initial;
+    background-color: #fff;
+
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  &-title {
+    margin: 0;
+  }
+
+  &-close {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+    margin-inline: auto 0;
+    right: 0.5rem;
+    position: relative;
+    color: #000;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000000'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/.75rem auto no-repeat !important;
+    border: 0;
+    border-radius: var(--grafema-border-radius);
+    opacity: .3;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      opacity: 1;
+      background-color: transparent;
+    }
+  }
+
+  &-footer {
+    display: flex;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.75rem;
+    border-bottom-right-radius: var(--grafema-border-radius);
+    border-bottom-left-radius: var(--grafema-border-radius);
+    margin-top: -1px;
+  }
+}
+
+@keyframes openTop {
+  from {
+    opacity: 0;
+    top: 1.25rem;
+  }
+  to {
+    opacity: 1;
+    top: 0;
+  }
+}
+
+@keyframes openLeft {
+  from {
+    opacity: 0;
+    left: -1.25rem;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    left: 0;
+  }
+}
+
+@keyframes openRight {
+  from {
+    opacity: 0;
+    right: -1.25rem;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    right: 0;
+  }
+}

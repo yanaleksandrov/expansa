@@ -1,0 +1,84 @@
+.nav-editor {
+  display: flex;
+  height: 100%;
+
+  @media screen and (max-width: 840px) {
+    flex-direction: column;
+  }
+
+  &-side {
+    flex: 1;
+    min-width: 15rem;
+    position: relative;
+    background-color: var(--grafema-bg);
+    border-inline-end: 1px solid var(--grafema-border);
+    margin-inline-end: -1px;
+    padding: 1.5rem 0;
+
+    @media screen and (max-width: 1024px) {
+      padding: 1.25rem 0;
+    }
+  }
+
+  &-main {
+    flex: 1;
+    min-width: 45%;
+    border-inline-end: 1px solid var(--grafema-border);
+  }
+
+  &-tools {
+    flex: 1;
+    min-width: 15rem;
+    padding: 1.75rem;
+
+    @media (max-width: 1024px) {
+      padding: 1.25rem;
+    }
+  }
+
+  > .nav-editor-list {
+    overflow: hidden;
+    border-radius: 0.5rem !important;
+    border: 1px solid var(--grafema-border) !important;
+    border-inline-end: 1px solid var(--grafema-border) !important;
+  }
+
+  &-list {
+    display: grid;
+
+    &:has(*) {
+      border: 1px solid var(--grafema-border);
+      background: linear-gradient(to right, hsla(0,0%,0%,0.03) 0%, hsla(0,0%,100%,1) 100%);
+      border-radius: 0.25rem 0 0 0.25rem;
+      border-inline-end: 0;
+    }
+
+    > .nav-editor-item:last-child > .nav-editor-list {
+      border-bottom-left-radius: 0;
+      border-bottom: 0;
+    }
+  }
+
+  &-item {
+    padding-inline: 1.5rem 0;
+    transition: padding-inline-start 0.25s;
+
+    &.sortable-chosen {
+      border-radius: inherit;
+    }
+
+    &:hover {
+      padding-inline-start: 1.625rem;
+    }
+  }
+
+  &-item-text {
+    padding: 0.65rem 0.75rem 0.65rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: move;
+    font-weight: 500;
+    font-size: 0.8125rem;
+  }
+}

@@ -1,0 +1,204 @@
+@import 'constants';
+
+@function str-split($string, $separator) {
+  $i: str-index($string, $separator);
+  @if $i != null {
+    @return str-insert(str-slice($string, 1, 1), str-slice(str-split(str-slice($string, $i + str-length($separator)), $separator), 1, 1), 100);
+  }
+  @return str-slice($string, 1, 1);
+}
+
+// display
+@each $key in (none, flex, inline-flex, block, inline-block, table, inline-table, grid, inline-grid) {
+  $selector: str-split($key, '-');
+  .d#{$selector} {
+    display: $key;
+
+    @if $key == flex or $key == grid {
+      align-content: flex-start;
+    }
+  }
+}
+
+// align-items
+@each $key in (stretch, center, flex-start, flex-end, baseline) {
+  $selector: str-split($key, '-');
+  .ai#{$selector} {
+    align-items: $key;
+  }
+}
+
+// align-content
+@each $key in (center, flex-start, flex-end, space-between, space-around, space-evenly, stretch) {
+  $selector: str-split($key, '-');
+  .ac#{$selector} {
+    align-content: $key;
+  }
+}
+
+// justify-content
+@each $key in (center, flex-start, flex-end, space-between, space-around, space-evenly, stretch) {
+  $selector: str-split($key, '-');
+  .jc#{$selector} {
+    justify-content: $key;
+  }
+}
+
+// justify-items
+@each $key in (center, flex-start, flex-end, stretch, baseline) {
+  $selector: str-split($key, '-');
+  .ji#{$selector} {
+    justify-items: $key;
+  }
+}
+
+// flex-direction
+@each $key in (column, column-reverse, row, row-reverse) {
+  $selector: str-split($key, '-');
+  .fd#{$selector} {
+    flex-direction: $key;
+  }
+}
+
+// flex-wrap
+@each $key in (wrap, nowrap, wrap-reverse) {
+  $selector: str-split($key, '-');
+  .fw#{$selector} {
+    flex-wrap: $key;
+  }
+}
+
+// font-weight
+@for $i from 1 through 9 {
+  .fw-#{$i}00 {
+    font-weight: #{$i}00;
+  }
+}
+
+// font-size
+@each $size in (96, 64, 48, 40, 32, 24, 18, 17, 16, 15, 14, 13, 12, 11) {
+  .fs-#{$size} {
+    font-size: #{$size/16}rem;
+  }
+}
+
+// line-height
+@each $size, $value in (
+  'xl': 1.6,
+  'lg': 1.5,
+  'md': 1.4,
+  'sm': 1.3,
+  'xs': 1.2,
+) {
+  .lh-#{$size} {
+    line-height: #{$value}em;
+  }
+}
+
+// text-align
+@each $key in (start, end, center) {
+  .t-#{$key} {
+    text-align: $key;
+  }
+}
+
+// colors
+@each $name, $color in $colors {
+  .t-#{'' + $name} {
+    color: $color !important;
+  }
+  .t-#{'' + $name}-lt {
+    color: #{$color}11 !important;
+  }
+}
+@each $name, $color in $colors {
+  .bg-#{'' + $name} {
+    background-color: $color !important;
+  }
+  .bg-#{'' + $name}-lt {
+    background-color: #{mix(rgba(255, 255, 255, 1), $color, 92%)} !important;
+  }
+}
+
+.mw {
+  max-width: 100%;
+  width: 100%;
+}
+@each $size in (40, 80, 120, 160, 200, 240, 280, 320, 360, 400, 440, 480, 520, 560, 600, 640, 680, 720, 760, 800, 1000, 1200, 1400, 1600) {
+  .mw-#{$size} {
+    max-width: #{$size/16}rem;
+    width: 100%;
+  }
+}
+
+// styles for width, gap, paddings & margins
+@each $size, $width in (
+  '': '9999',
+  'lg': '1279',
+  'md': '1024',
+  'sm': '640',
+  'xs': '480',
+) {
+  @media(max-width: #{$width}px) {
+    @each $selector, $property in (
+      'gtc': 'grid-template-columns',
+      'ga': 'grid-area',
+      'g': 'gap',
+      'm': 'margin',
+      'mt': 'margin-top',
+      'mr': 'margin-inline-end',
+      'mb': 'margin-bottom',
+      'ml': 'margin-inline-start',
+      'mx': 'margin-inline',
+      'my': 'margin-block',
+      'p': 'padding',
+      'pt': 'padding-top',
+      'pr': 'padding-inline-end',
+      'pb': 'padding-bottom',
+      'pl': 'padding-inline-start',
+      'px': 'padding-inline',
+      'py': 'padding-block',
+    ) {
+      $loop: 8;
+      $prefix: $size;
+      $letter: str-slice($selector, 1, 1);
+
+      @if $selector == w or $selector == gtc or $selector == ga {
+        $loop: 12;
+      }
+
+      @for $i from 0 through $loop {
+        $value: #{$i * 0.25}rem;
+
+        @if $size != '' {
+          $prefix: #{$size}\:;
+        }
+
+        // add 'auto' value for 'margin's properties
+        @if $i == 0 {
+          @if $letter != p and $letter != g {
+            .#{$prefix}#{$selector}-auto {
+              #{$property}: auto;
+            }
+          }
+          $value: #{$i * 0.25};
+        }
+
+        @if $selector == gtc {
+          $value: repeat(#{$i}, 1fr);
+        }
+
+        @if $selector == ga {
+          $value: span 1 / span #{$i};
+        }
+
+        // styles output
+        @if $value != 0% {
+          .#{$prefix}#{$selector}-#{$i} {
+            #{$property}: $value;
+          }
+        }
+      }
+    }
+  }
+}

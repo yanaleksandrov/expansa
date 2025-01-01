@@ -1,0 +1,26 @@
+.notes {
+    display: grid;
+    gap: 0.25rem;
+}
+
+.notes-item {
+    font-size: 0.6875rem;
+    color: var(--grafema-text-muted);
+    text-align: end;
+}
+
+.notes-abbr {
+
+}
+
+.notes-item-data {
+    font-size: 0.8125rem;
+    border-radius: var(--grafema-border-radius-lg);
+    box-shadow: var(--grafema-box-shadow);
+    background: var(--grafema-bg-active);
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    color: var(--grafema-dark);
+    text-align: start;
+    margin-top: 0.125rem;
+}

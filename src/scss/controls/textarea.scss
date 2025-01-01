@@ -1,0 +1,11 @@
+textarea {
+  resize: vertical;
+  white-space: pre-wrap;
+  min-height: 1.875rem;
+  padding-block: 0.325rem;
+  line-height: 1.5;
+
+  &[x-textarea] {
+    overflow: hidden;
+  }
+}

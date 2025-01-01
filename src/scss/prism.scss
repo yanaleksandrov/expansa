@@ -1,0 +1,194 @@
+/**
+ * PrismJS 1.25.0
+ *
+ * https://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript+javadoclike+json&plugins=line-numbers
+ */
+pre[class*="language-"] {
+	background: var(--grafema-bg-universal, hsla(0, 0%, 0%, 0.02));
+	color: #383A42;
+	overflow: auto;
+	position: relative;
+}
+
+pre[class*="language-"]:before {
+	background: var(--grafema-bg-universal, hsla(0, 0%, 0%, 0.04));
+	border-radius: 4px;
+	content: attr(data-lang);
+	font-size: 85%;
+	line-height: 1.4;
+	padding: 3px 6px;
+	position: absolute;
+	right: 1.65em;
+	top: 1.65em;
+}
+
+code[class*="language-"] {
+	background: transparent;
+	border: 0;
+	box-shadow: none;
+	color: #383A42;
+	padding: 0;
+	line-height: 1.45;
+	tab-size: 4;
+}
+
+.token.bold {
+	font-weight: bold;
+}
+
+.token.comment,
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+
+.token.namespace {
+	opacity: 0.8;
+}
+
+.token.comment,
+.token.prolog,
+.token.cdata {
+	color: hsl(230, 4%, 64%);
+}
+
+.token.doctype,
+.token.punctuation,
+.token.entity {
+	color: hsl(230, 8%, 24%);
+}
+
+.token.attr-name,
+.token.class-name,
+.token.boolean,
+.token.constant,
+.token.number,
+.token.atrule {
+	color: hsl(35, 99%, 36%);
+}
+
+.token.keyword {
+	color: hsl(301, 63%, 40%);
+}
+
+.token.property,
+.token.tag,
+.token.symbol,
+.token.deleted,
+.token.important {
+	color: hsl(5, 74%, 59%);
+}
+
+.token.selector,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted,
+.token.regex,
+.token.attr-value,
+.token.attr-value > .token.punctuation {
+	color: hsl(119, 34%, 47%);
+}
+
+.token.variable,
+.token.operator,
+.token.function {
+	color: hsl(221, 87%, 60%);
+}
+
+.token.url {
+	color: hsl(198, 99%, 37%);
+}
+
+/* HTML overrides */
+.language-html .token.attr-name {
+	color: hsl(35, 99%, 36%);
+}
+
+.language-html .token.attr-value > .token.punctuation.attr-equals,
+.language-html .token.special-attr > .token.attr-value > .token.value.css {
+	color: hsl(230, 8%, 24%);
+}
+
+/* CSS overrides */
+.language-css .token.selector {
+	color: hsl(5, 74%, 59%);
+}
+
+.language-css .token.property {
+	color: hsl(230, 8%, 24%);
+}
+
+.language-css .token.function,
+.language-css .token.url > .token.function {
+	color: hsl(198, 99%, 37%);
+}
+
+.language-css .token.url > .token.string.url {
+	color: hsl(119, 34%, 47%);
+}
+
+.language-css .token.important,
+.language-css .token.atrule .token.rule {
+	color: hsl(301, 63%, 40%);
+}
+
+/* JS overrides */
+.language-javascript .token.operator {
+	color: hsl(301, 63%, 40%);
+}
+
+.language-javascript .token.template-string > .token.interpolation > .token.interpolation-punctuation.punctuation {
+	color: hsl(344, 84%, 43%);
+}
+
+/* JSON overrides */
+.language-json .token.operator {
+	color: hsl(230, 8%, 24%);
+}
+
+.language-json .token.null.keyword {
+	color: hsl(35, 99%, 36%);
+}
+
+pre[class*="language-"].line-numbers {
+	position: relative;
+	padding-inline-start: 4.5em;
+	counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+	position: relative;
+	white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+	opacity: .6;
+	top: -0.15em;
+	position: absolute;
+	pointer-events: none;
+	font-size: 100%;
+	left: -4.5em;
+	width: 3.75em;
+	letter-spacing: -1px;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.line-numbers-rows > span {
+	display: block;
+	counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+	content: counter(linenumber);
+	color: #999;
+	display: block;
+	padding-right: 0.8em;
+	text-align: right;
+}

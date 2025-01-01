@@ -1,0 +1,33 @@
+.sortable {
+
+	&__item{
+		overflow: hidden;
+		width: 100%;
+		position: relative;
+		padding: 15px;
+		outline: 0;
+		font-size: 13px;
+		line-height: 0.8;
+		white-space: nowrap;
+		border: 1px solid #e1e1e1;
+		border-radius: 4px;
+		background-color: #fff;
+		display: block;
+		cursor: move;
+		-webkit-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		margin-top: 5px;
+		transition: all .2s;
+
+		&:first-child{
+			margin-top: 15px;
+		}
+
+		&.is-active,
+		&:hover{
+			border: 1px solid #c1c1c1;
+		}
+	}
+}

@@ -1,0 +1,61 @@
+.radio {
+  display: flex;
+  flex: 1;
+  transition: border-color, box-shadow 0.3s ease;
+  position: relative;
+  line-height: 1.2;
+
+  &--simple {
+
+  }
+
+  &--image,
+  &--described {
+    border: 1px solid var(--grafema-border);
+    border-radius: var(--grafema-border-radius);
+    background-color: var(--grafema-bg);
+    padding: 1rem;
+    overflow: hidden;
+
+    &:has(input:checked) {
+      border-color: var(--grafema-link);
+      box-shadow: 0 0 0 1px var(--grafema-link);
+    }
+  }
+
+  &--image {
+    padding: 0;
+    flex-direction: column;
+
+    input[type="radio"] {
+      right: 1rem;
+      top: 1rem;
+      position: absolute;
+    }
+
+    img {
+      border-top: 1px solid var(--grafema-border);
+      border-bottom: 1px solid var(--grafema-border);
+      border-radius: 0 0 var(--grafema-border-radius) var(--grafema-border-radius);
+      pointer-events: none;
+      position: static;
+      user-select: none;
+      width: 100%;
+    }
+  }
+
+  &-title {
+    color: var(--grafema-text-dark);
+    font-size: .8925rem;
+    font-weight: 500;
+    margin: 0 !important;
+    padding: 1rem;
+  }
+
+  &-content {
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--grafema-text-muted);
+    margin: 0 !important;
+  }
+}

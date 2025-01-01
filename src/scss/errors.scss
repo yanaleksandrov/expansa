@@ -1,0 +1,143 @@
+@import 'interface/reset';
+@import 'interface/variables';
+
+html {
+  height: 100%;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+body {
+  line-height: 1.4;
+  font-family: 'Inter', sustem-ui, sans-serif;
+  font-feature-settings: "liga" 0;
+  touch-action: manipulation;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+  font-size: 0.8125rem;
+}
+
+.errors {
+  background-color: var(--grafema-bg);
+  color: var(--grafema-dark);
+  padding-block: 1.5rem;
+  padding-inline: clamp(1rem, calc(50vw - 34rem), 68rem);
+
+  &-wrapper {
+    width: 100%;
+    background-color: #fff;
+    border-radius: var(--grafema-border-radius-lg);
+    border: 1px solid var(--grafema-border);
+    overflow: hidden;
+    word-break: break-all;
+
+    p {
+      margin-block: 0.5rem;
+
+      &:first-child {
+        margin-top: 0;
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    u {
+      color: var(--grafema-success);
+      text-decoration: none;
+    }
+
+    em {
+      color: var(--grafema-primary);
+      font-style: normal;
+    }
+
+    strong {
+      font-weight: 600;
+    }
+
+    code {
+      font-size: 0.8rem;
+      font-family: var(--grafema-font-code, ui-monospace);
+      letter-spacing: -0.03em;
+    }
+
+    dl {
+      margin-left: 2em;
+    }
+
+    dd {
+      margin-left: 2em;
+      color: var(--grafema-text-muted);
+      margin-bottom: 0.25rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--grafema-error);
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  &-title {
+    font-size: 1.35rem;
+    font-weight: 400;
+  }
+
+  &-content {
+    padding-bottom: 1.5rem;
+    font-size: 1rem;
+    padding-inline: 2rem;
+    word-break: break-all;
+  }
+
+  &-description {
+    background-color: #fff;
+    padding: 1.5rem 1.75rem;
+    border-bottom: 1px solid var(--grafema-border);
+  }
+
+  &-data {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &-navigation {
+    border-inline-end: 1px solid var(--grafema-border);
+    padding: 1rem 0;
+    width: 20rem;
+    display: grid;
+  }
+
+  &-navigation-item {
+    padding: 0.875rem 1.75rem;
+    cursor: pointer;
+
+    &.active,
+    &:hover {
+      transition: all 0.25s;
+      background-color: var(--grafema-bg);
+    }
+  }
+
+  &-source {
+    padding: 1.5rem 1.75rem;
+    flex: 1;
+    min-width: 20rem;
+    white-space: pre;
+    background-color: var(--grafema-bg) !important;
+  }
+}

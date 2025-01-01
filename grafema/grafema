@@ -1,0 +1,14 @@
+#!/usr/bin/env php
+<?php
+const GRFM_PATH                   = __DIR__ . '/';
+const GRFM_VERSION                = '2025.1';
+const GRFM_REQUIRED_PHP_VERSION   = '8.1';
+const GRFM_REQUIRED_MYSQL_VERSION = '5.6';
+
+require_once __DIR__ . '/env.php';
+require_once __DIR__ . '/autoload.php';
+
+use Grafema\Console\Terminal;
+
+$console = new Terminal();
+$console->handle();

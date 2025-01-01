@@ -1,0 +1,45 @@
+:root {
+  --grafema-white: #fff;
+
+  --grafema-bg: #f7f7f7;
+  --grafema-bg-hover: #f2f2f2;
+  --grafema-bg-dark: #efefef;
+  --grafema-bg-universal: rgba(142, 142, 142, 0.07);
+  --grafema-bg-active: rgba(134, 134, 134, 0.06);
+  --grafema-bg-light: rgba(255, 255, 255, 0.85);
+
+  --grafema-secondary: #5f6873;
+  --grafema-info: #1871ba;
+  --grafema-warning: #f76707;
+  --grafema-error: #d63939;
+  --grafema-dark: #1e1e1e;
+  --grafema-text-muted: #71777F;
+  --grafema-placeholder: #9aa0a9;
+
+  --grafema-border: #dfe2e3;
+  --grafema-border-hover: #ccced3;
+  --grafema-border-radius: 0.4rem;
+  --grafema-border-radius-lg: 0.5rem;
+  --grafema-border-radius-xl: 0.6rem;
+
+  --grafema-box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+
+  --grafema-link: #005bd3;
+  --grafema-link-hover: #054aa5;
+  --grafema-link-active: #6aeea7;
+
+  --grafema-primary: #1d5edd;
+  --grafema-primary-hover: #2c6be5;
+  --grafema-primary-active: #0e4ecb;
+
+  --grafema-success: #39b64d;
+  --grafema-success-hover: #51c263;
+  --grafema-success-active: #2eae43;
+
+  --grafema-danger: #d63939;
+  --grafema-danger-hover: #d85757;
+  --grafema-danger-active: #c32e2e;
+
+  --grafema-font-text: system-ui;
+  --grafema-font-code: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Ubuntu Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
+}

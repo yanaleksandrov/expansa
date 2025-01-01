@@ -1,0 +1,243 @@
+.datepicker {
+  display: block;
+
+  &__box{
+    padding: 5px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 0;
+  }
+
+  table th,
+  table td {
+    width: calc(100% / 7);
+    padding: 0;
+  }
+
+  table th {
+    color: #ccc;
+    text-transform: uppercase;
+    font-size: 0.66rem;
+    letter-spacing: 0.045rem;
+    line-height: 4;
+    font-weight: normal;
+    text-align: center;
+  }
+
+  &__wrapper {
+    color: #333;
+    margin-top: 2px;
+    border-radius: var(--grafema-border-radius);
+    position: relative;
+    z-index: 1;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 0;
+    display: flex;
+    flex-flow: wrap;
+    overflow: hidden;
+  }
+
+  &__calendar {
+    display: flex;
+    flex-flow: wrap;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  &:not(.is-inline) .datepicker__wrapper {
+    box-shadow: 0 3px 12px -5px rgb(99 99 99 / 15%);
+    margin: 0.25rem 0;
+    min-width: 15rem;
+  }
+
+  &__month {
+    flex: 1;
+  }
+
+  &__month:not(:first-child) .datepicker__prev,
+  &__month:not(:last-child) .datepicker__next {
+    display: none;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    position: relative;
+    text-align: center;
+    padding: 0.25rem;
+    border-bottom: 1px solid #ddd;
+  }
+
+  &__title {
+    display: inline-block;
+    padding: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    font-weight: bold;
+  }
+
+  &__title select{
+    font-weight: 400;
+    margin: 0 3px;
+    text-align: start;
+    padding-inline: 0.5rem 0.65rem !important;
+  }
+
+  &__title select[data-month] {
+    min-width: 5rem;
+  }
+
+  &__title select[data-year] {
+    width: 4.5rem;
+  }
+
+  &__title select option {
+    font: inherit;
+    font-size: 90%;
+    font-weight: normal;
+  }
+
+  &__prev,
+  &__next {
+    cursor: pointer;
+    outline: none;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    border-radius: 50%;
+    transition: all 0.2s;
+  }
+
+  &__prev:hover,
+  &__next:hover {
+    opacity: 1;
+    background-color: #fafafa;
+  }
+
+  &__prev {
+    margin-right: auto;
+  }
+
+  &__next {
+    margin-left: auto;
+  }
+
+  &__prev.is-disabled,
+  &__next.is-disabled {
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.4;
+  }
+
+  &__timepicker{
+    min-width: 100%;
+    display: flex;
+  }
+
+  &__timebox{
+    padding: 10px 15px;
+    border-top: 1px solid #ddd;
+    font-size: 0.75rem;
+    background: #fafafa;
+    width: 50%;
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  &__timebox select {
+    border-radius: var(--grafema-border-radius);
+    font: inherit;
+    margin: 0 3px;
+    padding: 7px 20px 7px 7px;
+    line-height: 1;
+    border-color: #dddddd;
+    outline: none;
+    display: inline-block;
+    width: auto;
+    -webkit-appearance: none;
+    background: #fff url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' width='20' height='20' viewBox='0 0 20 20'%3e%3cpath stroke='%23ddd' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M13 13l-3 3-3-3m6-6l-3-3-3 3'/%3e%3c/svg%3e") no-repeat right 0 top 50%;
+    cursor: pointer;
+  }
+
+  &__timebox input{
+    font: inherit;
+    border-radius: var(--grafema-border-radius);
+    padding: 5px 8px;
+    line-height: 1;
+    outline: none;
+    display: inline-block;
+    width: 2rem;
+    background-color: #fff;
+    border: 1px solid #ddd;
+  }
+
+  &__timebox input:focus {
+    box-shadow: 0 0 0 1px var(--grafema-primary);
+    border: 1px solid var(--grafema-primary);
+  }
+
+  &__day {
+
+  }
+
+  &__day > span {
+    cursor: pointer;
+    box-sizing: border-box;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  &__day > span:hover{
+    background: #6190e81a;
+    border-radius: var(--grafema-border-radius);
+  }
+
+  &__day.is-today > span {
+    font-weight: bold;
+  }
+
+  &__day.is-selected > span {
+    background: #6190e81a;
+  }
+
+  &__day.is-start > span,
+  &__day.is-end > span {
+    background-color: var(--grafema-primary);
+    color: #fff;
+  }
+
+  &__day.is-start > span {
+    border-top-left-radius: var(--grafema-border-radius);
+    border-bottom-left-radius: var(--grafema-border-radius);
+  }
+
+  &__day.is-end > span {
+    border-top-right-radius: var(--grafema-border-radius);
+    border-bottom-right-radius: var(--grafema-border-radius);
+  }
+
+  &__day.is-disabled,
+  &__day.is-otherMonth {
+    cursor: default;
+    pointer-events: none;
+    color: #ddd;
+  }
+
+  &__day.is-disabled > span,
+  &__day.is-otherMonth > span {
+    background-color: inherit;
+    color: inherit;
+  }
+}

@@ -1,0 +1,22 @@
+{
+    "name": "grafema-team/grafema",
+    "description": "Grafema CMS",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "grafema/Yan",
+            "email": "yanalexandrov@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo": "*",
+        "ext-fileinfo": "*",
+        "ext-curl": "*",
+        "ext-intl": "*"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "3.*",
+        "vimeo/psalm": "^5.26"
+    }
+}
