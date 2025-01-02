@@ -12,18 +12,18 @@ class Cookie
     public const SAMESITE_LAX = 'lax';
     public const SAMESITE_STRICT = 'strict';
 
-	/**
-	 * @throws CookieException
-	 */
-	public function __construct(
-	    protected string  $name,
-	    protected string  $value    = '',
-	    protected int     $expires  = 0,
-	    protected string  $path     = '',
-	    protected string  $domain   = '',
-	    protected bool    $secure   = false,
-	    protected bool    $httpOnly = false,
-	    protected ?string $sameSite = null
+    /**
+     * @throws CookieException
+     */
+    public function __construct(
+        protected string $name,
+        protected string $value = '',
+        protected int $expires = 0,
+        protected string $path = '',
+        protected string $domain = '',
+        protected bool $secure = false,
+        protected bool $httpOnly = false,
+        protected ?string $sameSite = null
     )
     {
         $this->setName($name);
@@ -39,21 +39,21 @@ class Cookie
         $str .= '=';
 
         if (empty($this->value)) {
-            $str .= 'deleted; expires='.gmdate('D, d M Y H:i:s T', time() - 31536001).'; Max-Age=0';
+            $str .= 'deleted; expires=' . gmdate('D, d M Y H:i:s T', time() - 31536001) . '; Max-Age=0';
         } else {
             $str .= rawurlencode($this->value);
 
             if ($this->expires > 0) {
-                $str .= '; expires='.gmdate('D, d M Y H:i:s T', $this->expires).'; Max-Age='.$this->getMaxAge();
+                $str .= '; expires=' . gmdate('D, d M Y H:i:s T', $this->expires) . '; Max-Age=' . $this->getMaxAge();
             }
         }
 
         if ($this->path) {
-            $str .= '; path='.$this->path;
+            $str .= '; path=' . $this->path;
         }
 
         if ($this->domain) {
-            $str .= '; domain='.$this->domain;
+            $str .= '; domain=' . $this->domain;
         }
 
         if ($this->secure) {
@@ -65,7 +65,7 @@ class Cookie
         }
 
         if (! is_null($this->sameSite)) {
-            $str .= '; samesite='.$this->sameSite;
+            $str .= '; samesite=' . $this->sameSite;
         }
 
         return $str;
@@ -100,7 +100,6 @@ class Cookie
         if (! preg_match("/^([A-z0-9._-]+)$/i", $name)) {
             throw new CookieException('The "name" parameter value contains illegal characters.');
         }
-
         $this->name = $name;
     }
 
@@ -109,7 +108,6 @@ class Cookie
         if (is_null($value)) {
             return $this->getValue();
         }
-
         $this->setValue($value);
     }
 
@@ -166,7 +164,7 @@ class Cookie
      */
     public function setPath(string $path): void
     {
-        $this->path = empty($path) ? '/' : $path;
+        $this->path = empty($path) ? DIRECTORY_SEPARATOR : $path;
     }
 
     /**
@@ -234,7 +232,6 @@ class Cookie
         if (! in_array($sameSite, [self::SAMESITE_NONE, self::SAMESITE_LAX, self::SAMESITE_STRICT, null])) {
             throw new CookieException('The "sameSite" parameter value is not valid.');
         }
-
         $this->sameSite = $sameSite;
     }
 }

@@ -22,12 +22,10 @@ use Expansa\Cookie\Cookie as CookieService;
  * @method static string getDomain()
  * @method static bool   getSecure()
  * @method static string getSameSite()
- *
- * @see \Expansa\Cookie\CookieJar
  */
 class Cookie extends Facade
 {
-    protected static function getFacadeAccessor(): string
+    protected static function getStaticClassAccessor(): string
     {
         return 'Expansa\Cookie\CookieJar';
     }

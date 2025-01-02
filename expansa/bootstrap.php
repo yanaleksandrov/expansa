@@ -13,6 +13,7 @@ use Expansa\{
     Is,
     User,
     Csrf,
+    Disk,
 };
 
 const EX_PATH                   = __DIR__ . '/';
@@ -139,3 +140,7 @@ require_once EX_PATH . 'routes.php';
 //
 //Expansa\Hook::call('testHook', 'my', 'name', 'is', 'Yan');
 //echo '</pre>';
+
+echo '<pre>';
+print_r(Disk::dir(EX_PATH));
+echo '</pre>';

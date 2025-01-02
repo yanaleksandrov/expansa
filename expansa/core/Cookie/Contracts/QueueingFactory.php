@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Contracts\Cookie;
+namespace Expansa\Cookie\Contracts;
 
 use Expansa\Cookie\Cookie;
 

@@ -1,7 +1,8 @@
 <?php
-namespace Expansa\File;
 
-use Expansa\Support\Arr;
+declare(strict_types=1);
+
+namespace Expansa\Support;
 
 /**
  * Usage:
@@ -26,7 +27,7 @@ class Svg
      * Defines the whitelist of elements and attributes allowed.
      */
     private static array $whitelist = [
-        'a' => [
+        'a'              => [
             'class',
             'clip-path',
             'clip-rule',
@@ -52,7 +53,7 @@ class Svg
             'xlink:href',
             'xlink:title',
         ],
-        'circle' => [
+        'circle'         => [
             'class',
             'clip-path',
             'clip-rule',
@@ -79,17 +80,17 @@ class Svg
             'systemLanguage',
             'transform',
         ],
-        'clipPath' => [
+        'clipPath'       => [
             'class',
             'clipPathUnits',
             'id',
         ],
-        'defs'  => [],
-        'style' => [
+        'defs'           => [],
+        'style'          => [
             'type',
         ],
-        'desc'    => [],
-        'ellipse' => [
+        'desc'           => [],
+        'ellipse'        => [
             'class',
             'clip-path',
             'clip-rule',
@@ -117,15 +118,15 @@ class Svg
             'systemLanguage',
             'transform',
         ],
-	    'feFlood' => [
-		    'flood-opacity',
-		    'result',
-	    ],
-	    'feBlend' => [
-		    'in',
-		    'in2',
-		    'result',
-	    ],
+        'feFlood'        => [
+            'flood-opacity',
+            'result',
+        ],
+        'feBlend'        => [
+            'in',
+            'in2',
+            'result',
+        ],
         'feGaussianBlur' => [
             'class',
             'color-interpolation-filters',
@@ -133,7 +134,7 @@ class Svg
             'requiredFeatures',
             'stdDeviation',
         ],
-        'filter' => [
+        'filter'         => [
             'class',
             'color-interpolation-filters',
             'filterRes',
@@ -147,7 +148,7 @@ class Svg
             'xlink:href',
             'y',
         ],
-        'foreignObject' => [
+        'foreignObject'  => [
             'class',
             'font-size',
             'height',
@@ -160,7 +161,7 @@ class Svg
             'x',
             'y',
         ],
-        'g' => [
+        'g'              => [
             'class',
             'clip-path',
             'clip-rule',
@@ -190,7 +191,7 @@ class Svg
             'font-weight',
             'text-anchor',
         ],
-        'image' => [
+        'image'          => [
             'class',
             'clip-path',
             'clip-rule',
@@ -209,7 +210,7 @@ class Svg
             'xlink:title',
             'y',
         ],
-        'line' => [
+        'line'           => [
             'class',
             'clip-path',
             'clip-rule',
@@ -254,7 +255,7 @@ class Svg
             'y1',
             'y2',
         ],
-        'marker' => [
+        'marker'         => [
             'id',
             'class',
             'markerHeight',
@@ -267,7 +268,7 @@ class Svg
             'systemLanguage',
             'viewBox',
         ],
-        'mask' => [
+        'mask'           => [
             'class',
             'height',
             'id',
@@ -277,11 +278,11 @@ class Svg
             'x',
             'y',
         ],
-        'metadata' => [
+        'metadata'       => [
             'class',
             'id',
         ],
-        'path' => [
+        'path'           => [
             'class',
             'clip-path',
             'clip-rule',
@@ -309,7 +310,7 @@ class Svg
             'systemLanguage',
             'transform',
         ],
-        'pattern' => [
+        'pattern'        => [
             'class',
             'height',
             'id',
@@ -325,7 +326,7 @@ class Svg
             'xlink:href',
             'y',
         ],
-        'polygon' => [
+        'polygon'        => [
             'class',
             'clip-path',
             'clip-rule',
@@ -355,7 +356,7 @@ class Svg
             'systemLanguage',
             'transform',
         ],
-        'polyline' => [
+        'polyline'       => [
             'class',
             'clip-path',
             'clip-rule',
@@ -398,7 +399,7 @@ class Svg
             'systemLanguage',
             'xlink:href',
         ],
-        'rect' => [
+        'rect'           => [
             'class',
             'clip-path',
             'clip-rule',
@@ -428,7 +429,7 @@ class Svg
             'x',
             'y',
         ],
-        'stop' => [
+        'stop'           => [
             'class',
             'id',
             'offset',
@@ -438,7 +439,7 @@ class Svg
             'style',
             'systemLanguage',
         ],
-        'svg' => [
+        'svg'            => [
             'class',
             'clip-path',
             'clip-rule',
@@ -460,13 +461,13 @@ class Svg
             'xmlns:xlink',
             'y',
         ],
-        'switch' => [
+        'switch'         => [
             'class',
             'id',
             'requiredFeatures',
             'systemLanguage',
         ],
-        'symbol' => [
+        'symbol'         => [
             'class',
             'fill',
             'fill-opacity',
@@ -493,7 +494,7 @@ class Svg
             'transform',
             'viewBox',
         ],
-        'text' => [
+        'text'           => [
             'class',
             'clip-path',
             'clip-rule',
@@ -525,7 +526,7 @@ class Svg
             'xml:space',
             'y',
         ],
-        'textPath' => [
+        'textPath'       => [
             'class',
             'id',
             'method',
@@ -537,8 +538,8 @@ class Svg
             'transform',
             'xlink:href',
         ],
-        'title' => [],
-        'tspan' => [
+        'title'          => [],
+        'tspan'          => [
             'class',
             'clip-path',
             'clip-rule',
@@ -574,7 +575,7 @@ class Svg
             'xml:space',
             'y',
         ],
-        'use' => [
+        'use'            => [
             'class',
             'clip-path',
             'clip-rule',
@@ -609,12 +610,12 @@ class Svg
         $this->xml->formatOutput = true;
     }
 
-    public function glob_tree_files($path)
+    public function globTreeFiles($path): array
     {
         $out = [];
         foreach (glob($path . '*.svg') as $file) {
             if (is_dir($file)) {
-                $out = array_merge($out, $this->glob_tree_files($file));
+                $out = array_merge($out, $this->globTreeFiles($file));
             } else {
                 $out[] = $file;
             }
@@ -622,7 +623,7 @@ class Svg
         return $out;
     }
 
-    public static function sprite($id, bool $print = true)
+    public static function sprite($id, bool $print = true): bool|string
     {
         $id = trim($id ?? '');
         $symbol = (array) (self::$items[$id] ?? []);
@@ -635,10 +636,10 @@ class Svg
 
         ob_start();
         ?>
-		<svg xmlns="http://www.w3.org/2000/svg" fill="none"<?php echo Arr::toHtmlAtts($symbol); ?>>
-			<use xlink:href="/<?php echo $url; ?>"></use>
-		</svg>
-		<?php
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none"<?php echo Arr::toHtmlAtts($symbol); ?>>
+            <use xlink:href="/<?php echo $url; ?>"></use>
+        </svg>
+        <?php
         if ($print) {
             return ob_get_flush();
         }
@@ -646,11 +647,11 @@ class Svg
         return ob_get_clean();
     }
 
-    public function addSprite($from_dir, $to_dir)
+    public function addSprite($from_dir, $to_dir): string
     {
         $sprite = $to_dir . 'sprite.svg';
         $files = array_filter(glob($from_dir . '*.svg'), 'file_exists');
-        if ( ! empty($files)) {
+        if (! empty($files)) {
             $_files = [];
             foreach ($files as $file) {
                 $is_loaded = $this->load($file);
@@ -668,7 +669,7 @@ class Svg
                             $this->xml->documentElement->appendChild($dom);
                         }
 
-                        if ( ! $node->hasAttribute('viewBox')) {
+                        if (! $node->hasAttribute('viewBox')) {
                             $width = $this->xml->documentElement->getAttribute('width');
                             $height = $this->xml->documentElement->getAttribute('height');
                             if ($width && $height) {
@@ -687,7 +688,7 @@ class Svg
                         // remove all not allowed attributes
                         for ($x = 0; $x < $node->attributes->length; ++$x) {
                             $attr = $node->attributes->item($x)->name;
-                            if ( ! in_array($attr, $symbol_whitelist, true)) {
+                            if (! in_array($attr, $symbol_whitelist, true)) {
                                 $node->removeAttribute($attr);
                                 --$x;
                             }
@@ -721,7 +722,7 @@ class Svg
     }
 
     // load XML SVG
-    public function loadXML($source)
+    public function loadXML($source): void
     {
         $this->xml->loadXML($source);
     }
@@ -739,7 +740,7 @@ class Svg
     /**
      * @see https://github.com/alnorris/SVG-Sanitizer
      */
-    public function sanitize()
+    public function sanitize(): void
     {
         // all elements in xml doc
         $elements = $this->xml->getElementsByTagName('*');
@@ -758,7 +759,7 @@ class Svg
                     $attr = $node->attributes->item($x)->name;
 
                     // check if attribute isn't in whitelist
-                    if ( ! in_array($attr, $whitelist_attr_arr, true)) {
+                    if (! in_array($attr, $whitelist_attr_arr, true)) {
                         $node->removeAttribute($attr);
                         --$x;
                     }

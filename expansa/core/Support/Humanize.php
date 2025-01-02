@@ -8,7 +8,7 @@ namespace Expansa\Support;
  * @see https://github.com/nFnK/php-humanizer
  * @since 2025.1
  */
-final class Humanize {
+class Humanize {
 
 	/**
 	 * Convert bytes to human-readable file size.

@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Cookie;
 
-use Expansa\Contracts\Cookie\QueueingFactory;
+use Expansa\Cookie\Contracts\QueueingFactory;
 use Expansa\Cookie\Exception\CookieException;
 
 class CookieJar implements QueueingFactory
@@ -19,10 +21,10 @@ class CookieJar implements QueueingFactory
 
     protected array $queued = [];
 
-	/**
-	 * @throws CookieException
-	 */
-	public function make(string $name, string $value, int $minutes = 0, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = null, string $sameSite = null): Cookie
+    /**
+     * @throws CookieException
+     */
+    public function make(string $name, string $value, int $minutes = 0, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = null, string $sameSite = null): Cookie
     {
         $path     = is_null($path) ? $this->path : $path;
         $domain   = is_null($domain) ? $this->domain : $domain;
@@ -35,18 +37,18 @@ class CookieJar implements QueueingFactory
         return new Cookie($name, $value, $expires, $path, $domain, $secure, $httpOnly, $sameSite);
     }
 
-	/**
-	 * @throws CookieException
-	 */
-	public function forever(string $name, string $value, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = true, string $sameSite = null): Cookie
+    /**
+     * @throws CookieException
+     */
+    public function forever(string $name, string $value, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = true, string $sameSite = null): Cookie
     {
         return $this->make($name, $value, 576000, $path, $domain, $secure, $httpOnly, $sameSite);
     }
 
-	/**
-	 * @throws CookieException
-	 */
-	public function forget($name, $path = null, $domain = null): Cookie
+    /**
+     * @throws CookieException
+     */
+    public function forget($name, $path = null, $domain = null): Cookie
     {
         return $this->make($name, '', -2628000, $path, $domain);
     }
@@ -56,10 +58,10 @@ class CookieJar implements QueueingFactory
         return ! is_null($this->queued($name, null, $path));
     }
 
-	/**
-	 * @throws CookieException
-	 */
-	public function queue(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = true, string $sameSite = null): void
+    /**
+     * @throws CookieException
+     */
+    public function queue(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = true, string $sameSite = null): void
     {
         if (is_string($cookie)) {
             $cookie = $this->make($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
@@ -96,9 +98,9 @@ class CookieJar implements QueueingFactory
     public function unqueue(string $name, string $path = null): void
     {
         if (is_null($path)) {
-           unset($this->queued[$name]);
+            unset($this->queued[$name]);
 
-           return;
+            return;
         }
 
         unset($this->queued[$name][$path]);
@@ -108,10 +110,10 @@ class CookieJar implements QueueingFactory
         }
     }
 
-	/**
-	 * @throws CookieException
-	 */
-	public function expire(string $name, string $path = null, string $domain = null): void
+    /**
+     * @throws CookieException
+     */
+    public function expire(string $name, string $path = null, string $domain = null): void
     {
         $this->queue($this->forget($name, $path, $domain));
     }
@@ -158,11 +160,21 @@ class CookieJar implements QueueingFactory
 
     public function setDefault(string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = null, string $sameSite = null): static
     {
-        if (! is_null($path)) $this->path = $path;
-        if (! is_null($domain)) $this->domain = $domain;
-        if (! is_null($secure)) $this->secure = $secure;
-        if (! is_null($httpOnly)) $this->httpOnly = $httpOnly;
-        if (! is_null($sameSite)) $this->sameSite = $sameSite;
+        if (! is_null($path)) {
+            $this->path = $path;
+        }
+        if (! is_null($domain)) {
+            $this->domain = $domain;
+        }
+        if (! is_null($secure)) {
+            $this->secure = $secure;
+        }
+        if (! is_null($httpOnly)) {
+            $this->httpOnly = $httpOnly;
+        }
+        if (! is_null($sameSite)) {
+            $this->sameSite = $sameSite;
+        }
 
         return $this;
     }

@@ -27,43 +27,43 @@ namespace Expansa\File;
  *
  * @since 2025.1
  */
-trait Traits {
+trait Traits
+{
+    public string $filepath = '';
 
-	public string $filepath = '';
+    public string $filename = '';
 
-	public string $filename = '';
+    public string $basename = '';
 
-	public string $basename = '';
+    public string $dirname = '';
 
-	public string $dirname = '';
+    public string $dirpath = '';
 
-	public string $dirpath = '';
+    public string $hash = '';
 
-	public string $hash = '';
+    public string $mime = '';
 
-	public string $mime = '';
+    public string $type = '';
 
-	public string $type = '';
+    public string $url = '';
 
-	public string $url = '';
+    public string $extension = '';
 
-	public string $extension = '';
+    public string $modified = '';
 
-	public string $modified = '';
+    public string $sizeHumanized = '';
 
-	public string $sizeHumanized = '';
+    public int $size = 0;
 
-	public int $size = 0;
+    public float $sizeKb = 0;
 
-	public float $sizeKb = 0;
+    public float $sizeMb = 0;
 
-	public float $sizeMb = 0;
+    public float $sizeGb = 0;
 
-	public float $sizeGb = 0;
+    public int $permission = 0;
 
-	public int $permission = 0;
+    public array $errors = [];
 
-	public array $errors = [];
-
-	public bool $exists = false;
+    public bool $exists = false;
 }

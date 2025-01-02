@@ -2,7 +2,7 @@
 
 namespace Expansa\Support;
 
-final class Collection
+class Collection
 {
 	/**
 	 * Iterates over data elements provided by a callback function using a generator.
