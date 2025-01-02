@@ -1,11 +1,12 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Expansa;
 
 /**
  * Represents a field associated with an object, allowing for retrieval, addition,
  * updating, and deletion of field values in a database.
- *
- * @since 2025.1
  */
 final class Attr {
 
@@ -13,7 +14,6 @@ final class Attr {
 	 * DB table name.
 	 *
 	 * @var string
-	 * @since 2025.1
 	 */
 	public static string $tableName = 'attr';
 
@@ -51,8 +51,6 @@ final class Attr {
 	 * Initializes the object ID and the table name based on the provided object.
 	 *
 	 * @param mixed $object The object associated with the field (e.g., User instance).
-	 *
-	 * @since 2025.1
 	 */
 	public function __construct( mixed $object ) {
 		if ( $object === null ) {
@@ -84,8 +82,6 @@ final class Attr {
 	 * @param mixed  $value    The value to be added.
 	 * @param bool   $isUnique Whether the field key must be unique (default: true).
 	 * @return bool            True if the field was added successfully, false otherwise.
-	 *
-	 * @since 2025.1
 	 */
 	public function add( string $key, mixed $value, bool $isUnique = true ): bool {
 		if ( ! $this->entityId ) {
@@ -121,8 +117,6 @@ final class Attr {
 	 * @param string $key  The key of the field to delete.
 	 * @param mixed $value The value of the field to delete (optional).
 	 * @return bool        True if the field was deleted successfully, false otherwise.
-	 *
-	 * @since 2025.1
 	 */
 	public function delete( string $key = '', mixed $value = '' ): bool {
 		if ( ! $this->entityId ) {
@@ -146,8 +140,6 @@ final class Attr {
 	 * @param string $type
 	 * @param string $key
 	 * @return array
-	 *
-	 * @since 2025.1
 	 */
 	public function fetch( string $type = '', string $key = '' ): array {
 		if ( ! $this->entityId || ! $this->entityColumn || ( $type && ! in_array( $type, $this->types, true ) ) ) {
@@ -180,8 +172,6 @@ final class Attr {
 	 * @param string  $key      The key of the field to retrieve. If empty, get all fields of object.
 	 * @param bool    $isSingle Whether to limit the result to a single value (default: true).
 	 * @return mixed            The field value or null if the object ID is not set.
-	 *
-	 * @since 2025.1
 	 */
 	public function get( string $type, string $key = '', bool $isSingle = true ): mixed {
 		if ( ! $this->entityId || ! $this->entityColumn || ! in_array( $type, $this->types, true ) ) {
@@ -215,8 +205,6 @@ final class Attr {
 	 * @param mixed $value    The new value for the field.
 	 * @param mixed $oldValue The old value of the field (optional).
 	 * @return bool           True if the field was updated successfully, false otherwise.
-	 *
-	 * @since 2025.1
 	 */
 	public function update( string $key, mixed $value, mixed $oldValue = '' ): bool {
 		if ( ! $this->entityId ) {
@@ -424,7 +412,6 @@ final class Attr {
 	 *
 	 * @param string $table
 	 * @param string $name
-	 * @since 2025.1
 	 */
 	public static function migrate( string $table, string $name ): void {
 		$tableName      = (new Db\Handler)->getTableName( $table . '_' . self::$tableName );

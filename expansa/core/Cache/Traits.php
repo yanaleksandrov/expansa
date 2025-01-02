@@ -1,32 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\Cache;
 
-trait Traits {
+trait Traits
+{
+    /**
+     * DB table name.
+     *
+     * @var string
+     */
+    protected static string $table = 'cache';
 
-	/**
-	 * DB table name.
-	 *
-	 * @var string
-	 * @since 2025.1
-	 */
-	protected static string $table = 'cache';
+    /**
+     * Holds the cached data.
+     *
+     * @var array
+     */
+    protected static array $cache = [];
 
-	/**
-	 * Holds the cached data.
-	 *
-	 * @var array
-	 *
-	 * @since 2025.1
-	 */
-	protected static array $cache = [];
-
-	/**
-	 * Holds the locked keys.
-	 *
-	 * @var array
-	 *
-	 * @since 2025.1
-	 */
-	protected static array $locks = [];
+    /**
+     * Holds the locked keys.
+     *
+     * @var array
+     */
+    protected static array $locks = [];
 }

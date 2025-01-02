@@ -1,13 +1,13 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Expansa;
 
 use Expansa\Csrf\Csrf;
 use Expansa\Csrf\Exceptions\InvalidCsrfTokenException;
 use Expansa\Csrf\Providers\NativeHttpOnlyCookieProvider;
 
-/**
- * @since 2025.1
- */
 final class Api {
 
 	/**
