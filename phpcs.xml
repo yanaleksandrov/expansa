@@ -1,90 +1,95 @@
 <?xml version="1.0"?>
-<ruleset name="Expansa Standards">
-    <description>PSR-12 The Expansa conventions</description>
+<ruleset name="Laravel Standards">
+    <description>PSR-12 Конвенции Laravel</description>
 
+    <!-- Наследует стандарты кодирования PSR-12 -->
     <rule ref="PSR12"/>
 
+    <!-- Требует открывающую скобку функции на новой строке (стиль BSD Allman) -->
+    <rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/>
+
+    <!-- Обнаруживает и предотвращает классы с дублирующимися именами -->
     <rule ref="Generic.Classes.DuplicateClassName">
         <exclude name="Generic.CodeAnalysis.EmptyStatement.DetectedIf"/>
     </rule>
+
+    <!-- Отмечает пустые операторы, такие как пустые if-условия -->
     <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
-    <rule ref="Generic.CodeAnalysis.ForLoopShouldBeWhileLoop"/>
+
+    <!-- Отмечает циклы с вызовами функций в условии -->
     <rule ref="Generic.CodeAnalysis.ForLoopWithTestFunctionCall"/>
+
+    <!-- Предотвращает использование перемешанных инкрементов в циклах -->
     <rule ref="Generic.CodeAnalysis.JumbledIncrementer"/>
+
+    <!-- Отмечает безусловные операторы if -->
     <rule ref="Generic.CodeAnalysis.UnconditionalIfStatement"/>
+
+    <!-- Предотвращает использование ненужного модификатора final -->
     <rule ref="Generic.CodeAnalysis.UnnecessaryFinalModifier"/>
-    <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
-        <exclude-pattern>/app/Http/Resources/*\.php</exclude-pattern>
-    </rule>
+
+    <!-- Отмечает неиспользуемые параметры функций -->
+    <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter"/>
+
+    <!-- Предотвращает использование бесполезных переопределённых методов -->
     <rule ref="Generic.CodeAnalysis.UselessOverridingMethod"/>
+
+    <!-- Обрабатывает комментарии DocBlock с исключениями для некоторых тегов -->
     <rule ref="Generic.Commenting.DocComment">
         <exclude name="Generic.Commenting.DocComment.TagValueIndent"/>
         <exclude name="Generic.Commenting.DocComment.NonParamGroup"/>
     </rule>
+
+    <!-- Предотвращает использование инлайновых управляющих конструкций -->
     <rule ref="Generic.ControlStructures.InlineControlStructure"/>
-    <rule ref="Generic.Files.ByteOrderMark"/>
-    <rule ref="Generic.Files.LineEndings">
-        <exclude name="Generic.Files.LineEndings.InvalidEOLChar"/>
-    </rule>
+
+    <!-- Предотвращает использование нескольких операторов в одной строке -->
     <rule ref="Generic.Formatting.DisallowMultipleStatements"/>
+
+    <!-- Предотвращает пробелы после приведения типа -->
     <rule ref="Generic.Formatting.SpaceAfterCast"/>
+
+    <!-- Проверяет вызовы функций на использование передачи по ссылке по времени вызова -->
     <rule ref="Generic.Functions.CallTimePassByReference"/>
+
+    <!-- Проверяет пробелы между аргументами в вызовах функций -->
     <rule ref="Generic.Functions.FunctionCallArgumentSpacing"/>
-    <rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/>
-    <rule ref="Generic.Metrics.CyclomaticComplexity">
-        <properties>
-            <property name="complexity" value="20"/>
-            <property name="absoluteComplexity" value="50"/>
-        </properties>
-    </rule>
-    <rule ref="Generic.Metrics.NestingLevel">
-        <properties>
-            <property name="nestingLevel" value="5"/>
-            <property name="absoluteNestingLevel" value="15"/>
-        </properties>
-    </rule>
-    <rule ref="Generic.NamingConventions.ConstructorName"/>
+
+    <!-- Проверяет использование констант в нижнем регистре -->
     <rule ref="Generic.PHP.LowerCaseConstant"/>
+
+    <!-- Проверяет использование устаревших функций PHP -->
     <rule ref="Generic.PHP.DeprecatedFunctions"/>
+
+    <!-- Предотвращает использование коротких открывающих тегов PHP -->
     <rule ref="Generic.PHP.DisallowShortOpenTag"/>
+
+    <!-- Запрещает использование определённых функций PHP -->
     <rule ref="Generic.PHP.ForbiddenFunctions"/>
+
+    <!-- Предотвращает использование подавленных ошибок в PHP -->
     <rule ref="Generic.PHP.NoSilencedErrors"/>
+
+    <!-- Требует явного использования строгих типов в PHP -->
     <rule ref="Generic.PHP.RequireStrictTypes"/>
+
+    <!-- Запрещает использование табуляции для отступов -->
     <rule ref="Generic.WhiteSpace.DisallowTabIndent"/>
+
+    <!-- Оформление отступов для блоков кода -->
     <rule ref="Generic.WhiteSpace.ScopeIndent">
         <properties>
+            <!-- Требует использование 4 пробелов для блоков кода -->
             <property name="indent" value="4"/>
         </properties>
     </rule>
 
-    <!-- Laravel-Specific Adjustments -->
-    <rule ref="Squiz.WhiteSpace.MemberVarSpacing">
-        <properties>
-            <property name="spacing" value="1"/>
-            <property name="spacingBeforeFirst" value="0"/>
-        </properties>
-    </rule>
-    <rule ref="Squiz.WhiteSpace.FunctionSpacing">
-        <properties>
-            <property name="spacing" value="1"/>
-            <property name="spacingAfterLast" value="0"/>
-        </properties>
+    <!-- Разрешаем использование табуляции для отступов -->
+    <rule ref="Generic.WhiteSpace.DisallowTabIndent">
+        <exclude/>
     </rule>
 
-    <!-- Laravel-Specific Adjustments -->
-    <rule ref="Squiz.WhiteSpace.MemberVarSpacing">
-        <properties>
-            <property name="spacing" value="1"/>
-            <property name="spacingBeforeFirst" value="0"/>
-        </properties>
-    </rule>
-    <rule ref="Squiz.WhiteSpace.FunctionSpacing">
-        <properties>
-            <property name="spacing" value="1"/>
-            <property name="spacingAfterLast" value="0"/>
-        </properties>
-    </rule>
-
+    <!-- Проверяет правильность объявления массивов -->
     <rule ref="Squiz.Arrays.ArrayDeclaration">
         <exclude name="Squiz.Arrays.ArrayDeclaration.ValueNotAligned" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.KeyNotAligned" />
@@ -97,48 +102,60 @@
         <exclude name="Squiz.Arrays.ArrayDeclaration.NoKeySpecified" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.KeySpecified" />
     </rule>
+
+    <!-- Предотвращает использование функций size() в циклах -->
     <rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
+
+    <!-- Запрещает использование некоторых функций PHP -->
     <rule ref="Squiz.PHP.DiscouragedFunctions">
         <properties>
             <property name="error" value="true"/>
         </properties>
     </rule>
+
+    <!-- Проверяет правильное использование пробела вокруг операторов -->
     <rule ref="Squiz.WhiteSpace.OperatorSpacing">
         <properties>
             <property name="ignoreNewlines" value="true"/>
         </properties>
     </rule>
 
-    <rule ref="Squiz.Arrays.ArrayDeclaration">
-        <exclude name="Squiz.Arrays.ArrayDeclaration.ValueNotAligned"/>
-        <exclude name="Squiz.Arrays.ArrayDeclaration.KeyNotAligned"/>
-        <exclude name="Squiz.Arrays.ArrayDeclaration.CloseBraceNotAligned"/>
-    </rule>
-    <rule ref="Squiz.PHP.DisallowSizeFunctionsInLoops"/>
-    <rule ref="Squiz.PHP.DiscouragedFunctions">
+    <rule ref="Squiz.WhiteSpace.MemberVarSpacing">
         <properties>
-            <property name="error" value="true"/>
+            <property name="spacing" value="1"/>
+            <property name="spacingBeforeFirst" value="0"/>
         </properties>
     </rule>
-    <rule ref="Squiz.WhiteSpace.OperatorSpacing">
+    <rule ref="Squiz.WhiteSpace.FunctionSpacing">
         <properties>
-            <property name="ignoreNewlines" value="true"/>
+            <property name="spacing" value="1"/>
+            <property name="spacingAfterLast" value="0"/>
         </properties>
     </rule>
 
-    <file>app</file>
-    <file>config</file>
-    <file>public</file>
-    <file>resources</file>
-    <file>routes</file>
-    <file>tests</file>
+    <rule ref="Generic.Files.LineEndings">
+        <exclude name="Generic.Files.LineEndings.InvalidEOLChar"/>
+    </rule>
 
+    <!-- Настроенные правила -->
+    <rule ref="phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php" />
+
+    <file>src</file>
+    <file>phpcs</file>
+
+    <!-- Исключает файлы с расширениями .js, .css, .xml, .blade.php и файлы из папки vendor -->
     <exclude-pattern>*/*.js</exclude-pattern>
     <exclude-pattern>*/*.css</exclude-pattern>
     <exclude-pattern>*/*.xml</exclude-pattern>
+    <exclude-pattern>*/*.blade.php</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
 
-    <arg value="spv"/>
+    <!-- Настройка цветов в выводе -->
     <arg name="colors"/>
+
+    <!-- Устанавливает вывод в формате spv -->
+    <arg value="spv"/>
+
+    <!-- Устанавливает лимит памяти для проверки -->
     <ini name="memory_limit" value="128M"/>
 </ruleset>

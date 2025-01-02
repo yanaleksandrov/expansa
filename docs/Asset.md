@@ -78,7 +78,7 @@ Asset::enqueue( 'alpine' );
 Допустим мы хотим подключать CSS стили по требованию: только если файл шаблона участвует в рендере текущей страницы.
 
 ```php
-Hook::add( 'grafema_view_part', function( $filepath, $template, $args ) {
+Hook::add( 'expansa_view_part', function( $filepath, $template, $args ) {
     $asset = sprtintf( '%s/%s.css', basename( $filepath ), $template );
     if ( file_exists( $asset ) ) {
         Asset::enqueue( 'main', sprtintf( 'path/to-file/%s.js', $template ) );

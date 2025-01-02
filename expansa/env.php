@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Constants for database name, user, password, host, prefix & charset.
  *
@@ -8,6 +9,7 @@
  *
  * @since 2025.1
  */
+
 const EX_DB_NAME             = 'alexandrov_cms';
 const EX_DB_USERNAME         = 'alexandrov_cms';
 const EX_DB_PASSWORD         = 'Wf9zh5BT';

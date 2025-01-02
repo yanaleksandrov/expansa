@@ -10,7 +10,7 @@ document.addEventListener('alpine:init', (() => {
         url.search = params.toString();
         window.history.replaceState({}, '', url.toString());
     };
-    const dialogHandler = (templateID, data = {}, dialogID = 'grafema-dialog') => {
+    const dialogHandler = (templateID, data = {}, dialogID = 'expansa-dialog') => {
         setTimeout((() => {
             let template = document.querySelector(`#${templateID}`), dialog = document.querySelector(`#${dialogID}`);
             if (dialog && template) {
@@ -38,14 +38,14 @@ document.addEventListener('alpine:init', (() => {
             if (el?.id === templateID && templateID && callback) {
                 let data = await callback();
                 if (data) {
-                    dialogHandler(templateID, data, 'grafema-dialog');
+                    dialogHandler(templateID, data, 'expansa-dialog');
                 }
             }
         },
         open: (templateID, data = {}, dialogID) => {
             dialogHandler(templateID, data, dialogID);
         },
-        close: (dialogID = 'grafema-dialog') => {
+        close: (dialogID = 'expansa-dialog') => {
             let dialog = document.querySelector(`#${dialogID}`) || el.closest('dialog');
             if (dialog) {
                 dialog.classList.remove('active');

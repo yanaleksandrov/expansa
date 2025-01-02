@@ -4,7 +4,7 @@ document.addEventListener('alpine:init', (() => {
     Alpine.magic('ajax', (el => (route, data, progressCallback) => {
         document.addEventListener(route, (({detail: {data, resolve}}) => resolve(data)));
         return new Promise((resolve => {
-            xhr.open(el.getAttribute('method')?.toUpperCase() ?? 'POST', grafema?.apiurl + route);
+            xhr.open(el.getAttribute('method')?.toUpperCase() ?? 'POST', expansa?.apiurl + route);
             xhr.withCredentials = true;
             xhr.responseType = 'json';
             xhr.onloadstart = xhr.upload.onprogress = event => progressCallback?.(onProgress(event, xhr));

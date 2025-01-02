@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Setup system core constants.
+ *
+ * @since 2025.1
+ */
+
 use Expansa\{
     Db,
     Debug,
@@ -9,11 +15,6 @@ use Expansa\{
     Csrf,
 };
 
-/**
- * Setup system core constants.
- *
- * @since 2025.1
- */
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';
 const EX_REQUIRED_PHP_VERSION   = '8.1';
@@ -73,12 +74,12 @@ if (! Is::installed()) {
         header(sprintf('%s 500 Internal Server Error', $serverProtocol), true, 500);
         header('Content-Type: text/html; charset=utf-8');
 
-	    I18n::f(
-			'Your server is running PHP version ":phpVersion" but Expansa :expansaVersion requires at least :phpRequiredVersion.',
-			$php_version,
-			EX_VERSION,
-			EX_REQUIRED_PHP_VERSION
-	    );
+        I18n::f(
+            'Your server is running PHP version ":phpVersion" but Expansa :expansaVersion requires at least :phpRequiredVersion.',
+            $php_version,
+            EX_VERSION,
+            EX_REQUIRED_PHP_VERSION
+        );
 
         exit;
     }
@@ -89,12 +90,12 @@ if (! Is::installed()) {
         header(sprintf('%s 500 Internal Server Error', $serverProtocol), true, 500);
         header('Content-Type: text/html; charset=utf-8');
 
-	    I18n::f(
-		    'Your server is running PHP version ":dbVersion" but Expansa :expansaVersion requires at least :dbRequiredVersion.',
-		    $db_version,
-		    EX_VERSION,
-		    EX_REQUIRED_MYSQL_VERSION
-	    );
+        I18n::f(
+            'Your server is running PHP version ":dbVersion" but Expansa :expansaVersion requires at least :dbRequiredVersion.',
+            $db_version,
+            EX_VERSION,
+            EX_REQUIRED_MYSQL_VERSION
+        );
 
         exit;
     }
@@ -115,18 +116,18 @@ require_once EX_PATH . 'routes.php';
 //Expansa\Hook::configure(EX_CORE . 'Listeners');
 //
 //function expansaTest($hook) {
-//	var_dump($hook);
-//	var_dump('111111');
-//	return $hook;
+//  var_dump($hook);
+//  var_dump('111111');
+//  return $hook;
 //}
 //
 //Expansa\Hook::add('testHook', 'expansaTest');
 //
 //
 //Expansa\Hook::add('testHook', #[Expansa\Hooks\HookListenerAlias('heyheyhey')] function($hook) {
-//	var_dump($hook);
-//	var_dump('222222');
-//	return $hook;
+//  var_dump($hook);
+//  var_dump('222222');
+//  return $hook;
 //}, Expansa\Hooks\Priority::HIGH);
 //
 //var_dump('--------------------------------------------------------------------------');
@@ -137,48 +138,4 @@ require_once EX_PATH . 'routes.php';
 //print_r(Expansa\Hook::get());
 //
 //Expansa\Hook::call('testHook', 'my', 'name', 'is', 'Yan');
-//echo '</pre>';
-
-//echo '<pre>';
-//$data    = 'Привет миру! Как у вас дела и что нового?';
-//$data    = 'Hello world my name is Yan Aleksandrov';
-//var_dump($data);
-//$encoded = Expansa\Codec::encode(['test' => $data]);
-//var_dump($encoded);
-//$decoded = Expansa\Codec::decode($encoded);
-//var_dump($decoded);
-//echo '</pre>';
-
-
-//echo '<pre>';
-//$texts = [
-//	'Its my life',
-//	'{"widget":{"debug":"on","window":{"title":"Sample Konfabulator Widget","name":"main_window","width":500,"height":500},"image":{"src":"Images/Sun.png","name":"sun1","hOffset":250,"vOffset":250,"alignment":"center"},"text":{"data":"Click Here","size":36,"style":"bold","name":"text1","hOffset":250,"vOffset":100,"alignment":"center","onMouseUp":"sun1.opacity = (sun1.opacity / 100) * 90;"}}}',
-//	'Привет, как у тебя дела?',
-//	23124325234,
-//	123,
-//	'动物中国俄国',
-//];
-//
-//foreach ($texts as $text) {
-//	$dictionary = new Expansa\Algorithms\Huffmans\Dictionary([(string)$text]);
-//	$huffman    = new Expansa\Algorithms\Huffmans\Huffman($dictionary, '1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz');
-//	$encoded = $huffman->encode($text, true);
-//	$decoded = $huffman->decode($encoded, true);
-//
-//	printExampleResult($text, $encoded, $decoded);
-//}
-//
-//function printExampleResult($str, $encodedStr, $decodedStr)
-//{
-//	$strLen = mb_strlen($str);
-//	$encodedStrLen = mb_strlen($encodedStr);
-//
-//	echo    'Original string :	'.$str.'<br />'.
-//		'Encoded string :	'.$encodedStr.'<br />'.
-//		'Decoded string :	'.$decodedStr.'<br />'.
-//		'Original length :	'.$strLen.'<br />'.
-//		'Encoded length :	'.$encodedStrLen.'<br />'.
-//		'Percentage gain :	'.(100 -(100 * $encodedStrLen / $strLen)).'%<br /><br />';
-//}
 //echo '</pre>';
