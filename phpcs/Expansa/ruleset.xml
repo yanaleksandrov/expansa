@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<ruleset name="Expansa">
+    <description>Custom coding standard for Expansa framework.</description>
+
+    <rule ref="./Sniffs/Formatting/EmptyConstructorSniff.php" />
+</ruleset>
