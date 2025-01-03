@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk;
+namespace Expansa\Filesystem;
 
-class Mime
+class MimeType
 {
     public function __construct(
         public array $typesList = [

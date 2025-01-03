@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk\Contracts;
+namespace Expansa\Filesystem\Contracts;
 
-use Expansa\Disk\Directory;
-use Expansa\Disk\File;
+use Expansa\Filesystem\Directory;
+use Expansa\Filesystem\File;
 
-interface System
+interface CommonInterface
 {
     public function clean(): Directory|File;
 

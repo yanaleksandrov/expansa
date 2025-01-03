@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk\Contracts;
+namespace Expansa\Filesystem\Contracts;
 
-use Expansa\Disk\File;
+use Expansa\Filesystem\File;
 
-interface FileSystem
+interface FileInterface
 {
     public function chmod(int $mode = 0755): File;
 

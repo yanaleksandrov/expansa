@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk;
+namespace Expansa\Filesystem\Traits;
 
 /**
  * Trait that provides file-related properties.
@@ -27,7 +27,7 @@ namespace Expansa\Disk;
  * @property bool   $exists     Indicates if the file exists.
  * @property array  $errors     An array of error messages related to the file.
  */
-trait EntryTraits
+trait Entry
 {
     public string $path = '';
 

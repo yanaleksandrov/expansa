@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk;
+namespace Expansa\Filesystem;
 
 /**
  * Class Disk

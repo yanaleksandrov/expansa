@@ -12,7 +12,7 @@ use Expansa\View;
 use Expansa\User;
 use Expansa\I18n;
 use Expansa\Url;
-use Expansa\Dir;
+use Expansa\Disk;
 use Expansa\Is;
 use Expansa\Db;
 
@@ -90,11 +90,11 @@ try {
          * @since 2025.1
          */
         Plugins::register(function () {
-            return ( new Dir(EX_PLUGINS) )->getFiles('*/*.php');
+            return Disk::dir(EX_PLUGINS)->files('*/*.php');
         });
 
         Themes::register(function () {
-            return ( new Dir(EX_THEMES) )->getFiles('*/*.php');
+            return Disk::dir(EX_THEMES)->files('*/*.php');
         });
 
         /**

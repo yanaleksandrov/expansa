@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk;
+namespace Expansa\Filesystem;
 
 use Expansa\Url;
+use Expansa\Filesystem\Traits\Entry;
 
-trait Entry
+class EntryHandler
 {
-    use EntryTraits;
+    use Entry;
 
     /**
      * Trait that provides file-related properties.

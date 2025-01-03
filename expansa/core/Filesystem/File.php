@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk;
+namespace Expansa\Filesystem;
 
 use DateTime;
-use Expansa\Disk\Contracts\FileSystem;
-use Expansa\Disk\Contracts\System;
-use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Validator;
+use Expansa\Filesystem\Contracts\FileInterface;
+use Expansa\Filesystem\Contracts\CommonInterface;
 
 /**
  * The File class provides a convenient and easy-to-use API for working with files.
@@ -18,10 +17,8 @@ use Expansa\Validator;
  * You can perform a wide range of operations: reading and writing to a file,
  * downloading and capturing, moving and copying files, and much more.
  */
-class File implements System, FileSystem
+class File extends EntryHandler implements CommonInterface, FileInterface
 {
-    use Entry;
-
     public function grab(string $url): File
     {
         $url = $this->sanitizeUrl($url);
@@ -96,7 +93,7 @@ class File implements System, FileSystem
     public function chmod(int $mode = 0755): File
     {
         if ($this->exists && ! chmod($this->path, $mode)) {
-            $this->errors[] = new Error('file-manipulations', I18n::_t('Failed to update file access rights'));
+            $this->errors[] = I18n::_t('Failed to update file access rights');
         }
         return $this;
     }
@@ -237,7 +234,7 @@ class File implements System, FileSystem
     public function upload(array $file): File
     {
         $maxFileSize = $this->getMaxUploadSizeInBytes();
-        $mimeTypes   = (new Mime())->typesList;
+        $mimeTypes   = (new MimeType())->typesList;
         $mimes       = implode(',', array_values($mimeTypes));
         $extensions  = str_replace('|', ',', implode(',', array_keys($mimeTypes)));
 

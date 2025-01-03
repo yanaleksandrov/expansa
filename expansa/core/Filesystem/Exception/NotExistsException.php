@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk\Exception;
+namespace Expansa\Filesystem\Exception;
 
 use Exception;
 
@@ -11,6 +11,6 @@ use Exception;
  *
  * Exception thrown when an error occurs related to cookies.
  *
- * @package Expansa\Disk
+ * @package Expansa\Filesystem
  */
 class NotExistsException extends Exception {}

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk\Contracts;
+namespace Expansa\Filesystem\Contracts;
 
-use Expansa\Disk\Directory;
+use Expansa\Filesystem\Directory;
 
-interface DirectorySystem
+interface DirectoryInterface
 {
     public function chmod(int $mode = 0755, bool $recursive = false): Directory;
 

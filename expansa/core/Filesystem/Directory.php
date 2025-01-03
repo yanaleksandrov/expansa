@@ -2,24 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Disk;
+namespace Expansa\Filesystem;
 
 use ZipArchive;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
-use Expansa\Disk\Contracts\System;
-use Expansa\Disk\Contracts\DirectorySystem;
-use Expansa\Disk\Exception\NotExistsException;
+use Expansa\Filesystem\Contracts\CommonInterface;
+use Expansa\Filesystem\Contracts\DirectoryInterface;
+use Expansa\Filesystem\Exception\NotExistsException;
 
 /**
  * Class Directory.
  *
  * A class that represents a directory on a file system.
  */
-class Directory implements System, DirectorySystem
+class Directory extends EntryHandler implements CommonInterface, DirectoryInterface
 {
-    use Entry;
-
     public function read(int $depth = 0, bool $treeFormat = false): array
     {
         if ($treeFormat) {

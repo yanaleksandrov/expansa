@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa;
 
 use Expansa\Facades\Facade;
-use Expansa\Disk\Directory;
-use Expansa\Disk\File;
+use Expansa\Filesystem\Directory;
+use Expansa\Filesystem\File;
 
 /**
  * Disk Facade
@@ -20,6 +20,6 @@ class Disk extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Disk\Disk';
+        return 'Expansa\Filesystem\Disk';
     }
 }
