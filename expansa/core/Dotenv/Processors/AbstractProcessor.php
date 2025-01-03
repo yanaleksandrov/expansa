@@ -6,9 +6,10 @@ namespace Expansa\Dotenv\Processors;
 
 /**
  * AbstractProcessor
- *
  * Defines the structure of a processor, which processes a value
  * and determines if it can be processed, as well as executes the processing logic.
+ *
+ * @package Expansa\Dotenv
  */
 abstract class AbstractProcessor
 {

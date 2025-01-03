@@ -6,9 +6,10 @@ namespace Expansa\Dotenv\Processors;
 
 /**
  * BooleanProcessor
- *
  * Processes a string value to determine if it represents a boolean
  * ("true" or "false") and returns its corresponding boolean equivalent.
+ *
+ * @package Expansa\Dotenv
  */
 class BooleanProcessor extends AbstractProcessor
 {

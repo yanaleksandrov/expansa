@@ -6,10 +6,10 @@ namespace Expansa\Dotenv\Processors;
 
 /**
  * NullProcessor
- *
  * This processor determines if a value is "null" or "NULL" and, if so, returns a null value.
  *
  * @extends AbstractProcessor
+ * @package Expansa\Dotenv
  */
 class NullProcessor extends AbstractProcessor
 {

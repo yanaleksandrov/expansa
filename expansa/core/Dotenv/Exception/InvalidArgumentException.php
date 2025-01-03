@@ -11,6 +11,6 @@ use Exception;
  *
  * Represents an exception thrown when an invalid argument is passed.
  *
- * @package Expansa\Dotenv\Exception
+ * @package Expansa\Dotenv
  */
 class InvalidArgumentException extends Exception {}
