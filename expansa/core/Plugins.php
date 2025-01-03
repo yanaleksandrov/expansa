@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Expansa;
 
 final class Plugins extends Extensions\Provider {

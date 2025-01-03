@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\Patterns;
 
 use Expansa\Error;
@@ -28,49 +30,51 @@ use Expansa\I18n;
  *
  * @since 2025.1
  */
-final class Registry {
+final class Registry
+{
+    /**
+     * Put item into the registry.
+     *
+     * @param string $key
+     * @param mixed $item
+     * @return void
+     */
+    private static array $registry = [];
 
-	/**
-	 * Put item into the registry.
-	 *
-	 * @param string $key
-	 * @param mixed $item
-	 * @return void
-	 */
-	private static array $registry = [];
+    /**
+     * Put item into the registry.
+     *
+     * @param  string $key
+     * @param  mixed  $value
+     * @return void
+     */
+    public static function set(string $key, mixed $value): void
+    {
+        if (! isset(self::$registry[ $key ])) {
+            self::$registry[ $key ] = $value;
+        } else {
+            new Error('registry-set', I18n::_t('You trying to override an existing data.'));
+        }
+    }
 
-	/**
-	 * Put item into the registry.
-	 *
-	 * @param  string $key
-	 * @param  mixed  $value
-	 * @return void
-	 */
-	public static function set( string $key, mixed $value ): void {
-		if ( ! isset( self::$registry[ $key ] ) ) {
-			self::$registry[ $key ] = $value;
-		} else {
-			new Error( 'registry-set', I18n::_t( 'You trying to override an existing data.' ) );
-		}
-	}
+    /**
+     * Get item by key.
+     *
+     * @param  string $key
+     * @param  mixed  $default
+     * @return null|mixed
+     */
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        $array = self::$registry;
 
-	/**
-	 * Get item by key.
-	 *
-	 * @param  string $key
-	 * @param  mixed  $default
-	 * @return null|mixed
-	 */
-	public static function get( string $key, mixed $default = null ): mixed {
-		$array = self::$registry;
+        foreach (explode('.', $key) as $segment) {
+            if (! is_array($array) || ! array_key_exists($segment, $array)) {
+                return $default;
+            }
+            $array = $array[ $segment ];
+        }
 
-		foreach ( explode( '.', $key ) as $segment ) {
-			if ( ! is_array( $array ) || ! array_key_exists( $segment, $array ) ) {
-				return $default;
-			}
-			$array = $array[ $segment ];
-		}
-
-		return $array;
-	}
+        return $array;
+    }
 }

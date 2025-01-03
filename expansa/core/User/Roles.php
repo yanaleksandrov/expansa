@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Expansa\User;
 
 use Expansa\Error;
@@ -21,178 +24,167 @@ use Expansa\I18n;
  */
 class Roles
 {
-	/**
-	 * Object list of roles and capabilities.
-	 *
-	 * @since 2025.1
-	 *
-	 * @var array[]
-	 */
-	private static array $roles = [];
+    /**
+     * Object list of roles and capabilities.
+     *
+     * @var array[]
+     */
+    private static array $roles = [];
 
-	/**
-	 * Add role name with list of capabilities.
-	 *
-	 * Updates the list of roles, if the role doesn't already exist.
-	 *
-	 * The capabilities are defined in the following format `array( 'read' => true );`
-	 * To explicitly deny a role a capability you set the value for that capability to false.
-	 *
-	 * @since 2025.1
-	 *
-	 * @param string $display_name role display name
-	 * @param mixed  $capabilities List of capabilities keyed by the capability name, e.g. [ 'edit_posts', 'delete_posts' ].
-	 *                             You can specify the ID of an existing role as the value.
-	 *                             In this case, the capabilities of the specified role are copied to the new one.
-	 */
-	public static function register( string $role, string $display_name, $capabilities )
-	{
-		$roles = self::fetch();
-		if ( empty( $role ) || isset( $roles[$role] ) ) {
-			return new Error( 'roles-register', I18n::_t( 'Sorry, the role with this ID already exists.' ) );
-		}
+    /**
+     * Add role name with list of capabilities.
+     *
+     * Updates the list of roles, if the role doesn't already exist.
+     *
+     * The capabilities are defined in the following format `array( 'read' => true );`
+     * To explicitly deny a role a capability you set the value for that capability to false.
+     *
+     * @since 2025.1
+     *
+     * @param string $display_name role display name
+     * @param mixed  $capabilities List of capabilities keyed by the capability name, e.g. [ 'edit_posts', 'delete_posts' ].
+     *                             You can specify the ID of an existing role as the value.
+     *                             In this case, the capabilities of the specified role are copied to the new one.
+     */
+    public static function register(string $role, string $display_name, $capabilities)
+    {
+        $roles = self::fetch();
+        if (empty($role) || isset($roles[$role])) {
+            return new Error('roles-register', I18n::_t('Sorry, the role with this ID already exists.'));
+        }
 
-		if ( is_string( $capabilities ) ) {
-			if ( isset( $roles[$capabilities] ) ) {
-				$capabilities = $roles[$capabilities]['capabilities'];
-			} else {
-				return new Error( 'roles-register', I18n::_t( 'You are trying to copy capabilities from a non exists role.' ) );
-			}
-		}
+        if (is_string($capabilities)) {
+            if (isset($roles[$capabilities])) {
+                $capabilities = $roles[$capabilities]['capabilities'];
+            } else {
+                return new Error('roles-register', I18n::_t('You are trying to copy capabilities from a non exists role.'));
+            }
+        }
 
-		self::$roles[$role] = [
-			'name'         => $display_name,
-			'capabilities' => $capabilities,
-		];
+        self::$roles[$role] = [
+            'name'         => $display_name,
+            'capabilities' => $capabilities,
+        ];
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Retrieve role object by name.
-	 *
-	 * @param string $role
-	 * @return object role object if found, null if the role does not exist
-	 * @since 2025.1
-	 */
-	public static function get( string $role )
-	{
-		$roles = self::fetch();
-		if ( isset( $roles[$role] ) ) {
-			return $roles[$role];
-		}
+    /**
+     * Retrieve role object by name.
+     *
+     * @param string $role
+     * @return object role object if found, null if the role does not exist
+     */
+    public static function get(string $role)
+    {
+        $roles = self::fetch();
+        if (isset($roles[$role])) {
+            return $roles[$role];
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * Remove role.
-	 *
-	 * @param string $role
-	 * @return bool
-	 * @since 2025.1
-	 */
-	public static function delete( string $role ): bool
-	{
-		$roles = self::fetch();
-		if ( ! isset( $roles[$role] ) ) {
-			return false;
-		}
+    /**
+     * Remove role.
+     *
+     * @param string $role
+     * @return bool
+     */
+    public static function delete(string $role): bool
+    {
+        $roles = self::fetch();
+        if (! isset($roles[$role])) {
+            return false;
+        }
 
-		unset( self::$roles[$role] );
+        unset(self::$roles[$role]);
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Set capability to role.
-	 *
-	 * @param string $role
-	 * @param mixed $capability Single capability or capabilities array
-	 * @return bool|Error
-	 * @since 2025.1
-	 */
-	public static function set( string $role, mixed $capability )
-	{
-		$roles = self::fetch();
-		if ( ! isset( $roles[$role] ) ) {
-			return new Error( 'roles-set', I18n::_t( 'You are trying set capability for non exists role.' ) );
-		}
+    /**
+     * Set capability to role.
+     *
+     * @param string $role
+     * @param mixed $capability Single capability or capabilities array
+     * @return bool|Error
+     */
+    public static function set(string $role, mixed $capability)
+    {
+        $roles = self::fetch();
+        if (! isset($roles[$role])) {
+            return new Error('roles-set', I18n::_t('You are trying set capability for non exists role.'));
+        }
 
-		if ( is_array( $capability ) ) {
-			self::$roles[$role]['capabilities'] = array_merge( $roles[$role]['capabilities'], $capability );
-		} else {
-			self::$roles[$role]['capabilities'][] = $capability;
-		}
+        if (is_array($capability)) {
+            self::$roles[$role]['capabilities'] = array_merge($roles[$role]['capabilities'], $capability);
+        } else {
+            self::$roles[$role]['capabilities'][] = $capability;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Remove capability from role.
-	 *
-	 * @param string $role
-	 * @param string $capability
-	 * @return bool|Error
-	 *
-	 * @since 2025.1
-	 */
-	public static function unset( string $role, string $capability )
-	{
-		$roles = self::fetch();
-		if ( ! isset( $roles[$role] ) ) {
-			return new Error( 'roles-unset', I18n::_t( 'You are trying unset capability for non exists role.' ) );
-		}
+    /**
+     * Remove capability from role.
+     *
+     * @param string $role
+     * @param string $capability
+     * @return bool|Error
+     */
+    public static function unset(string $role, string $capability)
+    {
+        $roles = self::fetch();
+        if (! isset($roles[$role])) {
+            return new Error('roles-unset', I18n::_t('You are trying unset capability for non exists role.'));
+        }
 
-		unset( $roles[$role]['capabilities'][$capability] );
+        unset($roles[$role]['capabilities'][$capability]);
 
-		return true;
-	}
+        return true;
+    }
 
-	/**
-	 * Whether role name is currently in the list of available roles.
-	 *
-	 * @param string $role
-	 * @return bool
-	 * @since 2025.1
-	 */
-	public static function exists( string $role ): bool
-	{
-		$roles = self::fetch();
+    /**
+     * Whether role name is currently in the list of available roles.
+     *
+     * @param string $role
+     * @return bool
+     */
+    public static function exists(string $role): bool
+    {
+        $roles = self::fetch();
 
-		return isset( $roles[$role] );
-	}
+        return isset($roles[$role]);
+    }
 
-	/**
-	 * Whether role name is currently in the list of available roles.
-	 *
-	 * @param string $role
-	 * @param $capabilities
-	 * @return bool
-	 * @since 2025.1
-	 */
-	public static function has_cap( string $role, $capabilities ): bool
-	{
-		$roles = self::fetch();
-		$role  = $roles[$role] ?? [];
-		if ( empty( $role ) ) {
-			return false;
-		}
+    /**
+     * Whether role name is currently in the list of available roles.
+     *
+     * @param string $role
+     * @param $capabilities
+     * @return bool
+     */
+    public static function has_cap(string $role, $capabilities): bool
+    {
+        $roles = self::fetch();
+        $role  = $roles[$role] ?? [];
+        if (empty($role)) {
+            return false;
+        }
 
-		if ( is_scalar( $capabilities ) ) {
-			$capabilities = [$capabilities];
-		}
+        if (is_scalar($capabilities)) {
+            $capabilities = [$capabilities];
+        }
 
-		return count( array_intersect( $capabilities, $role['capabilities'] ) ) > 0;
-	}
+        return count(array_intersect($capabilities, $role['capabilities'])) > 0;
+    }
 
-	/**
-	 * Get all roles.
-	 *
-	 * @since 2025.1
-	 */
-	private static function fetch(): array
-	{
-		return self::$roles;
-	}
+    /**
+     * Get all roles.
+     */
+    private static function fetch(): array
+    {
+        return self::$roles;
+    }
 }

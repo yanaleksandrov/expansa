@@ -16,9 +16,9 @@ use Expansa\Sanitizer;
  * I18n::f( 'Go to [documentation page](:pageLink) for resolve issue', 'https://google.com' )
  *
  * Main functionalities:
- * - `t|_t(_attr)`: translates a string and returns/outputs it (optionally sanitizes for HTML attributes).
- * - `f|_f(_attr)`: translates a string with placeholders and returns/outputs it (optionally sanitizes for HTML attributes).
- * - `c|_c(_attr)`: translates a string based on a condition and returns/outputs it (optionally sanitizes for HTML attributes).
+ * - `t|_t(_attr)`: translates a string and returns/outputs it (sanitizes for HTML attributes).
+ * - `f|_f(_attr)`: translates a string with placeholders and returns/outputs it (sanitizes for HTML attributes).
+ * - `c|_c(_attr)`: translates a string based on a condition and returns/outputs it (sanitizes for HTML attributes).
  *
  * TODO: Implement text pluralization.
  */

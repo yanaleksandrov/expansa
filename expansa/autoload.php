@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 // platform check
 if (PHP_VERSION_ID < 50600) {
     if (! headers_sent()) {

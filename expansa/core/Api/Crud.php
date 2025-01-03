@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Expansa\Api;
 
 /**
@@ -6,33 +9,33 @@ namespace Expansa\Api;
  *
  * This interface defines the basic CRUD methods (Create, Read, Update, Delete).
  */
-interface Crud {
+interface Crud
+{
+    /**
+     * Create a new resource.
+     *
+     * @return array
+     */
+    public function create(): array;
 
-	/**
-	 * Create a new resource.
-	 *
-	 * @return array
-	 */
-	public function create(): array;
+    /**
+     * Retrieve a list of resources.
+     *
+     * @return array
+     */
+    public function index(): array;
 
-	/**
-	 * Retrieve a list of resources.
-	 *
-	 * @return array
-	 */
-	public function index(): array;
+    /**
+     * Update an existing resource.
+     *
+     * @return array
+     */
+    public function update(): array;
 
-	/**
-	 * Update an existing resource.
-	 *
-	 * @return array
-	 */
-	public function update(): array;
-
-	/**
-	 * Delete an existing resource.
-	 *
-	 * @return array
-	 */
-	public function delete(): array;
+    /**
+     * Delete an existing resource.
+     *
+     * @return array
+     */
+    public function delete(): array;
 }

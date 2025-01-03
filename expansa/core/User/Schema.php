@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\User;
 
 use Expansa\Db;

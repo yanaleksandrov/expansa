@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Expansa\Db;
 use Expansa\Api;
 use Expansa\I18n;

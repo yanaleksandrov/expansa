@@ -1,5 +1,8 @@
 <?php
-namespace Expansa;
+
+declare(strict_types=1);
+
+namespace Expansa\Support;
 
 /**
  * This file is part of Expansa CMS.

@@ -1,12 +1,6 @@
 <?php
-/**
- * This file is part of Expansa CMS.
- *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE.md
- */
+
+declare(strict_types=1);
 
 namespace Expansa\Support;
 
@@ -112,7 +106,7 @@ class Hash
      */
     public static function setRounds(int $rounds)
     {
-        if ( ! defined('PASSWORD_ARGON2ID')) {
+        if (! defined('PASSWORD_ARGON2ID')) {
             throw new Exception('Алгоритм Argon2ID не поддерживается.');
         }
 

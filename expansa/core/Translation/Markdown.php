@@ -9,8 +9,8 @@ namespace Expansa\Translation;
  *
  * @package Expansa
  */
-class Markdown {
-
+class Markdown
+{
     /**
      * Constructor for the Markdown class.
      *
@@ -29,7 +29,7 @@ class Markdown {
             'link',
             //'code',
         ]
-    ) {}
+    ) {} // phpcs:ignore
 
     /**
      * Render some Markdown into HTML.
@@ -39,18 +39,19 @@ class Markdown {
      * @param string $text The Markdown text to be converted.
      * @return string      The converted HTML.
      */
-    public static function render( string $text ): string {
+    public static function render(string $text): string
+    {
         $markdown = new self();
 
         $text = "\n" . $text . "\n";
-        foreach ( $markdown->rules as $rule ) {
-            if ( ! method_exists( $markdown, $rule ) ) {
-                throw new \InvalidArgumentException( "Unknown markdown rule: $rule" );
+        foreach ($markdown->rules as $rule) {
+            if (! method_exists($markdown, $rule)) {
+                throw new \InvalidArgumentException("Unknown markdown rule: $rule");
             }
 
-            $text = $markdown->$rule( $text );
+            $text = $markdown->$rule($text);
         }
-        return trim( $text );
+        return trim($text);
     }
 
     /**
@@ -62,7 +63,8 @@ class Markdown {
      * @param string $text The Markdown text containing headers.
      * @return string      The text with converted HTML headers.
      */
-    private function headers( string $text ): string {
+    private function headers(string $text): string
+    {
         return preg_replace_callback(
             '{
                 ^(\#{1,6})    # $1 = string of #\'s
@@ -72,7 +74,7 @@ class Markdown {
                 \#*            # optional closing #\'s (not counted)
                 \n+
             }xm',           # 'm' modifier allows ^ and $ to match the start and end of each line (multiline)
-            function($matches) {
+            function ($matches) {
                 $level = strlen($matches[1]);  // Длина символов '#' для определения уровня заголовка
                 return "<h{$level}>{$matches[2]}</h{$level}>";  // Возвращаем HTML для заголовка
             },
@@ -89,7 +91,8 @@ class Markdown {
      * @param string $text The Markdown text containing blockquotes.
      * @return string      The text with converted HTML blockquotes.
      */
-    private function blockquote( string $text ): string {
+    private function blockquote(string $text): string
+    {
         return preg_replace(
             '#^> \s*(.*)$#mx',
             '<blockquote>$1</blockquote>',
@@ -106,7 +109,8 @@ class Markdown {
      * @param string $text The Markdown text containing bold elements.
      * @return string      The text with converted HTML bold tags.
      */
-    private function bold( string $text ): string {
+    private function bold(string $text): string
+    {
         return preg_replace(
             '/
                 \*\*(.*?)\*\*   # Match text surrounded by double asterisks (e.g. &#42;&#42;bold&#42;&#42;)
@@ -127,7 +131,8 @@ class Markdown {
      * @param string $text The Markdown text containing italic elements.
      * @return string      The text with converted HTML italic tags.
      */
-    private function italic( string $text ): string {
+    private function italic(string $text): string
+    {
         return preg_replace(
             '/
                 \*(.*?)\*    # Match text surrounded by single asterisks (e.g. *italic*)
@@ -149,7 +154,8 @@ class Markdown {
      * @param string $text The Markdown text containing links.
      * @return string      The text with converted HTML anchor tags.
      */
-    private function link( string $text ): string {
+    private function link(string $text): string
+    {
         return preg_replace(
             '/(?<!\!)\[([^\[]+)\]\((https?|mailto|tel|file|ws|ftp|sftp|git|svn):\/\/([^\)]+)\)/',
             '<a href="$2://$3">$1</a>',
@@ -166,16 +172,17 @@ class Markdown {
      * @param string $text The Markdown text containing images.
      * @return string      The text with converted HTML image tags.
      */
-    private function image( string $text ): string {
+    private function image(string $text): string
+    {
         return preg_replace_callback(
             '#!\[([^\]]*)\]\(([^)]+)\)#',
-            function( array $matches ) {
-                $url = filter_var( $matches[2], FILTER_SANITIZE_URL );
-                $alt = htmlspecialchars( $matches[1] ?? '', ENT_QUOTES, 'UTF-8' );
-                if ( ! empty( $alt ) ) {
-                    return sprintf( '<img src="%s" alt="%s"/>', $url, $alt );
+            function (array $matches) {
+                $url = filter_var($matches[2], FILTER_SANITIZE_URL);
+                $alt = htmlspecialchars($matches[1] ?? '', ENT_QUOTES, 'UTF-8');
+                if (! empty($alt)) {
+                    return sprintf('<img src="%s" alt="%s"/>', $url, $alt);
                 }
-                return sprintf( '<img src="%s"/>', $url );
+                return sprintf('<img src="%s"/>', $url);
             },
             $text
         );
@@ -189,7 +196,8 @@ class Markdown {
      * @param string $text The Markdown text containing inline code.
      * @return string      The text with converted HTML code tags.
      */
-    private function code( string $text ): string {
+    private function code(string $text): string
+    {
         return preg_replace(
             '#(?<!\\\)`([^\n`]+?)`#',
             '<code>$1</code>',

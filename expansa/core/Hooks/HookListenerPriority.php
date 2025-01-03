@@ -9,7 +9,7 @@ use Attribute;
 #[Attribute(Attribute::TARGET_METHOD)]
 final class HookListenerPriority
 {
-	public function __construct(
-		public int $priority
-	) {}
+    public function __construct(
+        public int $priority
+    ) {} // phpcs:ignore
 }

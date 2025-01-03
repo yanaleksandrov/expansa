@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Expansa\Field;
 
 use Expansa\Db;
@@ -9,23 +12,23 @@ use Expansa\Sanitizer;
  *
  * @since 2025.1
  */
-class Schema {
+class Schema
+{
+    /**
+     * Create new table into database.
+     *
+     * @param string $table
+     * @param string $name
+     */
+    public static function migrate(string $table, string $name): void
+    {
+        $charsetCollate = (new Db\Handler())->getCharsetCollate();
 
-	/**
-	 * Create new table into database.
-	 *
-	 * @param string $table
-	 * @param string $name
-	 * @since 2025.1
-	 */
-	public static function migrate( string $table, string $name ): void {
-		$charsetCollate = (new Db\Handler)->getCharsetCollate();
+        $tableName = Sanitizer::tablename($table);
+        $name      = Sanitizer::tablename($name);
 
-		$tableName = Sanitizer::tablename( $table );
-		$name      = Sanitizer::tablename( $name );
-
-		Db::query(
-			"
+        Db::query(
+            "
 			CREATE TABLE IF NOT EXISTS {$tableName}_fields (
 				`id`         BIGINT(20)   UNSIGNED NOT NULL AUTO_INCREMENT,
 				`{$name}_id` BIGINT(20)   UNSIGNED NOT NULL DEFAULT '0',
@@ -43,6 +46,6 @@ class Schema {
 					BEGIN
 						DELETE FROM {$tableName}_fields WHERE {$name}_id = OLD.id;
 					END;"
-		)->fetchAll();
-	}
+        )->fetchAll();
+    }
 }

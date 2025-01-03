@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\Env;
 
 class QuotedProcessor extends AbstractProcessor
@@ -35,7 +37,7 @@ class QuotedProcessor extends AbstractProcessor
      *
      * @return bool True if the string is wrapped by the character, false otherwise.
      */
-    private function isWrappedByChar(string $value, string $char) : bool
+    private function isWrappedByChar(string $value, string $char): bool
     {
         return !empty($value) && $value[0] === $char && $value[-1] === $char;
     }

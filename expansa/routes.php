@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Expansa\Plugins;
 use Expansa\Themes;
 use Expansa\Option;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\Csrf;
 
 use Expansa\Csrf\Exception\InvalidCsrfTokenException;
@@ -20,7 +22,6 @@ use Exception;
  * 	return $e->getMessage();
  * }
  *
- * @since 2025.1
  * @see   https://github.com/gilbitron/EasyCSRF
  */
 class Csrf

@@ -1,8 +1,8 @@
 <?php
 
-namespace Expansa;
+declare(strict_types=1);
 
-use Expansa\Db;
+namespace Expansa;
 
 /**
  * Core class for managing taxonomies.

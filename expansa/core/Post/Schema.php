@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace Expansa\Post;
 
 use Expansa\Db;
@@ -8,21 +11,21 @@ use Expansa\Db;
  *
  * @since 2025.1
  */
-final class Schema {
+final class Schema
+{
+    /**
+     * Get query for create new table into database.
+     *
+     * @param string $table
+     * @return void
+     */
+    public static function migrate(string $table): void
+    {
+        $tableName      = (new Db\Handler())->getTableName($table);
+        $charsetCollate = (new Db\Handler())->getCharsetCollate();
 
-	/**
-	 * Get query for create new table into database.
-	 *
-	 * @param string $table
-	 * @return void
-	 * @since 2025.1
-	 */
-	public static function migrate( string $table ): void {
-		$tableName      = (new Db\Handler)->getTableName( $table );
-		$charsetCollate = (new Db\Handler)->getCharsetCollate();
-
-		Db::query(
-			"
+        Db::query(
+            "
 			CREATE TABLE IF NOT EXISTS {$tableName} (
 				id          int          UNSIGNED NOT NULL AUTO_INCREMENT,
 				title       text         NOT NULL DEFAULT '',
@@ -43,6 +46,6 @@ final class Schema {
 				FULLTEXT KEY content (title,content)
 			) ENGINE=InnoDB {$charsetCollate}
 			COMMENT='post-type';"
-		)->fetchAll();
-	}
+        )->fetchAll();
+    }
 }

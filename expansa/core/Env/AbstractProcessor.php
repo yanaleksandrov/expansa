@@ -17,9 +17,7 @@ abstract class AbstractProcessor
      *
      * @param string $value The value to be processed.
      */
-    public function __construct(protected string $value)
-    {
-    }
+    public function __construct(protected string $value) {} // phpcs:ignore
 
     /**
      * Determines if the value can be processed.
