@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa;
 
 use Expansa\Csrf\Csrf;
-use Expansa\Csrf\Exceptions\InvalidCsrfTokenException;
+use Expansa\Csrf\Exception\InvalidCsrfTokenException;
 use Expansa\Csrf\Providers\NativeHttpOnlyCookieProvider;
 
 final class Api
@@ -15,19 +15,14 @@ final class Api
      */
     public static array $resources = [];
 
-    public function test()
-    {
-        echo '!!!! TESTS';
-    }
-
     /**
      * Register new API.
-     *
      * TODO: в качестве переменной $path добавить возможность указывать путь не только к папке, но и к файлу.
-     * Это позволит при необъодимости подключать эндпоинты выборочно, а не пакетно.
+     * Это позволит при необходимости подключать эндпоинты выборочно, а не пакетно.
      *
-     * @param string $root    Root of the API.
+     * @param string $root Root of the API.
      * @param string $dirpath
+     * @throws \Exception
      */
     public static function configure(string $root, string $dirpath): void
     {
@@ -40,8 +35,6 @@ final class Api
         Route::run();
     }
 
-    /**
-     */
     private static function run($slug): void
     {
         [$endpoint, $method] = explode('/', $slug, 2) + [null, null];
