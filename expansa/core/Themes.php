@@ -11,7 +11,6 @@ final class Themes extends Extensions\Provider
      *
      * @param callable $callback Callback function used for get plugins paths.
      * @return void
-     * @since 2025.1
      */
     public static function register(callable $callback): void
     {
@@ -26,8 +25,6 @@ final class Themes extends Extensions\Provider
      * Activate all registered extensions.
      *
      * Calls the `activate()` method on each registered plugin, allowing them to perform necessary initialization tasks.
-     *
-     * @since 2025.1
      */
     public static function activate(): void
     {
@@ -39,9 +36,8 @@ final class Themes extends Extensions\Provider
     /**
      * Deactivate all registered extensions.
      *
-     * Calls the `deactivate()` method on each registered plugin, allowing them to clean up resources or undo changes made during activation.
-     *
-     * @since 2025.1
+     * Calls the `deactivate()` method on each registered plugin, allowing
+     * them to clean up resources or undo changes made during activation.
      */
     public static function deactivate(): void
     {
@@ -54,8 +50,6 @@ final class Themes extends Extensions\Provider
      * Install all registered extensions.
      *
      * Calls the `install()` method on each registered plugin, allowing them to perform installation tasks.
-     *
-     * @since 2025.1
      */
     public static function install(): void
     {
@@ -66,10 +60,8 @@ final class Themes extends Extensions\Provider
 
     /**
      * Uninstall all registered extensions.
-     *
-     * Calls the `uninstall()` method on each registered plugin, allowing them to clean up resources or remove associated assets.
-     *
-     * @since 2025.1
+     * Calls the `uninstall()` method on each registered plugin, allowing them
+     * to clean up resources or remove associated assets.
      */
     public static function uninstall(): void
     {

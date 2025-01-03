@@ -2,28 +2,44 @@
 
 declare(strict_types=1);
 
-namespace Expansa;
+namespace Expansa\Dotenv;
 
-use Expansa\Env\AbstractProcessor;
-use Expansa\Env\BooleanProcessor;
-use Expansa\Env\NullProcessor;
-use Expansa\Env\NumberProcessor;
-use Expansa\Env\QuotedProcessor;
+use Expansa\Dotenv\Exception\InvalidArgumentException;
+use Expansa\Dotenv\Processors\NullProcessor;
+use Expansa\Dotenv\Processors\QuotedProcessor;
+use Expansa\Dotenv\Processors\NumberProcessor;
+use Expansa\Dotenv\Processors\BooleanProcessor;
+use Expansa\Dotenv\Processors\AbstractProcessor;
 
-final class Env
+/**
+ * Class Env
+ *
+ * Handles loading and processing of environment variables from a `.env` file.
+ * This class parses the `.env` file and populates the $_ENV and $_SERVER superglobals.
+ * It also supports custom processors to handle specific value transformations.
+ *
+ * @package Expansa\Dotenv
+ */
+class Env
 {
     /**
+     * Env constructor.
      *
+     * Initializes the Env instance with a file path and optional processors.
+     * Verifies the existence and readability of the `.env` file and configures the processors.
      *
-     * @var string $path       The directory where the .env file can be located.
-     * @var ?array $processors Configure the options on which the parsed will act.
+     * @param string $path       The absolute path to the `.env` file.
+     * @param ?array $processors Optional array of processor class names to transform values.
+     *
+     * @throws InvalidArgumentException If the `.env` file does not exist or is not readable.
      */
     private function __construct(
         protected string $path,
         protected ?array $processors
-    ) {
+    )
+    {
         if (!is_file($this->path) || !is_readable($this->path)) {
-            throw new \InvalidArgumentException("File '$this->path' does not exist or is not readable");
+            throw new InvalidArgumentException("File '$this->path' does not exist or is not readable");
         }
         $this->setProcessors($processors);
     }
@@ -31,6 +47,11 @@ final class Env
     /**
      * Loads the configuration data from the specified file path.
      * Parses the values into $_SERVER and $_ENV arrays, skipping empty and commented lines.
+     *
+     * @param string     $path       The path to the .env file.
+     * @param null|array $processors Optional custom processors for value transformation.
+     *
+     * @throws InvalidArgumentException
      */
     public static function load(string $path, ?array $processors = null): void
     {
@@ -53,6 +74,11 @@ final class Env
         }
     }
 
+    /**
+     * Configures the processors to be used for value transformation.
+     *
+     * @param null|array $processors Optional list of processor class names.
+     */
     private function setProcessors(?array $processors = null): void
     {
         if ($processors === null) {
@@ -60,7 +86,7 @@ final class Env
                 NullProcessor::class,
                 BooleanProcessor::class,
                 NumberProcessor::class,
-                QuotedProcessor::class
+                QuotedProcessor::class,
             ];
             return;
         }
@@ -76,15 +102,13 @@ final class Env
      * Process the value with the configured processors
      *
      * @param string $value The value to process
-     * @return mixed
+     * @return string
      */
-    private function processValue(string $value): mixed
+    private function processValue(string $value): string
     {
-        // first trim spaces and quotes if configured
         $trimmedValue = trim($value);
 
         foreach ($this->processors as $processor) {
-            /** @var AbstractProcessor $processorInstance */
             $processorInstance = new $processor($trimmedValue);
 
             if ($processorInstance->canBeProcessed()) {
