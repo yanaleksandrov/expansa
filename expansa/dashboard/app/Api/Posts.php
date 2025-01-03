@@ -5,7 +5,7 @@ use Expansa\I18n;
 use Expansa\Json;
 use Expansa\Post\Post;
 use Expansa\Query\Query;
-use Expansa\Support\Csv;
+use Expansa\Codec\Csv;
 use Expansa\View;
 
 class Posts implements \Expansa\Api\Contracts\Crud {

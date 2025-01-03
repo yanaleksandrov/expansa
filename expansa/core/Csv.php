@@ -14,6 +14,6 @@ class Csv extends Facade
 {
 	protected static function getStaticClassAccessor(): string
 	{
-		return 'Expansa\Support\Csv';
+		return 'Expansa\Codec\Csv';
 	}
 }

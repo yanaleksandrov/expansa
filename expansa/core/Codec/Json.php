@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Support;
+namespace Expansa\Codec;
 
 use Expansa\Error;
 
@@ -15,10 +15,10 @@ use Expansa\Error;
  * character encoding. It ensures that JSON data is processed correctly
  * while providing meaningful error handling.
  *
- * @package Expansa
+ * @package Expansa\Codec
  */
-class Json {
-
+class Json
+{
 	/**
 	 * Converts value to JSON format.
 	 *

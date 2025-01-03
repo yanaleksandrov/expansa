@@ -13,7 +13,8 @@
         "ext-pdo": "*",
         "ext-fileinfo": "*",
         "ext-curl": "*",
-        "ext-intl": "*"
+        "ext-intl": "*",
+        "ext-iconv": "*"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "3.*",

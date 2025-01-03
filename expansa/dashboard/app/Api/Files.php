@@ -12,7 +12,7 @@ namespace dashboard\app\Api;
 use Dashboard\Form;
 use Expansa\File;
 use Expansa\Sanitizer;
-use Expansa\Support\Csv;
+use Expansa\Codec\Csv;
 use Expansa\View;
 
 class Files extends \Expansa\Api\Handler

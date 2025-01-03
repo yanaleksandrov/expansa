@@ -2,97 +2,80 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Support;
+namespace Expansa\Codec;
 
+/**
+ * Provides functionality for encoding and decoding CSV data.
+ *
+ * @package Expansa\Codec
+ */
 class Csv
 {
     /**
+     * The raw CSV content.
+     *
      * @var string
      */
     private string $csv = '';
 
     /**
-     * @param string $delimiter
-     * @param string $enclosure
-     * @param string $linebreak
+     * Csv constructor.
+     *
+     * @param string $delimiter The field delimiter (default: 'auto').
+     * @param string $enclosure The field enclosure character (default: 'auto').
+     * @param string $linebreak The linebreak sequence (default: 'auto').
      */
     public function __construct(
         private string $delimiter = 'auto',
         private string $enclosure = 'auto',
         private string $linebreak = 'auto'
-    )
-    {} // phpcs:ignore
+    ) {} // phpcs:ignore
 
     /**
-     * @param $filepathOrData
-     * @param string $delimiter
-     * @param string $enclosure
-     * @param string $linebreak
-     * @return array
+     * Decodes a CSV file or string into an array.
+     *
+     * @param string $filepathOrData The file path or raw CSV data to decode.
+     * @param string $delimiter The field delimiter (default: 'auto').
+     * @param string $enclosure The field enclosure character (default: 'auto').
+     * @param string $linebreak The linebreak sequence (default: 'auto').
+     * @return array The decoded data as an array.
      */
-    public function decode($filepathOrData, string $delimiter = 'auto', string $enclosure = 'auto', string $linebreak = 'auto'): array
+    public function decode(
+        string $filepathOrData,
+        string $delimiter = 'auto',
+        string $enclosure = 'auto',
+        string $linebreak = 'auto'
+    ): array
     {
         return (new self($delimiter, $enclosure, $linebreak))->toArray($filepathOrData);
     }
 
     /**
-     * @param $items
-     * @param string $delimiter
-     * @param string $enclosure
-     * @param string $linebreak
-     * @return false|string
+     * Encodes an array into a CSV string.
+     *
+     * @param array $items The data to encode.
+     * @param string $delimiter The field delimiter (default: ',').
+     * @param string $enclosure The field enclosure character (default: '"').
+     * @param string $linebreak The linebreak sequence (default: "\r\n").
+     * @return false|string The encoded CSV string, or false on failure.
      */
-    public function encode($items, string $delimiter = ',', string $enclosure = '"', string $linebreak = "\r\n"): bool|string
+    public function encode(
+        array $items,
+        string $delimiter = ',',
+        string $enclosure = '"',
+        string $linebreak = "\r\n"
+    ): bool|string
     {
         return (new self($delimiter, $enclosure, $linebreak))->fromArray($items);
     }
 
     /**
-     * @param bool $set
-     * @return string
+     * Determines the field delimiter based on the CSV content.
+     *
+     * @return string The detected or set field delimiter.
      */
-    public function delimiterOldNonOptimized(bool $set = false): string
+    public function delimiter(): string
     {
-        if ($set !== false) {
-            return $this->delimiter = $set;
-        }
-        if ($this->delimiter === 'auto') {
-            // detect delimiter
-//          if ( str_contains( $this->csv, $this->enclosure . ',' ) ) {
-//              $this->delimiter = ',';
-//          } elseif ( str_contains( $this->csv, $this->enclosure . "\t" ) ) {
-//              $this->delimiter = "\t";
-//          } elseif ( str_contains( $this->csv, $this->enclosure . ';' ) ) {
-//              $this->delimiter = ';';
-//          } elseif ( str_contains( $this->csv, ',' ) ) {
-//              $this->delimiter = ',';
-//          } elseif ( str_contains( $this->csv, "\t" ) ) {
-//              $this->delimiter = "\t";
-//          } elseif ( str_contains( $this->csv, ';' ) ) {
-//              $this->delimiter = ';';
-//          } else {
-//              $this->delimiter = ',';
-//          }
-
-            $this->delimiter = match (true) {
-                str_contains($this->csv, $this->enclosure . ',')  => ',',
-                str_contains($this->csv, $this->enclosure . "\t") => "\t",
-                str_contains($this->csv, $this->enclosure . ';')  => ';',
-                str_contains($this->csv, ',')                     => ',',
-                str_contains($this->csv, "\t")                    => "\t",
-                str_contains($this->csv, ';')                     => ';',
-                default                                                  => ',',
-            };
-        }
-        return $this->delimiter;
-    }
-
-    public function delimiter(bool $set = false): string
-    {
-        if ($set !== false) {
-            return $this->delimiter = $set;
-        }
-
         if ($this->delimiter === 'auto') {
             $delimiters = [ ',', "\t", ';' ];
             foreach ($delimiters as $delimiter) {
@@ -107,14 +90,12 @@ class Csv
     }
 
     /**
-     * @param bool $set
-     * @return string
+     * Determines the field enclosure character based on the CSV content.
+     *
+     * @return string The detected or set field enclosure character.
      */
-    public function enclosure(bool $set = false): string
+    public function enclosure(): string
     {
-        if ($set !== false) {
-            return $this->enclosure = $set;
-        }
         if ($this->enclosure === 'auto') {
 //          if ( str_contains( $this->csv, '"' ) ) {
 //              $this->enclosure = '"';
@@ -133,14 +114,12 @@ class Csv
     }
 
     /**
-     * @param bool $set
-     * @return string
+     * Determines the linebreak sequence based on the CSV content.
+     *
+     * @return string The detected or set linebreak sequence.
      */
-    public function linebreak(bool $set = false): string
+    public function linebreak(): string
     {
-        if ($set !== false) {
-            return $this->linebreak = $set;
-        }
         if ($this->linebreak === 'auto') {
 //          if ( str_contains( $this->csv, "\r\n" ) ) {
 //              $this->linebreak = "\r\n";
@@ -162,10 +141,12 @@ class Csv
     }
 
     /**
-     * @param $filename
-     * @return array
+     * Converts CSV content into an array.
+     *
+     * @param string $filename The file path of the CSV content.
+     * @return array The parsed CSV data.
      */
-    private function toArray($filename): array
+    private function toArray(string $filename): array
     {
         if (! is_file($filename)) {
             return [];
@@ -196,16 +177,13 @@ class Csv
     }
 
     /**
-     * @param $items
-     * @return false|string
+     * Converts an array into a CSV string.
+     *
+     * @param array $items The data to convert.
+     * @return false|string The generated CSV string, or false on failure.
      */
-    private function fromArray($items): false|string
+    private function fromArray(array $items): false|string
     {
-        if (! is_array($items)) {
-            trigger_error('CSV::export array required', E_USER_WARNING);
-            return false;
-        }
-
         $delimiter = $this->delimiter();
         $enclosure = $this->enclosure();
         $linebreak = $this->linebreak();
