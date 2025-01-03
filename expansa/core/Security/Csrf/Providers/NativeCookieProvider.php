@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Csrf\Providers;
+namespace Expansa\Security\Csrf\Providers;
 
-use Expansa\Csrf\Interfaces\Provider;
+use Expansa\Security\Csrf\Contracts\SessionProvider;
 
-class NativeCookieProvider implements Provider
+class NativeCookieProvider implements SessionProvider
 {
     const HOUR_IN_SECONDS = 3600;
 

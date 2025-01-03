@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Csrf\Interfaces;
+namespace Expansa\Security\Csrf\Contracts;
 
-interface Provider
+interface SessionProvider
 {
     /**
      * Get a session value.

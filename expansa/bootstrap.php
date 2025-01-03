@@ -15,7 +15,6 @@ use Expansa\{
     Is,
     User,
     Csrf,
-    Disk,
 };
 
 const EX_PATH                   = __DIR__ . '/';
@@ -45,9 +44,7 @@ Debug::timer();
  *
  * @since 2025.1
  */
-( new Csrf\Csrf(
-    new Csrf\Providers\NativeHttpOnlyCookieProvider()
-) )->generate('token');
+( new Expansa\Security\Csrf\Csrf() )->generate('token');
 
 /**
  * Launch the installer if Expansa is not installed.
