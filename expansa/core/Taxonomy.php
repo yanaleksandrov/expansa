@@ -6,69 +6,62 @@ namespace Expansa;
 
 /**
  * Core class for managing taxonomies.
- *
- * @since 2025.1
  */
-final class Taxonomy {
+final class Taxonomy
+{
+    /**
+     * DB table name.
+     *
+     * @var string
+     */
+    public static string $table = 'term_taxonomy';
 
-	/**
-	 * DB table name.
-	 *
-	 * @var string
-	 * @since 2025.1
-	 */
-	public static string $table = 'term_taxonomy';
+    /**
+     *
+     *
+     * @param string $taxonomy
+     * @param string $object_type
+     * @param array $args
+     * @since 2025.1
+     */
+    public static function register(string $taxonomy, string $object_type, array $args = [])
+    {
+    }
 
-	/**
-	 *
-	 *
-	 * @param string $taxonomy
-	 * @param string $object_type
-	 * @param array $args
-	 * @since 2025.1
-	 */
-	public static function register( string $taxonomy, string $object_type, array $args = [] ) {
+    /**
+     *
+     *
+     * @param string $taxonomy
+     */
+    public static function unregister(string $taxonomy)
+    {
+    }
 
-	}
+    /**
+     * Determines whether the taxonomy object is hierarchical.
+     *
+     * Checks to make sure that the taxonomy is an object first. Then Gets the
+     * object, and finally returns the hierarchical value in the object.
+     *
+     * A false return value might also mean that the taxonomy does not exist.
+     *
+     * @param string $taxonomy Name of taxonomy object.
+     * @return  bool           Whether the taxonomy is hierarchical.
+     */
+    public static function isHierarchical(string $taxonomy): bool
+    {
+    }
 
-	/**
-	 *
-	 *
-	 * @param string $taxonomy
-	 * @since 2025.1
-	 */
-	public static function unregister( string $taxonomy ) {
+    /**
+     * Create new table into database.
+     */
+    public static function migrate(): void
+    {
+        $tableName      = (new Db\Handler())->getTableName(self::$table);
+        $charsetCollate = (new Db\Handler())->getCharsetCollate();
 
-	}
-
-	/**
-	 * Determines whether the taxonomy object is hierarchical.
-	 *
-	 * Checks to make sure that the taxonomy is an object first. Then Gets the
-	 * object, and finally returns the hierarchical value in the object.
-	 *
-	 * A false return value might also mean that the taxonomy does not exist.
-	 *
-	 * @since 2025.1
-	 *
-	 * @param string $taxonomy Name of taxonomy object.
-	 * @return  bool           Whether the taxonomy is hierarchical.
-	 */
-	public static function isHierarchical( string $taxonomy ): bool {
-
-	}
-
-	/**
-	 * Create new table into database.
-	 *
-	 * @since 2025.1
-	 */
-	public static function migrate(): void {
-		$tableName      = (new Db\Handler)->getTableName( self::$table );
-		$charsetCollate = (new Db\Handler)->getCharsetCollate();
-
-		Db::query(
-			"
+        Db::query(
+            "
 			CREATE TABLE IF NOT EXISTS {$tableName} (
 				term_taxonomy_id  bigint(20)  UNSIGNED NOT NULL AUTO_INCREMENT,
 				term_id           bigint(20)  UNSIGNED NOT NULL DEFAULT 0,
@@ -80,6 +73,6 @@ final class Taxonomy {
 				UNIQUE KEY term_id_taxonomy (term_id,taxonomy),
 				KEY taxonomy (taxonomy)
 			) ENGINE=InnoDB $charsetCollate;"
-		)->fetchAll();
-	}
+        )->fetchAll();
+    }
 }
