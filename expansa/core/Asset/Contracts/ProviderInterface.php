@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Asset;
+namespace Expansa\Asset\Contracts;
 
 interface ProviderInterface
 {

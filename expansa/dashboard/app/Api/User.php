@@ -8,7 +8,7 @@ use Expansa\Sanitizer;
 use Expansa\Url;
 use Expansa\View;
 
-class User implements Expansa\Api\Crud {
+class User implements Expansa\Api\Contracts\Crud {
 
 	/**
 	 * Endpoint name.

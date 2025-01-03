@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Extensions;
+namespace Expansa\Extensions\Contracts;
 
 /**
  * Interface Skeleton.

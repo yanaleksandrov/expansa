@@ -8,7 +8,7 @@ use Expansa\Query\Query;
 use Expansa\Support\Csv;
 use Expansa\View;
 
-class Posts implements \Expansa\Api\Crud {
+class Posts implements \Expansa\Api\Contracts\Crud {
 
 	/**
 	 * Endpoint name.

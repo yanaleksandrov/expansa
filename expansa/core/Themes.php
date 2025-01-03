@@ -18,7 +18,7 @@ final class Themes extends Extensions\Provider
         self::enqueue($callback, 'themes');
 
         foreach (self::$themes as $theme) {
-            $theme instanceof Extensions\Skeleton && $theme::launch();
+            $theme instanceof Extensions\Contracts\Skeleton && $theme::launch();
         }
     }
 
@@ -32,7 +32,7 @@ final class Themes extends Extensions\Provider
     public static function activate(): void
     {
         foreach (self::$themes as $theme) {
-            $theme instanceof Extensions\Skeleton && $theme::activate();
+            $theme instanceof Extensions\Contracts\Skeleton && $theme::activate();
         }
     }
 
@@ -46,7 +46,7 @@ final class Themes extends Extensions\Provider
     public static function deactivate(): void
     {
         foreach (self::$themes as $theme) {
-            $theme instanceof Extensions\Skeleton && $theme::deactivate();
+            $theme instanceof Extensions\Contracts\Skeleton && $theme::deactivate();
         }
     }
 
@@ -60,7 +60,7 @@ final class Themes extends Extensions\Provider
     public static function install(): void
     {
         foreach (self::$themes as $theme) {
-            $theme instanceof Extensions\Skeleton && $theme::install();
+            $theme instanceof Extensions\Contracts\Skeleton && $theme::install();
         }
     }
 
@@ -74,7 +74,7 @@ final class Themes extends Extensions\Provider
     public static function uninstall(): void
     {
         foreach (self::$themes as $theme) {
-            $theme instanceof Extensions\Skeleton && $theme::uninstall();
+            $theme instanceof Extensions\Contracts\Skeleton && $theme::uninstall();
         }
     }
 

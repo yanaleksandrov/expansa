@@ -6,7 +6,7 @@ use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Sanitizer;
 
-class Post implements \Expansa\Api\Crud {
+class Post implements Expansa\Api\Contracts\Crud {
 
 	/**
 	 * Endpoint name.

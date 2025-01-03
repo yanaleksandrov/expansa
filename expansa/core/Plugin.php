@@ -12,7 +12,7 @@ namespace Expansa;
  *
  * @since 2025.1
  */
-abstract class Plugin implements Extensions\Skeleton {
+abstract class Plugin implements Extensions\Contracts\Skeleton {
 
 	use Extensions\Traits;
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Asset;
 
+use Expansa\Asset\Contracts\ProviderInterface;
+
 class ProviderCSS implements ProviderInterface
 {
 	/**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Api;
+namespace Expansa\Api\Contracts;
 
 /**
  * Interface CrudInterface

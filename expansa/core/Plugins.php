@@ -17,7 +17,7 @@ final class Plugins extends Extensions\Provider {
 		self::enqueue( $callback, 'plugins' );
 
 		foreach ( self::$plugins as $plugin ) {
-			$plugin instanceof Extensions\Skeleton && $plugin::launch();
+			$plugin instanceof Extensions\Contracts\Skeleton && $plugin::launch();
 		}
 	}
 
@@ -30,7 +30,7 @@ final class Plugins extends Extensions\Provider {
 	 */
 	public static function activate(): void {
 		foreach ( self::$plugins as $plugin ) {
-			$plugin instanceof Extensions\Skeleton && $plugin::activate();
+			$plugin instanceof Extensions\Contracts\Skeleton && $plugin::activate();
 		}
 	}
 
@@ -43,7 +43,7 @@ final class Plugins extends Extensions\Provider {
 	 */
 	public static function deactivate(): void {
 		foreach ( self::$plugins as $plugin ) {
-			$plugin instanceof Extensions\Skeleton && $plugin::deactivate();
+			$plugin instanceof Extensions\Contracts\Skeleton && $plugin::deactivate();
 		}
 	}
 
@@ -56,7 +56,7 @@ final class Plugins extends Extensions\Provider {
 	 */
 	public static function install(): void {
 		foreach ( self::$plugins as $plugin ) {
-			$plugin instanceof Extensions\Skeleton && $plugin::install();
+			$plugin instanceof Extensions\Contracts\Skeleton && $plugin::install();
 		}
 	}
 
@@ -69,7 +69,7 @@ final class Plugins extends Extensions\Provider {
 	 */
 	public static function uninstall(): void {
 		foreach ( self::$plugins as $plugin ) {
-			$plugin instanceof Extensions\Skeleton && $plugin::uninstall();
+			$plugin instanceof Extensions\Contracts\Skeleton && $plugin::uninstall();
 		}
 	}
 
