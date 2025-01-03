@@ -73,8 +73,6 @@ final class Themes extends Extensions\Provider
     /**
      *
      *
-     * @since 2025.1
-     *
      * @return array[]
      */
     public static function get(): array

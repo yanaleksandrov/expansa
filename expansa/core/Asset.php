@@ -9,8 +9,6 @@ namespace Expansa;
  * application, and then outputted later based on dependencies.
  * This makes sure all assets will be included in the correct
  * order, no matter what order they are defined in.
- *
- * @version   2025.1
  */
 final class Asset
 {

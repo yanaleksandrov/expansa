@@ -12,8 +12,6 @@ namespace Expansa\Support;
  * TODO: 1. use "link preload" & inline svg output
  *
  * Svg::sprite( 'logo' ); // output symbol
- *
- * @since 2025.1
  */
 class Svg
 {

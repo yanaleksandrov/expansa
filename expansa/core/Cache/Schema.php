@@ -8,8 +8,6 @@ use Expansa\Db;
 
 /**
  * Schema class for managing database schema related operations.
- *
- * @since 2025.1
  */
 class Schema
 {

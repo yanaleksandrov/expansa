@@ -17,7 +17,6 @@ class Locale
      * Stores the locale determined from the HTTP request.
      *
      * @var string
-     * @since 2025.1
      */
     private static string $locale;
 
@@ -26,8 +25,6 @@ class Locale
      *
      * @param string $default
      * @return string
-     *
-     * @since 2025.1
      */
     protected function getLocale(string $default = 'en-US'): string
     {

@@ -10,8 +10,6 @@ class ProviderCSS implements ProviderInterface
 {
 	/**
 	 * List of type 'css' style tag.
-	 *
-	 * @since 2025.1
 	 */
 	private array $whitelist = ['rel', 'id', 'href', 'media'];
 
@@ -20,7 +18,6 @@ class ProviderCSS implements ProviderInterface
 	 * @param string $src
 	 * @param array $args
 	 * @return array
-	 * @since 2025.1
 	 */
 	public function add( string $id, string $src, array $args ): array
 	{
@@ -55,7 +52,6 @@ class ProviderCSS implements ProviderInterface
 	 *
 	 * @param string $code
 	 * @return string
-	 * @since 2025.1
 	 */
 	public function minify( string $code ): string
 	{

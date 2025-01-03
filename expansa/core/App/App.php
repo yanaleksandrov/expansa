@@ -9,8 +9,6 @@ use Expansa\Db\Medoo;
 
 /**
  * The main class for working with the application system.
- *
- * @since 2025.1
  */
 class App
 {
@@ -19,7 +17,6 @@ class App
      *
      * @param string $name
      * @param $value
-     * @since 2025.1
      */
     public function define(string $name, $value): void
     {

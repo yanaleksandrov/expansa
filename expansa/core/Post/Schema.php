@@ -6,11 +6,6 @@ namespace Expansa\Post;
 
 use Expansa\Db;
 
-/**
- *
- *
- * @since 2025.1
- */
 final class Schema
 {
     /**

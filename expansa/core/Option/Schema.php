@@ -6,11 +6,6 @@ namespace Expansa\Option;
 
 use Expansa\Db;
 
-/**
- *
- *
- * @since 2025.1
- */
 class Schema
 {
     /**
@@ -22,8 +17,6 @@ class Schema
 
     /**
      * Create new table into database.
-     *
-     * @since 2025.1
      */
     public static function migrate(): void
     {

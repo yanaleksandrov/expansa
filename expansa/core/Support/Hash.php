@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace Expansa\Support;
 
 use Exception;
+use Random\RandomException;
 
 /**
  * The Hash Class.
- *
- * @since 2025.1
  */
 class Hash
 {
@@ -17,25 +16,23 @@ class Hash
      * Generates a random password drawn from the defined set of characters.
      * TODO: password_hash is slowly 10-20 times then md5.
      *
-     * @param int  $length              Optional. The length of password to generate. Default 12.
-     * @param bool $special_chars       Optional. Whether to include standard special characters.
-     *                                  Default true.
-     * @param bool $extra_special_chars Optional. Whether to include other special characters.
-     *                                  Used when generating secret keys and salts. Default false.
-     *
+     * @param int  $length            Optional. The length of password to generate. Default 12.
+     * @param bool $specialChars      Optional. Whether to include standard special characters.
+     *                                Default true.
+     * @param bool $extraSpecialChars Optional. Whether to include other special characters.
+     *                                Used when generating secret keys and salts. Default false.
      * @return string The random password
-     *
-     * @since 2025.1
+     * @throws RandomException
      */
-    public static function generate(int $length = 12, bool $special_chars = true, bool $extra_special_chars = false): string
+    public static function generate(int $length = 12, bool $specialChars = true, bool $extraSpecialChars = false): string
     {
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-        if ($special_chars) {
+        if ($specialChars) {
             $chars .= '!@#$%^&*()';
         }
 
-        if ($extra_special_chars) {
+        if ($extraSpecialChars) {
             $chars .= '-_[]{}<>~`+=,.;:/?|';
         }
 
@@ -92,9 +89,10 @@ class Hash
     /**
      * Возвращает информацию о хеше пароля.
      *
+     * @param string $hashedPassword
      * @return array
      */
-    public static function info(string $hashedPassword)
+    public static function info(string $hashedPassword): array
     {
         return password_get_info($hashedPassword);
     }
@@ -104,7 +102,7 @@ class Hash
      *
      * @throws Exception
      */
-    public static function setRounds(int $rounds)
+    public static function setRounds(int $rounds): void
     {
         if (! defined('PASSWORD_ARGON2ID')) {
             throw new Exception('Алгоритм Argon2ID не поддерживается.');

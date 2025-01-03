@@ -6,9 +6,6 @@ namespace Expansa\Api;
 
 use Exception;
 
-/**
- * @since 2025.1
- */
 class ResponseJson
 {
 	/**

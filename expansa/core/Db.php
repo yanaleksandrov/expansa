@@ -17,7 +17,6 @@ final class Db
      * Db structure
      *
      * @var array
-     * @since 2025.1
      */
     public static array $schema = [];
 
@@ -25,7 +24,6 @@ final class Db
      * Db queries count
      *
      * @var int
-     * @since 2025.1
      */
     public static int $queries = 0;
 
@@ -33,7 +31,6 @@ final class Db
      * Db queries count
      *
      * @var null|Db\Medoo
-     * @since 2025.1
      */
     public static ?Db\Medoo $connection = null;
 
@@ -304,8 +301,6 @@ final class Db
 
     /**
      * Get count of queries
-     *
-     * @since 2025.1
      */
     public static function queries(): int
     {
@@ -314,8 +309,6 @@ final class Db
 
     /**
      * Get count of queries
-     *
-     * @since 2025.1
      */
     public static function info(): ?array
     {
@@ -339,8 +332,6 @@ final class Db
 
     /**
      * Get database version
-     *
-     * @since 2025.1
      */
     public static function version(): array|string|null
     {
@@ -356,7 +347,6 @@ final class Db
      * Get database schema
      *
      * @see   https://stackoverflow.com/questions/52642542/how-to-extract-column-name-and-type-from-mysql
-     * @since 2025.1
      */
     public static function schema(string $_column = null)
     {
@@ -392,8 +382,6 @@ final class Db
 
     /**
      * Update database schema.
-     *
-     * @since 2025.1
      */
     public static function updateSchema()
     {
@@ -407,7 +395,6 @@ final class Db
      * Try to check database connection
      *
      * @return Error|Medoo|null
-     * @since 2025.1
      */
     public static function check(): Error|Medoo|null
     {

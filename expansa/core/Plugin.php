@@ -9,8 +9,6 @@ namespace Expansa;
  * to set various properties such as name, URL, description, and versioning.
  *
  * This class utilizes the Traits to inherit common properties associated with plugins.
- *
- * @since 2025.1
  */
 abstract class Plugin implements Extensions\Contracts\Skeleton
 {

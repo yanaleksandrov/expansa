@@ -10,10 +10,8 @@ trait Singleton
      * Реальный экземпляр класса находится внутри статического поля.
      * В этом случае статическое поле является массивом, где каждый
      * подкласс Одиночки хранит свой собственный экземпляр.
-     *
-     * @since 2025.1
      */
-    protected static $instance;
+    protected static mixed $instance;
 
     /**
      * Это статический метод, управляющий доступом к экземпляру одиночки.
@@ -22,8 +20,6 @@ trait Singleton
      *
      * Эта реализация позволяет вам расширять класс Одиночки, сохраняя повсюду
      * только один экземпляр каждого подкласса.
-     *
-     * @since 2025.1
      */
     public static function init(...$args): self
     {
@@ -37,22 +33,16 @@ trait Singleton
      * Конструктор Одиночки не должен быть публичным, а должен быть скрытым,
      * чтобы предотвратить создание объекта через оператор new.
      * Однако он не может быть приватным, если мы хотим разрешить создание подклассов.
-     *
-     * @since 2025.1
      */
     protected function __construct(...$args) {} // phpcs:ignore
 
     /**
      * Cloning and deserialization are not allowed.
-     *
-     * @since 2025.1
      */
     protected function __clone() {} // phpcs:ignore
 
     /**
      * Singleton should not be recoverable from strings.
-     *
-     * @since 2025.1
      */
     public function __wakeup() {} // phpcs:ignore
 }

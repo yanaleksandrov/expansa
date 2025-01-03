@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Api;
 
-/**
- *
- * @since 2025.1
- */
 class Response
 {
     public static function getStatus()

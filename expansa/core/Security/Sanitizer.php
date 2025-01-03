@@ -615,8 +615,6 @@ final class Sanitizer
      *
      * @param string $value
      * @return string
-     *
-     * @since 2025.1
      */
     public static function href(mixed $value): string
     {
@@ -701,8 +699,6 @@ final class Sanitizer
      * @param mixed $value Value to change
      *
      * @return string the normalized string
-     *
-     * @since  2025.1
      */
     public static function whitespace(mixed $value): string
     {
@@ -715,8 +711,6 @@ final class Sanitizer
      * This differs from strip_tags() because it removes the contents of
      * the `<script>` and `<style>` tags. E.g. `strip_tags( '<script>something</script>' )`
      * will return 'something'. `Sanitizer::tags()` will return ''
-     *
-     * @since  2025.1
      *
      * @param  string $value String containing HTML tags.
      * @return string        The processed string.
@@ -733,8 +727,6 @@ final class Sanitizer
     /**
      * Sanitizer a mime type.
      *
-     * @since  2025.1
-     *
      * @param mixed $value Mime type.
      * @return string      Sanitized mime type.
      */
@@ -745,8 +737,6 @@ final class Sanitizer
 
     /**
      * Sanitizes a hex color with or without a hash.
-     *
-     * @since  2025.1
      *
      * @param string $value Color in HEX format
      * @return string|null  3 or 6 digit hex color with or without #
@@ -798,8 +788,6 @@ final class Sanitizer
     /**
      * Sanitize a login.
      *
-     * @since  2025.1
-     *
      * @param  mixed  $value Incoming login.
      * @return string
      */
@@ -827,8 +815,6 @@ final class Sanitizer
      *
      * Safe::accents("ªºÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöøùúûüýÿØ");
      *          echo: ooAAAAAACEEEEIIIINOOOOOUUUUYaaaaaaceeeeiiiinoooooouuuuyyO
-     *
-     * @since  2025.1
      *
      * @param  mixed  $value Incoming login.
      * @return string
@@ -867,8 +853,6 @@ final class Sanitizer
      * and end of filename. It is not guaranteed that this function will return a
      * filename that is allowed to be uploaded.
      *
-     * @since 2025.1
-     *
      * @param string $value The filename to be sanitized.
      * @return string       The sanitized filename.
      */
@@ -902,8 +886,6 @@ final class Sanitizer
 
     /**
      * Sanitize DB table name.
-     *
-     * @since 2025.1
      *
      * @param string $value The DB table name to be sanitized.
      * @return string       The sanitized DB table name.

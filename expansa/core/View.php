@@ -6,8 +6,6 @@ namespace Expansa;
 
 /**
  * Template class.
- *
- * @since 2025.1
  */
 final class View
 {

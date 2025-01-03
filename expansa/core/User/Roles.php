@@ -19,8 +19,6 @@ use Expansa\I18n;
  *       'capabilities' => []
  *    ]
  * ]
- *
- * @since 2025.1
  */
 class Roles
 {
@@ -38,8 +36,6 @@ class Roles
      *
      * The capabilities are defined in the following format `array( 'read' => true );`
      * To explicitly deny a role a capability you set the value for that capability to false.
-     *
-     * @since 2025.1
      *
      * @param string $display_name role display name
      * @param mixed  $capabilities List of capabilities keyed by the capability name, e.g. [ 'edit_posts', 'delete_posts' ].

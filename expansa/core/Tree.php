@@ -9,8 +9,6 @@ use Expansa\Support\Arr;
 /**
  * A class for displaying various tree-like structures.
  * Use it for output a tree of menu items, comments, taxonomies & many more.
- *
- * @since 2025.1
  */
 final class Tree
 {
@@ -18,15 +16,11 @@ final class Tree
 
     /**
      * Tree structures list.
-     *
-     * @since 2025.1
      */
     public array $list;
 
     /**
      * Tree structure name.
-     *
-     * @since 2025.1
      */
     public string $name;
 
@@ -36,8 +30,6 @@ final class Tree
      * $depth = -1 means flatly display every element (including child elements).
      * $depth = 0  means display all levels.
      * $depth > 0  specifies the number of display levels.
-     *
-     * @since 2025.1
      */
     public int $depth = 99;
 
@@ -46,7 +38,6 @@ final class Tree
      *
      * @param string $name
      * @param callable|null $function
-     * @since 2025.1
      */
     public static function attach(string $name, callable $function = null): void
     {
@@ -68,7 +59,6 @@ final class Tree
      *
      * @param string $name
      * @param callable $function
-     * @since 2025.1
      */
     public static function view(string $name, callable $function): void
     {
@@ -86,8 +76,6 @@ final class Tree
      * @param string $name
      * @param callable $function
      * @return string
-     *
-     * @since 2025.1
      */
     public static function include(string $name, callable $function): string
     {
@@ -120,8 +108,6 @@ final class Tree
      *
      * The function which is hooked in to handle the output of the page must check
      * that the user has the required capability as well.
-     *
-     * @since 2025.1
      */
     public function addItem(array $item): void
     {
@@ -146,8 +132,6 @@ final class Tree
      * Bulk add tree items.
      *
      * @param array $items
-     *
-     * @since 2025.1
      */
     public function addItems(array $items): void
     {
@@ -167,7 +151,6 @@ final class Tree
      * @param int $depth depth of parsing
      *
      * @return array
-     * @since  2025.1
      */
     public function parse(array $elements, ?string $parent_id = '', int $depth = 0): array
     {
@@ -205,8 +188,6 @@ final class Tree
      * @param string       $str
      * @param array|object $args
      * @return string
-     *
-     * @since  2025.1
      */
     public function vsprintf(string $str, array|object $args): string
     {

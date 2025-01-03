@@ -6,8 +6,6 @@ namespace Expansa;
 
 /**
  * Query class.
- *
- * @since 2025.1
  */
 final class Query
 {
@@ -27,22 +25,16 @@ final class Query
 
     /**
      * Array of post objects or post IDs.
-     *
-     * @since 2025.1
      */
     public array $posts;
 
     /**
      * The current post.
-     *
-     * @since 2025.1
      */
     public array $post;
 
     /**
      * The current slug.
-     *
-     * @since 2025.1
      */
     public string $slug;
 

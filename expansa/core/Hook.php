@@ -8,6 +8,10 @@ use Expansa\Facades\Facade;
 use Expansa\Hooks\Priority;
 
 /**
+ * Class Hook
+ *
+ * Provides a facade for managing hooks in the Expansa framework.
+ *
  * @method static array configure(string $path)
  * @method static void  add(string $name, string|array|callable $function, int $priority = Priority::BASE)
  * @method static bool  has(string $name)
@@ -17,8 +21,8 @@ use Expansa\Hooks\Priority;
  */
 class Hook extends Facade
 {
-	protected static function getStaticClassAccessor(): string
-	{
-		return 'Expansa\Hooks\Hooks';
-	}
+    protected static function getStaticClassAccessor(): string
+    {
+        return 'Expansa\Hooks\Hooks';
+    }
 }

@@ -6,8 +6,6 @@ namespace Expansa;
 
 /**
  * Core class for managing plugins.
- *
- * @since 2025.1
  */
 final class Term
 {
@@ -22,7 +20,6 @@ final class Term
 
     /**
      * @param string $term
-     * @since 2025.1
      */
     public static function unregister(string $term)
     {

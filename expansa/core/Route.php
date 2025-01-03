@@ -6,8 +6,6 @@ namespace Expansa;
 
 /**
  * Class Route.
- *
- * @since 2025.1
  */
 final class Route extends Routing\Router
 {
@@ -17,8 +15,6 @@ final class Route extends Routing\Router
      * @param string $methods           Allowed methods, | delimited
      * @param string $pattern           A route pattern such as /about/system
      * @param object|callable $callback The handling function to be executed
-     *
-     * @since 2025.1
      */
     public static function before(string $methods, string $pattern, object|callable $callback): void
     {

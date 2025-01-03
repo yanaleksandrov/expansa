@@ -6,38 +6,33 @@ namespace Expansa;
 
 /**
  * Core class for managing comments.
- *
- * @since 2025.1
  */
 final class Comments
 {
+    /**
+     * DB table name.
+     *
+     * @var string
+     */
+    public static string $table = 'comments';
 
-	/**
-	 * DB table name.
-	 *
-	 * @var string
-	 * @since 2025.1
-	 */
-	public static string $table = 'comments';
+    /**
+     * @param string $string
+     */
+    public static function add(string $string): void
+    {
+    }
 
-	/**
-	 * @param string $string
-	 * @since 2025.1
-	 */
-	public static function add( string $string ): void {}
+    /**
+     * Create new table into database.
+     */
+    public static function migrate(): void
+    {
+        $tableName      = (new Db\Handler())->getTableName(self::$table);
+        $charsetCollate = (new Db\Handler())->getCharsetCollate();
 
-	/**
-	 * Create new table into database.
-	 *
-	 * @since 2025.1
-	 */
-	public static function migrate(): void
-	{
-		$tableName      = (new Db\Handler)->getTableName( self::$table );
-		$charsetCollate = (new Db\Handler)->getCharsetCollate();
-
-		Db::query(
-			"
+        Db::query(
+            "
 			CREATE TABLE IF NOT EXISTS {$tableName} (
 				id           bigint(20)   UNSIGNED NOT NULL AUTO_INCREMENT,
 				post_id      bigint(20)   UNSIGNED NOT NULL DEFAULT '0',
@@ -60,8 +55,8 @@ final class Comments
 				KEY parent (parent),
 				KEY author_email (author_email(10))
 			) ENGINE=InnoDB {$charsetCollate};"
-		)->fetchAll();
+        )->fetchAll();
 
-		Field\Schema::migrate( $tableName, 'comment' );
-	}
+        Field\Schema::migrate($tableName, 'comment');
+    }
 }

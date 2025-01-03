@@ -75,8 +75,6 @@ final class Meta
      * @param string  $key      The key of the field to retrieve. If empty, get all fields of object.
      * @param bool    $isSingle Whether to limit the result to a single value (default: true).
      * @return mixed            The field value or null if the object ID is not set.
-     *
-     * @since 2025.1
      */
     public function get(string $type = '', mixed $key = '', bool $isSingle = true): mixed
     {
@@ -374,8 +372,6 @@ final class Meta
 
     /**
      * Create new table into database.
-     *
-     * @since 2025.1
      */
     public static function migrate(): void
     {

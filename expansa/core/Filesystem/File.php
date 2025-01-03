@@ -240,8 +240,6 @@ class File extends EntryHandler implements CommonInterface, FileInterface
 
         /**
          * Check file validation.
-         *
-         * @since 2025.1
          */
         $validator = ( new Validator(
             $file,
@@ -287,11 +285,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             I18n::_f('The maximum file size is :maxFileSize.', self::humanize($maxFileSize))
         )->apply();
 
-        /**
-         * If the incoming data has been checked for validity, continue uploading
-         *
-         * @since 2025.1
-         */
+        // if the incoming data has been checked for validity, continue uploading
         if ($validator instanceof Validator) {
             $this->errors[] = $validator;
         }
@@ -302,11 +296,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             $this->errors[] = I18n::_t('File name must not contain illegal characters and must not be empty.');
         }
 
-        /**
-         * Check that the uploaded file is unique.
-         *
-         * @since 2025.1
-         */
+        // check that the uploaded file is unique.
         if (is_file($filepath)) {
             $filename  = pathinfo($basename, PATHINFO_FILENAME);
             $extension = pathinfo($basename, PATHINFO_EXTENSION);
@@ -324,11 +314,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             }
         }
 
-        /**
-         * Create new file.
-         *
-         * @since 2025.1
-         */
+        // create new directory
         if (! is_dir($targetDir)) {
             mkdir($targetDir, 0755, true);
         }

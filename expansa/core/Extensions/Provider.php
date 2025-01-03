@@ -10,22 +10,16 @@ use Expansa\Plugin;
 
 /**
  * Provides storage functionality for managing themes & plugins instances.
- *
- * @since 2025.1
  */
 class Provider
 {
     /**
      * Contains registered instances of themes classes.
-     *
-     * @since 2025.1
      */
     public static array $themes = [];
 
     /**
      * Contains registered instances of plugin classes.
-     *
-     * @since 2025.1
      */
     public static array $plugins = [];
 
@@ -35,7 +29,6 @@ class Provider
      * @param callable $callback Callback function used for get plugins paths.
      * @param string   $type
      * @return void
-     * @since 2025.1
      */
     protected static function enqueue(callable $callback, string $type): void
     {

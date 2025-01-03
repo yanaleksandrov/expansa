@@ -7,9 +7,6 @@ namespace Expansa\Term;
 use Expansa\Db;
 use Expansa\Field;
 
-/**
- * @since 2025.1
- */
 class Schema
 {
     /**
@@ -21,8 +18,6 @@ class Schema
 
     /**
      * Create new table into database.
-     *
-     * @since 2025.1
      */
     public static function migrate(): void
     {

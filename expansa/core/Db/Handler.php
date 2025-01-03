@@ -11,8 +11,6 @@ use Expansa\Sanitizer;
  *
  * This class provides methods for interacting with the database, including retrieving
  * charset and collation settings for table creation queries.
- *
- * @since 2025.1
  */
 class Handler
 {
@@ -34,8 +32,6 @@ class Handler
      * to be used in SQL queries to set the charset and collation.
      *
      * @return string Returns the charset and collation string.
-     *
-     * @since 2025.1
      */
     public function getCharsetCollate(): string
     {

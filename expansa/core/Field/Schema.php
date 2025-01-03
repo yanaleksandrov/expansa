@@ -7,11 +7,6 @@ namespace Expansa\Field;
 use Expansa\Db;
 use Expansa\Sanitizer;
 
-/**
- *
- *
- * @since 2025.1
- */
 class Schema
 {
     /**

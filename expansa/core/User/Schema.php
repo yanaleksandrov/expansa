@@ -10,16 +10,12 @@ use Expansa\I18n;
 use Expansa\Sanitizer;
 use Expansa\Validator;
 
-/**
- * @since 2025.1
- */
 class Schema
 {
     /**
      * DB table name.
      *
      * @var string
-     * @since 2025.1
      */
     public static string $table = 'users';
 
@@ -28,8 +24,6 @@ class Schema
      *
      * @param array $userdata
      * @return array
-     *
-     * @since 2025.1
      */
     public static function sanitize(array $userdata): array
     {
@@ -59,8 +53,6 @@ class Schema
      *
      * @param array $userdata
      * @return array|Validator
-     *
-     * @since 2025.1
      */
     public static function validate(array $userdata): Validator|array
     {
@@ -85,8 +77,6 @@ class Schema
 
     /**
      * Create new table into database.
-     *
-     * @since 2025.1
      */
     public static function migrate(): void
     {

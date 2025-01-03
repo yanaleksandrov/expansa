@@ -13,8 +13,6 @@ use Expansa\User\Traits;
  * This class handles user-related operations including user creation, retrieval,
  * updating, deletion, and session management. It extends the Users class to inherit
  * user-related functionalities.
- *
- * @since 2025.1
  */
 final class User extends Schema
 {
@@ -55,8 +53,6 @@ final class User extends Schema
      * @param string        $getBy    The field to retrieve the user with. ID | login | email | nicename.
      * @param callable|null $callback
      * @return User|Error
-     *
-     * @since 2025.1
      */
     public static function get(string|int $value, string $getBy = 'id', ?callable $callback = null): User|Error
     {
@@ -103,7 +99,6 @@ final class User extends Schema
      * @param callable|null $callback
      *
      * @return User|Error The newly created user's ID or an Error object if the user could not be created.
-     * @since 2025.1
      */
     public static function add(array $userdata, ?callable $callback = null): User|Error
     {
@@ -174,7 +169,6 @@ final class User extends Schema
      * @param array $userdata
      * @param callable|null $callback
      * @return User|Error
-     * @since 2025.1
      */
     public static function update(array $userdata, ?callable $callback = null): User|Error
     {
@@ -228,8 +222,6 @@ final class User extends Schema
      * @param  int   $userID   User ID.
      * @param  int   $reassign Optional. Reassign posts to new User ID.
      * @return Error|int       The number of remote users or false.
-     *
-     * @since 2025.1
      */
     public static function delete(int $userID, int $reassign = 0): Error|int
     {
@@ -251,8 +243,6 @@ final class User extends Schema
      *
      * @param callable|null $callback
      * @return User|Error|null
-     *
-     * @since 2025.1
      */
     public static function current(?callable $callback = null): User|Error|null
     {
@@ -279,8 +269,6 @@ final class User extends Schema
      *
      * @param array $fields
      * @return bool Array of fields and values to search for users.
-     *
-     * @since  2025.1
      */
     public static function exists(array $fields): bool
     {
@@ -297,8 +285,6 @@ final class User extends Schema
      * @param integer $userID User ID.
      * @param string $capabilities Capability name.
      * @return   bool              Whether the user has the given capability.
-     *
-     * @since 2025.1
      */
     public static function can(int $userID, string $capabilities): bool
     {
@@ -327,8 +313,6 @@ final class User extends Schema
      * @param integer $userID User ID.
      * @param string $role    Role name.
      * @return   bool         The user has a role.
-     *
-     * @since 2025.1
      */
     public static function is(int $userID, string $role): bool
     {
@@ -349,8 +333,6 @@ final class User extends Schema
      * Проверяет, залогинен ли пользователь в этом сеансе.
      *
      * @return   bool
-     *
-     * @since   2025.1
      */
     public static function logged(): bool
     {
@@ -367,8 +349,6 @@ final class User extends Schema
      *
      * @param array $userdata
      * @return User|Error
-     *
-     * @since  2025.1
      */
     public static function login(array $userdata): User|Error
     {
@@ -417,8 +397,6 @@ final class User extends Schema
 
     /**
      * Де-авторизует текущего пользователя.
-     *
-     * @since   2025.1
      */
     public static function logout(): void
     {

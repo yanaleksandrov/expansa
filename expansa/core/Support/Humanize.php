@@ -9,7 +9,6 @@ namespace Expansa\Support;
  * @see https://github.com/mhanson01/humanize
  * @see https://github.com/coduo/php-humanizer
  * @see https://github.com/nFnK/php-humanizer
- * @since 2025.1
  */
 class Humanize
 {
@@ -18,7 +17,6 @@ class Humanize
      *
      * @param string|int $bytes
      * @return string
-     * @since 2025.1
      */
     public static function fromBytes(string|int $bytes): string
     {
@@ -51,7 +49,6 @@ class Humanize
      *
      * @param string $value
      * @return int
-     * @since 2025.1
      */
     public static function toBytes(string $value): int
     {

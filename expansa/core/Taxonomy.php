@@ -22,7 +22,6 @@ final class Taxonomy
      * @param string $taxonomy
      * @param string $object_type
      * @param array $args
-     * @since 2025.1
      */
     public static function register(string $taxonomy, string $object_type, array $args = [])
     {

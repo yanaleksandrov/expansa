@@ -9,8 +9,6 @@ use Expansa\Support\Arr;
 /**
  * Option class it is a self-contained class for creating, updating, and deleting options.
  * Uses static variables to store options, which allows to avoid using the object cache without losing performance.
- *
- * @since 2025.1
  */
 final class Option extends Option\Schema
 {

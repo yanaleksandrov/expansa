@@ -124,8 +124,6 @@ class Translator extends Locale
      * Output translated string.
      *
      * @param string $string
-     *
-     * @since 2025.1
      */
     public function t(string $string): void
     {

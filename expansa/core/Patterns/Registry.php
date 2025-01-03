@@ -27,8 +27,6 @@ use Expansa\I18n;
  * print_r( Registry::get( 'attributes.textarea' ) );
  * output: array( 'value', 'row' )
  * ```
- *
- * @since 2025.1
  */
 final class Registry
 {

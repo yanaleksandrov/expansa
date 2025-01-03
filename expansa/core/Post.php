@@ -101,8 +101,6 @@ class Post
 
             /**
              * Add slug just if post type is public.
-             *
-             * @since 2025.1
              */
             if ($type->public === true) {
                 $slug = Slug::add($post->id, $type->table, Sanitizer::slug($args['slug'] ?? $data['title']));

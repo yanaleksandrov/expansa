@@ -7,8 +7,6 @@ namespace Expansa\Extensions;
 /**
  * This trait provides common properties for Expansa plugins, including metadata
  * such as ID, name, version, and author information.
- *
- * @since 2025.1
  */
 trait Traits
 {

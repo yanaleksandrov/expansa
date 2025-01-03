@@ -9,38 +9,34 @@ use PHPMailer\PHPMailer\Exception;
 
 /**
  * A Mail class for sending emails using PHPMailer.
+ *
  * This class provides a static method to send emails with support for
  * attachments, custom headers, and multiple recipients.
- *
- * @since 2025.1
  */
 final class Mail
 {
-
-	/**
-	 * Sends an email.
-	 *
-	 * This method constructs an email message and sends it to one or
-	 * more recipients using the PHPMailer library. It supports
-	 * attachments and custom headers. The method will handle the
-	 * necessary configurations for sending the email.
-	 *
-	 * @param string $to         Recipient(s) email address(es).
-	 *                           Can be a comma-separated string or an array.
-	 * @param string $subject    Subject of the email.
-	 * @param string $message    The body of the email.
-	 * @param string $headers    Optional. Custom headers for the email.
-	 *                           Can be a string or an array. Default is an empty string.
-	 * @param array $attachments Optional. An array of file paths to be
-	 *                           attached to the email. Default is an empty array.
-	 *
-	 * @return bool Returns true if the email was sent successfully, false otherwise.
-	 *
-	 * @throws Exception If an error occurs during the sending process.
-	 *
-	 * @since 2025.1
-	 */
-    public static function send(string $to, string $subject, string $message, string $headers = '', array $attachments = [])
+    /**
+     * Sends an email.
+     *
+     * This method constructs an email message and sends it to one or
+     * more recipients using the PHPMailer library. It supports
+     * attachments and custom headers. The method will handle the
+     * necessary configurations for sending the email.
+     *
+     * @param string $to         Recipient(s) email address(es).
+     *                           Can be a comma-separated string or an array.
+     * @param string $subject    Subject of the email.
+     * @param string $message    The body of the email.
+     * @param string $headers    Optional. Custom headers for the email.
+     *                           Can be a string or an array. Default is an empty string.
+     * @param array $attachments Optional. An array of file paths to be
+     *                           attached to the email. Default is an empty array.
+     *
+     * @return bool Returns true if the email was sent successfully, false otherwise.
+     *
+     * @throws Exception If an error occurs during the sending process.
+     */
+    public static function send(string $to, string $subject, string $message, string $headers = '', array $attachments = []): bool
     {
         $atts = compact('to', 'subject', 'message', 'headers', 'attachments');
 
@@ -48,7 +44,7 @@ final class Mail
             $to = $atts['to'];
         }
 
-        if ( ! is_array($to)) {
+        if (! is_array($to)) {
             $to = explode(',', $to);
         }
 
@@ -68,13 +64,13 @@ final class Mail
             $attachments = $atts['attachments'];
         }
 
-        if ( ! is_array($attachments)) {
+        if (! is_array($attachments)) {
             $attachments = explode("\n", str_replace("\r\n", "\n", $attachments));
         }
         global $phpmailer;
 
         // (Re)create it, if it's gone missing.
-        if ( ! $phpmailer instanceof PHPMailer) {
+        if (! $phpmailer instanceof PHPMailer) {
             require_once EX_CORE . 'Mail/PHPMailer/Exception.php';
             require_once EX_CORE . 'Mail/PHPMailer/PHPMailer.php';
             require_once EX_CORE . 'Mail/PHPMailer/SMTP.php';
@@ -93,7 +89,7 @@ final class Mail
         if (empty($headers)) {
             $headers = [];
         } else {
-            if ( ! is_array($headers)) {
+            if (! is_array($headers)) {
                 // Explode the headers out, so this function can take
                 // both string headers and an array of headers.
                 $tempheaders = explode("\n", str_replace("\r\n", "\n", $headers));
@@ -103,7 +99,7 @@ final class Mail
             $headers = [];
 
             // If it's actually got contents.
-            if ( ! empty($tempheaders)) {
+            if (! empty($tempheaders)) {
                 // Iterate through the raw headers.
                 foreach ((array) $tempheaders as $header) {
                     if (strpos($header, ':') === false) {
@@ -183,7 +179,7 @@ final class Mail
 
         // Set "From" name and email.
         // If we don't have a name from the input headers.
-        if ( ! isset($from_name)) {
+        if (! isset($from_name)) {
             $from_name = 'Expansa';
         }
 
@@ -193,7 +189,7 @@ final class Mail
          * but there's no easy alternative. Defaulting to admin_email might appear to be
          * another option, but some hosts may refuse to relay mail from an unknown domain.
          */
-        if ( ! isset($from_email)) {
+        if (! isset($from_email)) {
             // Get the site domain and get rid of www.
             $sitename = parse_url($_SERVER['SCRIPT_URI'], PHP_URL_HOST);
             if (substr($sitename, 0, 4) === 'www.') {
@@ -249,7 +245,7 @@ final class Mail
                             $phpmailer->addReplyTo($address, $recipient_name);
                             break;
                     }
-                } catch ( Exception $e ) {
+                } catch (Exception $e) {
                     continue;
                 }
             }
@@ -261,7 +257,7 @@ final class Mail
         // Set Content-Type and charset.
 
         // If we don't have a content-type from the input headers.
-        if ( ! isset($content_type)) {
+        if (! isset($content_type)) {
             $content_type = 'text/html';
         }
 
@@ -273,19 +269,19 @@ final class Mail
         }
 
         // If we don't have a charset from the input headers.
-        if ( ! isset($charset)) {
+        if (! isset($charset)) {
             $charset = 'utf-8';
         }
 
         $phpmailer->CharSet = $charset;
         // Set custom headers.
-        if ( ! empty($headers)) {
+        if (! empty($headers)) {
             foreach ((array) $headers as $name => $content) {
                 // Only add custom headers not added automatically by PHPMailer.
-                if ( ! in_array($name, ['MIME-Version', 'X-Mailer'], true)) {
+                if (! in_array($name, ['MIME-Version', 'X-Mailer'], true)) {
                     try {
                         $phpmailer->addCustomHeader(sprintf('%1$s: %2$s', $name, $content));
-                    } catch ( Exception $e ) {
+                    } catch (Exception $e) {
                         continue;
                     }
                 }
@@ -296,7 +292,7 @@ final class Mail
             }
         }
 
-        if ( ! empty($attachments)) {
+        if (! empty($attachments)) {
             foreach ($attachments as $attachment) {
                 try {
                     $phpmailer->addAttachment($attachment);

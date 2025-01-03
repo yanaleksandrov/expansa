@@ -85,8 +85,6 @@ class Type
 
         /**
          * Show in dashboard menu.
-         *
-         * @since 2025.1
          */
         if ($this->showInMenu) {
             Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
@@ -129,8 +127,6 @@ class Type
      *
      * @param mixed ...$args
      * @return Type
-     *
-     * @since 2025.1
      */
     public static function register(...$args): self
     {
@@ -145,8 +141,6 @@ class Type
      * Unregister post type.
      *
      * @param string $key
-     *
-     * @since 2025.1
      */
     public static function unregister(string $key): void
     {
@@ -157,8 +151,6 @@ class Type
 
     /**
      * Get registered type.
-     *
-     * @since 2025.1
      */
     public static function get(string $key): ?self
     {
@@ -170,8 +162,6 @@ class Type
      *
      * @param string $key
      * @return bool
-     *
-     * @since 2025.1
      */
     public static function exist(string $key): bool
     {
@@ -190,8 +180,6 @@ class Type
      *                         must match; 'not' means no elements may match. Default 'and'.
      *
      * @return array
-     *
-     * @since 2025.1
      */
     public static function fetch(array $args = [], string $operator = 'and'): array
     {
@@ -200,8 +188,6 @@ class Type
 
     /**
      * Get registered types for using in select field.
-     *
-     * @since 2025.1
      */
     public static function options(array $filters = []): array
     {
