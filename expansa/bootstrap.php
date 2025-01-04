@@ -143,3 +143,12 @@ require_once EX_PATH . 'routes.php';
 //echo '<pre>';
 //print_r(Disk::dir(EX_PATH));
 //echo '</pre>';
+
+//echo '<pre>';
+//print_r(
+//    Expansa\Mail::to('test-zt9rpoi4o@srv1.mail-tester.com')
+//        ->from('yan@cms.codyshop.ru')
+//        ->message('Hello World!')
+//        ->send()
+//);
+//echo '</pre>';

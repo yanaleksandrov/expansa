@@ -58,3 +58,22 @@ const EX_DEBUG_LOG = true;
 const EX_HOUR_IN_SECONDS     = 3600;
 const EX_HALF_DAY_IN_SECONDS = 43200;
 const EX_DAY_IN_SECONDS      = 86400;
+
+/**
+ * DKIM (DomainKeys Identified Mail) settings for signing outgoing emails.
+ *
+ * @const string EX_DKIM_DOMAIN             The DKIM signing domain, typically matching the 'From' address domain.
+ * @const string EX_DKIM_PRIVATE            Path to the private key used for DKIM signing.
+ * @const string EX_DKIM_SELECTOR           The DKIM selector used in the DNS record to locate the public key.
+ * @const string EX_DKIM_PASSPHRASE         The passphrase for the private key, if applicable.
+ * @const string EX_DKIM_IDENTITY           The identity for signing the email. Typically set to the 'From' address.
+ * @const bool   EX_DKIM_COPY_HEADER_FIELDS Whether to include signed header fields in the DKIM signature.
+ * @const array  EX_DKIM_EXTRA_HEADERS      Optional list of extra headers to sign with the DKIM signature.
+ */
+const EX_DKIM_DOMAIN             = 'example.com';
+const EX_DKIM_PRIVATE            = 'dkim_private.pem';
+const EX_DKIM_SELECTOR           = 'phpmailer';
+const EX_DKIM_PASSPHRASE         = '';
+const EX_DKIM_IDENTITY           = '';
+const EX_DKIM_COPY_HEADER_FIELDS = false;
+const EX_DKIM_EXTRA_HEADERS      = ['List-Unsubscribe', 'List-Help'];
