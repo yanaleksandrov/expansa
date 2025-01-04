@@ -1,11 +1,4 @@
 <?php
-/**
- * Requests for PHP, an HTTP library.
- *
- * @copyright 2012-2023 Requests Contributors
- * @license   https://github.com/WordPress/Requests/blob/stable/LICENSE ISC
- * @link      https://github.com/WordPress/Requests
- */
 
 namespace Expansa\Http\Auth;
 
@@ -22,84 +15,85 @@ use Expansa\Http\Hooks;
  *
  * @package Requests\Authentication
  */
-class Basic implements Auth {
-	/**
-	 * Username
-	 *
-	 * @var string
-	 */
-	public $user;
+class Basic implements Auth
+{
+    /**
+     * Username
+     *
+     * @var string
+     */
+    public string $user;
 
-	/**
-	 * Password
-	 *
-	 * @var string
-	 */
-	public $pass;
+    /**
+     * Password
+     *
+     * @var string
+     */
+    public string $pass;
 
-	/**
-	 * Constructor
-	 *
-	 * @since 2.0 Throws an `InvalidArgument` exception.
-	 * @since 2.0 Throws an `ArgumentCount` exception instead of the Requests base `Exception.
-	 *
-	 * @param array|null $args Array of user and password. Must have exactly two elements
-	 *
-	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed argument is not an array or null.
-	 * @throws \Expansa\Http\Exception\ArgumentCount   On incorrect number of array elements (`authbasicbadargs`).
-	 */
-	public function __construct($args = null) {
-		if (is_array($args)) {
-			if (count($args) !== 2) {
-				throw ArgumentCount::create('an array with exactly two elements', count($args), 'authbasicbadargs');
-			}
+    /**
+     * Constructor
 
-			list($this->user, $this->pass) = $args;
-			return;
-		}
+     * @param array|null $args Array of user and password. Must have exactly two elements
+     *
+     * @throws InvalidArgument When the passed argument is not an array or null.
+     * @throws ArgumentCount   On incorrect number of array elements (`authbasicbadargs`).
+     */
+    public function __construct(?array $args = null)
+    {
+        if (is_array($args)) {
+            if (count($args) !== 2) {
+                throw ArgumentCount::create('an array with exactly two elements', count($args), 'authbasicbadargs');
+            }
 
-		if ($args !== null) {
-			throw InvalidArgument::create(1, '$args', 'array|null', gettype($args));
-		}
-	}
+            list($this->user, $this->pass) = $args;
+            return;
+        }
 
-	/**
-	 * Register the necessary callbacks
-	 *
-	 * @see \Expansa\Http\Auth\Basic::curl_before_send()
-	 * @see \Expansa\Http\Auth\Basic::fsockopen_header()
-	 * @param \Expansa\Http\Hooks $hooks Hook system
-	 */
-	public function register(Hooks $hooks) {
-		$hooks->register('curl.before_send', [$this, 'curl_before_send']);
-		$hooks->register('fsockopen.after_headers', [$this, 'fsockopen_header']);
-	}
+        if ($args !== null) {
+            throw InvalidArgument::create(1, '$args', 'array|null', gettype($args));
+        }
+    }
 
-	/**
-	 * Set cURL parameters before the data is sent.
-	 *
-	 * @param resource|\CurlHandle $handle The cURL handle.
-	 */
-	public function curl_before_send(&$handle) {
-		curl_setopt($handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-		curl_setopt($handle, CURLOPT_USERPWD, $this->getAuthString());
-	}
+    /**
+     * Register the necessary callbacks.
+     *
+     * @param Hooks $hooks Hook system
+     */
+    public function register(Hooks $hooks): void
+    {
+        $hooks->register('curl.before_send', [$this, 'curl_before_send']);
+        $hooks->register('fsockopen.after_headers', [$this, 'fsockopen_header']);
+    }
 
-	/**
-	 * Add extra headers to the request before sending.
-	 *
-	 * @param string $out HTTP header string.
-	 */
-	public function fsockopen_header(&$out) {
-		$out .= sprintf("Authorization: Basic %s\r\n", base64_encode($this->getAuthString()));
-	}
+    /**
+     * Set cURL parameters before the data is sent.
+     *
+     * @param resource|\CurlHandle $handle The cURL handle.
+     */
+    public function curl_before_send(&$handle): void
+    {
+        curl_setopt($handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        curl_setopt($handle, CURLOPT_USERPWD, $this->getAuthString());
+    }
 
-	/**
-	 * Get the authentication string (user:pass)
-	 *
-	 * @return string
-	 */
-	public function getAuthString() {
-		return $this->user . ':' . $this->pass;
-	}
+    /**
+     * Add extra headers to the request before sending.
+     *
+     * @param string $out HTTP header string.
+     */
+    public function fsockopen_header(&$out): void
+    {
+        $out .= sprintf("Authorization: Basic %s\r\n", base64_encode($this->getAuthString()));
+    }
+
+    /**
+     * Get the authentication string (user:pass)
+     *
+     * @return string
+     */
+    public function getAuthString(): string
+    {
+        return $this->user . ':' . $this->pass;
+    }
 }

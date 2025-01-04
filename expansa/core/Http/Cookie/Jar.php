@@ -1,11 +1,4 @@
 <?php
-/**
- * Requests for PHP, an HTTP library.
- *
- * @copyright 2012-2023 Requests Contributors
- * @license   https://github.com/WordPress/Requests/blob/stable/LICENSE ISC
- * @link      https://github.com/WordPress/Requests
- */
 
 namespace Expansa\Http\Cookie;
 
@@ -15,7 +8,6 @@ use IteratorAggregate;
 use ReturnTypeWillChange;
 use Expansa\Http\Cookie;
 use Expansa\Http\Exception;
-use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Contracts\HookManager;
 use Expansa\Http\Iri;
 use Expansa\Http\Response;
@@ -27,26 +19,13 @@ use Expansa\Http\Response;
  */
 class Jar implements ArrayAccess, IteratorAggregate {
 	/**
-	 * Actual item data
-	 *
-	 * @var array
-	 */
-	protected $cookies = [];
-
-	/**
 	 * Create a new jar
 	 *
 	 * @param array $cookies Existing cookie values
-	 *
-	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed argument is not an array.
 	 */
-	public function __construct($cookies = []) {
-		if (is_array($cookies) === false) {
-			throw InvalidArgument::create(1, '$cookies', 'array', gettype($cookies));
-		}
-
-		$this->cookies = $cookies;
-	}
+	public function __construct(
+        protected array $cookies = []
+    ) {}
 
 	/**
 	 * Normalise cookie data into a \Expansa\Http\Cookie

@@ -1,11 +1,4 @@
 <?php
-/**
- * IRI, part of Requests for PHP, an HTTP library.
- *
- * @copyright 2007-2009 Geoffrey Sneddon and Steve Minutillo
- * @license   https://opensource.org/licenses/bsd-license.php
- * @link      http://hg.gsnedders.com/iri/
- */
 
 namespace Expansa\Http;
 

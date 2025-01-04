@@ -1,14 +1,8 @@
 <?php
-/**
- * Requests for PHP, an HTTP library.
- *
- * @copyright 2012-2023 Requests Contributors
- * @license   https://github.com/WordPress/Requests/blob/stable/LICENSE ISC
- * @link      https://github.com/WordPress/Requests
- */
 
 namespace Expansa\Http;
 
+use Stringable;
 use Expansa\Http\Cookie\Jar;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Iri;
@@ -27,58 +21,27 @@ use Expansa\Http\Utility\InputValidator;
  */
 class Session {
 	/**
-	 * Base URL for requests
-	 *
-	 * URLs will be made absolute using this as the base
-	 *
-	 * @var string|null
-	 */
-	public $url = null;
-
-	/**
-	 * Base headers for requests
-	 *
-	 * @var array
-	 */
-	public $headers = [];
-
-	/**
-	 * Base data for requests
-	 *
-	 * If both the base data and the per-request data are arrays, the data will
-	 * be merged before sending the request.
-	 *
-	 * @var array
-	 */
-	public $data = [];
-
-	/**
-	 * Base options for requests
-	 *
-	 * The base options are merged with the per-request data for each request.
-	 * The only default option is a shared cookie jar between requests.
-	 *
-	 * Values here can also be set directly via properties on the Session
-	 * object, e.g. `$session->useragent = 'X';`
-	 *
-	 * @var array
-	 */
-	public $options = [];
-
-	/**
 	 * Create a new session
 	 *
-	 * @param string|\Stringable|null $url     Base URL for requests
+	 * @param string|\Stringable|null $url     Base URL for requests, URLs will be made absolute using this as the base
 	 * @param array                   $headers Default headers for requests
-	 * @param array                   $data    Default data for requests
-	 * @param array                   $options Default options for requests
-	 *
+     * @param array                   $data    Default data for requests. If both the base data and the per-request
+     *                                         data are arrays, the data will be merged before sending the request.
+	 * @param array                   $options Default options for requests. The base options are merged with the per-request data for each request.
+     *                                         The only default option is a shared cookie jar between requests.
+     *                                         Values here can also be set directly via properties on the Session
+     *                                         object, e.g. `$session->useragent = 'X';`
 	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $url argument is not a string, Stringable or null.
 	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $headers argument is not an array.
 	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $data argument is not an array.
 	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $options argument is not an array.
 	 */
-	public function __construct($url = null, $headers = [], $data = [], $options = []) {
+	public function __construct(
+        public null|string|Stringable $url = null,
+        public array $headers = [],
+        public array $data = [],
+        public array $options = []
+    ) {
 		if ($url !== null && InputValidator::is_string_or_stringable($url) === false) {
 			throw InvalidArgument::create(1, '$url', 'string|Stringable|null', gettype($url));
 		}
@@ -95,8 +58,6 @@ class Session {
 			throw InvalidArgument::create(4, '$options', 'array', gettype($options));
 		}
 
-		$this->url     = $url;
-		$this->headers = $headers;
 		$this->data    = $data;
 		$this->options = $options;
 

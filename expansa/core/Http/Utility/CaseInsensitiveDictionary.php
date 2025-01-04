@@ -1,11 +1,4 @@
 <?php
-/**
- * Requests for PHP, an HTTP library.
- *
- * @copyright 2012-2023 Requests Contributors
- * @license   https://github.com/WordPress/Requests/blob/stable/LICENSE ISC
- * @link      https://github.com/WordPress/Requests
- */
 
 namespace Expansa\Http\Utility;
 
@@ -22,18 +15,11 @@ use Expansa\Http\Exception;
  */
 class CaseInsensitiveDictionary implements ArrayAccess, IteratorAggregate {
 	/**
-	 * Actual item data
-	 *
-	 * @var array
-	 */
-	protected $data = [];
-
-	/**
 	 * Creates a case insensitive dictionary.
 	 *
 	 * @param array $data Dictionary/map to convert to case-insensitive
 	 */
-	public function __construct(array $data = []) {
+	public function __construct(protected array $data = []) {
 		foreach ($data as $offset => $value) {
 			$this->offsetSet($offset, $value);
 		}

@@ -1,11 +1,4 @@
 <?php
-/**
- * Requests for PHP, an HTTP library.
- *
- * @copyright 2012-2023 Requests Contributors
- * @license   https://github.com/WordPress/Requests/blob/stable/LICENSE ISC
- * @link      https://github.com/WordPress/Requests
- */
 
 namespace Expansa\Http;
 
@@ -22,66 +15,27 @@ use Expansa\Http\Utility\InputValidator;
  */
 class Cookie {
 	/**
-	 * Cookie name.
-	 *
-	 * @var string
-	 */
-	public $name;
-
-	/**
-	 * Cookie value.
-	 *
-	 * @var string
-	 */
-	public $value;
-
-	/**
-	 * Cookie attributes
-	 *
-	 * Valid keys are `'path'`, `'domain'`, `'expires'`, `'max-age'`, `'secure'` and
-	 * `'httponly'`.
-	 *
-	 * @var \Expansa\Http\Utility\CaseInsensitiveDictionary|array Array-like object
-	 */
-	public $attributes = [];
-
-	/**
-	 * Cookie flags
-	 *
-	 * Valid keys are `'creation'`, `'last-access'`, `'persistent'` and `'host-only'`.
-	 *
-	 * @var array
-	 */
-	public $flags = [];
-
-	/**
-	 * Reference time for relative calculations
-	 *
-	 * This is used in place of `time()` when calculating Max-Age expiration and
-	 * checking time validity.
-	 *
-	 * @var int
-	 */
-	public $reference_time = 0;
-
-	/**
 	 * Create a new cookie object
 	 *
-	 * @param int|string                                              $name           The name of the cookie.
-	 * @param string                                                  $value          The value for the cookie.
-	 * @param array|\Expansa\Http\Utility\CaseInsensitiveDictionary $attributes     Associative array of attribute data
-	 * @param array                                                   $flags          The flags for the cookie.
-	 *                                                                                Valid keys are `'creation'`, `'last-access'`,
-	 *                                                                                `'persistent'` and `'host-only'`.
-	 * @param int|null                                                $reference_time Reference time for relative calculations.
-	 *
-	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $name argument is not an integer or string that conforms to RFC 2616.
-	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $value argument is not a string.
-	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $attributes argument is not an array or iterable object with array access.
-	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $flags argument is not an array.
-	 * @throws \Expansa\Http\Exception\InvalidArgument When the passed $reference_time argument is not an integer or null.
-	 */
-	public function __construct($name, $value, $attributes = [], $flags = [], $reference_time = null) {
+	 * @param int|string                      $name           The name of the cookie.
+	 * @param string                          $value          The value for the cookie.
+	 * @param array|CaseInsensitiveDictionary $attributes     Associative array of attribute data. Valid keys are `'path'`, `'domain'`, `'expires'`, `'max-age'`, `'secure'` and `'httponly'`.
+	 * @param array                           $flags          The flags for the cookie. Valid keys are `'creation'`, `'last-access'`, `'persistent'` and `'host-only'`.
+	 * @param int|null                        $reference_time Reference time for relative calculations. This is used in place of `time()` when calculating Max-Age expiration and checking time validity.
+	 * @throws InvalidArgument                                When any of the following conditions are met:
+     *                                                        - The $name argument is not an integer or string that conforms to RFC 2616.
+     *                                                        - The $value argument is not a string.
+     *                                                        - The $attributes argument is not an array or iterable object with array access.
+     *                                                        - The $flags argument is not an array.
+     *                                                        - The $reference_time argument is not an integer or null.
+ */
+	public function __construct(
+        public int|string $name,
+        public string $value,
+        public array|CaseInsensitiveDictionary $attributes = [],
+        public array $flags = [],
+        public ?int $reference_time = null
+    ) {
 		if ($name !== '' && InputValidator::is_valid_rfc2616_token($name) === false) {
 			throw InvalidArgument::create(1, '$name', 'integer|string and conform to RFC 2616', gettype($name));
 		}
@@ -103,8 +57,6 @@ class Cookie {
 		}
 
 		$this->name       = (string) $name;
-		$this->value      = $value;
-		$this->attributes = $attributes;
 		$default_flags    = [
 			'creation'    => time(),
 			'last-access' => time(),

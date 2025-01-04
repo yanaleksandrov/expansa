@@ -1,15 +1,4 @@
 <?php
-/**
- * Requests for PHP, an HTTP library.
- *
- * Autoloader for Requests for PHP.
- *
- * Include this file if you'd like to avoid having to create your own autoloader.
- *
- * @copyright 2012-2023 Requests Contributors
- * @license   https://github.com/WordPress/Requests/blob/stable/LICENSE ISC
- * @link      https://github.com/WordPress/Requests
- */
 
 namespace Expansa\Http;
 

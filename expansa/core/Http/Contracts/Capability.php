@@ -1,11 +1,4 @@
 <?php
-/**
- * Requests for PHP, an HTTP library.
- *
- * @copyright 2012-2023 Requests Contributors
- * @license   https://github.com/WordPress/Requests/blob/stable/LICENSE ISC
- * @link      https://github.com/WordPress/Requests
- */
 
 namespace Expansa\Http\Contracts;
 
@@ -17,23 +10,23 @@ namespace Expansa\Http\Contracts;
  * @package Requests\Utilities
  * @since   2.0.0
  */
-interface Capability {
+interface Capability
+{
+    /**
+     * Support for SSL.
+     *
+     * @var string
+     */
+    public const SSL = 'ssl';
 
-	/**
-	 * Support for SSL.
-	 *
-	 * @var string
-	 */
-	const SSL = 'ssl';
-
-	/**
-	 * Collection of all capabilities supported in Requests.
-	 *
-	 * Note: this does not automatically mean that the capability will be supported for your chosen transport!
-	 *
-	 * @var array<string>
-	 */
-	const ALL = [
-		self::SSL,
-	];
+    /**
+     * Collection of all capabilities supported in Requests.
+     *
+     * Note: this does not automatically mean that the capability will be supported for your chosen transport!
+     *
+     * @var array<string>
+     */
+    public const ALL = [
+        self::SSL,
+    ];
 }
