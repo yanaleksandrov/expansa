@@ -3,16 +3,14 @@
 namespace Expansa\Http;
 
 use Expansa\Http\Cookie\Jar;
-use Expansa\Http\Exception;
 use Expansa\Http\Exception\Http;
 use Expansa\Http\Response\Headers;
 
 /**
  * HTTP response class
- *
  * Contains a response from \Expansa\Http\Requests::request()
  *
- * @package Requests
+ * @package Expansa\Http
  */
 class Response
 {
@@ -103,17 +101,15 @@ class Response
     public function is_redirect(): bool
     {
         $code = $this->status_code;
-        return is_int($code)
-            && (in_array($code, [300, 301, 302, 303, 307], true)
-                || ($code > 307 && $code < 400));
+        return is_int($code) && (in_array($code, [300, 301, 302, 303, 307], true) || ($code > 307 && $code < 400));
     }
 
     /**
      * Throws an exception if the request was not successful
      *
-     * @param bool $allow_redirects Set to false to throw on a 3xx as well
+     * @param bool $allow_redirects Set false to throw on a 3xx as well
      *
-     * @throws \Expansa\Http\Exception If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
+     * @throws Exception If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
      * @throws \Expansa\Http\Exception\Http On non-successful status code. Exception class corresponds to "Status" + code (e.g. {@see \Expansa\Http\Exception\Http\Status404})
      */
     public function throw_for_status(bool $allow_redirects = true): void
@@ -148,7 +144,7 @@ class Response
      *
      * @return array
      *
-     * @throws \Expansa\Http\Exception If `$this->body` is not valid json.
+     * @throws Exception If `$this->body` is not valid json.
      */
     public function decode_body(bool|null $associative = true, int $depth = 512, int $options = 0): array
     {

@@ -11,30 +11,23 @@ use Expansa\Http\Utility\InputValidator;
  *
  * Collection of utilities for working with and verifying SSL certificates.
  *
- * @package Requests\Utilities
+ * @package Expansa\Http
  */
 final class Ssl
 {
     /**
      * Verify the certificate against common name and subject alternative names
-     *
      * Unfortunately, PHP doesn't check the certificate against the alternative
      * names, leading things like 'https://www.github.com/' to be invalid.
      *
-     * @link https://tools.ietf.org/html/rfc2818#section-3.1 RFC2818, Section 3.1
-     *
-     * @param string|Stringable $host Host name to verify against
-     * @param array              $cert Certificate data from openssl_x509_parse()
+     * @param string|Stringable $host Host name to verify against.
+     * @param array             $cert Certificate data from openssl_x509_parse().
      * @return bool
-     * @throws InvalidArgument When the passed $host argument is not a string or a stringable object.
      * @throws InvalidArgument When the passed $cert argument is not an array or array accessible.
+     * @link https://tools.ietf.org/html/rfc2818#section-3.1 RFC2818, Section 3.1
      */
     public static function verify_certificate(string|Stringable $host, array $cert): bool
     {
-        if (InputValidator::is_string_or_stringable($host) === false) {
-            throw InvalidArgument::create(1, '$host', 'string|Stringable', gettype($host));
-        }
-
         if (InputValidator::has_array_access($cert) === false) {
             throw InvalidArgument::create(2, '$cert', 'array|ArrayAccess', gettype($cert));
         }
@@ -81,8 +74,7 @@ final class Ssl
      *
      * Verifies a dNSName for HTTPS usage, (almost) as per Firefox's rules:
      * - Wildcards can only occur in a name with more than 3 components
-     * - Wildcards can only occur as the last character in the first
-     *   component
+     * - Wildcards can only occur as the last character in the first component
      * - Wildcards may be preceded by additional characters
      *
      * We modify these rules to be a bit stricter and only allow the wildcard
@@ -91,14 +83,9 @@ final class Ssl
      *
      * @param string|Stringable $reference Reference dNSName
      * @return bool Is the name valid?
-     * @throws InvalidArgument When the passed argument is not a string or a stringable object.
      */
-    public static function verify_reference_name($reference): bool
+    public static function verify_reference_name(string|Stringable $reference): bool
     {
-        if (InputValidator::is_string_or_stringable($reference) === false) {
-            throw InvalidArgument::create(1, '$reference', 'string|Stringable', gettype($reference));
-        }
-
         if ($reference === '') {
             return false;
         }
@@ -146,14 +133,9 @@ final class Ssl
      * @param string|Stringable $host      Requested host
      * @param string|Stringable $reference dNSName to match against
      * @return bool Does the domain match?
-     * @throws InvalidArgument When either of the passed arguments is not a string or a stringable object.
      */
-    public static function match_domain($host, $reference): bool
+    public static function match_domain(string|Stringable $host, string|Stringable $reference): bool
     {
-        if (InputValidator::is_string_or_stringable($host) === false) {
-            throw InvalidArgument::create(1, '$host', 'string|Stringable', gettype($host));
-        }
-
         // Check if the reference is blocklisted first
         if (self::verify_reference_name($reference) !== true) {
             return false;

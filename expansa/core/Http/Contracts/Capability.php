@@ -4,11 +4,9 @@ namespace Expansa\Http\Contracts;
 
 /**
  * Capability interface declaring the known capabilities.
- *
  * This is used as the authoritative source for which capabilities can be queried.
  *
- * @package Requests\Utilities
- * @since   2.0.0
+ * @package Expansa\Http
  */
 interface Capability
 {

@@ -7,68 +7,41 @@ use Expansa\Http\Exception\Transport;
 /**
  * CURL Transport Exception.
  *
- * @package Requests\Exceptions
+ * @package Expansa\Http
  */
-final class Curl extends Transport {
+final class Curl extends Transport
+{
+    public const EASY  = 'cURLEasy';
 
-	const EASY  = 'cURLEasy';
-	const MULTI = 'cURLMulti';
-	const SHARE = 'cURLShare';
+    public const MULTI = 'cURLMulti';
 
-	/**
-	 * cURL error code
-	 *
-	 * @var int
-	 */
-	protected $code = -1;
+    public const SHARE = 'cURLShare';
 
-	/**
-	 * Which type of cURL error
-	 *
-	 * EASY|MULTI|SHARE
-	 *
-	 * @var string
-	 */
-	protected string $type = 'Unknown';
+    /**
+     * Create a new exception.
+     *
+     * @param string $reason Exception message.
+     * @param string $type   Exception type of cURL error. EASY|MULTI|SHARE
+     * @param mixed  $data   Associated data, if applicable.
+     * @param int    $code   Exception numerical code, if applicable.
+     */
+    public function __construct(
+        protected string $reason = 'Unknown',
+        protected string $type = 'Unknown',
+        mixed $data = null,
+        protected $code = -1
+    )
+    {
+        parent::__construct(sprintf('%d %s', $this->code, $this->reason), $this->type, $data, $this->code);
+    }
 
-	/**
-	 * Clear text error message
-	 *
-	 * @var string
-	 */
-	protected $reason = 'Unknown';
-
-	/**
-	 * Create a new exception.
-	 *
-	 * @param string $message Exception message.
-	 * @param string $type    Exception type.
-	 * @param mixed  $data    Associated data, if applicable.
-	 * @param int    $code    Exception numerical code, if applicable.
-	 */
-	public function __construct($message, $type, $data = null, $code = 0) {
-		if ($type !== null) {
-			$this->type = $type;
-		}
-
-		if ($code !== null) {
-			$this->code = (int) $code;
-		}
-
-		if ($message !== null) {
-			$this->reason = $message;
-		}
-
-		$message = sprintf('%d %s', $this->code, $this->reason);
-		parent::__construct($message, $this->type, $data, $this->code);
-	}
-
-	/**
-	 * Get the error message.
-	 *
-	 * @return string
-	 */
-	public function getReason() {
-		return $this->reason;
-	}
+    /**
+     * Get the error message.
+     *
+     * @return string
+     */
+    public function getReason(): string
+    {
+        return $this->reason;
+    }
 }

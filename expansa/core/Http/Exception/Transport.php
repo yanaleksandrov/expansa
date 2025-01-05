@@ -7,6 +7,6 @@ use Expansa\Http\Exception;
 /**
  * Transport Exception
  *
- * @package Requests\Exceptions
+ * @package Expansa\Http
  */
 class Transport extends Exception {}

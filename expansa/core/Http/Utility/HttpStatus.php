@@ -6,11 +6,9 @@ use Expansa\Http\Exception\InvalidArgument;
 
 /**
  * Helper class for dealing with HTTP status codes.
- *
  * The codes are synced with the mdn web docs at https://developer.mozilla.org/en-US/docs/Web/HTTP/Status.
  *
- * @package Requests\Utilities
- * @since   2.1.0
+ * @package Expansa\Http
  */
 final class HttpStatus
 {
@@ -57,8 +55,6 @@ final class HttpStatus
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/103
      */
     public const TEXT_103 = 'Early Hints';
-
-    // Successful responses (200 - 299)
 
     /**
      * HTTP response code 200 - OK.
@@ -726,13 +722,12 @@ final class HttpStatus
      */
     public const TEXT_511 = 'Network Authentication Required';
 
-
     /**
      * Map of status codes to their text.
      *
      * @var array<string>
      */
-    const MAP = [
+    public const MAP = [
         100 => self::TEXT_100,
         101 => self::TEXT_101,
         102 => self::TEXT_102,
@@ -801,9 +796,9 @@ final class HttpStatus
      *
      * @param int|string $code Status code.
      * @return string Status message.
-     * @throws \Expansa\Http\Exception\InvalidArgument When the passed $code argument is not a valid status code.
+     * @throws InvalidArgument When the passed $code argument is not a valid status code.
      */
-    public static function get_text($code)
+    public static function get_text(int|string $code): string
     {
         if (self::is_valid_code($code) === false) {
             // When the type is correct, add the value to the error message to help debugging.
@@ -821,12 +816,8 @@ final class HttpStatus
      * @param int|string $code Status code to check.
      * @return bool Whether the status code is valid.
      */
-    public static function is_valid_code($code)
+    public static function is_valid_code(int|string $code): bool
     {
-        if (!is_int($code) && !is_string($code)) {
-            return false;
-        }
-
-        return array_key_exists($code, self::MAP);
+        return isset(self::MAP[$code]);
     }
 }

@@ -7,7 +7,7 @@ use Exception as PHPException;
 /**
  * Exception for HTTP requests
  *
- * @package Requests\Exceptions
+ * @package Expansa\Http
  */
 class Exception extends PHPException
 {
@@ -30,7 +30,7 @@ class Exception extends PHPException
     }
 
     /**
-     * Like {@see \Exception::getCode()}, but a string code.
+     * Like {@see Exception::getCode()}, but a string code.
      *
      * @return string
      */

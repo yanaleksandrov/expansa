@@ -5,7 +5,7 @@ namespace Expansa\Http\Contracts;
 /**
  * Event dispatcher
  *
- * @package Requests\EventDispatcher
+ * @package Expansa\Http
  */
 interface HookManager
 {

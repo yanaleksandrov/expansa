@@ -8,12 +8,9 @@ use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Hooks;
 
 /**
- * Basic Authentication provider
+ * Provides a handler for Basic HTTP authentication via the Authorization header.
  *
- * Provides a handler for Basic HTTP authentication via the Authorization
- * header.
- *
- * @package Requests\Authentication
+ * @package Expansa\Http
  */
 class Basic implements Auth
 {
