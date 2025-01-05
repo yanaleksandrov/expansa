@@ -244,14 +244,14 @@ class Requests
      *
      * @param array<string, bool> $capabilities Optional. Associative array of capabilities to test against, i.e. `['<capability>' => true]`.
      * @return Transport
-     * @throws Exception If no valid transport is found (`notransport`).
+     * @throws HttpException If no valid transport is found (`notransport`).
      */
     protected static function get_transport(array $capabilities = []): Transport
     {
         $class = self::get_transport_class($capabilities);
 
         if ($class === '') {
-            throw new Exception('No working transports found', 'notransport', self::$transports);
+            throw new HttpException('No working transports found', 'notransport', self::$transports);
         }
 
         return new $class();
@@ -279,7 +279,7 @@ class Requests
      * @param array  $headers
      * @param array  $options
      * @return Response
-     * @throws Exception
+     * @throws HttpException
      */
     public static function get(string $url, array $headers = [], array $options = []): Response
     {
@@ -289,7 +289,7 @@ class Requests
     /**
      * Send a HEAD request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public static function head($url, $headers = [], $options = []): Response
     {
@@ -299,7 +299,7 @@ class Requests
     /**
      * Send a DELETE request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public static function delete($url, $headers = [], $options = []): Response
     {
@@ -309,7 +309,7 @@ class Requests
     /**
      * Send a TRACE request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public static function trace($url, $headers = [], $options = []): Response
     {
@@ -324,7 +324,7 @@ class Requests
      * @param array  $data
      * @param array  $options
      * @return Response
-     * @throws Exception
+     * @throws HttpException
      */
     public static function post(string $url, array $headers = [], array $data = [], array $options = []): Response
     {
@@ -334,7 +334,7 @@ class Requests
     /**
      * Send a PUT request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public static function put($url, $headers = [], $data = [], $options = []): Response
     {
@@ -344,7 +344,7 @@ class Requests
     /**
      * Send an OPTIONS request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public static function options($url, $headers = [], $data = [], $options = []): Response
     {
@@ -357,7 +357,7 @@ class Requests
      * `$headers` is required, as the specification recommends that should send an ETag
      *
      * @link https://tools.ietf.org/html/rfc5789
-     * @throws Exception
+     * @throws HttpException
      */
     public static function patch($url, $headers, $data = [], $options = []): Response
     {
@@ -366,12 +366,9 @@ class Requests
 
     /**
      * Main interface for HTTP requests
-     *
      * This method initiates a request and sends it via transport before parsing.
-     *
      * The `$options` parameter takes an associative array with the following
      * options:
-     *
      * - `timeout`: How long should we wait for a response?
      *    Note: for cURL, a minimum of 1 second applies, as DNS resolution
      *    operates at second-resolution only.
@@ -420,8 +417,7 @@ class Requests
      * @param string             $type    HTTP request type (use Requests constants)
      * @param array              $options Options for the request (see description for more information)
      * @return Response
-     *
-     * @throws Exception On invalid URLs (`nonhttp`)
+     * @throws HttpException On invalid URLs (`nonhttp`)
      */
     public static function request(
         string|Stringable $url,
@@ -613,7 +609,6 @@ class Requests
 
     /**
      * Set the default values
-     *
      * The $options parameter is updated with the results.
      *
      * @param string     $url     URL to request
@@ -622,13 +617,12 @@ class Requests
      * @param string     $type    HTTP request type
      * @param array      $options Options for the request
      * @return void
-     *
-     * @throws Exception When the $url is not an http(s) URL.
+     * @throws HttpException When the $url is not an http(s) URL.
      */
     protected static function set_defaults(&$url, &$headers, &$data, &$type, &$options)
     {
         if (!preg_match('/^http(s)?:\/\//i', $url, $matches)) {
-            throw new Exception('Only HTTP(S) requests are handled.', 'nonhttp', $url);
+            throw new HttpException('Only HTTP(S) requests are handled.', 'nonhttp', $url);
         }
 
         if (empty($options['hooks'])) {
@@ -688,10 +682,9 @@ class Requests
      * @param array  $req_data    Original $data array passed to {@link request()}, in case we need to follow redirects
      * @param array  $options     Original $options array passed to {@link request()}, in case we need to follow redirects
      * @return Response
-     *
-     * @throws Exception On missing head/body separator (`requests.no_crlf_separator`)
-     * @throws Exception On missing head/body separator (`noversion`)
-     * @throws Exception On missing head/body separator (`toomanyredirects`)
+     * @throws HttpException On missing head/body separator (`requests.no_crlf_separator`)
+     * @throws HttpException On missing head/body separator (`noversion`)
+     * @throws HttpException On missing head/body separator (`toomanyredirects`)
      */
     protected static function parse_response(
         string $headers,
@@ -714,7 +707,7 @@ class Requests
             $pos = strpos($headers, "\r\n\r\n");
             if ($pos === false) {
                 // Crap!
-                throw new Exception('Missing header/body separator', 'requests.no_crlf_separator');
+                throw new HttpException('Missing header/body separator', 'requests.no_crlf_separator');
             }
 
             $headers = substr($return->raw, 0, $pos);
@@ -732,7 +725,7 @@ class Requests
         $headers = explode("\n", $headers);
         preg_match('#^HTTP/(1\.\d)[ \t]+(\d+)#i', array_shift($headers), $matches);
         if (empty($matches)) {
-            throw new Exception('Response could not be parsed', 'noversion', $headers);
+            throw new HttpException('Response could not be parsed', 'noversion', $headers);
         }
 
         $return->protocol_version = (float) $matches[1];
@@ -790,7 +783,7 @@ class Requests
                 $redirected->history[] = $return;
                 return $redirected;
             } elseif ($options['redirected'] >= $options['redirects']) {
-                throw new Exception('Too many redirects', 'toomanyredirects', $return);
+                throw new HttpException('Too many redirects', 'toomanyredirects', $return);
             }
         }
 
@@ -817,7 +810,7 @@ class Requests
             $data     = $request['data'];
             $options  = $request['options'];
             $response = self::parse_response($response, $url, $headers, $data, $options);
-        } catch (Exception $e) {
+        } catch (HttpException $e) {
             $response = $e;
         }
     }

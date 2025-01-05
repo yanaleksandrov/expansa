@@ -50,7 +50,7 @@ class IdnaEncoder
      *
      * @param Stringable|string $hostname Hostname
      * @return string Punycode-encoded hostname
-     * @throws Exception
+     * @throws HttpException
      */
     public static function encode(Stringable|string $hostname): string
     {
@@ -66,11 +66,10 @@ class IdnaEncoder
      *
      * @param string $text ASCII or UTF-8 string (max length 64 characters)
      * @return string ASCII string
-     *
-     * @throws Exception Provided string longer than 64 ASCII characters (`idna.provided_too_long`)
-     * @throws Exception Prepared string longer than 64 ASCII characters (`idna.prepared_too_long`)
-     * @throws Exception Provided string already begins with xn-- (`idna.provided_is_prefixed`)
-     * @throws Exception Encoded string longer than 64 ASCII characters (`idna.encoded_too_long`)
+     * @throws HttpException Provided string longer than 64 ASCII characters (`idna.provided_too_long`)
+     * @throws HttpException Prepared string longer than 64 ASCII characters (`idna.prepared_too_long`)
+     * @throws HttpException Provided string already begins with xn-- (`idna.provided_is_prefixed`)
+     * @throws HttpException Encoded string longer than 64 ASCII characters (`idna.encoded_too_long`)
      */
     public static function to_ascii(string $text): string
     {
@@ -81,7 +80,7 @@ class IdnaEncoder
                 return $text;
             }
 
-            throw new Exception('Provided string is too long', 'idna.provided_too_long', $text);
+            throw new HttpException('Provided string is too long', 'idna.provided_too_long', $text);
         }
 
         // Step 2: nameprep
@@ -100,13 +99,13 @@ class IdnaEncoder
                 return $text;
             }
 
-            throw new Exception('Prepared string is too long', 'idna.prepared_too_long', $text);
+            throw new HttpException('Prepared string is too long', 'idna.prepared_too_long', $text);
             // @codeCoverageIgnoreEnd
         }
 
         // Step 5: Check ACE prefix
         if (strpos($text, self::ACE_PREFIX) === 0) {
-            throw new Exception('Provided string begins with ACE prefix', 'idna.provided_is_prefixed', $text);
+            throw new HttpException('Provided string begins with ACE prefix', 'idna.provided_is_prefixed', $text);
         }
 
         // Step 6: Encode with Punycode
@@ -120,7 +119,7 @@ class IdnaEncoder
             return $text;
         }
 
-        throw new Exception('Encoded string is too long', 'idna.encoded_too_long', $text);
+        throw new HttpException('Encoded string is too long', 'idna.encoded_too_long', $text);
     }
 
     /**
@@ -148,13 +147,11 @@ class IdnaEncoder
 
     /**
      * Convert a UTF-8 string to a UCS-4 codepoint array
-     *
      * Based on \Expansa\Http\Iri::replace_invalid_with_pct_encoding()
      *
      * @param string $input Text to convert.
      * @return array Unicode code points
-     *
-     * @throws Exception Invalid UTF-8 codepoint (`idna.invalidcodepoint`)
+     * @throws HttpException Invalid UTF-8 codepoint (`idna.invalidcodepoint`)
      */
     protected static function utf8_to_codepoints(string $input): array
     {
@@ -184,12 +181,12 @@ class IdnaEncoder
                 $length    = 4;
                 $remaining = 3;
             } else {                                    // Invalid byte:
-                throw new Exception('Invalid Unicode codepoint', 'idna.invalidcodepoint', $value);
+                throw new HttpException('Invalid Unicode codepoint', 'idna.invalidcodepoint', $value);
             }
 
             if ($remaining > 0) {
                 if ($position + $length > $strlen) {
-                    throw new Exception('Invalid Unicode codepoint', 'idna.invalidcodepoint', $character);
+                    throw new HttpException('Invalid Unicode codepoint', 'idna.invalidcodepoint', $character);
                 }
 
                 for ($position++; $remaining > 0; $position++) {
@@ -197,7 +194,7 @@ class IdnaEncoder
 
                     // If it is invalid, count the sequence as invalid and reprocess the current byte:
                     if (($value & 0xC0) !== 0x80) {
-                        throw new Exception('Invalid Unicode codepoint', 'idna.invalidcodepoint', $character);
+                        throw new HttpException('Invalid Unicode codepoint', 'idna.invalidcodepoint', $character);
                     }
 
                     --$remaining;
@@ -224,7 +221,7 @@ class IdnaEncoder
                     || $character > 0xEFFFD
                 )
             ) {
-                throw new Exception('Invalid Unicode codepoint', 'idna.invalidcodepoint', $character);
+                throw new HttpException('Invalid Unicode codepoint', 'idna.invalidcodepoint', $character);
             }
 
             $codepoints[] = $character;
@@ -236,12 +233,10 @@ class IdnaEncoder
     /**
      * RFC3492-compliant encoder
      *
-     * @internal Pseudocode from Section 6.3 is commented with "#" next to relevant code
-     *
      * @param string $input UTF-8 encoded string to encode
      * @return string Punycode-encoded string
-     *
-     * @throws Exception On character outside of the domain (never happens with Punycode) (`idna.character_outside_domain`)
+     * @throws HttpException On character outside of the domain (never happens with Punycode) (`idna.character_outside_domain`)
+     *@internal Pseudocode from Section 6.3 is commented with "#" next to relevant code
      */
     public static function punycode_encode(string $input): string
     {
@@ -270,7 +265,7 @@ class IdnaEncoder
                 // This never occurs for Punycode, so ignore in coverage
                 // @codeCoverageIgnoreStart
             } elseif ($char < $n) {
-                throw new Exception('Invalid character', 'idna.character_outside_domain', $char);
+                throw new HttpException('Invalid character', 'idna.character_outside_domain', $char);
                 // @codeCoverageIgnoreEnd
             } else {
                 $extended[$char] = true;
@@ -353,15 +348,14 @@ class IdnaEncoder
      *
      * @param int $digit Digit in the range 0-35.
      * @return string Single character corresponding to digit
-     *
-     * @throws Exception On invalid digit (`idna.invalid_digit`)
+     * @throws HttpException On invalid digit (`idna.invalid_digit`)
      */
     protected static function digit_to_char(int $digit): string
     {
         // @codeCoverageIgnoreStart
         // As far as I know, this never happens, but still good to be sure.
         if ($digit < 0 || $digit > 35) {
-            throw new Exception(sprintf('Invalid digit %d', $digit), 'idna.invalid_digit', $digit);
+            throw new HttpException(sprintf('Invalid digit %d', $digit), 'idna.invalid_digit', $digit);
         }
 
         // @codeCoverageIgnoreEnd

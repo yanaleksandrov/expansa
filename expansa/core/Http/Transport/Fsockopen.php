@@ -4,7 +4,7 @@ namespace Expansa\Http\Transport;
 
 use Stringable;
 use Expansa\Http\Contracts\Capability;
-use Expansa\Http\Exception;
+use Expansa\Http\HttpException;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Port;
 use Expansa\Http\Requests;
@@ -63,10 +63,9 @@ final class Fsockopen implements Transport
      * @param string|array       $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
      * @param array              $options Request options, see {@see \Expansa\Http\Requests::response()} for documentation
      * @return string Raw HTTP result
-     *
      * @throws InvalidArgument When the passed $data parameter is not an array or string.
-     * @throws \Expansa\Http\Exception       On failure to connect to socket (`fsockopenerror`)
-     * @throws \Expansa\Http\Exception       On socket timeout (`timeout`)
+     * @throws \Expansa\Http\HttpException       On failure to connect to socket (`fsockopenerror`)
+     * @throws \Expansa\Http\HttpException       On socket timeout (`timeout`)
      */
     public function request(
         string|Stringable $url,
@@ -87,7 +86,7 @@ final class Fsockopen implements Transport
 
         $url_parts = parse_url($url);
         if (empty($url_parts)) {
-            throw new Exception('Invalid URL.', 'invalidurl', $url);
+            throw new HttpException('Invalid URL.', 'invalidurl', $url);
         }
 
         $host                     = $url_parts['host'];
@@ -166,16 +165,16 @@ final class Fsockopen implements Transport
         restore_error_handler();
 
         if ($verifyname && !$this->verify_certificate_from_context($host, $context)) {
-            throw new Exception('SSL certificate did not match the requested domain name', 'ssl.no_match');
+            throw new HttpException('SSL certificate did not match the requested domain name', 'ssl.no_match');
         }
 
         if (!$socket) {
             if ($errno === 0) {
                 // Connection issue
-                throw new Exception(rtrim($this->connect_error), 'fsockopen.connect_error');
+                throw new HttpException(rtrim($this->connect_error), 'fsockopen.connect_error');
             }
 
-            throw new Exception($errstr, 'fsockopenerror', null, $errno);
+            throw new HttpException($errstr, 'fsockopenerror', null, $errno);
         }
 
         $data_format = $options['data_format'];
@@ -288,14 +287,14 @@ final class Fsockopen implements Transport
                     $error = ['message' => 'Failed to open stream'];
                 }
 
-                throw new Exception($error['message'], 'fopen');
+                throw new HttpException($error['message'], 'fopen');
             }
         }
 
         while (!feof($socket)) {
             $this->info = stream_get_meta_data($socket);
             if ($this->info['timed_out']) {
-                throw new Exception('fsocket timed out', 'timeout');
+                throw new HttpException('fsocket timed out', 'timeout');
             }
 
             $block = fread($socket, Requests::BUFFER_SIZE);
@@ -375,7 +374,7 @@ final class Fsockopen implements Transport
                 $responses[$id] = $handler->request($request['url'], $request['headers'], $request['data'], $request['options']);
 
                 $request['options']['hooks']->dispatch('transport.internal.parse_response', [&$responses[$id], $request]);
-            } catch (Exception $e) {
+            } catch (HttpException $e) {
                 $responses[$id] = $e;
             }
 
@@ -459,19 +458,16 @@ final class Fsockopen implements Transport
 
     /**
      * Verify the certificate against common name and subject alternative names
-     *
      * Unfortunately, PHP doesn't check the certificate against the alternative
      * names, leading things like 'https://www.github.com/' to be invalid.
      * Instead
      *
      * @link https://tools.ietf.org/html/rfc2818#section-3.1 RFC2818, Section 3.1
-     *
      * @param string   $host    Host name to verify against
      * @param resource $context Stream context
      * @return bool
-     *
-     * @throws \Expansa\Http\Exception On failure to connect via TLS (`fsockopen.ssl.connect_error`)
-     * @throws \Expansa\Http\Exception On not obtaining a match for the host (`fsockopen.ssl.no_match`)
+     * @throws \Expansa\Http\HttpException On failure to connect via TLS (`fsockopen.ssl.connect_error`)
+     * @throws \Expansa\Http\HttpException On not obtaining a match for the host (`fsockopen.ssl.no_match`)
      */
     public function verify_certificate_from_context(string $host, $context)
     {
@@ -480,7 +476,7 @@ final class Fsockopen implements Transport
         // If we don't have SSL options, then we couldn't make the connection at
         // all
         if (empty($meta) || empty($meta['ssl']) || empty($meta['ssl']['peer_certificate'])) {
-            throw new Exception(rtrim($this->connect_error), 'ssl.connect_error');
+            throw new HttpException(rtrim($this->connect_error), 'ssl.connect_error');
         }
 
         $cert = openssl_x509_parse($meta['ssl']['peer_certificate']);

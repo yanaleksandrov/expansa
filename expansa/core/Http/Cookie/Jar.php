@@ -7,7 +7,7 @@ use ArrayIterator;
 use IteratorAggregate;
 use ReturnTypeWillChange;
 use Expansa\Http\Cookie;
-use Expansa\Http\Exception;
+use Expansa\Http\HttpException;
 use Expansa\Http\Contracts\HookManager;
 use Expansa\Http\Iri;
 use Expansa\Http\Response;
@@ -76,14 +76,13 @@ class Jar implements ArrayAccess, IteratorAggregate
      *
      * @param string $offset Item name
      * @param string $value  Item value
-     *
-     * @throws Exception On attempting to use dictionary as list (`invalidset`).
+     * @throws HttpException On attempting to use dictionary as list (`invalidset`).
      */
     #[ReturnTypeWillChange]
     public function offsetSet($offset, $value): void
     {
         if ($offset === null) {
-            throw new Exception('Object is a dictionary, not a list', 'invalidset');
+            throw new HttpException('Object is a dictionary, not a list', 'invalidset');
         }
 
         $this->cookies[$offset] = $value;
@@ -131,7 +130,7 @@ class Jar implements ArrayAccess, IteratorAggregate
      * @param array  $data
      * @param string $type
      * @param array  $options
-     * @throws Exception
+     * @throws HttpException
      */
     public function before_request(string $url, array &$headers, array &$data, string &$type, array &$options): void
     {
@@ -162,7 +161,7 @@ class Jar implements ArrayAccess, IteratorAggregate
      * Parse all cookies from a response and attach them to the response
      *
      * @param Response $response Response as received.
-     * @throws Exception
+     * @throws HttpException
      */
     public function before_redirect_check(Response $response): void
     {

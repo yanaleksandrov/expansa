@@ -2,7 +2,7 @@
 
 namespace Expansa\Http\Exception;
 
-use Expansa\Http\Exception;
+use Expansa\Http\HttpException;
 
 /**
  * Exception for when an incorrect number of arguments are passed to a method.
@@ -16,7 +16,7 @@ use Expansa\Http\Exception;
  *
  * @package Requests\Exceptions
  */
-final class ArgumentCount extends Exception
+final class ArgumentCount extends HttpException
 {
     /**
      * Create a new argument count exception with a standardized text.

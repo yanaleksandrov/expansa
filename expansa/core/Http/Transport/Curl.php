@@ -8,7 +8,7 @@ use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use Expansa\Http\Hooks;
 use Expansa\Http\Contracts\Capability;
-use Expansa\Http\Exception;
+use Expansa\Http\HttpException;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Exception\Transport\Curl as CurlException;
 use Expansa\Http\Requests;
@@ -140,9 +140,8 @@ final class Curl implements Transport
      * @param string|array      $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
      * @param array             $options Request options, see {@see \Expansa\Http\Requests::response()} for documentation
      * @return string Raw HTTP result
-     *
      * @throws InvalidArgument When the passed $data parameter is not an array or string.
-     * @throws \Expansa\Http\Exception       On a cURL error (`curlerror`)
+     * @throws \Expansa\Http\HttpException       On a cURL error (`curlerror`)
      */
     public function request(string|Stringable $url, array $headers = [], string|array $data = [], array $options = []): string
     {
@@ -169,7 +168,7 @@ final class Curl implements Transport
                     $error = ['message' => 'Failed to open stream'];
                 }
 
-                throw new Exception($error['message'], 'fopen');
+                throw new HttpException($error['message'], 'fopen');
             }
         }
 
@@ -467,7 +466,7 @@ final class Curl implements Transport
      * @param string $response Response data from the body
      * @param array  $options  Request options
      * @return string|false HTTP response data including headers. False if non-blocking.
-     * @throws \Expansa\Http\Exception If the request resulted in a cURL error.
+     * @throws \Expansa\Http\HttpException If the request resulted in a cURL error.
      */
     public function process_response(string $response, array $options): false|string
     {
@@ -501,7 +500,7 @@ final class Curl implements Transport
                 curl_errno($this->handle),
                 curl_error($this->handle)
             );
-            throw new Exception($error, 'curlerror', $this->handle);
+            throw new HttpException($error, 'curlerror', $this->handle);
         }
 
         $this->info = curl_getinfo($this->handle);

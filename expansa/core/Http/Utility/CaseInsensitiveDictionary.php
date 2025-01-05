@@ -6,7 +6,7 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use ReturnTypeWillChange;
-use Expansa\Http\Exception;
+use Expansa\Http\HttpException;
 
 /**
  * Case-insensitive dictionary, suitable for HTTP headers
@@ -19,7 +19,7 @@ class CaseInsensitiveDictionary implements ArrayAccess, IteratorAggregate
      * Creates a case-insensitive dictionary.
      *
      * @param array $data Dictionary/map to convert to case-insensitive
-     * @throws Exception
+     * @throws HttpException
      */
     public function __construct(protected array $data = [])
     {
@@ -69,14 +69,13 @@ class CaseInsensitiveDictionary implements ArrayAccess, IteratorAggregate
      *
      * @param string $offset Item name
      * @param string $value  Item value
-     *
-     * @throws Exception On attempting to use dictionary as list (`invalidset`)
+     * @throws HttpException On attempting to use dictionary as list (`invalidset`)
      */
     #[ReturnTypeWillChange]
     public function offsetSet($offset, $value): void
     {
         if ($offset === null) {
-            throw new Exception('Object is a dictionary, not a list', 'invalidset');
+            throw new HttpException('Object is a dictionary, not a list', 'invalidset');
         }
 
         if (is_string($offset)) {

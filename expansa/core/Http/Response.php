@@ -108,15 +108,14 @@ class Response
      * Throws an exception if the request was not successful
      *
      * @param bool $allow_redirects Set false to throw on a 3xx as well
-     *
-     * @throws Exception If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
+     * @throws HttpException If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
      * @throws \Expansa\Http\Exception\Http On non-successful status code. Exception class corresponds to "Status" + code (e.g. {@see \Expansa\Http\Exception\Http\Status404})
      */
     public function throw_for_status(bool $allow_redirects = true): void
     {
         if ($this->is_redirect()) {
             if ($allow_redirects !== true) {
-                throw new Exception('Redirection not allowed', 'response.no_redirects', $this);
+                throw new HttpException('Redirection not allowed', 'response.no_redirects', $this);
             }
         } elseif (!$this->success) {
             $exception = Http::get_class($this->status_code);
@@ -126,11 +125,9 @@ class Response
 
     /**
      * JSON decode the response body.
-     *
      * The method parameters are the same as those for the PHP native `json_decode()` function.
      *
      * @link https://php.net/json-decode
-     *
      * @param bool|null $associative Optional. When `true`, JSON objects will be returned as associative arrays;
      *                               When `false`, JSON objects will be returned as objects.
      *                               When `null`, JSON objects will be returned as associative arrays
@@ -141,10 +138,8 @@ class Response
      * @param int       $options     Optional. Bitmask of JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE,
      *                               JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR.
      *                               Defaults to `0` (no options set).
-     *
      * @return array
-     *
-     * @throws Exception If `$this->body` is not valid json.
+     * @throws HttpException If `$this->body` is not valid json.
      */
     public function decode_body(bool|null $associative = true, int $depth = 512, int $options = 0): array
     {
@@ -152,7 +147,7 @@ class Response
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $last_error = json_last_error_msg();
-            throw new Exception('Unable to parse JSON data: ' . $last_error, 'response.invalid', $this);
+            throw new HttpException('Unable to parse JSON data: ' . $last_error, 'response.invalid', $this);
         }
 
         return $data;

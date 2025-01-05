@@ -256,7 +256,7 @@ class Cookie
      * @param string          $name  Attribute name
      * @param string|int|bool $value Attribute value (string/integer value, or true if empty/flag)
      * @return mixed Value if available, or null if the attribute value is invalid (and should be skipped)
-     * @throws Exception
+     * @throws HttpException
      */
     protected function normalize_attribute(string $name, string|int|bool $value): mixed
     {

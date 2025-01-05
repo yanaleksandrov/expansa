@@ -3,7 +3,7 @@
 namespace Expansa\Http\Response;
 
 use ArrayIterator;
-use Expansa\Http\Exception;
+use Expansa\Http\HttpException;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Utility\CaseInsensitiveDictionary;
 use Expansa\Http\Utility\FilteredIterator;
@@ -45,13 +45,12 @@ class Headers extends CaseInsensitiveDictionary
      *
      * @param string $offset Item name
      * @param string $value  Item value
-     *
-     * @throws \Expansa\Http\Exception On attempting to use dictionary as list (`invalidset`)
+     * @throws \Expansa\Http\HttpException On attempting to use dictionary as list (`invalidset`)
      */
     public function offsetSet($offset, $value): void
     {
         if ($offset === null) {
-            throw new Exception('Object is a dictionary, not a list', 'invalidset');
+            throw new HttpException('Object is a dictionary, not a list', 'invalidset');
         }
 
         if (is_string($offset)) {

@@ -94,7 +94,7 @@ class Session
      * @param array  $headers
      * @param array  $options
      * @return Response
-     * @throws Exception
+     * @throws HttpException
      */
     public function get(string $url, array $headers = [], array $options = []): Response
     {
@@ -104,7 +104,7 @@ class Session
     /**
      * Send a HEAD request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public function head($url, $headers = [], $options = []): Response
     {
@@ -114,7 +114,7 @@ class Session
     /**
      * Send a DELETE request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public function delete($url, $headers = [], $options = []): Response
     {
@@ -129,7 +129,7 @@ class Session
      * @param array  $data
      * @param array  $options
      * @return Response
-     * @throws Exception
+     * @throws HttpException
      */
     public function post(string $url, array $headers = [], array $data = [], array $options = []): Response
     {
@@ -139,7 +139,7 @@ class Session
     /**
      * Send a PUT request
      *
-     * @throws Exception
+     * @throws HttpException
      */
     public function put($url, $headers = [], $data = [], $options = []): Response
     {
@@ -152,7 +152,7 @@ class Session
      * `$headers` is required, as the specification recommends that should send an ETag
      *
      * @link https://tools.ietf.org/html/rfc5789
-     * @throws Exception
+     * @throws HttpException
      */
     public function patch($url, $headers, $data = [], $options = []): Response
     {
@@ -169,7 +169,7 @@ class Session
      * @param string     $type    HTTP request type (use \Expansa\Http\Requests constants)
      * @param array      $options Options for the request (see {@see \Expansa\Http\Requests::request()})
      * @return Response
-     * @throws Exception On invalid URLs (`nonhttp`)
+     * @throws HttpException On invalid URLs (`nonhttp`)
      */
     public function request(
         string $url,

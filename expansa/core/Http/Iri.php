@@ -240,7 +240,7 @@ class Iri
      * Create a new IRI object, from a specified string
      *
      * @param string|Stringable|null $iri
-     * @throws Exception
+     * @throws HttpException
      */
     public function __construct(string|Stringable|null $iri = null)
     {
@@ -254,7 +254,7 @@ class Iri
      * @param Iri|string $base     (Absolute) Base IRI
      * @param Iri|string $relative Relative IRI
      * @return false|Iri
-     * @throws Exception
+     * @throws HttpException
      */
     public static function absolutize(Iri|string $base, Iri|string $relative): false|Iri
     {
@@ -319,14 +319,14 @@ class Iri
      *
      * @param string $iri
      * @return array
-     * @throws Exception
+     * @throws HttpException
      */
     protected function parse_iri(string $iri): array
     {
         $iri = trim($iri, "\x20\x09\x0A\x0C\x0D");
         $has_match = preg_match('/^((?P<scheme>[^:\/?#]+):)?(\/\/(?P<authority>[^\/?#]*))?(?P<path>[^?#]*)(\?(?P<query>[^#]*))?(#(?P<fragment>.*))?$/', $iri, $match);
         if (!$has_match) {
-            throw new Exception('Cannot parse supplied IRI', 'iri.cannot_parse', $iri);
+            throw new HttpException('Cannot parse supplied IRI', 'iri.cannot_parse', $iri);
         }
 
         if ($match[1] === '') {
@@ -706,7 +706,7 @@ class Iri
      *
      * @param null|string $iri
      * @return bool
-     * @throws Exception
+     * @throws HttpException
      */
     protected function set_iri(?string $iri): bool
     {

@@ -43,13 +43,13 @@ final class Port
      *
      * @param string $type Request type. The following requests types are supported: 'acap', 'dict', 'http' and 'https'.
      * @return int
-     * @throws Exception       When a non-supported port is requested ('portnotsupported').
+     * @throws HttpException       When a non-supported port is requested ('portnotsupported').
      */
     public static function get(string $type): int
     {
         $type = strtoupper($type);
         if (!defined("self::$type")) {
-            throw new Exception(sprintf('Invalid port type (%s) passed', $type), 'portnotsupported');
+            throw new HttpException(sprintf('Invalid port type (%s) passed', $type), 'portnotsupported');
         }
         return constant("self::$type");
     }
