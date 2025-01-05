@@ -149,7 +149,7 @@ final class Fsockopen implements Transport
 
         $remote_socket .= ':' . $url_parts['port'];
 
-		set_error_handler([$this, 'connect_error_handler'], E_WARNING | E_NOTICE);
+		set_error_handler([$this, 'connectErrorHandler'], E_WARNING | E_NOTICE);
 
         $options['hooks']->dispatch('fsockopen.remote_socket', [&$remote_socket]);
 
@@ -164,7 +164,7 @@ final class Fsockopen implements Transport
 
         restore_error_handler();
 
-        if ($verifyname && !$this->verify_certificate_from_context($host, $context)) {
+        if ($verifyname && !$this->verifyCertificateFromContext($host, $context)) {
             throw new HttpException('SSL certificate did not match the requested domain name', 'ssl.no_match');
         }
 
@@ -180,10 +180,10 @@ final class Fsockopen implements Transport
         $data_format = $options['data_format'];
 
         if ($data_format === 'query') {
-            $path = self::format_get($url_parts, $data);
+            $path = self::formatGet($url_parts, $data);
             $data = '';
         } else {
-            $path = self::format_get($url_parts, []);
+            $path = self::formatGet($url_parts, []);
         }
 
         $options['hooks']->dispatch('fsockopen.remote_host_path', [&$path, $url]);
@@ -226,9 +226,9 @@ final class Fsockopen implements Transport
             $out .= sprintf("User-Agent: %s\r\n", $options['useragent']);
         }
 
-        $accept_encoding = $this->accept_encoding();
-        if (!isset($case_insensitive_headers['Accept-Encoding']) && !empty($accept_encoding)) {
-            $out .= sprintf("Accept-Encoding: %s\r\n", $accept_encoding);
+        $acceptEncoding = $this->acceptEncoding();
+        if (!isset($case_insensitive_headers['Accept-Encoding']) && !empty($acceptEncoding)) {
+            $out .= sprintf("Accept-Encoding: %s\r\n", $acceptEncoding);
         }
 
         $headers = Requests::flatten($headers);
@@ -355,14 +355,14 @@ final class Fsockopen implements Transport
      * @return array Array of Response objects (may contain \Expansa\Http\Exception or string responses as well)
      * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
      */
-    public function request_multiple(array $requests, array $options): array
+    public function requestMultiple(array $requests, array $options): array
     {
         // If you're not requesting, we can't get any responses ¯\_(ツ)_/¯
         if (empty($requests)) {
             return [];
         }
 
-        if (InputValidator::has_array_access($requests) === false || is_iterable($requests) === false) {
+        if (InputValidator::hasArrayAccess($requests) === false || is_iterable($requests) === false) {
             throw InvalidArgument::create(1, '$requests', 'array|ArrayAccess&Traversable', gettype($requests));
         }
 
@@ -391,7 +391,7 @@ final class Fsockopen implements Transport
      *
      * @return string Accept-Encoding header value
      */
-    private static function accept_encoding(): string
+    private static function acceptEncoding(): string
     {
         $type = [];
         if (function_exists('gzinflate')) {
@@ -411,10 +411,10 @@ final class Fsockopen implements Transport
      * Format a URL given GET data
      *
      * @param array        $url_parts Array of URL parts as received from {@link https://www.php.net/parse_url}
-     * @param array|object $data      Data to build query using, see {@link https://www.php.net/http_build_query}
+     * @param object|array $data      Data to build query using, see {@link https://www.php.net/http_build_query}
      * @return string URL with data
      */
-    private static function format_get($url_parts, $data): string
+    private static function formatGet(array $url_parts, object|array $data): string
     {
         if (!empty($data)) {
             if (empty($url_parts['query'])) {
@@ -444,7 +444,7 @@ final class Fsockopen implements Transport
      * @param int    $errno  Error number (e.g. E_WARNING)
      * @param string $errstr Error message
      */
-    public function connect_error_handler(int $errno, string $errstr): bool
+    public function connectErrorHandler(int $errno, string $errstr): bool
     {
         // Double-check we can handle it
         if (($errno & E_WARNING) === 0 && ($errno & E_NOTICE) === 0) {
@@ -469,7 +469,7 @@ final class Fsockopen implements Transport
      * @throws HttpException On failure to connect via TLS (`fsockopen.ssl.connect_error`)
      * @throws HttpException On not obtaining a match for the host (`fsockopen.ssl.no_match`)
      */
-    public function verify_certificate_from_context(string $host, $context)
+    public function verifyCertificateFromContext(string $host, $context): bool
     {
         $meta = stream_context_get_options($context);
 
@@ -481,7 +481,7 @@ final class Fsockopen implements Transport
 
         $cert = openssl_x509_parse($meta['ssl']['peer_certificate']);
 
-        return Ssl::verify_certificate($host, $cert);
+        return Ssl::verifyCertificate($host, $cert);
     }
 
     /**

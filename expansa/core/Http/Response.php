@@ -98,7 +98,7 @@ class Response
      *
      * @return bool True if redirect (3xx status), false if not.
      */
-    public function is_redirect(): bool
+    public function isRedirect(): bool
     {
         $code = $this->status_code;
         return is_int($code) && (in_array($code, [300, 301, 302, 303, 307], true) || ($code > 307 && $code < 400));
@@ -111,14 +111,14 @@ class Response
      * @throws HttpException If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
      * @throws HttpStatuses On non-successful status code. Exception class corresponds to "Status" + code (e.g. {@see \Expansa\Http\Exception\Http\Status404})
      */
-    public function throw_for_status(bool $allow_redirects = true): void
+    public function throwForStatus(bool $allow_redirects = true): void
     {
-        if ($this->is_redirect()) {
+        if ($this->isRedirect()) {
             if ($allow_redirects !== true) {
                 throw new HttpException('Redirection not allowed', 'response.no_redirects', $this);
             }
         } elseif (!$this->success) {
-            $exception = HttpStatuses::get_class($this->status_code);
+            $exception = HttpStatuses::getClass($this->status_code);
             throw new $exception(null, $this);
         }
     }
@@ -141,7 +141,7 @@ class Response
      * @return array
      * @throws HttpException If `$this->body` is not valid json.
      */
-    public function decode_body(bool|null $associative = true, int $depth = 512, int $options = 0): array
+    public function decodeBody(bool|null $associative = true, int $depth = 512, int $options = 0): array
     {
         $data = json_decode($this->body, $associative, $depth, $options);
 

@@ -155,7 +155,7 @@ final class Curl implements Transport
 
         $this->hooks = $options['hooks'];
 
-        $this->setup_handle($url, $headers, $data, $options);
+        $this->setupHandle($url, $headers, $data, $options);
 
         $options['hooks']->dispatch('curl.before_send', [&$this->handle]);
 
@@ -218,7 +218,7 @@ final class Curl implements Transport
             $response = $this->response_data;
         }
 
-        $this->process_response($response, $options);
+        $this->processResponse($response, $options);
 
         // Need to remove the $this reference from the curl handle.
         // Otherwise, \Expansa\Http\Transport\Curl won't be garbage collected and the curl_close() will never be called.
@@ -236,14 +236,14 @@ final class Curl implements Transport
      * @return array Array of Response objects.
      * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
      */
-    public function request_multiple(array $requests, array $options): array
+    public function requestMultiple(array $requests, array $options): array
     {
         // If you're not requesting, we can't get any responses ¯\_(ツ)_/¯
         if (empty($requests)) {
             return [];
         }
 
-        if (InputValidator::has_array_access($requests) === false || is_iterable($requests) === false) {
+        if (InputValidator::hasArrayAccess($requests) === false || is_iterable($requests) === false) {
             throw InvalidArgument::create(1, '$requests', 'array|ArrayAccess&Traversable', gettype($requests));
         }
 
@@ -254,7 +254,7 @@ final class Curl implements Transport
         $class = get_class($this);
         foreach ($requests as $id => $request) {
             $subrequests[$id] = new $class();
-            $subhandles[$id]  = $subrequests[$id]->get_subrequest_handle($request['url'], $request['headers'], $request['data'], $request['options']);
+            $subhandles[$id]  = $subrequests[$id]->getSubrequestHandle($request['url'], $request['headers'], $request['data'], $request['options']);
             $request['options']['hooks']->dispatch('curl.before_multi_add', [&$subhandles[$id]]);
             curl_multi_add_handle($multihandle, $subhandles[$id]);
         }
@@ -297,7 +297,7 @@ final class Curl implements Transport
                     $responses[$key] = $exception;
                     $options['hooks']->dispatch('transport.internal.parse_error', [&$responses[$key], $requests[$key]]);
                 } else {
-                    $responses[$key] = $subrequests[$key]->process_response($subrequests[$key]->response_data, $options);
+                    $responses[$key] = $subrequests[$key]->processResponse($subrequests[$key]->response_data, $options);
 
                     $options['hooks']->dispatch('transport.internal.parse_response', [&$responses[$key], $requests[$key]]);
                 }
@@ -327,11 +327,11 @@ final class Curl implements Transport
      * @param array        $headers Associative array of request headers
      * @param string|array $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
      * @param array        $options Request options, see {@see Requests::response()} for documentation
-     * @return CurlHandle Subrequest's cURL handle
+     * @return CurlHandle Subrequest cURL handle
      */
-    public function &get_subrequest_handle(string $url, array $headers, string|array $data, array $options): CurlHandle
+    public function &getSubrequestHandle(string $url, array $headers, string|array $data, array $options): CurlHandle
     {
-        $this->setup_handle($url, $headers, $data, $options);
+        $this->setupHandle($url, $headers, $data, $options);
 
         $options['hooks']->dispatch('curl.before_send', [&$this->handle]);
 
@@ -352,14 +352,14 @@ final class Curl implements Transport
     }
 
     /**
-     * Setup the cURL handle for the given data
+     * Set up the cURL handle for the given data
      *
      * @param string       $url     URL to request
      * @param array        $headers Associative array of request headers
      * @param string|array $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
      * @param array        $options Request options, see {@see Requests::response()} for documentation
      */
-    private function setup_handle(string $url, array $headers, string|array $data, array $options)
+    private function setupHandle(string $url, array $headers, string|array $data, array $options): void
     {
         $options['hooks']->dispatch('curl.before_request', [&$this->handle]);
 
@@ -380,7 +380,7 @@ final class Curl implements Transport
          * https://curl.se/mail/lib-2017-07/0013.html
          */
         if (!isset($headers['Expect']) && $options['protocol_version'] === 1.1) {
-            $headers['Expect'] = $this->get_expect_header($data);
+            $headers['Expect'] = $this->getExpectHeader($data);
         }
 
         $headers = Requests::flatten($headers);
@@ -389,7 +389,7 @@ final class Curl implements Transport
             $data_format = $options['data_format'];
 
             if ($data_format === 'query') {
-                $url  = self::format_get($url, $data);
+                $url  = self::formatGet($url, $data);
                 $data = '';
             } elseif (!is_string($data)) {
                 $data = http_build_query($data, '', '&');
@@ -454,8 +454,8 @@ final class Curl implements Transport
         }
 
         if ($options['blocking'] === true) {
-            curl_setopt($this->handle, CURLOPT_HEADERFUNCTION, [$this, 'stream_headers']);
-            curl_setopt($this->handle, CURLOPT_WRITEFUNCTION, [$this, 'stream_body']);
+            curl_setopt($this->handle, CURLOPT_HEADERFUNCTION, [$this, 'streamHeaders']);
+            curl_setopt($this->handle, CURLOPT_WRITEFUNCTION, [$this, 'streamBody']);
             curl_setopt($this->handle, CURLOPT_BUFFERSIZE, Requests::BUFFER_SIZE);
         }
     }
@@ -468,7 +468,7 @@ final class Curl implements Transport
      * @return string|false HTTP response data including headers. False if non-blocking.
      * @throws HttpException If the request resulted in a cURL error.
      */
-    public function process_response(string $response, array $options): false|string
+    public function processResponse(string $response, array $options): false|string
     {
         if ($options['blocking'] === false) {
             $fake_headers = '';
@@ -515,7 +515,7 @@ final class Curl implements Transport
      * @param string $headers Header string
      * @return int Length of provided header
      */
-    public function stream_headers(string $headers): int
+    public function streamHeaders(string $headers): int
     {
         // Why do we do this? cURL will send both the final response and any
         // interim responses, such as a 100 Continue. We don't need that.
@@ -540,7 +540,7 @@ final class Curl implements Transport
      * @param string $data Body data
      * @return bool|int Length of provided data
      */
-    public function stream_body(string $data): bool|int
+    public function streamBody(string $data): bool|int
     {
         $this->hooks->dispatch('request.progress', [$data, $this->response_bytes, $this->response_byte_limit]);
         $data_length = strlen($data);
@@ -573,7 +573,7 @@ final class Curl implements Transport
      * @param array|object $data Data to build query using, see {@link https://www.php.net/http_build_query}
      * @return string URL with data
      */
-    private static function format_get(string $url, array|object $data): string
+    private static function formatGet(string $url, array|object $data): string
     {
         if (!empty($data)) {
             $query     = '';
@@ -628,7 +628,7 @@ final class Curl implements Transport
      * @param string|array $data Data to send either as the POST body, or as parameters in the URL for a GET/HEAD.
      * @return string The "Expect" header.
      */
-    private function get_expect_header(string|array $data): string
+    private function getExpectHeader(string|array $data): string
     {
         if (!is_array($data)) {
             return strlen($data) >= 1048576 ? '100-Continue' : '';

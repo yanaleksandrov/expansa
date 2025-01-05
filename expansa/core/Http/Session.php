@@ -179,7 +179,7 @@ class Session
         array $options = []
     ): Response
     {
-        $request = $this->merge_request(compact('url', 'headers', 'data', 'options'));
+        $request = $this->mergeRequest(compact('url', 'headers', 'data', 'options'));
 
         return Requests::request($request['url'], $request['headers'], $request['data'], $type, $request['options']);
     }
@@ -194,14 +194,14 @@ class Session
      * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
      * @throws InvalidArgument When the passed $options argument is not an array.
      */
-    public function request_multiple(array $requests, array $options = []): array
+    public function requestMultiple(array $requests, array $options = []): array
     {
-        if (InputValidator::has_array_access($requests) === false || is_iterable($requests) === false) {
+        if (InputValidator::hasArrayAccess($requests) === false || is_iterable($requests) === false) {
             throw InvalidArgument::create(1, '$requests', 'array|ArrayAccess&Traversable', gettype($requests));
         }
 
         foreach ($requests as $key => $request) {
-            $requests[$key] = $this->merge_request($request, false);
+            $requests[$key] = $this->mergeRequest($request, false);
         }
 
         $options = array_merge($this->options, $options);
@@ -209,17 +209,17 @@ class Session
         // Disallow forcing the type, as that's a per-request setting
         unset($options['type']);
 
-        return Requests::request_multiple($requests, $options);
+        return Requests::requestMultiple($requests, $options);
     }
 
     /**
      * Merge a request's data with the default data
      *
-     * @param array $request       Request data (same form as {@see Session::request_multiple()})
+     * @param array $request       Request data (same form as {@see Session::requestMultiple()})
      * @param bool  $merge_options Should we merge options as well?
      * @return array Request data
      */
-    protected function merge_request(array $request, bool $merge_options = true): array
+    protected function mergeRequest(array $request, bool $merge_options = true): array
     {
         if ($this->url !== null) {
             $request['url'] = Iri::absolutize($this->url, $request['url']);

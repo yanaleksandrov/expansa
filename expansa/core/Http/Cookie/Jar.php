@@ -35,7 +35,7 @@ class Jar implements ArrayAccess, IteratorAggregate
      * @param string        $key    Optional. The name for this cookie.
      * @return Cookie
      */
-    public function normalize_cookie(string|Cookie $cookie, string $key = ''): Cookie
+    public function normalizeCookie(string|Cookie $cookie, string $key = ''): Cookie
     {
         if ($cookie instanceof Cookie) {
             return $cookie;
@@ -117,8 +117,8 @@ class Jar implements ArrayAccess, IteratorAggregate
      */
     public function register(HookManager $hooks): void
     {
-        $hooks->register('requests.before_request', [$this, 'before_request']);
-        $hooks->register('requests.before_redirect_check', [$this, 'before_redirect_check']);
+        $hooks->register('requests.before_request', [$this, 'beforeRequest']);
+        $hooks->register('requests.before_redirect_check', [$this, 'beforeRedirectCheck']);
     }
 
     /**
@@ -132,7 +132,7 @@ class Jar implements ArrayAccess, IteratorAggregate
      * @param array  $options
      * @throws HttpException
      */
-    public function before_request(string $url, array &$headers, array &$data, string &$type, array &$options): void
+    public function beforeRequest(string $url, array &$headers, array &$data, string &$type, array &$options): void
     {
         if (!$url instanceof Iri) {
             $url = new Iri($url);
@@ -141,15 +141,15 @@ class Jar implements ArrayAccess, IteratorAggregate
         if (!empty($this->cookies)) {
             $cookies = [];
             foreach ($this->cookies as $key => $cookie) {
-                $cookie = $this->normalize_cookie($cookie, $key);
+                $cookie = $this->normalizeCookie($cookie, $key);
 
                 // Skip expired cookies
-                if ($cookie->is_expired()) {
+                if ($cookie->isExpired()) {
                     continue;
                 }
 
-                if ($cookie->domain_matches($url->host)) {
-                    $cookies[] = $cookie->format_for_header();
+                if ($cookie->domainMatches($url->host)) {
+                    $cookies[] = $cookie->formatForHeader();
                 }
             }
 
@@ -163,14 +163,14 @@ class Jar implements ArrayAccess, IteratorAggregate
      * @param Response $response Response as received.
      * @throws HttpException
      */
-    public function before_redirect_check(Response $response): void
+    public function beforeRedirectCheck(Response $response): void
     {
         $url = $response->url;
         if (!$url instanceof Iri) {
             $url = new Iri($url);
         }
 
-        $cookies           = Cookie::parse_from_headers($response->headers, $url);
+        $cookies           = Cookie::parseFromHeaders($response->headers, $url);
         $this->cookies     = array_merge($this->cookies, $cookies);
         $response->cookies = $this;
     }

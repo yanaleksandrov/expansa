@@ -78,16 +78,14 @@ class Headers extends CaseInsensitiveDictionary
 
     /**
      * Flattens a value into a string
-     *
      * Converts an array into a string by imploding values with a comma, as per
      * RFC2616's rules for folding headers.
      *
-     * @param string|array $value Value to flatten
+     * @param array|string $value Value to flatten
      * @return string Flattened value
-     *
      * @throws InvalidArgument When the passed argument is not a string or an array.
      */
-    public function flatten($value): string
+    public function flatten(array|string $value): string
     {
         if (is_string($value)) {
             return $value;
@@ -106,7 +104,7 @@ class Headers extends CaseInsensitiveDictionary
      * Converts the internally stored values to a comma-separated string if there is more
      * than one value for a key.
      *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     public function getIterator(): ArrayIterator
     {

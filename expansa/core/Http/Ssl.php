@@ -26,9 +26,9 @@ final class Ssl
      * @throws InvalidArgument When the passed $cert argument is not an array or array accessible.
      * @link https://tools.ietf.org/html/rfc2818#section-3.1 RFC2818, Section 3.1
      */
-    public static function verify_certificate(string|Stringable $host, array $cert): bool
+    public static function verifyCertificate(string|Stringable $host, array $cert): bool
     {
-        if (InputValidator::has_array_access($cert) === false) {
+        if (InputValidator::hasArrayAccess($cert) === false) {
             throw InvalidArgument::create(2, '$cert', 'array|ArrayAccess', gettype($cert));
         }
 
@@ -48,8 +48,7 @@ final class Ssl
                 // Strip the 'DNS:' prefix and trim whitespace
                 $altname = trim(substr($altname, 4));
 
-                // Check for a match
-                if (self::match_domain($host, $altname) === true) {
+                if (self::matchDomain($host, $altname) === true) {
                     return true;
                 }
             }
@@ -63,7 +62,7 @@ final class Ssl
         // alt names, as per RFC2818
         if (!empty($cert['subject']['CN'])) {
             // Check for a match
-            return (self::match_domain($host, $cert['subject']['CN']) === true);
+            return (self::matchDomain($host, $cert['subject']['CN']) === true);
         }
 
         return false;
@@ -84,7 +83,7 @@ final class Ssl
      * @param string|Stringable $reference Reference dNSName
      * @return bool Is the name valid?
      */
-    public static function verify_reference_name(string|Stringable $reference): bool
+    public static function verifyReferenceName(string|Stringable $reference): bool
     {
         if ($reference === '') {
             return false;
@@ -134,10 +133,10 @@ final class Ssl
      * @param string|Stringable $reference dNSName to match against
      * @return bool Does the domain match?
      */
-    public static function match_domain(string|Stringable $host, string|Stringable $reference): bool
+    public static function matchDomain(string|Stringable $host, string|Stringable $reference): bool
     {
         // Check if the reference is blocklisted first
-        if (self::verify_reference_name($reference) !== true) {
+        if (self::verifyReferenceName($reference) !== true) {
             return false;
         }
 

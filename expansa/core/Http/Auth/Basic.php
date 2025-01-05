@@ -2,6 +2,7 @@
 
 namespace Expansa\Http\Auth;
 
+use CurlHandle;
 use Expansa\Http\Contracts\Auth;
 use Expansa\Http\Exception\ArgumentCount;
 use Expansa\Http\Exception\InvalidArgument;
@@ -59,16 +60,16 @@ class Basic implements Auth
      */
     public function register(Hooks $hooks): void
     {
-        $hooks->register('curl.before_send', [$this, 'curl_before_send']);
-        $hooks->register('fsockopen.after_headers', [$this, 'fsockopen_header']);
+        $hooks->register('curl.before_send', [$this, 'curlBeforeSend']);
+        $hooks->register('fsockopen.after_headers', [$this, 'fsockopenHeader']);
     }
 
     /**
      * Set cURL parameters before the data is sent.
      *
-     * @param resource|\CurlHandle $handle The cURL handle.
+     * @param CurlHandle $handle The cURL handle.
      */
-    public function curl_before_send(&$handle): void
+    public function curlBeforeSend(CurlHandle &$handle): void
     {
         curl_setopt($handle, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_setopt($handle, CURLOPT_USERPWD, $this->getAuthString());
@@ -79,7 +80,7 @@ class Basic implements Auth
      *
      * @param string $out HTTP header string.
      */
-    public function fsockopen_header(&$out): void
+    public function fsockopenHeader(string &$out): void
     {
         $out .= sprintf("Authorization: Basic %s\r\n", base64_encode($this->getAuthString()));
     }

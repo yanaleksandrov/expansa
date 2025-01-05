@@ -30,7 +30,7 @@ class Hooks implements HookManager
      */
     public function register(string $hook, callable $callback, int $priority = 0): void
     {
-        if (InputValidator::is_numeric_array_key($priority) === false) {
+        if (InputValidator::isNumericArrayKey($priority) === false) {
             throw InvalidArgument::create(3, '$priority', 'integer', gettype($priority));
         }
 

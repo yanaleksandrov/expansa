@@ -44,7 +44,7 @@ use Stringable;
  * @link http://hg.gsnedders.com/iri/
  *
  * @property string $iri IRI we're working with
- * @property-read string $uri IRI in URI form, {@see Iri::to_uri()}
+ * @property-read string $uri IRI in URI form, {@see Iri::toUri()}
  * @property string $scheme Scheme part of the IRI
  * @property string $authority Authority part, formatted for a URI (userinfo + host + port)
  * @property string $iauthority Authority part of the IRI (userinfo + host + port)
@@ -144,7 +144,7 @@ class Iri
      */
     public function __toString()
     {
-        return $this->get_iri();
+        return $this->getIri();
     }
 
     /**
@@ -244,7 +244,7 @@ class Iri
      */
     public function __construct(string|Stringable|null $iri = null)
     {
-        $this->set_iri($iri);
+        $this->setIri($iri);
     }
 
     /**
@@ -261,7 +261,7 @@ class Iri
         if (!$relative instanceof self) {
             $relative = new self($relative);
         }
-        if (!$relative->is_valid()) {
+        if (!$relative->isValid()) {
             return false;
         } elseif ($relative->scheme !== null) {
             return clone $relative;
@@ -270,11 +270,11 @@ class Iri
         if (!$base instanceof self) {
             $base = new self($base);
         }
-        if ($base->scheme === null || !$base->is_valid()) {
+        if ($base->scheme === null || !$base->isValid()) {
             return false;
         }
 
-        if ($relative->get_iri() !== '') {
+        if ($relative->getIri() !== '') {
             if ($relative->iuserinfo !== null || $relative->ihost !== null || $relative->port !== null) {
                 $target = clone $relative;
                 $target->scheme = $base->scheme;
@@ -294,7 +294,7 @@ class Iri
                     } else {
                         $target->ipath = $relative->ipath;
                     }
-                    $target->ipath = $target->remove_dot_segments($target->ipath);
+                    $target->ipath = $target->removeDotSegments($target->ipath);
                     $target->iquery = $relative->iquery;
                 } else {
                     $target->ipath = $base->ipath;
@@ -310,7 +310,7 @@ class Iri
             $target = clone $base;
             $target->ifragment = null;
         }
-        $target->scheme_normalization();
+        $target->schemeNormalization();
         return $target;
     }
 
@@ -321,7 +321,7 @@ class Iri
      * @return array
      * @throws HttpException
      */
-    protected function parse_iri(string $iri): array
+    protected function parseIri(string $iri): array
     {
         $iri = trim($iri, "\x20\x09\x0A\x0C\x0D");
         $has_match = preg_match('/^((?P<scheme>[^:\/?#]+):)?(\/\/(?P<authority>[^\/?#]*))?(?P<path>[^?#]*)(\?(?P<query>[^#]*))?(#(?P<fragment>.*))?$/', $iri, $match);
@@ -353,7 +353,7 @@ class Iri
      * @param string $input
      * @return string
      */
-    protected function remove_dot_segments(string $input): string
+    protected function removeDotSegments(string $input): string
     {
         $output = '';
         while (strpos($input, './') !== false || strpos($input, '/.') !== false || $input === '.' || $input === '..') {
@@ -411,10 +411,10 @@ class Iri
      * @param bool $iprivate Allow iprivate
      * @return string
      */
-    protected function replace_invalid_with_pct_encoding(string $text, string $extra_chars, bool $iprivate = false): string
+    protected function replaceInvalidWithPctEncoding(string $text, string $extra_chars, bool $iprivate = false): string
     {
         // Normalize as many pct-encoded sections as possible
-        $text = preg_replace_callback('/(?:%[A-Fa-f0-9]{2})+/', array($this, 'remove_iunreserved_percent_encoded'), $text);
+        $text = preg_replace_callback('/(?:%[A-Fa-f0-9]{2})+/', array($this, 'removeIunreservedPercentEncoded'), $text);
 
         // Replace invalid percent characters
         $text = preg_replace('/%(?![A-Fa-f0-9]{2})/', '%25', $text);
@@ -534,7 +534,7 @@ class Iri
      * @param array $regex_match PCRE match
      * @return string Replacement
      */
-    protected function remove_iunreserved_percent_encoded(array $regex_match): string
+    protected function removeIunreservedPercentEncoded(array $regex_match): string
     {
         // As we just have valid percent encoded sequences we can just explode
         // and ignore the first member of the returned array (an empty string).
@@ -648,7 +648,7 @@ class Iri
         return $string;
     }
 
-    protected function scheme_normalization(): void
+    protected function schemeNormalization(): void
     {
         if (isset($this->normalization[$this->scheme]['iuserinfo']) && $this->iuserinfo === $this->normalization[$this->scheme]['iuserinfo']) {
             $this->iuserinfo = null;
@@ -679,7 +679,7 @@ class Iri
      *
      * @return bool
      */
-    public function is_valid(): bool
+    public function isValid(): bool
     {
         $isauthority = $this->iuserinfo !== null || $this->ihost !== null || $this->port !== null;
         if (
@@ -708,7 +708,7 @@ class Iri
      * @return bool
      * @throws HttpException
      */
-    protected function set_iri(?string $iri): bool
+    protected function setIri(?string $iri): bool
     {
         static $cache;
         if (!$cache) {
@@ -731,13 +731,13 @@ class Iri
             return $return;
         }
 
-        $parsed = $this->parse_iri($iri);
+        $parsed = $this->parseIri($iri);
 
-        $return = $this->set_scheme($parsed['scheme'])
-            && $this->set_authority($parsed['authority'])
-            && $this->set_path($parsed['path'])
-            && $this->set_query($parsed['query'])
-            && $this->set_fragment($parsed['fragment']);
+        $return = $this->setScheme($parsed['scheme'])
+            && $this->setAuthority($parsed['authority'])
+            && $this->setPath($parsed['path'])
+            && $this->setQuery($parsed['query'])
+            && $this->setFragment($parsed['fragment']);
 
         $cache[$iri] = array(
             $this->scheme,
@@ -759,7 +759,7 @@ class Iri
      * @param string $scheme
      * @return bool
      */
-    protected function set_scheme(string $scheme): bool
+    protected function setScheme(string $scheme): bool
     {
         if (!preg_match('/^[A-Za-z][0-9A-Za-z+\-.]*$/', $scheme)) {
             $this->scheme = null;
@@ -777,7 +777,7 @@ class Iri
      * @param null|string $authority
      * @return bool
      */
-    protected function set_authority(?string $authority): bool
+    protected function setAuthority(?string $authority): bool
     {
         static $cache;
         if (!$cache) {
@@ -817,9 +817,9 @@ class Iri
             $port = null;
         }
 
-        $return = $this->set_userinfo($iuserinfo) &&
-                  $this->set_host($remaining) &&
-                  $this->set_port($port);
+        $return = $this->setUserinfo($iuserinfo) &&
+                  $this->setHost($remaining) &&
+                  $this->setPort($port);
 
         $cache[$authority] = array($this->iuserinfo,
                                    $this->ihost,
@@ -836,40 +836,38 @@ class Iri
      * @param null|string $iuserinfo
      * @return bool
      */
-    protected function set_userinfo(?string $iuserinfo): bool
+    protected function setUserinfo(?string $iuserinfo): bool
     {
         if ($iuserinfo === null) {
             $this->iuserinfo = null;
         } else {
-            $this->iuserinfo = $this->replace_invalid_with_pct_encoding($iuserinfo, '!$&\'()*+,;=:');
-            $this->scheme_normalization();
+            $this->iuserinfo = $this->replaceInvalidWithPctEncoding($iuserinfo, '!$&\'()*+,;=:');
+            $this->schemeNormalization();
         }
-
         return true;
     }
 
     /**
-     * Set the ihost. Returns true on success, false on failure (if there are
-     * any invalid characters).
+     * Set the ihost. Returns true on success, false on failure (if there are any invalid characters).
      *
-     * @param null string $ihost
+     * @param null|string $ihost
      * @return bool
      */
-    protected function set_host(?string $ihost): bool
+    protected function setHost(?string $ihost): bool
     {
         if ($ihost === null) {
             $this->ihost = null;
             return true;
         }
         if (substr($ihost, 0, 1) === '[' && substr($ihost, -1) === ']') {
-            if (Ipv6::check_ipv6(substr($ihost, 1, -1))) {
+            if (Ipv6::checkIpv6(substr($ihost, 1, -1))) {
                 $this->ihost = '[' . Ipv6::compress(substr($ihost, 1, -1)) . ']';
             } else {
                 $this->ihost = null;
                 return false;
             }
         } else {
-            $ihost = $this->replace_invalid_with_pct_encoding($ihost, '!$&\'()*+,;=');
+            $ihost = $this->replaceInvalidWithPctEncoding($ihost, '!$&\'()*+,;=');
 
             // Lowercase, but ignore pct-encoded sections (as they should
             // remain uppercase). This must be done after the previous step
@@ -888,7 +886,7 @@ class Iri
             $this->ihost = $ihost;
         }
 
-        $this->scheme_normalization();
+        $this->schemeNormalization();
 
         return true;
     }
@@ -897,10 +895,10 @@ class Iri
      * Set the port. Returns true on success, false on failure (if there are
      * any invalid characters).
      *
-     * @param null string $port
+     * @param null|string $port
      * @return bool
      */
-    protected function set_port(?string $port): bool
+    protected function setPort(?string $port): bool
     {
         if ($port === null) {
             $this->port = null;
@@ -909,7 +907,7 @@ class Iri
 
         if (strspn($port, '0123456789') === strlen($port)) {
             $this->port = (int) $port;
-            $this->scheme_normalization();
+            $this->schemeNormalization();
             return true;
         }
 
@@ -923,7 +921,7 @@ class Iri
      * @param string $ipath
      * @return bool
      */
-    protected function set_path(string $ipath): bool
+    protected function setPath(string $ipath): bool
     {
         static $cache;
         if (!$cache) {
@@ -933,13 +931,13 @@ class Iri
         if (isset($cache[$ipath])) {
             $this->ipath = $cache[$ipath][(int) ($this->scheme !== null)];
         } else {
-            $valid = $this->replace_invalid_with_pct_encoding($ipath, '!$&\'()*+,;=@:/');
-            $removed = $this->remove_dot_segments($valid);
+            $valid = $this->replaceInvalidWithPctEncoding($ipath, '!$&\'()*+,;=@:/');
+            $removed = $this->removeDotSegments($valid);
 
             $cache[$ipath] = array($valid, $removed);
             $this->ipath = ($this->scheme !== null) ? $removed : $valid;
         }
-        $this->scheme_normalization();
+        $this->schemeNormalization();
         return true;
     }
 
@@ -949,13 +947,13 @@ class Iri
      * @param null|string $iquery
      * @return bool
      */
-    protected function set_query(?string $iquery): bool
+    protected function setQuery(?string $iquery): bool
     {
         if ($iquery === null) {
             $this->iquery = null;
         } else {
-            $this->iquery = $this->replace_invalid_with_pct_encoding($iquery, '!$&\'()*+,;=:@/?', true);
-            $this->scheme_normalization();
+            $this->iquery = $this->replaceInvalidWithPctEncoding($iquery, '!$&\'()*+,;=:@/?', true);
+            $this->schemeNormalization();
         }
         return true;
     }
@@ -966,13 +964,13 @@ class Iri
      * @param null|string $ifragment
      * @return bool
      */
-    protected function set_fragment(?string $ifragment): bool
+    protected function setFragment(?string $ifragment): bool
     {
         if ($ifragment === null) {
             $this->ifragment = null;
         } else {
-            $this->ifragment = $this->replace_invalid_with_pct_encoding($ifragment, '!$&\'()*+,;=:@/?');
-            $this->scheme_normalization();
+            $this->ifragment = $this->replaceInvalidWithPctEncoding($ifragment, '!$&\'()*+,;=:@/?');
+            $this->schemeNormalization();
         }
         return true;
     }
@@ -980,10 +978,10 @@ class Iri
     /**
      * Convert an IRI to a URI (or parts thereof)
      *
-     * @param string|bool $iri IRI to convert (or false from {@see Iri::get_iri()})
+     * @param string|bool $iri IRI to convert (or false from {@see Iri::getIri()})
      * @return string|false URI if IRI is valid, false otherwise.
      */
-    protected function to_uri(string|bool $iri): false|string
+    protected function toUri(string|bool $iri): false|string
     {
         if (!is_string($iri)) {
             return false;
@@ -1010,9 +1008,9 @@ class Iri
      *
      * @return string|false
      */
-    protected function get_iri(): false|string
+    protected function getIri(): false|string
     {
-        if (!$this->is_valid()) {
+        if (!$this->isValid()) {
             return false;
         }
 
@@ -1020,7 +1018,7 @@ class Iri
         if ($this->scheme !== null) {
             $iri .= $this->scheme . ':';
         }
-        if (($iauthority = $this->get_iauthority()) !== null) {
+        if (($iauthority = $this->getIauthority()) !== null) {
             $iri .= '//' . $iauthority;
         }
         $iri .= $this->ipath;
@@ -1039,9 +1037,9 @@ class Iri
      *
      * @return false|string
      */
-    protected function get_uri(): false|string
+    protected function getUri(): false|string
     {
-        return $this->to_uri($this->get_iri());
+        return $this->toUri($this->getIri());
     }
 
     /**
@@ -1049,7 +1047,7 @@ class Iri
      *
      * @return string|null
      */
-    protected function get_iauthority(): ?string
+    protected function getIauthority(): ?string
     {
         if ($this->iuserinfo === null && $this->ihost === null && $this->port === null) {
             return null;
@@ -1073,11 +1071,11 @@ class Iri
      *
      * @return null|false|string
      */
-    protected function get_authority(): false|string
+    protected function getAuthority(): null|false|string
     {
-        $iauthority = $this->get_iauthority();
+        $iauthority = $this->getIauthority();
         if (is_string($iauthority)) {
-            return $this->to_uri($iauthority);
+            return $this->toUri($iauthority);
         }
         return $iauthority;
     }

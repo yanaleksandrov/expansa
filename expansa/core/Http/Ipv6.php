@@ -82,7 +82,7 @@ final class Ipv6
         // Prepare the IP to be compressed.
         // Note: Input validation is handled in the `uncompress()` method, which is the first call made in this method.
         $ip       = self::uncompress($ip);
-        $ip_parts = self::split_v6_v4($ip);
+        $ip_parts = self::splitV6V4($ip);
 
         // Replace all leading zeros
         $ip_parts[0] = preg_replace('/(^|:)0+([0-9])/', '\1\2', $ip_parts[0]);
@@ -120,7 +120,7 @@ final class Ipv6
      * @param string $ip An IPv6 address
      * @return array<string> [0] contains the IPv6 represented part, and [1] the IPv4 represented part
      */
-    private static function split_v6_v4(string $ip): array
+    private static function splitV6V4(string $ip): array
     {
         if (strpos($ip, '.') !== false) {
             $pos       = strrpos($ip, ':');
@@ -140,11 +140,11 @@ final class Ipv6
      * @param string $ip An IPv6 address
      * @return bool true if $ip is a valid IPv6 address
      */
-    public static function check_ipv6(string $ip): bool
+    public static function checkIpv6(string $ip): bool
     {
         // Note: Input validation is handled in the `uncompress()` method, which is the first call made in this method.
         $ip                = self::uncompress($ip);
-        list($ipv6, $ipv4) = self::split_v6_v4($ip);
+        list($ipv6, $ipv4) = self::splitV6V4($ip);
         $ipv6              = explode(':', $ipv6);
         $ipv4              = explode('.', $ipv4);
         if ((count($ipv6) === 8 && count($ipv4) === 1) || (count($ipv6) === 6 && count($ipv4) === 4)) {

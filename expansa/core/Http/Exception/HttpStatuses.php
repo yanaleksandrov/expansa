@@ -61,7 +61,7 @@ class HttpStatuses extends HttpException
      * @param int|bool $code HTTP status code, or false if unavailable
      * @return string Exception class name to use
      */
-    public static function get_class(int|bool $code): string
+    public static function getClass(int|bool $code): string
     {
         if (!$code) {
             return StatusUnknown::class;

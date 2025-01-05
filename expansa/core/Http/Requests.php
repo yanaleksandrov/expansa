@@ -87,7 +87,7 @@ class Requests
     /**
      * Option defaults.
      *
-     * @see Requests::get_default_options()
+     * @see Requests::getDefaultOptions()
      * @see Requests::request() for values returned by this method
      *
      * @var array
@@ -134,7 +134,7 @@ class Requests
     /**
      * Selected transport name
      *
-     * Use {@see Requests::get_transport()} instead
+     * Use {@see Requests::getTransport()} instead
      *
      * @var array
      */
@@ -150,8 +150,8 @@ class Requests
     /**
      * Default certificate path.
      *
-     * @see Requests::get_certificate_path()
-     * @see Requests::set_certificate_path()
+     * @see Requests::getCertificatePath()
+     * @see Requests::setCertificatePath()
      *
      * @var string|Stringable|bool
      */
@@ -186,7 +186,7 @@ class Requests
      *
      * @param string $transport Transport class to add, must support the Transport interface
      */
-    public static function add_transport(string $transport): void
+    public static function addTransport(string $transport): void
     {
         if (empty(self::$transports)) {
             self::$transports = self::DEFAULT_TRANSPORTS;
@@ -202,7 +202,7 @@ class Requests
      * @return string FQCN of the transport to use, or an empty string if no transport was
      *                found which provided the requested capabilities.
      */
-    protected static function get_transport_class(array $capabilities = []): string
+    protected static function getTransportClass(array $capabilities = []): string
     {
         // Caching code, don't bother testing coverage.
         // @codeCoverageIgnoreStart
@@ -246,9 +246,9 @@ class Requests
      * @return Transport
      * @throws HttpException If no valid transport is found (`notransport`).
      */
-    protected static function get_transport(array $capabilities = []): Transport
+    protected static function getTransport(array $capabilities = []): Transport
     {
-        $class = self::get_transport_class($capabilities);
+        $class = self::getTransportClass($capabilities);
 
         if ($class === '') {
             throw new HttpException('No working transports found', 'notransport', self::$transports);
@@ -262,14 +262,14 @@ class Requests
      * Supported capabilities can be found in the {@see Capability}
      * interface as constants.
      * Example usage:
-     * `Requests::has_capabilities([Capability::SSL => true])`.
+     * `Requests::hasCapabilities([Capability::SSL => true])`.
      *
      * @param array<string, bool> $capabilities Optional. Associative array of capabilities to test against, i.e. `['<capability>' => true]`.
      * @return bool Whether the transport has the requested capabilities.
      */
-    public static function has_capabilities(array $capabilities = []): bool
+    public static function hasCapabilities(array $capabilities = []): bool
     {
-        return self::get_transport_class($capabilities) !== '';
+        return self::getTransportClass($capabilities) !== '';
     }
 
     /**
@@ -425,15 +425,15 @@ class Requests
         ?array $data = [],
         string $type = self::GET,
         array $options = []
-    )
+    ): Response
     {
         if (empty($options['type'])) {
             $options['type'] = $type;
         }
 
-        $options = array_merge(self::get_default_options(), $options);
+        $options = array_merge(self::getDefaultOptions(), $options);
 
-        self::set_defaults($url, $headers, $data, $type, $options);
+        self::setDefaults($url, $headers, $data, $type, $options);
 
         $options['hooks']->dispatch('requests.before_request', [&$url, &$headers, &$data, &$type, &$options]);
 
@@ -446,7 +446,7 @@ class Requests
         } else {
             $need_ssl     = (stripos($url, 'https://') === 0);
             $capabilities = [Capability::SSL => $need_ssl];
-            $transport    = self::get_transport($capabilities);
+            $transport    = self::getTransport($capabilities);
         }
 
         $response = $transport->request($url, $headers, $data, $options);
@@ -490,18 +490,18 @@ class Requests
      * @param array $requests Requests data (see description for more information)
      * @param array $options  Global and default options (see {@see Requests::request()})
      * @return array Responses (either Response or a Exception object)
-     * @throws Exception\InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
+     * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
      */
-    public static function request_multiple(array $requests, array $options = []): array
+    public static function requestMultiple(array $requests, array $options = []): array
     {
-        if (InputValidator::has_array_access($requests) === false || is_iterable($requests) === false) {
+        if (InputValidator::hasArrayAccess($requests) === false || is_iterable($requests) === false) {
             throw InvalidArgument::create(1, '$requests', 'array|ArrayAccess&Traversable', gettype($requests));
         }
 
-        $options = array_merge(self::get_default_options(true), $options);
+        $options = array_merge(self::getDefaultOptions(true), $options);
 
         if (!empty($options['hooks'])) {
-            $options['hooks']->register('transport.internal.parse_response', [static::class, 'parse_multiple']);
+            $options['hooks']->register('transport.internal.parse_response', [static::class, 'parseMultiple']);
             if (!empty($options['complete'])) {
                 $options['hooks']->register('multiple.request.complete', $options['complete']);
             }
@@ -531,11 +531,11 @@ class Requests
                 $request['options'] = array_merge($options, $request['options']);
             }
 
-            self::set_defaults($request['url'], $request['headers'], $request['data'], $request['type'], $request['options']);
+            self::setDefaults($request['url'], $request['headers'], $request['data'], $request['type'], $request['options']);
 
             // Ensure we only hook in once
             if ($request['options']['hooks'] !== $options['hooks']) {
-                $request['options']['hooks']->register('transport.internal.parse_response', [static::class, 'parse_multiple']);
+                $request['options']['hooks']->register('transport.internal.parse_response', [static::class, 'parseMultiple']);
                 if (!empty($request['options']['complete'])) {
                     $request['options']['hooks']->register('multiple.request.complete', $request['options']['complete']);
                 }
@@ -551,16 +551,16 @@ class Requests
                 $transport = new $transport();
             }
         } else {
-            $transport = self::get_transport();
+            $transport = self::getTransport();
         }
 
-        $responses = $transport->request_multiple($requests, $options);
+        $responses = $transport->requestMultiple($requests, $options);
 
         foreach ($responses as $id => &$response) {
             // If our hook got messed with somehow, ensure we end up with the correct response
             if (is_string($response)) {
                 $request = $requests[$id];
-                self::parse_multiple($response, $request);
+                self::parseMultiple($response, $request);
                 $request['options']['hooks']->dispatch('multiple.request.complete', [&$response, $id]);
             }
         }
@@ -575,7 +575,7 @@ class Requests
      * @param bool $multirequest Is this a multirequest?
      * @return array Default option values
      */
-    protected static function get_default_options(bool $multirequest = false): array
+    protected static function getDefaultOptions(bool $multirequest = false): array
     {
         $defaults           = static::OPTION_DEFAULTS;
         $defaults['verify'] = self::$certificate_path;
@@ -592,7 +592,7 @@ class Requests
      *
      * @return string Default certificate path.
      */
-    public static function get_certificate_path(): string
+    public static function getCertificatePath(): string
     {
         return self::$certificate_path;
     }
@@ -602,7 +602,7 @@ class Requests
      *
      * @param string|Stringable|bool $path Certificate path, pointing to a PEM file.
      */
-    public static function set_certificate_path(string|Stringable|bool $path): void
+    public static function setCertificatePath(string|Stringable|bool $path): void
     {
         self::$certificate_path = $path;
     }
@@ -619,7 +619,7 @@ class Requests
      * @return void
      * @throws HttpException When the $url is not an http(s) URL.
      */
-    protected static function set_defaults(&$url, &$headers, &$data, &$type, &$options)
+    protected static function setDefaults(&$url, &$headers, &$data, &$type, &$options): void
     {
         if (!preg_match('/^http(s)?:\/\//i', $url, $matches)) {
             throw new HttpException('Only HTTP(S) requests are handled.', 'nonhttp', $url);
@@ -742,7 +742,7 @@ class Requests
         }
 
         if (isset($return->headers['transfer-encoding'])) {
-            $return->body = self::decode_chunked($return->body);
+            $return->body = self::decodeChunked($return->body);
             unset($return->headers['transfer-encoding']);
         }
 
@@ -757,7 +757,7 @@ class Requests
 
         $options['hooks']->dispatch('requests.before_redirect_check', [&$return, $req_headers, $req_data, $options]);
 
-        if ($return->is_redirect() && $options['follow_redirects'] === true) {
+        if ($return->isRedirect() && $options['follow_redirects'] === true) {
             if (isset($return->headers['location']) && $options['redirected'] < $options['redirects']) {
                 if ($return->status_code === 303) {
                     $options['type'] = self::GET;
@@ -799,10 +799,10 @@ class Requests
      * `$response` is either set to a Response instance, or an Exception object
      *
      * @param string $response Full response text including headers and body (will be overwritten with Response instance)
-     * @param array  $request  Request data as passed into {@see Requests::request_multiple()}
+     * @param array  $request  Request data as passed into {@see Requests::requestMultiple()}
      * @return void
      */
-    public static function parse_multiple(string &$response, array $request): void
+    public static function parseMultiple(string &$response, array $request): void
     {
         try {
             $url      = $request['url'];
@@ -822,7 +822,7 @@ class Requests
      * @param string $data Chunked body
      * @return string Decoded body
      */
-    protected static function decode_chunked(string $data): string
+    protected static function decodeChunked(string $data): string
     {
         if (!preg_match('/^([0-9a-f]+)(?:;(?:[\w-]*)(?:=(?:(?:[\w-]*)*|"(?:[^\r\n])*"))?)*\r\n/i', trim($data))) {
             return $data;
@@ -834,7 +834,6 @@ class Requests
         while (true) {
             $is_chunked = (bool) preg_match('/^([0-9a-f]+)(?:;(?:[\w-]*)(?:=(?:(?:[\w-]*)*|"(?:[^\r\n])*"))?)*\r\n/i', $encoded, $matches);
             if (!$is_chunked) {
-                // Looks like it's not chunked after all
                 return $data;
             }
 
@@ -860,7 +859,7 @@ class Requests
      * @param iterable $dictionary Dictionary of header values
      * @return array List of headers
      *
-     * @throws Exception\InvalidArgument When the passed argument is not iterable.
+     * @throws InvalidArgument When the passed argument is not iterable.
      */
     public static function flatten(iterable $dictionary): array
     {
@@ -911,7 +910,7 @@ class Requests
             }
         }
 
-        $decoded = self::compatible_gzinflate($data);
+        $decoded = self::compatibleGzinflate($data);
         if ($decoded !== false) {
             return $decoded;
         }
@@ -943,7 +942,7 @@ class Requests
      * @param string $gz_data String to decompress.
      * @return string|bool False on failure.
      */
-    public static function compatible_gzinflate(string $gz_data): string|bool
+    public static function compatibleGzinflate(string $gz_data): string|bool
     {
         if (trim($gz_data) === '') {
             return false;
@@ -972,7 +971,7 @@ class Requests
                 }
             }
 
-            $decompressed = self::compatible_gzinflate(substr($gz_data, $i));
+            $decompressed = self::compatibleGzinflate(substr($gz_data, $i));
             if ($decompressed !== false) {
                 return $decompressed;
             }

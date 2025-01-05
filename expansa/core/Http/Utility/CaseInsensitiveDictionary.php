@@ -103,7 +103,7 @@ class CaseInsensitiveDictionary implements ArrayAccess, IteratorAggregate
     /**
      * Get an iterator for the data
      *
-     * @return \ArrayIterator
+     * @return ArrayIterator
      */
     #[ReturnTypeWillChange]
     public function getIterator(): ArrayIterator

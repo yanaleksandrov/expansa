@@ -27,7 +27,7 @@ interface Transport
      * @param array $options  Global options, see {@see Requests::response()} for documentation
      * @return array Array of Response objects (may contain Exception or string responses as well)
      */
-    public function request_multiple(array $requests, array $options): array;
+    public function requestMultiple(array $requests, array $options): array;
 
     /**
      * Self-test whether the transport can be used.

@@ -25,7 +25,7 @@ class IdnaEncoder
     /**
      * Maximum length of a IDNA URL in ASCII.
      *
-     * @see IdnaEncoder::to_ascii()
+     * @see IdnaEncoder::toAscii()
      *
      * @var int
      */
@@ -56,7 +56,7 @@ class IdnaEncoder
     {
         $parts = explode('.', $hostname);
         foreach ($parts as &$part) {
-            $part = self::to_ascii($part);
+            $part = self::toAscii($part);
         }
         return implode('.', $parts);
     }
@@ -71,10 +71,10 @@ class IdnaEncoder
      * @throws HttpException Provided string already begins with xn-- (`idna.provided_is_prefixed`)
      * @throws HttpException Encoded string longer than 64 ASCII characters (`idna.encoded_too_long`)
      */
-    public static function to_ascii(string $text): string
+    public static function toAscii(string $text): string
     {
         // Step 1: Check if the text is already ASCII
-        if (self::is_ascii($text)) {
+        if (self::isAscii($text)) {
             // Skip to step 7
             if (strlen($text) < self::MAX_LENGTH) {
                 return $text;
@@ -88,7 +88,7 @@ class IdnaEncoder
 
         // Step 3: UseSTD3ASCIIRules is false, continue
         // Step 4: Check if it's ASCII now
-        if (self::is_ascii($text)) {
+        if (self::isAscii($text)) {
             // Skip to step 7
             /*
              * As the `nameprep()` method returns the original string, this code will never be reached until
@@ -109,7 +109,7 @@ class IdnaEncoder
         }
 
         // Step 6: Encode with Punycode
-        $text = self::punycode_encode($text);
+        $text = self::punycodeEncode($text);
 
         // Step 7: Prepend ACE prefix
         $text = self::ACE_PREFIX . $text;
@@ -128,7 +128,7 @@ class IdnaEncoder
      * @param string $text Text to examine.
      * @return bool Is the text string ASCII-only?
      */
-    protected static function is_ascii(string $text): bool
+    protected static function isAscii(string $text): bool
     {
         return (preg_match('/(?:[^\x00-\x7F])/', $text) !== 1);
     }
@@ -147,13 +147,13 @@ class IdnaEncoder
 
     /**
      * Convert a UTF-8 string to a UCS-4 codepoint array
-     * Based on Iri::replace_invalid_with_pct_encoding()
+     * Based on Iri::replaceInvalidWithPctEncoding()
      *
      * @param string $input Text to convert.
      * @return array Unicode code points
      * @throws HttpException Invalid UTF-8 codepoint (`idna.invalidcodepoint`)
      */
-    protected static function utf8_to_codepoints(string $input): array
+    protected static function utf8ToCodepoints(string $input): array
     {
         $codepoints = [];
 
@@ -236,9 +236,8 @@ class IdnaEncoder
      * @param string $input UTF-8 encoded string to encode
      * @return string Punycode-encoded string
      * @throws HttpException On character outside of the domain (never happens with Punycode) (`idna.character_outside_domain`)
-     *@internal Pseudocode from Section 6.3 is commented with "#" next to relevant code
      */
-    public static function punycode_encode(string $input): string
+    public static function punycodeEncode(string $input): string
     {
         $output = '';
         // let n = initial_n
@@ -251,7 +250,7 @@ class IdnaEncoder
         $h = 0;
         $b = 0; // see loop
         // copy them to the output in order
-        $codepoints = self::utf8_to_codepoints($input);
+        $codepoints = self::utf8ToCodepoints($input);
         $extended   = [];
 
         foreach ($codepoints as $char) {
@@ -319,13 +318,13 @@ class IdnaEncoder
 
                         // output the code point for digit t + ((q - t) mod (base - t))
                         $digit   = (int) ($t + (($q - $t) % (self::BOOTSTRAP_BASE - $t)));
-                        $output .= self::digit_to_char($digit);
+                        $output .= self::digitToChar($digit);
                         // let q = (q - t) div (base - t)
                         $q = (int) floor(($q - $t) / (self::BOOTSTRAP_BASE - $t));
                     }
 
                     // output the code point for digit q
-                    $output .= self::digit_to_char($q);
+                    $output .= self::digitToChar($q);
                     // let bias = adapt(delta, h + 1, test h equals b?)
                     $bias = self::adapt($delta, $h + 1, $h === $b);
                     // let delta = 0
@@ -350,7 +349,7 @@ class IdnaEncoder
      * @return string Single character corresponding to digit
      * @throws HttpException On invalid digit (`idna.invalid_digit`)
      */
-    protected static function digit_to_char(int $digit): string
+    protected static function digitToChar(int $digit): string
     {
         // @codeCoverageIgnoreStart
         // As far as I know, this never happens, but still good to be sure.

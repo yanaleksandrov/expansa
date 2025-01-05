@@ -36,12 +36,12 @@ class Cookie
         public ?int $reference_time = null
     )
     {
-        if ($name !== '' && InputValidator::is_valid_rfc2616_token($name) === false) {
+        if ($name !== '' && InputValidator::isValidRfc2616Token($name) === false) {
             throw InvalidArgument::create(1, '$name', 'integer|string and conform to RFC 2616', gettype($name));
         }
 
         if (
-            InputValidator::has_array_access($attributes) === false
+            InputValidator::hasArrayAccess($attributes) === false
             ||
             is_iterable($attributes) === false
         ) {
@@ -87,7 +87,7 @@ class Cookie
      *
      * @return bool True if expired, false if time is valid.
      */
-    public function is_expired(): bool
+    public function isExpired(): bool
     {
         if (isset($this->attributes['max-age'])) {
             $max_age = $this->attributes['max-age'];
@@ -108,13 +108,13 @@ class Cookie
      * @param Iri $uri URI to check
      * @return bool Whether the cookie is valid for the given URI
      */
-    public function uri_matches(Iri $uri): bool
+    public function uriMatches(Iri $uri): bool
     {
-        if (!$this->domain_matches($uri->host)) {
+        if (!$this->domainMatches($uri->host)) {
             return false;
         }
 
-        if (!$this->path_matches($uri->path)) {
+        if (!$this->pathMatches($uri->path)) {
             return false;
         }
 
@@ -127,7 +127,7 @@ class Cookie
      * @param string $domain Domain to check
      * @return bool Whether the cookie is valid for the given domain
      */
-    public function domain_matches(string $domain): bool
+    public function domainMatches(string $domain): bool
     {
         if (!isset($this->attributes['domain'])) {
             // Cookies created manually; cookies created by Requests will set
@@ -178,7 +178,7 @@ class Cookie
      * @param string $request_path Path to check
      * @return bool Whether the cookie is valid for the given path
      */
-    public function path_matches(string $request_path): bool
+    public function pathMatches(string $request_path): bool
     {
         if (empty($request_path)) {
             // Normalize empty path to root
@@ -233,7 +233,7 @@ class Cookie
             $orig_value = $value;
 
             if (is_string($key)) {
-                $value = $this->normalize_attribute($key, $value);
+                $value = $this->normalizeAttribute($key, $value);
             }
 
             if ($value === null) {
@@ -258,7 +258,7 @@ class Cookie
      * @return mixed Value if available, or null if the attribute value is invalid (and should be skipped)
      * @throws HttpException
      */
-    protected function normalize_attribute(string $name, string|int|bool $value): mixed
+    protected function normalizeAttribute(string $name, string|int|bool $value): mixed
     {
         switch (strtolower($name)) {
             case 'expires':
@@ -331,7 +331,7 @@ class Cookie
      *
      * @return string Cookie formatted for Cookie header
      */
-    public function format_for_header(): string
+    public function formatForHeader(): string
     {
         return sprintf('%s=%s', $this->name, $this->value);
     }
@@ -344,9 +344,9 @@ class Cookie
      *
      * @return string Cookie formatted for Set-Cookie header
      */
-    public function format_for_set_cookie(): string
+    public function formatForSetCookie(): string
     {
-        $header_value = $this->format_for_header();
+        $header_value = $this->formatForHeader();
         if (!empty($this->attributes)) {
             $parts = [];
             foreach ($this->attributes as $key => $value) {
@@ -384,7 +384,7 @@ class Cookie
             $name = trim($name);
         }
 
-        if ($name !== '' && InputValidator::is_valid_rfc2616_token($name) === false) {
+        if ($name !== '' && InputValidator::isValidRfc2616Token($name) === false) {
             throw InvalidArgument::create(2, '$name', 'integer|string and conform to RFC 2616', gettype($name));
         }
 
@@ -408,7 +408,7 @@ class Cookie
         $name  = trim($name);
         $value = trim($value);
 
-        if ($name !== '' && InputValidator::is_valid_rfc2616_token($name) === false) {
+        if ($name !== '' && InputValidator::isValidRfc2616Token($name) === false) {
             throw InvalidArgument::create(2, '$name', 'integer|string and conform to RFC 2616', gettype($name));
         }
 
@@ -442,7 +442,7 @@ class Cookie
      * @return array
      * @throws InvalidArgument When the passed $origin argument is not null or an instance of the Iri class.
      */
-    public static function parse_from_headers(Headers $headers, ?Iri $origin = null, ?int $time = null): array
+    public static function parseFromHeaders(Headers $headers, ?Iri $origin = null, ?int $time = null): array
     {
         $cookie_headers = $headers->getValues('Set-Cookie');
         if (empty($cookie_headers)) {
@@ -491,7 +491,7 @@ class Cookie
             }
 
             // Reject invalid cookie domains
-            if (!empty($origin) && !$parsed->domain_matches($origin->host)) {
+            if (!empty($origin) && !$parsed->domainMatches($origin->host)) {
                 continue;
             }
 

@@ -4,7 +4,6 @@ namespace Expansa\Http\Proxy;
 
 use CurlHandle;
 use Expansa\Http\Exception\ArgumentCount;
-use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Hooks;
 use Expansa\Http\Contracts\Proxy;
 
@@ -82,12 +81,12 @@ final class Http implements Proxy
      */
     public function register(Hooks $hooks): void
     {
-        $hooks->register('curl.before_send', [$this, 'curl_before_send']);
+        $hooks->register('curl.before_send', [$this, 'curlBeforeSend']);
 
-        $hooks->register('fsockopen.remote_socket', [$this, 'fsockopen_remote_socket']);
-        $hooks->register('fsockopen.remote_host_path', [$this, 'fsockopen_remote_host_path']);
+        $hooks->register('fsockopen.remote_socket', [$this, 'fsockopenRemoteSocket']);
+        $hooks->register('fsockopen.remote_host_path', [$this, 'fsockopenRemoteHostPath']);
         if ($this->use_authentication) {
-            $hooks->register('fsockopen.after_headers', [$this, 'fsockopen_header']);
+            $hooks->register('fsockopen.after_headers', [$this, 'fsockopenHeader']);
         }
     }
 
@@ -96,14 +95,14 @@ final class Http implements Proxy
      *
      * @param CurlHandle $handle cURL handle
      */
-    public function curl_before_send(CurlHandle &$handle): void
+    public function curlBeforeSend(CurlHandle &$handle): void
     {
         curl_setopt($handle, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
         curl_setopt($handle, CURLOPT_PROXY, $this->proxy);
 
         if ($this->use_authentication) {
             curl_setopt($handle, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
-            curl_setopt($handle, CURLOPT_PROXYUSERPWD, $this->get_auth_string());
+            curl_setopt($handle, CURLOPT_PROXYUSERPWD, $this->getAuthString());
         }
     }
 
@@ -112,7 +111,7 @@ final class Http implements Proxy
      *
      * @param string $remote_socket Socket connection string
      */
-    public function fsockopen_remote_socket(string &$remote_socket): void
+    public function fsockopenRemoteSocket(string &$remote_socket): void
     {
         $remote_socket = $this->proxy;
     }
@@ -123,7 +122,7 @@ final class Http implements Proxy
      * @param string $path Path to send in HTTP request string ("GET ...")
      * @param string $url  Full URL we're requesting
      */
-    public function fsockopen_remote_host_path(string &$path, string $url): void
+    public function fsockopenRemoteHostPath(string &$path, string $url): void
     {
         $path = $url;
     }
@@ -133,9 +132,9 @@ final class Http implements Proxy
      *
      * @param string $out HTTP header string
      */
-    public function fsockopen_header(string &$out): void
+    public function fsockopenHeader(string &$out): void
     {
-        $out .= sprintf("Proxy-Authorization: Basic %s\r\n", base64_encode($this->get_auth_string()));
+        $out .= sprintf("Proxy-Authorization: Basic %s\r\n", base64_encode($this->getAuthString()));
     }
 
     /**
@@ -143,7 +142,7 @@ final class Http implements Proxy
      *
      * @return string
      */
-    public function get_auth_string(): string
+    public function getAuthString(): string
     {
         return $this->user . ':' . $this->pass;
     }

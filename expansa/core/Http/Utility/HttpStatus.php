@@ -798,9 +798,9 @@ final class HttpStatus
      * @return string Status message.
      * @throws InvalidArgument When the passed $code argument is not a valid status code.
      */
-    public static function get_text(int|string $code): string
+    public static function getText(int|string $code): string
     {
-        if (self::is_valid_code($code) === false) {
+        if (self::isValidCode($code) === false) {
             // When the type is correct, add the value to the error message to help debugging.
             $type = gettype($code) . (is_scalar($code) ? " ($code)" : '');
 
@@ -816,7 +816,7 @@ final class HttpStatus
      * @param int|string $code Status code to check.
      * @return bool Whether the status code is valid.
      */
-    public static function is_valid_code(int|string $code): bool
+    public static function isValidCode(int|string $code): bool
     {
         return isset(self::MAP[$code]);
     }
