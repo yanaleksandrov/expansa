@@ -160,7 +160,7 @@ class Cookie
         }
 
         $prefix = substr($domain, 0, -$cookie_domain_length);
-        if (substr($prefix, -1) !== '.') {
+        if (!str_ends_with($prefix, '.')) {
             // The last character of the passed domain that is not included in the
             // domain string should be a %x2E (".") character.
             return false;
@@ -205,7 +205,7 @@ class Cookie
         }
 
         if (substr($request_path, 0, $cookie_path_length) === $cookie_path) {
-            if (substr($cookie_path, -1) === '/') {
+            if (str_ends_with($cookie_path, '/')) {
                 // The cookie-path is a prefix of the request-path, and the last
                 // character of the cookie-path is %x2F ("/").
                 return true;
@@ -393,7 +393,7 @@ class Cookie
 
         if (!empty($name)) {
             $value = $cookie_header;
-        } elseif (strpos($kvparts, '=') === false) {
+        } elseif (!str_contains($kvparts, '=')) {
             // Some sites might only have a value without the equals separator.
             // Deviate from RFC 6265 and pretend it was actually a blank name
             // (`=foo`)
@@ -417,7 +417,7 @@ class Cookie
 
         if (!empty($parts)) {
             foreach ($parts as $part) {
-                if (strpos($part, '=') === false) {
+                if (!str_contains($part, '=')) {
                     $part_key   = $part;
                     $part_value = true;
                 } else {
@@ -470,7 +470,7 @@ class Cookie
                 $path = $origin->path;
 
                 // Default path normalization as per RFC 6265 section 5.1.4
-                if (substr($path, 0, 1) !== '/') {
+                if (!str_starts_with($path, '/')) {
                     // If the uri-path is empty or if the first character of
                     // the uri-path is not a %x2F ("/") character, output
                     // %x2F ("/") and skip the remaining steps.

@@ -39,7 +39,7 @@ final class Ssl
             $altnames = explode(',', $cert['extensions']['subjectAltName']);
             foreach ($altnames as $altname) {
                 $altname = trim($altname);
-                if (strpos($altname, 'DNS:') !== 0) {
+                if (!str_starts_with($altname, 'DNS:')) {
                     continue;
                 }
 
@@ -103,7 +103,7 @@ final class Ssl
         // Check the first part of the name
         $first = array_shift($parts);
 
-        if (strpos($first, '*') !== false) {
+        if (str_contains($first, '*')) {
             // Check that the wildcard is the full part
             if ($first !== '*') {
                 return false;
@@ -117,7 +117,7 @@ final class Ssl
 
         // Check the remaining parts
         foreach ($parts as $part) {
-            if (strpos($part, '*') !== false) {
+            if (str_contains($part, '*')) {
                 return false;
             }
         }

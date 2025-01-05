@@ -42,7 +42,7 @@ final class Ipv6
         $c1              = ($ip1 === '') ? -1 : substr_count($ip1, ':');
         $c2              = ($ip2 === '') ? -1 : substr_count($ip2, ':');
 
-        if (strpos($ip2, '.') !== false) {
+        if (str_contains($ip2, '.')) {
             ++$c2;
         }
 
@@ -122,7 +122,7 @@ final class Ipv6
      */
     private static function splitV6V4(string $ip): array
     {
-        if (strpos($ip, '.') !== false) {
+        if (str_contains($ip, '.')) {
             $pos       = strrpos($ip, ':');
             $ipv6_part = substr($ip, 0, $pos);
             $ipv4_part = substr($ip, $pos + 1);

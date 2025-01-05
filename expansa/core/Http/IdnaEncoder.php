@@ -94,17 +94,15 @@ class IdnaEncoder
              * As the `nameprep()` method returns the original string, this code will never be reached until
              * that method is properly implemented.
              */
-            // @codeCoverageIgnoreStart
             if (strlen($text) < self::MAX_LENGTH) {
                 return $text;
             }
 
             throw new HttpException('Prepared string is too long', 'idna.prepared_too_long', $text);
-            // @codeCoverageIgnoreEnd
         }
 
         // Step 5: Check ACE prefix
-        if (strpos($text, self::ACE_PREFIX) === 0) {
+        if (str_starts_with($text, self::ACE_PREFIX)) {
             throw new HttpException('Provided string begins with ACE prefix', 'idna.provided_is_prefixed', $text);
         }
 
@@ -235,7 +233,7 @@ class IdnaEncoder
      *
      * @param string $input UTF-8 encoded string to encode
      * @return string Punycode-encoded string
-     * @throws HttpException On character outside of the domain (never happens with Punycode) (`idna.character_outside_domain`)
+     * @throws HttpException On character outside the domain (never happens with Punycode) (`idna.character_outside_domain`)
      */
     public static function punycodeEncode(string $input): string
     {

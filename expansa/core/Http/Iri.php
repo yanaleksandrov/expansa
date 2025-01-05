@@ -356,18 +356,18 @@ class Iri
     protected function removeDotSegments(string $input): string
     {
         $output = '';
-        while (strpos($input, './') !== false || strpos($input, '/.') !== false || $input === '.' || $input === '..') {
+        while (str_contains($input, './') || str_contains($input, '/.') || $input === '.' || $input === '..') {
             // A: If the input buffer begins with a prefix of "../" or "./",
             // then remove that prefix from the input buffer; otherwise,
-            if (strpos($input, '../') === 0) {
+            if (str_starts_with($input, '../')) {
                 $input = substr($input, 3);
-            } elseif (strpos($input, './') === 0) {
+            } elseif (str_starts_with($input, './')) {
                 $input = substr($input, 2);
             }
             // B: if the input buffer begins with a prefix of "/./" or "/.",
             // where "." is a complete path segment, then replace that prefix
             // with "/" in the input buffer; otherwise,
-            elseif (strpos($input, '/./') === 0) {
+            elseif (str_starts_with($input, '/./')) {
                 $input = substr($input, 2);
             } elseif ($input === '/.') {
                 $input = '/';
@@ -376,7 +376,7 @@ class Iri
             // where ".." is a complete path segment, then replace that prefix
             // with "/" in the input buffer and remove the last segment and its
             // preceding "/" (if any) from the output buffer; otherwise,
-            elseif (strpos($input, '/../') === 0) {
+            elseif (str_starts_with($input, '/../')) {
                 $input = substr($input, 3);
                 $output = substr_replace($output, '', (strrpos($output, '/') ?: 0));
             } elseif ($input === '/..') {
@@ -689,7 +689,7 @@ class Iri
                 (
                     $this->scheme === null &&
                     !$isauthority &&
-                    strpos($this->ipath, ':') !== false &&
+                    str_contains($this->ipath, ':') &&
                     (strpos($this->ipath, '/') === false ? true : strpos($this->ipath, ':') < strpos($this->ipath, '/'))
                 )
             )

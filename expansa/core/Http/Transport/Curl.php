@@ -112,12 +112,10 @@ final class Curl implements Transport
         }
 
         if (defined('CURLOPT_PROTOCOLS')) {
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants.curlopt_protocolsFound
             curl_setopt($this->handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         }
 
         if (defined('CURLOPT_REDIR_PROTOCOLS')) {
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants.curlopt_redir_protocolsFound
             curl_setopt($this->handle, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
         }
     }
@@ -430,14 +428,12 @@ final class Curl implements Transport
         if (is_int($timeout) || $this->version < self::CURL_7_16_2) {
             curl_setopt($this->handle, CURLOPT_TIMEOUT, ceil($timeout));
         } else {
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants.curlopt_timeout_msFound
             curl_setopt($this->handle, CURLOPT_TIMEOUT_MS, round($timeout * 1000));
         }
 
         if (is_int($options['connect_timeout']) || $this->version < self::CURL_7_16_2) {
             curl_setopt($this->handle, CURLOPT_CONNECTTIMEOUT, ceil($options['connect_timeout']));
         } else {
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants.curlopt_connecttimeout_msFound
             curl_setopt($this->handle, CURLOPT_CONNECTTIMEOUT_MS, round($options['connect_timeout'] * 1000));
         }
 

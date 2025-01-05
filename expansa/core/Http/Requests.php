@@ -765,7 +765,7 @@ class Requests
 
                 ++$options['redirected'];
                 $location = $return->headers['location'];
-                if (strpos($location, 'http://') !== 0 && strpos($location, 'https://') !== 0) {
+                if (!str_starts_with($location, 'http://') && !str_starts_with($location, 'https://')) {
                     // relative redirect, for compatibility make it absolute
                     $location = Iri::absolutize($url, $location);
                     $location = $location->uri;
@@ -949,7 +949,7 @@ class Requests
         }
 
         // Compressed data might contain a full zlib header, if so strip it for gzinflate()
-        if (substr($gz_data, 0, 3) === "\x1f\x8b\x08") {
+        if (str_starts_with($gz_data, "\x1f\x8b\x08")) {
             $i   = 10;
             $flg = ord(substr($gz_data, 3, 1));
             if ($flg > 0) {
@@ -977,14 +977,11 @@ class Requests
             }
         }
 
-        // If the data is Huffman Encoded, we must first strip the leading 2
-        // byte Huffman marker for gzinflate()
-        // The response is Huffman coded by many compressors such as
-        // java.util.zip.Deflater, Ruby's Zlib::Deflate, and .NET's
-        // System.IO.Compression.DeflateStream.
+        // If the data is Huffman Encoded, we must first strip the leading 2 byte Huffman marker for gzinflate()
+        // The response is Huffman coded by many compressors such as java.util.zip.Deflater, Ruby's Zlib::Deflate,
+        // and .NET's System.IO.Compression.DeflateStream.
         //
-        // See https://decompres.blogspot.com/ for a quick explanation of this
-        // data type
+        // See https://decompres.blogspot.com/ for a quick explanation of this data type
         $huffman_encoded = false;
 
         // low nibble of first byte should be 0x08
@@ -1004,7 +1001,7 @@ class Requests
             }
         }
 
-        if (substr($gz_data, 0, 4) === "\x50\x4b\x03\x04") {
+        if (str_starts_with($gz_data, "\x50\x4b\x03\x04")) {
             // ZIP file format header
             // Offset 6: 2 bytes, General-purpose field
             // Offset 26: 2 bytes, filename length

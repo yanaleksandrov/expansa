@@ -21,8 +21,7 @@ class Headers extends CaseInsensitiveDictionary
      * Unlike {@see Headers::getValues()}, this returns a string. If there are
      * multiple values, it concatenates them with a comma as per RFC2616.
      *
-     * Avoid using this where commas may be used unquoted in values, such as
-     * Set-Cookie headers.
+     * Avoid using this where commas may be used unquoted in values, such as Set-Cookie headers.
      *
      * @param string $offset Name of the header to retrieve.
      * @return string|null Header value

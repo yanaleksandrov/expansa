@@ -108,7 +108,6 @@ final class Fsockopen implements Transport
             $verifyname      = true;
 
             // SNI, if enabled (OpenSSL >=0.9.8j)
-			// phpcs:ignore PHPCompatibility.Constants.NewConstants.openssl_tlsext_server_nameFound
             if (defined('OPENSSL_TLSEXT_SERVER_NAME') && OPENSSL_TLSEXT_SERVER_NAME) {
                 $context_options['SNI_enabled'] = true;
             }
@@ -149,7 +148,7 @@ final class Fsockopen implements Transport
 
         $remote_socket .= ':' . $url_parts['port'];
 
-		set_error_handler([$this, 'connectErrorHandler'], E_WARNING | E_NOTICE);
+        set_error_handler([$this, 'connectErrorHandler'], E_WARNING | E_NOTICE);
 
         $options['hooks']->dispatch('fsockopen.remote_socket', [&$remote_socket]);
 
@@ -198,8 +197,7 @@ final class Fsockopen implements Transport
                 $request_body = $data;
             }
 
-            // Always include Content-length on POST requests to prevent
-            // 411 errors from some servers when the body is empty.
+            // Always include Content-Length in POST requests to avoid 411 errors on empty bodies.
             if (!empty($data) || $options['type'] === Requests::POST) {
                 if (!isset($case_insensitive_headers['Content-Length'])) {
                     $headers['Content-Length'] = strlen($request_body);
@@ -215,7 +213,11 @@ final class Fsockopen implements Transport
             $out         .= sprintf('Host: %s', $url_parts['host']);
             $scheme_lower = strtolower($url_parts['scheme']);
 
-            if (($scheme_lower === 'http' && $url_parts['port'] !== Port::HTTP) || ($scheme_lower === 'https' && $url_parts['port'] !== Port::HTTPS)) {
+            if (
+                ($scheme_lower === 'http' && $url_parts['port'] !== Port::HTTP)
+                ||
+                ($scheme_lower === 'https' && $url_parts['port'] !== Port::HTTPS)
+            ) {
                 $out .= ':' . $url_parts['port'];
             }
 
@@ -239,7 +241,7 @@ final class Fsockopen implements Transport
 
         $options['hooks']->dispatch('fsockopen.after_headers', [&$out]);
 
-        if (substr($out, -2) !== "\r\n") {
+        if (!str_ends_with($out, "\r\n")) {
             $out .= "\r\n";
         }
 
@@ -279,7 +281,7 @@ final class Fsockopen implements Transport
         $doingbody  = false;
         $download   = false;
         if ($options['filename']) {
-			$download = @fopen($options['filename'], 'wb');
+            $download = @fopen($options['filename'], 'wb');
             if ($download === false) {
                 $error = error_get_last();
                 if (!is_array($error)) {
