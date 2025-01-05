@@ -8,7 +8,7 @@ use Expansa\Http\Response\Headers;
 
 /**
  * HTTP response class
- * Contains a response from \Expansa\Http\Requests::request()
+ * Contains a response from Requests::request()
  *
  * @package Expansa\Http
  */
@@ -73,7 +73,7 @@ class Response
     /**
      * Previous requests (from redirects)
      *
-     * @var array Array of \Expansa\Http\Response objects
+     * @var array Array of Response objects
      */
     public array $history = [];
 

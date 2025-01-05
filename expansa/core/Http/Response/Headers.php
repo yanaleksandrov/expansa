@@ -18,7 +18,7 @@ class Headers extends CaseInsensitiveDictionary
     /**
      * Get the given header
      *
-     * Unlike {@see \Expansa\Http\Response\Headers::getValues()}, this returns a string. If there are
+     * Unlike {@see Headers::getValues()}, this returns a string. If there are
      * multiple values, it concatenates them with a comma as per RFC2616.
      *
      * Avoid using this where commas may be used unquoted in values, such as
@@ -45,7 +45,7 @@ class Headers extends CaseInsensitiveDictionary
      *
      * @param string $offset Item name
      * @param string $value  Item value
-     * @throws \Expansa\Http\HttpException On attempting to use dictionary as list (`invalidset`)
+     * @throws HttpException On attempting to use dictionary as list (`invalidset`)
      */
     public function offsetSet($offset, $value): void
     {

@@ -25,7 +25,7 @@ class IdnaEncoder
     /**
      * Maximum length of a IDNA URL in ASCII.
      *
-     * @see \Expansa\Http\IdnaEncoder::to_ascii()
+     * @see IdnaEncoder::to_ascii()
      *
      * @var int
      */
@@ -147,7 +147,7 @@ class IdnaEncoder
 
     /**
      * Convert a UTF-8 string to a UCS-4 codepoint array
-     * Based on \Expansa\Http\Iri::replace_invalid_with_pct_encoding()
+     * Based on Iri::replace_invalid_with_pct_encoding()
      *
      * @param string $input Text to convert.
      * @return array Unicode code points

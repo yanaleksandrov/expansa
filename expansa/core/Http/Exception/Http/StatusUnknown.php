@@ -29,8 +29,7 @@ final class StatusUnknown extends HttpStatuses
     /**
      * Create a new exception
      *
-     * If `$data` is an instance of {@see \Expansa\Http\Response}, uses the status
-     * code from it. Otherwise, sets as 0
+     * If `$data` is an instance of Response, uses the status code from it. Otherwise, sets as 0
      *
      * @param string|null $reason Reason phrase
      * @param mixed       $data   Associated data

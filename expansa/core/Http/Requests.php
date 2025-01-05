@@ -184,7 +184,7 @@ class Requests
     /**
      * Register a transport
      *
-     * @param string $transport Transport class to add, must support the \Expansa\Http\Transport interface
+     * @param string $transport Transport class to add, must support the Transport interface
      */
     public static function add_transport(string $transport): void
     {

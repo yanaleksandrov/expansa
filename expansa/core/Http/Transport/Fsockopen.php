@@ -61,11 +61,11 @@ final class Fsockopen implements Transport
      * @param string|Stringable $url     URL to request
      * @param array              $headers Associative array of request headers
      * @param string|array       $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
-     * @param array              $options Request options, see {@see \Expansa\Http\Requests::response()} for documentation
+     * @param array              $options Request options, see {@see Requests::response()} for documentation
      * @return string Raw HTTP result
      * @throws InvalidArgument When the passed $data parameter is not an array or string.
-     * @throws \Expansa\Http\HttpException       On failure to connect to socket (`fsockopenerror`)
-     * @throws \Expansa\Http\HttpException       On socket timeout (`timeout`)
+     * @throws HttpException       On failure to connect to socket (`fsockopenerror`)
+     * @throws HttpException       On socket timeout (`timeout`)
      */
     public function request(
         string|Stringable $url,
@@ -350,7 +350,7 @@ final class Fsockopen implements Transport
     /**
      * Send multiple requests simultaneously
      *
-     * @param array $requests Request data (array of 'url', 'headers', 'data', 'options') as per {@see \Expansa\Http\Contracts\Transport::request()}
+     * @param array $requests Request data (array of 'url', 'headers', 'data', 'options') as per {@see Transport::request()}
      * @param array $options  Global options, see {@see Requests::response()} for documentation
      * @return array Array of Response objects (may contain \Expansa\Http\Exception or string responses as well)
      * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
@@ -466,8 +466,8 @@ final class Fsockopen implements Transport
      * @param string   $host    Host name to verify against
      * @param resource $context Stream context
      * @return bool
-     * @throws \Expansa\Http\HttpException On failure to connect via TLS (`fsockopen.ssl.connect_error`)
-     * @throws \Expansa\Http\HttpException On not obtaining a match for the host (`fsockopen.ssl.no_match`)
+     * @throws HttpException On failure to connect via TLS (`fsockopen.ssl.connect_error`)
+     * @throws HttpException On not obtaining a match for the host (`fsockopen.ssl.no_match`)
      */
     public function verify_certificate_from_context(string $host, $context)
     {
@@ -486,9 +486,8 @@ final class Fsockopen implements Transport
 
     /**
      * Self-test whether the transport can be used.
-     * The available capabilities to test for can be found in {@see \Expansa\Http\Contracts\Capability}.
+     * The available capabilities to test for can be found in {@see Capability}.
      *
-     * @codeCoverageIgnore
      * @param array<string, bool> $capabilities Optional. Associative array of capabilities to test against, i.e. `['<capability>' => true]`.
      * @return bool Whether the transport can be used.
      */

@@ -141,7 +141,7 @@ final class Curl implements Transport
      * @param array             $options Request options.
      * @return string Raw HTTP result
      * @throws InvalidArgument When the passed $data parameter is not an array or string.
-     * @throws \Expansa\Http\HttpException       On a cURL error (`curlerror`)
+     * @throws HttpException       On a cURL error (`curlerror`)
      */
     public function request(string|Stringable $url, array $headers = [], string|array $data = [], array $options = []): string
     {
@@ -326,7 +326,7 @@ final class Curl implements Transport
      * @param string       $url     URL to request
      * @param array        $headers Associative array of request headers
      * @param string|array $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
-     * @param array        $options Request options, see {@see \Expansa\Http\Requests::response()} for documentation
+     * @param array        $options Request options, see {@see Requests::response()} for documentation
      * @return CurlHandle Subrequest's cURL handle
      */
     public function &get_subrequest_handle(string $url, array $headers, string|array $data, array $options): CurlHandle
@@ -357,7 +357,7 @@ final class Curl implements Transport
      * @param string       $url     URL to request
      * @param array        $headers Associative array of request headers
      * @param string|array $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
-     * @param array        $options Request options, see {@see \Expansa\Http\Requests::response()} for documentation
+     * @param array        $options Request options, see {@see Requests::response()} for documentation
      */
     private function setup_handle(string $url, array $headers, string|array $data, array $options)
     {
@@ -466,7 +466,7 @@ final class Curl implements Transport
      * @param string $response Response data from the body
      * @param array  $options  Request options
      * @return string|false HTTP response data including headers. False if non-blocking.
-     * @throws \Expansa\Http\HttpException If the request resulted in a cURL error.
+     * @throws HttpException If the request resulted in a cURL error.
      */
     public function process_response(string $response, array $options): false|string
     {
@@ -599,7 +599,7 @@ final class Curl implements Transport
 
     /**
      * Self-test whether the transport can be used.
-     * The available capabilities to test for can be found in {@see \Expansa\Http\Contracts\Capability}.
+     * The available capabilities to test for can be found in {@see Capability}.
      *
      * @codeCoverageIgnore
      * @param array<string, bool> $capabilities Optional. Associative array of capabilities to test against, i.e. `['<capability>' => true]`.

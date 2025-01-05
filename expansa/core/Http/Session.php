@@ -148,7 +148,7 @@ class Session
 
     /**
      * Send a PATCH request
-     * Note: Unlike {@see \Expansa\Http\Session::post()} and {@see \Expansa\Http\Session::put()},
+     * Note: Unlike {@see Session::post()} and {@see Session::put()},
      * `$headers` is required, as the specification recommends that should send an ETag
      *
      * @link https://tools.ietf.org/html/rfc5789
@@ -166,8 +166,8 @@ class Session
      * @param string     $url     URL to request
      * @param array      $headers Extra headers to send with the request
      * @param array|null $data    Data to send as a query string for GET/HEAD requests or in the body for POST requests.
-     * @param string     $type    HTTP request type (use \Expansa\Http\Requests constants)
-     * @param array      $options Options for the request (see {@see \Expansa\Http\Requests::request()})
+     * @param string     $type    HTTP request type (use Requests constants)
+     * @param array      $options Options for the request (see {@see Requests::request()})
      * @return Response
      * @throws HttpException On invalid URLs (`nonhttp`)
      */
@@ -188,7 +188,7 @@ class Session
      * Send multiple HTTP requests simultaneously.
      *
      * @param array $requests Requests data.
-     * @param array $options  Global and default options (see {@see \Expansa\Http\Requests::request()})
+     * @param array $options  Global and default options (see {@see Requests::request()})
      * @return array Responses (either Response or a Exception object)
      *
      * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
@@ -215,7 +215,7 @@ class Session
     /**
      * Merge a request's data with the default data
      *
-     * @param array $request       Request data (same form as {@see \Expansa\Http\Session::request_multiple()})
+     * @param array $request       Request data (same form as {@see Session::request_multiple()})
      * @param bool  $merge_options Should we merge options as well?
      * @return array Request data
      */
