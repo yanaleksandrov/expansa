@@ -138,7 +138,7 @@ final class Curl implements Transport
      * @param string|Stringable $url     URL to request
      * @param array             $headers Associative array of request headers
      * @param string|array      $data    Data to send either as the POST body, or as parameters in the URL for a GET/HEAD
-     * @param array             $options Request options, see {@see \Expansa\Http\Requests::response()} for documentation
+     * @param array             $options Request options.
      * @return string Raw HTTP result
      * @throws InvalidArgument When the passed $data parameter is not an array or string.
      * @throws \Expansa\Http\HttpException       On a cURL error (`curlerror`)
@@ -160,7 +160,7 @@ final class Curl implements Transport
         $options['hooks']->dispatch('curl.before_send', [&$this->handle]);
 
         if ($options['filename'] !== false) {
-			$this->stream_handle = @fopen($options['filename'], 'wb');
+            $this->stream_handle = @fopen($options['filename'], 'wb');
             if ($this->stream_handle === false) {
                 $error = error_get_last();
                 if (!is_array($error)) {
@@ -233,7 +233,7 @@ final class Curl implements Transport
      *
      * @param array $requests Request data
      * @param array $options  Global options
-     * @return array Array of \Expansa\Http\Response objects (may contain \Expansa\Http\Exception or string responses as well)
+     * @return array Array of Response objects.
      * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
      */
     public function request_multiple(array $requests, array $options): array

@@ -3,7 +3,7 @@
 namespace Expansa\Http;
 
 use Expansa\Http\Cookie\Jar;
-use Expansa\Http\Exception\Http;
+use Expansa\Http\Exception\HttpStatuses;
 use Expansa\Http\Response\Headers;
 
 /**
@@ -109,7 +109,7 @@ class Response
      *
      * @param bool $allow_redirects Set false to throw on a 3xx as well
      * @throws HttpException If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
-     * @throws \Expansa\Http\Exception\Http On non-successful status code. Exception class corresponds to "Status" + code (e.g. {@see \Expansa\Http\Exception\Http\Status404})
+     * @throws HttpStatuses On non-successful status code. Exception class corresponds to "Status" + code (e.g. {@see \Expansa\Http\Exception\Http\Status404})
      */
     public function throw_for_status(bool $allow_redirects = true): void
     {
@@ -118,7 +118,7 @@ class Response
                 throw new HttpException('Redirection not allowed', 'response.no_redirects', $this);
             }
         } elseif (!$this->success) {
-            $exception = Http::get_class($this->status_code);
+            $exception = HttpStatuses::get_class($this->status_code);
             throw new $exception(null, $this);
         }
     }

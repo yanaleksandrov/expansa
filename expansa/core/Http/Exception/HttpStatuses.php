@@ -10,7 +10,7 @@ use Expansa\Http\Exception\Http\StatusUnknown;
  *
  * @package Expansa\Http
  */
-class Http extends HttpException
+class HttpStatuses extends HttpException
 {
     /**
      * HTTP status code

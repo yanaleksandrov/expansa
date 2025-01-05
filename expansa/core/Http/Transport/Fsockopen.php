@@ -351,7 +351,7 @@ final class Fsockopen implements Transport
      * Send multiple requests simultaneously
      *
      * @param array $requests Request data (array of 'url', 'headers', 'data', 'options') as per {@see \Expansa\Http\Contracts\Transport::request()}
-     * @param array $options  Global options, see {@see \Expansa\Http\Requests::response()} for documentation
+     * @param array $options  Global options, see {@see Requests::response()} for documentation
      * @return array Array of Response objects (may contain \Expansa\Http\Exception or string responses as well)
      * @throws InvalidArgument When the passed $requests argument is not an array or iterable object with array access.
      */

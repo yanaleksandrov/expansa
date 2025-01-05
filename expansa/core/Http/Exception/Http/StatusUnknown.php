@@ -2,7 +2,7 @@
 
 namespace Expansa\Http\Exception\Http;
 
-use Expansa\Http\Exception\Http;
+use Expansa\Http\Exception\HttpStatuses;
 use Expansa\Http\Response;
 
 /**
@@ -10,7 +10,7 @@ use Expansa\Http\Response;
  *
  * @package Requests\Exceptions
  */
-final class StatusUnknown extends Http
+final class StatusUnknown extends HttpStatuses
 {
     /**
      * HTTP status code
