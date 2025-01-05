@@ -2,8 +2,6 @@
 
 namespace Expansa\Http\Exception;
 
-use Expansa\Http\Exception\HttpException;
-
 /**
  * Exception for when an incorrect number of arguments are passed to a method.
  *

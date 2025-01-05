@@ -23,7 +23,7 @@ interface Transport
     /**
      * Send multiple requests simultaneously
      *
-     * @param array $requests Request data (array of 'url', 'headers', 'data', 'options') as per {@see Transport::request()}
+     * @param array $requests Request data (array of 'url', 'headers', 'data', 'options') as per
      * @param array $options  Global options, see {@see Requests::response()} for documentation
      * @return array Array of Response objects (may contain Exception or string responses as well)
      */
@@ -34,7 +34,7 @@ interface Transport
      *
      * The available capabilities to test for can be found in {@see Capability}.
      *
-     * @param array<string, bool> $capabilities Associative array of capabilities to test against, i.e. `['<capability>' => true]`.
+     * @param array<string, bool> $capabilities Associative array of capabilities to test against.
      * @return bool Whether the transport can be used.
      */
     public static function test(array $capabilities = []): bool;

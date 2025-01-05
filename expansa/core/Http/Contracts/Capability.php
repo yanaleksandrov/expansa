@@ -24,7 +24,5 @@ interface Capability
      *
      * @var array<string>
      */
-    public const ALL = [
-        self::SSL,
-    ];
+    public const ALL = [self::SSL];
 }
