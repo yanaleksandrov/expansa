@@ -17,14 +17,14 @@ class Http extends Exception
      *
      * @var int
      */
-    protected int $code = 0;
+    protected $code = 0;
 
     /**
      * Reason phrase
      *
      * @var string
      */
-    protected string $reason = 'Unknown';
+    protected $reason = 'Unknown';
 
     /**
      * Create a new exception
