@@ -6,7 +6,7 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use ReturnTypeWillChange;
-use Expansa\Http\HttpException;
+use Expansa\Http\Exception\HttpException;
 
 /**
  * Case-insensitive dictionary, suitable for HTTP headers

@@ -7,7 +7,7 @@ use ArrayIterator;
 use IteratorAggregate;
 use ReturnTypeWillChange;
 use Expansa\Http\Cookie;
-use Expansa\Http\HttpException;
+use Expansa\Http\Exception\HttpException;
 use Expansa\Http\Contracts\HookManager;
 use Expansa\Http\Iri;
 use Expansa\Http\Response;

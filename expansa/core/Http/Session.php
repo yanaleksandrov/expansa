@@ -2,6 +2,7 @@
 
 namespace Expansa\Http;
 
+use Expansa\Http\Exception\HttpException;
 use Stringable;
 use Expansa\Http\Cookie\Jar;
 use Expansa\Http\Exception\InvalidArgument;

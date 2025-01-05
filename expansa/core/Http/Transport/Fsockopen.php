@@ -4,7 +4,7 @@ namespace Expansa\Http\Transport;
 
 use Stringable;
 use Expansa\Http\Contracts\Capability;
-use Expansa\Http\HttpException;
+use Expansa\Http\Exception\HttpException;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Port;
 use Expansa\Http\Requests;

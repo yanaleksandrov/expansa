@@ -2,6 +2,8 @@
 
 namespace Expansa\Http;
 
+use Expansa\Http\Exception\HttpException;
+
 /**
  * Port utilities for Requests
  * Find the correct port depending on the Request type.

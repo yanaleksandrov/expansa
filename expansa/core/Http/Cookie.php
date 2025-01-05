@@ -2,6 +2,7 @@
 
 namespace Expansa\Http;
 
+use Expansa\Http\Exception\HttpException;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Response\Headers;
 use Expansa\Http\Utility\CaseInsensitiveDictionary;

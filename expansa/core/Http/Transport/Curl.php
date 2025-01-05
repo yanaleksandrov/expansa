@@ -8,7 +8,7 @@ use RecursiveArrayIterator;
 use RecursiveIteratorIterator;
 use Expansa\Http\Hooks;
 use Expansa\Http\Contracts\Capability;
-use Expansa\Http\HttpException;
+use Expansa\Http\Exception\HttpException;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Exception\Transport\Curl as CurlException;
 use Expansa\Http\Requests;

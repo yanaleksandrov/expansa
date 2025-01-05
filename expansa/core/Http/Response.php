@@ -3,6 +3,7 @@
 namespace Expansa\Http;
 
 use Expansa\Http\Cookie\Jar;
+use Expansa\Http\Exception\HttpException;
 use Expansa\Http\Exception\HttpStatuses;
 use Expansa\Http\Response\Headers;
 

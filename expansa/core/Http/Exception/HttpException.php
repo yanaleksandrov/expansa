@@ -1,6 +1,6 @@
 <?php
 
-namespace Expansa\Http;
+namespace Expansa\Http\Exception;
 
 use Exception as PHPException;
 

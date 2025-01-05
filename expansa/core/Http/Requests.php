@@ -2,6 +2,7 @@
 
 namespace Expansa\Http;
 
+use Expansa\Http\Exception\HttpException;
 use Stringable;
 use Expansa\Http\Auth\Basic;
 use Expansa\Http\Contracts\Capability;

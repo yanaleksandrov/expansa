@@ -3,7 +3,7 @@
 namespace Expansa\Http\Response;
 
 use ArrayIterator;
-use Expansa\Http\HttpException;
+use Expansa\Http\Exception\HttpException;
 use Expansa\Http\Exception\InvalidArgument;
 use Expansa\Http\Utility\CaseInsensitiveDictionary;
 use Expansa\Http\Utility\FilteredIterator;
