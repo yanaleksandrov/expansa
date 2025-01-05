@@ -158,14 +158,7 @@ class Iri
     {
         if (method_exists($this, 'set_' . $name)) {
             call_user_func([$this, 'set_' . $name], $value);
-        } elseif (
-               $name === 'iauthority'
-            || $name === 'iuserinfo'
-            || $name === 'ihost'
-            || $name === 'ipath'
-            || $name === 'iquery'
-            || $name === 'ifragment'
-        ) {
+        } elseif (in_array($name, ['iauthority', 'iuserinfo', 'ihost', 'ipath', 'iquery', 'ifragment'], true)) {
             call_user_func([$this, 'set_' . substr($name, 1)], $value);
         }
     }

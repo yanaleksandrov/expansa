@@ -156,7 +156,7 @@ class Requests
      *
      * @var string|Stringable|bool
      */
-    protected static string|Stringable|bool $certificate_path = __DIR__ . '/../certificates/cacert.pem';
+    protected static string|Stringable|bool $certificatePath = __DIR__ . '/../certificates/cacert.pem';
 
     /**
      * All (known) valid deflate, gzip header magic markers.
@@ -167,7 +167,7 @@ class Requests
      *
      * @var array
      */
-    private static array $magic_compression_headers = [
+    private static array $magicCompressionHeaders = [
         "\x1f\x8b" => true, // Gzip marker.
         "\x78\x01" => true, // Zlib marker - level 1.
         "\x78\x5e" => true, // Zlib marker - level 2 to 5.
@@ -366,10 +366,8 @@ class Requests
     }
 
     /**
-     * Main interface for HTTP requests
-     * This method initiates a request and sends it via transport before parsing.
-     * The `$options` parameter takes an associative array with the following
-     * options:
+     * Main interface for HTTP requests. This method initiates a request and sends it via transport before parsing.
+     * The `$options` parameter takes an associative array with the following options:
      * - `timeout`: How long should we wait for a response?
      *    Note: for cURL, a minimum of 1 second applies, as DNS resolution
      *    operates at second-resolution only.
@@ -454,7 +452,7 @@ class Requests
 
         $options['hooks']->dispatch('requests.before_parse', [&$response, $url, $headers, $data, $type, $options]);
 
-        return self::parse_response($response, $url, $headers, $data, $options);
+        return self::parseResponse($response, $url, $headers, $data, $options);
     }
 
     /**
@@ -579,7 +577,7 @@ class Requests
     protected static function getDefaultOptions(bool $multirequest = false): array
     {
         $defaults           = static::OPTION_DEFAULTS;
-        $defaults['verify'] = self::$certificate_path;
+        $defaults['verify'] = self::$certificatePath;
 
         if ($multirequest !== false) {
             $defaults['complete'] = null;
@@ -595,7 +593,7 @@ class Requests
      */
     public static function getCertificatePath(): string
     {
-        return self::$certificate_path;
+        return self::$certificatePath;
     }
 
     /**
@@ -605,7 +603,7 @@ class Requests
      */
     public static function setCertificatePath(string|Stringable|bool $path): void
     {
-        self::$certificate_path = $path;
+        self::$certificatePath = $path;
     }
 
     /**
@@ -614,11 +612,11 @@ class Requests
      *
      * @param string     $url     URL to request
      * @param array      $headers Extra headers to send with the request
-     * @param array|null $data    Data to send either as a query string for GET/HEAD requests, or in the body for POST requests
+     * @param array|null $data    Data is sent as a query string for GET/HEAD requests or in the body for POST requests.
      * @param string     $type    HTTP request type
      * @param array      $options Options for the request
      * @return void
-     * @throws HttpException When the $url is not an http(s) URL.
+     * @throws HttpException When the $url is not a http(s) URL.
      */
     protected static function setDefaults(&$url, &$headers, &$data, &$type, &$options): void
     {
@@ -687,7 +685,7 @@ class Requests
      * @throws HttpException On missing head/body separator (`noversion`)
      * @throws HttpException On missing head/body separator (`toomanyredirects`)
      */
-    protected static function parse_response(
+    protected static function parseResponse(
         string $headers,
         string $url,
         array $req_headers,
@@ -707,7 +705,6 @@ class Requests
         if (!$options['filename']) {
             $pos = strpos($headers, "\r\n\r\n");
             if ($pos === false) {
-                // Crap!
                 throw new HttpException('Missing header/body separator', 'requests.no_crlf_separator');
             }
 
@@ -729,9 +726,9 @@ class Requests
             throw new HttpException('Response could not be parsed', 'noversion', $headers);
         }
 
-        $return->protocol_version = (float) $matches[1];
-        $return->status_code      = (int) $matches[2];
-        if ($return->status_code >= 200 && $return->status_code < 300) {
+        $return->protocolVersion = (float) $matches[1];
+        $return->statusCode      = (int) $matches[2];
+        if ($return->statusCode >= 200 && $return->statusCode < 300) {
             $return->success = true;
         }
 
@@ -760,7 +757,7 @@ class Requests
 
         if ($return->isRedirect() && $options['follow_redirects'] === true) {
             if (isset($return->headers['location']) && $options['redirected'] < $options['redirects']) {
-                if ($return->status_code === 303) {
+                if ($return->statusCode === 303) {
                     $options['type'] = self::GET;
                 }
 
@@ -806,11 +803,13 @@ class Requests
     public static function parseMultiple(string &$response, array $request): void
     {
         try {
-            $url      = $request['url'];
-            $headers  = $request['headers'];
-            $data     = $request['data'];
-            $options  = $request['options'];
-            $response = self::parse_response($response, $url, $headers, $data, $options);
+            $response = self::parseResponse(
+                $response,
+                $request['url'],
+                $request['headers'],
+                $request['data'],
+                $request['options']
+            );
         } catch (HttpException $e) {
             $response = $e;
         }
@@ -859,20 +858,13 @@ class Requests
      *
      * @param iterable $dictionary Dictionary of header values
      * @return array List of headers
-     *
-     * @throws InvalidArgument When the passed argument is not iterable.
      */
     public static function flatten(iterable $dictionary): array
     {
-        if (is_iterable($dictionary) === false) {
-            throw InvalidArgument::create(1, '$dictionary', 'iterable', gettype($dictionary));
-        }
-
         $return = [];
         foreach ($dictionary as $key => $value) {
             $return[] = sprintf('%s: %s', $key, $value);
         }
-
         return $return;
     }
 
@@ -892,7 +884,7 @@ class Requests
         }
 
         $marker = substr($data, 0, 2);
-        if (!isset(self::$magic_compression_headers[$marker])) {
+        if (!isset(self::$magicCompressionHeaders[$marker])) {
             // Not actually compressed. Probably cURL ruining this for us.
             return $data;
         }
@@ -940,31 +932,31 @@ class Requests
      * @link https://www.php.net/gzinflate#70875
      * @link https://www.php.net/gzinflate#77336
      *
-     * @param string $gz_data String to decompress.
+     * @param string $gzData String to decompress.
      * @return string|bool False on failure.
      */
-    public static function compatibleGzinflate(string $gz_data): string|bool
+    public static function compatibleGzinflate(string $gzData): string|bool
     {
-        if (trim($gz_data) === '') {
+        if (trim($gzData) === '') {
             return false;
         }
 
         // Compressed data might contain a full zlib header, if so strip it for gzinflate()
-        if (str_starts_with($gz_data, "\x1f\x8b\x08")) {
+        if (str_starts_with($gzData, "\x1f\x8b\x08")) {
             $i   = 10;
-            $flg = ord(substr($gz_data, 3, 1));
+            $flg = ord(substr($gzData, 3, 1));
             if ($flg > 0) {
                 if ($flg & 4) {
-                    list($xlen) = unpack('v', substr($gz_data, $i, 2));
+                    list($xlen) = unpack('v', substr($gzData, $i, 2));
                     $i         += 2 + $xlen;
                 }
 
                 if ($flg & 8) {
-                    $i = strpos($gz_data, "\0", $i) + 1;
+                    $i = strpos($gzData, "\0", $i) + 1;
                 }
 
                 if ($flg & 16) {
-                    $i = strpos($gz_data, "\0", $i) + 1;
+                    $i = strpos($gzData, "\0", $i) + 1;
                 }
 
                 if ($flg & 2) {
@@ -972,7 +964,7 @@ class Requests
                 }
             }
 
-            $decompressed = self::compatibleGzinflate(substr($gz_data, $i));
+            $decompressed = self::compatibleGzinflate(substr($gzData, $i));
             if ($decompressed !== false) {
                 return $decompressed;
             }
@@ -986,30 +978,30 @@ class Requests
         $huffman_encoded = false;
 
         // low nibble of first byte should be 0x08
-        list(, $first_nibble) = unpack('h', $gz_data);
+        list(, $first_nibble) = unpack('h', $gzData);
 
         // First 2 bytes should be divisible by 0x1F
-        list(, $first_two_bytes) = unpack('n', $gz_data);
+        list(, $first_two_bytes) = unpack('n', $gzData);
 
         if ($first_nibble === 0x08 && ($first_two_bytes % 0x1F) === 0) {
             $huffman_encoded = true;
         }
 
         if ($huffman_encoded) {
-            $decompressed = @gzinflate(substr($gz_data, 2));
+            $decompressed = @gzinflate(substr($gzData, 2));
             if ($decompressed !== false) {
                 return $decompressed;
             }
         }
 
-        if (str_starts_with($gz_data, "\x50\x4b\x03\x04")) {
+        if (str_starts_with($gzData, "\x50\x4b\x03\x04")) {
             // ZIP file format header
             // Offset 6: 2 bytes, General-purpose field
             // Offset 26: 2 bytes, filename length
             // Offset 28: 2 bytes, optional field length
             // Offset 30: Filename field, followed by optional field, followed
             // immediately by data
-            list(, $general_purpose_flag) = unpack('v', substr($gz_data, 6, 2));
+            list(, $general_purpose_flag) = unpack('v', substr($gzData, 6, 2));
 
             // If the file has been compressed on the fly, 0x08 bit is set of
             // the general purpose field. We can use this to differentiate
@@ -1018,13 +1010,13 @@ class Requests
 
             if (!$zip_compressed_on_the_fly) {
                 // Don't attempt to decode a compressed zip file
-                return $gz_data;
+                return $gzData;
             }
 
             // Determine the first byte of data, based on the above ZIP header
             // offsets:
-            $first_file_start = array_sum(unpack('v2', substr($gz_data, 26, 4)));
-            $decompressed     = @gzinflate(substr($gz_data, 30 + $first_file_start));
+            $first_file_start = array_sum(unpack('v2', substr($gzData, 26, 4)));
+            $decompressed     = @gzinflate(substr($gzData, 30 + $first_file_start));
             if ($decompressed !== false) {
                 return $decompressed;
             }
@@ -1033,14 +1025,14 @@ class Requests
         }
 
         // Finally fall back to straight gzinflate
-        $decompressed = @gzinflate($gz_data);
+        $decompressed = @gzinflate($gzData);
         if ($decompressed !== false) {
             return $decompressed;
         }
 
         // Fallback for all above failing, not expected, but included for
         // debugging and preventing regressions and to track stats
-        $decompressed = @gzinflate(substr($gz_data, 2));
+        $decompressed = @gzinflate(substr($gzData, 2));
         if ($decompressed !== false) {
             return $decompressed;
         }

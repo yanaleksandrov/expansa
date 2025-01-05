@@ -81,14 +81,14 @@ final class Ipv6
     {
         // Prepare the IP to be compressed.
         // Note: Input validation is handled in the `uncompress()` method, which is the first call made in this method.
-        $ip       = self::uncompress($ip);
-        $ip_parts = self::splitV6V4($ip);
+        $ip      = self::uncompress($ip);
+        $ipParts = self::splitV6V4($ip);
 
         // Replace all leading zeros
-        $ip_parts[0] = preg_replace('/(^|:)0+([0-9])/', '\1\2', $ip_parts[0]);
+        $ipParts[0] = preg_replace('/(^|:)0+([0-9])/', '\1\2', $ipParts[0]);
 
         // Find bunches of zeros
-        if (preg_match_all('/(?:^|:)(?:0(?::|$))+/', $ip_parts[0], $matches, PREG_OFFSET_CAPTURE)) {
+        if (preg_match_all('/(?:^|:)(?:0(?::|$))+/', $ipParts[0], $matches, PREG_OFFSET_CAPTURE)) {
             $max = 0;
             $pos = null;
             foreach ($matches[0] as $match) {
@@ -98,13 +98,13 @@ final class Ipv6
                 }
             }
 
-            $ip_parts[0] = substr_replace($ip_parts[0], '::', $pos, $max);
+            $ipParts[0] = substr_replace($ipParts[0], '::', $pos, $max);
         }
 
-        if ($ip_parts[1] !== '') {
-            return implode(':', $ip_parts);
+        if ($ipParts[1] !== '') {
+            return implode(':', $ipParts);
         } else {
-            return $ip_parts[0];
+            return $ipParts[0];
         }
     }
 

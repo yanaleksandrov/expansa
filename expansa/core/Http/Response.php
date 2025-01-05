@@ -41,14 +41,14 @@ class Response
      *
      * @var int|bool
      */
-    public int|bool $status_code = false;
+    public int|bool $statusCode = false;
 
     /**
      * Protocol version, false if non-blocking
      *
      * @var float|bool
      */
-    public float|bool $protocol_version = false;
+    public float|bool $protocolVersion = false;
 
     /**
      * Whether the request succeeded or not
@@ -101,7 +101,7 @@ class Response
      */
     public function isRedirect(): bool
     {
-        $code = $this->status_code;
+        $code = $this->statusCode;
         return is_int($code) && (in_array($code, [300, 301, 302, 303, 307], true) || ($code > 307 && $code < 400));
     }
 
@@ -119,7 +119,7 @@ class Response
                 throw new HttpException('Redirection not allowed', 'response.no_redirects', $this);
             }
         } elseif (!$this->success) {
-            $exception = HttpStatuses::getClass($this->status_code);
+            $exception = HttpStatuses::getClass($this->statusCode);
             throw new $exception(null, $this);
         }
     }

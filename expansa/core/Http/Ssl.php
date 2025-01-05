@@ -32,28 +32,28 @@ final class Ssl
             throw InvalidArgument::create(2, '$cert', 'array|ArrayAccess', gettype($cert));
         }
 
-        $has_dns_alt = false;
+        $hasDnsAlt = false;
 
         // Check the subjectAltName
         if (!empty($cert['extensions']['subjectAltName'])) {
-            $altnames = explode(',', $cert['extensions']['subjectAltName']);
-            foreach ($altnames as $altname) {
-                $altname = trim($altname);
-                if (!str_starts_with($altname, 'DNS:')) {
+            $altNames = explode(',', $cert['extensions']['subjectAltName']);
+            foreach ($altNames as $altName) {
+                $altName = trim($altName);
+                if (!str_starts_with($altName, 'DNS:')) {
                     continue;
                 }
 
-                $has_dns_alt = true;
+                $hasDnsAlt = true;
 
                 // Strip the 'DNS:' prefix and trim whitespace
-                $altname = trim(substr($altname, 4));
+                $altName = trim(substr($altName, 4));
 
-                if (self::matchDomain($host, $altname) === true) {
+                if (self::matchDomain($host, $altName) === true) {
                     return true;
                 }
             }
 
-            if ($has_dns_alt === true) {
+            if ($hasDnsAlt === true) {
                 return false;
             }
         }
