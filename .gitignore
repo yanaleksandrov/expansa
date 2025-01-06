@@ -2,10 +2,17 @@
 node_modules/
 
 # Optional npm cache directory
-.npm
+.npm/
 
 # dotenv environment variables file
 .env
-/vendor/
-/.idea/
-/.idea
+
+# Vendor directory (common in PHP projects)
+vendor/
+
+# IDE files (JetBrains IDEA)
+.idea/
+
+# OS-specific files
+.DS_Store    # macOS
+Thumbs.db    # Windows
