@@ -334,7 +334,7 @@ class Table
 
     protected function createCommand(string $name, array $parameters = []): Fluent
     {
-        return new Fluent(array_merge(compact('name'), $parameters));
+        return new Fluent(array_merge(['name' => $name], $parameters));
     }
 
     protected function createIndexName(string $type, array $columns): string
