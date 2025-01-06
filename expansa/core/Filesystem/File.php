@@ -241,7 +241,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         /**
          * Check file validation.
          */
-        $validator = ( new Validator(
+        $validator = Validator::data(
             $file,
             [
                 'type'     => 'type:' . $mimes,
@@ -250,7 +250,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
                 'size'     => 'min:0|max:' . $maxFileSize,
                 'name'     => 'extension:' . $extensions,
             ]
-        ) )->extend(
+        )->extend(
             'type:type',
             I18n::_t('Sorry, you are not allowed to upload this file type.')
         )->extend(

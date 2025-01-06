@@ -56,14 +56,14 @@ class Schema
      */
     public static function validate(array $userdata): Validator|array
     {
-        return ( new Validator(
+        return Validator::data(
             $userdata,
             [
                 'login'    => 'lengthMin:3|lengthMax:60',
                 'password' => 'required',
                 'email'    => 'email|unique',
             ]
-        ) )->extend(
+        )->extend(
             'email:unique',
             I18n::_t('Sorry, that email address or login is already used!'),
             fn($validator) => ! self::exists(

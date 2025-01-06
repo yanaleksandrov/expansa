@@ -124,14 +124,14 @@ final class User extends Schema
         )->apply();
 
         // validate incoming user data
-        $userdata = ( new Validator(
+        $userdata = Validator::data(
             $userdata,
             [
                 'login'    => 'lengthMin:3|lengthMax:60',
                 'password' => 'required',
                 'email'    => 'email|unique',
             ]
-        ) )->extend(
+        )->extend(
             'email:unique',
             I18n::_t('Sorry, that email address or login is already used!'),
             fn($validator) => ! self::exists(
@@ -362,13 +362,13 @@ final class User extends Schema
             ]
         )->apply();
 
-        $userdata = ( new Validator(
+        $userdata = Validator::data(
             $userdata,
             [
                 'login'    => 'lengthMin:3|lengthMax:60',
                 'password' => 'required',
             ]
-        ) )->apply();
+        )->apply();
 
         if ($userdata instanceof Validator) {
             return new Error('user-login', $userdata);

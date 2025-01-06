@@ -11,8 +11,7 @@ use Expansa\I18n;
  * Validates input against certain criteria.
  *
     print_r(
-        (
-        new Validator(
+        Validator::data(
             [
                 'field1'  => '2',
                 'field2'  => '',
@@ -83,7 +82,6 @@ use Expansa\I18n;
                 'field31' => 'time:H:i:s',
                 'field32' => 'required|numeric',
             ]
-        )
         )->extend(
             'time',
             I18n::_t( 'Time must be in \'%s\' format.' ),
@@ -185,6 +183,19 @@ final class Validator
                 'extension'    => I18n::_t('Invalid file extension. Accepted extensions are: %s.'),
             ]
         );
+    }
+
+    /**
+     * Setup validator rules via `data` method.
+     *
+     * @param array $fields
+     * @param array $rules
+     * @param bool  $break
+     * @return Validator
+     */
+    public function data(array $fields, array $rules, bool $break = false): self
+    {
+        return new self($fields, $rules, $break);
     }
 
     /**
