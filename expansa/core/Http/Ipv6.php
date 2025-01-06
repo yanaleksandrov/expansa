@@ -38,9 +38,9 @@ final class Ipv6
             return $ip;
         }
 
-        list($ip1, $ip2) = explode('::', $ip);
-        $c1              = ($ip1 === '') ? -1 : substr_count($ip1, ':');
-        $c2              = ($ip2 === '') ? -1 : substr_count($ip2, ':');
+        [$ip1, $ip2] = explode('::', $ip);
+        $c1          = ($ip1 === '') ? -1 : substr_count($ip1, ':');
+        $c2          = ($ip2 === '') ? -1 : substr_count($ip2, ':');
 
         if (str_contains($ip2, '.')) {
             ++$c2;

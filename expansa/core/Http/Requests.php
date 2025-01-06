@@ -73,7 +73,6 @@ class Requests
     /**
      * PATCH method
      *
-     * @link https://tools.ietf.org/html/rfc5789
      * @var string
      */
     public const PATCH = 'PATCH';
@@ -206,19 +205,17 @@ class Requests
     protected static function getTransportClass(array $capabilities = []): string
     {
         // Caching code, don't bother testing coverage.
-        // @codeCoverageIgnoreStart
         // Array of capabilities as a string to be used as an array key.
         ksort($capabilities);
-        $cap_string = serialize($capabilities);
+        $capString = serialize($capabilities);
 
         // Don't search for a transport if it's already been done for these $capabilities.
-        if (isset(self::$transport[$cap_string])) {
-            return self::$transport[$cap_string];
+        if (isset(self::$transport[$capString])) {
+            return self::$transport[$capString];
         }
 
         // Ensure we will not run this same check again later on.
-        self::$transport[$cap_string] = '';
-        // @codeCoverageIgnoreEnd
+        self::$transport[$capString] = '';
 
         if (empty(self::$transports)) {
             self::$transports = self::DEFAULT_TRANSPORTS;
@@ -232,12 +229,12 @@ class Requests
 
             $result = $class::test($capabilities);
             if ($result === true) {
-                self::$transport[$cap_string] = $class;
+                self::$transport[$capString] = $class;
                 break;
             }
         }
 
-        return self::$transport[$cap_string];
+        return self::$transport[$capString];
     }
 
     /**
@@ -250,11 +247,9 @@ class Requests
     protected static function getTransport(array $capabilities = []): Transport
     {
         $class = self::getTransportClass($capabilities);
-
         if ($class === '') {
             throw new HttpException('No working transports found', 'notransport', self::$transports);
         }
-
         return new $class();
     }
 
@@ -411,10 +406,10 @@ class Requests
      *    HEAD/GET/DELETE, 'body' for POST/PUT/OPTIONS/PATCH)
      *
      * @param string|Stringable $url     URL to request
-     * @param array              $headers Extra headers to send with the request
-     * @param array|null         $data    Data to send either as a query string for GET/HEAD requests, or in the body for POST requests
-     * @param string             $type    HTTP request type (use Requests constants)
-     * @param array              $options Options for the request (see description for more information)
+     * @param array             $headers Extra headers to send with the request
+     * @param array|null        $data    Data to send as a query string for GET/HEAD, or in the body for POST requests.
+     * @param string            $type    HTTP request type (use Requests constants)
+     * @param array             $options Options for the request (see description for more information)
      * @return Response
      * @throws HttpException On invalid URLs (`nonhttp`)
      */
@@ -443,8 +438,8 @@ class Requests
                 $transport = new $transport();
             }
         } else {
-            $need_ssl     = (stripos($url, 'https://') === 0);
-            $capabilities = [Capability::SSL => $need_ssl];
+            $needSsl      = (stripos($url, 'https://') === 0);
+            $capabilities = [Capability::SSL => $needSsl];
             $transport    = self::getTransport($capabilities);
         }
 
@@ -530,7 +525,13 @@ class Requests
                 $request['options'] = array_merge($options, $request['options']);
             }
 
-            self::setDefaults($request['url'], $request['headers'], $request['data'], $request['type'], $request['options']);
+            self::setDefaults(
+                $request['url'],
+                $request['headers'],
+                $request['data'],
+                $request['type'],
+                $request['options']
+            );
 
             // Ensure we only hook in once
             if ($request['options']['hooks'] !== $options['hooks']) {
@@ -571,15 +572,15 @@ class Requests
      * Get the default options
      *
      * @see Requests::request() for values returned by this method
-     * @param bool $multirequest Is this a multirequest?
+     * @param bool $multiRequest Is this a multi request?
      * @return array Default option values
      */
-    protected static function getDefaultOptions(bool $multirequest = false): array
+    protected static function getDefaultOptions(bool $multiRequest = false): array
     {
         $defaults           = static::OPTION_DEFAULTS;
         $defaults['verify'] = self::$certificatePath;
 
-        if ($multirequest !== false) {
+        if ($multiRequest !== false) {
             $defaults['complete'] = null;
         }
 
@@ -675,11 +676,11 @@ class Requests
     /**
      * HTTP response parser
      *
-     * @param string $headers     Full response text including headers and body
-     * @param string $url         Original request URL
-     * @param array  $req_headers Original $headers array passed to {@link request()}, in case we need to follow redirects
-     * @param array  $req_data    Original $data array passed to {@link request()}, in case we need to follow redirects
-     * @param array  $options     Original $options array passed to {@link request()}, in case we need to follow redirects
+     * @param string $headers    Full response text including headers and body
+     * @param string $url        Original request URL
+     * @param array  $reqHeaders Original $headers array passed to {@link request()} for handling redirects if needed.
+     * @param array  $reqData    Original $data array passed to {@link request()}, in case we need to follow redirects
+     * @param array  $options    Original $options array passed to {@link request()}, for handling redirects if needed.
      * @return Response
      * @throws HttpException On missing head/body separator (`requests.no_crlf_separator`)
      * @throws HttpException On missing head/body separator (`noversion`)
@@ -688,8 +689,8 @@ class Requests
     protected static function parseResponse(
         string $headers,
         string $url,
-        array $req_headers,
-        array $req_data,
+        array $reqHeaders,
+        array $reqData,
         array $options
     ): Response
     {
@@ -753,7 +754,7 @@ class Requests
             unset($return->headers['connection']);
         }
 
-        $options['hooks']->dispatch('requests.before_redirect_check', [&$return, $req_headers, $req_data, $options]);
+        $options['hooks']->dispatch('requests.before_redirect_check', [&$return, $reqHeaders, $reqData, $options]);
 
         if ($return->isRedirect() && $options['follow_redirects'] === true) {
             if (isset($return->headers['location']) && $options['redirected'] < $options['redirects']) {
@@ -771,13 +772,13 @@ class Requests
 
                 $hook_args = [
                     &$location,
-                    &$req_headers,
-                    &$req_data,
+                    &$reqHeaders,
+                    &$reqData,
                     &$options,
                     $return,
                 ];
                 $options['hooks']->dispatch('requests.before_redirect', $hook_args);
-                $redirected            = self::request($location, $req_headers, $req_data, $options['type'], $options);
+                $redirected            = self::request($location, $reqHeaders, $reqData, $options['type'], $options);
                 $redirected->history[] = $return;
                 return $redirected;
             } elseif ($options['redirected'] >= $options['redirects']) {
@@ -787,7 +788,7 @@ class Requests
 
         $return->redirects = $options['redirected'];
 
-        $options['hooks']->dispatch('requests.after_request', [&$return, $req_headers, $req_data, $options]);
+        $options['hooks']->dispatch('requests.after_request', [&$return, $reqHeaders, $reqData, $options]);
         return $return;
     }
 
@@ -796,7 +797,7 @@ class Requests
      * Internal use only. Converts a raw HTTP response to a Response while still executing a multiple request.
      * `$response` is either set to a Response instance, or an Exception object
      *
-     * @param string $response Full response text including headers and body (will be overwritten with Response instance)
+     * @param string $response Full response text including headers & body, will be overwritten with Response instance.
      * @param array  $request  Request data as passed into {@see Requests::requestMultiple()}
      * @return void
      */
@@ -832,8 +833,8 @@ class Requests
         $encoded = $data;
 
         while (true) {
-            $is_chunked = (bool) preg_match('/^([0-9a-f]+)(?:;(?:[\w-]*)(?:=(?:(?:[\w-]*)*|"(?:[^\r\n])*"))?)*\r\n/i', $encoded, $matches);
-            if (!$is_chunked) {
+            $isChunked = (bool) preg_match('/^([0-9a-f]+)(?:;(?:[\w-]*)(?:=(?:(?:[\w-]*)*|"(?:[^\r\n])*"))?)*\r\n/i', $encoded, $matches);
+            if (!$isChunked) {
                 return $data;
             }
 
@@ -843,9 +844,9 @@ class Requests
                 return $decoded;
             }
 
-            $chunk_length = strlen($matches[0]);
-            $decoded     .= substr($encoded, $chunk_length, $length);
-            $encoded      = substr($encoded, $chunk_length + $length + 2);
+            $chunkLength = strlen($matches[0]);
+            $decoded    .= substr($encoded, $chunkLength, $length);
+            $encoded     = substr($encoded, $chunkLength + $length + 2);
 
             if (trim($encoded) === '0' || empty($encoded)) {
                 return $decoded;
@@ -889,33 +890,16 @@ class Requests
             return $data;
         }
 
-        if (function_exists('gzdecode')) {
-            $decoded = @gzdecode($data);
-            if ($decoded !== false) {
-                return $decoded;
+        foreach (['gzdecode', 'gzinflate', 'gzuncompress'] as $function) {
+            if (function_exists($function)) {
+                $decoded = @$function($data); // phpcs:ignore
+                if ($decoded !== false) {
+                    return $decoded;
+                }
             }
         }
 
-        if (function_exists('gzinflate')) {
-            $decoded = @gzinflate($data);
-            if ($decoded !== false) {
-                return $decoded;
-            }
-        }
-
-        $decoded = self::compatibleGzinflate($data);
-        if ($decoded !== false) {
-            return $decoded;
-        }
-
-        if (function_exists('gzuncompress')) {
-            $decoded = @gzuncompress($data);
-            if ($decoded !== false) {
-                return $decoded;
-            }
-        }
-
-        return $data;
+        return self::compatibleGzinflate($data) ?: $data;
     }
 
     /**
@@ -975,19 +959,19 @@ class Requests
         // and .NET's System.IO.Compression.DeflateStream.
         //
         // See https://decompres.blogspot.com/ for a quick explanation of this data type
-        $huffman_encoded = false;
+        $huffmanEncoded = false;
 
         // low nibble of first byte should be 0x08
-        list(, $first_nibble) = unpack('h', $gzData);
+        list(, $firstNibble) = unpack('h', $gzData);
 
         // First 2 bytes should be divisible by 0x1F
-        list(, $first_two_bytes) = unpack('n', $gzData);
+        list(, $firstTwoBytes) = unpack('n', $gzData);
 
-        if ($first_nibble === 0x08 && ($first_two_bytes % 0x1F) === 0) {
-            $huffman_encoded = true;
+        if ($firstNibble === 0x08 && ($firstTwoBytes % 0x1F) === 0) {
+            $huffmanEncoded = true;
         }
 
-        if ($huffman_encoded) {
+        if ($huffmanEncoded) {
             $decompressed = @gzinflate(substr($gzData, 2));
             if ($decompressed !== false) {
                 return $decompressed;
@@ -1001,22 +985,22 @@ class Requests
             // Offset 28: 2 bytes, optional field length
             // Offset 30: Filename field, followed by optional field, followed
             // immediately by data
-            list(, $general_purpose_flag) = unpack('v', substr($gzData, 6, 2));
+            list(, $generalPurposeFlag) = unpack('v', substr($gzData, 6, 2));
 
             // If the file has been compressed on the fly, 0x08 bit is set of
             // the general purpose field. We can use this to differentiate
             // between a compressed document, and a ZIP file
-            $zip_compressed_on_the_fly = ((0x08 & $general_purpose_flag) === 0x08);
+            $zipCompressedOnTheFly = ((0x08 & $generalPurposeFlag) === 0x08);
 
-            if (!$zip_compressed_on_the_fly) {
+            if (!$zipCompressedOnTheFly) {
                 // Don't attempt to decode a compressed zip file
                 return $gzData;
             }
 
             // Determine the first byte of data, based on the above ZIP header
             // offsets:
-            $first_file_start = array_sum(unpack('v2', substr($gzData, 26, 4)));
-            $decompressed     = @gzinflate(substr($gzData, 30 + $first_file_start));
+            $firstFileStart = array_sum(unpack('v2', substr($gzData, 26, 4)));
+            $decompressed   = @gzinflate(substr($gzData, 30 + $firstFileStart));
             if ($decompressed !== false) {
                 return $decompressed;
             }

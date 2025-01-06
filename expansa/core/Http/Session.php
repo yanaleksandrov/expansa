@@ -180,7 +180,12 @@ class Session
         array $options = []
     ): Response
     {
-        $request = $this->mergeRequest(compact('url', 'headers', 'data', 'options'));
+        $request = $this->mergeRequest([
+            'url'     => $url,
+            'headers' => $headers,
+            'data'    => $data ?? [],
+            'options' => $options,
+        ]);
 
         return Requests::request($request['url'], $request['headers'], $request['data'], $type, $request['options']);
     }

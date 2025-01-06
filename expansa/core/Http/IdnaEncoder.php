@@ -234,7 +234,7 @@ class IdnaEncoder
      *
      * @param string $input UTF-8 encoded string to encode
      * @return string Punycode-encoded string
-     * @throws HttpException On character outside the domain (never happens with Punycode) (`idna.character_outside_domain`)
+     * @throws HttpException Character outside domain (never happens with Punycode) (`idna.character_outside_domain`)
      */
     public static function punycodeEncode(string $input): string
     {

@@ -108,14 +108,14 @@ class Response
     /**
      * Throws an exception if the request was not successful
      *
-     * @param bool $allow_redirects Set false to throw on a 3xx as well
-     * @throws HttpException If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
-     * @throws HttpStatuses On non-successful status code. Exception class corresponds to "Status" + code (e.g. {@see \Expansa\Http\Exception\Http\Status404})
+     * @param bool $allowRedirects Set false to throw on a 3xx as well
+     * @throws HttpException If `$allowRedirects` is false, and code is 3xx (`response.no_redirects`)
+     * @throws HttpStatuses On non-successful status code. Exception class corresponds to "Status" + code.
      */
-    public function throwForStatus(bool $allow_redirects = true): void
+    public function throwForStatus(bool $allowRedirects = true): void
     {
         if ($this->isRedirect()) {
-            if ($allow_redirects !== true) {
+            if ($allowRedirects !== true) {
                 throw new HttpException('Redirection not allowed', 'response.no_redirects', $this);
             }
         } elseif (!$this->success) {
