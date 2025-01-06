@@ -4,152 +4,31 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use Expansa\Facades\Facade;
+
 /**
- * Class Route.
+ * Route Facade
+ *
+ * Provides static access to the routing.
+ *
+ * @method static void before(string $methods, string $pattern, object|callable $callback)
+ * @method static void match(string $methods, string $pattern, callable|object $callback)
+ * @method static void any(string $pattern, callable|object $callback)
+ * @method static void get(string $pattern, callable|object $callback)
+ * @method static void post(string $pattern, callable|object $callback)
+ * @method static void patch(string $pattern, callable|object $callback)
+ * @method static void delete(string $pattern, callable|object $callback)
+ * @method static void put(string $pattern, callable|object $callback)
+ * @method static void options(string $pattern, callable|object $callback)
+ * @method static void middleware(string $baseRoute, callable $callback)
+ * @method static void run(object|callable $callback = null)
+ * @method static void set404(object|callable|string $matchFn, object|callable $callback = null)
+ * @method static void trigger404(mixed $match = null)
  */
-final class Route extends Routing\Router
+class Route extends Facade
 {
-    /**
-     * Store a before middleware route and a handling function to be executed when accessed using one of the specified methods.
-     *
-     * @param string $methods           Allowed methods, | delimited
-     * @param string $pattern           A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function before(string $methods, string $pattern, object|callable $callback): void
+    protected static function getStaticClassAccessor(): string
     {
-        self::router()->before($methods, $pattern, $callback);
-    }
-
-    /**
-     * Store a route and a handling function to be executed when accessed using one of the specified methods.
-     *
-     * @param string $methods           Allowed methods, | delimited
-     * @param string $pattern           A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function match(string $methods, string $pattern, callable|object $callback): void
-    {
-        self::router()->match($methods, $pattern, $callback);
-    }
-
-    /**
-     * Shorthand for a route accessed using any method.
-     *
-     * @param string          $pattern  A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function any(string $pattern, callable|object $callback): void
-    {
-        self::router()->match('GET|POST|PUT|DELETE|OPTIONS|PATCH|HEAD', $pattern, $callback);
-    }
-
-    /**
-     * Shorthand for a route accessed using GET.
-     *
-     * @param string          $pattern  A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function get(string $pattern, callable|object $callback): void
-    {
-        self::router()->match('GET', $pattern, $callback);
-    }
-
-    /**
-     * Shorthand for a route accessed using POST.
-     *
-     * @param string          $pattern  A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function post(string $pattern, callable|object $callback): void
-    {
-        self::router()->match('POST', $pattern, $callback);
-    }
-
-    /**
-     * Shorthand for a route accessed using PATCH.
-     *
-     * @param string          $pattern  A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function patch(string $pattern, callable|object $callback): void
-    {
-        self::router()->match('PATCH', $pattern, $callback);
-    }
-
-    /**
-     * Shorthand for a route accessed using DELETE.
-     *
-     * @param string          $pattern  A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function delete(string $pattern, callable|object $callback): void
-    {
-        self::router()->match('DELETE', $pattern, $callback);
-    }
-
-    /**
-     * Shorthand for a route accessed using PUT.
-     *
-     * @param string          $pattern  A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function put(string $pattern, callable|object $callback): void
-    {
-        self::router()->match('PUT', $pattern, $callback);
-    }
-
-    /**
-     * Shorthand for a route accessed using OPTIONS.
-     *
-     * @param string          $pattern  A route pattern such as /about/system
-     * @param object|callable $callback The handling function to be executed
-     */
-    public static function options(string $pattern, callable|object $callback): void
-    {
-        self::router()->match('OPTIONS', $pattern, $callback);
-    }
-
-    /**
-     * Mounts a collection of callbacks onto a base route.
-     *
-     * @param string   $baseRoute The route sub pattern to mount the callbacks on
-     * @param callable $callback  The callback method
-     */
-    public static function middleware(string $baseRoute, callable $callback): void
-    {
-        self::router()->mount($baseRoute, $callback);
-    }
-
-    /**
-     * Execute the router: Loop all defined before middlewares and routes, and execute the handling function if a match was found.
-     *
-     * @param object|callable|null $callback Function to be executed after a matching route was handled (= after router middleware)
-     * @return bool
-     */
-    public static function run(object|callable $callback = null): bool
-    {
-        return self::router()->run($callback);
-    }
-
-    /**
-     * Set the 404 handling function.
-     *
-     * @param object|callable|string $matchFn  The function to be executed
-     * @param object|callable|null   $callback The function to be executed
-     */
-    public static function set404(object|callable|string $matchFn, object|callable $callback = null): void
-    {
-        self::router()->set404($matchFn, $callback);
-    }
-
-    /**
-     * Triggers 404 response.
-     *
-     * @param mixed|null $match
-     */
-    public static function trigger404(mixed $match = null): void
-    {
-        self::router()->trigger404($match);
+        return '\Expansa\Routing\Router';
     }
 }
