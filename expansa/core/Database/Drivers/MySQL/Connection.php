@@ -4,10 +4,6 @@ namespace Expansa\Database\Drivers\MySQL;
 
 use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Connection as ConnectionBase;
-use Expansa\Database\Drivers\MySQL\Schema\Builder as SchemaBuilder;
-use Expansa\Database\Drivers\MySQL\Schema\Grammar as SchemaGrammar;
-use Expansa\Database\Drivers\MySQL\Query\Builder as QueryBuilder;
-use Expansa\Database\Drivers\MySQL\Query\Grammar as QueryGrammar;
 
 class Connection extends ConnectionBase
 {

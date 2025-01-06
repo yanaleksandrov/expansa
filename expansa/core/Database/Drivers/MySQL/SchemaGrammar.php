@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Drivers\MySQL\Schema;
+namespace Expansa\Database\Drivers\MySQL;
 
 use Expansa\Database\Expression;
 use Expansa\Database\Schema\Column;
@@ -10,7 +10,7 @@ use Expansa\Database\Schema\Grammar as GrammarBase;
 use Expansa\Database\Schema\Table as TableContract;
 use Expansa\Database\Fluent;
 
-class Grammar extends GrammarBase
+class SchemaGrammar extends GrammarBase
 {
     /**
      * Possible column modifiers.

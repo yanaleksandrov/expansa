@@ -65,7 +65,7 @@ $connection = new \Expansa\Database\Drivers\MySQL\Connection($pdo, [
 ]);
 print_r($pdo);
 print_r($connection);
-$database   = new \Expansa\Database\Drivers\MySQL\Schema\Builder($connection);
+$database   = new \Expansa\Database\Drivers\MySQL\SchemaBuilder($connection);
 $database->create('test_my_table', function (Table $table) {
     $table->id();
     $table->timestamps();

@@ -1,12 +1,14 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Expansa\Database\Drivers\MySQL\Query;
+declare(strict_types=1);
+
+namespace Expansa\Database\Drivers\MySQL;
 
 use Expansa\Database\Expression;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Query\Grammar as GrammarBase;
 
-class Grammar extends GrammarBase
+class QueryGrammar extends GrammarBase
 {
     public function compileUpsert(Builder $query, string $uniqueColumn, array $insertValues, array $updateValues, $returning = null): string
     {

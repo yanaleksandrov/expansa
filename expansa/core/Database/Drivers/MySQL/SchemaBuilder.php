@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Drivers\MySQL\Schema;
+namespace Expansa\Database\Drivers\MySQL;
 
-use Expansa\Database\Drivers\MySQL\Schema\Table;
+use Expansa\Database\Drivers\MySQL\SchemaTable;
 use Expansa\Database\Schema\Builder as BuilderAbstract;
 
-class Builder extends BuilderAbstract
+class SchemaBuilder extends BuilderAbstract
 {
     public function getTables(): array
     {
@@ -42,8 +42,8 @@ class Builder extends BuilderAbstract
         return array_map(fn ($value) => $value['column_name'], $results);
     }
 
-    public function createTable(string $table, \Closure $callback = null): Table
+    public function createTable(string $table, \Closure $callback = null): SchemaTable
     {
-        return new Table($table, $callback);
+        return new SchemaTable($table, $callback);
     }
 }

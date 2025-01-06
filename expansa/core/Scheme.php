@@ -31,6 +31,6 @@ class Scheme extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Database\Drivers\MySQL\Schema\Builder';
+        return 'Expansa\Database\Drivers\MySQL\SchemaBuilder';
     }
 }
