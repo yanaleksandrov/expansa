@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Patterns;
 
-use Expansa\Error;
-use Expansa\I18n;
-
 /**
  * The Registry pattern is designed primarily to solve the global scope problem.
  * This is a very common problem when you want to share data,
@@ -28,7 +25,7 @@ use Expansa\I18n;
  * output: array( 'value', 'row' )
  * ```
  */
-final class Registry
+class Registry
 {
     /**
      * Put item into the registry.
@@ -50,8 +47,6 @@ final class Registry
     {
         if (! isset(self::$registry[ $key ])) {
             self::$registry[ $key ] = $value;
-        } else {
-            new Error('registry-set', I18n::_t('You trying to override an existing data.'));
         }
     }
 

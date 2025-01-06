@@ -1,0 +1,28 @@
+<?php
+
+use Expansa\Facades\Scheme;
+use Expansa\Database\Migrations\Migration;
+use Expansa\Database\Schema\Table;
+
+return new class extends Migration
+{
+     /**
+     * Up the migration.
+     *
+     * @return void
+     */
+    public function up(): void
+    {
+
+    }
+
+    /**
+     * Down the migration.
+     *
+     * @return void
+     */
+    public function down(): void
+    {
+
+    }
+};

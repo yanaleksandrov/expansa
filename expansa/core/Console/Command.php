@@ -15,7 +15,7 @@ use Expansa\I18n;
  */
 abstract class Command implements Commands
 {
-	use Writer;
+    use Writer;
 
     /**
      * Command name.
@@ -54,9 +54,10 @@ abstract class Command implements Commands
      *
      * @param Terminal|null $console
      */
-	public function __construct(
-		protected ?Terminal $console = null
-    ) {}
+    public function __construct(
+        protected ?Terminal $console = null
+    )
+    {} // phpcs:ignore
 
     /**
      * Get console instance.
@@ -75,7 +76,7 @@ abstract class Command implements Commands
      *
      * @return static
      */
-    public function setConsole(Terminal $console) : static
+    public function setConsole(Terminal $console): static
     {
         $this->console = $console;
         return $this;
@@ -110,7 +111,7 @@ abstract class Command implements Commands
      *
      * @return static
      */
-    public function setName(string $name) : static
+    public function setName(string $name): static
     {
         $this->name = $name;
         return $this;
@@ -133,7 +134,7 @@ abstract class Command implements Commands
      *
      * @return static
      */
-    public function setGroup(string $group) : static
+    public function setGroup(string $group): static
     {
         $this->group = $group;
         return $this;
@@ -159,7 +160,7 @@ abstract class Command implements Commands
      *
      * @return static
      */
-    public function setDescription(string $description) : static
+    public function setDescription(string $description): static
     {
         $this->description = $description;
         return $this;
@@ -182,7 +183,7 @@ abstract class Command implements Commands
      *
      * @return static
      */
-    public function setSignature(string $signature) : static
+    public function setSignature(string $signature): static
     {
         $this->signature = $signature;
         return $this;
@@ -205,7 +206,7 @@ abstract class Command implements Commands
      *
      * @return static
      */
-    public function setOptions(array $options) : static
+    public function setOptions(array $options): static
     {
         $this->options = $options;
         return $this;
