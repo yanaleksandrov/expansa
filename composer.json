@@ -16,7 +16,8 @@
         "ext-intl": "*",
         "ext-iconv": "*",
         "ext-openssl": "*",
-        "ext-zlib": "*"
+        "ext-zlib": "*",
+        "ext-zip": "*"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "3.*",

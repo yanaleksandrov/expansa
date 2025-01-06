@@ -54,6 +54,10 @@ class App
 
     }
 
+    public function views() {
+
+    }
+
     public function registerServices(): void
     {
         $this->container->set('database', new Database());
