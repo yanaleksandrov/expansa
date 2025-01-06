@@ -7,14 +7,10 @@ namespace Expansa;
 use Expansa\Facades\Facade;
 
 /**
- * @method static void t(string $string)
- * @method static string _t(string $string)
- * @method static void t_attr(string $string)
- * @method static string _t_attr(string $string)
- * @method static void f(string $string, mixed ...$args)
- * @method static string _f(string $string, mixed ...$args)
- * @method static void f_attr(string $string, mixed ...$args)
- * @method static string _f_attr(string $string, mixed ...$args)
+ * @method static void t(string $string, mixed ...$args)
+ * @method static string _t(string $string, mixed ...$args)
+ * @method static void t_attr(string $string, mixed ...$args)
+ * @method static string _t_attr(string $string, mixed ...$args)
  * @method static void c(bool $condition, string $ifString, string $elseString = '')
  * @method static string _c(bool $condition, string $ifString, string $elseString = '')
  * @method static void c_attr(bool $condition, string $ifString, string $elseString = '')

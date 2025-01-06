@@ -48,7 +48,7 @@ class Provider
                 try {
                     foreach ([ 'name', 'description', 'version' ] as $property) {
                         if (! property_exists($extension, $property) || empty($extension->$property)) {
-                            throw new \Exception(I18n::_f('Extension parameter ":propertyName" is required', $property));
+                            throw new \Exception(I18n::_t('Extension parameter ":propertyName" is required', $property));
                         }
                     }
                 } catch (\Exception $e) {

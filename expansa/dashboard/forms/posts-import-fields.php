@@ -30,7 +30,7 @@ return Dashboard\Form::enqueue(
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_f( 'Sample: <samp>%s</samp>', 'pages' ),
+					'instruction' => I18n::_t( 'Sample: <samp>%s</samp>', 'pages' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -96,7 +96,7 @@ return Dashboard\Form::enqueue(
 				'before'      => '',
 				'after'       => '',
 				'tooltip'     => '',
-				'instruction' => I18n::_f( 'Sample: %s', '<samp>' . $sample . '</samp>' ),
+				'instruction' => I18n::_t( 'Sample: %s', '<samp>' . $sample . '</samp>' ),
 				'attributes'  => [],
 				'conditions'  => [],
 				'options'     => [

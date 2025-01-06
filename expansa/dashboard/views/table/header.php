@@ -168,7 +168,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 									    'options' => [
 										    'core' => [
 											    'content'     => I18n::_t( 'Expansa Core' ),
-											    'description' => I18n::_f( 'completion :percent\%', 0 ),
+											    'description' => I18n::_t( 'completion :percent\%', 0 ),
 										    ],
 									    ],
 								    ],
@@ -177,7 +177,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 									    'options' => array_reduce( Expansa\Plugins::get(), function( $carry, Expansa\Plugin $plugin ) {
 										    $carry[ $plugin->id ] = [
 											    'content'     => $plugin->name,
-											    'description' => I18n::_f( 'completion :percent%', 0 ),
+											    'description' => I18n::_t( 'completion :percent%', 0 ),
 										    ];
 										    return $carry;
 									    }, [] ),
@@ -187,7 +187,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 									    'options' => array_reduce( Expansa\Themes::get(), function( $carry, Expansa\Plugin $theme ) {
 										    $carry[ $theme->id ] = [
 											    'content'     => $theme->name,
-											    'description' => I18n::_f( 'completion :percent%', 0 ),
+											    'description' => I18n::_t( 'completion :percent%', 0 ),
 										    ];
 										    return $carry;
 									    }, [] ),

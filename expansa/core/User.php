@@ -58,7 +58,7 @@ final class User extends Schema
     {
         try {
             if (empty($value)) {
-                throw new \Exception(I18n::_f('You are trying to find a user with an empty :getByField.', $getBy));
+                throw new \Exception(I18n::_t('You are trying to find a user with an empty :getByField.', $getBy));
             }
 
             if (! in_array($getBy, [ 'id', 'login', 'email', 'nicename' ], true)) {

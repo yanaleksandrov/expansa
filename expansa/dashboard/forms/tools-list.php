@@ -81,7 +81,7 @@ return Dashboard\Form::enqueue(
 			'type'        => 'header',
 			'class'       => 'px-8 t-center',
 			'label'       => '',
-			'instruction' => I18n::_f(
+			'instruction' => I18n::_t(
 				'If the tool you need is not in the list, look in the [plugin catalog](:pluginsCatalogLink) to see if such a tool is available.',
 				Url::site( 'dashboard/plugins' )
 			),

@@ -20,6 +20,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	</a>
 	<?php Dashboard\Form::print( EX_DASHBOARD . 'forms/user-reset-password.php' ); ?>
 	<div class="t-center t-muted mt-3">
-		<?php I18n::f( 'I remembered the password, [send](:signInLink) me to the sign in page', Url::site( 'dashboard/sign-in' ) ); ?>
+		<?php I18n::t( 'I remembered the password, [send](:signInLink) me to the sign in page', Url::site( 'dashboard/sign-in' ) ); ?>
 	</div>
 </div>

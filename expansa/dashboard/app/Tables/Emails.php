@@ -67,8 +67,8 @@ final class Emails {
 	public function notFoundContent(): array {
 		return [
 			'title'       => I18n::_t( 'No emails templates found' ),
-			'description' => I18n::_f( 'Add [new email template](:emailDialog) manually', Url::site( '/dashboard/import' ) ),
-			'descriptiont' => I18n::_f(
+			'description' => I18n::_t( 'Add [new email template](:emailDialog) manually', Url::site( '/dashboard/import' ) ),
+			'descriptiont' => I18n::_t(
 				'Add %s manually',
 				sprintf( '<a href="#" @click.prevent="$dialog.open(\'tmpl-email-editor\', emailDialog)">%s</a>', I18n::_t( 'new email template' ) ),
 			),

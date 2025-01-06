@@ -29,7 +29,7 @@ return Dashboard\Form::enqueue(
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_f( '%sLearn how to describe the purpose of the image%s. Leave empty if the image is purely decorative.', '<a href="//www.w3.org/WAI/tutorials/images/decision-tree/" target="_blank">', '</a>' ),
+					'instruction' => I18n::_t( '%sLearn how to describe the purpose of the image%s. Leave empty if the image is purely decorative.', '<a href="//www.w3.org/WAI/tutorials/images/decision-tree/" target="_blank">', '</a>' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',

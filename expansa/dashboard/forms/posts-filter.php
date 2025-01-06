@@ -75,11 +75,11 @@ return Dashboard\Form::enqueue(
 			'attributes'  => [],
 			'conditions'  => [],
 			'options' => [
-				'svg'    => I18n::_f( 'SVG %s', '<i class="badge badge--blue-lt ml-auto">56</i>' ),
-				'images' => I18n::_f( 'Images %s', '<i class="badge badge--blue-lt ml-auto">670</i>' ),
-				'video'  => I18n::_f( 'Video %s', '<i class="badge badge--blue-lt ml-auto">35</i>' ),
-				'audio'  => I18n::_f( 'Audio %s', '<i class="badge badge--blue-lt ml-auto">147</i>' ),
-				'zip'    => I18n::_f( 'ZIP %s', '<i class="badge badge--blue-lt ml-auto">74</i>' ),
+				'svg'    => I18n::_t( 'SVG %s', '<i class="badge badge--blue-lt ml-auto">56</i>' ),
+				'images' => I18n::_t( 'Images %s', '<i class="badge badge--blue-lt ml-auto">670</i>' ),
+				'video'  => I18n::_t( 'Video %s', '<i class="badge badge--blue-lt ml-auto">35</i>' ),
+				'audio'  => I18n::_t( 'Audio %s', '<i class="badge badge--blue-lt ml-auto">147</i>' ),
+				'zip'    => I18n::_t( 'ZIP %s', '<i class="badge badge--blue-lt ml-auto">74</i>' ),
 			],
 		],
 		[

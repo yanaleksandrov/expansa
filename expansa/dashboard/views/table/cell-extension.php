@@ -53,7 +53,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	</div>
 	<div class="plugins__info">
 		<span class="plugins__text"><i class="ph ph-desktop-tower"></i> <?php echo $installations; ?></span>
-		<span class="plugins__text"><i class="ph ph-calendar-dots"></i> <?php I18n::f( 'Last updated: :date', $date ); ?></span>
+		<span class="plugins__text"><i class="ph ph-calendar-dots"></i> <?php I18n::t( 'Last updated: :date', $date ); ?></span>
 		<span class="plugins__text">
 			<?php
 			if ( $reviews > 0 ) :

@@ -160,7 +160,7 @@ class Posts implements \Expansa\Api\Contracts\Crud {
 				[
 					'icon'        => 'success',
 					'title'       => I18n::_t( 'Import is complete!' ),
-					'description' => I18n::_f( '%d posts was successfully imported. Do you want %sto launch a new import?%s', count( $imported ), '<a href="/dashboard/import">', '</a>' ),
+					'description' => I18n::_t( '%d posts was successfully imported. Do you want %sto launch a new import?%s', count( $imported ), '<a href="/dashboard/import">', '</a>' ),
 				]
 			)
 		];

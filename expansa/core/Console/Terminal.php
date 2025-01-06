@@ -230,7 +230,7 @@ class Terminal
 
         $command = $this->getCommand($this->command);
         if ($command === null) {
-	        $this->info(I18n::_f('[red]#Command ":commandName" not found#', $this->command));
+	        $this->info(I18n::_t('[red]#Command ":commandName" not found#', $this->command));
             return;
         }
 

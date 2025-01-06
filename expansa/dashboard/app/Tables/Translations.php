@@ -44,11 +44,11 @@ final class Translations {
 	public function columns(): array {
 		return [
 			Cell::add( 'source' )
-				->title( I18n::_f( ':icon Source text - English', '<i class="ph ph-text-aa"></i>' ) )
+				->title( I18n::_t( ':icon Source text - English', '<i class="ph ph-text-aa"></i>' ) )
 				->attributes( [ 'class' => 'translation__source' ] )
 				->view( 'raw' ),
 			Cell::add( 'value' )
-				->title( I18n::_f( ':icon Translations - Russian', '<i class="ph ph-globe-hemisphere-east"></i>' ) )
+				->title( I18n::_t( ':icon Translations - Russian', '<i class="ph ph-globe-hemisphere-east"></i>' ) )
 				->attributes( [ 'class' => 'translation__value' ] )
 				->view( 'translation' ),
 		];
@@ -63,7 +63,7 @@ final class Translations {
 	public function headerContent(): array {
 		return [
 			'title'       => I18n::_t( 'Translations' ),
-			'badge'       => I18n::_f( 'completed :stringsCount from :allStringsCount <i class="t-green">(:percent%)</i>', 56, 408, 25 ),
+			'badge'       => I18n::_t( 'completed :stringsCount from :allStringsCount <i class="t-green">(:percent%)</i>', 56, 408, 25 ),
 			'translation' => true,
 		];
 	}

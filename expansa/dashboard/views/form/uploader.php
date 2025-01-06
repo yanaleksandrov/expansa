@@ -45,7 +45,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			<?php if ( $instruction ) : ?>
 				<span class="fw-500"><?php echo $instruction; ?></span>
 			<?php endif; ?>
-			<span class="fs-13 t-muted"><?php I18n::f( 'Maximum upload file size is :maxsize', $max_size ); ?></span>
+			<span class="fs-13 t-muted"><?php I18n::t( 'Maximum upload file size is :maxsize', $max_size ); ?></span>
 		</span>
 		<input type="file"<?php echo Arr::toHtmlAtts( $attributes ); ?>>
 	</label>

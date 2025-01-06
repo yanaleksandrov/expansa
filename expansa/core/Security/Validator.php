@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Security;
 
 use DateTime;
+use Expansa\I18n;
 
 /**
  * Validates input against certain criteria.
@@ -150,11 +151,11 @@ final class Validator
                 'accepted'     => I18n::_t('Must be accepted.'),
                 'alpha'        => I18n::_t('Must contain only letters.'),
                 'alphanumeric' => I18n::_t('Must contain only letters and/or numbers.'),
-                'hex'          => I18n::_f('The color format should be :format.', 'HEX'),
-                'hsl'          => I18n::_f('The color format should be :format.', 'HSL'),
-                'hsla'         => I18n::_f('The color format should be :format.', 'HSLA'),
-                'rgb'          => I18n::_f('The color format should be :format.', 'RGB'),
-                'rgba'         => I18n::_f('The color format should be :format.', 'RGBA'),
+                'hex'          => I18n::_t('The color format should be :format.', 'HEX'),
+                'hsl'          => I18n::_t('The color format should be :format.', 'HSL'),
+                'hsla'         => I18n::_t('The color format should be :format.', 'HSLA'),
+                'rgb'          => I18n::_t('The color format should be :format.', 'RGB'),
+                'rgba'         => I18n::_t('The color format should be :format.', 'RGBA'),
                 'date'         => I18n::_t('Is not a valid date.'),
                 'later'        => I18n::_t('Must be date after \'%s\'.'),
                 'earlier'      => I18n::_t('Must be date before \'%s\'.'),

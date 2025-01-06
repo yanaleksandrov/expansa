@@ -32,7 +32,7 @@ class Help extends Command
 	    $command = $this->console->getCommand($commandName);
 	    if ($command === null) {
 		    $this->error(
-			    I18n::_f('Command ":commandName" not found', $commandName),
+			    I18n::_t('Command ":commandName" not found', $commandName),
 			    defined('TESTING') ? null : 1
 		    );
 		    return;

@@ -112,7 +112,7 @@ new class extends \Expansa\App\App {
 		Hook::add( 'expansa_dashboard_loaded', function( $content ) {
 			return str_replace(
 				'0Q 0.001s 999kb',
-				I18n::_f( ':queries\Q :memory :memory_peak', Db::queries(), Debug::timer( 'getall' ), Debug::memory_peak() ),
+				I18n::_t( ':queries\Q :memory :memory_peak', Db::queries(), Debug::timer( 'getall' ), Debug::memory_peak() ),
 				$content
 			);
 		} );
@@ -198,7 +198,7 @@ new class extends \Expansa\App\App {
 				[
 					'id'           => 'profile',
 					'url'          => 'profile',
-					'title'        => I18n::_f( 'Set yourself as %saway%s', '<strong>', '</strong>' ),
+					'title'        => I18n::_t( 'Set yourself as %saway%s', '<strong>', '</strong>' ),
 					'capabilities' => ['manage_options'],
 					'icon'         => 'ph ph-moon-stars',
 					'position'     => 30,

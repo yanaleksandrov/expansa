@@ -168,7 +168,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             $filepath  = $directory . DIRECTORY_SEPARATOR . $this->filename;
 
             if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
-                $this->errors[] = I18n::_f('Failed to create directory "%s".', $directory);
+                $this->errors[] = I18n::_t('Failed to create directory "%s".', $directory);
                 return $this;
             }
 
@@ -193,7 +193,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         } else {
             $newPath = $this->dirpath . DIRECTORY_SEPARATOR . $this->sanitizeName($name);
             if (!rename($this->path, $newPath)) {
-                $this->errors[] = I18n::_f('Failed to rename file to "%s".', $newPath);
+                $this->errors[] = I18n::_t('Failed to rename file to "%s".', $newPath);
             } else {
                 return new self($newPath);
             }
@@ -223,7 +223,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             $atime = $atime ?? $time;
 
             if (!touch($this->path, $time, $atime)) {
-                $this->errors[] = I18n::_f('Failed to update the timestamps for ":filePath".', $this->path);
+                $this->errors[] = I18n::_t('Failed to update the timestamps for ":filePath".', $this->path);
             }
 
             $this->modified = (new DateTime())->setTimestamp($time)->format('Y-m-d H:i:s');
@@ -263,8 +263,8 @@ class File extends EntryHandler implements CommonInterface, FileInterface
                 // Courtesy of php.net, the strings that describe the error indicated in $_FILES[{form field}]['error'].
                 $uploadErrorMessages = [
                     false,
-                    I18n::_f('The uploaded file exceeds the :maxUploadFileSize.', 'upload_max_filesize'),
-                    I18n::_f('The uploaded file exceeds the :maxFileSize directive.', 'MAX_FILE_SIZE'),
+                    I18n::_t('The uploaded file exceeds the :maxUploadFileSize.', 'upload_max_filesize'),
+                    I18n::_t('The uploaded file exceeds the :maxFileSize directive.', 'MAX_FILE_SIZE'),
                     I18n::_t('The uploaded file was only partially uploaded.'),
                     I18n::_t('No file was uploaded.'),
                     '',
@@ -282,7 +282,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             I18n::_t('File is empty. Please upload something more substantial.')
         )->extend(
             'size:max',
-            I18n::_f('The maximum file size is :maxFileSize.', self::humanize($maxFileSize))
+            I18n::_t('The maximum file size is :maxFileSize.', self::humanize($maxFileSize))
         )->apply();
 
         // if the incoming data has been checked for validity, continue uploading
@@ -334,16 +334,16 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         $this->createFile();
 
         if (!is_writable($this->path)) {
-            $this->errors[] = I18n::_f("The file is not writable: ':path'", $this->path);
+            $this->errors[] = I18n::_t("The file is not writable: ':path'", $this->path);
             return $this;
         }
 
         $fp = fopen($this->path, $after ? 'a' : 'w');
         if (!$fp) {
-            $this->errors[] = I18n::_f("The file cannot be opened: ':path'", $this->path);
+            $this->errors[] = I18n::_t("The file cannot be opened: ':path'", $this->path);
         } else {
             if (fwrite($fp, $content) === false) {
-                $this->errors[] = I18n::_f("It is not possible to write to the file: ':path'", $this->path);
+                $this->errors[] = I18n::_t("It is not possible to write to the file: ':path'", $this->path);
             }
             fclose($fp);
 

@@ -13,11 +13,10 @@ use Expansa\Sanitizer;
  * The class also offers methods for returning translations sanitized for use in HTML attributes.
  *
  * As text your can use base markdown syntax. For example links looks like this:
- * I18n::f( 'Go to [documentation page](:pageLink) for resolve issue', 'https://google.com' )
+ * I18n::t( 'Go to [documentation page](:pageLink) for resolve issue', 'https://google.com' )
  *
  * Main functionalities:
- * - `t|_t(_attr)`: translates a string and returns/outputs it (sanitizes for HTML attributes).
- * - `f|_f(_attr)`: translates a string with placeholders and returns/outputs it (sanitizes for HTML attributes).
+ * - `t|_t(_attr)`: translates a string with placeholders and returns/outputs it (sanitizes for HTML attributes).
  * - `c|_c(_attr)`: translates a string based on a condition and returns/outputs it (sanitizes for HTML attributes).
  *
  * TODO: Implement text pluralization.
@@ -121,58 +120,15 @@ class Translator extends Locale
     }
 
     /**
-     * Output translated string.
-     *
-     * @param string $string
-     */
-    public function t(string $string): void
-    {
-        echo self::_t($string);
-    }
-
-    /**
-     * Get translated string.
-     *
-     * @param string $string
-     * @return string
-     */
-    public function _t(string $string): string
-    {
-        return self::get(Markdown::render(htmlentities($string)));
-    }
-
-    /**
-     * Translation and use in html attribute.
-     *
-     * @param string $string
-     * @return void
-     */
-    public function t_attr(string $string): void
-    {
-        echo self::_t_attr($string);
-    }
-
-    /**
-     * Translation and use in html attribute.
-     *
-     * @param string $string
-     * @return string
-     */
-    public function _t_attr(string $string): string
-    {
-        return Sanitizer::attribute(self::_t($string));
-    }
-
-    /**
      * Translate with formatting.
      *
      * @param string $string
      * @param mixed ...$args
      * @return void
      */
-    public function f(string $string, mixed ...$args): void
+    public function t(string $string, mixed ...$args): void
     {
-        echo self::_f($string, ...$args);
+        echo self::_t($string, ...$args);
     }
 
     /**
@@ -182,7 +138,7 @@ class Translator extends Locale
      *
      * For example:
      *
-     * I18n::_f( 'Hi, :Firstname :Lastname, you have :count\st none closed ":TASKNAME" task', 'yan', 'aleksandrov', 1, 'test' )
+     * I18n::_t( 'Hi, :Firstname :Lastname, you have :count\st none closed ":TASKNAME" task', 'yan', 'aleksandrov', 1, 'test' )
      *
      * return 'Hi, Yan Aleksandrov, you have 1st none closed "TEST" task'
      *
@@ -190,7 +146,7 @@ class Translator extends Locale
      * @param mixed ...$args
      * @return string
      */
-    public function _f(string $string, mixed ...$args): string
+    public function _t(string $string, mixed ...$args): string
     {
         $string = htmlentities($string);
         $string = preg_replace_callback('/(:{1,2})(\w+)(?:\\\\([^:]+))?|%[sd]/u', function ($matches) use (&$args) {
@@ -225,9 +181,9 @@ class Translator extends Locale
      * @param mixed ...$args
      * @return void
      */
-    public function f_attr(string $string, mixed ...$args): void
+    public function t_attr(string $string, mixed ...$args): void
     {
-        echo Sanitizer::attribute(self::_f($string, ...$args));
+        echo Sanitizer::attribute(self::_t($string, ...$args));
     }
 
     /**
@@ -237,9 +193,9 @@ class Translator extends Locale
      * @param mixed ...$args
      * @return string
      */
-    public function _f_attr(string $string, mixed ...$args): string
+    public function _t_attr(string $string, mixed ...$args): string
     {
-        return Sanitizer::attribute(self::_f($string, ...$args));
+        return Sanitizer::attribute(self::_t($string, ...$args));
     }
 
     /**

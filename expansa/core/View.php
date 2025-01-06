@@ -114,7 +114,7 @@ final class View
 //      } catch ( \Throwable $e ) {
 //          ob_end_clean();
 //          print_r( $e );
-//          throw new \Exception( I18n::_f( 'Failed opening required: :filepath', $filepath ) );
+//          throw new \Exception( I18n::_t( 'Failed opening required: :filepath', $filepath ) );
 //      }
 
         ob_start();

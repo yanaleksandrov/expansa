@@ -98,7 +98,7 @@ $files       = [
                 <i class="ph ph-folder-simple-dashed"></i> <code>public_html</code>/<code>dev</code>/<code>cody</code>/<code>list</code>
             </div>
             <div class="df aic g-3">
-                <?php I18n::f(':count items', count([ ...$folders, ...$files ])); ?>
+                <?php I18n::t(':count items', count([ ...$folders, ...$files ])); ?>
                 <div class="field field--xs field--outline">
                     <label class="field-item">
                         <input type="search" name="search" placeholder="Search">

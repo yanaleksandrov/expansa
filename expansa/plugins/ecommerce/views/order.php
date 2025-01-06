@@ -19,7 +19,7 @@ use Expansa\Url;
 			<div class="attributes-editor">
 				<h5 class="attributes-title">
 					<a class="btn btn--icon btn--sm" href="<?php echo Url::dashboard( '/orders' ); ?>"><i class="ph ph-arrow-left"></i></a>
-					<span class="fw-600 mr-auto"><?php I18n::f( 'Order :orderNumber details', '#10566' ); ?></span>
+					<span class="fw-600 mr-auto"><?php I18n::t( 'Order :orderNumber details', '#10566' ); ?></span>
 					<button class="btn btn--sm btn--primary" type="submit"><?php I18n::t( 'Save' ); ?></button>
 				</h5>
 				<div class="attributes-description">

@@ -43,7 +43,7 @@ return Dashboard\Form::enqueue(
 					'type'        => 'header',
 					'class'       => 'p-8 t-center',
 					'label'       => I18n::_t( 'Import posts from a CSV file' ),
-					'instruction' => I18n::_f( 'This tool allows you to import (or merge) posts data to your website from a CSV or TXT file. %sDownload%s the file for an example or choose a file from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
+					'instruction' => I18n::_t( 'This tool allows you to import (or merge) posts data to your website from a CSV or TXT file. %sDownload%s the file for an example or choose a file from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
 				],
 				[
 					'type'        => 'uploader',

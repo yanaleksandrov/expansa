@@ -39,7 +39,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'        => 'button',
 			'name'        => 'uid',
-			'label'       => I18n::_f( '%s Apply', '<i class="ph ph-paper-plane-tilt"></i>' ),
+			'label'       => I18n::_t( '%s Apply', '<i class="ph ph-paper-plane-tilt"></i>' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

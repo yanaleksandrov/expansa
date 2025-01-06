@@ -28,7 +28,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 $fullStars  = round( $rating );
 $emptyStars = 5 - $fullStars;
 ?>
-<span class="<?php echo $class; ?>" title="<?php I18n::f( ':rate rating based on :count reviews', $rating, $reviews ); ?>">
+<span class="<?php echo $class; ?>" title="<?php I18n::t( ':rate rating based on :count reviews', $rating, $reviews ); ?>">
 	<?php echo str_repeat( '<i class="ph ph-star t-orange" aria-hidden="true"></i>' . PHP_EOL, $fullStars ); ?>
 	<?php echo str_repeat( '<i class="ph ph-star t-muted" aria-hidden="true"></i>' . PHP_EOL, $emptyStars ); ?>
 	<span class="t-dark ml-1">[<?php echo $reviews; ?>]</span>

@@ -51,7 +51,7 @@ class Index extends Command
 	    $this->info("[green]#$text#Program version: [green]#$version# | © 2024-$year «expansa.com»".PHP_EOL);
 
         if ($this->console->getOption('g')) {
-	        $this->info(I18n::_f('Hello, friend!'));
+	        $this->info(I18n::_t('Hello, friend!'));
         }
 
 	    $groupDefault = [];

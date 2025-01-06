@@ -58,7 +58,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 
 		if ( $version ) :
 			?>
-			<div class="themes-text" title="<?php I18n::f( 'Version :number', $version ); ?>"><?php echo $version; ?></div>
+			<div class="themes-text" title="<?php I18n::t( 'Version :number', $version ); ?>"><?php echo $version; ?></div>
 		<?php endif; ?>
 	</div>
 </div>

@@ -19,7 +19,7 @@ class Env extends Command
 
     public function handle() : void
     {
-	    $this->info(I18n::_f('Current application environment: [green]#:env#', 'local'));
+	    $this->info(I18n::_t('Current application environment: [green]#:env#', 'local'));
 
 	    $this->liveLine('Processing...');
 	    sleep(2);

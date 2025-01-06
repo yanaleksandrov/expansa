@@ -422,13 +422,13 @@ return Dashboard\Form::enqueue(
 									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[close_comments_for_old_posts]' => [
-									'content'     => I18n::_f( 'Automatically close comments on posts older than %s days', '<i class="field--sm field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></i>' ),
+									'content'     => I18n::_t( 'Automatically close comments on posts older than %s days', '<i class="field--sm field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></i>' ),
 									'icon'        => 'ph ph-hourglass-medium',
 									'description' => '',
 									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[thread_comments]' => [
-									'content'     => I18n::_f( 'Enable threaded (nested) comments %s levels deep', '<i class="field--sm field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></i>' ),
+									'content'     => I18n::_t( 'Enable threaded (nested) comments %s levels deep', '<i class="field--sm field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></i>' ),
 									'icon'        => 'ph ph-stack',
 									'description' => '',
 									'checked'     => Option::get( 'comments.default_status' ),

@@ -147,7 +147,7 @@ final class Debug
     {
         $title = I18n::_t('Fatal Error');
 
-        $description = I18n::_f('Find on line :lineNumber in file :filepath', $error->getLine(), $error->getFile());
+        $description = I18n::_t('Find on line :lineNumber in file :filepath', $error->getLine(), $error->getFile());
         $description = preg_replace('/[a-z0-9_\-]*\.php/i', '$1<u>$0</u>', $description);
         $description = preg_replace('/[0-9]/i', '$1<em>$0</em>', $description);
         $description = preg_replace('/[\(\)#\[\]\':]/i', '$1<ss>$0</ss>', $description);

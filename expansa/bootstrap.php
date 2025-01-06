@@ -74,7 +74,7 @@ if (! Is::installed()) {
         header(sprintf('%s 500 Internal Server Error', $serverProtocol), true, 500);
         header('Content-Type: text/html; charset=utf-8');
 
-        I18n::f(
+        I18n::t(
             'Your server is running PHP version ":phpVersion" but Expansa :expansaVersion requires at least :phpRequiredVersion.',
             $php_version,
             EX_VERSION,
@@ -90,7 +90,7 @@ if (! Is::installed()) {
         header(sprintf('%s 500 Internal Server Error', $serverProtocol), true, 500);
         header('Content-Type: text/html; charset=utf-8');
 
-        I18n::f(
+        I18n::t(
             'Your server is running PHP version ":dbVersion" but Expansa :expansaVersion requires at least :dbRequiredVersion.',
             $db_version,
             EX_VERSION,
