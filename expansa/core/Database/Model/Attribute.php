@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Model;
 
@@ -8,7 +10,7 @@ class Attribute
 
     public $set;
 
-    public function __construct(callable $get = null, callable $set = null)
+    public function __construct(?callable $get = null, ?callable $set = null)
     {
         $this->get = $get;
         $this->set = $set;

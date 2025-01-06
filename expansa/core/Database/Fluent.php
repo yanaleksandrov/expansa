@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Expansa\Database;
 
 use ArrayAccess;
+use JsonSerializable;
 use Expansa\Database\Contracts\Arrayable;
 use Expansa\Database\Contracts\Jsonable;
-use JsonSerializable;
 
 class Fluent implements Arrayable, ArrayAccess, Jsonable, JsonSerializable
 {
     public function __construct(
-		protected array $attributes = []
-    ) {}
+        protected array $attributes = []
+    ) {} // phpcs:ignore
 
     public function get($key, $default = null): mixed
     {

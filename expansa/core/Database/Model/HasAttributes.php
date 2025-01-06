@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Model;
 
@@ -43,8 +45,7 @@ trait HasAttributes
 
         if ($this->hasSetMutator($key)) {
             $this->setMutatorValue($key, $value);
-        }
-        else {
+        } else {
             $this->attributes[$key] = $value;
         }
 
@@ -92,7 +93,8 @@ trait HasAttributes
     {
         $attribute = $this->{Str::camel($key)}();
 
-        return call_user_func($attribute->get,
+        return call_user_func(
+            $attribute->get,
             $this->attributes[$key] ?? null,
             $this->attributes
         );
@@ -104,8 +106,6 @@ trait HasAttributes
 
         $this->attributes[$key] = call_user_func($attribute->set, $value, $this->attributes);
     }
-
-
 
     public function syncOriginals(): void
     {
@@ -119,15 +119,12 @@ trait HasAttributes
                 return true;
             }
         }
-
         return false;
     }
 
     public function getChanges(): array
     {
-        return array_filter($this->attributes, function ($key) {
-            return ! $this->originalIsEquivalent($key);
-        }, ARRAY_FILTER_USE_KEY);
+        return array_filter($this->attributes, fn ($key) => ! $this->originalIsEquivalent($key), ARRAY_FILTER_USE_KEY);
     }
 
     protected function originalIsEquivalent(string $key): bool
@@ -137,8 +134,7 @@ trait HasAttributes
         }
 
         $attribute = $this->attributes[$key] ?? null;
-        $original = $this->originals[$key] ?? null;
-
+        $original  = $this->originals[$key] ?? null;
         if ($attribute === $original) {
             return true;
         }

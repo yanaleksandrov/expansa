@@ -54,8 +54,7 @@ abstract class Builder implements QueryBuilder
     public function __construct(
         protected Connection $connection,
         protected Grammar $grammar
-    )
-    {} // phpcs:ignore
+    ) {} // phpcs:ignore
 
     public function useWritePDO(): static
     {
@@ -81,7 +80,6 @@ abstract class Builder implements QueryBuilder
     public function select(array $columns = ['*']): static
     {
         $this->command = 'select';
-
         $this->columns = $columns;
 
         return $this;

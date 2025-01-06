@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Model;
 
@@ -11,17 +13,19 @@ use stdClass;
  */
 class Model
 {
-    use HasAttributes, HasGuardAttributes, HasTimestamps, HasSoftDeletes;
+    use HasAttributes;
+    use HasGuardAttributes;
+    use HasTimestamps;
+    use HasSoftDeletes;
 
     // Поля, которые можно наполнять
     protected array $fillable = [];
 
     protected array $hidden = [];
 
-    public function __construct(array $attributes = [])
-    {
-        $this->attributes = $attributes;;
-    }
+    public function __construct(
+        protected array $attributes = []
+    ) {} // phpcs:ignore
 
     public static function create(array|stdClass $attributes): static
     {
@@ -32,7 +36,7 @@ class Model
     {
         $model = new static();
 
-        $model->setAttributes((array)$attributes)->syncOriginals();
+        $model->setAttributes((array) $attributes)->syncOriginals();
 
         return $model;
     }
@@ -46,11 +50,12 @@ class Model
         $error = function (string|array $keys) {
             throw new \Exception(sprintf(
                 'Add [%s] to fillable property to allow mass assignment on [%s].',
-                implode(", ", (array)$keys), get_class($this)
+                implode(", ", (array) $keys),
+                get_class($this)
             ));
         };
 
-        if($this->totallyGuarded()){
+        if ($this->totallyGuarded()) {
             $error(
                 (count($this->fillable) === 0)
                     ? array_keys($attributes)
@@ -59,7 +64,7 @@ class Model
         }
 
         foreach ($attributes as $key => $val) {
-            if(! $this->isFillable($key)){
+            if (! $this->isFillable($key)) {
                 $error($key);
             }
 
