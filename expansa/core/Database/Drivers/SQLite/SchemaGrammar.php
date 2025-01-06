@@ -1,13 +1,15 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Expansa\Database\Drivers\SQLite\Schema;
+declare(strict_types=1);
+
+namespace Expansa\Database\Drivers\SQLite;
 
 use Expansa\Database\Schema\Column;
 use Expansa\Database\Schema\Grammar as GrammarBase;
 use Expansa\Database\Schema\Table as TableContract;
 use Expansa\Database\Fluent;
 
-class Grammar extends GrammarBase
+class SchemaGrammar extends GrammarBase
 {
     /**
      * The possible column modifiers.
@@ -35,7 +37,8 @@ class Grammar extends GrammarBase
 
     public function compileCreate(TableContract $table): string
     {
-        return sprintf('%s TABLE %s (%s%s%s)',
+        return sprintf(
+            '%s TABLE %s (%s%s%s)',
             $table->isTemporary() ? 'CREATE TEMPORARY' : 'CREATE',
             $this->wrapTable($table),
             implode(', ', $this->getColumns($table)),
@@ -51,18 +54,19 @@ class Grammar extends GrammarBase
         $sql = '';
 
         foreach ($foreigns as $foreign) {
-            $sql.= sprintf(', FOREIGN KEY (%s) REFERENCES %s(%s)',
+            $sql .= sprintf(
+                ', FOREIGN KEY (%s) REFERENCES %s(%s)',
                 $this->columnize($foreign->columns),
                 $this->wrapTable($foreign->on),
-                $this->columnize((array)$foreign->references)
+                $this->columnize((array) $foreign->references)
             );
 
             if (! empty($this->onDelete)) {
-                $sql.= ' ON DELETE '.$foreign->onDelete;
+                $sql .= ' ON DELETE ' . $foreign->onDelete;
             }
 
             if (! empty($this->onUpdate)) {
-                $sql.= ' ON UPDATE '.$foreign->onUpdate;
+                $sql .= ' ON UPDATE ' . $foreign->onUpdate;
             }
         }
 
@@ -88,12 +92,12 @@ class Grammar extends GrammarBase
 
     public function compileDrop(TableContract $table): string
     {
-        return 'DROP TABLE '.$this->wrapTable($table);
+        return 'DROP TABLE ' . $this->wrapTable($table);
     }
 
     public function compileDropIfExists(TableContract $table): string
     {
-        return 'DROP TABLE IF EXISTS '.$this->wrapTable($table);
+        return 'DROP TABLE IF EXISTS ' . $this->wrapTable($table);
     }
 
     public function compileDropTables(): string
@@ -111,14 +115,17 @@ class Grammar extends GrammarBase
         $prefix = sprintf('ALTER TABLE %s ADD COLUMN ', $this->wrapTable($table));
 
         return array_map(function ($column) use ($prefix) {
-            return $prefix.$column;
+            return $prefix . $column;
         }, $this->getColumns($table));
     }
 
     public function compileRenameColumn(TableContract $table, Fluent $command): string
     {
-        return sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s',
-            $this->wrapTable($table), $this->wrap($command->from), $this->wrap($command->to)
+        return sprintf(
+            'ALTER TABLE %s RENAME COLUMN %s TO %s',
+            $this->wrapTable($table),
+            $this->wrap($command->from),
+            $this->wrap($command->to)
         );
     }
 
@@ -127,20 +134,28 @@ class Grammar extends GrammarBase
         $prefix = sprintf('ALTER TABLE %s DROP COLUMN ', $this->wrapTable($table));
 
         return array_map(function ($column) use ($prefix) {
-            return $prefix.$this->wrap($column);
-        }, (array)$command->columns);
+            return $prefix . $this->wrap($column);
+        }, (array) $command->columns);
     }
 
     public function compileIndex(TableContract $table, Fluent $command): string
     {
-        return sprintf('CREATE INDEX %s ON %s (%s)',
-            $this->wrap($command->index), $this->wrapTable($table), $this->columnize($command->columns));
+        return sprintf(
+            'CREATE INDEX %s ON %s (%s)',
+            $this->wrap($command->index),
+            $this->wrapTable($table),
+            $this->columnize($command->columns)
+        );
     }
 
     public function compileUnique(TableContract $table, Fluent $command): string
     {
-        return sprintf('CREATE UNIQUE INDEX %s ON %s (%s)',
-            $this->wrap($command->index), $this->wrapTable($table), $this->columnize($command->columns));
+        return sprintf(
+            'CREATE UNIQUE INDEX %s ON %s (%s)',
+            $this->wrap($command->index),
+            $this->wrapTable($table),
+            $this->columnize($command->columns)
+        );
     }
 
     public function compileDropPrimary(TableContract $table, Fluent $command): string
@@ -155,7 +170,7 @@ class Grammar extends GrammarBase
 
     public function compileDropIndex(TableContract $table, Fluent $command): string
     {
-        return 'DROP INDEX '.$this->wrap($command->index);
+        return 'DROP INDEX ' . $this->wrap($command->index);
     }
 
     public function compileEnableForeignKeys(): string
@@ -182,7 +197,6 @@ class Grammar extends GrammarBase
     {
         return 'VACUUM';
     }
-
 
     protected function typeInteger(Column $column): string
     {
@@ -261,8 +275,11 @@ class Grammar extends GrammarBase
 
     protected function typeEnum(Column $column): string
     {
-        return sprintf('TEXT CHECK ("%s" in (%s))',
-            $column->name, $this->quoteString($column->allowed));
+        return sprintf(
+            'TEXT CHECK ("%s" in (%s))',
+            $column->name,
+            $this->quoteString($column->allowed)
+        );
     }
 
     protected function typeSet(Column $column): string
@@ -290,11 +307,10 @@ class Grammar extends GrammarBase
         return $column->useCurrent ? 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' : 'TIMESTAMP';
     }
 
-
     protected function modifyCollate(Column $column)
     {
         if (! is_null($column->collation)) {
-            return ' COLLATE '.$this->wrapValue($column->collation);
+            return ' COLLATE ' . $this->wrapValue($column->collation);
         }
     }
 
@@ -318,7 +334,7 @@ class Grammar extends GrammarBase
     protected function modifyDefault(Column $column)
     {
         if (! is_null($column->default)) {
-            return ' DEFAULT '.$this->getDefaultValue($column->default);
+            return ' DEFAULT ' . $this->getDefaultValue($column->default);
         }
     }
 
@@ -369,6 +385,6 @@ class Grammar extends GrammarBase
     {
         [$field, $path] = $this->wrapJsonFieldAndPath($value);
 
-        return 'json_extract('.$field.$path.')';
+        return 'json_extract(' . $field . $path . ')';
     }
 }

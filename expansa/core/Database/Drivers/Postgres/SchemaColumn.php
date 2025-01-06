@@ -1,6 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Expansa\Database\Drivers\Postgres\Schema;
+declare(strict_types=1);
+
+namespace Expansa\Database\Drivers\Postgres;
 
 use Expansa\Database\Schema\Column as ColumnBase;
 
@@ -15,6 +17,6 @@ use Expansa\Database\Schema\Column as ColumnBase;
  * @method $this virtualAs(string $expression) Create a virtual generated column
  * @method $this array() Create an array column
  */
-class Column extends ColumnBase
+class SchemaColumn extends ColumnBase
 {
 }

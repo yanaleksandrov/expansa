@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Expansa\Database\Drivers\SQLite\Query;
+namespace Expansa\Database\Drivers\Postgres;
 
 use Expansa\Database\Query\Grammar as GrammarBase;
 
-class Grammar extends GrammarBase
+class QueryGrammar extends GrammarBase
 {
 
 }

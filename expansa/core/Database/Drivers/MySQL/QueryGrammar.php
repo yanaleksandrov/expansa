@@ -25,8 +25,12 @@ class QueryGrammar extends GrammarBase
         $query->addBinding(array_values($insertValues), 'columns');
         $query->addBinding(array_values($updateValues), 'columns');
 
-        return sprintf('INSERT INTO %s (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s',
-            $table, $sqlInsertColumns, $sqlInsertValues, $sqlUpdateSet
+        return sprintf(
+            'INSERT INTO %s (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s',
+            $table,
+            $sqlInsertColumns,
+            $sqlInsertValues,
+            $sqlUpdateSet
         );
     }
 
@@ -35,7 +39,6 @@ class QueryGrammar extends GrammarBase
         if ($value instanceof Expression) {
             return $value->getValue();
         }
-
         return sprintf('`%s`', $value);
     }
 }

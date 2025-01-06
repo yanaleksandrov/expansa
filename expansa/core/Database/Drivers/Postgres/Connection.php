@@ -4,10 +4,10 @@ namespace Expansa\Database\Drivers\Postgres;
 
 use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Connection as ConnectionBase;
-use Expansa\Database\Drivers\Postgres\Schema\Builder as SchemaBuilder;
-use Expansa\Database\Drivers\Postgres\Schema\Grammar as SchemaGrammar;
-use Expansa\Database\Drivers\Postgres\Query\Builder as QueryBuilder;
-use Expansa\Database\Drivers\Postgres\Query\Grammar as QueryGrammar;
+use Expansa\Database\Drivers\Postgres\SchemaBuilder as SchemaBuilder;
+use Expansa\Database\Drivers\Postgres\SchemaGrammar as SchemaGrammar;
+use Expansa\Database\Drivers\Postgres\QueryBuilder;
+use Expansa\Database\Drivers\Postgres\QueryGrammar;
 
 class Connection extends ConnectionBase
 {

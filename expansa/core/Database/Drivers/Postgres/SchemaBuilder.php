@@ -1,12 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Expansa\Database\Drivers\Postgres\Schema;
+namespace Expansa\Database\Drivers\Postgres;
 
-use Expansa\Database\Drivers\Postgres\Schema\Table;
+use Expansa\Database\Drivers\Postgres\SchemaTable;
 use Expansa\Database\Schema\Builder as BuilderAbstract;
 
-class Builder extends BuilderAbstract
+class SchemaBuilder extends BuilderAbstract
 {
     public function getColumnListing(string $table): array
     {
@@ -21,8 +22,8 @@ class Builder extends BuilderAbstract
 	    return array_map(fn($value) => $value['column_name'], $results);
     }
 
-    public function createTable(string $table, \Closure $callback = null): Table
+    public function createTable(string $table, \Closure $callback = null): SchemaTable
     {
-        return new Table($table, $callback);
+        return new SchemaTable($table, $callback);
     }
 }

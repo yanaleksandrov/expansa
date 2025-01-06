@@ -1,12 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Expansa\Database\Drivers\SQLite\Schema;
+declare(strict_types=1);
 
-use Expansa\Database\Drivers\SQLite\Schema\Table;
+namespace Expansa\Database\Drivers\SQLite;
+
 use Expansa\Database\Schema\Builder as BuilderAbstract;
 use Expansa\Filesystem\Filesystem;
 
-class Builder extends BuilderAbstract
+class SchemaBuilder extends BuilderAbstract
 {
     public function createDatabase(string $name): bool
     {
@@ -49,9 +50,9 @@ class Builder extends BuilderAbstract
         $this->connection->select($this->grammar->compileRebuild());
     }
 
-    protected function createTable(string $table, \Closure $callback = null): Table
+    protected function createTable(string $table, \Closure $callback = null): SchemaTable
     {
-        return new Table($table, $callback, $this->connection->getTablePrefix());
+        return new SchemaTable($table, $callback, $this->connection->getTablePrefix());
     }
 
     public function refreshDatabaseFile(): void

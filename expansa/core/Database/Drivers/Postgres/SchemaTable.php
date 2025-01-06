@@ -1,14 +1,14 @@
 <?php declare(strict_types=1);
 
-namespace Expansa\Database\Drivers\Postgres\Schema;
+namespace Expansa\Database\Drivers\Postgres;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Drivers\Postgres\Schema\Column;
+use Expansa\Database\Drivers\Postgres\SchemaColumn;
 use Expansa\Database\Schema\Table as TableBase;
 
-class Table extends TableBase
+class SchemaTable extends TableBase
 {
-    protected string $columnClassDefault = Column::class;
+    protected string $columnClassDefault = SchemaColumn::class;
 
     /*
     |--------------------------------------------------------------------------
@@ -20,9 +20,9 @@ class Table extends TableBase
      * Create column as primary auto-incrementing big integer (8-byte, 1 to 9223372036854775807).
      *
      * @param string $column
-     * @return Column
+     * @return SchemaColumn
      */
-    public function id(string $column = 'id'): Column
+    public function id(string $column = 'id'): SchemaColumn
     {
         return $this->addColumn('bigSerial', $column, ['primary' => true]);
     }
@@ -32,9 +32,9 @@ class Table extends TableBase
      *
      * @param $name
      * @param int|null $length
-     * @return Column
+     * @return SchemaColumn
      */
-    public function string(string $column, int $length = null): Column
+    public function string(string $column, int $length = null): SchemaColumn
     {
         if (is_null($length)) {
             return $this->text($column);
@@ -49,7 +49,7 @@ class Table extends TableBase
         $this->timestamp('updated_at', $precision);
     }
 
-    public function softDeletes(string $column = 'deleted_at', int $precision = 0): Column
+    public function softDeletes(string $column = 'deleted_at', int $precision = 0): SchemaColumn
     {
         return $this->timestamp($column, $precision);
     }
@@ -60,7 +60,7 @@ class Table extends TableBase
     |--------------------------------------------------------------------------
     */
 
-    public function boolean(string $column): Column
+    public function boolean(string $column): SchemaColumn
     {
         return $this->addColumn('boolean', $column);
     }
@@ -69,9 +69,9 @@ class Table extends TableBase
      * Create new small integer (2-byte, -32768 to +32767) column in table.
      *
      * @param string $name
-     * @return Column
+     * @return SchemaColumn
      */
-    public function smallInteger(string $column): Column
+    public function smallInteger(string $column): SchemaColumn
     {
         return $this->addColumn('smallInteger', $column);
     }
@@ -80,9 +80,9 @@ class Table extends TableBase
      * Create new typical integer (4-byte, -2147483648 to +2147483647) column in table.
      *
      * @param string $name
-     * @return Column
+     * @return SchemaColumn
      */
-    public function integer(string $column): Column
+    public function integer(string $column): SchemaColumn
     {
         return $this->addColumn('integer', $column);
     }
@@ -91,9 +91,9 @@ class Table extends TableBase
      * Create new big integer (8-byte, -9223372036854775808 to +9223372036854775807) column in table.
      *
      * @param string $name
-     * @return Column
+     * @return SchemaColumn
      */
-    public function bigInteger(string $column): Column
+    public function bigInteger(string $column): SchemaColumn
     {
         return $this->addColumn('bigInteger', $column);
     }
@@ -102,9 +102,9 @@ class Table extends TableBase
      * Create new auto-incrementing small integer (2-byte, 1 to 32767) column in table.
      *
      * @param string $name
-     * @return Column
+     * @return SchemaColumn
      */
-    public function smallSerial(string $column): Column
+    public function smallSerial(string $column): SchemaColumn
     {
         return $this->addColumn('smallSerial', $column);
     }
@@ -113,9 +113,9 @@ class Table extends TableBase
      * Create new auto-incrementing typical integer (4-byte, 1 to 2147483647) column in table.
      *
      * @param string $name
-     * @return Column
+     * @return SchemaColumn
      */
-    public function serial(string $column): Column
+    public function serial(string $column): SchemaColumn
     {
         return $this->addColumn('serial', $column);
     }
@@ -124,9 +124,9 @@ class Table extends TableBase
      * Create new auto-incrementing typical integer (8-byte, 1 to 9223372036854775807) column in table.
      *
      * @param string $name
-     * @return Column
+     * @return SchemaColumn
      */
-    public function bigSerial(string $column): Column
+    public function bigSerial(string $column): SchemaColumn
     {
         return $this->addColumn('bigSerial', $column);
     }
@@ -135,9 +135,9 @@ class Table extends TableBase
      * Create new double (15 decimal digits precision) column in table.
      *
      * @param string $name
-     * @return Column
+     * @return SchemaColumn
      */
-    public function double(string $column): Column
+    public function double(string $column): SchemaColumn
     {
         return $this->addColumn('double', $column);
     }
@@ -148,9 +148,9 @@ class Table extends TableBase
      * @param string $name
      * @param int $precision
      * @param int $scale
-     * @return Column
+     * @return SchemaColumn
      */
-    public function decimal(string $column, int $precision = null, int $scale = null): Column
+    public function decimal(string $column, int $precision = null, int $scale = null): SchemaColumn
     {
         return $this->numeric($column, $precision, $scale);
     }
@@ -161,9 +161,9 @@ class Table extends TableBase
      * @param string $name
      * @param int $precision
      * @param int $scale
-     * @return Column
+     * @return SchemaColumn
      */
-    public function numeric(string $column, int $precision = null, int $scale = null): Column
+    public function numeric(string $column, int $precision = null, int $scale = null): SchemaColumn
     {
         return $this->addColumn('numeric', $column, compact('precision', 'scale'));
     }
@@ -172,9 +172,9 @@ class Table extends TableBase
      * Create new double (6 decimal digits precision) column in table.
      *
      * @param string $column
-     * @return Column
+     * @return SchemaColumn
      */
-    public function real(string $column): Column
+    public function real(string $column): SchemaColumn
     {
         return $this->addColumn('real', $column);
     }
@@ -192,7 +192,7 @@ class Table extends TableBase
      * @param int $length
      * @return mixed
      */
-    public function char(string $column, int $length = null): Column
+    public function char(string $column, int $length = null): SchemaColumn
     {
         return $this->addColumn('char', $column, compact('length'));
     }
@@ -204,7 +204,7 @@ class Table extends TableBase
      * @param int|null $length
      * @return mixed
      */
-    public function varchar(string $column, int $length = null): Column
+    public function varchar(string $column, int $length = null): SchemaColumn
     {
         return $this->addColumn('varchar', $column, compact('length'));
     }
@@ -215,7 +215,7 @@ class Table extends TableBase
      * @param string $name
      * @return mixed
      */
-    public function text(string $column): Column
+    public function text(string $column): SchemaColumn
     {
         return $this->addColumn('text', $column);
     }
@@ -226,7 +226,7 @@ class Table extends TableBase
     |--------------------------------------------------------------------------
     */
 
-    public function timestamp(string $column, int $precision = 0): Column
+    public function timestamp(string $column, int $precision = 0): SchemaColumn
     {
         if($precision < 0) $precision = 0;
         if($precision > 6) $precision = 6;
@@ -234,7 +234,7 @@ class Table extends TableBase
         return $this->addColumn('timestamp', $column, compact('precision'));
     }
 
-    public function timestampTz(string $column, int $precision = 0): Column
+    public function timestampTz(string $column, int $precision = 0): SchemaColumn
     {
         if($precision < 0) $precision = 0;
         if($precision > 6) $precision = 6;
@@ -242,22 +242,22 @@ class Table extends TableBase
         return $this->addColumn('timestampTz', $column, compact('precision'));
     }
 
-    public function date(string $column): Column
+    public function date(string $column): SchemaColumn
     {
         return $this->addColumn('date', $column);
     }
 
-    public function time(string $column): Column
+    public function time(string $column): SchemaColumn
     {
         return $this->addColumn('time', $column);
     }
 
-    public function timeTz(string $column): Column
+    public function timeTz(string $column): SchemaColumn
     {
         return $this->addColumn('timeTz', $column);
     }
 
-    public function interval(string $column): Column
+    public function interval(string $column): SchemaColumn
     {
         throw new DatabaseException("Type 'interval' not supported.");
     }
@@ -269,7 +269,7 @@ class Table extends TableBase
     |--------------------------------------------------------------------------
     */
 
-    public function uuid(string $column): Column
+    public function uuid(string $column): SchemaColumn
     {
         return $this->addColumn('uuid', $column);
     }

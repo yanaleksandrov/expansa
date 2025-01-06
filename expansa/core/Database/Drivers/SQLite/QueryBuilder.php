@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Drivers\Postgres\Query;
+namespace Expansa\Database\Drivers\SQLite;
 
 use Expansa\Database\Query\Builder as BuilderBase;
 
-class Builder extends BuilderBase
+class QueryBuilder extends BuilderBase
 {
     protected $operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
