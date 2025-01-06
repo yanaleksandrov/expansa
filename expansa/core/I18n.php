@@ -25,6 +25,6 @@ class I18n extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Translation\Translator';
+        return '\Expansa\Translation\Translator';
     }
 }
