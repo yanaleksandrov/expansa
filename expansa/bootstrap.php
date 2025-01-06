@@ -82,6 +82,8 @@ if (! Is::installed()) {
     exit;
 }
 
+Expansa\Log::error('Test text', ['id' => 123]);
+
 /**
  * Check for the required PHP version, and the MySQL extension or a database drop-in.
  * Dies if requirements are not met.
