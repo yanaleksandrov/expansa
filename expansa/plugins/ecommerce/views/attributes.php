@@ -28,7 +28,7 @@ use Expansa\View;
 				<?php Form::print( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
 			</div>
 			<div class="attributes-side">
-				<div x-text="`<?php I18n::f_attr( ':attributesCount items', '${attributes.length}' ); ?>`">0 items</div>
+				<div x-text="`<?php I18n::t_attr( ':attributesCount items', '${attributes.length}' ); ?>`">0 items</div>
 				<div class="attributes-list">
 					<div class="attributes-values">
 						<template x-if="attributes.length">

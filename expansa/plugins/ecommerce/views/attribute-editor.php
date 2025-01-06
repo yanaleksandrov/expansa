@@ -29,7 +29,7 @@ use Expansa\Url;
 				<?php Form::print( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
 			</div>
 			<div class="attributes-side">
-				<div x-text="`<?php I18n::f_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
+				<div x-text="`<?php I18n::t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
 				<div class="attributes-list">
 					<?php
 					View::print(
