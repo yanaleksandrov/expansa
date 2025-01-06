@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Table image cell
@@ -13,8 +13,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$class = Sanitizer::class($args['key'] ?? [] );
-$prop  = Sanitizer::prop($args['key'] ?? [] );
+$class = Safe::class($args['key'] ?? [] );
+$prop  = Safe::prop($args['key'] ?? [] );
 ?>
 <div class="<?php echo $class; ?>">
     <span class="avatar avatar--rounded" :style="`background-image: url(${item.<?php echo $prop; ?>})`"></span>

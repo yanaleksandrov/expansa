@@ -4,7 +4,7 @@ namespace Dashboard\Forms;
 use Dashboard\Form;
 use Expansa\Hook;
 use Expansa\Json;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 use Expansa\View;
 
@@ -67,9 +67,9 @@ trait Traits {
 	private function parseFields( array $fields, int $step = 1 ): string {
 		$content = '';
 		foreach ( $fields as $field ) {
-			$name = Sanitizer::name( $field['name'] ?? '' );
-			$prop = Sanitizer::prop( $field['name'] ?? '' );
-			$type = Sanitizer::id( $field['type'] ?? '' );
+			$name = Safe::name( $field['name'] ?? '' );
+			$prop = Safe::prop( $field['name'] ?? '' );
+			$type = Safe::id( $field['type'] ?? '' );
 
 			if ( $type === 'tab' && ! isset( $startTab ) ) {
 				$startTab = true;
@@ -77,7 +77,7 @@ trait Traits {
 			}
 
 			// add required attributes & other manipulations
-			$field['attributes'] = Sanitizer::array( $field['attributes'] ?? [] );
+			$field['attributes'] = Safe::array( $field['attributes'] ?? [] );
 
 			match ( $type ) {
 				'step'     => $field['attributes']['x-wizard:step'] ??= '',
@@ -159,7 +159,7 @@ trait Traits {
 				continue;
 			}
 
-			$safeValue    = Sanitizer::attribute( $value );
+			$safeValue    = Safe::attribute( $value );
 			$attributeVal = match( gettype( $value ) ) {
 				'boolean' => $value === true ? 'true' : 'false',
 				'string'  => "'$safeValue'",
@@ -167,7 +167,7 @@ trait Traits {
 			};
 
 			$values = Json::encode( $value );
-			$prop   = Sanitizer::prop( $field );
+			$prop   = Safe::prop( $field );
 
 			$expressions[] = [
 				'expression' => match( $operator ) {
@@ -200,7 +200,7 @@ trait Traits {
 		if ( $expressions ) {
 			return [
 				'x-show'  => implode( ' && ', array_column( $expressions, 'expression' ) ),
-				'x-cloak' => Sanitizer::bool( in_array( false, array_column( $expressions, 'match' ), true ) ),
+				'x-cloak' => Safe::bool( in_array( false, array_column( $expressions, 'match' ), true ) ),
 			];
 		}
 		return [];

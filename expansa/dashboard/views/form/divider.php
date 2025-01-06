@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Form divider
@@ -13,6 +13,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$label = Sanitizer::trim( $args['label'] ?? '' );
+$label = Safe::trim( $args['label'] ?? '' );
 ?>
 <div class="card-hr"><?php echo $label; ?></div>

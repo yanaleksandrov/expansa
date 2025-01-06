@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Asset;
 
 use Expansa\Asset\Contracts\ProviderInterface;
+use Expansa\Safe;
 
 class ProviderJS implements ProviderInterface
 {
@@ -45,8 +46,8 @@ class ProviderJS implements ProviderInterface
 	 */
 	public function plug( array $asset ): string
 	{
-		$key     = Sanitizer::id( $asset['uid'] ?? '' );
-		$data    = Sanitizer::array( $asset['data'] ?? [] );
+		$key     = Safe::id( $asset['uid'] ?? '' );
+		$data    = Safe::array( $asset['data'] ?? [] );
 		$return  = '';
 
 		if ( $data ) {

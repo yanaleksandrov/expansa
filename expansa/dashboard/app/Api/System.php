@@ -8,7 +8,7 @@ use Expansa\Error;
 use Expansa\File;
 use Expansa\Option;
 use Expansa\Options;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Slug;
 use Expansa\Taxonomy;
 use Expansa\Term;
@@ -41,7 +41,7 @@ class System extends \Expansa\Api\Handler
 			'mysql'      => '5.6',
 		];
 
-		$database = (new Sanitizer(
+		$database = Safe::data(
 			$_POST,
 			[
 				'database' => 'trim',
@@ -50,7 +50,7 @@ class System extends \Expansa\Api\Handler
 				'host'     => 'trim',
 				'prefix'   => 'trim',
 			]
-		))->apply();
+		)->apply();
 
 		Db::init( $database );
 
@@ -78,7 +78,7 @@ class System extends \Expansa\Api\Handler
 		$siteurl  = $protocol . $_SERVER['SERVER_NAME'];
 
 		// TODO: check sanitize rules & add validator
-		[ $site, $userdata, $database ] = (new Sanitizer(
+		[ $site, $userdata, $database ] = Safe::data(
 			$_POST,
 			[
 				'site.name'     => 'trim',
@@ -93,7 +93,7 @@ class System extends \Expansa\Api\Handler
 				'db.host'       => 'trim',
 				'db.prefix'     => 'snakecase',
 			]
-		))->values();
+		)->values();
 
 		/**
 		 * The check for connection to the database should have already been passed by this point.

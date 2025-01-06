@@ -1,8 +1,8 @@
 <?php
+use Expansa\Safe;
 use Expansa\Url;
 use Expansa\I18n;
 use Expansa\View;
-use Expansa\Sanitizer;
 
 /**
  * Table header
@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $title, $badge, $show, $content, $uploader, $filter, $actions, $search, $translation ] = ( new Sanitizer(
+[ $title, $badge, $show, $content, $uploader, $filter, $actions, $search, $translation ] = Safe::data(
 	$args ?? [],
 	[
 		'title'       => 'trim',
@@ -29,7 +29,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		'search'      => 'bool:false',
 		'translation' => 'bool:false',
 	]
-) )->values();
+)->values();
 ?>
 <!-- table head start -->
 <div class="table__header">

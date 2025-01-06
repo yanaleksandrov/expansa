@@ -96,7 +96,7 @@ final class View
             Is::dashboard(), Is::install()             => EX_DASHBOARD . "{$template}.php",
             default                                    => "{$template}.php",
         };
-        $filepath = Sanitizer::path($filepath);
+        $filepath = Safe::path($filepath);
 
         /**
          * Override template file.

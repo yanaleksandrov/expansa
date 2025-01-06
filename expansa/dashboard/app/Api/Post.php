@@ -4,7 +4,7 @@ namespace dashboard\app\Api;
 use Expansa;
 use Expansa\Error;
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 class Post implements Expansa\Api\Contracts\Crud {
 
@@ -32,7 +32,7 @@ class Post implements Expansa\Api\Contracts\Crud {
 	 */
 	public function create(): array
 	{
-		$fields = ( new Sanitizer(
+		$fields = Safe::data(
 			$_POST ?? [],
 			[
 				'limits'     => 'absint',
@@ -41,15 +41,15 @@ class Post implements Expansa\Api\Contracts\Crud {
 				'end-date'   => 'datetime',
 				'sites'      => 'trim|sitesList',
 			]
-		) )->extend( 'sitesList', function( $value ) {
+		)->extend( 'sitesList', function( $value ) {
 			$sitesList = array_map( 'trim', explode( ',', $value ) );
 
 			return array_filter( $sitesList, fn( $url ) => filter_var( $url, FILTER_VALIDATE_URL ) );
 		} )->apply();
 
-		$title  = Sanitizer::text( $_POST['app-name'] ?? '' );
-		$status = Sanitizer::text( $_POST['status'] ?? '' );
-		$type   = Sanitizer::text( $_POST['post-type'] ?? '' );
+		$title  = Safe::text( $_POST['app-name'] ?? '' );
+		$status = Safe::text( $_POST['status'] ?? '' );
+		$type   = Safe::text( $_POST['post-type'] ?? '' );
 		if ( ! $type ) {
 			return Error::add( 'post-type-create', I18n::_t( 'Post type is missing' ) );
 		}

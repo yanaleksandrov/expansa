@@ -60,8 +60,8 @@ final class Media
                 }
 
                 foreach ($sizes as $key => $size) {
-                    $width  = Sanitizer::absint($size['width'] ?? 0);
-                    $height = Sanitizer::absint($size['height'] ?? 0);
+                    $width  = Safe::absint($size['width'] ?? 0);
+                    $height = Safe::absint($size['height'] ?? 0);
                     if (! $width || ! $height) {
                         continue;
                     }
@@ -120,8 +120,8 @@ final class Media
             // now make smaller copies for images
             if (in_array($file->mime, $types, true) && is_array($sizes)) {
                 foreach ($sizes as $size) {
-                    $width  = Sanitizer::absint($size['width'] ?? 0);
-                    $height = Sanitizer::absint($size['height'] ?? 0);
+                    $width  = Safe::absint($size['width'] ?? 0);
+                    $height = Safe::absint($size['height'] ?? 0);
                     if (! $width || ! $height) {
                         continue;
                     }

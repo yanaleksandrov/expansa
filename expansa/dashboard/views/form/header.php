@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Form title.
@@ -13,16 +13,14 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $label, $name, $class, $instruction ] = (
-    new Sanitizer(
-        $args ?? [],
-        [
-            'label'       => 'trim',
-            'name'        => 'key',
-            'class'       => 'class:t-center',
-            'instruction' => 'trim',
-        ]
-    )
+[ $label, $name, $class, $instruction ] = Safe::data(
+    $args ?? [],
+    [
+        'label'       => 'trim',
+        'name'        => 'key',
+        'class'       => 'class:t-center',
+        'instruction' => 'trim',
+    ]
 )->values();
 ?>
 <header class="<?php echo $class; ?>">

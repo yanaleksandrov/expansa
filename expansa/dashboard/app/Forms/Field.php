@@ -1,7 +1,7 @@
 <?php
 namespace Dashboard\Forms;
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\View;
 
 final class Field {
@@ -16,9 +16,9 @@ final class Field {
 	public function parse( array $fields, int $step = 1 ): string {
 		$content = '';
 		foreach ( $fields as $field ) {
-			$name = Sanitizer::name( $field['name'] ?? '' );
-			$prop = Sanitizer::prop( $field['name'] ?? '' );
-			$type = Sanitizer::id( $field['type'] ?? '' );
+			$name = Safe::name( $field['name'] ?? '' );
+			$prop = Safe::prop( $field['name'] ?? '' );
+			$type = Safe::id( $field['type'] ?? '' );
 
 			if ( $type === 'tab' && ! isset( $startTab ) ) {
 				$startTab = true;
@@ -26,7 +26,7 @@ final class Field {
 			}
 
 			// add required attributes & other manipulations
-			$field['attributes'] = Sanitizer::array( $field['attributes'] ?? [] );
+			$field['attributes'] = Safe::array( $field['attributes'] ?? [] );
 
 			match ( $type ) {
 				'step'     => $field['attributes']['x-wizard:step'] ??= '',

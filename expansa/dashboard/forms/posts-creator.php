@@ -1,7 +1,7 @@
 <?php
 use Expansa\I18n;
 use Expansa\Url;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Form for create & edit posts.

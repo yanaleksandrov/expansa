@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Url;
 use Expansa\I18n;
 
@@ -15,17 +15,15 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $title, $sizeHumanize ] = (
-	new Sanitizer(
-		$args ?? [],
-		[
-			'title'        => 'attribute',
-			'sizeHumanize' => 'trim',
-		]
-	)
+[ $title, $sizeHumanize ] = Safe::data(
+    $args ?? [],
+    [
+        'title' => 'attribute',
+        'sizeHumanize' => 'trim',
+    ]
 )->values();
 
-$src = Sanitizer::attribute( $args['sizes']['thumbnail']['url'] ?? $args['url'] ?? $args['icon'] ?? '' );
+$src = Safe::attribute( $args['sizes']['thumbnail']['url'] ?? $args['url'] ?? $args['icon'] ?? '' );
 ?>
 <div class="storage__item" @click="$dialog.open('tmpl-media-editor', item)">
 	<template x-if="item.url || item.icon">

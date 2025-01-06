@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Db;
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Class for handling database operations.
@@ -22,7 +22,7 @@ class Handler
      */
     public function getTableName(string $table): string
     {
-        return EX_DB_PREFIX . Sanitizer::tablename($table);
+        return EX_DB_PREFIX . Safe::tablename($table);
     }
 
     /**

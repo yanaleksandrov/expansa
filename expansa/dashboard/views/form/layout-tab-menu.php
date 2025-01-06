@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Form tab menu.
@@ -13,7 +13,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$fields    = Sanitizer::array( $args ?? [] );
+$fields    = Safe::array( $args ?? [] );
 $fields    = array_filter( $fields, fn( $field ) => $field['type'] === 'tab' );
 $classMenu = array_filter( array_column( $fields, 'class_menu' ), fn ( $field ) => $field )[0] ?? '';
 
@@ -24,17 +24,15 @@ if ( count( $fields ) === 0 ) {
 <ul class="<?php echo trim( sprintf( 'tab__nav %s', $classMenu ) ); ?>" x-sticky>
 	<?php
 	foreach ( $fields as $field ) :
-		[ $prop, $label, $icon, $class ] = (
-            new Sanitizer(
-				$field,
-                [
-					'name'         => 'prop:tab',
-					'label'        => 'trim',
-					'icon'         => 'attribute',
-					'class_button' => 'class',
-                ]
-            )
-		)->values();
+		[ $prop, $label, $icon, $class ] = Safe::data(
+			$field,
+            [
+				'name'         => 'prop:tab',
+				'label'        => 'trim',
+				'icon'         => 'attribute',
+				'class_button' => 'class',
+            ]
+        )->values();
 		?>
 		<li class="<?php echo trim( sprintf( 'tab__title %s', $class ) ); ?>" x-bind="tabButton('<?php echo $prop; ?>')">
 			<?php $icon && printf( '<i class="%s"></i> ', $icon ); ?>

@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Table raw text cell
@@ -13,7 +13,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$columns = Sanitizer::array( $args ?? [] );
+$columns = Safe::array( $args ?? [] );
 if ( ! $columns ) {
     return;
 }
@@ -21,17 +21,15 @@ if ( ! $columns ) {
 <div class="table__head">
 	<?php
 	foreach ( $columns as $column ) :
-		[ $key, $cell, $title, $sortable ] = (
-	        new Sanitizer(
-	            (array) $column,
-	            [
-	                'key'      => 'class',
-	                'cell'     => 'key',
-	                'title'    => 'trim',
-	                'sortable' => 'bool',
-	            ]
-	        )
-		)->values();
+		[ $key, $cell, $title, $sortable ] = Safe::data(
+            (array) $column,
+            [
+                'key'      => 'class',
+                'cell'     => 'key',
+                'title'    => 'trim',
+                'sortable' => 'bool',
+            ]
+        )->values();
 	    ?>
 	    <div class="<?php echo trim( sprintf( '%s df aic g-1', $key ) ); ?>"><?php
 			$title && print( $title );

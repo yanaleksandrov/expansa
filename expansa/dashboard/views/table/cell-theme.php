@@ -1,6 +1,6 @@
 <?php
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\View;
 
 /**
@@ -15,20 +15,18 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $key, $title, $description, $screenshot, $reviews, $version, $rating, $installed ] = (
-	new Sanitizer(
-		$args ?? [],
-		[
-			'key'         => 'class',
-			'title'       => 'trim',
-			'description' => 'trim',
-			'screenshot'  => 'url',
-			'reviews'     => 'absint',
-			'version'     => 'trim',
-			'rating'      => 'float',
-			'installed'   => 'bool',
-		]
-	)
+[ $key, $title, $description, $screenshot, $reviews, $version, $rating, $installed ] = Safe::data(
+	$args ?? [],
+	[
+		'key'         => 'class',
+		'title'       => 'trim',
+		'description' => 'trim',
+		'screenshot'  => 'url',
+		'reviews'     => 'absint',
+		'version'     => 'trim',
+		'rating'      => 'float',
+		'installed'   => 'bool',
+	]
 )->values();
 ?>
 <div class="themes-item">

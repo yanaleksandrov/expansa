@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Field;
 
 use Expansa\Db;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 class Schema
 {
@@ -19,8 +19,8 @@ class Schema
     {
         $charsetCollate = (new Db\Handler())->getCharsetCollate();
 
-        $tableName = Sanitizer::tablename($table);
-        $name      = Sanitizer::tablename($name);
+        $tableName = Safe::tablename($table);
+        $name      = Safe::tablename($name);
 
         Db::query(
             "

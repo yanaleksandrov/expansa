@@ -34,7 +34,7 @@ $list    = [];
 //		if ( $plugin instanceof Plugins\Skeleton ) {
 //			$list[$path] = array_combine(
 //				['content', 'description'],
-//				( new Expansa\Sanitizer() )->apply(
+//				( new Expansa\Safe() )->apply(
 //					$plugin->manifest(),
 //					[
 //						'name'        => 'html',

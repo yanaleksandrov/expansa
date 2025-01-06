@@ -1,4 +1,6 @@
 <?php
+use Expansa\Safe;
+
 /**
  * Progress bar
  *
@@ -11,7 +13,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $max, $min, $value, $speed ] = ( new Expansa\Sanitizer(
+[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $max, $min, $value, $speed ] = Safe::data(
 	$args ?? [],
 	[
 		'name'        => 'name',
@@ -32,7 +34,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		'value'       => 'absint:100',
 		'speed'       => 'absint:1000',
 	]
-) )->values();
+)->values();
 ?>
 <div class="<?php echo $class; ?>">
 	<div class="<?php echo $label_class; ?>">

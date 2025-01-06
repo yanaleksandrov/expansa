@@ -1,7 +1,7 @@
 <?php
 namespace Dashboard\Table;
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 final class Cell
 {
@@ -59,7 +59,7 @@ final class Cell
 	 * @return Cell
 	 */
 	public function sortOrder( string $order = 'DESC' ): Cell {
-		$order = Sanitizer::uppercase( $order );
+		$order = Safe::uppercase( $order );
         if ( in_array( $order, [ 'ASC', 'DESC' ], true ) ) {
 			$this->sortOrder = $order;
         }

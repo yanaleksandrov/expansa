@@ -6,7 +6,7 @@ use Expansa\Error;
 use Expansa\File;
 use Expansa\I18n;
 use Expansa\Post\Post;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Url;
 
 class Media extends \Expansa\Api\Handler
@@ -42,7 +42,7 @@ class Media extends \Expansa\Api\Handler
 	{
 		$errors = [];
 		$posts  = [];
-		$files  = Sanitizer::array( $_FILES ?? [] );
+		$files  = Safe::array( $_FILES ?? [] );
 //		exit;
 //		print_r( $_FILES );
 //		exit;

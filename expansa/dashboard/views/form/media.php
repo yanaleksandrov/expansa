@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -15,20 +15,18 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $type, $name, $label, $label_class, $class, $description, $attributes, $tooltip ] = (
-    new Sanitizer(
-        $args ?? [],
-        [
-			'type'        => 'key:text',
-			'name'        => 'attribute|key',
-			'label'       => 'trim:field',
-			'label_class' => 'class:df aic jcsb fw-500',
-			'class'       => 'class:dg g-1',
-			'description' => 'trim',
-			'attributes'  => 'array',
-			'tooltip'     => 'trim|attribute',
-        ]
-    )
+[ $type, $name, $label, $label_class, $class, $description, $attributes, $tooltip ] = Safe::data(
+    $args ?? [],
+    [
+		'type'        => 'key:text',
+		'name'        => 'attribute|key',
+		'label'       => 'trim:field',
+		'label_class' => 'class:df aic jcsb fw-500',
+		'class'       => 'class:dg g-1',
+		'description' => 'trim',
+		'attributes'  => 'array',
+		'tooltip'     => 'trim|attribute',
+    ]
 )->values();
 
 $attributes['type'] = 'file';
@@ -36,7 +34,7 @@ $attributes['type'] = 'file';
 <div class="<?php echo $class; ?>" x-data="{<?php echo $name; ?>: []}">
 	<div class="dg g-1" x-media>
 		<?php if ( $label ) : ?>
-			<span class="<?php echo $label_class; ?>"><?php Sanitizer::html( $label ); ?></span>
+			<span class="<?php echo $label_class; ?>"><?php Safe::html( $label ); ?></span>
 		<?php endif; ?>
 		<template x-for="(item, id) in <?php echo $name; ?>">
 			<img class="" :src="item.url" x-init="console.log(item.url)" alt="" width="200" height="200">

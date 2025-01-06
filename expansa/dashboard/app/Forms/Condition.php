@@ -2,7 +2,7 @@
 namespace Dashboard\Forms;
 
 use Expansa\Json;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 final class Condition {
 
@@ -39,7 +39,7 @@ final class Condition {
 				continue;
 			}
 
-			$safeValue    = Sanitizer::attribute( $value );
+			$safeValue    = Safe::attribute( $value );
 			$attributeVal = match( gettype( $value ) ) {
 				'boolean' => $value === true ? 'true' : 'false',
 				'string'  => "'$safeValue'",
@@ -47,7 +47,7 @@ final class Condition {
 			};
 
 			$values = Json::encode( $value );
-			$prop   = Sanitizer::prop( $field );
+			$prop   = Safe::prop( $field );
 
 			$expressions[] = [
 				'expression' => match( $operator ) {
@@ -80,7 +80,7 @@ final class Condition {
 		if ( $expressions ) {
 			return [
 				'x-show'  => implode( ' && ', array_column( $expressions, 'expression' ) ),
-				'x-cloak' => Sanitizer::bool( in_array( false, array_column( $expressions, 'match' ), true ) ),
+				'x-cloak' => Safe::bool( in_array( false, array_column( $expressions, 'match' ), true ) ),
 			];
 		}
 		return [];

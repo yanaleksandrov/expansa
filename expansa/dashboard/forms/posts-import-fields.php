@@ -2,10 +2,10 @@
 use Expansa\I18n;
 use Expansa\Post\Status;
 use Expansa\Post\Type;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
-$samples  = Sanitizer::array( $args['samples'] ?? [] );
-$filepath = Sanitizer::attribute( $args['filepath'] ?? '' );
+$samples  = Safe::array( $args['samples'] ?? [] );
+$filepath = Safe::attribute( $args['filepath'] ?? '' );
 if ( empty( $samples ) ) {
     return;
 }

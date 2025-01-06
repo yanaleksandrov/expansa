@@ -1,37 +1,37 @@
 <?php
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = ( new Sanitizer(
-	$args ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-		// select, checkbox, radio
-		'options'     => 'array',
-		// progress
-		'max'         => 'absint:0',
-		'min'         => 'absint:0',
-		'value'       => 'absint:100',
-		'speed'       => 'absint:1000',
-		// password
-		'switcher'    => 'bool:true',
-		'indicator'   => 'bool:true',
-		'generator'   => 'bool:true',
-		'characters'  => 'array',
-		// details: dropdown with button
-		'content'     => 'trim',
-		// uploader
-		'max_size'    => 'trim:' . ini_get( 'upload_max_filesize' ),
-	]
-) )->values();
+[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
+    $args ?? [],
+    [
+        'name'        => 'name',
+        'label'       => 'trim',
+        'class'       => 'class:field',
+        'label_class' => 'class:field-label',
+        'reset'       => 'bool:false',
+        'before'      => 'trim',
+        'after'       => 'trim',
+        'instruction' => 'trim',
+        'tooltip'     => 'attribute',
+        'copy'        => 'bool:false',
+        'conditions'  => 'array',
+        'attributes'  => 'array',
+        // select, checkbox, radio
+        'options'     => 'array',
+        // progress
+        'max'         => 'absint:0',
+        'min'         => 'absint:0',
+        'value'       => 'absint:100',
+        'speed'       => 'absint:1000',
+        // password
+        'switcher'    => 'bool:true',
+        'indicator'   => 'bool:true',
+        'generator'   => 'bool:true',
+        'characters'  => 'array',
+        // details: dropdown with button
+        'content'     => 'trim',
+        // uploader
+        'max_size'    => 'trim:' . ini_get( 'upload_max_filesize' ),
+    ]
+)->values();
 
 // field array
 [

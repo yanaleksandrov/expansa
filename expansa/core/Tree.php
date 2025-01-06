@@ -42,7 +42,7 @@ final class Tree
     public static function attach(string $name, callable $function = null): void
     {
         $tree = self::init($name);
-        $name = Sanitizer::html($name);
+        $name = Safe::html($name);
 
         if (empty($tree->list[$name])) {
             $tree->list[$name] = [];

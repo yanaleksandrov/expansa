@@ -4,7 +4,7 @@ use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Option;
 use Expansa\View;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\User;
 use Expansa\Url;
 
@@ -22,7 +22,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$slug	   = Sanitizer::trim( $args['slug'] ?? '' );
+$slug	   = Safe::trim( $args['slug'] ?? '' );
 $start_time = microtime( true );
 // print_r(
 //	Query::apply(

@@ -1,7 +1,7 @@
 <?php
 namespace Dashboard;
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 use Expansa\View;
 
@@ -52,7 +52,7 @@ final class Table {
 	 * @return string
 	 */
 	public function get(): string {
-		$tag    = Sanitizer::tag( $this->tag );
+		$tag    = Safe::tag( $this->tag );
 		$styles = $this->stylize( $this->columns );
 		if ( $styles ) {
 			$this->attributes['style'] = $styles;
@@ -70,7 +70,7 @@ final class Table {
 		);
 
 		if ( $this->dataVariable ) {
-			$prop = Sanitizer::prop( $this->dataVariable );
+			$prop = Safe::prop( $this->dataVariable );
 			$row  = current( $this->rows ?? [] );
 			?>
 			<template x-if="<?php echo $prop; ?>.length">
@@ -122,8 +122,8 @@ final class Table {
 		$styles = [];
 		if ( $columns ) {
 			foreach ( $columns as $i => $column ) {
-				$width    = Sanitizer::trim( $column->width ?: '1fr' );
-				$flexible = Sanitizer::bool( $column->flexible ?? false );
+				$width    = Safe::trim( $column->width ?: '1fr' );
+				$flexible = Safe::bool( $column->flexible ?? false );
 				if ( $flexible ) {
 					$width = sprintf( 'minmax(%s, 1fr)', $width );
 				}

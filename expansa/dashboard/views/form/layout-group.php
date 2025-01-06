@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Group
@@ -13,18 +13,16 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $label, $class, $label_class, $content_class, $content ] = (
-    new Sanitizer(
-        $args ?? [],
-        [
-	        'name'          => 'name',
-			'label'         => 'trim',
-	        'class'         => 'class:dg g-7 gtc-5 sm:gtc-1',
-			'label_class'   => 'class:ga-1 fw-500',
-	        'content_class' => 'class:dg ga-4 g-7 gtc-2 sm:gtc-1',
-			'content'       => 'trim',
-        ]
-    )
+[ $name, $label, $class, $label_class, $content_class, $content ] = Safe::data(
+    $args ?? [],
+    [
+        'name'          => 'name',
+		'label'         => 'trim',
+        'class'         => 'class:dg g-7 gtc-5 sm:gtc-1',
+		'label_class'   => 'class:ga-1 fw-500',
+        'content_class' => 'class:dg ga-4 g-7 gtc-2 sm:gtc-1',
+		'content'       => 'trim',
+    ]
 )->values();
 ?>
 <div class="<?php echo $class; ?>">

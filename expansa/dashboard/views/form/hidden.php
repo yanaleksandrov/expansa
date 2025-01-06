@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -15,6 +15,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$attributes = Sanitizer::array( $args['attributes'] ?? [] );
+$attributes = Safe::array( $args['attributes'] ?? [] );
 ?>
 <input<?php echo Arr::toHtmlAtts( $attributes ); ?>>

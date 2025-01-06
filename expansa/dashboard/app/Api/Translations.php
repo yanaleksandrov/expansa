@@ -12,7 +12,7 @@ namespace dashboard\app\Api;
 use Expansa\Dir;
 use Expansa\File;
 use Expansa\Json;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 class Translations extends \Expansa\Api\Handler
 {
@@ -27,7 +27,7 @@ class Translations extends \Expansa\Api\Handler
 	 * @since 2025.1
 	 */
 	public static function get(): array {
-		$dirpath = Sanitizer::path( EX_PATH . ( $_POST['project'] ?? '' ) );
+		$dirpath = Safe::path( EX_PATH . ( $_POST['project'] ?? '' ) );
 		$paths   = ( new Dir( $dirpath ) )->getFiles( '*.php', 10 );
 
 		$result = [];
@@ -97,13 +97,13 @@ class Translations extends \Expansa\Api\Handler
 	 * @url    PUT api/posts/$id
 	 */
 	public static function update(): array {
-		[ $project, $translations ] = ( new Sanitizer(
+		[ $project, $translations ] = Safe::data(
 			$_REQUEST,
 			[
 				'project'      => 'trim',
 				'translations' => 'array',
 			]
-		) )->values();
+		)->values();
 
 		if ( $project && $translations ) {
 			$content  = Json::encode( $translations );

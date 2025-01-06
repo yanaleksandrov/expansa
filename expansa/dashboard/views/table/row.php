@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 use Expansa\View;
 
@@ -20,15 +20,13 @@ if ( ! is_array( $data ) || empty( $row ) || empty( $columns ) ) {
 	return;
 }
 
-[ $tag, $view, $attributes ] = (
-	new Sanitizer(
-		(array) $row,
-		[
-			'tag'        => 'tag',
-			'view'       => 'trim',
-			'attributes' => 'array',
-		]
-	)
+[ $tag, $view, $attributes ] = Safe::data(
+    (array) $row,
+    [
+        'tag'        => 'tag',
+        'view'       => 'trim',
+        'attributes' => 'array',
+    ]
 )->values();
 
 $tag && printf( '<%s>', trim( sprintf( '%s %s', $tag, Arr::toHtmlAtts( $attributes ) ) ) );

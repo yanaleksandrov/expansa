@@ -65,7 +65,7 @@ final class Option extends Option\Schema
     public static function add(string $option, mixed $value): int|bool
     {
         $options = self::fetch();
-        $option  = Sanitizer::id($option);
+        $option  = Safe::id($option);
         if (empty($option)) {
             return false;
         }
@@ -115,7 +115,7 @@ final class Option extends Option\Schema
      */
     public static function update(string $option, mixed $value): bool|int
     {
-        $option = Sanitizer::id($option);
+        $option = Safe::id($option);
         if (empty($option)) {
             return false;
         }
@@ -262,7 +262,7 @@ final class Option extends Option\Schema
      */
     public static function attr(string $option, mixed $default = ''): string
     {
-        return Sanitizer::attribute(self::get($option, $default));
+        return Safe::attribute(self::get($option, $default));
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 use Expansa\I18n;
 use Expansa\Url;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Form for build tools list.
@@ -46,17 +46,15 @@ return Dashboard\Form::enqueue(
 				<div class="dg g-1 pt-8 pb-4">
 					<?php
 					foreach ( $tools as $tool ):
-						[ $icon, $image, $title, $link, $description ] = (
-							new Sanitizer(
-								$tool,
-								[
-									'icon'        => 'trim',
-									'image'       => 'attribute',
-									'title'       => 'trim',
-									'link'        => 'url',
-									'description' => 'trim',
-								]
-							)
+						[ $icon, $image, $title, $link, $description ] = Safe::data(
+							$tool,
+							[
+								'icon'        => 'trim',
+								'image'       => 'attribute',
+								'title'       => 'trim',
+								'link'        => 'url',
+								'description' => 'trim',
+							]
 						)->values();
 						?>
 						<div class="card card-border p-4 df fdr g-4">

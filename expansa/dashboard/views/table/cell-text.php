@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Table title with actions cell
@@ -13,9 +13,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$class = Sanitizer::class($args['key'] ?? [] );
-$prop  = Sanitizer::prop($args['key'] ?? [] );
-$value = Sanitizer::trim($args['value'] ?? '' );
+$class = Safe::class($args['key'] ?? [] );
+$prop  = Safe::prop($args['key'] ?? [] );
+$value = Safe::trim($args['value'] ?? '' );
 ?>
 <label class="<?php echo $class; ?>">
 	<textarea :name="`items[${i}]`" x-text="item.<?php echo $prop; ?>" rows="1" x-textarea="7"></textarea>

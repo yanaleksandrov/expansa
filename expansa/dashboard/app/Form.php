@@ -5,7 +5,7 @@ use Expansa\{
 	I18n,
 	Error,
 	Patterns,
-	Sanitizer,
+    Safe,
 };
 
 /**
@@ -38,7 +38,7 @@ class Form {
 	 * @since 2025.1
 	 */
 	public static function enqueue( string $uid, array $attributes = [], array $fields = [] ): string {
-		$uid = Sanitizer::id( $uid );
+		$uid = Safe::id( $uid );
 		if ( ! $uid ) {
 			new Error( 'form-register', I18n::_t( 'The form with %s ID is empty.', $uid ) );
 		}
@@ -137,7 +137,7 @@ class Form {
 	 * @since 2025.1
 	 */
 	public function insert( array $field ): void {
-		$name = Sanitizer::name( $field['name'] ?? '' );
+		$name = Safe::name( $field['name'] ?? '' );
 		if ( empty( $name ) ) {
 			new Error( 'form-add-field', I18n::_t( 'It is not possible to add a field with an empty "name".' ) );
 		}

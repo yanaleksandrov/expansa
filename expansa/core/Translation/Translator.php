@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Translation;
 
 use Expansa\Hook;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * The I18n class provides methods for handling translations in the system, including
@@ -183,7 +183,7 @@ class Translator extends Locale
      */
     public function t_attr(string $string, mixed ...$args): void
     {
-        echo Sanitizer::attribute(self::_t($string, ...$args));
+        echo Safe::attribute(self::_t($string, ...$args));
     }
 
     /**
@@ -195,7 +195,7 @@ class Translator extends Locale
      */
     public function _t_attr(string $string, mixed ...$args): string
     {
-        return Sanitizer::attribute(self::_t($string, ...$args));
+        return Safe::attribute(self::_t($string, ...$args));
     }
 
     /**
@@ -247,7 +247,7 @@ class Translator extends Locale
      */
     public function _c_attr(bool $condition, string $ifString, string $elseString = ''): string
     {
-        return Sanitizer::attribute(self::_c($condition, $ifString, $elseString));
+        return Safe::attribute(self::_c($condition, $ifString, $elseString));
     }
 
     /**

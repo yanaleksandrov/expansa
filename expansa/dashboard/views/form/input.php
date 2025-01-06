@@ -1,7 +1,7 @@
 <?php
 
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = ( new Sanitizer(
+[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
 	$args ?? [],
 	[
 		'name'        => 'name',
@@ -32,9 +32,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 		'conditions'  => 'array',
 		'attributes'  => 'array',
 	]
-) )->values();
+)->values();
 
-$prop = Sanitizer::prop( $attributes['name'] ?? $name );
+$prop = Safe::prop( $attributes['name'] ?? $name );
 ?>
 <div class="<?php echo $class; ?>">
 	<?php if ( $label ) : ?>

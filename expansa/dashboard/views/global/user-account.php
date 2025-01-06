@@ -1,9 +1,10 @@
 <?php
+
+use Expansa\Safe;
 use Expansa\View;
 use Expansa\Tree;
 use Expansa\User;
 use Expansa\I18n;
-use Expansa\Sanitizer;
 
 /**
  * Output user account button.
@@ -17,15 +18,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $class, $rating, $reviews ] = (
-	new Sanitizer(
-		$args ?? [],
-		[
-			'class'   => 'class:df aic g-1',
-			'rating'  => 'float',
-			'reviews' => 'absint',
-		]
-	)
+[ $class, $rating, $reviews ] = Safe::data(
+	$args ?? [],
+	[
+		'class'   => 'class:df aic g-1',
+		'rating'  => 'float',
+		'reviews' => 'absint',
+	]
 )->values();
 
 $user = User::current();

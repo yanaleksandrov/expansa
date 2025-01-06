@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -15,15 +15,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $attributes, $content, $step ] = (
-    new Sanitizer(
-        $args ?? [],
-        [
-            'attributes' => 'array',
-            'content'    => 'trim',
-            'step'       => 'absint:1',
-        ]
-    )
+[ $attributes, $content, $step ] = Safe::data(
+    $args ?? [],
+    [
+        'attributes' => 'array',
+        'content'    => 'trim',
+        'step'       => 'absint:1',
+    ]
 )->values();
 ?>
 <!-- step <?php echo $step; ?> -->

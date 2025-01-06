@@ -102,7 +102,8 @@ final class User extends Schema
      */
     public static function add(array $userdata, ?callable $callback = null): User|Error
     {
-        $userdata = ( new Sanitizer(
+
+        $userdata = Safe::data(
             $userdata,
             [
                 'login'    => 'login',
@@ -111,7 +112,7 @@ final class User extends Schema
                 'showname' => 'ucfirst:$login',
                 'nicename' => 'slug:$login|unique',
             ]
-        ) )->extend(
+        )->extend(
             'unique',
             function ($value) {
                 $suffix = 1;
@@ -172,7 +173,7 @@ final class User extends Schema
      */
     public static function update(array $userdata, ?callable $callback = null): User|Error
     {
-        $userID = Sanitizer::absint($userdata['id'] ?? 0);
+        $userID = Safe::absint($userdata['id'] ?? 0);
         if (! $userID) {
             return self::add($userdata);
         }
@@ -183,7 +184,7 @@ final class User extends Schema
 
         $user = self::get($userID);
         if ($user instanceof User) {
-            $userdata = ( new Sanitizer(
+            $userdata = Safe::data(
                 $userdata,
                 [
                     'password'   => 'trim',
@@ -196,7 +197,7 @@ final class User extends Schema
                     'registered' => 'datetime',
                     'visited'    => 'datetime',
                 ]
-            ) )->apply();
+            )->apply();
 
             $userdata = array_filter($userdata);
             if (Db::update(self::$table, $userdata)->rowCount()) {
@@ -352,14 +353,14 @@ final class User extends Schema
      */
     public static function login(array $userdata): User|Error
     {
-        $userdata = ( new Sanitizer(
+        $userdata = Safe::data(
             $userdata,
             [
                 'login'    => 'login',
                 'password' => 'trim',
                 'remember' => 'bool',
             ]
-        ) )->apply();
+        )->apply();
 
         $userdata = ( new Validator(
             $userdata,

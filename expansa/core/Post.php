@@ -70,7 +70,7 @@ class Post
             return new Error('post-add', I18n::_t('Post type is not registered.'));
         }
 
-        $data = ( new Sanitizer(
+        $data = Safe::data(
             $args,
             [
                 'title'      => 'text',
@@ -84,7 +84,7 @@ class Post
                 'parent'     => 'absint:0',
                 'position'   => 'absint:0',
             ]
-        ) )->apply();
+        )->apply();
 
         $user = User::current();
         if (! $data['author'] && $user instanceof User) {
@@ -103,7 +103,7 @@ class Post
              * Add slug just if post type is public.
              */
             if ($type->public === true) {
-                $slug = Slug::add($post->id, $type->table, Sanitizer::slug($args['slug'] ?? $data['title']));
+                $slug = Slug::add($post->id, $type->table, Safe::slug($args['slug'] ?? $data['title']));
                 if ($slug) {
                     $slug = Slug::get($slug);
 
@@ -113,7 +113,7 @@ class Post
                 }
             }
 
-            $fields = Sanitizer::array($args['fields'] ?? []);
+            $fields = Safe::array($args['fields'] ?? []);
             if ($fields) {
                 ( new Field($post) )->import($fields);
             }
@@ -126,7 +126,7 @@ class Post
     {
         $slug = Slug::get($value);
         if (! empty($slug['entity_table'])) {
-            return self::get(Sanitizer::tablename($slug['entity_table']), $slug['entity_id']);
+            return self::get(Safe::tablename($slug['entity_table']), $slug['entity_id']);
         }
         return null;
     }
@@ -167,7 +167,7 @@ class Post
 
         foreach ($data as $key => $value) {
             unset($data[ $key ]);
-            $data[ Sanitizer::camelcase($key) ] = $value;
+            $data[ Safe::camelcase($key) ] = $value;
         }
 
         $data['slug']   = $type->public === true ? Slug::getByEntity($data['id'], $type->table) : '';

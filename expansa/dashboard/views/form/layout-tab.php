@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Form tab markup
@@ -13,18 +13,16 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $property, $caption, $description, $content, $class_content ] = (
-    new Sanitizer(
-        $args ?? [],
-        [
-			'name'          => 'name',
-			'property'      => 'prop:tab',
-			'caption'       => 'trim|ucfirst',
-			'description'   => 'trim',
-			'content'       => 'trim',
-			'class_content' => 'class',
-        ]
-    )
+[ $name, $property, $caption, $description, $content, $class_content ] = Safe::data(
+    $args ?? [],
+    [
+		'name'          => 'name',
+		'property'      => 'prop:tab',
+		'caption'       => 'trim|ucfirst',
+		'description'   => 'trim',
+		'content'       => 'trim',
+		'class_content' => 'class',
+    ]
 )->values();
 
 if ( empty( $content ) ) {

@@ -17,22 +17,30 @@ final class Sanitizer
     public array $data = [];
 
     /**
-     * List for custom rules for extend sanitizer.
-     *
-     * @var array
-     */
-    protected array $extensions = [];
-
-    /**
      * Setup sanitizer rules.
      *
-     * @param array $fields Incoming fields and their values.
-     * @param array $rules  Sanitizer rules list. Example: 'kebabcase'.
+     * @param array $fields     Incoming fields and their values.
+     * @param array $rules      Sanitizer rules list. Example: 'kebabcase'.
+     * @param array $extensions List for custom rules for extend sanitizer.
      */
     public function __construct(
         protected array $fields = [],
-        protected array $rules = []
-    ) {}
+        protected array $rules = [],
+        protected array $extensions = [],
+    ) {} // phpcs:ignore
+
+    /**
+     * Setup sanitizer rules via `data` method.
+     *
+     * @param array $fields
+     * @param array $rules
+     * @param array $extensions
+     * @return Sanitizer
+     */
+    public function data(array $fields, array $rules, array $extensions = []): Sanitizer
+    {
+        return new self($fields, $rules, $extensions);
+    }
 
     /**
      * Add custom sanitizing rule or override exist.
@@ -56,8 +64,8 @@ final class Sanitizer
      */
     public function apply(): array
     {
-        foreach ($this->rules as $field => $rules_list) {
-            $rules = explode('|', $rules_list);
+        foreach ($this->rules as $field => $rulesList) {
+            $rules = explode('|', $rulesList);
 
             // add support dot notation
             if (str_contains($field, '.')) {
@@ -65,7 +73,7 @@ final class Sanitizer
             }
 
             foreach ($rules as $rule) {
-                [ $method, $default_value ] = explode(':', $rule, 2) + [ null, null ];
+                [ $method, $defaultValue ] = explode(':', $rule, 2) + [ null, null ];
 
                 $extension = isset($this->extensions[$method]) ? $this->extensions[$method] : null;
                 if (! empty($key)) {
@@ -75,12 +83,12 @@ final class Sanitizer
                 }
 
                 // set default value if incoming is empty & default is not empty
-                if (empty($value) && ! empty($default_value)) {
-                    $value = $default_value;
+                if (empty($value) && ! empty($defaultValue)) {
+                    $value = $defaultValue;
 
                     // substring "$" at the beginning, means that the default value must be taken from another field
-                    if (str_starts_with($default_value, '$')) {
-                        $value = $this->data[ trim($default_value, '$') ] ?? '';
+                    if (str_starts_with($defaultValue, '$')) {
+                        $value = $this->data[ trim($defaultValue, '$') ] ?? '';
                     }
                 }
 
@@ -116,19 +124,15 @@ final class Sanitizer
      * Checks for the presence of an element in the array.
      *
      * @param mixed $value Value to change
-     * @param string|null $comparison_value Value to compare
+     * @param string|null $comparisonValue Value to compare
      * @return string
      */
-    public static function exist(mixed $value, ?string $comparison_value): string
+    public static function exist(mixed $value, ?string $comparisonValue): string
     {
         $comparison = [];
-        if ($comparison_value) {
-            $comparison = array_map(
-                'trim',
-                explode(',', $comparison_value)
-            );
+        if ($comparisonValue) {
+            $comparison = array_map('trim', explode(',', $comparisonValue));
         }
-
         return in_array((string) $value, $comparison, true) ? (string) $value : '';
     }
 
@@ -584,19 +588,19 @@ final class Sanitizer
     {
         $value = self::trim($value);
 
-        $email_no_spam_address = '';
+        $emailNoSpamAddress = '';
         for ($i = 0, $len = strlen($value); $i < $len; $i++) {
             $j = rand(0, 1);
 
             if (0 === $j) {
-                $email_no_spam_address .= '&#' . ord($value[ $i ]) . ';';
+                $emailNoSpamAddress .= '&#' . ord($value[ $i ]) . ';';
             } elseif (1 === $j) {
-                $email_no_spam_address .= $value[ $i ];
+                $emailNoSpamAddress .= $value[ $i ];
             } elseif (2 === $j) {
-                $email_no_spam_address .= '%' . zeroise(dechex(ord($value[ $i ])), 2);
+                $emailNoSpamAddress .= '%' . zeroise(dechex(ord($value[ $i ])), 2);
             }
         }
-        return str_replace('@', '&#64;', $email_no_spam_address);
+        return str_replace('@', '&#64;', $emailNoSpamAddress);
     }
 
     /**
@@ -741,7 +745,7 @@ final class Sanitizer
      * @param string $value Color in HEX format
      * @return string|null  3 or 6 digit hex color with or without #
      */
-    public static function hex(string $value): ?string
+    public static function hex(mixed $value): ?string
     {
         $value = self::trim($value);
         if (! str_contains($value, '#')) {

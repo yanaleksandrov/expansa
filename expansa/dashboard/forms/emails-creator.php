@@ -1,6 +1,6 @@
 <?php
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Form for create & edit emails.
@@ -11,7 +11,7 @@ return Dashboard\Form::enqueue(
 	'emails-creator',
 	[
 		'@submit.window' => '$ajax("import-email")',
-		'x-data'         => sprintf( "tab('%s')", Sanitizer::prop( $_GET['tab'] ?? 'general' ) ),
+		'x-data'         => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
 	],
 	[
 		[

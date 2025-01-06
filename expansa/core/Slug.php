@@ -24,7 +24,7 @@ final class Slug
      */
     public static function add(int $entityId, string $entityTable, string $slug, string $locale = ''): string|bool
     {
-        $slug = Sanitizer::slug($slug);
+        $slug = Safe::slug($slug);
 
         try {
             return Db::insert(

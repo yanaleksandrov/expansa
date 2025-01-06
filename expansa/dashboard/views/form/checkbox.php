@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -15,7 +15,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = ( new Sanitizer(
+[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
 	$args ?? [],
 	[
 		'name'        => 'name',
@@ -32,13 +32,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 		'attributes'  => 'array',
 		'options'     => 'array',
 	]
-) )->values();
+)->values();
 
-$prop   = Sanitizer::prop( $attributes['name'] ?? $name );
+$prop   = Safe::prop( $attributes['name'] ?? $name );
 $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ) {
-	$prop = Sanitizer::prop( $key ?: $name );
+	$prop = Safe::prop( $key ?: $name );
 
-	[ $label, $icon, $instruction, $checked ] = ( new Sanitizer(
+	[ $label, $icon, $instruction, $checked ] = Safe::data(
 		$option,
 		[
 			'content'     => 'trim:' . $label,
@@ -46,7 +46,7 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 			'description' => 'trim:' . $instruction,
 			'checked'     => 'bool:' . strval( $attributes['checked'] ?? false ),
 		]
-	) )->values();
+	)->values();
 
 	ob_start();
 	?>

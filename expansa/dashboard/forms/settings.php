@@ -2,7 +2,7 @@
 use Expansa\I18n;
 use Expansa\Url;
 use Expansa\Option;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Website settings in dashboard
@@ -13,7 +13,7 @@ return Dashboard\Form::enqueue(
 	'settings',
 	[
 		'class'   => 'tab tab--vertical',
-		'x-data'  => sprintf( "tab('%s')", Sanitizer::prop( $_GET['tab'] ?? 'general' ) ),
+		'x-data'  => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
 		'@change' => '$ajax("options/update")',
 	],
 	[

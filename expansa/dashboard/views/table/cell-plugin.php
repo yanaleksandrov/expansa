@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Table raw text cell
@@ -13,8 +13,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$class = Sanitizer::class($args['key'] ?? [] );
-$prop  = Sanitizer::prop($args['key'] ?? [] );
+$class = Safe::class($args['key'] ?? [] );
+$prop  = Safe::prop($args['key'] ?? [] );
 ?>
 <div class="<?php echo $class; ?>">
 	<div class="fs-15 lh-sm fw-500" x-text="item.title"></div>

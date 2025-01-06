@@ -8,8 +8,8 @@ use Expansa\Db;
 use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Post\Type;
+use Expansa\Safe;
 use Expansa\User;
-use Expansa\Sanitizer;
 
 class Query
 {
@@ -154,7 +154,7 @@ class Query
          * TODO: add checking existing post types (remove type from array if not exist)
          */
         if (! empty($args['type'])) {
-            $types = array_map('Expansa\Sanitizer::id', is_array($args['type']) ? $args['type'] : [ $args['type'] ]);
+            $types = array_map('Expansa\Safe::id', is_array($args['type']) ? $args['type'] : [ $args['type'] ]);
         } else {
             return new Error('query', I18n::_t('"Type" parameter can not be empty.'));
         }
@@ -235,7 +235,7 @@ class Query
         /**
          * Post title
          */
-        $title = Sanitizer::html($args['title'] ?? '');
+        $title = Safe::html($args['title'] ?? '');
         if (! empty($title)) {
             $where[] = "t.title = '" . $title . "'";
         }
@@ -259,8 +259,8 @@ class Query
         /**
          * Post slug
          */
-        $slug        = Sanitizer::slug($args['slug'] ?? '');
-        $slug_strict = Sanitizer::bool($args['slug_strict'] ?? true);
+        $slug        = Safe::slug($args['slug'] ?? '');
+        $slug_strict = Safe::bool($args['slug_strict'] ?? true);
         if (! empty($slug)) {
             $where[] = $slug_strict ? "t.slug = '{$slug}'" : "t.slug REGEXP '^{$slug}(-[[:digit:]]+)?$'";
         }

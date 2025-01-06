@@ -1,6 +1,6 @@
 <?php
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\View;
 
 /**
@@ -15,25 +15,23 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $title, $description, $screenshot, $author, $categories, $installed, $active, $installations, $date, $reviews, $rating, $expansa, $version ] = (
-	new Sanitizer(
-		$args ?? [],
-		[
-			'title'         => 'trim',
-			'description'   => 'trim',
-			'screenshot'    => 'url',
-			'author'        => 'array',
-			'categories'    => 'array',
-			'installed'     => 'bool',
-			'active'        => 'bool',
-			'installations' => 'trim',
-			'date'          => 'trim',
-			'reviews'       => 'absint',
-			'rating'        => 'float',
-			'expansa'       => 'trim',
-			'version'       => 'trim',
-		]
-	)
+[ $title, $description, $screenshot, $author, $categories, $installed, $active, $installations, $date, $reviews, $rating, $expansa, $version ] = Safe::data(
+	$args ?? [],
+	[
+		'title'         => 'trim',
+		'description'   => 'trim',
+		'screenshot'    => 'url',
+		'author'        => 'array',
+		'categories'    => 'array',
+		'installed'     => 'bool',
+		'active'        => 'bool',
+		'installations' => 'trim',
+		'date'          => 'trim',
+		'reviews'       => 'absint',
+		'rating'        => 'float',
+		'expansa'       => 'trim',
+		'version'       => 'trim',
+	]
 )->values();
 ?>
 <div class="plugins__item" x-data="<?php printf( '{installed: %s, active: %s}', $installed ? 'true' : 'false', $active ? 'true' : 'false' ); ?>">

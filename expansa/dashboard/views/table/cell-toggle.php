@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\View;
 
 /**
@@ -14,8 +14,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$class = Sanitizer::class($args['key'] ?? [] );
-$prop  = Sanitizer::prop($args['key'] ?? [] );
+$class = Safe::class($args['key'] ?? [] );
+$prop  = Safe::prop($args['key'] ?? [] );
 ?>
 <div class="<?php echo $class; ?>">
 	<?php

@@ -11,7 +11,7 @@ namespace dashboard\app\Api;
 
 use Dashboard\Form;
 use Expansa\File;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Codec\Csv;
 use Expansa\View;
 
@@ -38,7 +38,7 @@ class Files extends \Expansa\Api\Handler
 					continue;
 				}
 
-				$filepath = Sanitizer::path( $uploadedFile->path ?? '' );
+				$filepath = Safe::path( $uploadedFile->path ?? '' );
 				$rows     = Csv::import( $filepath );
 
 				View::get(

@@ -417,8 +417,8 @@ final class Attr {
 		$tableName      = (new Db\Handler)->getTableName( $table . '_' . self::$tableName );
 		$charsetCollate = (new Db\Handler)->getCharsetCollate();
 
-		$name  = Sanitizer::tablename( $name );
-		$table = Sanitizer::tablename( $table );
+		$name  = Safe::tablename( $name );
+		$table = Safe::tablename( $table );
 
 		Db::query(
 			"

@@ -7,7 +7,7 @@ namespace Expansa\User;
 use Expansa\Db;
 use Expansa\Field;
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Validator;
 
 class Schema
@@ -27,7 +27,7 @@ class Schema
      */
     public static function sanitize(array $userdata): array
     {
-        return ( new Sanitizer(
+        return Safe::data(
             $userdata,
             [
                 'login'    => 'login',
@@ -36,7 +36,7 @@ class Schema
                 'showname' => 'ucfirst:$login',
                 'nicename' => 'slug:$login|unique',
             ]
-        ) )->extend(
+        )->extend(
             'unique',
             function ($value) {
                 $suffix = 1;

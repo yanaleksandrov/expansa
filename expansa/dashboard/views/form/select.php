@@ -1,7 +1,7 @@
 <?php
 
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = ( new Sanitizer(
+[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
 	$args ?? [],
 	[
 		'name'        => 'name',
@@ -33,10 +33,10 @@ if ( ! defined( 'EX_PATH' ) ) {
 		'attributes'  => 'array',
 		'options'     => 'array',
 	]
-) )->values();
+)->values();
 
-$value = Sanitizer::attribute( $attributes['value'] ?? '' );
-$prop  = Sanitizer::prop( $attributes['name'] ?? $name );
+$value = Safe::attribute( $attributes['value'] ?? '' );
+$prop  = Safe::prop( $attributes['name'] ?? $name );
 
 unset( $attributes['value'] );
 ?>
@@ -79,7 +79,7 @@ unset( $attributes['value'] );
 			foreach ( $options as $option_key => $option ) {
 				$optgroup_options = $option['options'] ?? [];
 				if ( $optgroup_options ) {
-					$label = Sanitizer::attribute( $option['label'] ?? '' );
+					$label = Safe::attribute( $option['label'] ?? '' );
 					?>
 					<optgroup label="<?php echo $label; ?>">
 						<?php

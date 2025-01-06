@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Url;
 
 /**
@@ -14,16 +14,14 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $class, $title, $description, $icon ] = (
-	new Sanitizer(
-		$args ?? [],
-		[
-			'class'       => 'class:dg jic m-auto t-center p-5 mw-320',
-			'title'       => 'trim',
-			'description' => 'trim',
-			'icon'        => 'id:empty-page',
-		]
-	)
+[ $class, $title, $description, $icon ] = Safe::data(
+	$args ?? [],
+	[
+		'class'       => 'class:dg jic m-auto t-center p-5 mw-320',
+		'title'       => 'trim',
+		'description' => 'trim',
+		'icon'        => 'id:empty-page',
+	]
 )->values();
 ?>
 <div class="<?php echo $class; ?>">

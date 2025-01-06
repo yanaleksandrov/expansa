@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Comma-separated list of links
@@ -13,8 +13,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$class = Sanitizer::class($args['key'] ?? [] );
-$prop  = Sanitizer::prop($args['key'] ?? [] );
+$class = Safe::class($args['key'] ?? [] );
+$prop  = Safe::prop($args['key'] ?? [] );
 ?>
 <div class="<?php echo $class; ?>" x-data="{show: false}">
 	<template x-for="(link, index) in item.<?php echo $prop; ?>.slice(0, show ? item.<?php echo $prop; ?>.length : 3)">

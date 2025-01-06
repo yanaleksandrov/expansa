@@ -1,5 +1,5 @@
 <?php
-use Expansa\Sanitizer;
+use Expansa\Safe;
 
 /**
  * Details html tag: button with dropdown menu
@@ -13,7 +13,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $label, $instruction, $class, $content ] = ( new Sanitizer(
+[ $label, $instruction, $class, $content ] = Safe::data(
 	$args ?? [],
 	[
 		'label'       => 'trim',
@@ -21,7 +21,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		'class'       => 'class',
 		'content'     => 'trim',
 	]
-) )->values();
+)->values();
 
 if ( empty( $label ) ) {
 	return;

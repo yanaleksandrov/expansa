@@ -3,7 +3,7 @@
 use Expansa\Db;
 use Expansa\I18n;
 use Expansa\Url;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\View;
 use Expansa\User;
 use Expansa\Hook;
@@ -21,7 +21,7 @@ return Dashboard\Form::enqueue(
 	'user-profile',
 	[
 		'class'   => 'tab',
-		'x-data'  => sprintf( "tab('%s')", Sanitizer::prop( $_GET['tab'] ?? 'profile' ) ),
+		'x-data'  => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'profile' ) ),
 		'@change' => '$ajax("user/update")',
 	],
 	[

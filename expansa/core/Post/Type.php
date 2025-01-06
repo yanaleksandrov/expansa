@@ -8,7 +8,7 @@ use Expansa\Db;
 use Expansa\Error;
 use Expansa\Field;
 use Expansa\I18n;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Support\Arr;
 use Expansa\Tree;
 
@@ -67,7 +67,7 @@ class Type
         public int $menuPosition = 10,
     )
     {
-        $postType = Sanitizer::kebabcase($key);
+        $postType = Safe::kebabcase($key);
         if (empty($postType) || strlen($postType) > 20) {
             Error::add('post-type-name-length', I18n::_t('Post type key is empty or exceeds 20 characters'));
         }
@@ -81,7 +81,7 @@ class Type
         $this->labelView       ??= I18n::_t('View Page');
         $this->labelSearch     ??= I18n::_t('Search Page');
         $this->labelSave       ??= I18n::_t('Save');
-        $this->table             = Sanitizer::tablename($key);
+        $this->table             = Safe::tablename($key);
 
         /**
          * Show in dashboard menu.
@@ -114,7 +114,7 @@ class Type
          * @var array $schema
          */
         $schema = Db::schema();
-        $type   = Sanitizer::snakecase($key);
+        $type   = Safe::snakecase($key);
         if (empty($schema[ $type ])) {
             Schema::migrate($type);
 

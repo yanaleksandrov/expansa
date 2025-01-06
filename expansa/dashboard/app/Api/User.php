@@ -4,7 +4,7 @@ namespace dashboard\app\Api;
 use Expansa;
 use Expansa\I18n;
 use Expansa\Mail;
-use Expansa\Sanitizer;
+use Expansa\Safe;
 use Expansa\Url;
 use Expansa\View;
 
@@ -50,7 +50,7 @@ class User implements Expansa\Api\Contracts\Crud {
 		$userdata    = $_REQUEST + [ 'id' => $currentUser->id ];
 
 		Expansa\User::update( $userdata, function ( Expansa\Field $field ) {
-			$fields = ( new Sanitizer(
+			$fields = Safe::data(
 				$_REQUEST,
 				[
 					'bio'     => 'trim',
@@ -58,7 +58,7 @@ class User implements Expansa\Api\Contracts\Crud {
 					'format'  => 'text',
 					'locale'  => 'locale',
 				]
-			) )->apply();
+			)->apply();
 
 			foreach ( $fields as $key => $value ) {
 				$field->mutate( $key, $value );
@@ -141,7 +141,7 @@ class User implements Expansa\Api\Contracts\Crud {
 	 */
 	public static function resetPassword(): array
 	{
-		$email = Sanitizer::email( $_REQUEST['email'] ?? '' );
+		$email = Safe::email( $_REQUEST['email'] ?? '' );
 		$user  = Expansa\User::get( $email, 'email' );
 		if ( $user instanceof Expansa\User ) {
 			$mail_is_sent = Mail::send(

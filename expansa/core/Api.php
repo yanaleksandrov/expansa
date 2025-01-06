@@ -44,9 +44,9 @@ final class Api
             // TODO: return error
         }
 
-        $method   = Sanitizer::camelcase($method);
-        $filepath = Sanitizer::path($resource['filepath'] ?? '');
-        $class    = Sanitizer::pascalcase($resource['class'] ?? '');
+        $method   = Safe::camelcase($method);
+        $filepath = Safe::path($resource['filepath'] ?? '');
+        $class    = Safe::pascalcase($resource['class'] ?? '');
 
         require_once $filepath;
 
@@ -111,7 +111,7 @@ final class Api
         $files = array_diff(scandir($path), [ '.', '..' ]);
 
         foreach ($files as $file) {
-            $filepath = Sanitizer::path($path . DIRECTORY_SEPARATOR . $file);
+            $filepath = Safe::path($path . DIRECTORY_SEPARATOR . $file);
 
             if (pathinfo($file, PATHINFO_EXTENSION) === 'php' && is_readable($filepath)) {
                 $content = file_get_contents($filepath);
