@@ -6,5 +6,4 @@ namespace Expansa\Database\Contracts;
 
 class DeadlockException extends DatabaseException
 {
-
 }

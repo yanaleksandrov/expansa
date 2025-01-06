@@ -8,5 +8,4 @@ use Expansa\Database\Schema\Table as TableBase;
 
 class SchemaTable extends TableBase
 {
-
 }

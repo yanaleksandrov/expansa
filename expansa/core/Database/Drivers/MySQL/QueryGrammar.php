@@ -12,9 +12,9 @@ class QueryGrammar extends GrammarBase
 {
     public function compileUpsert(Builder $query, string $uniqueColumn, array $insertValues, array $updateValues, $returning = null): string
     {
-        $table = $this->wrapTable($query->from);
+        $table            = $this->wrapTable($query->from);
         $sqlInsertColumns = $this->prepareColumns(array_keys($insertValues));
-        $sqlInsertValues = $this->prepareValues($insertValues);
+        $sqlInsertValues  = $this->prepareValues($insertValues);
 
         $sqlUpdateSet = [];
         foreach ($updateValues as $key => $val) {

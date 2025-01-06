@@ -14,6 +14,7 @@ use Expansa\Database\Contracts\Calypte\Model as ModelContract;
 
 /**
  * Used methods from [Query/Builder]:
+ *
  * @method take(int $count)
  * @method get()
  */
@@ -21,19 +22,18 @@ class Builder
 {
     use ForwardCalls;
 
-    protected ?ConnectionContract $connection = null;
-
     protected ?SchemaBuilderContract $schemaBuilder = null;
 
     protected ?QueryBuilderContract $query = null;
 
-    protected ?ModelContract $model = null;
-
-    public function __construct(ConnectionContract $connection, ModelContract $model)
+    public function __construct(
+        protected ?ConnectionContract $connection = null,
+        protected ?ModelContract $model = null
+    )
     {
-        $this->connection = $connection;
         $this->schemaBuilder = $connection->getSchemaBuilder();
-        $this->query = $connection->query();
+        $this->query         = $connection->query();
+
         $this->setModel($model);
     }
 
@@ -111,7 +111,7 @@ class Builder
      * @param Closure $callback
      * @return ModelContract|mixed|null
      */
-    public function firstOr(Closure $callback)
+    public function firstOr(Closure $callback): mixed
     {
         if (! is_null($model = $this->first())) {
             return $model;
