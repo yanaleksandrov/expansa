@@ -21,3 +21,17 @@ if (! function_exists('tap')) {
         return $value;
     }
 }
+
+if (! function_exists('t')) {
+    /**
+     * Translate with formatting.
+     *
+     * @param string $string
+     * @param mixed  ...$args
+     * @return mixed
+     */
+    function t(string $string, mixed ...$args): string
+    {
+        return Expansa\I18n::_t($string, ...$args);
+    }
+}

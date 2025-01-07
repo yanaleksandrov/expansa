@@ -138,9 +138,13 @@ class Translator extends Locale
      *
      * For example:
      *
-     * I18n::_t( 'Hi, :Firstname :Lastname, you have :count\st none closed ":TASKNAME" task', 'yan', 'aleksandrov', 1, 'test' )
+     * I18n::_t( 'Hi, :Firstname, you have :count\st none closed ":TASKNAME" task', 'john', 1, 'test' );
+     * return 'Hi, John, you have 1st none closed "TEST" task';
      *
-     * return 'Hi, Yan Aleksandrov, you have 1st none closed "TEST" task'
+     * For security purposes, you can't use html, but can use base markdown layout: bold, italic, headers, image & link:
+     *
+     * I18n::_t( '##Hi, *my name* is John, [view my profile](:profileLink).', 'http://example.com');
+     * return '<h2>Hi, <em>my name</em> is John, <a href="http://example.com">view my profile</a></h2>';
      *
      * @param string $string
      * @param mixed ...$args
