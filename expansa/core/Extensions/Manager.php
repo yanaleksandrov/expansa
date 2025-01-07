@@ -8,7 +8,7 @@ use Expansa\I18n;
 use Expansa\Extensions\Contracts\ExtensionSkeleton;
 use Expansa\Extensions\Exception\RequiredPropertyException;
 
-class ExtensionsManager
+class Manager
 {
     /**
      * Contains registered instances of plugin classes.

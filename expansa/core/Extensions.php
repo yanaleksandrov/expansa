@@ -20,6 +20,6 @@ class Extensions extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Extensions\ExtensionsManager';
+        return '\Expansa\Extensions\Manager';
     }
 }
