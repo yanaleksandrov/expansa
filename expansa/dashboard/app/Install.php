@@ -7,7 +7,6 @@ use Expansa\Route;
 use Expansa\Asset;
 use Expansa\View;
 use Expansa\Url;
-use Expansa\Support\Html;
 use Expansa\Api;
 use Expansa\Patterns\Singleton;
 

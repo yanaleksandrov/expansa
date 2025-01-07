@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use PDO;
+use PDOException;
+use PDOStatement;
 use Expansa\Db\Medoo;
-use PDO,
-
-PDOException, PDOStatement;
+use Expansa\Patterns\Singleton;
 
 final class Db
 {
-    use Patterns\Singleton;
+    use Singleton;
 
     /**
      * Db structure

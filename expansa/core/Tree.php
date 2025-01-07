@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa;
 
 use Expansa\Support\Arr;
+use Expansa\Patterns\Singleton;
 
 /**
  * A class for displaying various tree-like structures.
@@ -12,7 +13,7 @@ use Expansa\Support\Arr;
  */
 final class Tree
 {
-    use \Expansa\Patterns\Multiton;
+    use Singleton;
 
     /**
      * Tree structures list.
