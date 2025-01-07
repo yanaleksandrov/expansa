@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Extending;
+namespace Expansa\Extensions;
 
 use Expansa\I18n;
-use Expansa\Extending\Contracts\ExtensionSkeleton;
-use Expansa\Extending\Exception\RequiredPropertyException;
+use Expansa\Extensions\Contracts\ExtensionSkeleton;
+use Expansa\Extensions\Exception\RequiredPropertyException;
 
 class ExtensionsManager
 {
@@ -18,64 +18,70 @@ class ExtensionsManager
     /**
      * Register new extension.
      *
-     * @param callable $callback Callback function used for get extensions paths.
+     * @param string $type
      * @return void
      */
-    public function boot(callable $callback): void
+    public function boot(string $type): void
     {
-        self::enqueue($callback, 'plugins');
-
-        foreach (self::$extensions as $extension) {
+        foreach (self::$extensions[$type] ?? [] as $extension) {
             $extension instanceof ExtensionSkeleton && $extension->boot();
         }
     }
 
     /**
      * Activate all registered extensions.
-     *
      * Calls the `activate()` method on each registered plugin, allowing them to perform necessary initialization tasks.
+     *
+     * @param string $type
+     * @return void
      */
-    public function activate(): void
+    public function activate(string $type): void
     {
-        foreach (self::$extensions as $extension) {
+        foreach (self::$extensions[$type] ?? [] as $extension) {
             $extension instanceof ExtensionSkeleton && $extension->activate();
         }
     }
 
     /**
      * Deactivate all registered extensions.
-     *
      * Calls the `deactivate()` method on each registered plugin, allowing
      * them to clean up resources or undo changes made during activation.
+     *
+     * @param string $type
+     * @return void
      */
-    public function deactivate(): void
+    public function deactivate(string $type): void
     {
-        foreach (self::$extensions as $extension) {
+        foreach (self::$extensions[$type] ?? [] as $extension) {
             $extension instanceof ExtensionSkeleton && $extension->deactivate();
         }
     }
 
     /**
      * Install all registered extensions.
-     *
      * Calls the `install()` method on each registered plugin, allowing them to perform installation tasks.
+     *
+     * @param string $type
+     * @return void
      */
-    public function install(): void
+    public function install(string $type): void
     {
-        foreach (self::$extensions as $extension) {
+        foreach (self::$extensions[$type] ?? [] as $extension) {
             $extension instanceof ExtensionSkeleton && $extension->install();
         }
     }
 
     /**
      * Uninstall all registered extensions.
-     *
      * Calls the `uninstall()` method on each registered plugin, allowing
      * them to clean up resources or remove associated assets.
+     *
+     * @param string $type
+     * @return void
      */
-    public function uninstall(): void
+    public function uninstall(string $type): void
     {
-        foreach (self::$extensions as $extension) {
+        foreach (self::$extensions[$type] ?? [] as $extension) {
             $extension instanceof ExtensionSkeleton && $extension->uninstall();
         }
     }
@@ -86,7 +92,7 @@ class ExtensionsManager
      * @param callable $callback Callback function used for get plugins paths.
      * @return void
      */
-    protected function enqueue(callable $callback): void
+    public function enqueue(callable $callback): void
     {
         $paths = call_user_func($callback);
         if (!is_array($paths)) {

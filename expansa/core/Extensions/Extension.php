@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Extending;
+namespace Expansa\Extensions;
 
-use Expansa\Extending\Traits\ExtensionHelpers;
-use Expansa\Extending\Traits\ExtensionTraits;
+use Expansa\Extensions\Traits\ExtensionHelpers;
+use Expansa\Extensions\Traits\ExtensionTraits;
 
 abstract class Extension
 {

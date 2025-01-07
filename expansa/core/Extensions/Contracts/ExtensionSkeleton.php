@@ -10,12 +10,12 @@ namespace Expansa\Extensions\Contracts;
  * The Skeleton defines the contract for a plugin in an Expansa CMS. It serves as a
  * blueprint for implementing plugins and ensures consistency across different plugins.
  */
-interface Skeleton
+interface ExtensionSkeleton
 {
     /**
      * Launch the plugin.
      */
-    public static function launch();
+    public function boot(): void;
 
     /**
      * Activate action the plugin.
@@ -23,7 +23,7 @@ interface Skeleton
      * This method is responsible for activating the plugin.
      * It typically performs necessary initialization tasks and sets up any required resources or configurations.
      */
-    public static function activate();
+    public function activate(): void;
 
     /**
      * Deactivate action the plugin.
@@ -32,14 +32,14 @@ interface Skeleton
      * It is called when the plugin is being disabled or turned off.
      * It usually involves cleaning up resources, unregistering hooks, or undoing any changes made during activation.
      */
-    public static function deactivate();
+    public function deactivate(): void;
 
     /**
      * Install action the plugin.
      *
      * This method is responsible for installing the plugin.
      */
-    public static function install();
+    public function install(): void;
 
     /**
      * Uninstall action the plugin.
@@ -48,5 +48,5 @@ interface Skeleton
      * It is called when the plugin is being completely removed from the system.
      * It typically involves removing any database tables, files, or other assets associated with the plugin.
      */
-    public static function uninstall();
+    public function uninstall(): void;
 }

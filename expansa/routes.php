@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use Expansa\Plugins;
-use Expansa\Themes;
+use Expansa\Extensions;
 use Expansa\Option;
 use Expansa\Route;
 use Expansa\Debug;
@@ -91,13 +90,15 @@ try {
          *
          * @since 2025.1
          */
-        Plugins::register(function () {
-            return Disk::dir(EX_PLUGINS)->files('*/*.php');
+        Extensions::enqueue(function () {
+            return [
+                ...Disk::dir(EX_PLUGINS)->files('*/*.php'),
+                ...Disk::dir(EX_THEMES)->files('*/*.php'),
+            ];
         });
 
-        Themes::register(function () {
-            return Disk::dir(EX_THEMES)->files('*/*.php');
-        });
+        Extensions::boot('plugin');
+        Extensions::boot('theme');
 
         /**
          * The administrative panel also has a single entry point.

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Extending\Traits;
+namespace Expansa\Extensions\Traits;
 
 trait ExtensionHelpers
 {

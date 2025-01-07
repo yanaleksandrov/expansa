@@ -5,8 +5,10 @@ use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Tree;
+use Expansa\Extensions\Plugin;
 
-return new class extends Expansa\Plugin {
+return new class extends Plugin
+{
     public function __construct()
     {
         $this
@@ -16,7 +18,7 @@ return new class extends Expansa\Plugin {
             ->setDescription(I18n::_t('Tool for ability to edit, delete, upload, download, copy and paste files and folders.'));
     }
 
-    public static function launch(): void
+    public function boot(): void
     {
         if (! Is::dashboard()) {
             return;
@@ -46,23 +48,23 @@ return new class extends Expansa\Plugin {
         ));
     }
 
-    public static function activate()
+    public function activate(): void
     {
-        // do something when plugin is activated
+        // TODO: Implement activate() method.
     }
 
-    public static function deactivate()
+    public function deactivate(): void
     {
-        // do something when plugin is deactivated
+        // TODO: Implement deactivate() method.
     }
 
-    public static function install()
+    public function install(): void
     {
-        // do something when plugin is installed
+        // TODO: Implement install() method.
     }
 
-    public static function uninstall()
+    public function uninstall(): void
     {
-        // do something when plugin is uninstalled
+        // TODO: Implement uninstall() method.
     }
 };

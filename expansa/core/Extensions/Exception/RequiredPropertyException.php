@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Extending\Exception;
+namespace Expansa\Extensions\Exception;
 
 use Exception;
 

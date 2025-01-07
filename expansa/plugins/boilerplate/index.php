@@ -11,10 +11,9 @@ return new class extends Plugin
     {
         $this
             ->setVersion('2024.9')
-            ->setName('Query Monitor')
             ->setAuthor('Expansa Team')
-            ->setDependencies('ecommerce')
-            ->setDescription(I18n::_t('The developer tools panel for Expansa'));
+            ->setName('Expansa Plugin Boilerplate')
+            ->setDescription(I18n::_t('Plugin Boilerplate Description'));
     }
 
     public function boot(): void

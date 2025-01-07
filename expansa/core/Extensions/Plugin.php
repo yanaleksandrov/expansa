@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Extending;
+namespace Expansa\Extensions;
 
-use Expansa\Extending\Contracts\ExtensionSkeleton;
+use Expansa\Extensions\Contracts\ExtensionSkeleton;
 
 abstract class Plugin extends Extension implements ExtensionSkeleton
 {
