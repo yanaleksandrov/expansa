@@ -58,6 +58,10 @@ class App
 
     }
 
+    public function scheduler() {
+
+    }
+
     public function registerServices(): void
     {
         $this->container->set('database', new Database());
