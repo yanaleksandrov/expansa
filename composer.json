@@ -20,20 +20,25 @@
         "ext-zip": "*"
     },
     "require-dev": {
+        "dragonmantank/cron-expression": "^3.0",
         "squizlabs/php_codesniffer": "3.*",
-        "vimeo/psalm": "^5.26",
-        "spatie/image": "^3.7"
+        "spatie/image": "^3.7",
+        "vimeo/psalm": "^5.26"
     },
     "scripts": {
         "post-install-cmd": [
-            "if not exist expansa\\core\\spatie mkdir expansa\\core\\spatie",
-            "xcopy /e /i /h vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
-            "xcopy /e /i /h vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer"
+            "if not exist expansa\\core\\Images mkdir expansa\\core\\Images",
+            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
+            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer",
+            "if not exist expansa\\core\\Cron mkdir expansa\\core\\Cron",
+            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\core\\Cron"
         ],
         "post-update-cmd": [
-            "if not exist expansa\\core\\spatie mkdir expansa\\core\\spatie",
-            "xcopy /e /i /h vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
-            "xcopy /e /i /h vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer"
+            "if not exist expansa\\core\\Images mkdir expansa\\core\\Images",
+            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
+            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer",
+            "if not exist expansa\\core\\Cron mkdir expansa\\core\\Cron",
+            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\core\\Cron"
         ]
     }
 }
