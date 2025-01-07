@@ -17,10 +17,23 @@
         "ext-iconv": "*",
         "ext-openssl": "*",
         "ext-zlib": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "spatie/image": "^3.7"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "3.*",
         "vimeo/psalm": "^5.26"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "if not exist expansa\\core\\spatie mkdir expansa\\core\\spatie",
+            "xcopy /e /i /h vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
+            "xcopy /e /i /h vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer"
+        ],
+        "post-update-cmd": [
+            "if not exist expansa\\core\\spatie mkdir expansa\\core\\spatie",
+            "xcopy /e /i /h vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
+            "xcopy /e /i /h vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer"
+        ]
     }
 }

@@ -36,5 +36,4 @@ use Expansa\Database\Fluent;
  */
 class Column extends Fluent
 {
-
 }
