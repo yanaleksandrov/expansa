@@ -25,7 +25,6 @@ class Facade
      *
      * @param string $classNamespace
      * @param  mixed $classInstance
-     *
      * @return void
      */
     protected static function setClass(string $classNamespace, mixed $classInstance): void
@@ -37,7 +36,6 @@ class Facade
      * Get the resolved service class instance of the given class namespace.
      *
      * @param string $classNamespace
-     *
      * @return mixed
      */
     protected static function getClass(string $classNamespace): mixed
@@ -50,7 +48,6 @@ class Facade
      *
      * @param string $method
      * @param array $args
-     *
      * @return mixed
      * @throws FacadeException
      */
@@ -78,7 +75,6 @@ class Facade
      * Set the resolved service class instance to the class property.
      *
      * @param string $classNamespace
-     *
      * @return mixed
      * @throws FacadeException
      */
@@ -106,7 +102,6 @@ class Facade
      * in the first character to avoid the namespace scope issue.
      *
      * @param string $classNamespace
-     *
      * @return string
      */
     protected static function classNamespaceDecorator(string $classNamespace): string
