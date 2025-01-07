@@ -24,7 +24,16 @@ class CookieJar implements QueueingFactory
     /**
      * @throws CookieException
      */
-    public function make(string $name, string $value, int $minutes = 0, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = null, string $sameSite = null): Cookie
+    public function make(
+        string $name,
+        string $value,
+        int $minutes = 0,
+        string $path = null,
+        string $domain = null,
+        bool $secure = null,
+        bool $httpOnly = null,
+        string $sameSite = null
+    ): Cookie
     {
         $path     = is_null($path) ? $this->path : $path;
         $domain   = is_null($domain) ? $this->domain : $domain;
@@ -40,7 +49,15 @@ class CookieJar implements QueueingFactory
     /**
      * @throws CookieException
      */
-    public function forever(string $name, string $value, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = true, string $sameSite = null): Cookie
+    public function forever(
+        string $name,
+        string $value,
+        string $path = null,
+        string $domain = null,
+        bool $secure = null,
+        bool $httpOnly = true,
+        string $sameSite = null
+    ): Cookie
     {
         return $this->make($name, $value, 576000, $path, $domain, $secure, $httpOnly, $sameSite);
     }
@@ -61,7 +78,16 @@ class CookieJar implements QueueingFactory
     /**
      * @throws CookieException
      */
-    public function queue(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = true, string $sameSite = null): void
+    public function queue(
+        Cookie|string $cookie,
+        string $value = '',
+        int $minutes = 0,
+        string $path = null,
+        string $domain = null,
+        bool $secure = null,
+        bool $httpOnly = true,
+        string $sameSite = null
+    ): void
     {
         if (is_string($cookie)) {
             $cookie = $this->make($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
@@ -158,7 +184,13 @@ class CookieJar implements QueueingFactory
         return $this->sameSite;
     }
 
-    public function setDefault(string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = null, string $sameSite = null): static
+    public function setDefault(
+        string $path = null,
+        string $domain = null,
+        bool $secure = null,
+        bool $httpOnly = null,
+        string $sameSite = null
+    ): static
     {
         if (! is_null($path)) {
             $this->path = $path;
