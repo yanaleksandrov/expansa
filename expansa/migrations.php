@@ -11,7 +11,6 @@ use Expansa\User\Roles;
  *
  * @since 2025.1
  */
-
 Roles::register(
     'admin',
     I18n::_t('Administrator'),
