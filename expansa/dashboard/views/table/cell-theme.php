@@ -1,7 +1,8 @@
 <?php
+
+use app\View;
 use Expansa\I18n;
 use Expansa\Safe;
-use Expansa\View;
 
 /**
  * Table raw text cell

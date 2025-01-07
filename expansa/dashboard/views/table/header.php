@@ -1,8 +1,9 @@
 <?php
+
+use app\View;
+use Expansa\I18n;
 use Expansa\Safe;
 use Expansa\Url;
-use Expansa\I18n;
-use Expansa\View;
 
 /**
  * Table header

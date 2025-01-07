@@ -1,9 +1,9 @@
 <?php
 namespace Dashboard\Forms\Fields;
 
+use app\View;
 use Dashboard\Forms\Field;
 use Expansa\I18n;
-use Expansa\View;
 
 class Input extends Field {
 	

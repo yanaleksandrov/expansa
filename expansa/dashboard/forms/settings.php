@@ -1,8 +1,9 @@
 <?php
+
+use app\Option;
 use Expansa\I18n;
-use Expansa\Url;
-use Expansa\Option;
 use Expansa\Safe;
+use Expansa\Url;
 
 /**
  * Website settings in dashboard

@@ -1,6 +1,7 @@
 <?php
-use Expansa\Option;
-use Expansa\View;
+
+use app\Option;
+use app\View;
 
 /**
  * Expansa email wrapper.

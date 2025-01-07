@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
+use app\Post\Type;
+use app\Tree;
 use Expansa\Asset;
+use Expansa\Extensions\Plugin;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;
-use Expansa\Tree;
-use Expansa\Post\Type;
-use Expansa\Extensions\Plugin;
 
 return new class extends Plugin
 {

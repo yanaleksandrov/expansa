@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
+use app\Post\Type;
+use app\User\Roles;
 use Expansa\I18n;
-use Expansa\Post\Type;
-use Expansa\User\Roles;
 
 /**
  * Add roles and users.

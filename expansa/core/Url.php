@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use app\Option;
+
 final class Url
 {
     /**

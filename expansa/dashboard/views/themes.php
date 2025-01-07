@@ -1,7 +1,7 @@
 <?php
 
+use app\View;
 use Expansa\I18n;
-use Expansa\View;
 
 /**
  * Themes list.

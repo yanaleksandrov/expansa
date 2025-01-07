@@ -1,7 +1,7 @@
 <?php
+
 use Dashboard\Form;
 use Expansa\I18n;
-use Expansa\View;
 use Expansa\Url;
 
 /**

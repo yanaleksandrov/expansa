@@ -1,7 +1,8 @@
 <?php
+
+use app\Post\Status;
+use app\Post\Type;
 use Expansa\I18n;
-use Expansa\Post\Status;
-use Expansa\Post\Type;
 use Expansa\Safe;
 
 $samples  = Safe::array( $args['samples'] ?? [] );

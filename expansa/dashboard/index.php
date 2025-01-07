@@ -1,11 +1,12 @@
 <?php
+
+use app\Option;
+use app\User;
+use app\View;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;
-use Expansa\Option;
-use Expansa\View;
 use Expansa\Safe;
-use Expansa\User;
 use Expansa\Url;
 
 /**

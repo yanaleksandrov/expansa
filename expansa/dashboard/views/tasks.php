@@ -1,6 +1,7 @@
 <?php
+
+use app\View;
 use Expansa\I18n;
-use Expansa\View;
 
 /**
  * Expansa dashboard tools.

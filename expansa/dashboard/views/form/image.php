@@ -1,8 +1,9 @@
 <?php
-use Expansa\Safe;
-use Expansa\I18n;
+
+use app\View;
 use Expansa\Hook;
-use Expansa\View;
+use Expansa\I18n;
+use Expansa\Safe;
 
 /**
  * Single image uploader.

@@ -8,16 +8,8 @@ declare(strict_types=1);
  * @since 2025.1
  */
 
-use Expansa\{
-    Db,
-    Debug,
-    I18n,
-    Is,
-    User,
-};
-use Expansa\Scheme;
-use Expansa\Database\Schema\Table;
-use Expansa\Database\Schema\Builder;
+use app\User;
+use Expansa\{Db, Debug, I18n, Is,};
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';

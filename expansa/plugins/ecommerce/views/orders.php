@@ -1,5 +1,6 @@
 <?php
-use Expansa\View;
+
+use app\View;
 use Expansa\I18n;
 use Expansa\Url;
 

@@ -1,5 +1,6 @@
 <?php
-use Expansa\Tree;
+
+use app\Tree;
 
 /**
  * Expansa dashboard menu.

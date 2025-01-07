@@ -1,9 +1,9 @@
 <?php
 namespace Dashboard;
 
+use app\View;
 use Expansa\Safe;
 use Expansa\Support\Arr;
-use Expansa\View;
 
 /**
  * Class Table.

@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-use Expansa\Extensions;
-use Expansa\Option;
-use Expansa\Route;
-use Expansa\Debug;
-use Expansa\Slug;
-use Expansa\Post;
-use Expansa\Hook;
-use Expansa\View;
-use Expansa\User;
-use Expansa\I18n;
-use Expansa\Url;
-use Expansa\Disk;
-use Expansa\Is;
+use app\Option;
+use app\Post;
+use app\Slug;
+use app\User;
+use app\View;
 use Expansa\Db;
+use Expansa\Debug;
+use Expansa\Disk;
+use Expansa\Extensions;
+use Expansa\Hook;
+use Expansa\I18n;
+use Expansa\Is;
+use Expansa\Route;
+use Expansa\Url;
 
 try {
     /**
@@ -36,7 +36,7 @@ try {
     $dashboardRoute = sprintf('/%s/{slug}', $dashboardSlug);
 
     Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
-        $query = new Expansa\Query();
+        $query = new app\Query();
 
         $query->set('slug', sprintf('%s/%s', $dashboardSlug, $slug));
         $query->set(match ($slug) {
@@ -132,7 +132,7 @@ try {
      * @since 2025.1
      */
     Route::get('/{slug}', function ($slug) {
-        $query = new Expansa\Query();
+        $query = new app\Query();
 
         $slug = Slug::get($slug);
 
