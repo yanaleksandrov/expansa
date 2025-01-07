@@ -7,8 +7,10 @@ namespace Expansa;
 use Expansa\Facades\Facade;
 
 /**
- * @method static array       decode( $filepathOrData, string $delimiter = 'auto', string $enclosure = 'auto', string $linebreak = 'auto' )
- * @method static bool|string encode( $items, string $delimiter = ',', string $enclosure = '"', string $linebreak = "\r\n" )
+ * Csv Facade class provides static methods for CSV encoding and decoding.
+ *
+ * @method static array  decode($filepathOrData, string $delimiter = 'auto', string $enclosure = 'auto', string $linebreak = 'auto')
+ * @method static string encode($items, string $delimiter = ',', string $enclosure = '"', string $linebreak = "\r\n")
  */
 class Csv extends Facade
 {

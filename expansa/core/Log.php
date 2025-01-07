@@ -8,8 +8,7 @@ use Stringable;
 use Expansa\Facades\Facade;
 
 /**
- * Class Log
- * Provides a facade for managing log in the Expansa framework.
+ * Class Log provides a facade for managing log in the Expansa framework.
  *
  * @method static void emergency(string|Stringable $message, array $context = [])
  * @method static void alert(string|Stringable $message, array $context = [])

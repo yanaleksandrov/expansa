@@ -57,14 +57,14 @@ class Csv
      * @param string $delimiter The field delimiter (default: ',').
      * @param string $enclosure The field enclosure character (default: '"').
      * @param string $linebreak The linebreak sequence (default: "\r\n").
-     * @return false|string The encoded CSV string, or false on failure.
+     * @return string The encoded CSV string.
      */
     public function encode(
         array $items,
         string $delimiter = ',',
         string $enclosure = '"',
         string $linebreak = "\r\n"
-    ): bool|string
+    ): string
     {
         return (new self($delimiter, $enclosure, $linebreak))->fromArray($items);
     }
@@ -180,9 +180,9 @@ class Csv
      * Converts an array into a CSV string.
      *
      * @param array $items The data to convert.
-     * @return false|string The generated CSV string, or false on failure.
+     * @return string The generated CSV string.
      */
-    private function fromArray(array $items): false|string
+    private function fromArray(array $items): string
     {
         $delimiter = $this->delimiter();
         $enclosure = $this->enclosure();

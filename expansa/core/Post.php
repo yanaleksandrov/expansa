@@ -52,8 +52,7 @@ class Post
         public string $link = '',
         public string $slug = '',
         public array $fields = []
-    )
-    {} // phpcs:ignore
+    ) {} // phpcs:ignore
 
     /**
      * Add new post.

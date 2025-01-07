@@ -9,9 +9,7 @@ use Expansa\Filesystem\Directory;
 use Expansa\Filesystem\File;
 
 /**
- * Disk Facade
- *
- * Provides static access to the Disk subsystem.
+ * Disk Facade provides static access to manage local filesystem.
  *
  * @method static File file(string $filepath)
  * @method static Directory dir(string $dirpath)
