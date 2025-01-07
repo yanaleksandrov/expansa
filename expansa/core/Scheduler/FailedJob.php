@@ -1,6 +1,8 @@
 <?php
 
-namespace Expansa\Cron;
+declare(strict_types=1);
+
+namespace Expansa\Scheduler;
 
 use Exception;
 

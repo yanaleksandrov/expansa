@@ -1,6 +1,8 @@
 <?php
 
-namespace Expansa\Cron;
+declare(strict_types=1);
+
+namespace Expansa\Scheduler;
 
 use DateTime;
 use Exception;
@@ -9,39 +11,57 @@ use Cron\CronExpression;
 
 class Job
 {
-    use Traits\Interval;
+    use JobIntervals;
+
+    /**
+     * A function to execute before the job is executed.
+     *
+     * @var callable
+     */
+    private $before;
+
+    /**
+     * A function to execute after the job is executed.
+     *
+     * @var callable
+     */
+    private $after;
+
+    /**
+     * A function to ignore an overlapping job. If true, the job will run also if it's overlapping.
+     *
+     * @var callable
+     */
+    private $whenOverlapping;
 
     /**
      * Create a new Job instance.
      *
-     * @param callable|string          $command         Command to execute.
-     * @param array                    $args            Arguments to be passed to the command.
-     * @param null|string              $id              Job identifier.
-     * @param bool                     $runInBackground Defines if the job should run in background.
-     * @param DateTime|null            $creationTime    Creation time.
-     * @param null|Cron\CronExpression $executionTime   Job schedule time.
-     * @param string|null              $executionYear   Job schedule year.
-     * @param string                   $tempDir         Temporary directory path for lock files to prevent overlapping.
-     * @param string                   $lockFile        Path to the lock file.
-     * @param bool                     $truthTest       This could prevent the job to run. If true, the job will run (if due).
-     * @param mixed                    $output          The output of the executed job.
-     * @param int                      $returnCode      The return code of the executed job.
-     * @param array                    $outputTo        Files to write the output of the job.
-     * @param array                    $emailTo         Email addresses where the output should be sent to.
-     * @param array                    $emailConfig     Configuration for email sending.
-     * @param callable|null            $before          A function to execute before the job is executed.
-     * @param callable|null            $after           A function to execute after the job is executed.
-     * @param callable|null            $whenOverlapping A function to ignore an overlapping job. If true, the job will run even if it's overlapping.
-     * @param string|null              $outputMode      Output mode for the executed job.
+     * @param callable|string     $command         Command to execute.
+     * @param array               $args            Arguments to be passed to the command.
+     * @param null|string         $id              Job identifier.
+     * @param bool                $runInBackground Defines if the job should run in background.
+     * @param null|DateTime       $creationTime    Creation time.
+     * @param null|CronExpression $executionTime   Job schedule time.
+     * @param null|string         $executionYear   Job schedule year.
+     * @param string              $tempDir         Temporary directory path for lock files to prevent overlapping.
+     * @param string              $lockFile        Path to the lock file.
+     * @param bool                $truthTest       This could prevent the job to run. If true, the job will run.
+     * @param mixed               $output          The output of the executed job.
+     * @param int                 $returnCode      The return code of the executed job.
+     * @param array               $outputTo        Files to write the output of the job.
+     * @param array               $emailTo         Email addresses where the output should be sent to.
+     * @param array               $emailConfig     Configuration for email sending.
+     * @param null|string         $outputMode      Output mode for the executed job.
      */
     public function __construct(
-        private mixed $command,
-        private array $args = [],
+        private readonly mixed $command,
+        private readonly array $args = [],
         private ?string $id = null,
+        private readonly ?CronExpression $executionTime = null,
+        private readonly ?string $executionYear = null,
         private bool $runInBackground = true,
         private ?DateTime $creationTime = null,
-        private ?Cron\CronExpression $executionTime = null,
-        private ?string $executionYear = null,
         private string $tempDir = '',
         private string $lockFile = '',
         private bool $truthTest = true,
@@ -50,21 +70,15 @@ class Job
         private array $outputTo = [],
         private array $emailTo = [],
         private array $emailConfig = [],
-        private ?callable $before = null,
-        private ?callable $after = null,
-        private ?callable $whenOverlapping = null,
         private ?string $outputMode = null
     )
     {
         if (!is_string($id)) {
-            if (is_string($command)) {
-                $this->id = md5($command);
-            } elseif (is_array($command)) {
-                $this->id = md5(serialize($command));
-            } else {
-                /* @var object $command */
-                $this->id = spl_object_hash($command);
-            }
+            $this->id = match (true) {
+                is_string($command) => md5($command),
+                is_array($command)  => md5(serialize($command)),
+                default             => spl_object_hash($command),
+            };
         }
 
         $this->creationTime = new DateTime('now');
@@ -84,10 +98,8 @@ class Job
     }
 
     /**
-     * Check if the Job is due to run.
-     * It accepts as input a DateTime used to check if
-     * the job is due. Defaults to job creation time.
-     * It also defaults the execution time if not previously defined.
+     * Check if the Job is due to run. It accepts as input a DateTime used to check if the job is due.
+     * Defaults to job creation time. It also defaults the execution time if not previously defined.
      *
      * @param null|DateTime $date
      * @return bool
@@ -143,10 +155,9 @@ class Job
     }
 
     /**
-     * This will prevent the Job from overlapping.
-     * It prevents another instance of the same Job of
-     * being executed if the previous is still running.
-     * The job id is used as a filename for the lock file.
+     * This will prevent the Job from overlapping. It prevents another instance of the
+     * same Job of being executed if the previous is still running. The job id is used
+     * as a filename for the lock file.
      *
      * @param string        $tempDir         The directory path for the lock files
      * @param null|callable $whenOverlapping A callback to ignore job overlapping
@@ -158,11 +169,7 @@ class Job
             $tempDir = $this->tempDir;
         }
 
-        $this->lockFile = implode('/', [
-            trim($tempDir),
-            trim($this->id) . '.lock',
-        ]);
-
+        $this->lockFile = implode('/', [trim($tempDir), trim($this->id) . '.lock']);
         if ($whenOverlapping) {
             $this->whenOverlapping = $whenOverlapping;
         } else {
@@ -236,7 +243,7 @@ class Job
         }
 
         // Check if config has defined a tempDir
-        if (isset($config['tempDir']) && is_dir($config['tempDir'])) {
+        if (is_dir($config['tempDir'] ?? null)) {
             $this->tempDir = $config['tempDir'];
         }
 
@@ -303,7 +310,7 @@ class Job
     private function createLockFile(mixed $content = null): void
     {
         if ($this->lockFile) {
-            if ($content === null || ! is_string($content)) {
+            if (! is_string($content)) {
                 $content = $this->getId();
             }
 
@@ -367,7 +374,7 @@ class Job
      */
     public function output(array|string $filename, bool $append = false): static
     {
-        $this->outputTo = is_array($filename) ? $filename : [$filename];
+        $this->outputTo   = is_array($filename) ? $filename : [$filename];
         $this->outputMode = $append === false ? 'w' : 'a';
 
         return $this;
@@ -385,8 +392,7 @@ class Job
 
     /**
      * Set the emails where the output should be sent to.
-     * The Job should be set to write output to a file
-     * for this to work.
+     * The Job should be set to write output to a file for this to work.
      *
      * @param array|string $email
      * @return self
@@ -458,12 +464,10 @@ class Job
     }
 
     /**
-     * Set a function to be called after job execution.
-     * By default, this will force the job to run in foreground
-     * because the output is injected as a parameter of this
-     * function, but it could be avoided by passing true as a
-     * second parameter. The job will run in background if it
-     * meets all the other criteria.
+     * Set a function to be called after job execution. By default, this will force
+     * the job to run in foreground because the output is injected as a parameter of this
+     * function, but it could be avoided by passing true as a second parameter. The job
+     * will run in background if it meets all the other criteria.
      *
      * @param  callable $fn
      * @param bool      $runInBackground
@@ -482,12 +486,17 @@ class Job
     }
 
     /**
-     * @return Cron\CronExpression
+     * Get the execution time for the job.
+     *
+     * If no execution time is set, a default CronExpression
+     * for every minute (* * * * *) is returned.
+     *
+     * @return CronExpression The cron expression representing the execution time.
      */
-    public function getExecutionTime(): Cron\CronExpression
+    public function getExecutionTime(): CronExpression
     {
         if (! $this->executionTime) {
-            return Cron\CronExpression::factory('* * * * *');
+            return new CronExpression('* * * * *');
         }
 
         return $this->executionTime;

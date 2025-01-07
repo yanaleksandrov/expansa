@@ -1,11 +1,20 @@
 <?php
 
-namespace Expansa\Cron;
+declare(strict_types=1);
+
+namespace Expansa\Scheduler;
 
 use DateTime;
 use Exception;
+use ReflectionFunction;
+use ReflectionException;
 use InvalidArgumentException;
 
+/**
+ * Scheduler class.
+ *
+ * Fork of https://github.com/peppeocchi/php-cron-scheduler/tree/master.
+ */
 class Scheduler
 {
     /**
@@ -84,7 +93,7 @@ class Scheduler
      * @param array       $args   Optional arguments to pass to the php script
      * @param null|string $id     Optional custom identifier
      * @return Job
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function php(string $script, ?string $bin = null, array $args = [], ?string $id = null): Job
     {
@@ -123,7 +132,7 @@ class Scheduler
      *
      * @param null|DateTime $runTime Optional, run at specific moment
      * @return array  Executed jobs
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
     public function run(?Datetime $runTime = null): array
     {
@@ -138,7 +147,7 @@ class Scheduler
                 try {
                     $job->run();
                     $this->pushExecutedJob($job);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $this->pushFailedJob($job, $e);
                 }
             }
@@ -181,9 +190,9 @@ class Scheduler
      * Push a successfully executed job.
      *
      * @param  Job  $job
-     * @return Job
+     * @return void
      */
-    private function pushExecutedJob(Job $job): Job
+    private function pushExecutedJob(Job $job): void
     {
         $this->executedJobs[] = $job;
 
@@ -195,8 +204,6 @@ class Scheduler
         }
 
         $this->addSchedulerVerboseOutput("Executing {$compiled}");
-
-        return $job;
     }
 
     /**
@@ -214,10 +221,10 @@ class Scheduler
      *
      * @param Job       $job
      * @param Exception $e
-     * @return Job
-     * @throws \ReflectionException
+     * @return void
+     * @throws ReflectionException
      */
-    private function pushFailedJob(Job $job, Exception $e): Job
+    private function pushFailedJob(Job $job, Exception $e): void
     {
         $this->failedJobs[] = new FailedJob($job, $e);
 
@@ -225,14 +232,12 @@ class Scheduler
 
         // If callable, log the string Closure
         if (is_callable($compiled)) {
-            $reflectionClosure = new \ReflectionFunction($compiled);
+            $reflectionClosure = new ReflectionFunction($compiled);
 
             $compiled = 'Closure ' . $reflectionClosure->getClosureScopeClass()->getName();
         }
 
         $this->addSchedulerVerboseOutput("{$e->getMessage()}: {$compiled}");
-
-        return $job;
     }
 
     /**
@@ -279,7 +284,7 @@ class Scheduler
     public function work(array $seconds = [0])
     {
         while (true) {
-            if (in_array((int) date('s'), $seconds)) {
+            if (in_array((int) date('s'), $seconds, true)) {
                 $this->run();
                 sleep(1);
             }

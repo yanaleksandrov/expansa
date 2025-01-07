@@ -1,12 +1,14 @@
 <?php
 
-namespace Expansa\Cron\Traits;
+declare(strict_types=1);
+
+namespace Expansa\Scheduler;
 
 use DateTime;
 use Cron\CronExpression;
 use InvalidArgumentException;
 
-trait Interval
+trait JobIntervals
 {
     /**
      * Set the Job execution time.
@@ -16,7 +18,7 @@ trait Interval
      */
     public function at(string $expression): static
     {
-        $this->executionTime = CronExpression::factory($expression);
+        $this->executionTime = new CronExpression($expression);
 
         return $this;
     }
@@ -413,10 +415,7 @@ trait Interval
             return '*';
         }
 
-        if (
-            ! is_numeric($value) ||
-            ! ($value >= $min && $value <= $max)
-        ) {
+        if (! is_numeric($value) || ! ($value >= $min && $value <= $max)) {
             throw new InvalidArgumentException("Invalid value: it should be '*' or between {$min} and {$max}.");
         }
 
