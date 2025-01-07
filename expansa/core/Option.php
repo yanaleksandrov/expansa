@@ -72,8 +72,6 @@ final class Option extends Option\Schema
 
         /**
          * Add dotted options
-         *
-         * @since 1.0.1
          */
         if (str_contains($option, '.')) {
             return self::update($option, $value);
@@ -90,8 +88,6 @@ final class Option extends Option\Schema
 
         /**
          * Encode to json for array or object.
-         *
-         * @since 1.0.1
          */
         if (is_array($value) || is_object($value)) {
             $value = Json::encode($value);
@@ -122,8 +118,6 @@ final class Option extends Option\Schema
 
         /**
          * Update dotted options
-         *
-         * @since 1.0.1
          */
         $options = self::fetch();
         if (str_contains($option, '.')) {
@@ -153,8 +147,6 @@ final class Option extends Option\Schema
 
         /**
          * Encode to json for array or object.
-         *
-         * @since 1.0.1
          */
         if (is_array($value) || is_object($value)) {
             $value = Json::encode($value);
@@ -184,8 +176,6 @@ final class Option extends Option\Schema
 
         /**
          * Get dotted options
-         *
-         * @since 1.0.1
          */
         if (str_contains($option, '.')) {
             return Arr::get($options, $option) ?? $default;
@@ -205,8 +195,6 @@ final class Option extends Option\Schema
 
         /**
          * Delete dotted options
-         *
-         * @since 1.0.1
          */
         if (str_contains($option, '.')) {
             return self::update($option, '');

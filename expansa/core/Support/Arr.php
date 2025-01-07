@@ -151,8 +151,6 @@ class Arr
      * that will not disqualify it. When using the 'AND' operator,
      * any missing properties will disqualify it.
      *
-     * @since 4.7.0
-     *
      * @param array  $args     Optional. An array of key => value arguments to match
      *                         against each object. Default empty array.
      * @param string $operator Optional. The logical operation to perform. 'AND' means
