@@ -1,10 +1,9 @@
 <?php
 
-use Expansa\Db;
+declare(strict_types=1);
+
 use Expansa\I18n;
 use Expansa\Is;
-use Expansa\Hook;
-use Expansa\Debug;
 use Expansa\Extensions\Plugin;
 
 return new class extends Plugin
@@ -54,16 +53,6 @@ return new class extends Plugin
         if (! Is::dashboard()) {
             return;
         }
-
-        Hook::add('expansa_dashboard_footer', function () {
-            ?>
-            <template x-teleport="#query">
-                <a class="menu__link" x-show="query" href="#">
-                    <i class="ph ph-monitor"></i> <?php printf('%s %s %sQ', Debug::timer('getall'), Debug::memory_peak(), Db::queries()); ?>
-                </a>
-            </template>
-            <?php
-        });
     }
 
     public function activate(): void

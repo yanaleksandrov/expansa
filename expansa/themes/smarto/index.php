@@ -23,16 +23,6 @@ return new class extends Theme
         if (! Is::dashboard()) {
             return;
         }
-
-        Hook::add('expansa_dashboard_footer', function () {
-            ?>
-            <template x-teleport="#query">
-                <a class="menu__link" x-show="query" href="#">
-                    <i class="ph ph-monitor"></i> <?php printf('%s %s %sQ', Debug::timer('getall'), Debug::memory_peak(), Db::queries()); ?>
-                </a>
-            </template>
-            <?php
-        });
     }
 
     public function activate(): void

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Expansa\Asset;
 use Expansa\Hook;
 use Expansa\I18n;
