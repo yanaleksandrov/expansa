@@ -25,7 +25,7 @@ spl_autoload_register(function ($class) {
     // TODO: is so bad, fix it!
     $filepath = str_replace(
         ['\\', '/Expansa/', '/Dashboard/'],
-        ['/', '/core/', '/dashboard/app/'],
+        ['/', '/framework/', '/dashboard/app/'],
         $filepath
     );
 

@@ -23,7 +23,7 @@ const EX_DB_MAX_INDEX_LENGTH = 191;
  *
  * @since 2025.1
  */
-const EX_CORE      = __DIR__ . '/core/';
+const EX_CORE      = __DIR__ . '/framework/';
 const EX_DASHBOARD = __DIR__ . '/dashboard/';
 const EX_PLUGINS   = __DIR__ . '/plugins/';
 const EX_THEMES    = __DIR__ . '/themes/';

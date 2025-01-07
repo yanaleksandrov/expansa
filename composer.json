@@ -27,18 +27,18 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "if not exist expansa\\core\\Images mkdir expansa\\core\\Images",
-            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
-            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer",
-            "if not exist expansa\\core\\Scheduler mkdir expansa\\core\\Scheduler",
-            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\core\\Scheduler"
+            "if not exist expansa\\framework\\Images mkdir expansa\\framework\\Images",
+            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\framework\\Images\\Spatie\\Image",
+            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\framework\\Images\\Spatie\\ImageOptimizer",
+            "if not exist expansa\\framework\\Scheduler mkdir expansa\\framework\\Scheduler",
+            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\framework\\Scheduler"
         ],
         "post-update-cmd": [
-            "if not exist expansa\\core\\Images mkdir expansa\\core\\Images",
-            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\core\\Images\\Spatie\\Image",
-            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\core\\Images\\Spatie\\ImageOptimizer",
-            "if not exist expansa\\core\\Scheduler mkdir expansa\\core\\Scheduler",
-            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\core\\Scheduler"
+            "if not exist expansa\\framework\\Images mkdir expansa\\framework\\Images",
+            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\framework\\Images\\Spatie\\Image",
+            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\framework\\Images\\Spatie\\ImageOptimizer",
+            "if not exist expansa\\framework\\Scheduler mkdir expansa\\framework\\Scheduler",
+            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\framework\\Scheduler"
         ]
     }
 }
