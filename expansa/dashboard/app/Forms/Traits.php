@@ -1,12 +1,12 @@
 <?php
 namespace Dashboard\Forms;
 
+use app\View;
 use Dashboard\Form;
 use Expansa\Hook;
 use Expansa\Json;
 use Expansa\Safe;
 use Expansa\Support\Arr;
-use Expansa\View;
 
 trait Traits {
 

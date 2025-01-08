@@ -1,13 +1,12 @@
 <?php
 
-use Expansa\Db;
-use Expansa\I18n;
-use Expansa\Url;
-use Expansa\Safe;
-use Expansa\View;
-use Expansa\User;
+use app\Field;
+use app\User;
+use app\View;
 use Expansa\Hook;
-use Expansa\Field;
+use Expansa\I18n;
+use Expansa\Safe;
+use Expansa\Url;
 
 $user  = User::current();
 $field = new Field( $user );

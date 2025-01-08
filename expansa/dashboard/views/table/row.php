@@ -1,8 +1,8 @@
 <?php
 
+use app\View;
 use Expansa\Safe;
 use Expansa\Support\Arr;
-use Expansa\View;
 
 /**
  * Table row content.

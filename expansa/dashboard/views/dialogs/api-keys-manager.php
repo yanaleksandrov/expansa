@@ -1,5 +1,4 @@
 <?php
-use Expansa\View;
 
 /**
  * Template for API keys manager.

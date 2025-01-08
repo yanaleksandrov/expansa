@@ -1,7 +1,7 @@
 <?php
 
+use app\View;
 use Expansa\Hook;
-use Expansa\View;
 
 /**
  * Emails.

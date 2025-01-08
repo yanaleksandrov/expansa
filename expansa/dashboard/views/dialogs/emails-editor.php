@@ -1,5 +1,6 @@
 <?php
-use Expansa\View;
+
+use app\View;
 
 /**
  * Template for output emails editor.

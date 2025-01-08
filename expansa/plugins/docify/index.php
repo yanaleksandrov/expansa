@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Expansa\I18n;
-use Expansa\Post;
-use Expansa\Tree;
+use app\Post;
+use app\Tree;
 use Expansa\Extensions\Plugin;
+use Expansa\I18n;
 
 return new class extends Plugin
 {

@@ -1,10 +1,10 @@
 <?php
 
-use Expansa\Safe;
-use Expansa\View;
-use Expansa\Tree;
-use Expansa\User;
+use app\Tree;
+use app\User;
+use app\View;
 use Expansa\I18n;
+use Expansa\Safe;
 
 /**
  * Output user account button.

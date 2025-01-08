@@ -1,8 +1,8 @@
 <?php
 namespace Dashboard\Forms;
 
+use app\View;
 use Expansa\Safe;
-use Expansa\View;
 
 final class Field {
 

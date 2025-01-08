@@ -1,8 +1,8 @@
 <?php
 
+use app\Tree;
 use Expansa\Disk;
 use Expansa\I18n;
-use Expansa\Tree;
 
 /**
  * File manager table

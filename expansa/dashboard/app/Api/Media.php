@@ -22,7 +22,7 @@ class Media extends \Expansa\Api\Handler
 	 * @since 2025.1
 	 */
 	public static function get() {
-		$media = \Expansa\Media::get(
+		$media = \app\Media::get(
 			[
 				'per_page' => 60,
 			]
@@ -48,7 +48,7 @@ class Media extends \Expansa\Api\Handler
 //		exit;
 		foreach ( $files as $file ) {
 			$filename = $file['name'] ?? '';
-			$postID   = \Expansa\Media::upload( $file );
+			$postID   = \app\Media::upload( $file );
 			if ( $postID instanceof Error ) {
 				$errors[ $filename ] = Error::get();
 			} else {

@@ -2,13 +2,13 @@
 
 namespace Dashboard;
 
-use Expansa\Hook;
-use Expansa\Route;
-use Expansa\Asset;
-use Expansa\View;
-use Expansa\Url;
+use app\View;
 use Expansa\Api;
+use Expansa\Asset;
+use Expansa\Hook;
 use Expansa\Patterns\Singleton;
+use Expansa\Route;
+use Expansa\Url;
 
 /**
  *

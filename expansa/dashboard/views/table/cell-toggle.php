@@ -1,6 +1,7 @@
 <?php
+
+use app\View;
 use Expansa\Safe;
-use Expansa\View;
 
 /**
  * Table checkbox

@@ -2,7 +2,6 @@
 
 namespace dashboard\app\Api;
 
-use Expansa;
 use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Safe;
@@ -64,7 +63,7 @@ class Post
 //          }
 //      }
 
-        $post = Expansa\Post::add($type, compact('title', 'status', 'fields'));
+        $post = \app\Post::add($type, compact('title', 'status', 'fields'));
         echo '<pre>';
         print_r($fields);
         print_r($post);
