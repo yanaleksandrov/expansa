@@ -29,7 +29,6 @@ abstract class Builder implements SchemaBuilder
         if (is_null($connection)) {
             return $this->connection;
         }
-
         $this->connection = $connection;
 
         return $this;
@@ -86,23 +85,17 @@ abstract class Builder implements SchemaBuilder
 
     public function rename(string $from, string $to): void
     {
-        $this->build(tap($this->createTable($from), function ($table) use ($to) {
-            $table->rename($to);
-        }));
+        $this->build(tap($this->createTable($from), fn ($table) => $table->rename($to)));
     }
 
     public function drop(string $table)
     {
-        $this->build(tap($this->createTable($table), function ($table) {
-            $table->drop();
-        }));
+        $this->build(tap($this->createTable($table), fn($table) => $table->drop()));
     }
 
     public function dropIfExists(string $table): void
     {
-        $this->build(tap($this->createTable($table), function ($table) {
-            $table->dropIfExists();
-        }));
+        $this->build(tap($this->createTable($table), fn($table) => $table->dropIfExists()));
     }
 
     public function dropAllTables()

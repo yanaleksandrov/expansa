@@ -27,7 +27,7 @@ trait ConnectionLogger
     /**
      * Enable the query log on the connection.
      *
-     * @return void
+     * @return ConnectionLogger
      */
     public function enableQueryLog(): static
     {
@@ -39,7 +39,7 @@ trait ConnectionLogger
     /**
      * Disable the query log on the connection.
      *
-     * @return void
+     * @return ConnectionLogger
      */
     public function disableQueryLog(): static
     {
@@ -61,7 +61,7 @@ trait ConnectionLogger
     /**
      * Clear the query log.
      *
-     * @return void
+     * @return ConnectionLogger
      */
     public function flushQueryLog(): static
     {
@@ -83,7 +83,7 @@ trait ConnectionLogger
     /**
      * Reset the duration of all run queries.
      *
-     * @return void
+     * @return ConnectionLogger
      */
     public function resetTotalQueryDuration(): static
     {

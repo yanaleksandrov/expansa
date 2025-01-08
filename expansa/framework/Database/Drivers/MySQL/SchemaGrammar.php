@@ -408,15 +408,15 @@ class SchemaGrammar extends Grammar
     {
         if (! is_null($column->useCurrent)) {
             if ($column->type === 'date') {
-                return ' DEFAULT (CURRENT_DATE)';
+                return ' DEFAULT CURRENT_DATE';
             }
 
             if ($column->type === 'time') {
-                return ' DEFAULT (CURRENT_TIME)';
+                return ' DEFAULT CURRENT_TIME';
             }
 
             if (in_array($column->type, ['datetime', 'timestamp'])) {
-                return ' DEFAULT (CURRENT_TIMESTAMP)';
+                return ' DEFAULT CURRENT_TIMESTAMP';
             }
         }
 
@@ -444,7 +444,6 @@ class SchemaGrammar extends Grammar
         if (in_array($column->type, $this->serials) && $column->autoIncrement) {
             return ' AUTO_INCREMENT PRIMARY KEY';
         }
-
         return '';
     }
 
@@ -453,7 +452,6 @@ class SchemaGrammar extends Grammar
         if ($value instanceof Expression) {
             return $value->getValue();
         }
-
         return sprintf('`%s`', $value);
     }
 }

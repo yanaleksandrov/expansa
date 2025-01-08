@@ -54,8 +54,7 @@ abstract class Builder implements QueryBuilderContract
     public function __construct(
         protected AbstractConnectionBase $connection,
         protected Grammar $grammar
-    )
-    {} // phpcs:ignore
+    ) {} // phpcs:ignore
 
     public function useWritePDO(): static
     {
@@ -81,7 +80,6 @@ abstract class Builder implements QueryBuilderContract
     public function select(array $columns = ['*']): static
     {
         $this->command = 'select';
-
         $this->columns = $columns;
 
         return $this;
@@ -197,14 +195,14 @@ abstract class Builder implements QueryBuilderContract
         return $this->connection->delete($sql, $bindings);
     }
 
-    public function softDelete()
+    public function softDelete(): static
     {
         $this->command = 'update';
 
         return $this;
     }
 
-    public function distinct()
+    public function distinct(): static
     {
         $this->distinct = true;
 
@@ -404,12 +402,12 @@ abstract class Builder implements QueryBuilderContract
         return Arr::flatten($this->bindings);
     }
 
-    public function setBinding(mixed $values, string $type)
+    public function setBinding(mixed $values, string $type): void
     {
         $this->bindings[$type] = $values;
     }
 
-    public function addBinding(mixed $values, string $type)
+    public function addBinding(mixed $values, string $type): void
     {
         $this->bindings[$type] = array_merge(
             $this->bindings[$type],
@@ -422,12 +420,12 @@ abstract class Builder implements QueryBuilderContract
         return $this->where('id', '=', $id)->first();
     }
 
-    public function dump()
+    public function dump(): void
     {
         dump($this->toSql(), $this->getBindings());
     }
 
-    public function dd()
+    public function dd(): void
     {
         dd($this->toSql(), $this->getBindings());
     }

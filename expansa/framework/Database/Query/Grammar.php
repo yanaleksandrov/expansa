@@ -48,9 +48,9 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
 
     public function compileUpsert(Builder $query, string $uniqueColumn, array $insertValues, array $updateValues): string
     {
-        $table = $this->wrapTable($query->from);
+        $table            = $this->wrapTable($query->from);
         $sqlInsertColumns = $this->prepareColumns(array_keys($insertValues));
-        $sqlInsertValues = $this->prepareValues($insertValues);
+        $sqlInsertValues  = $this->prepareValues($insertValues);
 
         $sqlUpdateSet = [];
         foreach ($updateValues as $key => $val) {
@@ -267,9 +267,7 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
 
     public function prepareValues(array $values): string
     {
-        return implode(', ', array_map(function () {
-            return '?';
-        }, $values));
+        return implode(', ', array_map(fn() => '?', $values));
     }
 
     public function prepareValue(mixed $value): string
