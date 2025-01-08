@@ -16,9 +16,9 @@ trait PrepareWhereExpression
 
         // where('name = name')
         if (count($args) == 1) {
-            $reColumn = "([\w_.]+)";
+            $reColumn   = "([\w_.]+)";
             $reOperator = "(" . implode("|", $this->whereOperators) . ")";
-            $reValue = "[\"']?(.*?)[\"']?";
+            $reValue    = "[\"']?(.*?)[\"']?";
 
             if (preg_match("/^{$reColumn}\s{0,}{$reOperator}\s{0,}{$reValue}$/", $args[0], $match)) {
                 $parsed['column'] = $match[1];
