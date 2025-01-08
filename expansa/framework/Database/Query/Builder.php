@@ -3,7 +3,7 @@
 namespace Expansa\Database\Query;
 
 use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
-use Expansa\Database\Connection;
+use Expansa\Database\Abstract\AbstractConnection;
 use Expansa\Database\Query\Traits\PrepareWhereExpression;
 use Expansa\Database\Query\Grammar;use Expansa\Support\Arr;
 use InvalidArgumentException;
@@ -50,7 +50,7 @@ abstract class Builder implements QueryBuilderContract
     protected bool $withSQL = false;
 
     public function __construct(
-        protected Connection $connection,
+        protected AbstractConnection $connection,
         protected Grammar $grammar
     )
     {

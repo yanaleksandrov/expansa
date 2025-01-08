@@ -3,13 +3,13 @@
 namespace Expansa\Database\Postgres;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Connection as ConnectionBase;
-use Expansa\Database\Postgres\Schema\Builder as SchemaBuilder;
-use Expansa\Database\Postgres\Schema\Grammar as SchemaGrammar;
 use Expansa\Database\Postgres\Query\Builder as QueryBuilder;
 use Expansa\Database\Postgres\Query\Grammar as QueryGrammar;
+use Expansa\Database\Postgres\Schema\Builder as SchemaBuilder;
+use Expansa\Database\Postgres\Schema\Grammar as SchemaGrammar;
+use Expansa\Database\Abstracts\AbstractConnection;
 
-class Connection extends ConnectionBase
+class Connection extends AbstractConnection
 {
     public function getSchema()
     {

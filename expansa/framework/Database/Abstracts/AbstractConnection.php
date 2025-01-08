@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace framework\Database\Abstracts;
 
 use Closure;
 use Exception;
+use Expansa\Contracts\Events\Dispatcher;
 use Expansa\Database\Contracts\Connection as ConnectionContract;
 use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Contracts\QueryException;
-use Expansa\Contracts\Events\Dispatcher;
 use Expansa\Database\Events\QueryExecuted;
 use Expansa\Database\Query\Builder as QueryBuilder;
 use Expansa\Database\Query\Grammar as QueryGrammar;
@@ -21,7 +21,7 @@ use PDO;
 use PDOStatement;
 use Throwable;
 
-abstract class Connection implements ConnectionContract
+abstract class AbstractConnection implements ConnectionContract
 {
     use ConnectionLogger, ConnectionTransactions, DetectsErrors;
 

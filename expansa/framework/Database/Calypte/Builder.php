@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Expansa\Database\Calypte;
 
 use Closure;
-use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
-use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
 use Expansa\Database\Calypte\Exceptions\ModelNotFoundException;
 use Expansa\Database\Calypte\Traits\ForwardCalls;
-use Expansa\Database\Connection as ConnectionContract;
 use Expansa\Database\Contracts\Calypte\Model as ModelContract;
+use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
+use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
+use Expansa\Database\Abstracts\AbstractConnection;
 
 /**
  * Used methods from [Query/Builder]:
@@ -21,7 +21,7 @@ class Builder
 {
     use ForwardCalls;
 
-    protected ?ConnectionContract $connection = null;
+    protected ?AbstractConnection $connection = null;
 
     protected ?SchemaBuilderContract $schemaBuilder = null;
 
@@ -29,7 +29,7 @@ class Builder
 
     protected ?ModelContract $model = null;
 
-    public function __construct(ConnectionContract $connection, ModelContract $model)
+    public function __construct(AbstractConnection $connection, ModelContract $model)
     {
         $this->connection = $connection;
         $this->schemaBuilder = $connection->getSchemaBuilder();

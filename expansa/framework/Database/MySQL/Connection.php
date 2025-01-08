@@ -3,13 +3,13 @@
 namespace Expansa\Database\MySQL;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Connection as ConnectionBase;
-use Expansa\Database\MySQL\Schema\Builder as SchemaBuilder;
-use Expansa\Database\MySQL\Schema\Grammar as SchemaGrammar;
 use Expansa\Database\MySQL\Query\Builder as QueryBuilder;
 use Expansa\Database\MySQL\Query\Grammar as QueryGrammar;
+use Expansa\Database\MySQL\Schema\Builder as SchemaBuilder;
+use Expansa\Database\MySQL\Schema\Grammar as SchemaGrammar;
+use Expansa\Database\Abstracts\AbstractConnection;
 
-class Connection extends ConnectionBase
+class Connection extends AbstractConnection
 {
     public function getSchema()
     {

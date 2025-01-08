@@ -3,7 +3,7 @@
 namespace Expansa\Database\Schema;
 
 use Closure;
-use Expansa\Database\Connection;
+use Expansa\Database\Abstract\AbstractConnection;
 use Expansa\Database\Expression;
 use Expansa\Support\Fluent;
 
@@ -350,7 +350,7 @@ class Table
         return str_replace(['-','.'], '_', $index);
     }
 
-    public function build(Connection $connection, Grammar $grammar): void
+    public function build(AbstractConnection $connection, Grammar $grammar): void
     {
         $this->isValidConnection($connection);
 
@@ -380,7 +380,7 @@ class Table
         return $statements;
     }
 
-    protected function isValidConnection(Connection $connection): void
+    protected function isValidConnection(AbstractConnection $connection): void
     {
 
     }
