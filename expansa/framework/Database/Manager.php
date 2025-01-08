@@ -4,17 +4,20 @@ declare(strict_types=1);
 
 namespace Expansa\Database;
 
-use Expansa\Database\Contracts\Connection as ConnectionContract;
+use Closure;
+use Expansa\Database\Contracts\Connection;
 use Expansa\Database\Contracts\ConnectionResolver;
 use Expansa\Database\Contracts\DatabaseException;
 
-class DatabaseManager implements ConnectionResolver
+class Manager implements ConnectionResolver
 {
-    protected ConnectionFactory $factory;
+    protected Closure $reconnector;
 
     protected array $connections = [];
 
-    protected \Closure $reconnector;
+    protected array $driver;
+
+    protected array $config;
 
     protected array $drivers = [
         'mysql'  => [
@@ -33,11 +36,20 @@ class DatabaseManager implements ConnectionResolver
 
     public function __construct()
     {
-        $this->factory     = new ConnectionFactory();
-        $this->reconnector = fn (ConnectionContract $connection) => $this->reconnect($connection->getName());
+        $this->reconnector = fn (Connection $connection) => $this->reconnect($connection->getName());
     }
 
-    public function connection(string $name = null): ConnectionContract
+    public function makeFactory(array $driver, array $config)
+    {
+        $this->driver = $driver;
+        $this->config = $config;
+
+        $resolvePdo = (new $this->driver['connector']())->connect($this->config);
+
+        return new $this->driver['connection']($resolvePdo, $this->config);
+    }
+
+    public function connection(string $name = null): Connection
     {
         if (is_null($name)) {
             $name = $this->getDefaultConnection();
@@ -52,7 +64,7 @@ class DatabaseManager implements ConnectionResolver
         return $this->connections[$name];
     }
 
-    public function reconnect(string $name = null): ConnectionContract
+    public function reconnect(string $name = null): Connection
     {
         if (is_null($name)) {
             $name = $this->getDefaultConnection();
@@ -91,18 +103,18 @@ class DatabaseManager implements ConnectionResolver
         unset($this->connections[$name]);
     }
 
-    protected function makeConnection($name): ConnectionContract
+    protected function makeConnection($name): Connection
     {
         $config = $this->getConfig($name);
 
         if (!isset($this->drivers[$config['driver']])) {
-            throw new DatabaseException("Driver [{$name}] is not supported");
+            throw new DatabaseException("Driver [$name] is not supported");
         }
 
-        return $this->factory->make($this->drivers[$config['driver']], $config);
+        return $this->makeFactory($this->drivers[$config['driver']], $config);
     }
 
-    protected function configureConnection(ConnectionContract $connection, string $type = null): ConnectionContract
+    protected function configureConnection(Connection $connection, string $type = null): Connection
     {
         if ($this->app->bound('events')) {
             $connection->setEventDispatcher($this->app['events']);

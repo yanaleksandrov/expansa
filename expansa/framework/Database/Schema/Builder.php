@@ -7,15 +7,15 @@ namespace Expansa\Database\Schema;
 use Closure;
 use Expansa\Database\Contracts\Connection;
 use Expansa\Database\Contracts\SchemaBuilder;
-use Expansa\Database\Schema\Grammar as SchemaGrammar;
 
 abstract class Builder implements SchemaBuilder
 {
-    protected SchemaGrammar $grammar;
-
-    public function __construct(protected Connection $connection)
+    public function __construct(
+        protected Connection $connection,
+        protected ?Grammar $grammar = null,
+    )
     {
-        $this->grammar = $connection->getSchemaGrammar();
+        $this->grammar = $this->connection->getSchemaGrammar();
     }
 
     /**
@@ -55,7 +55,7 @@ abstract class Builder implements SchemaBuilder
         );
     }
 
-    public function getTables(): mixed
+    public function getTables(): array
     {
         return $this->connection->selectFromWriteConnection(
             $this->grammar->compileGetTables(),
@@ -70,7 +70,7 @@ abstract class Builder implements SchemaBuilder
         )) > 0;
     }
 
-    public function create(string $table, Closure $callback)
+    public function create(string $table, Closure $callback): void
     {
         $this->build(tap($this->createTable($table), function ($table) use ($callback) {
             $table->create();
@@ -78,7 +78,7 @@ abstract class Builder implements SchemaBuilder
         }));
     }
 
-    public function table(string $table, Closure $callback)
+    public function table(string $table, Closure $callback): void
     {
         $this->build($this->createTable($table, $callback));
     }
@@ -88,7 +88,7 @@ abstract class Builder implements SchemaBuilder
         $this->build(tap($this->createTable($from), fn ($table) => $table->rename($to)));
     }
 
-    public function drop(string $table)
+    public function drop(string $table): void
     {
         $this->build(tap($this->createTable($table), fn($table) => $table->drop()));
     }
@@ -180,7 +180,7 @@ abstract class Builder implements SchemaBuilder
 
     abstract protected function createTable(string $table, Closure $callback = null): Table;
 
-    protected function build($table)
+    protected function build($table): void
     {
         $table->build($this->connection, $this->grammar);
     }

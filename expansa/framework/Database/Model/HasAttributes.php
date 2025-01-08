@@ -137,7 +137,7 @@ trait HasAttributes
         }
 
         $attribute = $this->attributes[$key] ?? null;
-        $original = $this->originals[$key] ?? null;
+        $original  = $this->originals[$key] ?? null;
 
         if ($attribute === $original) {
             return true;

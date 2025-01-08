@@ -10,10 +10,7 @@ class SchemaBuilder extends Builder
 {
     public function getTables(): array
     {
-        return array_map(function ($v) {
-            $v = array_values((array) $v);
-            return $v[0];
-        }, parent::getTables());
+        return array_map(fn($v) => array_values((array) $v)[0], parent::getTables());
     }
 
     public function hasTable(string $table): bool

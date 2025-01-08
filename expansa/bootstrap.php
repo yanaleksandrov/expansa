@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 use app\User;
 use Expansa\{Db, Debug, I18n, Is,};
+use Expansa\Database\Schema;
+use Expansa\Database\Schema\Table;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';
@@ -58,11 +60,11 @@ echo '<pre>';
 //print_r($pdo);
 //print_r($connection);
 //$database   = new \Expansa\Database\Drivers\MySQL\SchemaBuilder($connection);
-Expansa\Schema::create('test_my_table', function (\Expansa\Database\Schema\Table $table) {
-    var_dump(43243454);
-    $table->id();
-    $table->timestamps();
-});
+//Schema::create('test_my_table', function (Table $table) {
+//    var_dump(43243454);
+//    $table->id();
+//    $table->timestamps();
+//});
 echo '</pre>';
 
 /**

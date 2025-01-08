@@ -61,6 +61,6 @@ class Safe extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Security\Sanitizer';
+        return '\Expansa\Security\Sanitizer';
     }
 }

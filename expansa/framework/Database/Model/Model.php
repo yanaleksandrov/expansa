@@ -14,9 +14,9 @@ use stdClass;
 class Model
 {
     use HasAttributes;
-    use HasGuardAttributes;
     use HasTimestamps;
     use HasSoftDeletes;
+    use HasGuardAttributes;
 
     // Поля, которые можно наполнять
     protected array $fillable = [];

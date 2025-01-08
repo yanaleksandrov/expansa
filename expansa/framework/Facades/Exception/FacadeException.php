@@ -14,4 +14,6 @@ use Exception;
  *
  * @package Expansa\Facades
  */
-class FacadeException extends Exception {}
+class FacadeException extends Exception
+{
+}
