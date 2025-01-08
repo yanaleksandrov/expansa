@@ -10,7 +10,6 @@ use Expansa\Contracts\Console\Command;
 use Expansa\Database\Contracts\Connection;
 use Expansa\Database\Contracts\ConnectionResolver;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Migration;
 use SplFileInfo;
 
 class Migrator
