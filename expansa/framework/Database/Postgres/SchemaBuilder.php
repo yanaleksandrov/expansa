@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Postgres\Schema;
+namespace Expansa\Database\Postgres;
 
-use Expansa\Database\Schema\Builder as BuilderAbstract;
+use Expansa\Database\Schema\Builder;
 
-class Builder extends BuilderAbstract
+class SchemaBuilder extends Builder
 {
     public function getColumnListing(string $table): array
     {
@@ -22,8 +22,8 @@ class Builder extends BuilderAbstract
         return array_map(fn($value) => $value['column_name'], $results);
     }
 
-    public function createTable(string $table, \Closure $callback = null): Table
+    public function createTable(string $table, \Closure $callback = null): SchemaTable
     {
-        return new Table($table, $callback);
+        return new SchemaTable($table, $callback);
     }
 }

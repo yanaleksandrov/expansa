@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Postgres\Schema;
+namespace Expansa\Database\Postgres;
 
-use Expansa\Database\Schema\Grammar as GrammarBase;
+use Expansa\Database\Schema\Grammar;
 
-class Grammar extends GrammarBase
+class SchemaGrammar extends Grammar
 {
     /**
      * Possible column modifiers.
@@ -36,27 +36,27 @@ class Grammar extends GrammarBase
         return 'SELECT column_name FROM information_schema.columns WHERE table_catalog = ? and table_schema = ? and table_name = ?';
     }
 
-    protected function typeBoolean(Column $column): string
+    protected function typeBoolean(SchemaColumn $column): string
     {
         return 'boolean' . (($column->array) ? ' array' : '');
     }
 
-    protected function typeSmallInteger(Column $column): string
+    protected function typeSmallInteger(SchemaColumn $column): string
     {
         return "smallint" . (($column->array) ? ' array' : '');
     }
 
-    protected function typeInteger(Column $column): string
+    protected function typeInteger(SchemaColumn $column): string
     {
         return "integer" . (($column->array) ? ' array' : '');
     }
 
-    protected function typeBigInteger(Column $column): string
+    protected function typeBigInteger(SchemaColumn $column): string
     {
         return "bigint" . (($column->array) ? ' array' : '');
     }
 
-    protected function typeNumeric(Column $column): string
+    protected function typeNumeric(SchemaColumn $column): string
     {
         if (! is_null($column->precision) && ! is_null($column->scale)) {
             return sprintf("numeric(%s,%s)", $column->precision, $column->scale) . (($column->array) ? ' array' : '');
@@ -70,34 +70,34 @@ class Grammar extends GrammarBase
         ;
     }
 
-    protected function typeReal(Column $column): string
+    protected function typeReal(SchemaColumn $column): string
     {
         return "real" . (($column->array) ? ' array' : '');
         ;
     }
 
-    protected function typeDouble(Column $column): string
+    protected function typeDouble(SchemaColumn $column): string
     {
         return "double precision" . (($column->array) ? ' array' : '');
         ;
     }
 
-    protected function typeSmallSerial(Column $column): string
+    protected function typeSmallSerial(SchemaColumn $column): string
     {
         return "smallserial";
     }
 
-    protected function typeSerial(Column $column): string
+    protected function typeSerial(SchemaColumn $column): string
     {
         return "serial";
     }
 
-    protected function typeBigSerial(Column $column): string
+    protected function typeBigSerial(SchemaColumn $column): string
     {
         return "bigserial";
     }
 
-    protected function typeChar(Column $column): string
+    protected function typeChar(SchemaColumn $column): string
     {
         if (is_null($column->length) || $column->length < 1) {
             $column->length = 1;
@@ -107,7 +107,7 @@ class Grammar extends GrammarBase
         ;
     }
 
-    protected function typeVarchar(Column $column): string
+    protected function typeVarchar(SchemaColumn $column): string
     {
         if (is_null($column->length) || $column->length < 1) {
             $column->length = 255;
@@ -117,13 +117,13 @@ class Grammar extends GrammarBase
         ;
     }
 
-    protected function typeText(Column $column): string
+    protected function typeText(SchemaColumn $column): string
     {
         return "text" . (($column->array) ? ' array' : '');
         ;
     }
 
-    protected function typeTimestamp(Column $column): string
+    protected function typeTimestamp(SchemaColumn $column): string
     {
         $precision = !is_null($column->precision) ? "({$column->precision})" : '';
         $useCurrent = $column->useCurrent ? ' default CURRENT_TIMESTAMP' : '';
@@ -131,7 +131,7 @@ class Grammar extends GrammarBase
         return sprintf('timestamp%s without time zone%s', $precision, $useCurrent);
     }
 
-    protected function typeTimestampTz(Column $column): string
+    protected function typeTimestampTz(SchemaColumn $column): string
     {
         $precision = !is_null($column->precision) ? "({$column->precision})" : '';
         $useCurrent = $column->useCurrent ? ' default CURRENT_TIMESTAMP' : '';
@@ -139,60 +139,60 @@ class Grammar extends GrammarBase
         return sprintf('timestamp%s with time zone%s', $precision, $useCurrent);
     }
 
-    protected function typeDate(Column $column): string
+    protected function typeDate(SchemaColumn $column): string
     {
         return 'date';
     }
 
-    protected function typeTime(Column $column): string
+    protected function typeTime(SchemaColumn $column): string
     {
         return 'time' . (is_null($column->precision) ? '' : "($column->precision)") . ' without time zone';
     }
 
-    protected function typeTimeTz(Column $column): string
+    protected function typeTimeTz(SchemaColumn $column): string
     {
         return 'time' . (is_null($column->precision) ? '' : "($column->precision)") . ' with time zone';
     }
 
-    protected function typeUuid(Column $column): string
+    protected function typeUuid(SchemaColumn $column): string
     {
         return 'uuid' . ($column->array ? ' array' : '');
     }
 
-    protected function modifyPrimary(Column $column)
+    protected function modifyPrimary(SchemaColumn $column)
     {
         if ($column->primary) {
             return ' PRIMARY KEY';
         }
     }
 
-    protected function modifyCollate(Column $column)
+    protected function modifyCollate(SchemaColumn $column)
     {
         if (! is_null($column->collation)) {
             return ' COLLATE ' . $this->wrapValue($column->collation);
         }
     }
 
-    protected function modifyNullable(Column $column)
+    protected function modifyNullable(SchemaColumn $column)
     {
         return $column->nullable ? ' NULL' : ' NOT NULL';
     }
 
-    protected function modifyDefault(Column $column)
+    protected function modifyDefault(SchemaColumn $column)
     {
         if (! is_null($column->default)) {
             return ' DEFAULT ' . $this->wrapDefaultValue($column->default);
         }
     }
 
-    protected function modifyVirtualAs(Column $column)
+    protected function modifyVirtualAs(SchemaColumn $column)
     {
         if ($column->virtualAs !== null) {
             return " GENERATED ALWAYS AS ({$column->virtualAs})";
         }
     }
 
-    protected function modifyStoredAs(Column $column)
+    protected function modifyStoredAs(SchemaColumn $column)
     {
         if ($column->storedAs !== null) {
             return " GENERATED ALWAYS AS ({$column->storedAs}) STORED";

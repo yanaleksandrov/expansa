@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Postgres;
 
-use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Postgres\Query\Builder as QueryBuilder;
-use Expansa\Database\Postgres\Query\Grammar as QueryGrammar;
-use Expansa\Database\Postgres\Schema\Builder as SchemaBuilder;
-use Expansa\Database\Postgres\Schema\Grammar as SchemaGrammar;
 use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Contracts\DatabaseException;
 
 class Connection extends AbstractConnectionBase
 {

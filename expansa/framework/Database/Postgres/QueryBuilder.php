@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Postgres\Query;
+namespace Expansa\Database\Postgres;
 
-use Expansa\Database\Query\Builder as BuilderBase;
+use Expansa\Database\Query\Builder;
 
-class Builder extends BuilderBase
+class QueryBuilder extends Builder
 {
     protected array $operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
