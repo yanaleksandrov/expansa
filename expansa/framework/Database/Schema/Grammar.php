@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
+use Expansa\Database\Abstracts\GrammarBase;
 use Expansa\Database\Contracts\SchemaGrammar as SchemaGrammarContract;
-use Expansa\Database\Grammar as BaseGrammar;
 
-abstract class Grammar extends BaseGrammar implements SchemaGrammarContract
+abstract class Grammar extends GrammarBase implements SchemaGrammarContract
 {
     protected bool $transaction = false;
 

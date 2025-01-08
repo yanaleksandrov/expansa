@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
+use Expansa\Database\Abstracts\GrammarBase;
 use Expansa\Database\Contracts\QueryGrammar as QueryGrammarContract;
-use Expansa\Database\Grammar as BaseGrammar;
 
-abstract class Grammar extends BaseGrammar implements QueryGrammarContract
+abstract class Grammar extends GrammarBase implements QueryGrammarContract
 {
     public function compileInsert(Builder $query, $values, $returning = null): string
     {
