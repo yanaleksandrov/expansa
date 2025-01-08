@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Commands;
 
@@ -27,7 +29,7 @@ class MigrateCommand extends Command
         $this->prepareDatabase();
 
         $this->migrator->dispatch('migrate', [
-	        realpath( $this->container->basePath('/database/migrations'))
+            realpath($this->container->basePath('/database/migrations'))
         ]);
 
         $this->output->newLine();

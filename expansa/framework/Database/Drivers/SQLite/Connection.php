@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\SQLite;
 
+use Expansa\Database\Abstracts\ConnectionBase;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Connection as ConnectionBase;
 
 class Connection extends ConnectionBase
 {
-    /**
-     * @throws DatabaseException
-     */
     public function __construct($pdo, array $config = [])
     {
         parent::__construct($pdo, $config);
@@ -23,14 +20,12 @@ class Connection extends ConnectionBase
         }
     }
 
-    /**
-     * @throws DatabaseException
-     */
     public function getSchema()
     {
         if (empty($this->config['schema'])) {
             throw new DatabaseException("For connection [%s] schema not configured.");
         }
+
         return $this->config['schema'];
     }
 
@@ -47,6 +42,7 @@ class Connection extends ConnectionBase
         if (is_null($this->schemaGrammar)) {
             $this->useSchemaGrammar();
         }
+
         return new SchemaBuilder($this);
     }
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
+use Expansa\Database\Abstracts\GrammarBase;
 use Expansa\Database\Contracts\SchemaGrammar as SchemaGrammarContract;
-use Expansa\Database\Grammar as BaseGrammar;
 
-abstract class Grammar extends BaseGrammar implements SchemaGrammarContract
+abstract class Grammar extends GrammarBase implements SchemaGrammarContract
 {
     protected bool $transaction = false;
 
@@ -30,7 +30,7 @@ abstract class Grammar extends BaseGrammar implements SchemaGrammarContract
         $columns = [];
 
         foreach ($table->getColumns() as $column) {
-            $sql = $this->wrap($column->name).' '.$this->getType($column);
+            $sql = $this->wrap($column->name) . ' ' . $this->getType($column);
 
             $columns[] = $this->addModifiers($sql, $table, $column);
         }
@@ -40,7 +40,7 @@ abstract class Grammar extends BaseGrammar implements SchemaGrammarContract
 
     public function getType($column): string
     {
-        return $this->{'type'.ucfirst($column->type)}($column);
+        return $this->{'type' . ucfirst($column->type)}($column);
     }
 
     public function addModifiers($sql, $table, $column): string

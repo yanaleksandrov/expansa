@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\SQLite;
 
+use Expansa\Database\Abstracts\ConnectorBase;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Connector as ConnectorBase;
 
 class Connector extends ConnectorBase
 {

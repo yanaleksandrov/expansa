@@ -14,18 +14,19 @@ use stdClass;
 class Model
 {
     use HasAttributes;
-    use HasGuardAttributes;
     use HasTimestamps;
     use HasSoftDeletes;
+    use HasGuardAttributes;
 
     // Поля, которые можно наполнять
     protected array $fillable = [];
 
     protected array $hidden = [];
 
-    public function __construct(
-        protected array $attributes = []
-    ) {} // phpcs:ignore
+    public function __construct(array $attributes = [])
+    {
+        $this->attributes = $attributes;
+    }
 
     public static function create(array|stdClass $attributes): static
     {
@@ -47,13 +48,11 @@ class Model
             return $this;
         }
 
-        $error = function (string|array $keys) {
-            throw new \Exception(sprintf(
-                'Add [%s] to fillable property to allow mass assignment on [%s].',
-                implode(", ", (array) $keys),
-                get_class($this)
-            ));
-        };
+        $error = fn (string|array $keys) => throw new \Exception(sprintf(
+            'Add [%s] to fillable property to allow mass assignment on [%s].',
+            implode(", ", (array) $keys),
+            get_class($this)
+        ));
 
         if ($this->totallyGuarded()) {
             $error(

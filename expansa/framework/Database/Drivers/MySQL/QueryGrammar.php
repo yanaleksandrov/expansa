@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\MySQL;
 
-use Expansa\Database\Expression;
 use Expansa\Database\Query\Builder;
-use Expansa\Database\Query\Grammar as GrammarBase;
+use Expansa\Database\Query\Grammar;
+use Expansa\Database\Schema\Expression;
 
-class QueryGrammar extends GrammarBase
+class QueryGrammar extends Grammar
 {
-    public function compileUpsert(Builder $query, string $uniqueColumn, array $insertValues, array $updateValues, $returning = null): string
+    public function compileUpsert(
+        Builder $query,
+        string $uniqueColumn,
+        array $insertValues,
+        array $updateValues,
+        $returning = null
+    ): string
     {
         $table            = $this->wrapTable($query->from);
         $sqlInsertColumns = $this->prepareColumns(array_keys($insertValues));
@@ -39,6 +45,7 @@ class QueryGrammar extends GrammarBase
         if ($value instanceof Expression) {
             return $value->getValue();
         }
+
         return sprintf('`%s`', $value);
     }
 }

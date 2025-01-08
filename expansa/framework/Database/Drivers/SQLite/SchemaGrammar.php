@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Expansa\Database\Drivers\SQLite;
 
 use Expansa\Database\Schema\Column;
-use Expansa\Database\Schema\Grammar as GrammarBase;
-use Expansa\Database\Schema\Table as TableContract;
-use Expansa\Database\Fluent;
+use Expansa\Database\Schema\Fluent;
+use Expansa\Database\Schema\Grammar;
+use Expansa\Database\Schema\Table;
 
-class SchemaGrammar extends GrammarBase
+class SchemaGrammar extends Grammar
 {
     /**
      * The possible column modifiers.
@@ -35,7 +35,7 @@ class SchemaGrammar extends GrammarBase
         return "SELECT * FROM sqlite_master WHERE type = 'table' AND name = ?";
     }
 
-    public function compileCreate(TableContract $table): string
+    public function compileCreate(Table $table): string
     {
         return sprintf(
             '%s TABLE %s (%s%s%s)',
@@ -47,7 +47,7 @@ class SchemaGrammar extends GrammarBase
         );
     }
 
-    protected function addForeignKeys(TableContract $table): string
+    protected function addForeignKeys(Table $table): string
     {
         $foreigns = array_filter($table->getCommands(), fn($command) => $command->name === 'foreignKey');
 
@@ -73,7 +73,7 @@ class SchemaGrammar extends GrammarBase
         return $sql;
     }
 
-    protected function addPrimaryKeys(TableContract $table): string
+    protected function addPrimaryKeys(Table $table): string
     {
         $commands = array_filter($table->getCommands(), fn($command) => $command->name === 'primary');
         $primary = reset($commands);
@@ -85,17 +85,17 @@ class SchemaGrammar extends GrammarBase
         return '';
     }
 
-    public function compileRename(TableContract $table, Fluent $command): string
+    public function compileRename(Table $table, Fluent $command): string
     {
         return sprintf('ALTER TABLE %s RENAME TO %s', $this->wrapTable($table), $this->wrapTable($command->to));
     }
 
-    public function compileDrop(TableContract $table): string
+    public function compileDrop(Table $table): string
     {
         return 'DROP TABLE ' . $this->wrapTable($table);
     }
 
-    public function compileDropIfExists(TableContract $table): string
+    public function compileDropIfExists(Table $table): string
     {
         return 'DROP TABLE IF EXISTS ' . $this->wrapTable($table);
     }
@@ -110,7 +110,7 @@ class SchemaGrammar extends GrammarBase
         return sprintf('PRAGMA table_info(%s)', $this->wrapTable($table));
     }
 
-    public function compileAdd(TableContract $table): array
+    public function compileAdd(Table $table): array
     {
         $prefix = sprintf('ALTER TABLE %s ADD COLUMN ', $this->wrapTable($table));
 
@@ -119,7 +119,7 @@ class SchemaGrammar extends GrammarBase
         }, $this->getColumns($table));
     }
 
-    public function compileRenameColumn(TableContract $table, Fluent $command): string
+    public function compileRenameColumn(Table $table, Fluent $command): string
     {
         return sprintf(
             'ALTER TABLE %s RENAME COLUMN %s TO %s',
@@ -129,7 +129,7 @@ class SchemaGrammar extends GrammarBase
         );
     }
 
-    public function compileDropColumn(TableContract $table, Fluent $command): array
+    public function compileDropColumn(Table $table, Fluent $command): array
     {
         $prefix = sprintf('ALTER TABLE %s DROP COLUMN ', $this->wrapTable($table));
 
@@ -138,7 +138,7 @@ class SchemaGrammar extends GrammarBase
         }, (array) $command->columns);
     }
 
-    public function compileIndex(TableContract $table, Fluent $command): string
+    public function compileIndex(Table $table, Fluent $command): string
     {
         return sprintf(
             'CREATE INDEX %s ON %s (%s)',
@@ -148,7 +148,7 @@ class SchemaGrammar extends GrammarBase
         );
     }
 
-    public function compileUnique(TableContract $table, Fluent $command): string
+    public function compileUnique(Table $table, Fluent $command): string
     {
         return sprintf(
             'CREATE UNIQUE INDEX %s ON %s (%s)',
@@ -158,17 +158,17 @@ class SchemaGrammar extends GrammarBase
         );
     }
 
-    public function compileDropPrimary(TableContract $table, Fluent $command): string
+    public function compileDropPrimary(Table $table, Fluent $command): string
     {
         return $this->compileDropIndex($table, $command);
     }
 
-    public function compileDropUnique(TableContract $table, Fluent $command): string
+    public function compileDropUnique(Table $table, Fluent $command): string
     {
         return $this->compileDropIndex($table, $command);
     }
 
-    public function compileDropIndex(TableContract $table, Fluent $command): string
+    public function compileDropIndex(Table $table, Fluent $command): string
     {
         return 'DROP INDEX ' . $this->wrap($command->index);
     }

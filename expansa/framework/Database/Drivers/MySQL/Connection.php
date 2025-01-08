@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\MySQL;
 
+use Expansa\Database\Abstracts\ConnectionBase;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Connection as ConnectionBase;
 
 class Connection extends ConnectionBase
 {

@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace Expansa\Database\Abstracts;
 
 use Expansa\Database\Contracts\DatabaseException;
+use Expansa\Database\Schema\Expression;
 use Expansa\Database\Schema\Table;
-use Expansa\Database\Traits\Macroable;
+use Expansa\Support\Traits\Macroable;
 
-abstract class Grammar
+abstract class GrammarBase
 {
     use Macroable {
         __call as macroCall;
@@ -159,9 +160,6 @@ abstract class Grammar
         return '"' . $segment . '"';
     }
 
-    /**
-     * @throws DatabaseException
-     */
     public function __call(string $method, array $parameters)
     {
         if (static::hasMacro($method)) {

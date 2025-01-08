@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Commands\Migrations;
 
@@ -28,7 +30,7 @@ class BaseCommand extends Command
         $paths = [];
 
         if ($this->input->hasOption('path')) {
-            $paths += (array)$this->input->getOption('path');
+            $paths += (array) $this->input->getOption('path');
         }
 
         if ($this->input->getOption('realpath')) {

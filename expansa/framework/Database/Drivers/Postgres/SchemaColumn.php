@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\Postgres;
 
-use Expansa\Database\Schema\Column as ColumnBase;
+use Expansa\Database\Schema\Column;
 
 /**
  * @method $this collation(string $collation) Specify a collation for the column
@@ -17,6 +17,6 @@ use Expansa\Database\Schema\Column as ColumnBase;
  * @method $this virtualAs(string $expression) Create a virtual generated column
  * @method $this array() Create an array column
  */
-class SchemaColumn extends ColumnBase
+class SchemaColumn extends Column
 {
 }

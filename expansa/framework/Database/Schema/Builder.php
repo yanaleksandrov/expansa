@@ -5,36 +5,30 @@ declare(strict_types=1);
 namespace Expansa\Database\Schema;
 
 use Closure;
-use Expansa\Database\Contracts\Connection as ConnectionContract;
-use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
-use Expansa\Database\Connection;
-use Expansa\Database\Schema\Grammar as SchemaGrammar;
+use Expansa\Database\Contracts\Connection;
+use Expansa\Database\Contracts\SchemaBuilder;
 
-abstract class Builder implements SchemaBuilderContract
+abstract class Builder implements SchemaBuilder
 {
-    protected ConnectionContract $connection;
-
-    protected SchemaGrammar $grammar;
-
-    public function __construct(Connection $connection)
+    public function __construct(
+        protected Connection $connection,
+        protected ?Grammar $grammar = null,
+    )
     {
-        $this->connection = $connection;
-
-        $this->grammar = $connection->getSchemaGrammar();
+        $this->grammar = $this->connection->getSchemaGrammar();
     }
 
     /**
      * Get or set the database connection instance.
      *
-     * @param ConnectionContract|null $connection
-     * @return ConnectionContract|static
+     * @param Connection|null $connection
+     * @return Connection|static
      */
-    public function connection(ConnectionContract $connection = null): static|ConnectionContract
+    public function connection(Connection $connection = null): static|Connection
     {
         if (is_null($connection)) {
             return $this->connection;
         }
-
         $this->connection = $connection;
 
         return $this;
@@ -61,7 +55,7 @@ abstract class Builder implements SchemaBuilderContract
         );
     }
 
-    public function getTables(): mixed
+    public function getTables(): array
     {
         return $this->connection->selectFromWriteConnection(
             $this->grammar->compileGetTables(),
@@ -76,7 +70,7 @@ abstract class Builder implements SchemaBuilderContract
         )) > 0;
     }
 
-    public function create(string $table, Closure $callback)
+    public function create(string $table, Closure $callback): void
     {
         $this->build(tap($this->createTable($table), function ($table) use ($callback) {
             $table->create();
@@ -84,30 +78,24 @@ abstract class Builder implements SchemaBuilderContract
         }));
     }
 
-    public function table(string $table, Closure $callback)
+    public function table(string $table, Closure $callback): void
     {
         $this->build($this->createTable($table, $callback));
     }
 
     public function rename(string $from, string $to): void
     {
-        $this->build(tap($this->createTable($from), function ($table) use ($to) {
-            $table->rename($to);
-        }));
+        $this->build(tap($this->createTable($from), fn ($table) => $table->rename($to)));
     }
 
-    public function drop(string $table)
+    public function drop(string $table): void
     {
-        $this->build(tap($this->createTable($table), function ($table) {
-            $table->drop();
-        }));
+        $this->build(tap($this->createTable($table), fn($table) => $table->drop()));
     }
 
     public function dropIfExists(string $table): void
     {
-        $this->build(tap($this->createTable($table), function ($table) {
-            $table->dropIfExists();
-        }));
+        $this->build(tap($this->createTable($table), fn($table) => $table->dropIfExists()));
     }
 
     public function dropAllTables()
@@ -192,7 +180,7 @@ abstract class Builder implements SchemaBuilderContract
 
     abstract protected function createTable(string $table, Closure $callback = null): Table;
 
-    protected function build($table)
+    protected function build($table): void
     {
         $table->build($this->connection, $this->grammar);
     }

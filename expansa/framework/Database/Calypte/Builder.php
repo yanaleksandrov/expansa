@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Expansa\Database\Calypte;
 
 use Closure;
-use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
-use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
 use Expansa\Database\Calypte\Exceptions\ModelNotFoundException;
 use Expansa\Database\Calypte\Traits\ForwardCalls;
-use Expansa\Database\Connection as ConnectionContract;
 use Expansa\Database\Contracts\Calypte\Model as ModelContract;
+use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
+use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
+use Expansa\Database\Abstracts\ConnectionBase;
 
 /**
  * Used methods from [Query/Builder]:
@@ -27,8 +27,8 @@ class Builder
     protected ?QueryBuilderContract $query = null;
 
     public function __construct(
-        protected ?ConnectionContract $connection = null,
-        protected ?ModelContract $model = null
+        protected ?ConnectionBase $connection = null,
+        protected ?ModelContract  $model = null
     )
     {
         $this->schemaBuilder = $connection->getSchemaBuilder();
@@ -111,7 +111,7 @@ class Builder
      * @param Closure $callback
      * @return ModelContract|mixed|null
      */
-    public function firstOr(Closure $callback): mixed
+    public function firstOr(Closure $callback)
     {
         if (! is_null($model = $this->first())) {
             return $model;

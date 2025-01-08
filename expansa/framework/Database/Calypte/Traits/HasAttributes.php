@@ -14,7 +14,7 @@ trait HasAttributes
 
     protected array $casts = [];
 
-    protected function getAttributes(): array
+    protected function getAttributes()
     {
         return $this->attributes;
     }
@@ -24,14 +24,14 @@ trait HasAttributes
         return $this->attributes[$key] ?? null;
     }
 
-    protected function setAttribute(string $key, mixed $value): void
+    protected function setAttribute(string $key, mixed $value)
     {
         $this->attributes[$key] = $value;
 
         $this->changes[$key] = $this->originalIsEquivalent($key);
     }
 
-    protected function setRawAttribute($attributes, bool $sync = false): void
+    protected function setRawAttribute($attributes, bool $sync = false)
     {
         $this->attributes = $attributes;
 
@@ -63,12 +63,12 @@ trait HasAttributes
         return false;
     }
 
-    protected function isChanged(): bool
+    protected function isChanged()
     {
         return in_array(true, $this->changes);
     }
 
-    protected function getChanges(): array
+    protected function getChanges()
     {
         $changes = [];
         foreach ($this->changes as $key => $state) {

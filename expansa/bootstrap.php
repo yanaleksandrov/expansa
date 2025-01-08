@@ -10,6 +10,8 @@ declare(strict_types=1);
 
 use app\User;
 use Expansa\{Db, Debug, I18n, Is,};
+use Expansa\Database\Schema;
+use Expansa\Database\Schema\Table;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';
@@ -43,8 +45,8 @@ try {
 } catch (Random\RandomException $e) {
 }
 
-//require_once EX_CORE . 'functions.php';
-//echo '<pre>';
+require_once EX_CORE . 'functions.php';
+echo '<pre>';
 //$pdo = new PDO('mysql:host=localhost;dbname=' . EX_DB_NAME, EX_DB_USERNAME, EX_DB_PASSWORD);
 //$connection = new \Expansa\Database\Drivers\MySQL\Connection($pdo, [
 //    'database' => EX_DB_NAME,
@@ -52,17 +54,18 @@ try {
 //    'password' => EX_DB_PASSWORD,
 //    'host'     => EX_DB_HOST,
 //    'prefix'   => EX_DB_PREFIX,
-//    'driver'   => EX_DB_TYPE,
+//    'driver'   => EX_DB_DRIVER,
 //    'charset'  => EX_DB_CHARSET,
 //]);
 //print_r($pdo);
 //print_r($connection);
 //$database   = new \Expansa\Database\Drivers\MySQL\SchemaBuilder($connection);
-//$database->create('test_my_table', function (Table $table) {
+//Schema::create('test_my_table', function (Table $table) {
+//    var_dump(43243454);
 //    $table->id();
 //    $table->timestamps();
 //});
-//echo '</pre>';
+echo '</pre>';
 
 /**
  * Launch the installer if Expansa is not installed.

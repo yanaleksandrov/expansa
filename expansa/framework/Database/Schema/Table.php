@@ -5,16 +5,10 @@ declare(strict_types=1);
 namespace Expansa\Database\Schema;
 
 use Closure;
-use Expansa\Database\Connection;
-use Expansa\Database\Expression;
-use Expansa\Database\Fluent;
+use Expansa\Database\Abstracts\ConnectionBase;
 
 class Table
 {
-    protected string $name;
-
-    protected string $prefix;
-
     protected array $columns = [];
 
     protected array $commands = [];
@@ -23,11 +17,12 @@ class Table
 
     protected bool $isTemporary = false;
 
-    public function __construct(string $name, Closure $callback = null, $prefix = '')
+    public function __construct(
+        protected string $name,
+        protected ?Closure $callback = null,
+        protected string $prefix = ''
+    )
     {
-        $this->name = $name;
-        $this->prefix = $prefix;
-
         if (!is_null($callback)) {
             $callback($this);
         }
@@ -76,7 +71,7 @@ class Table
 
     public function decimal(string $column, int $precision = null, int $scale = null): Column
     {
-        return $this->addColumn('decimal', $column, ['precision' => $precision, 'scale' => $scale]);
+        return $this->addColumn('decimal', $column, compact('precision', 'scale'));
     }
 
     public function float(string $column): Column
@@ -101,17 +96,17 @@ class Table
 
     public function string(string $column, int $length = null): Column
     {
-        return $this->addColumn('string', $column, ['length' => $length]);
+        return $this->addColumn('string', $column, compact('length'));
     }
 
     public function char(string $column, int $length = null): Column
     {
-        return $this->addColumn('char', $column, ['length' => $length]);
+        return $this->addColumn('char', $column, compact('length'));
     }
 
     public function varchar(string $column, int $length = null): Column
     {
-        return $this->addColumn('varchar', $column, ['length' => $length]);
+        return $this->addColumn('varchar', $column, compact('length'));
     }
 
     public function text(string $column): Column
@@ -131,7 +126,7 @@ class Table
 
     public function enum(string $column, array $allowed): Column
     {
-        return $this->addColumn('enum', $column, ['allowed' => $allowed]);
+        return $this->addColumn('enum', $column, compact('allowed'));
     }
 
     public function date(string $column): Column
@@ -149,15 +144,15 @@ class Table
         return $this->addColumn('datetime', $column);
     }
 
-    public function timestamp(string $column): Column
+    public function timestamp(string $column, int $precision = 0): Column
     {
         return $this->addColumn('timestamp', $column);
     }
 
-    public function timestamps(): void
+    public function timestamps(int $precision = 0): void
     {
-        $this->timestamp('created_at')->useCurrent();
-        $this->timestamp('updated_at')->useCurrent();
+        $this->timestamp('created_at', $precision)->useCurrent();
+        $this->timestamp('updated_at', $precision)->useCurrent();
     }
 
     /**
@@ -169,7 +164,7 @@ class Table
      */
     public function softDeletes(string $column = 'deleted_at', int $precision = 0): Column
     {
-        return $this->timestamp($column, $precision)->default(new Expression('NULL'))->nullable();
+        return $this->timestamp('deleted_at', $precision)->default(new Expression('NULL'))->nullable();
     }
 
     public function create(): static
@@ -190,7 +185,7 @@ class Table
 
     public function rename(string $to): static
     {
-        $this->addCommand('rename', ['to' => $to]);
+        $this->addCommand('rename', compact('to'));
 
         return $this;
     }
@@ -227,7 +222,7 @@ class Table
      */
     public function renameColumn(string $from, string $to, string $type = null): static
     {
-        $this->addCommand('renameColumn', ['from' => $from, 'to' => $to, 'type' => $type]);
+        $this->addCommand('renameColumn', compact('from', 'to', 'type'));
 
         return $this;
     }
@@ -334,7 +329,7 @@ class Table
 
     protected function createCommand(string $name, array $parameters = []): Fluent
     {
-        return new Fluent(array_merge(['name' => $name], $parameters));
+        return new Fluent(array_merge(compact('name'), $parameters));
     }
 
     protected function createIndexName(string $type, array $columns): string
@@ -346,7 +341,7 @@ class Table
         return str_replace(['-', '.'], '_', $index);
     }
 
-    public function build(Connection $connection, Grammar $grammar): void
+    public function build(ConnectionBase $connection, Grammar $grammar): void
     {
         $this->isValidConnection($connection);
 
@@ -376,7 +371,7 @@ class Table
         return $statements;
     }
 
-    protected function isValidConnection(Connection $connection): void
+    protected function isValidConnection(ConnectionBase $connection): void
     {
     }
 

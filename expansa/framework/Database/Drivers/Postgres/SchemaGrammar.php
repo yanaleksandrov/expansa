@@ -1,11 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\Postgres;
 
-use Expansa\Database\Drivers\Postgres\SchemaColumn;
-use Expansa\Database\Schema\Grammar as GrammarBase;
+use Expansa\Database\Schema\Grammar;
 
-class SchemaGrammar extends GrammarBase
+class SchemaGrammar extends Grammar
 {
     /**
      * Possible column modifiers.
@@ -24,7 +25,7 @@ class SchemaGrammar extends GrammarBase
     public function addModifiers($sql, $table, $column): string
     {
         if (in_array($column->type, $this->serials)) {
-            return $sql.$this->modifyPrimary($column);
+            return $sql . $this->modifyPrimary($column);
         }
 
         return parent::addModifiers($sql, $table, $column);
@@ -37,44 +38,48 @@ class SchemaGrammar extends GrammarBase
 
     protected function typeBoolean(SchemaColumn $column): string
     {
-        return 'boolean'.(($column->array) ? ' array' : '');
+        return 'boolean' . (($column->array) ? ' array' : '');
     }
 
     protected function typeSmallInteger(SchemaColumn $column): string
     {
-        return "smallint".(($column->array) ? ' array' : '');
+        return "smallint" . (($column->array) ? ' array' : '');
     }
 
     protected function typeInteger(SchemaColumn $column): string
     {
-        return "integer".(($column->array) ? ' array' : '');
+        return "integer" . (($column->array) ? ' array' : '');
     }
 
     protected function typeBigInteger(SchemaColumn $column): string
     {
-        return "bigint".(($column->array) ? ' array' : '');
+        return "bigint" . (($column->array) ? ' array' : '');
     }
 
     protected function typeNumeric(SchemaColumn $column): string
     {
         if (! is_null($column->precision) && ! is_null($column->scale)) {
-            return sprintf("numeric(%s,%s)", $column->precision, $column->scale).(($column->array) ? ' array' : '');;
-        }
-        else if (! is_null($column->precision)) {
-            return sprintf("numeric(%s)", $column->precision).(($column->array) ? ' array' : '');;
+            return sprintf("numeric(%s,%s)", $column->precision, $column->scale) . (($column->array) ? ' array' : '');
+            ;
+        } elseif (! is_null($column->precision)) {
+            return sprintf("numeric(%s)", $column->precision) . (($column->array) ? ' array' : '');
+            ;
         }
 
-        return 'numeric'.(($column->array) ? ' array' : '');;
+        return 'numeric' . (($column->array) ? ' array' : '');
+        ;
     }
 
     protected function typeReal(SchemaColumn $column): string
     {
-        return "real".(($column->array) ? ' array' : '');;
+        return "real" . (($column->array) ? ' array' : '');
+        ;
     }
 
     protected function typeDouble(SchemaColumn $column): string
     {
-        return "double precision".(($column->array) ? ' array' : '');;
+        return "double precision" . (($column->array) ? ' array' : '');
+        ;
     }
 
     protected function typeSmallSerial(SchemaColumn $column): string
@@ -92,32 +97,31 @@ class SchemaGrammar extends GrammarBase
         return "bigserial";
     }
 
-
-
     protected function typeChar(SchemaColumn $column): string
     {
-        if(is_null($column->length) || $column->length < 1){
+        if (is_null($column->length) || $column->length < 1) {
             $column->length = 1;
         }
 
-        return sprintf('char(%s)', $column->length).(($column->array) ? ' array' : '');;
+        return sprintf('char(%s)', $column->length) . (($column->array) ? ' array' : '');
+        ;
     }
 
     protected function typeVarchar(SchemaColumn $column): string
     {
-        if(is_null($column->length) || $column->length < 1){
+        if (is_null($column->length) || $column->length < 1) {
             $column->length = 255;
         }
 
-        return sprintf('varchar(%s)', $column->length).(($column->array) ? ' array' : '');;
+        return sprintf('varchar(%s)', $column->length) . (($column->array) ? ' array' : '');
+        ;
     }
 
     protected function typeText(SchemaColumn $column): string
     {
-        return "text".(($column->array) ? ' array' : '');;
+        return "text" . (($column->array) ? ' array' : '');
+        ;
     }
-
-
 
     protected function typeTimestamp(SchemaColumn $column): string
     {
@@ -142,22 +146,18 @@ class SchemaGrammar extends GrammarBase
 
     protected function typeTime(SchemaColumn $column): string
     {
-        return 'time'.(is_null($column->precision) ? '' : "($column->precision)").' without time zone';
+        return 'time' . (is_null($column->precision) ? '' : "($column->precision)") . ' without time zone';
     }
 
     protected function typeTimeTz(SchemaColumn $column): string
     {
-        return 'time'.(is_null($column->precision) ? '' : "($column->precision)").' with time zone';
+        return 'time' . (is_null($column->precision) ? '' : "($column->precision)") . ' with time zone';
     }
-
-
 
     protected function typeUuid(SchemaColumn $column): string
     {
-        return 'uuid'.($column->array ? ' array' : '');
+        return 'uuid' . ($column->array ? ' array' : '');
     }
-
-
 
     protected function modifyPrimary(SchemaColumn $column)
     {
@@ -169,7 +169,7 @@ class SchemaGrammar extends GrammarBase
     protected function modifyCollate(SchemaColumn $column)
     {
         if (! is_null($column->collation)) {
-            return ' COLLATE '.$this->wrapValue($column->collation);
+            return ' COLLATE ' . $this->wrapValue($column->collation);
         }
     }
 
@@ -181,7 +181,7 @@ class SchemaGrammar extends GrammarBase
     protected function modifyDefault(SchemaColumn $column)
     {
         if (! is_null($column->default)) {
-            return ' DEFAULT '.$this->wrapDefaultValue($column->default);
+            return ' DEFAULT ' . $this->wrapDefaultValue($column->default);
         }
     }
 

@@ -13,13 +13,6 @@ use Expansa\Database\Schema\Table;
 class Repository
 {
     /**
-     * The database connection resolver instance.
-     *
-     * @var ConnectionResolver
-     */
-    protected ConnectionResolver $resolver;
-
-    /**
      * The name of the migration table.
      *
      * @var string
@@ -29,14 +22,15 @@ class Repository
     /**
      * The name of the database connection to use.
      *
-     * @var string
+     * @var null|string
      */
     protected ?string $connection = null;
 
-    public function __construct(ConnectionResolver $resolver, array $config)
+    /**
+     * @param ConnectionResolver $resolver The database connection resolver instance.
+     */
+    public function __construct(protected ConnectionResolver $resolver, array $config)
     {
-        $this->resolver = $resolver;
-
         $this->table = $config['table'] ?? 'migrations';
     }
 

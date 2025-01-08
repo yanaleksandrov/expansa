@@ -46,13 +46,11 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
             return $this;
         }
 
-        $error = function (string|array $keys) {
-            throw new \Exception(sprintf(
-                'Add [%s] to fillable property to allow mass assignment on [%s].',
-                implode(", ", (array) $keys),
-                get_class($this)
-            ));
-        };
+        $error = fn (string|array $keys) => throw new \Exception(sprintf(
+            'Add [%s] to fillable property to allow mass assignment on [%s].',
+            implode(", ", (array) $keys),
+            get_class($this)
+        ));
 
         if ($this->totallyGuarded()) {
             $error(

@@ -10,7 +10,7 @@ class Attribute
 
     public $set;
 
-    public function __construct(?callable $get = null, ?callable $set = null)
+    public function __construct(callable $get = null, callable $set = null)
     {
         $this->get = $get;
         $this->set = $set;

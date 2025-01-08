@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\Postgres;
 
-use Expansa\Database\Query\Grammar as GrammarBase;
+use Expansa\Database\Query\Grammar;
 
-class QueryGrammar extends GrammarBase
+class QueryGrammar extends Grammar
 {
-
 }

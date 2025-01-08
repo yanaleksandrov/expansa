@@ -53,7 +53,7 @@ class Facade
      */
     public static function __callStatic(string $method, array $args)
     {
-        return (self::getResolvedClassInstance())->{$method}(...$args);
+        return self::getResolvedClassInstance()->{$method}(...$args);
     }
 
     /**
@@ -89,8 +89,9 @@ class Facade
         }
 
         $classNamespace = self::classNamespaceDecorator($classNamespace);
+        $classArguments = static::getConstructorArgs();
 
-        $classInstance = new $classNamespace();
+        $classInstance  = new $classNamespace(...$classArguments);
 
         self::setClass($classNamespace, $classInstance);
 
@@ -122,5 +123,10 @@ class Facade
     protected static function getStaticClassAccessor(): string
     {
         throw new FacadeException('The "getStaticClassAccessor()" method is not declared by the successor class.');
+    }
+
+    protected static function getConstructorArgs(): array
+    {
+        return [];
     }
 }

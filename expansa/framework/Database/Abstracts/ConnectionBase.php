@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace Expansa\Database\Abstracts;
 
 use Closure;
 use Exception;
+use Expansa\Contracts\Events\Dispatcher;
 use Expansa\Database\Contracts\Connection as ConnectionContract;
 use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Contracts\QueryException;
-use Expansa\Contracts\Events\Dispatcher;
 use Expansa\Database\Events\QueryExecuted;
 use Expansa\Database\Query\Builder as QueryBuilder;
 use Expansa\Database\Query\Grammar as QueryGrammar;
@@ -23,13 +23,11 @@ use PDO;
 use PDOStatement;
 use Throwable;
 
-abstract class Connection implements ConnectionContract
+abstract class ConnectionBase implements ConnectionContract
 {
     use ConnectionLogger;
     use ConnectionTransactions;
     use DetectsErrors;
-
-    protected ?PDO $pdo = null;
 
     protected ?PDO $readPdo = null;
 
@@ -39,17 +37,16 @@ abstract class Connection implements ConnectionContract
 
     protected string $tablePrefix;
 
-    protected array $config;
-
     protected int $fetchMode = PDO::FETCH_OBJ;
 
     protected bool $recordsModified = false;
 
-    public function __construct($pdo, array $config = [])
+    public function __construct(
+        protected ?PDO $pdo = null,
+        protected array $config = []
+    )
     {
-        $this->pdo         = $pdo;
         $this->readPdo     = $pdo;
-        $this->config      = $config;
         $this->database    = $config['database'];
         $this->tablePrefix = $config['prefix'] ?? '';
 
@@ -106,7 +103,9 @@ abstract class Connection implements ConnectionContract
 
     public function select(string $query, array $bindings = [], bool $useReadPdo = true): array
     {
-        return $this->statement($query, $bindings, $useReadPdo)->fetchAll();
+        $statement = $this->statement($query, $bindings, $useReadPdo);
+
+        return $statement->fetchAll();
     }
 
     public function cursor(string $query, array $bindings = [], bool $useReadPdo = true): \Iterator
@@ -177,7 +176,7 @@ abstract class Connection implements ConnectionContract
 
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
-            // to execute the statement, and then we'll use PDO to fetch the affected.
+            // to execute the statement and then we'll use PDO to fetch the affected.
             $statement = $this->getPdo()->prepare($query);
 
             $this->bindValues($statement, $this->prepareBindings($bindings));
@@ -201,10 +200,19 @@ abstract class Connection implements ConnectionContract
         try {
             $result = $this->runQueryCallback($query, $bindings, $callback);
         } catch (QueryException $e) {
-            $result = $this->handleQueryException($e, $query, $bindings, $callback);
+            $result = $this->handleQueryException(
+                $e,
+                $query,
+                $bindings,
+                $callback
+            );
         }
 
-        $this->logQuery($query, $bindings, $this->getElapsedTime($start));
+        $this->logQuery(
+            $query,
+            $bindings,
+            $this->getElapsedTime($start)
+        );
 
         return $result;
     }
@@ -214,7 +222,11 @@ abstract class Connection implements ConnectionContract
         try {
             return $callback($query, $bindings);
         } catch (Exception $e) {
-            throw new QueryException($query, $this->prepareBindings($bindings), $e);
+            throw new QueryException(
+                $query,
+                $this->prepareBindings($bindings),
+                $e
+            );
         }
     }
 
@@ -236,9 +248,9 @@ abstract class Connection implements ConnectionContract
                 is_string($key) ? $key : $key + 1,
                 $value,
                 match (true) {
-                    is_int($value)      => PDO::PARAM_INT,
+                    is_int($value) => PDO::PARAM_INT,
                     is_resource($value) => PDO::PARAM_LOB,
-                    default             => PDO::PARAM_STR
+                    default => PDO::PARAM_STR
                 },
             );
         }
@@ -439,6 +451,7 @@ abstract class Connection implements ConnectionContract
         if (is_null($this->schemaGrammar)) {
             $this->useSchemaGrammar();
         }
+
         throw new DatabaseException("Schema builder is not supported.");
     }
 
@@ -459,6 +472,7 @@ abstract class Connection implements ConnectionContract
         if (is_null($this->schemaGrammar)) {
             $this->useQueryGrammar();
         }
+
         throw new DatabaseException("Query builder is not supported.");
     }
 }

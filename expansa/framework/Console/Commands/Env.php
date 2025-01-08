@@ -17,18 +17,18 @@ class Env extends Command
 
     protected array $options = [];
 
-    public function handle() : void
+    public function handle(): void
     {
-	    $this->info(I18n::_t('Current application environment: [green]#:env#', 'local'));
+        $this->info(I18n::_t('Current application environment: [green]#:env#', 'local'));
 
-	    $this->liveLine('Processing...');
-	    sleep(2);
-	    $this->liveLine('50% complete...');
-	    sleep(2);
-	    $this->liveLine('100% complete!', true);
+        $this->liveLine('Processing...');
+        sleep(2);
+        $this->liveLine('50% complete...');
+        sleep(2);
+        $this->liveLine('100% complete!', true);
     }
 
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return I18n::_t('Display the current Expansa CMS environment');
     }

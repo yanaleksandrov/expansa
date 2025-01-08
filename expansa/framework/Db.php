@@ -52,7 +52,7 @@ final class Db
                         'password' => defined('EX_DB_PASSWORD') ? EX_DB_PASSWORD : '',
                         'host'     => defined('EX_DB_HOST') ? EX_DB_HOST : 'localhost',
                         'prefix'   => defined('EX_DB_PREFIX') ? EX_DB_PREFIX : 'expansa_',
-                        'type'     => defined('EX_DB_TYPE') ? EX_DB_TYPE : 'mysql',
+                        'type'     => defined('EX_DB_DRIVER') ? EX_DB_DRIVER : 'mysql',
                         'charset'  => defined('EX_DB_CHARSET') ? EX_DB_CHARSET : 'utf8mb4',
                     ],
                     $options

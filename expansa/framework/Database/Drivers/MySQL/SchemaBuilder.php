@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\MySQL;
 
-use Expansa\Database\Drivers\MySQL\SchemaTable;
-use Expansa\Database\Schema\Builder as BuilderAbstract;
+use Expansa\Database\Schema\Builder;
 
-class SchemaBuilder extends BuilderAbstract
+class SchemaBuilder extends Builder
 {
     public function getTables(): array
     {
-        return array_map(function ($v) {
-            $v = array_values((array) $v);
-            return $v[0];
-        }, parent::getTables());
+        return array_map(fn($v) => array_values((array) $v)[0], parent::getTables());
     }
 
     public function hasTable(string $table): bool

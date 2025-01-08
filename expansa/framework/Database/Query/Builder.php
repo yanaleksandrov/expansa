@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use Expansa\Database\Contracts\QueryBuilder;
-use Expansa\Database\Connection;
+use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
+use Expansa\Database\Abstracts\ConnectionBase;
 use Expansa\Database\Query\Traits\PrepareWhereExpression;
 use Expansa\Support\Arr;
 use InvalidArgumentException;
 
-abstract class Builder implements QueryBuilder
+abstract class Builder implements QueryBuilderContract
 {
     use PrepareWhereExpression;
 
     protected bool $useWritePDO = false;
 
-    protected $bindings = [
+    protected array $bindings = [
         'columns' => [],
         //'select' => [],
         //'from' => [],
@@ -52,8 +52,8 @@ abstract class Builder implements QueryBuilder
     protected bool $withSQL = false;
 
     public function __construct(
-        protected Connection $connection,
-        protected Grammar $grammar
+        protected ConnectionBase $connection,
+        protected Grammar        $grammar
     ) {} // phpcs:ignore
 
     public function useWritePDO(): static
@@ -195,14 +195,14 @@ abstract class Builder implements QueryBuilder
         return $this->connection->delete($sql, $bindings);
     }
 
-    public function softDelete()
+    public function softDelete(): static
     {
         $this->command = 'update';
 
         return $this;
     }
 
-    public function distinct()
+    public function distinct(): static
     {
         $this->distinct = true;
 
@@ -402,12 +402,12 @@ abstract class Builder implements QueryBuilder
         return Arr::flatten($this->bindings);
     }
 
-    public function setBinding(mixed $values, string $type)
+    public function setBinding(mixed $values, string $type): void
     {
         $this->bindings[$type] = $values;
     }
 
-    public function addBinding(mixed $values, string $type)
+    public function addBinding(mixed $values, string $type): void
     {
         $this->bindings[$type] = array_merge(
             $this->bindings[$type],
@@ -420,12 +420,12 @@ abstract class Builder implements QueryBuilder
         return $this->where('id', '=', $id)->first();
     }
 
-    public function dump()
+    public function dump(): void
     {
         dump($this->toSql(), $this->getBindings());
     }
 
-    public function dd()
+    public function dd(): void
     {
         dd($this->toSql(), $this->getBindings());
     }

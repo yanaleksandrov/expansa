@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\MySQL;
 
-use Expansa\Database\Connector as ConnectorBase;
+use Expansa\Database\Abstracts\ConnectorBase;
 use PDO;
 
 class Connector extends ConnectorBase

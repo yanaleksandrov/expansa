@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Expansa\Database\Drivers\Postgres;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Schema\Table as TableBase;
+use Expansa\Database\Schema\Table;
 
-class SchemaTable extends TableBase
+class SchemaTable extends Table
 {
     protected string $columnClassDefault = SchemaColumn::class;
 
@@ -31,7 +31,7 @@ class SchemaTable extends TableBase
     /**
      * Create string column
      *
-     * @param string   $column
+     * @param $name
      * @param int|null $length
      * @return SchemaColumn
      */
@@ -69,7 +69,7 @@ class SchemaTable extends TableBase
     /**
      * Create new small integer (2-byte, -32768 to +32767) column in table.
      *
-     * @param string $column
+     * @param string $name
      * @return SchemaColumn
      */
     public function smallInteger(string $column): SchemaColumn
@@ -80,7 +80,7 @@ class SchemaTable extends TableBase
     /**
      * Create new typical integer (4-byte, -2147483648 to +2147483647) column in table.
      *
-     * @param string $column
+     * @param string $name
      * @return SchemaColumn
      */
     public function integer(string $column): SchemaColumn
@@ -91,7 +91,7 @@ class SchemaTable extends TableBase
     /**
      * Create new big integer (8-byte, -9223372036854775808 to +9223372036854775807) column in table.
      *
-     * @param string $column
+     * @param string $name
      * @return SchemaColumn
      */
     public function bigInteger(string $column): SchemaColumn
@@ -102,7 +102,7 @@ class SchemaTable extends TableBase
     /**
      * Create new auto-incrementing small integer (2-byte, 1 to 32767) column in table.
      *
-     * @param string $column
+     * @param string $name
      * @return SchemaColumn
      */
     public function smallSerial(string $column): SchemaColumn
@@ -113,7 +113,7 @@ class SchemaTable extends TableBase
     /**
      * Create new auto-incrementing typical integer (4-byte, 1 to 2147483647) column in table.
      *
-     * @param string $column
+     * @param string $name
      * @return SchemaColumn
      */
     public function serial(string $column): SchemaColumn
@@ -124,7 +124,7 @@ class SchemaTable extends TableBase
     /**
      * Create new auto-incrementing typical integer (8-byte, 1 to 9223372036854775807) column in table.
      *
-     * @param string $column
+     * @param string $name
      * @return SchemaColumn
      */
     public function bigSerial(string $column): SchemaColumn
@@ -135,7 +135,7 @@ class SchemaTable extends TableBase
     /**
      * Create new double (15 decimal digits precision) column in table.
      *
-     * @param string $column
+     * @param string $name
      * @return SchemaColumn
      */
     public function double(string $column): SchemaColumn
@@ -146,9 +146,9 @@ class SchemaTable extends TableBase
     /**
      * Create new decimal (up to 131072 digits before decimal point and after 16383) column in table.
      *
-     * @param string   $column
-     * @param null|int $precision
-     * @param null|int $scale
+     * @param string $name
+     * @param int $precision
+     * @param int $scale
      * @return SchemaColumn
      */
     public function decimal(string $column, int $precision = null, int $scale = null): SchemaColumn
@@ -159,9 +159,9 @@ class SchemaTable extends TableBase
     /**
      * Create new numeric (up to 131072 digits before decimal point and after 16383) column in table.
      *
-     * @param string   $column
-     * @param null|int $precision
-     * @param null|int $scale
+     * @param string $name
+     * @param int $precision
+     * @param int $scale
      * @return SchemaColumn
      */
     public function numeric(string $column, int $precision = null, int $scale = null): SchemaColumn
@@ -189,8 +189,8 @@ class SchemaTable extends TableBase
     /**
      * Create column as text fixed-length (blank padded).
      *
-     * @param string   $column
-     * @param null|int $length
+     * @param string $column
+     * @param int $length
      * @return mixed
      */
     public function char(string $column, int $length = null): SchemaColumn
@@ -213,7 +213,7 @@ class SchemaTable extends TableBase
     /**
      * Create column as text variable unlimited length.
      *
-     * @param string $column
+     * @param string $name
      * @return mixed
      */
     public function text(string $column): SchemaColumn

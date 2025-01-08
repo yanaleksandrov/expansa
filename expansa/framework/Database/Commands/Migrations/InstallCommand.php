@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Commands\Migrations;
 
@@ -31,7 +33,7 @@ class InstallCommand extends Command
 
 
         $paths = [
-            realpath( $this->container->basePath('/database/migrations'))
+            realpath($this->container->basePath('/database/migrations'))
         ];
 
         return 0;

@@ -1,13 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\Postgres;
 
+use Expansa\Database\Abstracts\ConnectionBase;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Connection as ConnectionBase;
-use Expansa\Database\Drivers\Postgres\SchemaBuilder as SchemaBuilder;
-use Expansa\Database\Drivers\Postgres\SchemaGrammar as SchemaGrammar;
-use Expansa\Database\Drivers\Postgres\QueryBuilder;
-use Expansa\Database\Drivers\Postgres\QueryGrammar;
 
 class Connection extends ConnectionBase
 {

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\Postgres;
 
-use Expansa\Database\Query\Builder as BuilderBase;
+use Expansa\Database\Query\Builder;
 
-class QueryBuilder extends BuilderBase
+class QueryBuilder extends Builder
 {
-    protected $operators = [
+    protected array $operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
         'like', 'not like', 'between', 'ilike', 'not ilike',
         '~', '&', '|', '#', '<<', '>>', '<<=', '>>=',

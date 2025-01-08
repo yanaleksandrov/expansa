@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\MySQL;
 
-use Expansa\Database\Schema\Table as TableBase;
+use Expansa\Database\Schema\Table;
 
-class SchemaTable extends TableBase
+class SchemaTable extends Table
 {
 }

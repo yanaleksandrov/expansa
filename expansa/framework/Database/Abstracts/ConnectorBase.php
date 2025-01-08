@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace Expansa\Database\Abstracts;
 
 use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Traits\DetectsErrors;
 use PDO;
 
-abstract class Connector
+abstract class ConnectorBase
 {
     use DetectsErrors;
 
@@ -22,20 +22,14 @@ abstract class Connector
         PDO::ATTR_EMULATE_PREPARES  => false,
     ];
 
-    /**
-     * @throws DatabaseException
-     */
-    public function connect(array $config): PDO
+    public function connect(array $config)
     {
         $this->config = $config;
 
         return $this->create($this->getDsn(), $this->getOptions());
     }
 
-    /**
-     * @throws DatabaseException
-     */
-    protected function create(string $dsn, array $options = []): PDO
+    protected function create(string $dsn, array $options = [])
     {
         [$username, $password] = [
             $this->config['username'] ?? null, $this->config['password'] ?? null,

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Migrations;
 
@@ -39,13 +41,11 @@ class MigrationCreator
     protected function getStub(string $table, bool $create): string
     {
         if (empty($table)) {
-            $stub = __DIR__.'/stubs/migration.stub';
-        }
-        elseif ($create) {
-            $stub = __DIR__.'/stubs/migration.create.stub';
-        }
-        else {
-            $stub = __DIR__.'/stubs/migration.update.stub';
+            $stub = __DIR__ . '/stubs/migration.stub';
+        } elseif ($create) {
+            $stub = __DIR__ . '/stubs/migration.create.stub';
+        } else {
+            $stub = __DIR__ . '/stubs/migration.update.stub';
         }
 
         return file_get_contents($stub);
@@ -53,6 +53,6 @@ class MigrationCreator
 
     protected function getPath(string $name, string $path): string
     {
-        return $path.'/'.date("Y_m_d_His").'_'.$name.'.php';
+        return $path . '/' . date("Y_m_d_His") . '_' . $name . '.php';
     }
 }

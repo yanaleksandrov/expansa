@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use Expansa\Database\Contracts\QueryGrammar;
-use Expansa\Database\Grammar as BaseGrammar;
+use Expansa\Database\Abstracts\GrammarBase;
+use Expansa\Database\Contracts\QueryGrammar as QueryGrammarContract;
 
-abstract class Grammar extends BaseGrammar implements QueryGrammar
+abstract class Grammar extends GrammarBase implements QueryGrammarContract
 {
     public function compileInsert(Builder $query, $values, $returning = null): string
     {
@@ -48,9 +48,9 @@ abstract class Grammar extends BaseGrammar implements QueryGrammar
 
     public function compileUpsert(Builder $query, string $uniqueColumn, array $insertValues, array $updateValues): string
     {
-        $table = $this->wrapTable($query->from);
+        $table            = $this->wrapTable($query->from);
         $sqlInsertColumns = $this->prepareColumns(array_keys($insertValues));
-        $sqlInsertValues = $this->prepareValues($insertValues);
+        $sqlInsertValues  = $this->prepareValues($insertValues);
 
         $sqlUpdateSet = [];
         foreach ($updateValues as $key => $val) {
@@ -267,9 +267,7 @@ abstract class Grammar extends BaseGrammar implements QueryGrammar
 
     public function prepareValues(array $values): string
     {
-        return implode(', ', array_map(function () {
-            return '?';
-        }, $values));
+        return implode(', ', array_map(fn() => '?', $values));
     }
 
     public function prepareValue(mixed $value): string
