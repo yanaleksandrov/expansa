@@ -23,7 +23,7 @@ use PDO;
 use PDOStatement;
 use Throwable;
 
-abstract class AbstractConnectionBase implements ConnectionContract
+abstract class ConnectionBase implements ConnectionContract
 {
     use ConnectionLogger;
     use ConnectionTransactions;

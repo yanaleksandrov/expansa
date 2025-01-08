@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\Postgres;
 
-use Expansa\Database\Abstracts\AbstractConnectorBase;
+use Expansa\Database\Abstracts\ConnectorBase;
 use PDO;
 
-class Connector extends AbstractConnectorBase
+class Connector extends ConnectorBase
 {
     protected array $options = [
         PDO::ATTR_CASE              => PDO::CASE_NATURAL,

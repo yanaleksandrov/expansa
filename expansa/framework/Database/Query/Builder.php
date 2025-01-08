@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Database\Query;
 
 use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
-use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Abstracts\ConnectionBase;
 use Expansa\Database\Query\Traits\PrepareWhereExpression;
 use Expansa\Support\Arr;
 use InvalidArgumentException;
@@ -52,8 +52,8 @@ abstract class Builder implements QueryBuilderContract
     protected bool $withSQL = false;
 
     public function __construct(
-        protected AbstractConnectionBase $connection,
-        protected Grammar $grammar
+        protected ConnectionBase $connection,
+        protected Grammar        $grammar
     ) {} // phpcs:ignore
 
     public function useWritePDO(): static

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\SQLite;
 
-use Expansa\Database\Abstracts\AbstractConnectorBase;
+use Expansa\Database\Abstracts\ConnectorBase;
 use Expansa\Database\Contracts\DatabaseException;
 
-class Connector extends AbstractConnectorBase
+class Connector extends ConnectorBase
 {
     public function getDsn(): string
     {

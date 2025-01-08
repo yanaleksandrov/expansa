@@ -10,7 +10,7 @@ use Expansa\Database\Calypte\Traits\ForwardCalls;
 use Expansa\Database\Contracts\Calypte\Model as ModelContract;
 use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
 use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
-use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Abstracts\ConnectionBase;
 
 /**
  * Used methods from [Query/Builder]:
@@ -27,8 +27,8 @@ class Builder
     protected ?QueryBuilderContract $query = null;
 
     public function __construct(
-        protected ?AbstractConnectionBase $connection = null,
-        protected ?ModelContract $model = null
+        protected ?ConnectionBase $connection = null,
+        protected ?ModelContract  $model = null
     )
     {
         $this->schemaBuilder = $connection->getSchemaBuilder();

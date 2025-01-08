@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Database\Schema;
 
 use Closure;
-use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Abstracts\ConnectionBase;
 use Expansa\Database\Expression;
 use Expansa\Database\Fluent;
 
@@ -343,7 +343,7 @@ class Table
         return str_replace(['-', '.'], '_', $index);
     }
 
-    public function build(AbstractConnectionBase $connection, Grammar $grammar): void
+    public function build(ConnectionBase $connection, Grammar $grammar): void
     {
         $this->isValidConnection($connection);
 
@@ -373,7 +373,7 @@ class Table
         return $statements;
     }
 
-    protected function isValidConnection(AbstractConnectionBase $connection): void
+    protected function isValidConnection(ConnectionBase $connection): void
     {
     }
 

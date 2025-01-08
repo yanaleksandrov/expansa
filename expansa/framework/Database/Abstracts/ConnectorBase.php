@@ -8,7 +8,7 @@ use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Traits\DetectsErrors;
 use PDO;
 
-abstract class AbstractConnectorBase
+abstract class ConnectorBase
 {
     use DetectsErrors;
 

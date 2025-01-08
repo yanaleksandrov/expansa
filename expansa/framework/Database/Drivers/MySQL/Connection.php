@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\MySQL;
 
-use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Abstracts\ConnectionBase;
 use Expansa\Database\Contracts\DatabaseException;
 
-class Connection extends AbstractConnectionBase
+class Connection extends ConnectionBase
 {
     public function getSchema()
     {
