@@ -27,10 +27,10 @@ use Expansa\Facades\Facade;
  * @method static void   dropColumn(string $table, string|array $columns)
  * @method static void   dropColumns(string $table, array $columns)
  */
-class Scheme extends Facade
+class Schema extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Database\Drivers\MySQL\SchemaBuilder';
+        return '\Expansa\Database\Schema';
     }
 }
