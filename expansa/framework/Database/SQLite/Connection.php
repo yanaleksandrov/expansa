@@ -1,16 +1,28 @@
 <?php declare(strict_types=1);
 
-namespace Expansa\Database\Postgres;
+namespace Expansa\Database\SQLite;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Postgres\Query\Builder as QueryBuilder;
-use Expansa\Database\Postgres\Query\Grammar as QueryGrammar;
-use Expansa\Database\Postgres\Schema\Builder as SchemaBuilder;
-use Expansa\Database\Postgres\Schema\Grammar as SchemaGrammar;
+use Expansa\Database\SQLite\Query\Builder as QueryBuilder;
+use Expansa\Database\SQLite\Query\Grammar as QueryGrammar;
+use Expansa\Database\SQLite\Schema\Builder as SchemaBuilder;
+use Expansa\Database\SQLite\Schema\Grammar as SchemaGrammar;
 use Expansa\Database\Abstracts\AbstractConnectionBase;
 
-class ConnectionBase extends AbstractConnectionBase
+class Connection extends AbstractConnectionBase
 {
+    public function __construct($pdo, array $config = [])
+    {
+        parent::__construct($pdo, $config);
+
+        if (isset($config['foreign_keys']) && $config['foreign_keys'] === true) {
+            $this->getSchemaBuilder()->enableForeignKeys();
+        }
+        else {
+            $this->getSchemaBuilder()->disableForeignKeys();
+        }
+    }
+
     public function getSchema()
     {
         if (empty($this->config['schema'])) {

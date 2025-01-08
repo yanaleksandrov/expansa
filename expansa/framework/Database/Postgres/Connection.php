@@ -1,15 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace Expansa\Database\MySQL;
+namespace Expansa\Database\Postgres;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\MySQL\Query\Builder as QueryBuilder;
-use Expansa\Database\MySQL\Query\Grammar as QueryGrammar;
-use Expansa\Database\MySQL\Schema\Builder as SchemaBuilder;
-use Expansa\Database\MySQL\Schema\Grammar as SchemaGrammar;
+use Expansa\Database\Postgres\Query\Builder as QueryBuilder;
+use Expansa\Database\Postgres\Query\Grammar as QueryGrammar;
+use Expansa\Database\Postgres\Schema\Builder as SchemaBuilder;
+use Expansa\Database\Postgres\Schema\Grammar as SchemaGrammar;
 use Expansa\Database\Abstracts\AbstractConnectionBase;
 
-class ConnectionBase extends AbstractConnectionBase
+class Connection extends AbstractConnectionBase
 {
     public function getSchema()
     {
@@ -24,9 +24,6 @@ class ConnectionBase extends AbstractConnectionBase
     {
         $this->schemaGrammar = new SchemaGrammar();
         $this->schemaGrammar->setTablePrefix($this->tablePrefix);
-        $this->schemaGrammar->setCharset($this->getConfig('charset', 'utf8mb4'));
-        $this->schemaGrammar->setCollate($this->getConfig('collate', 'utf8mb4_unicode_ci'));
-        $this->schemaGrammar->setEngine($this->getConfig('engine', 'InnoDB'));
 
         return $this;
     }
