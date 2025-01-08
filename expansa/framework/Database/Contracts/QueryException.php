@@ -9,17 +9,15 @@ use Throwable;
 
 class QueryException extends DatabaseException
 {
-    protected $sql;
-
-    protected $bindings;
-
-    public function __construct($sql, array $bindings, Throwable $previous)
+    public function __construct(
+        protected $sql,
+        protected array $bindings,
+        Throwable $previous
+    )
     {
         parent::__construct('', 0, $previous);
 
-        $this->sql = $sql;
-        $this->bindings = $bindings;
-        $this->code = 0;
+        $this->code    = 0;
         $this->message = $this->formatMessage($sql, $bindings, $previous);
 
         if ($previous instanceof \PDOException) {

@@ -22,19 +22,18 @@ class Builder
 {
     use ForwardCalls;
 
-    protected ?AbstractConnectionBase $connection = null;
-
     protected ?SchemaBuilderContract $schemaBuilder = null;
 
     protected ?QueryBuilderContract $query = null;
 
-    protected ?ModelContract $model = null;
-
-    public function __construct(AbstractConnectionBase $connection, ModelContract $model)
+    public function __construct(
+        protected ?AbstractConnectionBase $connection = null,
+        protected ?ModelContract $model = null
+    )
     {
-        $this->connection = $connection;
         $this->schemaBuilder = $connection->getSchemaBuilder();
-        $this->query = $connection->query();
+        $this->query         = $connection->query();
+
         $this->setModel($model);
     }
 

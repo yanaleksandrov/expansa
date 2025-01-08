@@ -11,10 +11,6 @@ use Expansa\Database\Fluent;
 
 class Table
 {
-    protected string $name;
-
-    protected string $prefix;
-
     protected array $columns = [];
 
     protected array $commands = [];
@@ -23,11 +19,12 @@ class Table
 
     protected bool $isTemporary = false;
 
-    public function __construct(string $name, Closure $callback = null, $prefix = '')
+    public function __construct(
+        protected string $name,
+        protected ?Closure $callback = null,
+        protected string $prefix = ''
+    )
     {
-        $this->name = $name;
-        $this->prefix = $prefix;
-
         if (!is_null($callback)) {
             $callback($this);
         }

@@ -29,8 +29,6 @@ abstract class AbstractConnectionBase implements ConnectionContract
     use ConnectionTransactions;
     use DetectsErrors;
 
-    protected ?PDO $pdo = null;
-
     protected ?PDO $readPdo = null;
 
     protected Closure $reconnector;
@@ -39,22 +37,17 @@ abstract class AbstractConnectionBase implements ConnectionContract
 
     protected string $tablePrefix;
 
-    protected array $config;
-
     protected int $fetchMode = PDO::FETCH_OBJ;
 
     protected bool $recordsModified = false;
 
-    public function __construct($pdo, array $config = [])
+    public function __construct(
+        protected ?PDO $pdo = null,
+        protected array $config = []
+    )
     {
-        $this->pdo = $pdo;
-
-        $this->readPdo = $pdo;
-
-        $this->config = $config;
-
-        $this->database = $config['database'];
-
+        $this->readPdo     = $pdo;
+        $this->database    = $config['database'];
         $this->tablePrefix = $config['prefix'] ?? '';
 
         $this->useSchemaGrammar();
