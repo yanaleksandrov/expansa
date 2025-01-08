@@ -21,9 +21,9 @@ class SchemaBuilder extends Builder
         return count($this->connection->selectFromWriteConnection(
             $this->grammar->compileTableExists(),
             [
-                    $this->connection->getDatabaseName(),
-                    $this->connection->getTablePrefix() . $table,
-                ]
+                $this->connection->getDatabaseName(),
+                $this->connection->getTablePrefix() . $table,
+            ]
         )) > 0;
     }
 
@@ -38,11 +38,7 @@ class SchemaBuilder extends Builder
             ]
         );
 
-        $results = array_map(function ($value) {
-            return $value['column_name'];
-        }, $results);
-
-        return $results;
+        return array_map(fn ($value) => $value['column_name'], $results);
     }
 
     public function createTable(string $table, \Closure $callback = null): SchemaTable
