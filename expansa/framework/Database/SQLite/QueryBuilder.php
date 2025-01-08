@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\SQLite\Query;
+namespace Expansa\Database\SQLite;
 
-use Expansa\Database\Query\Builder as BuilderBase;
+use Expansa\Database\Query\Builder;
 
-class Builder extends BuilderBase
+class QueryBuilder extends Builder
 {
     protected array $operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',

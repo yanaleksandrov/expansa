@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database\SQLite;
 
-use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\SQLite\Query\Builder as QueryBuilder;
-use Expansa\Database\SQLite\Query\Grammar as QueryGrammar;
-use Expansa\Database\SQLite\Schema\Builder as SchemaBuilder;
-use Expansa\Database\SQLite\Schema\Grammar as SchemaGrammar;
 use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Contracts\DatabaseException;
 
 class Connection extends AbstractConnectionBase
 {

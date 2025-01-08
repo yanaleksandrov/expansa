@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\SQLite\Schema;
+namespace Expansa\Database\SQLite;
 
-use Expansa\Database\Schema\Builder as BuilderAbstract;
+use Expansa\Database\Schema\Builder;
 use Expansa\Filesystem\Filesystem;
 
-class Builder extends BuilderAbstract
+class SchemaBuilder extends Builder
 {
     public function createDatabase(string $name): bool
     {
@@ -50,9 +50,9 @@ class Builder extends BuilderAbstract
         $this->connection->select($this->grammar->compileRebuild());
     }
 
-    protected function createTable(string $table, \Closure $callback = null): Table
+    protected function createTable(string $table, \Closure $callback = null): SchemaTable
     {
-        return new Table($table, $callback, $this->connection->getTablePrefix());
+        return new SchemaTable($table, $callback, $this->connection->getTablePrefix());
     }
 
     public function refreshDatabaseFile(): void

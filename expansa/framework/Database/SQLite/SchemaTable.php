@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\SQLite\Schema;
+namespace Expansa\Database\SQLite;
 
 use Expansa\Database\Contracts\Connection;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Schema\Table as TableBase;
+use Expansa\Database\Schema\Table;
 
-class Table extends TableBase
+class SchemaTable extends Table
 {
     protected function isValidConnection(Connection $connection): void
     {
