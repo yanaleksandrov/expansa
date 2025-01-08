@@ -8,9 +8,8 @@ use Expansa\Facades\Facade;
 use Spatie\Image\Image as SpatieImage;
 
 /**
- * Image facade for interacting with the image processing functionality.
- * This facade provides static methods for image operations like loading,
- * creating a new image, and more.
+ * Image facade for interacting with the image processing functionality. This facade provides
+ * static methods for image operations like loading, creating a new image, and more.
  *
  * @method static SpatieImage load(string $pathToImage) Load an image from a file.
  * @method static SpatieImage new(int $width, int $height, ?string $backgroundColor = null)
