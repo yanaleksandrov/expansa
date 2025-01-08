@@ -6,8 +6,6 @@ namespace Expansa\Database\Schema;
 
 use Closure;
 use Expansa\Database\Abstracts\ConnectionBase;
-use Expansa\Database\Expression;
-use Expansa\Database\Fluent;
 
 class Table
 {

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Expansa\Database\Migrations;
 
 use Exception;
-use SplFileInfo;
 use Expansa\Console\Traits\InteractsWithIO;
 use Expansa\Contracts\Console\Command;
 use Expansa\Database\Contracts\Connection;
 use Expansa\Database\Contracts\ConnectionResolver;
 use Expansa\Database\Contracts\DatabaseException;
+use Expansa\Database\Migration;
+use SplFileInfo;
 
 class Migrator
 {
@@ -30,8 +31,7 @@ class Migrator
     public function __construct(
         protected ConnectionResolver $db,
         protected Repository $repository
-    )
-    {} // phpcs:ignore
+    ) {} // phpcs:ignore
 
     public function setConnection(string $name = null): static
     {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace Expansa\Database\Schema;
 
 use ArrayAccess;
 use JsonSerializable;

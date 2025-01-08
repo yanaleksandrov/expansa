@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Drivers\MySQL;
 
-use Expansa\Database\Expression;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Query\Grammar;
+use Expansa\Database\Schema\Expression;
 
 class QueryGrammar extends Grammar
 {

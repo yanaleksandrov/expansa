@@ -58,7 +58,7 @@ echo '<pre>';
 //print_r($pdo);
 //print_r($connection);
 //$database   = new \Expansa\Database\Drivers\MySQL\SchemaBuilder($connection);
-Expansa\Schema::create('test_my_table', function (Expansa\Database\Schema\Table $table) {
+Expansa\Schema::create('test_my_table', function (\Expansa\Database\Schema\Table $table) {
     var_dump(43243454);
     $table->id();
     $table->timestamps();

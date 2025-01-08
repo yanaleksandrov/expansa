@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
-use Expansa\Database\Fluent;
-
 /**
  * @method $this change() Change the column
  * @method $this type(string $type) Specify a type for the column

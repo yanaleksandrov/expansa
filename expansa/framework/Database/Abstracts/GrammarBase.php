@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Database\Abstracts;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Expression;
+use Expansa\Database\Schema\Expression;
 use Expansa\Database\Schema\Table;
 use Expansa\Support\Traits\Macroable;
 

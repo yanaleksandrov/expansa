@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Migrations;
+namespace Expansa\Database;
 
 abstract class Migration
 {

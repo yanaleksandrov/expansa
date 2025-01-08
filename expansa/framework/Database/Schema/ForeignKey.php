@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
-use Expansa\Database\Fluent;
-
 /**
  * @method ForeignKey deferrable(bool $value = true) Set the foreign key as deferrable (PostgreSQL)
  * @method ForeignKey initiallyImmediate(bool $value = true) Set the default time to check the constraint (PostgreSQL)
