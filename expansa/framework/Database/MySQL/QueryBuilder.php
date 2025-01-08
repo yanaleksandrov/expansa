@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\MySQL\Query;
+namespace Expansa\Database\MySQL;
 
-use Expansa\Database\Query\Builder as BuilderBase;
+use Expansa\Database\Query\Builder;
 
-class Builder extends BuilderBase
+class QueryBuilder extends Builder
 {
     protected array $operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',

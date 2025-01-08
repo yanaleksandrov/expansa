@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\MySQL\Schema;
+namespace Expansa\Database\MySQL;
 
-use Expansa\Database\Schema\Builder as BuilderAbstract;
+use Expansa\Database\Schema\Builder;
 
-class Builder extends BuilderAbstract
+class SchemaBuilder extends Builder
 {
     public function getTables(): array
     {
@@ -45,8 +45,8 @@ class Builder extends BuilderAbstract
         return $results;
     }
 
-    public function createTable(string $table, \Closure $callback = null): Table
+    public function createTable(string $table, \Closure $callback = null): SchemaTable
     {
-        return new Table($table, $callback);
+        return new SchemaTable($table, $callback);
     }
 }

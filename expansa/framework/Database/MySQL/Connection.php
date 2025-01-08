@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database\MySQL;
 
-use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\MySQL\Query\Builder as QueryBuilder;
-use Expansa\Database\MySQL\Query\Grammar as QueryGrammar;
-use Expansa\Database\MySQL\Schema\Builder as SchemaBuilder;
-use Expansa\Database\MySQL\Schema\Grammar as SchemaGrammar;
 use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Contracts\DatabaseException;
 
 class Connection extends AbstractConnectionBase
 {

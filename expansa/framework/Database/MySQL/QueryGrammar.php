@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\MySQL\Query;
+namespace Expansa\Database\MySQL;
 
 use Expansa\Database\Expression;
 use Expansa\Database\Query\Builder;
-use Expansa\Database\Query\Grammar as GrammarBase;
+use Expansa\Database\Query\Grammar;
 
-class Grammar extends GrammarBase
+class QueryGrammar extends Grammar
 {
     public function compileUpsert(
         Builder $query,
