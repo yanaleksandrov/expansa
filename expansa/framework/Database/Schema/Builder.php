@@ -1,33 +1,30 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
 use Closure;
-use Expansa\Database\Contracts\Connection as ConnectionContract;
-use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
-use Expansa\Database\Abstracts\AbstractConnectionBase;
+use Expansa\Database\Contracts\Connection;
+use Expansa\Database\Contracts\SchemaBuilder;
 use Expansa\Database\Schema\Grammar as SchemaGrammar;
 
-abstract class Builder implements SchemaBuilderContract
+abstract class Builder implements SchemaBuilder
 {
-    protected ConnectionContract $connection;
-
     protected SchemaGrammar $grammar;
 
-    public function __construct(AbstractConnectionBase $connection)
+    public function __construct(protected Connection $connection)
     {
-        $this->connection = $connection;
-
         $this->grammar = $connection->getSchemaGrammar();
     }
 
     /**
      * Get or set the database connection instance.
      *
-     * @param ConnectionContract|null $connection
-     * @return ConnectionContract|static
+     * @param Connection|null $connection
+     * @return Connection|static
      */
-    public function connection(ConnectionContract $connection = null): static|ConnectionContract
+    public function connection(Connection $connection = null): static|Connection
     {
         if (is_null($connection)) {
             return $this->connection;
@@ -37,7 +34,6 @@ abstract class Builder implements SchemaBuilderContract
 
         return $this;
     }
-
 
     public function createDatabase(string $name): mixed
     {
@@ -60,7 +56,6 @@ abstract class Builder implements SchemaBuilderContract
         );
     }
 
-
     public function getTables(): mixed
     {
         return $this->connection->selectFromWriteConnection(
@@ -71,7 +66,8 @@ abstract class Builder implements SchemaBuilderContract
     public function hasTable(string $table): bool
     {
         return count($this->connection->selectFromWriteConnection(
-            $this->grammar->compileTableExists(), [$this->connection->getTablePrefix().$table]
+            $this->grammar->compileTableExists(),
+            [$this->connection->getTablePrefix() . $table]
         )) > 0;
     }
 
@@ -116,7 +112,6 @@ abstract class Builder implements SchemaBuilderContract
         );
     }
 
-
     public function getColumns(string $table): array
     {
         return $this->connection->selectFromWriteConnection(
@@ -129,7 +124,9 @@ abstract class Builder implements SchemaBuilderContract
         $columns = $this->getColumns($table);
 
         foreach ($columns as $item) {
-            if ($item->name === $column) return $item->type;
+            if ($item->name === $column) {
+                return $item->type;
+            }
         }
 
         return '';
@@ -147,7 +144,9 @@ abstract class Builder implements SchemaBuilderContract
         $tableColumns = array_map(fn ($v) => strtolower($v->name), $this->getColumns($table));
 
         foreach ($columns as $column) {
-            if (! in_array(strtolower($column), $tableColumns)) return false;
+            if (! in_array(strtolower($column), $tableColumns)) {
+                return false;
+            }
         }
 
         return true;
@@ -172,7 +171,6 @@ abstract class Builder implements SchemaBuilderContract
         $this->dropColumn($table, $column);
     }
 
-
     public function enableForeignKeys(): void
     {
         $this->connection->statement(
@@ -186,7 +184,6 @@ abstract class Builder implements SchemaBuilderContract
             $this->grammar->compileDisableForeignKeys()
         );
     }
-
 
     abstract protected function createTable(string $table, Closure $callback = null): Table;
 

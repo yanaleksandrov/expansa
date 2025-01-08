@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Commands\Migrations;
 
@@ -15,8 +17,8 @@ class RollbackCommand extends BaseCommand
         parent::handle();
 
         $this->migrate->dispatch('rollback', $this->getPaths(), [
-            'pretend' => (bool)$this->input->getOption('pretend'),
-            'step' => (int)$this->input->getOption('step'),
+            'pretend' => (bool) $this->input->getOption('pretend'),
+            'step'    => (int) $this->input->getOption('step'),
         ]);
 
         return 0;

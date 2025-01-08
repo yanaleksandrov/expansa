@@ -14,6 +14,7 @@ use Expansa\Database\Abstracts\AbstractConnectionBase;
 
 /**
  * Used methods from [Query/Builder]:
+ *
  * @method take(int $count)
  * @method get()
  */

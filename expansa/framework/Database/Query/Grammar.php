@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
@@ -38,7 +40,7 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
             }, $returning);
 
 
-            $sql.= ' RETURNING '.implode(", ", $returning);
+            $sql .= ' RETURNING ' . implode(", ", $returning);
         }
 
         return $sql;
@@ -59,8 +61,13 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
         $query->addBinding(array_values($insertValues), 'columns');
         $query->addBinding(array_values($updateValues), 'columns');
 
-        return sprintf('INSERT INTO %s (%s) VALUES (%s) ON CONFLICT (%s) DO UPDATE SET %s',
-            $table, $sqlInsertColumns, $sqlInsertValues, $this->wrap($uniqueColumn), $sqlUpdateSet
+        return sprintf(
+            'INSERT INTO %s (%s) VALUES (%s) ON CONFLICT (%s) DO UPDATE SET %s',
+            $table,
+            $sqlInsertColumns,
+            $sqlInsertValues,
+            $this->wrap($uniqueColumn),
+            $sqlUpdateSet
         );
     }
 
@@ -74,8 +81,11 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
 
         $sqlWhere = $this->compileWheres($query);
 
-        return sprintf('UPDATE %s SET %s %s',
-            $this->wrapTable($query->from), $sqlSet, $sqlWhere
+        return sprintf(
+            'UPDATE %s SET %s %s',
+            $this->wrapTable($query->from),
+            $sqlSet,
+            $sqlWhere
         );
     }
 
@@ -83,8 +93,10 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
     {
         $sqlWhere = $this->compileWheres($query);
 
-        return sprintf('DELETE FROM %s %s',
-            $this->wrapTable($query->from), $sqlWhere
+        return sprintf(
+            'DELETE FROM %s %s',
+            $this->wrapTable($query->from),
+            $sqlWhere
         );
     }
 
@@ -101,7 +113,7 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
         $sql[] = $this->compileOrders($query);
         $sql[] = $this->compileLimit($query);
 
-        return "SELECT ".implode("", $sql);
+        return "SELECT " . implode("", $sql);
     }
 
     public function compileColumns(Builder $query): string
@@ -119,7 +131,7 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
 
     public function compileFroms(Builder $query): string
     {
-        return " FROM ".$this->wrapTable($query->from);
+        return " FROM " . $this->wrapTable($query->from);
     }
 
     public function compileWheres(Builder $query): string
@@ -132,34 +144,36 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
 
         foreach ($query->conditions as $where) {
             if (! empty($sql)) {
-                $sql.= ' '.$where['boolean'].' ';
+                $sql .= ' ' . $where['boolean'] . ' ';
             }
 
-            $sql.= $this->{"where".$where['type']}($query, $where);
+            $sql .= $this->{"where" . $where['type']}($query, $where);
         }
 
-        return " WHERE ".$sql;
+        return " WHERE " . $sql;
     }
 
     protected function compileAggregate(Builder $query): string
     {
         if (is_array($query->distinct)) {
-            $columns = 'DISTINCT '.$this->prepareColumns($query->distinct);
-        }
-        else {
+            $columns = 'DISTINCT ' . $this->prepareColumns($query->distinct);
+        } else {
             $columns = $this->prepareColumns($query->aggregate['columns']);
 
             if ($query->distinct && $columns !== '*') {
-                $columns = 'DISTINCT '.$columns;
+                $columns = 'DISTINCT ' . $columns;
             }
         }
 
         $function = $query->aggregate['function'];
         $query->aggregate = null;
 
-        return sprintf('SELECT %s(%s) as aggregate FROM (%s) as %s',
-            $function, $columns,
-            $this->compileSelect($query), $this->wrapTable('temp')
+        return sprintf(
+            'SELECT %s(%s) as aggregate FROM (%s) as %s',
+            $function,
+            $columns,
+            $this->compileSelect($query),
+            $this->wrapTable('temp')
         );
     }
 
@@ -176,7 +190,8 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
     {
         $query->addBinding($where['value'], 'where');
 
-        return sprintf('%s %s %s',
+        return sprintf(
+            '%s %s %s',
             $this->wrap($where['column']),
             $where['operator'],
             $this->prepareValue($where['value'])
@@ -185,12 +200,12 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
 
     protected function whereNull(Builder $query, array $where): string
     {
-        return $this->wrap($where['column']).' IS NULL';
+        return $this->wrap($where['column']) . ' IS NULL';
     }
 
     protected function whereNotNull(Builder $query, array $where): string
     {
-        return $this->wrap($where['column']).' IS NOT NULL';
+        return $this->wrap($where['column']) . ' IS NOT NULL';
     }
 
     protected function whereIn(Builder $query, array $where): string
@@ -199,7 +214,8 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
             $query->addBinding($value, 'where');
         }
 
-        return sprintf('%s %s (%s)',
+        return sprintf(
+            '%s %s (%s)',
             $this->wrap($where['column']),
             $where['type'] === 'In' ? 'IN' : 'NOT IN',
             $this->prepareValues($where['values'])
@@ -211,20 +227,23 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
         $sql = [];
 
         foreach ($query->orders as $order) {
-            $sql[] = $this->wrap($order['column']).' '.strtoupper($order['direction']);
+            $sql[] = $this->wrap($order['column']) . ' ' . strtoupper($order['direction']);
         }
 
-        return count($sql) > 0 ? ' ORDER BY '.implode(', ', $sql) : '';
+        return count($sql) > 0 ? ' ORDER BY ' . implode(', ', $sql) : '';
     }
 
     protected function compileLimit(Builder $query): string
     {
         $sql = '';
-        if ($query->limit) $sql.= ' LIMIT '.$query->limit;
-        if ($query->limit && $query->offset) $sql.= ' OFFSET '.$query->offset;
+        if ($query->limit) {
+            $sql .= ' LIMIT ' . $query->limit;
+        }
+        if ($query->limit && $query->offset) {
+            $sql .= ' OFFSET ' . $query->offset;
+        }
         return $sql;
     }
-
 
     public function supportSavepoints(): bool
     {
@@ -233,15 +252,13 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
 
     public function compileSavepoint(string $name): string
     {
-        return 'SAVEPOINT '.$name;
+        return 'SAVEPOINT ' . $name;
     }
 
     public function compileSavepointRollBack(string $name): string
     {
-        return 'ROLLBACK TO SAVEPOINT '.$name;
+        return 'ROLLBACK TO SAVEPOINT ' . $name;
     }
-
-
 
     public function prepareColumns(array $columns): string
     {
@@ -259,5 +276,4 @@ abstract class Grammar extends BaseGrammar implements QueryGrammarContract
     {
         return "?";
     }
-
 }

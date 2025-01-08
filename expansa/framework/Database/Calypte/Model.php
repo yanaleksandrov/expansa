@@ -6,7 +6,7 @@ namespace Expansa\Database\Calypte;
 
 use ArrayAccess;
 use Expansa\Database\Contracts\Arrayable;
-use Expansa\Database\Contracts\Database\Calypte\Model as ModelContract;
+use Expansa\Database\Contracts\Calypte\Model as ModelContract;
 use Expansa\Database\Contracts\Jsonable;
 use Expansa\Database\Calypte\Traits\ForwardCalls;
 use Expansa\Database\Calypte\Traits\HasAttributes;
@@ -16,7 +16,10 @@ use JsonSerializable;
 
 class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSerializable
 {
-    use HasQuery, HasAttributes, GuardAttributes, ForwardCalls;
+    use HasQuery;
+    use HasAttributes;
+    use GuardAttributes;
+    use ForwardCalls;
 
     protected string $keyName = 'id';
 
@@ -35,7 +38,6 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
 
     public function newInstance()
     {
-
     }
 
     public function fill(array $attributes): static
@@ -44,14 +46,13 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
             return $this;
         }
 
-        $error = function (string|array $keys) {
-            throw new \Exception(sprintf(
-                'Add [%s] to fillable property to allow mass assignment on [%s].',
-                implode(", ", (array)$keys), get_class($this)
-            ));
-        };
+        $error = fn (string|array $keys) => throw new \Exception(sprintf(
+            'Add [%s] to fillable property to allow mass assignment on [%s].',
+            implode(", ", (array) $keys),
+            get_class($this)
+        ));
 
-        if($this->totallyGuarded()){
+        if ($this->totallyGuarded()) {
             $error(
                 (count($this->fillable) === 0)
                     ? array_keys($attributes)
@@ -60,7 +61,7 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
         }
 
         foreach ($attributes as $key => $val) {
-            if(! $this->isFillable($key)){
+            if (! $this->isFillable($key)) {
                 $error($key);
             }
 
@@ -78,9 +79,7 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
 
         $data = $this->newQuery()->where($this->keyName, $this->getKey())->get();
 
-        $this->setRawAttribute(
-
-        );
+        $this->setRawAttribute();
 
         return $this;
     }
@@ -89,12 +88,13 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
     {
         if ($this->exists) {
             $saved = $this->performUpdate();
-        }
-        else {
+        } else {
             $saved = $this->performInsert();
         }
 
-        if($saved) $this->finishSave();
+        if ($saved) {
+            $this->finishSave();
+        }
 
         return $saved;
     }
@@ -121,8 +121,7 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
             $id = $query->insertGetId($attributes, $this->keyName);
 
             $this->setAttribute($this->keyName, $id);
-        }
-        else {
+        } else {
             if (empty($attributes)) {
                 return true;
             }
@@ -175,7 +174,6 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
     {
         return $this->incrementing;
     }
-
 
     // dddd
     public function jsonSerialize(): array
@@ -235,7 +233,7 @@ class Model implements ModelContract, Arrayable, ArrayAccess, Jsonable, JsonSeri
 
     public static function __callStatic(string $method, array $parameters): mixed
     {
-        return (new static)->{$method}(...$parameters);
+        return (new static())->{$method}(...$parameters);
     }
 
     public function __call(string $method, array $parameters): mixed

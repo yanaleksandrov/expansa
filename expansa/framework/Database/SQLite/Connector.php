@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\SQLite;
 
@@ -12,16 +14,15 @@ class Connector extends AbstractConnectorBase
         $dsn = "sqlite:";
 
         if ($this->config['database'] === ':memory:') {
-            $dsn.= "memory";
-        }
-        else {
+            $dsn .= "memory";
+        } else {
             $path = realpath($this->config['database']);
 
             if ($path === false) {
-                throw new DatabaseException('Database "'.$this->config['database'].'" does not exists.');
+                throw new DatabaseException('Database "' . $this->config['database'] . '" does not exists.');
             }
 
-            $dsn.= $path;
+            $dsn .= $path;
         }
 
         return $dsn;

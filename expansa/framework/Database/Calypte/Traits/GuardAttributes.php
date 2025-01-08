@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Calypte\Traits;
 
-use Expansa\Database\Calypte\Builder;
-
 trait GuardAttributes
 {
-    protected static $unguarded = false;
+    protected static bool $unguarded = false;
 
-    protected static $databaseColumns = [];
+    protected static array $databaseColumns = [];
 
     protected array $guarded = ['*'];
 
@@ -67,6 +65,4 @@ trait GuardAttributes
 
         return in_array($key, static::$databaseColumns[$className]);
     }
-
-
 }

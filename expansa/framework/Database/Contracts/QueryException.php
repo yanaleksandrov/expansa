@@ -29,7 +29,7 @@ class QueryException extends DatabaseException
 
     protected function formatMessage(string $sql, array $bindings, Throwable $previous)
     {
-        return $previous->getMessage().' (SQL: '.Str::replaceArray('?', $bindings, $sql).')';
+        return $previous->getMessage() . ' (SQL: ' . Str::replaceArray('?', $bindings, $sql) . ')';
     }
 
     public function getSql()

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
@@ -14,12 +16,12 @@ abstract class Builder implements QueryBuilderContract
 
     protected bool $useWritePDO = false;
 
-    protected $bindings = [
+    protected array $bindings = [
         'columns' => [],
         //'select' => [],
         //'from' => [],
         //'join' => [],
-        'where' => [],
+        'where'   => [],
         //'groupBy' => [],
         //'having' => [],
         //'order' => [],
@@ -51,10 +53,9 @@ abstract class Builder implements QueryBuilderContract
 
     public function __construct(
         protected AbstractConnectionBase $connection,
-        protected Grammar                $grammar
+        protected Grammar $grammar
     )
-    {
-    }
+    {} // phpcs:ignore
 
     public function useWritePDO(): static
     {
@@ -94,8 +95,7 @@ abstract class Builder implements QueryBuilderContract
 
         if (! is_array(reset($values))) {
             $values = [$values];
-        }
-        else {
+        } else {
             foreach ($values as $key => $value) {
                 ksort($value);
                 $values[$key] = $value;
@@ -104,7 +104,9 @@ abstract class Builder implements QueryBuilderContract
 
         $bindings = [];
         foreach ($values as $value) {
-            foreach ($value as $val) $bindings[] = $val;
+            foreach ($value as $val) {
+                $bindings[] = $val;
+            }
         }
 
         $sql = $this->grammar->compileInsert($this, $values);
@@ -112,8 +114,7 @@ abstract class Builder implements QueryBuilderContract
         if ($this->withDump) {
             dump($sql, $bindings);
             return 0;
-        }
-        elseif ($this->withSQL) {
+        } elseif ($this->withSQL) {
             return compact($sql, $bindings);
         }
 
@@ -129,14 +130,13 @@ abstract class Builder implements QueryBuilderContract
         if ($this->withDump) {
             dump($sql, $bindings);
             return 0;
-        }
-        elseif ($this->withSQL) {
+        } elseif ($this->withSQL) {
             return compact($sql, $bindings);
         }
 
         $result = $this->connection->selectOne($sql, $bindings, false);
 
-        return is_numeric($result[$keyName]) ? (int)$result[$keyName] : $result[$keyName];
+        return is_numeric($result[$keyName]) ? (int) $result[$keyName] : $result[$keyName];
     }
 
     public function upsert(string $uniqueColumn, array $insertValues, array $updateValues): int
@@ -156,8 +156,7 @@ abstract class Builder implements QueryBuilderContract
         if ($this->withDump) {
             dump($sql, array_merge($insertValues, $updateValues), $bindings);
             return 0;
-        }
-        elseif ($this->withSQL) {
+        } elseif ($this->withSQL) {
             return compact($sql, $bindings);
         }
 
@@ -176,8 +175,7 @@ abstract class Builder implements QueryBuilderContract
         if ($this->withDump) {
             dump($sql, $bindings);
             return 0;
-        }
-        elseif ($this->withSQL) {
+        } elseif ($this->withSQL) {
             return compact($sql, $bindings);
         }
 
@@ -192,8 +190,7 @@ abstract class Builder implements QueryBuilderContract
         if ($this->withDump) {
             dump($sql, $bindings);
             return 0;
-        }
-        elseif ($this->withSQL) {
+        } elseif ($this->withSQL) {
             return compact($sql, $bindings);
         }
 
@@ -224,10 +221,10 @@ abstract class Builder implements QueryBuilderContract
     public function whereRaw(string $expression, array $bindings = null, string $boolean = 'and'): static
     {
         $this->conditions[] = [
-            'type' => 'raw',
+            'type'       => 'raw',
             'expression' => $expression,
-            'bindings' => $bindings,
-            'boolean' => $boolean
+            'bindings'   => $bindings,
+            'boolean'    => $boolean,
         ];
 
         return $this;
@@ -240,9 +237,9 @@ abstract class Builder implements QueryBuilderContract
     public function where(...$condition): static
     {
         $this->conditions[] = [
-            'type' => 'basic',
+            'type'    => 'basic',
             ...$this->prepareWhere($condition),
-            'boolean' => 'and'
+            'boolean' => 'and',
         ];
 
         return $this;
@@ -251,9 +248,9 @@ abstract class Builder implements QueryBuilderContract
     public function orWhere(...$condition): static
     {
         $this->conditions[] = [
-            'type' => 'basic',
+            'type'    => 'basic',
             ...$this->prepareWhere($condition),
-            'boolean' => 'or'
+            'boolean' => 'or',
         ];
 
         return $this;
@@ -263,7 +260,7 @@ abstract class Builder implements QueryBuilderContract
     {
         $type = $not ? 'NotNull' : 'Null';
 
-        foreach ((array)$columns as $column) {
+        foreach ((array) $columns as $column) {
             $this->conditions[] = compact('type', 'column', 'boolean');
         }
 
@@ -288,10 +285,10 @@ abstract class Builder implements QueryBuilderContract
     public function whereIn(string $column, array $values, string $boolean = 'and', bool $not = false): static
     {
         $this->conditions[] = [
-            'type' => $not ? 'NotIn' : 'In',
-            'column' => $column,
-            'values' => $values,
-            'boolean' => $boolean
+            'type'    => $not ? 'NotIn' : 'In',
+            'column'  => $column,
+            'values'  => $values,
+            'boolean' => $boolean,
         ];
 
         return $this;
@@ -344,10 +341,13 @@ abstract class Builder implements QueryBuilderContract
         $results = [];
 
         if (is_null($key)) {
-            foreach ($queryResults as $row) $results[] = $row->$column;
-        }
-        else {
-            foreach ($queryResults as $row) $results[$row->$key] = $row->$column;
+            foreach ($queryResults as $row) {
+                $results[] = $row->$column;
+            }
+        } else {
+            foreach ($queryResults as $row) {
+                $results[$row->$key] = $row->$column;
+            }
         }
 
         return $results;
@@ -386,7 +386,7 @@ abstract class Builder implements QueryBuilderContract
 
     public function count(string $column = 'id'): int
     {
-        return (int)$this->aggregate(__FUNCTION__, [$column]);
+        return (int) $this->aggregate(__FUNCTION__, [$column]);
     }
 
     protected function runSelect(): array

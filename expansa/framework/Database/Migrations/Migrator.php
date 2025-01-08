@@ -1,14 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Migrations;
 
 use Exception;
+use SplFileInfo;
 use Expansa\Console\Traits\InteractsWithIO;
 use Expansa\Contracts\Console\Command;
 use Expansa\Database\Contracts\Connection;
 use Expansa\Database\Contracts\ConnectionResolver;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Migrations\Migration;use SplFileInfo;
 
 class Migrator
 {
@@ -27,10 +29,9 @@ class Migrator
 
     public function __construct(
         protected ConnectionResolver $db,
-        protected Repository      $repository
+        protected Repository $repository
     )
-    {
-    }
+    {} // phpcs:ignore
 
     public function setConnection(string $name = null): static
     {
@@ -97,7 +98,9 @@ class Migrator
 
             $this->components()->task($migration->name, fn() => $this->runMigration($migration, 'up', $batch));
 
-            if($step) $batch++;
+            if ($step) {
+                $batch++;
+            }
         }
 
         $this->output->newLine();
@@ -119,7 +122,7 @@ class Migrator
         $pretend = $options['pretend'] ?? false;
 
         $migrations = array_map(function ($value) {
-            return (object)['migration' => $value];
+            return (object) ['migration' => $value];
         }, $this->repository->getRan());
 
         $this->rollbackMigrations($migrations);
@@ -194,7 +197,9 @@ class Migrator
 
     protected function runMigration(Migration $migration, string $method, int $batch = null): void
     {
-        if (! method_exists($migration, $method)) return;
+        if (! method_exists($migration, $method)) {
+            return;
+        }
 
         $connection = $this->resolveConnection($migration->connection);
 
@@ -215,8 +220,7 @@ class Migrator
 
         if ($method === 'up') {
             $this->repository->add($migration->name, $batch);
-        }
-        else {
+        } else {
             $this->repository->delete($migration->name);
         }
     }
@@ -318,5 +322,4 @@ class Migrator
     {
         return $this->db->connection($connection);
     }
-
 }

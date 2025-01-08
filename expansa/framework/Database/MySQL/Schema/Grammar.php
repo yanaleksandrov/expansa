@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\MySQL\Schema;
 
@@ -17,7 +19,7 @@ class Grammar extends GrammarBase
      */
     protected array $modifiers = [
         'Unsigned', 'Charset', 'Collate', 'Primary', 'Nullable', 'Default',
-        'VirtualAs', 'StoredAs', 'Increment', 'Comment', 'After', 'First'
+        'VirtualAs', 'StoredAs', 'Increment', 'Comment', 'After', 'First',
     ];
 
     /**
@@ -58,7 +60,9 @@ class Grammar extends GrammarBase
     {
         return sprintf(
             'CREATE DATABASE %s DEFAULT CHARSET=%s COLLATE=%s',
-            $this->wrap($name), $this->charset, $this->collate
+            $this->wrap($name),
+            $this->charset,
+            $this->collate
         );
     }
 
@@ -84,11 +88,16 @@ class Grammar extends GrammarBase
 
     public function compileCreate(TableContract $table): array
     {
-        $sql= [sprintf('%s TABLE %s (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s',
-            $table->isTemporary()?'CREATE TEMPORARY':'CREATE', $this->wrapTable($table),
+        $sql = [sprintf(
+            '%s TABLE %s (%s) ENGINE=%s DEFAULT CHARSET=%s COLLATE=%s',
+            $table->isTemporary() ? 'CREATE TEMPORARY' : 'CREATE',
+            $this->wrapTable($table),
             implode(', ', $this->getColumns($table)),
-            $this->engine, $this->charset, $this->collate
-        )];
+            $this->engine,
+            $this->charset,
+            $this->collate
+        )
+        ];
 
         $this->addAutoIncrementFrom($table, $sql);
 
@@ -102,12 +111,12 @@ class Grammar extends GrammarBase
 
     public function compileDrop(TableContract $table): string
     {
-        return 'DROP TABLE '.$this->wrapTable($table);
+        return 'DROP TABLE ' . $this->wrapTable($table);
     }
 
     public function compileDropIfExists(TableContract $table): string
     {
-        return 'DROP TABLE IF EXISTS '.$this->wrapTable($table);
+        return 'DROP TABLE IF EXISTS ' . $this->wrapTable($table);
     }
 
     public function compileDropTables(): string
@@ -122,7 +131,7 @@ class Grammar extends GrammarBase
 
     public function compileAdd(TableContract $table): array
     {
-        $columns = array_map(fn ($column) => 'ADD '.$column, $this->getColumns($table));
+        $columns = array_map(fn ($column) => 'ADD ' . $column, $this->getColumns($table));
 
         $sql = [sprintf('ALTER TABLE %s %s', $this->wrapTable($table), implode(', ', $columns))];
 
@@ -145,19 +154,26 @@ class Grammar extends GrammarBase
     public function compileRenameColumn(TableContract $table, Fluent $command): string
     {
         if (is_null($command->type)) {
-            return sprintf('ALTER TABLE %s RENAME COLUMN %s TO %s',
-                $this->wrapTable($table), $this->wrap($command->from), $this->wrap($command->to)
+            return sprintf(
+                'ALTER TABLE %s RENAME COLUMN %s TO %s',
+                $this->wrapTable($table),
+                $this->wrap($command->from),
+                $this->wrap($command->to)
             );
         }
 
-        return sprintf('ALTER TABLE %s CHANGE COLUMN %s %s %s',
-            $this->wrapTable($table), $this->wrap($command->from), $this->wrap($command->to), $command->type
+        return sprintf(
+            'ALTER TABLE %s CHANGE COLUMN %s %s %s',
+            $this->wrapTable($table),
+            $this->wrap($command->from),
+            $this->wrap($command->to),
+            $command->type
         );
     }
 
     public function compileDropColumn(TableContract $table, Fluent $command): string
     {
-        $columns = array_map(fn($column) => 'DROP '.$this->wrapTable($column), (array)$command->columns);
+        $columns = array_map(fn($column) => 'DROP ' . $this->wrapTable($column), (array) $command->columns);
 
         return sprintf('ALTER TABLE %s %s', $this->wrapTable($table), implode(', ', $columns));
     }
@@ -179,9 +195,12 @@ class Grammar extends GrammarBase
 
     protected function compileIndexBase(TableContract $table, Fluent $command, string $type): string
     {
-        return sprintf('ALTER TABLE %s ADD %s %s%s(%s)',
-            $this->wrapTable($table), $type, $this->wrap($command->index),
-            $command->algorithm ? ' USIGN '.$command->algorithm : '',
+        return sprintf(
+            'ALTER TABLE %s ADD %s %s%s(%s)',
+            $this->wrapTable($table),
+            $type,
+            $this->wrap($command->index),
+            $command->algorithm ? ' USIGN ' . $command->algorithm : '',
             $this->columnize($command->columns)
         );
     }
@@ -211,7 +230,6 @@ class Grammar extends GrammarBase
         return 'SET FOREIGN_KEY_CHECKS=0';
     }
 
-
     protected function typeInteger(Column $column): string
     {
         return 'int';
@@ -231,8 +249,7 @@ class Grammar extends GrammarBase
     {
         if (! is_null($column->precision) && ! is_null($column->scale)) {
             return sprintf("decimal(%s,%s)", $column->precision, $column->scale);
-        }
-        else if (! is_null($column->precision)) {
+        } elseif (! is_null($column->precision)) {
             return sprintf("decimal(%s)", $column->precision);
         }
 
@@ -261,14 +278,16 @@ class Grammar extends GrammarBase
 
     protected function typeString(Column $column): string
     {
-        if (is_null($column->length) || $column->length < 1) $column->length = 255;
+        if (is_null($column->length) || $column->length < 1) {
+            $column->length = 255;
+        }
 
         return $this->typeVarchar($column);
     }
 
     protected function typeChar(Column $column): string
     {
-        if(is_null($column->length) || $column->length < 1){
+        if (is_null($column->length) || $column->length < 1) {
             $column->length = 1;
         }
 
@@ -277,7 +296,7 @@ class Grammar extends GrammarBase
 
     protected function typeVarchar(Column $column): string
     {
-        if(is_null($column->length) || $column->length < 1){
+        if (is_null($column->length) || $column->length < 1) {
             $column->length = 255;
         }
 
@@ -346,9 +365,8 @@ class Grammar extends GrammarBase
 
     protected function typeUuid(Column $column): string
     {
-        return 'uuid'.($column->array ? ' array' : '');
+        return 'uuid' . ($column->array ? ' array' : '');
     }
-
 
     protected function modifyUnsigned(Column $column): string
     {
@@ -365,7 +383,7 @@ class Grammar extends GrammarBase
     protected function modifyCollate(Column $column)
     {
         if (! is_null($column->collation)) {
-            return ' COLLATE '.$this->wrapValue($column->collation);
+            return ' COLLATE ' . $this->wrapValue($column->collation);
         }
     }
 
@@ -389,21 +407,21 @@ class Grammar extends GrammarBase
     protected function modifyDefault(Column $column)
     {
         if (! is_null($column->useCurrent)) {
-            if ($column->type === 'date'){
+            if ($column->type === 'date') {
                 return ' DEFAULT (CURRENT_DATE)';
             }
 
-            if ($column->type === 'time'){
+            if ($column->type === 'time') {
                 return ' DEFAULT (CURRENT_TIME)';
             }
 
-            if (in_array($column->type, ['datetime','timestamp'])){
+            if (in_array($column->type, ['datetime', 'timestamp'])) {
                 return ' DEFAULT (CURRENT_TIMESTAMP)';
             }
         }
 
         if (! is_null($column->default)) {
-            return ' DEFAULT '.$this->getDefaultValue($column->default);
+            return ' DEFAULT ' . $this->getDefaultValue($column->default);
         }
     }
 
@@ -429,7 +447,6 @@ class Grammar extends GrammarBase
 
         return '';
     }
-
 
     protected function wrap(string|Expression $value): string
     {

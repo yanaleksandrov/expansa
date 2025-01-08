@@ -40,7 +40,6 @@ trait HasAttributes
         }
     }
 
-
     protected function syncOriginals(): void
     {
         $this->originals = $this->attributes;
@@ -57,15 +56,15 @@ trait HasAttributes
 
         if ($attribute === $original) {
             return true;
-        }
-        elseif (is_null($attribute)) {
+        } elseif (is_null($attribute)) {
             return false;
         }
 
         return false;
     }
 
-    protected function isChanged(){
+    protected function isChanged()
+    {
         return in_array(true, $this->changes);
     }
 
@@ -73,7 +72,9 @@ trait HasAttributes
     {
         $changes = [];
         foreach ($this->changes as $key => $state) {
-            if (! $state) continue;
+            if (! $state) {
+                continue;
+            }
 
             $changes[$key] = $this->attributes[$key];
         }

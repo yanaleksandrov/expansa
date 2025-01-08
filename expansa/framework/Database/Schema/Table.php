@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
@@ -45,7 +47,6 @@ class Table
     {
         return $this->isTemporary;
     }
-
 
     /**
      * Create column as big integer primary auto-incrementing.
@@ -171,7 +172,6 @@ class Table
         return $this->timestamp('deleted_at', $precision)->default(new Expression('NULL'))->nullable();
     }
 
-
     public function create(): static
     {
         $this->isCreating = true;
@@ -209,7 +209,6 @@ class Table
         return $this;
     }
 
-
     public function addColumn(string $type, string $name, array $parameters = []): Column
     {
         $column = new Column(
@@ -242,10 +241,9 @@ class Table
         return $this;
     }
 
-
     public function primary(string|array $columns, string $index = null): static
     {
-        $index = $index ?: $this->createIndexName('primary', (array)$columns);
+        $index = $index ?: $this->createIndexName('primary', (array) $columns);
 
         $this->addCommand('primary', compact('index', 'columns'));
 
@@ -254,7 +252,7 @@ class Table
 
     public function index(string|array $columns, string $index = null): static
     {
-        $index = $index ?: $this->createIndexName('index', (array)$columns);
+        $index = $index ?: $this->createIndexName('index', (array) $columns);
 
         $this->addCommand('index', compact('index', 'columns'));
 
@@ -263,7 +261,7 @@ class Table
 
     public function unique(string|array $columns, string $index = null): static
     {
-        $index = $index ?: $this->createIndexName('unique', (array)$columns);
+        $index = $index ?: $this->createIndexName('unique', (array) $columns);
 
         $this->addCommand('unique', compact('index', 'columns'));
 
@@ -292,7 +290,7 @@ class Table
 
     protected function dropIndexCommand(string $command, string $type, string|array $index): static
     {
-        if (is_array($index)){
+        if (is_array($index)) {
             $index = $this->createIndexName($type, $index);
         }
 
@@ -300,7 +298,6 @@ class Table
 
         return $this;
     }
-
 
     public function foreingId(string $column): ForeignIdColumn
     {
@@ -317,7 +314,6 @@ class Table
 
         return $this->commands[] = $command;
     }
-
 
     public function getColumns(): array
     {
@@ -343,11 +339,11 @@ class Table
 
     protected function createIndexName(string $type, array $columns): string
     {
-        $index = array_merge([$this->prefix.$this->name], $columns, [$type]);
+        $index = array_merge([$this->prefix . $this->name], $columns, [$type]);
 
         $index = strtolower(implode('_', $index));
 
-        return str_replace(['-','.'], '_', $index);
+        return str_replace(['-', '.'], '_', $index);
     }
 
     public function build(AbstractConnectionBase $connection, Grammar $grammar): void
@@ -368,7 +364,7 @@ class Table
         $statements = [];
 
         foreach ($this->commands as $command) {
-            $method = 'compile'.ucfirst($command['name']);
+            $method = 'compile' . ucfirst($command['name']);
 
             if (method_exists($grammar, $method) || $grammar::hasMacro($method)) {
                 if (! is_null($sql = $grammar->$method($this, $command))) {
@@ -382,7 +378,6 @@ class Table
 
     protected function isValidConnection(AbstractConnectionBase $connection): void
     {
-
     }
 
     protected function getCommandsByNamed(array $names): array
@@ -418,8 +413,10 @@ class Table
     protected function addIndexes(): void
     {
         foreach ($this->columns as $column) {
-            foreach (['primary','unique','index'] as $index) {
-                if (! isset($column->$index)) continue;
+            foreach (['primary', 'unique', 'index'] as $index) {
+                if (! isset($column->$index)) {
+                    continue;
+                }
 
                 // If the column index without name
                 if ($column->$index === true || empty($column->$index)) {

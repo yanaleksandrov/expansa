@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\MySQL\Query;
 
@@ -8,11 +10,17 @@ use Expansa\Database\Query\Grammar as GrammarBase;
 
 class Grammar extends GrammarBase
 {
-    public function compileUpsert(Builder $query, string $uniqueColumn, array $insertValues, array $updateValues, $returning = null): string
+    public function compileUpsert(
+        Builder $query,
+        string $uniqueColumn,
+        array $insertValues,
+        array $updateValues,
+        $returning = null
+    ): string
     {
-        $table = $this->wrapTable($query->from);
+        $table            = $this->wrapTable($query->from);
         $sqlInsertColumns = $this->prepareColumns(array_keys($insertValues));
-        $sqlInsertValues = $this->prepareValues($insertValues);
+        $sqlInsertValues  = $this->prepareValues($insertValues);
 
         $sqlUpdateSet = [];
         foreach ($updateValues as $key => $val) {
@@ -23,8 +31,12 @@ class Grammar extends GrammarBase
         $query->addBinding(array_values($insertValues), 'columns');
         $query->addBinding(array_values($updateValues), 'columns');
 
-        return sprintf('INSERT INTO %s (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s',
-            $table, $sqlInsertColumns, $sqlInsertValues, $sqlUpdateSet
+        return sprintf(
+            'INSERT INTO %s (%s) VALUES (%s) ON DUPLICATE KEY UPDATE %s',
+            $table,
+            $sqlInsertColumns,
+            $sqlInsertValues,
+            $sqlUpdateSet
         );
     }
 

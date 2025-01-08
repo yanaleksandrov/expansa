@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\SQLite;
 
@@ -17,8 +19,7 @@ class Connection extends AbstractConnectionBase
 
         if (isset($config['foreign_keys']) && $config['foreign_keys'] === true) {
             $this->getSchemaBuilder()->enableForeignKeys();
-        }
-        else {
+        } else {
             $this->getSchemaBuilder()->disableForeignKeys();
         }
     }

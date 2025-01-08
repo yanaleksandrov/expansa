@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database;
 
@@ -26,11 +28,9 @@ abstract class Grammar
         return $this;
     }
 
-
-
     protected function columnize(string|array $columns): string
     {
-        return implode(', ', array_map([$this, 'wrap'], (array)$columns));
+        return implode(', ', array_map([$this, 'wrap'], (array) $columns));
     }
 
     protected function wrap(string|Expression $value): string
@@ -49,13 +49,15 @@ abstract class Grammar
         }
 
         if (is_array($table)) {
-            if (is_null($table[1])) return $this->wrapTable($table[0]);
+            if (is_null($table[1])) {
+                return $this->wrapTable($table[0]);
+            }
 
-            return $this->wrapTable($table[0]).' as '.$this->wrap($table[1]);
+            return $this->wrapTable($table[0]) . ' as ' . $this->wrap($table[1]);
         }
 
-        if(! empty($this->tablePrefix)){
-            $table = $this->tablePrefix.$table;
+        if (! empty($this->tablePrefix)) {
+            $table = $this->tablePrefix . $table;
         }
 
         return $this->wrap($table);
@@ -63,9 +65,11 @@ abstract class Grammar
 
     protected function wrapValue(string $value): string
     {
-        if ($value === '*') return $value;
+        if ($value === '*') {
+            return $value;
+        }
 
-        return '"'.str_replace('"', '""', $value).'"';
+        return '"' . str_replace('"', '""', $value) . '"';
     }
 
     protected function getDefaultValue(mixed $value = null): string
@@ -78,7 +82,7 @@ abstract class Grammar
             return 'NULL';
         }
 
-        return $this->wrapValue( is_bool($value) ? (int)$value : (string)$value );
+        return $this->wrapValue(is_bool($value) ? (int) $value : (string) $value);
     }
 
     protected function quoteString($value): string
@@ -89,7 +93,6 @@ abstract class Grammar
 
         return "'$value'";
     }
-
 
     protected function isJsonSelector(string $value): bool
     {
@@ -108,7 +111,7 @@ abstract class Grammar
 
         $field = $this->wrap($parts[0]);
 
-        $path = count($parts) > 1 ? ', '.$this->wrapJsonPath($parts[1]) : '';
+        $path = count($parts) > 1 ? ', ' . $this->wrapJsonPath($parts[1]) : '';
 
         return [$field, $path];
     }
@@ -128,7 +131,7 @@ abstract class Grammar
         $jsonPath = array_map(fn ($segment) =>  $this->wrapJsonPathSegment($segment), $jsonPath);
         $jsonPath = implode('.', $jsonPath);
 
-        return "'$".(str_starts_with($jsonPath, '[') ? '' : '.').$jsonPath."'";
+        return "'$" . (str_starts_with($jsonPath, '[') ? '' : '.') . $jsonPath . "'";
     }
 
     /**
@@ -147,15 +150,14 @@ abstract class Grammar
             }
 
             if (! empty($key)) {
-                return '"'.$key.'"'.$parts[0];
+                return '"' . $key . '"' . $parts[0];
             }
 
             return $parts[0];
         }
 
-        return '"'.$segment.'"';
+        return '"' . $segment . '"';
     }
-
 
     public function __call(string $method, array $parameters)
     {
@@ -163,6 +165,8 @@ abstract class Grammar
             return $this->macroCall($method, $parameters);
         }
 
-        throw new DatabaseException(sprintf('Grammar method %s in %s not configured or not supported.', $method, static::class));
+        throw new DatabaseException(
+            sprintf('Grammar method %s in %s not configured or not supported.', $method, static::class)
+        );
     }
 }

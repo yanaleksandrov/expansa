@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Postgres\Query;
 
@@ -6,7 +8,7 @@ use Expansa\Database\Query\Builder as BuilderBase;
 
 class Builder extends BuilderBase
 {
-    protected $operators = [
+    protected array $operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
         'like', 'not like', 'between', 'ilike', 'not ilike',
         '~', '&', '|', '#', '<<', '>>', '<<=', '>>=',

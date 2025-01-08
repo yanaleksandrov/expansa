@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Abstracts;
 
@@ -23,11 +25,13 @@ use Throwable;
 
 abstract class AbstractConnectionBase implements ConnectionContract
 {
-    use ConnectionLogger, ConnectionTransactions, DetectsErrors;
+    use ConnectionLogger;
+    use ConnectionTransactions;
+    use DetectsErrors;
 
-    protected $pdo = null;
+    protected ?PDO $pdo = null;
 
-    protected $readPdo = null;
+    protected ?PDO $readPdo = null;
 
     protected Closure $reconnector;
 
@@ -125,7 +129,6 @@ abstract class AbstractConnectionBase implements ConnectionContract
         return $this->affectingStatement($query, $bindings);
     }
 
-
     public function lastInsertId(string $name = null): string|false
     {
         return $this->pdo->lastInsertId($name);
@@ -203,15 +206,19 @@ abstract class AbstractConnectionBase implements ConnectionContract
 
         try {
             $result = $this->runQueryCallback($query, $bindings, $callback);
-        }
-        catch (QueryException $e) {
+        } catch (QueryException $e) {
             $result = $this->handleQueryException(
-                $e, $query, $bindings, $callback
+                $e,
+                $query,
+                $bindings,
+                $callback
             );
         }
 
         $this->logQuery(
-            $query, $bindings, $this->getElapsedTime($start)
+            $query,
+            $bindings,
+            $this->getElapsedTime($start)
         );
 
         return $result;
@@ -221,11 +228,11 @@ abstract class AbstractConnectionBase implements ConnectionContract
     {
         try {
             return $callback($query, $bindings);
-        }
-
-        catch (Exception $e) {
+        } catch (Exception $e) {
             throw new QueryException(
-                $query, $this->prepareBindings($bindings), $e
+                $query,
+                $this->prepareBindings($bindings),
+                $e
             );
         }
     }
@@ -273,7 +280,6 @@ abstract class AbstractConnectionBase implements ConnectionContract
     | Pretend
     |--------------------------------------------------------------------------
     */
-
     protected bool $pretending = false;
 
     public function pretending(): bool
@@ -391,7 +397,6 @@ abstract class AbstractConnectionBase implements ConnectionContract
     | Events
     |--------------------------------------------------------------------------
     */
-
     protected ?Dispatcher $events = null;
 
     public function event(string|object $event): static
@@ -427,13 +432,11 @@ abstract class AbstractConnectionBase implements ConnectionContract
         return $this;
     }
 
-
     /*
     |--------------------------------------------------------------------------
     | Schema
     |--------------------------------------------------------------------------
     */
-
     protected SchemaGrammar|null $schemaGrammar = null;
 
     public function useSchemaGrammar(): static

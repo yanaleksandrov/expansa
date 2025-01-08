@@ -1,10 +1,11 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\SQLite\Schema;
 
 use Expansa\Database\Contracts\Connection;
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Schema\Column;
 use Expansa\Database\Schema\Table as TableBase;
 
 class Table extends TableBase

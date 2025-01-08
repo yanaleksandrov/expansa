@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Events;
 
@@ -11,6 +13,5 @@ class QueryExecuted
         public array $bindings,
         public float $time,
         public Connection $connection
-    )
-    {}
+    ) {} // phpcs:ignore
 }

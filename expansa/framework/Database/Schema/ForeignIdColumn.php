@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
@@ -32,7 +34,7 @@ class ForeignIdColumn extends Column
                 return $this->references($column);
             }
 
-            $table = str_replace('_'.$column, '', $this->name);
+            $table = str_replace('_' . $column, '', $this->name);
         }
 
         return $this->references($column)->on($table);

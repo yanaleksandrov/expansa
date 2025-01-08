@@ -1,12 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Query\Traits;
 
 trait PrepareWhereExpression
 {
-    protected array $whereOperators = [
-        '=', '>', '<', '>=', '<=', '<>', '!=', 'like', 'not like'
-    ];
+    protected array $whereOperators = ['=', '>', '<', '>=', '<=', '<>', '!=', 'like', 'not like'];
 
     protected function prepareWhere($condition): array
     {
@@ -17,15 +17,14 @@ trait PrepareWhereExpression
         // where('name = name')
         if (count($args) == 1) {
             $reColumn = "([\w_.]+)";
-            $reOperator = "(".implode("|", $this->whereOperators).")";
+            $reOperator = "(" . implode("|", $this->whereOperators) . ")";
             $reValue = "[\"']?(.*?)[\"']?";
 
             if (preg_match("/^{$reColumn}\s{0,}{$reOperator}\s{0,}{$reValue}$/", $args[0], $match)) {
                 $parsed['column'] = $match[1];
                 $parsed['operator'] = $match[2];
                 $parsed['value'] = $match[3];
-            }
-            else {
+            } else {
                 throw new \Exception("Query where invalid");
             }
         }
@@ -55,5 +54,4 @@ trait PrepareWhereExpression
     {
         return in_array($operator, $this->whereOperators);
     }
-
 }

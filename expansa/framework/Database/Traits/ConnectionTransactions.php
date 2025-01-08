@@ -1,11 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Traits;
 
 use Closure;
+use Throwable;
 use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Contracts\DeadlockException;
-use Throwable;
 
 trait ConnectionTransactions
 {
@@ -18,8 +20,7 @@ trait ConnectionTransactions
 
             try {
                 $callbackResult = $callback($this);
-            }
-            catch (Throwable $e) {
+            } catch (Throwable $e) {
                 $this->handleTransactionException($e, $curAttempt, $attempts);
 
                 continue;
@@ -31,9 +32,7 @@ trait ConnectionTransactions
                 }
 
                 $this->transactions = max(0, $this->transactions - 1);
-
-            }
-            catch (Throwable $e) {
+            } catch (Throwable $e) {
                 $this->handleTransactionCommitException($e, $curAttempt, $attempts);
 
                 continue;
@@ -96,19 +95,16 @@ trait ConnectionTransactions
 
             try {
                 $this->getPdo()->beginTransaction();
-            }
-            catch (Throwable $e) {
+            } catch (Throwable $e) {
                 if ($this->causedByLostConnection($e)) {
                     $this->reconnect();
 
                     $this->getPdo()->beginTransaction();
-                }
-                else {
+                } else {
                     throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
                 }
             }
-        }
-        elseif ($this->transactions >= 1 && $this->queryGrammar->supportSavepoints()) {
+        } elseif ($this->transactions >= 1 && $this->queryGrammar->supportSavepoints()) {
             $this->createSavepoint();
         }
     }
@@ -116,7 +112,7 @@ trait ConnectionTransactions
     protected function createSavepoint(): void
     {
         $this->getPdo()->exec(
-            $this->queryGrammar->compileSavepoint('point'. ($this->transactions+1))
+            $this->queryGrammar->compileSavepoint('point' . ($this->transactions + 1))
         );
     }
 
@@ -131,7 +127,7 @@ trait ConnectionTransactions
 
     public function rollBack(int $toLevel = null): bool
     {
-        $toLevel = $toLevel ?: $this->transactions-1;
+        $toLevel = $toLevel ?: $this->transactions - 1;
 
         if ($toLevel < 0 || $toLevel >= $this->transactions) {
             return false;
@@ -140,14 +136,12 @@ trait ConnectionTransactions
         try {
             if ($toLevel === 0) {
                 $this->getPdo()->rollBack();
-            }
-            elseif ($this->queryGrammar->supportSavepoints()) {
+            } elseif ($this->queryGrammar->supportSavepoints()) {
                 $this->getPdo()->exec(
-                    $this->queryGrammar->compileSavepointRollBack('point'.($toLevel + 1))
+                    $this->queryGrammar->compileSavepointRollBack('point' . ($toLevel + 1))
                 );
             }
-        }
-        catch (Throwable $e) {
+        } catch (Throwable $e) {
             if ($this->causedByLostConnection($e)) {
                 $this->transactions = 0;
             }

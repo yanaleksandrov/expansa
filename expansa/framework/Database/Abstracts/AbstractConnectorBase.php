@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Abstracts;
 
@@ -13,11 +15,11 @@ abstract class AbstractConnectorBase
     protected array $config;
 
     protected array $options = [
-        PDO::ATTR_CASE => PDO::CASE_NATURAL,
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_ORACLE_NULLS => PDO::NULL_NATURAL,
+        PDO::ATTR_CASE              => PDO::CASE_NATURAL,
+        PDO::ATTR_ERRMODE           => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_ORACLE_NULLS      => PDO::NULL_NATURAL,
         PDO::ATTR_STRINGIFY_FETCHES => false,
-        PDO::ATTR_EMULATE_PREPARES => false,
+        PDO::ATTR_EMULATE_PREPARES  => false,
     ];
 
     public function connect(array $config)
@@ -35,8 +37,7 @@ abstract class AbstractConnectorBase
 
         try {
             return new PDO($dsn, $username, $password, $options);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             if ($this->causedByLostConnection($e)) {
                 return new PDO($dsn, $username, $password, $options);
             }
@@ -50,19 +51,19 @@ abstract class AbstractConnectorBase
         $dsn = "{$this->config['driver']}:";
 
         if (isset($this->config['host'])) {
-            $dsn.= "host={$this->config['host']};";
+            $dsn .= "host={$this->config['host']};";
         }
 
         if (isset($this->config['port'])) {
-            $dsn.= "port={$this->config['port']};";
+            $dsn .= "port={$this->config['port']};";
         }
 
         if (isset($this->config['database'])) {
-            $dsn.= "dbname={$this->config['database']};";
+            $dsn .= "dbname={$this->config['database']};";
         }
 
         if (isset($this->config['charset'])) {
-            $dsn.= "charset={$this->config['charset']};";
+            $dsn .= "charset={$this->config['charset']};";
         }
 
         return $dsn;

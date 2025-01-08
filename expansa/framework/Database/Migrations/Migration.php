@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Migrations;
 
@@ -17,11 +19,9 @@ abstract class Migration
 
     public function up(): void
     {
-
     }
 
     public function down(): void
     {
-        
     }
 }

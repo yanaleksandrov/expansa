@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
@@ -28,7 +30,7 @@ abstract class Grammar extends BaseGrammar implements SchemaGrammarContract
         $columns = [];
 
         foreach ($table->getColumns() as $column) {
-            $sql = $this->wrap($column->name).' '.$this->getType($column);
+            $sql = $this->wrap($column->name) . ' ' . $this->getType($column);
 
             $columns[] = $this->addModifiers($sql, $table, $column);
         }
@@ -38,7 +40,7 @@ abstract class Grammar extends BaseGrammar implements SchemaGrammarContract
 
     public function getType($column): string
     {
-        return $this->{'type'.ucfirst($column->type)}($column);
+        return $this->{'type' . ucfirst($column->type)}($column);
     }
 
     public function addModifiers($sql, $table, $column): string

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
@@ -20,8 +22,8 @@ use Expansa\Support\Fluent;
  * @method $this primary() Add a primary index
  * @method $this index(string $indexName = null) Add an index
  * @method $this unique(string $indexName = null) Add a unique indexes to be inserted into the column
- * method $this fulltext(string $indexName = null) Add a fulltext index
- * method $this spatialIndex(string $indexName = null) Add a spatial index
+ * @method $this fulltext(string $indexName = null) Add a fulltext index
+ * @method $this spatialIndex(string $indexName = null) Add a spatial index
  *
  * @method $this generatedAs(string $expression = null) Create a SQL compliant identity column
  * @method $this always(bool $value = true) Used as a modifier for generatedAs()
@@ -34,5 +36,4 @@ use Expansa\Support\Fluent;
  */
 class Column extends Fluent
 {
-
 }

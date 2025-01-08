@@ -21,8 +21,8 @@ trait HasQuery
     public function getTable()
     {
         return $this->table ?? Str::pluralModel(
-                basename(str_replace('\\', '/', get_class($this)))
-            );
+            basename(str_replace('\\', '/', get_class($this)))
+        );
     }
 
     public function setTable(string $table)
@@ -32,7 +32,6 @@ trait HasQuery
 
     public function query()
     {
-
     }
 
     public function newQuery()
@@ -42,7 +41,6 @@ trait HasQuery
 
     public function fill(array $attributes = [])
     {
-
     }
 
     public function update(array $attributes = [])
@@ -57,6 +55,5 @@ trait HasQuery
 
     public function delete()
     {
-
     }
 }

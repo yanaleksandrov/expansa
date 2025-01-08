@@ -6,5 +6,4 @@ namespace Expansa\Database\Contracts;
 
 interface QueryBuilder
 {
-
 }

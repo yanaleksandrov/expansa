@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Postgres\Schema;
 
@@ -227,16 +229,24 @@ class Table extends TableBase
 
     public function timestamp(string $column, int $precision = 0): Column
     {
-        if($precision < 0) $precision = 0;
-        if($precision > 6) $precision = 6;
+        if ($precision < 0) {
+            $precision = 0;
+        }
+        if ($precision > 6) {
+            $precision = 6;
+        }
 
         return $this->addColumn('timestamp', $column, compact('precision'));
     }
 
     public function timestampTz(string $column, int $precision = 0): Column
     {
-        if($precision < 0) $precision = 0;
-        if($precision > 6) $precision = 6;
+        if ($precision < 0) {
+            $precision = 0;
+        }
+        if ($precision > 6) {
+            $precision = 6;
+        }
 
         return $this->addColumn('timestampTz', $column, compact('precision'));
     }
@@ -260,7 +270,6 @@ class Table extends TableBase
     {
         throw new DatabaseException("Type 'interval' not supported.");
     }
-
 
     /*
     |--------------------------------------------------------------------------

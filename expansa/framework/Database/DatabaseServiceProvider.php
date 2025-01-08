@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database;
 
@@ -19,7 +21,7 @@ class DatabaseServiceProvider extends ServiceProvider
         });
 
         $this->commands([
-            'migrate' => MigrateCommand::class
+            'migrate' => MigrateCommand::class,
         ]);
 
         $this->app->bind('scheme', function ($app) {

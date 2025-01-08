@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\Commands;
 
@@ -48,16 +50,18 @@ class MigrationMakeCommand extends Command
 
         $path = str_replace(base_path(), '', $path);
 
-        $this->components()->success('Migration ['.$path.'] created successfully.');
+        $this->components()->success('Migration [' . $path . '] created successfully.');
 
         return 0;
     }
 
     protected function ensureMigrationExists(string $table, bool $create): bool
     {
-        if (! $create) return false;
+        if (! $create) {
+            return false;
+        }
 
-        $migrations = array_diff(scandir($this->getMigrationPath()), ['.','..']);
+        $migrations = array_diff(scandir($this->getMigrationPath()), ['.', '..']);
         foreach ($migrations as $migration) {
             [$migrationTable, $migrationCreate] = $this->creator->guessTable($migration);
 
@@ -85,7 +89,7 @@ class MigrationMakeCommand extends Command
     public function getArguments(): array
     {
         return [
-            new InputArgument('name', InputArgument::REQUIRED,'The name of the migration')
+            new InputArgument('name', InputArgument::REQUIRED, 'The name of the migration')
         ];
     }
 }

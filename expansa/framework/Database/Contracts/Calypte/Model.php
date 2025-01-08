@@ -6,5 +6,4 @@ namespace Expansa\Database\Contracts\Calypte;
 
 interface Model
 {
-
 }

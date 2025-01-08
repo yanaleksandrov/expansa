@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database\MySQL\Schema;
 
@@ -9,7 +11,7 @@ class Builder extends BuilderAbstract
     public function getTables(): array
     {
         return array_map(function ($v) {
-            $v = array_values((array)$v);
+            $v = array_values((array) $v);
             return $v[0];
         }, parent::getTables());
     }
@@ -17,20 +19,22 @@ class Builder extends BuilderAbstract
     public function hasTable(string $table): bool
     {
         return count($this->connection->selectFromWriteConnection(
-                $this->grammar->compileTableExists(), [
+            $this->grammar->compileTableExists(),
+            [
                     $this->connection->getDatabaseName(),
-                    $this->connection->getTablePrefix().$table
+                    $this->connection->getTablePrefix() . $table,
                 ]
-            )) > 0;
+        )) > 0;
     }
 
     public function getColumnListing(string $table): array
     {
         $results = $this->connection->select(
-            $this->grammar->compileColumnListing(), [
+            $this->grammar->compileColumnListing(),
+            [
                 $this->connection->getDatabaseName(),
                 $this->connection->getSchema(),
-                $this->connection->getTablePrefix().$table
+                $this->connection->getTablePrefix() . $table,
             ]
         );
 
