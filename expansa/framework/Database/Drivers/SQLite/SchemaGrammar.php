@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\SQLite;
+namespace Expansa\Database\Drivers\SQLite;
 
 use Expansa\Database\Schema\Column;
 use Expansa\Database\Schema\Grammar;
 use Expansa\Database\Schema\Table;
-use Expansa\Support\Fluent;
+use Expansa\Database\Fluent;
 
 class SchemaGrammar extends Grammar
 {

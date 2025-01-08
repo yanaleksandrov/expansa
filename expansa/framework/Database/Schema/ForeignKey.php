@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
-use Expansa\Support\Fluent;
+use Expansa\Database\Fluent;
 
 /**
  * @method ForeignKey deferrable(bool $value = true) Set the foreign key as deferrable (PostgreSQL)

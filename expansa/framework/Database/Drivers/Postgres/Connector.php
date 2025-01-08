@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Postgres;
+namespace Expansa\Database\Drivers\Postgres;
 
-use PDO;
 use Expansa\Database\Abstracts\AbstractConnectorBase;
+use PDO;
 
 class Connector extends AbstractConnectorBase
 {

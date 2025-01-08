@@ -2,24 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\SQLite;
+namespace Expansa\Database\Drivers\Postgres;
 
 use Expansa\Database\Abstracts\AbstractConnectionBase;
 use Expansa\Database\Contracts\DatabaseException;
 
 class Connection extends AbstractConnectionBase
 {
-    public function __construct($pdo, array $config = [])
-    {
-        parent::__construct($pdo, $config);
-
-        if (isset($config['foreign_keys']) && $config['foreign_keys'] === true) {
-            $this->getSchemaBuilder()->enableForeignKeys();
-        } else {
-            $this->getSchemaBuilder()->disableForeignKeys();
-        }
-    }
-
     public function getSchema()
     {
         if (empty($this->config['schema'])) {

@@ -7,7 +7,7 @@ namespace Expansa\Database\Schema;
 use Closure;
 use Expansa\Database\Abstracts\AbstractConnectionBase;
 use Expansa\Database\Expression;
-use Expansa\Support\Fluent;
+use Expansa\Database\Fluent;
 
 class Table
 {

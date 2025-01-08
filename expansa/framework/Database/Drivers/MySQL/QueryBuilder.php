@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\MySQL;
+namespace Expansa\Database\Drivers\MySQL;
 
 use Expansa\Database\Query\Builder;
 

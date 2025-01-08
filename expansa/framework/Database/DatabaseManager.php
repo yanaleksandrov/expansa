@@ -19,16 +19,16 @@ class DatabaseManager implements ConnectionResolver
 
     protected array $drivers = [
         'mysql'  => [
-            'connection' => \Expansa\Database\MySQL\Connection::class,
-            'connector'  => \Expansa\Database\MySQL\Connector::class,
+            'connection' => \Expansa\Database\Drivers\MySQL\Connection::class,
+            'connector'  => \Expansa\Database\Drivers\MySQL\Connector::class,
         ],
         'pgsql'  => [
-            'connection' => \Expansa\Database\Postgres\Connection::class,
-            'connector'  => \Expansa\Database\Postgres\Connector::class,
+            'connection' => \Expansa\Database\Drivers\Postgres\Connection::class,
+            'connector'  => \Expansa\Database\Drivers\Postgres\Connector::class,
         ],
         'sqlite' => [
-            'connection' => \Expansa\Database\SQLite\Connection::class,
-            'connector'  => \Expansa\Database\SQLite\Connector::class,
+            'connection' => \Expansa\Database\Drivers\SQLite\Connection::class,
+            'connector'  => \Expansa\Database\Drivers\SQLite\Connector::class,
         ],
     ];
 

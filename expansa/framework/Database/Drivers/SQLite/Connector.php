@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\SQLite;
+namespace Expansa\Database\Drivers\SQLite;
 
-use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Abstracts\AbstractConnectorBase;
+use Expansa\Database\Contracts\DatabaseException;
 
 class Connector extends AbstractConnectorBase
 {

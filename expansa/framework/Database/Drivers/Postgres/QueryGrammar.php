@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Postgres;
+namespace Expansa\Database\Drivers\Postgres;
 
 use Expansa\Database\Query\Grammar;
 

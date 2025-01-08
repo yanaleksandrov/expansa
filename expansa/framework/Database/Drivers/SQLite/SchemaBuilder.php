@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\SQLite;
+namespace Expansa\Database\Drivers\SQLite;
 
 use Expansa\Database\Schema\Builder;
 use Expansa\Filesystem\Filesystem;
