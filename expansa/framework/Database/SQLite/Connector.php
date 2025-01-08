@@ -3,9 +3,9 @@
 namespace Expansa\Database\SQLite;
 
 use Expansa\Database\Contracts\DatabaseException;
-use Expansa\Database\Connector as ConnectorBase;
+use Expansa\Database\Abstracts\AbstractConnectorBase;
 
-class Connector extends ConnectorBase
+class Connector extends AbstractConnectorBase
 {
     public function getDsn(): string
     {

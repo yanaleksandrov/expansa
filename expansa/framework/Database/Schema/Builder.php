@@ -5,7 +5,7 @@ namespace Expansa\Database\Schema;
 use Closure;
 use Expansa\Database\Contracts\Connection as ConnectionContract;
 use Expansa\Database\Contracts\SchemaBuilder as SchemaBuilderContract;
-use Expansa\Database\Abstract\AbstractConnection;
+use Expansa\Database\Abstracts\AbstractConnectionBase;
 use Expansa\Database\Schema\Grammar as SchemaGrammar;
 
 abstract class Builder implements SchemaBuilderContract
@@ -14,7 +14,7 @@ abstract class Builder implements SchemaBuilderContract
 
     protected SchemaGrammar $grammar;
 
-    public function __construct(AbstractConnection $connection)
+    public function __construct(AbstractConnectionBase $connection)
     {
         $this->connection = $connection;
 

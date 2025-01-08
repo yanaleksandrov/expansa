@@ -2,10 +2,10 @@
 
 namespace Expansa\Database\Postgres;
 
-use Expansa\Database\Connector as ConnectorBase;
+use Expansa\Database\Abstracts\AbstractConnectorBase;
 use PDO;
 
-class Connector extends ConnectorBase
+class Connector extends AbstractConnectorBase
 {
     protected array $options = [
         PDO::ATTR_CASE => PDO::CASE_NATURAL,

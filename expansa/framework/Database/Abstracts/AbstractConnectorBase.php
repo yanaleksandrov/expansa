@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace Expansa\Database\Abstracts;
 
 use Expansa\Database\Contracts\DatabaseException;
 use Expansa\Database\Traits\DetectsErrors;
 use PDO;
 
-abstract class Connector
+abstract class AbstractConnectorBase
 {
     use DetectsErrors;
 

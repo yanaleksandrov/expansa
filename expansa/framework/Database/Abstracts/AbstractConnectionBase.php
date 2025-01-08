@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace framework\Database\Abstracts;
+namespace Expansa\Database\Abstracts;
 
 use Closure;
 use Exception;
@@ -21,7 +21,7 @@ use PDO;
 use PDOStatement;
 use Throwable;
 
-abstract class AbstractConnection implements ConnectionContract
+abstract class AbstractConnectionBase implements ConnectionContract
 {
     use ConnectionLogger, ConnectionTransactions, DetectsErrors;
 

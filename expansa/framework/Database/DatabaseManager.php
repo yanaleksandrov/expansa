@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Expansa\Database;
 
@@ -16,21 +18,21 @@ class DatabaseManager implements ConnectionResolver
     protected \Closure $reconnector;
 
     protected array $drivers = [
-        'mysql' => [
-            'connection' => \Expansa\Database\MySQL\Connection::class,
-            'connector' => \Expansa\Database\MySQL\Connector::class,
+        'mysql'  => [
+            'connection' => \Expansa\Database\MySQL\ConnectionBase::class,
+            'connector'  => \Expansa\Database\MySQL\Connector::class,
         ],
-        'pgsql' => [
-            'connection' => \Expansa\Database\Postgres\Connection::class,
-            'connector' => \Expansa\Database\Postgres\Connector::class,
+        'pgsql'  => [
+            'connection' => \Expansa\Database\Postgres\ConnectionBase::class,
+            'connector'  => \Expansa\Database\Postgres\Connector::class,
         ],
         'sqlite' => [
-            'connection' => \Expansa\Database\SQLite\Connection::class,
-            'connector' => \Expansa\Database\SQLite\Connector::class,
-        ]
+            'connection' => \Expansa\Database\SQLite\ConnectionBase::class,
+            'connector'  => \Expansa\Database\SQLite\Connector::class,
+        ],
     ];
 
-    public function __construct (protected Application $app)
+    public function __construct(protected Application $app)
     {
         $this->factory     = new ConnectionFactory();
         $this->reconnector = fn (ConnectionContract $connection) => $this->reconnect($connection->getName());
@@ -53,7 +55,9 @@ class DatabaseManager implements ConnectionResolver
 
     public function reconnect(string $name = null): ConnectionContract
     {
-        if (is_null($name)) $name = $this->getDefaultConnection();
+        if (is_null($name)) {
+            $name = $this->getDefaultConnection();
+        }
 
         $this->disconnect($name);
 
@@ -70,7 +74,9 @@ class DatabaseManager implements ConnectionResolver
 
     public function disconnect(string $name = null): void
     {
-        if (is_null($name)) $name = $this->getDefaultConnection();
+        if (is_null($name)) {
+            $name = $this->getDefaultConnection();
+        }
 
         if (isset($this->connections[$name])) {
             $this->connections[$name]->disconnect();
