@@ -11,7 +11,6 @@ declare(strict_types=1);
 use app\User;
 use Expansa\{Db, Debug, Is};
 use Expansa\I18n;
-use Expansa\Hook;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';

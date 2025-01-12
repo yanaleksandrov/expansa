@@ -52,28 +52,4 @@ final class Taxonomy
     public static function isHierarchical(string $taxonomy): bool
     {
     }
-
-    /**
-     * Create new table into database.
-     */
-    public static function migrate(): void
-    {
-        $tableName      = (new Db\Handler())->getTableName(self::$table);
-        $charsetCollate = (new Db\Handler())->getCharsetCollate();
-
-        Db::query(
-            "
-			CREATE TABLE IF NOT EXISTS {$tableName} (
-				term_taxonomy_id  bigint(20)  UNSIGNED NOT NULL AUTO_INCREMENT,
-				term_id           bigint(20)  UNSIGNED NOT NULL DEFAULT 0,
-				taxonomy          varchar(32) NOT NULL DEFAULT '',
-				description       longtext    NOT NULL,
-				count             bigint(20)  NOT NULL DEFAULT 0,
-				parent            bigint(20)  UNSIGNED NOT NULL DEFAULT 0,
-				PRIMARY KEY (term_taxonomy_id),
-				UNIQUE KEY term_id_taxonomy (term_id,taxonomy),
-				KEY taxonomy (taxonomy)
-			) ENGINE=InnoDB $charsetCollate;"
-        )->fetchAll();
-    }
 }

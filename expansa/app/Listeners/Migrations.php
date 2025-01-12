@@ -10,7 +10,62 @@ use Expansa\Database\Schema\Table;
 
 final class Migrations
 {
-    public function createCommentsTable(): void
+    public function createMainDatabaseTables(): void
+    {
+        $this->createCacheTable();
+        $this->createSlugsTable();
+        $this->createTermsTable();
+        $this->createUsersTable();
+        $this->createOptionsTable();
+        $this->createCommentsTable();
+        $this->createTaxonomiesTable();
+    }
+
+    public function createPostsTable(string $postType): void
+    {
+        Schema::create($postType, function (Table $table) {
+            $statuses = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
+
+            $table->id();
+            $table->text('title');
+            $table->text('content');
+            $table->bigInt('author_id')->default(0);
+            $table->bigInt('parent_id')->default(0);
+            $table->smallInt('comments')->default(0);
+            $table->smallInt('views')->default(0);
+            $table->enum('status', $statuses)->default('pending');
+            $table->bool('discussable')->default(1);
+            $table->string('password', 255);
+            $table->timestamps();
+
+            // indexes
+            $table->index('author_id');
+            $table->index('parent_id');
+            $table->index('status');
+            $table->index('parent_id');
+        });
+
+        $this->createFieldsTable($postType);
+    }
+
+    public function createFieldsTable(string $name): void
+    {
+        Schema::create($name . '_fields', function (Table $table) use ($name) {
+            $column = "{$name}_id";
+
+            $table->id();
+            $table->bigInt($column)->default(0);
+            $table->string('key', 255)->default(null);
+            $table->text('value');
+
+            // indexes
+            $table->index([$column, 'key']);
+        });
+
+        $this->addCascadeDeleteTrigger($name);
+    }
+
+    private function createCommentsTable(): void
     {
         Schema::create('comments', function (Table $table) {
             $table->id();
@@ -44,7 +99,7 @@ final class Migrations
         $this->createFieldsTable('comments');
     }
 
-    public function createOptionsTable(): void
+    private function createOptionsTable(): void
     {
         Schema::create('options', function (Table $table) {
             $table->id();
@@ -53,7 +108,7 @@ final class Migrations
         });
     }
 
-    public function createSlugsTable(): void
+    private function createSlugsTable(): void
     {
         Schema::create('slugs', function (Table $table) {
             $table->id();
@@ -72,7 +127,7 @@ final class Migrations
         $this->addUlidCreationTrigger('slugs');
     }
 
-    public function createTermsTable(): void
+    private function createTermsTable(): void
     {
         Schema::create('terms', function (Table $table) {
             $table->id('term_id');
@@ -86,7 +141,7 @@ final class Migrations
         });
     }
 
-    public function createTaxonomiesTable(): void
+    private function createTaxonomiesTable(): void
     {
         Schema::create('taxonomies', function (Table $table) {
             $table->id('term_taxonomy_id');
@@ -104,7 +159,7 @@ final class Migrations
         $this->createFieldsTable('terms');
     }
 
-    public function createUsersTable(): void
+    private function createUsersTable(): void
     {
         Schema::create('users', function (Table $table) {
             $table->id();
@@ -136,48 +191,17 @@ final class Migrations
         $this->createFieldsTable('users');
     }
 
-    public function createPostsTable(string $type): void
+    private function createCacheTable(): void
     {
-        Schema::create($type, function (Table $table) {
-            $statuses = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
-
-            $table->id();
-            $table->text('title');
-            $table->text('content');
-            $table->bigInt('author_id')->default(0);
-            $table->bigInt('parent_id')->default(0);
-            $table->smallInt('comments')->default(0);
-            $table->smallInt('views')->default(0);
-            $table->enum('status', $statuses)->default('pending');
-            $table->bool('discussable')->default(1);
-            $table->string('password', 255);
-            $table->timestamps();
-
-            // indexes
-            $table->index('author_id');
-            $table->index('parent_id');
-            $table->index('status');
-            $table->index('parent_id');
-        });
-
-        $this->createFieldsTable($type);
-    }
-
-    public function createFieldsTable(string $name): void
-    {
-        Schema::create($name . '_fields', function (Table $table) use ($name) {
-            $column = "{$name}_id";
-
-            $table->id();
-            $table->bigInt($column)->default(0);
-            $table->string('key', 255)->default(null);
+        Schema::create('cache', function (Table $table) {
+            $table->string('key', 255)->primary();
             $table->text('value');
+            $table->datetime('expiry_at');
 
             // indexes
-            $table->index([$column, 'key']);
+            $table->index('key');
+            $table->index('expiry_at');
         });
-
-        $this->addCascadeDeleteTrigger($name);
     }
 
     private function addUlidCreationTrigger(string $table): void

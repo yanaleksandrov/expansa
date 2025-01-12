@@ -134,12 +134,7 @@ class System
          *
          * @since 2025.1
          */
-        Hook::call('createTermsTable');
-        Hook::call('createUsersTable');
-        Hook::call('createSlugsTable');
-        Hook::call('createOptionsTable');
-        Hook::call('createCommentsTable');
-        Hook::call('createTaxonomiesTable');
+        Hook::call('createMainDatabaseTables');
 
         Db::init();
         Db::updateSchema();

@@ -42,7 +42,7 @@ class Roles
      *                             You can specify the ID of an existing role as the value.
      *                             In this case, the capabilities of the specified role are copied to the new one.
      */
-    public static function register(string $role, string $display_name, $capabilities)
+    public static function register(string $role, string $display_name, mixed $capabilities): true|Error
     {
         $roles = self::fetch();
         if (empty($role) || isset($roles[$role])) {
@@ -69,9 +69,9 @@ class Roles
      * Retrieve role object by name.
      *
      * @param string $role
-     * @return object role object if found, null if the role does not exist
+     * @return null|object|array role object if found, null if the role does not exist
      */
-    public static function get(string $role)
+    public static function get(string $role): object|array|null
     {
         $roles = self::fetch();
         if (isset($roles[$role])) {
@@ -106,7 +106,7 @@ class Roles
      * @param mixed $capability Single capability or capabilities array
      * @return bool|Error
      */
-    public static function set(string $role, mixed $capability)
+    public static function set(string $role, mixed $capability): Error|bool
     {
         $roles = self::fetch();
         if (! isset($roles[$role])) {
@@ -129,7 +129,7 @@ class Roles
      * @param string $capability
      * @return bool|Error
      */
-    public static function unset(string $role, string $capability)
+    public static function unset(string $role, string $capability): Error|bool
     {
         $roles = self::fetch();
         if (! isset($roles[$role])) {
@@ -161,7 +161,7 @@ class Roles
      * @param $capabilities
      * @return bool
      */
-    public static function has_cap(string $role, $capabilities): bool
+    public static function hasCap(string $role, $capabilities): bool
     {
         $roles = self::fetch();
         $role  = $roles[$role] ?? [];

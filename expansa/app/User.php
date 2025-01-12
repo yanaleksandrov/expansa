@@ -316,7 +316,7 @@ final class User extends Schema
 
         if (is_array($roles)) {
             foreach ($roles as $role) {
-                return Roles::has_cap($role, $capabilities);
+                return Roles::hasCap($role, $capabilities);
             }
         }
         return false;
