@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Databaze;
+namespace Expansa\Database;
 
 use PDO;
 use PDOStatement;

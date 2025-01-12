@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Databaze\Exception;
+namespace Expansa\Database\Exception;
 
 use Exception;
 

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Databaze;
+namespace Expansa\Database;
 
 use PDO;
 use Exception;
 use PDOException;
 use PDOStatement;
-use Expansa\Databaze\Exception\InvalidArgumentException;
+use Expansa\Database\Exception\InvalidArgumentException;
 
 class Manager extends ManagerBase
 {

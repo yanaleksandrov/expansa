@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Expansa;
 
 use PDOStatement;
-use Expansa\Databaze\Exception\InvalidArgumentException;
-use Expansa\Databaze\Manager;
-use Expansa\Databaze\Raw;
+use Expansa\Database\Exception\InvalidArgumentException;
+use Expansa\Database\Manager;
+use Expansa\Database\Raw;
 use Expansa\Facades\Facade;
 
 /**

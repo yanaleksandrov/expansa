@@ -6,7 +6,7 @@ namespace dashboard\app\Api;
 
 use app\Option;
 use app\User;
-use Expansa\Databaze\Manager;
+use Expansa\Database\Manager;
 use Expansa\Db;
 use Expansa\Error;
 use Expansa\Hook;
