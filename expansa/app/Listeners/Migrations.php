@@ -130,7 +130,7 @@ final class Migrations
     private function createTermsTable(): void
     {
         Schema::create('terms', function (Table $table) {
-            $table->id('term_id');
+            $table->id();
             $table->string('name', 200)->default('');
             $table->string('slug', 200)->default('');
             $table->bigInt('term_group')->default(0);
@@ -139,24 +139,21 @@ final class Migrations
             $table->index('slug', 'slug_index');
             $table->index('name', 'name_index');
         });
+
+        $this->createFieldsTable('terms');
     }
 
     private function createTaxonomiesTable(): void
     {
         Schema::create('taxonomies', function (Table $table) {
-            $table->id('term_taxonomy_id');
+            $table->id();
             $table->bigInt('term_id')->default(0);
-            $table->string('taxonomy', 32)->default('');
-            $table->text('description');
             $table->bigInt('count')->default(0);
             $table->bigInt('parent')->default(0);
 
             // indexes
-            $table->unique(['term_id', 'taxonomy'], 'term_id_taxonomy');
-            $table->index('taxonomy');
+            $table->unique('term_id');
         });
-
-        $this->createFieldsTable('terms');
     }
 
     private function createUsersTable(): void

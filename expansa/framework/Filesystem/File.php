@@ -116,10 +116,8 @@ class File extends EntryHandler implements CommonInterface, FileInterface
 
     public function copy(string $to): File
     {
-        var_dump($this->exists);
         if ($this->exists) {
             $newPath = sprintf('%s/%s.%s', $to, $this->filename, $this->extension);
-            var_dump($newPath);
             $dirPath = dirname($newPath);
 
             if (!is_dir($dirPath) && !mkdir($dirPath, 0755, true)) {

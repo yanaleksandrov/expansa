@@ -121,3 +121,26 @@ require_once EX_PATH . 'routes.php';
 //        ->send()
 //);
 //echo '</pre>';
+
+echo '<pre>';
+var_dump('');
+$startTime = microtime(true);
+//for ($i = 0; $i <= 100000; $i++) {
+//    Expansa\Db::insert('slugs', [
+//        'post_id'    => 1,
+//        'post_table' => 'pages',
+//        'slug'       => 'hello-worlddd-' . $i,
+//        'locale'     => '',
+//    ]);
+//}
+//}
+print_r(\app\Slug::getting('hello-worldds-98615'));
+var_dump("Time:  " . number_format(( microtime(true) - $startTime), 6) . " Seconds\n");
+
+$startTime = microtime(true);
+//for ($i = 0; $i <= 100000; $i++) {
+//    \app\Slug::insert(1, 'pages', 'hello-worldds-' . $i);
+//}
+print_r(\app\Slug::get('hello-worldds-98615'));
+var_dump("Time:  " . number_format(( microtime(true) - $startTime), 6) . " Seconds\n");
+echo '<pre>';

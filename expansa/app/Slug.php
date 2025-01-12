@@ -6,6 +6,7 @@ namespace app;
 
 use Expansa\Db;
 use Expansa\Safe;
+use Expansa\Database\Db as Database;
 
 final class Slug
 {
@@ -15,6 +16,31 @@ final class Slug
      * @var string
      */
     private static string $table = 'slugs';
+
+    public static function insert(int $entityId, string $entityTable, string $slug, string $locale = ''): void
+    {
+        $table = EX_DB_PREFIX . self::$table;
+        Database::insert(
+            "INSERT INTO $table (post_id, post_table, slug, locale) VALUES (:post_id, :post_table, :slug, :locale)",
+            [
+                'post_id'    => $entityId,
+                'post_table' => $entityTable,
+                'slug'       => $slug,
+                'locale'     => $locale,
+            ]
+        );
+    }
+
+    public static function getting(string $slug, string $locale = ''): mixed
+    {
+        $table = EX_DB_PREFIX . self::$table;
+        return Database::select(
+            "SELECT * FROM $table WHERE slug = :slug",
+            [
+                'slug'   => $slug,
+            ]
+        );
+    }
 
     /**
      * Add new slug.
