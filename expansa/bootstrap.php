@@ -10,8 +10,8 @@ declare(strict_types=1);
 
 use app\User;
 use Expansa\{Db, Debug, I18n, Is,};
-use Expansa\Database\Schema;
-use Expansa\Database\Schema\Table;
+use Expansa\DatabaseLegacy\Schema;
+use Expansa\DatabaseLegacy\Schema\Table;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';

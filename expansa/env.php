@@ -10,15 +10,21 @@
  * @since 2025.1
  */
 
+const EX_DB_DRIVER           = 'mysql';
 const EX_DB_NAME             = 'alexandrov_cms';
 const EX_DB_USERNAME         = 'alexandrov_cms';
 const EX_DB_PASSWORD         = 'Wf9zh5BT';
 const EX_DB_HOST             = 'localhost';
 const EX_DB_PREFIX           = 'expansa_';
-const EX_DB_DRIVER           = 'mysql';
 const EX_DB_CHARSET          = 'utf8mb4';
-const EX_DB_COLLATE          = '';
+const EX_DB_COLLATION        = '';
+const EX_DB_PORT             = 3306;
 const EX_DB_MAX_INDEX_LENGTH = 191;
+const EX_DB_LOGGING          = false;
+// Error handling strategies when the error has occurred.
+// PDO::ERRMODE_SILENT (default) | PDO::ERRMODE_WARNING | PDO::ERRMODE_EXCEPTION
+// Read more from https://www.php.net/manual/en/pdo.error-handling.php.
+const EX_DB_ERROR_MODE       = PDO::ERRMODE_SILENT;
 
 /**
  * Constants for paths to Expansa directories.

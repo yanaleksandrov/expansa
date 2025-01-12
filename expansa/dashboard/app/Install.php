@@ -15,26 +15,20 @@ use Expansa\Url;
  *
  * @package Expansa
  */
-final class Install extends \Expansa\App\App
+final class Install
 {
     use Singleton;
+
+    public const EX_IS_INSTALL = true;
 
     /**
      * Class constructor
      *
      * @return void|bool
-     * @since 2025.1
+     * @throws \Exception
      */
     public function __construct()
     {
-
-        /**
-         * Define declare the necessary constants
-         *
-         * @since 2025.1
-         */
-        $this->define('EX_IS_INSTALL', true);
-
         /**
          * Add core API endpoints.
          * Important! If current request is request to API, stop code execution after Api::create().

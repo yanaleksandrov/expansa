@@ -183,8 +183,6 @@ final class Is
             return false;
         }
 
-        Db::init();
-
         $schema = Db::schema();
         if (empty($schema)) {
             return false;

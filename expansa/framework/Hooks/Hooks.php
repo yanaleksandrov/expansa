@@ -42,11 +42,9 @@ class Hooks extends HooksCollector
             foreach ($methods as $method) {
                 $methodName = $method->getName();
 
-                if (!$method->isPublic()) {
-                    throw new PathfinderException("The method '$methodName' is not public");
+                if ($method->isPublic()) {
+                    $this->add($methodName, [$instance, $methodName]);
                 }
-
-                $this->add($methodName, [$instance, $methodName]);
             }
         }
     }

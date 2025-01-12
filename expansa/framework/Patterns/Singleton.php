@@ -4,21 +4,15 @@ declare(strict_types=1);
 
 namespace Expansa\Patterns;
 
+use Expansa\Patterns\Exception\SingletonException;
+
 /**
- * Singleton is an evolution of the Singleton pattern, where instead of a single instance
- * you can create and use many. From a practical point of view, a singleton can be used
- * to create single-type classes that should not overlap each other. The simplest example
- * is working with multiple configurations, where each singleton class stores some different
- * set of data.
+ * This trait implements the Singleton pattern, ensuring that a class has only one instance
+ * and provides a global point of access to it. The instance is stored in a static array,
+ * allowing for multiple Singleton instances identified by a class name.
  */
 trait Singleton
 {
-    /**
-     * A real instance of the class is inside a static field. In this case the static field
-     * is an array, where each instance of the class is accessible by a flag.
-     */
-    protected static array $instances = [];
-
     /**
      * This is a static method that controls access to a Singleton.
      * On the first run, it creates a Singleton instance and places it in a static field.
@@ -26,27 +20,53 @@ trait Singleton
      */
     public static function init(...$args)
     {
+        static $instances;
+
         $id = static::class;
-        if (!isset(self::$instances[$id])) {
-            self::$instances[$id] = new self(...$args);
+        if (!isset($instances[$id])) {
+            $instances[$id] = new self(...$args);
         }
-        return self::$instances[$id];
+        return $instances[$id];
     }
 
     /**
      * The constructor of a Singleton should not be public, but should be hidden to prevent
      * the creation of an object through the `new` operator. However, it cannot be private
      * if we want to allow the creation of subclasses.
+     *
+     * @param mixed ...$args Optional arguments for the class constructor.
      */
     protected function __construct(...$args) {} // phpcs:ignore
 
     /**
-     * Cloning and deserialization are not allowed.
+     * Prevents cloning of the instance.
+     * Cloning is not allowed to ensure the Singleton pattern is maintained.
+     *
+     * @throws SingletonException
      */
-    protected function __clone() {} // phpcs:ignore
+    protected function __clone()
+    {
+        throw new SingletonException('You can not clone a singleton.');
+    }
 
     /**
-     * Singleton should not be recoverable from strings.
+     * Prevents deserialization of the instance.
+     * The Singleton instance should not be recoverable from strings to maintain its integrity.
+     *
+     * @throws SingletonException
      */
-    public function __wakeup() {} // phpcs:ignore
+    public function __wakeup()
+    {
+        throw new SingletonException('You can not deserialize a singleton.');
+    }
+
+    /**
+     * Prevents serialization of the instance.
+     *
+     * @throws SingletonException Thrown when attempting to serialize a Singleton instance.
+     */
+    public function __sleep()
+    {
+        throw new SingletonException('You can not serialize a singleton.');
+    }
 }

@@ -2,18 +2,9 @@
 
 declare(strict_types=1);
 
-use Expansa\Db;
 use Expansa\Api;
 use Expansa\I18n;
 use Expansa\Patterns\Registry;
-
-/**
- * Launch database connection.
- * TODO: configure & launch db including
- *
- * @since  2025.1
- */
-Db::init();
 
 /**
  * Create a single entry point to the website.
