@@ -45,6 +45,8 @@ class Facade
 
     /**
      * Handle all the methods that will lead to service class capability.
+     * Check if the class namespace already have a cached resolved instance,
+     * if not then the class namespace must be resolved.
      *
      * @param string $method
      * @param array $args
@@ -53,21 +55,10 @@ class Facade
      */
     public static function __callStatic(string $method, array $args)
     {
-        return self::getResolvedClassInstance()->{$method}(...$args);
-    }
-
-    /**
-     * Check if the class namespace already have a cached resolved instance,
-     * if not then the class namespace must be resolved.
-     *
-     * @return mixed
-     * @throws FacadeException
-     */
-    protected static function getResolvedClassInstance(): mixed
-    {
         $classNamespace = static::getStaticClassAccessor();
+        $classInstance  = self::getClass($classNamespace) ?: self::resolveClassNameSpace($classNamespace);
 
-        return self::getClass($classNamespace) ?: self::resolveClassNamespace($classNamespace);
+        return $classInstance()->{$method}(...$args);
     }
 
     /**
