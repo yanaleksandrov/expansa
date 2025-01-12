@@ -53,7 +53,10 @@ class Roles
             if (isset($roles[$capabilities])) {
                 $capabilities = $roles[$capabilities]['capabilities'];
             } else {
-                return new Error('roles-register', I18n::_t('You are trying to copy capabilities from a non exists role.'));
+                return new Error(
+                    'roles-register',
+                    I18n::_t('You are trying to copy capabilities from a non exists role.')
+                );
             }
         }
 
