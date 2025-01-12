@@ -294,7 +294,7 @@ class Table
         return $this;
     }
 
-    public function foreingId(string $column): ForeignIdColumn
+    public function foreignId(string $column): ForeignIdColumn
     {
         $column = $this->bigInt($column);
 

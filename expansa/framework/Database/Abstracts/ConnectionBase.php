@@ -176,7 +176,7 @@ abstract class ConnectionBase implements ConnectionContract
 
             // For update or delete statements, we want to get the number of rows affected
             // by the statement and return that back to the developer. We'll first need
-            // to execute the statement and then we'll use PDO to fetch the affected.
+            // to execute the statement, and then we'll use PDO to fetch the affected.
             $statement = $this->getPdo()->prepare($query);
 
             $this->bindValues($statement, $this->prepareBindings($bindings));

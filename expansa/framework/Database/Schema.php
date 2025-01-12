@@ -32,6 +32,12 @@ use Expansa\Database\Contracts\DatabaseException;
  */
 class Schema extends Facade
 {
+    protected static array $drivers = [
+        'mysql'  => 'MySQL',
+        'pgsql'  => 'Postgres',
+        'sqlite' => 'SQLite',
+    ];
+
     /**
      * Get the class name of the static accessor.
      *

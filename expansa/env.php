@@ -17,8 +17,11 @@ const EX_DB_HOST             = 'localhost';
 const EX_DB_PREFIX           = 'expansa_';
 const EX_DB_DRIVER           = 'mysql';
 const EX_DB_CHARSET          = 'utf8mb4';
-const EX_DB_COLLATE          = '';
+const EX_DB_COLLATION        = '';
 const EX_DB_MAX_INDEX_LENGTH = 191;
+const EX_DB_PORT             = '3306';
+const EX_DB_SOCKET           = '';
+const EX_DB_ENGINE           = 'InnoDb';
 
 /**
  * Constants for paths to Expansa directories.

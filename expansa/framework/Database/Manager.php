@@ -116,9 +116,9 @@ class Manager implements ConnectionResolver
 
     protected function configureConnection(Connection $connection, string $type = null): Connection
     {
-        if ($this->app->bound('events')) {
-            $connection->setEventDispatcher($this->app['events']);
-        }
+//        if ($this->app->bound('events')) {
+//            $connection->setEventDispatcher($this->app['events']);
+//        }
 
         $connection->setReconnector($this->reconnector);
 
@@ -127,7 +127,8 @@ class Manager implements ConnectionResolver
 
     public function getDefaultConnection(): string
     {
-        return config()->get('database.default');
+        return 'mysql';
+        //return config()->get('database.default');
     }
 
     public function setDefaultConnection(string $name): void
@@ -137,8 +138,23 @@ class Manager implements ConnectionResolver
 
     protected function getConfig($name): array
     {
-        $config = config()->get("database.connections.{$name}");
+        //$config = config()->get("database.connections.{$name}");
 
+        $config = [
+            'database'       => EX_DB_NAME,
+            'username'       => EX_DB_USERNAME,
+            'password'       => EX_DB_PASSWORD,
+            'host'           => EX_DB_HOST,
+            'prefix'         => EX_DB_PREFIX,
+            'driver'         => EX_DB_DRIVER,
+            'charset'        => EX_DB_CHARSET,
+            'port'           => EX_DB_PORT,
+            'unix_socket'    => EX_DB_SOCKET,
+            'collation'      => EX_DB_COLLATION,
+            'prefix_indexes' => true,
+            'strict'         => true,
+            'engine'         => EX_DB_ENGINE,
+        ];
         if (is_null($config)) {
             throw new DatabaseException("Connection [{$name}] not configured");
         }
