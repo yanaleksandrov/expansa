@@ -47,27 +47,6 @@ try {
 
 }
 
-//echo '<pre>';
-//$pdo = new PDO('mysql:host=localhost;dbname=' . EX_DB_NAME, EX_DB_USERNAME, EX_DB_PASSWORD);
-//$connection = new \Expansa\Database\Drivers\MySQL\Connection($pdo, [
-//    'database' => EX_DB_NAME,
-//    'username' => EX_DB_USERNAME,
-//    'password' => EX_DB_PASSWORD,
-//    'host'     => EX_DB_HOST,
-//    'prefix'   => EX_DB_PREFIX,
-//    'driver'   => EX_DB_DRIVER,
-//    'charset'  => EX_DB_CHARSET,
-//]);
-//print_r($pdo);
-//print_r($connection);
-//$database   = new \Expansa\Database\Drivers\MySQL\SchemaBuilder($connection);
-//Schema::create('test_my_table', function (Table $table) {
-//    var_dump(43243454);
-//    $table->id();
-//    $table->timestamps();
-//});
-//echo '</pre>';
-
 /**
  * Launch the installer if Expansa is not installed.
  *
@@ -134,39 +113,6 @@ User::current();
 
 require_once EX_PATH . 'migrations.php';
 require_once EX_PATH . 'routes.php';
-
-//
-//echo '<pre>';
-//Expansa\Hook::configure(EX_CORE . 'Listeners');
-//
-//function expansaTest($hook) {
-//  var_dump($hook);
-//  var_dump('111111');
-//  return $hook;
-//}
-//
-//Expansa\Hook::add('testHook', 'expansaTest');
-//
-//
-//Expansa\Hook::add('testHook', #[Expansa\Hooks\HookListenerAlias('heyheyhey')] function($hook) {
-//  var_dump($hook);
-//  var_dump('222222');
-//  return $hook;
-//}, Expansa\Hooks\Priority::HIGH);
-//
-//var_dump('--------------------------------------------------------------------------');
-////Expansa\Hooks::flush('testHook', ['Expansa\Listeners\Test', 'testHook']);
-////Expansa\Hooks::flush('testHook', 'expansaTest');
-////Expansa\Hooks::flush('testHook', 'heyheyhey');
-//
-//print_r(Expansa\Hook::get());
-//
-//Expansa\Hook::call('testHook', 'my', 'name', 'is', 'Yan');
-//echo '</pre>';
-
-//echo '<pre>';
-//print_r(Disk::dir(EX_PATH));
-//echo '</pre>';
 
 //echo '<pre>';
 //print_r(
