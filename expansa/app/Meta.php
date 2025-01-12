@@ -6,7 +6,6 @@ namespace app;
 
 use Expansa\Cache;
 use Expansa\Db;
-use function Expansa\gettype;
 
 /**
  * Represents a field associated with an object, allowing for retrieval,

@@ -186,7 +186,7 @@ final class Tree
      * Example: vsprintf( 'y = %y$d, x = %x$1.1f', [ 'x' => 1, 'y' => 2 ] )
      * Result:  'y = 2, x = 1.0'
      *
-     * $args also can be object, then it's properties are retrieved using get_object_vars().
+     * $args also can be objected, then it's properties are retrieved using get_object_vars().
      * '%s' without argument name works fine too. Everything vsprintf() can do is supported.
      *
      * @param string       $str

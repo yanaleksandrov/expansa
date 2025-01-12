@@ -54,6 +54,13 @@ final class User extends Schema
     public array $capabilities = [];
 
     /**
+     * DB table name.
+     *
+     * @var string
+     */
+    public static string $table = 'users';
+
+    /**
      * Retrieves user info by a given field.
      *
      * @param string|int    $value    A value for $field. A user ID, slug, email address, or login name.

@@ -9,9 +9,9 @@ declare(strict_types=1);
  */
 
 use app\User;
-use Expansa\{Db, Debug, I18n, Is,};
-use Expansa\Database\Schema;
-use Expansa\Database\Schema\Table;
+use Expansa\{Db, Debug, Is};
+use Expansa\I18n;
+use Expansa\Hook;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';
@@ -25,6 +25,7 @@ const EX_REQUIRED_MYSQL_VERSION = '5.6';
  */
 require_once EX_PATH . 'env.php';
 require_once EX_PATH . 'autoload.php';
+require_once EX_CORE . 'functions.php';
 require_once EX_PATH . 'config.php';
 
 /**
@@ -43,9 +44,9 @@ Debug::timer();
 try {
     (new Expansa\Security\Csrf\Csrf())->generate('token');
 } catch (Random\RandomException $e) {
+
 }
 
-require_once EX_CORE . 'functions.php';
 //echo '<pre>';
 //$pdo = new PDO('mysql:host=localhost;dbname=' . EX_DB_NAME, EX_DB_USERNAME, EX_DB_PASSWORD);
 //$connection = new \Expansa\Database\Drivers\MySQL\Connection($pdo, [

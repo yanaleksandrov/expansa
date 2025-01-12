@@ -11,7 +11,7 @@ use Expansa\Db;
  * Represents a field associated with an object, allowing for retrieval, addition,
  * updating, and deletion of field values in a database.
  */
-final class Field extends \app\Field\Schema
+final class Field
 {
     use \app\Field\Traits;
 
@@ -30,7 +30,7 @@ final class Field extends \app\Field\Schema
         ] = match (true) {
             $object instanceof User => [
                 $object->id,
-                'user_id',
+                'id',
                 sprintf('%s_fields', $object::$table),
                 sprintf('user-fields-%d', $object->id),
             ],

@@ -9,6 +9,8 @@ use Throwable;
 
 class QueryException extends DatabaseException
 {
+    protected ?array $errorInfo;
+
     public function __construct(
         protected $sql,
         protected array $bindings,
@@ -25,7 +27,7 @@ class QueryException extends DatabaseException
         }
     }
 
-    protected function formatMessage(string $sql, array $bindings, Throwable $previous)
+    protected function formatMessage(string $sql, array $bindings, Throwable $previous): string
     {
         return $previous->getMessage() . ' (SQL: ' . Str::replaceArray('?', $bindings, $sql) . ')';
     }
@@ -35,7 +37,7 @@ class QueryException extends DatabaseException
         return $this->sql;
     }
 
-    public function getBindings()
+    public function getBindings(): array
     {
         return $this->bindings;
     }
