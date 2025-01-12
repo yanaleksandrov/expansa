@@ -22,7 +22,7 @@ use Expansa\Facades\Facade;
  * @method bool         has(string $table, array $join, array $where = null)
  * @method array        rand(string $table, array $join = null, array|string $columns = null, array $where = null)
  * @method null|int     count(string $table, array $join = null, string $column = null, array $where = null)
- * @method null|array   select(string $table, array $join, array|string $columns = null, array $where = null)
+ * @method null|array   select(string $table, string|array $join, array|string $columns = null, array $where = null)
  * @method null|string  avg(string $table, array $join, string $column = null, array $where = null)
  * @method null|string  max(string $table, array $join, string $column = null, array $where = null)
  * @method null|string  min(string $table, array $join, string $column = null, array $where = null)
@@ -38,7 +38,7 @@ class Db extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Databaze\Manager';
+        return '\Expansa\Database\Manager';
     }
 
     protected static function getConstructorArgs(): array
