@@ -82,7 +82,7 @@ final class Migrations
             $table->id();
             $table->ulid();
             $table->bigInt('post_id')->unsigned();
-            $table->string('post_table', 255);
+            $table->string('post_table', 191);
             $table->string('slug', 255)->unique();
             $table->string('locale', 100)->default('');
 

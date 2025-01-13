@@ -175,7 +175,9 @@ abstract class BuilderAbstract
                 return null;
             }
 
+            echo '<pre>';
             echo $this->generate($statement, $map);
+            echo '</pre>';
 
             $this->debugMode = false;
 

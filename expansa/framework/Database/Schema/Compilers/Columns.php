@@ -2,61 +2,42 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Schema;
+namespace Expansa\Database\Schema\Compilers;
 
-use Expansa\Database\Abstracts\Base;
+use Expansa\Database\Schema\Column;
 
-class BuilderGrammar extends Base
+trait Columns
 {
-    protected function charset(): string
+    protected function compileCharset(): string
     {
-        return EX_DB_CHARSET ? sprintf(' CHARSET=%s', EX_DB_CHARSET) : '';
+        return EX_DB_CHARSET ?? '';
     }
 
-    protected function collate(): string
+    protected function compileCollate(): string
     {
-        return EX_DB_COLLATION ? sprintf(' COLLATE=%s', EX_DB_COLLATION) : '';
-    }
-
-    protected function sql(Table $table): string
-    {
-        $sql = [];
-        foreach ($table->getColumns() as $column) {
-            $unsigned  = $this->compileUnsigned($column);
-            $type      = $this->compileType($column);
-            $primary   = $this->compilePrimary($column);
-            $increment = $this->compileIncrement($column);
-            $default   = $this->compileDefaultValue($column);
-            $nullable  = $this->compileNullable($column);
-
-            $sql[] = PHP_EOL . "`$column->name` {$type}{$unsigned}{$nullable}{$default}{$increment}{$primary}";
-        }
-
-        (new Command())->compile($table);
-
-        return implode(', ', $sql) . PHP_EOL;
+        return EX_DB_COLLATION ?? '';
     }
 
     protected function compileUnsigned(Column $column): string
     {
         if ($column->unsigned) {
-            return ' UNSIGNED';
+            return 'UNSIGNED';
         }
         return '';
     }
 
-    protected function compilePrimary(Column $column): string
-    {
-        if ($column->primary) {
-            return ' PRIMARY KEY';
-        }
-        return '';
-    }
-
-    protected function compileIncrement(Column $column): string
+    protected function compileAutoIncrement(Column $column): string
     {
         if ($column->autoIncrement) {
-            return ' AUTO_INCREMENT PRIMARY KEY';
+            return 'AUTO_INCREMENT';
+        }
+        return '';
+    }
+
+    protected function compilePrimaryKey(Column $column): string
+    {
+        if ($column->autoIncrement || $column->primary) {
+            return 'PRIMARY KEY';
         }
         return '';
     }
@@ -73,7 +54,7 @@ class BuilderGrammar extends Base
                 'binary',
                 'varbinary',
                 'char',
-                'varchar'    => sprintf('%s(%d)', $column->type, $column->precision ?? $column->length),
+                'varchar'    => sprintf('%s(%d)', $column->type, $column->precision ?? $column->length ?? ''),
                 'float',
                 'decimal',
                 'double'     => sprintf(
@@ -89,24 +70,23 @@ class BuilderGrammar extends Base
                 default      => $column->type,
             };
         }
-        return $column->type;
+        return mb_strtolower($column->type);
     }
 
     protected function compileDefaultValue(Column $column): string
     {
-        //print_r($column);
         if (! is_null($column->useCurrent)) {
             return match ($column->type) {
                 'datetime',
-                'timestamp' => ' DEFAULT CURRENT_TIMESTAMP',
-                'date'      => ' DEFAULT CURRENT_DATE',
-                'time'      => ' DEFAULT CURRENT_TIME',
+                'timestamp' => 'DEFAULT CURRENT_TIMESTAMP',
+                'date'      => 'DEFAULT CURRENT_DATE',
+                'time'      => 'DEFAULT CURRENT_TIME',
                 default     => '',
             };
         }
 
         if (! is_null($column->default)) {
-            return ' DEFAULT ' . $this->getDefaultValue($column->default);
+            return 'DEFAULT ' . $this->getDefaultValue($column->default);
         }
 
         return '';
@@ -126,7 +106,7 @@ class BuilderGrammar extends Base
             return '';
         }
 
-        return ' NOT NULL';
+        return 'NOT NULL';
     }
 
     protected function getDefaultValue(mixed $value = null): string

@@ -9,7 +9,7 @@ use Expansa\Patterns\Fluent;
 
 trait Commands
 {
-    protected array $commands = [];
+    public array $commands = [];
 
     public function create(): static
     {
@@ -100,11 +100,6 @@ trait Commands
     public function foreign(string $column): CommandForeign
     {
         return $this->commands[] = new CommandForeign(['name' => 'foreign', 'column' => $column]);
-    }
-
-    public function getCommands(): array
-    {
-        return $this->commands;
     }
 
     private function dropIndexCommand(string $command, string $type, string|array $index): static

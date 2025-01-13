@@ -18,6 +18,7 @@ use PDOStatement;
  * @method PDOStatement query(string $statement, array $map = [])
  * @method PDOStatement create(string $table, array $columns, array $options = null)
  * @method PDOStatement drop(string $table)
+ * @method PDOStatement rename(string $table, string $to)
  * @method PDOStatement insert(string $table, array $values, ?string $primaryKey = null)
  * @method PDOStatement update(string $table, array $data, array $where = null)
  * @method PDOStatement delete(string $table, Raw|array $where)

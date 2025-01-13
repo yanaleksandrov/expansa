@@ -43,7 +43,7 @@ final class Option extends \app\Option\Schema
     public static function fetch(): array
     {
         if (empty(self::$options)) {
-            $options = Db::select(self::$table, '*');
+            $options = Db::select(self::$table, ['*']);
             if ($options) {
                 $options = array_column($options, 'value', 'key');
                 foreach ($options as $key => $value) {
