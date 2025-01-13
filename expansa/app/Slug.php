@@ -122,41 +122,4 @@ final class Slug
         }
         return Db::delete(self::$table, [ $by => $value ])->rowCount() > 0;
     }
-
-    /**
-     * Create new table into database.
-     */
-    public static function migrate(): void
-    {
-        $tableName      = (new Db\Handler())->getTableName(self::$table);
-        $charsetCollate = (new Db\Handler())->getCharsetCollate();
-
-        Db::query(
-            "
-			CREATE TABLE IF NOT EXISTS {$tableName} (
-				id           BIGINT(20)   UNSIGNED NOT NULL AUTO_INCREMENT,
-			    uuid         CHAR(13)     NOT NULL,
-			    entity_id    BIGINT(20)   UNSIGNED NOT NULL,
-				entity_table VARCHAR(255) NOT NULL,
-                slug         VARCHAR(255) NOT NULL UNIQUE,
-			    locale       VARCHAR(100) NOT NULL DEFAULT '',
-
-				PRIMARY KEY (id),
-
-			    UNIQUE KEY unique_uuid (uuid),
-			    UNIQUE KEY unique_slug_locale (slug, locale),
-
-                INDEX idx_entity (entity_id, entity_table)
-			) ENGINE=InnoDB {$charsetCollate};
-
-			CREATE TRIGGER before_insert_{$tableName}
-				BEFORE INSERT ON {$tableName}
-				FOR EACH ROW
-					BEGIN
-					    IF NEW.uuid IS NULL THEN
-					        SET NEW.uuid = LOWER(CONV(UUID_SHORT(), 10, 36));
-					    END IF;
-					END;"
-        )->fetchAll();
-    }
 }

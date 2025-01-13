@@ -14,8 +14,15 @@ use Expansa\Support\Arr;
  * Option class it is a self-contained class for creating, updating, and deleting options.
  * Uses static variables to store options, which allows to avoid using the object cache without losing performance.
  */
-final class Option extends \app\Option\Schema
+final class Option
 {
+    /**
+     * DB table name.
+     *
+     * @var string
+     */
+    public static string $table = 'options';
+
     /**
      * Options list
      *

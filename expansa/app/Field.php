@@ -11,7 +11,7 @@ use Expansa\Database\Db;
  * Represents a field associated with an object, allowing for retrieval, addition,
  * updating, and deletion of field values in a database.
  */
-final class Field extends \app\Field\Schema
+final class Field
 {
     use \app\Field\Traits;
 

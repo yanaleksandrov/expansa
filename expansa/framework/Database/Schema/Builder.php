@@ -49,10 +49,7 @@ class Builder extends Base
             $statement = $this->compileIndexes($table, $command, $name);
 
             if ($statement) {
-                $this->connection->debug()->query($statement, [
-                    ':table' => $name,
-                    ':index' => $command->index,
-                ]);
+                $this->connection->query($statement);
             }
         }
     }

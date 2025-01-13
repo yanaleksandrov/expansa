@@ -37,13 +37,13 @@ trait Indexes
             }
 
             $columnType = $result[$column];
-            if (in_array($columnType, ['char', 'varchar', 'text', 'tinytext', 'mediumtext', 'longtext'], true)) {
+            if (preg_match('/^(char|varchar|text|tinytext|mediumtext|longtext)/', $columnType)) {
                 $keys[] = sprintf("`$column`(%d)", EX_DB_MAX_INDEX_LENGTH);
             } else {
                 $keys[] = "`$column`";
             }
         }
 
-        return sprintf("ALTER TABLE <$name> ADD $type :index (%s)", implode(', ', $keys));
+        return sprintf("ALTER TABLE <$name> ADD $type <$command->index> (%s)", implode(', ', $keys));
     }
 }
