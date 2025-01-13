@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\DatabaseLegacy\Drivers\MySQL;
 
+use Expansa\Database\Schema\Expression;
 use Expansa\DatabaseLegacy\Schema\Column;
-use Expansa\DatabaseLegacy\Schema\Expression;
 use Expansa\DatabaseLegacy\Schema\Fluent;
 use Expansa\DatabaseLegacy\Schema\Grammar;
 use Expansa\DatabaseLegacy\Schema\Table;

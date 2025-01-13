@@ -4,7 +4,7 @@ namespace Dashboard;
 
 use app\Tree;
 use Expansa\Asset;
-use Expansa\Db;
+use Expansa\Database\Db;
 use Expansa\Debug;
 use Expansa\Hook;
 use Expansa\I18n;
@@ -13,13 +13,11 @@ use Expansa\Url;
 
 new class
 {
-    /**
-     * Now the code is exclusively for the administrative panel.
-     */
-    public const EX_IS_DASHBOARD = true;
-
     public function __construct()
     {
+        if (!defined('EX_IS_DASHBOARD')) {
+            define('EX_IS_DASHBOARD', true);
+        }
 
         /**
          * Include CSS styles & JS scripts.

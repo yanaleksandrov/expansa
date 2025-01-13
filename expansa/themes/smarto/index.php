@@ -1,11 +1,8 @@
 <?php
 
-use Expansa\Db;
+use Expansa\Extensions\Theme;
 use Expansa\I18n;
 use Expansa\Is;
-use Expansa\Hook;
-use Expansa\Debug;
-use Expansa\Extensions\Theme;
 
 return new class extends Theme
 {

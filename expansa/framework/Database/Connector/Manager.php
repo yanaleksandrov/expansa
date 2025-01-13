@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace Expansa\Database\Connector;
 
+use Expansa\Database\Exception;
+use Expansa\Database\Exception\InvalidArgumentException;
 use PDO;
-use Exception;
 use PDOException;
 use PDOStatement;
-use Expansa\Database\Exception\InvalidArgumentException;
 
 class Manager extends ManagerBase
 {
@@ -916,7 +916,7 @@ class Manager extends ManagerBase
                 } else {
                     $this->pdo->commit();
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->pdo->rollBack();
                 throw $e;
             }

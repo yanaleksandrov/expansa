@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\User;
 
 use app\Field;
-use Expansa\Db;
+use Expansa\Database\Db;
 use Expansa\I18n;
 use Expansa\Safe;
 use Expansa\Validator;

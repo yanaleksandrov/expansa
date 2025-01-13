@@ -19,8 +19,6 @@ final class Install
 {
     use Singleton;
 
-    public const EX_IS_INSTALL = true;
-
     /**
      * Class constructor
      *
@@ -29,6 +27,10 @@ final class Install
      */
     public function __construct()
     {
+        if (!defined('EX_IS_INSTALL')) {
+            define('EX_IS_INSTALL', true);
+        }
+
         /**
          * Add core API endpoints.
          * Important! If current request is request to API, stop code execution after Api::create().

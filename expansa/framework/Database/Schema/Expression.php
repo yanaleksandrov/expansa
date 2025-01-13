@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\DatabaseLegacy\Schema;
+namespace Expansa\Database\Schema;
 
 class Expression
 {

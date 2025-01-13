@@ -9,9 +9,7 @@ declare(strict_types=1);
  */
 
 use app\User;
-use Expansa\{Db, Debug, I18n, Is,};
-use Expansa\DatabaseLegacy\Schema;
-use Expansa\DatabaseLegacy\Schema\Table;
+use Expansa\{Database\Db, Debug, I18n, Is,};
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';
@@ -46,7 +44,7 @@ try {
 }
 
 require_once EX_CORE . 'functions.php';
-echo '<pre>';
+//echo '<pre>';
 //$pdo = new PDO('mysql:host=localhost;dbname=' . EX_DB_NAME, EX_DB_USERNAME, EX_DB_PASSWORD);
 //$connection = new \Expansa\Database\Drivers\MySQL\Connection($pdo, [
 //    'database' => EX_DB_NAME,
@@ -65,7 +63,7 @@ echo '<pre>';
 //    $table->id();
 //    $table->timestamps();
 //});
-echo '</pre>';
+//echo '</pre>';
 
 /**
  * Launch the installer if Expansa is not installed.

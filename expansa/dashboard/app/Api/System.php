@@ -6,12 +6,12 @@ namespace dashboard\app\Api;
 
 use app\Option;
 use app\User;
-use Expansa\Database\Manager;
-use Expansa\Db;
+use Expansa\Database\Connector\Manager;
+use Expansa\Database\Db;
+use Expansa\Disk;
 use Expansa\Error;
 use Expansa\Hook;
 use Expansa\Safe;
-use Expansa\Disk;
 
 class System
 {

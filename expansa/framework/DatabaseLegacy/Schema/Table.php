@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\DatabaseLegacy\Schema;
 
 use Closure;
+use Expansa\Database\Schema\Expression;
 use Expansa\DatabaseLegacy\Abstracts\ConnectionBase;
 
 class Table
@@ -294,7 +295,7 @@ class Table
         return $this;
     }
 
-    public function foreingId(string $column): ForeignIdColumn
+    public function foreignId(string $column): ForeignIdColumn
     {
         $column = $this->bigInt($column);
 

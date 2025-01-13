@@ -2,15 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Expansa;
+namespace Expansa\Database;
 
-use PDOStatement;
+use Expansa\Database\Connector\Manager;
+use Expansa\Database\Connector\Raw;
 use Expansa\Database\Exception\InvalidArgumentException;
-use Expansa\Database\Manager;
-use Expansa\Database\Raw;
 use Expansa\Facades\Facade;
+use PDOStatement;
 
 /**
+ * This class provides a facade for database interactions, offering a variety of methods to execute
+ * common SQL operations such as querying, creating, dropping tables, and performing CRUD operations.
+ * It also includes methods for more advanced operations like schema management and raw SQL execution.
+ *
  * @method PDOStatement query(string $statement, array $map = [])
  * @method PDOStatement create(string $table, array $columns, array $options = null)
  * @method PDOStatement drop(string $table)
@@ -38,7 +42,7 @@ class Db extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Database\Manager';
+        return '\Expansa\Database\Connector\Manager';
     }
 
     protected static function getConstructorArgs(): array

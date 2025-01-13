@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\DatabaseLegacy\Abstracts;
 
+use Expansa\Database\Schema\Expression;
 use Expansa\DatabaseLegacy\Contracts\DatabaseException;
-use Expansa\DatabaseLegacy\Schema\Expression;
 use Expansa\DatabaseLegacy\Schema\Table;
 use Expansa\Support\Traits\Macroable;
 

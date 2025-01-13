@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\Term;
 
 use app\Field;
-use Expansa\Db;
+use Expansa\Database\Db;
 
 class Schema
 {
