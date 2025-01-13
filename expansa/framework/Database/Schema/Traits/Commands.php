@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema\Traits;
 
-use Expansa\Database\Schema\Foreign;
+use Expansa\Database\Schema\CommandForeign;
 use Expansa\Patterns\Fluent;
 
 trait Commands
@@ -97,9 +97,9 @@ trait Commands
         return $this->dropIndexCommand(__FUNCTION__, 'unique', $index);
     }
 
-    public function foreign(string $column): Foreign
+    public function foreign(string $column): CommandForeign
     {
-        return $this->commands[] = new Foreign(['name' => 'foreign', 'column' => $column]);
+        return $this->commands[] = new CommandForeign(['name' => 'foreign', 'column' => $column]);
     }
 
     public function getCommands(): array

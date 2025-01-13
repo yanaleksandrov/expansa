@@ -10,13 +10,12 @@ use Expansa\Patterns\Fluent;
  * This class represents the definition of foreign key constraints in a database schema.
  * It provides methods for setting the referenced table, columns, and actions to be performed
  * on update or delete operations.
- *
- * @method Foreign on(string $table) Specify the referenced table
- * @method Foreign references(string|array $columns) Specify the referenced column(s)
- * @method Foreign onUpdate(string $action)
- * @method Foreign onDelete(string $action)
+ * @method CommandForeign on(string $table) Specify the referenced table
+ * @method CommandForeign references(string|array $columns) Specify the referenced column(s)
+ * @method CommandForeign onUpdate(string $action)
+ * @method CommandForeign onDelete(string $action)
  */
-class Foreign extends Fluent
+class CommandForeign extends Fluent
 {
     /**
      * Set ON UPDATE action to RESTRICT;

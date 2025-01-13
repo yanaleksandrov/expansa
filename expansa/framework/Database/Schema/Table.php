@@ -51,7 +51,7 @@ use Expansa\Database\Schema\Traits\Commands;
  * @method static dropPrimary(string|array $index) Drop a primary key
  * @method static dropIndex(string|array $index) Drop an index
  * @method static dropUnique(string|array $index) Drop a unique index
- * @method Foreign foreign(string $column) Add a foreign key constraint
+ * @method CommandForeign foreign(string $column) Add a foreign key constraint
  */
 class Table
 {

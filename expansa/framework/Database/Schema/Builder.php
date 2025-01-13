@@ -7,7 +7,7 @@ namespace Expansa\Database\Schema;
 use Closure;
 use Expansa\Database\Query\Builder as QueryBuilder;
 
-class Builder extends Grammar
+class Builder extends BuilderGrammar
 {
     public function __construct(
         public QueryBuilder $connection,

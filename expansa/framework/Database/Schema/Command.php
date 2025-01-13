@@ -54,7 +54,7 @@ class Command extends Base
         return implode(', ', array_map([$this, 'wrap'], (array) $columns));
     }
 
-    private function compileOnDeleteCascade(Foreign $command): string
+    private function compileOnDeleteCascade(CommandForeign $command): string
     {
         if (!isset($command->on, $command->column, $command->references)) {
             return '';

@@ -6,7 +6,7 @@ namespace Expansa\Database\Schema;
 
 use Expansa\Database\Abstracts\Base;
 
-class Grammar extends Base
+class BuilderGrammar extends Base
 {
     protected function charset(): string
     {
