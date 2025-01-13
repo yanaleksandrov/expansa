@@ -15,7 +15,7 @@ const EX_DB_PASSWORD         = 'db.password';
 const EX_DB_HOST             = 'db.host';
 const EX_DB_PREFIX           = 'db.prefix';
 const EX_DB_CHARSET          = 'utf8mb4';
-const EX_DB_COLLATION        = '';
+const EX_DB_COLLATION        = 'utf8mb4_general_ci';
 const EX_DB_PORT             = 3306;
 const EX_DB_MAX_INDEX_LENGTH = 191;
 // It is disabled by default for better performance.

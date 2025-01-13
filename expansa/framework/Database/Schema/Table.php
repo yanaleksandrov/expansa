@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
+use Expansa\Database\Query\Builder;
 use Expansa\Database\Schema\Traits\Columns;
 use Expansa\Database\Schema\Traits\Commands;
 
@@ -57,4 +58,9 @@ class Table
 {
     use Columns;
     use Commands;
+
+    public function __construct(
+        public string $name,
+        public Builder $connection
+    ) {} // phpcs:ignore
 }

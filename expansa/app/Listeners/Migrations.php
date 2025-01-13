@@ -63,6 +63,82 @@ final class Migrations
         });
     }
 
+    private function createCacheTable(): void
+    {
+        Schema::createIfNotExists('cache', function (Table $table) {
+            $table->string('key', 191)->primary();
+            $table->text('value');
+            $table->datetime('expiry_at');
+
+            // indexes
+            $table->index('key');
+            $table->index('expiry_at');
+        });
+    }
+
+    private function createSlugsTable(): void
+    {
+        Schema::createIfNotExists('slugs', function (Table $table) {
+            $table->id();
+            $table->ulid();
+            $table->bigInt('post_id')->unsigned();
+            $table->string('post_table', 255);
+            $table->string('slug', 255)->unique();
+            $table->string('locale', 100)->default('');
+
+            // indexes
+            $table->index('ulid');
+            $table->index(['post_id', 'post_table']);
+            $table->index(['slug', 'locale']);
+        });
+    }
+
+    private function createTermsTable(): void
+    {
+        Schema::createIfNotExists('terms', function (Table $table) {
+            $table->id();
+            $table->string('name', 200)->default('');
+            $table->string('slug', 200)->default('');
+            $table->bigInt('term_group')->default(0);
+
+            // indexes
+            $table->index('slug', 'slug_index');
+            $table->index('name', 'name_index');
+        });
+
+        $this->createFieldsTable('terms');
+    }
+
+    private function createUsersTable(): void
+    {
+        Schema::createIfNotExists('users', function (Table $table) {
+            $table->id();
+            $table->ulid();
+            $table->string('login', 60);
+            $table->string('password', 255);
+            $table->string('nicename', 60);
+            $table->string('firstname', 60);
+            $table->string('lastname', 60);
+            $table->string('showname', 255);
+            $table->string('email', 100);
+            $table->string('locale', 16);
+            $table->bool('is_verified')->default(0);
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->string('verification_token', 100);
+            $table->string('password_reset_token', 100);
+            $table->dateTime('visited_at')->useCurrent();
+            $table->timestamps();
+
+            // indexes
+            $table->index('login');
+            $table->index('nicename');
+            $table->index('email');
+            $table->index('status');
+        });
+
+        $this->createFieldsTable('users');
+    }
+
     private function createCommentsTable(): void
     {
         Schema::createIfNotExists('comments', function (Table $table) {
@@ -106,39 +182,6 @@ final class Migrations
         });
     }
 
-    private function createSlugsTable(): void
-    {
-        Schema::createIfNotExists('slugs', function (Table $table) {
-            $table->id();
-            $table->ulid();
-            $table->bigInt('post_id')->unsigned();
-            $table->string('post_table', 255);
-            $table->string('slug', 255)->unique();
-            $table->string('locale', 100)->default('');
-
-            // indexes
-            $table->index('ulid');
-            $table->index(['post_id', 'post_table']);
-            $table->index(['slug', 'locale']);
-        });
-    }
-
-    private function createTermsTable(): void
-    {
-        Schema::createIfNotExists('terms', function (Table $table) {
-            $table->id();
-            $table->string('name', 200)->default('');
-            $table->string('slug', 200)->default('');
-            $table->bigInt('term_group')->default(0);
-
-            // indexes
-            $table->index('slug', 'slug_index');
-            $table->index('name', 'name_index');
-        });
-
-        $this->createFieldsTable('terms');
-    }
-
     private function createTaxonomiesTable(): void
     {
         Schema::createIfNotExists('taxonomies', function (Table $table) {
@@ -149,49 +192,6 @@ final class Migrations
 
             // indexes
             $table->index('term_id');
-        });
-    }
-
-    private function createUsersTable(): void
-    {
-        Schema::createIfNotExists('users', function (Table $table) {
-            $table->id();
-            $table->ulid();
-            $table->string('login', 60);
-            $table->string('password', 255);
-            $table->string('nicename', 60);
-            $table->string('firstname', 60);
-            $table->string('lastname', 60);
-            $table->string('showname', 255);
-            $table->string('email', 100);
-            $table->string('locale', 16);
-            $table->bool('is_verified')->default(0);
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('verification_token', 100);
-            $table->string('password_reset_token', 100);
-            $table->dateTime('visited_at')->useCurrent();
-            $table->timestamps();
-
-            // indexes
-            $table->index('login');
-            $table->index('nicename');
-            $table->index('email');
-            $table->index('status');
-        });
-
-        $this->createFieldsTable('users');
-    }
-
-    private function createCacheTable(): void
-    {
-        Schema::createIfNotExists('cache', function (Table $table) {
-            $table->string('key', 255)->primary();
-            $table->text('value');
-            $table->datetime('expiry_at');
-
-            // indexes
-            $table->index('key');
-            $table->index('expiry_at');
         });
     }
 }

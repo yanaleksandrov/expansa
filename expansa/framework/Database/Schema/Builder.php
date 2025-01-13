@@ -15,36 +15,41 @@ class Builder extends BuilderGrammar
 
     public function create(string $name, Closure $callback): void
     {
-        $this->bind("CREATE DATABASE {$this->wrap($name)} (%s) DEFAULT{$this->charset()}{$this->collate()}", $callback);
+        $this->bind(
+            "CREATE DATABASE {$this->wrap($name)} (%s) ENGINE=InnoDB DEFAULT{$this->charset()}{$this->collate()}",
+            $name,
+            $callback
+        );
     }
 
     public function createIfNotExists(string $name, Closure $callback): void
     {
         $this->bind(
-            "CREATE TABLE IF NOT EXISTS {$this->wrap($name)} (%s) DEFAULT{$this->charset()}{$this->collate()}",
+            "CREATE TABLE IF NOT EXISTS {$this->wrap($name)} (%s) ENGINE=InnoDB DEFAULT{$this->charset()}{$this->collate()}",
+            $name,
             $callback
         );
     }
 
     public function drop(string $name): void
     {
-        $this->bind("DROP DATABASE {$this->wrap($name)}");
+        $this->bind("DROP DATABASE {$this->wrap($name)}", $name);
     }
 
     public function dropIfExists(string $name): void
     {
-        $this->bind("DROP DATABASE IF EXISTS {$this->wrap($name)}");
+        $this->bind("DROP DATABASE IF EXISTS {$this->wrap($name)}", $name);
     }
 
     public function rename(string $name, string $to): void
     {
-        $this->bind("RENAME TABLE {$this->wrap($name)} TO {$this->wrap($to)}");
+        $this->bind("RENAME TABLE {$this->wrap($name)} TO {$this->wrap($to)}", $name);
     }
 
-    public function bind(string $query, ?Closure $callback = null): void
+    private function bind(string $query, string $name, ?Closure $callback = null): void
     {
         if ($callback instanceof Closure) {
-            $callback($table = new Table());
+            $callback($table = new Table($name, $this->connection));
 
             $query = sprintf($query, $this->sql($table));
         }

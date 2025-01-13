@@ -12,9 +12,12 @@ class Command extends Base
     public function compile(Table $table): string
     {
         $sql = '';
+        echo '<pre>';
+        print_r($table);
+        echo '</pre>';
         foreach ($table->getCommands() as $command) {
             $sql .= match ($command->name) {
-                'createUlid' => $this->compileOnCreateUlid($command),
+                'createUlid' => $this->compileOnCreateUlid($command, $table),
                 'foreign'    => $this->compileForeignCommand($command),
                 'primary'    => $this->compilePrimary($table, $command),
                 'index'      => $this->compileIndex($table, $command),
@@ -42,11 +45,18 @@ class Command extends Base
 
     protected function compileIndexBase(Table $table, Fluent $command, string $type): string
     {
-        $index     = $this->wrap($command->index ?? '');
-        $columns   = $this->columnize($command->columns ?? '');
-        $algorithm = $command->algorithm ? ' USIGN ' . $command->algorithm : '';
+        $length = str_starts_with(EX_DB_CHARSET, 'utf8mb4') ?
+            sprintf('(%d)', EX_DB_MAX_INDEX_LENGTH) : '';
 
-        return sprintf('ALTER TABLE %s ADD %s %s%s(%s)', 'reeeeee', $type, $index, $algorithm, $columns);
+        return sprintf(
+            'ALTER TABLE %s ADD %s %s%s (`%s`%s)',
+            $this->wrap($table->name),
+            $type,
+            $this->wrap($command->index ?? ''),
+            isset($command->algorithm) ? ' USIGN ' . $command->algorithm : '',
+            $this->columnize($command->columns ?? ''),
+            $length
+        );
     }
 
     protected function columnize(string|array $columns): string
@@ -79,7 +89,7 @@ CREATE TRIGGER cascade_delete_$prefix{$command->on}
         };
     }
 
-    private function compileOnCreateUlid(Fluent $command): string
+    private function compileOnCreateUlid(Fluent $command, Table $table): string
     {
         if (!isset($command->name)) {
             return '';
@@ -87,8 +97,8 @@ CREATE TRIGGER cascade_delete_$prefix{$command->on}
         $prefix = EX_DB_PREFIX;
 
         return "
-CREATE TRIGGER before_insert_$prefix{$table}
-    BEFORE INSERT ON $prefix{$table}
+CREATE TRIGGER before_insert_$prefix{$table->name}
+    BEFORE INSERT ON $prefix{$table->name}
     FOR EACH ROW
         BEGIN
             IF NEW.$command->name IS NULL THEN

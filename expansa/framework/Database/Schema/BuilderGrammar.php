@@ -69,19 +69,23 @@ class BuilderGrammar extends Base
                 'smallint',
                 'mediumint',
                 'int',
-                'bigint',    => sprintf('%s(%d)', $column->type, $column->precision),
+                'bigint',
                 'binary',
                 'varbinary',
                 'char',
-                'varchar'    => sprintf('%s(%d)', $column->type, $column->length),
+                'varchar'    => sprintf('%s(%d)', $column->type, $column->precision ?? $column->length),
                 'float',
                 'decimal',
                 'double'     => sprintf(
-                    "{$column->type}({$column->precision}%s)",
+                    "$column->type($column->precision%s)",
                     isset($column->scale) ? ",$column->scale" : ''
                 ),
                 'enum',
-                'set'        => sprintf('%s(%s)', $column->type, $column->precision),
+                'set'        => sprintf(
+                    '%s(%s)',
+                    $column->type,
+                    implode(', ', array_map(fn($item) => "'$item'", (array) $column->allowed))
+                ),
                 default      => $column->type,
             };
         }
@@ -130,7 +134,6 @@ class BuilderGrammar extends Base
         if (is_null($value)) {
             return 'NULL';
         }
-
-        return $this->wrap(is_bool($value) ? (int) $value : (string) $value);
+        return sprintf("'%s'", is_bool($value) ? (int) $value : (string) $value);
     }
 }

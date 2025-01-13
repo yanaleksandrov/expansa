@@ -6,8 +6,8 @@ namespace Expansa\Security\Csrf;
 
 use Random\RandomException;
 use Expansa\Security\Csrf\Contracts\SessionProvider;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
 use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
+use Expansa\Security\Exception\InvalidCsrfTokenException;
 
 /**
  * CSRF (Cross-Site Request Forgery) token management class.
