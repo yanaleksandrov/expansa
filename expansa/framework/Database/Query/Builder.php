@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use Expansa\Database\Exception;
 use Expansa\Database\Exception\InvalidArgumentException;
 use PDO;
 use PDOException;
@@ -379,7 +378,7 @@ class Builder extends BuilderAbstract
 
             foreach ($options as $key => $value) {
                 if (is_string($value) || is_int($value)) {
-                    $optionStack[] = "{$key} = {$value}";
+                    $optionStack[] = "$key = $value";
                 }
             }
 
@@ -394,7 +393,7 @@ class Builder extends BuilderAbstract
             $command .= ' IF NOT EXISTS';
         }
 
-        return $this->exec("{$command} {$tableName} (" . implode(', ', $stack) . "){$tableOption}");
+        return $this->exec("$command $tableName (" . implode(', ', $stack) . ")$tableOption");
     }
 
     /**
@@ -427,7 +426,7 @@ class Builder extends BuilderAbstract
         $lastArgs = $args[array_key_last($args)];
         $callback = is_callable($lastArgs) ? $lastArgs : null;
 
-        $where = is_callable($where) ? null : $where;
+        $where   = is_callable($where) ? null : $where;
         $columns = is_callable($columns) ? null : $columns;
 
         $column = $where === null ? $join : $columns;
@@ -617,7 +616,7 @@ class Builder extends BuilderAbstract
 
             if (isset($match['operator'])) {
                 if (is_numeric($value)) {
-                    $fields[] = "{$column} = {$column} {$match['operator']} {$value}";
+                    $fields[] = "$column = $column {$match['operator']} $value";
                 }
             } else {
                 $mapKey = $this->mapKey();
