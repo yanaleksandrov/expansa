@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Connector;
+namespace Expansa\Database\Query;
 
 use Expansa\Database\Exception;
 use Expansa\Database\Exception\InvalidArgumentException;
@@ -10,7 +10,7 @@ use PDO;
 use PDOException;
 use PDOStatement;
 
-class Manager extends ManagerBase
+class Builder extends BuilderAbstract
 {
     /**
      * Connect the database.
@@ -545,11 +545,6 @@ class Manager extends ManagerBase
                             PDO::PARAM_STR,
                         ];
                         break;
-
-                    case 'object':
-                        $value = serialize($value);
-                        break;
-
                     case 'NULL':
                     case 'resource':
                     case 'boolean':
@@ -626,7 +621,7 @@ class Manager extends ManagerBase
                 }
             } else {
                 $mapKey = $this->mapKey();
-                $fields[] = "{$column} = {$mapKey}";
+                $fields[] = "$column = $mapKey";
 
                 switch ($type) {
                     case 'array':
@@ -636,11 +631,6 @@ class Manager extends ManagerBase
                                 serialize($value),
                             PDO::PARAM_STR,
                         ];
-                        break;
-
-                    case 'object':
-                        $value = serialize($value);
-
                         break;
                     case 'NULL':
                     case 'resource':
@@ -700,7 +690,7 @@ class Manager extends ManagerBase
                 $mapKey     = $this->mapKey();
                 $columnName = $this->columnQuote($column);
 
-                $stack[] = "{$columnName} = REPLACE({$columnName}, {$mapKey}a, {$mapKey}b)";
+                $stack[] = "$columnName = REPLACE($columnName, {$mapKey}a, {$mapKey}b)";
 
                 $map[$mapKey . 'a'] = [$old, PDO::PARAM_STR];
                 $map[$mapKey . 'b'] = [$new, PDO::PARAM_STR];
@@ -809,8 +799,7 @@ class Manager extends ManagerBase
     {
         $orderRaw = $this->raw(
             $this->type === 'mysql' ? 'RAND()'
-                : ($this->type === 'mssql' ? 'NEWID()'
-                : 'RANDOM()')
+                : ($this->type === 'mssql' ? 'NEWID()' : 'RANDOM()')
         );
 
         if ($where === null) {
@@ -901,7 +890,7 @@ class Manager extends ManagerBase
      *
      * @param callable $actions
      * @return void
-     * @throws Exception
+     * @throws \Exception
      */
     public function action(callable $actions): void
     {

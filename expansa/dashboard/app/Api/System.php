@@ -6,7 +6,7 @@ namespace dashboard\app\Api;
 
 use app\Option;
 use app\User;
-use Expansa\Database\Connector\Manager;
+use Expansa\Database\Query\Builder;
 use Expansa\Database\Db;
 use Expansa\Disk;
 use Expansa\Error;
@@ -57,7 +57,7 @@ class System
                 'php'        => version_compare($value, strval(phpversion()), '<='),
                 'mysql'      => version_compare($value, $connection->version(), '<='),
                 'memory'     => intval(ini_get('memory_limit')) >= intval($value),
-                'connection' => $connection instanceof Manager,
+                'connection' => $connection instanceof Builder,
                 default      => extension_loaded($check),
             },
         ], array_keys($checks), $checks);

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database;
 
-use Expansa\Database\Connector\Manager;
-use Expansa\Database\Connector\Raw;
+use Expansa\Database\Query\Builder;
+use Expansa\Database\Query\Raw;
 use Expansa\Database\Exception\InvalidArgumentException;
 use Expansa\Facades\Facade;
 use PDOStatement;
@@ -42,7 +42,7 @@ class Db extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Database\Connector\Manager';
+        return '\Expansa\Database\Query\Builder';
     }
 
     protected static function getConstructorArgs(): array
@@ -67,12 +67,12 @@ class Db extends Facade
      * Create new database connection
      *
      * @param array $options
-     * @return null|Manager
+     * @return null|Builder
      */
-    public static function connection(array $options): ?Manager
+    public static function connection(array $options): ?Builder
     {
         try {
-            return new Manager($options);
+            return new Builder($options);
         } catch (InvalidArgumentException $e) {
             return null;
         }

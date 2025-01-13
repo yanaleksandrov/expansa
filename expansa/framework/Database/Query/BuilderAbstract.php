@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Connector;
+namespace Expansa\Database\Query;
 
 use InvalidArgumentException;
 use PDO;
 use PDOStatement;
 
-abstract class ManagerBase
+abstract class BuilderAbstract
 {
     /**
      * The PDO object.
@@ -259,7 +259,7 @@ abstract class ManagerBase
 
         foreach ($map as $key => $value) {
             $replace = match ($value[1]) {
-                PDO::PARAM_STR  => $this->quote("{$value[0]}"),
+                PDO::PARAM_STR  => $this->quote("$value[0]"),
                 PDO::PARAM_NULL => 'NULL',
                 PDO::PARAM_LOB  => '{LOB_DATA}',
                 default         => $value[0] . '',
@@ -351,7 +351,7 @@ abstract class ManagerBase
             return '"' . $this->prefix . $table . '"';
         }
 
-        throw new InvalidArgumentException("Incorrect table name: {$table}.");
+        throw new InvalidArgumentException("Incorrect table name: $table.");
     }
 
     /**
@@ -368,7 +368,7 @@ abstract class ManagerBase
                 '"' . $column . '"';
         }
 
-        throw new InvalidArgumentException("Incorrect column name: {$column}.");
+        throw new InvalidArgumentException("Incorrect column name: $column.");
     }
 
     /**
@@ -502,13 +502,13 @@ abstract class ManagerBase
             $operator = $match['operator'] ?? null;
 
             if ($isIndex && isset($match['comparison']) && in_array($operator, ['>', '>=', '<', '<=', '=', '!='])) {
-                $stack[] = "{$column} {$operator} " . $this->columnQuote($match['comparison']);
+                $stack[] = "$column $operator " . $this->columnQuote($match['comparison']);
                 continue;
             }
 
             if ($operator && $operator !== '=') {
                 if (in_array($operator, ['>', '>=', '<', '<='])) {
-                    $condition = "{$column} {$operator} ";
+                    $condition = "$column $operator ";
 
                     if (is_numeric($value)) {
                         $condition .= $mapKey;
@@ -546,7 +546,7 @@ abstract class ManagerBase
 
                         case 'object':
                             if ($raw = $this->buildRaw($value, $map)) {
-                                $stack[] = "{$column} != {$raw}";
+                                $stack[] = "$column != $raw";
                             }
                             break;
 
@@ -554,7 +554,7 @@ abstract class ManagerBase
                         case 'double':
                         case 'boolean':
                         case 'string':
-                            $stack[] = "{$column} != {$mapKey}";
+                            $stack[] = "$column != $mapKey";
                             $map[$mapKey] = $this->typeMap($value, $type);
                             break;
                     }
@@ -597,7 +597,7 @@ abstract class ManagerBase
                         if ($this->isRaw($value[0]) && $this->isRaw($value[1])) {
                             $stack[] = "({$column} BETWEEN {$this->buildRaw($value[0], $map)} AND {$this->buildRaw($value[1], $map)})";
                         } else {
-                            $stack[] = "({$column} BETWEEN {$mapKey}a AND {$mapKey}b)";
+                            $stack[] = "($column BETWEEN {$mapKey}a AND {$mapKey}b)";
                             $dataType = (is_numeric($value[0]) && is_numeric($value[1])) ? PDO::PARAM_INT : PDO::PARAM_STR;
 
                             $map[$mapKey . 'a'] = [$value[0], $dataType];
@@ -605,10 +605,10 @@ abstract class ManagerBase
                         }
                     }
                 } elseif ($operator === 'REGEXP') {
-                    $stack[] = "{$column} REGEXP {$mapKey}";
+                    $stack[] = "$column REGEXP $mapKey";
                     $map[$mapKey] = [$value, PDO::PARAM_STR];
                 } else {
-                    throw new InvalidArgumentException("Invalid operator [{$operator}] for column {$column} supplied.");
+                    throw new InvalidArgumentException("Invalid operator [$operator] for column $column supplied.");
                 }
 
                 continue;
@@ -638,7 +638,7 @@ abstract class ManagerBase
 
                 case 'object':
                     if ($raw = $this->buildRaw($value, $map)) {
-                        $stack[] = "{$column} = {$raw}";
+                        $stack[] = "$column = $raw";
                     }
                     break;
 
@@ -646,7 +646,7 @@ abstract class ManagerBase
                 case 'double':
                 case 'boolean':
                 case 'string':
-                    $stack[] = "{$column} = {$mapKey}";
+                    $stack[] = "$column = $mapKey";
                     $map[$mapKey] = $this->typeMap($value, $type);
                     break;
             }
@@ -742,7 +742,7 @@ abstract class ManagerBase
                             }
 
                             $valueString = implode(',', $valueStack);
-                            $stack[] = "FIELD({$this->columnQuote($column)}, {$valueString})";
+                            $stack[] = "FIELD({$this->columnQuote($column)}, $valueString)";
                         } elseif ($value === 'ASC' || $value === 'DESC') {
                             $stack[] = $this->columnQuote($column) . ' ' . $value;
                         } elseif (is_int($column)) {
@@ -775,7 +775,7 @@ abstract class ManagerBase
                         is_numeric($limit[0]) &&
                         is_numeric($limit[1])
                     ) {
-                        $clause .= " OFFSET {$limit[0]} ROWS FETCH NEXT {$limit[1]} ROWS ONLY";
+                        $clause .= " OFFSET $limit[0] ROWS FETCH NEXT $limit[1] ROWS ONLY";
                     }
                 } else {
                     if (is_numeric($limit)) {
@@ -785,7 +785,7 @@ abstract class ManagerBase
                         is_numeric($limit[0]) &&
                         is_numeric($limit[1])
                     ) {
-                        $clause .= " LIMIT {$limit[1]} OFFSET {$limit[0]}";
+                        $clause .= " LIMIT $limit[1] OFFSET $limit[0]";
                     }
                 }
             }
@@ -819,9 +819,9 @@ abstract class ManagerBase
         preg_match("/(?<table>" . $this::TABLE_PATTERN . ")\s*\((?<alias>" . $this::ALIAS_PATTERN . ")\)/u", $table, $tableMatch);
 
         if (isset($tableMatch['table'], $tableMatch['alias'])) {
-            $table = $this->tableQuote($tableMatch['table']);
+            $table      = $this->tableQuote($tableMatch['table']);
             $tableAlias = $this->tableQuote($tableMatch['alias']);
-            $tableQuery = "{$table} AS {$tableAlias}";
+            $tableQuery = "$table AS $tableAlias";
         } else {
             $table = $this->tableQuote($table);
             $tableQuery = $table;
@@ -881,16 +881,11 @@ abstract class ManagerBase
      */
     protected function isJoin(mixed $join): bool
     {
-        if (!is_array($join)) {
-            return false;
+        if (is_array($join)) {
+            $keys = array_keys($join);
+
+            return is_string($keys[0] ?? null) && str_starts_with($keys[0], '[');
         }
-
-        $keys = array_keys($join);
-
-        if (is_string($keys[0] ?? null) && str_starts_with($keys[0], '[')) {
-            return true;
-        }
-
         return false;
     }
 
@@ -958,7 +953,7 @@ abstract class ManagerBase
                 $tableName .= ' AS ' . $this->tableQuote($match['alias']);
             }
 
-            $tableJoin[] = $type[$match['join']] . " JOIN {$tableName} {$relation}";
+            $tableJoin[] = $type[$match['join']] . " JOIN $tableName $relation";
         }
 
         return implode(' ', $tableJoin);
@@ -968,11 +963,11 @@ abstract class ManagerBase
      * Mapping columns for the stack.
      *
      * @param array|string $columns
-     * @param array $stack
-     * @param bool $root
+     * @param array        $stack
+     * @param bool         $root
      * @return array
      */
-    protected function columnMap($columns, array &$stack, bool $root): array
+    protected function columnMap(array|string $columns, array &$stack, bool $root): array
     {
         if ($columns === '*') {
             return $stack;
@@ -1119,9 +1114,9 @@ abstract class ManagerBase
         return $this->exec($query, $map, function ($statement) use (&$data) {
             foreach ($data as $key => $return) {
                 if (isset($return[3])) {
-                    $statement->bindParam($key, $data[$key][1], $return[2], $return[3]);
+                    $statement->bindParam($key, $return[1], $return[2], $return[3]);
                 } else {
-                    $statement->bindParam($key, $data[$key][1], $return[2]);
+                    $statement->bindParam($key, $return[1], $return[2]);
                 }
             }
         });
@@ -1137,10 +1132,15 @@ abstract class ManagerBase
      * @param null|array  $where
      * @return null|string
      */
-    protected function aggregate(string $type, string $table, array $join = null, string $column = null, array $where = null): ?string
+    protected function aggregate(
+        string $type,
+        string $table,
+        array $join = null,
+        string $column = null,
+        array $where = null
+    ): ?string
     {
-        $map = [];
-
+        $map   = [];
         $query = $this->exec($this->selectContext($table, $map, $join, $column, $where, $type), $map);
 
         if (!$this->statement) {

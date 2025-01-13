@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Connector;
+namespace Expansa\Database\Query;
 
 /**
  * The Medoo raw object.

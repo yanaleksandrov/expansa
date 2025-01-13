@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Expansa\Database\Schema;
 
 use Closure;
-use Expansa\Database\Connector\Manager;
+use Expansa\Database\Query\Builder as QueryBuilder;
 
 class Builder extends Grammar
 {
     public function __construct(
-        public Manager $connection,
+        public QueryBuilder $connection,
     ) {} // phpcs:ignore
 
     public function create(string $name, Closure $callback): void
