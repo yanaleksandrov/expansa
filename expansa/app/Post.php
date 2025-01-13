@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app;
 
 use app\Post\Type;
-use Expansa\Db;
+use Expansa\Database\Db;
 use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Patterns\Registry;

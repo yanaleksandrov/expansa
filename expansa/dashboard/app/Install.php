@@ -15,7 +15,7 @@ use Expansa\Url;
  *
  * @package Expansa
  */
-final class Install extends \Expansa\App\App
+final class Install
 {
     use Singleton;
 
@@ -23,17 +23,13 @@ final class Install extends \Expansa\App\App
      * Class constructor
      *
      * @return void|bool
-     * @since 2025.1
+     * @throws \Exception
      */
     public function __construct()
     {
-
-        /**
-         * Define declare the necessary constants
-         *
-         * @since 2025.1
-         */
-        $this->define('EX_IS_INSTALL', true);
+        if (!defined('EX_IS_INSTALL')) {
+            define('EX_IS_INSTALL', true);
+        }
 
         /**
          * Add core API endpoints.

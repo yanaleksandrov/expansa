@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Cache;
 
-use Expansa\Db;
+use Expansa\Database\Db;
 
 /**
  * Schema class for managing database schema related operations.

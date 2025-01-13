@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Field;
 
-use Expansa\Db;
+use Expansa\Database\Db;
 use Expansa\Safe;
 
 class Schema

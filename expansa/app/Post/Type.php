@@ -6,7 +6,7 @@ namespace app\Post;
 
 use app\Field;
 use app\Tree;
-use Expansa\Db;
+use Expansa\Database\Db;
 use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Safe;

@@ -7,7 +7,7 @@ use app\Post;
 use app\Slug;
 use app\User;
 use app\View;
-use Expansa\Db;
+use Expansa\Database\Db;
 use Expansa\Debug;
 use Expansa\Disk;
 use Expansa\Extensions;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app;
 
-use Expansa\Db;
+use Expansa\Database\Db;
 
 /**
  * Core class for managing taxonomies.

@@ -6,6 +6,7 @@ namespace Expansa;
 
 use app\Option;
 use DateTime;
+use Expansa\Database\Db;
 
 /**
  * This class provides a set of static methods to check various conditions, such as validating
@@ -182,8 +183,6 @@ final class Is
         if (! defined('EX_PATH') || ! file_exists(EX_PATH . 'env.php')) {
             return false;
         }
-
-        Db::init();
 
         $schema = Db::schema();
         if (empty($schema)) {

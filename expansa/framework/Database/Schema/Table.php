@@ -4,429 +4,63 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
-use Closure;
-use Expansa\Database\Abstracts\ConnectionBase;
+use Expansa\Database\Query\Builder;
+use Expansa\Database\Schema\Traits\Columns;
+use Expansa\Database\Schema\Traits\Commands;
 
+/**
+ * This class provides a fluent interface for defining and manipulating database schema tables.
+ *
+ * @method Column id(string $column = 'id') Add an auto-incrementing primary key column
+ * @method Column ulid(string $column = 'ulid') Add a ULID column
+ * @method Column tinyInt(string $column, int $precision = 3) Add a TINYINT column
+ * @method Column smallInt(string $column, int $precision = 5) Add a SMALLINT column
+ * @method Column mediumInt(string $column, int $precision = 8) Add a MEDIUMINT column
+ * @method Column int(string $column, int $precision = 10) Add an INT column
+ * @method Column bigInt(string $column, int $precision = 20) Add a BIGINT column
+ * @method Column decimal(string $column, int $precision = null, int $scale = null) Add a DECIMAL column
+ * @method Column float(string $column) Add a FLOAT column
+ * @method Column double(string $column) Add a DOUBLE column
+ * @method Column bool(string $column) Add a BOOLEAN column
+ * @method Column blob(string $column) Add a BLOB column
+ * @method Column string(string $column, int $length = null) Add a STRING column
+ * @method Column char(string $column, int $length = null) Add a CHAR column
+ * @method Column tinyText(string $column) Add a TINYTEXT column
+ * @method Column mediumText(string $column) Add a MEDIUMTEXT column
+ * @method Column text(string $column) Add a TEXT column
+ * @method Column longText(string $column) Add a LONGTEXT column
+ * @method Column uuid(string $column) Add a UUID column
+ * @method Column json(string $column) Add a JSON column
+ * @method Column enum(string $column, array $allowed) Add an ENUM column
+ * @method Column date(string $column) Add a DATE column
+ * @method Column time(string $column) Add a TIME column
+ * @method Column datetime(string $column) Add a DATETIME column
+ * @method Column timestamp(string $column) Add a TIMESTAMP column
+ * @method void   timestamps() Add created_at and updated_at columns
+ * @method Column addColumn(string $type, string $name, array $parameters = []) Add a new column to the table
+ * @method array  getColumns() Get all columns of the table
+ *
+ * @method static create() Add a create command for the table
+ * @method static rename(string $to) Add a rename command for the table
+ * @method static drop() Add a drop command for the table
+ * @method static dropIfExists() Add a dropIfExists command for the table
+ * @method static renameColumn(string $from, string $to, string $type = null) Add a rename column command
+ * @method static dropColumn(string|array $columns) Add a drop column command
+ * @method static primary(string|array $columns, string $index = null) Add a primary key command
+ * @method static index(string|array $columns, string $index = null) Add an index command
+ * @method static unique(string|array $columns, string $index = null) Add a unique index command
+ * @method static dropPrimary(string|array $index) Drop a primary key
+ * @method static dropIndex(string|array $index) Drop an index
+ * @method static dropUnique(string|array $index) Drop a unique index
+ * @method CommandForeign foreign(string $column) Add a foreign key constraint
+ */
 class Table
 {
-    protected array $columns = [];
-
-    protected array $commands = [];
-
-    protected bool $isCreating = false;
-
-    protected bool $isTemporary = false;
+    use Columns;
+    use Commands;
 
     public function __construct(
-        protected string $name,
-        protected ?Closure $callback = null,
-        protected string $prefix = ''
-    )
-    {
-        if (!is_null($callback)) {
-            $callback($this);
-        }
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function isCreating(): bool
-    {
-        return $this->isCreating;
-    }
-
-    public function isTemporary(): bool
-    {
-        return $this->isTemporary;
-    }
-
-    /**
-     * Create column as big integer primary auto-incrementing.
-     *
-     * @param string $column
-     * @return Column
-     */
-    public function id(string $column = 'id'): Column
-    {
-        return $this->bigInt($column)->autoIncrement()->unsigned();
-    }
-
-    public function int(string $column): Column
-    {
-        return $this->addColumn('integer', $column);
-    }
-
-    public function smallInt(string $column): Column
-    {
-        return $this->addColumn('smallInteger', $column);
-    }
-
-    public function bigInt(string $column): Column
-    {
-        return $this->addColumn('bigInteger', $column);
-    }
-
-    public function decimal(string $column, int $precision = null, int $scale = null): Column
-    {
-        return $this->addColumn('decimal', $column, compact('precision', 'scale'));
-    }
-
-    public function float(string $column): Column
-    {
-        return $this->addColumn('float', $column);
-    }
-
-    public function double(string $column): Column
-    {
-        return $this->addColumn('double', $column);
-    }
-
-    public function bool(string $column): Column
-    {
-        return $this->addColumn('boolean', $column);
-    }
-
-    public function blob(string $column): Column
-    {
-        return $this->addColumn('blob', $column);
-    }
-
-    public function string(string $column, int $length = null): Column
-    {
-        return $this->addColumn('string', $column, compact('length'));
-    }
-
-    public function char(string $column, int $length = null): Column
-    {
-        return $this->addColumn('char', $column, compact('length'));
-    }
-
-    public function varchar(string $column, int $length = null): Column
-    {
-        return $this->addColumn('varchar', $column, compact('length'));
-    }
-
-    public function text(string $column): Column
-    {
-        return $this->addColumn('text', $column);
-    }
-
-    public function json(string $column): Column
-    {
-        return $this->addColumn('json', $column);
-    }
-
-    public function jsonb(string $column): Column
-    {
-        return $this->addColumn('jsonb', $column);
-    }
-
-    public function enum(string $column, array $allowed): Column
-    {
-        return $this->addColumn('enum', $column, compact('allowed'));
-    }
-
-    public function date(string $column): Column
-    {
-        return $this->addColumn('date', $column);
-    }
-
-    public function time(string $column): Column
-    {
-        return $this->addColumn('time', $column);
-    }
-
-    public function datetime(string $column): Column
-    {
-        return $this->addColumn('datetime', $column);
-    }
-
-    public function timestamp(string $column, int $precision = 0): Column
-    {
-        return $this->addColumn('timestamp', $column);
-    }
-
-    public function timestamps(int $precision = 0): void
-    {
-        $this->timestamp('created_at', $precision)->useCurrent();
-        $this->timestamp('updated_at', $precision)->useCurrent();
-    }
-
-    /**
-     * Add a "deleted at" timestamp for the table.
-     *
-     * @param string $column
-     * @param int $precision
-     * @return Column
-     */
-    public function softDeletes(string $column = 'deleted_at', int $precision = 0): Column
-    {
-        return $this->timestamp('deleted_at', $precision)->default(new Expression('NULL'))->nullable();
-    }
-
-    public function create(): static
-    {
-        $this->isCreating = true;
-
-        $this->addCommand('create');
-
-        return $this;
-    }
-
-    public function temporary(): static
-    {
-        $this->isTemporary = true;
-
-        return $this;
-    }
-
-    public function rename(string $to): static
-    {
-        $this->addCommand('rename', compact('to'));
-
-        return $this;
-    }
-
-    public function drop(): static
-    {
-        $this->addCommand('drop');
-
-        return $this;
-    }
-
-    public function dropIfExists(): static
-    {
-        $this->addCommand('dropIfExists');
-
-        return $this;
-    }
-
-    public function addColumn(string $type, string $name, array $parameters = []): Column
-    {
-        $column = new Column(
-            array_merge(compact('type', 'name'), $parameters)
-        );
-        $this->columns[] = $column;
-
-        return $column;
-    }
-
-    /**
-     * @param string $from Old column name
-     * @param string $to New column name
-     * @param string|null $type Column data type (MySQL)
-     * @return $this
-     */
-    public function renameColumn(string $from, string $to, string $type = null): static
-    {
-        $this->addCommand('renameColumn', compact('from', 'to', 'type'));
-
-        return $this;
-    }
-
-    public function dropColumn(string|array $columns): static
-    {
-        $columns = is_array($columns) ? $columns : func_get_args();
-
-        $this->addCommand('dropColumn', compact('columns'));
-
-        return $this;
-    }
-
-    public function primary(string|array $columns, string $index = null): static
-    {
-        $index = $index ?: $this->createIndexName('primary', (array) $columns);
-
-        $this->addCommand('primary', compact('index', 'columns'));
-
-        return $this;
-    }
-
-    public function index(string|array $columns, string $index = null): static
-    {
-        $index = $index ?: $this->createIndexName('index', (array) $columns);
-
-        $this->addCommand('index', compact('index', 'columns'));
-
-        return $this;
-    }
-
-    public function unique(string|array $columns, string $index = null): static
-    {
-        $index = $index ?: $this->createIndexName('unique', (array) $columns);
-
-        $this->addCommand('unique', compact('index', 'columns'));
-
-        return $this;
-    }
-
-    public function rawIndex(string $expression, string $index): static
-    {
-        return $this->index([new Expression($expression)], $index);
-    }
-
-    public function dropPrimary(string|array $index): static
-    {
-        return $this->dropIndexCommand(__FUNCTION__, 'primary', $index);
-    }
-
-    public function dropIndex(string|array $index): static
-    {
-        return $this->dropIndexCommand('dropIndex', 'index', $index);
-    }
-
-    public function dropUnique(string|array $index): static
-    {
-        return $this->dropIndexCommand(__FUNCTION__, 'unique', $index);
-    }
-
-    protected function dropIndexCommand(string $command, string $type, string|array $index): static
-    {
-        if (is_array($index)) {
-            $index = $this->createIndexName($type, $index);
-        }
-
-        $this->addCommand($command, compact('index'));
-
-        return $this;
-    }
-
-    public function foreingId(string $column): ForeignIdColumn
-    {
-        $column = $this->bigInt($column);
-
-        array_pop($this->columns);
-
-        return $this->columns[] = new ForeignIdColumn($this, $column->getAttributes());
-    }
-
-    public function foreign(string $columns): ForeignKey
-    {
-        $command = new ForeignKey(['name' => 'foreignKey', 'columns' => $columns]);
-
-        return $this->commands[] = $command;
-    }
-
-    public function getColumns(): array
-    {
-        return $this->columns;
-    }
-
-    public function getCommands(): array
-    {
-        return $this->commands;
-    }
-
-    protected function addCommand(string $name, array $parameters = []): Fluent
-    {
-        $this->commands[] = $command = $this->createCommand($name, $parameters);
-
-        return $command;
-    }
-
-    protected function createCommand(string $name, array $parameters = []): Fluent
-    {
-        return new Fluent(array_merge(compact('name'), $parameters));
-    }
-
-    protected function createIndexName(string $type, array $columns): string
-    {
-        $index = array_merge([$this->prefix . $this->name], $columns, [$type]);
-
-        $index = strtolower(implode('_', $index));
-
-        return str_replace(['-', '.'], '_', $index);
-    }
-
-    public function build(ConnectionBase $connection, Grammar $grammar): void
-    {
-        $this->isValidConnection($connection);
-
-        $statements = $this->toSql($grammar);
-
-        foreach ($statements as $statement) {
-            $connection->statement($statement);
-        }
-    }
-
-    public function toSql(Grammar $grammar): array
-    {
-        $this->addImpliedCommands($grammar);
-
-        $statements = [];
-
-        foreach ($this->commands as $command) {
-            $method = 'compile' . ucfirst($command['name']);
-
-            if (method_exists($grammar, $method) || $grammar::hasMacro($method)) {
-                if (! is_null($sql = $grammar->$method($this, $command))) {
-                    $statements = array_merge($statements, (array) $sql);
-                }
-            }
-        }
-
-        return $statements;
-    }
-
-    protected function isValidConnection(ConnectionBase $connection): void
-    {
-    }
-
-    protected function getCommandsByNamed(array $names): array
-    {
-        return array_filter($this->commands, function ($command) use ($names) {
-            return in_array($command['name'], $names);
-        });
-    }
-
-    protected function addImpliedCommands(Grammar $grammar): void
-    {
-        if (count($this->getAddedColumns()) > 0 && ! $this->isCreating) {
-            array_unshift($this->commands, $this->createCommand('add'));
-        }
-
-        if (count($this->getChangedColumns()) > 0 && ! $this->isCreating) {
-            array_unshift($this->commands, $this->createCommand('change'));
-        }
-
-        $this->addIndexes();
-    }
-
-    protected function getAddedColumns(): array
-    {
-        return array_filter($this->columns, fn ($column) => ! $column->change);
-    }
-
-    protected function getChangedColumns(): array
-    {
-        return array_filter($this->columns, fn ($column) => $column->change);
-    }
-
-    protected function addIndexes(): void
-    {
-        foreach ($this->columns as $column) {
-            foreach (['primary', 'unique', 'index'] as $index) {
-                if (! isset($column->$index)) {
-                    continue;
-                }
-
-                // If the column index without name
-                if ($column->$index === true || empty($column->$index)) {
-                    $this->$index($column->name);
-                    unset($column->$index);
-
-                    continue 2;
-                }
-
-                // If the column index with name
-                $this->$index($column->name, $column->$index);
-                unset($column->$index);
-
-                continue 2;
-            }
-        }
-    }
+        public string $name,
+        public Builder $connection
+    ) {} // phpcs:ignore
 }

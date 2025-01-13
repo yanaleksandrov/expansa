@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
+use Expansa\Patterns\Fluent;
+
 /**
+ * This class provides a fluent interface for defining and manipulating database column properties.
+ *
  * @method $this change() Change the column
  * @method $this type(string $type) Specify a type for the column
- * @method $this collate(string $collate) Specify a collation for the column (SQLite/MySQL/PostgreSQL)
+ * @method $this collate(string $collate) Specify a collation for the column (SQLite/MySQL/PostgresSQL)
  * @method $this default(mixed $value) Specify a "default" value for the column
  * @method $this nullable(bool $value = true) Allow NULL value
  * @method $this unsigned() Create an unsigned column (MySQL)
@@ -31,7 +35,10 @@ namespace Expansa\Database\Schema;
  * @method $this virtualAsJson(string $expression) Create a virtual generated column
  *
  * @method $this check(string $expression) Create a check rules (SQLite)
+ *
+ * @method $this foreign(string $column) Create a foreign key constraint
+ * @method $this references(string $column) Specify the referenced column for the foreign key
+ * @method $this on(string $column) Specify the referenced table for the foreign key
+ * @method $this onDelete(string $column) Set the action to be performed on delete
  */
-class Column extends Fluent
-{
-}
+class Column extends Fluent {} // phpcs:ignore

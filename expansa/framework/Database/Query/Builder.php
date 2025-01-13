@@ -4,429 +4,1069 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use Expansa\Database\Contracts\QueryBuilder as QueryBuilderContract;
-use Expansa\Database\Abstracts\ConnectionBase;
-use Expansa\Database\Query\Traits\PrepareWhereExpression;
-use Expansa\Support\Arr;
-use InvalidArgumentException;
+use Expansa\Database\Exception\InvalidArgumentException;
+use PDO;
+use PDOException;
+use PDOStatement;
 
-abstract class Builder implements QueryBuilderContract
+class Builder extends BuilderAbstract
 {
-    use PrepareWhereExpression;
-
-    protected bool $useWritePDO = false;
-
-    protected array $bindings = [
-        'columns' => [],
-        //'select' => [],
-        //'from' => [],
-        //'join' => [],
-        'where'   => [],
-        //'groupBy' => [],
-        //'having' => [],
-        //'order' => [],
-        //'union' => [],
-        //'unionOrder' => [],
-    ];
-
-    public string $command;
-
-    public array $from;
-
-    public bool|array $distinct = false;
-
-    public ?array $columns = null;
-
-    public ?array $aggregate = [];
-
-    public array $conditions = [];
-
-    public array $orders = [];
-
-    public ?int $limit = null;
-
-    public ?int $offset = null;
-
-    protected bool $withDump = false;
-
-    protected bool $withSQL = false;
-
-    public function __construct(
-        protected ConnectionBase $connection,
-        protected Grammar        $grammar
-    ) {} // phpcs:ignore
-
-    public function useWritePDO(): static
+    /**
+     * Connect the database.
+     * ```
+     * $database = new Medoo([
+     *      // required
+     *      'type' => 'mysql',
+     *      'database' => 'name',
+     *      'host' => 'localhost',
+     *      'username' => 'your_username',
+     *      'password' => 'your_password',
+     *      // [optional]
+     *      'charset' => 'utf8mb4',
+     *      'port' => 3306,
+     *      'prefix' => 'PREFIX_'
+     * ]);
+     * ```
+     *
+     * @param array $options Connection options
+     * @return void
+     * @throws PDOException|InvalidArgumentException
+     */
+    public function __construct(array $options)
     {
-        $this->useWritePDO = true;
-
-        return $this;
-    }
-
-    public function withDump(): static
-    {
-        $this->withDump = true;
-
-        return $this;
-    }
-
-    public function withSQL(): static
-    {
-        $this->withSQL = true;
-
-        return $this;
-    }
-
-    public function select(array $columns = ['*']): static
-    {
-        $this->command = 'select';
-        $this->columns = $columns;
-
-        return $this;
-    }
-
-    public function insert(array $values): int|array
-    {
-        if (empty($values)) {
-            return 0;
+        if (isset($options['prefix'])) {
+            $this->prefix = $options['prefix'];
         }
 
-        if (! is_array(reset($values))) {
-            $values = [$values];
+        if (isset($options['testMode']) && $options['testMode'] === true) {
+            $this->testMode = true;
+            return;
+        }
+
+        $options['type'] = $options['type'] ?? $options['driver'];
+
+        if (!isset($options['pdo'])) {
+            $options['database'] = $options['database'] ?? $options['database_name'];
+
+            if (!isset($options['socket'])) {
+                $options['host'] = $options['host'] ?? $options['server'] ?? false;
+            }
+        }
+
+        if (isset($options['type'])) {
+            $this->type = strtolower($options['type']);
+
+            if ($this->type === 'mariadb') {
+                $this->type = 'mysql';
+            }
+        }
+
+        if (isset($options['logging']) && is_bool($options['logging'])) {
+            $this->logging = $options['logging'];
+        }
+
+        $option = $options['option'] ?? [];
+
+        $commands = match ($this->type) {
+            'mysql' => ['SET SQL_MODE=ANSI_QUOTES'], // Make MySQL using standard quoted identifier.
+            'mssql' => [
+                'SET QUOTED_IDENTIFIER ON',          // Keep MSSQL QUOTED_IDENTIFIER is ON for standard quoting.
+                'SET ANSI_NULLS ON',                 // Make ANSI_NULLS is ON for NULL value.
+            ],
+            default => [],
+        };
+
+        if (isset($options['pdo'])) {
+            if (!$options['pdo'] instanceof PDO) {
+                throw new InvalidArgumentException('Invalid PDO object supplied.');
+            }
+
+            $this->pdo = $options['pdo'];
+
+            foreach ($commands as $value) {
+                $this->pdo->exec($value);
+            }
+
+            return;
+        }
+
+        if (isset($options['dsn'])) {
+            if (is_array($options['dsn']) && isset($options['dsn']['driver'])) {
+                $attr = $options['dsn'];
+            } else {
+                throw new InvalidArgumentException('Invalid DSN option supplied.');
+            }
         } else {
-            foreach ($values as $key => $value) {
-                ksort($value);
-                $values[$key] = $value;
+            if (
+                isset($options['port']) &&
+                is_int($options['port'] * 1)
+            ) {
+                $port = $options['port'];
+            }
+
+            $isPort = isset($port);
+
+            switch ($this->type) {
+                case 'mysql':
+                    $attr = [
+                        'driver' => 'mysql',
+                        'dbname' => $options['database'],
+                    ];
+
+                    if (isset($options['socket'])) {
+                        $attr['unix_socket'] = $options['socket'];
+                    } else {
+                        $attr['host'] = $options['host'];
+
+                        if ($isPort) {
+                            $attr['port'] = $port;
+                        }
+                    }
+
+                    break;
+
+                case 'pgsql':
+                    $attr = [
+                        'driver' => 'pgsql',
+                        'host'   => $options['host'],
+                        'dbname' => $options['database'],
+                    ];
+
+                    if ($isPort) {
+                        $attr['port'] = $port;
+                    }
+
+                    break;
+
+                case 'sybase':
+                    $attr = [
+                        'driver' => 'dblib',
+                        'host'   => $options['host'],
+                        'dbname' => $options['database'],
+                    ];
+
+                    if ($isPort) {
+                        $attr['port'] = $port;
+                    }
+
+                    break;
+
+                case 'oracle':
+                    $attr = [
+                        'driver' => 'oci',
+                        'dbname' => $options['host'] ?
+                            '//' . $options['host'] . ($isPort ? ':' . $port : ':1521') . '/' . $options['database'] :
+                            $options['database'],
+                    ];
+
+                    if (isset($options['charset'])) {
+                        $attr['charset'] = $options['charset'];
+                    }
+
+                    break;
+
+                case 'mssql':
+                    if (isset($options['driver']) && $options['driver'] === 'dblib') {
+                        $attr = [
+                            'driver' => 'dblib',
+                            'host'   => $options['host'] . ($isPort ? ':' . $port : ''),
+                            'dbname' => $options['database'],
+                        ];
+
+                        if (isset($options['appname'])) {
+                            $attr['appname'] = $options['appname'];
+                        }
+
+                        if (isset($options['charset'])) {
+                            $attr['charset'] = $options['charset'];
+                        }
+                    } else {
+                        $attr = [
+                            'driver'   => 'sqlsrv',
+                            'Server'   => $options['host'] . ($isPort ? ',' . $port : ''),
+                            'Database' => $options['database'],
+                        ];
+
+                        if (isset($options['appname'])) {
+                            $attr['APP'] = $options['appname'];
+                        }
+
+                        $config = [
+                            'ApplicationIntent',
+                            'AttachDBFileName',
+                            'Authentication',
+                            'ColumnEncryption',
+                            'ConnectionPooling',
+                            'Encrypt',
+                            'Failover_Partner',
+                            'KeyStoreAuthentication',
+                            'KeyStorePrincipalId',
+                            'KeyStoreSecret',
+                            'LoginTimeout',
+                            'MultipleActiveResultSets',
+                            'MultiSubnetFailover',
+                            'Scrollable',
+                            'TraceFile',
+                            'TraceOn',
+                            'TransactionIsolation',
+                            'TransparentNetworkIPResolution',
+                            'TrustServerCertificate',
+                            'WSID',
+                        ];
+
+                        foreach ($config as $value) {
+                            $keyname = strtolower(
+                                preg_replace(['/([a-z\d])([A-Z])/', '/([^_])([A-Z][a-z])/'], '$1_$2', $value)
+                            );
+
+                            if (isset($options[$keyname])) {
+                                $attr[$value] = $options[$keyname];
+                            }
+                        }
+                    }
+
+                    break;
+
+                case 'sqlite':
+                    $attr = [
+                        'driver' => 'sqlite',
+                        $options['database']
+                    ];
+
+                    break;
             }
         }
 
-        $bindings = [];
-        foreach ($values as $value) {
-            foreach ($value as $val) {
-                $bindings[] = $val;
+        if (!isset($attr)) {
+            throw new InvalidArgumentException('Incorrect connection options.');
+        }
+
+        $driver = $attr['driver'];
+
+        if (!in_array($driver, PDO::getAvailableDrivers())) {
+            throw new InvalidArgumentException("Unsupported PDO driver: {$driver}.");
+        }
+
+        unset($attr['driver']);
+
+        $stack = [];
+
+        foreach ($attr as $key => $value) {
+            $stack[] = is_int($key) ? $value : $key . '=' . $value;
+        }
+
+        $dsn = $driver . ':' . implode(';', $stack);
+
+        if (
+            in_array($this->type, ['mysql', 'pgsql', 'sybase', 'mssql']) &&
+            isset($options['charset'])
+        ) {
+            $commands[] = "SET NAMES '{$options['charset']}'" . (
+                $this->type === 'mysql' && isset($options['collation']) ?
+                    " COLLATE '{$options['collation']}'" : ''
+                );
+        }
+
+        $this->dsn = $dsn;
+
+        try {
+            $this->pdo = new PDO(
+                $dsn,
+                $options['username'] ?? null,
+                $options['password'] ?? null,
+                $option
+            );
+
+            if (isset($options['error'])) {
+                $this->pdo->setAttribute(
+                    PDO::ATTR_ERRMODE,
+                    in_array($options['error'], [
+                        PDO::ERRMODE_SILENT,
+                        PDO::ERRMODE_WARNING,
+                        PDO::ERRMODE_EXCEPTION,
+                    ]) ?
+                        $options['error'] :
+                        PDO::ERRMODE_SILENT
+                );
+            }
+
+            if (isset($options['command']) && is_array($options['command'])) {
+                $commands = array_merge($commands, $options['command']);
+            }
+
+            foreach ($commands as $value) {
+                $this->pdo->exec($value);
+            }
+        } catch (PDOException $e) {
+            throw new PDOException($e->getMessage());
+        }
+    }
+
+    /**
+     * Execute customized raw statement.
+     *
+     * @param string $statement The raw SQL statement.
+     * @param array $map The array of input parameters value for prepared statement.
+     * @return PDOStatement|null
+     */
+    public function query(string $statement, array $map = []): ?PDOStatement
+    {
+        $raw = $this->raw($statement, $map);
+        $statement = $this->buildRaw($raw, $map);
+
+        return $this->exec($statement, $map);
+    }
+
+    /**
+     * Build a raw object.
+     *
+     * @param string $string The raw string.
+     * @param array $map The array of mapping data for the raw string.
+     * @return Raw
+     */
+    public static function raw(string $string, array $map = []): Raw
+    {
+        $raw = new Raw();
+
+        $raw->map   = $map;
+        $raw->value = $string;
+
+        return $raw;
+    }
+
+    /**
+     * Quote a string for use in a query.
+     *
+     * @param string $string
+     * @return string
+     */
+    public function quote(string $string): string
+    {
+        if ($this->type === 'mysql') {
+            return "'" . preg_replace(['/([\'"])/', '/(\\\\\\\")/'], ["\\\\\${1}", '\\\${1}'], $string) . "'";
+        }
+
+        return "'" . preg_replace('/\'/', '\'\'', $string) . "'";
+    }
+
+    /**
+     * Create a table.
+     *
+     * @param string     $table
+     * @param array      $columns Columns definition.
+     * @param null|array $options Additional table options for creating a table.
+     * @return PDOStatement|null
+     */
+    public function create(string $table, array $columns, array $options = null): ?PDOStatement
+    {
+        $stack = [];
+        $tableOption = '';
+        $tableName = $this->tableQuote($table);
+
+        foreach ($columns as $name => $definition) {
+            if (is_int($name)) {
+                $stack[] = preg_replace("/\<(" . $this::COLUMN_PATTERN . ")\>/u", '"$1"', $definition);
+            } elseif (is_array($definition)) {
+                $stack[] = $this->columnQuote($name) . ' ' . implode(' ', $definition);
+            } elseif (is_string($definition)) {
+                $stack[] = $this->columnQuote($name) . ' ' . $definition;
             }
         }
 
-        $sql = $this->grammar->compileInsert($this, $values);
+        if (is_array($options)) {
+            $optionStack = [];
 
-        if ($this->withDump) {
-            dump($sql, $bindings);
-            return 0;
-        } elseif ($this->withSQL) {
-            return compact($sql, $bindings);
+            foreach ($options as $key => $value) {
+                if (is_string($value) || is_int($value)) {
+                    $optionStack[] = "$key = $value";
+                }
+            }
+
+            $tableOption = ' ' . implode(', ', $optionStack);
+        } elseif (is_string($options)) {
+            $tableOption = ' ' . $options;
         }
 
-        return $this->connection->insert($sql, $bindings);
-    }
+        $command = 'CREATE TABLE';
 
-    public function insertGetId(array $values, string $keyName = 'id'): mixed
-    {
-        $bindings = array_values($values);
-
-        $sql = $this->grammar->compileInsert($this, $values, $keyName);
-
-        if ($this->withDump) {
-            dump($sql, $bindings);
-            return 0;
-        } elseif ($this->withSQL) {
-            return compact($sql, $bindings);
+        if (in_array($this->type, ['mysql', 'pgsql', 'sqlite'])) {
+            $command .= ' IF NOT EXISTS';
         }
 
-        $result = $this->connection->selectOne($sql, $bindings, false);
-
-        return is_numeric($result[$keyName]) ? (int) $result[$keyName] : $result[$keyName];
+        return $this->exec("$command $tableName (" . implode(', ', $stack) . ")$tableOption");
     }
 
-    public function upsert(string $uniqueColumn, array $insertValues, array $updateValues): int
+    /**
+     * Drop a table.
+     *
+     * @param string $table
+     * @return PDOStatement|null
+     */
+    public function drop(string $table): ?PDOStatement
     {
-        if (! array_key_exists($uniqueColumn, $insertValues)) {
-            throw new InvalidArgumentException("The unique column [$uniqueColumn] must be in the insert values.");
+        return $this->exec('DROP TABLE IF EXISTS ' . $this->tableQuote($table));
+    }
+
+    /**
+     * Select data from the table.
+     *
+     * @param string            $table
+     * @param array             $join
+     * @param null|array|string $columns
+     * @param null|array        $where
+     * @return array|null
+     */
+    public function select(string $table, array $join, array|string $columns = null, array $where = null): ?array
+    {
+        $map = [];
+        $result = [];
+        $columnMap = [];
+
+        $args = func_get_args();
+        $lastArgs = $args[array_key_last($args)];
+        $callback = is_callable($lastArgs) ? $lastArgs : null;
+
+        $where   = is_callable($where) ? null : $where;
+        $columns = is_callable($columns) ? null : $columns;
+
+        $column = $where === null ? $join : $columns;
+        $isSingle = (is_string($column) && $column !== '*');
+
+        $statement = $this->exec($this->selectContext($table, $map, $join, $columns, $where), $map);
+
+        $this->columnMap($columns, $columnMap, true);
+
+        if (!$this->statement) {
+            return $result;
         }
 
-        if (empty($insertValues) || empty($updateValues)) {
-            throw new InvalidArgumentException('Values must not be empty.');
+        if ($columns === '*') {
+            if (isset($callback)) {
+                while ($data = $statement->fetch(PDO::FETCH_ASSOC)) {
+                    $callback($data);
+                }
+
+                return null;
+            }
+
+            return $statement->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        $sql = $this->grammar->compileUpsert($this, $uniqueColumn, $insertValues, $updateValues);
+        while ($data = $statement->fetch(PDO::FETCH_ASSOC)) {
+            $currentStack = [];
 
-        $bindings = $this->getBindings();
+            if (isset($callback)) {
+                $this->dataMap($data, $columns, $columnMap, $currentStack, true);
 
-        if ($this->withDump) {
-            dump($sql, array_merge($insertValues, $updateValues), $bindings);
-            return 0;
-        } elseif ($this->withSQL) {
-            return compact($sql, $bindings);
+                $callback(
+                    $isSingle ?
+                        $currentStack[$columnMap[$column][0]] :
+                        $currentStack
+                );
+            } else {
+                $this->dataMap($data, $columns, $columnMap, $currentStack, true, $result);
+            }
         }
 
-        return $this->connection->statement($sql, $bindings)->rowCount();
-    }
-
-    public function update(array $values): int|array
-    {
-        if (empty($values)) {
-            return 0;
+        if (isset($callback)) {
+            return null;
         }
 
-        $sql = $this->grammar->compileUpdate($this, $values);
-        $bindings = array_merge(array_values($values), $this->bindings['where']);
+        if ($isSingle) {
+            $singleResult = [];
+            $resultKey = $columnMap[$column][0];
 
-        if ($this->withDump) {
-            dump($sql, $bindings);
-            return 0;
-        } elseif ($this->withSQL) {
-            return compact($sql, $bindings);
+            foreach ($result as $item) {
+                $singleResult[] = $item[$resultKey];
+            }
+
+            return $singleResult;
         }
 
-        return $this->connection->update($sql, $bindings);
+        return $result;
     }
 
-    public function delete(): int|array
+    /**
+     * Insert one or more records into the table.
+     *
+     * @param string      $table
+     * @param array       $values
+     * @param null|string $primaryKey
+     * @return PDOStatement|null
+     */
+    public function insert(string $table, array $values, ?string $primaryKey = null): ?PDOStatement
     {
-        $sql = $this->grammar->compileDelete($this);
-        $bindings = $this->bindings['where'];
+        $stack     = [];
+        $columns   = [];
+        $fields    = [];
+        $map       = [];
+        $returning = [];
 
-        if ($this->withDump) {
-            dump($sql, $bindings);
-            return 0;
-        } elseif ($this->withSQL) {
-            return compact($sql, $bindings);
+        if (!isset($values[0])) {
+            $values = [$values];
         }
 
-        return $this->connection->delete($sql, $bindings);
+        foreach ($values as $data) {
+            foreach ($data as $key => $value) {
+                $columns[] = $key;
+            }
+        }
+
+        $columns = array_unique($columns);
+
+        foreach ($values as $data) {
+            $values = [];
+
+            foreach ($columns as $key) {
+                $value = $data[$key];
+                $type = gettype($value);
+
+                if ($this->type === 'oracle' && $type === 'resource') {
+                    $values[] = 'EMPTY_BLOB()';
+                    $returning[$this->mapKey()] = [$key, $value, PDO::PARAM_LOB];
+                    continue;
+                }
+
+                if ($raw = $this->buildRaw($data[$key], $map)) {
+                    $values[] = $raw;
+                    continue;
+                }
+
+                $mapKey = $this->mapKey();
+                $values[] = $mapKey;
+
+                switch ($type) {
+                    case 'array':
+                        $map[$mapKey] = [
+                            strpos($key, '[JSON]') === strlen($key) - 6 ?
+                                json_encode($value) :
+                                serialize($value),
+                            PDO::PARAM_STR,
+                        ];
+                        break;
+                    case 'NULL':
+                    case 'resource':
+                    case 'boolean':
+                    case 'integer':
+                    case 'double':
+                    case 'string':
+                        $map[$mapKey] = $this->typeMap($value, $type);
+                        break;
+                }
+            }
+
+            $stack[] = '(' . implode(', ', $values) . ')';
+        }
+
+        foreach ($columns as $key) {
+            $fields[] = $this->columnQuote(preg_replace("/(\s*\[JSON\]$)/i", '', $key));
+        }
+
+        $query = 'INSERT INTO ' . $this->tableQuote($table) . ' (' . implode(', ', $fields) . ') VALUES ' . implode(', ', $stack);
+
+        if (
+            $this->type === 'oracle' && (!empty($returning) || isset($primaryKey))
+        ) {
+            if ($primaryKey) {
+                $returning[':RETURNID'] = [$primaryKey, '', PDO::PARAM_INT, 8];
+            }
+
+            $statement = $this->returningQuery($query, $map, $returning);
+
+            if ($primaryKey) {
+                $this->returnId = $returning[':RETURNID'][1];
+            }
+
+            return $statement;
+        }
+
+        return $this->exec($query, $map);
     }
 
-    public function softDelete(): static
+    /**
+     * Modify data from the table.
+     *
+     * @param string     $table
+     * @param array      $data
+     * @param null|array $where
+     * @return PDOStatement|null
+     */
+    public function update(string $table, array $data, array $where = null): ?PDOStatement
     {
-        $this->command = 'update';
+        $fields = [];
+        $map = [];
+        $returning = [];
 
-        return $this;
+        foreach ($data as $key => $value) {
+            $column = $this->columnQuote(preg_replace("/(\s*\[(JSON|\+|\-|\*|\/)\]$)/", '', $key));
+            $type   = gettype($value);
+
+            if ($this->type === 'oracle' && $type === 'resource') {
+                $fields[] = "{$column} = EMPTY_BLOB()";
+                $returning[$this->mapKey()] = [$key, $value, PDO::PARAM_LOB];
+                continue;
+            }
+
+            if ($raw = $this->buildRaw($value, $map)) {
+                $fields[] = "{$column} = {$raw}";
+                continue;
+            }
+
+            preg_match("/" . $this::COLUMN_PATTERN . "(\[(?<operator>\+|\-|\*|\/)\])?/u", $key, $match);
+
+            if (isset($match['operator'])) {
+                if (is_numeric($value)) {
+                    $fields[] = "$column = $column {$match['operator']} $value";
+                }
+            } else {
+                $mapKey = $this->mapKey();
+                $fields[] = "$column = $mapKey";
+
+                switch ($type) {
+                    case 'array':
+                        $map[$mapKey] = [
+                            strpos($key, '[JSON]') === strlen($key) - 6 ?
+                                json_encode($value) :
+                                serialize($value),
+                            PDO::PARAM_STR,
+                        ];
+                        break;
+                    case 'NULL':
+                    case 'resource':
+                    case 'boolean':
+                    case 'integer':
+                    case 'double':
+                    case 'string':
+                        $map[$mapKey] = $this->typeMap($value, $type);
+                        break;
+                }
+            }
+        }
+
+        $query = 'UPDATE ' . $this->tableQuote($table) . ' SET ' . implode(', ', $fields) . $this->whereClause($where, $map);
+
+        if ($this->type === 'oracle' && !empty($returning)) {
+            return $this->returningQuery($query, $map, $returning);
+        }
+
+        return $this->exec($query, $map);
     }
 
-    public function distinct(): static
+    /**
+     * Delete data from the table.
+     *
+     * @param string    $table
+     * @param array|Raw $where
+     * @return PDOStatement|null
+     */
+    public function delete(string $table, Raw|array $where): ?PDOStatement
     {
-        $this->distinct = true;
+        $map = [];
 
-        return $this;
+        return $this->exec('DELETE FROM ' . $this->tableQuote($table) . $this->whereClause($where, $map), $map);
     }
 
-    public function from(string $table, string $as = null): static
+    /**
+     * Replace old data with a new one.
+     *
+     * @param string     $table
+     * @param array      $columns
+     * @param null|array $where
+     * @return PDOStatement|null
+     * @throws InvalidArgumentException
+     */
+    public function replace(string $table, array $columns, array $where = null): ?PDOStatement
     {
-        $this->from = [$table, $as]; // $as ? sprintf('%s as %s', $table, $as) : $table;
+        $map   = [];
+        $stack = [];
 
-        return $this;
+        foreach ($columns as $column => $replacements) {
+            if (!is_array($replacements)) {
+                continue;
+            }
+
+            foreach ($replacements as $old => $new) {
+                $mapKey     = $this->mapKey();
+                $columnName = $this->columnQuote($column);
+
+                $stack[] = "$columnName = REPLACE($columnName, {$mapKey}a, {$mapKey}b)";
+
+                $map[$mapKey . 'a'] = [$old, PDO::PARAM_STR];
+                $map[$mapKey . 'b'] = [$new, PDO::PARAM_STR];
+            }
+        }
+
+        if (empty($stack)) {
+            throw new InvalidArgumentException('Invalid columns supplied.');
+        }
+
+        return $this->exec('UPDATE ' . $this->tableQuote($table) . ' SET ' . implode(', ', $stack) . $this->whereClause($where, $map), $map);
     }
 
-    public function whereRaw(string $expression, array $bindings = null, string $boolean = 'and'): static
+    /**
+     * Get only one record from the table.
+     *
+     * @param string            $table
+     * @param null|array        $join
+     * @param null|array|string $columns
+     * @param null|array        $where
+     * @return mixed
+     */
+    public function get(string $table, array $join = null, array|string $columns = null, array $where = null): mixed
     {
-        $this->conditions[] = [
-            'type'       => 'raw',
-            'expression' => $expression,
-            'bindings'   => $bindings,
-            'boolean'    => $boolean,
-        ];
+        $map          = [];
+        $result       = [];
+        $columnMap    = [];
+        $currentStack = [];
+
+        if ($where === null) {
+            if ($this->isJoin($join)) {
+                $where['LIMIT'] = 1;
+            } else {
+                $columns['LIMIT'] = 1;
+            }
+
+            $column = $join;
+        } else {
+            $column = $columns;
+            $where['LIMIT'] = 1;
+        }
+
+        $isSingle = (is_string($column) && $column !== '*');
+        $query = $this->exec($this->selectContext($table, $map, $join, $columns, $where), $map);
+
+        if (!$this->statement) {
+            return false;
+        }
+
+        $data = $query->fetchAll(PDO::FETCH_ASSOC);
+
+        if (isset($data[0])) {
+            if ($column === '*') {
+                return $data[0];
+            }
+
+            $this->columnMap($columns, $columnMap, true);
+            $this->dataMap($data[0], $columns, $columnMap, $currentStack, true, $result);
+
+            if ($isSingle) {
+                return $result[0][$columnMap[$column][0]];
+            }
+
+            return $result[0];
+        }
+    }
+
+    /**
+     * Determine whether the target data existed from the table.
+     *
+     * @param string     $table
+     * @param array      $join
+     * @param null|array $where
+     * @return bool
+     */
+    public function has(string $table, array $join, array $where = null): bool
+    {
+        $map = [];
+        $column = null;
+
+        $query = $this->exec(
+            $this->type === 'mssql' ?
+                $this->selectContext($table, $map, $join, $column, $where, self::raw('TOP 1 1')) :
+                'SELECT EXISTS(' . $this->selectContext($table, $map, $join, $column, $where, '1') . ')',
+            $map
+        );
+
+        if (!$this->statement) {
+            return false;
+        }
+        $result = $query->fetchColumn();
+
+        return $result === '1' || $result === 1 || $result === true;
+    }
+
+    /**
+     * Randomly fetch data from the table.
+     *
+     * @param string            $table
+     * @param null|array        $join
+     * @param null|array|string $columns
+     * @param null|array        $where
+     * @return array
+     */
+    public function rand(string $table, array $join = null, array|string $columns = null, array $where = null): array
+    {
+        $orderRaw = $this->raw(
+            $this->type === 'mysql' ? 'RAND()'
+                : ($this->type === 'mssql' ? 'NEWID()' : 'RANDOM()')
+        );
+
+        if ($where === null) {
+            if ($this->isJoin($join)) {
+                $where['ORDER'] = $orderRaw;
+            } else {
+                $columns['ORDER'] = $orderRaw;
+            }
+        } else {
+            $where['ORDER'] = $orderRaw;
+        }
+
+        return $this->select($table, $join, $columns, $where);
+    }
+
+    /**
+     * Count the number of rows from the table.
+     *
+     * @param string      $table
+     * @param null|array  $join
+     * @param null|string $column
+     * @param null|array  $where
+     * @return int|null
+     */
+    public function count(string $table, array $join = null, string $column = null, array $where = null): ?int
+    {
+        return (int) $this->aggregate('COUNT', $table, $join, $column, $where);
+    }
+
+    /**
+     * Calculate the average value of the column.
+     *
+     * @param string      $table
+     * @param array       $join
+     * @param null|string $column
+     * @param null|array  $where
+     * @return null|string
+     */
+    public function avg(string $table, array $join, string $column = null, array $where = null): ?string
+    {
+        return $this->aggregate('AVG', $table, $join, $column, $where);
+    }
+
+    /**
+     * Get the maximum value of the column.
+     *
+     * @param string      $table
+     * @param array       $join
+     * @param null|string $column
+     * @param null|array  $where
+     * @return null|string
+     */
+    public function max(string $table, array $join, string $column = null, array $where = null): ?string
+    {
+        return $this->aggregate('MAX', $table, $join, $column, $where);
+    }
+
+    /**
+     * Get the minimum value of the column.
+     *
+     * @param string      $table
+     * @param array       $join
+     * @param null|string $column
+     * @param null|array  $where
+     * @return null|string
+     */
+    public function min(string $table, array $join, string $column = null, array $where = null): ?string
+    {
+        return $this->aggregate('MIN', $table, $join, $column, $where);
+    }
+
+    /**
+     * Calculate the total value of the column.
+     *
+     * @param string      $table
+     * @param array       $join
+     * @param null|string $column
+     * @param null|array  $where
+     * @return null|string
+     */
+    public function sum(string $table, array $join, string $column = null, array $where = null): ?string
+    {
+        return $this->aggregate('SUM', $table, $join, $column, $where);
+    }
+
+    /**
+     * Start a transaction.
+     *
+     * @param callable $actions
+     * @return void
+     * @throws \Exception
+     */
+    public function action(callable $actions): void
+    {
+        if (is_callable($actions)) {
+            $this->pdo->beginTransaction();
+
+            try {
+                $result = $actions($this);
+
+                if ($result === false) {
+                    $this->pdo->rollBack();
+                } else {
+                    $this->pdo->commit();
+                }
+            } catch (\Exception $e) {
+                $this->pdo->rollBack();
+                throw $e;
+            }
+        }
+    }
+
+    /**
+     * Return the ID for the last inserted row.
+     *
+     * @param null|string $name
+     * @return null|string
+     */
+    public function id(?string $name = null): ?string
+    {
+        return match ($this->type) {
+            'oracle' => $this->returnId,
+            'pgsql'  => (string) $this->pdo->query('SELECT LASTVAL()')->fetchColumn() ?: null,
+            default  => $this->pdo->lastInsertId($name),
+        };
+    }
+
+    /**
+     * Enable debug mode and output readable statement string.
+     *
+     * @return self
+     */
+    public function debug(): self
+    {
+        $this->debugMode = true;
 
         return $this;
     }
 
     /**
-     * @param ...$condition
-     * @return $this
+     * Enable debug logging mode.
+     *
+     * @return void
      */
-    public function where(...$condition): static
+    public function beginDebug(): void
     {
-        $this->conditions[] = [
-            'type'    => 'basic',
-            ...$this->prepareWhere($condition),
-            'boolean' => 'and',
-        ];
-
-        return $this;
+        $this->debugMode    = true;
+        $this->debugLogging = true;
     }
 
-    public function orWhere(...$condition): static
+    /**
+     * Disable debug logging and return all readable statements.
+     *
+     * @return array
+     */
+    public function debugLog(): array
     {
-        $this->conditions[] = [
-            'type'    => 'basic',
-            ...$this->prepareWhere($condition),
-            'boolean' => 'or',
-        ];
+        $this->debugMode    = false;
+        $this->debugLogging = false;
 
-        return $this;
+        return $this->debugLogs;
     }
 
-    public function whereNull(string|array $columns, string $boolean = 'and', bool $not = false): static
+    /**
+     * Return the last performed statement.
+     *
+     * @return null|string
+     */
+    public function last(): ?string
     {
-        $type = $not ? 'NotNull' : 'Null';
-
-        foreach ((array) $columns as $column) {
-            $this->conditions[] = compact('type', 'column', 'boolean');
+        if (empty($this->logs)) {
+            return null;
         }
 
-        return $this;
+        $log = $this->logs[array_key_last($this->logs)];
+
+        return $this->generate($log[0], $log[1]);
     }
 
-    public function orWhereNull(string|array $columns): static
+    /**
+     * Return all executed statements.
+     *
+     * @return string[]
+     */
+    public function log(): array
     {
-        return $this->whereNull($columns, 'or');
+        return array_map(fn ($log) => $this->generate($log[0], $log[1]), $this->logs);
     }
 
-    public function whereNotNull(string|array $columns, string $boolean = 'and'): static
+    /**
+     * Get information about the database connection.
+     *
+     * @return array
+     */
+    public function info(): array
     {
-        return $this->whereNull($columns, $boolean, true);
-    }
-
-    public function orWhereNotNull(string|array $columns): static
-    {
-        return $this->whereNull($columns, 'or', true);
-    }
-
-    public function whereIn(string $column, array $values, string $boolean = 'and', bool $not = false): static
-    {
-        $this->conditions[] = [
-            'type'    => $not ? 'NotIn' : 'In',
-            'column'  => $column,
-            'values'  => $values,
-            'boolean' => $boolean,
+        $output = [
+            'server'     => 'SERVER_INFO',
+            'driver'     => 'DRIVER_NAME',
+            'client'     => 'CLIENT_VERSION',
+            'version'    => 'SERVER_VERSION',
+            'connection' => 'CONNECTION_STATUS',
         ];
 
-        return $this;
-    }
-
-    public function orderBy($column, $direction = 'asc'): static
-    {
-        $this->orders[] = compact('column', 'direction');
-
-        return $this;
-    }
-
-    public function orderByDesc($column): static
-    {
-        return $this->orderBy($column, 'desc');
-    }
-
-    public function offset(?int $offset): static
-    {
-        $this->offset = $offset;
-
-        return $this;
-    }
-
-    public function limit(?int $limit): static
-    {
-        $this->limit = $limit;
-
-        return $this;
-    }
-
-    public function take(int $count): static
-    {
-        $this->offset = 0;
-        $this->limit = $count;
-
-        return $this;
-    }
-
-    public function pluck(string $column, string $key = null): array
-    {
-        $originalColumns = $this->columns;
-
-        $this->columns = $key ? [$column, $key] : [$column];
-
-        $queryResults = $this->runSelect();
-
-        $this->columns = $originalColumns;
-
-        $results = [];
-
-        if (is_null($key)) {
-            foreach ($queryResults as $row) {
-                $results[] = $row->$column;
-            }
-        } else {
-            foreach ($queryResults as $row) {
-                $results[$row->$key] = $row->$column;
+        foreach ($output as $key => $value) {
+            try {
+                $output[$key] = $this->pdo->getAttribute(constant('PDO::ATTR_' . $value));
+            } catch (PDOException $e) {
+                $output[$key] = $e->getMessage();
             }
         }
 
-        return $results;
+        $output['dsn'] = $this->dsn;
+
+        return $output;
     }
 
-    public function min(string $column): mixed
+    /**
+     * Get database version
+     */
+    public function version(): string
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        return preg_replace(
+            '/^\D*(\d+\.\d+(\.\d+)?)/',
+            '$1',
+            $this->pdo->getAttribute(constant('PDO::ATTR_CLIENT_VERSION'))
+        ) ?: '';
     }
 
-    public function max(string $column): mixed
+    /**
+     * Get database schema
+     *
+     * @see https://stackoverflow.com/questions/52642542/how-to-extract-column-name-and-type-from-mysql
+     */
+    public function schema(string $col = null): array
     {
-        return $this->aggregate(__FUNCTION__, [$column]);
+        if (! $this->schema) {
+            $query = $this->query(
+                '
+				SELECT
+    				COLUMN_NAME as name, DATA_TYPE as type, TABLE_NAME as tbl
+				FROM
+				    INFORMATION_SCHEMA.COLUMNS
+				WHERE
+				    TABLE_SCHEMA = :database',
+                [
+                    ':database' => EX_DB_NAME, // TODO: компонент фреймворка ничего не должен знать про константу
+                ]
+            );
+
+            if ($query instanceof PDOStatement) {
+                $columns = $query->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($columns as $column) {
+                    $this->schema[$column['tbl']][$column['name']] = $column['type'];
+                }
+            }
+        }
+
+        if (isset($this->schema[$col])) {
+            return $this->schema[$col];
+        }
+        return $this->schema;
     }
 
-    protected function aggregate($function, $columns = ['*']): mixed
+    public function updateSchema(): array
     {
-        $this->aggregate = compact('function', 'columns');
+        $this->schema = [];
 
-        $results = $this->get();
-
-        return empty($results) ? null : $results[0]->aggregate;
-    }
-
-    public function get(): array
-    {
-        $sql = $this->grammar->compileSelect($this);
-
-        return $this->connection->select($sql, $this->bindings['where']);
-    }
-
-    public function first(): null|array|\stdClass
-    {
-        return $this->take(1)->get()[0] ?? null;
-    }
-
-    public function count(string $column = 'id'): int
-    {
-        return (int) $this->aggregate(__FUNCTION__, [$column]);
-    }
-
-    protected function runSelect(): array
-    {
-        return $this->connection->select($this->toSql(), $this->getBindings(), $this->useWritePDO);
-    }
-
-    protected function toSql(): string
-    {
-        return $this->grammar->compileSelect($this);
-    }
-
-    public function getBindings(): array
-    {
-        return Arr::flatten($this->bindings);
-    }
-
-    public function setBinding(mixed $values, string $type): void
-    {
-        $this->bindings[$type] = $values;
-    }
-
-    public function addBinding(mixed $values, string $type): void
-    {
-        $this->bindings[$type] = array_merge(
-            $this->bindings[$type],
-            is_array($values) ? $values : [$values]
-        );
-    }
-
-    public function find($id, $columns = ['*'])
-    {
-        return $this->where('id', '=', $id)->first();
-    }
-
-    public function dump(): void
-    {
-        dump($this->toSql(), $this->getBindings());
-    }
-
-    public function dd(): void
-    {
-        dd($this->toSql(), $this->getBindings());
+        return $this->schema();
     }
 }

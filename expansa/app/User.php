@@ -7,7 +7,7 @@ namespace app;
 use app\User\Roles;
 use app\User\Schema;
 use app\User\Traits;
-use Expansa\Db;
+use Expansa\Database\Db;
 use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Is;

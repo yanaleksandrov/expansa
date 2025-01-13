@@ -32,6 +32,9 @@ if (! function_exists('t')) {
      */
     function t(string $string, mixed ...$args): string
     {
-        return Expansa\I18n::_t($string, ...$args);
+        if (class_exists('Expansa\I18n')) {
+            return Expansa\I18n::_t($string, ...$args);
+        }
+        return $string;
     }
 }
