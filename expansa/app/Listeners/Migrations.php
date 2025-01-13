@@ -22,7 +22,7 @@ final class Migrations
 
     public function createPostsTable(string $postType): void
     {
-        Schema::createIfNotExists($postType, function (Table $table) {
+        Schema::create($postType, function (Table $table) {
             $statuses = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
 
             $table->id();
@@ -49,7 +49,7 @@ final class Migrations
 
     private function createFieldsTable(string $name): void
     {
-        Schema::createIfNotExists($name . '_fields', function (Table $table) use ($name) {
+        Schema::create($name . '_fields', function (Table $table) use ($name) {
             $column = "{$name}_id";
 
             $table->id();
@@ -65,7 +65,7 @@ final class Migrations
 
     private function createCacheTable(): void
     {
-        Schema::createIfNotExists('cache', function (Table $table) {
+        Schema::create('cache', function (Table $table) {
             $table->string('key', 191)->primary();
             $table->text('value');
             $table->datetime('expiry_at');
@@ -78,7 +78,7 @@ final class Migrations
 
     private function createSlugsTable(): void
     {
-        Schema::createIfNotExists('slugs', function (Table $table) {
+        Schema::create('slugs', function (Table $table) {
             $table->id();
             $table->ulid();
             $table->bigInt('post_id')->unsigned();
@@ -95,7 +95,7 @@ final class Migrations
 
     private function createTermsTable(): void
     {
-        Schema::createIfNotExists('terms', function (Table $table) {
+        Schema::create('terms', function (Table $table) {
             $table->id();
             $table->string('name', 200)->default('');
             $table->string('slug', 200)->default('');
@@ -111,7 +111,7 @@ final class Migrations
 
     private function createUsersTable(): void
     {
-        Schema::createIfNotExists('users', function (Table $table) {
+        Schema::create('users', function (Table $table) {
             $table->id();
             $table->ulid();
             $table->string('login', 60);
@@ -141,7 +141,7 @@ final class Migrations
 
     private function createCommentsTable(): void
     {
-        Schema::createIfNotExists('comments', function (Table $table) {
+        Schema::create('comments', function (Table $table) {
             $table->id();
             $table->bigInt('post_id')->unsigned()->default(0);
             $table->bigInt('parent_id')->unsigned()->default(0);
@@ -175,7 +175,7 @@ final class Migrations
 
     private function createOptionsTable(): void
     {
-        Schema::createIfNotExists('options', function (Table $table) {
+        Schema::create('options', function (Table $table) {
             $table->id();
             $table->string('key', 191)->default('');
             $table->text('value');
@@ -184,7 +184,7 @@ final class Migrations
 
     private function createTaxonomiesTable(): void
     {
-        Schema::createIfNotExists('taxonomies', function (Table $table) {
+        Schema::create('taxonomies', function (Table $table) {
             $table->id();
             $table->bigInt('term_id')->default(0);
             $table->bigInt('count')->default(0);

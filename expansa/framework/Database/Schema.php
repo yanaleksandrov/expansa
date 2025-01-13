@@ -11,9 +11,7 @@ use Expansa\Facades\Facade;
  * Schema facade for database operations.
  *
  * @method static void create(string $table, Closure $callback)
- * @method static void createIfNotExists(string $table, Closure $callback)
  * @method static void drop(string $table)
- * @method static void dropIfExists(string $table)
  * @method static void rename(string $from, string $to)
  */
 class Schema extends Facade

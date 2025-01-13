@@ -16,15 +16,6 @@ class Builder extends BuilderGrammar
     public function create(string $name, Closure $callback): void
     {
         $this->bind(
-            "CREATE DATABASE {$this->wrap($name)} (%s) ENGINE=InnoDB DEFAULT{$this->charset()}{$this->collate()}",
-            $name,
-            $callback
-        );
-    }
-
-    public function createIfNotExists(string $name, Closure $callback): void
-    {
-        $this->bind(
             "CREATE TABLE IF NOT EXISTS {$this->wrap($name)} (%s) ENGINE=InnoDB DEFAULT{$this->charset()}{$this->collate()}",
             $name,
             $callback
@@ -32,11 +23,6 @@ class Builder extends BuilderGrammar
     }
 
     public function drop(string $name): void
-    {
-        $this->bind("DROP DATABASE {$this->wrap($name)}", $name);
-    }
-
-    public function dropIfExists(string $name): void
     {
         $this->bind("DROP DATABASE IF EXISTS {$this->wrap($name)}", $name);
     }
