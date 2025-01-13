@@ -8,6 +8,6 @@ abstract class Base
 {
     protected function wrap(string $value): string
     {
-        return sprintf('`%s`', $value);
+        return sprintf('<%s>', $value);
     }
 }
