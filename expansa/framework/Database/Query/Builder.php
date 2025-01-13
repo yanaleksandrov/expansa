@@ -414,7 +414,7 @@ class Builder extends BuilderAbstract
      * @param null|array        $where
      * @return array|null
      */
-    public function select(string $table, array $join, array|string $columns = null, array $where = null): ?array
+    public function select(string $table, $join, array|string $columns = null, array $where = null): ?array
     {
         $map       = [];
         $result    = [];
