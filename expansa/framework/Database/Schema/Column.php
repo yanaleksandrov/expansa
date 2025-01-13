@@ -41,6 +41,4 @@ use Expansa\Patterns\Fluent;
  * @method $this on(string $column) Specify the referenced table for the foreign key
  * @method $this onDelete(string $column) Set the action to be performed on delete
  */
-class Column extends Fluent
-{
-}
+class Column extends Fluent {} // phpcs:ignore

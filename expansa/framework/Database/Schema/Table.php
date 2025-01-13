@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
-use Expansa\Patterns\Fluent;
 use Expansa\Database\Contracts\Types;
+use Expansa\Patterns\Fluent;
 
 class Table
 {
@@ -181,12 +181,7 @@ class Table
 
     public function addColumn(string $type, string $name, array $parameters = []): Column
     {
-        $column = new Column(
-            array_merge(['type' => $type, 'name' => $name], $parameters)
-        );
-        $this->columns[] = $column;
-
-        return $column;
+        return $this->columns[] = new Column(array_merge(['type' => $type, 'name' => $name], $parameters));
     }
 
     public function renameColumn(string $from, string $to, string $type = null): static
@@ -232,11 +227,6 @@ class Table
         return $this;
     }
 
-    public function rawIndex(string $expression, string $index): static
-    {
-        return $this->index([new Expression($expression)], $index);
-    }
-
     public function dropPrimary(string|array $index): static
     {
         return $this->dropIndexCommand(__FUNCTION__, 'primary', $index);
@@ -250,17 +240,6 @@ class Table
     public function dropUnique(string|array $index): static
     {
         return $this->dropIndexCommand(__FUNCTION__, 'unique', $index);
-    }
-
-    protected function dropIndexCommand(string $command, string $type, string|array $index): static
-    {
-        if (is_array($index)) {
-            $index = $this->createIndexName($type, $index);
-        }
-
-        $this->addCommand($command, compact('index'));
-
-        return $this;
     }
 
     public function foreign(string $column): Foreign
@@ -278,19 +257,23 @@ class Table
         return $this->commands;
     }
 
-    protected function addCommand(string $name, array $parameters = []): Fluent
+    private function dropIndexCommand(string $command, string $type, string|array $index): static
     {
-        $this->commands[] = $command = $this->createCommand($name, $parameters);
+        if (is_array($index)) {
+            $index = $this->createIndexName($type, $index);
+        }
 
-        return $command;
+        $this->addCommand($command, compact('index'));
+
+        return $this;
     }
 
-    protected function createCommand(string $name, array $parameters = []): Fluent
+    private function addCommand(string $name, array $parameters = []): Fluent
     {
-        return new Fluent(array_merge(['name' => $name], $parameters));
+        return $this->commands[] = new Fluent(array_merge(['name' => $name], $parameters));
     }
 
-    protected function createIndexName(string $type, array $columns): string
+    private function createIndexName(string $type, array $columns): string
     {
         $index = array_merge([$this->prefix . $this->name], $columns, [$type]);
 

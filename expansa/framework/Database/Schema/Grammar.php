@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema;
 
-use Closure;
 use Expansa\Database\Abstracts\Base;
 
 class Grammar extends Base
@@ -128,10 +127,6 @@ class Grammar extends Base
 
     protected function getDefaultValue(mixed $value = null): string
     {
-        if ($value instanceof Expression) {
-            return $value->getValue();
-        }
-
         if (is_null($value)) {
             return 'NULL';
         }
