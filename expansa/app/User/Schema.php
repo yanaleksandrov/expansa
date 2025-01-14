@@ -74,36 +74,4 @@ class Schema
             )
         )->apply();
     }
-
-    /**
-     * Create new table into database.
-     */
-    public static function migrate(): void
-    {
-        $tableName      = (new Db\Handler())->getTableName(self::$table);
-        $charsetCollate = (new Db\Handler())->getCharsetCollate();
-
-        Db::query(
-            "
-			CREATE TABLE IF NOT EXISTS {$tableName} (
-				id            bigint(20)   UNSIGNED NOT NULL AUTO_INCREMENT,
-				login         varchar(60)  NOT NULL DEFAULT '',
-				password      varchar(255) NOT NULL DEFAULT '',
-				nicename      varchar(60)  NOT NULL DEFAULT '',
-				firstname     varchar(60)  NOT NULL DEFAULT '',
-				lastname      varchar(60)  NOT NULL DEFAULT '',
-				showname      varchar(255) NOT NULL DEFAULT '',
-				email         varchar(100) NOT NULL DEFAULT '',
-				locale        varchar(100) NOT NULL DEFAULT '',
-				registered    DATETIME     NOT NULL DEFAULT NOW(),
-				visited       DATETIME     NOT NULL DEFAULT NOW(),
-				PRIMARY KEY   (id),
-				KEY login_key (login),
-				KEY nicename  (nicename),
-				KEY email     (email)
-			) ENGINE=InnoDB {$charsetCollate};"
-        )->fetchAll();
-
-        Field\Schema::migrate($tableName, 'user');
-    }
 }

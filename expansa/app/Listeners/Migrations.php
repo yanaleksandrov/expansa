@@ -6,6 +6,7 @@ namespace app\Listeners;
 
 use Expansa\Database\Schema;
 use Expansa\Database\Schema\Table;
+use Expansa\Support\Str;
 
 final class Migrations
 {
@@ -28,10 +29,11 @@ final class Migrations
             $table->id();
             $table->text('title');
             $table->text('content');
-            $table->bigInt('author_id')->default(0);
-            $table->bigInt('parent_id')->default(0);
-            $table->smallInt('comments')->default(0);
-            $table->smallInt('views')->default(0);
+            $table->bigInt('author_id')->unsigned()->default(0);
+            $table->bigInt('parent_id')->unsigned()->default(0);
+            $table->smallInt('comments')->unsigned()->default(0);
+            $table->smallInt('views')->unsigned()->default(0);
+            $table->mediumInt('position')->unsigned()->default(0);
             $table->enum('status', $statuses)->default('pending');
             $table->bool('discussable')->default(1);
             $table->string('password', 255);
@@ -41,7 +43,7 @@ final class Migrations
             $table->index('author_id');
             $table->index('parent_id');
             $table->index('status');
-            $table->index('parent_id');
+            $table->index(['title', 'content']); // TODO: fulltext index
         });
 
         $this->createFieldsTable($postType);
@@ -50,12 +52,12 @@ final class Migrations
     private function createFieldsTable(string $name): void
     {
         Schema::create($name . '_fields', function (Table $table) use ($name) {
-            $column = "{$name}_id";
+            $column = sprintf("%s_id", Str::singularize($name));
 
             $table->id();
-            $table->bigInt($column)->default(0);
+            $table->bigInt($column)->unsigned()->default(0);
             $table->string('key', 255)->default(null);
-            $table->text('value');
+            $table->mediumText('value');
 
             // indexes
             $table->index([$column, 'key']);
@@ -67,11 +69,10 @@ final class Migrations
     {
         Schema::create('cache', function (Table $table) {
             $table->string('key', 191)->primary();
-            $table->text('value');
+            $table->mediumText('value');
             $table->datetime('expiry_at');
 
             // indexes
-            $table->index('key');
             $table->index('expiry_at');
         });
     }
@@ -80,16 +81,15 @@ final class Migrations
     {
         Schema::create('slugs', function (Table $table) {
             $table->id();
-            $table->ulid();
+            $table->ulid()->unique();
             $table->bigInt('post_id')->unsigned();
-            $table->string('post_table', 255);
+            $table->string('post_table', 191);
             $table->string('slug', 255)->unique();
             $table->string('locale', 100)->default('');
 
             // indexes
-            $table->index('ulid');
-            $table->index(['post_id', 'post_table']);
-            $table->index(['slug', 'locale']);
+            $table->unique(['slug', 'locale']);
+            $table->unique(['post_id', 'post_table']);
         });
     }
 
@@ -99,7 +99,7 @@ final class Migrations
             $table->id();
             $table->string('name', 200)->default('');
             $table->string('slug', 200)->default('');
-            $table->bigInt('term_group')->default(0);
+            $table->bigInt('term_group')->unsigned()->default(0);
 
             // indexes
             $table->index('slug', 'slug_index');
@@ -113,14 +113,14 @@ final class Migrations
     {
         Schema::create('users', function (Table $table) {
             $table->id();
-            $table->ulid();
-            $table->string('login', 60);
+            $table->ulid()->unique();
+            $table->string('login', 60)->unique();
             $table->string('password', 255);
             $table->string('nicename', 60);
             $table->string('firstname', 60);
             $table->string('lastname', 60);
             $table->string('showname', 255);
-            $table->string('email', 100);
+            $table->string('email', 100)->unique();
             $table->string('locale', 16);
             $table->bool('is_verified')->default(0);
             $table->enum('status', ['active', 'inactive'])->default('active');
@@ -130,10 +130,7 @@ final class Migrations
             $table->timestamps();
 
             // indexes
-            $table->index('login');
             $table->index('nicename');
-            $table->index('email');
-            $table->index('status');
         });
 
         $this->createFieldsTable('users');
@@ -177,7 +174,7 @@ final class Migrations
     {
         Schema::create('options', function (Table $table) {
             $table->id();
-            $table->string('key', 191)->default('');
+            $table->string('key', 191)->unique()->default('');
             $table->text('value');
         });
     }
@@ -186,9 +183,9 @@ final class Migrations
     {
         Schema::create('taxonomies', function (Table $table) {
             $table->id();
-            $table->bigInt('term_id')->default(0);
-            $table->bigInt('count')->default(0);
-            $table->bigInt('parent')->default(0);
+            $table->bigInt('term_id')->unsigned()->default(0);
+            $table->bigInt('count')->unsigned()->default(0);
+            $table->bigInt('parent')->unsigned()->default(0);
 
             // indexes
             $table->index('term_id');

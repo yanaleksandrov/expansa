@@ -11,7 +11,7 @@ use Expansa\Database\Db;
  * Represents a field associated with an object, allowing for retrieval, addition,
  * updating, and deletion of field values in a database.
  */
-final class Field extends \app\Field\Schema
+final class Field
 {
     use \app\Field\Traits;
 
@@ -78,21 +78,6 @@ final class Field extends \app\Field\Schema
                 }
                 return $result;
             }
-
-//          $table  = EX_DB_PREFIX . $this->table;
-//          $query = "
-//              SELECT JSON_OBJECTAGG(`key`, `values`) AS `result`
-//              FROM (
-//                  SELECT `key`, JSON_ARRAYAGG(`value`) AS `values`
-//                  FROM {$table}
-//                  WHERE `user_id` = :user_id
-//                  GROUP BY `key`
-//              ) AS aggregated;
-//          ";
-//          $data = Db::query( $query, [ ':user_id' => $this->entityId ] )->fetchColumn();
-//          if ( is_string( $data ) ) {
-//              return json_decode( $data );
-//          }
 
             return null;
         });

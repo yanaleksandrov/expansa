@@ -175,7 +175,9 @@ abstract class BuilderAbstract
                 return null;
             }
 
+            echo '<pre>';
             echo $this->generate($statement, $map);
+            echo '</pre>';
 
             $this->debugMode = false;
 
@@ -272,29 +274,12 @@ abstract class BuilderAbstract
     }
 
     /**
-     * Build a raw object.
-     *
-     * @param string $string The raw string.
-     * @param array $map The array of mapping data for the raw string.
-     * @return Medoo::raw
-     */
-    public static function raw(string $string, array $map = []): Raw
-    {
-        $raw = new Raw();
-
-        $raw->map   = $map;
-        $raw->value = $string;
-
-        return $raw;
-    }
-
-    /**
      * Finds whether the object is raw.
      *
-     * @param object $object
+     * @param mixed $object Some object.
      * @return bool
      */
-    protected function isRaw(object $object): bool
+    protected function isRaw(mixed $object): bool
     {
         return $object instanceof Raw;
     }

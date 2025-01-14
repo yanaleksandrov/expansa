@@ -6,10 +6,9 @@ namespace Expansa;
 
 /**
  * Error class.
- *
  * A class whose task is to simplify error handling (messages) when working with Expansa.
- * In order to start working with a class, you need to create an instance of it, and then add or remove errors (messages) to it.
- * The class applies the $message and $data parameters.
+ * In order to start working with a class, you need to create an instance of it, and then
+ * add or remove errors (messages) to it. The class applies the $message and $data parameters.
  *
  * These are strings and in general they are similar, but they separated by logic:
  *   $message - is a message for the user.

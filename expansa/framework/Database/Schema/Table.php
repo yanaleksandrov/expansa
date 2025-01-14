@@ -38,7 +38,6 @@ use Expansa\Database\Schema\Traits\Commands;
  * @method Column timestamp(string $column) Add a TIMESTAMP column
  * @method void   timestamps() Add created_at and updated_at columns
  * @method Column addColumn(string $type, string $name, array $parameters = []) Add a new column to the table
- * @method array  getColumns() Get all columns of the table
  *
  * @method static create() Add a create command for the table
  * @method static rename(string $to) Add a rename command for the table

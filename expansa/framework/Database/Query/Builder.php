@@ -13,20 +13,6 @@ class Builder extends BuilderAbstract
 {
     /**
      * Connect the database.
-     * ```
-     * $database = new Medoo([
-     *      // required
-     *      'type' => 'mysql',
-     *      'database' => 'name',
-     *      'host' => 'localhost',
-     *      'username' => 'your_username',
-     *      'password' => 'your_password',
-     *      // [optional]
-     *      'charset' => 'utf8mb4',
-     *      'port' => 3306,
-     *      'prefix' => 'PREFIX_'
-     * ]);
-     * ```
      *
      * @param array $options Connection options
      * @return void
@@ -404,7 +390,19 @@ class Builder extends BuilderAbstract
      */
     public function drop(string $table): ?PDOStatement
     {
-        return $this->exec('DROP TABLE IF EXISTS ' . $this->tableQuote($table));
+        return $this->exec("DROP TABLE IF EXISTS {$this->tableQuote($table)}");
+    }
+
+    /**
+     * Rename a table.
+     *
+     * @param string $table
+     * @param string $to
+     * @return PDOStatement|null
+     */
+    public function rename(string $table, string $to): ?PDOStatement
+    {
+        return $this->exec("RENAME TABLE {$this->tableQuote($table)} TO {$this->tableQuote($to)}");
     }
 
     /**
@@ -416,10 +414,10 @@ class Builder extends BuilderAbstract
      * @param null|array        $where
      * @return array|null
      */
-    public function select(string $table, array $join, array|string $columns = null, array $where = null): ?array
+    public function select(string $table, $join, array|string $columns = null, array $where = null): ?array
     {
-        $map = [];
-        $result = [];
+        $map       = [];
+        $result    = [];
         $columnMap = [];
 
         $args = func_get_args();
@@ -712,7 +710,7 @@ class Builder extends BuilderAbstract
      * @param null|array        $where
      * @return mixed
      */
-    public function get(string $table, array $join = null, array|string $columns = null, array $where = null): mixed
+    public function get(string $table, $join = null, array|string $columns = null, array $where = null): mixed
     {
         $map          = [];
         $result       = [];
@@ -755,6 +753,8 @@ class Builder extends BuilderAbstract
 
             return $result[0];
         }
+
+        return null;
     }
 
     /**

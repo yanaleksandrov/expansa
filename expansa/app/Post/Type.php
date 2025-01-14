@@ -10,6 +10,7 @@ use Expansa\Database\Db;
 use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Safe;
+use Expansa\Hook;
 use Expansa\Support\Arr;
 
 class Type
@@ -29,7 +30,7 @@ class Type
      * @param string $labelSearch     Text to display for "Search".
      * @param string $labelSave       Text to display for "Save".
      * @param string $table           The name of the database table where items are stored.
-     * @param bool   $public          Whether the item is intended for public use via the admin interface or by front-end users.
+     * @param bool   $public          Indicates if the item is for public use via admin interface or front-end users.
      * @param bool   $hierarchical    Whether the structure is hierarchical (e.g., like pages). Default false.
      * @param bool   $searchable      Whether items of this type are available in front-end search.
      * @param bool   $showInMenu      Whether to display this item in the admin menu. If true, it is displayed
@@ -110,15 +111,11 @@ class Type
 
         /**
          * DataBase table schema.
-         *
-         * @var array $schema
          */
         $schema = Db::schema();
         $type   = Safe::snakecase($key);
         if (empty($schema[ $type ])) {
-            Schema::migrate($type);
-
-            Field\Schema::migrate(EX_DB_PREFIX . $type, 'post');
+            Hook::call('createPostsTable', $type);
         }
     }
 
