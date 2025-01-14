@@ -113,8 +113,9 @@ class Type
          * DataBase table schema.
          */
         $schema = Db::schema();
+        $type   = Safe::snakecase($key);
         if (empty($schema[$key])) {
-            Hook::call('createPostsTable', $key);
+            Hook::call('createPostsTable', $type);
         }
     }
 
