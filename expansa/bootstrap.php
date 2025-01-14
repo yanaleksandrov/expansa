@@ -129,13 +129,12 @@ Expansa\Log::error('Test text', ['id' => 123]);
  */
 User::current();
 
+Expansa\Hook::configure(EX_PATH . 'app/Listeners');
+
 require_once EX_PATH . 'migrations.php';
 require_once EX_PATH . 'routes.php';
 
-//
 //echo '<pre>';
-//Expansa\Hook::configure(EX_CORE . 'Listeners');
-//
 //function expansaTest($hook) {
 //  var_dump($hook);
 //  var_dump('111111');
