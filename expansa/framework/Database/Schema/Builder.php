@@ -32,6 +32,7 @@ class Builder extends Base
                     $this->compileType($column),
                     $this->compileUnsigned($column),
                     $this->compileNullable($column),
+                    $this->compileUniqueness($column),
                     $this->compileDefaultValue($column),
                     $this->compileAutoIncrement($column),
                     $this->compilePrimaryKey($column),

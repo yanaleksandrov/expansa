@@ -233,7 +233,7 @@ try {
         </body>
         </html>
         <?php
-        printf('%dQ %s %s', Db::queries(), Debug::timer('getall'), Debug::memory_peak());
+        printf('%dQ %s %s', count(Db::log()), Debug::timer('getall'), Debug::memory_peak());
     });
 
 //  Route::set404( function() {

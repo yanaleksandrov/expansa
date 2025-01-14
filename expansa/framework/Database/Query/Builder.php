@@ -710,7 +710,7 @@ class Builder extends BuilderAbstract
      * @param null|array        $where
      * @return mixed
      */
-    public function get(string $table, array $join = null, array|string $columns = null, array $where = null): mixed
+    public function get(string $table, $join = null, array|string $columns = null, array $where = null): mixed
     {
         $map          = [];
         $result       = [];
@@ -753,6 +753,8 @@ class Builder extends BuilderAbstract
 
             return $result[0];
         }
+
+        return null;
     }
 
     /**

@@ -106,7 +106,7 @@ new class
         Hook::add('expansa_dashboard_loaded', function ($content) {
             return str_replace(
                 '0Q 0.001s 999kb',
-                I18n::_t(':queries\Q :memory :memory_peak', Db::queries(), Debug::timer('getall'), Debug::memory_peak()),
+                I18n::_t(':queries\Q :memory :memory_peak', count(Db::log()), Debug::timer('getall'), Debug::memory_peak()),
                 $content
             );
         });

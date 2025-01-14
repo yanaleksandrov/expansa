@@ -37,7 +37,11 @@ trait Indexes
             }
 
             $columnType = $result[$column];
-            if (preg_match('/^(char|varchar|text|tinytext|mediumtext|longtext)/', $columnType)) {
+            if (
+                preg_match('/^(char|varchar|text|tinytext|mediumtext|longtext)/', $columnType)
+                &&
+                $type !== 'UNIQUE'
+            ) {
                 $keys[] = sprintf("`$column`(%d)", EX_DB_MAX_INDEX_LENGTH);
             } else {
                 $keys[] = "`$column`";

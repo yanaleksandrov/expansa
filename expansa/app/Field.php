@@ -79,21 +79,6 @@ final class Field
                 return $result;
             }
 
-//          $table  = EX_DB_PREFIX . $this->table;
-//          $query = "
-//              SELECT JSON_OBJECTAGG(`key`, `values`) AS `result`
-//              FROM (
-//                  SELECT `key`, JSON_ARRAYAGG(`value`) AS `values`
-//                  FROM {$table}
-//                  WHERE `user_id` = :user_id
-//                  GROUP BY `key`
-//              ) AS aggregated;
-//          ";
-//          $data = Db::query( $query, [ ':user_id' => $this->entityId ] )->fetchColumn();
-//          if ( is_string( $data ) ) {
-//              return json_decode( $data );
-//          }
-
             return null;
         });
     }

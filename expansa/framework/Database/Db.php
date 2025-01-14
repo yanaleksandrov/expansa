@@ -38,6 +38,7 @@ use PDOStatement;
  * @method string       version()
  * @method array        schema(string $column = null)
  * @method array        updateSchema()
+ * @method array        log()
  */
 class Db extends Facade
 {

@@ -9,12 +9,14 @@ use app\User\Schema;
 use app\User\Traits;
 use Expansa\Database\Db;
 use Expansa\Error;
+use Expansa\Facades\Facade;
 use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Safe;
 use Expansa\Session;
 use Expansa\Support\Hash;
 use Expansa\Validator;
+use Expansa\Security\Validator as SecurityValidator;
 
 /**
  * This class handles user-related operations including user creation, retrieval,
@@ -149,8 +151,8 @@ final class User extends Schema
             )
         )->apply();
 
-        if ($userdata instanceof Validator) {
-            return new Error('user-add', $userdata);
+        if ($userdata instanceof SecurityValidator) {
+            return new Error('user-add', $userdata->errors);
         }
 
         [ $login, $password ] = array_values($userdata);

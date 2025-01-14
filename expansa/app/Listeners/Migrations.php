@@ -81,14 +81,13 @@ final class Migrations
     {
         Schema::create('slugs', function (Table $table) {
             $table->id();
-            $table->ulid();
+            $table->ulid()->unique();
             $table->bigInt('post_id')->unsigned();
             $table->string('post_table', 191);
-            $table->string('slug', 255);
+            $table->string('slug', 255)->unique();
             $table->string('locale', 100)->default('');
 
             // indexes
-            $table->unique('ulid');
             $table->unique(['slug', 'locale']);
             $table->unique(['post_id', 'post_table']);
         });
@@ -132,8 +131,6 @@ final class Migrations
 
             // indexes
             $table->index('nicename');
-            $table->unique('login');
-            $table->unique('email');
         });
 
         $this->createFieldsTable('users');
@@ -177,11 +174,8 @@ final class Migrations
     {
         Schema::create('options', function (Table $table) {
             $table->id();
-            $table->string('key', 191)->default('')->unique();
+            $table->string('key', 191)->unique()->default('');
             $table->text('value');
-
-            // indexes
-            $table->unique('key');
         });
     }
 

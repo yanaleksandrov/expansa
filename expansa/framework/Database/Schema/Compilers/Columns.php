@@ -18,20 +18,19 @@ trait Columns
         return EX_DB_COLLATION ?? '';
     }
 
+    protected function compileUniqueness(Column $column): string
+    {
+        return $column->unique ? 'UNIQUE' : '';
+    }
+
     protected function compileUnsigned(Column $column): string
     {
-        if ($column->unsigned) {
-            return 'UNSIGNED';
-        }
-        return '';
+        return $column->unsigned ? 'UNSIGNED' : '';
     }
 
     protected function compileAutoIncrement(Column $column): string
     {
-        if ($column->autoIncrement) {
-            return 'AUTO_INCREMENT';
-        }
-        return '';
+        return $column->autoIncrement ? 'AUTO_INCREMENT' : '';
     }
 
     protected function compilePrimaryKey(Column $column): string
