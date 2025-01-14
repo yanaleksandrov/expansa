@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Images;
 
+use Spatie\Image\Enums\Fit;
 use Spatie\Image\Enums\ColorFormat;
 use Spatie\Image\Enums\ImageDriver;
 use Spatie\Image\Enums\CropPosition;
