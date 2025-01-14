@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app;
 
 use app\User\Roles;
-use app\User\Schema;
 use app\User\Traits;
 use Expansa\Database\Db;
 use Expansa\Error;
@@ -22,9 +21,11 @@ use Expansa\Security\Validator as SecurityValidator;
  * updating, deletion, and session management. It extends the Users class to inherit
  * user-related functionalities.
  */
-final class User extends Schema
+final class User
 {
     use Traits;
+
+    public static string $table = 'users';
 
     public int $id = 0;
 
