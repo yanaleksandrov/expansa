@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace dashboard\app\Api;
 
 use app\View;

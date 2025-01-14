@@ -2,7 +2,7 @@
 
 namespace dashboard\app\Api;
 
-class Extensions extends \Expansa\Api\Handler
+class Extensions
 {
 	/**
 	 * Endpoint name.

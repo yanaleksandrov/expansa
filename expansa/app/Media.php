@@ -6,10 +6,9 @@ namespace app;
 
 use app\Query\Query;
 use Expansa\Error;
-use Expansa\File\Image;
-use Expansa\Files;
+use Expansa\Image;
+use Expansa\Disk;
 use Expansa\Patterns;
-use Expansa\Post\Post;
 use Expansa\Safe;
 use Expansa\Url;
 
@@ -41,7 +40,7 @@ final class Media
 
                 $filepath = sprintf('%si/original/%s', EX_UPLOADS, $post['slug'] ?? '');
                 if (file_exists($filepath)) {
-                    $file      = Files::open($filepath);
+                    $file      = Disk::file($filepath);
                     $iconPath  = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?? 'default');
                     $posts[$i] = [
                         ...$post,
@@ -73,7 +72,7 @@ final class Media
 
                     $filepath = sprintf('%si/%sx%s/%s', EX_UPLOADS, $width, $height, $post['slug'] ?? '');
                     if (file_exists($filepath)) {
-                        $file     = Files::open($filepath);
+                        $file     = Disk::file($filepath);
                         $iconPath = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?? 'default');
 
                         $posts[$i]['sizes'][$key] = [

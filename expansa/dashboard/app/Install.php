@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dashboard;
 
 use app\View;
@@ -22,7 +24,7 @@ final class Install
     /**
      * Class constructor
      *
-     * @return void|bool
+     * @return void
      * @throws \Exception
      */
     public function __construct()

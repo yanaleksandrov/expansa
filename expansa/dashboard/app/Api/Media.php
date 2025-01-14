@@ -9,7 +9,7 @@ use Expansa\Post\Post;
 use Expansa\Safe;
 use Expansa\Url;
 
-class Media extends \Expansa\Api\Handler
+class Media
 {
 	/**
 	 * Endpoint name.

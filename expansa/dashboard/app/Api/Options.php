@@ -5,7 +5,7 @@ namespace dashboard\app\Api;
 use Expansa\I18n;
 use Expansa\Support\Arr;
 
-class Options extends \Expansa\Api\Handler
+class Options
 {
 
 	/**

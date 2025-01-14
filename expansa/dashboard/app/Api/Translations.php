@@ -7,7 +7,7 @@ use Expansa\File;
 use Expansa\Json;
 use Expansa\Safe;
 
-class Translations extends \Expansa\Api\Handler
+class Translations
 {
     /**
      * Endpoint name.

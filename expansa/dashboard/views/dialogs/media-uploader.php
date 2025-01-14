@@ -14,5 +14,5 @@ if ( ! defined( 'EX_PATH' ) ) {
 
 <!-- media uploader template start -->
 <template id="tmpl-media-uploader">
-	<?php Dashboard\Form::print( EX_DASHBOARD . 'forms/expansa-files-uploader.php' ); ?>
+	<?php Dashboard\Form::print( EX_DASHBOARD . 'forms/files-uploader.php' ); ?>
 </template>

@@ -9,7 +9,6 @@ use app\User\Schema;
 use app\User\Traits;
 use Expansa\Database\Db;
 use Expansa\Error;
-use Expansa\Facades\Facade;
 use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Safe;
