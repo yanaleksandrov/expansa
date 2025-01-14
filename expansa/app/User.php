@@ -43,7 +43,7 @@ final class User extends Schema
 
     public string $email = '';
 
-    public string $locale = '';
+    public ?string $locale = '';
 
     public string $registered = '';
 

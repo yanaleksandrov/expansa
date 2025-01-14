@@ -175,9 +175,7 @@ abstract class BuilderAbstract
                 return null;
             }
 
-            echo '<pre>';
             echo $this->generate($statement, $map);
-            echo '</pre>';
 
             $this->debugMode = false;
 
@@ -298,7 +296,7 @@ abstract class BuilderAbstract
         }
 
         $query = preg_replace_callback(
-            '/(([`\'])[\<]*?)?((FROM|TABLE|TABLES LIKE|INTO|UPDATE|JOIN|TABLE IF EXISTS)\s*)?\<((' . $this::TABLE_PATTERN . ')(\.' . $this::COLUMN_PATTERN . ')?)\>([^,]*?\2)?/',
+            '/(([`\'])[\<]*?)?((AFTER DELETE ON|BEFORE INSERT ON|FROM|TABLE|TABLES LIKE|INTO|UPDATE|JOIN|TABLE IF EXISTS)\s*)?\<((' . $this::TABLE_PATTERN . ')(\.' . $this::COLUMN_PATTERN . ')?)\>([^,]*?\2)?/',
             function ($matches) {
                 if (!empty($matches[2]) && isset($matches[8])) {
                     return $matches[0];

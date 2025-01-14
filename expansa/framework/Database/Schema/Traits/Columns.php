@@ -22,7 +22,7 @@ trait Columns
 
     public function ulid(string $column = 'ulid'): Column
     {
-        $column = $this->addColumn('char(24)', $column)->unique();
+        $column = $this->addColumn('char(26)', $column)->unique();
 
         $this->commands[] = $this->addCommand('createUlid', ['column' => $column->getAttributes()]);
 
