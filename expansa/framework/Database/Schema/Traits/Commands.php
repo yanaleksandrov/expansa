@@ -120,9 +120,7 @@ trait Commands
 
     private function createIndexName(string $type, array $columns): string
     {
-        $index = array_merge([EX_DB_PREFIX . $this->name], $columns, [$type]);
-
-        $index = strtolower(implode('_', $index));
+        $index = strtolower(implode('_', array_merge($columns, [$type])));
 
         return str_replace(['-', '.'], '_', $index);
     }

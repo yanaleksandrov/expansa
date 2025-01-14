@@ -81,11 +81,11 @@ final class Migrations
     {
         Schema::create('slugs', function (Table $table) {
             $table->id();
-            $table->ulid()->unique();
             $table->bigInt('post_id')->unsigned();
-            $table->string('post_table', 191);
-            $table->string('slug', 255)->unique();
-            $table->string('locale', 100)->default('');
+            $table->string('post_table', 255);
+            $table->ulid()->unique();
+            $table->string('slug', 255);
+            $table->string('locale', 10)->nullable()->default(null);
 
             // indexes
             $table->unique(['slug', 'locale']);
@@ -97,8 +97,8 @@ final class Migrations
     {
         Schema::create('terms', function (Table $table) {
             $table->id();
-            $table->string('name', 200)->default('');
-            $table->string('slug', 200)->default('');
+            $table->string('name', 255)->default('');
+            $table->string('slug', 255)->default('');
             $table->bigInt('term_group')->unsigned()->default(0);
 
             // indexes
@@ -121,7 +121,7 @@ final class Migrations
             $table->string('lastname', 60);
             $table->string('showname', 255);
             $table->string('email', 100)->unique();
-            $table->string('locale', 16);
+            $table->string('locale', 10)->nullable()->default(null);
             $table->bool('is_verified')->default(0);
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->string('verification_token', 100);
@@ -147,7 +147,7 @@ final class Migrations
             $table->string('author_email', 255)->default('');
             $table->string('author_ip', 39)->default('');
             $table->string('author_agent', 255)->default('');
-            $table->string('type', 20)->default('comment');
+            $table->string('locale', 10)->nullable()->default(null);
             $table->enum('status', ['pending', 'approved', 'spam', 'rejected', 'trash'])->default('pending');
             $table->text('content');
             $table->smallInt('likes')->unsigned()->default(0);
@@ -159,15 +159,13 @@ final class Migrations
             $table->index('post_id');
             $table->index('parent_id');
             $table->index('author_id');
-            $table->index('type');
+            $table->index('locale');
             $table->index('status');
             $table->index('likes');
             $table->index('dislikes');
             $table->index('rating');
             $table->index('created_at');
         });
-
-        $this->createFieldsTable('comments');
     }
 
     private function createOptionsTable(): void

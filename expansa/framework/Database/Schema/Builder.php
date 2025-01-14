@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Expansa\Database\Schema;
 
 use Closure;
-use Expansa\Database\Abstracts\Base;
 use Expansa\Database\Query\Builder as QueryBuilder;
 use Expansa\Database\Schema\Compilers\Columns;
 use Expansa\Database\Schema\Compilers\Indexes;
 use Expansa\Database\Schema\Compilers\Triggers;
 
-class Builder extends Base
+class Builder
 {
     use Columns;
     use Indexes;
@@ -47,8 +46,13 @@ class Builder extends Base
         ]);
 
         foreach ($table->commands as $command) {
-            $statement = $this->compileIndexes($table, $command, $name);
+            $statement = $this->compileIndexes($table, $command);
 
+            if ($statement) {
+                $this->connection->query($statement);
+            }
+
+            $statement = $this->compileTriggers($table, $command);
             if ($statement) {
                 $this->connection->query($statement);
             }
