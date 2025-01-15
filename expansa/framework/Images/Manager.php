@@ -19,7 +19,7 @@ use Spatie\ImageOptimizer\Optimizers\Pngquant;
 use Spatie\ImageOptimizer\Optimizers\Gifsicle;
 use Spatie\ImageOptimizer\Optimizers\Jpegoptim;
 
-class Image
+class Manager
 {
     protected function __construct(public ?SpatieImage $driver = null)
     {
