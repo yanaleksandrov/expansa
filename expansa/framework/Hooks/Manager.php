@@ -8,7 +8,7 @@ use Expansa\Support\Exception\PathfinderException;
 use Expansa\Support\Pathfinder;
 use ReflectionException;
 
-class Hooks extends HooksCollector
+class Manager extends HooksCollector
 {
     use Pathfinder;
 

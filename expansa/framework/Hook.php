@@ -21,6 +21,6 @@ class Hook extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Hooks\Hooks';
+        return '\Expansa\Hooks\Manager';
     }
 }
