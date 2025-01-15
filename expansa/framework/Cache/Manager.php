@@ -7,7 +7,7 @@ namespace Expansa\Cache;
 use DateTime;
 use Expansa\Database\Db;
 
-final class CacheManager
+final class Manager
 {
     use Traits;
 
