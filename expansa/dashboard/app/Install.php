@@ -92,14 +92,6 @@ final class Install
             }
 
             /**
-             * Include assets before calling hooks, but after they are registered.
-             *
-             * @since 2025.1
-             */
-            Hook::add('expansa_dashboard_header', fn () => Asset::render('*.css'));
-            Hook::add('expansa_dashboard_footer', fn () => Asset::render('*.js'));
-
-            /**
              * The administrative panel also has a single entry point.
              *
              * @since 2025.1

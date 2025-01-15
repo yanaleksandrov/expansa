@@ -121,7 +121,7 @@ try {
          *
          * @since 2025.1
          */
-        echo Hook::call('expansa_dashboard_loaded', $content, $slug);
+        echo Hook::call('dashboardLoaded', $content, $slug);
     });
 
     /**

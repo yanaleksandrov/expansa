@@ -91,27 +91,6 @@ new class
         }
 
         /**
-         * Include assets before calling hooks, but after they are registered.
-         *
-         * @since 2025.1
-         */
-        Hook::add('expansa_dashboard_header', fn () => Asset::render('*.css'), 999);
-        Hook::add('expansa_dashboard_footer', fn () => Asset::render('*.js'), 999);
-
-        /**
-         * Add benchmark result.
-         *
-         * @since 2025.1
-         */
-        Hook::add('expansa_dashboard_loaded', function ($content) {
-            return str_replace(
-                '0Q 0.001s 999kb',
-                I18n::_t(':queries\Q :memory :memory_peak', count(Db::log()), Debug::timer('getall'), Debug::memory_peak()),
-                $content
-            );
-        });
-
-        /**
          * Register menu
          *
          * @since 2025.1

@@ -282,6 +282,7 @@ button {
   &[disabled] {
     background-color: #f7f7f7;
     border-color: var(--expansa-border) !important;
+    box-shadow: none;
     color: var(--expansa-text-muted) !important;
     cursor: not-allowed;
     pointer-events: none;

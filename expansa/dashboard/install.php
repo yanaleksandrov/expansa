@@ -43,7 +43,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		 *
 		 * @since 2025.1
 		 */
-		Hook::call( 'expansa_dashboard_header' );
+		Hook::call( 'renderDashboardHeader' );
 
 		ini_set('display_errors', '1');
 		ini_set('display_startup_errors', '1');
@@ -63,7 +63,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		 *
 		 * @since 2025.1
 		 */
-		Hook::call( 'expansa_dashboard_footer' );
+		Hook::call( 'renderDashboardFooter' );
 		?>
 	</body>
 </html>

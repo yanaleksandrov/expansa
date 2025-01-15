@@ -118,7 +118,7 @@ $start_time = microtime( true );
 	 *
 	 * @since 2025.1
 	 */
-	Hook::call( 'expansa_dashboard_header' );
+	Hook::call( 'renderDashboardHeader' );
 	?>
 </head>
 <body x-data="expansa" @keydown.window.prevent.ctrl.s="$notification.add(notifications.ctrlS)">
@@ -250,7 +250,7 @@ $start_time = microtime( true );
 	 *
 	 * @since 2025.1
 	 */
-	Hook::call( 'expansa_dashboard_footer' );
+	Hook::call( 'renderDashboardFooter' );
 	?>
 </body>
 </html>
