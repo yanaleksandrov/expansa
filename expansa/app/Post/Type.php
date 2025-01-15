@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace app\Post;
 
-use app\Field;
 use app\Tree;
-use Expansa\Database\Db;
+use Expansa\Db;
 use Expansa\Error;
+use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Safe;
-use Expansa\Hook;
 use Expansa\Support\Arr;
 
 class Type
@@ -141,9 +140,7 @@ class Type
      */
     public static function unregister(string $key): void
     {
-        if (isset(self::$items[ $key ])) {
-            unset(self::$items[ $key ]);
-        }
+        unset(self::$items[ $key ]);
     }
 
     /**

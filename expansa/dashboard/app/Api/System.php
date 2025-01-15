@@ -7,7 +7,7 @@ namespace dashboard\app\Api;
 use app\Option;
 use app\User;
 use Expansa\Database\Query\Builder;
-use Expansa\Database\Db;
+use Expansa\Db;
 use Expansa\Disk;
 use Expansa\Error;
 use Expansa\Hook;

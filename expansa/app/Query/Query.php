@@ -6,7 +6,7 @@ namespace app\Query;
 
 use app\Post\Type;
 use app\User;
-use Expansa\Database\Db;
+use Expansa\Db;
 use Expansa\Error;
 use Expansa\I18n;
 use Expansa\Safe;

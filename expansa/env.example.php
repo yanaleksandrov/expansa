@@ -56,6 +56,7 @@ const EX_HASH_KEY  = 'hashkey';
  */
 const EX_DEBUG     = true;
 const EX_DEBUG_LOG = true;
+const EX_DEBUG_VIEW = __DIR__ . '/dashboard/debug.php';
 
 /**
  * Cron intervals.

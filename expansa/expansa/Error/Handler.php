@@ -49,9 +49,7 @@ class Handler
      */
     protected function remove(string|int $code): void
     {
-        if (isset(self::$errors[ $code ])) {
-            unset(self::$errors[ $code ]);
-        }
+        unset(self::$errors[ $code ]);
     }
 
     /**

@@ -750,9 +750,7 @@ class Requests
         }
 
         //fsockopen and cURL compatibility
-        if (isset($return->headers['connection'])) {
-            unset($return->headers['connection']);
-        }
+        unset($return->headers['connection']);
 
         $options['hooks']->dispatch('requests.before_redirect_check', [&$return, $reqHeaders, $reqData, $options]);
 

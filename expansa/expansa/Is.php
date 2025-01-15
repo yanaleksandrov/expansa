@@ -6,7 +6,6 @@ namespace Expansa;
 
 use app\Option;
 use DateTime;
-use Expansa\Database\Db;
 
 /**
  * This class provides a set of static methods to check various conditions, such as validating

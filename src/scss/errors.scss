@@ -33,6 +33,7 @@ body {
     background-color: #fff;
     border-radius: var(--expansa-border-radius-lg);
     border: 1px solid var(--expansa-border);
+    box-shadow: var(--expansa-box-shadow);
     overflow: hidden;
     word-break: break-all;
 
@@ -120,6 +121,7 @@ body {
     padding: 1rem 0;
     width: 20rem;
     display: grid;
+    align-content: start;
   }
 
   &-navigation-item {

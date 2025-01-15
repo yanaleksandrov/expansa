@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Cache;
 
 use DateTime;
-use Expansa\Database\Db;
+use Expansa\Db;
 
 final class Manager
 {

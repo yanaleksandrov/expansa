@@ -182,11 +182,12 @@ abstract class BuilderAbstract
             return null;
         }
 
-        if ($this->logging) {
-            $this->logs[] = [$statement, $map];
-        } else {
-            $this->logs = [[$statement, $map]];
-        }
+        $this->logs[] = [$statement, $map];
+//        if ($this->logging) {
+//            $this->logs[] = [$statement, $map];
+//        } else {
+//            $this->logs = [[$statement, $map]];
+//        }
 
         $statement = $this->pdo->prepare($statement);
         $errorInfo = $this->pdo->errorInfo();
