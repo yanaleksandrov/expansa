@@ -50,7 +50,7 @@ trait AssetHandler
      */
     public static function toPath(string $url): string
     {
-        $rootPath = explode('/framework/', __DIR__)[0] ?? '';
+        $rootPath = explode('/expansa/', __DIR__)[0] ?? '';
         $filepath = $rootPath . DIRECTORY_SEPARATOR . ltrim(parse_url($url, PHP_URL_PATH), '/');
 
         return is_file($filepath) ? $filepath : '';

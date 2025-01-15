@@ -31,7 +31,7 @@ const EX_DB_ERROR_MODE       = PDO::ERRMODE_SILENT;
  *
  * @since 2025.1
  */
-const EX_CORE      = __DIR__ . '/framework/';
+const EX_CORE      = __DIR__ . '/expansa/';
 const EX_DASHBOARD = __DIR__ . '/dashboard/';
 const EX_PLUGINS   = __DIR__ . '/plugins/';
 const EX_THEMES    = __DIR__ . '/themes/';
