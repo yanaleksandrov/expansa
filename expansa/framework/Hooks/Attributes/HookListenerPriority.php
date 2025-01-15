@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Hooks;
+namespace Expansa\Hooks\Attributes;
 
 use Attribute;
 

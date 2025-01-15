@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Hooks;
 
+use Expansa\Hooks\Attributes\AttributesReader;
 use ReflectionException;
 
 abstract class HooksCollector

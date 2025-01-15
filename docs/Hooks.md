@@ -43,8 +43,7 @@ Hook::add('testHook', 'applyTestHook');
 ### #2. Добавление через анонимную функцию
 
 ```php
-use Expansa\Hook;
-use Expansa\Hooks\HookListenerAlias;
+use Expansa\Hook;use Expansa\Hooks\Attributes\HookListenerAlias;
 
 Hook::add('testHook', fn(&$var) => $var = 'foo');
 // или
@@ -110,7 +109,7 @@ Hook::add('testHook', 'commerceProductCreate', Priority::HIGH + 1);
 аттрибут `HookListenerPriority`, где 400 - число приоритета:
 
 ```php
-use Expansa\Hooks\HookListenerPriority;
+use Expansa\Hooks\Attributes\HookListenerPriority;
 
 class Test
 {
