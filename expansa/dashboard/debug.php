@@ -54,7 +54,7 @@ use Expansa\I18n;
 	</div>
 
 	<script id="prism-js" src="/dashboard/assets/js/prism.min.js"></script>
-	<script id="prism-js" src="/dashboard/assets/js/expansa.min.js"></script>
-	<script id="prism-js" src="/dashboard/assets/js/alpine.min.js"></script>
+	<script id="expansa-js" src="/dashboard/assets/js/expansa.min.js"></script>
+	<script id="alpine-js" src="/dashboard/assets/js/alpine.min.js"></script>
 </body>
 </html>

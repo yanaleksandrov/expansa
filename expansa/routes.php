@@ -175,8 +175,6 @@ Route::get('/{slug}', function ($slug) {
 		<link rel="icon" type="image/png" sizes="16x16" href="/dashboard/assets/images/favicons/favicon-16x16.png">
 		<link rel="manifest" href="/dashboard/assets/images/favicons/site.webmanifest">
 		<link rel="mask-icon" href="/dashboard/assets/images/favicons/safari-pinned-tab.svg" color="#5bbad5">
-		<meta name="msapplication-TileColor" content="#da532c">
-		<meta name="theme-color" content="#ffffff">
         <?php
         /**
          * Prints scripts or data before the closing body tag on the dashboard.

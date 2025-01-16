@@ -94,8 +94,6 @@ $start_time = microtime( true );
 <html lang="<?php echo I18n::locale(); ?>">
 <head>
 	<meta charset="<?php Option::attr( 'charset', 'UTF-8' ); ?>">
-	<meta name="theme-color" content="#ffffff">
-	<meta name="msapplication-TileColor" content="#da532c">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Menu</title>
 	<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/images/favicons/apple-touch-icon.png">

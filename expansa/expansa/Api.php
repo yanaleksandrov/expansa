@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa;
 
 use Expansa\Security\Csrf\Csrf;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
 use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
+use Expansa\Security\Exception\InvalidCsrfTokenException;
 
 final class Api
 {

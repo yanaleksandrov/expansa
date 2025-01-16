@@ -241,9 +241,9 @@ return Dashboard\Form::enqueue(
 							'mbstring'   => I18n::_t( 'Mbstring PHP Extension' ),
 							'gd'         => I18n::_t( 'GD PHP Extension' ),
 							'memory'     => I18n::_t( '128MB or more allocated memory' ),
-							'php'        => I18n::_t( 'PHP version 8.1 or higher' ),
+							'php'        => I18n::_t( 'PHP version %s or higher', EX_REQUIRED_PHP_VERSION ),
 							'connection' => I18n::_t( 'Testing the database connection' ),
-							'mysql'      => I18n::_t( 'MySQL version 5.6 or higher' ),
+							'mysql'      => I18n::_t( 'MySQL version %s or higher', EX_REQUIRED_MYSQL_VERSION ),
 						];
 						?>
 						<ul class="dg g-1">
@@ -365,7 +365,7 @@ return Dashboard\Form::enqueue(
 					'type'     => 'custom',
 					'callback' => function() {
 						View::print(
-							EX_PATH . 'dashboard/views/global/state',
+							'views/global/state',
 							[
 								'icon'        => 'success',
 								'title'       => I18n::_t( 'Woo-hoo, Expansa has been successfully installed!' ),

@@ -2,15 +2,6 @@
 
 declare(strict_types=1);
 
-/**
- * Loads the Expansa Environment.
- *
- * @since 2025.1
- */
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
 if (extension_loaded('xhprof')) {
     xhprof_enable(XHPROF_FLAGS_CPU + XHPROF_FLAGS_MEMORY);
 }
