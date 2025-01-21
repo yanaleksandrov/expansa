@@ -6,7 +6,6 @@ use app\Tree;
 use Expansa\Asset;
 use Expansa\Extensions\Plugin;
 use Expansa\Hook;
-use Expansa\I18n;
 use Expansa\Is;
 
 return new class extends Plugin
@@ -17,7 +16,7 @@ return new class extends Plugin
             ->setName('File Manager')
             ->setVersion('2025.2')
             ->setAuthor('Expansa Team')
-            ->setDescription(I18n::_t('Tool for ability to edit, delete, upload, download, copy and paste files and folders.'));
+            ->setDescription(t('Tool for ability to edit, delete, upload, download, copy and paste files and folders.'));
     }
 
     public function boot(): void
@@ -41,7 +40,7 @@ return new class extends Plugin
                 [
                     'id'           => 'file-manager',
                     'url'          => 'file-manager',
-                    'title'        => I18n::_t('File Manager'),
+                    'title'        => t('File Manager'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-folder-open',
                     'position'     => 800,

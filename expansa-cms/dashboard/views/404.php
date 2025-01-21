@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * 404 page.
  *
@@ -16,6 +14,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 <div class="expansa-main">
 	<div class="df fdc aic jcc t-center t-muted">
 		<h1 class="fs-64">404</h1>
-		<p><?php I18n::t( 'Oops! Page not found.' ); ?></p>
+		<p><?php t( 'Oops! Page not found.' ); ?></p>
 	</div>
 </div>

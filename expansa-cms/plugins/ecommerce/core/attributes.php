@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Form for create & edit emails.
  *
@@ -23,13 +21,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'name',
-					'label'       => I18n::_t( 'Attribute Name' ),
+					'label'       => t( 'Attribute Name' ),
 					'class'       => 'field ga-4',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Name for the attribute (shown on the front-end)' ),
+					'instruction' => t( 'Name for the attribute (shown on the front-end)' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 
@@ -42,13 +40,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'slug',
-					'label'       => I18n::_t( 'Slug' ),
+					'label'       => t( 'Slug' ),
 					'class'       => 'field ga-4',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Unique slug/reference for the attribute; must be no more than 28 characters' ),
+					'instruction' => t( 'Unique slug/reference for the attribute; must be no more than 28 characters' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 
@@ -61,7 +59,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'description',
-					'label'       => I18n::_t( 'Description' ),
+					'label'       => t( 'Description' ),
 					'class'       => 'field ga-4',
 					'label_class' => '',
 					'reset'       => 0,
@@ -77,13 +75,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'type',
-					'label'       => I18n::_t( 'Type' ),
+					'label'       => t( 'Type' ),
 					'class'       => 'field ga-3',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Determines how this attribute\'s values are displayed' ),
+					'instruction' => t( 'Determines how this attribute\'s values are displayed' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -92,22 +90,22 @@ return Dashboard\Form::enqueue(
 						'value'    => $user->locale ?? '',
 					],
 					'options'     => [
-						'select' => I18n::_t( 'Dropdown List' ),
-						'button' => I18n::_t( 'Button' ),
-						'color'  => I18n::_t( 'Color' ),
-						'image'  => I18n::_t( 'Image' ),
+						'select' => t( 'Dropdown List' ),
+						'button' => t( 'Button' ),
+						'color'  => t( 'Color' ),
+						'image'  => t( 'Image' ),
 					],
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'unit',
-					'label'       => I18n::_t( 'Unit' ),
+					'label'       => t( 'Unit' ),
 					'class'       => 'field ga-1',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'E.g.: kg, inch or lbs' ),
+					'instruction' => t( 'E.g.: kg, inch or lbs' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -127,13 +125,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'assignments',
-					'label'       => I18n::_t( 'Category assignments' ),
+					'label'       => t( 'Category assignments' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Some types of attributes are applicable only to certain product groups. For example, the size of the monitor is only for electronics.' ),
+					'instruction' => t( 'Some types of attributes are applicable only to certain product groups. For example, the size of the monitor is only for electronics.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -142,8 +140,8 @@ return Dashboard\Form::enqueue(
 						'value'    => $user->locale ?? '',
 					],
 					'options'     => [
-						''       => I18n::_t( 'Any products categories' ),
-						'button' => I18n::_t( 'Some category' ),
+						''       => t( 'Any products categories' ),
+						'button' => t( 'Some category' ),
 					],
 				],
 			],
@@ -165,9 +163,9 @@ return Dashboard\Form::enqueue(
 			'attributes'  => [],
 			'options'     => [
 				'unique' => [
-					'content'     => I18n::_t( 'Uniqueness' ),
+					'content'     => t( 'Uniqueness' ),
 					'icon'        => 'ph ph-number-one',
-					'description' => I18n::_t( 'Activate it if the attribute value can only be single, such as serial number, license or certificate number.' ),
+					'description' => t( 'Activate it if the attribute value can only be single, such as serial number, license or certificate number.' ),
 					'checked'     => false,
 				],
 			],
@@ -189,9 +187,9 @@ return Dashboard\Form::enqueue(
 			'attributes'  => [],
 			'options'     => [
 				'filterable' => [
-					'content'     => I18n::_t( 'Filterable' ),
+					'content'     => t( 'Filterable' ),
 					'icon'        => 'ph ph-funnel',
-					'description' => I18n::_t( 'Activate it if you need to show it in the product filter' ),
+					'description' => t( 'Activate it if you need to show it in the product filter' ),
 					'checked'     => false,
 				],
 			],

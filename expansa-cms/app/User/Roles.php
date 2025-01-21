@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app\User;
 
 use Expansa\Error;
-use Expansa\I18n;
 
 /**
  * Base class used to implement the API for user roles and their capabilities.
@@ -46,14 +45,14 @@ class Roles
     {
         $roles = self::fetch();
         if (empty($role) || isset($roles[$role])) {
-            return new Error('roles-register', I18n::_t('Sorry, the role with this ID already exists.'));
+            return new Error('roles-register', t('Sorry, the role with this ID already exists.'));
         }
 
         if (is_string($capabilities)) {
             if (isset($roles[$capabilities])) {
                 $capabilities = $roles[$capabilities]['capabilities'];
             } else {
-                return new Error('roles-register', I18n::_t('You are trying to copy capabilities from a non exists role.'));
+                return new Error('roles-register', t('You are trying to copy capabilities from a non exists role.'));
             }
         }
 
@@ -110,7 +109,7 @@ class Roles
     {
         $roles = self::fetch();
         if (! isset($roles[$role])) {
-            return new Error('roles-set', I18n::_t('You are trying set capability for non exists role.'));
+            return new Error('roles-set', t('You are trying set capability for non exists role.'));
         }
 
         if (is_array($capability)) {
@@ -133,7 +132,7 @@ class Roles
     {
         $roles = self::fetch();
         if (! isset($roles[$role])) {
-            return new Error('roles-unset', I18n::_t('You are trying unset capability for non exists role.'));
+            return new Error('roles-unset', t('You are trying unset capability for non exists role.'));
         }
 
         unset($roles[$role]['capabilities'][$capability]);

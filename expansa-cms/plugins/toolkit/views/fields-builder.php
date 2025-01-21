@@ -1,7 +1,6 @@
 <?php
 
 use app\View;
-use Expansa\I18n;
 
 /**
  * Fields builder
@@ -33,7 +32,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 							[
 								'name'        => 'perpage',
 								'type'        => 'select',
-								'label'       => I18n::_t( 'Number of items per page' ),
+								'label'       => t( 'Number of items per page' ),
 								'label_class' => 'df aic fs-12 t-muted',
 								'value'       => '',
 								'reset'       => false,
@@ -53,7 +52,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					</div>
 				</div>
 				<div class="fields-builder__title">
-					Code Preview <i class="ph ph-copy" title="<?php I18n::t_attr( 'Copy to clipboard' ); ?>" x-copy="$refs.code.innerText"></i>
+					Code Preview <i class="ph ph-copy" title="<?php t_attr( 'Copy to clipboard' ); ?>" x-copy="$refs.code.innerText"></i>
 				</div>
 				<pre x-ref="code" x-highlight.php>
 View::print(
@@ -61,7 +60,7 @@ View::print(
 	[
 		'name'        =&gt; 'perpage',
 		'type'        =&gt; 'select',
-		'label'       =&gt; I18n::_t( 'Number of items per page' ),
+		'label'       =&gt; t( 'Number of items per page' ),
 		'label_class' =&gt; 'df aic fs-12 t-muted',
 		'value'       =&gt; '',
 		'reset'       =&gt; false,

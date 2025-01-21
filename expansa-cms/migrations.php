@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use app\Post\Type;
 use app\User\Roles;
-use Expansa\I18n;
 
 /**
  * Add roles and users.
@@ -13,7 +12,7 @@ use Expansa\I18n;
  */
 Roles::register(
     'admin',
-    I18n::_t('Administrator'),
+    t('Administrator'),
     [
         'read',
         'files_upload',
@@ -47,7 +46,7 @@ Roles::register(
 
 Roles::register(
     'editor',
-    I18n::_t('Editor'),
+    t('Editor'),
     [
         'read',
         'files_upload',
@@ -68,7 +67,7 @@ Roles::register(
 
 Roles::register(
     'author',
-    I18n::_t('Author'),
+    t('Author'),
     [
         'read',
         'files_upload',
@@ -82,7 +81,7 @@ Roles::register(
 
 Roles::register(
     'subscriber',
-    I18n::_t('Subscriber'),
+    t('Subscriber'),
     [
         'read',
     ]
@@ -95,15 +94,15 @@ Roles::register(
  */
 Type::register(
     key: 'pages',
-    labelName: I18n::_t('Page'),
-    labelNamePlural: I18n::_t('Pages'),
-    labelAllItems: I18n::_t('All Pages'),
-    labelAdd: I18n::_t('Add New'),
-    labelEdit: I18n::_t('Edit Page'),
-    labelUpdate: I18n::_t('Update Page'),
-    labelView: I18n::_t('View Page'),
-    labelSearch: I18n::_t('Search Pages'),
-    labelSave: I18n::_t('Save Page'),
+    labelName: t('Page'),
+    labelNamePlural: t('Pages'),
+    labelAllItems: t('All Pages'),
+    labelAdd: t('Add New'),
+    labelEdit: t('Edit Page'),
+    labelUpdate: t('Update Page'),
+    labelView: t('View Page'),
+    labelSearch: t('Search Pages'),
+    labelSave: t('Save Page'),
     public: true,
     hierarchical: false,
     searchable: true,
@@ -118,15 +117,15 @@ Type::register(
 
 Type::register(
     key: 'media',
-    labelName: I18n::_t('Storage'),
-    labelNamePlural: I18n::_t('Storage'),
-    labelAllItems: I18n::_t('Library'),
-    labelAdd: I18n::_t('Upload'),
-    labelEdit: I18n::_t('Edit Media'),
-    labelUpdate: I18n::_t('Update Media'),
-    labelView: I18n::_t('View Media'),
-    labelSearch: I18n::_t('Search Media'),
-    labelSave: I18n::_t('Save Media'),
+    labelName: t('Storage'),
+    labelNamePlural: t('Storage'),
+    labelAllItems: t('Library'),
+    labelAdd: t('Upload'),
+    labelEdit: t('Edit Media'),
+    labelUpdate: t('Update Media'),
+    labelView: t('View Media'),
+    labelSearch: t('Search Media'),
+    labelSave: t('Save Media'),
     public: true,
     hierarchical: false,
     searchable: false,
@@ -141,15 +140,15 @@ Type::register(
 
 Type::register(
     key: 'api-keys',
-    labelName: I18n::_t('API Key'),
-    labelNamePlural: I18n::_t('API Keys'),
-    labelAllItems: I18n::_t('All API Keys'),
-    labelAdd: I18n::_t('Add New Key'),
-    labelEdit: I18n::_t('Edit Key'),
-    labelUpdate: I18n::_t('Update Key'),
-    labelView: I18n::_t('View Key'),
-    labelSearch: I18n::_t('Search Keys'),
-    labelSave: I18n::_t('Save Key'),
+    labelName: t('API Key'),
+    labelNamePlural: t('API Keys'),
+    labelAllItems: t('All API Keys'),
+    labelAdd: t('Add New Key'),
+    labelEdit: t('Edit Key'),
+    labelUpdate: t('Update Key'),
+    labelView: t('View Key'),
+    labelSearch: t('Search Keys'),
+    labelSave: t('Save Key'),
     public: false,
     hierarchical: false,
     searchable: false,

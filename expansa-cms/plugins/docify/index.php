@@ -5,7 +5,6 @@ declare(strict_types=1);
 use app\Post;
 use app\Tree;
 use Expansa\Extensions\Plugin;
-use Expansa\I18n;
 
 return new class extends Plugin
 {
@@ -15,7 +14,7 @@ return new class extends Plugin
             ->setName('Docify')
             ->setVersion('2024.9')
             ->setAuthor('Expansa Team')
-            ->setDescription(I18n::_t('Simple way to create docs for your plugins'));
+            ->setDescription(t('Simple way to create docs for your plugins'));
     }
 
     public function boot(): void
@@ -43,15 +42,15 @@ return new class extends Plugin
         //Api::create( sprintf( '%s%sapi', __DIR__, DIRECTORY_SEPARATOR ), '/api/' );
         Post\Type::register(
             key: 'documents',
-            labelName: I18n::_t( 'Documentation' ),
-            labelNamePlural: I18n::_t( 'Documentation' ),
-            labelAllItems: I18n::_t( 'Documents' ),
-            labelAdd: I18n::_t( 'Add Document' ),
-            labelEdit: I18n::_t( 'Edit Document' ),
-            labelUpdate: I18n::_t( 'Update Document' ),
-            labelView: I18n::_t( 'View Document' ),
-            labelSearch: I18n::_t( 'Search Documents' ),
-            labelSave: I18n::_t( 'Save Document' ),
+            labelName: t( 'Documentation' ),
+            labelNamePlural: t( 'Documentation' ),
+            labelAllItems: t( 'Documents' ),
+            labelAdd: t( 'Add Document' ),
+            labelEdit: t( 'Edit Document' ),
+            labelUpdate: t( 'Update Document' ),
+            labelView: t( 'View Document' ),
+            labelSearch: t( 'Search Documents' ),
+            labelSave: t( 'Save Document' ),
             public: true,
             hierarchical: false,
             searchable: false,
@@ -69,7 +68,7 @@ return new class extends Plugin
                 [
                     'id'           => 'docify',
                     'url'          => 'docify',
-                    'title'        => I18n::_t( 'Import project' ),
+                    'title'        => t( 'Import project' ),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 100,

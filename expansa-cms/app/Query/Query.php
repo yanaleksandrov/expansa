@@ -8,9 +8,7 @@ use app\Post\Type;
 use app\User;
 use Expansa\Db;
 use Expansa\Error;
-use Expansa\I18n;
 use Expansa\Safe;
-use function Expansa\Query\sort;
 
 class Query
 {
@@ -157,7 +155,7 @@ class Query
         if (! empty($args['type'])) {
             $types = array_map('Expansa\Safe::id', is_array($args['type']) ? $args['type'] : [ $args['type'] ]);
         } else {
-            return new Error('query', I18n::_t('"Type" parameter can not be empty.'));
+            return new Error('query', t('"Type" parameter can not be empty.'));
         }
 
         /**

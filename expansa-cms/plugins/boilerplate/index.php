@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Expansa\I18n;
 use Expansa\Extensions\Plugin;
 
 return new class extends Plugin
@@ -13,7 +12,7 @@ return new class extends Plugin
             ->setVersion('2024.9')
             ->setAuthor('Expansa Team')
             ->setName('Expansa Plugin Boilerplate')
-            ->setDescription(I18n::_t('Plugin Boilerplate Description'));
+            ->setDescription(t('Plugin Boilerplate Description'));
     }
 
     public function boot(): void

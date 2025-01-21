@@ -6,7 +6,6 @@ namespace Dashboard\Tables;
 
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 
 final class Media
 {
@@ -50,15 +49,15 @@ final class Media
     {
         return [
             'icon'        => 'no-media',
-            'title'       => I18n::_t('Files in library is not found'),
-            'description' => I18n::_t('They have not been uploaded or do not match the filter parameters'),
+            'title'       => t('Files in library is not found'),
+            'description' => t('They have not been uploaded or do not match the filter parameters'),
         ];
     }
 
     public function headerContent(): array
     {
         return [
-            'title'    => I18n::_t('Media Library'),
+            'title'    => t('Media Library'),
             'actions'  => false,
             'filter'   => false,
             'uploader' => true,

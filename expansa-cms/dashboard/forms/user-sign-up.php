@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Sign Up form
  *
@@ -16,27 +14,27 @@ return Dashboard\Form::enqueue(
 	[
 		[
 			'type'        => 'header',
-			'label'       => I18n::_t( 'Create new account' ),
+			'label'       => t( 'Create new account' ),
 			'name'        => 'title',
 			'class'       => '',
-			'instruction' => I18n::_t( 'After creating an account, more platform features will be available to you' ),
+			'instruction' => t( 'After creating an account, more platform features will be available to you' ),
 		],
 		[
 			'type'        => 'email',
 			'name'        => 'email',
-			'label'       => I18n::_t( 'User Email' ),
+			'label'       => t( 'User Email' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => I18n::_t( 'Notifications will be sent to this email' ),
+			'instruction' => t( 'Notifications will be sent to this email' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'placeholder' => I18n::_t( 'Enter user email' ),
+				'placeholder' => t( 'Enter user email' ),
 				'@change'     => "login = email.split('@')[0]",
 				'required'    => true,
 			],
@@ -44,7 +42,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'        => 'text',
 			'name'        => 'login',
-			'label'       => I18n::_t( 'User Login' ),
+			'label'       => t( 'User Login' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
@@ -56,14 +54,14 @@ return Dashboard\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'placeholder' => I18n::_t( 'Enter user login' ),
+				'placeholder' => t( 'Enter user login' ),
 				'required'    => true,
 			],
 		],
 		[
 			'type'        => 'password',
 			'name'        => 'password',
-			'label'       => I18n::_t( 'Password' ),
+			'label'       => t( 'Password' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
@@ -75,7 +73,7 @@ return Dashboard\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'placeholder' => I18n::_t( 'Password' ),
+				'placeholder' => t( 'Password' ),
 				'required'    => true,
 			],
 			'switcher'   => 1,
@@ -92,7 +90,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'        => 'submit',
 			'name'        => 'sign-up',
-			'label'      => I18n::_t( 'Sign Up' ),
+			'label'      => t( 'Sign Up' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

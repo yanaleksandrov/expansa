@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Posts actions.
  *
@@ -30,16 +28,16 @@ return Dashboard\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [],
 			'options' => [
-				''      => I18n::_t( 'Bulk Actions' ),
-				'edit'  => I18n::_t( 'Edit' ),
-				'trash' => I18n::_t( 'Move to trash' ),
-				'copy'  => I18n::_t( 'Copy' ),
+				''      => t( 'Bulk Actions' ),
+				'edit'  => t( 'Edit' ),
+				'trash' => t( 'Move to trash' ),
+				'copy'  => t( 'Copy' ),
 			],
 		],
 		[
 			'type'        => 'button',
 			'name'        => 'uid',
-			'label'       => I18n::_t( '%s Apply', '<i class="ph ph-paper-plane-tilt"></i>' ),
+			'label'       => t( '%s Apply', '<i class="ph ph-paper-plane-tilt"></i>' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

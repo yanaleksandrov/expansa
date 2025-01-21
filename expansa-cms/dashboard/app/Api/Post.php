@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace dashboard\app\Api;
 
 use Expansa\Error;
-use Expansa\I18n;
 use Expansa\Safe;
 
 class Post
@@ -53,7 +52,7 @@ class Post
         $status = Safe::text($_POST['status'] ?? '');
         $type   = Safe::text($_POST['post-type'] ?? '');
         if (! $type) {
-            return Error::add('post-type-create', I18n::_t('Post type is missing'));
+            return Error::add('post-type-create', t('Post type is missing'));
         }
 
         // TODO:: title make unique by user for "api-keys" post type

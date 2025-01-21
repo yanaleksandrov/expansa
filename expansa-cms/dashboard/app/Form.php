@@ -45,12 +45,12 @@ class Form
     {
         $uid = Safe::id($uid);
         if (! $uid) {
-            new Error('form-register', I18n::_t('The form with %s ID is empty.', $uid));
+            new Error('form-register', t('The form with %s ID is empty.', $uid));
         }
 
         $form = self::init($uid);
         if (isset($form->uid)) {
-            new Error('form-register', I18n::_t('The form identified by %s already exists! Potential conflicts detected!', $uid));
+            new Error('form-register', t('The form identified by %s already exists! Potential conflicts detected!', $uid));
         }
 
         $form->uid        = $uid;
@@ -116,7 +116,7 @@ class Form
                 return $form->wrap($form->attributes, $content);
             }
         } else {
-            new Error('form-view', I18n::_t('From::enqueue located along the "%s" path should return the form ID.', $path));
+            new Error('form-view', t('From::enqueue located along the "%s" path should return the form ID.', $path));
         }
 
         return $content;
@@ -148,7 +148,7 @@ class Form
     {
         $name = Safe::name($field['name'] ?? '');
         if (empty($name)) {
-            new Error('form-add-field', I18n::_t('It is not possible to add a field with an empty "name".'));
+            new Error('form-add-field', t('It is not possible to add a field with an empty "name".'));
         }
 
         $this->insertField($this->fields, $field, $this);

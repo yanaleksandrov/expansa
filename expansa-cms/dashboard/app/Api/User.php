@@ -6,7 +6,6 @@ namespace dashboard\app\Api;
 
 use app\View;
 use Expansa;
-use Expansa\I18n;
 use Expansa\Mail;
 use Expansa\Safe;
 use Expansa\Url;
@@ -72,7 +71,7 @@ class User
             [
                 'target'   => 'body',
                 'method'   => 'notify',
-                'fragment' => I18n::_t('User is updated'),
+                'fragment' => t('User is updated'),
             ],
         ];
     }
@@ -149,7 +148,7 @@ class User
         if ($user instanceof \app\User) {
             $mail_is_sent = Mail::send(
                 $email,
-                I18n::_t('Instructions for reset password'),
+                t('Instructions for reset password'),
                 View::get(
                     EX_DASHBOARD . 'views/mails/wrapper',
                     [

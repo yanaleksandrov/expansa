@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Expansa\Filesystem;
 
 use DateTime;
-use Expansa\I18n;
 use Expansa\Validator;
 use Expansa\Filesystem\Contracts\FileInterface;
 use Expansa\Filesystem\Contracts\CommonInterface;
@@ -23,7 +22,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
     {
         $url = $this->sanitizeUrl($url);
         if (!$url) {
-            $this->errors[] = I18n::_t('File URL is not valid.');
+            $this->errors[] = t('File URL is not valid.');
 
             return $this;
         }
@@ -33,7 +32,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         $filepath  = sprintf('%s%s', $targetDir, $basename);
 
         if (!$extension) {
-            $this->errors[] = I18n::_t('The file cannot be grabbed because it does not contain an extension.');
+            $this->errors[] = t('The file cannot be grabbed because it does not contain an extension.');
 
             return $this;
         }
@@ -55,30 +54,30 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         $error = curl_errno($ch);
         if ($error) {
             $errors = [
-                1  => I18n::_t('The URL you passed to the libcurl function uses an unsupported protocol.'),
-                3  => I18n::_t('The URL you provided is not properly formatted.'),
-                6  => I18n::_t('Couldn\'t resolve the host specified in the URL.'),
-                7  => I18n::_t('Failed to connect to the remote host.'),
-                8  => I18n::_t('The server sent a strange reply to a FTP-related command.'),
-                9  => I18n::_t('Access denied to the resource on the server.'),
-                18 => I18n::_t('The file transfer was only partially completed.'),
-                22 => I18n::_t('The HTTP server returned an error code.'),
-                23 => I18n::_t('An error occurred when writing received data to a local file.'),
-                25 => I18n::_t('The upload failed.'),
-                27 => I18n::_t('A memory allocation request failed.'),
-                28 => I18n::_t('The operation timed out.'),
-                35 => I18n::_t('A problem occurred while establishing an SSL/TLS connection.'),
-                37 => I18n::_t('The FTP server couldn\'t retrieve the specified file.'),
-                47 => I18n::_t('Too many redirects were followed during the request.'),
-                51 => I18n::_t('The remote server\'s SSL certificate or SSH md5 fingerprint was deemed not OK.'),
-                52 => I18n::_t('The server returned nothing during the request.'),
-                56 => I18n::_t('Failure with receiving network data.'),
-                58 => I18n::_t('Problem with the local client certificate.'),
-                63 => I18n::_t('The requested file size exceeds the allowed limits.'),
-                67 => I18n::_t('Failure with sending network data.'),
-                94 => I18n::_t('The last received HTTP, FTP, or SMTP response code.'),
-                95 => I18n::_t('An SSL cipher problem occurred.'),
-                99 => I18n::_t('Something went wrong when uploading the file.'),
+                1  => t('The URL you passed to the libcurl function uses an unsupported protocol.'),
+                3  => t('The URL you provided is not properly formatted.'),
+                6  => t('Couldn\'t resolve the host specified in the URL.'),
+                7  => t('Failed to connect to the remote host.'),
+                8  => t('The server sent a strange reply to a FTP-related command.'),
+                9  => t('Access denied to the resource on the server.'),
+                18 => t('The file transfer was only partially completed.'),
+                22 => t('The HTTP server returned an error code.'),
+                23 => t('An error occurred when writing received data to a local file.'),
+                25 => t('The upload failed.'),
+                27 => t('A memory allocation request failed.'),
+                28 => t('The operation timed out.'),
+                35 => t('A problem occurred while establishing an SSL/TLS connection.'),
+                37 => t('The FTP server couldn\'t retrieve the specified file.'),
+                47 => t('Too many redirects were followed during the request.'),
+                51 => t('The remote server\'s SSL certificate or SSH md5 fingerprint was deemed not OK.'),
+                52 => t('The server returned nothing during the request.'),
+                56 => t('Failure with receiving network data.'),
+                58 => t('Problem with the local client certificate.'),
+                63 => t('The requested file size exceeds the allowed limits.'),
+                67 => t('Failure with sending network data.'),
+                94 => t('The last received HTTP, FTP, or SMTP response code.'),
+                95 => t('An SSL cipher problem occurred.'),
+                99 => t('Something went wrong when uploading the file.'),
             ];
 
             $this->errors[] = $errors[ $error ] ?? $errors[99];
@@ -93,7 +92,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
     public function chmod(int $mode = 0755): File
     {
         if ($this->exists && ! chmod($this->path, $mode)) {
-            $this->errors[] = I18n::_t('Failed to update file access rights');
+            $this->errors[] = t('Failed to update file access rights');
         }
         return $this;
     }
@@ -105,10 +104,10 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             if ($handle) {
                 fclose($handle);
             } else {
-                $this->errors[] = I18n::_t('Failed to open the file for writing.');
+                $this->errors[] = t('Failed to open the file for writing.');
             }
         } else {
-            $this->errors[] = I18n::_t('The file does not exist or you don\'t have permission to edit the file.');
+            $this->errors[] = t('The file does not exist or you don\'t have permission to edit the file.');
         }
 
         return $this;
@@ -121,11 +120,11 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             $dirPath = dirname($newPath);
 
             if (!is_dir($dirPath) && !mkdir($dirPath, 0755, true)) {
-                $this->errors[] = I18n::_t('Failed to create the directory.');
+                $this->errors[] = t('Failed to create the directory.');
             } elseif (!is_file($newPath) && !copy($this->path, $newPath)) {
                 $this->errors[] = is_file($newPath)
-                    ? I18n::_t('File already exists at the destination.')
-                    : I18n::_t('Failed to copy the file.');
+                    ? t('File already exists at the destination.')
+                    : t('Failed to copy the file.');
             }
         }
 
@@ -168,7 +167,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             $filepath  = $directory . DIRECTORY_SEPARATOR . $this->filename;
 
             if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
-                $this->errors[] = I18n::_t('Failed to create directory "%s".', $directory);
+                $this->errors[] = t('Failed to create directory "%s".', $directory);
                 return $this;
             }
 
@@ -176,7 +175,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
                 return new self($filepath);
             }
 
-            $this->errors[] = I18n::_t('Failed to move the file.');
+            $this->errors[] = t('Failed to move the file.');
         }
         return $this;
     }
@@ -189,11 +188,11 @@ class File extends EntryHandler implements CommonInterface, FileInterface
     public function rename(string $name): File
     {
         if (!$this->exists) {
-            $this->errors[] = I18n::_t('File not exists at the destination.');
+            $this->errors[] = t('File not exists at the destination.');
         } else {
             $newPath = $this->dirpath . DIRECTORY_SEPARATOR . $this->sanitizeName($name);
             if (!rename($this->path, $newPath)) {
-                $this->errors[] = I18n::_t('Failed to rename file to "%s".', $newPath);
+                $this->errors[] = t('Failed to rename file to "%s".', $newPath);
             } else {
                 return new self($newPath);
             }
@@ -223,7 +222,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             $atime = $atime ?? $time;
 
             if (!touch($this->path, $time, $atime)) {
-                $this->errors[] = I18n::_t('Failed to update the timestamps for ":filePath".', $this->path);
+                $this->errors[] = t('Failed to update the timestamps for ":filePath".', $this->path);
             }
 
             $this->modified = (new DateTime())->setTimestamp($time)->format('Y-m-d H:i:s');
@@ -252,10 +251,10 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             ]
         )->extend(
             'type:type',
-            I18n::_t('Sorry, you are not allowed to upload this file type.')
+            t('Sorry, you are not allowed to upload this file type.')
         )->extend(
             'error:equal',
-            I18n::_t('An error occurred while uploading the file, please try again.'),
+            t('An error occurred while uploading the file, please try again.'),
             function ($validator, $value, $comparison_value) {
                 $value            = intval($value);
                 $comparison_value = intval($comparison_value);
@@ -263,14 +262,14 @@ class File extends EntryHandler implements CommonInterface, FileInterface
                 // Courtesy of php.net, the strings that describe the error indicated in $_FILES[{form field}]['error'].
                 $uploadErrorMessages = [
                     false,
-                    I18n::_t('The uploaded file exceeds the :maxUploadFileSize.', 'upload_max_filesize'),
-                    I18n::_t('The uploaded file exceeds the :maxFileSize directive.', 'MAX_FILE_SIZE'),
-                    I18n::_t('The uploaded file was only partially uploaded.'),
-                    I18n::_t('No file was uploaded.'),
+                    t('The uploaded file exceeds the :maxUploadFileSize.', 'upload_max_filesize'),
+                    t('The uploaded file exceeds the :maxFileSize directive.', 'MAX_FILE_SIZE'),
+                    t('The uploaded file was only partially uploaded.'),
+                    t('No file was uploaded.'),
                     '',
-                    I18n::_t('Missing a temporary folder.'),
-                    I18n::_t('Failed to write file to disk.'),
-                    I18n::_t('File upload stopped by extension.'),
+                    t('Missing a temporary folder.'),
+                    t('Failed to write file to disk.'),
+                    t('File upload stopped by extension.'),
                 ];
 
                 $validator->messages['error:equal'] = $uploadErrorMessages[ $value ];
@@ -279,10 +278,10 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             }
         )->extend(
             'size:min',
-            I18n::_t('File is empty. Please upload something more substantial.')
+            t('File is empty. Please upload something more substantial.')
         )->extend(
             'size:max',
-            I18n::_t('The maximum file size is :maxFileSize.', self::humanize($maxFileSize))
+            t('The maximum file size is :maxFileSize.', self::humanize($maxFileSize))
         )->apply();
 
         // if the incoming data has been checked for validity, continue uploading
@@ -293,7 +292,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         $basename = $this->sanitizeName($file['name'] ?? '');
         $filepath = sprintf('%s%s', $targetDir, $basename);
         if (!$basename) {
-            $this->errors[] = I18n::_t('File name must not contain illegal characters and must not be empty.');
+            $this->errors[] = t('File name must not contain illegal characters and must not be empty.');
         }
 
         // check that the uploaded file is unique.
@@ -303,7 +302,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
 
             // check that the existing and uploaded file are the same
             if (hash_file('md5', $filepath) === hash_file('md5', $file['tmp_name']) && unlink($file['tmp_name'])) {
-                $this->errors[] = I18n::_t('File already exists.');
+                $this->errors[] = t('File already exists.');
             } else {
                 // make sure that the file name in the folder is unique
                 $suffix = 1;
@@ -323,7 +322,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         if ($uploaded) {
             return new self($filepath);
         } else {
-            $this->errors[] = I18n::_t('Something went wrong, upload is failed.');
+            $this->errors[] = t('Something went wrong, upload is failed.');
         }
 
         return $this;
@@ -334,16 +333,16 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         $this->createFile();
 
         if (!is_writable($this->path)) {
-            $this->errors[] = I18n::_t("The file is not writable: ':path'", $this->path);
+            $this->errors[] = t("The file is not writable: ':path'", $this->path);
             return $this;
         }
 
         $fp = fopen($this->path, $after ? 'a' : 'w');
         if (!$fp) {
-            $this->errors[] = I18n::_t("The file cannot be opened: ':path'", $this->path);
+            $this->errors[] = t("The file cannot be opened: ':path'", $this->path);
         } else {
             if (fwrite($fp, $content) === false) {
-                $this->errors[] = I18n::_t("It is not possible to write to the file: ':path'", $this->path);
+                $this->errors[] = t("It is not possible to write to the file: ':path'", $this->path);
             }
             fclose($fp);
 

@@ -6,7 +6,6 @@ namespace Dashboard\Tables;
 
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 
 final class Comments
 {
@@ -39,20 +38,20 @@ final class Comments
                 ->fixedWidth('1rem')
                 ->view('cb'),
             Cell::add('author')
-                ->title(I18n::_t('Author'))
+                ->title(t('Author'))
                 ->flexibleWidth('6rem')
                 ->view('links'),
             Cell::add('comment')
-                ->title(I18n::_t('Comment'))
+                ->title(t('Comment'))
                 ->flexibleWidth('6rem')
                 ->view('raw'),
             Cell::add('date')
-                ->title(I18n::_t('In response to'))
+                ->title(t('In response to'))
                 ->fixedWidth('9rem')
                 ->sortable()
                 ->view('date'),
             Cell::add('date')
-                ->title(I18n::_t('Date'))
+                ->title(t('Date'))
                 ->fixedWidth('9rem')
                 ->sortable()
                 ->view('date'),
@@ -71,7 +70,7 @@ final class Comments
     public function headerContent(): array
     {
         return [
-            'title'   => I18n::_t('Comments'),
+            'title'   => t('Comments'),
             'actions' => true,
             'filter'  => true,
         ];
@@ -80,8 +79,8 @@ final class Comments
     public function notFoundContent(): array
     {
         return [
-            'title'       => I18n::_t('No comments found'),
-            'description' => I18n::_t("Don't worry, they will appear as soon as someone leaves a comment."),
+            'title'       => t('No comments found'),
+            'description' => t("Don't worry, they will appear as soon as someone leaves a comment."),
         ];
     }
 }

@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Order editor form.
  *
@@ -23,7 +21,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'customer',
-					'label'       => I18n::_t( 'Customer' ),
+					'label'       => t( 'Customer' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -39,13 +37,13 @@ return Dashboard\Form::enqueue(
 						'x-select' => '{"showSearch": 1}',
 					],
 					'options'     => [
-						'select' => I18n::_t( 'Ian Aleksandrov' ),
+						'select' => t( 'Ian Aleksandrov' ),
 					],
 				],
 				[
 					'type'        => 'datetime-local',
 					'name'        => 'datetime',
-					'label'       => I18n::_t( 'Date created' ),
+					'label'       => t( 'Date created' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -129,7 +127,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'firstname',
-							'label'       => I18n::_t( 'First Name' ),
+							'label'       => t( 'First Name' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -145,7 +143,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'lastname',
-							'label'       => I18n::_t( 'Last Name' ),
+							'label'       => t( 'Last Name' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -161,7 +159,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'company',
-							'label'       => I18n::_t( 'Company Name' ),
+							'label'       => t( 'Company Name' ),
 							'class'       => 'field ga-2',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -177,7 +175,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'address',
-							'label'       => I18n::_t( 'Phone' ),
+							'label'       => t( 'Phone' ),
 							'class'       => 'field ga-2',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -193,7 +191,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'country',
-							'label'       => I18n::_t( 'Country / Region' ),
+							'label'       => t( 'Country / Region' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -209,13 +207,13 @@ return Dashboard\Form::enqueue(
 								'x-select' => '{"showSearch": 1}',
 							],
 							'options'     => [
-								'select' => I18n::_t( 'United States' ),
+								'select' => t( 'United States' ),
 							],
 						],
 						[
 							'type'        => 'select',
 							'name'        => 'country',
-							'label'       => I18n::_t( 'State / County' ),
+							'label'       => t( 'State / County' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -231,13 +229,13 @@ return Dashboard\Form::enqueue(
 								'x-select' => '{"showSearch": 1}',
 							],
 							'options'     => [
-								'select' => I18n::_t( 'United States' ),
+								'select' => t( 'United States' ),
 							],
 						],
 						[
 							'type'        => 'text',
 							'name'        => 'city',
-							'label'       => I18n::_t( 'City' ),
+							'label'       => t( 'City' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -253,7 +251,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'zip',
-							'label'       => I18n::_t( 'Postal code / ZIP' ),
+							'label'       => t( 'Postal code / ZIP' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -269,7 +267,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'address',
-							'label'       => I18n::_t( 'Address' ),
+							'label'       => t( 'Address' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -285,7 +283,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'address',
-							'label'       => I18n::_t( 'Apartment, suite, etc' ),
+							'label'       => t( 'Apartment, suite, etc' ),
 							'class'       => '',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -301,7 +299,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'textarea',
 							'name'        => 'note',
-							'label'       => I18n::_t( 'Customer provided note:' ),
+							'label'       => t( 'Customer provided note:' ),
 							'class'       => 'field ga-2',
 							'label_class' => 'df aic fs-12 t-muted',
 							'reset'       => 0,
@@ -313,7 +311,7 @@ return Dashboard\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'placeholder' => I18n::_t( 'Customer notes about the order' ),
+								'placeholder' => t( 'Customer notes about the order' ),
 							],
 						],
 					],

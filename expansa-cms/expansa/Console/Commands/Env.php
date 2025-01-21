@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\I18n;
 use Expansa\Console\Command;
 
 class Env extends Command
@@ -19,7 +18,7 @@ class Env extends Command
 
     public function handle(): void
     {
-        $this->info(I18n::_t('Current application environment: [green]#:env#', 'local'));
+        $this->info(t('Current application environment: [green]#:env#', 'local'));
 
         $this->liveLine('Processing...');
         sleep(2);
@@ -30,6 +29,6 @@ class Env extends Command
 
     public function getDescription(): string
     {
-        return I18n::_t('Display the current Expansa CMS environment');
+        return t('Display the current Expansa CMS environment');
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\I18n;
 use Expansa\Safe;
 use Expansa\Support\Arr;
 
@@ -47,7 +46,7 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 		echo $after;
 		if ( $copy ) :
 			?>
-			<i class="ph ph-copy" title="<?php I18n::t_attr( 'Copy' ); ?>" @click="$copy(<?php echo $prop; ?>)"></i>
+			<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" @click="$copy(<?php echo $prop; ?>)"></i>
 		<?php
 		endif;
 		if ( $tooltip ) :

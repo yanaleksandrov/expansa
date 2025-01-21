@@ -7,7 +7,6 @@ namespace Dashboard\Tables;
 use Dashboard\Form;
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 use Expansa\Url;
 
 final class Pages
@@ -44,20 +43,20 @@ final class Pages
                 ->fixedWidth('2.5rem')
                 ->view('image'),
             Cell::add('title')
-                ->title(I18n::_t('Title'))
+                ->title(t('Title'))
                 ->flexibleWidth('16rem')
                 ->sortable()
                 ->view('title'),
             Cell::add('author')
-                ->title(I18n::_t('Author'))
+                ->title(t('Author'))
                 ->flexibleWidth('6rem')
                 ->view('links'),
             Cell::add('categories')
-                ->title(I18n::_t('Categories'))
+                ->title(t('Categories'))
                 ->flexibleWidth('6rem')
                 ->view('links'),
             Cell::add('date')
-                ->title(I18n::_t('Date'))
+                ->title(t('Date'))
                 ->fixedWidth('6rem')
                 ->sortable()
                 ->view('date'),
@@ -85,8 +84,8 @@ final class Pages
                         'conditions'  => [],
                         'attributes'  => [],
                         'options'     => [
-                            ''                => I18n::_t('Select an author'),
-                            'user-registered' => I18n::_t('New user registered'),
+                            ''                => t('Select an author'),
+                            'user-registered' => t('New user registered'),
                         ],
                     ],
                     [
@@ -105,7 +104,7 @@ final class Pages
                         'conditions'  => [],
                         'attributes'  => [
                             'readonly'    => true,
-                            'placeholder' => I18n::_t('Select dates'),
+                            'placeholder' => t('Select dates'),
                         ],
                     ],
                 ]
@@ -124,7 +123,7 @@ final class Pages
     public function headerContent(): array
     {
         return [
-            'title'   => I18n::_t('Pages'),
+            'title'   => t('Pages'),
             'actions' => true,
             'filter'  => true,
         ];
@@ -133,8 +132,8 @@ final class Pages
     public function notFoundContent(): array
     {
         return [
-            'title'       => I18n::_t('Pages not found'),
-            'description' => I18n::_t('You don\'t have any pages yet. <a @click="$dialog.open(\'tmpl-post-editor\', postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', Url::site('/dashboard/import')),
+            'title'       => t('Pages not found'),
+            'description' => t('You don\'t have any pages yet. <a @click="$dialog.open(\'tmpl-post-editor\', postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', Url::site('/dashboard/import')),
         ];
     }
 }

@@ -6,7 +6,7 @@ use Expansa\I18n;
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title><?php I18n::t( 'Expansa Debug' ); ?></title>
+	<title><?php t( 'Expansa Debug' ); ?></title>
 	<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/images/favicons/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="/dashboard/assets/images/favicons/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/dashboard/assets/images/favicons/favicon-16x16.png">
@@ -32,11 +32,11 @@ use Expansa\I18n;
 	<div class="errors-wrapper">
 	    <?php if ( $details ) : ?>
 			<div class="errors-description">
-				<p><strong><?php I18n::t( 'Arguments:' ); ?></strong></p>
+				<p><strong><?php t( 'Arguments:' ); ?></strong></p>
 				<dl>
 	                <?php foreach ( $details as $detail ) : ?>
-						<dt><code>#<?php echo $detail->key; ?> <?php I18n::t( 'required type:' ); ?> <em>(<?php echo $detail->type; ?>)</em></code></dt>
-						<dd><p><?php I18n::t( 'incoming value:' ); ?>: <?php print_r( $detail->value ); ?></p></dd>
+						<dt><code>#<?php echo $detail->key; ?> <?php t( 'required type:' ); ?> <em>(<?php echo $detail->type; ?>)</em></code></dt>
+						<dd><p><?php t( 'incoming value:' ); ?>: <?php print_r( $detail->value ); ?></p></dd>
 	                <?php endforeach; ?>
 				</dl>
 			</div>

@@ -6,7 +6,6 @@ namespace app;
 
 use Expansa\Error;
 use Expansa\Hook;
-use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Safe;
 
@@ -44,7 +43,7 @@ final class View
         }
 
         if ($status < 300 || 399 < $status) {
-            return new Error('view-redirect', I18n::_t('HTTP redirect status code must be a redirection code, 3xx.'));
+            return new Error('view-redirect', t('HTTP redirect status code must be a redirection code, 3xx.'));
         }
 
         /**
@@ -121,7 +120,7 @@ final class View
 //      } catch ( \Throwable $e ) {
 //          ob_end_clean();
 //          print_r( $e );
-//          throw new \Exception( I18n::_t( 'Failed opening required: :filepath', $filepath ) );
+//          throw new \Exception( t( 'Failed opening required: :filepath', $filepath ) );
 //      }
 
         ob_start();

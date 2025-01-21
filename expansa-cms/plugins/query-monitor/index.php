@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Extensions\Plugin;
 
@@ -14,7 +13,7 @@ return new class extends Plugin
             ->setVersion('2024.9')
             ->setName('Query Monitor')
             ->setAuthor('Expansa Team')
-            ->setDescription(I18n::_t('The developer tools panel for Expansa'));
+            ->setDescription(t('The developer tools panel for Expansa'));
     }
 
     /**

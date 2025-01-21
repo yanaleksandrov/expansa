@@ -33,9 +33,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 <div class="themes-item">
 	<div class="themes-image" style="background-image: url(<?php echo $screenshot; ?>)">
 		<div class="themes-action">
-			<button class="btn btn--outline" type="button"><?php I18n::t( 'View Demo' ); ?></button>
-			<button class="btn btn--outline" type="button"<?php $installed && print( ' hidden' ); ?>><?php I18n::t( 'Activate' ); ?></button>
-			<button class="btn btn--primary" type="button"<?php ! $installed && print( ' hidden' ); ?>><?php I18n::t( 'Customize' ); ?></button>
+			<button class="btn btn--outline" type="button"><?php t( 'View Demo' ); ?></button>
+			<button class="btn btn--outline" type="button"<?php $installed && print( ' hidden' ); ?>><?php t( 'Activate' ); ?></button>
+			<button class="btn btn--primary" type="button"<?php ! $installed && print( ' hidden' ); ?>><?php t( 'Customize' ); ?></button>
 		</div>
 	</div>
 	<h6 class="themes-title"><?php echo $title, I18n::_c( $installed, ' <i class="badge badge--green-lt">Active</i>' ); ?></h6>
@@ -52,12 +52,12 @@ if ( ! defined( 'EX_PATH' ) ) {
 				]
 			);
 		} else {
-			I18n::t( 'This theme has not been rated yet' );
+			t( 'This theme has not been rated yet' );
 		}
 
 		if ( $version ) :
 			?>
-			<div class="themes-text" title="<?php I18n::t( 'Version :number', $version ); ?>"><?php echo $version; ?></div>
+			<div class="themes-text" title="<?php t( 'Version :number', $version ); ?>"><?php echo $version; ?></div>
 		<?php endif; ?>
 	</div>
 </div>

@@ -7,7 +7,6 @@ namespace Dashboard\Tables;
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
 use Expansa\Hook;
-use Expansa\I18n;
 use Expansa\Url;
 
 final class Users
@@ -43,9 +42,9 @@ final class Users
         return [
             Cell::add('cb')->title('<input type="checkbox" x-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
             Cell::add('image')->fixedWidth('2.5rem')->view('image'),
-            Cell::add('name')->title(I18n::_t('Name'))->flexibleWidth('16rem')->sortable()->view('title'),
-            Cell::add('role')->title(I18n::_t('Role'))->fixedWidth('6rem')->view('raw'),
-            Cell::add('visit')->title(I18n::_t('Last visit'))->fixedWidth('6rem')->view('raw'),
+            Cell::add('name')->title(t('Name'))->flexibleWidth('16rem')->sortable()->view('title'),
+            Cell::add('role')->title(t('Role'))->fixedWidth('6rem')->view('raw'),
+            Cell::add('visit')->title(t('Last visit'))->fixedWidth('6rem')->view('raw'),
         ];
     }
 
@@ -61,7 +60,7 @@ final class Users
     public function headerContent(): array
     {
         return [
-            'title'   => I18n::_t('Users'),
+            'title'   => t('Users'),
             'actions' => true,
             'filter'  => true,
         ];
@@ -70,8 +69,8 @@ final class Users
     public function notFoundContent(): array
     {
         return [
-            'title'       => I18n::_t('Users not found'),
-            'description' => I18n::_t('You don\'t have any users yet. <a @click="$dialog.open(\'tmpl-post-editor\', postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', Url::site('/dashboard/import')),
+            'title'       => t('Users not found'),
+            'description' => t('You don\'t have any users yet. <a @click="$dialog.open(\'tmpl-post-editor\', postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', Url::site('/dashboard/import')),
         ];
     }
 }

@@ -1,7 +1,6 @@
 <?php
 
 use app\View;
-use Expansa\I18n;
 
 /**
  * Addons list for install.
@@ -20,7 +19,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	View::print(
 		'views/table/header',
 		[
-			'title'  => I18n::_t( 'Add Plugins' ),
+			'title'  => t( 'Add Plugins' ),
 			'search' => true,
 		]
 	);

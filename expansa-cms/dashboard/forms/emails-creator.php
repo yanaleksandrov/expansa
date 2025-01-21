@@ -1,5 +1,4 @@
 <?php
-use Expansa\I18n;
 use Expansa\Safe;
 
 /**
@@ -16,7 +15,7 @@ return Dashboard\Form::enqueue(
 	[
 		[
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'General' ),
+			'label'         => t( 'General' ),
 			'name'          => 'general',
 			'class_menu'    => '',
 			'class_button'  => '',
@@ -28,7 +27,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'event',
-					'label'       => I18n::_t( 'Events' ),
+					'label'       => t( 'Events' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -44,14 +43,14 @@ return Dashboard\Form::enqueue(
 						'required' => true,
 					],
 					'options' => [
-						''                => I18n::_t( 'Select an event' ),
-						'user-registered' => I18n::_t( 'New user registered' ),
+						''                => t( 'Select an event' ),
+						'user-registered' => t( 'New user registered' ),
 					],
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'subject',
-					'label'       => I18n::_t( 'Email subject' ),
+					'label'       => t( 'Email subject' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -65,13 +64,13 @@ return Dashboard\Form::enqueue(
 					'attributes'  => [
 						'value'       => '',
 						'required'    => true,
-						'placeholder' => I18n::_t( 'Email subject' ),
+						'placeholder' => t( 'Email subject' ),
 					],
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'title',
-					'label'       => I18n::_t( 'Title' ),
+					'label'       => t( 'Title' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -83,15 +82,15 @@ return Dashboard\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'value'       => I18n::_t( 'Your are registered' ),
+						'value'       => t( 'Your are registered' ),
 						'required'    => true,
-						'placeholder' => I18n::_t( 'Mail title...' ),
+						'placeholder' => t( 'Mail title...' ),
 					],
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'subtitle',
-					'label'       => I18n::_t( 'Subtitle' ),
+					'label'       => t( 'Subtitle' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -103,15 +102,15 @@ return Dashboard\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'value'       => I18n::_t( 'We have received a new registration request. Read the instructions.' ),
+						'value'       => t( 'We have received a new registration request. Read the instructions.' ),
 						'required'    => true,
-						'placeholder' => I18n::_t( 'Subtitle' ),
+						'placeholder' => t( 'Subtitle' ),
 					],
 				],
 				[
 					'type'        => 'textarea',
 					'name'        => 'content',
-					'label'       => I18n::_t( 'Content' ),
+					'label'       => t( 'Content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -126,19 +125,19 @@ return Dashboard\Form::enqueue(
 						'value'       => '',
 						'rows'        => 1,
 						'required'    => true,
-						'placeholder' => I18n::_t( 'N/A' ),
+						'placeholder' => t( 'N/A' ),
 					],
 				],
 				[
 					'type'        => 'textarea',
 					'name'        => 'recipients',
-					'label'       => I18n::_t( 'Recipient(s)' ),
+					'label'       => t( 'Recipient(s)' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Enter recipients for this email. Each recipient email from a new line.' ),
+					'instruction' => t( 'Enter recipients for this email. Each recipient email from a new line.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -147,14 +146,14 @@ return Dashboard\Form::enqueue(
 						'value'       => '',
 						'rows'        => 1,
 						'required'    => true,
-						'placeholder' => I18n::_t( 'N/A' ),
+						'placeholder' => t( 'N/A' ),
 					],
 				],
 			],
 		],
 		[
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'Global' ),
+			'label'         => t( 'Global' ),
 			'name'          => 'global',
 			'class_menu'    => '',
 			'class_button'  => '',
@@ -166,7 +165,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'bottom',
-					'label'       => I18n::_t( 'Mail bottom content' ),
+					'label'       => t( 'Mail bottom content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -178,14 +177,14 @@ return Dashboard\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'value'       => I18n::_t( 'Team, PO Box 16122, Collins Street West, <a href="#" target="_blank">Victoria 8007, Australia</a>' ),
-						'placeholder' => I18n::_t( 'N/A' ),
+						'value'       => t( 'Team, PO Box 16122, Collins Street West, <a href="#" target="_blank">Victoria 8007, Australia</a>' ),
+						'placeholder' => t( 'N/A' ),
 					],
 				],
 				[
 					'type'        => 'textarea',
 					'name'        => 'footer',
-					'label'       => I18n::_t( 'Footer content' ),
+					'label'       => t( 'Footer content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -197,15 +196,15 @@ return Dashboard\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'value'       => I18n::_t( 'This message is generated automatically. Don\'t reply it. All rights reserved © 2024' ),
-						'placeholder' => I18n::_t( 'N/A' ),
+						'value'       => t( 'This message is generated automatically. Don\'t reply it. All rights reserved © 2024' ),
+						'placeholder' => t( 'N/A' ),
 					],
 				],
 			],
 		],
 		[
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'Test' ),
+			'label'         => t( 'Test' ),
 			'name'          => 'test',
 			'class_menu'    => '',
 			'class_button'  => '',
@@ -217,13 +216,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'email',
 					'name'        => 'email',
-					'label'       => I18n::_t( 'Send To' ),
+					'label'       => t( 'Send To' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Enter recipients for this email. Each recipient email from a new line.' ),
+					'instruction' => t( 'Enter recipients for this email. Each recipient email from a new line.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -233,7 +232,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'submit',
 					'name'        => 'check',
-					'label'       => I18n::_t( 'Send a test email' ),
+					'label'       => t( 'Send a test email' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -255,7 +254,7 @@ return Dashboard\Form::enqueue(
 		],
 		[
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'Placeholders' ),
+			'label'         => t( 'Placeholders' ),
 			'name'          => 'placeholders',
 			'class_menu'    => '',
 			'class_button'  => '',
@@ -270,14 +269,14 @@ return Dashboard\Form::enqueue(
 					'callback' => function() {
 						?>
 						<div class="dg g-2">
-							<div><code>:name</code> <?php I18n::t( 'User display name if email found in users' ); ?></div>
-							<div><code>:link</code> <?php I18n::t( 'Link to page' ); ?></div>
-							<div><code>:admin_email</code> <?php I18n::t( 'The site admin email' ); ?></div>
-							<div><code>:site_title</code> <?php I18n::t( 'The site title' ); ?></div>
-							<div><code>:unsubscribe_url</code> <?php I18n::t( 'Url to unsubscribe from emails' ); ?></div>
-							<div><code>:unsubscribe_link</code> <?php I18n::t( 'Clickable link to unsubscribe from emails' ); ?></div>
-							<div><code>:year</code> <?php I18n::t( 'Current year' ); ?></div>
-							<div><code>:date</code> <?php I18n::t( 'Current date in "24 August, 2024" format' ); ?></div>
+							<div><code>:name</code> <?php t( 'User display name if email found in users' ); ?></div>
+							<div><code>:link</code> <?php t( 'Link to page' ); ?></div>
+							<div><code>:admin_email</code> <?php t( 'The site admin email' ); ?></div>
+							<div><code>:site_title</code> <?php t( 'The site title' ); ?></div>
+							<div><code>:unsubscribe_url</code> <?php t( 'Url to unsubscribe from emails' ); ?></div>
+							<div><code>:unsubscribe_link</code> <?php t( 'Clickable link to unsubscribe from emails' ); ?></div>
+							<div><code>:year</code> <?php t( 'Current year' ); ?></div>
+							<div><code>:date</code> <?php t( 'Current date in "24 August, 2024" format' ); ?></div>
 						</div>
 						<?php
 					},

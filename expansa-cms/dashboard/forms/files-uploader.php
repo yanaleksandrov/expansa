@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Form for build custom fields
  *
@@ -22,7 +20,7 @@ return Dashboard\Form::enqueue(
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => I18n::_t( 'Click to upload or drag & drop' ),
+			'instruction' => t( 'Click to upload or drag & drop' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -40,7 +38,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'        => 'textarea',
 			'name'        => 'urls',
-			'label'       => I18n::_t( 'Or upload from external URL' ),
+			'label'       => t( 'Or upload from external URL' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
@@ -52,7 +50,7 @@ return Dashboard\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'placeholder' => I18n::_t( 'Each URL must be from a new line' ),
+				'placeholder' => t( 'Each URL must be from a new line' ),
 				'@change'     => '$ajax("media/grab", {urls}).then(response => files = response)',
 				'x-textarea'  => 19,
 			],

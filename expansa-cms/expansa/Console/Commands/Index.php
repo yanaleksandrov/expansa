@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\I18n;
 use Expansa\Console\Command;
 use Expansa\Console\Terminal;
 
@@ -30,8 +29,8 @@ class Index extends Command
         parent::__construct($console);
 
         $this->setOptions([
-            '-g'  => I18n::_t('Shows greeting'),
-            '-he' => I18n::_t('New howing'),
+            '-g'  => t('Shows greeting'),
+            '-he' => t('New howing'),
         ]);
     }
 
@@ -53,7 +52,7 @@ class Index extends Command
         $this->info("[green]#$text#Program version: [green]#$version# | © 2024-$year «expansa.com»" . PHP_EOL);
 
         if ($this->console->getOption('g')) {
-            $this->info(I18n::_t('Hello, friend!'));
+            $this->info(t('Hello, friend!'));
         }
 
         $groupDefault = [];
@@ -67,7 +66,7 @@ class Index extends Command
             $groups[$group][$name] = $command;
         }
 
-        $this->info(I18n::_t('[yellow]#Available Commands:#'));
+        $this->info(t('[yellow]#Available Commands:#'));
 
         foreach ($groupDefault as $name => $command) {
             $this->info(str_pad("  [green]#$name#", 32) . $command->getDescription());

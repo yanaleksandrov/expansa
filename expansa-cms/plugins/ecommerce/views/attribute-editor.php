@@ -2,7 +2,6 @@
 
 use app\View;
 use Dashboard\Form;
-use Expansa\I18n;
 use Expansa\Url;
 
 /**
@@ -20,17 +19,17 @@ use Expansa\Url;
 			<div class="attributes-editor">
 				<h5 class="attributes-title">
 					<a class="btn btn--icon btn--sm" href="<?php echo Url::dashboard( '/attributes' ); ?>"><i class="ph ph-arrow-left"></i></a>
-					<span class="fw-600 mr-auto"><?php I18n::t( 'Add new attribute' ); ?></span>
-					<button class="btn btn--danger" type="button" hidden x-cloak><?php I18n::t( 'Delete' ); ?></button>
-					<button class="btn btn--primary" type="submit" disabled><?php I18n::t( 'Save' ); ?></button>
+					<span class="fw-600 mr-auto"><?php t( 'Add new attribute' ); ?></span>
+					<button class="btn btn--danger" type="button" hidden x-cloak><?php t( 'Delete' ); ?></button>
+					<button class="btn btn--primary" type="submit" disabled><?php t( 'Save' ); ?></button>
 				</h5>
 				<div class="attributes-description">
-					<p><?php I18n::t( 'Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.' ); ?></p>
+					<p><?php t( 'Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.' ); ?></p>
 				</div>
 				<?php Form::print( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
 			</div>
 			<div class="attributes-side">
-				<div x-text="`<?php I18n::t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
+				<div x-text="`<?php t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
 				<div class="attributes-list">
 					<?php
 					View::print(
@@ -51,7 +50,7 @@ use Expansa\Url;
 							'conditions'  => [],
 							'attributes'  => [
 								'name'                 => 'value',
-								'placeholder'          => I18n::_t( 'Add attribute value and press Enter' ),
+								'placeholder'          => t( 'Add attribute value and press Enter' ),
 								'@keyup.enter.prevent' => '$el.value.trim() && values.push({title: $el.value.trim(), slug: $safe.slug($el.value)}), $el.value = "", values.sort((a, b) => a.title.localeCompare(b.title))',
 							],
 						],
@@ -62,10 +61,10 @@ use Expansa\Url;
 							<template x-for="(value, i) in values" :key="i">
 								<div class="attributes-value">
 									<div class="attributes-value-title">
-										<input type="text" :name="`values.${i}.title`" x-model="value.title" placeholder="<?php I18n::t( 'Title' ); ?>" required>
+										<input type="text" :name="`values.${i}.title`" x-model="value.title" placeholder="<?php t( 'Title' ); ?>" required>
 									</div>
 									<div class="attributes-value-slug">
-										<input type="text" :name="`values.${i}.slug`" x-model="value.slug" placeholder="<?php I18n::t( 'Slug' ); ?>" required>
+										<input type="text" :name="`values.${i}.slug`" x-model="value.slug" placeholder="<?php t( 'Slug' ); ?>" required>
 									</div>
 									<div class="btn btn--icon t-red" @click="values.splice(i, 1)"><i class="ph ph-trash"></i></div>
 								</div>
@@ -78,8 +77,8 @@ use Expansa\Url;
 								[
 									'icon'        => 'empty-pack',
 									'class'       => 'dg jic m-auto t-center p-8 mw-320',
-									'title'       => I18n::_t( 'Values not found' ),
-									'description' => I18n::_t( 'Try to add new attribute value, there will be results here' ),
+									'title'       => t( 'Values not found' ),
+									'description' => t( 'Try to add new attribute value, there will be results here' ),
 								]
 							);
 							?>

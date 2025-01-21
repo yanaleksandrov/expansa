@@ -1,7 +1,6 @@
 <?php
 
 use app\View;
-use Expansa\I18n;
 use Expansa\Safe;
 
 /**
@@ -46,13 +45,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 			</div>
 		</div>
 		<div class="plugins__action">
-			<button class="btn btn--outline"<?php ( $installed && $active ) && print( ' x-cloak' ); ?>><?php I18n::t( 'Install' ); ?></button>
-			<button class="btn btn--primary"<?php ( $installed && ! $active ) && print( ' x-cloak' ); ?>><?php I18n::t( 'Activate' ); ?></button>
+			<button class="btn btn--outline"<?php ( $installed && $active ) && print( ' x-cloak' ); ?>><?php t( 'Install' ); ?></button>
+			<button class="btn btn--primary"<?php ( $installed && ! $active ) && print( ' x-cloak' ); ?>><?php t( 'Activate' ); ?></button>
 		</div>
 	</div>
 	<div class="plugins__info">
 		<span class="plugins__text"><i class="ph ph-desktop-tower"></i> <?php echo $installations; ?></span>
-		<span class="plugins__text"><i class="ph ph-calendar-dots"></i> <?php I18n::t( 'Last updated: :date', $date ); ?></span>
+		<span class="plugins__text"><i class="ph ph-calendar-dots"></i> <?php t( 'Last updated: :date', $date ); ?></span>
 		<span class="plugins__text">
 			<?php
 			if ( $reviews > 0 ) :
@@ -65,10 +64,10 @@ if ( ! defined( 'EX_PATH' ) ) {
 					]
 				);
 			else :
-				I18n::t( 'This plugin has not been rated yet' );
+				t( 'This plugin has not been rated yet' );
 			endif;
 			?>
 		</span>
-		<span class="plugins__text"><i class="ph ph-check"></i> <?php I18n::t( '**Compatible** with your Expansa version' ); ?></span>
+		<span class="plugins__text"><i class="ph ph-check"></i> <?php t( '**Compatible** with your Expansa version' ); ?></span>
 	</div>
 </div>

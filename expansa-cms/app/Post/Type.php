@@ -8,7 +8,6 @@ use app\Tree;
 use Expansa\Db;
 use Expansa\Error;
 use Expansa\Hook;
-use Expansa\I18n;
 use Expansa\Safe;
 use Expansa\Support\Arr;
 
@@ -69,18 +68,18 @@ class Type
     {
         $postType = Safe::kebabcase($key);
         if (empty($postType) || strlen($postType) > 20) {
-            Error::add('post-type-name-length', I18n::_t('Post type key is empty or exceeds 20 characters'));
+            Error::add('post-type-name-length', t('Post type key is empty or exceeds 20 characters'));
         }
 
-        $this->labelName       ??= I18n::_t('Page');
-        $this->labelNamePlural ??= I18n::_t('Pages');
-        $this->labelAllItems   ??= I18n::_t('All Pages');
-        $this->labelAdd        ??= I18n::_t('Add Page');
-        $this->labelEdit       ??= I18n::_t('Edit Page');
-        $this->labelUpdate     ??= I18n::_t('Update Page');
-        $this->labelView       ??= I18n::_t('View Page');
-        $this->labelSearch     ??= I18n::_t('Search Page');
-        $this->labelSave       ??= I18n::_t('Save');
+        $this->labelName       ??= t('Page');
+        $this->labelNamePlural ??= t('Pages');
+        $this->labelAllItems   ??= t('All Pages');
+        $this->labelAdd        ??= t('Add Page');
+        $this->labelEdit       ??= t('Edit Page');
+        $this->labelUpdate     ??= t('Update Page');
+        $this->labelView       ??= t('View Page');
+        $this->labelSearch     ??= t('Search Page');
+        $this->labelSave       ??= t('Save');
         $this->table             = Safe::tablename($key);
 
         /**

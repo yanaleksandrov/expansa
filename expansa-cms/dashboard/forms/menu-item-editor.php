@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Form for menu editor
  *
@@ -19,13 +17,13 @@ return Dashboard\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function() {
 				?>
-				<h6><?php I18n::t( 'Menu item data' ); ?></h6>
+				<h6><?php t( 'Menu item data' ); ?></h6>
 				<?php
 			},
 		],
 		[
 			'type'        => 'text',
-			'label'       => I18n::_t( 'Navigation Label' ),
+			'label'       => t( 'Navigation Label' ),
 			'name'        => 'title',
 			'value'       => '',
 			'placeholder' => '',
@@ -45,7 +43,7 @@ return Dashboard\Form::enqueue(
 		],
 		[
 			'type'        => 'text',
-			'label'       => I18n::_t( 'CSS Classes (optional)' ),
+			'label'       => t( 'CSS Classes (optional)' ),
 			'name'        => 'classes',
 			'value'       => '',
 			'placeholder' => '',
@@ -63,7 +61,7 @@ return Dashboard\Form::enqueue(
 		],
 		[
 			'type'        => 'checkbox',
-			'label'       => I18n::_t( 'Open link in a new tab' ),
+			'label'       => t( 'Open link in a new tab' ),
 			'name'        => 'link-target',
 			'value'       => '',
 			'placeholder' => '',
@@ -81,7 +79,7 @@ return Dashboard\Form::enqueue(
 		],
 		[
 			'type'        => 'textarea',
-			'label'       => I18n::_t( 'Description' ),
+			'label'       => t( 'Description' ),
 			'name'        => 'description',
 			'value'       => '',
 			'placeholder' => '',
@@ -93,7 +91,7 @@ return Dashboard\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => I18n::_t( 'The description will be displayed in the menu if the active theme supports it.' ),
+			'instruction' => t( 'The description will be displayed in the menu if the active theme supports it.' ),
 			'attributes'  => [],
 			'conditions'  => [],
 		],

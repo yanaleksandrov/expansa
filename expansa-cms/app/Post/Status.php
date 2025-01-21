@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace app\Post;
 
-use Expansa\I18n;
-
 class Status
 {
     /**
@@ -64,13 +62,13 @@ class Status
     public static function getStatuses(): array
     {
         return [
-            'publish'   => I18n::_t('Publish'),
-            'pending'   => I18n::_t('Pending'),
-            'draft'     => I18n::_t('Draft'),
-            'protected' => I18n::_t('Protected'),
-            'private'   => I18n::_t('Private'),
-            'trash'     => I18n::_t('Trash'),
-            'future'    => I18n::_t('Future'),
+            'publish'   => t('Publish'),
+            'pending'   => t('Pending'),
+            'draft'     => t('Draft'),
+            'protected' => t('Protected'),
+            'private'   => t('Private'),
+            'trash'     => t('Trash'),
+            'future'    => t('Future'),
         ];
     }
 }

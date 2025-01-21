@@ -13,7 +13,7 @@ use Expansa\Safe;
  * The class also offers methods for returning translations sanitized for use in HTML attributes.
  *
  * As text your can use base markdown syntax. For example links looks like this:
- * I18n::t( 'Go to [documentation page](:pageLink) for resolve issue', 'https://google.com' )
+ * t( 'Go to [documentation page](:pageLink) for resolve issue', 'https://google.com' )
  *
  * Main functionalities:
  * - `t|_t(_attr)`: translates a string with placeholders and returns/outputs it (sanitizes for HTML attributes).
@@ -138,12 +138,12 @@ class Translator extends Locale
      *
      * For example:
      *
-     * I18n::_t( 'Hi, :Firstname, you have :count\st none closed ":TASKNAME" task', 'john', 1, 'test' );
+     * t( 'Hi, :Firstname, you have :count\st none closed ":TASKNAME" task', 'john', 1, 'test' );
      * return 'Hi, John, you have 1st none closed "TEST" task';
      *
      * For security purposes, you can't use html, but can use base markdown layout: bold, italic, headers, image & link:
      *
-     * I18n::_t( '##Hi, *my name* is John, [view my profile](:profileLink).', 'http://example.com');
+     * t( '##Hi, *my name* is John, [view my profile](:profileLink).', 'http://example.com');
      * return '<h2>Hi, <em>my name</em> is John, <a href="http://example.com">view my profile</a></h2>';
      *
      * @param string $string

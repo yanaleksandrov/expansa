@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Form for build custom fields
  *
@@ -21,7 +19,7 @@ return Dashboard\Form::enqueue(
 				?>
 				<div class="progress" :style="'--expansa-progress:' + $wizard.progress().progress"></div>
 				<div class="p-8 pt-7 pb-7 df aic jcsb">
-					<span x-text="$wizard.current().title"><?php I18n::t( 'Upload CSV file' ); ?></span>
+					<span x-text="$wizard.current().title"><?php t( 'Upload CSV file' ); ?></span>
 					<span class="t-muted">
 						step <strong x-text="$wizard.progress().current">1</strong> from <strong x-text="$wizard.progress().total">2</strong>
 					</span>
@@ -35,15 +33,15 @@ return Dashboard\Form::enqueue(
 			'attributes' => [
 				'class'          => 'pl-8 pr-8',
 				'x-wizard:step'  => 'fields.trim()',
-				'x-wizard:title' => I18n::_t( 'Upload CSV file' ),
+				'x-wizard:title' => t( 'Upload CSV file' ),
 			],
 			'fields' => [
 				[
 					'name'        => 'title',
 					'type'        => 'header',
 					'class'       => 'p-8 t-center',
-					'label'       => I18n::_t( 'Import posts from a CSV file' ),
-					'instruction' => I18n::_t( 'This tool allows you to import (or merge) posts data to your website from a CSV or TXT file. %sDownload%s the file for an example or choose a file from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
+					'label'       => t( 'Import posts from a CSV file' ),
+					'instruction' => t( 'This tool allows you to import (or merge) posts data to your website from a CSV or TXT file. %sDownload%s the file for an example or choose a file from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
 				],
 				[
 					'type'        => 'uploader',
@@ -54,7 +52,7 @@ return Dashboard\Form::enqueue(
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Click to upload or drag & drop' ),
+					'instruction' => t( 'Click to upload or drag & drop' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -72,15 +70,15 @@ return Dashboard\Form::enqueue(
 				'class'          => 'pl-8 pr-8',
 				'x-cloak'        => true,
 				'x-wizard:step'  => 'output.trim()',
-				'x-wizard:title' => I18n::_t( 'Column mapping' ),
+				'x-wizard:title' => t( 'Column mapping' ),
 			],
 			'fields' => [
 				[
 					'name'        => 'title',
 					'type'        => 'header',
 					'class'       => 'p-8 t-center',
-					'label'       => I18n::_t( 'Map CSV fields to posts' ),
-					'instruction' => I18n::_t( 'Select fields from your CSV file that you want to map to fields in the posts, or that you want to ignore during import' ),
+					'label'       => t( 'Map CSV fields to posts' ),
+					'instruction' => t( 'Select fields from your CSV file that you want to map to fields in the posts, or that you want to ignore during import' ),
 				],
 				[
 					'type'     => 'custom',
@@ -94,7 +92,7 @@ return Dashboard\Form::enqueue(
 				'class'          => 'dg p-8',
 				'x-html'         => 'output',
 				'x-cloak'        => true,
-				'x-wizard:title' => I18n::_t( 'Import is completed' ),
+				'x-wizard:title' => t( 'Import is completed' ),
 			],
 		],
 		[
@@ -103,9 +101,9 @@ return Dashboard\Form::enqueue(
 				?>
 				<!-- buttons -->
 				<div class="p-8 df jcsb g-2" x-show="!output.trim()">
-					<button type="button" class="btn btn--outline" :disabled="$wizard.cannotGoBack()" x-show="$wizard.isNotLast()" @click="$wizard.goBack()" disabled><?php I18n::t( 'Back' ); ?></button>
-					<button type="button" class="btn btn--primary" :disabled="$wizard.cannotGoNext()" x-show="$wizard.isFirst()" @click="$wizard.goNext()" disabled><?php I18n::t( 'Continue' ); ?></button>
-					<button type="submit" class="btn btn--primary" x-show="$wizard.isStep(1)" x-cloak><?php I18n::t( 'Run the importer' ); ?></button>
+					<button type="button" class="btn btn--outline" :disabled="$wizard.cannotGoBack()" x-show="$wizard.isNotLast()" @click="$wizard.goBack()" disabled><?php t( 'Back' ); ?></button>
+					<button type="button" class="btn btn--primary" :disabled="$wizard.cannotGoNext()" x-show="$wizard.isFirst()" @click="$wizard.goNext()" disabled><?php t( 'Continue' ); ?></button>
+					<button type="submit" class="btn btn--primary" x-show="$wizard.isStep(1)" x-cloak><?php t( 'Run the importer' ); ?></button>
 				</div>
 				<?php
 			},

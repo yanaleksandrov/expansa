@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Posts actions.
  *
@@ -30,13 +28,13 @@ return Dashboard\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'placeholder' => I18n::_t( 'e.g. search text' ),
+				'placeholder' => t( 'e.g. search text' ),
 			],
 		],
 		[
 			'type'        => 'submit',
 			'name'        => 'submit',
-			'label'       => I18n::_t( 'Apply filter' ),
+			'label'       => t( 'Apply filter' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

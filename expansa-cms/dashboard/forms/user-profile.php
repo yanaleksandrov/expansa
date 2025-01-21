@@ -35,14 +35,14 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'image',
 							'name'        => 'avatar',
-							'label'       => I18n::_t( 'Profile Settings' ),
+							'label'       => t( 'Profile Settings' ),
 							'class'       => '',
 							'label_class' => 'field-label fw-500 fs-18',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => I18n::_t( 'Click to upload your avatar' ),
-							'tooltip'     => I18n::_t( 'This is tooltip' ),
+							'instruction' => t( 'Click to upload your avatar' ),
+							'tooltip'     => t( 'This is tooltip' ),
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
@@ -59,7 +59,7 @@ return Dashboard\Form::enqueue(
 		],
 		[
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'Overview' ),
+			'label'         => t( 'Overview' ),
 			'name'          => 'profile',
 			'caption'       => '',
 			'description'   => '',
@@ -71,7 +71,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'contacts',
-					'label'         => I18n::_t( 'Contact info' ),
+					'label'         => t( 'Contact info' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -79,20 +79,20 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'email',
 							'name'        => 'email',
-							'label'       => I18n::_t( 'Your email' ),
+							'label'       => t( 'Your email' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '<i class="ph ph-at"></i>',
 							'after'       => '',
-							'instruction' => I18n::_t( 'Is not displayed anywhere. It is used to work with the account and system notifications' ),
+							'instruction' => t( 'Is not displayed anywhere. It is used to work with the account and system notifications' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
 								'value'          => $user->email ?? '',
-								'placeholder'    => I18n::_t( 'e.g. user@gmail.com' ),
+								'placeholder'    => t( 'e.g. user@gmail.com' ),
 								'x-autocomplete' => '',
 							],
 						],
@@ -101,7 +101,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'name',
-					'label'         => I18n::_t( 'Name' ),
+					'label'         => t( 'Name' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -109,20 +109,20 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'login',
-							'label'       => I18n::_t( 'Login' ),
+							'label'       => t( 'Login' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '<i class="ph ph-user"></i>',
 							'after'       => '',
-							'instruction' => I18n::_t( 'Cannot be changed because used to log in to your account' ),
+							'instruction' => t( 'Cannot be changed because used to log in to your account' ),
 							'tooltip'     => '',
 							'copy'        => 1,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
 								'value'       => $user->login ?? '',
-								'placeholder' => I18n::_t( 'e.g. admin' ),
+								'placeholder' => t( 'e.g. admin' ),
 								'required'    => true,
 								'readonly'    => true,
 							],
@@ -130,27 +130,27 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'nicename',
-							'label'       => I18n::_t( 'Nicename' ),
+							'label'       => t( 'Nicename' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => I18n::_t( 'This field is used as part of the profile page URL' ),
+							'instruction' => t( 'This field is used as part of the profile page URL' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
 								'value'       => $user->nicename ?? '',
-								'placeholder' => I18n::_t( 'Username' ),
+								'placeholder' => t( 'Username' ),
 								'required'    => true,
 							],
 						],
 						[
 							'type'        => 'text',
 							'name'        => 'firstname',
-							'label'       => I18n::_t( 'First name' ),
+							'label'       => t( 'First name' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -163,14 +163,14 @@ return Dashboard\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'value'       => $user->firstname ?? '',
-								'placeholder' => I18n::_t( 'e.g. John' ),
+								'placeholder' => t( 'e.g. John' ),
 								'@input'      => 'showname = `${firstname} ${lastname}`',
 							],
 						],
 						[
 							'type'        => 'text',
 							'name'        => 'lastname',
-							'label'       => I18n::_t( 'Last name' ),
+							'label'       => t( 'Last name' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -183,20 +183,20 @@ return Dashboard\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'value'       => $user->lastname ?? '',
-								'placeholder' => I18n::_t( 'e.g. Doe' ),
+								'placeholder' => t( 'e.g. Doe' ),
 								'@input'      => 'showname = `${firstname} ${lastname}`',
 							],
 						],
 						[
 							'type'        => 'text',
 							'name'        => 'showname',
-							'label'       => I18n::_t( 'Show name as' ),
+							'label'       => t( 'Show name as' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '<i class="ph ph-identification-badge"></i>',
 							'after'       => '',
-							'instruction' => I18n::_t( 'Your name may appear around website where you contribute or are mentioned' ),
+							'instruction' => t( 'Your name may appear around website where you contribute or are mentioned' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -210,7 +210,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'about-yourself',
-					'label'         => I18n::_t( 'About yourself' ),
+					'label'         => t( 'About yourself' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -218,13 +218,13 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'textarea',
 							'name'        => 'bio',
-							'label'       => I18n::_t( 'Biographical info' ),
+							'label'       => t( 'Biographical info' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => I18n::_t( 'Share a little biographical information to fill out your profile. This may be shown publicly.' ),
+							'instruction' => t( 'Share a little biographical information to fill out your profile. This may be shown publicly.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -232,7 +232,7 @@ return Dashboard\Form::enqueue(
 							'attributes'  => [
 								'rows'        => count( explode("\n", $field->get( 'bio' ) ?? '' ) ),
 								'value'       => $field->get( 'bio' ),
-								'placeholder' => I18n::_t( 'A few words about yourself' ),
+								'placeholder' => t( 'A few words about yourself' ),
 							],
 						],
 					],
@@ -242,7 +242,7 @@ return Dashboard\Form::enqueue(
 		[
 			'name'          => 'appearance',
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'Appearance' ),
+			'label'         => t( 'Appearance' ),
 			'description'   => '',
 			'icon'          => 'ph ph-paint-brush-broad',
 			'class_button'  => '',
@@ -251,7 +251,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'theme',
-					'label'         => I18n::_t( 'Theme preferences' ),
+					'label'         => t( 'Theme preferences' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -265,7 +265,7 @@ return Dashboard\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => I18n::_t( 'Choose how dashboard looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes.' ),
+							'instruction' => t( 'Choose how dashboard looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -275,16 +275,16 @@ return Dashboard\Form::enqueue(
 							],
 							'options'     => [
 								'light' => [
-									'content'     => I18n::_t( 'Light mode' ),
+									'content'     => t( 'Light mode' ),
 									'icon'        => 'ph ph-user-list',
-									'description' => I18n::_t( 'This theme will be active when your system is set to “light mode”' ),
+									'description' => t( 'This theme will be active when your system is set to “light mode”' ),
 									'checked'     => $field->get( 'format' ) === 'light',
 									'image'       => Url::site( 'dashboard/assets/images/dashboard-light.svg' ),
 								],
 								'dark'  => [
-									'content'     => I18n::_t( 'Dark mode' ),
+									'content'     => t( 'Dark mode' ),
 									'icon'        => 'ph ph-police-car',
-									'description' => I18n::_t( 'This theme will be active when your system is set to “night mode”' ),
+									'description' => t( 'This theme will be active when your system is set to “night mode”' ),
 									'checked'     => $field->get( 'format' ) === 'dark',
 									'image'       => Url::site( 'dashboard/assets/images/dashboard-dark.svg' ),
 								],
@@ -295,7 +295,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'toolbar',
-					'label'         => I18n::_t( 'Toolbar' ),
+					'label'         => t( 'Toolbar' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -303,13 +303,13 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => 'toolbar',
-							'label'       => I18n::_t( 'Show when viewing site' ),
+							'label'       => t( 'Show when viewing site' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => I18n::_t( 'these settings can be changed for each user separately' ),
+							'instruction' => t( 'these settings can be changed for each user separately' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -324,7 +324,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'translations',
-					'label'         => I18n::_t( 'Translations' ),
+					'label'         => t( 'Translations' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -332,13 +332,13 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'locale',
-							'label'       => I18n::_t( 'Language' ),
+							'label'       => t( 'Language' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => I18n::_t( 'Language for your dashboard panel' ),
+							'instruction' => t( 'Language for your dashboard panel' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -356,7 +356,7 @@ return Dashboard\Form::enqueue(
 		[
 			'name'          => 'password',
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'Security' ),
+			'label'         => t( 'Security' ),
 			'caption'       => '',
 			'icon'          => 'ph ph-password',
 			'class_button'  => '',
@@ -365,7 +365,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'sessions',
-					'label'         => I18n::_t( 'Web sessions' ),
+					'label'         => t( 'Web sessions' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -418,7 +418,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'passwords',
-					'label'         => I18n::_t( 'Change password' ),
+					'label'         => t( 'Change password' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -426,19 +426,19 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'password',
 							'name'        => 'password-new',
-							'label'       => I18n::_t( 'New password' ),
+							'label'       => t( 'New password' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => I18n::_t( "Make sure it's at least 15 characters OR at least 12 characters including a number and a lowercase letter." ),
+							'instruction' => t( "Make sure it's at least 15 characters OR at least 12 characters including a number and a lowercase letter." ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'placeholder' => I18n::_t( 'New password' ),
+								'placeholder' => t( 'New password' ),
 							],
 							'switcher'    => 1,
 							'generator'   => 1,
@@ -454,7 +454,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'password',
 							'name'        => 'password-old',
-							'label'       => I18n::_t( 'Old password' ),
+							'label'       => t( 'Old password' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -467,7 +467,7 @@ return Dashboard\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'x-autocomplete' => '',
-								'placeholder'    => I18n::_t( 'Old password' ),
+								'placeholder'    => t( 'Old password' ),
 							],
 							'switcher'    => 1,
 							'generator'   => 0,
@@ -477,7 +477,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'submit',
 							'name'        => 'password-save',
-							'label'       => I18n::_t( 'Update password' ),
+							'label'       => t( 'Update password' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -503,7 +503,7 @@ return Dashboard\Form::enqueue(
 		[
 			'name'          => 'applications',
 			'type'          => 'tab',
-			'label'         => I18n::_t( 'API keys' ),
+			'label'         => t( 'API keys' ),
 			'description'   => '',
 			'icon'          => 'ph ph-key',
 			'class_button'  => '',
@@ -512,7 +512,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'auth',
-					'label'         => I18n::_t( 'Authentication keys' ),
+					'label'         => t( 'Authentication keys' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -526,7 +526,7 @@ return Dashboard\Form::enqueue(
 								} );
 								?>
 								<div class="dg g-2 ga-4">
-									<p><?php I18n::t( 'Application passwords allow authentication via non-interactive systems, such as REST API, without providing your actual password. Application passwords can be easily revoked. They cannot be used for traditional logins to your website.' ); ?></p>
+									<p><?php t( 'Application passwords allow authentication via non-interactive systems, such as REST API, without providing your actual password. Application passwords can be easily revoked. They cannot be used for traditional logins to your website.' ); ?></p>
 									<div>
 										<button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
 											<i class="ph ph-plus"></i> Add new key
@@ -540,7 +540,7 @@ return Dashboard\Form::enqueue(
 											<h6 class="fs-15">Amplication</h6>
 											<code class="fs-12 bg-green-lt t-green">
 												<span class="badge badge--sm badge--green-lt">Active</span> SHA256:Ai2xqyVBORX9PJJigJxfrdzXfKPajJHZMYw3+dOo+nw
-												<i class="ph ph-copy" title="<?php I18n::t_attr( 'Copy' ); ?>" @click="$copy()"></i>
+												<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" @click="$copy()"></i>
 											</code>
 											<div class="fs-12 t-muted lh-xs">Added on Nov 15, 2022</div>
 										</div>

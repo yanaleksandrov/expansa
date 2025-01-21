@@ -6,7 +6,6 @@ namespace Dashboard\Tables;
 
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 use Expansa\Url;
 
 final class Emails
@@ -40,16 +39,16 @@ final class Emails
                 ->fixedWidth('1rem')
                 ->view('cb'),
             Cell::add('title')
-                ->title(I18n::_t('Name'))
+                ->title(t('Name'))
                 ->flexibleWidth('15rem')
                 ->sortable()
                 ->view('title'),
             Cell::add('recipients')
-                ->title(I18n::_t('Recipients'))
+                ->title(t('Recipients'))
                 ->flexibleWidth('15rem')
                 ->view('title'),
             Cell::add('event')
-                ->title(I18n::_t('Event'))
+                ->title(t('Event'))
                 ->fixedWidth('9rem')
                 ->view('date'),
         ];
@@ -67,7 +66,7 @@ final class Emails
     public function headerContent(): array
     {
         return [
-            'title'   => I18n::_t('Emails'),
+            'title'   => t('Emails'),
             'actions' => true,
         ];
     }
@@ -75,11 +74,11 @@ final class Emails
     public function notFoundContent(): array
     {
         return [
-            'title'        => I18n::_t('No emails templates found'),
-            'description'  => I18n::_t('Add [new email template](:emailDialog) manually', Url::site('/dashboard/import')),
-            'descriptiont' => I18n::_t(
+            'title'        => t('No emails templates found'),
+            'description'  => t('Add [new email template](:emailDialog) manually', Url::site('/dashboard/import')),
+            'descriptiont' => t(
                 'Add %s manually',
-                sprintf('<a href="#" @click.prevent="$dialog.open(\'tmpl-email-editor\', emailDialog)">%s</a>', I18n::_t('new email template')),
+                sprintf('<a href="#" @click.prevent="$dialog.open(\'tmpl-email-editor\', emailDialog)">%s</a>', t('new email template')),
             ),
         ];
     }

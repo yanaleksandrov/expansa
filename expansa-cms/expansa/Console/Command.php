@@ -6,7 +6,6 @@ namespace Expansa\Console;
 
 use Expansa\Console\Contracts\Commands;
 use Expansa\Console\Output\Writer;
-use Expansa\I18n;
 
 /**
  * Class Command.
@@ -150,7 +149,7 @@ abstract class Command implements Commands
         if (isset($this->description)) {
             return $this->description;
         }
-        return $this->description = I18n::_t('This command does not provide a description.');
+        return $this->description = t('This command does not provide a description.');
     }
 
     /**

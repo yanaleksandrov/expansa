@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * API Keys manager form.
  *
@@ -32,7 +30,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'app-name',
-					'label'       => I18n::_t( 'App name' ),
+					'label'       => t( 'App name' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -51,7 +49,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'status',
-					'label'       => I18n::_t( 'Status' ),
+					'label'       => t( 'Status' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -66,8 +64,8 @@ return Dashboard\Form::enqueue(
 						'value' => '',
 					],
 					'options'     => [
-						'publish' => I18n::_t( 'Active' ),
-						'draft'   => I18n::_t( 'Disabled' ),
+						'publish' => t( 'Active' ),
+						'draft'   => t( 'Disabled' ),
 					],
 				],
 			]
@@ -83,13 +81,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'number',
 					'name'        => 'limits',
-					'label'       => I18n::_t( 'Requests limits' ),
+					'label'       => t( 'Requests limits' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Max request limits for this API key' ),
+					'instruction' => t( 'Max request limits for this API key' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -102,7 +100,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'period',
-					'label'       => I18n::_t( 'Limits period' ),
+					'label'       => t( 'Limits period' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -117,12 +115,12 @@ return Dashboard\Form::enqueue(
 						'value' => '',
 					],
 					'options'     => [
-						'second' => I18n::_t( 'per second' ),
-						'minute' => I18n::_t( 'per minute' ),
-						'hour'   => I18n::_t( 'per hour' ),
-						'day'    => I18n::_t( 'per day' ),
-						'week'   => I18n::_t( 'per week' ),
-						'month'  => I18n::_t( 'per month' ),
+						'second' => t( 'per second' ),
+						'minute' => t( 'per minute' ),
+						'hour'   => t( 'per hour' ),
+						'day'    => t( 'per day' ),
+						'week'   => t( 'per week' ),
+						'month'  => t( 'per month' ),
 					],
 				],
 			]
@@ -138,7 +136,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'date',
 					'name'        => 'start-date',
-					'label'       => I18n::_t( 'Start date' ),
+					'label'       => t( 'Start date' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -156,7 +154,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'date',
 					'name'        => 'end-date',
-					'label'       => I18n::_t( 'End date' ),
+					'label'       => t( 'End date' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -176,13 +174,13 @@ return Dashboard\Form::enqueue(
 		[
 			'type'        => 'url',
 			'name'        => 'sites',
-			'label'       => I18n::_t( 'Allowed websites' ),
+			'label'       => t( 'Allowed websites' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => I18n::_t( 'The list of sites from which it is allowed to accept requests. Empty, so everyone is allowed.' ),
+			'instruction' => t( 'The list of sites from which it is allowed to accept requests. Empty, so everyone is allowed.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -197,9 +195,9 @@ return Dashboard\Form::enqueue(
 			'callback' => function() {
 				?>
 				<div class="df jcsb g-2">
-					<button type="button" class="btn btn--outline" @click="$dialog.close()"><?php I18n::t( 'Cancel' ); ?></button>
+					<button type="button" class="btn btn--outline" @click="$dialog.close()"><?php t( 'Cancel' ); ?></button>
 					<button type="submit" class="btn btn--primary" :disabled="appName === ''">
-						<i class="ph ph-plug"></i> <?php I18n::t( 'Save project' ); ?>
+						<i class="ph ph-plug"></i> <?php t( 'Save project' ); ?>
 					</button>
 				</div>
 				<?php

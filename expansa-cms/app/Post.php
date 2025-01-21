@@ -7,7 +7,6 @@ namespace app;
 use app\Post\Type;
 use Expansa\Db;
 use Expansa\Error;
-use Expansa\I18n;
 use Expansa\Patterns\Registry;
 use Expansa\Safe;
 use Expansa\Url;
@@ -71,7 +70,7 @@ class Post
     {
         $type = Type::get($type);
         if (! $type instanceof Type) {
-            return new Error('post-add', I18n::_t('Post type is not registered.'));
+            return new Error('post-add', t('Post type is not registered.'));
         }
 
         $data = Safe::data(
@@ -147,7 +146,7 @@ class Post
     {
         $type = Type::get($type);
         if (! $type instanceof Type) {
-            return new Error('post-get', I18n::_t('Post type is not registered.'));
+            return new Error('post-get', t('Post type is not registered.'));
         }
 
         $data = Db::get($type->table, '*', [ $field => $value ]);

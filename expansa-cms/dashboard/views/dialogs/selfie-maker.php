@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Template for output selfie maker.
  *
@@ -30,24 +28,24 @@ if ( ! defined( 'EX_PATH' ) ) {
 		></div>
 
 		<div x-show="!showImg">
-			<h6><?php I18n::t( 'Center your face' ); ?></h6>
+			<h6><?php t( 'Center your face' ); ?></h6>
 			<div class="fs-14 t-muted mt-2 pl-4 pr-4">
-				<?php I18n::t( 'Align your face to the center of the selfie area and then take a photo' ); ?>
+				<?php t( 'Align your face to the center of the selfie area and then take a photo' ); ?>
 			</div>
 			<div class="df jcsb mt-6 mw">
-				<button type="button" class="btn btn--outline" @click="$dialog.close(), $stream.stop()"><?php I18n::t( 'Cancel' ); ?></button>
-				<button class="btn btn--primary" @click="$countdown.start(3, () => second = $countdown.second, () => showImg = $stream.snapshot($refs))"><?php I18n::t( 'Take Selfie' ); ?></button>
+				<button type="button" class="btn btn--outline" @click="$dialog.close(), $stream.stop()"><?php t( 'Cancel' ); ?></button>
+				<button class="btn btn--primary" @click="$countdown.start(3, () => second = $countdown.second, () => showImg = $stream.snapshot($refs))"><?php t( 'Take Selfie' ); ?></button>
 			</div>
 		</div>
 
 		<div x-show="showImg">
-			<h6><?php I18n::t( 'Check quality' ); ?></h6>
+			<h6><?php t( 'Check quality' ); ?></h6>
 			<div class="fs-14 t-muted mt-2 pl-4 pr-4">
-				<?php I18n::t( 'Make sure your face is not blurred or out of the frame before continuing' ); ?>
+				<?php t( 'Make sure your face is not blurred or out of the frame before continuing' ); ?>
 			</div>
 			<div class="df jcsb mt-6 mw">
-				<button class="btn btn--outline" type="button" @click="showImg = ''"><i class="ph ph-arrows-clockwise"></i> <?php I18n::t( 'Take a new' ); ?></button>
-				<button class="btn btn--primary" type="button" @click="showImg = ''"><i class="ph ph-user-focus"></i> <?php I18n::t( 'Use this photo' ); ?></button>
+				<button class="btn btn--outline" type="button" @click="showImg = ''"><i class="ph ph-arrows-clockwise"></i> <?php t( 'Take a new' ); ?></button>
+				<button class="btn btn--primary" type="button" @click="showImg = ''"><i class="ph ph-user-focus"></i> <?php t( 'Use this photo' ); ?></button>
 			</div>
 		</div>
 	</div>

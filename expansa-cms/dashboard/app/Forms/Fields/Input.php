@@ -6,17 +6,16 @@ namespace Dashboard\Forms\Fields;
 
 use app\View;
 use Dashboard\Forms\Field;
-use Expansa\I18n;
 
 class Input extends Field
 {
     public function __construct()
     {
         $this->type        = 'input';
-        $this->label       = I18n::_t('Text');
+        $this->label       = t('Text');
         $this->category    = 'basic';
         $this->icon        = 'ph ph-text-t';
-        $this->description = I18n::_t('A basic text input, useful for storing single string values.');
+        $this->description = t('A basic text input, useful for storing single string values.');
         $this->preview     = '';
         $this->view        = View::get();
         $this->defaults    = [];

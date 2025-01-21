@@ -6,7 +6,6 @@ namespace Dashboard\Tables;
 
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 
 final class Plugins
 {
@@ -59,19 +58,19 @@ final class Plugins
                 ->fixedWidth('2.5rem')
                 ->view('image'),
             Cell::add('plugin')
-                ->title(I18n::_t('Plugin'))
+                ->title(t('Plugin'))
                 ->flexibleWidth('14rem')
                 ->view('plugin'),
             Cell::add('description')
-                ->title(I18n::_t('Description'))
+                ->title(t('Description'))
                 ->flexibleWidth('14rem')
                 ->view('raw'),
             Cell::add('version')
-                ->title(I18n::_t('Version'))
+                ->title(t('Version'))
                 ->fixedWidth('4rem')
                 ->view('badge'),
             Cell::add('active')
-                ->title(I18n::_t('Activity'))
+                ->title(t('Activity'))
                 ->fixedWidth('4rem')
                 ->view('checkbox'),
         ];
@@ -89,7 +88,7 @@ final class Plugins
     public function headerContent(): array
     {
         return [
-            'title'   => I18n::_t('Plugins'),
+            'title'   => t('Plugins'),
             'actions' => true,
             'filter'  => true,
         ];
@@ -99,8 +98,8 @@ final class Plugins
     {
         return [
             'icon'        => 'no-plugins',
-            'title'       => I18n::_t('Plugins are not installed yet'),
-            'description' => I18n::_t('You can download them manually or install from the repository'),
+            'title'       => t('Plugins are not installed yet'),
+            'description' => t('You can download them manually or install from the repository'),
         ];
     }
 }

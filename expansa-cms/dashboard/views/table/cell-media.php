@@ -1,7 +1,6 @@
 <?php
 use Expansa\Safe;
 use Expansa\Url;
-use Expansa\I18n;
 
 /**
  * Table media element in storage.
@@ -33,6 +32,6 @@ $src = Safe::attribute( $args['sizes']['thumbnail']['url'] ?? $args['url'] ?? $a
 		</div>
 	</template>
 	<template x-if="!item.url && !item.icon">
-		<img class="storage__image" src="<?php echo Url::dashboard( '/assets/images/files/broken.svg' ) ?>" title="<?php I18n::t_attr( 'Image is broken' ); ?>" width="40" height="40">
+		<img class="storage__image" src="<?php echo Url::dashboard( '/assets/images/files/broken.svg' ) ?>" title="<?php t_attr( 'Image is broken' ); ?>" width="40" height="40">
 	</template>
 </div>

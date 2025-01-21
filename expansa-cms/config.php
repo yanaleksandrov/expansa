@@ -84,7 +84,7 @@ Registry::set(
     'images',
     [
         'thumbnail' => [
-            'name'   => I18n::_t('Thumbnail'),
+            'name'   => t('Thumbnail'),
             'width'  => 240,
             'height' => 240,
         ],

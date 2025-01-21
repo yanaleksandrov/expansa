@@ -8,7 +8,6 @@ use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
 use Expansa\Console\Commands\Index;
 use Expansa\Console\Output\Writer;
-use Expansa\I18n;
 
 /**
  * Class Console.
@@ -230,7 +229,7 @@ class Terminal
 
         $command = $this->getCommand($this->command);
         if ($command === null) {
-	        $this->info(I18n::_t('[red]#Command ":commandName" not found#', $this->command));
+	        $this->info(t('[red]#Command ":commandName" not found#', $this->command));
             return;
         }
 

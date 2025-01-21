@@ -1,7 +1,6 @@
 <?php
 
 use app\View;
-use Expansa\I18n;
 
 /**
  * Expansa dashboard tools.
@@ -20,7 +19,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	View::print(
 		'views/table/header',
 		[
-			'title' => I18n::_t( 'Tasks' ),
+			'title' => t( 'Tasks' ),
 		]
 	);
     ?>

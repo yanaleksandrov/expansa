@@ -6,7 +6,6 @@ namespace Dashboard\Tables;
 
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 
 final class PluginsInstall
 {
@@ -336,15 +335,15 @@ final class PluginsInstall
     {
         return [
             'icon'        => 'no-plugins',
-            'title'       => I18n::_t('Plugins not found'),
-            'description' => I18n::_t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
+            'title'       => t('Plugins not found'),
+            'description' => t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
         ];
     }
 
     public function headerContent(): array
     {
         return [
-            'title' => I18n::_t('Add Plugins'),
+            'title' => t('Add Plugins'),
         ];
     }
 

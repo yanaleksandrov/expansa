@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Reset password form
  *
@@ -17,14 +15,14 @@ return Dashboard\Form::enqueue(
 		[
 			'name'        => 'title',
 			'type'        => 'header',
-			'label'       => I18n::_t( 'Reset password' ),
+			'label'       => t( 'Reset password' ),
 			'class'       => 't-center',
-			'instruction' => I18n::_t( 'Enter the email address that you used to register. We will send you an email that will allow you to reset your password.' ),
+			'instruction' => t( 'Enter the email address that you used to register. We will send you an email that will allow you to reset your password.' ),
 		],
 		[
 			'type'        => 'email',
 			'name'        => 'email',
-			'label'       => I18n::_t( 'Your email' ),
+			'label'       => t( 'Your email' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
@@ -36,7 +34,7 @@ return Dashboard\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'placeholder'    => I18n::_t( 'Enter your email address' ),
+				'placeholder'    => t( 'Enter your email address' ),
 				'required'       => true,
 				'x-autocomplete' => '',
 			],
@@ -44,7 +42,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'        => 'submit',
 			'name'        => 'sign-in',
-			'label'       => I18n::_t( 'Send me instructions' ),
+			'label'       => t( 'Send me instructions' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

@@ -8,7 +8,6 @@ use app\User\Roles;
 use app\User\Traits;
 use Expansa\Db;
 use Expansa\Error;
-use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Safe;
 use Expansa\Security\Validator as SecurityValidator;
@@ -67,11 +66,11 @@ final class User
     {
         try {
             if (empty($value)) {
-                throw new \Exception(I18n::_t('You are trying to find a user with an empty :getByField.', $getBy));
+                throw new \Exception(t('You are trying to find a user with an empty :getByField.', $getBy));
             }
 
             if (! in_array($getBy, [ 'id', 'login', 'email', 'nicename' ], true)) {
-                throw new \Exception(I18n::_t('To get a user, use an ID, login, email or nicename.'));
+                throw new \Exception(t('To get a user, use an ID, login, email or nicename.'));
             }
 
             $users    = Db::select(self::$table, '*', [ $getBy => $value ], [ 'LIMIT' => 1 ]);
@@ -91,7 +90,7 @@ final class User
                 return $user;
             }
 
-            throw new \Exception(I18n::_t('User not found.'));
+            throw new \Exception(t('User not found.'));
         } catch (\Exception $e) {
             return new Error('user-get', $e->getMessage());
         }
@@ -142,7 +141,7 @@ final class User
             ]
         )->extend(
             'email:unique',
-            I18n::_t('Sorry, that email address or login is already used!'),
+            t('Sorry, that email address or login is already used!'),
             fn($validator) => ! self::exists(
                 [
                     'login' => $validator->fields['login'],
@@ -160,7 +159,7 @@ final class User
 
         $user_count = Db::insert(self::$table, $userdata)->rowCount();
         if ($user_count !== 1) {
-            return new Error('user-add', I18n::_t('Something went wrong, it was not possible to add a user.'));
+            return new Error('user-add', t('Something went wrong, it was not possible to add a user.'));
         }
 
         $user = self::get($login, 'login');
@@ -218,7 +217,7 @@ final class User
             }
         }
 
-        return new Error('user-update', I18n::_t('User not found.'));
+        return new Error('user-update', t('User not found.'));
     }
 
     /**
@@ -240,7 +239,7 @@ final class User
         ];
 
         if (! self::exists($fields)) {
-            return new Error('user-delete', I18n::_t('The user you are trying to delete does not exist.'));
+            return new Error('user-delete', t('The user you are trying to delete does not exist.'));
         }
 
         if ($reassign) {
@@ -399,10 +398,10 @@ final class User
                 return self::$current = $user;
             }
 
-            return new Error('user-login', I18n::_t('User password is incorrect.'));
+            return new Error('user-login', t('User password is incorrect.'));
         }
 
-        return new Error('user-login', I18n::_t('User not found: invalid login or email.'));
+        return new Error('user-login', t('User not found: invalid login or email.'));
     }
 
     /**

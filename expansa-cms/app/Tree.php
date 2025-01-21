@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace app;
 
 use Expansa\Error;
-use Expansa\I18n;
 use Expansa\Patterns\Singleton;
 use Expansa\Safe;
 use Expansa\Support\Arr;
@@ -117,7 +116,7 @@ final class Tree
     {
         $item_id = trim((string) ( $item['id'] ?? '' ));
         if (! $item_id) {
-            new Error('tree-add-item', I18n::_t('Tree item ID is required.'));
+            new Error('tree-add-item', t('Tree item ID is required.'));
         }
 
         $item = array_replace(

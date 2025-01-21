@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Form for create & edit emails.
  *
@@ -23,13 +21,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'name',
-					'label'       => I18n::_t( 'Category Name' ),
+					'label'       => t( 'Category Name' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'The name is how it appears on your site.' ),
+					'instruction' => t( 'The name is how it appears on your site.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -41,13 +39,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'slug',
-					'label'       => I18n::_t( 'Slug' ),
+					'label'       => t( 'Slug' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ),
+					'instruction' => t( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -69,13 +67,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'type',
-					'label'       => I18n::_t( 'The parent category of the product' ),
+					'label'       => t( 'The parent category of the product' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ),
+					'instruction' => t( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -84,16 +82,16 @@ return Dashboard\Form::enqueue(
 						'value'    => $user->locale ?? '',
 					],
 					'options'     => [
-						'select' => I18n::_t( 'Dropdown List' ),
-						'button' => I18n::_t( 'Button' ),
-						'color'  => I18n::_t( 'Color' ),
-						'image'  => I18n::_t( 'Image' ),
+						'select' => t( 'Dropdown List' ),
+						'button' => t( 'Button' ),
+						'color'  => t( 'Color' ),
+						'image'  => t( 'Image' ),
 					],
 				],
 				[
 					'type'        => 'media',
 					'name'        => 'image',
-					'label'       => I18n::_t( 'Image' ),
+					'label'       => t( 'Image' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -111,13 +109,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'description',
-					'label'       => I18n::_t( 'Description' ),
+					'label'       => t( 'Description' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'The description is not prominent by default; however, some themes may show it.' ),
+					'instruction' => t( 'The description is not prominent by default; however, some themes may show it.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',

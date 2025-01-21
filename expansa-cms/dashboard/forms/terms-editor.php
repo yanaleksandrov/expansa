@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Form for terms editor
  *
@@ -19,13 +17,13 @@ return Dashboard\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function() {
 				?>
-				<h6><?php I18n::t( 'Add New Category' ); ?></h6>
+				<h6><?php t( 'Add New Category' ); ?></h6>
 				<?php
 			},
 		],
 		[
 			'type'        => 'text',
-			'label'       => I18n::_t( 'Name' ),
+			'label'       => t( 'Name' ),
 			'name'        => 'title',
 			'value'       => '',
 			'placeholder' => '',
@@ -37,7 +35,7 @@ return Dashboard\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => I18n::_t( 'The name is how it appears on your site' ),
+			'instruction' => t( 'The name is how it appears on your site' ),
 			'attributes'  => [
 				'@input' => 'slug = $safe.slug(title)',
 			],
@@ -45,7 +43,7 @@ return Dashboard\Form::enqueue(
 		],
 		[
 			'type'        => 'text',
-			'label'       => I18n::_t( 'Slug' ),
+			'label'       => t( 'Slug' ),
 			'name'        => 'slug',
 			'value'       => '',
 			'placeholder' => '',
@@ -57,13 +55,13 @@ return Dashboard\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => I18n::_t( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ),
+			'instruction' => t( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ),
 			'attributes'  => [],
 			'conditions'  => [],
 		],
 		[
 			'type'        => 'select',
-			'label'       => I18n::_t( 'Parent category' ),
+			'label'       => t( 'Parent category' ),
 			'name'        => 'parent',
 			'value'       => '',
 			'placeholder' => '',
@@ -75,16 +73,16 @@ return Dashboard\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => I18n::_t( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ),
+			'instruction' => t( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ),
 			'attributes'  => [],
 			'conditions'  => [],
 			'options' => [
-				'' => I18n::_t( 'None' ),
+				'' => t( 'None' ),
 			],
 		],
 		[
 			'type'        => 'textarea',
-			'label'       => I18n::_t( 'Short description' ),
+			'label'       => t( 'Short description' ),
 			'name'        => 'description',
 			'value'       => '',
 			'placeholder' => '',
@@ -96,14 +94,14 @@ return Dashboard\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => I18n::_t( 'The description is not prominent by default; however, some themes may show it.' ),
+			'instruction' => t( 'The description is not prominent by default; however, some themes may show it.' ),
 			'attributes'  => [],
 			'conditions'  => [],
 		],
 		[
 			'type'        => 'submit',
 			'name'        => 'add',
-			'label'       => I18n::_t( 'Add New Category' ),
+			'label'       => t( 'Add New Category' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

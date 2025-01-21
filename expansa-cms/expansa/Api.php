@@ -54,7 +54,7 @@ final class Api
         try {
             $csrf->check('token', $_COOKIE['expansa_token'] ?? '');
         } catch (InvalidCsrfTokenException $e) {
-            $data = new Error('api-no-route', I18n::_t('Ajax queries not allows without CSRF token!'));
+            $data = new Error('api-no-route', t('Ajax queries not allows without CSRF token!'));
         }
 
         if (empty($data)) {
@@ -69,7 +69,7 @@ final class Api
                     $data = ( new $class() )->{$method}();
                 }
             } catch (\ReflectionException $e) {
-                $data = new Error('api-no-route', I18n::_t('No route was found matching the URL and request method.'));
+                $data = new Error('api-no-route', t('No route was found matching the URL and request method.'));
             }
 
             /**
@@ -106,7 +106,7 @@ final class Api
     private static function scan(string $path): void
     {
         if (! is_dir($path)) {
-            throw new \Exception(I18n::_t('API path is not a directory'));
+            throw new \Exception(t('API path is not a directory'));
         }
 
         $files = array_diff(scandir($path), [ '.', '..' ]);

@@ -8,7 +8,6 @@ use Expansa\Db;
 use Expansa\Error;
 use Expansa\Json;
 use Expansa\Safe;
-use Expansa\I18n;
 use Expansa\Support\Arr;
 
 /**
@@ -216,7 +215,7 @@ final class Option
             return new Error(
                 'option-delete',
                 sprintf(
-                    I18n::_t('You are not allowed to delete the "%s" option. You can just update it.'),
+                    t('You are not allowed to delete the "%s" option. You can just update it.'),
                     $option
                 )
             );

@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Form for filter posts
  *
@@ -16,7 +14,7 @@ return Dashboard\Form::enqueue(
 	[
 		[
 			'type'        => 'progress',
-			'label'       => I18n::_t( 'Storage' ),
+			'label'       => t( 'Storage' ),
 			'name'        => 'progress',
 			'value'       => 75,
 			'placeholder' => '',
@@ -28,9 +26,9 @@ return Dashboard\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => I18n::_t( '25% used of 2GB' ),
+			'instruction' => t( '25% used of 2GB' ),
 			'attributes'  => [
-				'placeholder' => I18n::_t( 'e.g. image name' ),
+				'placeholder' => t( 'e.g. image name' ),
 			],
 			'conditions'  => [],
 			'max'         => 100,
@@ -39,7 +37,7 @@ return Dashboard\Form::enqueue(
 		],
 		[
 			'type'        => 'search',
-			'label'       => I18n::_t( 'Search' ),
+			'label'       => t( 'Search' ),
 			'name'        => 's',
 			'value'       => '',
 			'placeholder' => '',
@@ -53,13 +51,13 @@ return Dashboard\Form::enqueue(
 			'tooltip'     => '',
 			'instruction' => '',
 			'attributes'  => [
-				'placeholder' => I18n::_t( 'e.g. image name' ),
+				'placeholder' => t( 'e.g. image name' ),
 			],
 			'conditions'  => [],
 		],
 		[
 			'type'        => 'checkbox',
-			'label'       => I18n::_t( 'File types' ),
+			'label'       => t( 'File types' ),
 			'name'        => 'types',
 			'value'       => '',
 			'placeholder' => '',
@@ -75,16 +73,16 @@ return Dashboard\Form::enqueue(
 			'attributes'  => [],
 			'conditions'  => [],
 			'options' => [
-				'svg'    => I18n::_t( 'SVG %s', '<i class="badge badge--blue-lt ml-auto">56</i>' ),
-				'images' => I18n::_t( 'Images %s', '<i class="badge badge--blue-lt ml-auto">670</i>' ),
-				'video'  => I18n::_t( 'Video %s', '<i class="badge badge--blue-lt ml-auto">35</i>' ),
-				'audio'  => I18n::_t( 'Audio %s', '<i class="badge badge--blue-lt ml-auto">147</i>' ),
-				'zip'    => I18n::_t( 'ZIP %s', '<i class="badge badge--blue-lt ml-auto">74</i>' ),
+				'svg'    => t( 'SVG %s', '<i class="badge badge--blue-lt ml-auto">56</i>' ),
+				'images' => t( 'Images %s', '<i class="badge badge--blue-lt ml-auto">670</i>' ),
+				'video'  => t( 'Video %s', '<i class="badge badge--blue-lt ml-auto">35</i>' ),
+				'audio'  => t( 'Audio %s', '<i class="badge badge--blue-lt ml-auto">147</i>' ),
+				'zip'    => t( 'ZIP %s', '<i class="badge badge--blue-lt ml-auto">74</i>' ),
 			],
 		],
 		[
 			'type'        => 'select',
-			'label'       => I18n::_t( 'Author' ),
+			'label'       => t( 'Author' ),
 			'name'        => 'authors',
 			'value'       => '',
 			'placeholder' => '',
@@ -100,8 +98,8 @@ return Dashboard\Form::enqueue(
 			'attributes'  => [],
 			'conditions'  => [],
 			'options' => [
-				''                => I18n::_t( 'Select an author' ),
-				'user-registered' => I18n::_t( 'New user registered' ),
+				''                => t( 'Select an author' ),
+				'user-registered' => t( 'New user registered' ),
 			],
 		],
 	]

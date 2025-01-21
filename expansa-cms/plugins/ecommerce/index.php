@@ -7,7 +7,6 @@ use app\Tree;
 use Expansa\Asset;
 use Expansa\Extensions\Plugin;
 use Expansa\Hook;
-use Expansa\I18n;
 use Expansa\Is;
 
 return new class extends Plugin
@@ -18,7 +17,7 @@ return new class extends Plugin
             ->setName('eCommerce')
             ->setVersion('2025.2')
             ->setAuthor('Expansa Team')
-            ->setDescription(I18n::_t('Everything you need to launch an online store in days and keep it growing for years.'));
+            ->setDescription(t('Everything you need to launch an online store in days and keep it growing for years.'));
     }
 
     public function boot(): void
@@ -54,15 +53,15 @@ return new class extends Plugin
 
         Type::register(
             key: 'orders',
-            labelName: I18n::_t('Order'),
-            labelNamePlural: I18n::_t('Orders'),
-            labelAllItems: I18n::_t('All Orders'),
-            labelAdd: I18n::_t('Add New'),
-            labelEdit: I18n::_t('Edit Order'),
-            labelUpdate: I18n::_t('Update Order'),
-            labelView: I18n::_t('View Order'),
-            labelSearch: I18n::_t('Search Orders'),
-            labelSave: I18n::_t('Save Order'),
+            labelName: t('Order'),
+            labelNamePlural: t('Orders'),
+            labelAllItems: t('All Orders'),
+            labelAdd: t('Add New'),
+            labelEdit: t('Edit Order'),
+            labelUpdate: t('Update Order'),
+            labelView: t('View Order'),
+            labelSearch: t('Search Orders'),
+            labelSave: t('Save Order'),
             public: true,
             hierarchical: false,
             searchable: false,
@@ -77,15 +76,15 @@ return new class extends Plugin
 
         Type::register(
             key: 'products',
-            labelName: I18n::_t('Product'),
-            labelNamePlural: I18n::_t('Products'),
-            labelAllItems: I18n::_t('All Products'),
-            labelAdd: I18n::_t('Add New'),
-            labelEdit: I18n::_t('Edit Product'),
-            labelUpdate: I18n::_t('Update Product'),
-            labelView: I18n::_t('View Product'),
-            labelSearch: I18n::_t('Search Products'),
-            labelSave: I18n::_t('Save Product'),
+            labelName: t('Product'),
+            labelNamePlural: t('Products'),
+            labelAllItems: t('All Products'),
+            labelAdd: t('Add New'),
+            labelEdit: t('Edit Product'),
+            labelUpdate: t('Update Product'),
+            labelView: t('View Product'),
+            labelSearch: t('Search Products'),
+            labelSave: t('Save Product'),
             public: true,
             hierarchical: false,
             searchable: true,
@@ -102,13 +101,13 @@ return new class extends Plugin
             [
                 [
                     'id'       => 'divider-ecommerce',
-                    'title'    => I18n::_t('E-Commerce'),
+                    'title'    => t('E-Commerce'),
                     'position' => 250,
                 ],
                 [
                     'id'           => 'ecommerce',
                     'url'          => 'ecommerce',
-                    'title'        => I18n::_t('Store'),
+                    'title'        => t('Store'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-storefront',
                     'position'     => 280,
@@ -117,7 +116,7 @@ return new class extends Plugin
                 [
                     'id'           => 'settings',
                     'url'          => 'settings',
-                    'title'        => I18n::_t('Settings'),
+                    'title'        => t('Settings'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,
@@ -126,7 +125,7 @@ return new class extends Plugin
                 [
                     'id'           => 'coupons',
                     'url'          => 'coupons',
-                    'title'        => I18n::_t('Coupons'),
+                    'title'        => t('Coupons'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 5,
@@ -135,7 +134,7 @@ return new class extends Plugin
                 [
                     'id'           => 'status',
                     'url'          => 'status',
-                    'title'        => I18n::_t('Status'),
+                    'title'        => t('Status'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 10,
@@ -144,7 +143,7 @@ return new class extends Plugin
                 [
                     'id'           => 'categories',
                     'url'          => 'categories',
-                    'title'        => I18n::_t('Categories'),
+                    'title'        => t('Categories'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,
@@ -153,7 +152,7 @@ return new class extends Plugin
                 [
                     'id'           => 'attributes',
                     'url'          => 'attributes',
-                    'title'        => I18n::_t('Attributes'),
+                    'title'        => t('Attributes'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 10,
@@ -162,7 +161,7 @@ return new class extends Plugin
                 [
                     'id'           => 'reviews',
                     'url'          => 'reviews',
-                    'title'        => I18n::_t('Reviews'),
+                    'title'        => t('Reviews'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 20,
@@ -171,7 +170,7 @@ return new class extends Plugin
                 [
                     'id'           => 'statuses',
                     'url'          => 'statuses',
-                    'title'        => I18n::_t('Statuses'),
+                    'title'        => t('Statuses'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,

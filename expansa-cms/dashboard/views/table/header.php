@@ -44,9 +44,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 		    <div class="df aic g-1" x-show="!bulk">
 			    <?php if ( $filter ) : ?>
 				    <div class="df aic g-1">
-					    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '<?php I18n::t_attr( 'Reset Filter' ); ?>' : '<?php I18n::t( 'Filter' ); ?>'">
+					    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '<?php t_attr( 'Reset Filter' ); ?>' : '<?php t( 'Filter' ); ?>'">
 						    <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
-						    <span x-text="showFilter ? '<?php I18n::t_attr( 'Reset' ); ?>' : '<?php I18n::t_attr( 'Filter' ); ?>'"><?php I18n::t( 'Filter' ); ?></span>
+						    <span x-text="showFilter ? '<?php t_attr( 'Reset' ); ?>' : '<?php t_attr( 'Filter' ); ?>'"><?php t( 'Filter' ); ?></span>
 					    </button>
 					    <?php
 					    View::print(
@@ -96,7 +96,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 							    'attributes'  => [
 								    'type'        => 'search',
 								    'name'        => 's',
-								    'placeholder' => I18n::_t( 'Search plugins' ),
+								    'placeholder' => t( 'Search plugins' ),
 							    ],
 						    ]
 					    );
@@ -106,7 +106,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			    <?php if ( $uploader ) : ?>
 				    <div class="df aic g-1">
 					    <button class="btn btn--sm btn--outline" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
-						    <i class="ph ph-upload-simple"></i> <?php I18n::t( 'Add new file' ); ?>
+						    <i class="ph ph-upload-simple"></i> <?php t( 'Add new file' ); ?>
 					    </button>
 				    </div>
 			    <?php endif; ?>
@@ -165,30 +165,30 @@ if ( ! defined( 'EX_PATH' ) ) {
 							    ],
 							    'options'     => [
 								    'core' => [
-									    'label'   => I18n::_t( 'Core' ),
+									    'label'   => t( 'Core' ),
 									    'options' => [
 										    'core' => [
-											    'content'     => I18n::_t( 'Expansa Core' ),
-											    'description' => I18n::_t( 'completion :percent\%', 0 ),
+											    'content'     => t( 'Expansa Core' ),
+											    'description' => t( 'completion :percent\%', 0 ),
 										    ],
 									    ],
 								    ],
 								    'plugins' => [
-									    'label'   => I18n::_t( 'Plugins' ),
+									    'label'   => t( 'Plugins' ),
 									    'options' => array_reduce( Expansa\Plugins::get(), function( $carry, Expansa\Plugin $plugin ) {
 										    $carry[ $plugin->id ] = [
 											    'content'     => $plugin->name,
-											    'description' => I18n::_t( 'completion :percent%', 0 ),
+											    'description' => t( 'completion :percent%', 0 ),
 										    ];
 										    return $carry;
 									    }, [] ),
 								    ],
 								    'themes' => [
-									    'label'   => I18n::_t( 'Themes' ),
+									    'label'   => t( 'Themes' ),
 									    'options' => array_reduce( Expansa\Themes::get(), function( $carry, Expansa\Plugin $theme ) {
 										    $carry[ $theme->id ] = [
 											    'content'     => $theme->name,
-											    'description' => I18n::_t( 'completion :percent%', 0 ),
+											    'description' => t( 'completion :percent%', 0 ),
 										    ];
 										    return $carry;
 									    }, [] ),
@@ -197,7 +197,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 						    ]
 					    );
 					    ?>
-					    <button type="button" class="btn btn--sm btn--outline" @click="$ajax('translations/get', {project}).then(data => items = data.items)"><i class="ph ph-scan"></i> <?php I18n::t( 'Scan' ); ?></button>
+					    <button type="button" class="btn btn--sm btn--outline" @click="$ajax('translations/get', {project}).then(data => items = data.items)"><i class="ph ph-scan"></i> <?php t( 'Scan' ); ?></button>
 				    </div>
 			    <?php endif; ?>
 		    </div>
@@ -205,7 +205,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		    <?php if ( $actions ) : ?>
 			    <div class="df aic g-1" x-show="bulk" x-cloak>
 				    <?php Dashboard\Form::print( EX_DASHBOARD . 'forms/posts-actions.php' ); ?>
-				    <button type="button" class="btn btn--sm t-red" x-bind="reset"><i class="ph ph-trash"></i> <?php I18n::t( 'Reset' ); ?></button>
+				    <button type="button" class="btn btn--sm t-red" x-bind="reset"><i class="ph ph-trash"></i> <?php t( 'Reset' ); ?></button>
 			    </div>
 		    <?php endif; ?>
 	    </div>

@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\I18n;
 use Expansa\Safe;
 use Expansa\Support\Arr;
 
@@ -52,7 +51,7 @@ $attributes = [
 		echo $label;
         if ( $generator ) {
             ?>
-			<span class="ml-auto fw-400 fs-13 t-muted" @click="<?php echo $prop; ?> = $password.generate(); $dispatch('input')"><?php I18n::t( 'Generate' ); ?></span>
+			<span class="ml-auto fw-400 fs-13 t-muted" @click="<?php echo $prop; ?> = $password.generate(); $dispatch('input')"><?php t( 'Generate' ); ?></span>
 		<?php } ?>
 	</div>
 	<div class="field-item">
@@ -63,7 +62,7 @@ $attributes = [
         endif;
         if ( $copy ) :
             ?>
-			<i class="ph ph-copy" title="<?php I18n::t_attr( 'Copy' ); ?>" x-copy="<?php echo $prop; ?>"></i>
+			<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" x-copy="<?php echo $prop; ?>"></i>
 		<?php endif; ?>
 	</div>
 	<?php if ( $instruction ) : ?>
@@ -86,11 +85,11 @@ $attributes = [
 		<div class="dg g-2 gtc-2 t-muted fs-13 mt-3 lh-xs">
 			<?php
 			$messages = [
-				'lowercase' => I18n::_t( '%d lowercase letters' ),
-				'uppercase' => I18n::_t( '%d uppercase letters' ),
-				'special'   => I18n::_t( '%d special characters' ),
-				'length'    => I18n::_t( '%d characters minimum' ),
-				'digit'     => I18n::_t( '%d numbers' ),
+				'lowercase' => t( '%d lowercase letters' ),
+				'uppercase' => t( '%d uppercase letters' ),
+				'special'   => t( '%d special characters' ),
+				'length'    => t( '%d characters minimum' ),
+				'digit'     => t( '%d numbers' ),
 			];
 
             foreach ( $characters as $character => $count ) {

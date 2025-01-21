@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Documentation creator.
  *
@@ -61,7 +59,7 @@ Dashboard\Form::enqueue(
 				?>
 				<div class="progress" :style="'--expansa-progress:' + $wizard.progress().progress"></div>
 				<div class="p-8 pt-7 pb-7 df aic jcsb">
-					<span x-text="$wizard.current().title"><?php I18n::t( 'Choose project' ); ?></span>
+					<span x-text="$wizard.current().title"><?php t( 'Choose project' ); ?></span>
 					<span class="t-muted">
 						step <strong x-text="$wizard.progress().current">1</strong> from <strong x-text="$wizard.progress().total">2</strong>
 					</span>
@@ -74,19 +72,19 @@ Dashboard\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'pl-8 pr-8',
-				'x-wizard:title' => I18n::_t( 'Choose project' ),
+				'x-wizard:title' => t( 'Choose project' ),
 			],
 			'fields' => [
 				[
 					'name'        => 'title',
 					'type'        => 'header',
 					'class'       => 'p-8 t-center',
-					'label'       => I18n::_t( 'Select the project you want to export to docs' ),
-					'instruction' => I18n::_t( 'This tool allows you to convert docblock comments into docs pages. You can also use markdown.' ),
+					'label'       => t( 'Select the project you want to export to docs' ),
+					'instruction' => t( 'This tool allows you to convert docblock comments into docs pages. You can also use markdown.' ),
 				],
 				[
 					'type'        => 'select',
-					'label'       => I18n::_t( 'Select a project to document' ),
+					'label'       => t( 'Select a project to document' ),
 					'name'        => 'project',
 					'value'       => 'none',
 					'placeholder' => '',
@@ -101,9 +99,9 @@ Dashboard\Form::enqueue(
 					'conditions' => [],
 					'options'    => [
 						'optgroup' => [
-							'label'   => I18n::_t( 'Plugins' ),
+							'label'   => t( 'Plugins' ),
 							'options' => [
-								'none' => I18n::_t( 'Nothing is selected' ),
+								'none' => t( 'Nothing is selected' ),
 								...$list,
 							],
 						],
@@ -116,7 +114,7 @@ Dashboard\Form::enqueue(
 			'attributes' => [
 				'class'          => 'pl-8 pr-8',
 				'x-cloak'        => true,
-				'x-wizard:title' => I18n::_t( 'Project import is completed' ),
+				'x-wizard:title' => t( 'Project import is completed' ),
 			],
 			'fields' => [
 				[
@@ -131,7 +129,7 @@ Dashboard\Form::enqueue(
 				?>
 				<!-- buttons -->
 				<div class="p-8 df jcfe g-2">
-					<button type="submit" class="btn btn--primary" :disabled="project.trim() === 'none'" disabled><?php I18n::t( 'Run the importer' ); ?></button>
+					<button type="submit" class="btn btn--primary" :disabled="project.trim() === 'none'" disabled><?php t( 'Run the importer' ); ?></button>
 				</div>
 				<?php
 			},

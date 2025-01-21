@@ -1,7 +1,6 @@
 <?php
 
 use app\View;
-use Expansa\I18n;
 use Expansa\Url;
 
 /**
@@ -27,20 +26,20 @@ return Dashboard\Form::enqueue(
 			'fields'     => [
 				[
 					'type'        => 'header',
-					'label'       => I18n::_t( 'Welcome to Expansa!' ),
+					'label'       => t( 'Welcome to Expansa!' ),
 					'name'        => 'title',
 					'class'       => 't-center',
-					'instruction' => I18n::_t( 'This is installation wizard. Before start, you need to set some settings. Please fill the information about your website.' ),
+					'instruction' => t( 'This is installation wizard. Before start, you need to set some settings. Please fill the information about your website.' ),
 				],
 				[
 					'name'  => 'website-data',
 					'type'  => 'divider',
-					'label' => I18n::_t( 'Website data' ),
+					'label' => t( 'Website data' ),
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'site[name]',
-					'label'       => I18n::_t( 'Site name' ),
+					'label'       => t( 'Site name' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -52,7 +51,7 @@ return Dashboard\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'Example: My Blog' ),
+						'placeholder'    => t( 'Example: My Blog' ),
 						'required'       => true,
 						'x-autocomplete' => '',
 					],
@@ -60,19 +59,19 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'site[tagline]',
-					'label'       => I18n::_t( 'Site tagline' ),
+					'label'       => t( 'Site tagline' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( "Don't worry, you can always change these settings later" ),
+					'instruction' => t( "Don't worry, you can always change these settings later" ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'Example: Just another Expansa site' ),
+						'placeholder'    => t( 'Example: Just another Expansa site' ),
 						'x-autocomplete' => '',
 					],
 				],
@@ -90,30 +89,30 @@ return Dashboard\Form::enqueue(
 				[
 					'name'        => 'title',
 					'type'        => 'header',
-					'label'       => I18n::_t( 'Step 1: Database' ),
-					'instruction' => I18n::_t( 'Information about connecting to the database. If you are not sure about it, contact your hosting provider.' ),
+					'label'       => t( 'Step 1: Database' ),
+					'instruction' => t( 'Information about connecting to the database. If you are not sure about it, contact your hosting provider.' ),
 				],
 				[
 					'name'  => 'credits',
 					'type'  => 'divider',
-					'label' => I18n::_t( 'Database credits' ),
+					'label' => t( 'Database credits' ),
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'db[database]',
-					'label'       => I18n::_t( 'Database name' ),
+					'label'       => t( 'Database name' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Specify the name of the empty database' ),
+					'instruction' => t( 'Specify the name of the empty database' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'database_name' ),
+						'placeholder'    => t( 'database_name' ),
 						'required'       => true,
 						'x-autocomplete' => '',
 					],
@@ -121,38 +120,38 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'db[username]',
-					'label'       => I18n::_t( 'MySQL database user name' ),
+					'label'       => t( 'MySQL database user name' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'User of the all privileges in the database' ),
+					'instruction' => t( 'User of the all privileges in the database' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'user_name' ),
+						'placeholder'    => t( 'user_name' ),
 						'required'       => true,
 						'x-autocomplete' => '',
 					],
 				],
 				[	'type'        => 'text',
 					'name'        => 'db[password]',
-					'label'       => I18n::_t( 'MySQL password' ),
+					'label'       => t( 'MySQL password' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Password for the specified user' ),
+					'instruction' => t( 'Password for the specified user' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'Password' ),
+						'placeholder'    => t( 'Password' ),
 						'required'       => true,
 						'x-autocomplete' => '',
 					],
@@ -168,7 +167,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'db[host]',
-							'label'       => I18n::_t( 'Hostname' ),
+							'label'       => t( 'Hostname' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -181,7 +180,7 @@ return Dashboard\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'value'          => 'localhost',
-								'placeholder'    => I18n::_t( 'Hostname' ),
+								'placeholder'    => t( 'Hostname' ),
 								'required'       => true,
 								'x-autocomplete' => '',
 							],
@@ -189,7 +188,7 @@ return Dashboard\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'db[prefix]',
-							'label'       => I18n::_t( 'Prefix' ),
+							'label'       => t( 'Prefix' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -202,7 +201,7 @@ return Dashboard\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'value'          => 'expansa_',
-								'placeholder'    => I18n::_t( 'Prefix' ),
+								'placeholder'    => t( 'Prefix' ),
 								'required'       => true,
 								'x-autocomplete' => '',
 							],
@@ -223,27 +222,27 @@ return Dashboard\Form::enqueue(
 				[
 					'name'        => 'title',
 					'type'        => 'header',
-					'label'       => I18n::_t( 'Step 2: System check' ),
-					'instruction' => I18n::_t( 'This is an important step that will help make sure that your server is ready for installation and properly configured.' ),
+					'label'       => t( 'Step 2: System check' ),
+					'instruction' => t( 'This is an important step that will help make sure that your server is ready for installation and properly configured.' ),
 				],
 				[
 					'name'  => 'website-data',
 					'type'  => 'divider',
-					'label' => I18n::_t( 'System check' ),
+					'label' => t( 'System check' ),
 				],
 				[
 					'name'     => 'date-format',
 					'type'     => 'custom',
 					'callback' => function() {
 						$checks = [
-							'pdo'        => I18n::_t( 'PDO PHP Extension' ),
-							'curl'       => I18n::_t( 'cURL PHP Extension' ),
-							'mbstring'   => I18n::_t( 'Mbstring PHP Extension' ),
-							'gd'         => I18n::_t( 'GD PHP Extension' ),
-							'memory'     => I18n::_t( '128MB or more allocated memory' ),
-							'php'        => I18n::_t( 'PHP version %s or higher', EX_REQUIRED_PHP_VERSION ),
-							'connection' => I18n::_t( 'Testing the database connection' ),
-							'mysql'      => I18n::_t( 'MySQL version %s or higher', EX_REQUIRED_MYSQL_VERSION ),
+							'pdo'        => t( 'PDO PHP Extension' ),
+							'curl'       => t( 'cURL PHP Extension' ),
+							'mbstring'   => t( 'Mbstring PHP Extension' ),
+							'gd'         => t( 'GD PHP Extension' ),
+							'memory'     => t( '128MB or more allocated memory' ),
+							'php'        => t( 'PHP version %s or higher', EX_REQUIRED_PHP_VERSION ),
+							'connection' => t( 'Testing the database connection' ),
+							'mysql'      => t( 'MySQL version %s or higher', EX_REQUIRED_MYSQL_VERSION ),
 						];
 						?>
 						<ul class="dg g-1">
@@ -272,30 +271,30 @@ return Dashboard\Form::enqueue(
 				[
 					'name'        => 'title',
 					'type'        => 'header',
-					'label'       => I18n::_t( 'Step 3: Create account' ),
-					'instruction' => I18n::_t( 'Almost everything is ready! The last step: add website owner information.' ),
+					'label'       => t( 'Step 3: Create account' ),
+					'instruction' => t( 'Almost everything is ready! The last step: add website owner information.' ),
 				],
 				[
 					'name'  => 'user-credits',
 					'type'  => 'divider',
-					'label' => I18n::_t( 'Owner credits' ),
+					'label' => t( 'Owner credits' ),
 				],
 				[
 					'type'        => 'email',
 					'name'        => 'user[email]',
-					'label'       => I18n::_t( 'Your email address' ),
+					'label'       => t( 'Your email address' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Double-check your email address before continuing' ),
+					'instruction' => t( 'Double-check your email address before continuing' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'Enter email' ),
+						'placeholder'    => t( 'Enter email' ),
 						'@change'        => "user.login = user.email.split('@')[0]",
 						'required'       => true,
 						'x-autocomplete' => '',
@@ -304,19 +303,19 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'user[login]',
-					'label'       => I18n::_t( 'Your login' ),
+					'label'       => t( 'Your login' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Can use only alphanumeric characters, underscores, hyphens and @ symbol' ),
+					'instruction' => t( 'Can use only alphanumeric characters, underscores, hyphens and @ symbol' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'Enter login' ),
+						'placeholder'    => t( 'Enter login' ),
 						'required'       => true,
 						'x-autocomplete' => '',
 					],
@@ -324,7 +323,7 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'password',
 					'name'        => 'user[password]',
-					'label'       => I18n::_t( 'Your password' ),
+					'label'       => t( 'Your password' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -336,7 +335,7 @@ return Dashboard\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'placeholder'    => I18n::_t( 'Password' ),
+						'placeholder'    => t( 'Password' ),
 						'required'       => true,
 						'x-autocomplete' => '',
 					],
@@ -368,8 +367,8 @@ return Dashboard\Form::enqueue(
 							'views/global/state',
 							[
 								'icon'        => 'success',
-								'title'       => I18n::_t( 'Woo-hoo, Expansa has been successfully installed!' ),
-								'description' => I18n::_t( 'We hope the installation process was easy. Thank you, and enjoy.' ),
+								'title'       => t( 'Woo-hoo, Expansa has been successfully installed!' ),
+								'description' => t( 'We hope the installation process was easy. Thank you, and enjoy.' ),
 							]
 						);
 					},
@@ -381,10 +380,10 @@ return Dashboard\Form::enqueue(
 			'callback' => function() {
 				?>
 				<div class="py-8 df jcsb g-2">
-					<button type="button" class="btn btn--outline" x-show="$wizard.isNotLast()" :disabled="$wizard.cannotGoBack()" @click="$wizard.goBack()" disabled><?php I18n::t( 'Back' ); ?></button>
-					<button type="button" class="btn btn--primary" x-show="$wizard.isNotLast() && !$wizard.isStep(3)" :disabled="$wizard.cannotGoNext()" @click="$wizard.goNext()" disabled><?php I18n::t( 'Continue' ); ?></button>
-					<button type="submit" class="btn btn--primary" x-show="$wizard.isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" x-cloak disabled><?php I18n::t( 'Install Expansa' ); ?></button>
-					<a href="<?php echo Url::site( '/dashboard/profile' ); ?>" class="btn btn--primary mx-auto" x-show="$wizard.isLast()" x-cloak><?php I18n::t( 'Go to dashboard' ); ?></a>
+					<button type="button" class="btn btn--outline" x-show="$wizard.isNotLast()" :disabled="$wizard.cannotGoBack()" @click="$wizard.goBack()" disabled><?php t( 'Back' ); ?></button>
+					<button type="button" class="btn btn--primary" x-show="$wizard.isNotLast() && !$wizard.isStep(3)" :disabled="$wizard.cannotGoNext()" @click="$wizard.goNext()" disabled><?php t( 'Continue' ); ?></button>
+					<button type="submit" class="btn btn--primary" x-show="$wizard.isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" x-cloak disabled><?php t( 'Install Expansa' ); ?></button>
+					<a href="<?php echo Url::site( '/dashboard/profile' ); ?>" class="btn btn--primary mx-auto" x-show="$wizard.isLast()" x-cloak><?php t( 'Go to dashboard' ); ?></a>
 				</div>
 				<?php
 			},

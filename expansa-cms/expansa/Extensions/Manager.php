@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Extensions;
 
-use Expansa\I18n;
 use Expansa\Extensions\Contracts\ExtensionSkeleton;
 use Expansa\Extensions\Exception\RequiredPropertyException;
 
@@ -116,7 +115,7 @@ class Manager
                     }
 
                     throw new RequiredPropertyException(
-                        I18n::_t('Extension parameter ":propertyName" is required', $property)
+                        t('Extension parameter ":propertyName" is required', $property)
                     );
                 }
             } catch (RequiredPropertyException $e) {

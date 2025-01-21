@@ -2,7 +2,6 @@
 
 use app\Post\Status;
 use app\Post\Type;
-use Expansa\I18n;
 use Expansa\Safe;
 
 $samples  = Safe::array( $args['samples'] ?? [] );
@@ -17,7 +16,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'          => 'group',
 			'name'          => 'data',
-			'label'         => I18n::_t( 'Required Data' ),
+			'label'         => t( 'Required Data' ),
 			'class'         => '',
 			'label_class'   => '',
 			'content_class' => '',
@@ -25,13 +24,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'type',
-					'label'       => I18n::_t( 'Post type' ),
+					'label'       => t( 'Post type' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Sample: <samp>%s</samp>', 'pages' ),
+					'instruction' => t( 'Sample: <samp>%s</samp>', 'pages' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -42,13 +41,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'status',
-					'label'       => I18n::_t( 'Post status' ),
+					'label'       => t( 'Post status' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Set default post status, if not specified' ),
+					'instruction' => t( 'Set default post status, if not specified' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -59,13 +58,13 @@ return Dashboard\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'author',
-					'label'       => I18n::_t( 'Post author' ),
+					'label'       => t( 'Post author' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( 'Set post author, if not specified' ),
+					'instruction' => t( 'Set post author, if not specified' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -80,7 +79,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'          => 'group',
 			'name'          => 'map-data',
-			'label'         => I18n::_t( 'Map Data' ),
+			'label'         => t( 'Map Data' ),
 			'class'         => '',
 			'label_class'   => '',
 			'content_class' => '',
@@ -97,23 +96,23 @@ return Dashboard\Form::enqueue(
 				'before'      => '',
 				'after'       => '',
 				'tooltip'     => '',
-				'instruction' => I18n::_t( 'Sample: %s', '<samp>' . $sample . '</samp>' ),
+				'instruction' => t( 'Sample: %s', '<samp>' . $sample . '</samp>' ),
 				'attributes'  => [],
 				'conditions'  => [],
 				'options'     => [
-					''         => I18n::_t( 'No import' ),
+					''         => t( 'No import' ),
 					'optgroup' => [
-						'label'   => I18n::_t( 'Main fields' ),
+						'label'   => t( 'Main fields' ),
 						'options' => [
-							'name'     => I18n::_t( 'Post ID' ),
-							'author'   => I18n::_t( 'Author ID' ),
-							'views'    => I18n::_t( 'Views count' ),
-							'type'     => I18n::_t( 'Type' ),
-							'title'    => I18n::_t( 'Title' ),
-							'content'  => I18n::_t( 'Content' ),
-							'created'  => I18n::_t( 'Created at' ),
-							'modified' => I18n::_t( 'Modified at' ),
-							'status'   => I18n::_t( 'Status' ),
+							'name'     => t( 'Post ID' ),
+							'author'   => t( 'Author ID' ),
+							'views'    => t( 'Views count' ),
+							'type'     => t( 'Type' ),
+							'title'    => t( 'Title' ),
+							'content'  => t( 'Content' ),
+							'created'  => t( 'Created at' ),
+							'modified' => t( 'Modified at' ),
+							'status'   => t( 'Status' ),
 						],
 					],
 				],

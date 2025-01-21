@@ -1,7 +1,6 @@
 <?php
 
 use app\View;
-use Expansa\I18n;
 
 /**
  * Expansa dashboard menu.
@@ -18,7 +17,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 <div class="expansa-main">
 	<div class="nav-editor">
 		<div class="nav-editor-side">
-			<h4><?php I18n::t( 'Menus' ); ?></h4>
+			<h4><?php t( 'Menus' ); ?></h4>
 			<div class="dg g-2 p-4">
 				<?php
 				View::print(
@@ -26,7 +25,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					[
 						'type'        => 'select',
 						'name'        => 'menu-editing',
-						'label'       => I18n::_t( 'Select a menu to edit' ),
+						'label'       => t( 'Select a menu to edit' ),
 						'class'       => 'field field--outline',
 						'label_class' => 'df fs-13 t-muted',
 						'reset'       => 0,
@@ -42,17 +41,17 @@ if ( ! defined( 'EX_PATH' ) ) {
 							'x-select' => '',
 						],
 						'options'     => [
-							'type'     => I18n::_t( 'Top Left' ),
-							'template' => I18n::_t( 'Top Right' ),
-							'status'   => I18n::_t( 'Primary' ),
-							'format'   => I18n::_t( 'Sidebar' ),
+							'type'     => t( 'Top Left' ),
+							'template' => t( 'Top Right' ),
+							'status'   => t( 'Primary' ),
+							'format'   => t( 'Sidebar' ),
 						],
 					],
 				);
 				?>
-				<a class="fw-500 fs-13" href="#"><?php I18n::t( 'Create a new menu' ); ?></a>
+				<a class="fw-500 fs-13" href="#"><?php t( 'Create a new menu' ); ?></a>
 			</div>
-			<h6><?php I18n::t( 'Add menu items' ); ?></h6>
+			<h6><?php t( 'Add menu items' ); ?></h6>
 			<div class="accordion" x-data="{expanded: false}">
 				<div class="accordion-item">
 					<div class="accordion-title" @click="expanded = ! expanded">Pages</div>
@@ -64,7 +63,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		</div>
 		<div class="nav-editor-main">
 			<div class="table__header p-6 g-2">
-				<h6><?php I18n::t( 'Menu structure' ); ?></h6>
+				<h6><?php t( 'Menu structure' ); ?></h6>
 			</div>
 			<div class="df fww g-2 p-6">
 				<?php
@@ -86,7 +85,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 						'conditions'  => [],
 						'attributes'  => [
 							'name'        => 'menu-name',
-							'placeholder' => I18n::_t( 'Menu Name' ),
+							'placeholder' => t( 'Menu Name' ),
 							'required'    => 1,
 						],
 					],
@@ -112,13 +111,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 							'x-select'    => '',
 							'multiple'    => 1,
 							'required'    => 1,
-							'placeholder' => I18n::_t( 'Choose location' ),
+							'placeholder' => t( 'Choose location' ),
 						],
 						'options'     => [
-							'type'     => I18n::_t( 'Top Left' ),
-							'template' => I18n::_t( 'Top Right' ),
-							'status'   => I18n::_t( 'Primary' ),
-							'format'   => I18n::_t( 'Sidebar' ),
+							'type'     => t( 'Top Left' ),
+							'template' => t( 'Top Right' ),
+							'status'   => t( 'Primary' ),
+							'format'   => t( 'Sidebar' ),
 						],
 					],
 				);
@@ -127,7 +126,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					[
 						'type'        => 'text',
 						'name'        => 'menu-create',
-						'label'       => I18n::_t( 'Create Menu' ),
+						'label'       => t( 'Create Menu' ),
 						'class'       => '',
 						'label_class' => '',
 						'reset'       => 0,
@@ -145,7 +144,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				);
 				?>
-				<div class="fs-13 t-muted"><?php I18n::t( 'Drag the items into the order you prefer. Click the arrow on the right of the item to reveal additional configuration options.' ); ?></div>
+				<div class="fs-13 t-muted"><?php t( 'Drag the items into the order you prefer. Click the arrow on the right of the item to reveal additional configuration options.' ); ?></div>
 			</div>
 			<ul class="nav-editor-list">
 				<li class="nav-editor-item">

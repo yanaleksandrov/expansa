@@ -2,7 +2,6 @@
 
 namespace dashboard\app\Api;
 
-use Expansa\I18n;
 use Expansa\Support\Arr;
 
 class Options
@@ -55,7 +54,7 @@ class Options
 
 		return [
 			[
-				'fragment' => I18n::_t( 'Options is updated successfully' ),
+				'fragment' => t( 'Options is updated successfully' ),
 				'target'   => 'body',
 				'method'   => 'notify',
 				'custom'   => [

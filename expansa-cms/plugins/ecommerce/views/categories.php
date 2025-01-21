@@ -2,7 +2,6 @@
 
 use app\View;
 use Dashboard\Form;
-use Expansa\I18n;
 
 /**
  * Attributes list
@@ -18,18 +17,18 @@ use Expansa\I18n;
 		<form class="attributes-wrapper" x-data="{values: []}">
 			<div class="attributes-editor">
 				<h5 class="attributes-title">
-					<span class="fw-600 mr-auto"><?php I18n::t( 'Products Categories' ); ?></span>
-					<button class="btn btn--sm" type="button"><?php I18n::t( 'Export' ); ?></button>
-					<button class="btn btn--sm" type="button"><?php I18n::t( 'Import' ); ?></button>
-					<button class="btn btn--sm btn--primary" type="submit"><?php I18n::t( 'Save' ); ?></button>
+					<span class="fw-600 mr-auto"><?php t( 'Products Categories' ); ?></span>
+					<button class="btn btn--sm" type="button"><?php t( 'Export' ); ?></button>
+					<button class="btn btn--sm" type="button"><?php t( 'Import' ); ?></button>
+					<button class="btn btn--sm btn--primary" type="submit"><?php t( 'Save' ); ?></button>
 				</h5>
 				<div class="attributes-description">
-					<p><?php I18n::t( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. Deleting a category does not delete the products in that category.' ); ?></p>
+					<p><?php t( 'Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. Deleting a category does not delete the products in that category.' ); ?></p>
 				</div>
 				<?php Form::print( EX_PLUGINS . 'ecommerce/core/categories.php', true ); ?>
 			</div>
 			<div class="attributes-side">
-				<div x-text="`<?php I18n::t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
+				<div x-text="`<?php t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
 				<div class="attributes-list">
 					<div class="attributes-values">
 						<template x-if="values.length">
@@ -48,8 +47,8 @@ use Expansa\I18n;
 								[
 									'icon'        => 'empty-pack',
 									'class'       => 'dg jic m-auto t-center p-8 mw-320',
-									'title'       => I18n::_t( 'Categories not found' ),
-									'description' => I18n::_t( 'Try to add new category, there will be results here' ),
+									'title'       => t( 'Categories not found' ),
+									'description' => t( 'Try to add new category, there will be results here' ),
 								]
 							);
 							?>

@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * Media files editor.
  *
@@ -15,7 +13,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'          => 'group',
 			'name'          => 'manage',
-			'label'         => I18n::_t( 'Alternative Text' ),
+			'label'         => t( 'Alternative Text' ),
 			'class'         => 'dg g-2 gtc-3',
 			'label_class'   => 'ga-1 fs-12 t-muted',
 			'content_class' => 'ga-2',
@@ -29,7 +27,7 @@ return Dashboard\Form::enqueue(
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => I18n::_t( '%sLearn how to describe the purpose of the image%s. Leave empty if the image is purely decorative.', '<a href="//www.w3.org/WAI/tutorials/images/decision-tree/" target="_blank">', '</a>' ),
+					'instruction' => t( '%sLearn how to describe the purpose of the image%s. Leave empty if the image is purely decorative.', '<a href="//www.w3.org/WAI/tutorials/images/decision-tree/" target="_blank">', '</a>' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -43,7 +41,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'          => 'group',
 			'name'          => 'manage',
-			'label'         => I18n::_t( 'Title' ),
+			'label'         => t( 'Title' ),
 			'class'         => 'dg g-2 gtc-3',
 			'label_class'   => 'ga-1 fs-12 t-muted',
 			'content_class' => 'ga-2',
@@ -71,7 +69,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'          => 'group',
 			'name'          => 'manage',
-			'label'         => I18n::_t( 'Caption' ),
+			'label'         => t( 'Caption' ),
 			'class'         => 'dg g-2 gtc-3',
 			'label_class'   => 'ga-1 fs-12 t-muted',
 			'content_class' => 'ga-2',
@@ -97,7 +95,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'          => 'group',
 			'name'          => 'manage',
-			'label'         => I18n::_t( 'Description' ),
+			'label'         => t( 'Description' ),
 			'class'         => 'dg g-2 gtc-3',
 			'label_class'   => 'ga-1 fs-12 t-muted',
 			'content_class' => 'ga-2',
@@ -125,7 +123,7 @@ return Dashboard\Form::enqueue(
 		[
 			'type'          => 'group',
 			'name'          => 'manage',
-			'label'         => I18n::_t( 'File URL' ),
+			'label'         => t( 'File URL' ),
 			'class'         => 'dg g-2 gtc-3',
 			'label_class'   => 'ga-1 fs-12 t-muted',
 			'content_class' => 'ga-2',

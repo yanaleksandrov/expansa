@@ -6,7 +6,6 @@ namespace Dashboard\Tables;
 
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 
 final class Themes
 {
@@ -105,15 +104,15 @@ final class Themes
     public function notFoundContent(): array
     {
         return [
-            'title'       => I18n::_t('Themes not found'),
-            'description' => I18n::_t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
+            'title'       => t('Themes not found'),
+            'description' => t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
         ];
     }
 
     public function headerContent(): array
     {
         return [
-            'title' => I18n::_t('Themes'),
+            'title' => t('Themes'),
         ];
     }
 

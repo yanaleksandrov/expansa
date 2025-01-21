@@ -2,7 +2,6 @@
 
 use app\Tree;
 use Expansa\Disk;
-use Expansa\I18n;
 
 /**
  * File manager table
@@ -28,7 +27,7 @@ $files       = [
     <div class="fm">
         <div class="fm-header">
             <ul class="fm-header-list">
-                <li class="fm-header-item" title="<?php I18n::t_attr('Go to parent folder'); ?>">
+                <li class="fm-header-item" title="<?php t_attr('Go to parent folder'); ?>">
                     <button class="btn btn--icon btn--outline btn--xs">
 	                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
                             <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -38,42 +37,42 @@ $files       = [
                         </svg>
                     </button>
                 </li>
-                <li class="fm-header-item" title="<?php I18n::t_attr('Back'); ?>">
+                <li class="fm-header-item" title="<?php t_attr('Back'); ?>">
                     <button class="btn btn--icon btn--outline btn--xs"><i class="ph ph-caret-left"></i></button>
                 </li>
-                <li class="fm-header-item" title="<?php I18n::t_attr('Next'); ?>">
+                <li class="fm-header-item" title="<?php t_attr('Next'); ?>">
                     <button class="btn btn--icon btn--outline btn--xs"><i class="ph ph-caret-right"></i></button>
                 </li>
-                <li class="fm-header-item" title="<?php I18n::t_attr('Update'); ?>">
+                <li class="fm-header-item" title="<?php t_attr('Update'); ?>">
                     <button class="btn btn--icon btn--outline btn--xs"><i class="ph ph-arrows-clockwise"></i></button>
                 </li>
             </ul>
             <ul class="fm-header-list">
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-file-plus"></i> <?php I18n::t('Add file'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-file-plus"></i> <?php t('Add file'); ?></button>
                 </li>
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-folder-plus"></i> <?php I18n::t('Add folder'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-folder-plus"></i> <?php t('Add folder'); ?></button>
                 </li>
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-upload-simple"></i> <?php I18n::t('Upload'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-upload-simple"></i> <?php t('Upload'); ?></button>
                 </li>
             </ul>
             <ul class="fm-header-list">
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-copy"></i> <?php I18n::t('Copy'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-copy"></i> <?php t('Copy'); ?></button>
                 </li>
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-scissors"></i> <?php I18n::t('Cut'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-scissors"></i> <?php t('Cut'); ?></button>
                 </li>
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-download-simple"></i> <?php I18n::t('Download'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-download-simple"></i> <?php t('Download'); ?></button>
                 </li>
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-textbox"></i> <?php I18n::t('Rename'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-textbox"></i> <?php t('Rename'); ?></button>
                 </li>
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-trash-simple"></i> <?php I18n::t('Delete'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-trash-simple"></i> <?php t('Delete'); ?></button>
                 </li>
             </ul>
             <ul class="fm-header-list">
@@ -84,11 +83,11 @@ $files       = [
                                 <path d="M6.331 1.688a.991.991 0 0 0-.883-.648 26.605 26.605 0 0 0-3.456.033 1.004 1.004 0 0 0-.92.893C.735 4.903.623 7.85.975 10.792c.119 1 .937 1.725 1.915 1.832 2.762.3 5.485.293 8.247-.008a2.092 2.092 0 0 0 1.845-1.823c.218-1.82.276-3.684.14-5.971a1.906 1.906 0 0 0-1.745-1.788c-1.344-.112-2.279-.118-3.931-.153a.998.998 0 0 1-.915-.652l-.2-.54ZM8 5.981h2.5M8 8.981h2.5M9.248 2.934V8.98"/>
                             </g>
                         </svg>
-                        <?php I18n::t('Archive'); ?>
+                        <?php t('Archive'); ?>
                     </button>
                 </li>
                 <li class="fm-header-item">
-                    <button class="btn btn--outline btn--xs"><i class="ph ph-file-zip"></i> <?php I18n::t('Extract files'); ?></button>
+                    <button class="btn btn--outline btn--xs"><i class="ph ph-file-zip"></i> <?php t('Extract files'); ?></button>
                 </li>
             </ul>
         </div>
@@ -98,7 +97,7 @@ $files       = [
                 <i class="ph ph-folder-simple-dashed"></i> <code>public_html</code>/<code>dev</code>/<code>cody</code>/<code>list</code>
             </div>
             <div class="df aic g-3">
-                <?php I18n::t(':count items', count([ ...$folders, ...$files ])); ?>
+                <?php t(':count items', count([ ...$folders, ...$files ])); ?>
                 <div class="field field--xs field--outline">
                     <label class="field-item">
                         <input type="search" name="search" placeholder="Search">

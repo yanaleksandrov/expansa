@@ -56,26 +56,26 @@ new class
                         'showMenu'            => false,
                         'spriteFlagsUrl'      => Url::site('/dashboard/assets/sprites/flags.svg'),
                         'notifications'       => [
-                            'ctrlS' => I18n::_t_attr('Expansa saves the changes automatically, so there is no need to press ⌘ + S'),
+                            'ctrlS' => t_attr('Expansa saves the changes automatically, so there is no need to press ⌘ + S'),
                         ],
                         'uploaderDialog'      => [
-                            'title' => I18n::_t('Upload Files'),
+                            'title' => t('Upload Files'),
                             'class' => 'dialog--md',
                         ],
                         'emailDialog'         => [
-                            'title' => I18n::_t('Email Settings'),
+                            'title' => t('Email Settings'),
                             'class' => 'dialog--xl dialog--right',
                         ],
                         'postEditorDialog'    => [
-                            'title' => I18n::_t('Post Editor'),
+                            'title' => t('Post Editor'),
                             'class' => 'dialog--lg dialog--right',
                         ],
                         'takeSelfieDialog'    => [
-                            'title' => I18n::_t('Take A Selfie'),
+                            'title' => t('Take A Selfie'),
                             'class' => 'dialog--sm',
                         ],
                         'apiKeyManagerDialog' => [
-                            'title' => I18n::_t('Create/update new project'),
+                            'title' => t('Create/update new project'),
                             'class' => 'dialog--sm',
                         ],
                     ]
@@ -98,7 +98,7 @@ new class
                 [
                     'id'           => 'users',
                     'url'          => 'users',
-                    'title'        => I18n::_t('Users'),
+                    'title'        => t('Users'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-users-three',
                     'position'     => 600,
@@ -106,7 +106,7 @@ new class
                 [
                     'id'           => 'emails',
                     'url'          => 'emails',
-                    'title'        => I18n::_t('Emails'),
+                    'title'        => t('Emails'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-mailbox',
                     'position'     => 700,
@@ -114,7 +114,7 @@ new class
                 [
                     'id'           => 'tasks',
                     'url'          => 'tasks',
-                    'title'        => I18n::_t('My plans and tasks'),
+                    'title'        => t('My plans and tasks'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-list-checks',
                     'position'     => 800,
@@ -122,7 +122,7 @@ new class
                 [
                     'id'           => 'settings',
                     'url'          => 'settings',
-                    'title'        => I18n::_t('Settings'),
+                    'title'        => t('Settings'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-gear',
                     'position'     => 900,
@@ -130,7 +130,7 @@ new class
                 [
                     'id'           => 'translation',
                     'url'          => 'translation',
-                    'title'        => I18n::_t('Translation'),
+                    'title'        => t('Translation'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-translate',
                     'position'     => 1000,
@@ -148,7 +148,7 @@ new class
                 [
                     'id'           => 'comments',
                     'url'          => 'comments',
-                    'title'        => I18n::_t('Sign out'),
+                    'title'        => t('Sign out'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-sign-out',
                     'position'     => 0,
@@ -161,7 +161,7 @@ new class
                 [
                     'id'           => 'profile',
                     'url'          => 'profile',
-                    'title'        => I18n::_t('Profile'),
+                    'title'        => t('Profile'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-gear',
                     'position'     => 20,
@@ -169,7 +169,7 @@ new class
                 [
                     'id'           => 'profile',
                     'url'          => 'profile',
-                    'title'        => I18n::_t('Set yourself as %saway%s', '<strong>', '</strong>'),
+                    'title'        => t('Set yourself as %saway%s', '<strong>', '</strong>'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-moon-stars',
                     'position'     => 30,
@@ -177,7 +177,7 @@ new class
                 [
                     'id'           => 'dialogs',
                     'url'          => 'comments',
-                    'title'        => I18n::_t('Pause notifications'),
+                    'title'        => t('Pause notifications'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-bell-slash',
                     'position'     => 40,
@@ -190,7 +190,7 @@ new class
                 [
                     'id'           => 'comments',
                     'url'          => 'comments',
-                    'title'        => I18n::_t('Add account'),
+                    'title'        => t('Add account'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-user-plus',
                     'position'     => 60,
@@ -198,7 +198,7 @@ new class
                 [
                     'id'           => 'comments',
                     'url'          => 'comments',
-                    'title'        => I18n::_t('Igor Ivanov'),
+                    'title'        => t('Igor Ivanov'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-user-plus',
                     'position'     => 70,
@@ -217,7 +217,7 @@ new class
                     [
                         'id'           => 'website',
                         'url'          => '/',
-                        'title'        => I18n::_t('Expansa'),
+                        'title'        => t('Expansa'),
                         'capabilities' => ['manage_options'],
                         'icon'         => 'ph ph-user-focus',
                         'position'     => 10,
@@ -241,7 +241,7 @@ new class
                     [
                         'id'           => 'new',
                         'url'          => 'new',
-                        'title'        => I18n::_t('New'),
+                        'title'        => t('New'),
                         'capabilities' => ['manage_options'],
                         'icon'         => 'ph ph-plus',
                         'position'     => 40,
@@ -267,13 +267,13 @@ new class
             [
                 [
                     'id'       => 'divider-workspace',
-                    'title'    => I18n::_t('Workspace'),
+                    'title'    => t('Workspace'),
                     'position' => 0,
                 ],
                 [
                     'id'           => 'profile',
                     'url'          => 'profile',
-                    'title'        => I18n::_t('Profile'),
+                    'title'        => t('Profile'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-user-focus',
                     'position'     => 0,
@@ -281,13 +281,13 @@ new class
                 ],
                 [
                     'id'       => 'divider-content',
-                    'title'    => I18n::_t('Content'),
+                    'title'    => t('Content'),
                     'position' => 10,
                 ],
                 [
                     'id'           => 'dialogs',
                     'url'          => 'comments',
-                    'title'        => I18n::_t('Discussions'),
+                    'title'        => t('Discussions'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-chats',
                     'position'     => 200,
@@ -295,7 +295,7 @@ new class
                 [
                     'id'           => 'comments',
                     'url'          => 'comments',
-                    'title'        => I18n::_t('Comments'),
+                    'title'        => t('Comments'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,
@@ -304,7 +304,7 @@ new class
                 [
                     'id'           => 'chat',
                     'url'          => 'chat',
-                    'title'        => I18n::_t('Chat'),
+                    'title'        => t('Chat'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 10,
@@ -312,13 +312,13 @@ new class
                 ],
                 [
                     'id'       => 'divider-customization',
-                    'title'    => I18n::_t('Customization'),
+                    'title'    => t('Customization'),
                     'position' => 300,
                 ],
                 [
                     'id'           => 'appearance',
                     'url'          => 'themes',
-                    'title'        => I18n::_t('Appearance'),
+                    'title'        => t('Appearance'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-paint-bucket',
                     'position'     => 400,
@@ -326,7 +326,7 @@ new class
                 [
                     'id'           => 'themes',
                     'url'          => 'themes',
-                    'title'        => I18n::_t('Themes'),
+                    'title'        => t('Themes'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,
@@ -335,7 +335,7 @@ new class
                 [
                     'id'           => 'menus',
                     'url'          => 'nav-menu',
-                    'title'        => I18n::_t('Menus'),
+                    'title'        => t('Menus'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 10,
@@ -344,7 +344,7 @@ new class
                 [
                     'id'           => 'plugins',
                     'url'          => 'plugins',
-                    'title'        => I18n::_t('Plugins'),
+                    'title'        => t('Plugins'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-plug',
                     'position'     => 500,
@@ -352,7 +352,7 @@ new class
                 [
                     'id'           => 'installed',
                     'url'          => 'plugins',
-                    'title'        => I18n::_t('Installed'),
+                    'title'        => t('Installed'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,
@@ -361,7 +361,7 @@ new class
                 [
                     'id'           => 'install',
                     'url'          => 'plugins-install',
-                    'title'        => I18n::_t('Add new'),
+                    'title'        => t('Add new'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 10,
@@ -370,7 +370,7 @@ new class
                 [
                     'id'           => 'tools',
                     'url'          => 'tools',
-                    'title'        => I18n::_t('Tools'),
+                    'title'        => t('Tools'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-hammer',
                     'position'     => 700,
@@ -378,7 +378,7 @@ new class
                 [
                     'id'           => 'import',
                     'url'          => 'import',
-                    'title'        => I18n::_t('Import'),
+                    'title'        => t('Import'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 10,
@@ -387,7 +387,7 @@ new class
                 [
                     'id'           => 'export',
                     'url'          => 'export',
-                    'title'        => I18n::_t('Export'),
+                    'title'        => t('Export'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 20,

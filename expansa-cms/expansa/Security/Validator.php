@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Expansa\Security;
 
 use DateTime;
-use Expansa\I18n;
 
 /**
  * Validates input against certain criteria.
@@ -84,7 +83,7 @@ use Expansa\I18n;
             ]
         )->extend(
             'time',
-            I18n::_t( 'Time must be in \'%s\' format.' ),
+            t( 'Time must be in \'%s\' format.' ),
             function( $validator, $value, $comparison_value ) {
                 $time = DateTime::createFromFormat( $comparison_value, $value );
 
@@ -92,16 +91,16 @@ use Expansa\I18n;
             }
         )->extend(
             'array',
-            I18n::_t( 'This is not array.' ),
+            t( 'This is not array.' ),
             function( $validator, $value ) {
                 return is_array( $value );
             }
         )->extend(
             'numeric',
-            I18n::_t( 'Oh no, must be numeric' )
+            t( 'Oh no, must be numeric' )
         )->extend(
             'field32:numeric',
-            I18n::_t( 'Message for specified field: must be numeric' )
+            t( 'Message for specified field: must be numeric' )
         )->apply()
     );
  *
@@ -146,41 +145,41 @@ final class Validator
         $this->messages = array_merge(
             $this->messages,
             [
-                'accepted'     => I18n::_t('Must be accepted.'),
-                'alpha'        => I18n::_t('Must contain only letters.'),
-                'alphanumeric' => I18n::_t('Must contain only letters and/or numbers.'),
-                'hex'          => I18n::_t('The color format should be :format.', 'HEX'),
-                'hsl'          => I18n::_t('The color format should be :format.', 'HSL'),
-                'hsla'         => I18n::_t('The color format should be :format.', 'HSLA'),
-                'rgb'          => I18n::_t('The color format should be :format.', 'RGB'),
-                'rgba'         => I18n::_t('The color format should be :format.', 'RGBA'),
-                'date'         => I18n::_t('Is not a valid date.'),
-                'later'        => I18n::_t('Must be date after \'%s\'.'),
-                'earlier'      => I18n::_t('Must be date before \'%s\'.'),
-                'different'    => I18n::_t('Must be different than \'%s\'.'),
-                'email'        => I18n::_t('Is not a valid email address.'),
-                'equals'       => I18n::_t('Must be the same as \'%s\'.'),
-                'ip'           => I18n::_t('Is not a valid IP address.'),
-                'ipv4'         => I18n::_t('Is not a valid IPv4 address.'),
-                'ipv6'         => I18n::_t('Is not a valid IPv6 address.'),
-                'length'       => I18n::_t('Must be %d characters long.'),
-                'lengthMin'    => I18n::_t('Must be at least %d characters long.'),
-                'lengthMax'    => I18n::_t('Must not exceed %d characters.'),
-                'mac'          => I18n::_t('Is not a valid MAC address.'),
-                'max'          => I18n::_t('Must be no more than %s.'),
-                'min'          => I18n::_t('Must be at least %s.'),
-                'numeric'      => I18n::_t('Must be numeric.'),
-                'required'     => I18n::_t('Is required.'),
-                'regex'        => I18n::_t('The field is not valid format.'),
-                'similar'      => I18n::_t('Value of this field must be same with \'%s\'.'),
-                'slug'         => I18n::_t('Must contain only letters, numbers, dashes and underscores.'),
-                'tld'          => I18n::_t('Is not a valid top-level domain (TLD).'),
-                'url'          => I18n::_t('Is not a valid URL.'),
-                'uuid'         => I18n::_t('Is not a valid UUID.'),
-                'type'         => I18n::_t('This type of file is not allowed.'),
-                'minSize'      => I18n::_t('File size is too small. Must be greater than or equal to %s.'),
-                'maxSize'      => I18n::_t('File size is too big. Must be less than %s.'),
-                'extension'    => I18n::_t('Invalid file extension. Accepted extensions are: %s.'),
+                'accepted'     => t('Must be accepted.'),
+                'alpha'        => t('Must contain only letters.'),
+                'alphanumeric' => t('Must contain only letters and/or numbers.'),
+                'hex'          => t('The color format should be :format.', 'HEX'),
+                'hsl'          => t('The color format should be :format.', 'HSL'),
+                'hsla'         => t('The color format should be :format.', 'HSLA'),
+                'rgb'          => t('The color format should be :format.', 'RGB'),
+                'rgba'         => t('The color format should be :format.', 'RGBA'),
+                'date'         => t('Is not a valid date.'),
+                'later'        => t('Must be date after \'%s\'.'),
+                'earlier'      => t('Must be date before \'%s\'.'),
+                'different'    => t('Must be different than \'%s\'.'),
+                'email'        => t('Is not a valid email address.'),
+                'equals'       => t('Must be the same as \'%s\'.'),
+                'ip'           => t('Is not a valid IP address.'),
+                'ipv4'         => t('Is not a valid IPv4 address.'),
+                'ipv6'         => t('Is not a valid IPv6 address.'),
+                'length'       => t('Must be %d characters long.'),
+                'lengthMin'    => t('Must be at least %d characters long.'),
+                'lengthMax'    => t('Must not exceed %d characters.'),
+                'mac'          => t('Is not a valid MAC address.'),
+                'max'          => t('Must be no more than %s.'),
+                'min'          => t('Must be at least %s.'),
+                'numeric'      => t('Must be numeric.'),
+                'required'     => t('Is required.'),
+                'regex'        => t('The field is not valid format.'),
+                'similar'      => t('Value of this field must be same with \'%s\'.'),
+                'slug'         => t('Must contain only letters, numbers, dashes and underscores.'),
+                'tld'          => t('Is not a valid top-level domain (TLD).'),
+                'url'          => t('Is not a valid URL.'),
+                'uuid'         => t('Is not a valid UUID.'),
+                'type'         => t('This type of file is not allowed.'),
+                'minSize'      => t('File size is too small. Must be greater than or equal to %s.'),
+                'maxSize'      => t('File size is too big. Must be less than %s.'),
+                'extension'    => t('Invalid file extension. Accepted extensions are: %s.'),
             ]
         );
     }

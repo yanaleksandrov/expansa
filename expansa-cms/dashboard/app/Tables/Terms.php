@@ -6,7 +6,6 @@ namespace Dashboard\Tables;
 
 use Dashboard\Table\Cell;
 use Dashboard\Table\Row;
-use Expansa\I18n;
 
 final class Terms
 {
@@ -42,8 +41,8 @@ final class Terms
     {
         ob_start();
         ?>
-        <p><?php I18n::t('Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the default category Uncategorized. The default category cannot be deleted.'); ?></p>
-        <p><?php I18n::t('Image'); ?></p>
+        <p><?php t('Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the default category Uncategorized. The default category cannot be deleted.'); ?></p>
+        <p><?php t('Image'); ?></p>
         <?php
         return ob_get_clean();
     }
@@ -59,10 +58,10 @@ final class Terms
     {
         return [
             Cell::add('cb')->title('<input type="checkbox" x-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
-            Cell::add('image')->title(I18n::_t('Image'))->fixedWidth('2.5rem')->view('image'),
-            Cell::add('title')->title(I18n::_t('Title'))->view('title'),
-            Cell::add('slug')->title(I18n::_t('Slug'))->view('raw'),
-            Cell::add('count')->title(I18n::_t('Count'))->fixedWidth('2rem')->view('raw'),
+            Cell::add('image')->title(t('Image'))->fixedWidth('2.5rem')->view('image'),
+            Cell::add('title')->title(t('Title'))->view('title'),
+            Cell::add('slug')->title(t('Slug'))->view('raw'),
+            Cell::add('count')->title(t('Count'))->fixedWidth('2rem')->view('raw'),
         ];
     }
 
@@ -77,15 +76,15 @@ final class Terms
     public function notFoundContent(): array
     {
         return [
-            'title'       => I18n::_t('Terms not found'),
-            'description' => I18n::_t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
+            'title'       => t('Terms not found'),
+            'description' => t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
         ];
     }
 
     public function headerContent(): array
     {
         return [
-            'title'   => I18n::_t('Terms'),
+            'title'   => t('Terms'),
             'actions' => true,
             'filter'  => true,
         ];

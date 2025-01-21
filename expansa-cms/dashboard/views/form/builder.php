@@ -1,7 +1,6 @@
 <?php
 
 use app\View;
-use Expansa\I18n;
 
 /**
  * Query builder
@@ -24,7 +23,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 				[
 					'type'        => 'select',
 					'name'        => 'type',
-					'label'       => I18n::_t( 'Type' ),
+					'label'       => t( 'Type' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -40,13 +39,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 						'required' => 1,
 					],
 					'options'     => [
-						'type'     => I18n::_t( 'Post Type' ),
-						'template' => I18n::_t( 'Post Template' ),
-						'status'   => I18n::_t( 'Post Status' ),
-						'format'   => I18n::_t( 'Post Format' ),
-						'category' => I18n::_t( 'Post Category' ),
-						'taxonomy' => I18n::_t( 'Post Taxonomy' ),
-						'post'     => I18n::_t( 'Post' ),
+						'type'     => t( 'Post Type' ),
+						'template' => t( 'Post Template' ),
+						'status'   => t( 'Post Status' ),
+						'format'   => t( 'Post Format' ),
+						'category' => t( 'Post Category' ),
+						'taxonomy' => t( 'Post Taxonomy' ),
+						'post'     => t( 'Post' ),
 					],
 				],
 			);
@@ -55,7 +54,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 				[
 					'type'        => 'text',
 					'name'        => 'label',
-					'label'       => I18n::_t( 'Label' ),
+					'label'       => t( 'Label' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -77,14 +76,14 @@ if ( ! defined( 'EX_PATH' ) ) {
 				[
 					'type'        => 'text',
 					'name'        => 'name',
-					'label'       => I18n::_t( 'Name' ),
+					'label'       => t( 'Name' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
 					'instruction' => '',
-					'tooltip'     => I18n::_t( 'Single word, no spaces. Underscores and dashes allowed' ),
+					'tooltip'     => t( 'Single word, no spaces. Underscores and dashes allowed' ),
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
@@ -99,7 +98,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 				[
 					'type'        => 'text',
 					'name'        => 'default',
-					'label'       => I18n::_t( 'Default value' ),
+					'label'       => t( 'Default value' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -119,7 +118,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			?>
 		</div>
 		<template x-for="(group, key) in groups">
-			<div class="builder-group" data-or="<?php I18n::t_attr( 'or' ); ?>">
+			<div class="builder-group" data-or="<?php t_attr( 'or' ); ?>">
 				<template x-for="(rule, i) in group.rules">
 					<div class="builder__rules">
 						<div class="dg g-1">
@@ -156,14 +155,14 @@ if ( ! defined( 'EX_PATH' ) ) {
 					</div>
 				</template>
 				<div class="builder__buttons">
-					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" x-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php I18n::t( 'Remove Group' ); ?></button>
-					<button type="button" class="btn btn--sm t-purple ml-auto" @click="addRule(key)"><i class="ph ph-plus"></i> <?php I18n::t( 'add rule' ); ?></button>
+					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" x-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php t( 'Remove Group' ); ?></button>
+					<button type="button" class="btn btn--sm t-purple ml-auto" @click="addRule(key)"><i class="ph ph-plus"></i> <?php t( 'add rule' ); ?></button>
 				</div>
 			</div>
 		</template>
 		<div class="builder__buttons mt-2">
-			<button class="btn btn--sm btn--outline" type="button" @click="addGroup"><?php I18n::t( 'Add Group' ); ?></button>
-			<button class="btn btn--sm btn--primary" type="submit"><i class="ph ph-floppy-disk"></i> <?php I18n::t( 'Save' ); ?></button>
+			<button class="btn btn--sm btn--outline" type="button" @click="addGroup"><?php t( 'Add Group' ); ?></button>
+			<button class="btn btn--sm btn--primary" type="submit"><i class="ph ph-floppy-disk"></i> <?php t( 'Save' ); ?></button>
 		</div>
 	</div>
 </div>

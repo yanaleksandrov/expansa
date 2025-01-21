@@ -7,7 +7,6 @@ namespace dashboard\app\Api;
 use app\Query\Query;
 use app\View;
 use Expansa\Codec\Csv;
-use Expansa\I18n;
 use Expansa\Json;
 use Expansa\Post\Post;
 
@@ -162,8 +161,8 @@ class Posts
                 EX_DASHBOARD . 'views/global/state',
                 [
                     'icon'        => 'success',
-                    'title'       => I18n::_t('Import is complete!'),
-                    'description' => I18n::_t('%d posts was successfully imported. Do you want %sto launch a new import?%s', count($imported), '<a href="/dashboard/import">', '</a>'),
+                    'title'       => t('Import is complete!'),
+                    'description' => t('%d posts was successfully imported. Do you want %sto launch a new import?%s', count($imported), '<a href="/dashboard/import">', '</a>'),
                 ]
             ),
         ];
