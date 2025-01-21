@@ -1,6 +1,4 @@
 <?php
-use Expansa\I18n;
-
 /**
  * This file is part of Expansa CMS.
  *

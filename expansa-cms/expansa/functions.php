@@ -17,4 +17,16 @@ if (! function_exists('t')) {
         }
         return $string;
     }
+
+    /**
+     * Translate with formatting and sanitize for use in html attributes.
+     *
+     * @param string $string
+     * @param mixed  ...$args
+     * @return mixed
+     */
+    function t_attr(string $string, mixed ...$args): string
+    {
+        return Expansa\Safe::attribute(t($string, ...$args));
+    }
 }
