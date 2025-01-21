@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace app;
 
-use Expansa\Database\Db;
+use Expansa\Db;
 use Expansa\Error;
 use Expansa\Json;
 use Expansa\Safe;
+use Expansa\I18n;
 use Expansa\Support\Arr;
 
 /**
@@ -203,7 +204,6 @@ final class Option
      */
     public static function delete(string $option): int|Error
     {
-
         /**
          * Delete dotted options
          */
@@ -222,7 +222,7 @@ final class Option
             );
         }
 
-        if (isset(self::$options[ $option ]) && ! self::$suspend) {
+        if (!self::$suspend) {
             unset(self::$options[ $option ]);
         }
 

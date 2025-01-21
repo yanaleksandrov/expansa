@@ -6,8 +6,6 @@ namespace Dashboard;
 
 use app\View;
 use Expansa\Api;
-use Expansa\Asset;
-use Expansa\Hook;
 use Expansa\Patterns\Singleton;
 use Expansa\Route;
 use Expansa\Url;
@@ -47,16 +45,6 @@ final class Install
          *
          * @since 2025.1
          */
-        $this->route();
-    }
-
-    /**
-     * Add router
-     *
-     * @since 2025.1
-     */
-    private function route(): void
-    {
         Route::get('(.*)', function ($slug) {
             http_response_code(200);
 
@@ -71,54 +59,11 @@ final class Install
             }
 
             /**
-             * Run the installer wizard.
-             *
-             * @since 2025.1
-             */
-            $styles = [ 'expansa', 'controls', 'utility', 'phosphor' ];
-            foreach ($styles as $style) {
-                Asset::enqueue($style, Url::site('dashboard/assets/css/' . $style . '.css'));
-            }
-
-            $scripts = [ 'expansa', 'ajax', 'alpine' ];
-            foreach ($scripts as $script) {
-                $data = [];
-                if ($script === 'expansa') {
-                    $data['data'] = [
-                        'apiurl' => Url::site('/api/'),
-                    ];
-                }
-                Asset::enqueue($script, Url::site('dashboard/assets/js/' . $script . '.js'), $data);
-            }
-
-            /**
              * The administrative panel also has a single entry point.
              *
              * @since 2025.1
              */
-            View::print(EX_PATH . 'dashboard/install');
-            //echo ( new Html() )->beautify( View::get( EX_PATH . 'dashboard/install' ) );
-
-            if (extension_loaded('xhprof')) {
-                $xhprof_data = xhprof_disable();
-                $xhprof_root = 'C:\OpenServer\domains\expansa.loc\xhprof';
-                $xhprof_lib  = $xhprof_root . '\xhprof_lib\utils\xhprof_lib.php';
-                $xhprof_runs = $xhprof_root . '\xhprof_lib\utils\xhprof_runs.php';
-
-                // Подключаем необходимые файлы
-                include_once $xhprof_lib;
-                include_once $xhprof_runs;
-
-                // Сохраняем данные профилирования
-                $xhprof_runs = new \XHProfRuns_Default();
-                $run_id      = $xhprof_runs->save_run($xhprof_data, 'my_app');
-                $report_url  = "http://expansa.loc/xhprof/xhprof_html/index.php?run={$run_id}&source=my_app";
-
-                // Выводим отчёт на текущей странице
-                echo '<code>';
-                echo "<a href='{$report_url}' target='_blank'>Ссылка на ваш отчет</a>";
-                echo '</code>';
-            }
+            View::print('install');
         });
 
         Route::run(fn() => die());

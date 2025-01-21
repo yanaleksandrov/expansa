@@ -31,12 +31,12 @@ const EX_DB_ERROR_MODE       = PDO::ERRMODE_SILENT;
  *
  * @since 2025.1
  */
-const EX_CORE      = __DIR__ . '/expansa/';
-const EX_DASHBOARD = __DIR__ . '/dashboard/';
-const EX_PLUGINS   = __DIR__ . '/plugins/';
-const EX_THEMES    = __DIR__ . '/themes/';
-const EX_UPLOADS   = __DIR__ . '/uploads/';
-const EX_I18N      = __DIR__ . '/i18n/';
+const EX_CORE       = __DIR__ . '/expansa/';
+const EX_DASHBOARD  = __DIR__ . '/dashboard/';
+const EX_PLUGINS    = __DIR__ . '/plugins/';
+const EX_THEMES     = __DIR__ . '/themes/';
+const EX_UPLOADS    = __DIR__ . '/uploads/';
+const EX_I18N       = __DIR__ . '/i18n/';
 
 /**
  * Authentication unique keys and salts.
@@ -57,6 +57,7 @@ const EX_HASH_KEY  = 'hashkey';
  */
 const EX_DEBUG     = true;
 const EX_DEBUG_LOG = true;
+const EX_DEBUG_VIEW = __DIR__ . '/dashboard/debug.php';
 
 /**
  * Cron intervals.

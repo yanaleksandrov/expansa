@@ -150,6 +150,8 @@
     <exclude-pattern>*/*.xml</exclude-pattern>
     <exclude-pattern>*/*.blade.php</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/expansa/dashboard/views/*</exclude-pattern>
+    <exclude-pattern>*/expansa/dashboard/*.php</exclude-pattern>
 
     <!-- Настройка цветов в выводе -->
     <arg name="colors"/>

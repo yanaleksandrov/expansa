@@ -6,8 +6,9 @@ namespace dashboard\app\Api;
 
 use app\Option;
 use app\User;
-use Expansa\Database\Query\Builder;
-use Expansa\Database\Db;
+use Expansa\Debugger;
+use Expansa\Json;
+use Expansa\Db;
 use Expansa\Disk;
 use Expansa\Error;
 use Expansa\Hook;
@@ -27,42 +28,68 @@ class System
      */
     public static function test(): array
     {
-        $checks = [
-            'connection' => false,
-            'pdo'        => false,
-            'curl'       => false,
-            'mbstring'   => false,
-            'gd'         => false,
-            'memory'     => 128,
-            'php'        => '8.1',
-            'mysql'      => '5.6',
-        ];
+        $data = [];
+        $requirements = ['connection', 'pdo', 'curl', 'mbstring', 'gd', 'memory', 'php', 'mysql'];
 
-        $connection = Db::connection(
-            Safe::data(
-                $_POST,
-                [
-                    'database' => 'trim',
-                    'username' => 'trim',
-                    'password' => 'trim',
-                    'host'     => 'trim',
-                    'prefix'   => 'trim',
-                    'driver'   => 'trim:mysql',
-                ]
-            )->apply()
-        );
+        $data = Safe::data($_POST, [
+            'database' => 'trim',
+            'username' => 'trim',
+            'password' => 'trim',
+            'host'     => 'trim',
+            'prefix'   => 'trim',
+            'driver'   => 'trim:mysql',
+        ])->apply();
 
-        $data = array_map(fn ($check, $value) => [
-            $check => match ($check) {
-                'php'        => version_compare($value, strval(phpversion()), '<='),
-                'mysql'      => version_compare($value, $connection->version(), '<='),
-                'memory'     => intval(ini_get('memory_limit')) >= intval($value),
-                'connection' => $connection instanceof Builder,
-                default      => extension_loaded($check),
-            },
-        ], array_keys($checks), $checks);
+        try {
+            $connection  = Db::connection([
+                'driver'   => $data['driver'],
+                'database' => $data['database'],
+                'username' => $data['username'],
+                'password' => $data['password'],
+                'host'     => $data['host'],
+                'prefix'   => $data['prefix'],
+                'charset'  => $data['driver'],
+                'port'     => 21,
+                'error'    => \PDO::ERRMODE_SILENT,
+            ]);
 
-        return array_merge(...$data);
+            foreach ($requirements as $requirement) {
+                $data[$requirement] = match ($requirement) {
+                    'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
+                    'mysql'      => version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>='),
+                    'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
+                    'connection' => $connection->version(),
+                    default      => extension_loaded($requirement),
+                };
+            }
+
+            exit($data);
+        } finally {
+            foreach ($requirements as $requirement) {
+                $data[$requirement] = match ($requirement) {
+                    'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
+                    'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
+                    'mysql',
+                    'connection' => false,
+                    default      => extension_loaded($requirement),
+                };
+            }
+
+            header('Content-Type: application/json; charset=utf-8');
+            exit(
+                Json::encode(
+                    [
+                        'status'    => 200,
+                        'benchmark' => Debugger::timer('getall'),
+                        'memory'    => Debugger::memory_peak(),
+                        'data'      => $data,
+                        'errors'    => [],
+                    ],
+                    true,
+                    true
+                )
+            );
+        }
     }
 
     /**

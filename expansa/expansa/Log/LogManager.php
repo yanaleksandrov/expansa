@@ -61,9 +61,7 @@ class LogManager implements LoggerInterface
     {
         $driver = empty($name) ? $this->getDefaultDriver() : $name;
 
-        if (isset($this->drivers[$driver])) {
-            unset($this->drivers[$driver]);
-        }
+        unset($this->drivers[$driver]);
 
         return $this;
     }

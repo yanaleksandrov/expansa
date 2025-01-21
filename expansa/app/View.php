@@ -98,10 +98,11 @@ final class View
     public static function get(string $template, array $args = []): string
     {
         $filepath = match (true) {
-            str_starts_with($template, EX_PATH) => "{$template}.php",
-            Is::dashboard(), Is::install()             => EX_DASHBOARD . "{$template}.php",
-            default                                    => "{$template}.php",
+            Is::install()   => EX_PATH . "dashboard/$template.php",
+            Is::dashboard() => EX_DASHBOARD . "$template.php",
+            default         => "$template.php",
         };
+
         $filepath = Safe::path($filepath);
 
         /**

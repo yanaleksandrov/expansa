@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa;
 
 use Expansa\Security\Csrf\Csrf;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
 use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
+use Expansa\Security\Exception\InvalidCsrfTokenException;
 
 final class Api
 {
@@ -83,8 +83,9 @@ final class Api
         $data = Json::encode(
             [
                 'status'    => 200,
-                'benchmark' => Debug::timer('getall'),
-                'memory'    => Debug::memory_peak(),
+                'benchmark' => Debugger::timer('getall'),
+                'memory'    => Debugger::memory_peak(),
+                'queries'   => count(Db::log()),
                 'data'      => $data instanceof Error ? [] : $data,
                 'errors'    => $data instanceof Error ? Error::get() : [],
             ],

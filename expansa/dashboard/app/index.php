@@ -4,8 +4,6 @@ namespace Dashboard;
 
 use app\Tree;
 use Expansa\Asset;
-use Expansa\Database\Db;
-use Expansa\Debug;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;

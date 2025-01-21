@@ -1,7 +1,7 @@
 <?php
-use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Url;
+use Expansa\Json;
 
 /*
  * Expansa install wizard.
@@ -14,13 +14,16 @@ use Expansa\Url;
 if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
+
+$expansa = Json::encode([
+	'apiurl'         => Url::site('/api/'),
+    'spriteFlagsUrl' => Url::site('/dashboard/assets/sprites/flags.svg'),
+]);
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
 	<head>
 		<meta charset="UTF-8">
-		<meta name="theme-color" content="#ffffff">
-		<meta name="msapplication-TileColor" content="#da532c">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title><?php I18n::t( 'Install Expansa' ); ?></title>
 		<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/images/favicons/apple-touch-icon.png">
@@ -32,23 +35,11 @@ if ( ! defined( 'EX_PATH' ) ) {
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-		<style>
-            :root {
-                --expansa-font-text: "Inter", sustem-ui, sans-serif !important;
-            }
-		</style>
-		<?php
-		/**
-		 * Prints scripts or data before the closing body tag on the dashboard.
-		 *
-		 * @since 2025.1
-		 */
-		Hook::call( 'renderDashboardHeader' );
-
-		ini_set('display_errors', '1');
-		ini_set('display_startup_errors', '1');
-		error_reporting(E_ALL);
-		?>
+		<style>:root {--expansa-font-text: "Inter", sustem-ui, sans-serif !important;}</style>
+		<link rel="stylesheet" id="expansa-css" href="<?php echo Url::site( '/dashboard/assets/css/expansa.min.css' ); ?>">
+		<link rel="stylesheet" id="controls-css" href="<?php echo Url::site( '/dashboard/assets/css/controls.min.css' ); ?>">
+		<link rel="stylesheet" id="utility-css" href="<?php echo Url::site( '/dashboard/assets/css/utility.min.css' ); ?>">
+		<link rel="stylesheet" id="phosphor-css" href="<?php echo Url::site( '/dashboard/assets/css/phosphor.min.css' ); ?>">
 	</head>
 	<body class="df jcc p-6" x-data="expansa">
         <div class="mw-400">
@@ -57,13 +48,9 @@ if ( ! defined( 'EX_PATH' ) ) {
             </div>
             <?php Dashboard\Form::print( EX_PATH . 'dashboard/forms/system-install.php' ); ?>
         </div>
-		<?php
-		/**
-		 * Prints scripts or data before the closing body tag on the dashboard.
-		 *
-		 * @since 2025.1
-		 */
-		Hook::call( 'renderDashboardFooter' );
-		?>
+        <script>const expansa = <?php echo $expansa; ?>;</script>
+        <script id="ajax-js" src="<?php echo Url::site( '/dashboard/assets/js/ajax.min.js' ); ?>"></script>
+        <script id="expansa-js" src="<?php echo Url::site( '/dashboard/assets/js/expansa.min.js' ); ?>"></script>
+        <script id="alpine-js" src="<?php echo Url::site( '/dashboard/assets/js/alpine.min.js' ); ?>"></script>
 	</body>
 </html>

@@ -6,7 +6,7 @@ use Expansa\I18n;
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title><?php I18n::t( 'Expansa Fatal Error' ); ?></title>
+	<title><?php I18n::t( 'Expansa Debug' ); ?></title>
 	<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/images/favicons/apple-touch-icon.png">
 	<link rel="icon" type="image/png" sizes="32x32" href="/dashboard/assets/images/favicons/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/dashboard/assets/images/favicons/favicon-16x16.png">
@@ -30,22 +30,22 @@ use Expansa\I18n;
 		<p><?php echo $description; ?></p>
 	</div>
 	<div class="errors-wrapper">
-		<?php if ( $details ) : ?>
+	    <?php if ( $details ) : ?>
 			<div class="errors-description">
 				<p><strong><?php I18n::t( 'Arguments:' ); ?></strong></p>
 				<dl>
-					<?php foreach ( $details as $detail ) : ?>
+	                <?php foreach ( $details as $detail ) : ?>
 						<dt><code>#<?php echo $detail->key; ?> <?php I18n::t( 'required type:' ); ?> <em>(<?php echo $detail->type; ?>)</em></code></dt>
 						<dd><p><?php I18n::t( 'incoming value:' ); ?>: <?php print_r( $detail->value ); ?></p></dd>
-					<?php endforeach; ?>
+	                <?php endforeach; ?>
 				</dl>
 			</div>
-		<?php endif; ?>
+	    <?php endif; ?>
 		<div class="errors-data">
 			<ul class="errors-navigation">
-				<?php foreach ( $traces as $trace ) : ?>
+	            <?php foreach ( $traces as $trace ) : ?>
 					<li class="errors-navigation-item"><code><strong><?php echo $trace->line; ?>:</strong></code> <?php echo $trace->file; ?></li>
-				<?php endforeach; ?>
+	            <?php endforeach; ?>
 			</ul>
 			<pre class="errors-source" x-highlight.php>
 				<code class="language-php"><?php echo htmlspecialchars( $code ); ?></code>
@@ -54,7 +54,7 @@ use Expansa\I18n;
 	</div>
 
 	<script id="prism-js" src="/dashboard/assets/js/prism.min.js"></script>
-	<script id="prism-js" src="/dashboard/assets/js/expansa.min.js"></script>
-	<script id="prism-js" src="/dashboard/assets/js/alpine.min.js"></script>
+	<script id="expansa-js" src="/dashboard/assets/js/expansa.min.js"></script>
+	<script id="alpine-js" src="/dashboard/assets/js/alpine.min.js"></script>
 </body>
 </html>
