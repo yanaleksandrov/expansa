@@ -54,4 +54,3 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 		<div class="field-instruction">{!! $instruction !!}</div>
 	@endif
 </div>
-<?php echo PHP_EOL; ?>

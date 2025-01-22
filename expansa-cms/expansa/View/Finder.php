@@ -89,22 +89,23 @@ class Finder
 
     private function getAllFiles(string $directory): array
     {
-        $files = [];
+        static $files = [];
+        if (isset($files[$directory])) {
+            return $files[$directory];
+        }
 
-        // Открываем директорию
         $iterator = new RecursiveIteratorIterator(
             new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
             RecursiveIteratorIterator::LEAVES_ONLY
         );
 
-        // Перебираем все файлы в директории
         foreach ($iterator as $file) {
             if ($file->isFile()) {
-                $files[] = $file->getRealPath();
+                $files[$directory][] = $file->getRealPath();
             }
         }
 
-        return $files;
+        return $files[$directory];
     }
 
     protected function getPossibleViewFiles(string $view): array

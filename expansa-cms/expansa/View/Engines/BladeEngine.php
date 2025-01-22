@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Expansa\View\Engines;
 
-use Expansa\View\Compilers\MoonCompiler;
+use Expansa\View\Compilers\BladeCompiler;
 use Expansa\View\Factory;
 
-class MoonEngine extends PhpEngine
+class BladeEngine extends PhpEngine
 {
-    protected MoonCompiler $compiler;
+    protected BladeCompiler $compiler;
 
     public function __construct()
     {
-        $this->compiler = new MoonCompiler();
+        $this->compiler = new BladeCompiler();
     }
 
     public function setFactory(Factory $factory): void

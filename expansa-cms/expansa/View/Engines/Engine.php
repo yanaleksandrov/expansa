@@ -21,8 +21,7 @@ abstract class Engine
 
     public function setCache(bool $shouldCache, string $cachePath): void
     {
-        $this->cachePath = $cachePath;
-
+        $this->cachePath   = $cachePath;
         $this->shouldCache = $shouldCache;
     }
 

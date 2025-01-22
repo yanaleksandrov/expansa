@@ -11,7 +11,7 @@ use Expansa\View\Compilers\Traits\CompileIncludes;
 use Expansa\View\Compilers\Traits\CompileLayout;
 use Expansa\View\Factory;
 
-class MoonCompiler
+class BladeCompiler
 {
     use CompileCommon;
     use CompileConditions;

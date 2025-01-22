@@ -75,7 +75,7 @@ class Field
             }
 
             $prefix   = in_array($type, [ 'tab', 'step', 'group' ], true) ? 'layout-' : '';
-            $content .= View::make("form/{$prefix}{$type}", compact('field'));
+            $content .= View::make("form/{$prefix}{$type}", $field);
         }
         return $content;
     }

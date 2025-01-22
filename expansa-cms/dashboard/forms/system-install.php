@@ -1,13 +1,7 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Expansa\Url;
-
-/**
- * Register form for first Expansa installation.
- *
- * @since 2025.1
- */
 
 return Dashboard\Form::enqueue(
     'system-install',
@@ -233,32 +227,8 @@ return Dashboard\Form::enqueue(
                     'label' => t('System check'),
                 ],
                 [
-                    'name'     => 'date-format',
-                    'type'     => 'custom',
-                    'callback' => function () {
-                        $checks = [
-                            'pdo'        => t('PDO PHP Extension'),
-                            'curl'       => t('cURL PHP Extension'),
-                            'mbstring'   => t('Mbstring PHP Extension'),
-                            'gd'         => t('GD PHP Extension'),
-                            'memory'     => t('128MB or more allocated memory'),
-                            'php'        => t('PHP version %s or higher', EX_REQUIRED_PHP_VERSION),
-                            'connection' => t('Testing the database connection'),
-                            'mysql'      => t('MySQL version %s or higher', EX_REQUIRED_MYSQL_VERSION),
-                        ];
-                        ?>
-                        <ul class="dg g-1">
-                            <?php foreach ($checks as $icon => $title) : ?>
-                                <li class="df aic">
-                                    <span class="badge badge--xl badge--round badge--icon" :class="approved.<?php echo $icon; ?> === undefined ? 'badge--load' : (approved.<?php echo $icon; ?> ? 't-green' : 't-red')">
-                                        <i class="ph" :class="approved.<?php echo $icon; ?> ? 'ph-check' : 'ph-x'"></i>
-                                    </span>
-                                    <span class="ml-4"><?php echo $title; ?></span>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                        <?php
-                    },
+                    'name' => 'checker',
+                    'type' => 'checker',
                 ],
             ],
         ],
@@ -365,8 +335,8 @@ return Dashboard\Form::enqueue(
                 [
                     'type'     => 'custom',
                     'callback' => function () {
-                        View::print(
-                            'views/global/state',
+                        View::make(
+                            'global/state',
                             [
                                 'icon'        => 'success',
                                 'title'       => t('Woo-hoo, Expansa has been successfully installed!'),

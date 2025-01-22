@@ -65,7 +65,6 @@ final class Install
              * @since 2025.1
              */
             echo View::make('install');
-            //\app\View::print('views/install.blade');
         });
 
         Route::run(fn() => die());

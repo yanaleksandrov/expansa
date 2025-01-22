@@ -7,7 +7,7 @@ namespace Expansa\View\Engines;
 class EngineManager
 {
     protected array $extensions = [
-        'blade.php' => 'moon',
+        'blade.php' => 'blade',
         'php'       => 'php',
         'html'      => 'file',
         'css'       => 'file',
@@ -23,7 +23,7 @@ class EngineManager
     {
         $this->register('file', fn() => new FileEngine());
         $this->register('php', fn() => new PhpEngine());
-        $this->register('moon', fn() => new MoonEngine());
+        $this->register('blade', fn() => new BladeEngine());
         $this->register('scss', fn() => new ScssEngine());
         $this->register('js', fn() => new JsEngine());
     }

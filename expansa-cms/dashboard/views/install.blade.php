@@ -45,12 +45,6 @@ $expansa = Json::encode([
     <body class="df jcc p-6" x-data="expansa">
         <div class="mw-400">
             <div class="df jcc">
-                {{t('Hello worlds!')}}
-	            @if(true)
-                    <div>312аdd3в435</div>
-	            @endif
-            </div>
-            <div class="df jcc">
                 <img src="<?php echo Url::site('/dashboard/assets/images/logo-decorate.svg'); ?>" width="200" height="117" alt="Expansa CMS">
             </div>
             <?php Dashboard\Form::print(EX_PATH . 'dashboard/forms/system-install.php'); ?>

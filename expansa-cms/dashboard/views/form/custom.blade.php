@@ -11,7 +11,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$callback = $args['callback'] ?? null;
+$callback = $__data['callback'] ?? null;
 if ( is_callable( $callback ) ) {
 	ob_start();
 	call_user_func( $callback );
