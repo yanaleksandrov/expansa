@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dashboard\Forms;
 
-use app\View;
+use Expansa\View;
 use Expansa\Safe;
 
 class Field
@@ -26,7 +26,7 @@ class Field
 
             if ($type === 'tab' && ! isset($startTab)) {
                 $startTab = true;
-                $content .= View::get('views/form/layout-tab-menu', $fields);
+                $content .= View::make('form/layout-tab-menu', $fields);
             }
 
             // add required attributes & other manipulations
@@ -53,11 +53,11 @@ class Field
                 ];
             }
 
-            if (in_array($type, [ 'select' ], true)) {
+            if ($type === 'select') {
                 unset($field['attributes']['type']);
             }
 
-            if (in_array($type, [ 'date' ], true)) {
+            if ($type === 'date') {
                 $field['attributes']['type'] = 'text';
             }
 
@@ -75,7 +75,7 @@ class Field
             }
 
             $prefix   = in_array($type, [ 'tab', 'step', 'group' ], true) ? 'layout-' : '';
-            $content .= View::get("views/form/{$prefix}{$type}", $field);
+            $content .= View::make("form/{$prefix}{$type}", $field);
         }
         return $content;
     }

@@ -49,7 +49,6 @@ class ScssEngine extends Engine
         while (ob_get_level() > $obLevel) {
             ob_end_clean();
         }
-
         throw $e;
     }
 }

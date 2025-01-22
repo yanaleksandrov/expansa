@@ -2,11 +2,11 @@
 
 namespace dashboard\app\Api;
 
-use app\View;
 use Dashboard\Form;
 use Expansa\Csv;
 use Expansa\Disk;
 use Expansa\Safe;
+use Expansa\View;
 
 class Files
 {
@@ -34,7 +34,7 @@ class Files
                 $filepath = Safe::path($uploadedFile->path ?? '');
                 $rows     = Csv::decode($filepath);
 
-                View::get(
+                echo view(
                     EX_DASHBOARD . 'forms/posts-import-fields',
                     [
                         'samples'  => $rows[0] ?? [],

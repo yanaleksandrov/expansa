@@ -28,7 +28,7 @@ class System
      */
     public static function test(): array
     {
-        $data = [];
+        $datas = [];
         $requirements = ['connection', 'pdo', 'curl', 'mbstring', 'gd', 'memory', 'php', 'mysql'];
 
         $data = Safe::data($_POST, [
@@ -54,7 +54,7 @@ class System
             ]);
 
             foreach ($requirements as $requirement) {
-                $data[$requirement] = match ($requirement) {
+                $datas[$requirement] = match ($requirement) {
                     'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
                     'mysql'      => version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>='),
                     'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
@@ -63,10 +63,10 @@ class System
                 };
             }
 
-            exit($data);
+            exit($datas);
         } finally {
             foreach ($requirements as $requirement) {
-                $data[$requirement] = match ($requirement) {
+                $datas[$requirement] = match ($requirement) {
                     'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
                     'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
                     'mysql',
@@ -82,7 +82,7 @@ class System
                         'status'    => 200,
                         'benchmark' => Debugger::timer('getall'),
                         'memory'    => Debugger::memory_peak(),
-                        'data'      => $data,
+                        'data'      => $datas,
                         'errors'    => [],
                     ],
                     true,
@@ -127,7 +127,7 @@ class System
          * @since 2025.1
          */
         $config = EX_PATH . 'env.php';
-        Disk::file(EX_PATH . 'env-sample.php')->copy('envsss')->rewrite(
+        Disk::file(EX_PATH . 'env-sample.php')->copy('env')->rewrite(
             array_combine(
                 [
                     'db.name',

@@ -263,6 +263,65 @@ final class Sanitizer
     }
 
     /**
+     * Sanitizer attributes list.
+     *
+     * @param mixed $attributes Value to change
+     * @return string
+     */
+    public static function attributes(mixed $attributes): string
+    {
+        if (!is_array($attributes)) {
+            return '';
+        }
+
+        $booleanAttributes = [
+            'accesskey',
+            'async',
+            'autofocus',
+            'autoplay',
+            'checked',
+            'contenteditable',
+            'controls',
+            'disabled',
+            'draggable',
+            'hidden',
+            'ismap',
+            'loop',
+            'multiple',
+            'readonly',
+            'required',
+            'selected',
+
+            'v-cloak',
+            'x-cloak',
+        ];
+
+        $atts = [];
+        foreach ($attributes as $attribute => $value) {
+            $attribute = trim(htmlspecialchars((string) $attribute, ENT_QUOTES));
+            $value     = trim(htmlspecialchars((string) $value, ENT_QUOTES));
+            if (! $attribute) {
+                continue;
+            }
+
+            if (in_array($attribute, $booleanAttributes, true)) {
+                if ($value) {
+                    $atts[] = $attribute;
+                }
+            } else {
+                $atts[] = match ($attribute) {
+                    'value' => sprintf('%s="%s"', $attribute, $value),
+                    default => $value
+                        ? sprintf('%s="%s"', $attribute, $value)
+                        : ( str_starts_with($attribute, 'x-') ? $attribute : '' ),
+                };
+            }
+        }
+
+        return $atts ? ' ' . implode(' ', $atts) : '';
+    }
+
+    /**
      * Value to price.
      *
      * @param mixed $value Value to change

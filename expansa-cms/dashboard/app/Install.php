@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Dashboard;
 
-use app\View;
 use Expansa\Api;
+use Expansa\Html;
 use Expansa\Patterns\Singleton;
 use Expansa\Route;
 use Expansa\Url;
+use Expansa\View;
 
 /**
  *
@@ -54,7 +55,7 @@ final class Install
              * @since 2025.1
              */
             if ($slug !== 'install') {
-                View::redirect(Url::site('install'));
+                redirect(Url::site('install'));
                 exit;
             }
 
@@ -63,7 +64,7 @@ final class Install
              *
              * @since 2025.1
              */
-            View::print('install');
+            echo view('install');
         });
 
         Route::run(fn() => die());

@@ -6,9 +6,7 @@ use app\Option;
 use app\Post;
 use app\Slug;
 use app\User;
-use app\View;
-use Expansa\Db;
-use Expansa\Debugger;
+use Expansa\View;
 use Expansa\Disk;
 use Expansa\Extensions;
 use Expansa\Hook;
@@ -51,7 +49,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      * @since 2025.1
      */
     if ($slug !== 'install' && ! Is::installed()) {
-        View::redirect(Url::install());
+        redirect(Url::install());
         exit;
     }
 
@@ -62,7 +60,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      * @since 2025.1
      */
     if (! in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && ! User::logged() && Is::installed()) {
-        View::redirect(Url::sign_in());
+        redirect(Url::sign_in());
         exit;
     }
 
@@ -73,7 +71,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      */
     $black_list_slugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
     if (in_array($slug, $black_list_slugs, true) && User::logged()) {
-        View::redirect(Url::site('dashboard'));
+        redirect(Url::site('dashboard'));
         exit;
     }
 
@@ -104,12 +102,9 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      *
      * @since 2025.1
      */
-    $content = View::get(
-        'index',
-        [
-            'slug' => $slug,
-        ]
-    );
+    $content = View::make('index', [
+        'slug' => $slug,
+    ]);
     //$content = (new Expansa\Html())->beautify($content);
 
     /**
@@ -159,7 +154,7 @@ Route::get('/{slug}', function ($slug) {
      * @since 2025.1
      */
     if (Is::installed() && $slug === 'install') {
-        View::redirect(Url::site('dashboard'));
+        redirect(Url::site('dashboard'));
         exit;
     }
 

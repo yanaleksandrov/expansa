@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace dashboard\app\Api;
 
-use app\View;
-use Expansa;
+use Expansa\View;
 use Expansa\Mail;
 use Expansa\Safe;
 use Expansa\Url;
@@ -149,12 +148,9 @@ class User
             $mail_is_sent = Mail::send(
                 $email,
                 t('Instructions for reset password'),
-                View::get(
-                    EX_DASHBOARD . 'views/mails/wrapper',
-                    [
-                        'body_template' => EX_DASHBOARD . 'views/mails/reset-password',
-                    ]
-                )
+                View::make(EX_DASHBOARD . 'views/mails/wrapper', [
+                    'body_template' => EX_DASHBOARD . 'views/mails/reset-password',
+                ])
             );
 
             return [

@@ -7,8 +7,6 @@ namespace Expansa;
 use Expansa\Facades\Facade;
 
 /**
- * Route Facade
- *
  * Provides static access to the routing.
  *
  * @method static void before(string $methods, string $pattern, object|callable $callback)

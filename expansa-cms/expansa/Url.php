@@ -102,12 +102,12 @@ final class Url
         return self::site('dashboard/reset-password');
     }
 
-    public static function install()
+    public static function install(): string
     {
         return self::site('dashboard/install');
     }
 
-    public static function installed()
+    public static function installed(): string
     {
         return self::site('dashboard/installed');
     }

@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\View\Engines;
 
-use Expansa\Container\Container;
-
 class EngineManager
 {
     protected array $extensions = [
-        'moon.php'  => 'moon',
-        'blade.php' => 'moon',
+        'blade.php' => 'blade',
         'php'       => 'php',
         'html'      => 'file',
         'css'       => 'file',
@@ -22,13 +19,11 @@ class EngineManager
 
     protected array $resolved = [];
 
-    public function __construct(
-        protected Container $container
-    )
+    public function __construct()
     {
         $this->register('file', fn() => new FileEngine());
         $this->register('php', fn() => new PhpEngine());
-        $this->register('moon', fn() => new MoonEngine());
+        $this->register('blade', fn() => new BladeEngine());
         $this->register('scss', fn() => new ScssEngine());
         $this->register('js', fn() => new JsEngine());
     }
@@ -46,7 +41,7 @@ class EngineManager
             return $this->resolve($this->extensions[$extension]);
         }
 
-        throw new \InvalidArgumentException("Engine with extension [{$extension}] not found.");
+        throw new \InvalidArgumentException("Engine with extension [$extension] not found.");
     }
 
     public function resolve($name)
@@ -59,6 +54,6 @@ class EngineManager
             return $this->resolved[$name] = call_user_func($this->resolvers[$name]);
         }
 
-        throw new \InvalidArgumentException("Engine [{$name}] not found.");
+        throw new \InvalidArgumentException("Engine [$name] not found.");
     }
 }

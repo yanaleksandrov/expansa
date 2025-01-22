@@ -17,12 +17,11 @@ abstract class Engine
      *
      * @var string
      */
-    protected $lastRendered;
+    protected string $lastRendered;
 
     public function setCache(bool $shouldCache, string $cachePath): void
     {
-        $this->cachePath = $cachePath;
-
+        $this->cachePath   = $cachePath;
         $this->shouldCache = $shouldCache;
     }
 

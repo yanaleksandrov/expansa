@@ -6,14 +6,10 @@ use Expansa\Is;
 use Expansa\Debug;
 use Expansa\Security\Csrf\Csrf;
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
-
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';
 const EX_REQUIRED_PHP_VERSION   = '8.2';
-const EX_REQUIRED_MYSQL_VERSION = '5.6';
+const EX_REQUIRED_MYSQL_VERSION = '8.0';
 const EX_REQUIRED_MEMORY        = 128;
 
 // Include required autoload.

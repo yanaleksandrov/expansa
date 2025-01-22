@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa\View;
 
-use Expansa\Container\Container;
 use Expansa\View\Engines\Engine;
 use Expansa\View\Engines\EngineManager;
+use Expansa\View\Exception\ViewException;
 
 class Factory
 {
@@ -21,7 +21,6 @@ class Factory
     protected static array $sectionStack = [];
 
     public function __construct(
-        protected Container $container,
         protected Finder $finder,
         protected EngineManager $engine,
         array $config
@@ -29,7 +28,10 @@ class Factory
     {
         $this->cache = is_bool($config['cache']) && $config['cache'];
 
-        if (isset($config['cache_path']) && is_dir($config['cache_path'])) {
+        if (isset($config['cache_path'])) {
+            if (!is_dir($config['cache_path'])) {
+                mkdir($config['cache_path'], 0755, true);
+            }
             $this->cachePath = $config['cache_path'];
         }
 
@@ -41,8 +43,7 @@ class Factory
         $file = $this->finder->find($view);
 
         if (is_null($file)) {
-            var_dump($view, $file);
-            die();
+            throw new ViewException("File $view does not exist");
         }
 
         $data = array_merge($this->shared, $data);
@@ -96,17 +97,10 @@ class Factory
 
     public function extendSection(string $name, string $content): void
     {
-        //var_dump($name, $content, static::$sectionContents[$name] ?? null);
-
         if (isset(static::$sectionContents[$name])) {
             $content = str_replace('@parent', $content, static::$sectionContents[$name]);
-
-            //$content = str_replace('##__PARENT_SECTION_CONTENT__##', $content, static::$sectionStack[$name]);
         }
-
         static::$sectionContents[$name] = $content;
-
-        //dump(static::$sectionContents);
     }
 
     public function stopSection($overwrite = false): string
@@ -131,7 +125,6 @@ class Factory
         if (empty(static::$sectionStack)) {
             return '';
         }
-
         $name = $this->stopSection();
 
         return $this->yieldContent($name);

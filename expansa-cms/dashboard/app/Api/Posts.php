@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace dashboard\app\Api;
 
 use app\Query\Query;
-use app\View;
+use Expansa\Url;
+use Expansa\View;
 use Expansa\Codec\Csv;
 use Expansa\Json;
 use Expansa\Post\Post;
@@ -130,13 +131,7 @@ class Posts
         if (file_exists($filename)) {
             $rows = Csv::import($filename);
             foreach ($rows as $row) {
-                $args = array_filter(
-                    array_combine($map, $row),
-                    function ($key) {
-                        return ! empty($key);
-                    },
-                    ARRAY_FILTER_USE_KEY
-                );
+                $args = array_filter(array_combine($map, $row), fn ($key) => ! empty($key), ARRAY_FILTER_USE_KEY);
 
                 $status = trim(strval($row['status'] ?? $status));
                 $author = trim(strval($row['author'] ?? $author));
@@ -157,14 +152,11 @@ class Posts
 
         return [
             'completed' => true,
-            'output'    => View::get(
-                EX_DASHBOARD . 'views/global/state',
-                [
-                    'icon'        => 'success',
-                    'title'       => t('Import is complete!'),
-                    'description' => t('%d posts was successfully imported. Do you want %sto launch a new import?%s', count($imported), '<a href="/dashboard/import">', '</a>'),
-                ]
-            ),
+            'output'    => View::make(EX_DASHBOARD . 'views/global/state', [
+                'icon'        => 'success',
+                'title'       => t('Import is complete!'),
+                'description' => t(':counts posts was successfully imported. Do you want [to launch a new import?](:link)', count($imported), Url::site('/dashboard/import')),
+            ]),
         ];
     }
 }

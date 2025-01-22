@@ -10,7 +10,7 @@ trait CompileLayout
     {
         $name = $this->stripBrackets($name);
 
-        $this->layouts[] = "<?php echo \$__env->make({$name})->render(); ?>";
+        $this->layouts[] = "<?php echo \$__env->make($name)->render(); ?>";
 
         return '';
     }
@@ -18,10 +18,10 @@ trait CompileLayout
     public function compileSection($name): string
     {
         $name = $this->stripBrackets($name);
-        return "<?php \$__env->startSection({$name}); ?>";
+        return "<?php \$__env->startSection($name); ?>";
     }
 
-    public function compileEndsection(): string
+    public function compileEndSection(): string
     {
         return "<?php \$__env->stopSection(); ?>";
     }

@@ -28,10 +28,6 @@ class View
         return $this->engine->get($this->path, $this->data);
     }
 
-    public function compiled()
-    {
-    }
-
     public function with(string|array $key, mixed $value = null): static
     {
         if (is_array($key)) {
@@ -39,7 +35,6 @@ class View
         } else {
             $this->data[$key] = $value;
         }
-
         return $this;
     }
 
@@ -56,11 +51,6 @@ class View
     public function getData(): array
     {
         return $this->data;
-    }
-
-    public function toHtml(): string
-    {
-        return $this->render();
     }
 
     public function __toString(): string
