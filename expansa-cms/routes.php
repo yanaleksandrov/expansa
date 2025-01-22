@@ -49,7 +49,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      * @since 2025.1
      */
     if ($slug !== 'install' && ! Is::installed()) {
-        View::redirect(Url::install());
+        redirect(Url::install());
         exit;
     }
 
@@ -60,7 +60,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      * @since 2025.1
      */
     if (! in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && ! User::logged() && Is::installed()) {
-        View::redirect(Url::sign_in());
+        redirect(Url::sign_in());
         exit;
     }
 
@@ -71,7 +71,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      */
     $black_list_slugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
     if (in_array($slug, $black_list_slugs, true) && User::logged()) {
-        View::redirect(Url::site('dashboard'));
+        redirect(Url::site('dashboard'));
         exit;
     }
 
@@ -154,7 +154,7 @@ Route::get('/{slug}', function ($slug) {
      * @since 2025.1
      */
     if (Is::installed() && $slug === 'install') {
-        View::redirect(Url::site('dashboard'));
+        redirect(Url::site('dashboard'));
         exit;
     }
 

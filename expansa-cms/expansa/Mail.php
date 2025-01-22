@@ -8,8 +8,6 @@ use Expansa\Mail\Mailer;
 use Expansa\Facades\Facade;
 
 /**
- * Mail Facade
- *
  * Provides static access to the Mail subsystem.
  *
  * @method static Mailer to(string $email)

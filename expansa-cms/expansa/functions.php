@@ -59,3 +59,48 @@ if (!function_exists('view')) {
         return \Expansa\View::make($view, $data);
     }
 }
+
+if (!function_exists('redirect')) {
+    function redirect(string $location, int $status = 302, string $redirectBy = 'Expansa'): void
+    {
+        /**
+         * Filters the redirect location.
+         *
+         * @param string $location the path or URL to redirect to
+         * @param int    $status   the HTTP response status code to use
+         */
+        $location = Expansa\Hook::call('expansaRedirectLocation', $location, $status);
+
+        /**
+         * Filters the redirect HTTP response status code to use.
+         *
+         * @param int    $status   the HTTP response status code to use
+         * @param string $location the path or URL to redirect to
+         */
+        $status = Expansa\Hook::call('expansaRedirectStatus', $status, $location);
+
+        if ($location) {
+            if ($status < 300 || 399 < $status) {
+                new \Expansa\Error('view-redirect', t('HTTP redirect status code must be a redirection code, 3xx.'));
+
+                return;
+            }
+
+            /**
+             * Filters the X-Redirect-By header.
+             *
+             * Allows applications to identify themselves when they're doing a redirect.
+             *
+             * @param string $redirectBy The application doing the redirect.
+             * @param int    $status     Status code to use.
+             * @param string $location   The path to redirect to.
+             */
+            $redirectBy = Expansa\Hook::call('expansaRedirectBy', $redirectBy, $status, $location);
+            if (is_string($redirectBy)) {
+                header("X-Redirect-By: $redirectBy");
+            }
+
+            header("Location: $location", true, $status);
+        }
+    }
+}
