@@ -28,24 +28,29 @@ if (! Is::installed()) {
 }
 
 // Base PHP & MySQL versions checker.
-require_once EX_PATH . 'dashboard/error.php';
+require_once EX_PATH . 'dashboard/views/error.blade.php';
 
-/**
- *
- *
- * @since 2025.1
- */
 Debug::start(EX_DEBUG_VIEW, function () {
 
-    // Basic constants for the environment.
+    // Determine if the application is in maintenance mode...
+    if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
+        require $maintenance;
+    }
+
+    // Basic constants for the environment
     require_once EX_PATH . 'env.php';
 
-    // The initial configuration of the application.
-    require_once EX_PATH . 'config.php';
+    // Application default data
+    require_once EX_PATH . 'config/countries.php';
+    require_once EX_PATH . 'config/timezones.php';
+    require_once EX_PATH . 'config/languages.php';
 
-    // Register default Expansa data.
+    // The initial configuration of the application
+    require_once EX_PATH . 'app.php';
+
+    // Register default Expansa data
     require_once EX_PATH . 'migrations.php';
 
-    // Register Expansa routes.
+    // Register Expansa routes
     require_once EX_PATH . 'routes.php';
 }, EX_DEBUG);

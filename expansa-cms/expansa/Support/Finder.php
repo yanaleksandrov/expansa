@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use Expansa\Support\Exception\PathfinderException;
+use Expansa\Support\Exception\FinderException;
 
-trait Pathfinder
+trait Finder
 {
     /**
      * Perform a glob on the directory.
@@ -14,12 +14,12 @@ trait Pathfinder
      * @param string $path
      * @param int $depth
      * @return array
-     * @throws PathfinderException
+     * @throws FinderException
      */
     public function discover(string $path, int $depth = 99): array
     {
         if (!is_dir($path)) {
-            throw new PathfinderException("The path '$path' is not a directory");
+            throw new FinderException("The path '$path' is not a directory");
         }
 
         $search = function ($path, int $currentDepth) use (&$search, $depth) {

@@ -2,8 +2,16 @@
 
 declare(strict_types=1);
 
+use app\User;
 use app\Post\Type;
 use app\User\Roles;
+
+/**
+ * Set up current user.
+ *
+ * @since 2025.1
+ */
+User::current();
 
 /**
  * Add roles and users.

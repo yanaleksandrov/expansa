@@ -59,15 +59,6 @@ const EX_DEBUG_LOG = true;
 const EX_DEBUG_VIEW = __DIR__ . '/dashboard/debug.php';
 
 /**
- * Cron intervals.
- *
- * @since 2025.1
- */
-const EX_HOUR_IN_SECONDS     = 3600;
-const EX_HALF_DAY_IN_SECONDS = 43200;
-const EX_DAY_IN_SECONDS      = 86400;
-
-/**
  * DKIM (DomainKeys Identified Mail) settings for signing outgoing emails.
  *
  * @const string EX_DKIM_DOMAIN             The DKIM signing domain, typically matching the 'From' address domain.
