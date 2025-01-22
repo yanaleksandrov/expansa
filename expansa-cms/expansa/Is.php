@@ -233,16 +233,14 @@ final class Is
 
     /**
      * Check value to find if it was serialized.
-     *
      * If $data is not string, then returned value will always be false.
      * Serialized data is always a string.
      *
-     * @param string $data   Value to check to see if was serialized.
-     * @param bool   $strict Optional. Whether to be strict about the end of the string. Default true.
-     *
+     * @param mixed $data   Value to check to see if was serialized.
+     * @param bool  $strict Optional. Whether to be strict about the end of the string. Default true.
      * @return bool False if not serialized and true if it was
      */
-    public static function serialized($data, bool $strict = true): bool
+    public static function serialized(mixed $data, bool $strict = true): bool
     {
         // If it isn't a string, it isn't serialized.
         if (! is_string($data)) {
@@ -286,7 +284,7 @@ final class Is
                     if (substr($data, -2, 1) !== '"') {
                         return false;
                     }
-                } elseif (strpos($data, '"') === false) {
+                } elseif (!str_contains($data, '"')) {
                     return false;
                 }
                 // Or else fall through.
