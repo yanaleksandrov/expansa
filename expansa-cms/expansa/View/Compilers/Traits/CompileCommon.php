@@ -14,7 +14,7 @@ trait CompileCommon
         return '<?php ';
     }
 
-    protected function compileEndphp(): string
+    protected function compileEndPhp(): string
     {
         return ' ?>';
     }
@@ -89,7 +89,7 @@ trait CompileCommon
         return "<?php case {$expression}: ?>";
     }
 
-    protected function compileDefault()
+    protected function compileDefault(): string
     {
         return '<?php default: ?>';
     }

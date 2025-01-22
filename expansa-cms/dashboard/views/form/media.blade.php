@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $type, $name, $label, $label_class, $class, $description, $attributes, $tooltip ] = Safe::data(
-    $args ?? [],
+	$__data ?? [],
     [
 		'type'        => 'key:text',
 		'name'        => 'attribute|key',

@@ -137,6 +137,14 @@ class MoonCompiler
             'escaped' => ['{{', '}}'],
         ];
 
+        $beautifier = true;
+        if ($beautifier) {
+//            $content = preg_replace('/^[\t ]*(?=@if)/m', '', $content);
+//            $content = preg_replace('/^[\t ]*(?=@endif\s*<\/)/m', '', $content);
+//            $content = preg_replace('/}}\s*(?=@if)/m', "}}\n", $content);
+//            $content = preg_replace("/(@if\([^\)]*\))(\s*)(\t|\x20{4})(<\w+)/", "$1$2$4", $content);
+        }
+
         foreach ($echos as $type => $tags) {
             $pattern = sprintf('/(@)?%s\s*(.+?)\s*%s/s', $tags[0], $tags[1]);
 
@@ -155,7 +163,7 @@ class MoonCompiler
                     $value = "escape({$value})";
                 }
 
-                return $this->getRawBlockPlaceholder("<?php echo {$value}; ?>");
+                return $this->getRawBlockPlaceholder("<?php echo $value; ?>");
             }, $content);
         }
 
@@ -209,7 +217,6 @@ class MoonCompiler
         if (is_null($this->cacheDir)) {
             throw new \Exception('Cache path not configured.');
         }
-
         return rtrim($this->cacheDir, '/') . '/' . sha1($path) . ".php";
     }
 }

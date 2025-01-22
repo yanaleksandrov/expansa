@@ -13,6 +13,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$label = Safe::trim( $args['label'] ?? '' );
+$label = Safe::trim( $__data['label'] ?? '' );
 ?>
-<div class="card-hr"><?php echo $label; ?></div>
+<div class="card-hr">{!! $label !!}</div>

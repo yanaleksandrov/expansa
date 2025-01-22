@@ -14,7 +14,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $label, $name, $class, $instruction ] = Safe::data(
-    $args ?? [],
+	$__data ?? [],
     [
         'label'       => 'trim',
         'name'        => 'key',
@@ -23,11 +23,11 @@ if ( ! defined( 'EX_PATH' ) ) {
     ]
 )->values();
 ?>
-<header class="<?php echo $class; ?>">
-	<?php if ( $label ) : ?>
-		<h4><?php echo $label; ?></h4>
-	<?php endif; ?>
-	<?php if ( $instruction ) : ?>
-		<p class="t-muted"><?php echo $instruction; ?></p>
-	<?php endif; ?>
+<header class="{{ $class }}">
+	@if($label)
+		<h4>{!! $label !!}</h4>
+	@endif
+	@if($instruction)
+		<p class="t-muted">{!! $instruction !!}</p>
+	@endif
 </header>

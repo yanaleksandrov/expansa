@@ -13,7 +13,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$fields    = Safe::array( $args ?? [] );
+$fields    = Safe::array( $__data ?? [] );
 $fields    = array_filter( $fields, fn( $field ) => $field['type'] === 'tab' );
 $classMenu = array_filter( array_column( $fields, 'class_menu' ), fn ( $field ) => $field )[0] ?? '';
 

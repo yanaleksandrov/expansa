@@ -15,8 +15,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $switcher, $indicator, $generator, $characters ] = Safe::data(
-	$args ?? [],
+[ $name, $label, $class, $labelClass, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $switcher, $indicator, $generator, $characters ] = Safe::data(
+	$__data ?? [],
 	[
 		'name'        => 'name',
 		'label'       => 'trim',
@@ -46,31 +46,26 @@ $attributes = [
 	'@input.window' => $generator ? 'data = $password.check(' . $prop . ')' : '',
 ];
 ?>
-<div class="<?php echo $class; ?>" x-data="{show: true, data: {}}">
-	<div class="<?php echo $label_class; ?>"><?php
-		echo $label;
-        if ( $generator ) {
-            ?>
-			<span class="ml-auto fw-400 fs-13 t-muted" @click="<?php echo $prop; ?> = $password.generate(); $dispatch('input')"><?php t( 'Generate' ); ?></span>
-		<?php } ?>
+<div class="{{ $class }}" x-data="{show: true, data: {}}">
+	<div class="{{ $labelClass }}">
+		{!! $label !!}
+		@if($generator)
+			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = $password.generate(); $dispatch('input')"><?php t( 'Generate' ); ?></div>
+		@endif
 	</div>
 	<div class="field-item">
 		<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
-		<?php if ( $switcher ) : ?>
+		@if($switcher)
 			<i class="ph" :class="show ? 'ph-eye-closed' : 'ph-eye'" @click="show = $password.switch(show)"></i>
-			<?php
-        endif;
-        if ( $copy ) :
-            ?>
-			<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" x-copy="<?php echo $prop; ?>"></i>
-		<?php endif; ?>
+		@endif
+		@if($copy)
+			<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" x-copy="{{ $prop }}"></i>
+		@endif
 	</div>
-	<?php if ( $instruction ) : ?>
-		<div class="field-instruction"><?php echo $instruction; ?></div>
-		<?php
-	endif;
-	if ( $indicator ) :
-		?>
+	@if($instruction)
+		<div class="field-instruction">{!! $instruction !!}</div>
+	@endif
+	@if($indicator)
 		<div class="dg g-2 gtc-5 mt-2">
 			<i class="pt-1" :class="data.progress > <?php echo 100 / 5; ?> ? 'bg-red' : 'bg-muted-lt'"></i>
 			<i class="pt-1" :class="data.progress > <?php echo 100 / 5 * 2; ?> ? 'bg-amber' : 'bg-muted-lt'"></i>
@@ -78,10 +73,8 @@ $attributes = [
 			<i class="pt-1" :class="data.progress > <?php echo 100 / 5 * 4; ?> ? 'bg-green' : 'bg-muted-lt'"></i>
 			<i class="pt-1" :class="data.progress === 100 ? 'bg-green' : 'bg-muted-lt'"></i>
 		</div>
-		<?php
-	endif;
-	if ( ! empty( $characters ) ) :
-		?>
+	@endif
+	@if($characters)
 		<div class="dg g-2 gtc-2 t-muted fs-13 mt-3 lh-xs">
 			<?php
 			$messages = [
@@ -97,10 +90,10 @@ $attributes = [
                     continue;
                 }
                 ?>
-				<div class="df aifs g-2" :class="data.<?php echo $character; ?> && 't-green'">
-					<i class="ph" :class="data.<?php echo $character; ?> ? 'ph-check' : 'ph-x'"></i> <span><?php printf( $messages[$character], $count ); ?></span>
+				<div class="df aifs g-2" :class="data.{{ $character }} && 't-green'">
+					<i class="ph" :class="data.{{ $character }} ? 'ph-check' : 'ph-x'"></i> <span><?php printf( $messages[$character], $count ); ?></span>
 				</div>
 			<?php } ?>
 		</div>
-	<?php endif; ?>
+	@endif
 </div>

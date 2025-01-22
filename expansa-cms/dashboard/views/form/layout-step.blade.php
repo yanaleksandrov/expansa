@@ -16,16 +16,16 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $attributes, $content, $step ] = Safe::data(
-    $args ?? [],
+    $__data ?? [],
     [
-        'attributes' => 'array',
+        'attributes' => 'attributes',
         'content'    => 'trim',
         'step'       => 'absint:1',
     ]
 )->values();
 ?>
 <!-- step <?php echo $step; ?> -->
-<div <?php echo Arr::toHtmlAtts( $attributes ); ?>>
-	<?php echo $content; ?>
+<div{!! $attributes !!}>
+    {!! $content !!}
 </div>
 

@@ -3,10 +3,10 @@
 use Expansa\Safe;
 use Expansa\Support\Arr;
 
-/*
- * Radio buttons
+/**
+ * Single and multiple checkboxes.
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/radio.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/checkbox.php
  *
  * @package Expansa\Templates
  * @since   2025.1
@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
-	$args ?? [],
+	$__data ?? [],
 	[
 		'name'        => 'name',
 		'label'       => 'trim',
@@ -34,16 +34,16 @@ if ( ! defined( 'EX_PATH' ) ) {
 	]
 )->values();
 
+$prop   = Safe::prop( $attributes['name'] ?? $name );
 $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ) {
-	$prop  = Safe::prop( $name );
-	$value = Safe::attribute( $key ?: $name );
+	$prop = Safe::prop( $key ?: $name );
 
 	[ $label, $icon, $instruction, $checked ] = Safe::data(
 		$option,
 		[
 			'content'     => 'trim:' . $label,
 			'icon'        => 'attribute',
-			'description' => 'trim',
+			'description' => 'trim:' . $instruction,
 			'checked'     => 'bool:' . strval( $attributes['checked'] ?? false ),
 		]
 	)->values();
@@ -51,12 +51,13 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 	ob_start();
 	?>
 	<label class="field-item">
-		<input<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'radio', 'value' => $value, 'name' => $name, 'x-model.fill' => $prop, 'checked' => $checked ] ); ?>>
 		<?php if ( $icon ) : ?>
 			<span class="field-icon"><i class="<?php echo $icon; ?>"></i></span>
 		<?php endif; ?>
+		<input class="field-checkbox"<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'x-model.fill' => $prop, 'checked' => $checked ] ); ?>>
+		<span class="field-switcher"></span>
 		<span class="<?php echo $label_class; ?>">
-		<?php echo $label; ?>
+			<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>
 				<span class="field-instruction"><?php echo $instruction; ?></span>
 			<?php endif; ?>

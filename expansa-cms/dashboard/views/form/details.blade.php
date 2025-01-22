@@ -14,7 +14,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $label, $instruction, $class, $content ] = Safe::data(
-	$args ?? [],
+	$__data ?? [],
 	[
 		'label'       => 'trim',
 		'instruction' => 'html',

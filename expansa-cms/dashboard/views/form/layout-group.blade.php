@@ -13,8 +13,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-[ $name, $label, $class, $label_class, $content_class, $content ] = Safe::data(
-    $args ?? [],
+[ $name, $label, $class, $labelClass, $contentClass, $content ] = Safe::data(
+	$__data ?? [],
     [
         'name'          => 'name',
 		'label'         => 'trim',
@@ -26,10 +26,10 @@ if ( ! defined( 'EX_PATH' ) ) {
 )->values();
 ?>
 <div class="<?php echo $class; ?>">
-	<?php if ( $label ) : ?>
-		<div class="<?php echo $label_class; ?>"><?php echo $label; ?></div>
-	<?php endif; ?>
-	<div class="<?php echo $content_class; ?>">
-		<?php echo $content; ?>
+	@if($label)
+		<div class="{{ $labelClass }}">{{ $label }}</div>
+	@endif
+	<div class="{{ $contentClass }}">
+		{!! $content !!}
 	</div>
 </div>

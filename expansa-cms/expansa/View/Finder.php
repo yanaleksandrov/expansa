@@ -10,19 +10,17 @@ use RecursiveDirectoryIterator;
 
 class Finder
 {
+    protected array $paths = [];
+
     protected array $namespaces = [];
 
-    protected array $extensions = ['blade.php', 'moon.php', 'php', 'html', 'css', 'scss', 'js'];
+    protected array $extensions = ['blade.php', 'php', 'html', 'css', 'scss', 'js'];
 
     public array $views = [];
 
-    public function __construct(
-        protected string|array $paths = []
-    )
+    public function __construct(string|array $paths = [])
     {
-        $paths = (array) $paths;
-
-        foreach ($paths as $path) {
+        foreach ((array) $paths as $path) {
             $this->paths[] = $this->resolvePath($path);
         }
     }
@@ -71,11 +69,8 @@ class Finder
         $path  = $this->resolvePath($path);
         $files = $this->getAllFiles($path);
 
-        $substrLength = strlen($path) + 1;
-
         foreach ($files as $file) {
-            $name = str_replace('/', '.', substr($file->getRealPath(), $substrLength));
-
+            $name = trim(str_replace($path, '', $file), '/');
             if (! in_array($name, $names)) {
                 continue;
             }
@@ -83,8 +78,8 @@ class Finder
             $extension = substr($name, strlen($view) + 1);
 
             return [
-                'path'      => $file->getRealPath(),
-                'name'      => (empty($prefix) ? '' : $prefix . '.') . $file->getBasename('.' . $extension),
+                'path'      => $file,
+                'name'      => (empty($prefix) ? '' : $prefix . '.') . basename($file, '.' . $extension),
                 'extension' => $extension,
             ];
         }

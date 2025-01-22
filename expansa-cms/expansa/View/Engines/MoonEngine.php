@@ -33,9 +33,6 @@ class MoonEngine extends PhpEngine
             $this->compiler->compile($path);
         }
 
-        return $this->evaluatePath(
-            $this->compiler->getCompiledPath($path),
-            $data
-        );
+        return $this->evaluatePath($this->compiler->getCompiledPath($path), $data);
     }
 }

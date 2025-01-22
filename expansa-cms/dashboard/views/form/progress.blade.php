@@ -14,7 +14,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $max, $min, $value, $speed ] = Safe::data(
-	$args ?? [],
+	$__data ?? [],
 	[
 		'name'        => 'name',
 		'label'       => 'trim',

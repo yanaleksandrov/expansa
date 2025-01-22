@@ -14,7 +14,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $name, $property, $caption, $description, $content, $class_content ] = Safe::data(
-    $args ?? [],
+	$__data ?? [],
     [
 		'name'          => 'name',
 		'property'      => 'prop:tab',

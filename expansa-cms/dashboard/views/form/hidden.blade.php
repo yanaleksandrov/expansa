@@ -15,6 +15,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$attributes = Safe::array( $args['attributes'] ?? [] );
+$attributes = Safe::array( $__data['attributes'] ?? [] );
 ?>
 <input<?php echo Arr::toHtmlAtts( $attributes ); ?>>

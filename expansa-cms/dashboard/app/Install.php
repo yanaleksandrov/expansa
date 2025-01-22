@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Dashboard;
 
-use app\View;
 use Expansa\Api;
+use Expansa\Html;
 use Expansa\Patterns\Singleton;
 use Expansa\Route;
 use Expansa\Url;
+use Expansa\View;
 
 /**
  *
@@ -63,7 +64,8 @@ final class Install
              *
              * @since 2025.1
              */
-            View::print('install');
+            echo View::make('install');
+            //\app\View::print('views/install.blade');
         });
 
         Route::run(fn() => die());

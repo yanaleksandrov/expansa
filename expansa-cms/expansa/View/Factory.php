@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa\View;
 
-use Expansa\Container\Container;
 use Expansa\View\Engines\Engine;
 use Expansa\View\Engines\EngineManager;
+use Expansa\View\Exception\ViewException;
 
 class Factory
 {
@@ -21,7 +21,6 @@ class Factory
     protected static array $sectionStack = [];
 
     public function __construct(
-        protected Container $container,
         protected Finder $finder,
         protected EngineManager $engine,
         array $config
@@ -29,20 +28,26 @@ class Factory
     {
         $this->cache = is_bool($config['cache']) && $config['cache'];
 
-        if (isset($config['cache_path']) && is_dir($config['cache_path'])) {
+        if (isset($config['cache_path'])) {
+            if (!is_dir($config['cache_path'])) {
+                mkdir($config['cache_path'], 0755, true);
+            }
             $this->cachePath = $config['cache_path'];
         }
 
         $this->share('__env', $this);
     }
 
+    /**
+     * @throws ViewException
+     */
     public function make(string $view, array $data = []): View
     {
         $file = $this->finder->find($view);
 
         if (is_null($file)) {
-            var_dump($view, $file);
             die();
+            throw new ViewException("File $view does not exist");
         }
 
         $data = array_merge($this->shared, $data);
