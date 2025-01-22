@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $prop, $attributes ] = Safe::data(
-	$args ?? [],
+    $__data ?? [],
     [
         'key'        => 'prop',
         'attributes' => 'array',

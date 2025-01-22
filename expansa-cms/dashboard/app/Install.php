@@ -64,7 +64,7 @@ final class Install
              *
              * @since 2025.1
              */
-            echo View::make('install');
+            echo view('install');
         });
 
         Route::run(fn() => die());

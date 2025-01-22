@@ -2,7 +2,7 @@
 
 use app\Tree;
 use app\User;
-use app\View;
+use Expansa\View;
 use Expansa\I18n;
 use Expansa\Safe;
 
@@ -19,7 +19,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $class, $rating, $reviews ] = Safe::data(
-	$args ?? [],
+	$__data ?? [],
 	[
 		'class'   => 'class:df aic g-1',
 		'rating'  => 'float',
@@ -38,7 +38,7 @@ ob_start();
 <?php
 $label = ob_get_clean();
 
-View::print(
+echo view(
 	'views/form/details',
 	[
 		'label'       => $label,

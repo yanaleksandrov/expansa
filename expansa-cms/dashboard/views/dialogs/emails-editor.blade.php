@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 
 /**
  * Template for output emails editor.
@@ -23,7 +23,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		</div>
 		<div class="email-preview">
 			<?php
-			View::print(
+			echo view(
 				'views/mails/wrappers',
 				[
 					'body_template' => 'views/mails/reset-password',

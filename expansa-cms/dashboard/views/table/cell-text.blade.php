@@ -13,9 +13,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$class = Safe::class($args['key'] ?? [] );
-$prop  = Safe::prop($args['key'] ?? [] );
-$value = Safe::trim($args['value'] ?? '' );
+$class = Safe::class($__data['key'] ?? [] );
+$prop  = Safe::prop($__data['key'] ?? [] );
+$value = Safe::trim($__data['value'] ?? '' );
 ?>
 <label class="<?php echo $class; ?>">
 	<textarea :name="`items[${i}]`" x-text="item.<?php echo $prop; ?>" rows="1" x-textarea="7"></textarea>

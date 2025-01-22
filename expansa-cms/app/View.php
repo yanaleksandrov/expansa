@@ -68,7 +68,7 @@ final class View
     /**
      * Loads a template part into a template.
      *
-     * Using: View::print( 'templates/content', [
+     * Using: echo view( 'templates/content', [
      *          'key' => 'value'
      *        ] );.
      *

@@ -15,7 +15,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$template = trim( $args['body_template'] ?? '' );
+$template = trim( $__data['body_template'] ?? '' );
 if ( empty( $template ) ) {
 	return false;
 }

@@ -1,7 +1,7 @@
 <?php
 
 use app\Option;
-use app\View;
+use Expansa\View;
 
 /**
  * Expansa email wrapper.
@@ -15,7 +15,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$template = trim( $args['body_template'] ?? '' );
+$template = trim( $__data['body_template'] ?? '' );
 if ( empty( $template ) || ! is_file( $template ) ) {
 	return false;
 }
@@ -43,7 +43,7 @@ if ( empty( $template ) || ! is_file( $template ) ) {
 		</table>
 		<table border="0" cellpadding="0" cellspacing="0" style="width: 90%; max-width: 560px; margin: 0 auto; background: #fff; border-radius: 4px; overflow: hidden; border: 1px solid #e6e7e9; border-top: 4px solid #206bc4;">
 			<tr>
-				<?php View::print( $template, $args ); ?>
+				<?php echo view( $template, $__data ); ?>
 			</tr>
 		</table>
 		<table border="0" cellpadding="10" cellspacing="0" style="width: 90%; max-width: 560px; padding: 20px 0 0; margin: 0 auto;">

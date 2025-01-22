@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 
 /**
  * Themes list.
@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 ?>
 <div class="expansa-main">
 	<?php
-	View::print(
+	echo view(
 		'views/table/header',
 		[
 			'title' => t( 'Themes' ),

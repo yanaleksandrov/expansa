@@ -137,12 +137,12 @@ class BladeCompiler
             'escaped' => ['{{', '}}'],
         ];
 
-        $beautifier = true;
-        if ($beautifier) {
-//            $content = preg_replace('/^[\t ]*(?=@if)/m', '', $content);
-//            $content = preg_replace('/^[\t ]*(?=@endif\s*<\/)/m', '', $content);
-//            $content = preg_replace('/}}\s*(?=@if)/m', "}}\n", $content);
-//            $content = preg_replace("/(@if\([^\)]*\))(\s*)(\t|\x20{4})(<\w+)/", "$1$2$4", $content);
+        if (0) {
+            // beautify html source code
+            $content = preg_replace('/^[\t ]*(?=@if)/m', '', $content);
+            $content = preg_replace('/^[\t ]*(?=@endif\s*<\/)/m', '', $content);
+            $content = preg_replace('/}}\s*(?=@if)/m', "}}\n", $content);
+            $content = preg_replace("/(@if\([^\)]*\))(\s*)(\t|\x20{4})(<\w+)/", "$1$2$4", $content);
         }
 
         foreach ($echos as $type => $tags) {

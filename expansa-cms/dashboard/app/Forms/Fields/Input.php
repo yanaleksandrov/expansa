@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Dashboard\Forms\Fields;
 
-use app\View;
+use Expansa\View;
 use Dashboard\Forms\Field;
 
 class Input extends Field
@@ -17,7 +17,7 @@ class Input extends Field
         $this->icon        = 'ph ph-text-t';
         $this->description = t('A basic text input, useful for storing single string values.');
         $this->preview     = '';
-        $this->view        = View::get();
+        $this->view        = View::make('install');
         $this->defaults    = [];
     }
 

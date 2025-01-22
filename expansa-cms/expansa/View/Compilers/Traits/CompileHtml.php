@@ -31,6 +31,6 @@ trait CompileHtml
     {
         $file = trim($file, "()\"'");
 
-        return "<style>{$file} {$this->path}</style>";
+        return "<style>$file $this->path</style>";
     }
 }

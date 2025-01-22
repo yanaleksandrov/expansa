@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Expansa\Url;
 
 /**
@@ -14,7 +14,7 @@ use Expansa\Url;
 ?>
 <div class="expansa-main">
 	<?php
-	View::print(
+	echo view(
 		'views/table/header',
 		[
 			'title' => t( 'Orders' ),

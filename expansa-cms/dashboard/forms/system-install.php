@@ -335,14 +335,11 @@ return Dashboard\Form::enqueue(
                 [
                     'type'     => 'custom',
                     'callback' => function () {
-                        View::make(
-                            'global/state',
-                            [
-                                'icon'        => 'success',
-                                'title'       => t('Woo-hoo, Expansa has been successfully installed!'),
-                                'description' => t('We hope the installation process was easy. Thank you, and enjoy.'),
-                            ]
-                        );
+                        View::make('global/state', [
+                            'icon'        => 'success',
+                            'title'       => t('Woo-hoo, Expansa has been successfully installed!'),
+                            'description' => t('We hope the installation process was easy. Thank you, and enjoy.'),
+                        ]);
                     },
                 ],
             ],

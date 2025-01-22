@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Expansa\I18n;
 use Expansa\Safe;
 
@@ -17,7 +17,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $key, $title, $description, $screenshot, $reviews, $version, $rating, $installed ] = Safe::data(
-	$args ?? [],
+    $__data ?? [],
 	[
 		'key'         => 'class',
 		'title'       => 'trim',
@@ -44,7 +44,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	<?php endif; ?>
 	<div class="themes-data"><?php
 		if ( $reviews > 0 ) {
-			View::print(
+			echo view(
 				'views/global/rating',
 				[
 					'rating'  => $rating,

@@ -141,7 +141,6 @@ class Finder
         return $this;
     }
 
-    // Work with namespace
     public function addNamespace(string $namespace, string|array $paths, bool $prepend = false): static
     {
         $paths = (array) $paths;
@@ -223,7 +222,6 @@ class Finder
                 ];
             }
         }
-
         return null;
     }
 }

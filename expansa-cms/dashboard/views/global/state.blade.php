@@ -15,7 +15,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $class, $title, $description, $icon ] = Safe::data(
-	$args ?? [],
+    $__data ?? [],
 	[
 		'class'       => 'class:dg jic m-auto t-center p-5 mw-320',
 		'title'       => 'trim',

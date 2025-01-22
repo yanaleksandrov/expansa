@@ -21,6 +21,7 @@ use Expansa\Security\Sanitizer;
  * @method static string markup(mixed $value)
  * @method static string html(mixed $value)
  * @method static string attribute(mixed $value)
+ * @method static string attributes(mixed $value)
  * @method static float  price(mixed $value)
  * @method static string text(mixed $value, bool $keepNewLines = false)
  * @method static string textarea(mixed $value)

@@ -35,7 +35,6 @@ class View
         } else {
             $this->data[$key] = $value;
         }
-
         return $this;
     }
 

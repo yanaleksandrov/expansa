@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Dashboard\Form;
 use Expansa\Url;
 
@@ -32,7 +32,7 @@ use Expansa\Url;
 				<div x-text="`<?php t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
 				<div class="attributes-list">
 					<?php
-					View::print(
+					echo view(
 						'views/form/input',
 						[
 							'type'        => 'text',
@@ -72,7 +72,7 @@ use Expansa\Url;
 						</template>
 						<template x-if="!values.length">
 							<?php
-							View::print(
+							echo view(
 								'views/global/state',
 								[
 									'icon'        => 'empty-pack',

@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 
 /**
  * Expansa dashboard menu.
@@ -20,7 +20,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			<h4><?php t( 'Menus' ); ?></h4>
 			<div class="dg g-2 p-4">
 				<?php
-				View::print(
+				echo view(
 					'views/form/select',
 					[
 						'type'        => 'select',
@@ -67,7 +67,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			</div>
 			<div class="df fww g-2 p-6">
 				<?php
-				View::print(
+				echo view(
 					'views/form/input',
 					[
 						'type'        => 'text',
@@ -90,7 +90,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 						],
 					],
 				);
-				View::print(
+				echo view(
 					'views/form/select',
 					[
 						'type'        => 'select',
@@ -121,7 +121,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 						],
 					],
 				);
-				View::print(
+				echo view(
 					'views/form/submit',
 					[
 						'type'        => 'text',

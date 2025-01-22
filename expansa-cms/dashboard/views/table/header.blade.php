@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Expansa\I18n;
 use Expansa\Safe;
 use Expansa\Url;
@@ -18,7 +18,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $title, $badge, $show, $content, $uploader, $filter, $actions, $search, $translation ] = Safe::data(
-	$args ?? [],
+    $__data ?? [],
 	[
 		'title'       => 'trim',
 		'badge'       => 'trim',
@@ -49,7 +49,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 						    <span x-text="showFilter ? '<?php t_attr( 'Reset' ); ?>' : '<?php t_attr( 'Filter' ); ?>'"><?php t( 'Filter' ); ?></span>
 					    </button>
 					    <?php
-					    View::print(
+					    echo view(
 						    'views/form/number',
 						    [
 							    'type'        => 'number',
@@ -77,7 +77,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			    <?php if ( $search ) : ?>
 				    <div class="df aic g-1">
 					    <?php
-					    View::print(
+					    echo view(
 						    'views/form/input',
 						    [
 							    'type'        => 'search',
@@ -118,7 +118,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					    </div>
 					    <span class="badge badge--round badge--icon badge--lg"><i class="ph ph-arrows-left-right"></i></span>
 					    <?php
-					    View::print(
+					    echo view(
 						    'views/form/select',
 						    [
 							    'type'        => 'select',
@@ -142,7 +142,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 						    ]
 					    );
 
-					    View::print(
+					    echo view(
 						    'views/form/select',
 						    [
 							    'type'        => 'select',

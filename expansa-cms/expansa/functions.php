@@ -52,3 +52,10 @@ if (!function_exists('escape')) {
         return trim(htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8', $doubleEncode));
     }
 }
+
+if (!function_exists('view')) {
+    function view(string $view, array $data = []): Expansa\View\View
+    {
+        return \Expansa\View::make($view, $data);
+    }
+}

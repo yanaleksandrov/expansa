@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Expansa\Hook;
 use Expansa\Safe;
 
@@ -39,7 +39,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 $prop = Safe::prop( $attributes['name'] ?? $name );
 
 Hook::add( 'expansa_dashboard_footer', function() {
-	View::print( 'views/dialogs/selfie-maker' );
+	echo view( 'views/dialogs/selfie-maker' );
 } );
 ?>
 <div class="<?php echo $class; ?>">

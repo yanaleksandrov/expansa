@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Expansa\Safe;
 
 /**
@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $title, $description, $screenshot, $author, $categories, $installed, $active, $installations, $date, $reviews, $rating, $expansa, $version ] = Safe::data(
-	$args ?? [],
+    $__data ?? [],
 	[
 		'title'         => 'trim',
 		'description'   => 'trim',
@@ -55,7 +55,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		<span class="plugins__text">
 			<?php
 			if ( $reviews > 0 ) :
-				View::print(
+				echo view(
 					'views/global/rating',
 					[
 						'class'   => 'df aic g-1',

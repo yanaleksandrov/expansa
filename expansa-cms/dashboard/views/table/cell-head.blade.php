@@ -13,7 +13,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$columns = Safe::array( $args ?? [] );
+$columns = Safe::array( $__data ?? [] );
 if ( ! $columns ) {
     return;
 }

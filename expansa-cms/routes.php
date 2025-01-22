@@ -6,9 +6,7 @@ use app\Option;
 use app\Post;
 use app\Slug;
 use app\User;
-use app\View;
-use Expansa\Db;
-use Expansa\Debugger;
+use Expansa\View;
 use Expansa\Disk;
 use Expansa\Extensions;
 use Expansa\Hook;
@@ -104,12 +102,9 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      *
      * @since 2025.1
      */
-    $content = View::get(
-        'index',
-        [
-            'slug' => $slug,
-        ]
-    );
+    $content = View::make('index', [
+        'slug' => $slug,
+    ]);
     //$content = (new Expansa\Html())->beautify($content);
 
     /**

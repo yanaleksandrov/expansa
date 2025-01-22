@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Expansa\Hook;
 
 /**
@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 Hook::add( 'expansa_dashboard_footer', function() {
-	View::print( 'views/dialogs/posts-editor' );
+	echo view( 'views/dialogs/posts-editor' );
 } );
 ?>
 <div class="expansa-main">

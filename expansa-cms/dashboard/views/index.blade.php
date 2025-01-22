@@ -2,7 +2,7 @@
 
 use app\Option;
 use app\User;
-use app\View;
+use Expansa\View;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;
@@ -23,7 +23,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$slug	   = Safe::trim( $args['slug'] ?? '' );
+$slug	   = Safe::trim( $__data['slug'] ?? '' );
 $start_time = microtime( true );
 // print_r(
 //	Query::apply(
@@ -126,7 +126,7 @@ $start_time = microtime( true );
 				<div class="expansa-bar-menu" :class="showMenu && 'active'" @click="showMenu = !showMenu">
 					<i class="ph ph-list"></i>
 				</div>
-				<?php View::print( 'views/menu-bar' ); ?>
+				<?php echo view( 'views/menu-bar' ); ?>
 
 				<details class="expansa-search" x-data="search" x-bind="wrapper">
 					<summary class="expansa-search-btn" x-bind="button">
@@ -158,8 +158,8 @@ $start_time = microtime( true );
 						<template x-if="!links.length">
 							<div class="expansa-search-results">
 								<?php
-								View::print(
-									'views/global/state',
+								echo view(
+									'global/state',
 									[
 										'icon'        => 'ufo',
 										'title'       => t( 'Nothing found' ),
@@ -177,20 +177,20 @@ $start_time = microtime( true );
 					</div>
 				</details>
 
-				<?php View::print( 'views/global/user-account' ); ?>
+				<?php echo view( 'views/global/user-account' ); ?>
 			</div>
 			<!-- interface panel start -->
 			<div class="expansa-panel">
 				<a href="<?php echo Url::site(); ?>" target="_blank">
 					<img src="<?php echo Url::site( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34" alt="Expansa Logo">
 				</a>
-				<?php View::print( 'views/menu-panel' ); ?>
+				<?php echo view( 'views/menu-panel' ); ?>
 			</div>
 			<!-- interface sidebar start -->
 			<?php
-			View::print( 'views/menu' );
+			echo view( 'views/menu' );
 
-			View::print( 'views/' . $slug );
+			echo view( 'views/' . $slug );
 			?>
 			<!-- interface board start -->
 			<div class="expansa-board">
@@ -202,7 +202,7 @@ $start_time = microtime( true );
 	} else {
 		?>
 		<div class="df aic jcc p-6">
-			<?php View::print( 'views/' . $slug ); ?>
+			<?php echo view( 'views/' . $slug ); ?>
 		</div>
 		<?php
 	}

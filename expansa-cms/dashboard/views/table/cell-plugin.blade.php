@@ -13,8 +13,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 
-$class = Safe::class($args['key'] ?? [] );
-$prop  = Safe::prop($args['key'] ?? [] );
+$class = Safe::class($__data['key'] ?? [] );
+$prop  = Safe::prop($__data['key'] ?? [] );
 ?>
 <div class="<?php echo $class; ?>">
 	<div class="fs-15 lh-sm fw-500" x-text="item.title"></div>

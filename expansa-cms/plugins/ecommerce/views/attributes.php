@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 use Dashboard\Form;
 
 /**
@@ -42,7 +42,7 @@ use Dashboard\Form;
 						</template>
 						<template x-if="!attributes.length">
 							<?php
-							View::print(
+							echo view(
 								'views/global/state',
 								[
 									'icon'        => 'empty-pack',

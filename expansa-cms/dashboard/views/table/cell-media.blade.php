@@ -15,14 +15,14 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $title, $sizeHumanize ] = Safe::data(
-    $args ?? [],
+    $__data ?? [],
     [
         'title' => 'attribute',
         'sizeHumanize' => 'trim',
     ]
 )->values();
 
-$src = Safe::attribute( $args['sizes']['thumbnail']['url'] ?? $args['url'] ?? $args['icon'] ?? '' );
+$src = Safe::attribute( $__data['sizes']['thumbnail']['url'] ?? $__data['url'] ?? $__data['icon'] ?? '' );
 ?>
 <div class="storage__item" @click="$dialog.open('tmpl-media-editor', item)">
 	<template x-if="item.url || item.icon">

@@ -1,7 +1,7 @@
 <?php
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
-    $args ?? [],
+    $__data ?? [],
     [
         'name'        => 'name',
         'label'       => 'trim',

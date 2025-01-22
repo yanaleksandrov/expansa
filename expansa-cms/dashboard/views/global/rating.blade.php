@@ -14,7 +14,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 [ $class, $rating, $reviews ] = Safe::data(
-	$args ?? [],
+    $__data ?? [],
 	[
 		'class'   => 'class:df aic g-1',
 		'rating'  => 'float',

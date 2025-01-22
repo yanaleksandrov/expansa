@@ -4,8 +4,8 @@ use app\Post\Status;
 use app\Post\Type;
 use Expansa\Safe;
 
-$samples  = Safe::array( $args['samples'] ?? [] );
-$filepath = Safe::attribute( $args['filepath'] ?? '' );
+$samples  = Safe::array( $__data['samples'] ?? [] );
+$filepath = Safe::attribute( $__data['filepath'] ?? '' );
 if ( empty( $samples ) ) {
     return;
 }

@@ -1,6 +1,6 @@
 <?php
 
-use app\View;
+use Expansa\View;
 
 /**
  * Query builder
@@ -18,7 +18,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	<div class="builder-wrapper">
 		<div class="builder-header">
 			<?php
-			View::print(
+			echo view(
 				'views/form/select',
 				[
 					'type'        => 'select',
@@ -49,7 +49,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				],
 			);
-			View::print(
+			echo view(
 				'views/form/input',
 				[
 					'type'        => 'text',
@@ -71,7 +71,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				],
 			);
-			View::print(
+			echo view(
 				'views/form/input',
 				[
 					'type'        => 'text',
@@ -93,7 +93,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				],
 			);
-			View::print(
+			echo view(
 				'views/form/input',
 				[
 					'type'        => 'text',

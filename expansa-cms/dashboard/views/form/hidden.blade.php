@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Safe;
-use Expansa\Support\Arr;
 
 /**
  * Hidden input field
@@ -14,7 +13,5 @@ use Expansa\Support\Arr;
 if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
-
-$attributes = Safe::array( $__data['attributes'] ?? [] );
 ?>
-<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
+<input<?php echo Safe::attributes( $__data['attributes'] ?? [] ); ?>>
