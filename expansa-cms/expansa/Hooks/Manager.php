@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Expansa\Hooks;
 
-use Expansa\Support\Exception\PathfinderException;
-use Expansa\Support\Pathfinder;
+use Expansa\Support\Exception\FinderException;
+use Expansa\Support\Finder;
 use ReflectionException;
 
 class Manager extends HooksCollector
 {
-    use Pathfinder;
+    use Finder;
 
     /**
-     * @throws PathfinderException|ReflectionException
+     * @throws FinderException|ReflectionException
      */
     public function configure(string $path): void
     {
@@ -28,7 +28,7 @@ class Manager extends HooksCollector
             }
 
             if (!$namespace) {
-                throw new PathfinderException('The class must use a namespace');
+                throw new FinderException('The class must use a namespace');
             }
             $classname = basename($path, '.php');
 

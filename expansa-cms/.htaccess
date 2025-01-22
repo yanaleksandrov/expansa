@@ -1,26 +1,30 @@
-Options +FollowSymLinks
-# Options +SymLinksIfOwnerMatch
-Options -Indexes
-DirectoryIndex index.php index.html
-AddDefaultCharset UTF-8
-
+# BEGIN Expansa
 <IfModule mod_rewrite.c>
-    RewriteEngine on
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
 
-    # for 301-redirect http to https
-    RewriteCond %{HTTPS} off
-    RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+    RewriteEngine On
 
-    RewriteBase /
-    RewriteCond $1 !^(index\.php|uploads|robots\.txt|favicon\.ico)
-    RewriteCond %{REQUEST_FILENAME} !-f
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ /index.php/$1 [L,QSA]
-</IfModule>
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
 
-<IfModule mod_expires.c>
-    <filesmatch ".(jpg|jpeg|gif|png|webp|svg|ico|css|js|woff|woff2)$">
-        ExpiresActive on
-        ExpiresDefault "access plus 1 month"
-    </filesmatch>
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    # Deny access to .env.php and other system files
+    RewriteRule ^(\.env|\.htaccess|env.php|artisan)$ / [L,R=301]
 </IfModule>
+# END Expansa
