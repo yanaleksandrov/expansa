@@ -127,19 +127,6 @@ final class Is
     }
 
     /**
-     * Checks whether the given variable is a Expansa Errors.
-     *
-     * Returns whether `$thing` is an instance of the `Errors` class.
-     *
-     * @param mixed $thing The variable to check
-     * @return bool        Whether the variable is an instance of Errors
-     */
-    public static function error(mixed $thing): bool
-    {
-        return $thing instanceof Error;
-    }
-
-    /**
      * Determines whether the current request is for an administrative interface page.
      *
      * Function is not intended to be used for security purposes. Returns `true` whenever the current URL

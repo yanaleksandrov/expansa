@@ -7,20 +7,12 @@ use app\Post;
 use app\Slug;
 use app\User;
 use Expansa\View;
-use Expansa\Disk;
 use Expansa\Extensions;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Route;
 use Expansa\Url;
-
-/**
- * Triggered before initializing the route.
- *
- * @since 2025.1
- */
-Hook::call('expansa_route_init');
 
 /**
  * Load private administrative panel.
@@ -43,36 +35,20 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
         default          => 'isDashboard',
     }, true);
 
-    /**
-     * Run the installer if Expansa is not installed.
-     *
-     * @since 2025.1
-     */
+    // Run the installer if Expansa is not installed.
     if ($slug !== 'install' && ! Is::installed()) {
-        redirect(Url::install());
-        exit;
+        return redirect(Url::install());
     }
 
-    /**
-     * Out from dashboard if user is not logged.
-     * Also leave access for the registration and password recovery pages.
-     *
-     * @since 2025.1
-     */
+    // Redirect unauthenticated users from the dashboard, but allow access to registration and password recovery.
     if (! in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && ! User::logged() && Is::installed()) {
-        redirect(Url::sign_in());
-        exit;
+        return redirect(Url::sign_in());
     }
 
-    /**
-     * Not allow some slugs for logged user, they are reserved.
-     *
-     * @since 2025.1
-     */
-    $black_list_slugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
-    if (in_array($slug, $black_list_slugs, true) && User::logged()) {
-        redirect(Url::site('dashboard'));
-        exit;
+    // Not allow some slugs for logged user, they are reserved.
+    $blackListSlugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
+    if (in_array($slug, $blackListSlugs, true) && User::logged()) {
+        return redirect(Url::site('dashboard'));
     }
 
     /**
@@ -81,18 +57,6 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      * @since 2025.1
      */
     require_once EX_DASHBOARD . 'app/index.php';
-
-    /**
-     * Load installed and launch active plugins & themes.
-     *
-     * @since 2025.1
-     */
-    Extensions::enqueue(function () {
-        return [
-            ...Disk::dir(EX_PLUGINS)->files('*/*.php'),
-            ...Disk::dir(EX_THEMES)->files('*/*.php'),
-        ];
-    });
 
     Extensions::boot('plugin');
     Extensions::boot('theme');
@@ -154,8 +118,7 @@ Route::get('/{slug}', function ($slug) {
      * @since 2025.1
      */
     if (Is::installed() && $slug === 'install') {
-        redirect(Url::site('dashboard'));
-        exit;
+        return redirect(Url::site('dashboard'));
     }
 
     ?>

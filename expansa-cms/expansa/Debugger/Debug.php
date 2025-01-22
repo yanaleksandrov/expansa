@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Pulse;
+namespace Expansa\Debugger;
 
 use Error;
 use Exception;
@@ -16,7 +16,7 @@ use Expansa\Db;
  *
  * @package Expansa
  */
-final class Debug
+class Debug
 {
     public function start(string $viewPath, callable $callback, bool $isShowErrors = false): void
     {

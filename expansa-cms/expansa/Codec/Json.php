@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Codec;
 
-use Expansa\Error;
-
 /**
  * Class Json
  *
@@ -26,9 +24,9 @@ class Json
 	 * @param bool $ascii        For ASCII output and $html_safe for HTML escaping.
 	 * @param bool $pretty       For easier reading and clarity.
 	 * @param bool $forceObjects Enforces the encoding of non-associative arrays as objects.
-	 * @return string|Error
+	 * @return string
 	 */
-	public function encode( mixed $value, bool $ascii = false, bool $pretty = false, bool $forceObjects = false ): string|Error {
+	public function encode( mixed $value, bool $ascii = false, bool $pretty = false, bool $forceObjects = false ): string {
 		$flags = JSON_UNESCAPED_SLASHES                  // do not escape slashes by default
 			| ( $ascii ? 0 : JSON_UNESCAPED_UNICODE )    // keep unicode unescaped if $ascii = false
 			| ( $pretty ? JSON_PRETTY_PRINT : 0 )        // pretty print
@@ -37,8 +35,8 @@ class Json
 		$json = json_encode( $value, $flags );
 
 		// check for encoding errors
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new Error( json_last_error_msg() );
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			return '';
 		}
 
 		return $json;
@@ -55,13 +53,12 @@ class Json
 		$flags  = $forceArrays ? JSON_OBJECT_AS_ARRAY : 0;
 		$flags |= JSON_BIGINT_AS_STRING;
 
-		$value = json_decode( $json, flags: $flags );
+		$value = json_decode($json, flags: $flags);
 
 		// check for decoding errors
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new Error( 'json-decode', json_last_error_msg() );
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			return null;
 		}
-
 		return $value;
 	}
 
@@ -71,7 +68,7 @@ class Json
 	 * @param mixed $data
 	 * @return bool
 	 */
-	public function isValid( mixed $data ): bool {
-		return $this->decode( $data ) instanceof Error;
+	public function isValid(mixed $data): bool {
+		return json_validate($data);
 	}
 }

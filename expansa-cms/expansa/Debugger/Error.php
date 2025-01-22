@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Error;
+namespace Expansa\Debugger;
 
 /**
  * Errors class.
@@ -15,7 +15,7 @@ namespace Expansa\Error;
  *   $message - is a message for the user.
  *   $data    - is an instruction for the developer.
  */
-class Handler
+class Error
 {
     /**
      * Errors list storage.

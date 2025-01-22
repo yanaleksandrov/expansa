@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app;
 
+use LogicException;
 use app\Post\Type;
 use Expansa\Db;
-use Expansa\Error;
 use Expansa\Patterns\Registry;
 use Expansa\Safe;
 use Expansa\Url;
@@ -64,13 +64,13 @@ class Post
      * @param string $type
      * @param array $args
      *
-     * @return Error|Post|null
+     * @return ?Post
      */
-    public static function add(string $type, array $args): Error|Post|null
+    public static function add(string $type, array $args): ?Post
     {
         $type = Type::get($type);
         if (! $type instanceof Type) {
-            return new Error('post-add', t('Post type is not registered.'));
+            throw new LogicException(t('Post type is not registered.'));
         }
 
         $data = Safe::data(
@@ -125,7 +125,7 @@ class Post
         return $post;
     }
 
-    public static function getBySlug(string $value): Error|Post|null
+    public static function getBySlug(string $value): ?Post
     {
         $slug = Slug::get($value);
         if (! empty($slug['entity_table'])) {
@@ -137,16 +137,16 @@ class Post
     /**
      * Get post by field.
      *
-     * @param string $type
+     * @param string     $type
      * @param int|string $value
-     * @param string $field
-     * @return Error|Post|null
+     * @param string     $field
+     * @return null|Post
      */
-    public static function get(string $type, int|string $value, string $field = 'id'): Error|Post|null
+    public static function get(string $type, int|string $value, string $field = 'id'): ?Post
     {
         $type = Type::get($type);
         if (! $type instanceof Type) {
-            return new Error('post-get', t('Post type is not registered.'));
+            throw new LogicException(t('Post type is not registered.'));
         }
 
         $data = Db::get($type->table, '*', [ $field => $value ]);

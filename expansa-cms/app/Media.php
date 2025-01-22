@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace app;
 
 use app\Query\Query;
+use Exception;
 use Expansa\Error;
 use Expansa\Image;
 use Expansa\Disk;
@@ -108,7 +109,7 @@ final class Media
      *
      * @param array $file Array that represents a `$_FILES` upload array.
      * @return Error|int
-     * @throws \Exception
+     * @throws Exception
      */
     public static function upload(array $file): int|Error
     {

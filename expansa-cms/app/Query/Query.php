@@ -7,8 +7,8 @@ namespace app\Query;
 use app\Post\Type;
 use app\User;
 use Expansa\Db;
-use Expansa\Error;
 use Expansa\Safe;
+use InvalidArgumentException;
 
 class Query
 {
@@ -155,7 +155,7 @@ class Query
         if (! empty($args['type'])) {
             $types = array_map('Expansa\Safe::id', is_array($args['type']) ? $args['type'] : [ $args['type'] ]);
         } else {
-            return new Error('query', t('"Type" parameter can not be empty.'));
+            throw new InvalidArgumentException(t('"Type" parameter can not be empty.'));
         }
 
         /**

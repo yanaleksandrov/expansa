@@ -57,7 +57,7 @@ class Finder
                     ];
                 }
             } catch (\Exception $e) {
-                new Error('finder-methods', $e->getMessage());
+
             }
         }
         return $classes;

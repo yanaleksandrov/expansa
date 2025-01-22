@@ -55,8 +55,7 @@ final class Install
              * @since 2025.1
              */
             if ($slug !== 'install') {
-                redirect(Url::site('install'));
-                exit;
+                return redirect(Url::site('install'));
             }
 
             /**

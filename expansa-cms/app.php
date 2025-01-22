@@ -31,3 +31,13 @@ Expansa\I18n::configure(
  * @since 2025.1
  */
 Expansa\Api::configure('/api', sprintf('%sapp/Api', EX_DASHBOARD));
+
+/**
+ * Load installed and launch active plugins & themes.
+ *
+ * @since 2025.1
+ */
+Expansa\Extensions::enqueue(fn () => [
+    ...Expansa\Disk::dir(EX_PLUGINS)->files('*/*.php'),
+    ...Expansa\Disk::dir(EX_THEMES)->files('*/*.php'),
+]);
