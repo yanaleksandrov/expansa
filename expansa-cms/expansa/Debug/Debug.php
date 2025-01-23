@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Debugger;
+namespace Expansa\Debug;
 
 use Error;
 use Exception;
-use Expansa\Db;
 
 /**
  * A utility class for debugging PHP applications. Provides methods to manage error reporting,
@@ -20,8 +19,6 @@ class Debug
 {
     public function start(string $viewPath, callable $callback, bool $isShowErrors = false): void
     {
-        $bench = new Bench();
-
         if ($isShowErrors) {
             ini_set('error_reporting', E_ALL);
             ini_set('display_errors', 1);
@@ -30,13 +27,7 @@ class Debug
 
         if (is_callable($callback)) {
             try {
-                $bench->start();
                 $callback();
-                $bench->end();
-
-                $queries = count(Db::log());
-
-                echo "{$queries}Q {$bench->getTime()}s {$bench->getMemoryPeak()}";
             } catch (Error | Exception $e) {
                 extract($this->getData($e), EXTR_SKIP);
 

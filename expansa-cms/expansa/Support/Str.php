@@ -248,4 +248,17 @@ class Str
 
         return $word;
     }
+
+    /**
+     * Extract all URLs from text.
+     *
+     * @param string $text
+     * @return array
+     */
+    public static function extractUrls(string $text): array
+    {
+        preg_match_all('/\bhttps?:\/\/\S+/', $text, $matches);
+
+        return array_unique($matches[0] ?? []);
+    }
 }

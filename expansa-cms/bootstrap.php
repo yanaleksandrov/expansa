@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Expansa\Db;
 use Expansa\Is;
 use Expansa\Debug;
 use Expansa\Security\Csrf\Csrf;
@@ -31,6 +32,8 @@ if (! Is::installed()) {
 require_once EX_PATH . 'dashboard/views/error.blade.php';
 
 Debug::start(EX_DEBUG_VIEW, function () {
+    // Start benchmark timer
+    metric()->start();
 
     // Determine if the application is in maintenance mode...
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
@@ -53,4 +56,6 @@ Debug::start(EX_DEBUG_VIEW, function () {
 
     // Register Expansa routes
     require_once EX_PATH . 'routes.php';
+
+    printf('<!-- %sQ %ss %s -->', count(Db::log()), metric()->time(), metric()->memory());
 }, EX_DEBUG);

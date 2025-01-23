@@ -37,18 +37,18 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
 
     // Run the installer if Expansa is not installed.
     if ($slug !== 'install' && ! Is::installed()) {
-        return redirect(Url::install());
+        redirect(Url::install());
     }
 
     // Redirect unauthenticated users from the dashboard, but allow access to registration and password recovery.
     if (! in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && ! User::logged() && Is::installed()) {
-        return redirect(Url::sign_in());
+        redirect(Url::sign_in());
     }
 
     // Not allow some slugs for logged user, they are reserved.
     $blackListSlugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
     if (in_array($slug, $blackListSlugs, true) && User::logged()) {
-        return redirect(Url::site('dashboard'));
+        redirect(Url::site('dashboard'));
     }
 
     /**
@@ -118,7 +118,7 @@ Route::get('/{slug}', function ($slug) {
      * @since 2025.1
      */
     if (Is::installed() && $slug === 'install') {
-        return redirect(Url::site('dashboard'));
+        redirect(Url::site('dashboard'));
     }
 
     ?>

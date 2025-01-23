@@ -60,8 +60,16 @@ if (!function_exists('view')) {
     }
 }
 
+if (!function_exists('metric')) {
+    function metric(): Expansa\Debug\Metric
+    {
+        static $metric;
+        return $metric ?? ($metric = new Expansa\Debug\Metric());
+    }
+}
+
 if (!function_exists('redirect')) {
-    function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): null
+    function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): bool
     {
         /**
          * Filters the redirect location.
@@ -83,7 +91,7 @@ if (!function_exists('redirect')) {
             if ($status < 300 || 399 < $status) {
                 new \Expansa\Error('view-redirect', t('HTTP redirect status code must be a redirection code, 3xx.'));
 
-                return null;
+                return false;
             }
 
             /**
@@ -101,9 +109,8 @@ if (!function_exists('redirect')) {
             }
 
             header("Location: $to", true, $status);
-
-            return exit;
         }
-        return null;
+
+        return true;
     }
 }

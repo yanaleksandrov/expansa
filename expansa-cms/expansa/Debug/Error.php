@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Debugger;
+namespace Expansa\Debug;
 
 /**
  * Errors class.

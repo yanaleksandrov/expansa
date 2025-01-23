@@ -32,7 +32,7 @@ class Json
 			| ( $pretty ? JSON_PRETTY_PRINT : 0 )        // pretty print
 			| ( $forceObjects ? JSON_FORCE_OBJECT : 0 ); // convert arrays to objects if specified
 
-		$json = json_encode( $value, $flags );
+		$json = json_encode($value, $flags);
 
 		// check for encoding errors
 		if (json_last_error() !== JSON_ERROR_NONE) {
