@@ -14,7 +14,7 @@ namespace Expansa;
  *   $message - is a message for the user.
  *   $data    - is an instruction for the developer.
  */
-final class Error extends Debugger\Error
+final class Error extends Debug\Error
 {
     /**
      * Initialize the error.
@@ -46,10 +46,10 @@ final class Error extends Debugger\Error
     {
         if ($message instanceof Validator) {
             foreach ($message->errors as $key => $errors) {
-                (new Debugger\Error())->push(sprintf('%s-%s', $code, $key), $errors);
+                (new Debug\Error())->push(sprintf('%s-%s', $code, $key), $errors);
             }
         } else {
-            (new Debugger\Error())->push($code, $message);
+            (new Debug\Error())->push($code, $message);
         }
     }
 
@@ -63,7 +63,7 @@ final class Error extends Debugger\Error
      */
     public static function delete(string|int $code): void
     {
-        (new Debugger\Error())->remove($code);
+        (new Debug\Error())->remove($code);
     }
 
     /**
@@ -73,7 +73,7 @@ final class Error extends Debugger\Error
      */
     public static function exists(): bool
     {
-        return (new Debugger\Error())->hasError();
+        return (new Debug\Error())->hasError();
     }
 
     /**
@@ -84,7 +84,7 @@ final class Error extends Debugger\Error
      */
     public static function get(string|int $code = ''): array
     {
-        return (new Debugger\Error())->getError($code);
+        return (new Debug\Error())->getError($code);
     }
 
     /**
@@ -94,6 +94,6 @@ final class Error extends Debugger\Error
      */
     public static function getCodes(): array
     {
-        return (new Debugger\Error())->getErrorCodes();
+        return (new Debug\Error())->getErrorCodes();
     }
 }
