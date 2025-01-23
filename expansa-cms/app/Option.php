@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace app;
 
+use LogicException;
 use Expansa\Db;
 use Expansa\Error;
 use Expansa\Json;
@@ -212,12 +213,8 @@ final class Option
 
         $not_allowed_options = array_keys(self::default());
         if (in_array($option, $not_allowed_options, true)) {
-            return new Error(
-                'option-delete',
-                sprintf(
-                    t('You are not allowed to delete the "%s" option. You can just update it.'),
-                    $option
-                )
+            throw new LogicException(
+                t('You are not allowed to delete the ":optionName" option. You can just update it.', $option)
             );
         }
 

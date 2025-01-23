@@ -6,7 +6,7 @@ namespace dashboard\app\Api;
 
 use app\Option;
 use app\User;
-use Expansa\Debugger;
+use Expansa\Debug;
 use Expansa\Json;
 use Expansa\Db;
 use Expansa\Disk;
@@ -80,8 +80,8 @@ class System
                 Json::encode(
                     [
                         'status'    => 200,
-                        'benchmark' => Debugger::timer('getall'),
-                        'memory'    => Debugger::memory_peak(),
+                        'benchmark' => metric()->time(),
+                        'memory'    => metric()->memory(),
                         'data'      => $datas,
                         'errors'    => [],
                     ],

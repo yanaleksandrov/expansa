@@ -17,7 +17,8 @@
         "ext-iconv": "*",
         "ext-openssl": "*",
         "ext-zlib": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-bcmath": "*"
     },
     "require-dev": {
         "dragonmantank/cron-expression": "^3.0",
@@ -27,18 +28,18 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "if not exist expansa\\expansa\\Images mkdir expansa\\expansa\\Images",
-            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\expansa\\Images\\Spatie\\Image",
-            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\expansa\\Images\\Spatie\\ImageOptimizer",
-            "if not exist expansa\\expansa\\Scheduler mkdir expansa\\expansa\\Scheduler",
-            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\expansa\\Scheduler"
+            "if not exist expansa-cms\\expansa\\Images mkdir expansa-cms\\expansa\\Images",
+            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa-cms\\expansa\\Images\\Spatie\\Image",
+            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa-cms\\expansa\\Images\\Spatie\\ImageOptimizer",
+            "if not exist expansa-cms\\expansa\\Scheduler mkdir expansa-cms\\expansa\\Scheduler",
+            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa-cms\\expansa\\Scheduler"
         ],
         "post-update-cmd": [
-            "if not exist expansa\\expansa\\Images mkdir expansa\\expansa\\Images",
-            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa\\expansa\\Images\\Spatie\\Image",
-            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa\\expansa\\Images\\Spatie\\ImageOptimizer",
-            "if not exist expansa\\expansa\\Scheduler mkdir expansa\\expansa\\Scheduler",
-            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa\\expansa\\Scheduler"
+            "if not exist expansa-cms\\expansa\\Images mkdir expansa-cms\\expansa\\Images",
+            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa-cms\\expansa\\Images\\Spatie\\Image",
+            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa-cms\\expansa\\Images\\Spatie\\ImageOptimizer",
+            "if not exist expansa-cms\\expansa\\Scheduler mkdir expansa-cms\\expansa\\Scheduler",
+            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa-cms\\expansa\\Scheduler"
         ]
     }
 }

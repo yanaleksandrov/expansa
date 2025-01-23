@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use Exception;
 use Expansa\Security\Csrf\Csrf;
 use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
 use Expansa\Security\Exception\InvalidCsrfTokenException;
+use ReflectionException;
 
 final class Api
 {
-    /**
-     * @var array
-     */
     public static array $resources = [];
 
     /**
@@ -22,7 +21,7 @@ final class Api
      *
      * @param string $root Root of the API.
      * @param string $dirpath
-     * @throws \Exception
+     * @throws Exception
      */
     public static function configure(string $root, string $dirpath): void
     {
@@ -45,8 +44,8 @@ final class Api
         }
 
         $method   = Safe::camelcase($method);
-        $filepath = Safe::path($resource['filepath'] ?? '');
         $class    = Safe::pascalcase($resource['class'] ?? '');
+        $filepath = Safe::path($resource['filepath'] ?? '');
 
         require_once $filepath;
 
@@ -68,7 +67,7 @@ final class Api
                 } else {
                     $data = ( new $class() )->{$method}();
                 }
-            } catch (\ReflectionException $e) {
+            } catch (ReflectionException $e) {
                 $data = new Error('api-no-route', t('No route was found matching the URL and request method.'));
             }
 
@@ -83,8 +82,8 @@ final class Api
         $data = Json::encode(
             [
                 'status'    => 200,
-                'benchmark' => Debugger::timer('getall'),
-                'memory'    => Debugger::memory_peak(),
+                'benchmark' => metric()->time(),
+                'memory'    => metric()->memory(),
                 'queries'   => count(Db::log()),
                 'data'      => $data instanceof Error ? [] : $data,
                 'errors'    => $data instanceof Error ? Error::get() : [],
@@ -101,12 +100,12 @@ final class Api
      * Extract all API classes.
      *
      * @param string $path Path to directory with API controllers.
-     * @throws \Exception
+     * @throws Exception
      */
     private static function scan(string $path): void
     {
         if (! is_dir($path)) {
-            throw new \Exception(t('API path is not a directory'));
+            throw new Exception(t('API path is not a directory'));
         }
 
         $files = array_diff(scandir($path), [ '.', '..' ]);

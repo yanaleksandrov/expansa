@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\User;
 
-use Expansa\Error;
+use InvalidArgumentException;
 
 /**
  * Base class used to implement the API for user roles and their capabilities.
@@ -36,41 +36,42 @@ class Roles
      * The capabilities are defined in the following format `array( 'read' => true );`
      * To explicitly deny a role a capability you set the value for that capability to false.
      *
-     * @param string $display_name role display name
-     * @param mixed  $capabilities List of capabilities keyed by the capability name, e.g. [ 'edit_posts', 'delete_posts' ].
+     * @param string $display_name Role display name.
+     * @param mixed  $capabilities List of capabilities keyed by the capability name, e.g. ['edit_posts', 'delete_posts'].
      *                             You can specify the ID of an existing role as the value.
      *                             In this case, the capabilities of the specified role are copied to the new one.
      */
-    public static function register(string $role, string $display_name, $capabilities)
+    public static function register(string $role, string $display_name, mixed $capabilities): bool
     {
         $roles = self::fetch();
-        if (empty($role) || isset($roles[$role])) {
-            return new Error('roles-register', t('Sorry, the role with this ID already exists.'));
-        }
-
-        if (is_string($capabilities)) {
-            if (isset($roles[$capabilities])) {
-                $capabilities = $roles[$capabilities]['capabilities'];
-            } else {
-                return new Error('roles-register', t('You are trying to copy capabilities from a non exists role.'));
+        if (!isset($roles[$role])) {
+            if (is_string($capabilities)) {
+                if (isset($roles[$capabilities])) {
+                    $capabilities = $roles[$capabilities]['capabilities'];
+                } else {
+                    throw new InvalidArgumentException(
+                        t('You are trying to copy capabilities from a non exists role.')
+                    );
+                }
             }
+
+            self::$roles[$role] = [
+                'name'         => $display_name,
+                'capabilities' => $capabilities,
+            ];
+
+            return true;
         }
-
-        self::$roles[$role] = [
-            'name'         => $display_name,
-            'capabilities' => $capabilities,
-        ];
-
-        return true;
+        return false;
     }
 
     /**
      * Retrieve role object by name.
      *
      * @param string $role
-     * @return object role object if found, null if the role does not exist
+     * @return null|array Role object if found, null if the role does not exist
      */
-    public static function get(string $role)
+    public static function get(string $role): ?array
     {
         $roles = self::fetch();
         if (isset($roles[$role])) {
@@ -103,13 +104,13 @@ class Roles
      *
      * @param string $role
      * @param mixed $capability Single capability or capabilities array
-     * @return bool|Error
+     * @return bool
      */
-    public static function set(string $role, mixed $capability)
+    public static function set(string $role, mixed $capability): bool
     {
         $roles = self::fetch();
         if (! isset($roles[$role])) {
-            return new Error('roles-set', t('You are trying set capability for non exists role.'));
+            throw new InvalidArgumentException(t('You are trying set capability for non exists role.'));
         }
 
         if (is_array($capability)) {
@@ -126,13 +127,13 @@ class Roles
      *
      * @param string $role
      * @param string $capability
-     * @return bool|Error
+     * @return bool
      */
-    public static function unset(string $role, string $capability)
+    public static function unset(string $role, string $capability): bool
     {
         $roles = self::fetch();
         if (! isset($roles[$role])) {
-            return new Error('roles-unset', t('You are trying unset capability for non exists role.'));
+            throw new InvalidArgumentException(t('You are trying unset capability for non exists role.'));
         }
 
         unset($roles[$role]['capabilities'][$capability]);
@@ -160,7 +161,7 @@ class Roles
      * @param $capabilities
      * @return bool
      */
-    public static function has_cap(string $role, $capabilities): bool
+    public static function hasCap(string $role, $capabilities): bool
     {
         $roles = self::fetch();
         $role  = $roles[$role] ?? [];

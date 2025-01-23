@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Expansa\Log;
 
-use Expansa\Container\Container;
+use Expansa\Log\Contracts\LoggerInterface;
 use Expansa\Log\Formatter\TelegramFormatter;
 use Expansa\Log\Handlers\FileHandler;
 use Expansa\Log\Handlers\RotatingFileHandler;
 use Expansa\Log\Handlers\TelegramHandler;
-use Expansa\Log\Contracts\LoggerInterface;
 
 class LogManager implements LoggerInterface
 {

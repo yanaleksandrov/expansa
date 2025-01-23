@@ -17,6 +17,6 @@ class Debug extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Pulse\Debug';
+        return '\Expansa\Debug\Debug';
     }
 }

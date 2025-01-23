@@ -60,30 +60,38 @@ if (!function_exists('view')) {
     }
 }
 
+if (!function_exists('metric')) {
+    function metric(): Expansa\Debug\Metric
+    {
+        static $metric;
+        return $metric ?? ($metric = new Expansa\Debug\Metric());
+    }
+}
+
 if (!function_exists('redirect')) {
-    function redirect(string $location, int $status = 302, string $redirectBy = 'Expansa'): void
+    function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): bool
     {
         /**
          * Filters the redirect location.
          *
-         * @param string $location the path or URL to redirect to
+         * @param string $to the path or URL to redirect to
          * @param int    $status   the HTTP response status code to use
          */
-        $location = Expansa\Hook::call('expansaRedirectLocation', $location, $status);
+        $to = Expansa\Hook::call('expansaRedirectLocation', $to, $status);
 
         /**
          * Filters the redirect HTTP response status code to use.
          *
          * @param int    $status   the HTTP response status code to use
-         * @param string $location the path or URL to redirect to
+         * @param string $to the path or URL to redirect to
          */
-        $status = Expansa\Hook::call('expansaRedirectStatus', $status, $location);
+        $status = Expansa\Hook::call('expansaRedirectStatus', $status, $to);
 
-        if ($location) {
+        if ($to) {
             if ($status < 300 || 399 < $status) {
                 new \Expansa\Error('view-redirect', t('HTTP redirect status code must be a redirection code, 3xx.'));
 
-                return;
+                return false;
             }
 
             /**
@@ -93,14 +101,16 @@ if (!function_exists('redirect')) {
              *
              * @param string $redirectBy The application doing the redirect.
              * @param int    $status     Status code to use.
-             * @param string $location   The path to redirect to.
+             * @param string $to   The path to redirect to.
              */
-            $redirectBy = Expansa\Hook::call('expansaRedirectBy', $redirectBy, $status, $location);
+            $redirectBy = Expansa\Hook::call('expansaRedirectBy', $redirectBy, $status, $to);
             if (is_string($redirectBy)) {
                 header("X-Redirect-By: $redirectBy");
             }
 
-            header("Location: $location", true, $status);
+            header("Location: $to", true, $status);
         }
+
+        return true;
     }
 }

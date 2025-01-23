@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Dashboard;
 
+use InvalidArgumentException;
 use Expansa\{
-    I18n,
-    Error,
     Patterns,
     Safe,
 };
@@ -38,19 +37,19 @@ class Form
      * @param array $attributes Html attributes list.
      * @param array $fields     Fields list. Contains a nested array of arrays.
      * @return string
-     *
-     * @since 2025.1
      */
     public static function enqueue(string $uid, array $attributes = [], array $fields = []): string
     {
         $uid = Safe::id($uid);
         if (! $uid) {
-            new Error('form-register', t('The form with %s ID is empty.', $uid));
+            throw new InvalidArgumentException(t('The form with :formUid ID is empty.', $uid));
         }
 
         $form = self::init($uid);
         if (isset($form->uid)) {
-            new Error('form-register', t('The form identified by %s already exists! Potential conflicts detected!', $uid));
+            throw new InvalidArgumentException(
+                t('The form identified by %s already exists! Potential conflicts detected!', $uid)
+            );
         }
 
         $form->uid        = $uid;
@@ -97,12 +96,10 @@ class Form
      * Get form markup.
      *
      * @param string $path               Path to register form.
-     * @param bool $without_form_wrapper
+     * @param bool $withoutFormWrapper
      * @return string
-     *
-     * @since 2025.1
      */
-    public static function get(string $path, bool $without_form_wrapper = false): string
+    public static function get(string $path, bool $withoutFormWrapper = false): string
     {
         $content = '';
 
@@ -112,11 +109,13 @@ class Form
             $content = trim($form->parseFields($form->fields ?? []));
 
             // return only the contents of the form without its wrapper
-            if (! $without_form_wrapper && $content) {
+            if (! $withoutFormWrapper && $content) {
                 return $form->wrap($form->attributes, $content);
             }
         } else {
-            new Error('form-view', t('From::enqueue located along the "%s" path should return the form ID.', $path));
+            throw new InvalidArgumentException(
+                t('From::enqueue located along the "%s" path should return the form ID.', $path)
+            );
         }
 
         return $content;
@@ -126,14 +125,14 @@ class Form
      * Output form markup.
      *
      * @param string $path               Path to register form.
-     * @param bool $without_form_wrapper
+     * @param bool $withoutFormWrapper
      * @return void
      *
      * @since 2025.1
      */
-    public static function print(string $path, bool $without_form_wrapper = false): void
+    public static function print(string $path, bool $withoutFormWrapper = false): void
     {
-        echo self::get($path, $without_form_wrapper);
+        echo self::get($path, $withoutFormWrapper);
     }
 
     /**
@@ -141,14 +140,12 @@ class Form
      *
      * @param array $field
      * @return void
-     *
-     * @since 2025.1
      */
     public function insert(array $field): void
     {
         $name = Safe::name($field['name'] ?? '');
         if (empty($name)) {
-            new Error('form-add-field', t('It is not possible to add a field with an empty "name".'));
+            throw new InvalidArgumentException(t('It is not possible to add a field with an empty "name"'));
         }
 
         $this->insertField($this->fields, $field, $this);
