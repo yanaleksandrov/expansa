@@ -21,7 +21,7 @@ module.exports = {
     ...parseEntries('scss/**.scss', 'css'),
   },
   output: {
-    path: path.resolve(__dirname, 'expansa/dashboard/assets'),
+    path: path.resolve(__dirname, 'expansa-cms/dashboard/assets'),
     iife: false,
   },
   optimization: {
