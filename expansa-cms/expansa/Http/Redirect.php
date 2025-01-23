@@ -17,10 +17,9 @@ final class Redirect
 
     private ?string $to;
 
-    public function __construct(
-        private string $redirectBy = 'Expansa',
-        private int $status = 302,
-    ) {} // phpcs:ignore
+    private string $redirectBy = 'Expansa';
+
+    private int $status = 302;
 
     public function await(int $seconds = 7): void
     {
@@ -103,8 +102,8 @@ final class Redirect
                 header("X-Redirect-By: $this->redirectBy");
             }
 
-           // header("Location: $this->to", true, $this->status);
-            //exit;
+            header("Location: $this->to", true, $this->status);
+            exit;
         }
 
         return $this;

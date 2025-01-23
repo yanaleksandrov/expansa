@@ -7,7 +7,6 @@ namespace Dashboard;
 use Expansa\Api;
 use Expansa\Patterns\Singleton;
 use Expansa\Route;
-use Expansa\Url;
 
 /**
  *
@@ -53,7 +52,7 @@ final class Install
              * @since 2025.1
              */
             if ($slug !== 'install') {
-                redirect(Url::site('install'));
+                redirect('install');
             }
 
             /**
