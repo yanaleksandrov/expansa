@@ -113,10 +113,10 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         return $this;
     }
 
-    public function copy(string $to): File
+    public function copy(string $name): File
     {
         if ($this->exists) {
-            $newPath = sprintf('%s/%s.%s', $to, $this->filename, $this->extension);
+            $newPath = sprintf('%s/%s.%s', $this->dirpath, $name, $this->extension);
             $dirPath = dirname($newPath);
 
             if (!is_dir($dirPath) && !mkdir($dirPath, 0755, true)) {
@@ -199,6 +199,11 @@ class File extends EntryHandler implements CommonInterface, FileInterface
         }
 
         return $this;
+    }
+
+    public function get(string $path): File
+    {
+        return new self($path);
     }
 
     public function rewrite(array $content): File

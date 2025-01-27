@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-use app\Option;
 use app\Post;
 use app\Slug;
 use app\User;
 use Expansa\View;
 use Expansa\Extensions;
 use Expansa\Hook;
-use Expansa\I18n;
 use Expansa\Is;
 use Expansa\Route;
 
@@ -91,21 +89,18 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
 Route::get('/{slug}', function ($slug) {
     $query = new app\Query();
 
-    $slug = Slug::get($slug);
-
-    $entityId    = $slug['entity_id'] ?? 0;
-    $entityTable = $slug['entity_table'] ?? '';
-    if (! $slug && ( ! $entityId || ! $entityTable )) {
+    $entity      = Slug::get($slug);
+    $entityId    = $entity['entity_id'] ?? 0;
+    $entityTable = $entity['entity_table'] ?? '';
+    if (! $entity && ( ! $entityId || ! $entityTable )) {
         Route::trigger404();
     }
 
     $entity = Post::get($entityTable, $entityId);
-    echo '<pre>';
-    var_dump($entityTable);
-    print_r($slug);
-    print_r($entity);
-    var_dump(\Expansa\Error::get());
-    echo '</pre>';
+//    echo '<pre>';
+//    print_r($slug);
+//    print_r($entity);
+//    echo '</pre>';
 
     if (empty($slug)) {
         $query->set('isHome', true);
@@ -120,80 +115,10 @@ Route::get('/{slug}', function ($slug) {
         redirect('dashboard');
     }
 
-    ?>
-	<!DOCTYPE html>
-	<html lang="<?php echo I18n::locale(); ?>">
-	<head>
-		<title>Menu</title>
-		<meta charset="<?php Option::attr('charset', 'UTF-8'); ?>">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/images/favicons/apple-touch-icon.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="/dashboard/assets/images/favicons/favicon-32x32.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="/dashboard/assets/images/favicons/favicon-16x16.png">
-		<link rel="manifest" href="/dashboard/assets/images/favicons/site.webmanifest">
-		<link rel="mask-icon" href="/dashboard/assets/images/favicons/safari-pinned-tab.svg" color="#5bbad5">
-        <?php
-        /**
-         * Prints scripts or data before the closing body tag on the dashboard.
-         *
-         * @since 2025.1
-         */
-        Hook::call('expansa_header');
-        ?>
-	</head>
-	<body>
-    <?php
-    /**
-     * Prints scripts or data before the closing body tag on the dashboard.
-     *
-     * @since 2025.1
-     */
-    Hook::call('expansa_footer');
-    ?>
-	<script type="text/javascript">
-        new Promise(resolve => {
-            function userActionHandler() {
-                resolve();
-
-                document.removeEventListener('mousemove', userActionHandler);
-                document.removeEventListener('touchstart', userActionHandler);
-                document.removeEventListener('scroll', userActionHandler);
-            }
-
-            document.addEventListener('mousemove', userActionHandler);
-            document.addEventListener('touchstart', userActionHandler);
-            document.addEventListener('scroll', userActionHandler);
-        }).then(function() {
-            (function(m, e, t, r, i, k, a) {
-                m[i] = m[i] || function() {
-                    (m[i].a = m[i].a || []).push(arguments)
-                };
-                m[i].l = 1 * new Date();
-                for (var j = 0; j < document.scripts.length; j++) {
-                    if (document.scripts[j].src === r) {
-                        return;
-                    }
-                }
-                k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-            })(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-
-            ym(45044579, "init", {
-                clickmap: true,
-                trackLinks: true,
-                accurateTrackBounce: true
-            });
-        });
-	</script>
-	</body>
-	</html>
-    <?php
+    echo view('index.blade', [
+        'slug' => $slug,
+    ]);
 });
-
-//  Route::set404( function() {
-//      header( 'HTTP/1.1 404 Not Found' );
-//
-//      echo 'Page not found 404';
-//  } );
 
 /**
  * Launch routing.

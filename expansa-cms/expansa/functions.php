@@ -78,3 +78,19 @@ if (!function_exists('redirect')) {
         return $redirect->redirect($to, $status, $redirectBy);
     }
 }
+
+if (! function_exists('tree')) {
+    /**
+     * Print data of tree structure.
+     *
+     * @param string   $name
+     * @param callable $function
+     * @return mixed
+     */
+    function tree(string $name, callable $function): string
+    {
+        ob_start();
+        \Expansa\Builders\Tree::view($name, $function);
+        return ob_get_clean();
+    }
+}

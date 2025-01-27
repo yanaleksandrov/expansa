@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace app;
+namespace Expansa\Builders;
 
-use InvalidArgumentException;
-use Expansa\Patterns\Singleton;
 use Expansa\Safe;
 use Expansa\Support\Arr;
+use Expansa\Patterns\Singleton;
+use InvalidArgumentException;
 
 /**
  * A class for displaying various tree-like structures.
  * Use it for output a tree of menu items, comments, taxonomies & many more.
  */
-final class Tree
+class Tree
 {
     use Singleton;
 

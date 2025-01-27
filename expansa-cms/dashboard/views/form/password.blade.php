@@ -50,7 +50,7 @@ $attributes = [
 	<div class="{{ $labelClass }}">
 		{!! $label !!}
 		@if($generator)
-			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = $password.generate(); $dispatch('input')"><?php t( 'Generate' ); ?></div>
+			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = $password.generate(); $dispatch('input')">{{ t( 'Generate' ) }}</div>
 		@endif
 	</div>
 	<div class="field-item">
@@ -59,7 +59,7 @@ $attributes = [
 			<i class="ph" :class="show ? 'ph-eye-closed' : 'ph-eye'" @click="show = $password.switch(show)"></i>
 		@endif
 		@if($copy)
-			<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" x-copy="{{ $prop }}"></i>
+			<i class="ph ph-copy" title="{{ t( 'Copy' ) }}" x-copy="{{ $prop }}"></i>
 		@endif
 	</div>
 	@if($instruction)

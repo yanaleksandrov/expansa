@@ -21,7 +21,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			<div class="dg g-2 p-4">
 				<?php
 				echo view(
-					'views/form/select',
+					'form/select',
 					[
 						'type'        => 'select',
 						'name'        => 'menu-editing',
@@ -68,7 +68,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			<div class="df fww g-2 p-6">
 				<?php
 				echo view(
-					'views/form/input',
+					'form/input',
 					[
 						'type'        => 'text',
 						'name'        => 'menu-name',
@@ -91,7 +91,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				);
 				echo view(
-					'views/form/select',
+					'form/select',
 					[
 						'type'        => 'select',
 						'name'        => 'menu-location',
@@ -122,7 +122,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				);
 				echo view(
-					'views/form/submit',
+					'form/submit',
 					[
 						'type'        => 'text',
 						'name'        => 'menu-create',

@@ -43,7 +43,7 @@ use Dashboard\Form;
 						<template x-if="!values.length">
 							<?php
 							echo view(
-								'views/global/state',
+								'global/state',
 								[
 									'icon'        => 'empty-pack',
 									'class'       => 'dg jic m-auto t-center p-8 mw-320',

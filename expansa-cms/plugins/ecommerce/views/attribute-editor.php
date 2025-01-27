@@ -33,7 +33,7 @@ use Expansa\Url;
 				<div class="attributes-list">
 					<?php
 					echo view(
-						'views/form/input',
+						'form/input',
 						[
 							'type'        => 'text',
 							'name'        => 'value',
@@ -73,7 +73,7 @@ use Expansa\Url;
 						<template x-if="!values.length">
 							<?php
 							echo view(
-								'views/global/state',
+								'global/state',
 								[
 									'icon'        => 'empty-pack',
 									'class'       => 'dg jic m-auto t-center p-8 mw-320',

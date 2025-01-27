@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace app\Post;
 
-use app\Tree;
+use Expansa\Builders\Tree;
 use Expansa\Db;
 use Expansa\Error;
 use Expansa\Hook;

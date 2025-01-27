@@ -42,14 +42,12 @@ class Form
     {
         $uid = Safe::id($uid);
         if (! $uid) {
-            throw new InvalidArgumentException(t('The form with :formUid ID is empty.', $uid));
+            throw new InvalidArgumentException(t('The form with ":formUid" ID is empty.', $uid));
         }
 
         $form = self::init($uid);
         if (isset($form->uid)) {
-            throw new InvalidArgumentException(
-                t('The form identified by %s already exists! Potential conflicts detected!', $uid)
-            );
+            //throw new InvalidArgumentException(t('The form identified by ":formUid" already exists.', $uid));
         }
 
         $form->uid        = $uid;

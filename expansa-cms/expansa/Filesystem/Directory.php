@@ -9,7 +9,6 @@ use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use Expansa\Filesystem\Contracts\CommonInterface;
 use Expansa\Filesystem\Contracts\DirectoryInterface;
-use Expansa\Filesystem\Exception\NotExistsException;
 
 /**
  * Class Directory.
@@ -136,16 +135,13 @@ class Directory extends EntryHandler implements CommonInterface, DirectoryInterf
         return $this;
     }
 
-    /**
-     * @throws NotExistsException
-     */
-    public function copy(string $to): Directory
+    public function copy(string $name): Directory
     {
         if (!is_dir($this->path)) {
             return $this;
         }
 
-        $to = $to . DIRECTORY_SEPARATOR . basename($to);
+        $to = $this->dirpath . DIRECTORY_SEPARATOR . $name;
         if (!is_dir($to)) {
             mkdir($to, 0755, true);
         }
@@ -231,5 +227,10 @@ class Directory extends EntryHandler implements CommonInterface, DirectoryInterf
             }
         }
         return $this;
+    }
+
+    public function get(string $path): Directory
+    {
+        return new self($path);
     }
 }

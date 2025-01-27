@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 Hook::add( 'expansa_dashboard_footer', function() {
-	echo view( 'views/dialogs/posts-editor' );
+	echo view( 'dialogs/posts-editor' );
 } );
 ?>
 <div class="expansa-main">

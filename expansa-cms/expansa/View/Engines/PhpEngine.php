@@ -18,13 +18,11 @@ class PhpEngine extends Engine
         $obLevel = ob_get_level();
 
         ob_start();
-
         try {
             $this->require($path, $data);
         } catch (Throwable $e) {
             $this->handleException($e, $obLevel);
         }
-
         return trim(ob_get_clean());
     }
 

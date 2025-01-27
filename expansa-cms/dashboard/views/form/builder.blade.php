@@ -19,7 +19,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		<div class="builder-header">
 			<?php
 			echo view(
-				'views/form/select',
+				'form/select',
 				[
 					'type'        => 'select',
 					'name'        => 'type',
@@ -50,7 +50,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 				],
 			);
 			echo view(
-				'views/form/input',
+				'form/input',
 				[
 					'type'        => 'text',
 					'name'        => 'label',
@@ -72,7 +72,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 				],
 			);
 			echo view(
-				'views/form/input',
+				'form/input',
 				[
 					'type'        => 'text',
 					'name'        => 'name',
@@ -94,7 +94,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 				],
 			);
 			echo view(
-				'views/form/input',
+				'form/input',
 				[
 					'type'        => 'text',
 					'name'        => 'default',

@@ -17,7 +17,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 <div class="expansa-main">
 	<?php
 	echo view(
-		'views/table/header',
+		'table/header',
 		[
 			'title' => t( 'Themes' ),
 		]

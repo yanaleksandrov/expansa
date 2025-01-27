@@ -1,6 +1,6 @@
 <?php
 
-use app\Tree;
+use Expansa\Builders\Tree;
 use Expansa\Disk;
 
 /**

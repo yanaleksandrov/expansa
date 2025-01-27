@@ -17,3 +17,7 @@ if ( is_callable( $callback ) ) {
 	call_user_func( $callback );
 	echo ob_get_clean();
 }
+
+if (is_string($callback)) {
+    echo $callback;
+}

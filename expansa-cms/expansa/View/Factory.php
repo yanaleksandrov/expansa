@@ -43,7 +43,7 @@ class Factory
         $file = $this->finder->find($view);
 
         if (is_null($file)) {
-            throw new ViewException("File $view does not exist");
+            throw new ViewException("File '$view' does not exist!");
         }
 
         $data = array_merge($this->shared, $data);

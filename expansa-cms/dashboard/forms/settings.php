@@ -15,7 +15,7 @@ return Dashboard\Form::enqueue(
 	[
 		'class'   => 'tab tab--vertical',
 		'x-data'  => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
-		'@change' => '$ajax("options/update")',
+		'@change' => '$ajax("option/update")',
 	],
 	[
 		[

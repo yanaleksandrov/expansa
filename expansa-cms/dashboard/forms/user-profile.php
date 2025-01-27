@@ -31,7 +31,7 @@ return Dashboard\Form::enqueue(
                 <div class="dg g-1 p-7 sm:p-5 pb-4 sm:pb-4 bg-gray-lt">
                     <?php
                     echo view(
-                        'views/form/image',
+                        'form/image',
                         [
                             'type'        => 'image',
                             'name'        => 'avatar',
@@ -522,7 +522,7 @@ return Dashboard\Form::enqueue(
                             'type'     => 'custom',
                             'callback' => function () {
                                 Hook::add('expansa_dashboard_footer', function () {
-                                    echo view('views/dialogs/api-keys-manager');
+                                    echo view('dialogs/api-keys-manager');
                                 });
                                 ?>
                                 <div class="dg g-2 ga-4">

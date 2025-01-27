@@ -11,11 +11,13 @@ interface CommonInterface
 {
     public function clean(): Directory|File;
 
-    public function copy(string $to): Directory|File;
+    public function copy(string $name): Directory|File;
 
     public function move(string $to): Directory|File;
 
     public function rename(string $name): Directory|File;
+
+    public function get(string $path): Directory|File;
 
     public function delete(): bool;
 

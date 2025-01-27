@@ -6,7 +6,6 @@ namespace dashboard\app\Api;
 
 use app\Option;
 use app\User;
-use Expansa\Debug;
 use Expansa\Json;
 use Expansa\Db;
 use Expansa\Disk;
@@ -31,64 +30,54 @@ class System
         $datas = [];
         $requirements = ['connection', 'pdo', 'curl', 'mbstring', 'gd', 'memory', 'php', 'mysql'];
 
+        // Basic constants for the environment
+        require_once EX_PATH . 'env.example.php';
+
         $data = Safe::data($_POST, [
             'database' => 'trim',
             'username' => 'trim',
             'password' => 'trim',
             'host'     => 'trim',
             'prefix'   => 'trim',
-            'driver'   => 'trim:mysql',
+            'driver'   => 'trim:' . EX_DB_DRIVER,
+            'charset'  => 'trim:' . EX_DB_CHARSET,
+            'port'     => 'trim:' . EX_DB_PORT,
+            'error'    => 'trim:' . EX_DB_ERROR_MODE,
         ])->apply();
 
         try {
-            $connection  = Db::connection([
-                'driver'   => $data['driver'],
-                'database' => $data['database'],
-                'username' => $data['username'],
-                'password' => $data['password'],
-                'host'     => $data['host'],
-                'prefix'   => $data['prefix'],
-                'charset'  => $data['driver'],
-                'port'     => 21,
-                'error'    => \PDO::ERRMODE_SILENT,
-            ]);
-
-            foreach ($requirements as $requirement) {
-                $datas[$requirement] = match ($requirement) {
-                    'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
-                    'mysql'      => version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>='),
-                    'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
-                    'connection' => $connection->version(),
-                    default      => extension_loaded($requirement),
-                };
-            }
-
-            exit($datas);
+            $connection = new \Expansa\Database\Query\Builder($data);
         } finally {
-            foreach ($requirements as $requirement) {
-                $datas[$requirement] = match ($requirement) {
-                    'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
-                    'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
-                    'mysql',
-                    'connection' => false,
-                    default      => extension_loaded($requirement),
-                };
+            $mysql     = false;
+            $connected = false;
+            if (! empty($connection)) {
+                $mysql     = version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>=');
+                $connected = $connection instanceof \Expansa\Database\Query\Builder;
             }
-
             header('Content-Type: application/json; charset=utf-8');
-            exit(
-                Json::encode(
-                    [
-                        'status'    => 200,
-                        'benchmark' => metric()->time(),
-                        'memory'    => metric()->memory(),
-                        'data'      => $datas,
-                        'errors'    => [],
-                    ],
-                    true,
-                    true
-                )
+
+            echo Json::encode(
+                [
+                    'status'    => 200,
+                    'benchmark' => metric()->time(),
+                    'memory'    => metric()->memory(),
+                    'data'      => array_map(
+                        fn($requirement) => match ($requirement) {
+                            'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
+                            'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
+                            'mysql'      => $mysql,
+                            'connection' => $connected,
+                            default      => extension_loaded($requirement),
+                        },
+                        array_combine($requirements, $requirements)
+                    ),
+                    'errors'    => [],
+                ],
+                true,
+                true
             );
+
+            exit();
         }
     }
 
@@ -108,7 +97,7 @@ class System
             [
                 'site.name'     => 'trim',
                 'site.tagline'  => 'trim',
-                'site.url'      => "trim:{$siteurl}|url",
+                'site.url'      => "trim:$siteurl|url",
                 'user.login'    => 'trim',
                 'user.email'    => 'email',
                 'user.password' => 'trim',
@@ -127,20 +116,8 @@ class System
          * @since 2025.1
          */
         $config = EX_PATH . 'env.php';
-        Disk::file(EX_PATH . 'env-sample.php')->copy('env')->rewrite(
-            array_combine(
-                [
-                    'db.name',
-                    'db.username',
-                    'db.password',
-                    'db.host',
-                    'db.prefix',
-                ],
-                $database
-            )
-        );
         if (! file_exists($config)) {
-            Disk::file(EX_PATH . 'env-sample.php')->copy('env')->rewrite(
+            Disk::file(EX_PATH . 'env.example.php')->copy('env')->get(EX_PATH . 'env.php')->rewrite(
                 array_combine(
                     [
                         'db.name',

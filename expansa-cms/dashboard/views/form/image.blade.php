@@ -39,7 +39,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 $prop = Safe::prop( $attributes['name'] ?? $name );
 
 Hook::add( 'expansa_dashboard_footer', function() {
-	echo view( 'views/dialogs/selfie-maker' );
+	echo view( 'dialogs/selfie-maker' );
 } );
 ?>
 <div class="<?php echo $class; ?>">

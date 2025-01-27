@@ -56,7 +56,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			<?php
 			if ( $reviews > 0 ) :
 				echo view(
-					'views/global/rating',
+					'global/rating',
 					[
 						'class'   => 'df aic g-1',
 						'rating'  => $rating,

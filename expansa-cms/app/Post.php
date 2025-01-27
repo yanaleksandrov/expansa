@@ -146,7 +146,7 @@ class Post
     {
         $type = Type::get($type);
         if (! $type instanceof Type) {
-            throw new LogicException(t('Post type is not registered.'));
+            return null;
         }
 
         $data = Db::get($type->table, '*', [ $field => $value ]);

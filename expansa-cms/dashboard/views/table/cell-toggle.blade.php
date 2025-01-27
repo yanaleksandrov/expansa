@@ -21,7 +21,7 @@ $prop  = Safe::prop($__data['key'] ?? [] );
 <div class="<?php echo $class; ?>">
 	<?php
 	echo view(
-		'views/form/checkbox',
+		'form/checkbox',
 		[
 			'type'        => 'checkbox',
 			'name'        => 'uid',

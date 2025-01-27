@@ -4,13 +4,13 @@ namespace dashboard\app\Api;
 
 use Expansa\Support\Arr;
 
-class Options
+class Option
 {
 
 	/**
 	 * Endpoint name.
 	 */
-	public string $endpoint = 'posts';
+	public string $endpoint = 'option';
 
 	/**
 	 * Create item.

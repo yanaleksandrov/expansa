@@ -16,7 +16,7 @@ const EX_DB_HOST             = 'db.host';
 const EX_DB_PREFIX           = 'db.prefix';
 const EX_DB_CHARSET          = 'utf8mb4';
 const EX_DB_COLLATION        = 'utf8mb4_general_ci';
-const EX_DB_PORT             = 3306;
+const EX_DB_PORT             = 21;
 const EX_DB_MAX_INDEX_LENGTH = 191;
 // It is disabled by default for better performance.
 const EX_DB_LOGGING          = false;
@@ -56,7 +56,7 @@ const EX_HASH_KEY  = 'hashkey';
  */
 const EX_DEBUG     = true;
 const EX_DEBUG_LOG = true;
-const EX_DEBUG_VIEW = __DIR__ . '/dashboard/debug.php';
+const EX_DEBUG_VIEW = __DIR__ . '/dashboard/views/debug.blade.php';
 
 /**
  * DKIM (DomainKeys Identified Mail) settings for signing outgoing emails.

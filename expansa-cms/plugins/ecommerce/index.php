@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use app\Post\Type;
-use app\Tree;
 use Expansa\Asset;
+use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Hook;
 use Expansa\Is;

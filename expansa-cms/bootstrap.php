@@ -19,6 +19,14 @@ require_once EX_PATH . 'autoload.php';
 // Register base Expansa functions.
 require_once EX_PATH . 'expansa/functions.php';
 
+// Basic constants for the environment
+if (is_file(EX_PATH . 'env.php')) {
+    require_once EX_PATH . 'env.php';
+}
+
+// Start benchmark timer
+metric()->start();
+
 // Generate CSRF token.
 (new Csrf())->generate('token');
 
@@ -32,16 +40,10 @@ if (! Is::installed()) {
 require_once EX_PATH . 'dashboard/views/error.blade.php';
 
 Debug::start(EX_DEBUG_VIEW, function () {
-    // Start benchmark timer
-    metric()->start();
-
     // Determine if the application is in maintenance mode...
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
         require $maintenance;
     }
-
-    // Basic constants for the environment
-    require_once EX_PATH . 'env.php';
 
     // Application default data
     require_once EX_PATH . 'config/countries.php';

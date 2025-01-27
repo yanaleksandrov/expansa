@@ -45,7 +45,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	<div class="themes-data"><?php
 		if ( $reviews > 0 ) {
 			echo view(
-				'views/global/rating',
+				'global/rating',
 				[
 					'rating'  => $rating,
 					'reviews' => $reviews,

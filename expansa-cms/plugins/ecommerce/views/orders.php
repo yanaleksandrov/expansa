@@ -14,7 +14,7 @@ use Expansa\Url;
 ?>
 <div class="expansa-main">
     <?php
-    echo view('views/table/header', [
+    echo view('table/header', [
         'title' => t('Orders'),
     ]);
     ?>

@@ -50,7 +50,7 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 
 	ob_start();
 	?>
-	<label class="field-item">
+	<div class="field-item">
 		<?php if ( $icon ) : ?>
 			<span class="field-icon"><i class="<?php echo $icon; ?>"></i></span>
 		<?php endif; ?>
@@ -62,7 +62,7 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 				<span class="field-instruction"><?php echo $instruction; ?></span>
 			<?php endif; ?>
 		</span>
-	</label>
+	</div>
 	<?php
 	return ob_get_clean();
 };

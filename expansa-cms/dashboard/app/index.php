@@ -2,8 +2,8 @@
 
 namespace Dashboard;
 
-use app\Tree;
 use Expansa\Asset;
+use Expansa\Builders\Tree;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;
@@ -93,7 +93,7 @@ new class
          *
          * @since 2025.1
          */
-        Tree::attach('core-panel-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-panel-menu', fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'users',
@@ -211,52 +211,50 @@ new class
          *
          * @since 2025.1
          */
-        Tree::attach('dashboard-menu-bar', function (Tree $tree) {
-            $tree->addItems(
+        Tree::attach('dashboard-menu-bar', fn (Tree $tree) => $tree->addItems(
+            [
                 [
-                    [
-                        'id'           => 'website',
-                        'url'          => '/',
-                        'title'        => t('Expansa'),
-                        'capabilities' => ['manage_options'],
-                        'icon'         => 'ph ph-user-focus',
-                        'position'     => 10,
-                    ],
-                    [
-                        'id'           => 'updates',
-                        'url'          => 'updates',
-                        'title'        => 0,
-                        'capabilities' => ['manage_options'],
-                        'icon'         => 'ph ph-clock-clockwise',
-                        'position'     => 20,
-                    ],
-                    [
-                        'id'           => 'comments',
-                        'url'          => 'comments',
-                        'title'        => 0,
-                        'capabilities' => ['manage_options'],
-                        'icon'         => 'ph ph-chats',
-                        'position'     => 30,
-                    ],
-                    [
-                        'id'           => 'new',
-                        'url'          => 'new',
-                        'title'        => t('New'),
-                        'capabilities' => ['manage_options'],
-                        'icon'         => 'ph ph-plus',
-                        'position'     => 40,
-                    ],
-                    [
-                        'id'           => 'site-health',
-                        'url'          => 'site-health',
-                        'title'        => '0Q 0.001s 999kb',
-                        'capabilities' => ['manage_options'],
-                        'icon'         => 'ph ph-monitor',
-                        'position'     => 50,
-                    ],
-                ]
-            );
-        });
+                    'id'           => 'website',
+                    'url'          => '/',
+                    'title'        => t('Expansa'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-user-focus',
+                    'position'     => 10,
+                ],
+                [
+                    'id'           => 'updates',
+                    'url'          => 'updates',
+                    'title'        => 0,
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-clock-clockwise',
+                    'position'     => 20,
+                ],
+                [
+                    'id'           => 'comments',
+                    'url'          => 'comments',
+                    'title'        => 0,
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-chats',
+                    'position'     => 30,
+                ],
+                [
+                    'id'           => 'new',
+                    'url'          => 'new',
+                    'title'        => t('New'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-plus',
+                    'position'     => 40,
+                ],
+                [
+                    'id'           => 'site-health',
+                    'url'          => 'site-health',
+                    'title'        => '0Q 0.001s 999kb',
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-monitor',
+                    'position'     => 50,
+                ],
+            ]
+        ));
 
         /**
          * Register menu in left panel.

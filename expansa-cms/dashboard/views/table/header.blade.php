@@ -50,7 +50,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					    </button>
 					    <?php
 					    echo view(
-						    'views/form/number',
+						    'form/number',
 						    [
 							    'type'        => 'number',
 							    'name'        => 'page',
@@ -78,7 +78,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 				    <div class="df aic g-1">
 					    <?php
 					    echo view(
-						    'views/form/input',
+						    'form/input',
 						    [
 							    'type'        => 'search',
 							    'name'        => 's',
@@ -119,7 +119,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					    <span class="badge badge--round badge--icon badge--lg"><i class="ph ph-arrows-left-right"></i></span>
 					    <?php
 					    echo view(
-						    'views/form/select',
+						    'form/select',
 						    [
 							    'type'        => 'select',
 							    'name'        => 'language',
@@ -143,7 +143,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					    );
 
 					    echo view(
-						    'views/form/select',
+						    'form/select',
 						    [
 							    'type'        => 'select',
 							    'name'        => 'project',

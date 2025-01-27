@@ -16,8 +16,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 Hook::add( 'expansa_dashboard_footer', function() {
-	echo view( 'views/dialogs/media-editor' );
-	echo view( 'views/dialogs/media-uploader' );
+	echo view( 'dialogs/media-editor' );
+	echo view( 'dialogs/media-uploader' );
 } );
 ?>
 <div class="expansa-main">

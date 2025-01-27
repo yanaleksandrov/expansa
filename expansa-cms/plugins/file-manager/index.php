@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use app\Tree;
 use Expansa\Asset;
+use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Hook;
 use Expansa\Is;
@@ -35,7 +35,7 @@ return new class extends Plugin
 
         Asset::enqueue('file-manager', '/plugins/file-manager/assets/css/main.css');
 
-        Tree::attach('core-panel-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-panel-menu', fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'file-manager',
