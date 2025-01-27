@@ -59,7 +59,7 @@ Dashboard\Form::enqueue(
 				?>
 				<div class="progress" :style="'--expansa-progress:' + $wizard.progress().progress"></div>
 				<div class="p-8 pt-7 pb-7 df aic jcsb">
-					<span x-text="$wizard.current().title"><?php t( 'Choose project' ); ?></span>
+					<span x-text="$wizard.current().title"><?php echo t( 'Choose project' ); ?></span>
 					<span class="t-muted">
 						step <strong x-text="$wizard.progress().current">1</strong> from <strong x-text="$wizard.progress().total">2</strong>
 					</span>
@@ -129,7 +129,7 @@ Dashboard\Form::enqueue(
 				?>
 				<!-- buttons -->
 				<div class="p-8 df jcfe g-2">
-					<button type="submit" class="btn btn--primary" :disabled="project.trim() === 'none'" disabled><?php t( 'Run the importer' ); ?></button>
+					<button type="submit" class="btn btn--primary" :disabled="project.trim() === 'none'" disabled><?php echo t( 'Run the importer' ); ?></button>
 				</div>
 				<?php
 			},

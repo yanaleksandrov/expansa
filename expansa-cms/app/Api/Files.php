@@ -1,12 +1,12 @@
 <?php
 
-namespace dashboard\app\Api;
+namespace app\Api;
 
+use dashboard\app\Api\File;
 use Dashboard\Form;
 use Expansa\Csv;
 use Expansa\Disk;
 use Expansa\Safe;
-use Expansa\View;
 
 class Files
 {

@@ -35,7 +35,7 @@ final class Install
          *
          * @since 2025.1
          */
-        Api::configure('/api', sprintf('%sdashboard/app/Api', EX_PATH));
+        Api::configure('/api', sprintf('%sapp/Api', EX_PATH));
 
 
         /**

@@ -30,7 +30,7 @@ Expansa\I18n::configure(
  *
  * @since 2025.1
  */
-Expansa\Api::configure('/api', sprintf('%sapp/Api', EX_DASHBOARD));
+Expansa\Api::configure('/api', sprintf('%sapp/Api', EX_PATH));
 
 /**
  * Load installed and launch active plugins & themes.

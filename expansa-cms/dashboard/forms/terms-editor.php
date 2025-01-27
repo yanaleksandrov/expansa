@@ -17,7 +17,7 @@ return Dashboard\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function() {
 				?>
-				<h6><?php t( 'Add New Category' ); ?></h6>
+				<h6><?php echo t( 'Add New Category' ); ?></h6>
 				<?php
 			},
 		],

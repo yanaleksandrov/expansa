@@ -52,7 +52,7 @@ unset( $attributes['value'] );
 		echo $after;
 		if ( $copy ) {
 			?>
-			<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" @click="$copy(<?php echo $prop; ?>)"></i>
+			<i class="ph ph-copy" title="<?php echo t_attr( 'Copy' ); ?>" @click="$copy(<?php echo $prop; ?>)"></i>
 			<?php
 		}
 		if ( $tooltip ) {

@@ -19,17 +19,17 @@ use Expansa\Url;
 			<div class="attributes-editor">
 				<h5 class="attributes-title">
 					<a class="btn btn--icon btn--sm" href="<?php echo Url::dashboard( '/attributes' ); ?>"><i class="ph ph-arrow-left"></i></a>
-					<span class="fw-600 mr-auto"><?php t( 'Add new attribute' ); ?></span>
-					<button class="btn btn--danger" type="button" hidden x-cloak><?php t( 'Delete' ); ?></button>
-					<button class="btn btn--primary" type="submit" disabled><?php t( 'Save' ); ?></button>
+					<span class="fw-600 mr-auto"><?php echo t( 'Add new attribute' ); ?></span>
+					<button class="btn btn--danger" type="button" hidden x-cloak><?php echo t( 'Delete' ); ?></button>
+					<button class="btn btn--primary" type="submit" disabled><?php echo t( 'Save' ); ?></button>
 				</h5>
 				<div class="attributes-description">
-					<p><?php t( 'Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.' ); ?></p>
+					<p><?php echo t( 'Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.' ); ?></p>
 				</div>
 				<?php Form::print( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
 			</div>
 			<div class="attributes-side">
-				<div x-text="`<?php t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
+				<div x-text="`<?php echo t_attr( ':valuesCount items', '${values.length}' ); ?>`">0 items</div>
 				<div class="attributes-list">
 					<?php
 					echo view(
@@ -61,10 +61,10 @@ use Expansa\Url;
 							<template x-for="(value, i) in values" :key="i">
 								<div class="attributes-value">
 									<div class="attributes-value-title">
-										<input type="text" :name="`values.${i}.title`" x-model="value.title" placeholder="<?php t( 'Title' ); ?>" required>
+										<input type="text" :name="`values.${i}.title`" x-model="value.title" placeholder="<?php echo t( 'Title' ); ?>" required>
 									</div>
 									<div class="attributes-value-slug">
-										<input type="text" :name="`values.${i}.slug`" x-model="value.slug" placeholder="<?php t( 'Slug' ); ?>" required>
+										<input type="text" :name="`values.${i}.slug`" x-model="value.slug" placeholder="<?php echo t( 'Slug' ); ?>" required>
 									</div>
 									<div class="btn btn--icon t-red" @click="values.splice(i, 1)"><i class="ph ph-trash"></i></div>
 								</div>

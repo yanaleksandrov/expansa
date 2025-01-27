@@ -44,7 +44,7 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 		<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
 		{{$after}}
 		@if($copy)
-			<i class="ph ph-copy" title="<?php t_attr( 'Copy' ); ?>" @click="$copy({{$prop}})"></i>
+			<i class="ph ph-copy" title="<?php echo t_attr( 'Copy' ); ?>" @click="$copy({{$prop}})"></i>
 		@endif
 		@if($tooltip)
 			<i class="ph ph-info" x-tooltip.click.prevent="'{{$tooltip}}'"></i>

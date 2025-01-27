@@ -1,10 +1,9 @@
 <?php
 
-namespace dashboard\app\Api;
+namespace app\Api;
 
-use Expansa\Error;
 use Expansa\Disk;
-use Expansa\Safe;
+use Expansa\Error;
 use Expansa\Support\Str;
 
 class Media
@@ -19,7 +18,7 @@ class Media
      *
      * @since 2025.1
      */
-    public static function get()
+    public static function get(): array
     {
         $media = \app\Media::get(
             [

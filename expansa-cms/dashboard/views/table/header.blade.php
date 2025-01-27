@@ -44,9 +44,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 		    <div class="df aic g-1" x-show="!bulk">
 			    <?php if ( $filter ) : ?>
 				    <div class="df aic g-1">
-					    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '<?php t_attr( 'Reset Filter' ); ?>' : '<?php t( 'Filter' ); ?>'">
+					    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '<?php echo t_attr( 'Reset Filter' ); ?>' : '<?php echo t( 'Filter' ); ?>'">
 						    <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
-						    <span x-text="showFilter ? '<?php t_attr( 'Reset' ); ?>' : '<?php t_attr( 'Filter' ); ?>'"><?php t( 'Filter' ); ?></span>
+						    <span x-text="showFilter ? '<?php echo t_attr( 'Reset' ); ?>' : '<?php echo t_attr( 'Filter' ); ?>'"><?php echo t( 'Filter' ); ?></span>
 					    </button>
 					    <?php
 					    echo view(
@@ -106,7 +106,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			    <?php if ( $uploader ) : ?>
 				    <div class="df aic g-1">
 					    <button class="btn btn--sm btn--outline" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
-						    <i class="ph ph-upload-simple"></i> <?php t( 'Add new file' ); ?>
+						    <i class="ph ph-upload-simple"></i> <?php echo t( 'Add new file' ); ?>
 					    </button>
 				    </div>
 			    <?php endif; ?>
@@ -197,7 +197,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 						    ]
 					    );
 					    ?>
-					    <button type="button" class="btn btn--sm btn--outline" @click="$ajax('translations/get', {project}).then(data => items = data.items)"><i class="ph ph-scan"></i> <?php t( 'Scan' ); ?></button>
+					    <button type="button" class="btn btn--sm btn--outline" @click="$ajax('translations/get', {project}).then(data => items = data.items)"><i class="ph ph-scan"></i> <?php echo t( 'Scan' ); ?></button>
 				    </div>
 			    <?php endif; ?>
 		    </div>
@@ -205,7 +205,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		    <?php if ( $actions ) : ?>
 			    <div class="df aic g-1" x-show="bulk" x-cloak>
 				    <?php Dashboard\Form::print( EX_DASHBOARD . 'forms/posts-actions.php' ); ?>
-				    <button type="button" class="btn btn--sm t-red" x-bind="reset"><i class="ph ph-trash"></i> <?php t( 'Reset' ); ?></button>
+				    <button type="button" class="btn btn--sm t-red" x-bind="reset"><i class="ph ph-trash"></i> <?php echo t( 'Reset' ); ?></button>
 			    </div>
 		    <?php endif; ?>
 	    </div>

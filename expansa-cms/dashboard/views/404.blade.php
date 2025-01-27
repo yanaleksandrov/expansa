@@ -14,6 +14,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 <div class="expansa-main">
 	<div class="df fdc aic jcc t-center t-muted">
 		<h1 class="fs-64">404</h1>
-		<p><?php t( 'Oops! Page not found.' ); ?></p>
+		<p><?php echo t( 'Oops! Page not found.' ); ?></p>
 	</div>
 </div>

@@ -526,7 +526,7 @@ return Dashboard\Form::enqueue(
                                 });
                                 ?>
                                 <div class="dg g-2 ga-4">
-                                    <p><?php t('Application passwords allow authentication via non-interactive systems, such as REST API, without providing your actual password. Application passwords can be easily revoked. They cannot be used for traditional logins to your website.'); ?></p>
+                                    <p><?php echo t('Application passwords allow authentication via non-interactive systems, such as REST API, without providing your actual password. Application passwords can be easily revoked. They cannot be used for traditional logins to your website.'); ?></p>
                                     <div>
                                         <button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
                                             <i class="ph ph-plus"></i> Add new key
@@ -540,7 +540,7 @@ return Dashboard\Form::enqueue(
                                             <h6 class="fs-15">Amplication</h6>
                                             <code class="fs-12 bg-green-lt t-green">
                                                 <span class="badge badge--sm badge--green-lt">Active</span> SHA256:Ai2xqyVBORX9PJJigJxfrdzXfKPajJHZMYw3+dOo+nw
-                                                <i class="ph ph-copy" title="<?php t_attr('Copy'); ?>" @click="$copy()"></i>
+                                                <i class="ph ph-copy" title="<?php echo t_attr('Copy'); ?>" @click="$copy()"></i>
                                             </code>
                                             <div class="fs-12 t-muted lh-xs">Added on Nov 15, 2022</div>
                                         </div>

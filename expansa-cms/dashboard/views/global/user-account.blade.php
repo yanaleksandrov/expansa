@@ -29,7 +29,7 @@ $user = User::current();
 
 ob_start();
 ?>
-<div class="expansa-user-name"><?php t('Hi, :Username', $user->showname); ?></div>
+<div class="expansa-user-name"><?php echo t('Hi, :Username', $user->showname); ?></div>
 <div class="avatar avatar--xs" style="background-image: url(https://i.pravatar.cc/150?img=3)">
 	<i class="badge bg-green" title="<?php I18n::c_attr( true, 'Online', 'Offline' ); ?>"></i>
 </div>

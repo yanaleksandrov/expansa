@@ -22,7 +22,7 @@ use Expansa\Url;
         <div class="kanban__wrapper">
             <div class="kanban__col">
                 <div class="kanban__title">
-                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php t_attr('The order has been received and is awaiting processing by the moderator'); ?>'"></i>
+                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php echo t_attr('The order has been received and is awaiting processing by the moderator'); ?>'"></i>
                     <span class="fs-15 fw-500 mr-auto">New</span>
                     <span class="badge badge--azure-lt">Add order</span>
                     <span class="badge">3</span>
@@ -110,7 +110,7 @@ use Expansa\Url;
             </div>
             <div class="kanban__col">
                 <div class="kanban__title">
-                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php t_attr('The order has been verified by a moderator. The items from the order are reserved and are being prepared for shipment.'); ?>'"></i>
+                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php echo t_attr('The order has been verified by a moderator. The items from the order are reserved and are being prepared for shipment.'); ?>'"></i>
                     <span class="fs-15 fw-500 mr-auto">In Progress</span>
                     <span class="badge">3</span>
                 </div>
@@ -145,7 +145,7 @@ use Expansa\Url;
             </div>
             <div class="kanban__col">
                 <div class="kanban__title">
-                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php t_attr('At this stage, we are preparing the products for shipment'); ?>'"></i>
+                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php echo t_attr('At this stage, we are preparing the products for shipment'); ?>'"></i>
                     <span class="fs-15 fw-500 mr-auto">Picking</span>
                     <span class="badge">3</span>
                 </div>
@@ -153,7 +153,7 @@ use Expansa\Url;
             </div>
             <div class="kanban__col">
                 <div class="kanban__title">
-                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php t_attr('The products of order have been transferred to the courier, transport company or postal service'); ?>'"></i>
+                    <i class="ph ph-info" x-tooltip.click.prevent="'<?php echo t_attr('The products of order have been transferred to the courier, transport company or postal service'); ?>'"></i>
                     <span class="fs-15 fw-500 mr-auto">Shipping</span>
                     <span class="badge">3</span>
                 </div>

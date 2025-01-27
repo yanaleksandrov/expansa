@@ -17,7 +17,7 @@ return Dashboard\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function() {
 				?>
-				<h6><?php t( 'Menu item data' ); ?></h6>
+				<h6><?php echo t( 'Menu item data' ); ?></h6>
 				<?php
 			},
 		],

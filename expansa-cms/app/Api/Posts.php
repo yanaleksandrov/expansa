@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace dashboard\app\Api;
+namespace app\Api;
 
 use app\Query\Query;
-use Expansa\Url;
-use Expansa\View;
 use Expansa\Codec\Csv;
 use Expansa\Json;
 use Expansa\Post\Post;
+use Expansa\Url;
+use Expansa\View;
 
 class Posts
 {

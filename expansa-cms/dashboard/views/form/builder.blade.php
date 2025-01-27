@@ -118,7 +118,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			?>
 		</div>
 		<template x-for="(group, key) in groups">
-			<div class="builder-group" data-or="<?php t_attr( 'or' ); ?>">
+			<div class="builder-group" data-or="<?php echo t_attr( 'or' ); ?>">
 				<template x-for="(rule, i) in group.rules">
 					<div class="builder__rules">
 						<div class="dg g-1">
@@ -155,14 +155,14 @@ if ( ! defined( 'EX_PATH' ) ) {
 					</div>
 				</template>
 				<div class="builder__buttons">
-					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" x-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php t( 'Remove Group' ); ?></button>
-					<button type="button" class="btn btn--sm t-purple ml-auto" @click="addRule(key)"><i class="ph ph-plus"></i> <?php t( 'add rule' ); ?></button>
+					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" x-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php echo t( 'Remove Group' ); ?></button>
+					<button type="button" class="btn btn--sm t-purple ml-auto" @click="addRule(key)"><i class="ph ph-plus"></i> <?php echo t( 'add rule' ); ?></button>
 				</div>
 			</div>
 		</template>
 		<div class="builder__buttons mt-2">
-			<button class="btn btn--sm btn--outline" type="button" @click="addGroup"><?php t( 'Add Group' ); ?></button>
-			<button class="btn btn--sm btn--primary" type="submit"><i class="ph ph-floppy-disk"></i> <?php t( 'Save' ); ?></button>
+			<button class="btn btn--sm btn--outline" type="button" @click="addGroup"><?php echo t( 'Add Group' ); ?></button>
+			<button class="btn btn--sm btn--primary" type="submit"><i class="ph ph-floppy-disk"></i> <?php echo t( 'Save' ); ?></button>
 		</div>
 	</div>
 </div>

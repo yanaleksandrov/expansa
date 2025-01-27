@@ -269,14 +269,14 @@ return Dashboard\Form::enqueue(
 					'callback' => function() {
 						?>
 						<div class="dg g-2">
-							<div><code>:name</code> <?php t( 'User display name if email found in users' ); ?></div>
-							<div><code>:link</code> <?php t( 'Link to page' ); ?></div>
-							<div><code>:admin_email</code> <?php t( 'The site admin email' ); ?></div>
-							<div><code>:site_title</code> <?php t( 'The site title' ); ?></div>
-							<div><code>:unsubscribe_url</code> <?php t( 'Url to unsubscribe from emails' ); ?></div>
-							<div><code>:unsubscribe_link</code> <?php t( 'Clickable link to unsubscribe from emails' ); ?></div>
-							<div><code>:year</code> <?php t( 'Current year' ); ?></div>
-							<div><code>:date</code> <?php t( 'Current date in "24 August, 2024" format' ); ?></div>
+							<div><code>:name</code> <?php echo t( 'User display name if email found in users' ); ?></div>
+							<div><code>:link</code> <?php echo t( 'Link to page' ); ?></div>
+							<div><code>:admin_email</code> <?php echo t( 'The site admin email' ); ?></div>
+							<div><code>:site_title</code> <?php echo t( 'The site title' ); ?></div>
+							<div><code>:unsubscribe_url</code> <?php echo t( 'Url to unsubscribe from emails' ); ?></div>
+							<div><code>:unsubscribe_link</code> <?php echo t( 'Clickable link to unsubscribe from emails' ); ?></div>
+							<div><code>:year</code> <?php echo t( 'Current year' ); ?></div>
+							<div><code>:date</code> <?php echo t( 'Current date in "24 August, 2024" format' ); ?></div>
 						</div>
 						<?php
 					},

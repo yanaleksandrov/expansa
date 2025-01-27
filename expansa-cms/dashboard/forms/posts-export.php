@@ -80,7 +80,7 @@ return Dashboard\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function () {
 				?>
-				<button type="submit" class="btn btn--primary btn--lg"><?php t( 'Export posts' ); ?></button>
+				<button type="submit" class="btn btn--primary btn--lg"><?php echo t( 'Export posts' ); ?></button>
 				<?php
 			},
 		],

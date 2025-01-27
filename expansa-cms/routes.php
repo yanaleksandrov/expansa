@@ -53,7 +53,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
      *
      * @since 2025.1
      */
-    require_once EX_DASHBOARD . 'app/index.php';
+    require_once EX_DASHBOARD . 'index.php';
 
     Extensions::boot('plugin');
     Extensions::boot('theme');

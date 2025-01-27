@@ -195,9 +195,9 @@ return Dashboard\Form::enqueue(
 			'callback' => function() {
 				?>
 				<div class="df jcsb g-2">
-					<button type="button" class="btn btn--outline" @click="$dialog.close()"><?php t( 'Cancel' ); ?></button>
+					<button type="button" class="btn btn--outline" @click="$dialog.close()"><?php echo t( 'Cancel' ); ?></button>
 					<button type="submit" class="btn btn--primary" :disabled="appName === ''">
-						<i class="ph ph-plug"></i> <?php t( 'Save project' ); ?>
+						<i class="ph ph-plug"></i> <?php echo t( 'Save project' ); ?>
 					</button>
 				</div>
 				<?php

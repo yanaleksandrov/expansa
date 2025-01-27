@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace dashboard\app\Api;
+namespace app\Api;
 
 use Expansa\Error;
 use Expansa\Safe;

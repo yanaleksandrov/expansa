@@ -53,7 +53,7 @@ if (! defined('EX_PATH')) {
                     </div>
                 </div>
                 <div class="fields-builder__title">
-                    Code Preview <i class="ph ph-copy" title="<?php t_attr('Copy to clipboard'); ?>" x-copy="$refs.code.innerText"></i>
+                    Code Preview <i class="ph ph-copy" title="<?php echo t_attr('Copy to clipboard'); ?>" x-copy="$refs.code.innerText"></i>
                 </div>
                 <pre x-ref="code" x-highlight.php>
 echo view(

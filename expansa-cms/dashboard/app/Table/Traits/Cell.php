@@ -18,7 +18,7 @@ trait Cell
      *
      * @var string
      */
-    public string $view = 'views/table/cell';
+    public string $view = 'table/cell';
 
     /**
      * Column is sortable.

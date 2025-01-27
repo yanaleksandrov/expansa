@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace dashboard\app\Api;
+namespace app\Api;
 
-use Expansa\View;
 use Expansa\Mail;
 use Expansa\Safe;
 use Expansa\Url;
+use Expansa\View;
 
 class User
 {

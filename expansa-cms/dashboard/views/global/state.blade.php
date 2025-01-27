@@ -25,17 +25,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 )->values();
 ?>
 <div class="{{ $class }}">
-	<?php if ( $icon ) : ?>
-		<svg><use xlink:href="<?php echo Url::dashboard( '/assets/sprites/states.svg#' . $icon ); ?>"></use></svg>
-		<?php
-	endif;
-	if ( $title ) :
-		?>
+	@if($icon)
+		<svg><use xlink:href="<?php echo Url::dashboard('/assets/sprites/states.svg#' . $icon); ?>"></use></svg>
+	@endif
+	@if($title)
 		<h6 class="mt-4 mw">{{ $title }}</h6>
-		<?php
-	endif;
-	if ( $description ) :
-		?>
-		<p class="t-muted">{{ $description }}</p>
-	<?php endif; ?>
+	@endif
+	@if($description)
+		<p class="t-muted">{!! $description !!}</p>
+	@endif
 </div>

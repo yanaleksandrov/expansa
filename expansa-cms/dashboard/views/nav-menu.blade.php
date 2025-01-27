@@ -17,7 +17,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 <div class="expansa-main">
 	<div class="nav-editor">
 		<div class="nav-editor-side">
-			<h4><?php t( 'Menus' ); ?></h4>
+			<h4><?php echo t( 'Menus' ); ?></h4>
 			<div class="dg g-2 p-4">
 				<?php
 				echo view(
@@ -49,9 +49,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				);
 				?>
-				<a class="fw-500 fs-13" href="#"><?php t( 'Create a new menu' ); ?></a>
+				<a class="fw-500 fs-13" href="#"><?php echo t( 'Create a new menu' ); ?></a>
 			</div>
-			<h6><?php t( 'Add menu items' ); ?></h6>
+			<h6><?php echo t( 'Add menu items' ); ?></h6>
 			<div class="accordion" x-data="{expanded: false}">
 				<div class="accordion-item">
 					<div class="accordion-title" @click="expanded = ! expanded">Pages</div>
@@ -63,7 +63,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		</div>
 		<div class="nav-editor-main">
 			<div class="table__header p-6 g-2">
-				<h6><?php t( 'Menu structure' ); ?></h6>
+				<h6><?php echo t( 'Menu structure' ); ?></h6>
 			</div>
 			<div class="df fww g-2 p-6">
 				<?php
@@ -144,7 +144,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 					],
 				);
 				?>
-				<div class="fs-13 t-muted"><?php t( 'Drag the items into the order you prefer. Click the arrow on the right of the item to reveal additional configuration options.' ); ?></div>
+				<div class="fs-13 t-muted"><?php echo t( 'Drag the items into the order you prefer. Click the arrow on the right of the item to reveal additional configuration options.' ); ?></div>
 			</div>
 			<ul class="nav-editor-list">
 				<li class="nav-editor-item">

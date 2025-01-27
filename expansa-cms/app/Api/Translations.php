@@ -1,6 +1,6 @@
 <?php
 
-namespace dashboard\app\Api;
+namespace app\Api;
 
 use Expansa\Dir;
 use Expansa\File;

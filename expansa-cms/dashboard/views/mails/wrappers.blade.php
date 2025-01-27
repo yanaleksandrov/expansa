@@ -43,7 +43,7 @@ if ( empty( $template ) ) {
 					<tr>
 						<td>
 							<p style="margin: 0; text-align: center; font-size: 10.35px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: #7c8188; height: 7px;">
-								<span style="background-color: #fff; display: inline-block; padding: 0 8px;"><?php t( "What's next?" ); ?></span>
+								<span style="background-color: #fff; display: inline-block; padding: 0 8px;"><?php echo t( "What's next?" ); ?></span>
 							</p>
 						</td>
 					</tr>

@@ -20,12 +20,12 @@ if ( ! defined( 'EX_PATH' ) ) {
 		</div>
 		<div class="media-editor-side">
 			<div class="dg g-1 fs-12">
-				<div><strong><?php t( 'Uploaded on' ); ?>:</strong> <span x-text="$store.dialog.created"></span></div>
-				<div><strong><?php t( 'Uploaded by' ); ?>:</strong> <span x-text="$store.dialog.author"></span></div>
-				<div><strong><?php t( 'File name' ); ?>:</strong> <span x-text="$store.dialog.filename"></span></div>
-				<div><strong><?php t( 'File type' ); ?>:</strong> <span x-text="$store.dialog.mime"></span></div>
-				<div><strong><?php t( 'File size' ); ?>:</strong> <span x-text="$store.dialog.sizeHumanize"></span></div>
-				<div><strong><?php t( 'Length' ); ?>:</strong> 2 minutes, 48 seconds</div>
+				<div><strong><?php echo t( 'Uploaded on' ); ?>:</strong> <span x-text="$store.dialog.created"></span></div>
+				<div><strong><?php echo t( 'Uploaded by' ); ?>:</strong> <span x-text="$store.dialog.author"></span></div>
+				<div><strong><?php echo t( 'File name' ); ?>:</strong> <span x-text="$store.dialog.filename"></span></div>
+				<div><strong><?php echo t( 'File type' ); ?>:</strong> <span x-text="$store.dialog.mime"></span></div>
+				<div><strong><?php echo t( 'File size' ); ?>:</strong> <span x-text="$store.dialog.sizeHumanize"></span></div>
+				<div><strong><?php echo t( 'Length' ); ?>:</strong> 2 minutes, 48 seconds</div>
 			</div>
 			<?php Dashboard\Form::print( EX_DASHBOARD . 'forms/media-editor.php' ); ?>
 		</div>

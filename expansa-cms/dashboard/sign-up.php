@@ -19,6 +19,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	</a>
 	<?php Dashboard\Form::print( EX_DASHBOARD . 'forms/user-sign-up.php' ); ?>
 	<div class="fs-14 t-center t-muted mt-3">
-		<?php t( 'Already have an account? [Sign In](:signInLink)', Url::site( 'dashboard/sign-in' ) ); ?>
+		<?php echo t( 'Already have an account? [Sign In](:signInLink)', Url::site( 'dashboard/sign-in' ) ); ?>
 	</div>
 </div>

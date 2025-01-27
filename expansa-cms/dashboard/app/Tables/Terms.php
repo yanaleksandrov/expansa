@@ -41,8 +41,8 @@ final class Terms
     {
         ob_start();
         ?>
-        <p><?php t('Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the default category Uncategorized. The default category cannot be deleted.'); ?></p>
-        <p><?php t('Image'); ?></p>
+        <p><?php echo t('Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the default category Uncategorized. The default category cannot be deleted.'); ?></p>
+        <p><?php echo t('Image'); ?></p>
         <?php
         return ob_get_clean();
     }
