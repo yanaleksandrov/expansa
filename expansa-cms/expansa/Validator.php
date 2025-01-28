@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa;
 
-use Expansa\Facades\Facade;
+use Expansa\Patterns\Facade;
 use Expansa\Security\Validator as SecurityValidator;
 
 /**

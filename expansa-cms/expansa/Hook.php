@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa;
 
-use Expansa\Facades\Facade;
 use Expansa\Hooks\Priority;
+use Expansa\Patterns\Facade;
 
 /**
  * Class Hook provides a facade for managing hooks in the Expansa framework.

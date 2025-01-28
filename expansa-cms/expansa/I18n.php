@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa;
 
-use Expansa\Facades\Facade;
+use Expansa\Patterns\Facade;
 
 /**
  * I18n Facade class provides static methods for internationalization and localization,

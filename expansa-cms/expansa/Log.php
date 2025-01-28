@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use Expansa\Patterns\Facade;
 use Stringable;
-use Expansa\Facades\Facade;
 
 /**
  * Class Log provides a facade for managing log in the Expansa framework.

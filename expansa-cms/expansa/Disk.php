@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa;
 
-use Expansa\Facades\Facade;
 use Expansa\Filesystem\Directory;
 use Expansa\Filesystem\File;
+use Expansa\Patterns\Facade;
 
 /**
  * Disk Facade provides static access to manage local filesystem.

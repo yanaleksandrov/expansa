@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa;
 
 use Expansa\Mail\Mailer;
-use Expansa\Facades\Facade;
+use Expansa\Patterns\Facade;
 
 /**
  * Provides static access to the Mail subsystem.

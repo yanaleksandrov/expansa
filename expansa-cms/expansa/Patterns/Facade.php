@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Facades;
+namespace Expansa\Patterns;
 
-use Expansa\Facades\Exception\FacadeException;
+use Expansa\Patterns\Exception\FacadeException;
 
 /**
  * The Facade Class.

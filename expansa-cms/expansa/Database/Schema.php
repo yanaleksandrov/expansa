@@ -6,7 +6,7 @@ namespace Expansa\Database;
 
 use Closure;
 use Expansa\Db;
-use Expansa\Facades\Facade;
+use Expansa\Patterns\Facade;
 
 /**
  * Schema facade for database operations.

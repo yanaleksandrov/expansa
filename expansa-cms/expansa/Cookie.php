@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa;
 
-use Expansa\Facades\Facade;
 use Expansa\Cookie\Cookie as CookieService;
+use Expansa\Patterns\Facade;
 
 /**
  * @method static CookieService make(string $name, string $value, int $minutes = 0, string $path = null, string $domain = null, bool $secure = null, bool $httpOnly = null, string $sameSite = null)

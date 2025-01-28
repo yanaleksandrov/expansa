@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa;
 
-use Expansa\Facades\Facade;
+use Expansa\Patterns\Facade;
 
 /**
  * @method static string|Error encode( mixed $value, bool $ascii = false, bool $pretty = false, bool $forceObjects = false )

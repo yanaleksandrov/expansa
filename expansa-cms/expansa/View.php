@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use Expansa\Patterns\Facade;
 use Expansa\View\View as BaseView;
-use Expansa\Facades\Facade;
 
 /**
  * The View class provides a static interface to the view factory, allowing the creation and management of views.

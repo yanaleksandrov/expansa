@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Facades\Exception;
+namespace Expansa\Patterns\Exception;
 
 use Exception;
 

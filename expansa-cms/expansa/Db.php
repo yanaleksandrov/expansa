@@ -7,7 +7,7 @@ namespace Expansa;
 use Expansa\Database\Exception\InvalidArgumentException;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Query\Raw;
-use Expansa\Facades\Facade;
+use Expansa\Patterns\Facade;
 use PDOStatement;
 
 /**

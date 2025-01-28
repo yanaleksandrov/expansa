@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa;
 
 use DateTime;
-use Expansa\Facades\Facade;
+use Expansa\Patterns\Facade;
 
 /**
  * Cache facade class providing static methods for caching operations.
