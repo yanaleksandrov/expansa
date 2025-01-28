@@ -1,6 +1,6 @@
 <?php
 
-use Dashboard\Form;
+use Expansa\Builders\Form;
 use Expansa\Url;
 
 /**
@@ -9,7 +9,6 @@ use Expansa\Url;
  * This template can be overridden by copying it to themes/yourtheme/ecommerce/templates/order.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 
 ?>
@@ -25,7 +24,7 @@ use Expansa\Url;
                 <div class="attributes-description">
                     <p>Updated by Ian Iskenderov December 23, 10:14 pm</p>
                 </div>
-                <?php Form::print(EX_PLUGINS . 'ecommerce/core/order.php', true); ?>
+                <?php Form::make(EX_PLUGINS . 'ecommerce/core/order.php', true); ?>
             </div>
             <div class="attributes-side">
                 <div><?php echo t('Timeline'); ?></div>

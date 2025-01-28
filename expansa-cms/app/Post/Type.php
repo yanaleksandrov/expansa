@@ -6,10 +6,10 @@ namespace app\Post;
 
 use Expansa\Builders\Tree;
 use Expansa\Db;
-use Expansa\Error;
 use Expansa\Hook;
 use Expansa\Safe;
 use Expansa\Support\Arr;
+use InvalidArgumentException;
 
 class Type
 {
@@ -68,7 +68,7 @@ class Type
     {
         $postType = Safe::kebabcase($key);
         if (empty($postType) || strlen($postType) > 20) {
-            Error::add('post-type-name-length', t('Post type key is empty or exceeds 20 characters'));
+            throw new InvalidArgumentException(t('Post type key is empty or exceeds 20 characters'));
         }
 
         $this->labelName       ??= t('Page');
@@ -112,7 +112,7 @@ class Type
          */
         $schema = Db::schema();
         $type   = Safe::snakecase($key);
-        if (empty($schema[$key])) {
+        if (empty($schema[EX_DB_PREFIX . $type])) {
             Hook::call('createPostsTable', $type);
         }
     }

@@ -10,7 +10,7 @@ if ( empty( $samples ) ) {
     return;
 }
 
-return Dashboard\Form::enqueue(
+return Expansa\Form::enqueue(
 	'import-fields',
 	fields: [
 		[

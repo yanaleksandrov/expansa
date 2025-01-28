@@ -143,6 +143,6 @@ class Metric
             $precision = strspn($numberStr, '0');
         }
 
-        return rtrim(number_format($microtime, $precision, '.', ''), '0');
+        return rtrim(number_format($microtime, $precision + 1, '.', ''), '0');
     }
 }

@@ -32,7 +32,7 @@ metric()->start();
 
 // Launch the installer if Expansa is not installed.
 if (! Is::installed()) {
-    Dashboard\Install::init();
+    require_once EX_PATH . 'install.php';
     exit;
 }
 

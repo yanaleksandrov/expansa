@@ -33,8 +33,12 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
     }, true);
 
     // Run the installer if Expansa is not installed.
-    if ($slug !== 'install' && ! Is::installed()) {
-        redirect('install');
+    if (!Is::installed()) {
+        if ($slug !== 'install') {
+            redirect('install');
+        }
+        echo view('install');
+        exit;
     }
 
     // Redirect unauthenticated users from the dashboard, but allow access to registration and password recovery.
@@ -66,7 +70,7 @@ Route::any($dashboardRoute, function ($slug) use ($dashboardSlug) {
     $content = View::make('index', [
         'slug' => $slug,
     ]);
-    //$content = (new Expansa\Html())->beautify($content);
+    $content = (new Expansa\Support\Html())->beautify($content->render());
 
     /**
      * Expansa dashboard is fully loaded.

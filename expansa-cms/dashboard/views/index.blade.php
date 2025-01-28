@@ -9,8 +9,6 @@ use Expansa\Url;
 /**
  * Remove the duplicate access to the console at two addresses:
  * "dashboard" and "dashboard/index", leave only the first one.
- *
- * @since 2025.1
  */
 if ( ! defined( 'EX_PATH' ) ) {
 	$dashboardUrl = trim( $_SERVER['SCRIPT_URI'] ?? '' );
@@ -60,12 +58,12 @@ $slug = Safe::trim( $__data['slug'] ?? '' );
 			<?php echo view('menu-bar'); ?>
 			<details class="expansa-search" x-data="search" x-bind="wrapper">
 				<summary class="expansa-search-btn" x-bind="button">
-					<i class="ph ph-magnifying-glass"></i> <?php echo t_attr( 'Search...' ); ?> <code>Ctrl+K</code>
+					<i class="ph ph-magnifying-glass"></i> {{ t('Search...') }} <code>Ctrl+K</code>
 				</summary>
 				<div class="expansa-search-box">
 					<div class="field field--lg field--outline">
 						<label class="field-item">
-							<input class="expansa-search-input" type="search" name="search" placeholder="<?php echo t_attr( 'Search...' ); ?>" x-bind="input" @input.debounce.250ms="$ajax('search').then(() => links = [{url: '', text: 'Страницы'}, {url: '/dashboard/themes', text: 'Привет'}, {url: '/dashboard/plugins', text: 'Привет'}])">
+							<input class="expansa-search-input" type="search" name="search" placeholder="{{ t('Search...') }}" x-bind="input" @input.debounce.250ms="$ajax('search').then(() => links = [{url: '', text: 'Страницы'}, {url: '/dashboard/themes', text: 'Привет'}, {url: '/dashboard/plugins', text: 'Привет'}])">
 						</label>
 					</div>
 					<template x-if="links.length">
@@ -120,7 +118,7 @@ $slug = Safe::trim( $__data['slug'] ?? '' );
 		<?php
 		echo view('menu');
 
-		echo view($slug ?: 'index');
+		echo view($slug);
 		?>
 		<!-- interface board start -->
 		<div class="expansa-board">

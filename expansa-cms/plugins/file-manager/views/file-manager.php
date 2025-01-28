@@ -9,7 +9,6 @@ use Expansa\Disk;
  * This template can be overridden by copying it to themes/yourtheme/file-manager/templates/file-manager.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 
 if (! defined('EX_PATH')) {

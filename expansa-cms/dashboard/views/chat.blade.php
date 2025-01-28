@@ -5,7 +5,6 @@
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/chat.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 if ( ! defined( 'EX_PATH' ) ) {
 	exit;

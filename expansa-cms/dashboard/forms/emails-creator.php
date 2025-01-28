@@ -1,4 +1,5 @@
 <?php
+
 use Expansa\Safe;
 
 /**
@@ -6,7 +7,7 @@ use Expansa\Safe;
  *
  * @since 2025.1
  */
-return Dashboard\Form::enqueue(
+return Expansa\Form::enqueue(
 	'emails-creator',
 	[
 		'@submit.window' => '$ajax("import-email")',

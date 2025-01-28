@@ -10,7 +10,7 @@ use Expansa\Url;
  *
  * @since 2025.1
  */
-return Dashboard\Form::enqueue(
+return Expansa\Form::enqueue(
 	'settings',
 	[
 		'class'   => 'tab tab--vertical',

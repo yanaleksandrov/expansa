@@ -94,3 +94,21 @@ if (! function_exists('tree')) {
         return ob_get_clean();
     }
 }
+
+if (! function_exists('form')) {
+    /**
+     * Print form.
+     *
+     * @param string $path
+     * @param string $uid
+     * @return mixed
+     */
+    function form(string $path, string $uid): string
+    {
+        if (is_file($path)) {
+            require_once $path;
+        }
+
+        return (new \Expansa\Builders\Form())->make($uid);
+    }
+}

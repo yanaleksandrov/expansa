@@ -37,7 +37,7 @@ return new class extends Plugin
             return $filepath;
         });
 
-        Tree::attach('dashboard-main-menu', fn ($tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'toolkit',
@@ -73,7 +73,7 @@ return new class extends Plugin
          *
          * @since 2025.1
          */
-        Dashboard\Form::enqueue(
+        Expansa\Form::enqueue(
             'builder/fields',
             [
                 'class'  => 'dg p-7 g-7',

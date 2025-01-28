@@ -8,7 +8,7 @@ use Expansa\Support\Exception\FinderException;
 use Expansa\Support\Finder;
 use ReflectionException;
 
-class Manager extends HooksCollector
+final class Manager extends HooksCollector
 {
     use Finder;
 

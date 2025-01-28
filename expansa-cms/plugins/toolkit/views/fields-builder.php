@@ -1,14 +1,11 @@
 <?php
 
-use Expansa\View;
-
 /**
  * Fields builder
  *
  * This template can be overridden by copying it to themes/yourtheme/toolkit/templates/forms-builder.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 
 if (! defined('EX_PATH')) {
@@ -21,7 +18,7 @@ if (! defined('EX_PATH')) {
             <div class="fields-builder__header">
                 <h4>Fields Builder</h4>
             </div>
-            <?php Dashboard\Form::print(EX_DASHBOARD . 'forms/fields-builder.php'); ?>
+            <?php echo form(EX_DASHBOARD . 'forms/fields-builder.php', 'fields-builder'); ?>
         </div>
         <div class="fields-builder__main">
             <div class="fields-builder__code">

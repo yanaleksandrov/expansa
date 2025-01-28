@@ -26,6 +26,11 @@
         "spatie/image": "^3.7",
         "vimeo/psalm": "^5.26"
     },
+    "autoload": {
+        "psr-4": {
+            "Expansa\\": "expansa-cms/expansa/"
+        }
+    },
     "scripts": {
         "post-install-cmd": [
             "if not exist expansa-cms\\expansa\\Images mkdir expansa-cms\\expansa\\Images",

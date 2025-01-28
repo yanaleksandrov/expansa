@@ -4,7 +4,7 @@
  *
  * @since 2025.1
  */
-return Dashboard\Form::enqueue(
+return Expansa\Form::enqueue(
 	'user-sign-up',
 	[
 		'class'           => 'dg g-6',

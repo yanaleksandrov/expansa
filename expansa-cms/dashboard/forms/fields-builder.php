@@ -4,7 +4,7 @@
  *
  * @since 2025.1
  */
-return Dashboard\Form::enqueue(
+return Expansa\Form::enqueue(
 	'fields-builder',
 	[
 		'class'           => 'builder',

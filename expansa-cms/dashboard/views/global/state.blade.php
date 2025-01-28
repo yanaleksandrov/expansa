@@ -8,7 +8,6 @@ use Expansa\Url;
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/global/state.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 if ( ! defined( 'EX_PATH' ) ) {
 	exit;

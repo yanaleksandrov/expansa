@@ -18,82 +18,66 @@ User::current();
  *
  * @since 2025.1
  */
-Roles::register(
-    'admin',
-    t('Administrator'),
-    [
-        'read',
-        'files_upload',
-        'files_edit',
-        'files_delete',
-        'types_publish',
-        'types_edit',
-        'types_delete',
-        'other_types_publish',
-        'other_types_edit',
-        'other_types_delete',
-        'private_types_publish',
-        'private_types_edit',
-        'private_types_delete',
-        'manage_comments',
-        'manage_options',
-        'manage_update',
-        'manage_import',
-        'manage_export',
-        'themes_install',
-        'themes_switch',
-        'themes_delete',
-        'plugins_install',
-        'plugins_activate',
-        'plugins_delete',
-        'users_create',
-        'users_edit',
-        'users_delete',
-    ]
-);
+Roles::register('admin', t('Administrator'), [
+    'read',
+    'files_upload',
+    'files_edit',
+    'files_delete',
+    'types_publish',
+    'types_edit',
+    'types_delete',
+    'other_types_publish',
+    'other_types_edit',
+    'other_types_delete',
+    'private_types_publish',
+    'private_types_edit',
+    'private_types_delete',
+    'manage_comments',
+    'manage_options',
+    'manage_update',
+    'manage_import',
+    'manage_export',
+    'themes_install',
+    'themes_switch',
+    'themes_delete',
+    'plugins_install',
+    'plugins_activate',
+    'plugins_delete',
+    'users_create',
+    'users_edit',
+    'users_delete',
+]);
 
-Roles::register(
-    'editor',
-    t('Editor'),
-    [
-        'read',
-        'files_upload',
-        'files_edit',
-        'files_delete',
-        'types_publish',
-        'types_edit',
-        'types_delete',
-        'other_types_publish',
-        'other_types_edit',
-        'other_types_delete',
-        'private_types_publish',
-        'private_types_edit',
-        'private_types_delete',
-        'manage_comments',
-    ]
-);
+Roles::register('editor', t('Editor'), [
+    'read',
+    'files_upload',
+    'files_edit',
+    'files_delete',
+    'types_publish',
+    'types_edit',
+    'types_delete',
+    'other_types_publish',
+    'other_types_edit',
+    'other_types_delete',
+    'private_types_publish',
+    'private_types_edit',
+    'private_types_delete',
+    'manage_comments',
+]);
 
-Roles::register(
-    'author',
-    t('Author'),
-    [
-        'read',
-        'files_upload',
-        'files_edit',
-        'files_delete',
-        'types_publish',
-        'types_edit',
-        'types_delete',
-    ]
-);
+Roles::register('author', t('Author'), [
+    'read',
+    'files_upload',
+    'files_edit',
+    'files_delete',
+    'types_publish',
+    'types_edit',
+    'types_delete',
+]);
 
-Roles::register(
-    'subscriber',
-    t('Subscriber'),
-    [
-        'read',
-    ]
-);
+Roles::register('subscriber', t('Subscriber'), [
+    'read',
+]);
 
 /**
  * Set up default post types: "pages", "media" & "api-keys".

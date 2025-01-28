@@ -1,6 +1,6 @@
 <?php
 
-use Dashboard\Form;
+use Expansa\Builders\Form;
 
 /**
  * Attributes list
@@ -8,7 +8,6 @@ use Dashboard\Form;
  * This template can be overridden by copying it to themes/yourtheme/ecommerce/templates/attributes.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 ?>
 <div class="expansa-main">
@@ -24,7 +23,7 @@ use Dashboard\Form;
                 <div class="attributes-description">
                     <p><?php echo t('Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. Deleting a category does not delete the products in that category.'); ?></p>
                 </div>
-                <?php Form::print(EX_PLUGINS . 'ecommerce/core/categories.php', true); ?>
+                <?php Form::make(EX_PLUGINS . 'ecommerce/core/categories.php', true); ?>
             </div>
             <div class="attributes-side">
                 <div x-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>

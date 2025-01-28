@@ -1,4 +1,5 @@
 <?php
+
 use Expansa\Url;
 
 /**
@@ -6,7 +7,7 @@ use Expansa\Url;
  *
  * @since 2025.1
  */
-return Dashboard\Form::enqueue(
+return Expansa\Form::enqueue(
 	'posts-export',
 	[
 		'class'           => 'card card-border px-8 pb-8 g-8',

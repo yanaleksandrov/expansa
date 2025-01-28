@@ -7,7 +7,6 @@ use Expansa\Safe;
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cells/head.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 if ( ! defined( 'EX_PATH' ) ) {
 	exit;

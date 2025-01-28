@@ -1,7 +1,6 @@
 <?php
 
-use Expansa\View;
-use Dashboard\Form;
+use Expansa\Builders\Form;
 
 /**
  * Attributes list
@@ -9,7 +8,6 @@ use Dashboard\Form;
  * This template can be overridden by copying it to themes/yourtheme/ecommerce/templates/attributes.php
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 ?>
 <div class="expansa-main">
@@ -25,7 +23,7 @@ use Dashboard\Form;
 				<div class="attributes-description">
 					<p><?php echo t( 'Attributes define product details such as size or color and allow them to be included in product filtering.' ); ?></p>
 				</div>
-				<?php Form::print( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
+				<?php Form::make( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
 			</div>
 			<div class="attributes-side">
 				<div x-text="`<?php echo t_attr( ':attributesCount items', '${attributes.length}' ); ?>`">0 items</div>

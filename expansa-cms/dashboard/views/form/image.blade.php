@@ -12,7 +12,6 @@ use Expansa\Safe;
  * TODO: add crop imag
  *
  * @package Expansa\Templates
- * @since   2025.1
  */
 if ( ! defined( 'EX_PATH' ) ) {
 	exit;

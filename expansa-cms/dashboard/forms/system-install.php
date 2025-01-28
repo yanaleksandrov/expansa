@@ -1,9 +1,9 @@
 <?php
 
-use Expansa\View;
 use Expansa\Url;
+use Expansa\View;
 
-return Dashboard\Form::enqueue(
+return Expansa\Form::enqueue(
     'system-install',
     [
         'class'           => 'dg g-2',
