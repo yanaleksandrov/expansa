@@ -17,7 +17,7 @@ use Expansa\Url;
         <form class="attributes-wrapper" x-data="{values: []}">
             <div class="attributes-editor">
                 <h5 class="attributes-title">
-                    <a class="btn btn--icon btn--sm" href="<?php echo Url::dashboard('/attributes'); ?>"><i class="ph ph-arrow-left"></i></a>
+                    <a class="btn btn--icon btn--sm" href="<?php echo url('/dashboard/attributes'); ?>"><i class="ph ph-arrow-left"></i></a>
                     <span class="fw-600 mr-auto"><?php echo t('Add new attribute'); ?></span>
                     <button class="btn btn--danger" type="button" hidden x-cloak><?php echo t('Delete'); ?></button>
                     <button class="btn btn--primary" type="submit" disabled><?php echo t('Save'); ?></button>

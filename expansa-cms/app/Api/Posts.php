@@ -155,7 +155,7 @@ class Posts
             'output'    => View::make(EX_DASHBOARD . 'views/global/state', [
                 'icon'        => 'success',
                 'title'       => t('Import is complete!'),
-                'description' => t(':counts posts was successfully imported. Do you want [to launch a new import?](:link)', count($imported), Url::site('/dashboard/import')),
+                'description' => t(':counts posts was successfully imported. Do you want [to launch a new import?](:link)', count($imported), url('/dashboard/import')),
             ]),
         ];
     }

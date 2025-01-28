@@ -17,7 +17,7 @@ use Expansa\Url;
         <form class="attributes-wrapper" x-data="{attributes: []}">
             <div class="attributes-editor">
                 <h5 class="attributes-title">
-                    <a class="btn btn--icon btn--sm" href="<?php echo Url::dashboard('/orders'); ?>"><i class="ph ph-arrow-left"></i></a>
+                    <a class="btn btn--icon btn--sm" href="<?php echo url('/dashboard/orders'); ?>"><i class="ph ph-arrow-left"></i></a>
                     <span class="fw-600 mr-auto"><?php echo t('Order :orderNumber details', '#10566'); ?></span>
                     <button class="btn btn--sm btn--primary" type="submit"><?php echo t('Save'); ?></button>
                 </h5>

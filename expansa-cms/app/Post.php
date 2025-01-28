@@ -151,23 +151,6 @@ class Post
 
         $data = Db::get($type->table, '*', [ $field => $value ]);
 
-        // add data for media files
-        $sizes = Registry::get('images');
-        if ($type === 'media' && is_array($data) && is_array($sizes)) {
-            $file_path = sprintf('%s%s', EX_PATH, $data['slug'] ?? '');
-            foreach ($sizes as $index => $size) {
-                $width  = intval($size['width'] ?? 0);
-                $height = intval($size['height'] ?? 0);
-
-                if (! $width || ! $height) {
-                    continue;
-                }
-
-                $file_resized           = str_replace('/i/original/', sprintf('/i/%sx%s/', $width, $height), $file_path);
-                $sizes[ $index ]['url'] = Url::fromPath($file_resized);
-            }
-        }
-
         foreach ($data as $key => $value) {
             unset($data[ $key ]);
             $data[ Safe::camelcase($key) ] = $value;

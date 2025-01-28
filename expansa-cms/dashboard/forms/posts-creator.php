@@ -42,7 +42,7 @@ return Expansa\Form::enqueue(
             'class'       => '',
             'label_class' => '',
             'reset'       => 0,
-            'before'      => sprintf('<code class="badge">%s</code>', Url::site()),
+            'before'      => sprintf('<code class="badge">%s</code>', url()),
             'after'       => '',
             'instruction' => '',
             'tooltip'     => '',

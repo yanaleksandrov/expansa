@@ -356,7 +356,7 @@ return Expansa\Form::enqueue(
                     <button type="submit" class="btn btn--primary" x-show="$wizard.isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" x-cloak disabled>
                         <?php echo t('Install Expansa'); ?>
                     </button>
-                    <a href="<?php echo Url::site('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" x-show="$wizard.isLast()" x-cloak><?php echo t('Go to dashboard'); ?></a>
+                    <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" x-show="$wizard.isLast()" x-cloak><?php echo t('Go to dashboard'); ?></a>
                 </div>
                 <?php
             },

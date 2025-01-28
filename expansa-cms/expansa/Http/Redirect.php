@@ -66,7 +66,7 @@ final class Redirect
 
     public function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): self
     {
-        $to = Url::site($to);
+        $to = url($to);
 
         /**
          * Filters the redirect location.

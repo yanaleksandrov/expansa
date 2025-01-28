@@ -65,13 +65,13 @@ return Expansa\Form::enqueue(
 			'options'     => [
 				'csv' => [
 					'icon'        => 'ph ph-file-csv',
-					'image'       => Url::site( 'dashboard/assets/images/dashboard-light.svg' ),
+					'image'       => url( 'dashboard/assets/images/dashboard-light.svg' ),
 					'content'     => t( 'CSV file' ),
 					'description' => t( 'A clear format for apps that work with tables' ),
 				],
 				'json' => [
 					'icon'        => 'ph ph-file-txt',
-					'image'       => Url::site( 'dashboard/assets/images/dashboard-dark.svg' ),
+					'image'       => url( 'dashboard/assets/images/dashboard-dark.svg' ),
 					'content'     => t( 'JSON file' ),
 					'description' => t( 'Universal format for cross-platform data exchange' ),
 				],

@@ -16,8 +16,8 @@ if (!defined('EX_PATH')) {
 }
 
 $expansa = Json::encode([
-    'apiurl' => Url::site('/api/'),
-    'spriteFlagsUrl' => Url::site('/dashboard/assets/sprites/flags.svg'),
+    'apiurl' => url('/api/'),
+    'spriteFlagsUrl' => url('/dashboard/assets/sprites/flags.svg'),
 ]);
 ?>
         <!DOCTYPE html>
@@ -39,22 +39,22 @@ $expansa = Json::encode([
     <style>:root {
             --expansa-font-text: "Inter", sustem-ui, sans-serif !important;
         }</style>
-    <link rel="stylesheet" id="expansa-css" href="<?php echo Url::site('/dashboard/assets/css/expansa.min.css'); ?>">
-    <link rel="stylesheet" id="controls-css" href="<?php echo Url::site('/dashboard/assets/css/controls.min.css'); ?>">
-    <link rel="stylesheet" id="utility-css" href="<?php echo Url::site('/dashboard/assets/css/utility.min.css'); ?>">
-    <link rel="stylesheet" id="phosphor-css" href="<?php echo Url::site('/dashboard/assets/css/phosphor.min.css'); ?>">
+    <link rel="stylesheet" id="expansa-css" href="<?php echo url('/dashboard/assets/css/expansa.min.css'); ?>">
+    <link rel="stylesheet" id="controls-css" href="<?php echo url('/dashboard/assets/css/controls.min.css'); ?>">
+    <link rel="stylesheet" id="utility-css" href="<?php echo url('/dashboard/assets/css/utility.min.css'); ?>">
+    <link rel="stylesheet" id="phosphor-css" href="<?php echo url('/dashboard/assets/css/phosphor.min.css'); ?>">
 </head>
 <body class="df jcc p-6" x-data="expansa">
 <div class="mw-400">
     <div class="df jcc">
-        <img src="<?php echo Url::site('/dashboard/assets/images/logo-decorate.svg'); ?>" width="200" height="117"
+        <img src="<?php echo url('/dashboard/assets/images/logo-decorate.svg'); ?>" width="200" height="117"
              alt="Expansa CMS">
     </div>
     <?php echo form(EX_PATH . 'dashboard/forms/system-install.php'); ?>
 </div>
 <script>const expansa = <?php echo $expansa; ?>;</script>
-<script id="ajax-js" src="<?php echo Url::site('/dashboard/assets/js/ajax.min.js'); ?>"></script>
-<script id="expansa-js" src="<?php echo Url::site('/dashboard/assets/js/expansa.min.js'); ?>"></script>
-<script id="alpine-js" src="<?php echo Url::site('/dashboard/assets/js/alpine.min.js'); ?>"></script>
+<script id="ajax-js" src="<?php echo url('/dashboard/assets/js/ajax.min.js'); ?>"></script>
+<script id="expansa-js" src="<?php echo url('/dashboard/assets/js/expansa.min.js'); ?>"></script>
+<script id="alpine-js" src="<?php echo url('/dashboard/assets/js/alpine.min.js'); ?>"></script>
 </body>
 </html>

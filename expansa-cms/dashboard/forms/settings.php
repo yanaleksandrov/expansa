@@ -569,17 +569,17 @@ return Expansa\Form::enqueue(
 							],
 							'options'     => [
 								'mystery' => [
-									'image'   => Url::site( 'dashboard/assets/images/dashboard-light.svg' ),
+									'image'   => url( 'dashboard/assets/images/dashboard-light.svg' ),
 									'title'   => t( 'Mystery Person' ),
 									'content' => t( 'This theme will be active when your system is set to “light mode”' ),
 								],
 								'gravatar' => [
-									'image'   => Url::site( 'dashboard/assets/images/dashboard-dark.svg' ),
+									'image'   => url( 'dashboard/assets/images/dashboard-dark.svg' ),
 									'title'   => t( 'Gravatar Logo' ),
 									'content' => t( 'This theme will be active when your system is set to “night mode”' ),
 								],
 								'generated' => [
-									'image'   => Url::site( 'dashboard/assets/images/dashboard-dark.svg' ),
+									'image'   => url( 'dashboard/assets/images/dashboard-dark.svg' ),
 									'title'   => t( 'Generated' ),
 									'content' => t( 'This theme will be active when your system is set to “night mode”' ),
 								],
@@ -673,7 +673,7 @@ return Expansa\Form::enqueue(
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
-							'before'      => sprintf( '<code class="badge"><i class="ph ph-link"></i> %s</code>', Url::site() ),
+							'before'      => sprintf( '<code class="badge"><i class="ph ph-link"></i> %s</code>', url() ),
 							'after'       => '',
 							'instruction' => t( 'Select the permalink structure for your website. Including the %slug% tag makes links easy to understand, and can help your posts rank higher in search engines.' ),
 							'tooltip'     => t( 'ZIP Code must be US or CDN format. You can use an extended ZIP+4 code to determine address more accurately.' ),
@@ -692,7 +692,7 @@ return Expansa\Form::enqueue(
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
-							'before'      => sprintf( '<code class="badge"><i class="ph ph-link"></i> %s</code>', Url::site() ),
+							'before'      => sprintf( '<code class="badge"><i class="ph ph-link"></i> %s</code>', url() ),
 							'after'       => '',
 							'instruction' => '',
 							'tooltip'     => '',

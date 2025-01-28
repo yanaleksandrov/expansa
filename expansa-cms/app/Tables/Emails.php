@@ -75,7 +75,7 @@ final class Emails
     {
         return [
             'title'        => t('No emails templates found'),
-            'description'  => t('Add [new email template](:emailDialog) manually', Url::site('/dashboard/import')),
+            'description'  => t('Add [new email template](:emailDialog) manually', url('/dashboard/import')),
             'descriptiont' => t(
                 'Add %s manually',
                 sprintf('<a href="#" @click.prevent="$dialog.open(\'tmpl-email-editor\', emailDialog)">%s</a>', t('new email template')),

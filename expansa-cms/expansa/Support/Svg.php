@@ -630,7 +630,7 @@ class Svg
             return '';
         }
 
-        $url = str_replace(EX_PATH, Url::site(), self::$source) . "#{$id}";
+        $url = str_replace(EX_PATH, url(), self::$source) . "#{$id}";
 
         ob_start();
         ?>

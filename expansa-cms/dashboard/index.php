@@ -32,7 +32,7 @@ new class
             if (! Is::debug()) {
                 $style = sprintf('%s.min', $style);
             }
-            Asset::enqueue($style, Url::dashboard('/assets/css/' . $style . '.css'));
+            Asset::enqueue($style, url('/dashboard/assets/css/' . $style . '.css'));
         }
 
         $scripts = ['ajax', 'alpine'];
@@ -46,7 +46,7 @@ new class
                 $data['data'] = Hook::call(
                     'expansa_dashboard_data',
                     [
-                        'apiurl'              => Url::site('/api/'),
+                        'apiurl'              => url('/api/'),
                         'items'               => [],
                         'locale'              => I18n::locale(),
                         'dateFormat'          => 'j M, Y',
@@ -54,7 +54,7 @@ new class
                         'showFilter'          => false,
                         'bulk'                => false,
                         'showMenu'            => false,
-                        'spriteFlagsUrl'      => Url::site('/dashboard/assets/sprites/flags.svg'),
+                        'spriteFlagsUrl'      => url('/dashboard/assets/sprites/flags.svg'),
                         'notifications'       => [
                             'ctrlS' => t_attr('Expansa saves the changes automatically, so there is no need to press ⌘ + S'),
                         ],
@@ -85,7 +85,7 @@ new class
             if (! Is::debug()) {
                 $script = sprintf('%s.min', $script);
             }
-            Asset::enqueue($script, Url::dashboard('/assets/js/' . $script . '.js'), $data);
+            Asset::enqueue($script, url('/dashboard/assets/js/' . $script . '.js'), $data);
         }
 
         /**

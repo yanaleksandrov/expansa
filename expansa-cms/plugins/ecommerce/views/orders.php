@@ -29,7 +29,7 @@ use Expansa\Url;
                 <div class="kanban__items">
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--green-lt">Paid: $ 550.45</span>
                         </div>
                         <div class="kanban__progress">
@@ -42,7 +42,7 @@ use Expansa\Url;
                     </div>
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--green-lt">Paid: $ 230.00</span>
                         </div>
                         <div class="kanban__progress">
@@ -55,7 +55,7 @@ use Expansa\Url;
                     </div>
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--green-lt">Paid: $ 550.45</span>
                         </div>
                         <div class="kanban__progress">
@@ -68,7 +68,7 @@ use Expansa\Url;
                     </div>
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--green-lt">Paid: $ 550.45</span>
                         </div>
                         <div class="kanban__progress">
@@ -81,7 +81,7 @@ use Expansa\Url;
                     </div>
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--green-lt">Paid: $ 550.45</span>
                         </div>
                         <div class="kanban__progress">
@@ -94,7 +94,7 @@ use Expansa\Url;
                     </div>
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--green-lt">Paid: $ 550.45</span>
                         </div>
                         <div class="kanban__progress">
@@ -116,7 +116,7 @@ use Expansa\Url;
                 <div class="kanban__items">
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--orange-lt">Unpaid: $ 230.00</span>
                         </div>
                         <div class="kanban__progress">
@@ -129,7 +129,7 @@ use Expansa\Url;
                     </div>
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--orange-lt">Unpaid: $ 230.00</span>
                         </div>
                         <div class="kanban__progress">
@@ -159,7 +159,7 @@ use Expansa\Url;
                 <div class="kanban__items">
                     <div class="kanban__item">
                         <div class="kanban__name">
-                            <a class="kanban__label" href="<?php echo Url::dashboard('/order'); ?>">#10245</a>
+                            <a class="kanban__label" href="<?php echo url('dashboard/order'); ?>">#10245</a>
                             <span class="badge badge--green-lt">Paid: $ 550.45</span>
                         </div>
                         <div class="kanban__progress">

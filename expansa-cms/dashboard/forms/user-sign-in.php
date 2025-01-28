@@ -49,7 +49,7 @@ return Expansa\Form::enqueue(
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Forgot your password? You can [reset it here](:resetPasswordLink)', Url::site( '/dashboard/reset-password' ) ),
+			'instruction' => t( 'Forgot your password? You can [reset it here](:resetPasswordLink)', url( '/dashboard/reset-password' ) ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',

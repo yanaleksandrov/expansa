@@ -109,7 +109,7 @@ class EntryHandler
      */
     protected function getUrl(): string
     {
-        return Url::site(str_replace(EX_PATH, '', $this->path));
+        return url(str_replace(EX_PATH, '', $this->path));
     }
 
     /**

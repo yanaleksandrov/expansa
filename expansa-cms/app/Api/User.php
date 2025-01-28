@@ -109,7 +109,7 @@ class User
             [
                 'target'   => 'body',
                 'method'   => 'redirect',
-                'fragment' => Url::site('dashboard'),
+                'fragment' => url('dashboard'),
             ],
         ];
     }
@@ -128,7 +128,7 @@ class User
                 [
                     'target'   => 'body',
                     'method'   => 'redirect',
-                    'fragment' => Url::sign_in(),
+                    'fragment' => url('sign-in'),
                 ],
             ];
         }

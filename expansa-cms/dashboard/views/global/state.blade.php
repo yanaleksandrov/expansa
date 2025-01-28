@@ -25,7 +25,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 ?>
 <div class="{{ $class }}">
 	@if($icon)
-		<svg><use xlink:href="<?php echo Url::dashboard('/assets/sprites/states.svg#' . $icon); ?>"></use></svg>
+		<svg><use xlink:href="<?php echo url('/dashboard/assets/sprites/states.svg#' . $icon); ?>"></use></svg>
 	@endif
 	@if($title)
 		<h6 class="mt-4 mw">{{ $title }}</h6>

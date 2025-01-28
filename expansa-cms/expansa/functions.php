@@ -112,3 +112,20 @@ if (! function_exists('form')) {
         return (new \Expansa\Builders\Form())->make($uid);
     }
 }
+
+if (! function_exists('url')) {
+    /**
+     * Get url.
+     *
+     * @param string $slug
+     * @return string
+     */
+    function url(string $slug): string
+    {
+        static $url;
+        if (!$url) {
+            $url = new \Expansa\Support\Url();
+        }
+        return $url->site($slug);
+    }
+}

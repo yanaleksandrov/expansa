@@ -114,7 +114,7 @@ if (!defined('EX_PATH')) {
                 <div class="df aic g-2">
                     <div class="df aic g-1">
                         <svg width="16" height="16">
-                            <use xlink:href="<?php echo Url::dashboard( '/assets/sprites/flags.svg#us' ); ?>"></use>
+                            <use xlink:href="<?php echo url('/dashboard/assets/sprites/flags.svg#us'); ?>"></use>
                         </svg>
                         English
                     </div>

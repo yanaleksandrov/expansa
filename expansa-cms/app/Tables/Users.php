@@ -70,7 +70,7 @@ final class Users
     {
         return [
             'title'       => t('Users not found'),
-            'description' => t('You don\'t have any users yet. <a @click="$dialog.open(\'tmpl-post-editor\', postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', Url::site('/dashboard/import')),
+            'description' => t('You don\'t have any users yet. <a @click="$dialog.open(\'tmpl-post-editor\', postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
         ];
     }
 }

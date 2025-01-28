@@ -31,6 +31,6 @@ $src = Safe::attribute( $__data['sizes']['thumbnail']['url'] ?? $__data['url'] ?
 		</div>
 	</template>
 	<template x-if="!item.url && !item.icon">
-		<img class="storage__image" src="<?php echo Url::dashboard( '/assets/images/files/broken.svg' ) ?>" title="<?php t_attr( 'Image is broken' ); ?>" width="40" height="40">
+		<img class="storage__image" src="<?php echo url('/dashboard/assets/images/files/broken.svg') ?>" title="<?php t_attr( 'Image is broken' ); ?>" width="40" height="40">
 	</template>
 </div>
