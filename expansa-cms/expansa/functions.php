@@ -60,11 +60,11 @@ if (!function_exists('view')) {
     }
 }
 
-if (!function_exists('metric')) {
-    function metric(): Expansa\Debug\Metric
+if (!function_exists('metrics')) {
+    function metrics(): Expansa\Debug\Metric
     {
-        static $metric;
-        return $metric ?? ($metric = new Expansa\Debug\Metric());
+        static $metrics;
+        return $metrics ?? ($metrics = new Expansa\Debug\Metric());
     }
 }
 
@@ -126,5 +126,22 @@ if (! function_exists('url')) {
             $url = new \Expansa\Support\Url();
         }
         return $url->site($slug);
+    }
+}
+
+if (! function_exists('session')) {
+    /**
+     * Get session.
+     *
+     * @param array $config
+     * @return Expansa\Session\PhpSession
+     */
+    function session(array $config = ['name' => 'expansa']): Expansa\Session\PhpSession
+    {
+        static $session;
+        if (!$session) {
+            $session = new Expansa\Session\PhpSession($config);
+        }
+        return $session;
     }
 }
