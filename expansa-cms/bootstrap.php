@@ -24,7 +24,8 @@ if (is_file(EX_PATH . 'env.php')) {
 }
 
 // Start benchmark timer
-metric()->start();
+metrics()->start();
+//session()->start();
 
 // Generate CSRF token.
 (new Csrf())->generate('token');

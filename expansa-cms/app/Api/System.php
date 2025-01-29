@@ -59,8 +59,8 @@ class System
             echo Json::encode(
                 [
                     'status'    => 200,
-                    'benchmark' => metric()->time(),
-                    'memory'    => metric()->memory(),
+                    'benchmark' => metrics()->time(),
+                    'memory'    => metrics()->memory(),
                     'data'      => array_map(
                         fn($requirement) => match ($requirement) {
                             'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),

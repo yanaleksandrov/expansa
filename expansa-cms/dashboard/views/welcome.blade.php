@@ -32,7 +32,7 @@ use Expansa\I18n;
 	Hook::call( 'renderDashboardHeader' );
 	?>
 </head>
-<body>
+<body class="df jcc p-6">
     <?php
 	echo view($slug);
 

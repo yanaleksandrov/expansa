@@ -82,8 +82,8 @@ final class Api
         $data = Json::encode(
             [
                 'status'    => 200,
-                'benchmark' => metric()->time(),
-                'memory'    => metric()->memory(),
+                'benchmark' => metrics()->time(),
+                'memory'    => metrics()->memory(),
                 'queries'   => count(Db::log()),
                 'data'      => $data instanceof Error ? [] : $data,
                 'errors'    => $data instanceof Error ? Error::get() : [],
