@@ -9,8 +9,7 @@ if (!defined('EX_PATH')) {
     exit;
 }
 ?>
-
-        <!-- media editor template start -->
+<!-- media editor template start -->
 <template id="tmpl-media-editor" x-init="$dialog.init(() => $ajax('media/get'))">
     <div class="media-editor">
         <div class="media-editor-main">
@@ -28,7 +27,7 @@ if (!defined('EX_PATH')) {
                 </div>
                 <div><strong><?php echo t('Length'); ?>:</strong> 2 minutes, 48 seconds</div>
             </div>
-            <?php echo form(EX_DASHBOARD . 'forms/media-editor.php'); ?>
+            <?php echo form('media-editor', EX_DASHBOARD . 'forms/media-editor.php'); ?>
         </div>
     </div>
 </template>

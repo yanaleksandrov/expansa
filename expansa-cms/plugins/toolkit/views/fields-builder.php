@@ -18,7 +18,7 @@ if (! defined('EX_PATH')) {
             <div class="fields-builder__header">
                 <h4>Fields Builder</h4>
             </div>
-            <?php echo form(EX_DASHBOARD . 'forms/fields-builder.php', 'fields-builder'); ?>
+            <?php echo form('fields-builder', EX_DASHBOARD . 'forms/fields-builder.php'); ?>
         </div>
         <div class="fields-builder__main">
             <div class="fields-builder__code">

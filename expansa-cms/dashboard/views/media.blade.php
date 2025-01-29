@@ -3,8 +3,7 @@
 use Expansa\Hook;
 
 /**
- * Files storage.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/media.php
+ * Files storage template can be overridden by copying it to themes/yourtheme/dashboard/views/media.php
  *
  * @package Expansa\Templates
  */

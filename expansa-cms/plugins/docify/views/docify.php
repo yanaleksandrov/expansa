@@ -114,6 +114,6 @@ return Expansa\Form::enqueue(
 ?>
 <div class="expansa-main p-7 bg-gray-lt">
     <div class="mw-600 m-auto">
-        <?php echo form(EX_DASHBOARD . 'import/documents.php'); ?>
+        <?php echo form('documents', EX_DASHBOARD . 'import/documents.php'); ?>
     </div>
 </div>

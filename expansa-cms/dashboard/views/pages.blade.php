@@ -3,8 +3,7 @@
 use Expansa\Hook;
 
 /**
- * Pages list.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/pages.php
+ * Pages list template can be overridden by copying it to themes/yourtheme/dashboard/views/pages.php
  *
  * @package Expansa\Templates
  */

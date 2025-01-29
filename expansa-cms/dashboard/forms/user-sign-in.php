@@ -1,7 +1,4 @@
 <?php
-
-use Expansa\Url;
-
 /**
  * Sign In form
  *
@@ -43,13 +40,13 @@ return Expansa\Form::enqueue(
 		[
 			'type'        => 'password',
 			'name'        => 'password',
-			'label'       => t( 'Password' ),
+			'label'       => t('Password'),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Forgot your password? You can [reset it here](:resetPasswordLink)', url( '/dashboard/reset-password' ) ),
+			'instruction' => t('Forgot your password? You can [reset it here](:resetPasswordLink)', url('/reset-password')),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',

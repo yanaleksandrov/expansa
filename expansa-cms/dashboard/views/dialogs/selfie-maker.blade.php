@@ -10,7 +10,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 ?>
-
 <!-- selfie maker start -->
 <template id="take-selfie">
 	<div class="p-7 t-center" x-data="{second: '', showImg: ''}">

@@ -1,7 +1,4 @@
 <?php
-
-use Expansa\View;
-
 /**
  * Expansa dashboard tools.
  *

@@ -1,8 +1,6 @@
 <?php
-
 /**
- * Expansa dashboard menu.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/menu-panel.php
+ * Expansa dashboard menu panel template can be overridden by copying it to themes/yourtheme/dashboard/views/menu-panel.php
  *
  * @package Expansa\Templates
  */

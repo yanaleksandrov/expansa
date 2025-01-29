@@ -1,7 +1,7 @@
 <?php
-
 /**
  * Addons list for install.
+ *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/plugins-install.php
  *
  * @package Expansa\Templates

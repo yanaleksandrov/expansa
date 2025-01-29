@@ -3,8 +3,7 @@
 use Expansa\Safe;
 
 /**
- * Expansa dashboard menu.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/menu-bar.php
+ * Expansa dashboard menu top bar template can be overridden by copying it to themes/yourtheme/dashboard/views/menu-bar.php
  *
  * @package Expansa\Templates
  */

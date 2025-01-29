@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Expansa\Db;
 use Expansa\Is;
 use Expansa\Debug;
 use Expansa\Security\Csrf\Csrf;
@@ -46,9 +45,9 @@ Debug::start(EX_DEBUG_VIEW, function () {
     }
 
     // Application default data
-    require_once EX_PATH . 'config/countries.php';
-    require_once EX_PATH . 'config/timezones.php';
-    require_once EX_PATH . 'config/languages.php';
+    require_once EX_PATH . 'resources/countries.php';
+    require_once EX_PATH . 'resources/timezones.php';
+    require_once EX_PATH . 'resources/languages.php';
 
     // Register default Expansa data
     require_once EX_PATH . 'migrations.php';
@@ -58,6 +57,4 @@ Debug::start(EX_DEBUG_VIEW, function () {
 
     // Register Expansa routes
     require_once EX_PATH . 'routes.php';
-
-    printf('<!-- %sQ %ss %s -->', count(Db::log()), metric()->time(), metric()->memory());
 }, EX_DEBUG);

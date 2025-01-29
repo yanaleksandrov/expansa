@@ -63,7 +63,8 @@ final class Form
 
         $form = self::$forms[$uid] ?? null;
         if ($form instanceof \Expansa\Builders\Forms\Form) {
-            return $form->parse($form->fields ?? []);
+            $html = $form->parse($form->fields ?? []);
+            return $form->wrap($form->attributes, $html);
         }
         return '';
     }

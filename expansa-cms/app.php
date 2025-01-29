@@ -92,3 +92,6 @@ Expansa\Extensions::enqueue(fn () => [
     ...Expansa\Disk::dir(EX_PLUGINS)->files('*/*.php'),
     ...Expansa\Disk::dir(EX_THEMES)->files('*/*.php'),
 ]);
+
+Expansa\Extensions::boot('plugin');
+Expansa\Extensions::boot('theme');

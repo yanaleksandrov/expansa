@@ -1,8 +1,6 @@
 <?php
-
 /**
- * Themes list.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/themes.php
+ * Themes list template can be overridden by copying it to themes/yourtheme/dashboard/views/themes.php
  *
  * @package Expansa\Templates
  */

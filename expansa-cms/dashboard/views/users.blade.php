@@ -1,7 +1,6 @@
 <?php
 /**
- * Users list.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/users.php
+ * Users list template can be overridden by copying it to themes/yourtheme/dashboard/views/users.php
  *
  * @package Expansa\Templates
  */

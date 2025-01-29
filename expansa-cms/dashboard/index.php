@@ -7,7 +7,6 @@ use Expansa\Builders\Tree;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Is;
-use Expansa\Url;
 
 new class
 {

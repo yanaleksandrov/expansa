@@ -9,8 +9,7 @@ if (!defined('EX_PATH')) {
     exit;
 }
 ?>
-
-        <!-- media uploader template start -->
+<!-- media uploader template start -->
 <template id="tmpl-media-uploader">
-    <?php echo form(EX_DASHBOARD . 'forms/files-uploader.php'); ?>
+    <?php echo form('files-uploader', EX_DASHBOARD . 'forms/files-uploader.php'); ?>
 </template>

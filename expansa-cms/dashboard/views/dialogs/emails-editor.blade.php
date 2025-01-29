@@ -10,12 +10,11 @@ if (!defined('EX_PATH')) {
     exit;
 }
 ?>
-
-        <!-- email editor template start -->
+<!-- email editor template start -->
 <template id="tmpl-email-editor" x-init="$dialog.init(() => emailDialog)">
     <div class="email">
         <div class="email-form">
-            <?php echo form(EX_DASHBOARD . 'forms/emails-creator.php'); ?>
+            <?php echo form('emails-creator', EX_DASHBOARD . 'forms/emails-creator.php'); ?>
         </div>
         <div class="email-preview">
             <?php

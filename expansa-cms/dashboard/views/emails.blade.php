@@ -3,8 +3,7 @@
 use Expansa\Hook;
 
 /**
- * Emails.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/emails.php
+ * Emails template can be overridden by copying it to themes/yourtheme/dashboard/views/emails.php
  *
  * @version 2025.1
  */

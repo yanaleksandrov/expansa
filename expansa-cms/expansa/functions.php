@@ -99,16 +99,15 @@ if (! function_exists('form')) {
     /**
      * Print form.
      *
-     * @param string $path
      * @param string $uid
+     * @param string $path
      * @return mixed
      */
-    function form(string $path, string $uid): string
+    function form(string $uid, string $path): string
     {
         if (is_file($path)) {
             require_once $path;
         }
-
         return (new \Expansa\Builders\Form())->make($uid);
     }
 }
@@ -120,7 +119,7 @@ if (! function_exists('url')) {
      * @param string $slug
      * @return string
      */
-    function url(string $slug): string
+    function url(string $slug = ''): string
     {
         static $url;
         if (!$url) {

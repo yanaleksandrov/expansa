@@ -19,5 +19,5 @@ if (! defined('EX_PATH')) {
             <div class="t-muted fs-12 mw-600">managing custom fields</div>
         </div>
     </div>
-    <?php echo form(EX_DASHBOARD . 'forms/fields-builder.php'); ?>
+    <?php echo form('fields-builder', EX_DASHBOARD . 'forms/fields-builder.php'); ?>
 </div>

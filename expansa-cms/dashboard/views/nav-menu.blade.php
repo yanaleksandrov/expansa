@@ -1,8 +1,6 @@
 <?php
-
 /**
- * Expansa dashboard menu.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/nav-menu.php
+ * Expansa dashboard menu template can be overridden by copying it to themes/yourtheme/dashboard/views/nav-menu.php
  *
  * @package Expansa\Templates
  */
@@ -226,7 +224,7 @@ if (!defined('EX_PATH')) {
             <!--				</ul>-->
             <!--			</template>-->
 
-            <?php echo form(EX_DASHBOARD . 'forms/menu-item-editor.php'); ?>
+            <?php echo form('menu-item-editor', EX_DASHBOARD . 'forms/menu-item-editor.php'); ?>
         </div>
     </div>
 </div>

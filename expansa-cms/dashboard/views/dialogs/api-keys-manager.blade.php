@@ -10,8 +10,7 @@ if (!defined('EX_PATH')) {
     exit;
 }
 ?>
-
-        <!-- email editor template start -->
+<!-- email editor template start -->
 <template id="tmpl-api-keys-manager">
-    <?php echo form(EX_DASHBOARD . 'forms/api-keys-manager.php'); ?>
+    <?php echo form('api-keys-manager', EX_DASHBOARD . 'forms/api-keys-manager.php'); ?>
 </template>

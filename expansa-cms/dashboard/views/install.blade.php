@@ -2,12 +2,9 @@
 
 use Expansa\I18n;
 use Expansa\Json;
-use Expansa\Url;
 
 /*
  * Expansa install wizard.
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/install.php
  *
  * @package Expansa\Templates
  */
@@ -20,7 +17,7 @@ $expansa = Json::encode([
     'spriteFlagsUrl' => url('/dashboard/assets/sprites/flags.svg'),
 ]);
 ?>
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
 <head>
     <meta charset="UTF-8">
@@ -50,7 +47,7 @@ $expansa = Json::encode([
         <img src="<?php echo url('/dashboard/assets/images/logo-decorate.svg'); ?>" width="200" height="117"
              alt="Expansa CMS">
     </div>
-    <?php echo form(EX_PATH . 'dashboard/forms/system-install.php'); ?>
+    <?php echo form('system-install', EX_PATH . 'dashboard/forms/system-install.php'); ?>
 </div>
 <script>const expansa = <?php echo $expansa; ?>;</script>
 <script id="ajax-js" src="<?php echo url('/dashboard/assets/js/ajax.min.js'); ?>"></script>

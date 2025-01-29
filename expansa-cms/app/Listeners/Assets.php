@@ -6,7 +6,6 @@ namespace app\Listeners;
 
 use Expansa\Asset;
 use Expansa\Db;
-use Expansa\Debug;
 
 final class Assets
 {

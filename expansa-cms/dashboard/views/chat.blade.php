@@ -1,8 +1,6 @@
 <?php
 /**
- * Chat.
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/chat.php
+ * Chat template can be overridden by copying it to themes/yourtheme/dashboard/views/chat.php
  *
  * @package Expansa\Templates
  */

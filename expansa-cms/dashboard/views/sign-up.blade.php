@@ -1,11 +1,6 @@
 <?php
-
-use Expansa\Url;
-
 /**
- * User sign up page.
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/sign-up.php
+ * User sign up template can be overridden by copying it to themes/yourtheme/dashboard/views/sign-up.php
  *
  * @package Expansa\Templates
  */
@@ -14,11 +9,11 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 ?>
 <div class="mw-360">
-	<a href="<?php echo url(); ?>" class="df jcc mb-4" target="_blank">
-        <img src="<?php echo url( 'dashboard/assets/images/logo-decorate.svg' ); ?>" width="212" height="124" alt="Expansa CMS">
+	<a href="{{ url() }}" class="df jcc mb-4" target="_blank">
+		<img src="{{ url('dashboard/assets/images/logo-decorate.svg') }}" width="212" height="124" alt="Expansa CMS">
 	</a>
-	<?php echo form( EX_DASHBOARD . 'forms/user-sign-up.php' ); ?>
+	<?php echo form('user-sign-up', EX_DASHBOARD . 'forms/user-sign-up.php'); ?>
 	<div class="fs-14 t-center t-muted mt-3">
-		<?php echo t( 'Already have an account? [Sign In](:signInLink)', url( 'dashboard/sign-in' ) ); ?>
+		{!! t('Already have an account? [Sign In](:signInLink)', url('sign-in')) !!}
 	</div>
 </div>

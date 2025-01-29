@@ -1,7 +1,6 @@
 <?php
 /**
- * Translation table.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/translation.php
+ * Translation table template can be overridden by copying it to themes/yourtheme/dashboard/views/translation.php
  *
  * @package Expansa\Templates
  */

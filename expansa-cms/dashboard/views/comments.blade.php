@@ -1,7 +1,6 @@
 <?php
 /**
- * Comments list.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/comments.php
+ * Comments list template can be overridden by copying it to themes/yourtheme/dashboard/views/comments.php
  *
  * @package Expansa\Templates
  */

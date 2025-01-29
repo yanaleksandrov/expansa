@@ -4,7 +4,6 @@ use app\Option;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Safe;
-use Expansa\Url;
 
 /**
  * Remove the duplicate access to the console at two addresses:

@@ -2,9 +2,7 @@
 /**
  * This file is part of Expansa CMS.
  *
- * @link     https://www.expansa.io
- * @contact  team@core.io
- * @license  https://github.com/expansa-team/expansa/LICENSE.md
+ * @package Expansa\Templates
  */
 if (!defined('EX_PATH')) {
     exit;
