@@ -9,7 +9,7 @@ use Spatie\Image\Enums\ColorFormat;
 use Spatie\Image\Enums\ImageDriver;
 use Spatie\Image\Enums\CropPosition;
 use Spatie\Image\Enums\FlipDirection;
-use Spatie\Image\Image as SpatieImage;
+use Spatie\Image\Image;
 use Spatie\Image\Exceptions\InvalidImageDriver;
 use Spatie\ImageOptimizer\OptimizerChain;
 use Spatie\ImageOptimizer\Optimizers\Svgo;
@@ -21,13 +21,13 @@ use Spatie\ImageOptimizer\Optimizers\Jpegoptim;
 
 class Manager
 {
-    protected function __construct(public ?SpatieImage $driver = null)
+    protected function __construct(public ?Image $driver = null)
     {
         try {
             if (extension_loaded('imagick')) {
-                $this->driver = SpatieImage::useImageDriver(ImageDriver::Imagick);
+                $this->driver = Image::useImageDriver(ImageDriver::Imagick);
             } else {
-                $this->driver = SpatieImage::useImageDriver(ImageDriver::Gd);
+                $this->driver = Image::useImageDriver(ImageDriver::Gd);
             }
         } catch (InvalidImageDriver $e) {} // phpcs:ignore
     }

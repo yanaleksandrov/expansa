@@ -2,8 +2,6 @@
 
 namespace Docify\Api\v1;
 
-use Expansa;
-
 class Projects
 {
     public string $endpoint = 'projects';

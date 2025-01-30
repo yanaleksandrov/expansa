@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Expansa\Support\Is;
 use Expansa\Facades\Debug;
 
 const EX_PATH                   = __DIR__ . '/';
