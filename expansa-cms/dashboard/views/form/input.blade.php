@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -10,8 +10,8 @@ use Expansa\Support\Arr;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $name, $label, $class, $labelClass, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(

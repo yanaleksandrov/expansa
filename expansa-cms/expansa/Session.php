@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use Expansa\Facades\Json;
+
 /**
  * Session class
- *
  * TODO: migrate to https://github.com/odan/session/tree/c7afc83519a109dd45039662ea8dd8aea7675761
  */
 final class Session

@@ -7,10 +7,10 @@ namespace app;
 use app\Query\Query;
 use Exception;
 use Expansa\Error;
-use Expansa\Image;
-use Expansa\Disk;
+use Expansa\Facades\Disk;
+use Expansa\Facades\Image;
+use Expansa\Facades\Safe;
 use Expansa\Patterns;
-use Expansa\Safe;
 
 /**
  * Expansa administration Media API.

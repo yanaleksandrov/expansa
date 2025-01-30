@@ -1,8 +1,7 @@
 <?php
 
-use Expansa\View;
-use Expansa\Hook;
-use Expansa\Safe;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Safe;
 
 /**
  * Single image uploader.
@@ -13,8 +12,8 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
@@ -35,11 +34,11 @@ if ( ! defined( 'EX_PATH' ) ) {
 	]
 )->values();
 
-$prop = Safe::prop( $attributes['name'] ?? $name );
+$prop = Safe::prop($attributes['name'] ?? $name);
 
-Hook::add( 'expansa_dashboard_footer', function() {
-	echo view( 'dialogs/selfie-maker' );
-} );
+Hook::add('expansa_dashboard_footer', function () {
+    echo view('dialogs/selfie-maker');
+});
 ?>
 <div class="<?php echo $class; ?>">
 	<div class="df aife g-4">

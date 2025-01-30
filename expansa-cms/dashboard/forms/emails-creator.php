@@ -1,13 +1,13 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 /**
  * Form for create & edit emails.
  *
  * @since 2025.1
  */
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
 	'emails-creator',
 	[
 		'@submit.window' => '$ajax("import-email")',

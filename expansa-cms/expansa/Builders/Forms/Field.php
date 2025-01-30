@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms;
 
-use Expansa\Json;
-use Expansa\Safe;
-use Expansa\View;
+use Expansa\Facades\Json;
+use Expansa\Facades\Safe;
+use Expansa\Facades\View;
 
 class Field
 {

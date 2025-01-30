@@ -1,18 +1,17 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
- * Output rating.
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/global/rating.php
+ * Output rating template can be overridden by copying it to themes/yourtheme/dashboard/views/global/rating.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $class, $rating, $reviews ] = Safe::data(
+[$class, $rating, $reviews] = Safe::data(
     $__data ?? [],
 	[
 		'class'   => 'class:df aic g-1',
@@ -21,7 +20,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	]
 )->values();
 
-$fullStars  = round( $rating );
+$fullStars = round($rating);
 $emptyStars = 5 - $fullStars;
 ?>
 <span class="<?php echo $class; ?>" title="<?php echo t( ':rate rating based on :count reviews', $rating, $reviews ); ?>">

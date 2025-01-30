@@ -6,8 +6,8 @@ namespace app\Query;
 
 use app\Post\Type;
 use app\User;
-use Expansa\Db;
-use Expansa\Safe;
+use Expansa\Facades\Db;
+use Expansa\Facades\Safe;
 use InvalidArgumentException;
 
 class Query
@@ -153,7 +153,7 @@ class Query
          * TODO: add checking existing post types (remove type from array if not exist)
          */
         if (! empty($args['type'])) {
-            $types = array_map('Expansa\Safe::id', is_array($args['type']) ? $args['type'] : [ $args['type'] ]);
+            $types = array_map('Expansa\Facades\Safe', is_array($args['type']) ? $args['type'] : [ $args['type'] ]);
         } else {
             throw new InvalidArgumentException(t('"Type" parameter can not be empty.'));
         }

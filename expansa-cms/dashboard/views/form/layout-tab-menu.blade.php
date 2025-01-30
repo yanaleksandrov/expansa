@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Form tab menu.
@@ -8,16 +9,16 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 $fields    = Safe::array( $__data['fields'] ?? [] );
 $fields    = array_filter( $fields, fn( $field ) => $field['type'] === 'tab' );
 $classMenu = array_filter( array_column( $fields, 'class_menu' ), fn ( $field ) => $field )[0] ?? '';
 
-if ( count( $fields ) === 0 ) {
-	return;
+if (count($fields) === 0) {
+    return;
 }
 ?>
 <ul class="<?php echo trim( sprintf( 'tab__nav %s', $classMenu ) ); ?>" x-sticky>

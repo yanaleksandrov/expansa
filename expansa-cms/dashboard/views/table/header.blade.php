@@ -1,7 +1,7 @@
 <?php
 
-use Expansa\I18n;
-use Expansa\Safe;
+use Expansa\Facades\I18n;
+use Expansa\Facades\Safe;
 
 /**
  * Table header
@@ -208,8 +208,9 @@ if (!defined('EX_PATH')) {
 
             <?php if ($actions) : ?>
             <div class="df aic g-1" x-show="bulk" x-cloak>
-                <?php echo form('posts-actions', EX_DASHBOARD . 'forms/posts-actions.php'); ?>
-                <button type="button" class="btn btn--sm t-red" x-bind="reset"><i class="ph ph-trash"></i> <?php echo t('Reset'); ?></button>
+                    <?php echo form('posts-actions', EX_DASHBOARD . 'forms/posts-actions.php'); ?>
+                <button type="button" class="btn btn--sm t-red" x-bind="reset"><i
+                            class="ph ph-trash"></i> <?php echo t('Reset'); ?></button>
             </div>
             <?php endif; ?>
         </div>

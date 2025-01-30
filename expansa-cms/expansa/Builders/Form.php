@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders;
 
 use Expansa\Builders\Forms\Field;
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use InvalidArgumentException;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 /**
  * Hidden input field
@@ -9,8 +9,8 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 ?>
-<input<?php echo Safe::attributes( $__data['attributes'] ?? [] ); ?>>
+<input<?php echo Safe::attributes($__data['attributes'] ?? []); ?>>

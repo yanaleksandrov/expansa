@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Http;
 
-use Expansa\Hook;
+use Expansa\Facades\Hook;
 use InvalidArgumentException;
 
 /**

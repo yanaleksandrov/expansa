@@ -4,7 +4,7 @@
  *
  * @since 2025.1
  */
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
 	'files-uploader',
 	[
 		'class'  => 'dg g-7 p-7',

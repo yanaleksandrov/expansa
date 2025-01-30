@@ -1,13 +1,13 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 /**
  * Form for build tools list.
  *
  * @since 2025.1
  */
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
 	'tools-list',
 	[
 		'class' => 'card card-border p-8 mw-600 m-auto',

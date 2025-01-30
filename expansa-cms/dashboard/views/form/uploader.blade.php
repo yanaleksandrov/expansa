@@ -1,17 +1,15 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
- * Files uploader.
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/uploader.php
+ * Files uploader template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/uploader.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $max_size ] = Safe::data(
@@ -45,6 +43,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 			<?php endif; ?>
 			<span class="fs-13 t-muted"><?php echo t( 'Maximum upload file size is :maxsize', $max_size ); ?></span>
 		</span>
-		<input type="file"<?php echo Arr::toHtmlAtts( $attributes ); ?>>
-	</label>
+        <input type="file"<?php echo Arr::toHtmlAtts($attributes); ?>>
+    </label>
 </div>

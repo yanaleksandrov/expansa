@@ -12,8 +12,8 @@ if (! function_exists('t')) {
      */
     function t(string $string, mixed ...$args): string
     {
-        if (class_exists('Expansa\I18n')) {
-            return Expansa\I18n::_t($string, ...$args);
+        if (class_exists('Expansa\Facades\I18n')) {
+            return \Expansa\Facades\I18n::_t($string, ...$args);
         }
         return $string;
     }
@@ -29,7 +29,7 @@ if (! function_exists('t_attr')) {
      */
     function t_attr(string $string, mixed ...$args): string
     {
-        return Expansa\Safe::attribute(t($string, ...$args));
+        return \Expansa\Facades\Safe::attribute(t($string, ...$args));
     }
 }
 
@@ -56,7 +56,7 @@ if (!function_exists('escape')) {
 if (!function_exists('view')) {
     function view(string $view, array $data = []): Expansa\View\View
     {
-        return \Expansa\View::make($view, $data);
+        return \Expansa\Facades\View::make($view, $data);
     }
 }
 

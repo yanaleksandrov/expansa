@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace app;
 
-use LogicException;
 use app\Post\Type;
-use Expansa\Db;
-use Expansa\Safe;
+use Expansa\Facades\Db;
+use Expansa\Facades\Safe;
+use LogicException;
 
 class Post
 {

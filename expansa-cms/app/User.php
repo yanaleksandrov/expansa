@@ -6,14 +6,14 @@ namespace app;
 
 use app\User\Roles;
 use app\User\Traits;
-use Expansa\Db;
 use Expansa\Error;
+use Expansa\Facades\Db;
+use Expansa\Facades\Safe;
+use Expansa\Facades\Validator;
 use Expansa\Is;
-use Expansa\Safe;
 use Expansa\Security\Validator as SecurityValidator;
 use Expansa\Session;
 use Expansa\Support\Hash;
-use Expansa\Validator;
 
 /**
  * This class handles user-related operations including user creation, retrieval,

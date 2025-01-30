@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Table media element in storage.
@@ -8,19 +9,19 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $title, $sizeHumanize ] = Safe::data(
+[$title, $sizeHumanize] = Safe::data(
     $__data ?? [],
     [
-        'title' => 'attribute',
+        'title'        => 'attribute',
         'sizeHumanize' => 'trim',
     ]
 )->values();
 
-$src = Safe::attribute( $__data['sizes']['thumbnail']['url'] ?? $__data['url'] ?? $__data['icon'] ?? '' );
+$src = Safe::attribute($__data['sizes']['thumbnail']['url'] ?? $__data['url'] ?? $__data['icon'] ?? '');
 ?>
 <div class="storage__item" @click="$dialog.open('tmpl-media-editor', item)">
 	<template x-if="item.url || item.icon">

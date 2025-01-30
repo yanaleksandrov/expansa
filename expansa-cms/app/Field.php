@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app;
 
-use Expansa\Cache;
-use Expansa\Db;
+use Expansa\Facades\Cache;
+use Expansa\Facades\Db;
 
 /**
  * Represents a field associated with an object, allowing for retrieval, addition,

@@ -19,7 +19,7 @@ if (! defined('EX_PATH')) {
  */
 $list    = [];
 
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
     'import/documents',
     [
         'class'           => 'card card-border',

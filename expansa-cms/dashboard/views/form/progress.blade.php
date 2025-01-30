@@ -1,15 +1,14 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
- * Progress bar
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/progress.php
+ * Progress bar template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/progress.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $max, $min, $value, $speed ] = Safe::data(

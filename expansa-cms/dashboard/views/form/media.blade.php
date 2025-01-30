@@ -1,21 +1,19 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
- * Media field
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/media.php
+ * Media field template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/media.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $type, $name, $label, $label_class, $class, $description, $attributes, $tooltip ] = Safe::data(
-	$__data ?? [],
+[$type, $name, $label, $label_class, $class, $description, $attributes, $tooltip] = Safe::data(
+    $__data ?? [],
     [
 		'type'        => 'key:text',
 		'name'        => 'attribute|key',

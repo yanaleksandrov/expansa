@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -10,11 +10,11 @@ use Expansa\Support\Arr;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $prop, $attributes ] = Safe::data(
+[$prop, $attributes] = Safe::data(
     $__data ?? [],
 	[
 		'key'        => 'prop',
@@ -22,6 +22,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts( $attributes ); ?>>
-	<input type="checkbox" :name="`items[${i}]`" :value="item.<?php echo $prop; ?>" x-bind="switcher" />
+<div<?php echo Arr::toHtmlAtts($attributes); ?>>
+    <input type="checkbox" :name="`items[${i}]`" :value="item.<?php echo $prop; ?>" x-bind="switcher"/>
 </div>

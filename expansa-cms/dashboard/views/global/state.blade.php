@@ -1,18 +1,17 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
- * Different site states.
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/global/state.php
+ * States template can be overridden by copying it to themes/yourtheme/dashboard/views/global/state.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $class, $title, $description, $icon ] = Safe::data(
+[$class, $title, $description, $icon] = Safe::data(
     $__data ?? [],
 	[
 		'class'       => 'class:dg jic m-auto t-center p-5 mw-320',

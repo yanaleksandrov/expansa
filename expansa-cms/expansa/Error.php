@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa;
 
+use Expansa\Facades\Validator;
+
 /**
  * Error class.
  * A class whose task is to simplify error handling (messages) when working with Expansa.

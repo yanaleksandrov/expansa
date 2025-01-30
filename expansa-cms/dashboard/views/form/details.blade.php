@@ -1,9 +1,9 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Details html tag: button with dropdown menu
- *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/details.php
  *
  * @package Expansa\Templates

@@ -1,15 +1,15 @@
 <?php
 
 use app\Option;
-use Expansa\I18n;
-use Expansa\Safe;
+use Expansa\Facades\I18n;
+use Expansa\Facades\Safe;
 
 /**
  * Website settings in dashboard
  *
  * @since 2025.1
  */
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
 	'settings',
 	[
 		'class'   => 'tab tab--vertical',

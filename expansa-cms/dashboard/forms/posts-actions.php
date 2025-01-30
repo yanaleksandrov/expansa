@@ -4,7 +4,7 @@
  *
  * @since 2025.1
  */
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
 	'posts-actions',
 	[
 		'class'           => 'df fww g-1',

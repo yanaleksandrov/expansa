@@ -1,7 +1,6 @@
 <?php
 
-use Expansa\View;
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 /**
  * Table checkbox
@@ -10,12 +9,12 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-$class = Safe::class($__data['key'] ?? [] );
-$prop  = Safe::prop($__data['key'] ?? [] );
+$class = Safe::class($__data['key'] ?? []);
+$prop  = Safe::prop($__data['key'] ?? []);
 ?>
 <div class="<?php echo $class; ?>">
 	<?php

@@ -18,7 +18,7 @@
 
 ```php
 <?php
-use Expansa\Hook;
+use Expansa\Facades\Hook;
 
 Hook::call('testHook', $var1, $var2, ...);
 ```
@@ -30,7 +30,7 @@ Hook::call('testHook', $var1, $var2, ...);
 ### #1. Добавление через обычную callback функцию
 
 ```php
-use Expansa\Hook;
+use Expansa\Facades\Hook;
 
 function applyTestHook($var) {
     $var = 'foo';
@@ -43,7 +43,7 @@ Hook::add('testHook', 'applyTestHook');
 ### #2. Добавление через анонимную функцию
 
 ```php
-use Expansa\Hook;use Expansa\Hooks\Attributes\HookListenerAlias;
+use Expansa\Facades\Hook;use Expansa\Hooks\Attributes\HookListenerAlias;
 
 Hook::add('testHook', fn(&$var) => $var = 'foo');
 // или
@@ -62,7 +62,7 @@ Hook::add('testHook', #[HookListenerAlias('applyTestHook')] fn(&$var) => $var = 
 названию хука.
 
 ```php
-Expansa\Hook::configure(GRFM_CORE . 'Listeners');
+\Expansa\Facades\Hook::configure(GRFM_CORE . 'Listeners');
 
 // file app/Listeners/Test.php
 <?php
@@ -98,8 +98,7 @@ TODO: вероятно этот механизм следует исправит
 
 ```php
 <?php
-use Expansa\Hook;
-use Expansa\Hooks\Priority;
+use Expansa\Facades\Hook;use Expansa\Hooks\Priority;
 
 Hook::add('testHook', 'commerceProductUpdate', Priority::BASE);
 Hook::add('testHook', 'commerceProductCreate', Priority::HIGH + 1);
@@ -135,10 +134,10 @@ class Test
 
 ```php
 // правильно:
-Expansa\Hook::call("commerceUpdate{$status}{$post}");
+\Expansa\Facades\Hook::call("commerceUpdate{$status}{$post}");
 
 // неправильно:
-Expansa\Hook::call('commerceUpdate' . $status . $post);
+\Expansa\Facades\Hook::call('commerceUpdate' . $status . $post);
 ```
 
 Также, в PHP комментариях к динамическому хуку рекомендуется писать возможные варианты 
@@ -152,5 +151,5 @@ Expansa\Hook::call('commerceUpdate' . $status . $post);
  *  - `commerceUpdateOldOrder`
  *  - `commerceUpdateDraftPage`
  */
-Expansa\Hook::call("commerceUpdate{$status}{$post}");
+\Expansa\Facades\Hook::call("commerceUpdate{$status}{$post}");
 ```

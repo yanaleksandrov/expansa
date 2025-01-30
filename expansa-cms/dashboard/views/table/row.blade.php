@@ -1,26 +1,23 @@
 <?php
 
-use Expansa\View;
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
- * Table row content.
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/row.php
+ * Table row content template can be overridden by copying it to themes/yourtheme/dashboard/views/table/row.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-if ( ! is_array( $data ) || empty( $row ) || empty( $columns ) ) {
-	return;
+if (!is_array($data) || empty($row) || empty($columns)) {
+    return;
 }
 
-[ $tag, $view, $attributes ] = Safe::data(
-    (array) $row,
+[$tag, $view, $attributes] = Safe::data(
+    (array)$row,
     [
         'tag'        => 'tag',
         'view'       => 'trim',

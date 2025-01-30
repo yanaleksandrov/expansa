@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Table title with actions cell
@@ -8,8 +9,8 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 $class = Safe::class($__data['key'] ?? [] );
@@ -17,5 +18,5 @@ $prop  = Safe::prop($__data['key'] ?? [] );
 $value = Safe::trim($__data['value'] ?? '' );
 ?>
 <label class="<?php echo $class; ?>">
-	<textarea :name="`items[${i}]`" x-text="item.<?php echo $prop; ?>" rows="1" x-textarea="7"></textarea>
+    <textarea :name="`items[${i}]`" x-text="item.<?php echo $prop; ?>" rows="1" x-textarea="7"></textarea>
 </label>

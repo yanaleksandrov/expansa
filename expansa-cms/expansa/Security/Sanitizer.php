@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Security;
 
-use Expansa\Json;
+use Expansa\Facades\Json;
 use Expansa\Security\Xss\Kses;
 
 final class Sanitizer

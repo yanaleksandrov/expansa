@@ -4,9 +4,9 @@ namespace app\Api;
 
 use dashboard\app\Api\File;
 use Expansa\Builders\Form;
-use Expansa\Csv;
-use Expansa\Disk;
-use Expansa\Safe;
+use Expansa\Facades\Csv;
+use Expansa\Facades\Disk;
+use Expansa\Facades\Safe;
 
 class Files
 {

@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use app\Post\Type;
-use Expansa\Asset;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
-use Expansa\Hook;
+use Expansa\Facades\Asset;
+use Expansa\Facades\Hook;
 use Expansa\Is;
 
 return new class extends Plugin

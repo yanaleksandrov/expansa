@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Check system.

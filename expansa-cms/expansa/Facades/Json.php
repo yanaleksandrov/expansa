@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa;
+namespace Expansa\Facades;
 
+use Expansa\Error;
 use Expansa\Patterns\Facade;
 
 /**

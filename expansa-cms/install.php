@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use Expansa\Api;
-use Expansa\Asset;
+use Expansa\Facades\Asset;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Route;
 use Expansa\Is;
-use Expansa\Route;
-use Expansa\Hook;
 
 if (!defined('EX_IS_INSTALL')) {
     define('EX_IS_INSTALL', true);

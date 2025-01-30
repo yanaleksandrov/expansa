@@ -6,12 +6,12 @@ namespace app\Api;
 
 use app\Option;
 use app\User;
-use Expansa\Db;
-use Expansa\Disk;
 use Expansa\Error;
-use Expansa\Hook;
-use Expansa\Json;
-use Expansa\Safe;
+use Expansa\Facades\Db;
+use Expansa\Facades\Disk;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Json;
+use Expansa\Facades\Safe;
 
 class System
 {

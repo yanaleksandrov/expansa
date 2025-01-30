@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Form tab markup
@@ -8,12 +9,12 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $name, $property, $caption, $description, $content, $class_content ] = Safe::data(
-	$__data ?? [],
+[$name, $property, $caption, $description, $content, $class_content] = Safe::data(
+    $__data ?? [],
     [
 		'name'          => 'name',
 		'property'      => 'prop:tab',
@@ -24,8 +25,8 @@ if ( ! defined( 'EX_PATH' ) ) {
     ]
 )->values();
 
-if ( empty( $content ) ) {
-	return;
+if (empty($content)) {
+    return;
 }
 ?>
 <!-- tab "<?php echo $name; ?>" start -->
@@ -44,6 +45,5 @@ if ( empty( $content ) ) {
 	<?php endif; ?>
 	<div class="dg g-8">
 		<?php echo $content; ?>
-
 	</div>
 </div>

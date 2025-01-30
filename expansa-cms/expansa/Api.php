@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace Expansa;
 
 use Exception;
+use Expansa\Facades\Db;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Json;
+use Expansa\Facades\Route;
+use Expansa\Facades\Safe;
 use Expansa\Security\Csrf\Csrf;
 use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
 use Expansa\Security\Exception\InvalidCsrfTokenException;

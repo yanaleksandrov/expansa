@@ -1,21 +1,19 @@
 <?php
 
-use Expansa\View;
-use Expansa\I18n;
-use Expansa\Safe;
+use Expansa\Facades\I18n;
+use Expansa\Facades\Safe;
 
 /**
  * Table raw text cell
- *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cell-toggle.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $key, $title, $description, $screenshot, $reviews, $version, $rating, $installed ] = Safe::data(
+[$key, $title, $description, $screenshot, $reviews, $version, $rating, $installed] = Safe::data(
     $__data ?? [],
 	[
 		'key'         => 'class',
@@ -54,9 +52,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 			t( 'This theme has not been rated yet' );
 		}
 
-		if ( $version ) :
-			?>
-			<div class="themes-text" title="<?php echo t( 'Version :number', $version ); ?>"><?php echo $version; ?></div>
-		<?php endif; ?>
-	</div>
+                             if ($version) :
+                                 ?>
+        <div class="themes-text" title="<?php echo t( 'Version :number', $version ); ?>"><?php echo $version; ?></div>
+        <?php endif; ?>
+    </div>
 </div>

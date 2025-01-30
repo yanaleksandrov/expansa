@@ -1,7 +1,5 @@
 <?php
 
-use Expansa\View;
-
 /**
  * Query builder
  *

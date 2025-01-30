@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Mail;
 
-use Expansa\Hook;
+use Expansa\Facades\Hook;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 

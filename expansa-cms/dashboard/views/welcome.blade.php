@@ -1,7 +1,8 @@
 <?php
-use app\Option;
-use Expansa\Hook;
-use Expansa\I18n;
+
+use Expansa\Facades\Hook;
+use Expansa\Facades\I18n;
+
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
@@ -29,7 +30,7 @@ use Expansa\I18n;
 	 *
 	 * @since 2025.1
 	 */
-	Hook::call( 'renderDashboardHeader' );
+	Hook::call('renderDashboardHeader');
 	?>
 </head>
 <body class="df jcc p-6">

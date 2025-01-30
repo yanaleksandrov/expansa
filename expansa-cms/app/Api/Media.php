@@ -2,8 +2,8 @@
 
 namespace app\Api;
 
-use Expansa\Disk;
 use Expansa\Error;
+use Expansa\Facades\Disk;
 use Expansa\Support\Str;
 
 class Media

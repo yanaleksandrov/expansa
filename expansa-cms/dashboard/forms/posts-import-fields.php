@@ -2,7 +2,7 @@
 
 use app\Post\Status;
 use app\Post\Type;
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 $samples  = Safe::array( $__data['samples'] ?? [] );
 $filepath = Safe::attribute( $__data['filepath'] ?? '' );
@@ -10,7 +10,7 @@ if ( empty( $samples ) ) {
     return;
 }
 
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
 	'import-fields',
 	fields: [
 		[

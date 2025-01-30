@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Form divider
@@ -8,10 +9,10 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-$label = Safe::trim( $__data['label'] ?? '' );
+$label = Safe::trim($__data['label'] ?? '');
 ?>
 <div class="card-hr">{!! $label !!}</div>

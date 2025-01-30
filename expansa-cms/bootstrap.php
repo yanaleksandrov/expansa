@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
+use Expansa\Facades\Debug;
 use Expansa\Is;
-use Expansa\Debug;
 use Expansa\Security\Csrf\Csrf;
 
 const EX_PATH                   = __DIR__ . '/';

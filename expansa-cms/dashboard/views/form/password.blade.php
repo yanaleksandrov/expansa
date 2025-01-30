@@ -1,17 +1,15 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /*
- * Password field
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/password.php
+ * Password field template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/password.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $name, $label, $class, $labelClass, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $switcher, $indicator, $generator, $characters ] = Safe::data(
@@ -37,7 +35,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	]
 )->values();
 
-$prop       = Safe::prop( $attributes['name'] ?? $name );
+$prop = Safe::prop($attributes['name'] ?? $name);
 $attributes = [
 	...$attributes,
 	'name'          => $name,

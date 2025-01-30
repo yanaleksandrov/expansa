@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 /**
  * Expansa dashboard menu top bar template can be overridden by copying it to themes/yourtheme/dashboard/views/menu-bar.php
@@ -13,7 +13,7 @@ if (!defined('EX_PATH')) {
 
 echo tree('dashboard-menu-bar', function($items) {
     ?>
-    <ul id="dashboard-menu-bar" class="menu mr-auto">
+<ul id="dashboard-menu-bar" class="menu mr-auto">
         <?php
         foreach ($items as $item) :
             [$url, $icon, $title] = Safe::data($item, [

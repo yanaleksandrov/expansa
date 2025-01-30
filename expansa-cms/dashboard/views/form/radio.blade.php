@@ -1,17 +1,15 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /*
- * Radio buttons
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/radio.php
+ * Radio buttons template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/radio.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(

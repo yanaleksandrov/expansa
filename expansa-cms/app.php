@@ -7,14 +7,14 @@ declare(strict_types=1);
  *
  * @since 2025.1
  */
-Expansa\Hook::configure(EX_PATH . 'app/Listeners');
+\Expansa\Facades\Hook::configure(EX_PATH . 'app/Listeners');
 
 /**
  * Register forms fields.
  *
  * @since 2025.1
  */
-Expansa\Form::configure(
+\Expansa\Facades\Form::configure(
     [
         'text'            => \Expansa\Builders\Forms\Fields\Input::class,
         'color'           => \Expansa\Builders\Forms\Fields\Input::class,
@@ -65,7 +65,7 @@ Expansa\Form::configure(
  *
  * @since 2025.1
  */
-Expansa\I18n::configure(
+\Expansa\Facades\I18n::configure(
     [
         EX_CORE      => EX_DASHBOARD,
         EX_DASHBOARD => EX_DASHBOARD,
@@ -88,10 +88,10 @@ Expansa\Api::configure('/api', sprintf('%sapp/Api', EX_PATH));
  *
  * @since 2025.1
  */
-Expansa\Extensions::enqueue(fn () => [
-    ...Expansa\Disk::dir(EX_PLUGINS)->files('*/*.php'),
-    ...Expansa\Disk::dir(EX_THEMES)->files('*/*.php'),
+\Expansa\Facades\Extensions::enqueue(fn () => [
+    ...\Expansa\Facades\Disk::dir(EX_PLUGINS)->files('*/*.php'),
+    ...\Expansa\Facades\Disk::dir(EX_THEMES)->files('*/*.php'),
 ]);
 
-Expansa\Extensions::boot('plugin');
-Expansa\Extensions::boot('theme');
+\Expansa\Facades\Extensions::boot('plugin');
+\Expansa\Facades\Extensions::boot('theme');

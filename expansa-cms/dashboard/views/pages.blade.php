@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Hook;
+use Expansa\Facades\Hook;
 
 /**
  * Pages list template can be overridden by copying it to themes/yourtheme/dashboard/views/pages.php

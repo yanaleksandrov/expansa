@@ -1,8 +1,6 @@
 <?php
 
-use Expansa\View;
-
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
     'system-install',
     [
         'class'           => 'dg g-2',
@@ -333,7 +331,7 @@ return Expansa\Form::enqueue(
             'fields'     => [
                 [
                     'type'     => 'custom',
-                    'callback' => View::make('global/state', [
+                    'callback' => view('global/state', [
                         'icon'        => 'success',
                         'title'       => t('Woo-hoo, Expansa has been successfully installed!'),
                         'description' => t('We hope the installation process was easy. Thank you, and enjoy.'),

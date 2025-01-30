@@ -1,23 +1,23 @@
 <?php
 
 use app\Option;
-use Expansa\Hook;
-use Expansa\I18n;
-use Expansa\Safe;
+use Expansa\Facades\Hook;
+use Expansa\Facades\I18n;
+use Expansa\Facades\Safe;
 
 /**
  * Remove the duplicate access to the console at two addresses:
  * "dashboard" and "dashboard/index", leave only the first one.
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	$dashboardUrl = trim( $_SERVER['SCRIPT_URI'] ?? '' );
-	if ( $dashboardUrl ) {
-		header( 'Location: ' . $dashboardUrl . 'profile' );
-	}
-	exit;
+if (!defined('EX_PATH')) {
+    $dashboardUrl = trim($_SERVER['SCRIPT_URI'] ?? '');
+    if ($dashboardUrl) {
+        header('Location: ' . $dashboardUrl . 'profile');
+    }
+    exit;
 }
 
-$slug = Safe::trim( $__data['slug'] ?? '' );
+$slug = Safe::trim($__data['slug'] ?? '');
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">

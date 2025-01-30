@@ -6,10 +6,10 @@ namespace app\Tables;
 
 use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Row;
-use Expansa\Disk;
-use Expansa\Hook;
-use Expansa\I18n;
-use Expansa\Json;
+use Expansa\Facades\Disk;
+use Expansa\Facades\Hook;
+use Expansa\Facades\I18n;
+use Expansa\Facades\Json;
 
 final class Translations
 {

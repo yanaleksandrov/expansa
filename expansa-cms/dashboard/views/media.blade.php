@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Hook;
+use Expansa\Facades\Hook;
 
 /**
  * Files storage template can be overridden by copying it to themes/yourtheme/dashboard/views/media.php

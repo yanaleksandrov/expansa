@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Group
@@ -8,12 +9,12 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $name, $label, $class, $labelClass, $contentClass, $content ] = Safe::data(
-	$__data ?? [],
+[$name, $label, $class, $labelClass, $contentClass, $content] = Safe::data(
+    $__data ?? [],
     [
         'name'          => 'name',
 		'label'         => 'trim',

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace app\Listeners;
 
-use Expansa\Asset;
-use Expansa\Db;
+use Expansa\Facades\Asset;
+use Expansa\Facades\Db;
 
 final class Assets
 {

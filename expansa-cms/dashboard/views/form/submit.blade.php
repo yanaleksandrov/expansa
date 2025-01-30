@@ -1,17 +1,15 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
- * Submit button
- *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/submit.php
+ * Submit button template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/submit.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
@@ -34,6 +32,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 
 $attributes['type'] ??= 'submit';
 ?>
-<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAtts( $conditions ); ?>>
-	<button<?php echo Arr::toHtmlAtts( $attributes ); ?>><?php echo $label; ?></button>
+<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAtts($conditions); ?>>
+    <button<?php echo Arr::toHtmlAtts($attributes); ?>><?php echo $label; ?></button>
 </div>

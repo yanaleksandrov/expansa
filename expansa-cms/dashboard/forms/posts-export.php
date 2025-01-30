@@ -4,7 +4,7 @@
  *
  * @since 2025.1
  */
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
 	'posts-export',
 	[
 		'class'           => 'card card-border px-8 pb-8 g-8',

@@ -2,9 +2,9 @@
 
 use app\Field;
 use app\User;
-use Expansa\Hook;
-use Expansa\I18n;
-use Expansa\Safe;
+use Expansa\Facades\Hook;
+use Expansa\Facades\I18n;
+use Expansa\Facades\Safe;
 
 $user  = User::current();
 $field = new Field($user);
@@ -14,7 +14,7 @@ $field = new Field($user);
  *
  * @since 2025.1
  */
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
     'user-profile',
     [
         'class'   => 'tab',

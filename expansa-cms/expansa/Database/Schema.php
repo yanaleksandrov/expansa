@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Database;
 
 use Closure;
-use Expansa\Db;
+use Expansa\Facades\Db;
 use Expansa\Patterns\Facade;
 
 /**

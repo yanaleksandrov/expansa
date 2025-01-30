@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Codec;
+namespace Expansa\Codecs;
 
 /**
  * Provides functionality for encoding and decoding CSV data.

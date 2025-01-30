@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace app;
 
-use LogicException;
-use Expansa\Db;
 use Expansa\Error;
-use Expansa\Json;
-use Expansa\Safe;
+use Expansa\Facades\Db;
+use Expansa\Facades\Json;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
+use LogicException;
 
 /**
  * Option class it is a self-contained class for creating, updating, and deleting options.

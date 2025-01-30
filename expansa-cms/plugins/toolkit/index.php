@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Expansa\Asset;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
-use Expansa\Hook;
+use Expansa\Facades\Asset;
+use Expansa\Facades\Hook;
 use Expansa\Is;
 
 return new class extends Plugin
@@ -73,7 +73,7 @@ return new class extends Plugin
          *
          * @since 2025.1
          */
-        Expansa\Form::enqueue(
+        \Expansa\Facades\Form::enqueue(
             'builder/fields',
             [
                 'class'  => 'dg p-7 g-7',

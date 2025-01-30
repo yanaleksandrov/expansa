@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace app\Api;
 
 use app\Query\Query;
-use Expansa\Codec\Csv;
-use Expansa\Json;
+use Expansa\Codecs\Csv;
+use Expansa\Facades\Json;
+use Expansa\Facades\View;
 use Expansa\Post\Post;
-use Expansa\View;
 
 class Posts
 {

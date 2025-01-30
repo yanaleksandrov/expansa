@@ -1,7 +1,6 @@
 <?php
 
-use Expansa\Safe;
-use Expansa\Support\Arr;
+use Expansa\Facades\Safe;
 
 /**
  * Form step
@@ -10,11 +9,11 @@ use Expansa\Support\Arr;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $attributes, $content, $step ] = Safe::data(
+[$attributes, $content, $step] = Safe::data(
     $__data ?? [],
     [
         'attributes' => 'attributes',

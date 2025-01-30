@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa\Builders;
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
+use Expansa\Facades\View;
 use Expansa\Support\Arr;
-use Expansa\View;
 
 /**
  * Class Table.

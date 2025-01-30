@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace app\Api;
 
 use Expansa\Error;
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 class Post
 {

@@ -1,7 +1,7 @@
 <?php
 
 use Expansa\Builders\Tree;
-use Expansa\Disk;
+use Expansa\Facades\Disk;
 
 /**
  * File manager table

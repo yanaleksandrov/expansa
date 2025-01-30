@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa;
+namespace Expansa\Facades;
 
 use Expansa\Patterns\Facade;
 

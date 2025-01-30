@@ -3,9 +3,9 @@
 namespace app\Api;
 
 use Expansa\Dir;
-use Expansa\File;
-use Expansa\Json;
-use Expansa\Safe;
+use Expansa\Facades\Json;
+use Expansa\Facades\Safe;
+use Expansa\Facades\Disk;
 
 class Translations
 {
@@ -104,8 +104,7 @@ class Translations
             $content  = Json::encode($translations);
             $filepath = sprintf('%s/%s.json', EX_I18N . $project, 'ru');
 
-            $file = ( new File($filepath) )->write($content, false);
-            //$file = Disk::file( $filepath )->write( $content, false );
+            $file = Disk::file($filepath)->write($content, false);
         }
         return [];
     }

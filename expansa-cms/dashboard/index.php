@@ -2,10 +2,10 @@
 
 namespace Dashboard;
 
-use Expansa\Asset;
 use Expansa\Builders\Tree;
-use Expansa\Hook;
-use Expansa\I18n;
+use Expansa\Facades\Asset;
+use Expansa\Facades\Hook;
+use Expansa\Facades\I18n;
 use Expansa\Is;
 
 new class

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace app\Post;
 
 use Expansa\Builders\Tree;
-use Expansa\Db;
-use Expansa\Hook;
-use Expansa\Safe;
+use Expansa\Facades\Db;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 use InvalidArgumentException;
 

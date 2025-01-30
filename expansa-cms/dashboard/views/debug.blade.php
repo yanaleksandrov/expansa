@@ -1,5 +1,7 @@
 <?php
-use Expansa\I18n;
+
+use Expansa\Facades\I18n;
+
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">

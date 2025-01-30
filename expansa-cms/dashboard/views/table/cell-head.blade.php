@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Table raw text cell
@@ -8,20 +9,20 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-$columns = Safe::array( $__data ?? [] );
-if ( ! $columns ) {
+$columns = Safe::array($__data ?? []);
+if (!$columns) {
     return;
 }
 ?>
 <div class="table__head">
-	<?php
-	foreach ( $columns as $column ) :
-		[ $key, $cell, $title, $sortable ] = Safe::data(
-            (array) $column,
+    <?php
+    foreach ($columns as $column) :
+        [$key, $cell, $title, $sortable] = Safe::data(
+            (array)$column,
             [
                 'key'      => 'class',
                 'cell'     => 'key',

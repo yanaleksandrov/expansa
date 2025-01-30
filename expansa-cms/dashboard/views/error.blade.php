@@ -1,6 +1,6 @@
 <?php
 $phpVersion = strval(phpversion());
-$dbVersion  = Expansa\Db::version();
+$dbVersion = \Expansa\Facades\Db::version();
 
 $phpVersionIsCompatible = version_compare(EX_REQUIRED_PHP_VERSION, $phpVersion, '<=');
 $dbVersionIsCompatible  = version_compare(EX_REQUIRED_MYSQL_VERSION, $dbVersion, '<=');

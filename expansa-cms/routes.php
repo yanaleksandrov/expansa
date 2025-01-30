@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-use app\Post;
-use app\Slug;
 use app\User;
-use Expansa\Hook;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Route;
 use Expansa\Is;
-use Expansa\Route;
 
 /**
  * None dashboard pages: website frontend output.

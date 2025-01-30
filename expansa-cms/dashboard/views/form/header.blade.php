@@ -1,5 +1,6 @@
 <?php
-use Expansa\Safe;
+
+use Expansa\Facades\Safe;
 
 /**
  * Form title.
@@ -8,12 +9,12 @@ use Expansa\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $label, $name, $class, $instruction ] = Safe::data(
-	$__data ?? [],
+[$label, $name, $class, $instruction] = Safe::data(
+    $__data ?? [],
     [
         'label'       => 'trim',
         'name'        => 'key',
@@ -23,10 +24,10 @@ if ( ! defined( 'EX_PATH' ) ) {
 )->values();
 ?>
 <header class="{{ $class }}">
-	@if($label)
-		<h4>{!! $label !!}</h4>
-	@endif
-	@if($instruction)
-		<p class="t-muted">{!! $instruction !!}</p>
-	@endif
+    @if($label)
+        <h4>{!! $label !!}</h4>
+    @endif
+    @if($instruction)
+        <p class="t-muted">{!! $instruction !!}</p>
+    @endif
 </header>

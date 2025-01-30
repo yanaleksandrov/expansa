@@ -1,20 +1,18 @@
 <?php
 
-use Expansa\View;
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 
 /**
  * Table extension item.
- *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cell-extension.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
-[ $title, $description, $screenshot, $author, $categories, $installed, $active, $installations, $date, $reviews, $rating, $expansa, $version ] = Safe::data(
+[$title, $description, $screenshot, $author, $categories, $installed, $active, $installations, $date, $reviews, $rating, $expansa, $version] = Safe::data(
     $__data ?? [],
 	[
 		'title'         => 'trim',

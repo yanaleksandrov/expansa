@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace app\Api;
 
-use Expansa\Mail;
-use Expansa\Safe;
-use Expansa\View;
+use Expansa\Facades\Mail;
+use Expansa\Facades\Safe;
+use Expansa\Facades\View;
 
 class User
 {

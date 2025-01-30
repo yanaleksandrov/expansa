@@ -6,7 +6,7 @@
  * @since 2025.1
  */
 
-return Expansa\Form::enqueue(
+return \Expansa\Facades\Form::enqueue(
     'order-editor',
     [
         'class' => 'dg g-3 p-5 pt-4',

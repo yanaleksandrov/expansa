@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Translation;
 
-use Expansa\Hook;
-use Expansa\Safe;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Safe;
 
 /**
  * The I18n class provides methods for handling translations in the system, including

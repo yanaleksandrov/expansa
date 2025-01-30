@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Expansa\Filesystem;
 
 use DateTime;
-use Expansa\Validator;
-use Expansa\Filesystem\Contracts\FileInterface;
+use Expansa\Facades\Validator;
 use Expansa\Filesystem\Contracts\CommonInterface;
+use Expansa\Filesystem\Contracts\FileInterface;
 
 /**
  * The File class provides a convenient and easy-to-use API for working with files.

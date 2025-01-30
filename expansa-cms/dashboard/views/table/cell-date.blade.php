@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Safe;
+use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -10,8 +10,8 @@ use Expansa\Support\Arr;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (!defined('EX_PATH')) {
+    exit;
 }
 
 [ $prop, $attributes ] = Safe::data(
@@ -22,7 +22,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts( $attributes ); ?>>
-	Published
-	<div x-text="item.<?php echo $prop; ?>"></div>
+<div<?php echo Arr::toHtmlAtts($attributes); ?>>
+    Published
+    <div x-text="item.<?php echo $prop; ?>"></div>
 </div>
