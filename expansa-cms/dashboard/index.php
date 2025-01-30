@@ -6,7 +6,7 @@ use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
-use Expansa\Is;
+use Expansa\Support\Is;
 
 new class
 {

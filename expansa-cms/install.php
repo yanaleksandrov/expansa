@@ -6,7 +6,7 @@ use Expansa\Api;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
-use Expansa\Is;
+use Expansa\Support\Is;
 
 if (!defined('EX_IS_INSTALL')) {
     define('EX_IS_INSTALL', true);

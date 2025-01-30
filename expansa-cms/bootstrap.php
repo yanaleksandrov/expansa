@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Debug;
-use Expansa\Is;
 use Expansa\Security\Csrf\Csrf;
+use Expansa\Support\Is;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';

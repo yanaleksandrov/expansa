@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa;
+namespace Expansa\Support;
 
 use app\Option;
 use DateTime;

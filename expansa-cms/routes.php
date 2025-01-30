@@ -5,7 +5,7 @@ declare(strict_types=1);
 use app\User;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
-use Expansa\Is;
+use Expansa\Support\Is;
 
 /**
  * None dashboard pages: website frontend output.

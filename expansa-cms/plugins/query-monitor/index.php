@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Expansa\Is;
 use Expansa\Extensions\Plugin;
+use Expansa\Support\Is;
 
 return new class extends Plugin
 {

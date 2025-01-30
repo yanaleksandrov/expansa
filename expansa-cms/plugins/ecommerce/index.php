@@ -7,7 +7,7 @@ use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
-use Expansa\Is;
+use Expansa\Support\Is;
 
 return new class extends Plugin
 {

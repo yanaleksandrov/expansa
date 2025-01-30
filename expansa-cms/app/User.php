@@ -10,10 +10,10 @@ use Expansa\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
-use Expansa\Is;
 use Expansa\Security\Validator as SecurityValidator;
 use Expansa\Session;
 use Expansa\Support\Hash;
+use Expansa\Support\Is;
 
 /**
  * This class handles user-related operations including user creation, retrieval,
