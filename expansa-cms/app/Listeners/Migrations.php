@@ -81,15 +81,15 @@ final class Migrations
     {
         Schema::create('slugs', function (Table $table) {
             $table->id();
-            $table->bigInt('post_id')->unsigned();
-            $table->string('post_table', 255);
+            $table->bigInt('entity_id')->unsigned();
+            $table->string('entity_table', 255);
             $table->ulid()->unique();
             $table->string('slug', 255);
-            $table->string('locale', 10)->nullable()->default(null);
+            //$table->string('locale', 10)->nullable()->default(null);
 
             // indexes
-            $table->unique(['slug', 'locale']);
-            $table->unique(['post_id', 'post_table']);
+            $table->unique(['slug']);
+            $table->unique(['entity_id', 'entity_table']);
         });
     }
 

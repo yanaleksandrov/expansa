@@ -273,7 +273,7 @@ final class Option
      * @param  bool $suspend  Optional. Suspends additions if true, re-enables them if false.
      * @return bool           The current suspend setting.
      */
-    public function suspend_addition(bool $suspend): bool
+    public function suspendAddition(bool $suspend): bool
     {
         if (false === $suspend) {
             $options = Db::select(self::$table, '*');

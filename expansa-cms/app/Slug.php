@@ -22,10 +22,9 @@ final class Slug
      * @param int    $entityId
      * @param string $entityTable
      * @param string $slug
-     * @param string $locale
      * @return string|bool
      */
-    public static function add(int $entityId, string $entityTable, string $slug, string $locale = ''): string|bool
+    public static function add(int $entityId, string $entityTable, string $slug): string|bool
     {
         $slug = Safe::slug($slug);
 
@@ -36,7 +35,6 @@ final class Slug
                     'entity_id'    => $entityId,
                     'entity_table' => $entityTable,
                     'slug'         => $slug,
-                    'locale'       => $locale,
                 ]
             )->rowCount() > 0;
         } catch (\Exception $e) {
@@ -68,7 +66,6 @@ final class Slug
                 'entity_id'    => $entityId,
                 'entity_table' => $entityTable,
                 'slug'         => $slug,
-                'locale'       => $locale,
             ]
         )->rowCount() > 0;
 
@@ -82,44 +79,46 @@ final class Slug
      * @param string $entityTable
      * @return string
      */
-    public static function getByEntity(int $entityId, string $entityTable): string
+    public static function find(int $entityId, string $entityTable): string
     {
-        return Db::get(self::$table, 'slug', [ 'entity_id' => $entityId, 'entity_table' => $entityTable ]) ?? '';
+        return Db::get(self::$table, 'slug', ['entity_id' => $entityId, 'entity_table' => $entityTable]) ?? '';
     }
 
     /**
      * Get data by slug.
      *
      * @param string $slug
-     * @param string $locale
      * @return mixed
      */
-    public static function get(string $slug, string $locale = ''): mixed
+    public static function get(string $slug): mixed
     {
-        return Db::get(self::$table, '*', [ 'slug' => $slug, 'locale' => $locale ]);
+        return Db::get(self::$table, '*', ['slug' => $slug]);
     }
 
     /**
+     * Update slug.
+     *
      * @param string $slug
      * @param string $newSlug
-     * @param string $locale
      * @return bool
      */
-    public static function update(string $slug, string $newSlug, string $locale = ''): bool
+    public static function update(string $slug, string $newSlug): bool
     {
-        return Db::update(self::$table, [ 'slug' => $newSlug ], [ 'slug[=]' => $slug ])->rowCount() === 1;
+        return Db::update(self::$table, ['slug' => $newSlug], ['slug[=]' => $slug])->rowCount() === 1;
     }
 
     /**
+     * Delete slug.
+     *
      * @param string $value
      * @param string $by
      * @return bool
      */
     public static function delete(string $value, string $by = 'slug'): bool
     {
-        if (! in_array($by, [ 'uuid', 'entity_id', 'entity_table', 'slug', 'locale' ], true)) {
+        if (! in_array($by, ['uuid', 'entity_id', 'entity_table', 'slug'], true)) {
             return false;
         }
-        return Db::delete(self::$table, [ $by => $value ])->rowCount() > 0;
+        return Db::delete(self::$table, [$by => $value])->rowCount() > 0;
     }
 }

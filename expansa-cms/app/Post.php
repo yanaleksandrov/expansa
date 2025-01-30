@@ -154,7 +154,7 @@ class Post
             $data[ Safe::camelcase($key) ] = $value;
         }
 
-        $data['slug']   = $type->public === true ? Slug::getByEntity($data['id'], $type->table) : '';
+        $data['slug']   = $type->public === true ? Slug::find($data['id'], $type->table) : '';
         $data['fields'] = [];
 
         return new Post(...$data);
