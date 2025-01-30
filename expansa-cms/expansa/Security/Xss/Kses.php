@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Security\Xss;
 
-use Expansa\Security\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 
 class Kses
 {
