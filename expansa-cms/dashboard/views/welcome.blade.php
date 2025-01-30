@@ -6,14 +6,14 @@ use Expansa\I18n;
 <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
 <head>
-	<meta charset="{{ Option::attr('charset', 'UTF-8') }}">
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Menu</title>
-	<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/images/favicons/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/dashboard/assets/images/favicons/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/dashboard/assets/images/favicons/favicon-16x16.png">
-	<link rel="manifest" href="/dashboard/assets/images/favicons/site.webmanifest">
-	<link rel="mask-icon" href="/dashboard/assets/images/favicons/safari-pinned-tab.svg" color="#5bbad5">
+	<link rel="apple-touch-icon" sizes="180x180" href="{{ url('/dashboard/assets/images/favicons/apple-touch-icon.png') }}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{{ url('/dashboard/assets/images/favicons/favicon-32x32.png') }}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{{ url('/dashboard/assets/images/favicons/favicon-16x16.png') }}">
+	<link rel="manifest" href="{{ url('/dashboard/assets/images/favicons/site.webmanifest') }}">
+	<link rel="mask-icon" href="{{ url('/dashboard/assets/images/favicons/safari-pinned-tab.svg') }}" color="#5bbad5">
 
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

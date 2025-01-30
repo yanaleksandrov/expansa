@@ -1,7 +1,4 @@
 <?php
-
-use Expansa\Url;
-
 /**
  * Expansa is installed information
  *

@@ -11,7 +11,6 @@ use Expansa\Image;
 use Expansa\Disk;
 use Expansa\Patterns;
 use Expansa\Safe;
-use Expansa\Url;
 
 /**
  * Expansa administration Media API.

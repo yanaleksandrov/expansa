@@ -19,7 +19,7 @@ class Url
     public function site(string $path = ''): string
     {
         try {
-            if (!class_exists(Option::class)) {
+            if (!class_exists(Option::class) || !defined('EX_DB_DRIVER')) {
                 throw new RuntimeException(t('The Option class is not defined.'));
             }
 
@@ -35,13 +35,13 @@ class Url
 
             $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
             $url  = $protocol . filter_var($host, FILTER_SANITIZE_URL);
-        }
+        } finally {
+            $url = rtrim($url, '/') . '/';
+            if ($path) {
+                $url .= ltrim($path, '/');
+            }
 
-        $url = rtrim($url, '/') . '/';
-        if ($path) {
-            $url .= ltrim($path, '/');
+            return $url;
         }
-
-        return $url;
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem;
 
-use Expansa\Url;
 use Expansa\Filesystem\Traits\Entry;
 
 class EntryHandler

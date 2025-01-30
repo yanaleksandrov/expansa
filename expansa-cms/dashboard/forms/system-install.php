@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Url;
 use Expansa\View;
 
 return Expansa\Form::enqueue(

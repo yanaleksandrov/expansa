@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Safe;
-use Expansa\Url;
 
 /**
  * Form for build tools list.

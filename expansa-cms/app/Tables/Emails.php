@@ -6,7 +6,6 @@ namespace app\Tables;
 
 use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Row;
-use Expansa\Url;
 
 final class Emails
 {

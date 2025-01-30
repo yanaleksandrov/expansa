@@ -39,7 +39,7 @@ if (! Is::installed()) {
 // Base PHP & MySQL versions checker.
 require_once EX_PATH . 'dashboard/views/error.blade.php';
 
-Debug::start(EX_DEBUG_VIEW, function () {
+Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
     // Determine if the application is in maintenance mode...
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
         require $maintenance;
@@ -58,4 +58,4 @@ Debug::start(EX_DEBUG_VIEW, function () {
 
     // Register Expansa routes
     require_once EX_PATH . 'routes.php';
-}, EX_DEBUG);
+});

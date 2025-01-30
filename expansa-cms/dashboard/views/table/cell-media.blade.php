@@ -1,6 +1,5 @@
 <?php
 use Expansa\Safe;
-use Expansa\Url;
 
 /**
  * Table media element in storage.

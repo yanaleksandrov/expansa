@@ -339,7 +339,7 @@ final class User
     }
 
     /**
-     * Проверяет, залогинен ли пользователь в этом сеансе.
+     * Проверяет, авторизован ли пользователь в этом сеансе.
      *
      * @return   bool
      */
@@ -361,31 +361,25 @@ final class User
      */
     public static function login(array $userdata): User|Error
     {
-        $userdata = Safe::data(
-            $userdata,
-            [
-                'login'    => 'login',
-                'password' => 'trim',
-                'remember' => 'bool',
-            ]
-        )->apply();
+        $userdata = Safe::data($userdata, [
+            'login'    => 'login',
+            'password' => 'trim',
+            'remember' => 'bool',
+        ])->apply();
 
-        $userdata = Validator::data(
-            $userdata,
-            [
-                'login'    => 'lengthMin:3|lengthMax:60',
-                'password' => 'required',
-            ]
-        )->apply();
+        $userdata = Validator::data($userdata, [
+            'login'    => 'lengthMin:3|lengthMax:60',
+            'password' => 'required',
+        ])->apply();
 
         if ($userdata instanceof Validator) {
             return new Error('user-login', $userdata);
         }
 
-        [ $login_or_email, $password, $remember ] = array_values($userdata);
+        [ $loginOrEmail, $password, $remember ] = array_values($userdata);
 
-        $field = Is::email($login_or_email) ? 'email' : 'login';
-        $user  = User::get($login_or_email, $field);
+        $field = Is::email($loginOrEmail) ? 'email' : 'login';
+        $user  = User::get($loginOrEmail, $field);
         if ($user instanceof User) {
             if (password_verify($password, $user->password)) {
                 if ($remember) {

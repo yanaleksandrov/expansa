@@ -3,7 +3,6 @@
 use app\Option;
 use Expansa\I18n;
 use Expansa\Safe;
-use Expansa\Url;
 
 /**
  * Website settings in dashboard

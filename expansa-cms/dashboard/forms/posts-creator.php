@@ -1,7 +1,4 @@
 <?php
-
-use Expansa\Url;
-
 /**
  * Form for create & edit posts.
  *

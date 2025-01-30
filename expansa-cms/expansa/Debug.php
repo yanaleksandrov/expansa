@@ -11,7 +11,7 @@ use Expansa\Patterns\Facade;
  * It allows starting the debug process with a specified view path, callback,
  * and an optional flag to show errors.
  *
- * @method static void start(string $viewPath, callable $callback, bool $isShowErrors = false)
+ * @method static void start(bool $isShowErrors, string $viewPath, callable $callback)
  */
 class Debug extends Facade
 {

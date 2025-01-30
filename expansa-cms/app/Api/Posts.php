@@ -8,7 +8,6 @@ use app\Query\Query;
 use Expansa\Codec\Csv;
 use Expansa\Json;
 use Expansa\Post\Post;
-use Expansa\Url;
 use Expansa\View;
 
 class Posts

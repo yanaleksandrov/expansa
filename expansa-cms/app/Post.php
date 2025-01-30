@@ -7,9 +7,7 @@ namespace app;
 use LogicException;
 use app\Post\Type;
 use Expansa\Db;
-use Expansa\Patterns\Registry;
 use Expansa\Safe;
-use Expansa\Url;
 
 class Post
 {

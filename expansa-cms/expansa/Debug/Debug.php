@@ -17,7 +17,7 @@ use Exception;
  */
 class Debug
 {
-    public function start(string $viewPath, callable $callback, bool $isShowErrors = false): void
+    public function start(bool $isShowErrors, string $viewPath, callable $callback): void
     {
         if ($isShowErrors) {
             ini_set('error_reporting', E_ALL);

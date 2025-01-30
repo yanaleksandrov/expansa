@@ -11,9 +11,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 $callback = $__data['callback'] ?? null;
-if ( is_callable( $callback ) ) {
+if (is_callable($callback)) {
 	ob_start();
-	call_user_func( $callback );
+	call_user_func($callback);
 	echo ob_get_clean();
 }
 

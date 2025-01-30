@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Builders\Form;
-use Expansa\Url;
 
 /**
  * Attributes list

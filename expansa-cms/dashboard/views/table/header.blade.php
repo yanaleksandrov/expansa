@@ -2,7 +2,6 @@
 
 use Expansa\I18n;
 use Expansa\Safe;
-use Expansa\Url;
 
 /**
  * Table header

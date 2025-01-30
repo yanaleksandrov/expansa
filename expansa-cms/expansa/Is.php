@@ -23,7 +23,7 @@ final class Is
      */
     public static function email(string $thing): bool
     {
-        return filter_var($thing, FILTER_VALIDATE_EMAIL);
+        return filter_var($thing, FILTER_VALIDATE_EMAIL) !== false;
     }
 
     /**
@@ -36,7 +36,7 @@ final class Is
      */
     public static function url(string $thing): bool
     {
-        return filter_var($thing, FILTER_VALIDATE_URL);
+        return filter_var($thing, FILTER_VALIDATE_URL) !== false;
     }
 
     /**

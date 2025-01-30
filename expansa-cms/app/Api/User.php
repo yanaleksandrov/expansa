@@ -6,7 +6,6 @@ namespace app\Api;
 
 use Expansa\Mail;
 use Expansa\Safe;
-use Expansa\Url;
 use Expansa\View;
 
 class User
@@ -95,7 +94,7 @@ class User
     public static function signIn(): array
     {
         $user = \app\User::login($_POST);
-        if ($user instanceof Expansa\Error) {
+        if ($user instanceof \Expansa\Debug\Error) {
             return [
                 [
                     'target'   => 'body',
@@ -119,7 +118,7 @@ class User
      *
      * @since 2025.1
      */
-    public static function signUp(): array
+    public static function signUp(): array|\app\User
     {
         $user = \app\User::add($_REQUEST ?? []);
         if ($user instanceof \app\User) {
@@ -148,8 +147,8 @@ class User
             $mail_is_sent = Mail::send(
                 $email,
                 t('Instructions for reset password'),
-                View::make(EX_DASHBOARD . 'views/mails/wrapper', [
-                    'body_template' => EX_DASHBOARD . 'views/mails/reset-password',
+                View::make(EX_DASHBOARD . 'mails/wrapper', [
+                    'body_template' => EX_DASHBOARD . 'mails/reset-password',
                 ])
             );
 

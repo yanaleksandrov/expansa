@@ -5,7 +5,6 @@ use app\User;
 use Expansa\Hook;
 use Expansa\I18n;
 use Expansa\Safe;
-use Expansa\Url;
 
 $user  = User::current();
 $field = new Field($user);
