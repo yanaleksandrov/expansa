@@ -23,7 +23,7 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 
-    # Deny access to .env.php and other system files
-    RewriteRule ^(\.env|\.htaccess|env.php|artisan)$ / [L,R=301]
+    # Deny access to env.php and other system files
+    RewriteRule ^(\.htaccess|env.php|artisan)$ / [L,R=301]
 </IfModule>
 # END Expansa

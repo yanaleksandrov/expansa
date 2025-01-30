@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Post;
+namespace App\Post;
 
 use Expansa\Builders\Tree;
 use Expansa\Facades\Db;

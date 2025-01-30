@@ -34,7 +34,7 @@ const EX_CORE      = __DIR__ . '/expansa/';
 const EX_DASHBOARD = __DIR__ . '/dashboard/';
 const EX_PLUGINS   = __DIR__ . '/plugins/';
 const EX_THEMES    = __DIR__ . '/themes/';
-const EX_UPLOADS   = __DIR__ . '/uploads/';
+const EX_STORAGE   = __DIR__ . '/storage/';
 const EX_I18N      = __DIR__ . '/i18n/';
 
 /**

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use app\User;
-use app\Post\Type;
-use app\User\Roles;
+use App\User;
+use App\Post\Type;
+use App\User\Roles;
 
 /**
  * Set up current user.

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use app\Option;
+use App\Option;
 use Throwable;
 use RuntimeException;
 

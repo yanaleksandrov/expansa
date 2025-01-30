@@ -1,6 +1,6 @@
 <?php
 
-use app\User;
+use App\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;

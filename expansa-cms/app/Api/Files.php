@@ -1,9 +1,7 @@
 <?php
 
-namespace app\Api;
+namespace App\Api;
 
-use dashboard\app\Api\File;
-use Expansa\Builders\Form;
 use Expansa\Facades\Csv;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Safe;
@@ -25,7 +23,7 @@ class Files
         $files = $_FILES ?? [];
         if ($files) {
             foreach ($files as $file) {
-                $uploadedFile = Disk::file()->upload($file)->move(EX_UPLOADS . 'i/');
+                $uploadedFile = Disk::file('')->upload($file)->move(EX_STORAGE . 'i/');
 
                 if (! $uploadedFile instanceof File) {
                     continue;
@@ -43,7 +41,7 @@ class Files
                 );
 
                 return [
-                    'fields' => Form::get(EX_DASHBOARD . 'forms/expansa-post-import-fields.php', true),
+                    'fields' => form(EX_DASHBOARD . 'forms/expansa-post-import-fields.php', true),
                 ];
             }
         }

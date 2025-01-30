@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app;
+namespace App;
 
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;

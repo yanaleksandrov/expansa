@@ -14,7 +14,7 @@ if (!defined('EX_PATH')) {
             <?php echo form('terms-editor', EX_DASHBOARD . 'forms/terms-editor.php'); ?>
         </div>
         <div class="terms-main">
-            <?php (new \Expansa\Builders\Table(new \app\Tables\Terms()))->print(); ?>
+            <?php (new \Expansa\Builders\Table(new \App\Tables\Terms()))->print(); ?>
         </div>
     </div>
 </div>

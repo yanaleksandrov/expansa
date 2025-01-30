@@ -9,5 +9,5 @@ if (!defined('EX_PATH')) {
 }
 ?>
 <div class="expansa-main">
-    <?php (new \Expansa\Builders\Table(new \app\Tables\Plugins()))->print(); ?>
+    <?php (new \Expansa\Builders\Table(new \App\Tables\Plugins()))->print(); ?>
 </div>

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace app\Api;
+namespace App\Api;
 
-use app\Option;
-use app\User;
+use App\Option;
+use App\User;
 use Expansa\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Disk;
@@ -25,7 +25,7 @@ class System
      *
      * @since 2025.1
      */
-    public static function test(): array
+    public function test(): array
     {
         $datas = [];
         $requirements = ['connection', 'pdo', 'curl', 'mbstring', 'gd', 'memory', 'php', 'mysql'];
@@ -86,7 +86,7 @@ class System
      *
      * @since 2025.1
      */
-    public static function install(): array
+    public function install(): array
     {
         $protocol = ( ! empty($_SERVER['HTTPS']) && 'off' !== strtolower($_SERVER['HTTPS']) ? 'https://' : 'http://' );
         $siteurl  = $protocol . $_SERVER['SERVER_NAME'];

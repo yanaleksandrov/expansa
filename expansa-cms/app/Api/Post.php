@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Api;
+namespace App\Api;
 
 use Expansa\Error;
 use Expansa\Facades\Safe;
@@ -64,7 +64,7 @@ class Post
 //          }
 //      }
 
-        $post = \app\Post::add($type, compact('title', 'status', 'fields'));
+        $post = \App\Post::add($type, compact('title', 'status', 'fields'));
         echo '<pre>';
         print_r($fields);
         print_r($post);

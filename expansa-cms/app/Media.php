@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace app;
+namespace App;
 
-use app\Query\Query;
+use App\Query\Query;
 use Exception;
 use Expansa\Error;
 use Expansa\Facades\Disk;
@@ -38,7 +38,7 @@ final class Media
                     continue;
                 }
 
-                $filepath = sprintf('%si/original/%s', EX_UPLOADS, $post['slug'] ?? '');
+                $filepath = sprintf('%si/original/%s', EX_STORAGE, $post['slug'] ?? '');
                 if (file_exists($filepath)) {
                     $file      = Disk::file($filepath);
                     $iconPath  = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?? 'default');
@@ -70,7 +70,7 @@ final class Media
                         continue;
                     }
 
-                    $filepath = sprintf('%si/%sx%s/%s', EX_UPLOADS, $width, $height, $post['slug'] ?? '');
+                    $filepath = sprintf('%si/%sx%s/%s', EX_STORAGE, $width, $height, $post['slug'] ?? '');
                     if (file_exists($filepath)) {
                         $file     = Disk::file($filepath);
                         $iconPath = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?? 'default');
@@ -114,10 +114,10 @@ final class Media
     {
         // TODO: add checking user capabilities
 
-        $targetDir = sprintf('%si/original/', EX_UPLOADS);
+        $targetDir = sprintf('%si/original/', EX_STORAGE);
 
         // upload original image
-        $originalFile = Files::upload($file, $targetDir, function ($file) {
+        $originalFile = Disk::upload($file, $targetDir, function ($file) {
             $sizes = Patterns\Registry::get('images');
             $types = [ 'image/jpeg', 'image/gif', 'image/png', 'image/bmp', 'image/webp', 'image/avif', 'image/tiff', 'image/x-icon' ];
 

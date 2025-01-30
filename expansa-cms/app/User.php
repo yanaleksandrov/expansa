@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace app;
+namespace App;
 
-use app\User\Roles;
-use app\User\Traits;
+use App\User\Roles;
+use App\User\Traits;
 use Expansa\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;

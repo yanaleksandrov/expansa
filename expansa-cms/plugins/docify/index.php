@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use app\Post;
+use App\Post;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 
@@ -39,7 +39,6 @@ return new class extends Plugin
             }
         );
 
-        //Api::create( sprintf( '%s%sapi', __DIR__, DIRECTORY_SEPARATOR ), '/api/' );
         Post\Type::register(
             key: 'documents',
             labelName: t('Documentation'),
@@ -76,25 +75,6 @@ return new class extends Plugin
                 ],
             ]
         ));
-
-        /**
-         * Get all uploaded plugins.
-         *
-         * @since 2025.1
-         */
-//      $plugins = new Plugins\Manager( function () {
-//          $paths = ( new Dir( EX_PLUGINS ) )->getFiles( '*.php', 1 );
-//          if ( ! $paths ) {
-//              return null;
-//          }
-//      } );
-//      if ( $plugins::$collection ) {
-//          $docblock = ( new Parser() )->run( '' );
-//          $classes  = ( new Finder() )->methods( $plugins::$collection );
-//          echo '<pre>';
-//          print_r( $classes );
-//          echo '</pre>';
-//      }
     }
 
     public function activate(): void

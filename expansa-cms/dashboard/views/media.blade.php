@@ -17,6 +17,6 @@ Hook::add('expansa_dashboard_footer', function () {
 });
 ?>
 <div class="expansa-main">
-    <?php (new \Expansa\Builders\Table(new \app\Tables\Media()))->print(); ?>
+    <?php (new \Expansa\Builders\Table(new \App\Tables\Media()))->print(); ?>
     <div x-intersect="$ajax('media/get').then(({posts}) => items = posts)"></div>
 </div>

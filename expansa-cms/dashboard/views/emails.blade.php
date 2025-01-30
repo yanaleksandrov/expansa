@@ -16,5 +16,5 @@ Hook::add('expansa_dashboard_footer', function () {
 });
 ?>
 <div class="expansa-main">
-    <?php (new \Expansa\Builders\Table(new \app\Tables\Emails()))->print(); ?>
+    <?php (new \Expansa\Builders\Table(new \App\Tables\Emails()))->print(); ?>
 </div>

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Tables;
+namespace App\Tables;
 
 use Expansa\Builders\Form;
 use Expansa\Builders\Table\Cell;

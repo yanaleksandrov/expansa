@@ -2,27 +2,29 @@
 
 declare(strict_types=1);
 
-use app\User;
+use App\User;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
 use Expansa\Support\Is;
+use Expansa\Security\Csrf\Csrf;
 
-/**
- * None dashboard pages: website frontend output.
- *
- * @param string $slug Current page slug.
- *
- * @since 2025.1
- */
-Route::get('/{slug}', function ($slug) {
+// Generate CSRF token.
+(new Csrf())->generate('token');
+
+//Route::middleware('/api', function () {
+//
+//    Route::post('/system/install', '\App\Api\System@install');
+//});
+
+Route::get('/(.*)', function ($slug) {
     $dashboardSlug  = ltrim(str_replace(EX_PATH, '/', EX_DASHBOARD), '/');
 
-    // Run the installer if Expansa is not installed.
+    // run the installer if Expansa is not installed.
     if (!Is::installed()) {
         if ($slug !== 'install') {
             redirect('install');
         }
-        echo view('install');
+        echo view('welcome', ['slug' => 'install']);
         exit;
     }
 

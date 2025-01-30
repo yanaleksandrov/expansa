@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Query;
+namespace App\Query;
 
 /**
  * Convert a boolean search query into a query that is compatible with a fulltext search.

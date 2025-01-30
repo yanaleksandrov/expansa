@@ -16,6 +16,6 @@ class Json extends Facade
 {
 	protected static function getStaticClassAccessor(): string
 	{
-		return '\Expansa\Codec\Json';
+		return '\Expansa\Codecs\Json';
 	}
 }

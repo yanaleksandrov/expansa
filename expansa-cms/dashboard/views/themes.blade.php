@@ -17,6 +17,6 @@ if (!defined('EX_PATH')) {
         ]
     );
 
-    (new \Expansa\Builders\Table(new \app\Tables\Themes()))->print();
+    (new \Expansa\Builders\Table(new \App\Tables\Themes()))->print();
     ?>
 </div>

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace app\Query;
+namespace App\Query;
 
-use app\Post\Type;
-use app\User;
+use App\Post\Type;
+use App\User;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use InvalidArgumentException;

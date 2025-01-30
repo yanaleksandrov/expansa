@@ -1,6 +1,6 @@
 <?php
 $phpVersion = strval(phpversion());
-$dbVersion = \Expansa\Facades\Db::version();
+$dbVersion  = \Expansa\Facades\Db::version();
 
 $phpVersionIsCompatible = version_compare(EX_REQUIRED_PHP_VERSION, $phpVersion, '<=');
 $dbVersionIsCompatible  = version_compare(EX_REQUIRED_MYSQL_VERSION, $dbVersion, '<=');
@@ -26,7 +26,7 @@ header('Content-Type: text/html; charset=utf-8');
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" id="errors-css" href="/dashboard/assets/css/errors.css">
+    <link rel="stylesheet" id="errors-css" href="<?php echo url('/dashboard/assets/css/errors.css'); ?>">
 </head>
 <body class="errors">
     <?php if (!$phpVersionIsCompatible) : ?>

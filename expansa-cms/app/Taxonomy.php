@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app;
+namespace App;
 
 /**
  * Core class for managing taxonomies.

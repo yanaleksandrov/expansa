@@ -1,7 +1,7 @@
 <?php
 
-use app\Field;
-use app\User;
+use App\Field;
+use App\User;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;

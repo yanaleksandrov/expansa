@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Api;
+namespace App\Api;
 
 use Expansa\Error;
 use Expansa\Facades\Disk;
@@ -20,7 +20,7 @@ class Media
      */
     public static function get(): array
     {
-        $media = \app\Media::get(
+        $media = \App\Media::get(
             [
                 'per_page' => 60,
             ]
@@ -42,11 +42,11 @@ class Media
         $posts  = [];
         foreach ($_FILES as $file) {
             $filename = $file['name'] ?? '';
-            $postID   = \app\Media::upload($file);
+            $postID   = \App\Media::upload($file);
             if ($postID instanceof Error) {
                 $errors[ $filename ] = Error::get();
             } else {
-                $posts[] = \app\Post::get('media', $postID);
+                $posts[] = \App\Post::get('media', $postID);
             }
         }
 
@@ -70,7 +70,7 @@ class Media
         $urls   = Str::extractUrls($_POST['urls'] ?? '');
         echo '<pre>';
         if ($urls) {
-            $filepath = sprintf('%si/original/', EX_UPLOADS);
+            $filepath = sprintf('%si/original/', EX_STORAGE);
 
             foreach ($urls as $url) {
                 $files[$url] = Disk::file($filepath)->grab($url);

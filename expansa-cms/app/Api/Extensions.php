@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Api;
+namespace App\Api;
 
 class Extensions
 {

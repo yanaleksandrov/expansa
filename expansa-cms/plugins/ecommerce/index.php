@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use app\Post\Type;
+use App\Post\Type;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;

@@ -20,6 +20,6 @@ if (!defined('EX_PATH')) {
         ]
     );
 
-    (new \Expansa\Builders\Table(new \app\Tables\PluginsInstall()))->print();
+    (new \Expansa\Builders\Table(new \App\Tables\PluginsInstall()))->print();
     ?>
 </div>

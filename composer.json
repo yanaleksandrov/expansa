@@ -28,7 +28,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Expansa\\": "expansa-cms/expansa/"
+            "Expansa\\": "expansa-cms/expansa/",
+            "App\\": "expansa-cms/app/"
         }
     },
     "scripts": {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Api;
+namespace App\Api;
 
 use Expansa\Facades\Mail;
 use Expansa\Facades\Safe;
@@ -46,10 +46,10 @@ class User
      */
     public function update(): array
     {
-        $currentUser = \app\User::current();
+        $currentUser = \App\User::current();
         $userdata    = $_REQUEST + [ 'id' => $currentUser->id ];
 
-        \app\User::update($userdata, function (\app\Field $field) {
+        \App\User::update($userdata, function (\App\Field $field) {
             $fields = Safe::data(
                 $_REQUEST,
                 [
@@ -93,7 +93,7 @@ class User
      */
     public static function signIn(): array
     {
-        $user = \app\User::login($_POST);
+        $user = \App\User::login($_POST);
         if ($user instanceof \Expansa\Debug\Error) {
             return [
                 [
@@ -118,10 +118,10 @@ class User
      *
      * @since 2025.1
      */
-    public static function signUp(): array|\app\User
+    public static function signUp(): array|\App\User
     {
-        $user = \app\User::add($_REQUEST ?? []);
-        if ($user instanceof \app\User) {
+        $user = \App\User::add($_REQUEST ?? []);
+        if ($user instanceof \App\User) {
             return [
                 'signed-up' => true,
                 [
@@ -142,8 +142,8 @@ class User
     public static function resetPassword(): array
     {
         $email = Safe::email($_REQUEST['email'] ?? '');
-        $user  = \app\User::get($email, 'email');
-        if ($user instanceof \app\User) {
+        $user  = \App\User::get($email, 'email');
+        if ($user instanceof \App\User) {
             $mail_is_sent = Mail::send(
                 $email,
                 t('Instructions for reset password'),

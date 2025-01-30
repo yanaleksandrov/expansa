@@ -21,24 +21,15 @@ new class
          *
          * @since 2025.1
          */
-        $styles  = ['phosphor'];
-        if (! Is::install()) {
-            $styles  = [
-                'phosphor', 'air-datepicker', 'colorist', 'datepicker', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
-            ];
-        }
+        $suffix = ! Is::debug() ? '.min' : '';
+        $styles = [
+            'phosphor', 'air-datepicker', 'colorist', 'datepicker', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+        ];
         foreach ($styles as $style) {
-            if (! Is::debug()) {
-                $style = sprintf('%s.min', $style);
-            }
-            Asset::enqueue($style, url('/dashboard/assets/css/' . $style . '.css'));
+            Asset::enqueue($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
-        $scripts = ['ajax', 'alpine'];
-        if (! Is::install()) {
-            $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable'];
-        }
-
+        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'expansa') {
@@ -80,11 +71,7 @@ new class
                     ]
                 );
             }
-
-            if (! Is::debug()) {
-                $script = sprintf('%s.min', $script);
-            }
-            Asset::enqueue($script, url('/dashboard/assets/js/' . $script . '.js'), $data);
+            Asset::enqueue($script, url("/dashboard/assets/js/$script$suffix.js"), $data);
         }
 
         /**

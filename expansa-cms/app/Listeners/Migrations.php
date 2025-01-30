@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace app\Listeners;
+namespace App\Listeners;
 
 use Expansa\Database\Schema;
 use Expansa\Database\Schema\Table;

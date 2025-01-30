@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace app;
+namespace App;
 
-use app\Post\Type;
+use App\Post\Type;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use LogicException;

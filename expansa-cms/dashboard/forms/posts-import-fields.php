@@ -1,7 +1,7 @@
 <?php
 
-use app\Post\Status;
-use app\Post\Type;
+use App\Post\Status;
+use App\Post\Type;
 use Expansa\Facades\Safe;
 
 $samples  = Safe::array( $__data['samples'] ?? [] );

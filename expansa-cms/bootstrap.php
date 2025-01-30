@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-use Expansa\Facades\Debug;
-use Expansa\Security\Csrf\Csrf;
 use Expansa\Support\Is;
+use Expansa\Facades\Debug;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.1';
@@ -12,50 +11,43 @@ const EX_REQUIRED_PHP_VERSION   = '8.3';
 const EX_REQUIRED_MYSQL_VERSION = '8.0';
 const EX_REQUIRED_MEMORY        = 128;
 
-// Include required autoload.
+// include required autoload.
 require_once EX_PATH . 'autoload.php';
 
-// Register base Expansa functions.
+// register base Expansa functions.
 require_once EX_PATH . 'expansa/functions.php';
 
-// Basic constants for the environment
+// basic constants for the environment
 if (is_file(EX_PATH . 'env.php')) {
     require_once EX_PATH . 'env.php';
 }
 
-// Start benchmark timer
+// start benchmark timer
 metrics()->start();
-//session()->start();
 
-// Generate CSRF token.
-(new Csrf())->generate('token');
+// launch the installer if Expansa is not installed.
+require_once EX_PATH . 'install.php';
 
-// Launch the installer if Expansa is not installed.
-if (! Is::installed()) {
-    require_once EX_PATH . 'install.php';
-    exit;
-}
-
-// Base PHP & MySQL versions checker.
-require_once EX_PATH . 'dashboard/views/error.blade.php';
+// base PHP & MySQL versions checker
+require_once EX_PATH . 'public/error.php';
 
 Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
-    // Determine if the application is in maintenance mode...
+    // determine if the application is in maintenance mode...
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
         require $maintenance;
     }
 
-    // Application default data
+    // application default data
     require_once EX_PATH . 'resources/countries.php';
     require_once EX_PATH . 'resources/timezones.php';
     require_once EX_PATH . 'resources/languages.php';
 
-    // Register default Expansa data
+    // register default Expansa data
     require_once EX_PATH . 'migrations.php';
 
-    // The initial configuration of the application
+    // the initial configuration of the application
     require_once EX_PATH . 'app.php';
 
-    // Register Expansa routes
+    // register Expansa routes
     require_once EX_PATH . 'routes.php';
 });

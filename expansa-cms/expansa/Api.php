@@ -31,6 +31,9 @@ final class Api
     public static function configure(string $root, string $dirpath): void
     {
         self::scan($dirpath);
+        echo '<pre>';
+        print_r(self::$resources);
+        echo '</pre>';
 
         Route::middleware($root, function () {
             Route::get('/(.*)', fn ($slug) => self::run($slug));

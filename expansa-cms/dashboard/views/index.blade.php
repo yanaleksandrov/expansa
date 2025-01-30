@@ -1,6 +1,6 @@
 <?php
 
-use app\Option;
+use App\Option;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
@@ -25,11 +25,11 @@ $slug = Safe::trim($__data['slug'] ?? '');
 	<meta charset="{{ Option::attr( 'charset', 'UTF-8' ) }}">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Menu</title>
-	<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/images/favicons/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="/dashboard/assets/images/favicons/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="/dashboard/assets/images/favicons/favicon-16x16.png">
-	<link rel="manifest" href="/dashboard/assets/images/favicons/site.webmanifest">
-	<link rel="mask-icon" href="/dashboard/assets/images/favicons/safari-pinned-tab.svg" color="#5bbad5">
+	<link rel="apple-touch-icon" sizes="180x180" href="/dashboard/assets/favicon/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/dashboard/assets/favicon/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/dashboard/assets/favicon/favicon-16x16.png">
+	<link rel="manifest" href="/dashboard/assets/favicon/site.webmanifest">
+	<link rel="mask-icon" href="/dashboard/assets/favicon/safari-pinned-tab.svg" color="#5bbad5">
 
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

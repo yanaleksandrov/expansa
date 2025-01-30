@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace app\Api;
+namespace App\Api;
 
-use app\Query\Query;
+use App\Query\Query;
 use Expansa\Codecs\Csv;
 use Expansa\Facades\Json;
 use Expansa\Facades\View;

@@ -1,6 +1,6 @@
 <?php
 
-use app\Option;
+use App\Option;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
