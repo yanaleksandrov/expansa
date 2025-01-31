@@ -31,7 +31,9 @@ class System
         $requirements = ['connection', 'pdo', 'curl', 'mbstring', 'gd', 'memory', 'php', 'mysql'];
 
         // Basic constants for the environment
-        require_once EX_PATH . 'env.example.php';
+        if (!is_file(EX_PATH . 'env.php')) {
+            require_once EX_PATH . 'env.example.php';
+        }
 
         $data = Safe::data($_POST, [
             'database' => 'trim',
@@ -61,6 +63,7 @@ class System
                     'status'    => 200,
                     'benchmark' => metrics()->time(),
                     'memory'    => metrics()->memory(),
+                    'queries'   => count(Db::log()),
                     'data'      => array_map(
                         fn($requirement) => match ($requirement) {
                             'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),

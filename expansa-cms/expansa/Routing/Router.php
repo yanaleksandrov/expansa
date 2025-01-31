@@ -58,11 +58,11 @@ class Router
      * Store a before middleware route and a handling function to be
      * executed when accessed using one of the specified methods.
      *
-     * @param string          $methods Allowed methods, | delimited
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $methods Allowed methods, | delimited
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function before(string $methods, string $pattern, callable|object $fn): void
+    public function before(string $methods, string $pattern, callable|array $fn): void
     {
         $pattern = $this->baseRoute . '/' . trim($pattern, '/');
         $pattern = $this->baseRoute ? rtrim($pattern, '/') : $pattern;
@@ -82,11 +82,11 @@ class Router
     /**
      * Store a route and a handling function to be executed when accessed using one of the specified methods.
      *
-     * @param string          $methods Allowed methods, | delimited
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $methods Allowed methods, | delimited
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function match(string $methods, string $pattern, callable|object $fn): void
+    public function match(string $methods, string $pattern, callable|array $fn): void
     {
         $pattern = $this->baseRoute . '/' . trim($pattern, '/');
         $pattern = $this->baseRoute ? rtrim($pattern, '/') : $pattern;
@@ -102,10 +102,10 @@ class Router
     /**
      * Shorthand for a route accessed using any method.
      *
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function any(string $pattern, callable|object $fn): void
+    public function any(string $pattern, callable|array $fn): void
     {
         $this->match('GET|POST|PUT|DELETE|OPTIONS|PATCH|HEAD', $pattern, $fn);
     }
@@ -113,10 +113,10 @@ class Router
     /**
      * Shorthand for a route accessed using GET.
      *
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function get(string $pattern, callable|object $fn): void
+    public function get(string $pattern, callable|array $fn): void
     {
         $this->match('GET', $pattern, $fn);
     }
@@ -124,10 +124,10 @@ class Router
     /**
      * Shorthand for a route accessed using POST.
      *
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function post(string $pattern, callable|object $fn): void
+    public function post(string $pattern, callable|array $fn): void
     {
         $this->match('POST', $pattern, $fn);
     }
@@ -135,10 +135,10 @@ class Router
     /**
      * Shorthand for a route accessed using PATCH.
      *
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function patch(string $pattern, callable|object $fn): void
+    public function patch(string $pattern, callable|array $fn): void
     {
         $this->match('PATCH', $pattern, $fn);
     }
@@ -146,10 +146,10 @@ class Router
     /**
      * Shorthand for a route accessed using DELETE.
      *
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function delete(string $pattern, callable|object $fn): void
+    public function delete(string $pattern, callable|array $fn): void
     {
         $this->match('DELETE', $pattern, $fn);
     }
@@ -157,10 +157,10 @@ class Router
     /**
      * Shorthand for a route accessed using PUT.
      *
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function put(string $pattern, callable|object $fn): void
+    public function put(string $pattern, callable|array $fn): void
     {
         $this->match('PUT', $pattern, $fn);
     }
@@ -168,10 +168,10 @@ class Router
     /**
      * Shorthand for a route accessed using OPTIONS.
      *
-     * @param string          $pattern A route pattern such as /about/system
-     * @param callable|object $fn      The handling function to be executed
+     * @param string         $pattern A route pattern such as /about/system
+     * @param callable|array $fn      The handling function to be executed
      */
-    public function options(string $pattern, callable|object $fn): void
+    public function options(string $pattern, callable|array $fn): void
     {
         $this->match('OPTIONS', $pattern, $fn);
     }
@@ -329,15 +329,15 @@ class Router
     /**
      * Set the 404 handling function.
      *
-     * @param callable|object|string $match_fn The function to be executed
-     * @param null|callable|object   $fn       The function to be executed
+     * @param callable|object|string $matchFn The function to be executed
+     * @param null|callable|array    $fn      The function to be executed
      */
-    public function set404(callable|object|string $match_fn, callable|object $fn = null): void
+    public function set404(callable|object|string $matchFn, callable|array $fn = null): void
     {
         if (! is_null($fn)) {
-            $this->notFoundCallback[$match_fn] = $fn;
+            $this->notFoundCallback[$matchFn] = $fn;
         } else {
-            $this->notFoundCallback['/'] = $match_fn;
+            $this->notFoundCallback['/'] = $matchFn;
         }
     }
 
@@ -504,9 +504,9 @@ class Router
     {
         if (is_callable($fn)) {
             call_user_func_array($fn, $params);
-        } elseif (stripos($fn, '@') !== false) {
+        } else {
             // Explode segments of given route
-            [$controller, $method] = explode('@', $fn);
+            [$controller, $method] = $fn;
 
             // Adjust controller class if namespace has been set
             if ($this->getNamespace() !== '') {

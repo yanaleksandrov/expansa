@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App;
 
+use Exception;
 use App\User\Roles;
 use App\User\Traits;
 use Expansa\Error;
@@ -66,11 +67,11 @@ final class User
     {
         try {
             if (empty($value)) {
-                throw new \Exception(t('You are trying to find a user with an empty :getByField.', $getBy));
+                throw new Exception(t('You are trying to find a user with an empty :getByField.', $getBy));
             }
 
             if (! in_array($getBy, [ 'id', 'login', 'email', 'nicename' ], true)) {
-                throw new \Exception(t('To get a user, use an ID, login, email or nicename.'));
+                throw new Exception(t('To get a user, use an ID, login, email or nicename.'));
             }
 
             $users    = Db::select(self::$table, '*', [ $getBy => $value ], [ 'LIMIT' => 1 ]);
@@ -90,8 +91,8 @@ final class User
                 return $user;
             }
 
-            throw new \Exception(t('User not found.'));
-        } catch (\Exception $e) {
+            throw new Exception(t('User not found.'));
+        } catch (Exception $e) {
             return new Error('user-get', $e->getMessage());
         }
     }
@@ -111,25 +112,19 @@ final class User
     public static function add(array $userdata, ?callable $callback = null): User|Error
     {
 
-        $userdata = Safe::data(
-            $userdata,
-            [
-                'login'    => 'login',
-                'password' => 'trim',
-                'email'    => 'email',
-                'showname' => 'ucfirst:$login',
-                'nicename' => 'slug:$login|unique',
-            ]
-        )->extend(
-            'unique',
-            function ($value) {
-                $suffix = 1;
-                while (Db::select(self::$table, 'id', [ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
-                    $suffix++;
-                }
-                return sprintf('%s%s', $value, $suffix > 1 ? "-$suffix" : '');
+        $userdata = Safe::data($userdata, [
+            'login'    => 'login',
+            'password' => 'trim',
+            'email'    => 'email',
+            'showname' => 'ucfirst:$login',
+            'nicename' => 'slug:$login|unique',
+        ])->extend('unique', function ($value) {
+            $suffix = 1;
+            while (Db::select(self::$table, 'id', [ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
+                $suffix++;
             }
-        )->apply();
+            return sprintf('%s%s', $value, $suffix > 1 ? "-$suffix" : '');
+        })->apply();
 
         // validate incoming user data
         $userdata = Validator::data(

@@ -3,18 +3,52 @@
 declare(strict_types=1);
 
 use App\User;
+use Expansa\Error;
+use Expansa\Facades\Safe;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
+use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
+use Expansa\Security\Exception\InvalidCsrfTokenException;
 use Expansa\Support\Is;
 use Expansa\Security\Csrf\Csrf;
 
-// Generate CSRF token.
-(new Csrf())->generate('token');
+Route::middleware('/api', function () {
 
-//Route::middleware('/api', function () {
-//
-//    Route::post('/system/install', '\App\Api\System@install');
-//});
+    header('Content-Type: application/json; charset=utf-8');
+
+    $csrf = new Csrf(new NativeHttpOnlyCookieProvider());
+    try {
+        $csrf->check('token', $_COOKIE['expansa_token'] ?? '');
+    } catch (InvalidCsrfTokenException $e) {
+        $data = new Error('api-no-route', t('Ajax queries not allows without CSRF token!'));
+    }
+
+    // generate CSRF token.
+    $csrf->generate('token');
+
+    foreach (
+        [
+            App\Api\Extensions::class,
+            App\Api\Files::class,
+            App\Api\Media::class,
+            App\Api\Option::class,
+            App\Api\Post::class,
+            App\Api\Posts::class,
+            App\Api\System::class,
+            App\Api\Translations::class,
+            App\Api\User::class,
+        ] as $class
+    ) {
+        $methods = get_class_methods($class);
+        foreach ($methods as $method) {
+            $classname = (new ReflectionClass($class))->getShortName();
+            $prefix    = Safe::lowercase($classname);
+            $endpoint  = Safe::kebabcase($method);
+
+            Route::post("/$prefix/$endpoint", [$class, $method]);
+        }
+    }
+});
 
 Route::get('/(.*)', function ($slug) {
     $dashboardSlug  = ltrim(str_replace(EX_PATH, '/', EX_DASHBOARD), '/');

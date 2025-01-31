@@ -76,14 +76,6 @@ declare(strict_types=1);
 );
 
 /**
- * Add core API endpoints.
- * Important! If current request is request to API, stop code execution after Api::create().
- *
- * @since 2025.1
- */
-Expansa\Api::configure('/api', sprintf('%sapp/Api', EX_PATH));
-
-/**
  * Load installed and launch active plugins & themes.
  *
  * @since 2025.1
