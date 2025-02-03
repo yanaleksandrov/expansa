@@ -3,53 +3,26 @@
 	<style type="text/css">
 	<![CDATA[
 	.am-weather-sun {
-		-webkit-animation: am-weather-sun 9s ease-in-out 0s infinite;
-		   -moz-animation: am-weather-sun 9s ease-in-out 0s infinite;
-			 -o-animation: am-weather-sun 9s ease-in-out 0s infinite;
-				animation: am-weather-sun 9s ease-in-out 0s infinite;
+		animation: am-weather-sun 9s ease-in-out 0s infinite;
 	}
 	.am-weather-sun-shiny line {
-		-webkit-animation: am-weather-sun-shiny 2s linear 0s infinite;
-		   -moz-animation: am-weather-sun-shiny 2s linear 0s infinite;
-			 -o-animation: am-weather-sun-shiny 2s linear 0s infinite;
-				animation: am-weather-sun-shiny 2s linear 0s infinite;
+		animation: am-weather-sun-shiny 2s linear 0s infinite;
 	}
-	@-webkit-keyframes am-weather-sun {
-		0% {
-			-webkit-transform: rotate(0deg);
-				-ms-transform: rotate(0deg);
-					transform: rotate(0deg);
-		}
-		100% {
-			-webkit-transform: rotate(360deg);
-				-ms-transform: rotate(360deg);
-					transform: rotate(360deg);
-		}
+	.am-weather-cloud-2 {
+		animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
+	}
+	.am-weather-rain-1 {
+		animation: am-weather-rain 8s linear 0s infinite;
+	}
+	.am-weather-rain-2 {
+		animation: am-weather-rain 8s linear 0.26s infinite;
 	}
 	@keyframes am-weather-sun {
 		0% {
-			-webkit-transform: rotate(0deg);
-				-ms-transform: rotate(0deg);
-					transform: rotate(0deg);
+			transform: rotate(0deg);
 		}
 		100% {
-			-webkit-transform: rotate(360deg);
-				-ms-transform: rotate(360deg);
-					transform: rotate(360deg);
-		}
-	}
-	@-webkit-keyframes am-weather-sun-shiny {
-		0% {
-			stroke-dasharray: 3px 10px;
-			stroke-dashoffset: 0px;
-		}
-		50% {
-			stroke-dasharray: 0.1px 10px;
-			stroke-dashoffset: -1px;
-		}
-		100% {
-			stroke-dasharray: 3px 10px;
-			stroke-dashoffset: 0px;
+			transform: rotate(360deg);
 		}
 	}
 	@keyframes am-weather-sun-shiny {
@@ -66,77 +39,25 @@
 			stroke-dashoffset: 0px;
 		}
 	}
-	
-	
-	.am-weather-cloud-2 {
-		-webkit-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-		   -moz-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-			 -o-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-				animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-	}
 	@keyframes am-weather-cloud-2 {
 		0% {
-			-webkit-transform: translate(0px,2px);
-				-ms-transform: translate(0px,2px);
-					transform: translate(0px,2px);
+			transform: translate(0px,2px);
 		}
 		50% {
-			-webkit-transform: translate(2px,2px);
-				-ms-transform: translate(2px,2px);
-					transform: translate(2px,2px);
+			transform: translate(2px,2px);
 		}
 		100% {
-			-webkit-transform: translate(0px,2px);
-				-ms-transform: translate(0px,2px);
-					transform: translate(0px,2px);
+			transform: translate(0px,2px);
 		}
 	}
-	@-webkit-keyframes am-weather-cloud-2 {
+	@keyframes am-weather-rain {
 		0% {
-			-webkit-transform: translate(0px,2px);
-				-ms-transform: translate(0px,2px);
-					transform: translate(0px,2px);
-		}
-		50% {
-			-webkit-transform: translate(2px,2px);
-				-ms-transform: translate(2px,2px);
-					transform: translate(2px,2px);
+			stroke-dashoffset: 0;
 		}
 		100% {
-			-webkit-transform: translate(0px,2px);
-				-ms-transform: translate(0px,2px);
-					transform: translate(0px,2px);
+			stroke-dashoffset: -100;
 		}
 	}
-	
-		.am-weather-rain-1 {
-			-webkit-animation: am-weather-rain 8s linear 0s infinite;
-			   -moz-animation: am-weather-rain 8s linear 0s infinite;
-				 -o-animation: am-weather-rain 8s linear 0s infinite;
-					animation: am-weather-rain 8s linear 0s infinite;
-		}
-		.am-weather-rain-2 {
-			-webkit-animation: am-weather-rain 8s linear 0.26s infinite;
-			   -moz-animation: am-weather-rain 8s linear 0.26s infinite;
-				 -o-animation: am-weather-rain 8s linear 0.26s infinite;
-					animation: am-weather-rain 8s linear 0.26s infinite;
-		}
-		@-webkit-keyframes am-weather-rain {
-			0% {
-				stroke-dashoffset: 0;
-			}
-			100% {
-				stroke-dashoffset: -100;
-			}
-		}
-		@keyframes am-weather-rain {
-			0% {
-				stroke-dashoffset: 0;
-			}
-			100% {
-				stroke-dashoffset: -100;
-			}
-		}
 	]]>
 	</style>
     </defs>

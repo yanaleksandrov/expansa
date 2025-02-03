@@ -3,40 +3,30 @@
 	<style type="text/css">
 	<![CDATA[
 		.am-weather-moon {
-		  -webkit-transform-origin: 12.5px 15.15px 0;
-			 -moz-transform-origin: 12.5px 15.15px 0;
-			  -ms-transform-origin: 12.5px 15.15px 0;
-				  transform-origin: 12.5px 15.15px 0;
-			-webkit-animation: am-weather-moon 6s linear 0s infinite;
-			   -moz-animation: am-weather-moon 6s linear 0s infinite;
-				 -o-animation: am-weather-moon 6s linear 0s infinite;
-					animation: am-weather-moon 6s linear 0s infinite;
+			transform-origin: 12.5px 15.15px 0;
+			animation: am-weather-moon 6s linear 0s infinite;
 		}
 		.am-weather-moon-star-2 {
-			-webkit-animation: am-weather-moon-star-2 4s linear 0s infinite;
-			   -moz-animation: am-weather-moon-star-2 4s linear 0s infinite;
-				 -o-animation: am-weather-moon-star-2 4s linear 0s infinite;
-					animation: am-weather-moon-star-2 4s linear 0s infinite;
+			animation: am-weather-moon-star-2 4s linear 0s infinite;
+		}
+		.am-weather-cloud-2 {
+			animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
+		}
+		.am-weather-rain-1 {
+			animation: am-weather-rain 8s linear 0s infinite;
+		}
+		.am-weather-rain-2 {
+			animation: am-weather-rain 8s linear 0.26s infinite;
 		}
 		@keyframes am-weather-moon {
 			0% {
-			-webkit-transform: rotate(0deg);
-			   -moz-transform: rotate(0deg);
-				-ms-transform: rotate(0deg);
-					transform: rotate(0deg);
+				transform: rotate(0deg);
 			}
 			50% {
-			-webkit-transform: rotate(15deg);
-			   -moz-transform: rotate(15deg);
-				-ms-transform: rotate(15deg);
-					transform: rotate(15deg);
+				transform: rotate(15deg);
 			}
-
 			100% {
-			-webkit-transform: rotate(0deg);
-			   -moz-transform: rotate(0deg);
-				-ms-transform: rotate(0deg);
-					transform: rotate(0deg);
+				transform: rotate(0deg);
 			}
 		}
 		@keyframes am-weather-moon-star-2 {
@@ -47,67 +37,15 @@
 				opacity: 1;
 			}
 		}
-		
-		
-		.am-weather-cloud-2 {
-			-webkit-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-			   -moz-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-				 -o-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-					animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-		}
 		@keyframes am-weather-cloud-2 {
 			0% {
-				-webkit-transform: translate(0px,2px);
-					-ms-transform: translate(0px,2px);
-						transform: translate(0px,2px);
+				transform: translate(0px,2px);
 			}
 			50% {
-				-webkit-transform: translate(2px,2px);
-					-ms-transform: translate(2px,2px);
-						transform: translate(2px,2px);
+				transform: translate(2px,2px);
 			}
 			100% {
-				-webkit-transform: translate(0px,2px);
-					-ms-transform: translate(0px,2px);
-						transform: translate(0px,2px);
-			}
-		}
-		@-webkit-keyframes am-weather-cloud-2 {
-			0% {
-				-webkit-transform: translate(0px,2px);
-					-ms-transform: translate(0px,2px);
-						transform: translate(0px,2px);
-			}
-			50% {
-				-webkit-transform: translate(2px,2px);
-					-ms-transform: translate(2px,2px);
-						transform: translate(2px,2px);
-			}
-			100% {
-				-webkit-transform: translate(0px,2px);
-					-ms-transform: translate(0px,2px);
-						transform: translate(0px,2px);
-			}
-		}
-	
-		.am-weather-rain-1 {
-			-webkit-animation: am-weather-rain 8s linear 0s infinite;
-			   -moz-animation: am-weather-rain 8s linear 0s infinite;
-				 -o-animation: am-weather-rain 8s linear 0s infinite;
-					animation: am-weather-rain 8s linear 0s infinite;
-		}
-		.am-weather-rain-2 {
-			-webkit-animation: am-weather-rain 8s linear 0.26s infinite;
-			   -moz-animation: am-weather-rain 8s linear 0.26s infinite;
-				 -o-animation: am-weather-rain 8s linear 0.26s infinite;
-					animation: am-weather-rain 8s linear 0.26s infinite;
-		}
-		@-webkit-keyframes am-weather-rain {
-			0% {
-				stroke-dashoffset: 0;
-			}
-			100% {
-				stroke-dashoffset: -100;
+				transform: translate(0px,2px);
 			}
 		}
 		@keyframes am-weather-rain {

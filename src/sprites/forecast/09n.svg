@@ -3,30 +3,13 @@
 	<style type="text/css">
 		<![CDATA[
 		.am-weather-rain-1 {
-			-webkit-animation: am-weather-rain 8s linear 0s infinite;
-			   -moz-animation: am-weather-rain 8s linear 0s infinite;
-				 -o-animation: am-weather-rain 8s linear 0s infinite;
-					animation: am-weather-rain 8s linear 0s infinite;
+			animation: am-weather-rain 8s linear 0s infinite;
 		}
 		.am-weather-rain-2 {
-			-webkit-animation: am-weather-rain 8s linear 0.26s infinite;
-			   -moz-animation: am-weather-rain 8s linear 0.26s infinite;
-				 -o-animation: am-weather-rain 8s linear 0.26s infinite;
-					animation: am-weather-rain 8s linear 0.26s infinite;
+			animation: am-weather-rain 8s linear 0.26s infinite;
 		}
 		.am-weather-rain-3 {
-			-webkit-animation: am-weather-rain 8s linear 0.13s infinite;
-			   -moz-animation: am-weather-rain 8s linear 0.13s infinite;
-				 -o-animation: am-weather-rain 8s linear 0.13s infinite;
-					animation: am-weather-rain 8s linear 0.13s infinite;
-		}
-		@-webkit-keyframes am-weather-rain {
-			0% {
-				stroke-dashoffset: 0;
-			}
-			100% {
-				stroke-dashoffset: -100;
-			}
+			animation: am-weather-rain 8s linear 0.13s infinite;
 		}
 		@keyframes am-weather-rain {
 			0% {

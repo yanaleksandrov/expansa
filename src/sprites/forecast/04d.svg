@@ -3,88 +3,31 @@
 	<style type="text/css">
 	<![CDATA[
 	.am-weather-cloud-1 {
-		-webkit-animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
-		   -moz-animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
-			 -o-animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
-				animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
+		animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
+	}
+	.am-weather-cloud-2 {
+		animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
 	}
 	@keyframes am-weather-cloud-1 {
 		0% {
-		-webkit-transform: translate(-5px,0px);
-			-ms-transform: translate(-5px,0px);
-				transform: translate(-5px,0px);
+			transform: translate(-5px,0px);
 		}
-
 		50% {
-		-webkit-transform: translate(5px,0px);
-			-ms-transform: translate(5px,0px);
-				transform: translate(5px,0px);
+			transform: translate(5px,0px);
 		}
-
 		100% {
-		-webkit-transform: translate(-5px,0px);
-			-ms-transform: translate(-5px,0px);
-				transform: translate(-5px,0px);
+			transform: translate(-5px,0px);
 		}
-	}
-	@-webkit-keyframes am-weather-cloud-1 {
-		0% {
-		-webkit-transform: translate(-5px,0px);
-			-ms-transform: translate(-5px,0px);
-				transform: translate(-5px,0px);
-		}
-
-		50% {
-		-webkit-transform: translate(5px,0px);
-			-ms-transform: translate(5px,0px);
-				transform: translate(5px,0px);
-		}
-
-		100% {
-		-webkit-transform: translate(-5px,0px);
-			-ms-transform: translate(-5px,0px);
-				transform: translate(-5px,0px);
-		}
-	}
-	
-	.am-weather-cloud-2 {
-		-webkit-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-		   -moz-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-			 -o-animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
-				animation: am-weather-cloud-2 3s ease-in-out 0s infinite;
 	}
 	@keyframes am-weather-cloud-2 {
 		0% {
-			-webkit-transform: translate(0px,0px);
-				-ms-transform: translate(0px,0px);
-					transform: translate(0px,0px);
+			transform: translate(0px,0px);
 		}
 		50% {
-			-webkit-transform: translate(2px,0px);
-				-ms-transform: translate(2px,0px);
-					transform: translate(2px,0px);
+			transform: translate(2px,0px);
 		}
 		100% {
-			-webkit-transform: translate(0px,0px);
-				-ms-transform: translate(0px,0px);
-					transform: translate(0px,0px);
-		}
-	}
-	@-webkit-keyframes am-weather-cloud-2 {
-		0% {
-			-webkit-transform: translate(0px,0px);
-				-ms-transform: translate(0px,0px);
-					transform: translate(0px,0px);
-		}
-		50% {
-			-webkit-transform: translate(2px,0px);
-				-ms-transform: translate(2px,0px);
-					transform: translate(2px,0px);
-		}
-		100% {
-			-webkit-transform: translate(0px,0px);
-				-ms-transform: translate(0px,0px);
-					transform: translate(0px,0px);
+			transform: translate(0px,0px);
 		}
 	}
 	]]>

@@ -3,93 +3,41 @@
 	<style type="text/css">
 	<![CDATA[
 	.am-weather-cloud-1 {
-		-webkit-animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
-		   -moz-animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
-			 -o-animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
-				animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
+		animation: am-weather-cloud-1 7s ease-in-out 0s infinite;
+	}
+	.am-weather-snow-1 {
+		animation: am-weather-snow 2s linear 0s infinite;
+	}
+	.am-weather-snow-2 {
+		animation: am-weather-snow 2s linear 0.5s infinite;
 	}
 	@keyframes am-weather-cloud-1 {
 		0% {
-		-webkit-transform: translate(0,0px);
-			-ms-transform: translate(0,0px);
-				transform: translate(0,0px);
+			transform: translate(0,0px);
 		}
-
 		50% {
-		-webkit-transform: translate(3px,0px);
-			-ms-transform: translate(3px,0px);
-				transform: translate(3px,0px);
+			transform: translate(3px,0px);
 		}
-
 		100% {
-		-webkit-transform: translate(0,0px);
-			-ms-transform: translate(0,0px);
-				transform: translate(0,0px);
+			transform: translate(0,0px);
 		}
 	}
-	@-webkit-keyframes am-weather-cloud-1 {
-		0% {
-		-webkit-transform: translate(0,0px);
-			-ms-transform: translate(0,0px);
-				transform: translate(0,0px);
-		}
-
-		50% {
-		-webkit-transform: translate(3px,0px);
-			-ms-transform: translate(3px,0px);
-				transform: translate(3px,0px);
-		}
-
-		100% {
-		-webkit-transform: translate(0,0px);
-			-ms-transform: translate(0,0px);
-				transform: translate(0,0px);
-		}
-	}
-	
-
 	@keyframes am-weather-snow {
 		0% {
 			opacity: 1;
-			-webkit-transform: translateX(0) translateY(0);
-			   -moz-transform: translateX(0) translateY(0);
-				-ms-transform: translateX(0) translateY(0);
-					transform: translateX(0) translateY(0);
+			transform: translateX(0) translateY(0);
 		}
 		33.33% {
-			-webkit-transform: translateX(-1.2px) translateY(2px);
-			   -moz-transform: translateX(-1.2px) translateY(2px);
-				-ms-transform: translateX(-1.2px) translateY(2px);
-					transform: translateX(-1.2px) translateY(2px);
+			transform: translateX(-1.2px) translateY(2px);
 		}
 		66.66% {
-			-webkit-transform: translateX(1.4px) translateY(4px);
-			   -moz-transform: translateX(1.4px) translateY(4px);
-				-ms-transform: translateX(1.4px) translateY(4px);
-					transform: translateX(1.4px) translateY(4px);
+			transform: translateX(1.4px) translateY(4px);
 			opacity: 1;
 		}
 		100% {
-			-webkit-transform: translateX(-1.6px) translateY(6px);
-			   -moz-transform: translateX(-1.6px) translateY(6px);
-				-ms-transform: translateX(-1.6px) translateY(6px);
-					transform: translateX(-1.6px) translateY(6px);
+			transform: translateX(-1.6px) translateY(6px);
 			opacity: 0;
 		}
-	}
-
-	.am-weather-snow-1 {
-		-webkit-animation: am-weather-snow 2s linear 0s infinite;
-		   -moz-animation: am-weather-snow 2s linear 0s infinite;
-			 -o-animation: am-weather-snow 2s linear 0s infinite;
-				animation: am-weather-snow 2s linear 0s infinite;
-	}
-
-	.am-weather-snow-2 {
-		-webkit-animation: am-weather-snow 2s linear 0.5s infinite;
-		   -moz-animation: am-weather-snow 2s linear 0.5s infinite;
-			 -o-animation: am-weather-snow 2s linear 0.5s infinite;
-				animation: am-weather-snow 2s linear 0.5s infinite;
 	}
 	]]>
 	</style>
