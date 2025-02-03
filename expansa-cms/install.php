@@ -39,5 +39,6 @@ if (! Is::installed()) {
 
     // register Expansa routes
     require_once EX_PATH . 'routes/api.php';
+    require_once EX_PATH . 'routes/web.php';
     exit;
 }
