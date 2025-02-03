@@ -6,7 +6,6 @@ namespace App\Api;
 
 use App\Option;
 use App\User;
-use Expansa\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Hook;
@@ -56,7 +55,7 @@ class System
                 $mysql     = version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>=');
                 $connected = $connection instanceof \Expansa\Database\Query\Builder;
             }
-            header('Content-Type: application/json; charset=utf-8');
+           //header('Content-Type: application/json; charset=utf-8');
 
             echo Json::encode(
                 [

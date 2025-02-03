@@ -7,20 +7,14 @@ namespace App;
 use Exception;
 use App\User\Roles;
 use App\User\Traits;
-use Expansa\Error;
+use Expansa\Debug\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
 use Expansa\Security\Validator as SecurityValidator;
-use Expansa\Session;
 use Expansa\Support\Hash;
 use Expansa\Support\Is;
 
-/**
- * This class handles user-related operations including user creation, retrieval,
- * updating, deletion, and session management. It extends the Users class to inherit
- * user-related functionalities.
- */
 final class User
 {
     use Traits;
@@ -43,7 +37,7 @@ final class User
 
     public string $email = '';
 
-    public ?string $locale = '';
+    public string $locale = '';
 
     public string $registered = '';
 
@@ -93,20 +87,18 @@ final class User
 
             throw new Exception(t('User not found.'));
         } catch (Exception $e) {
-            return new Error('user-get', $e->getMessage());
+            return error('user-get', $e->getMessage());
         }
     }
 
     /**
      * Insert a user into the database.
-     *
      * The showname & nickname fields should not be left empty, because nickname
      * is part of the URL of the user's page, and showname is displayed as the name.
      * Therefore, we generate it based on the login.
      *
      * @param array         $userdata
      * @param callable|null $callback
-     *
      * @return User|Error The newly created user's ID or an Error object if the user could not be created.
      */
     public static function add(array $userdata, ?callable $callback = null): User|Error
@@ -146,7 +138,7 @@ final class User
         )->apply();
 
         if ($userdata instanceof SecurityValidator) {
-            return new Error('user-add', $userdata->errors);
+            return error('user-add', $userdata->errors);
         }
 
         [ $login, $password ] = array_values($userdata);
@@ -154,7 +146,7 @@ final class User
 
         $user_count = Db::insert(self::$table, $userdata)->rowCount();
         if ($user_count !== 1) {
-            return new Error('user-add', t('Something went wrong, it was not possible to add a user.'));
+            return error('user-add', t('Something went wrong, it was not possible to add a user.'));
         }
 
         $user = self::get($login, 'login');
@@ -170,7 +162,7 @@ final class User
      * Update a user in the database. If no ID is found in the received array,
      * the function passes the work to the add method.
      *
-     * @param array $userdata
+     * @param array         $userdata
      * @param callable|null $callback
      * @return User|Error
      */
@@ -187,20 +179,17 @@ final class User
 
         $user = self::get($userID);
         if ($user instanceof User) {
-            $userdata = Safe::data(
-                $userdata,
-                [
-                    'password'   => 'trim',
-                    'nicename'   => 'trim',
-                    'firstname'  => 'tags',
-                    'lastname'   => 'tags',
-                    'showname'   => 'tags',
-                    'email'      => 'email',
-                    'locale'     => 'locale',
-                    'registered' => 'datetime',
-                    'visited'    => 'datetime',
-                ]
-            )->apply();
+            $userdata = Safe::data($userdata, [
+                'password'   => 'trim',
+                'nicename'   => 'trim',
+                'firstname'  => 'tags',
+                'lastname'   => 'tags',
+                'showname'   => 'tags',
+                'email'      => 'email',
+                'locale'     => 'locale',
+                'registered' => 'datetime',
+                'visited'    => 'datetime',
+            ])->apply();
 
             $userdata = array_filter($userdata);
             if (Db::update(self::$table, $userdata)->rowCount()) {
@@ -212,7 +201,7 @@ final class User
             }
         }
 
-        return new Error('user-update', t('User not found.'));
+        return error('user-update', t('User not found.'));
     }
 
     /**
@@ -234,7 +223,7 @@ final class User
         ];
 
         if (! self::exists($fields)) {
-            return new Error('user-delete', t('The user you are trying to delete does not exist.'));
+            return error('user-delete', t('The user you are trying to delete does not exist.'));
         }
 
         if ($reassign) {
@@ -254,9 +243,9 @@ final class User
             return self::$current;
         }
 
-        Session::start();
+        session()->start();
 
-        $userID = Session::get(self::$session_id);
+        $userID = session()->get(self::$session_id);
         if ($userID) {
             self::$current = self::get($userID);
         }
@@ -294,7 +283,7 @@ final class User
     {
         $roles = [];
         $user  = self::current();
-        if ((int) $user->id === $userID) {
+        if ($user->id === $userID) {
             $roles = $user->roles ?? [];
         } else {
             $user = self::get($userID);
@@ -316,7 +305,7 @@ final class User
      *
      * @param integer $userID User ID.
      * @param string $role    Role name.
-     * @return   bool         The user has a role.
+     * @return bool           The user has a role.
      */
     public static function is(int $userID, string $role): bool
     {
@@ -340,8 +329,8 @@ final class User
      */
     public static function logged(): bool
     {
-        Session::start();
-        $userID = abs((int) Session::get(self::$session_id));
+        session()->start();
+        $userID = abs((int) session()->get(self::$session_id));
         if ($userID) {
             return true;
         }
@@ -368,7 +357,7 @@ final class User
         ])->apply();
 
         if ($userdata instanceof Validator) {
-            return new Error('user-login', $userdata);
+            return error('user-login', $userdata);
         }
 
         [ $loginOrEmail, $password, $remember ] = array_values($userdata);
@@ -377,20 +366,16 @@ final class User
         $user  = User::get($loginOrEmail, $field);
         if ($user instanceof User) {
             if (password_verify($password, $user->password)) {
-                if ($remember) {
-                    Session::start();
-                } else {
-                    Session::start(1);
-                }
-                Session::set(self::$session_id, $user->id);
+                session()->start();
+                session()->set(self::$session_id, $user->id);
 
                 return self::$current = $user;
             }
 
-            return new Error('user-login', t('User password is incorrect.'));
+            return error('user-login', t('User password is incorrect.'));
         }
 
-        return new Error('user-login', t('User not found: invalid login or email.'));
+        return error('user-login', t('User not found: invalid login or email.'));
     }
 
     /**
@@ -398,11 +383,11 @@ final class User
      */
     public static function logout(): void
     {
-        Session::start();
+        session()->start();
 
         self::$current = [];
 
-        $userID = abs((int) Session::get(self::$session_id));
+        $userID = abs((int) session()->get(self::$session_id));
         if ($userID) {
             self::update(
                 [
@@ -410,6 +395,6 @@ final class User
                 ]
             );
         }
-        Session::set(self::$session_id, null);
+        session()->set(self::$session_id, null);
     }
 }

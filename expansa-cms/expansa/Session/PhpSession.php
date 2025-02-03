@@ -45,7 +45,7 @@ final class PhpSession implements SessionInterface, SessionManagerInterface
         // Prevent uninitialized state
         $empty = [];
         $this->storage = &$empty;
-        $this->flash = new Flash($empty);
+        $this->flash   = new Flash($empty);
 
         $keys = array_keys($this->options);
         foreach ($keys as $key) {

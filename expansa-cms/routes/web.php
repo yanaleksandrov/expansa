@@ -3,24 +3,22 @@
 declare(strict_types=1);
 
 use App\User;
-use Expansa\Error;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
-use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
 use Expansa\Support\Is;
 use Expansa\Security\Csrf\Csrf;
+use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
+use Expansa\Security\Exception\InvalidCsrfTokenException;
 
-Route::middleware('/api', function () {
-
+Route::any('/api', function () {
     header('Content-Type: application/json; charset=utf-8');
 
     $csrf = new Csrf(new NativeHttpOnlyCookieProvider());
     try {
         $csrf->check('token', $_COOKIE['expansa_token'] ?? '');
     } catch (InvalidCsrfTokenException $e) {
-        $data = new Error('api-no-route', t('Ajax queries not allows without CSRF token!'));
+        $data = error('api-no-route', t('Ajax queries not allows without CSRF token!'));
     }
 
     // generate CSRF token.

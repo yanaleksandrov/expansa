@@ -347,8 +347,8 @@ final class Curl implements Transport
             $this->streamHandle = fopen($options['filename'], 'wb');
         }
 
-        $this->responseData       = '';
-        $this->responseBytes      = 0;
+        $this->responseData      = '';
+        $this->responseBytes     = 0;
         $this->responseByteLimit = false;
         if ($options['max_bytes'] !== false) {
             $this->responseByteLimit = $options['max_bytes'];

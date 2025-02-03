@@ -145,3 +145,17 @@ if (! function_exists('session')) {
         return $session;
     }
 }
+
+if (! function_exists('error')) {
+    /**
+     * Create new errors.
+     *
+     * @param string       $code
+     * @param string|array $message
+     * @return Expansa\Debug\Error
+     */
+    function error(string $code, string|array $message = ''): Expansa\Debug\Error
+    {
+        return new Expansa\Debug\Error($code, $message);
+    }
+}

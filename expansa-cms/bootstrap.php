@@ -48,5 +48,5 @@ Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
     require_once EX_PATH . 'app.php';
 
     // register Expansa routes
-    require_once EX_PATH . 'routes.php';
+    require_once EX_PATH . 'routes/web.php';
 });

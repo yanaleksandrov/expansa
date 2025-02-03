@@ -6,6 +6,7 @@ namespace App\Api;
 
 use Expansa\Error;
 use Expansa\Facades\Safe;
+use PHPMailer\PHPMailer\Exception;
 
 class Post
 {
@@ -30,6 +31,7 @@ class Post
      * Create item.
      *
      * @url    POST api/posts
+     * @throws Exception
      */
     public function create(): array
     {
@@ -52,7 +54,7 @@ class Post
         $status = Safe::text($_POST['status'] ?? '');
         $type   = Safe::text($_POST['post-type'] ?? '');
         if (! $type) {
-            return Error::add('post-type-create', t('Post type is missing'));
+            throw new Exception(t('Post type is missing'));
         }
 
         // TODO:: title make unique by user for "api-keys" post type

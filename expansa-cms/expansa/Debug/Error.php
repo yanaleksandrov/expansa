@@ -22,20 +22,20 @@ class Error
      *
      * @var array
      */
-    protected static array $errors = [];
+    private static array $errors = [];
 
     /**
      * Add an error or append additional message to an existing error.
      *
-     * @param string|int $code      Errors code.
+     * @param string $code          Error code.
      * @param string|array $message Error single message or array of messages.
      */
-    protected function push(string|int $code, string|array $message = ''): void
+    public function __construct(string $code, string|array $message = '')
     {
         if (is_array($message)) {
-            self::$errors[ $code ] = array_merge(self::$errors[$code] ?? [], $message);
+            self::$errors[$code] = array_merge(self::$errors[$code] ?? [], $message);
         } else {
-            self::$errors[ $code ][] = $message;
+            self::$errors[$code][] = $message;
         }
     }
 
@@ -45,38 +45,25 @@ class Error
      * This function removes all error messages associated with the specified
      * error code, along with any error data for that code.
      *
-     * @param string|int $code Errors code.
+     * @param string $code Errors code.
      */
-    protected function remove(string|int $code): void
+    public function remove(string $code): void
     {
-        unset(self::$errors[ $code ]);
-    }
-
-    /**
-     * Retrieve all error codes.
-     *
-     * @return array List of error codes, if available.
-     */
-    protected function getErrorCodes(): array
-    {
-        if (! $this->hasError()) {
-            return [];
-        }
-        return array_keys(self::$errors);
+        unset(self::$errors[$code]);
     }
 
     /**
      * Retrieve all error messages or error messages matching code.
      *
-     * @param string|int $code Optional. Retrieve messages matching code, if exists.
+     * @param string $code Optional. Retrieve messages matching code, if exists.
      * @return array Errors strings on success, or empty array on failure (if using code parameter).
      */
-    public function getError(string|int $code = ''): array
+    public function get(string $code = ''): array
     {
         if (empty($code)) {
             return self::$errors;
         }
-        return self::$errors[ $code ] ?? [];
+        return self::$errors[$code] ?? [];
     }
 
     /**
@@ -84,7 +71,7 @@ class Error
      *
      * @return bool
      */
-    protected function hasError(): bool
+    public function exists(): bool
     {
         return ! empty(self::$errors);
     }
