@@ -79,21 +79,21 @@ return new class extends Plugin
 
     public function activate(): void
     {
-        // TODO: Implement activate() method.
+
     }
 
     public function deactivate(): void
     {
-        // TODO: Implement deactivate() method.
+
     }
 
     public function install(): void
     {
-        // TODO: Implement install() method.
+
     }
 
     public function uninstall(): void
     {
-        // TODO: Implement uninstall() method.
+
     }
 };

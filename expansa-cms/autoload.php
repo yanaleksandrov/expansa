@@ -19,15 +19,8 @@ if (PHP_VERSION_ID < 50600) {
 }
 
 // autoload class
-spl_autoload_register(function ($class) {
-    $filepath = sprintf('%s%s.php', EX_PATH, $class);
-
-    // TODO: is so bad, fix it!
-    $filepath = str_replace(
-        ['\\', '/Expansa/', '/App/'],
-        ['/', '/expansa/', '/app/'],
-        $filepath
-    );
-
-    require_once $filepath;
-});
+spl_autoload_register(fn ($class) => require_once str_replace(
+    ['\\', '/Expansa/', '/App/'],
+    ['/', '/expansa/', '/app/'],
+    sprintf('%s%s.php', EX_PATH, $class)
+));

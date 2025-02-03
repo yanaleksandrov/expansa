@@ -143,14 +143,6 @@ final class Is
     }
 
     /**
-     * Determines whether the current request is for install wizard page.
-     */
-    public static function install(): bool
-    {
-        return defined('EX_IS_INSTALL') && EX_IS_INSTALL === true;
-    }
-
-    /**
      * Checks if the application is in debug mode.
      *
      * @return bool True if debug mode is enabled, false otherwise.

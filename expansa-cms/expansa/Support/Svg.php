@@ -9,8 +9,6 @@ namespace Expansa\Support;
  * $svg = new Svg();
  * $svg->addSprite( EX_DASHBOARD . 'assets/images/', EX_DASHBOARD . 'assets/' ); // create sprite.
  *
- * TODO: 1. use "link preload" & inline svg output
- *
  * Svg::sprite( 'logo' ); // output symbol
  */
 class Svg

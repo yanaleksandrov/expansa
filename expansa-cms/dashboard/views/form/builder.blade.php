@@ -115,7 +115,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			?>
 		</div>
 		<template x-for="(group, key) in groups">
-			<div class="builder-group" data-or="<?php echo t_attr( 'or' ); ?>">
+			<div class="builder-group" data-or="{{ t(' or ') }}">
 				<template x-for="(rule, i) in group.rules">
 					<div class="builder__rules">
 						<div class="dg g-1">

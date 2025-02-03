@@ -13,39 +13,34 @@ if (!defined('EX_PATH')) {
     exit;
 }
 
-[$title, $badge, $show, $content, $uploader, $filter, $actions, $search, $translation] = Safe::data(
-    $__data ?? [],
-    [
-        'title' => 'trim',
-        'badge' => 'trim',
-        'show' => 'bool:true',
-        'content' => 'trim',
-        'uploader' => 'bool:false',
-        'filter' => 'bool:false',
-        'actions' => 'bool:false',
-        'search' => 'bool:false',
-        'translation' => 'bool:false',
-    ]
-)->values();
+[$title, $badge, $show, $content, $uploader, $filter, $actions, $search, $translation] = Safe::data($__data ?? [], [
+    'title'       => 'trim',
+    'badge'       => 'trim',
+    'show'        => 'bool:true',
+    'content'     => 'trim',
+    'uploader'    => 'bool:false',
+    'filter'      => 'bool:false',
+    'actions'     => 'bool:false',
+    'search'      => 'bool:false',
+    'translation' => 'bool:false',
+])->values();
 ?>
-        <!-- table head start -->
+<!-- table head start -->
 <div class="table__header">
     <div class="mw df fww aic jcsb g-3 py-5 px-7 md:p-5">
         <?php if ($title) : ?>
         <h4><?php echo $title; ?>
-                <?php $badge && print('<span class="badge">' . $badge . '</span>'); ?>
+            <?php $badge && print('<span class="badge">' . $badge . '</span>'); ?>
         </h4>
         <?php endif; ?>
         <div class="df aic g-1">
             <div class="df aic g-1" x-show="!bulk">
                 <?php if ($filter) : ?>
-                <div class="df aic g-1">
-                    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter"
-                            @click="showFilter = !showFilter" :class="showFilter && 't-red'"
-                            :title="showFilter ? '<?php echo t_attr( 'Reset Filter' ); ?>' : '<?php echo t( 'Filter' ); ?>'">
-                        <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
-                        <span x-text="showFilter ? '<?php echo t_attr( 'Reset' ); ?>' : '<?php echo t_attr( 'Filter' ); ?>'"><?php echo t('Filter'); ?></span>
-                    </button>
+                    <div class="df aic g-1">
+                        <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '{{ t('Reset Filter') }}' : '<?php echo t( 'Filter' ); ?>'">
+                            <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
+                            <span x-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'"><?php echo t('Filter'); ?></span>
+                        </button>
                         <?php
                         echo view(
                             'form/number',
@@ -70,10 +65,10 @@ if (!defined('EX_PATH')) {
                             ]
                         );
                         ?>
-                </div>
+                    </div>
                 <?php endif; ?>
                 <?php if ($search) : ?>
-                <div class="df aic g-1">
+                    <div class="df aic g-1">
                         <?php
                         echo view(
                             'form/input',
@@ -99,7 +94,7 @@ if (!defined('EX_PATH')) {
                             ]
                         );
                         ?>
-                </div>
+                    </div>
                 <?php endif; ?>
                 <?php if ($uploader) : ?>
                 <div class="df aic g-1">
@@ -113,12 +108,11 @@ if (!defined('EX_PATH')) {
                 <div class="df aic g-2">
                     <div class="df aic g-1">
                         <svg width="16" height="16">
-                            <use xlink:href="<?php echo url('/dashboard/assets/sprites/flags.svg#us'); ?>"></use>
+                            <use xlink:href="{{ url('/dashboard/assets/sprites/flags.svg#us') }}"></use>
                         </svg>
                         English
                     </div>
-                    <span class="badge badge--round badge--icon badge--lg"><i
-                                class="ph ph-arrows-left-right"></i></span>
+                    <span class="badge badge--round badge--icon badge--lg"><i class="ph ph-arrows-left-right"></i></span>
                         <?php
                         echo view(
                             'form/select',

@@ -10,11 +10,6 @@ use Expansa\Facades\Disk;
 class Translations
 {
     /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'translations';
-
-    /**
      * Get media files.
      *
      * @since 2025.1

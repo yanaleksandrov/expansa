@@ -2,17 +2,12 @@
 
 namespace App\Api;
 
-use Expansa\Error;
+use Expansa\Debug\Error;
 use Expansa\Facades\Disk;
 use Expansa\Support\Str;
 
 class Media
 {
-    /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'media';
-
     /**
      * Get media files.
      *

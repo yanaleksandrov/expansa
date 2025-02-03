@@ -15,16 +15,11 @@ use Expansa\Facades\Safe;
 class System
 {
     /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'system';
-
-    /**
      * Check the compliance of the server with the minimum requirements.
      *
      * @since 2025.1
      */
-    public function test(): array
+    public function test(): string
     {
         $datas = [];
         $requirements = ['connection', 'pdo', 'curl', 'mbstring', 'gd', 'memory', 'php', 'mysql'];
@@ -55,14 +50,12 @@ class System
                 $mysql     = version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>=');
                 $connected = $connection instanceof \Expansa\Database\Query\Builder;
             }
-           //header('Content-Type: application/json; charset=utf-8');
 
             echo Json::encode(
                 [
                     'status'    => 200,
                     'benchmark' => metrics()->time(),
                     'memory'    => metrics()->memory(),
-                    'queries'   => count(Db::log()),
                     'data'      => array_map(
                         fn($requirement) => match ($requirement) {
                             'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
@@ -74,9 +67,7 @@ class System
                         array_combine($requirements, $requirements)
                     ),
                     'errors'    => [],
-                ],
-                true,
-                true
+                ]
             );
 
             exit();
@@ -88,28 +79,24 @@ class System
      *
      * @since 2025.1
      */
-    public function install(): array
+    public function install(): string
     {
         $protocol = ( ! empty($_SERVER['HTTPS']) && 'off' !== strtolower($_SERVER['HTTPS']) ? 'https://' : 'http://' );
         $siteurl  = $protocol . $_SERVER['SERVER_NAME'];
 
-        // TODO: check sanitize rules & add validator
-        [ $site, $userdata, $database ] = Safe::data(
-            $_POST,
-            [
-                'site.name'     => 'trim',
-                'site.tagline'  => 'trim',
-                'site.url'      => "trim:$siteurl|url",
-                'user.login'    => 'trim',
-                'user.email'    => 'email',
-                'user.password' => 'trim',
-                'db.database'   => 'trim',
-                'db.username'   => 'trim',
-                'db.password'   => 'trim',
-                'db.host'       => 'trim',
-                'db.prefix'     => 'snakecase',
-            ]
-        )->values();
+        [ $site, $userdata, $database ] = Safe::data($_POST, [
+            'site.name'     => 'trim',
+            'site.tagline'  => 'trim',
+            'site.url'      => "url:$siteurl",
+            'user.login'    => 'trim',
+            'user.email'    => 'email',
+            'user.password' => 'trim',
+            'db.database'   => 'trim',
+            'db.username'   => 'trim',
+            'db.password'   => 'trim',
+            'db.host'       => 'trim',
+            'db.prefix'     => 'snakecase',
+        ])->values();
 
         /**
          * The check for connection to the database should have already been passed by this point.
@@ -118,7 +105,7 @@ class System
          * @since 2025.1
          */
         $config = EX_PATH . 'env.php';
-        if (! file_exists($config)) {
+        if (! is_file($config)) {
             Disk::file(EX_PATH . 'env.example.php')->copy('env')->get(EX_PATH . 'env.php')->rewrite(
                 array_combine(
                     [
@@ -154,14 +141,29 @@ class System
         Option::update('site', $site);
 
         $user = User::add($userdata);
+
+        User::login($userdata);
+
+        echo Json::encode(['installed' => $user instanceof User]);
+        exit;
+
         if ($user instanceof User) {
-            User::login($userdata);
-
-            return [
-                'installed' => $user instanceof User,
-            ];
+            echo Json::encode(
+                [
+                    'status'    => 200,
+                    'benchmark' => metrics()->time(),
+                    'memory'    => metrics()->memory(),
+                    'data'      => [
+                        [
+                            'target'   => 'body',
+                            'method'   => 'redirect',
+                            'fragment' => url('installed'),
+                        ],
+                    ],
+                    'errors'    => [],
+                ]
+            );
         }
-
-        return Error::get();
+        exit;
     }
 }

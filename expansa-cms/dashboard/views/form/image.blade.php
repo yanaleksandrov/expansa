@@ -44,7 +44,7 @@ Hook::add('expansa_dashboard_footer', function () {
 	<div class="df aife g-4">
 		<div class="image" x-data="avatar, tabs = 'upload'" x-init="content = 'Yan Aleksandrov'">
 			<input type="file" id="fileInputs" x-ref="input" @change="add($event, () => $dialog.open('crop-image'))" hidden>
-			<span class="image__close" @click="remove" x-show="image" title="<?php echo t_attr( 'Remove image' ); ?>" x-cloak>
+			<span class="image__close" @click="remove" x-show="image" title="{{ t('Remove image') }}" x-cloak>
 				<i class="ph ph-x"></i>
 			</span>
 			<div class="image__container">
@@ -53,7 +53,7 @@ Hook::add('expansa_dashboard_footer', function () {
 						<span x-text="getInitials(content)" x-show="!image"></span>
 					</span>
 				</label>
-				<span class="image__action" @click="$dialog.open('take-selfie', takeSelfieDialog)" title="<?php echo t_attr( 'You can take a selfie. Allow the browser to access the camera' ); ?>"><i class="ph ph-webcam"></i></span>
+				<span class="image__action" @click="$dialog.open('take-selfie', takeSelfieDialog)" title="{{ t('You can take a selfie. Allow the browser to access the camera') }}"><i class="ph ph-webcam"></i></span>
 			</div>
 		</div>
 		<div class="dg g-1 mw50x9">

@@ -22,21 +22,21 @@ class Input extends Field
 
     public function assets()
     {
-        // TODO: Implement assets() method.
+
     }
 
     public function render()
     {
-        // TODO: Implement render() method.
+
     }
 
     public function settings()
     {
-        // TODO: Implement settings() method.
+
     }
 
     public function validate()
     {
-        // TODO: Implement validate() method.
+
     }
 }

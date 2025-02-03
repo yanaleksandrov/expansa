@@ -538,7 +538,7 @@ return \Expansa\Facades\Form::enqueue(
                                             <h6 class="fs-15">Amplication</h6>
                                             <code class="fs-12 bg-green-lt t-green">
                                                 <span class="badge badge--sm badge--green-lt">Active</span> SHA256:Ai2xqyVBORX9PJJigJxfrdzXfKPajJHZMYw3+dOo+nw
-                                                <i class="ph ph-copy" title="<?php echo t_attr('Copy'); ?>" @click="$copy()"></i>
+                                                <i class="ph ph-copy" title="<?php echo t('Copy'); ?>" @click="$copy()"></i>
                                             </code>
                                             <div class="fs-12 t-muted lh-xs">Added on Nov 15, 2022</div>
                                         </div>

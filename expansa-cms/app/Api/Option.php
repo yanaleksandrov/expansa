@@ -7,11 +7,6 @@ use Expansa\Support\Arr;
 class Option
 {
     /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'option';
-
-    /**
      * Create item.
      *
      * @url    POST api/user

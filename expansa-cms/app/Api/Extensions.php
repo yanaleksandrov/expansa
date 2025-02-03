@@ -5,11 +5,6 @@ namespace App\Api;
 class Extensions
 {
     /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'extensions';
-
-    /**
      * Get all items.
      *
      * @url    GET api/extensions

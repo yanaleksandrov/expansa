@@ -2,13 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Post;
+use App\Slug;
 use App\User;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
 use Expansa\Support\Is;
 
 Route::get('/(.*)', function ($slug) {
-    $dashboardSlug  = ltrim(str_replace(EX_PATH, '/', EX_DASHBOARD), '/');
+    /**
+     * Expansa dashboard panel.
+     *
+     * @param string $slug Dashboard page root slug.
+     */
+    $dashboard = Hook::call('dashboardRootSlug', 'dashboard');
 
     // run the installer if Expansa is not installed.
     if (!Is::installed()) {
@@ -19,54 +26,44 @@ Route::get('/(.*)', function ($slug) {
         exit;
     }
 
-    // Redirect unauthenticated users from the dashboard, but allow access to registration and password recovery.
-    // ! in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true)
-    if (str_starts_with($slug, $dashboardSlug) && ! User::logged()) {
+    // redirect unauthenticated users from the dashboard, but allow access to registration and password recovery.
+    if (str_starts_with($slug, $dashboard) && ! User::logged()) {
         redirect('sign-in');
     }
 
-    // Not allow some slugs for logged user, they are reserved.
+    // not allow some slugs for logged user, they are reserved.
     $blackListSlugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
+    var_dump(User::logged());
     if (in_array($slug, $blackListSlugs, true) && User::logged()) {
         redirect('dashboard');
     }
 
-    if (in_array($slug, ['install', 'sign-in', 'sign-up', 'reset-password'], true) && !User::logged()) {
-        /**
-         * Launch dashboard.
-         *
-         * @since 2025.1
-         */
-        require_once EX_DASHBOARD . 'index.php';
+    // include & launch dashboard
+    if (in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && !User::logged()) {
+        require_once EX_PATH . 'dashboard/index.php';
 
         $page = 'welcome';
     }
 
-//    $entity      = Slug::get($slug);
-//    $entityId    = $entity['entity_id'] ?? 0;
-//    $entityTable = $entity['entity_table'] ?? '';
-//    if (! $entity && ( ! $entityId || ! $entityTable )) {
-//        Route::trigger404();
-//    }
-//    $entity = Post::get($entityTable, $entityId);
+    // try to get entity from slug
+    $entity = Slug::get($slug);
+    if (!$entity) {
+        //$page = '404';
+    }
 
-    /**
-     * The administrative panel also has a single entry point.
-     *
-     * @since 2025.1
-     */
+    // output view to frontend
     $content = view($page ?? 'index', [
-        'slug' => $slug,
+        'slug'   => $slug,
+        'entity' => $entity,
+        //'post'   => Post::get($entity['entity_id'] ?? 0, $entity['entity_table'] ?? ''),
     ]);
     $content = (new Expansa\Support\Html())->beautify($content->render());
 
     /**
-     * Expansa dashboard is fully loaded.
+     * Expansa page is fully loaded.
      *
      * @param string $content Current page content.
      * @param string $slug    Current page slug.
-     *
-     * @since 2025.1
      */
     echo Hook::call('dashboardLoaded', $content, $slug);
 });

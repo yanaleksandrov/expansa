@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 namespace App\Api;
 
-use Expansa\Error;
 use Expansa\Facades\Safe;
 use PHPMailer\PHPMailer\Exception;
 
 class Post
 {
-    /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'post';
-
     /**
      * Get all items.
      *

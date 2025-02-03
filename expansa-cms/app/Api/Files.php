@@ -9,11 +9,6 @@ use Expansa\Facades\Safe;
 class Files
 {
     /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'files';
-
-    /**
      * Upload files from external url.
      *
      * @since 2025.1

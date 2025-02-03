@@ -8,16 +8,6 @@ namespace Expansa\Support;
 class Arr
 {
     /**
-     * TODO: Memory-saving array iteration.
-     *
-     * @param array $array
-     * @return mixed
-     */
-    public static function each(array $array): mixed
-    {
-    }
-
-    /**
      * Recursively delete array elements with an empty values.
      *
      * @param array $array

@@ -11,11 +11,6 @@ use Expansa\Facades\View;
 class User
 {
     /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'user';
-
-    /**
      * Create item.
      *
      * @url    POST api/user
@@ -99,7 +94,7 @@ class User
                 [
                     'target'   => 'body',
                     'method'   => 'notify',
-                    'fragment' => $user->getError('user-login'),
+                    'fragment' => $user->get('user-login'),
                 ],
             ];
         }

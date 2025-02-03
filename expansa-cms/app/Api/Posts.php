@@ -13,11 +13,6 @@ use Expansa\Facades\View;
 class Posts
 {
     /**
-     * Endpoint name.
-     */
-    public string $endpoint = 'posts';
-
-    /**
      * Create item.
      *
      * @url    POST api/posts

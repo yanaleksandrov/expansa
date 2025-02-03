@@ -14,7 +14,6 @@ class Hash
 {
     /**
      * Generates a random password drawn from the defined set of characters.
-     * TODO: password_hash is slowly 10-20 times then md5.
      *
      * @param int  $length            Optional. The length of password to generate. Default 12.
      * @param bool $specialChars      Optional. Whether to include standard special characters.

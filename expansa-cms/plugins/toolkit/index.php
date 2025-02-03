@@ -171,7 +171,7 @@ return new class extends Plugin
                                                     'icon'    => 'ph ph-image-square',
                                                 ],
                                                 'media'    => [
-                                                    'content' => t('Media'), // TODO: gallery instead
+                                                    'content' => t('Media'),
                                                     'icon'    => 'ph ph-images-square',
                                                 ],
                                                 'editor'   => [
@@ -226,7 +226,7 @@ return new class extends Plugin
                                             'label'   => t('Layout'),
                                             'options' => [
                                                 'details'  => [
-                                                    'content' => t('Details'), // TODO: rename context menu
+                                                    'content' => t('Details'),
                                                     'icon'    => 'ph ph-dots-three-outline-vertical',
                                                 ],
                                                 'divider'  => [
@@ -434,21 +434,21 @@ return new class extends Plugin
 
     public function activate(): void
     {
-        // TODO: Implement activate() method.
+
     }
 
     public function deactivate(): void
     {
-        // TODO: Implement deactivate() method.
+
     }
 
     public function install(): void
     {
-        // TODO: Implement install() method.
+
     }
 
     public function uninstall(): void
     {
-        // TODO: Implement uninstall() method.
+
     }
 };

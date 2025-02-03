@@ -216,6 +216,7 @@ class Directory extends EntryHandler implements CommonInterface, DirectoryInterf
     public function move(string $to): Directory
     {
         // TODO: Implement move() method.
+        return $this;
     }
 
     public function rename(string $name): Directory

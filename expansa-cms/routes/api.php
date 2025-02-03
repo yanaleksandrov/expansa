@@ -8,7 +8,7 @@ use Expansa\Security\Csrf\Csrf;
 use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
 use Expansa\Security\Exception\InvalidCsrfTokenException;
 
-Route::any('/api', function () {
+Route::before('GET|POST', '/api/.*', function () {
     header('Content-Type: application/json; charset=utf-8');
 
     $csrf = new Csrf(new NativeHttpOnlyCookieProvider());
@@ -20,7 +20,9 @@ Route::any('/api', function () {
 
     // generate CSRF token.
     $csrf->generate('token');
+});
 
+Route::middleware('/api', function () {
     foreach (
         [
             App\Api\Extensions::class,
