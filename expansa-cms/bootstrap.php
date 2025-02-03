@@ -28,7 +28,7 @@ metrics()->start();
 require_once EX_PATH . 'install.php';
 
 // base PHP & MySQL versions checker
-require_once EX_PATH . 'public/error.php';
+require_once EX_PATH . 'dashboard/error.php';
 
 Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
     // determine if the application is in maintenance mode...
@@ -37,9 +37,9 @@ Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
     }
 
     // application default data
-    require_once EX_PATH . 'resources/countries.php';
-    require_once EX_PATH . 'resources/timezones.php';
-    require_once EX_PATH . 'resources/languages.php';
+    require_once EX_PATH . 'dashboard/data/countries.php';
+    require_once EX_PATH . 'dashboard/data/timezones.php';
+    require_once EX_PATH . 'dashboard/data/languages.php';
 
     // register default Expansa data
     require_once EX_PATH . 'migrations.php';
