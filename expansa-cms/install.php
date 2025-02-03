@@ -38,6 +38,6 @@ if (! Is::installed()) {
     //echo (new Expansa\Support\Html())->beautify($content->render());
 
     // register Expansa routes
-    require_once EX_PATH . 'routes/web.php';
+    require_once EX_PATH . 'routes/api.php';
     exit;
 }
