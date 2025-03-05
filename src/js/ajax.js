@@ -33,7 +33,7 @@ document.addEventListener( 'alpine:init', () => {
 						})
 					);
 
-					if (data) {
+					if (Array.isArray(data)) {
 						data.forEach(({method, fragment, selectors, delay}) => {
 							parseFragment(method, fragment, selectors, delay)
 						});

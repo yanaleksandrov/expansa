@@ -46,10 +46,10 @@ return new class extends Plugin
             return $filepath;
         });
 
-        Asset::enqueue('ecommerce-main', '/plugins/ecommerce/assets/css/main.css');
-        Asset::enqueue('ecommerce-order', '/plugins/ecommerce/assets/css/order.css');
-        Asset::enqueue('ecommerce-notes', '/plugins/ecommerce/assets/css/notes.css');
-        Asset::enqueue('ecommerce-product', '/plugins/ecommerce/assets/css/product.css');
+        Asset::style('ecommerce-main', '/plugins/ecommerce/assets/css/main.css');
+        Asset::style('ecommerce-order', '/plugins/ecommerce/assets/css/order.css');
+        Asset::style('ecommerce-notes', '/plugins/ecommerce/assets/css/notes.css');
+        Asset::style('ecommerce-product', '/plugins/ecommerce/assets/css/product.css');
 
         Type::register(
             key: 'orders',

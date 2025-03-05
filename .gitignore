@@ -16,3 +16,4 @@ vendor/
 # OS-specific files
 .DS_Store    # macOS
 Thumbs.db    # Windows
+/expansa-cms/env.php

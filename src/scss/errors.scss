@@ -36,6 +36,7 @@ body {
     box-shadow: var(--expansa-box-shadow);
     overflow: hidden;
     word-break: break-all;
+    max-height: 53em;
 
     p {
       margin-block: 0.5rem;
@@ -120,8 +121,7 @@ body {
     border-inline-end: 1px solid var(--expansa-border);
     padding: 1rem 0;
     width: 20rem;
-    display: grid;
-    align-content: start;
+    overflow-y: auto;
   }
 
   &-navigation-item {

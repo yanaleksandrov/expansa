@@ -7,6 +7,13 @@ namespace Expansa\Builders\Table\Traits;
 trait Table
 {
     /**
+     * Filter.
+     *
+     * @var null|string
+     */
+    public ?string $filter = '';
+
+    /**
      * Tag for table wrapper.
      *
      * @var string

@@ -20,20 +20,23 @@ class Script extends Provider
     /**
      * Constructor for the script asset, allowing to define various attributes of the script tag.
      *
-     * @param string $uid         Unique ID attribute of the asset.
-     * @param string $src         URL or path to the external JavaScript file.
-     * @param array  $data        Additional data passed to the asset.
-     * @param string $class       CSS class name for the script tag.
-     * @param string $type        MIME type of the script (default is 'text/javascript').
-     * @param bool   $async       Whether the script should be executed asynchronously.
-     * @param bool   $defer       Whether the script should be executed after the document is parsed.
-     * @param string $integrity   Integrity hash for the script file to verify its content.
-     * @param string $crossorigin Specifies how to handle cross-origin requests for the script.
-     * @param bool   $nomodule    Executes the script only in browsers that do not support modules.
-     * @param string $language    Specifies the language of the script (deprecated, not recommended for use).
-     * @param string $event       Specifies an event that will trigger the script (deprecated, not recommended for use).
-     * @param string $path        Local path to the script for internal reference.
+     * @param string $uid          Unique ID attribute of the asset.
+     * @param string $src          URL or path to the external JavaScript file.
+     * @param array  $data         Additional data passed to the asset.
+     * @param string $class        CSS class name for the script tag.
+     * @param string $type         MIME type of the script (default is 'text/javascript').
+     * @param bool   $async        Whether the script should be executed asynchronously.
+     * @param bool   $defer        Whether the script should be executed after the document is parsed.
+     * @param string $integrity    Integrity hash for the script file to verify its content.
+     * @param string $crossorigin  Specifies how to handle cross-origin requests for the script.
+     * @param bool   $nomodule     Executes the script only in browsers that do not support modules.
+     * @param string $language     Specifies the language of the script (deprecated, not recommended for use).
+     * @param string $event        Specifies an event that will trigger the script (deprecated, not recommended for use)
+     * @param string $path         Local path to the script for internal reference.
+     * @param string $id
+     * @param string $version
      * @param array  $dependencies Array of assets that are required before this script.
+     * @param bool   $toFooter     Output before close body tag.
      */
     public function __construct(
         public string $uid,
@@ -51,7 +54,8 @@ class Script extends Provider
         public string $path = '',
         public string $id = '',
         public string $version = '',
-        public array $dependencies = []
+        public array $dependencies = [],
+        public bool $toFooter = true,
     )
     {
         $this->path = $this->toPath($src);
@@ -73,7 +77,7 @@ class Script extends Provider
     public function render(Provider $asset): string
     {
         $key  = $this->sanitizeConst($asset->uid);
-        $atts = array_diff_key((array) $asset, array_flip(['uid', 'path', 'data', 'dependencies']));
+        $atts = array_diff_key((array) $asset, array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
         $data = json_encode($asset->data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 
         $return = '';

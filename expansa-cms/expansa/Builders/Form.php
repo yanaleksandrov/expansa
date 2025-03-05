@@ -90,9 +90,9 @@ final class Form
      *
      * @param string   $uid
      * @param callable $function
-     * @return Form
+     * @return \Expansa\Builders\Forms\Form
      */
-    public function override(string $uid, callable $function): Form
+    public function override(string $uid, callable $function): \Expansa\Builders\Forms\Form
     {
         $form = self::$forms[$uid];
         if (is_callable($function)) {

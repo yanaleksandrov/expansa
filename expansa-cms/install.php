@@ -10,7 +10,7 @@ use Expansa\Support\Is;
 if (! Is::installed()) {
     $suffix = ! Is::debug() ? '.min' : '';
     foreach (['expansa', 'controls', 'utility', 'phosphor'] as $style) {
-        Asset::enqueue($style, url("/dashboard/assets/css/$style$suffix.css"));
+        Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
     }
 
     foreach (['expansa', 'ajax', 'alpine'] as $script) {
@@ -21,7 +21,7 @@ if (! Is::installed()) {
                 'spriteFlagsUrl' => url('/dashboard/assets/sprites/flags.svg'),
             ];
         }
-        Asset::enqueue($script, url("/dashboard/assets/js/$script$suffix.js"), $data);
+        Asset::script($script, url("/dashboard/assets/js/$script$suffix.js"), $data);
     }
 
     Hook::configure(EX_PATH . 'app/Listeners');

@@ -27,13 +27,18 @@ Route::get('/(.*)', function ($slug) {
     }
 
     // redirect unauthenticated users from the dashboard, but allow access to registration and password recovery.
-    if (str_starts_with($slug, $dashboard) && ! User::logged()) {
-        redirect('sign-in');
+    if (str_starts_with($slug, $dashboard)) {
+        if (! User::logged()) {
+            redirect('sign-in');
+        }
+
+        require_once EX_PATH . 'dashboard/index.php';
+
+        $slug = str_replace('dashboard/', '', $slug);
     }
 
     // not allow some slugs for logged user, they are reserved.
     $blackListSlugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
-    var_dump(User::logged());
     if (in_array($slug, $blackListSlugs, true) && User::logged()) {
         redirect('dashboard');
     }
@@ -45,19 +50,22 @@ Route::get('/(.*)', function ($slug) {
         $page = 'welcome';
     }
 
-    // try to get entity from slug
-    $entity = Slug::get($slug);
-    if (!$entity) {
-        //$page = '404';
-    }
+    if (empty($slug)) {
+        $slug = 'welcome';
+    } else {
+        // try to get entity from slug
+        $entity = Slug::get($slug);
+        if (!$entity) {
+            //$page = '404';
+        }
 
-    // output view to frontend
-    $content = view($page ?? 'index', [
-        'slug'   => $slug,
-        'entity' => $entity,
-        //'post'   => Post::get($entity['entity_id'] ?? 0, $entity['entity_table'] ?? ''),
-    ]);
-    $content = (new Expansa\Support\Html())->beautify($content->render());
+        // output view to frontend
+        $content = view($page ?? 'index', [
+            'slug'   => $slug,
+            'entity' => $entity,
+        ]);
+        $content = (new Expansa\Support\Html())->beautify($content->render());
+    }
 
     /**
      * Expansa page is fully loaded.
@@ -65,7 +73,7 @@ Route::get('/(.*)', function ($slug) {
      * @param string $content Current page content.
      * @param string $slug    Current page slug.
      */
-    echo Hook::call('dashboardLoaded', $content, $slug);
+    echo Hook::call('dashboardLoaded', $content ?? '', $slug);
 });
 
 /**

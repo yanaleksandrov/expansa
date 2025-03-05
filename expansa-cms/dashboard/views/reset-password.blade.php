@@ -12,7 +12,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 ?>
 <div class="mw-360">
 	<a href="{{ url() }}" class="df jcc mb-4" target="_blank">
-		<img src="{{ url('dashboard/assets/images/logo-decorate.svg') }}" width="212" height="124" alt="Expansa CMS">
+		<img src="{{ url('dashboard/assets/images/logo-grid.svg') }}" width="212" height="124" alt="Expansa CMS">
 	</a>
 	<?php echo form('user-reset-password', EX_DASHBOARD . 'forms/user-reset-password.php'); ?>
 	<div class="t-center t-muted mt-3">

@@ -16,8 +16,8 @@ trait AssetHandler
      */
     public function sortDependencies(array $assets): array
     {
-        $dependents = array_filter($assets, fn (Provider $asset) => ! empty($asset->dependencies));
-        $assets     = array_filter($assets, fn (Provider $asset) => empty($asset->dependencies));
+        $dependents = array_filter($assets, fn (?Provider $asset) => ! empty($asset->dependencies));
+        $assets     = array_filter($assets, fn (?Provider $asset) => empty($asset->dependencies));
 
         foreach ($dependents as $key => $dependent) {
             $dependencies = $dependent['dependencies'] ?? [];

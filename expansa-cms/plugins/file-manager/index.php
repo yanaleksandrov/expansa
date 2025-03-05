@@ -33,7 +33,7 @@ return new class extends Plugin
             return $filepath;
         });
 
-        Asset::enqueue('file-manager', '/plugins/file-manager/assets/css/main.css');
+        Asset::style('file-manager', '/plugins/file-manager/assets/css/main.css');
 
         Tree::attach('dashboard-panel-menu', fn (Tree $tree) => $tree->addItems(
             [

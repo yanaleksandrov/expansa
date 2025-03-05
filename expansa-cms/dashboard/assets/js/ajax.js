@@ -23,7 +23,7 @@ document.addEventListener('alpine:init', (() => {
                         composed: true,
                         cancelable: true
                     }));
-                    if (data) {
+                    if (Array.isArray(data)) {
                         data.forEach((({method, fragment, selectors, delay}) => {
                             parseFragment(method, fragment, selectors, delay);
                         }));

@@ -11,12 +11,12 @@ final class Assets
 {
     public function renderDashboardHeader(): void
     {
-        Asset::render('*.css');
+        Asset::render(['toFooter' => false]);
     }
 
     public function renderDashboardFooter(): void
     {
-        Asset::render('*.js');
+        Asset::render(['toFooter' => true]);
     }
 
     public function dashboardLoaded(string $content): string

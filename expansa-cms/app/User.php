@@ -14,6 +14,7 @@ use Expansa\Facades\Validator;
 use Expansa\Security\Validator as SecurityValidator;
 use Expansa\Support\Hash;
 use Expansa\Support\Is;
+use Random\RandomException;
 
 final class User
 {
@@ -100,6 +101,7 @@ final class User
      * @param array         $userdata
      * @param callable|null $callback
      * @return User|Error The newly created user's ID or an Error object if the user could not be created.
+     * @throws RandomException
      */
     public static function add(array $userdata, ?callable $callback = null): User|Error
     {
@@ -165,6 +167,7 @@ final class User
      * @param array         $userdata
      * @param callable|null $callback
      * @return User|Error
+     * @throws RandomException
      */
     public static function update(array $userdata, ?callable $callback = null): User|Error
     {
@@ -243,7 +246,9 @@ final class User
             return self::$current;
         }
 
-        session()->start();
+        if (!session()->isStarted()) {
+            session()->start();
+        }
 
         $userID = session()->get(self::$session_id);
         if ($userID) {
@@ -329,7 +334,6 @@ final class User
      */
     public static function logged(): bool
     {
-        session()->start();
         $userID = abs((int) session()->get(self::$session_id));
         if ($userID) {
             return true;
@@ -366,7 +370,9 @@ final class User
         $user  = User::get($loginOrEmail, $field);
         if ($user instanceof User) {
             if (password_verify($password, $user->password)) {
-                session()->start();
+                if (!session()->isStarted()) {
+                    session()->start();
+                }
                 session()->set(self::$session_id, $user->id);
 
                 return self::$current = $user;
@@ -383,7 +389,9 @@ final class User
      */
     public static function logout(): void
     {
-        session()->start();
+        if (session()->isStarted()) {
+            session()->start();
+        }
 
         self::$current = [];
 

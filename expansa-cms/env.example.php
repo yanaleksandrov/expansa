@@ -54,9 +54,9 @@ const EX_HASH_KEY  = 'hashkey';
  *
  * @since 2025.1
  */
-const EX_DEBUG     = true;
-const EX_DEBUG_LOG = true;
-const EX_DEBUG_VIEW = __DIR__ . '/dashboard/views/debug.blade.php';
+const EX_DEBUG      = true;
+const EX_DEBUG_LOG  = true;
+const EX_DEBUG_VIEW = EX_DASHBOARD . 'debug.php';
 
 /**
  * DKIM (DomainKeys Identified Mail) settings for signing outgoing emails.

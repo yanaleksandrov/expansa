@@ -16,6 +16,40 @@ new class
             define('EX_IS_DASHBOARD', true);
         }
 
+        foreach (
+            [
+                'favicon'   => [
+                    'href'  => url('/dashboard/assets/favicon/favicon-96x96.png'),
+                    'rel'   => 'icon',
+                    'type'  => 'image/png',
+                    'sizes' => '96x96',
+                ],
+                'favicon-svg'  => [
+                    'href' => url('/dashboard/assets/favicon/favicon.svg'),
+                    'rel'  => 'icon',
+                    'type' => 'image/svg+xml',
+                ],
+                'favicon-ico'  => [
+                    'href' => url('/dashboard/assets/favicon/favicon.ico'),
+                    'rel'  => 'shortcut icon',
+                    'type' => '',
+                ],
+                'favicon-apple' => [
+                    'href'  => url('/dashboard/assets/favicon/apple-touch-icon.png'),
+                    'rel'   => 'apple-touch-icon',
+                    'sizes' => '180x180',
+                    'type'  => '',
+                ],
+                'manifest'  => [
+                    'href' => url('/dashboard/assets/favicon/site.webmanifest'),
+                    'rel'  => 'manifest',
+                    'type' => '',
+                ],
+            ] as $uid => $asset
+        ) {
+            Asset::style($uid, $asset['href'], $asset);
+        }
+
         /**
          * Include CSS styles & JS scripts.
          *
@@ -23,10 +57,10 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'datepicker', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
-            Asset::enqueue($style, url("/dashboard/assets/css/$style$suffix.css"));
+            Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
         $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable'];
@@ -71,7 +105,7 @@ new class
                     ]
                 );
             }
-            Asset::enqueue($script, url("/dashboard/assets/js/$script$suffix.js"), $data);
+            Asset::script($script, url("/dashboard/assets/js/$script$suffix.js"), $data);
         }
 
         /**

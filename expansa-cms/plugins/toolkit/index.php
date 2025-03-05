@@ -25,7 +25,7 @@ return new class extends Plugin
             return;
         }
 
-        Asset::enqueue('toolkit-main', '/plugins/toolkit/assets/css/main.css');
+        Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
 
         Hook::add('expansa_view_part', function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/fields-builder.php') {

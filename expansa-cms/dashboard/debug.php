@@ -1,7 +1,6 @@
 <?php
-
 use Expansa\Facades\I18n;
-
+use Expansa\Facades\Safe;
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
@@ -26,10 +25,10 @@ use Expansa\Facades\I18n;
 		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256">
 			<path fill="currentColor" d="M128 24a104 104 0 1 0 104 104A104 104 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88 88 0 0 1-88 88Zm-8-80V80a8 8 0 0 1 16 0v56a8 8 0 0 1-16 0Zm20 36a12 12 0 1 1-12-12 12 12 0 0 1 12 12Z"/>
 		</svg>
-		<h3 class="errors-title">{{ $title }}: {{ $context }}</h3>
+		<h3 class="errors-title"><?php echo Safe::markup( "$title: $context" ); ?></h3>
 	</header>
 	<div class="errors-content">
-		<p>{{ $description }}</p>
+		<p><?php echo Safe::markup( $description ?? '' ); ?></p>
 	</div>
 	<div class="errors-wrapper">
 	    <?php if ( $details ) : ?>
@@ -49,9 +48,7 @@ use Expansa\Facades\I18n;
 					<li class="errors-navigation-item"><code><strong><?php echo $trace->line; ?>:</strong></code> <?php echo $trace->file; ?></li>
 	            <?php endforeach; ?>
 			</ul>
-			<pre class="errors-source" x-highlight.php>
-				<code class="language-php">{{ $code }}</code>
-			</pre>
+			<pre class="errors-source" x-highlight.php><code class="language-php"><?php echo Safe::markup( $code ?? '' ); ?></code></pre>
 		</div>
 	</div>
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Form;
+use Expansa\Facades\Form;
 use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Row;
 
@@ -64,7 +64,7 @@ final class Pages
 
     public function filter(): void
     {
-        Form::override('items-filter', fn (Form $form) => $form->before('submit')->attach(
+        Form::override('items-filter', fn (\Expansa\Builders\Forms\Form $form) => $form->before('submit')->attach(
             [
                 [
                     'type'        => 'select',

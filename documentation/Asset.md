@@ -56,7 +56,7 @@ Asset::enqueue( $id, $src, $version );
 Чтобы при изменении файла, URL файла отличался и он загрузился в браузер как новый, а не брался из кэша, можно указать версию файла динамически на основе времени изменения файла:
 
 ```php
-Asset::enqueue( 'main', 'path/to-file/main.js', filemtime( 'path/to-file/main.js' ) );
+Asset::script( 'main', 'path/to-file/main.js', filemtime( 'path/to-file/main.js' ) );
 ```
 
 ### #2 Загружаем скрипт с нестандартного адреса через CDN
@@ -70,7 +70,7 @@ Asset::override( 'jquery', '//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.
 ### #3 Регистрируем штатный скрипт "alpine.js"
 
 ```php
-Asset::enqueue( 'alpine' );
+Asset::script('alpine');
 ```
 
 ### #4 Загружаем ресурсы только в файлах шаблона
@@ -81,7 +81,7 @@ Asset::enqueue( 'alpine' );
 Hook::add( 'expansa_view_part', function( $filepath, $template, $args ) {
     $asset = sprtintf( '%s/%s.css', basename( $filepath ), $template );
     if ( file_exists( $asset ) ) {
-        Asset::enqueue( 'main', sprtintf( 'path/to-file/%s.js', $template ) );
+        Asset::script( 'main', sprtintf( 'path/to-file/%s.js', $template ) );
     }
 } );
 ```

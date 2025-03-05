@@ -29,12 +29,13 @@ class Manager
      * This will allow you to combine JS or CSS files into one without any problems.
      * Get rid of script conflicts when the dependent script is connected to the main one.
      *
-     * @param string $uid  Unique ID of the resource.
-     * @param string $src  Full URL of the resource, or path of the script relative to the Expansa root directory.
-     * @param array  $data List of attributes.
+     * @param string $uid      Unique ID of the resource.
+     * @param string $src      Full URL of the resource, or path of the script relative to the Expansa root directory.
+     * @param string $provider Type of asset.
+     * @param array  $data     List of attributes.
      * @return void
      */
-    public function enqueue(string $uid, string $src, ...$data): void
+    public function enqueue(string $uid, string $src, string $provider, ...$data): void
     {
         $uid = $this->sanitizeId($uid);
         $src = $this->sanitizeUrl($src);
@@ -45,12 +46,39 @@ class Manager
 
             // add to assets
             if (! isset(self::$assets[$id])) {
-                self::$assets[$id] = match ($extension) {
-                    'js'  => new Script($uid, $src, ...$data),
-                    'css' => new Link($uid, $src, ...$data),
+                self::$assets[$id] = match ($provider) {
+                    'js'    => new Script($uid, $src, ...$data),
+                    'css'   => new Link($uid, $src, ...$data),
+                    default => null,
                 };
             }
         }
+    }
+
+    /**
+     * Correctly add styles.
+     *
+     * @param string $uid Unique ID of the resource.
+     * @param string $src
+     * @param array $data
+     * @return void
+     */
+    public function script(string $uid, string $src, array ...$data): void
+    {
+        $this->enqueue($uid, $src, 'js', ...$data);
+    }
+
+    /**
+     * Correctly add styles.
+     *
+     * @param string $uid Unique ID of the resource.
+     * @param string $src
+     * @param array $data
+     * @return void
+     */
+    public function style(string $uid, string $src, array ...$data): void
+    {
+        $this->enqueue($uid, $src, 'css', ...$data);
     }
 
     /**
@@ -94,16 +122,47 @@ class Manager
     /**
      * Render HTML tags for include assets.
      *
-     * @param  string $pattern
+     * @param array $filter An associative array of filtering conditions, where the key is the object
+     *                      property name and the value is the expected value or a pattern with `*`.
      * @return void
+     * Example filter:
+     * [
+     *     'uid'      => 'notifications',
+     *     'path'     => '*.js',
+     *     'toFooter' => true
+     * ]
      */
-    public function render(string $pattern): void
+    public function render(array $filter = []): void
     {
         $assets = $this->sortDependencies(self::$assets);
-        foreach ($assets as $asset) {
-            if (!$asset instanceof Provider || ! fnmatch($pattern, $asset->path)) {
-                continue;
+
+        $assets = array_filter($assets, function ($asset) use ($filter) {
+            if (!$asset instanceof Provider) {
+                return false;
             }
+
+            if (empty($filter)) {
+                return true;
+            }
+
+            foreach ($filter as $key => $value) {
+                if (!property_exists($asset, $key)) {
+                    continue;
+                }
+
+                if (is_string($value) && str_contains($value, '*')) {
+                    if (!fnmatch($value, $asset->$key)) {
+                        return false;
+                    }
+                } elseif ($asset->$key !== $value) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        foreach ($assets as $asset) {
             echo $asset->render($asset);
         }
     }

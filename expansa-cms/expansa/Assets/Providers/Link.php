@@ -27,6 +27,7 @@ class Link extends Provider
      * @param string $disabled       Disables the link if present (primarily for stylesheets).
      * @param string $referrerpolicy Specifies the referrer information to be included with the request.
      * @param string $path           Computed path to the linked resource.
+     * @param bool   $toFooter       Output before close body tag.
      */
     public function __construct(
         public string $uid,
@@ -47,6 +48,7 @@ class Link extends Provider
         public string $path = '',
         public string $id = '',
         public string $version = '',
+        public bool $toFooter = false,
     )
     {
         $this->path = $this->toPath($href);
@@ -67,7 +69,7 @@ class Link extends Provider
      */
     public function render(Provider $asset): string
     {
-        $attributes = array_diff_key((array) $asset, array_flip(['uid', 'path', 'data']));
+        $attributes = array_diff_key((array) $asset, array_flip(['uid', 'path', 'data', 'toFooter']));
 
         return sprintf("	<link%s/>\n", $this->sanitizeAttributes($attributes));
     }
