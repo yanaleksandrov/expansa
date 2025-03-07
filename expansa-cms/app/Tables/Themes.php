@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
-use Expansa\Builders\Table\Cell;
-use Expansa\Builders\Table\Row;
 
 final class Themes extends Table
 {
@@ -61,39 +59,10 @@ final class Themes extends Table
         ];
     }
 
-    public function rows(): array
-    {
-        return [
-            Row::add()->tag(''),
-        ];
-    }
-
     public function columns(): array
     {
         return [
-            Cell::add('theme')->view('theme'),
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'class' => 'themes',
-        ];
-    }
-
-    public function notFoundContent(): array
-    {
-        return [
-            'title'       => t('Themes not found'),
-            'description' => t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
-        ];
-    }
-
-    public function headerContent(): array
-    {
-        return [
-            'title' => t('Themes'),
+            $this->cell('theme')->view('theme'),
         ];
     }
 }

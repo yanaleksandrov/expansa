@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\Cell;
-use Expansa\Builders\Table\Row;
+use Expansa\Builders\Table;
 
-final class Plugins
+final class Plugins extends Table
 {
     public function data(): array
     {
@@ -40,66 +39,32 @@ final class Plugins
         ];
     }
 
-    public function rows(): array
-    {
-        return [
-            Row::add()->attribute('class', 'table__row')
-        ];
-    }
-
     public function columns(): array
     {
         return [
-            Cell::add('cb')
+            $this->cell('cb')
                 ->title('<input type="checkbox" x-bind="trigger" />')
                 ->fixedWidth('1rem')
                 ->view('cb'),
-            Cell::add('image')
+            $this->cell('image')
                 ->fixedWidth('2.5rem')
                 ->view('image'),
-            Cell::add('plugin')
+            $this->cell('plugin')
                 ->title(t('Plugin'))
                 ->flexibleWidth('14rem')
                 ->view('plugin'),
-            Cell::add('description')
+            $this->cell('description')
                 ->title(t('Description'))
                 ->flexibleWidth('14rem')
                 ->view('raw'),
-            Cell::add('version')
+            $this->cell('version')
                 ->title(t('Version'))
                 ->fixedWidth('4rem')
                 ->view('badge'),
-            Cell::add('active')
+            $this->cell('active')
                 ->title(t('Activity'))
                 ->fixedWidth('4rem')
-                ->view('checkbox'),
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'class'  => 'table',
-            'x-data' => 'table',
-            'x-init' => '$ajax("extensions/get").then(response => console.log(response))',
-        ];
-    }
-
-    public function headerContent(): array
-    {
-        return [
-            'title'   => t('Plugins'),
-            'actions' => true,
-            'filter'  => true,
-        ];
-    }
-
-    public function notFoundContent(): array
-    {
-        return [
-            'icon'        => 'no-plugins',
-            'title'       => t('Plugins are not installed yet'),
-            'description' => t('You can download them manually or install from the repository'),
+                ->view('toggle'),
         ];
     }
 }

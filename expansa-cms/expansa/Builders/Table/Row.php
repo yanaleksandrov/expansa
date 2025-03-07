@@ -6,32 +6,20 @@ namespace Expansa\Builders\Table;
 
 use Expansa\Facades\Safe;
 
-final class Row
+class Row
 {
-    use \Expansa\Builders\Table\Traits\Row;
-
     /**
      * Add new row.
      *
-     * @return Row
+     * @param string $tag Tag for row wrapper.
+     * @param string $view Path to get view for render table row.
+     * @param array $attributes Attributes list.
      */
-    public static function add(): Row
-    {
-        return new self();
-    }
-
-    /**
-     * Set row tag.
-     *
-     * @param string $tag
-     * @return Row
-     */
-    public function tag(string $tag): Row
-    {
-        $this->tag = Safe::tag($tag);
-
-        return $this;
-    }
+    public function __construct(
+        public string $tag = 'div',
+        public string $view = 'table/row',
+        public array $attributes = []
+    ) {} // phpcs:ignore
 
     /**
      * Set row attribute.

@@ -6,20 +6,30 @@ namespace Expansa\Builders\Table;
 
 use Expansa\Facades\Safe;
 
-final class Cell
+class Cell
 {
-    use \Expansa\Builders\Table\Traits\Cell;
-
     /**
-     * Add new column.
+     * Column constructor.
      *
-     * @param string $key
-     * @return Cell
+     * @param string $key Unique column key.
+     * @param string $title Title of column.
+     * @param string $view Path to get view for render column cell.
+     * @param bool $sortable Column is sortable.
+     * @param string $width Min column width.
+     * @param bool $flexible Column width is flexible.
+     * @param bool $searchable Column is searchable.
+     * @param array $attributes Cell wrapper HTML attributes list.
      */
-    public static function add(string $key): Cell
-    {
-        return new self($key);
-    }
+    public function __construct(
+        public string $key = '',
+        public string $title = '',
+        public string $view = 'table/cell',
+        public bool $sortable = false,
+        public string $width = '',
+        public bool $flexible = false,
+        public bool $searchable = false,
+        public array $attributes = []
+    ) {} // phpcs:ignore
 
     /**
      * Set column title.
@@ -55,23 +65,6 @@ final class Cell
     public function sortable(): Cell
     {
         $this->sortable = true;
-
-        return $this;
-    }
-
-    /**
-     * Default sort ordering.
-     *
-     * @param string $order
-     * @return Cell
-     */
-    public function sortOrder(string $order = 'DESC'): Cell
-    {
-        $order = Safe::uppercase($order);
-        if (in_array($order, [ 'ASC', 'DESC' ], true)) {
-            $this->sortOrder = $order;
-        }
-        $this->sortOrder = 'DESC';
 
         return $this;
     }

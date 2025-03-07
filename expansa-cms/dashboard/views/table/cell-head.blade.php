@@ -13,30 +13,21 @@ if (!defined('EX_PATH')) {
     exit;
 }
 
-$columns = Safe::array($__data ?? []);
-if (!$columns) {
-    return;
-}
+[$key, $cell, $title, $sortable] = Safe::data(
+	(array) $__data['cell'] ?? [],
+	[
+		'key'      => 'class',
+		'cell'     => 'key',
+		'title'    => 'trim',
+		'sortable' => 'bool',
+	]
+)->values();
 ?>
-<div class="table__head">
-    <?php
-    foreach ($columns as $column) :
-        [$key, $cell, $title, $sortable] = Safe::data(
-            (array)$column,
-            [
-                'key'      => 'class',
-                'cell'     => 'key',
-                'title'    => 'trim',
-                'sortable' => 'bool',
-            ]
-        )->values();
-	    ?>
-	    <div class="<?php echo trim( sprintf( '%s df aic g-1', $key ) ); ?>"><?php
-			$title && print( $title );
-			if ( $sortable ) :
-				?>
-	            <i class="ph ph-sort-ascending"></i>
-			<?php endif; ?>
-	    </div>
-	<?php endforeach; ?>
+<div class="<?php echo trim( sprintf( '%s df aic g-1', $key ) ); ?>">
+	<?php
+	$title && print( $title );
+    if ( $sortable ) :
+		?>
+		<i class="ph ph-sort-ascending"></i>
+	<?php endif; ?>
 </div>

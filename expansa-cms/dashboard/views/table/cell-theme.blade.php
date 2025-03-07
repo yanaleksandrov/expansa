@@ -28,33 +28,26 @@ if (!defined('EX_PATH')) {
 )->values();
 ?>
 <div class="themes-item">
-	<div class="themes-image" style="background-image: url(<?php echo $screenshot; ?>)">
+	<div class="themes-image" style="background-image: url({{ $screenshot }})">
 		<div class="themes-action">
-			<button class="btn btn--outline" type="button"><?php echo t( 'View Demo' ); ?></button>
-			<button class="btn btn--outline" type="button"<?php $installed && print( ' hidden' ); ?>><?php echo t( 'Activate' ); ?></button>
-			<button class="btn btn--primary" type="button"<?php ! $installed && print( ' hidden' ); ?>><?php echo t( 'Customize' ); ?></button>
+			<button class="btn btn--outline" type="button">{{ t('View Demo') }}</button>
+			<button class="btn btn--outline" type="button"<?php $installed && print( ' hidden' ); ?>>{{ t('Activate') }}</button>
+			<button class="btn btn--primary" type="button"<?php ! $installed && print( ' hidden' ); ?>>{{ t('Customize') }}</button>
 		</div>
 	</div>
-	<h6 class="themes-title"><?php echo $title, I18n::_c( $installed, ' <i class="badge badge--green-lt">Active</i>' ); ?></h6>
-	<?php if ( $description ) : ?>
-		<div class="themes-text"><?php echo $description; ?></div>
-	<?php endif; ?>
-	<div class="themes-data"><?php
-		if ( $reviews > 0 ) {
-			echo view(
-				'global/rating',
-				[
-					'rating'  => $rating,
-					'reviews' => $reviews,
-				]
-			);
-		} else {
-			t( 'This theme has not been rated yet' );
-		}
+	<h6 class="themes-title">{{ $title }}</h6>
+	@if ($description)
+		<div class="themes-text">{{ $description }}</div>
+	@endif
+	<div class="themes-data">
+		@if ($reviews > 0)
+			<?php echo view('global/rating', ['rating' => $rating, 'reviews' => $reviews] ); ?>
+		@else
+			{{ t('This theme has not been rated yet') }}
+		@endif
 
-                             if ($version) :
-                                 ?>
-        <div class="themes-text" title="<?php echo t( 'Version :number', $version ); ?>"><?php echo $version; ?></div>
-        <?php endif; ?>
+		@if ($version)
+        	<div class="themes-text" title="{{ t('Version :number', $version) }}">{{ $version }}</div>
+		@endif
     </div>
 </div>

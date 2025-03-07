@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\Cell;
-use Expansa\Builders\Table\Row;
+use Expansa\Builders\Table;
 
-final class PluginsInstall
+final class PluginsInstall extends Table
 {
     public function data(): array
     {
@@ -31,7 +30,7 @@ final class PluginsInstall
                 'installed'       => false,
                 'active'          => false,
                 'installations'   => '300k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -64,7 +63,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => false,
                 'installations'   => '100k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -121,7 +120,7 @@ final class PluginsInstall
                 'installed'       => false,
                 'active'          => true,
                 'installations'   => '100k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 0,
                 'rating'          => 0,
                 'expansa_version' => '2025.1',
@@ -146,7 +145,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => true,
                 'installations'   => '10k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -171,7 +170,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => false,
                 'installations'   => '10k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -196,7 +195,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => false,
                 'installations'   => '10k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -221,7 +220,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => false,
                 'installations'   => '10k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -246,7 +245,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => false,
                 'installations'   => '10k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -271,7 +270,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => false,
                 'installations'   => '10k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -296,7 +295,7 @@ final class PluginsInstall
                 'installed'       => true,
                 'active'          => false,
                 'installations'   => '10k+ installations',
-                'date'            => '18 September, 2024',
+                'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
                 'expansa_version' => '2025.1',
@@ -305,50 +304,10 @@ final class PluginsInstall
         ];
     }
 
-    public function dataVariable(): string
-    {
-        return '';
-    }
-
-    public function rows(): array
-    {
-        return [
-            Row::add()->tag(''),
-        ];
-    }
-
     public function columns(): array
     {
         return [
-            Cell::add('extension')->view('extension'),
+            $this->cell('extension')->view('extension'),
         ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'class' => 'plugins',
-        ];
-    }
-
-    public function notFoundContent(): array
-    {
-        return [
-            'icon'        => 'no-plugins',
-            'title'       => t('Plugins not found'),
-            'description' => t('You don\'t have any themes installed yet, <a @click="$dialog.open(\'tmpl-post-editor\')">download them</a>'),
-        ];
-    }
-
-    public function headerContent(): array
-    {
-        return [
-            'title' => t('Add Plugins'),
-        ];
-    }
-
-    public function headerTemplate(): string
-    {
-        return '';
     }
 }

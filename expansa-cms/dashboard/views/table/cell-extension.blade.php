@@ -65,6 +65,6 @@ if (!defined('EX_PATH')) {
 			endif;
 			?>
 		</span>
-		<span class="plugins__text"><i class="ph ph-check"></i> <?php echo t( '**Compatible** with your Expansa version' ); ?></span>
+		<span class="plugins__text"><i class="ph ph-check"></i> <?php echo t( 'Compatible' ); ?></span>
 	</div>
 </div>

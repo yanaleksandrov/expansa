@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Builders;
 
+use Expansa\Builders\Table\Abstracts\TableBase;
 use Expansa\Facades\Safe;
 use Expansa\Facades\View;
 use Expansa\Support\Arr;
+use Expansa\Builders\Table\Cell;
+use Expansa\Builders\Table\Row;
 
 /**
  * Class Table.
@@ -15,32 +18,25 @@ use Expansa\Support\Arr;
  *
  * @package Dashboard\Tables
  */
-class Table
+abstract class Table extends TableBase
 {
-    use \Expansa\Builders\Table\Traits\Table;
-
-    public function __construct()
+    /**
+     * Table constructor.
+     *
+     * @param array $data Data for rendering the table.
+     * @param array $columns Columns list.
+     */
+    public function __construct(
+        public array $data = [],
+        public array $columns = []
+    )
     {
         // include filter
         require_once EX_DASHBOARD . 'forms/items-filter.php';
 
         $methods = [
-            'tag',
-            'rows',
-            'columns',
-            'filter',
-            'attributes',
             'data',
-            'dataAfter',
-            'dataBefore',
-            'dataVariable',
-            'headerContent',
-            'headerTemplate',
-            'notFoundAfter',
-            'notFoundBefore',
-            'notFoundContent',
-            'notFoundTemplate',
-            'cellHeadTemplate',
+            'columns',
         ];
 
         foreach ($methods as $method) {
@@ -50,71 +46,9 @@ class Table
         }
     }
 
-    /**
-     * Get table markup.
-     *
-     * @return string
-     */
-    public function get(): string
+    public function cell(string $key): Cell
     {
-        $tag    = Safe::tag($this->tag);
-        $styles = $this->stylize($this->columns);
-        if ($styles) {
-            $this->attributes['style'] = $styles;
-        }
-
-        ob_start();
-        $tag && printf('<%s>', trim($tag . ' ' . Arr::toHtmlAtts($this->attributes)));
-
-        echo view(
-            $this->headerTemplate,
-            [
-                'content' => $this->data ? View::make(sprintf('%s/%s', $this->views, $this->cellHeadTemplate), $this->columns) : '',
-                ...$this->headerContent
-            ]
-        );
-
-        if ($this->dataVariable) {
-            $prop = Safe::prop($this->dataVariable);
-            $row  = current($this->rows ?? []);
-            ?>
-            <template x-if="<?php echo $prop; ?>.length">
-                <?php echo $this->dataBefore ?? ''; ?>
-                    <template x-for="(item, i) in <?php echo $prop; ?>">
-                        <?php echo view($row->view, [ 'data' => $this->data, 'row' => $row, 'columns' => $this->columns ]); ?>
-                    </template>
-                <?php echo $this->dataAfter ?? ''; ?>
-            </template>
-            <template x-if="!<?php echo $prop; ?>.length">
-                <?php echo view($this->notFoundTemplate, $this->notFoundContent); ?>
-            </template>
-            <?php
-        } else {
-            if ($this->data) {
-                echo $this->dataBefore ?? '';
-                foreach ($this->data as $i => $data) {
-                    $row = $this->rows[ $i ] ?? end($this->rows);
-                    echo view($row->view ?? '', [ 'data' => $data, 'row' => $row, 'columns' => $this->columns ]);
-                }
-                echo ( $this->dataAfter ?? '' ) . PHP_EOL;
-            } else {
-                echo view($this->notFoundTemplate, $this->notFoundContent) . PHP_EOL;
-            }
-        }
-
-        $tag && printf('</%s>', $tag);
-
-        return ob_get_clean();
-    }
-
-    /**
-     * Output table markup.
-     *
-     * @return void
-     */
-    public function print(): void
-    {
-        echo $this->get();
+        return new Cell($key);
     }
 
     /**

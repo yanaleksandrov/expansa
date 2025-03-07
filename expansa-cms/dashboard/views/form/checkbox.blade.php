@@ -54,7 +54,6 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 			<span class="field-icon"><i class="<?php echo $icon; ?>"></i></span>
 		<?php endif; ?>
 		<input class="field-checkbox"<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'x-model.fill' => $prop, 'checked' => $checked ] ); ?>>
-		<span class="field-switcher"></span>
 		<span class="<?php echo $label_class; ?>">
 			<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>

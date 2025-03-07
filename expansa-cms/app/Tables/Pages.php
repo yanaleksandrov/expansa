@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
+use Expansa\Builders\Table;
 use Expansa\Facades\Form;
-use Expansa\Builders\Table\Cell;
-use Expansa\Builders\Table\Row;
 
-final class Pages
+final class Pages extends Table
 {
     public function data(): array
     {
@@ -24,37 +23,30 @@ final class Pages
         ];
     }
 
-    public function rows(): array
-    {
-        return [
-            Row::add()->attribute('class', 'table__row')
-        ];
-    }
-
     public function columns(): array
     {
         return [
-            Cell::add('cb')
+            $this->cell('cb')
                 ->title('<input type="checkbox" x-bind="trigger" />')
                 ->fixedWidth('1rem')
                 ->view('cb'),
-            Cell::add('image')
+            $this->cell('image')
                 ->fixedWidth('2.5rem')
                 ->view('image'),
-            Cell::add('title')
+            $this->cell('title')
                 ->title(t('Title'))
                 ->flexibleWidth('16rem')
                 ->sortable()
                 ->view('title'),
-            Cell::add('author')
+            $this->cell('author')
                 ->title(t('Author'))
                 ->flexibleWidth('6rem')
                 ->view('links'),
-            Cell::add('categories')
+            $this->cell('categories')
                 ->title(t('Categories'))
                 ->flexibleWidth('6rem')
                 ->view('links'),
-            Cell::add('date')
+            $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('6rem')
                 ->sortable()
@@ -107,30 +99,5 @@ final class Pages
                 ],
             ]
         ));
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'class'  => 'table',
-            'x-data' => 'table',
-        ];
-    }
-
-    public function headerContent(): array
-    {
-        return [
-            'title'   => t('Pages'),
-            'actions' => true,
-            'filter'  => true,
-        ];
-    }
-
-    public function notFoundContent(): array
-    {
-        return [
-            'title'       => t('Pages not found'),
-            'description' => t('You don\'t have any pages yet. <a @click="$dialog.open(\'tmpl-post-editor\', postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
-        ];
     }
 }

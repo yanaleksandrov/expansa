@@ -63,7 +63,7 @@ new class
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
-        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable'];
+        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'expansa') {

@@ -741,7 +741,7 @@ final class Sanitizer
     public static function class(mixed $value): string
     {
         $sanitized = [];
-        $classes   = explode(' ', (string) $value);
+        $classes   = explode(' ', self::trim($value));
 
         foreach ($classes as $class) {
             // Strip out any %-encoded octets.
