@@ -218,7 +218,6 @@ textarea {
   flex: 1;
   width: 100%;
   position: relative;
-  font-size: 0.875rem;
   outline: 0;
   background-color: var(--expansa-white);
   transition: color, box-shadow 0.2s ease;
@@ -271,7 +270,6 @@ button {
   background-color: transparent;
   height: 1.875rem;
   padding: 0 0.875em;
-  border: 1px solid transparent;
   border-radius: 0.5em;
 
   &:hover {
@@ -280,10 +278,9 @@ button {
 
   &[readonly],
   &[disabled] {
-    background-color: #f7f7f7;
-    border-color: var(--expansa-border) !important;
-    box-shadow: none;
+    background-color: #f7f7f7 !important;
     color: var(--expansa-text-muted) !important;
+    box-shadow: none;
     cursor: not-allowed;
     pointer-events: none;
     resize: none;

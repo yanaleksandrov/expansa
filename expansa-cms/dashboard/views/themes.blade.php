@@ -7,6 +7,8 @@
 if (!defined('EX_PATH')) {
     exit;
 }
+
+$table = new App\Tables\Themes();
 ?>
 <div class="expansa-main">
     <?php
@@ -17,6 +19,10 @@ if (!defined('EX_PATH')) {
         ]
     );
 
-    (new \Expansa\Builders\Table(new \App\Tables\Themes()))->print();
+    echo '<pre>';
+    print_r( $table );
+    echo '</pre>';
+
+    //(new Expansa\Builders\Table(new App\Tables\Themes()))->print();
     ?>
 </div>

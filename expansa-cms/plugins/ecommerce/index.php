@@ -22,10 +22,6 @@ return new class extends Plugin
 
     public function boot(): void
     {
-        if (! Is::dashboard()) {
-            return;
-        }
-
         // TODO: переделать подключение файлов плагинов
         Hook::add('expansa_view_part', function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/order.php') {
@@ -50,6 +46,8 @@ return new class extends Plugin
         Asset::style('ecommerce-order', '/plugins/ecommerce/assets/css/order.css');
         Asset::style('ecommerce-notes', '/plugins/ecommerce/assets/css/notes.css');
         Asset::style('ecommerce-product', '/plugins/ecommerce/assets/css/product.css');
+        Asset::style('ecommerce-cart', '/plugins/ecommerce/assets/css/cart.css');
+        Asset::style('ecommerce-price', '/plugins/ecommerce/assets/css/price.css');
 
         Type::register(
             key: 'orders',

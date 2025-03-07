@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
+use Expansa\Builders\Table;
 use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Row;
 
-final class Themes
+final class Themes extends Table
 {
-    public function tag(): string
-    {
-        return '';
-    }
-
     public function data(): array
     {
         return [
@@ -65,21 +61,6 @@ final class Themes
         ];
     }
 
-    public function dataVariable(): string
-    {
-        return  '';
-    }
-
-    public function dataBefore(): string
-    {
-        return '<div class="themes">';
-    }
-
-    public function dataAfter(): string
-    {
-        return '</div>';
-    }
-
     public function rows(): array
     {
         return [
@@ -114,25 +95,5 @@ final class Themes
         return [
             'title' => t('Themes'),
         ];
-    }
-
-    public function headerTemplate(): string
-    {
-        return '';
-    }
-
-    public function notFoundAfter(): string
-    {
-        return '';
-    }
-
-    public function notFoundBefore(): string
-    {
-        return '';
-    }
-
-    public function cellHeadTemplate(): string
-    {
-        return '';
     }
 }

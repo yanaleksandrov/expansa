@@ -13,7 +13,7 @@ if (! function_exists('t')) {
     function t(string $string, mixed ...$args): string
     {
         if (class_exists('Expansa\Facades\I18n')) {
-            return \Expansa\Facades\I18n::_t($string, ...$args);
+            return Expansa\Facades\I18n::_t($string, ...$args);
         }
         return $string;
     }
@@ -29,7 +29,7 @@ if (! function_exists('t_attr')) {
      */
     function t_attr(string $string, mixed ...$args): string
     {
-        return \Expansa\Facades\Safe::attribute(t($string, ...$args));
+        return Expansa\Facades\Safe::attribute(t($string, ...$args));
     }
 }
 
@@ -56,7 +56,7 @@ if (!function_exists('escape')) {
 if (!function_exists('view')) {
     function view(string $view, array $data = []): Expansa\View\View
     {
-        return \Expansa\Facades\View::make($view, $data);
+        return Expansa\Facades\View::make($view, $data);
     }
 }
 
@@ -73,7 +73,7 @@ if (!function_exists('redirect')) {
     {
         static $redirect;
         if (!$redirect) {
-            $redirect = new \Expansa\Http\Redirect();
+            $redirect = new Expansa\Http\Redirect();
         }
         return $redirect->redirect($to, $status, $redirectBy);
     }
@@ -90,7 +90,7 @@ if (! function_exists('tree')) {
     function tree(string $name, callable $function): string
     {
         ob_start();
-        \Expansa\Builders\Tree::view($name, $function);
+        Expansa\Builders\Tree::view($name, $function);
         return ob_get_clean();
     }
 }
@@ -108,7 +108,7 @@ if (! function_exists('form')) {
         if (is_file($path)) {
             require_once $path;
         }
-        return (new \Expansa\Builders\Form())->make($uid);
+        return (new Expansa\Builders\Form())->make($uid);
     }
 }
 
@@ -123,7 +123,7 @@ if (! function_exists('url')) {
     {
         static $url;
         if (!$url) {
-            $url = new \Expansa\Support\Url();
+            $url = new Expansa\Support\Url();
         }
         return $url->site($slug);
     }

@@ -64,7 +64,8 @@ Route::get('/(.*)', function ($slug) {
             'slug'   => $slug,
             'entity' => $entity,
         ]);
-        $content = (new Expansa\Support\Html())->beautify($content->render());
+        //$content = (new Expansa\Support\Html())->beautify($content->render());
+        $content = $content->render();
     }
 
     /**

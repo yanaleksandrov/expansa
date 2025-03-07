@@ -15,11 +15,11 @@ use Expansa\Support\Arr;
  *
  * @package Dashboard\Tables
  */
-final class Table
+class Table
 {
     use \Expansa\Builders\Table\Traits\Table;
 
-    public function __construct($table)
+    public function __construct()
     {
         // include filter
         require_once EX_DASHBOARD . 'forms/items-filter.php';
@@ -44,8 +44,8 @@ final class Table
         ];
 
         foreach ($methods as $method) {
-            if (method_exists($table, $method)) {
-                $this->$method = $table->$method();
+            if (method_exists($this, $method)) {
+                $this->$method = $this->$method();
             }
         }
     }

@@ -16,8 +16,6 @@
   min-width: fit-content;
   width: fit-content;
   border-radius: 0.6em;
-  background-color: transparent;
-  background-image: radial-gradient(100% 100% at 15% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
   text-decoration: none;
   transition: background-color 0.15s;
   -webkit-user-select: none;
@@ -25,6 +23,10 @@
   -ms-user-select: none;
   user-select: none;
   cursor: pointer;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: radial-gradient(100% 100% at 15% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
 
   > * {
     font-size: inherit;
@@ -47,70 +49,65 @@
     }
   }
 
+  &--primary,
+  &--success,
+  &--danger {
+    box-shadow: 0 1px 1px #fff3 inset, 0 -1px 1px #0003 inset;
+  }
+
   &--primary {
-    border-color: var(--expansa-primary);
     background-color: var(--expansa-primary);
     color: var(--expansa-white);
-    box-shadow: 0 .75px .75px #fff3 inset, 0 -.75px .75px #0003 inset;
 
     &:hover {
       background-color: var(--expansa-primary-hover);
-      border-color: var(--expansa-primary-hover);
       color: var(--expansa-white);
     }
 
     &:active {
       background-color: var(--expansa-primary-active);
-      border-color: var(--expansa-primary-active);
     }
   }
 
   &--success {
-    border-color: var(--expansa-success);
     background-color: var(--expansa-success);
     color: var(--expansa-white);
-    box-shadow: 0 .75px .75px #fff3 inset, 0 -.75px .75px #0003 inset;
 
     &:hover {
       background-color: var(--expansa-success-hover);
-      border-color: var(--expansa-success-hover);
       color: var(--expansa-white);
     }
 
     &:active {
       background-color: var(--expansa-success-active);
-      border-color: var(--expansa-success-active);
     }
   }
 
   &--danger {
-    border-color: var(--expansa-danger);
     background-color: var(--expansa-danger);
     color: var(--expansa-white);
-    box-shadow: 0 .75px .75px #fff3 inset, 0 -.75px .75px #0003 inset;
 
     &:hover {
       background-color: var(--expansa-danger-hover);
-      border-color: var(--expansa-danger-hover);
       color: var(--expansa-white);
     }
 
     &:active {
       background-color: var(--expansa-danger-active);
-      border-color: var(--expansa-danger-active);
     }
   }
 
   &--outline {
     border: 1px solid var(--expansa-border);
-    background-color: var(--expansa-white) !important;
+    background-color: var(--expansa-white);
 
     &:hover {
+      border-color: var(--expansa-border-hover);
       background-color: var(--expansa-bg);
     }
 
     &:active {
-      border-color: rgb(27 31 36 / 15%);
+      border-color: var(--expansa-border);
       background-color: var(--expansa-bg-hover);
     }
   }
@@ -189,15 +186,6 @@
 
   &--rounded {
     border-radius: 3rem;
-  }
-
-  &[disabled],
-  &[disabled]:active,
-  &[disabled]:hover {
-    background-color: #f7f7f7;
-    color: var(--expansa-border-hover);
-    pointer-events: none;
-    transition: none;
   }
 }
 

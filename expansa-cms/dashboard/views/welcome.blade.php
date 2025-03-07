@@ -1,5 +1,4 @@
 <?php
-
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 ?>
