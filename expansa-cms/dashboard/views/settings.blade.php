@@ -8,8 +8,4 @@ if (!defined('EX_PATH')) {
     exit;
 }
 ?>
-<div class="expansa-main">
-    <!-- tabs start -->
-    <?php echo form('settings', EX_DASHBOARD . 'forms/settings.php'); ?>
-    <!-- tabs end -->
-</div>
+<?php echo form('settings', EX_DASHBOARD . 'forms/settings.php'); ?>

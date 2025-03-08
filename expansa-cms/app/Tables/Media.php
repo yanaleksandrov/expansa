@@ -13,10 +13,31 @@ final class Media extends Table
         return [];
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('media')->view('media'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title'    => t('Media Library'),
+            'actions'  => false,
+            'filter'   => false,
+            'uploader' => true,
+            'show'     => 'false',
+            'content'  => '',
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'icon'        => 'no-media',
+            'title'       => t('Files in library is not found'),
+            'description' => t('They have not been uploaded or do not match the filter parameters'),
         ];
     }
 }

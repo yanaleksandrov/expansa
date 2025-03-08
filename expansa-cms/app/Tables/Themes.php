@@ -59,10 +59,25 @@ final class Themes extends Table
         ];
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('theme')->view('theme'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title' => t('Themes'),
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'title'       => t('Themes not found'),
+            'description' => t('You don\'t have any themes installed yet, <a @click="$dialog.open(`tmpl-post-editor`)">download them</a>'),
         ];
     }
 }

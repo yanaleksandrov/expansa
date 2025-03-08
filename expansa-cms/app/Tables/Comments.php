@@ -22,7 +22,7 @@ final class Comments extends Table
         ];
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('cb')
@@ -47,6 +47,23 @@ final class Comments extends Table
                 ->fixedWidth('9rem')
                 ->sortable()
                 ->view('date'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title'   => t('Comments'),
+            'actions' => true,
+            'filter'  => true,
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'title'       => t('No comments found'),
+            'description' => t('Don&apos;t worry, they will appear as soon as someone leaves a comment.'),
         ];
     }
 }

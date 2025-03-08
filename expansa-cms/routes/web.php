@@ -59,9 +59,21 @@ Route::get('/(.*)', function ($slug) {
             //$page = '404';
         }
 
+        if ($slug === 'edit') {
+            $table = match ($_GET['table'] ?? 'page') {
+                'comments'     => new App\Tables\Comments(),
+                'translations' => new App\Tables\Translations(),
+                'emails'       => new App\Tables\Emails(),
+                'plugins'      => new App\Tables\Plugins(),
+                'users'        => new App\Tables\Users(),
+                default        => new App\Tables\Pages(),
+            };
+        }
+
         // output view to frontend
         $content = view($page ?? 'index', [
             'slug'   => $slug,
+            'table'  => $table ?? null,
             'entity' => $entity,
         ]);
         //$content = (new Expansa\Support\Html())->beautify($content->render());

@@ -304,10 +304,27 @@ final class PluginsInstall extends Table
         ];
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('extension')->view('extension'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title'  => t('Add Plugins'),
+            'search' => true,
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'icon'        => 'no-plugins',
+            'title'       => t('Plugins not found'),
+            'description' => t('You don&apos;t have any themes installed yet, <a @click="$dialog.open(`tmpl-post-editor`)">download them</a>'),
         ];
     }
 }

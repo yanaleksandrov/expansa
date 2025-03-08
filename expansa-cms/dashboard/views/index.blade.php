@@ -17,7 +17,8 @@ if (!defined('EX_PATH')) {
     exit;
 }
 
-$slug = Safe::trim($__data['slug'] ?? '');
+$slug  = Safe::trim($__data['slug'] ?? '');
+$table = $__data['table'] ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
@@ -100,20 +101,22 @@ $slug = Safe::trim($__data['slug'] ?? '');
 
 			<?php echo view( 'global/user-account' ); ?>
 		</div>
-		<!-- interface panel start -->
+
 		<div class="expansa-panel">
 			<a href="<?php echo url(); ?>" target="_blank">
 				<img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34" alt="Expansa Logo">
 			</a>
 			<?php echo view( 'menu-panel' ); ?>
 		</div>
-		<!-- interface sidebar start -->
-		<?php
-		echo view('menu');
 
-		echo view($slug);
-		?>
-		<!-- interface board start -->
+		<div class="expansa-side">
+			<?php echo view('menu'); ?>
+		</div>
+
+		<div class="expansa-main">
+			<?php echo view($slug, $__data ?? []); ?>
+		</div>
+
 		<div class="expansa-board">
 			<a href="#" class="dif g-1 aic t-dark" title="Get Support"><i class="ph ph-headset fs-12"></i> support</a>
 			<a href="#" class="dif g-1 aic t-dark" title="Expansa CMS version"><i class="ph ph-git-branch fs-12"></i> 2025.1</a>

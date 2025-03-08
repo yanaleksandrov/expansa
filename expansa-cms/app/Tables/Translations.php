@@ -26,7 +26,7 @@ final class Translations extends Table
         return $data;
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('source')
@@ -37,6 +37,23 @@ final class Translations extends Table
                 ->title(t(':icon Translations - Russian', '<i class="ph ph-globe-hemisphere-east"></i>'))
                 ->attributes([ 'class' => 'translation__value' ])
                 ->view('translation'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title'       => t('Translations'),
+            'badge'       => t('completed :stringsCount from :allStringsCount <i class="t-green">(:percent%)</i>', 56, 408, 25),
+            'translation' => true,
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'title'       => t('Translates not found'),
+            'description' => t("Click the 'Scan' button to get started and load the strings to be translated from the source code."),
         ];
     }
 }

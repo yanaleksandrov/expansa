@@ -39,7 +39,7 @@ final class Plugins extends Table
         ];
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('cb')
@@ -65,6 +65,24 @@ final class Plugins extends Table
                 ->title(t('Activity'))
                 ->fixedWidth('4rem')
                 ->view('toggle'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title'   => t('Plugins'),
+            'actions' => true,
+            'filter'  => true,
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'icon'        => 'no-plugins',
+            'title'       => t('Plugins are not installed yet'),
+            'description' => t('You can download them manually or install from the repository'),
         ];
     }
 }

@@ -13,7 +13,7 @@ if (!defined('EX_PATH')) {
 
 echo tree('dashboard-menu-bar', function($items) {
     ?>
-<ul id="dashboard-menu-bar" class="menu mr-auto">
+    <ul id="dashboard-menu-bar" class="menu mr-auto">
         <?php
         foreach ($items as $item) :
             [$url, $icon, $title] = Safe::data($item, [

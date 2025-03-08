@@ -8,5 +8,5 @@ abstract class TableBase
 {
     abstract public function data(): array;
 
-    abstract public function columns(): array;
+    abstract public function cells(): array;
 }

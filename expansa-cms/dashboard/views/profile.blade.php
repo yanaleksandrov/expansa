@@ -8,6 +8,4 @@ if (!defined('EX_PATH')) {
     exit;
 }
 ?>
-<div class="expansa-main">
-    {!! form('user-profile', EX_DASHBOARD . 'forms/user-profile.php') !!}
-</div>
+{!! form('user-profile', EX_DASHBOARD . 'forms/user-profile.php') !!}

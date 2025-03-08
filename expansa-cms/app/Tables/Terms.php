@@ -26,7 +26,7 @@ final class Terms extends Table
         ];
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('cb')->title('<input type="checkbox" x-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
@@ -34,6 +34,23 @@ final class Terms extends Table
             $this->cell('title')->title(t('Title'))->view('title'),
             $this->cell('slug')->title(t('Slug'))->view('raw'),
             $this->cell('count')->title(t('Count'))->fixedWidth('2rem')->view('raw'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title'   => t('Terms'),
+            'actions' => true,
+            'filter'  => true,
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'title'       => t('Pages not found'),
+            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
         ];
     }
 }

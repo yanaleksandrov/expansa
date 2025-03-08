@@ -24,26 +24,18 @@ abstract class Table extends TableBase
      * Table constructor.
      *
      * @param array $data Data for rendering the table.
-     * @param array $columns Columns list.
+     * @param array $cells Table cells list.
      */
     public function __construct(
         public array $data = [],
-        public array $columns = []
+        public array $cells = []
     )
     {
         // include filter
         require_once EX_DASHBOARD . 'forms/items-filter.php';
 
-        $methods = [
-            'data',
-            'columns',
-        ];
-
-        foreach ($methods as $method) {
-            if (method_exists($this, $method)) {
-                $this->$method = $this->$method();
-            }
-        }
+        $this->data  = $this->data();
+        $this->cells = $this->cells();
     }
 
     public function cell(string $key): Cell

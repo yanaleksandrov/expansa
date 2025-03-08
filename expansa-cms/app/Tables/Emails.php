@@ -22,7 +22,7 @@ final class Emails extends Table
         ];
     }
 
-    public function columns(): array
+    public function cells(): array
     {
         return [
             $this->cell('cb')
@@ -42,6 +42,22 @@ final class Emails extends Table
                 ->title(t('Event'))
                 ->fixedWidth('9rem')
                 ->view('date'),
+        ];
+    }
+
+    public function headData(): array
+    {
+        return [
+            'title'   => t('Emails'),
+            'actions' => true,
+        ];
+    }
+
+    public function notFoundData(): array
+    {
+        return [
+            'title'       => t('No emails templates found'),
+            'description' => t('Add [new email template](:emailDialog) manually', url('/dashboard/import')),
         ];
     }
 }
