@@ -320,15 +320,6 @@ new class
                     'parent_id'    => 'dialogs',
                 ],
                 [
-                    'id'           => 'chat',
-                    'url'          => 'chat',
-                    'title'        => t('Chat'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => '',
-                    'position'     => 10,
-                    'parent_id'    => 'dialogs',
-                ],
-                [
                     'id'       => 'divider-customization',
                     'title'    => t('Customization'),
                     'position' => 300,
