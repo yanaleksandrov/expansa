@@ -90,7 +90,7 @@ class Type
                 [
                     [
                         'id'           => $postType,
-                        'url'          => $postType,
+                        'url'          => "edit?table=$postType",
                         'title'        => $this->labelNamePlural,
                         'capabilities' => $this->capabilities,
                         'icon'         => $this->menuIcon,
@@ -98,7 +98,7 @@ class Type
                     ],
                     [
                         'id'           => sprintf('type-%s', $postType),
-                        'url'          => $postType,
+                        'url'          => "edit?table=$postType",
                         'title'        => $this->labelAllItems,
                         'capabilities' => $this->capabilities,
                         'parent_id'    => $postType,

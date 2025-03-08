@@ -312,7 +312,7 @@ new class
                 ],
                 [
                     'id'           => 'comments',
-                    'url'          => 'comments',
+                    'url'          => 'edit?table=comments',
                     'title'        => t('Comments'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
