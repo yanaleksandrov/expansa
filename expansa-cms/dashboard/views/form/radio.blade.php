@@ -48,10 +48,10 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 	ob_start();
 	?>
 	<label class="field-item">
-		<input<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'radio', 'value' => $value, 'name' => $name, 'x-model.fill' => $prop, 'checked' => $checked ] ); ?>>
 		<?php if ( $icon ) : ?>
 			<span class="field-icon"><i class="<?php echo $icon; ?>"></i></span>
 		<?php endif; ?>
+		<input<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'radio', 'value' => $value, 'name' => $name, 'x-model.fill' => $prop, 'checked' => $checked ] ); ?>>
 		<span class="<?php echo $label_class; ?>">
 		<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>

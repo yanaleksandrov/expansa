@@ -50,9 +50,9 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 	ob_start();
 	?>
 	<div class="field-item">
-		<?php if ( $icon ) : ?>
-			<span class="field-icon"><i class="<?php echo $icon; ?>"></i></span>
-		<?php endif; ?>
+		@if($icon)
+			<span class="field-icon"><i class="{{ $icon }}"></i></span>
+		@endif
 		<input class="field-checkbox"<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'x-model.fill' => $prop, 'checked' => $checked ] ); ?>>
 		<span class="<?php echo $label_class; ?>">
 			<?php echo $label; ?>

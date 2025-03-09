@@ -60,14 +60,18 @@ Route::get('/(.*)', function ($slug) {
         }
 
         if ($slug === 'edit') {
-            $table = match ($_GET['table'] ?? 'page') {
-                'comments'     => new App\Tables\Comments(),
-                'translations' => new App\Tables\Translations(),
-                'emails'       => new App\Tables\Emails(),
-                'plugins'      => new App\Tables\Plugins(),
-                'users'        => new App\Tables\Users(),
-                default        => new App\Tables\Pages(),
-            };
+            $table = $slug = $_GET['table'] ?? 'page';
+
+            $instances = [
+                'comments'    => App\Tables\Comments::class,
+                'translation' => App\Tables\Translations::class,
+                'emails'      => App\Tables\Emails::class,
+                'plugins'     => App\Tables\Plugins::class,
+                'users'       => App\Tables\Users::class,
+                'page'        => App\Tables\Pages::class,
+            ];
+
+            $table = new ($instances[$table] ?? App\Tables\Pages::class)();
         }
 
         // output view to frontend

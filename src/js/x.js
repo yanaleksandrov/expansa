@@ -635,6 +635,11 @@
             }
             dataItems = saferEval(`${items}`, component.data);
         }
+        if (attribute.modifiers.includes("lazy")) {
+            el.setAttribute(attribute.directive, expression);
+            el.removeAttribute(attribute.name);
+            return;
+        }
         while (el.nextSibling) {
             let next = el.nextSibling;
             if (next.nodeType === Node.ELEMENT_NODE && next.hasAttribute("v-each")) {
@@ -648,7 +653,7 @@
             (async () => {
                 clone.__x_for_data = {
                     [item]: dataItem,
-                    [index]: +key
+                    [index]: +key || key
                 };
                 if (hasChildEach) {
                     contextStack.push(`${items}[${key}]`);

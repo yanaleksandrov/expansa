@@ -14,12 +14,14 @@ if (!defined('EX_PATH')) {
     exit;
 }
 
-[$prop, $attributes] = Safe::data(
+[$prop, $attributes, $source, $value] = Safe::data(
     $__data ?? [],
     [
         'key'        => 'prop',
         'attributes' => 'array',
+        'source'     => 'trim',
+        'value'      => 'trim',
     ]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts($attributes); ?> x-text="item.<?php echo $prop; ?>"></div>
+<div<?php echo Arr::toHtmlAtts($attributes); ?> x-text="item.{{ $prop }}">{{ $source }}</div>

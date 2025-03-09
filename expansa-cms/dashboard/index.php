@@ -147,14 +147,6 @@ new class
                     'icon'         => 'ph ph-gear',
                     'position'     => 900,
                 ],
-                [
-                    'id'           => 'translation',
-                    'url'          => 'translation',
-                    'title'        => t('Translation'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-translate',
-                    'position'     => 1000,
-                ],
             ]
         ));
 
@@ -401,6 +393,32 @@ new class
                     'icon'         => '',
                     'position'     => 20,
                     'parent_id'    => 'tools',
+                ],
+                [
+                    'id'           => 'translation',
+                    'url'          => 'edit?table=translation',
+                    'title'        => t('Multilingual'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-translate',
+                    'position'     => 800,
+                ],
+                [
+                    'id'           => 'translations',
+                    'url'          => 'edit?table=translation',
+                    'title'        => t('Translations'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 20,
+                    'parent_id'    => 'translation',
+                ],
+                [
+                    'id'           => 'translations-settings',
+                    'url'          => 'multilingual-settings',
+                    'title'        => t('Settings'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 30,
+                    'parent_id'    => 'translation',
                 ],
             ]
         ));

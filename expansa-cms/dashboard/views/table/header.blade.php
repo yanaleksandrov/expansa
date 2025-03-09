@@ -24,10 +24,13 @@ if (!defined('EX_PATH')) {
     'search'      => 'bool:false',
     'translation' => 'bool:false',
 ])->values();
+
+$plugins = Expansa\Facades\Extensions::get('plugin');
+$themes  = Expansa\Facades\Extensions::get('theme');
 ?>
 <!-- table head start -->
 <div class="table__header">
-    <div class="mw df fww aic jcsb g-3 py-5 px-7 md:p-5">
+    <div class="mw df fww aic jcsb g-3 py-5 px-6 md:p-5">
         <?php if ($title) : ?>
         <h4><?php echo $title; ?>
             <?php $badge && print('<span class="badge">' . $badge . '</span>'); ?>
@@ -171,9 +174,9 @@ if (!defined('EX_PATH')) {
                                     ],
                                     'plugins' => [
                                         'label' => t('Plugins'),
-                                        'options' => array_reduce(Expansa\Plugins::get(), function ($carry, Expansa\Plugin $plugin) {
+                                        'options' => array_reduce($plugins, function ($carry, Expansa\Extensions\Plugin $plugin) {
                                             $carry[$plugin->id] = [
-                                                'content' => $plugin->name,
+                                                'content'     => $plugin->name,
                                                 'description' => t('completion :percent%', 0),
                                             ];
                                             return $carry;
@@ -181,9 +184,9 @@ if (!defined('EX_PATH')) {
                                     ],
                                     'themes' => [
                                         'label' => t('Themes'),
-                                        'options' => array_reduce(Expansa\Themes::get(), function ($carry, Expansa\Plugin $theme) {
+                                        'options' => array_reduce($themes, function ($carry, Expansa\Extensions\Theme $theme) {
                                             $carry[$theme->id] = [
-                                                'content' => $theme->name,
+                                                'content'     => $theme->name,
                                                 'description' => t('completion :percent%', 0),
                                             ];
                                             return $carry;
@@ -193,9 +196,9 @@ if (!defined('EX_PATH')) {
                             ]
                         );
                         ?>
-                    <button type="button" class="btn btn--sm btn--outline"
-                            @click="$ajax('translations/get', {project}).then(data => items = data.items)"><i
-                                class="ph ph-scan"></i> <?php echo t('Scan'); ?></button>
+                    <button type="button" class="btn btn--sm btn--outline" @click="$ajax('translations/get', {project}).then(data => items = data.items)">
+                        <i class="ph ph-scan"></i> <?php echo t('Scan'); ?>
+                    </button>
                 </div>
                 <?php endif; ?>
             </div>

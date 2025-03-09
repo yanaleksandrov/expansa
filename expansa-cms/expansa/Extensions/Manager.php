@@ -15,6 +15,17 @@ class Manager
     public static array $extensions = [];
 
     /**
+     * Get extensions list.
+     *
+     * @param string $type
+     * @return array
+     */
+    public function get(string $type): array
+    {
+         return self::$extensions[$type] ?? [];
+    }
+
+    /**
      * Register new extension.
      *
      * @param string $type

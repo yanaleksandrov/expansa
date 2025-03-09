@@ -8,38 +8,38 @@ if (!defined('EX_PATH')) {
     exit;
 }
 
-$table = new App\Tables\Translations();
+$table = $__data['table'] ?? null;
+if (! $table instanceof Expansa\Builders\Table) {
+    return;
+}
 
-echo view('table/header', [
-    'title'       => t('Translations'),
-    'badge'       => t('completed :stringsCount from :allStringsCount <i class="t-green">(:percent%)</i>', 56, 408, 25),
-    'translation' => true,
-]);
-echo '<pre>';
-print_r($table);
-echo '</pre>';
+echo view('table/header', $table->headData());
 ?>
 
 @if($table->data)
-    <form class="table translation" method="POST" @input.debounce.500ms="$ajax('translations/update',{project})">
-        <div class="table__head" style="{{ $table->stylize($table->cells) }}">
-            @foreach($table->cells as $cell)
-                <?php echo view('table/cell-head', ['cell' => $cell]); ?>
+    <form class="translation" method="POST" @input.debounce.500ms="$ajax('translations/update',{project})" v-data="{items: {}}">
+        <div class="translation-head">
+            @foreach($table->cells as $i => $cell)
+                <div class="translation-{{ $i === 0 ? 'source' : 'value' }}">
+                    <i class="{{ $i === 0 ? 'ph ph-text-aa' : 'ph ph-globe-hemisphere-east' }}"></i> {{ $cell->title }} - English
+                </div>
             @endforeach
         </div>
+        <div class="translation-grid" v-each.lazy="item in items" v-init="console.log(item)">
+            <div class="translation-source" v-text="item.source">{{ $item['source'] ?? '' }}</div>
+            <label class="translation-value">
+                <textarea rows="1" x-textarea="7" :value="item.value">{{ $item['value'] ?? '' }}</textarea>
+            </label>
+        </div>
         @foreach($table->data as $item)
-            <div class="table__row" style="{{ $table->stylize($table->cells) }}">
-                @foreach($table->cells as $cell)
-                    <?php echo view($cell->view, ['class' => $cell->key, ...$item]); ?>
-                @endforeach
+            <div class="translation-grid">
+                <div class="translation-source">{{ $item['source'] ?? '' }}</div>
+                <label class="translation-value">
+                    <textarea name="`translations[${item.source}]`" rows="1" x-textarea="7">{{ $item['value'] ?? '' }}</textarea>
+                </label>
             </div>
         @endforeach
     </form>
 @else
-    <?php
-    echo view('global/state', [
-        'title'       => t('Translates not found'),
-        'description' => t("Click the 'Scan' button to get started and load the strings to be translated from the source code."),
-    ]);
-    ?>
+    <?php echo view('global/state', $table->notFoundData()); ?>
 @endif
