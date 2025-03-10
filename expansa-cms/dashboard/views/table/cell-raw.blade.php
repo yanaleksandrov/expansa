@@ -6,7 +6,7 @@ use Expansa\Support\Arr;
 /**
  * Table raw text cell
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cells/raw.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cell-raw.blade.php
  *
  * @package Expansa\Templates
  */
@@ -24,4 +24,4 @@ if (!defined('EX_PATH')) {
     ]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts($attributes); ?> x-text="item.{{ $prop }}">{{ $source }}</div>
+{{ $__data[$prop] ?? '' }}

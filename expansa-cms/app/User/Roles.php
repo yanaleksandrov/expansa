@@ -71,14 +71,9 @@ class Roles
      * @param string $role
      * @return null|array Role object if found, null if the role does not exist
      */
-    public static function get(string $role): ?array
+    public static function get(string $role = ''): ?array
     {
-        $roles = self::fetch();
-        if (isset($roles[$role])) {
-            return $roles[$role];
-        }
-
-        return null;
+        return isset($role) ? self::$roles[$role] ?? [] : self::$roles;
     }
 
     /**

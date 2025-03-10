@@ -32,4 +32,15 @@ class Disk
     {
         return new Directory($dirpath);
     }
+
+    public function upload(string|array $filedata): File
+    {
+        $storage = new Storage();
+        if (is_string($filedata)) {
+            $filepath = $storage->grab($filedata);
+        } else {
+            $filepath = $storage->upload($filedata);
+        }
+        return new File($filepath);
+    }
 }

@@ -4,10 +4,10 @@
  *
  * @since 2025.1
  */
-return \Expansa\Facades\Form::enqueue(
+return Expansa\Facades\Form::enqueue(
 	'files-uploader',
 	[
-		'class'  => 'dg g-7 p-7',
+		'class'  => 'dg g-6 p-6',
 	    'x-data' => '{percent: 0, uploader: null}',
     ],
 	[

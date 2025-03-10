@@ -49,7 +49,10 @@ if (! function_exists('root')) {
 if (!function_exists('escape')) {
     function escape(mixed $value, bool $doubleEncode = true): string
     {
-        return trim(htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8', $doubleEncode));
+        if (!is_scalar($value)) {
+            return '';
+        }
+        return trim(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8', $doubleEncode));
     }
 }
 

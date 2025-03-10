@@ -17,8 +17,6 @@ interface CommonInterface
 
     public function rename(string $name): Directory|File;
 
-    public function get(string $path): Directory|File;
-
     public function delete(): bool;
 
     public function download(): void;

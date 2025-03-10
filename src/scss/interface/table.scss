@@ -1,0 +1,130 @@
+.table {
+  width: 100%;
+  display: grid;
+  margin-bottom: auto;
+  grid-template-rows: max-content;
+
+  &__filter {
+    display: flex;
+    gap: 0.25rem;
+    padding-inline: 1.5rem;
+    padding-bottom: 1rem;
+
+    @media screen and (max-width: 1024px) {
+      padding-inline: 1.25rem;
+    }
+  }
+
+  &__head {
+    white-space: nowrap;
+    width: 100%;
+    z-index: 10;
+    color: var(--expansa-secondary);
+    font-weight: 500;
+    font-size: 0.8rem;
+    text-align: start;
+    padding: 0 1.5rem;
+    margin-top: -0.375rem;
+    display: grid;
+    gap: 1.25rem;
+    grid-template-columns: var(--expansa-grid-template-columns);
+    min-width: 100%;
+    height: 2rem;
+
+    @media screen and (max-width: 1024px) {
+      padding-inline: 1.25rem;
+    }
+
+    > * {
+      padding: 0.4rem 0;
+      transition: color 0.3s;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+
+      &:has(i) {
+        cursor: pointer;
+
+        &:hover {
+          color: var(--expansa-dark);
+        }
+      }
+    }
+
+    i {
+      font-size: 0.8rem;
+    }
+  }
+
+  &__row {
+    display: grid;
+    gap: 1.25rem;
+    position: relative;
+    padding: 0.75rem 1.5rem;
+    grid-template-columns: var(--expansa-grid-template-columns);
+
+    &:nth-child(1 of .table__row) {
+      padding-top: 1.5rem;
+
+      @media screen and (max-width: 1024px) {
+        padding-top: 1rem;
+      }
+    }
+
+    &:last-child {
+      padding-bottom: 1.5rem;
+
+      @media screen and (max-width: 1024px) {
+        padding-bottom: 1rem;
+      }
+    }
+
+    @media screen and (max-width: 1024px) {
+      padding-inline: 1.25rem;
+    }
+  }
+
+  &__bulk {
+    padding: 0.75rem 1.5rem;
+    width: 100%;
+    background-color: var(--expansa-bg);
+    border-top: 1px solid var(--expansa-border);
+    border-bottom: 1px solid var(--expansa-border);
+    position: absolute;
+    display: flex;
+    align-items: center;
+    top: 0;
+    bottom: 2rem;
+
+    @media screen and (max-width: 1024px) {
+      padding-inline: 1.25rem;
+    }
+  }
+
+  &__header {
+    max-width: 100%;
+    position: sticky;
+    top: 42px;
+    background-color: var(--expansa-bg);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    z-index: 99;
+    border-bottom: 1px solid var(--expansa-border);
+
+    @media screen and (max-width: 1024px) {
+      top: 52px;
+    }
+  }
+
+  &__link {
+    display: inline-flex;
+
+    &:not(:nth-last-child(2)):after {
+      content: ', ';
+      padding-inline-end: 0.25rem;
+    }
+  }
+}

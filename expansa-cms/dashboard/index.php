@@ -125,7 +125,7 @@ new class
                 ],
                 [
                     'id'           => 'emails',
-                    'url'          => 'emails',
+                    'url'          => "edit?table=email",
                     'title'        => t('Emails'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-mailbox',

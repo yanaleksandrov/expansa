@@ -11,26 +11,42 @@ if (!defined('EX_PATH')) {
     exit;
 }
 
-$table = new App\Tables\Media();
-$column = $table->cells[0] ?? [];
+$table = $__data['table'] ?? null;
+if (! $table instanceof Expansa\Builders\Table) {
+    return;
+}
 
-Hook::add('expansa_dashboard_footer', function () {
+Hook::add('renderDashboardFooter', function () {
     echo view('dialogs/media-editor');
     echo view('dialogs/media-uploader');
-});
+}, 0);
+
+echo view('table/header', $table->headData());
 ?>
-<?php echo view('table/header', $table->headData()); ?>
-
-@if($table->data)
-    <div class="storage" x-storage>
-        @foreach($table->data as $item)
-            <div class="storage__item">
-                <?php echo view($column->view, $item); ?>
+<div class="storage" v-data="{items: {}}">
+    <div class="storage__item" v-each.lazy="(item, i) in items" @click="$dialog.open('tmpl-media-editor', item)">
+        <template v-if="item.url || item.icon">
+            <img class="storage__image" :src="item.sizes?.thumbnail?.url || item.url || item.icon" width="200" height="200">
+            <div class="storage__meta">
+                <div class="storage__data" v-text="item.sizeHumanize"></div>
             </div>
-        @endforeach
+        </template>
+        <template v-if="!item.url && !item.icon">
+            <img class="storage__image" src="{{ url('/dashboard/assets/images/files/broken.svg') }}" title="{{ t('Image is broken') }}" width="40" height="40">
+        </template>
     </div>
-@else
-    <?php echo view('global/state', $table->notFoundData()); ?>
-@endif
+    @foreach($table->data as $item)
+        <div class="storage__item" @click="$dialog.open('tmpl-media-editor', item)">
+            <img class="storage__image" src="{{ $item['sizes']['thumbnail']['url'] ?? $item['url'] ?? $item['icon'] ?? '' }}" width="200" height="200">
+            <div class="storage__meta">
+                <div class="storage__data">{{ $item['sizeHumanize'] ?? '' }}</div>
+            </div>
+        </div>
+    @endforeach
 
-<div x-intersect="$ajax('media/get').then(({posts}) => items = posts)"></div>
+    <div v-hide="items.length === 0">
+        <?php echo view('global/state', $table->notFoundData()); ?>
+    </div>
+
+    <div x-intersect="$ajax('media/get').then(({posts}) => items = posts)"></div>
+</div>
