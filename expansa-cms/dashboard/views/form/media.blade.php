@@ -8,9 +8,7 @@ use Expansa\Support\Arr;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 [$type, $name, $label, $label_class, $class, $description, $attributes, $tooltip] = Safe::data(
     $__data ?? [],

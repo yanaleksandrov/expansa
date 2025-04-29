@@ -4,8 +4,6 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 {!! form('user-profile', EX_DASHBOARD . 'forms/user-profile.php') !!}

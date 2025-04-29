@@ -6,9 +6,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <!-- email editor template start -->
 <template id="tmpl-api-keys-manager">

@@ -4,9 +4,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <div class="mw-400" x-data="expansa">
     <div class="df jcc">

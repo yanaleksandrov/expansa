@@ -4,8 +4,6 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 {!! form('multilingual-settings', EX_DASHBOARD . 'forms/multilingual-settings.php') !!}

@@ -9,9 +9,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 [$title, $badge, $show, $content, $uploader, $filter, $actions, $search, $translation] = Safe::data($__data ?? [], [
     'title'       => 'trim',

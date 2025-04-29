@@ -4,9 +4,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 $table = new App\Tables\Themes();
 ?>

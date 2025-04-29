@@ -4,9 +4,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <div class="expansa-main p-7 bg-gray-lt">
     <div class="mw-600 m-auto">

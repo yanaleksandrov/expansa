@@ -5,9 +5,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <!-- post editor template start -->
 <template id="tmpl-post-editor" x-init="$dialog.init(() => postEditorDialog)">

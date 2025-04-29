@@ -9,9 +9,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 $class = Safe::class($__data['key'] ?? [] );
 $prop  = Safe::prop($__data['key'] ?? [] );

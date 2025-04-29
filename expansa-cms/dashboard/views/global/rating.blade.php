@@ -7,9 +7,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 [$class, $rating, $reviews] = Safe::data(
     $__data ?? [],
