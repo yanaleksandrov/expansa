@@ -34,7 +34,6 @@ class Humanize
      * Converts a human-readable file size value to a number of bytes that it represents.
      * Supports the following modifiers: K, M, G and T.
      * Invalid input is returned unchanged.
-     *
      * Example:
      * <code>
      * $this->to_bytes(10);          // 10
@@ -48,9 +47,9 @@ class Humanize
      * </code>
      *
      * @param string $value
-     * @return int
+     * @return null|array|string|string[]
      */
-    public static function toBytes(string $value): int
+    public static function toBytes(string $value): array|null|string
     {
         return preg_replace_callback(
             '/^\s*(\d+)\s*(?:([kmgt]?)b?)?\s*$/i',
