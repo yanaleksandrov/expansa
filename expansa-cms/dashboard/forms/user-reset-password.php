@@ -55,7 +55,7 @@ return \Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'class'     => 'btn btn--lg btn--primary btn--full',
-				'disabled'  => '',
+                'disabled'  => true,
 				':disabled' => '!/\S+@\S+\.\S+/.test(email)',
 			],
 		],

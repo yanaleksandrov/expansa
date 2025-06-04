@@ -31,6 +31,7 @@ $btnSizes: ();
 			'padding-inline': #{map-get($value, 'height') / 16 / 2.22222222222}rem,
 			'font-size': #{map-get($value, 'font') / 16}rem,
 			'height': #{map-get($value, 'height') / 16}rem,
+			'border-radius': var(--expansa-border-radius#{$suffix}),
 		)
 	));
 }
@@ -40,10 +41,12 @@ $fieldSizes: ();
 	@if $suffix != '' {
 		$suffix: '--' + #{$suffix};
 	}
+
 	$fieldSizes: map-merge($fieldSizes, (
 		#{$suffix}: (
 			'font-size': #{map-get($value, 'font') / 16}rem,
 			'height': #{map-get($value, 'height') / 16}rem,
+			'border-radius': var(--expansa-border-radius#{$suffix}),
 		)
 	));
 }

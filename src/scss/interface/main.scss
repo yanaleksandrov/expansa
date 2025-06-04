@@ -247,7 +247,7 @@ textarea {
   &[readonly],
   &[disabled] {
     background-color: #f7f7f7;
-    border-color: #f7f7f7 !important;
+    border-color: var(--expansa-border) !important;
     cursor: not-allowed;
     resize: none;
     transition: none;
@@ -286,6 +286,7 @@ button {
   &[readonly],
   &[disabled] {
     background-color: #f7f7f7 !important;
+    border: 1px solid var(--expansa-border) !important;
     color: var(--expansa-text-muted) !important;
     box-shadow: none;
     cursor: not-allowed;

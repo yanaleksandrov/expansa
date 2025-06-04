@@ -10,7 +10,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 ?>
-<div class="mw-360">
+<main class="mw-360">
 	<a href="{{ url() }}" class="df jcc mb-4" target="_blank">
 		<img src="{{ url('dashboard/assets/images/logo-grid.svg') }}" width="212" height="124" alt="Expansa CMS">
 	</a>
@@ -18,4 +18,4 @@ if ( ! defined( 'EX_PATH' ) ) {
 	<div class="t-center t-muted mt-3">
 		{!! t('I remembered the password, [send](:signInLink) me to the sign in page', url('dashboard/sign-in')) !!}
 	</div>
-</div>
+</main>
