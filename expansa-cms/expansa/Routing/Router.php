@@ -314,7 +314,7 @@ class Router
                 $this->trigger404();
             }
         } elseif ($callback && is_callable($callback)) {
-            $callback();
+            $callback($this);
         }
 
         // If it originally was a HEAD request, clean up after ourselves by emptying the output buffer
@@ -502,6 +502,7 @@ class Router
 
     private function invoke($fn, $params = []): void
     {
+        $params = [232456786];
         if (is_callable($fn)) {
             call_user_func_array($fn, $params);
         } else {

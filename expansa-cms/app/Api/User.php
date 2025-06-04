@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api;
 
+use Expansa\Facades\Json;
 use Expansa\Facades\Mail;
 use Expansa\Facades\Safe;
 use Expansa\Facades\View;
@@ -86,26 +87,27 @@ class User
      *
      * @url    GET api/user/sign-in
      */
-    public static function signIn(): array
+    public static function signIn($data): string
     {
+        var_dump($data);
         $user = \App\User::login($_POST);
         if ($user instanceof \Expansa\Debug\Error) {
-            return [
+            return Json::encode([
                 [
                     'target'   => 'body',
                     'method'   => 'notify',
                     'fragment' => $user->get('user-login'),
                 ],
-            ];
+            ]);
         }
 
-        return [
+        return Json::encode([
             [
                 'target'   => 'body',
                 'method'   => 'redirect',
                 'fragment' => url('dashboard'),
             ],
-        ];
+        ]);
     }
 
     /**

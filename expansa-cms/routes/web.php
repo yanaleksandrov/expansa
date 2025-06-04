@@ -9,6 +9,7 @@ use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
 use Expansa\Support\Is;
 
+var_dump('4523463457');
 Route::get('/(.*)', function ($slug) {
     /**
      * Expansa dashboard panel.
