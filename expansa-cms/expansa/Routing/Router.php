@@ -502,7 +502,6 @@ class Router
 
     private function invoke($fn, $params = []): void
     {
-        $params = [232456786];
         if (is_callable($fn)) {
             call_user_func_array($fn, $params);
         } else {

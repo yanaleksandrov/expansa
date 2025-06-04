@@ -47,11 +47,11 @@ Route::middleware('/api', function () {
     }
 });
 
-/**
- * Launch routing.
- *
- * @since 2025.1
- */
-Route::run();
-
-exit;
+///**
+// * Launch routing.
+// *
+// * @since 2025.1
+// */
+//Route::run();
+//
+//exit;
