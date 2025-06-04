@@ -4,9 +4,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 echo tree('dashboard-main-menu', $test = function ($items, $tree) use (&$test) {
     if (empty($items) || !is_array($items)) {

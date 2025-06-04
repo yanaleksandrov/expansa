@@ -57,7 +57,7 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'mynaui', 'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
@@ -125,7 +125,7 @@ new class
                 ],
                 [
                     'id'           => 'emails',
-                    'url'          => 'emails',
+                    'url'          => "edit?table=email",
                     'title'        => t('Emails'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-mailbox',
@@ -146,14 +146,6 @@ new class
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-gear',
                     'position'     => 900,
-                ],
-                [
-                    'id'           => 'translation',
-                    'url'          => 'translation',
-                    'title'        => t('Translation'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-translate',
-                    'position'     => 1000,
                 ],
             ]
         ));
@@ -320,15 +312,6 @@ new class
                     'parent_id'    => 'dialogs',
                 ],
                 [
-                    'id'           => 'chat',
-                    'url'          => 'chat',
-                    'title'        => t('Chat'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => '',
-                    'position'     => 10,
-                    'parent_id'    => 'dialogs',
-                ],
-                [
                     'id'       => 'divider-customization',
                     'title'    => t('Customization'),
                     'position' => 300,
@@ -410,6 +393,32 @@ new class
                     'icon'         => '',
                     'position'     => 20,
                     'parent_id'    => 'tools',
+                ],
+                [
+                    'id'           => 'translation',
+                    'url'          => 'edit?table=translation',
+                    'title'        => t('Multilingual'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-translate',
+                    'position'     => 800,
+                ],
+                [
+                    'id'           => 'translations',
+                    'url'          => 'edit?table=translation',
+                    'title'        => t('Translations'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 20,
+                    'parent_id'    => 'translation',
+                ],
+                [
+                    'id'           => 'translations-settings',
+                    'url'          => 'multilingual-settings',
+                    'title'        => t('Settings'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 30,
+                    'parent_id'    => 'translation',
                 ],
             ]
         ));

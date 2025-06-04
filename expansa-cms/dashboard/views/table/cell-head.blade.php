@@ -9,9 +9,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 [$key, $cell, $title, $sortable] = Safe::data(
 	(array) $__data['cell'] ?? [],

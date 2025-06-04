@@ -17,8 +17,4 @@ interface FileInterface
     public function read(): string;
 
     public function touch(?int $time = null, ?int $atime = null): File;
-
-    public function upload(array $file): File;
-
-    public function grab(string $url): File;
 }

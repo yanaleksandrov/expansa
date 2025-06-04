@@ -9,7 +9,7 @@ use Expansa\Facades\Safe;
  *
  * @since 2025.1
  */
-return \Expansa\Facades\Form::enqueue(
+return Expansa\Facades\Form::enqueue(
 	'settings',
 	[
 		'class'   => 'tab tab--vertical',
@@ -169,13 +169,13 @@ return \Expansa\Facades\Form::enqueue(
 								'users[membership]' => [
 									'content'     => t( 'Anyone can register' ),
 									'icon'        => 'ph ph-user-list',
-									'description' => t( 'An avatar is an image that can be associated with a user across multiple websites. In this area, you can choose to display avatars of users who interact with the site.' ),
+									'description' => t( 'An avatar is an image that can be associated with a user across multiple websites. In this area, you can choose to display avatars of users who interact with the site' ),
 									'checked'     => Option::get( 'users.membership', true ),
 								],
 								'users[moderate]' => [
 									'content'     => t( 'Must confirm' ),
 									'icon'        => 'ph ph-police-car',
-									'description' => t( 'Configure the account verification algorithm.' ),
+									'description' => t( 'Configure the account verification algorithm' ),
 									'checked'     => Option::get( 'users.moderate', false ),
 								],
 							],
@@ -422,13 +422,13 @@ return \Expansa\Facades\Form::enqueue(
 									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[close_comments_for_old_posts]' => [
-									'content'     => t( 'Automatically close comments on posts older than %s days', '<i class="field--sm field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></i>' ),
+									'content'     => t( 'Automatically close comments on posts older than %s days', '<i class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></i>' ),
 									'icon'        => 'ph ph-hourglass-medium',
 									'description' => '',
 									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[thread_comments]' => [
-									'content'     => t( 'Enable threaded (nested) comments %s levels deep', '<i class="field--sm field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></i>' ),
+									'content'     => t( 'Enable threaded (nested) comments %s levels deep', '<i class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></i>' ),
 									'icon'        => 'ph ph-stack',
 									'description' => '',
 									'checked'     => Option::get( 'comments.default_status' ),
@@ -672,7 +672,7 @@ return \Expansa\Facades\Form::enqueue(
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
-							'before'      => sprintf( '<code class="badge"><i class="ph ph-link"></i> %s</code>', url() ),
+							'before'      => sprintf( '<code><i class="ph ph-link"></i> %s</code>', url() ),
 							'after'       => '',
 							'instruction' => t( 'Select the permalink structure for your website. Including the %slug% tag makes links easy to understand, and can help your posts rank higher in search engines.' ),
 							'tooltip'     => t( 'ZIP Code must be US or CDN format. You can use an extended ZIP+4 code to determine address more accurately.' ),
@@ -691,7 +691,7 @@ return \Expansa\Facades\Form::enqueue(
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
-							'before'      => sprintf( '<code class="badge"><i class="ph ph-link"></i> %s</code>', url() ),
+							'before'      => sprintf( '<code><i class="ph ph-link"></i> %s</code>', url() ),
 							'after'       => '',
 							'instruction' => '',
 							'tooltip'     => '',

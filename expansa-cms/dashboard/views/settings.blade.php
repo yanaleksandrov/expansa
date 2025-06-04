@@ -4,8 +4,6 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <?php echo form('settings', EX_DASHBOARD . 'forms/settings.php'); ?>

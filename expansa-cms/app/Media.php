@@ -112,35 +112,38 @@ final class Media
      */
     public static function upload(array $file): int|Error
     {
-        // TODO: add checking user capabilities
-
-        $targetDir = sprintf('%si/original/', EX_STORAGE);
+        $filepath = EX_STORAGE . 'i/original/' . ($file['name'] ?? '');
 
         // upload original image
-        $originalFile = Disk::upload($file, $targetDir, function ($file) {
-            $sizes = Patterns\Registry::get('images');
-            $types = [ 'image/jpeg', 'image/gif', 'image/png', 'image/bmp', 'image/webp', 'image/avif', 'image/tiff', 'image/x-icon' ];
+        print_r($file);
+        print_r($file['tmp_name']);
+        print_r($filepath);
+        $originalFile = Disk::file($filepath)->upload($file);
+        exit;
 
-            // now make smaller copies for images
-            if (in_array($file->mime, $types, true) && is_array($sizes)) {
-                foreach ($sizes as $size) {
-                    $width  = Safe::absint($size['width'] ?? 0);
-                    $height = Safe::absint($size['height'] ?? 0);
-                    if (! $width || ! $height) {
-                        continue;
-                    }
+        $sizes = Patterns\Registry::get('images');
+        $types = [ 'image/jpeg', 'image/gif', 'image/png', 'image/bmp', 'image/webp', 'image/avif', 'image/tiff', 'image/x-icon' ];
 
-                    // TODO: add file storage variations
-                    $filepathResize = str_replace(
-                        '/i/original/',
-                        sprintf('/i/%s/', implode('x', [ $width, $height ])),
-                        $file->path
-                    );
-
-                    ( new Image() )->fromFile($file->path)->thumbnail($width, $height)->toFile($filepathResize, $file->mime);
+        // now make smaller copies for images
+        if (in_array($file->mime, $types, true) && is_array($sizes)) {
+            foreach ($sizes as $size) {
+                $width  = Safe::absint($size['width'] ?? 0);
+                $height = Safe::absint($size['height'] ?? 0);
+                if (! $width || ! $height) {
+                    continue;
                 }
+
+                // TODO: add file storage variations
+                $filepathResize = str_replace(
+                    '/i/original/',
+                    sprintf('/i/%s/', implode('x', [ $width, $height ])),
+                    $file->path
+                );
+
+                Image::load($file->path)->crop($width, $height)->save($filepathResize);
+                (new Image())->fromFile($file->path)->thumbnail($width, $height)->toFile($filepathResize, $file->mime);
             }
-        });
+        }
 
         if ($originalFile instanceof Error) {
             return $originalFile;

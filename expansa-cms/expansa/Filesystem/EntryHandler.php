@@ -12,6 +12,8 @@ class EntryHandler
 
     /**
      * Trait that provides file-related properties.
+     *
+     * @param string $path
      */
     public function __construct(string $path)
     {
@@ -155,6 +157,8 @@ class EntryHandler
 
     /**
      * Determine if a file exists.
+     *
+     * @return bool
      */
     protected function isExists(): bool
     {

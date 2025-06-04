@@ -12,11 +12,39 @@ final class Users extends Table
     {
         return [
             [
-                'cb'     => '<input type="checkbox" name="post[]" x-bind="switcher">',
-                'avatar' => 'https://i.pravatar.cc/150?img=1',
+                'id'     => 1,
+                'image'  => 'https://i.pravatar.cc/150?img=1',
                 'name'   => 'Izabella Tabakova',
                 'email'  => 'codyshop@team.com',
-                'role'   => 'Admin',
+                'status' => 'Active',
+                'role'   => 'admin',
+                'visit'  => '3 days ago',
+            ],
+            [
+                'id'     => 1,
+                'image'  => 'https://i.pravatar.cc/150?img=2',
+                'name'   => 'Izabella Tabakova',
+                'email'  => 'codyshop@team.com',
+                'status' => 'Active',
+                'role'   => 'subscriber',
+                'visit'  => '3 days ago',
+            ],
+            [
+                'id'     => 1,
+                'image'  => 'https://i.pravatar.cc/150?img=3',
+                'name'   => 'Izabella Tabakova',
+                'email'  => 'codyshop@team.com',
+                'status' => 'Active',
+                'role'   => 'editor',
+                'visit'  => '3 days ago',
+            ],
+            [
+                'id'     => 1,
+                'image'  => 'https://i.pravatar.cc/150?img=4',
+                'name'   => 'Izabella Tabakova',
+                'email'  => 'codyshop@team.com',
+                'status' => 'Active',
+                'role'   => 'author',
                 'visit'  => '3 days ago',
             ],
         ];
@@ -25,11 +53,12 @@ final class Users extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')->title('<input type="checkbox" x-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
+            $this->cell('id')->title('<input type="checkbox" x-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
             $this->cell('image')->fixedWidth('2.5rem')->view('image'),
             $this->cell('name')->title(t('Name'))->flexibleWidth('16rem')->sortable()->view('title'),
-            $this->cell('role')->title(t('Role'))->fixedWidth('6rem')->view('raw'),
-            $this->cell('visit')->title(t('Last visit'))->fixedWidth('6rem')->view('raw'),
+            $this->cell('status')->title(t('Status'))->fixedWidth('6rem')->view('raw'),
+            $this->cell('visit')->title(t('Last visit'))->fixedWidth('8rem')->view('raw'),
+            $this->cell('role')->title(t('Role'))->fixedWidth('8rem')->view('role'),
         ];
     }
 

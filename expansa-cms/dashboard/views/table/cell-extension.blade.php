@@ -8,9 +8,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 [$title, $description, $screenshot, $author, $categories, $installed, $active, $installations, $date, $reviews, $rating, $expansa, $version] = Safe::data(
     $__data ?? [],

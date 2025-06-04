@@ -517,9 +517,10 @@ final class Validator
      */
     protected function max(mixed $value, mixed $maximum_value): bool
     {
-        $value         = intval($value);
-        $maximum_value = intval($maximum_value);
         if (function_exists('bccomp')) {
+            $value         = strval($value);
+            $maximum_value = strval($maximum_value);
+
             return ! ( bccomp($value, $maximum_value, 14) === 1 );
         }
         return $maximum_value <= $value;
@@ -534,9 +535,10 @@ final class Validator
      */
     protected function min(mixed $value, mixed $minimum_value): bool
     {
-        $value         = intval($value);
-        $minimum_value = intval($minimum_value);
         if (function_exists('bccomp')) {
+            $value         = strval($value);
+            $minimum_value = strval($minimum_value);
+
             return ! ( bccomp($minimum_value, $value, 14) >= 0 );
         }
         return $minimum_value >= $value;

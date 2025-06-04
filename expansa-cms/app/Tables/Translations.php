@@ -16,11 +16,13 @@ final class Translations extends Table
         $filepath = EX_DASHBOARD . sprintf('i18n/%s.json', I18n::locale());
         $filetext = Disk::file($filepath)->read();
 
-        $json  = Json::decode($filetext, true);
-
         $data = [];
-        foreach ($json as $source => $value) {
-            $data['items'][] = [ 'source' => $source, 'value' => $value ];
+        if ($filetext) {
+            $json  = Json::decode($filetext, true);
+
+            foreach ($json as $source => $value) {
+                $data[] = compact('source', 'value');
+            }
         }
 
         return $data;
@@ -29,14 +31,8 @@ final class Translations extends Table
     public function cells(): array
     {
         return [
-            $this->cell('source')
-                ->title(t(':icon Source text - English', '<i class="ph ph-text-aa"></i>'))
-                ->attributes([ 'class' => 'translation__source' ])
-                ->view('raw'),
-            $this->cell('value')
-                ->title(t(':icon Translations - Russian', '<i class="ph ph-globe-hemisphere-east"></i>'))
-                ->attributes([ 'class' => 'translation__value' ])
-                ->view('translation'),
+            $this->cell('translation-source')->title(t('Source text')),
+            $this->cell('translation-value')->title(t('Translations')),
         ];
     }
 
@@ -44,7 +40,7 @@ final class Translations extends Table
     {
         return [
             'title'       => t('Translations'),
-            'badge'       => t('completed :stringsCount from :allStringsCount <i class="t-green">(:percent%)</i>', 56, 408, 25),
+            'badge'       => t('completed :stringsCount from :allStringsCount', 56, 408, 25) . '<i class="t-green">(25%)</i>',
             'translation' => true,
         ];
     }

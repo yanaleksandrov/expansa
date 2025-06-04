@@ -150,7 +150,7 @@
     }
 
     &-btn {
-      border: 1px solid var(--expansa-border);
+      background-color: var(--expansa-bg-universal);
       border-radius: var(--expansa-border-radius);
       overflow: hidden;
       height: 1.875rem;
@@ -852,27 +852,3 @@
   }
 }
 
-.translation {
-  width: 100%;
-
-  &__grid {
-    display: grid;
-    gap: 1px;
-    grid-template-columns: var(--expansa-grid-template-columns);
-    background-color: var(--expansa-border);
-    border-bottom: 1px solid var(--expansa-border);
-  }
-
-  &__source {
-    padding: 0.4rem 1.5rem;
-    background-color: var(--expansa-white);
-
-    @media (max-width: 1024px) {
-      padding-inline: 1.25rem;
-    }
-  }
-
-  &__value {
-    background-color: var(--expansa-white);
-  }
-}

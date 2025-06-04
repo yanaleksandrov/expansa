@@ -22,6 +22,4 @@ if ( ! defined( 'EX_PATH' ) ) {
 	]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts( $attributes ); ?>>
-    <span class="badge badge--green-lt" x-text="item.<?php echo $prop; ?>"></span>
-</div>
+<span class="badge badge--green-lt"><i class="ph ph-person-simple-throw"></i> {{ $__data[$prop] ?? '' }}</span>

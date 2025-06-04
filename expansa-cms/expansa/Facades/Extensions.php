@@ -9,6 +9,7 @@ use Expansa\Patterns\Facade;
 /**
  * Class Extensions provides a facade for managing including extensions: plugins & themes.
  *
+ * @method static array get(string $type)
  * @method static void enqueue(callable $callback)
  * @method static void boot(string $type)
  * @method static void activate(string $type)

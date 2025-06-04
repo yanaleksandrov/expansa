@@ -5,9 +5,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <!-- media uploader template start -->
 <template id="tmpl-media-uploader">

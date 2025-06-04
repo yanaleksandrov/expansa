@@ -6,20 +6,20 @@ use Expansa\Support\Arr;
 /**
  * Table raw text cell
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cells/raw.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cell-raw.blade.php
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
-[$prop, $attributes] = Safe::data(
+[$prop, $attributes, $source, $value] = Safe::data(
     $__data ?? [],
     [
         'key'        => 'prop',
         'attributes' => 'array',
+        'source'     => 'trim',
+        'value'      => 'trim',
     ]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts($attributes); ?> x-text="item.<?php echo $prop; ?>"></div>
+{{ $__data[$prop] ?? '' }}

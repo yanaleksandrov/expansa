@@ -59,15 +59,33 @@ Route::get('/(.*)', function ($slug) {
             //$page = '404';
         }
 
+        $tableName = $_GET['table'] ?? 'pages';
+        if ($slug === 'users') {
+            $slug  = 'edit';
+            $tableName = 'users';
+        }
+
         if ($slug === 'edit') {
-            $table = match ($_GET['table'] ?? 'page') {
-                'comments'     => new App\Tables\Comments(),
-                'translations' => new App\Tables\Translations(),
-                'emails'       => new App\Tables\Emails(),
-                'plugins'      => new App\Tables\Plugins(),
-                'users'        => new App\Tables\Users(),
-                default        => new App\Tables\Pages(),
-            };
+            $instances = [
+                'comments'    => App\Tables\Comments::class,
+                'translation' => App\Tables\Translations::class,
+                'emails'      => App\Tables\Emails::class,
+                'plugins'     => App\Tables\Plugins::class,
+                'users'       => App\Tables\Users::class,
+                'pages'       => App\Tables\Pages::class,
+            ];
+
+            $table = new ($instances[$tableName] ?? App\Tables\Pages::class)();
+
+            if ($tableName === 'media') {
+                $slug  = 'media';
+                $table = new App\Tables\Media();
+            }
+
+            if ($tableName === 'users') {
+                $slug  = 'edit';
+                $table = new App\Tables\Users();
+            }
         }
 
         // output view to frontend
@@ -76,8 +94,8 @@ Route::get('/(.*)', function ($slug) {
             'table'  => $table ?? null,
             'entity' => $entity,
         ]);
-        //$content = (new Expansa\Support\Html())->beautify($content->render());
-        $content = $content->render();
+        $content = (new Expansa\Support\Html())->beautify($content->render());
+        //$content = $content->render();
     }
 
     /**

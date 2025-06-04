@@ -9,9 +9,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 $fields    = Safe::array( $__data['fields'] ?? [] );
 $fields    = array_filter( $fields, fn( $field ) => $field['type'] === 'tab' );

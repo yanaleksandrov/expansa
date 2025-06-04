@@ -9,8 +9,6 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <input<?php echo Safe::attributes($__data['attributes'] ?? []); ?>>

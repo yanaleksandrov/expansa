@@ -229,9 +229,4 @@ class Directory extends EntryHandler implements CommonInterface, DirectoryInterf
         }
         return $this;
     }
-
-    public function get(string $path): Directory
-    {
-        return new self($path);
-    }
 }

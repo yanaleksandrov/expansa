@@ -1194,7 +1194,7 @@ document.addEventListener( 'alpine:init', () => {
 
 			// TODO: при уменьшении экрана, элемент не помещается
 			// в то же время нужно соблюсти ширину как у нативного select
-			// select.selectEl.nextSibling.style.minWidth = `${width}px`;
+			select.selectEl.nextSibling.style.minWidth = `${width}px`;
 		} catch(e) {
 			console.error(e);
 		}

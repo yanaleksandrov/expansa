@@ -5,9 +5,7 @@
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <!-- media editor template start -->
 <template id="tmpl-media-editor" x-init="$dialog.init(() => $ajax('media/get'))">

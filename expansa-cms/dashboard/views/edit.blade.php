@@ -7,9 +7,7 @@ use Expansa\Facades\Hook;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 $table = $__data['table'] ?? null;
 if (! $table instanceof Expansa\Builders\Table) {
@@ -20,23 +18,28 @@ Hook::add('expansa_dashboard_footer', function () {
     echo view('dialogs/emails-editor');
 });
 ?>
-<?php echo view('table/header', $table->headData()); ?>
+<div class="table" x-data="table" style="{{ $table->stylize($table->cells) }}">
+    <div class="table__header">
+        <?php echo view('table/header', $table->headData()); ?>
 
-@if($table->data)
-    <div class="table" x-data="table">
-        <div class="table__head" style="{{ $table->stylize($table->cells) }}">
+        <div class="table__head">
             @foreach($table->cells as $cell)
-                <?php echo view('table/cell-head', [ 'cell' => $cell ]); ?>
+                <?php echo view('table/cell-head', ['cell' => $cell]); ?>
             @endforeach
         </div>
+    </div>
+
+    @if($table->data)
         @foreach($table->data as $item)
-            <div class="table__row" style="{{ $table->stylize($table->cells) }}">
+            <div class="table__row hover">
                 @foreach($table->cells as $cell)
-                    <?php echo view($cell->view, ['class' => $cell->key, ...$item]); ?>
+                    <div class="{{ $cell->key }}">
+                        @include($cell->view, ['key' => $cell->key, ...$item])
+                    </div>
                 @endforeach
             </div>
         @endforeach
-    </div>
-@else
-    <?php echo view('global/state', $table->notFoundData()); ?>
-@endif
+    @else
+        <?php echo view('global/state', $table->notFoundData()); ?>
+    @endif
+</div>

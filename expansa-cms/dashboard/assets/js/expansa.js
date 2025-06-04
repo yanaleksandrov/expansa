@@ -992,6 +992,7 @@ var __webpack_modules__ = {
                             return acc;
                         }), [])
                     });
+                    select.selectEl.nextSibling.style.minWidth = `${width}px`;
                 } catch (e) {
                     console.error(e);
                 }

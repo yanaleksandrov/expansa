@@ -1,27 +1,16 @@
 <?php
 
 use Expansa\Facades\Safe;
-use Expansa\Support\Arr;
 
 /**
  * Table raw text cell
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cells/text.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/table/cell-cb.blade.php
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
-[$prop, $attributes] = Safe::data(
-    $__data ?? [],
-	[
-		'key'        => 'prop',
-		'attributes' => 'array',
-	]
-)->values();
+$prop = Safe::prop($__data['key'] ?? '');
 ?>
-<div<?php echo Arr::toHtmlAtts($attributes); ?>>
-    <input type="checkbox" :name="`items[${i}]`" :value="item.<?php echo $prop; ?>" x-bind="switcher"/>
-</div>
+<input type="checkbox" :name="`items[${i}]`" x-bind="switcher"/>

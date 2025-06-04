@@ -8,9 +8,7 @@ use Expansa\Support\Arr;
  *
  * @package Expansa\Templates
  */
-if (!defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 if (!is_array($data) || empty($row) || empty($columns)) {
     return;
