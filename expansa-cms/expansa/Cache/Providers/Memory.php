@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Cache;
+namespace Expansa\Cache\Providers;
 
 use DateTime;
+use Expansa\Cache\Traits;
 use Expansa\Facades\Db;
 
-final class Manager
+class Memory
 {
     use Traits;
 
