@@ -38,7 +38,7 @@ final class User
 
     public string $email = '';
 
-    public string $locale = '';
+    public ?string $locale = '';
 
     public string $registered = '';
 

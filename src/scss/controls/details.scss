@@ -19,7 +19,7 @@
   &-content {
     position: absolute;
     z-index: 99;
-    border-radius: var(--expansa-border-radius-lg);
+    border-radius: var(--expansa-border-radius--lg);
     border: 1px solid var(--expansa-border);
     background-color: var(--expansa-white);
     top: calc(100% + 0.125rem);

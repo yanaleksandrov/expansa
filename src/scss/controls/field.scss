@@ -10,7 +10,7 @@
     flex-wrap: wrap;
     padding: 0.25rem;
     background-color: var(--expansa-bg);
-    border-radius: var(--expansa-border-radius-xl);
+    border-radius: var(--expansa-border-radius--xl);
   }
 
   &--grid {
@@ -320,6 +320,10 @@
       border-color: var(--expansa-link);
       box-shadow: 0 0 0 1px var(--expansa-link);
       z-index: 1;
+    }
+
+    &:has(.ss-main) {
+      padding-inline: 0;
     }
 
     &:has(.ss-main:not(.ss-open-below)):focus-within {
