@@ -70,7 +70,6 @@ Route::get('/(.*)', function ($slug) {
                 'comments'    => App\Tables\Comments::class,
                 'translation' => App\Tables\Translations::class,
                 'emails'      => App\Tables\Emails::class,
-                'plugins'     => App\Tables\Plugins::class,
                 'users'       => App\Tables\Users::class,
                 'pages'       => App\Tables\Pages::class,
             ];

@@ -80,10 +80,10 @@ Expansa\Facades\I18n::configure(
  *
  * @since 2025.1
  */
-Expansa\Facades\Extensions::enqueue(fn () => [
-    ...Expansa\Facades\Disk::dir(EX_PLUGINS)->files('*/*.php'),
-    ...Expansa\Facades\Disk::dir(EX_THEMES)->files('*/*.php'),
-]);
-
-Expansa\Facades\Extensions::boot('plugin');
-Expansa\Facades\Extensions::boot('theme');
+//Expansa\Facades\Extensions::enqueue(fn () => [
+//    ...Expansa\Facades\Disk::dir(EX_PLUGINS)->files('*/*.php'),
+//    ...Expansa\Facades\Disk::dir(EX_THEMES)->files('*/*.php'),
+//]);
+//
+//Expansa\Facades\Extensions::boot('plugin');
+//Expansa\Facades\Extensions::boot('theme');

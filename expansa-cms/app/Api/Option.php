@@ -39,22 +39,15 @@ class Option
     {
         $options = Arr::exclude($_POST, [ 'nonce' ]);
         if ($options) {
-            print_r($options);
             foreach ($options as $option => $value) {
-                print_r(Arr::dot([ $option => $value ]));
-                //Option::modify( $option, $value );
+                \App\Option::update($option, $value);
             }
         }
 
         return [
             [
-                'fragment' => t('Options is updated successfully'),
-                'target'   => 'body',
-                'method'   => 'notify',
-                'custom'   => [
-                    'type'     => 'success',
-                    'duration' => 5000,
-                ],
+                'target' => 'body',
+                'notify' => t('Options is updated successfully'),
             ],
         ];
     }

@@ -119,7 +119,7 @@ final class Option
      *
      * @param string $option  Name of the option to retrieve.
      * @param mixed  $value   Option value as a number, string, or array. The array will be serialized.
-     * @return int            Number of updated rows or false, if option and value is exists.
+     * @return bool|int       Number of updated rows or false, if option and value is exists.
      */
     public static function update(string $option, mixed $value): bool|int
     {
