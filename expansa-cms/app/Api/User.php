@@ -87,16 +87,16 @@ class User
      *
      * @url    GET api/user/sign-in
      */
-    public static function signIn($data): string
+    public static function signIn(): string
     {
-        var_dump($data);
         $user = \App\User::login($_POST);
         if ($user instanceof \Expansa\Debug\Error) {
-            return Json::encode([
-                [
-                    'target'   => 'body',
-                    'method'   => 'notify',
-                    'fragment' => $user->get('user-login'),
+            echo Json::encode([
+                'data' => [
+                    [
+                        'target' => 'body',
+                        'notify' => $user->get('user-login')[0],
+                    ],
                 ],
             ]);
         }

@@ -182,7 +182,7 @@ class Router
      * @param string   $baseRoute The route sub pattern to mount the callbacks on
      * @param callable $fn        The callback method
      */
-    public function middleware(string $baseRoute, callable $fn): void
+    public function prefix(string $baseRoute, callable $fn): void
     {
         // Track current base route
         $curBaseRoute = $this->baseRoute;

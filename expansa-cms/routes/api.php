@@ -22,7 +22,7 @@ Route::before('GET|POST', '/api/.*', function () {
     $csrf->generate('token');
 });
 
-Route::middleware('/api', function () {
+Route::prefix('/api', function () {
     foreach (
         [
             App\Api\Extensions::class,
@@ -46,12 +46,3 @@ Route::middleware('/api', function () {
         }
     }
 });
-
-///**
-// * Launch routing.
-// *
-// * @since 2025.1
-// */
-//Route::run();
-//
-//exit;

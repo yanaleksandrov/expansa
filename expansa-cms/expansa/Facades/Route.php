@@ -18,7 +18,7 @@ use Expansa\Patterns\Facade;
  * @method static void delete(string $pattern, callable|object $callback)
  * @method static void put(string $pattern, callable|object $callback)
  * @method static void options(string $pattern, callable|object $callback)
- * @method static void middleware(string $baseRoute, callable $callback)
+ * @method static void prefix(string $baseRoute, callable $callback)
  * @method static void run(object|callable $callback = null)
  * @method static void set404(object|callable|string $matchFn, object|callable $callback = null)
  * @method static void trigger404(mixed $match = null)

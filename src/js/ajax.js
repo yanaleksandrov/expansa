@@ -34,9 +34,7 @@ document.addEventListener( 'alpine:init', () => {
 					);
 
 					if (Array.isArray(data)) {
-						data.forEach(({method, fragment, selectors, delay}) => {
-							parseFragment(method, fragment, selectors, delay)
-						});
+						data.forEach(item => parseFragment(item));
 					}
 				} catch (e) {
 					console.error(e);
@@ -136,13 +134,14 @@ document.addEventListener( 'alpine:init', () => {
 
 	/**
 	 *
-	 * @param method
-	 * @param fragment
-	 * @param selectors
-	 * @param delay
+	 * @param item
 	 */
-	function parseFragment(method, fragment, selectors = 'body', delay) {
-		[...document.querySelectorAll(selectors)].forEach(target => {
+	function parseFragment(item) {
+		const { target, ...rest } = item;
+
+		document.querySelectorAll(target).forEach(target => Object.entries(rest).forEach(([key, fragment]) => {
+			const [method, delay] = key.split(':');
+
 			setTimeout(() => {
 				switch (method) {
 					case 'changeURL':
@@ -204,7 +203,7 @@ document.addEventListener( 'alpine:init', () => {
 						}
 						break;
 				}
-			}, delay || 0);
-		});
+			}, Number(delay || 0));
+		}));
 	}
 });

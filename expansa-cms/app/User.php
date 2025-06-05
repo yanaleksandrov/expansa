@@ -38,7 +38,7 @@ final class User
 
     public string $email = '';
 
-    public ?string $locale = '';
+    public string $locale = '';
 
     public string $registered = '';
 
@@ -360,8 +360,8 @@ final class User
             'password' => 'required',
         ])->apply();
 
-        if ($userdata instanceof Validator) {
-            return error('user-login', $userdata);
+        if ($userdata instanceof SecurityValidator) {
+            return error('user-login', $userdata->errors);
         }
 
         [ $loginOrEmail, $password, $remember ] = array_values($userdata);
