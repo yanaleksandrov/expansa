@@ -1,12 +1,12 @@
 @import '../constants/index.scss';
 
 .btn {
-  color: inherit;
+  color: var(--expansa-dark);
   font: inherit;
   font-weight: 500;
   overflow: hidden;
   position: relative;
-  padding: 0 1em;
+  padding: 0 0.875em;
   outline: 0;
   gap: 0.3em !important;
   display: inline-flex;
@@ -15,7 +15,7 @@
   white-space: nowrap;
   min-width: fit-content;
   width: fit-content;
-  border-radius: 0.6em;
+  border-radius: var(--expansa-border-radius);
   text-decoration: none;
   transition: background-color 0.15s;
   -webkit-user-select: none;
@@ -26,19 +26,9 @@
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-image: radial-gradient(100% 100% at 15% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
 
   > * {
     font-size: inherit;
-  }
-
-  &:hover {
-    background-color: var(--expansa-bg-universal);
-  }
-
-  &:active {
-    border-color: rgb(27 31 36 / 15%);
-    background-color: var(--expansa-bg-hover);
   }
 
   @each $suffix, $properties in $btnSizes {
@@ -50,6 +40,7 @@
   }
 
   &--primary,
+  &--secondary,
   &--success,
   &--danger {
     box-shadow: 0 1px 1px #fff3 inset, 0 -1px 1px #0003 inset;
@@ -66,6 +57,20 @@
 
     &:active {
       background-color: var(--expansa-primary-active);
+    }
+  }
+
+  &--secondary {
+    background-color: var(--expansa-secondary);
+    color: var(--expansa-white);
+
+    &:hover {
+      background-color: var(--expansa-secondary-hover);
+      color: var(--expansa-white);
+    }
+
+    &:active {
+      background-color: var(--expansa-secondary-active);
     }
   }
 
@@ -139,6 +144,7 @@
     }
 
     &[class*="primary"]:hover:before,
+    &[class*="secondary"]:hover:before,
     &[class*="success"]:hover:before,
     &[class*="danger"]:hover:before {
       color: var(--expansa-white);
@@ -163,7 +169,7 @@
       border: 1.5px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
-      color: var(--expansa-secondary);
+      color: var(--expansa-text-secondary);
       position: absolute;
       width: 1em;
       height: 1em;
@@ -173,6 +179,7 @@
     }
 
     &[class*="primary"]:after,
+    &[class*="secondary"]:after,
     &[class*="success"]:after,
     &[class*="danger"]:after {
       color: var(--expansa-white);

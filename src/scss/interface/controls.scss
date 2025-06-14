@@ -155,7 +155,7 @@
     align-items: center;
     font-weight: 500;
     white-space: nowrap;
-    color: var(--expansa-secondary);
+    color: var(--expansa-text-secondary);
 
     &:hover,
     &.active {
@@ -357,7 +357,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--expansa-secondary);
+  color: var(--expansa-text-secondary);
   text-align: center;
   text-transform: uppercase;
   vertical-align: bottom;
@@ -443,7 +443,7 @@
 }
 
 .badge {
-  color: var(--expansa-secondary);
+  color: var(--expansa-text-secondary);
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;
@@ -508,7 +508,7 @@
       border: 1px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
-      color: var(--expansa-secondary);
+      color: var(--expansa-text-secondary);
       position: absolute;
       width: 1em;
       height: 1em;

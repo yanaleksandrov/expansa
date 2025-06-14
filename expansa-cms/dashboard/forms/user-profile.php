@@ -17,9 +17,11 @@ $field = new Field($user);
 return \Expansa\Facades\Form::enqueue(
     'user-profile',
     [
-        'class'   => 'tab',
-        'x-data'  => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
-        '@change' => '$ajax("user/update")',
+        'class'           => 'tab',
+        'x-data'          => sprintf("{ isChanged: false, ...tab('%s') }", Safe::prop($_GET['tab'] ?? 'profile')),
+        '@reset'          => 'isChanged = false, $warnOnUnload.remove()',
+        '@change'         => 'isChanged = true, $warnOnUnload.add("Профиль не сохранён!")',
+	    '@submit.prevent' => '$ajax("user/update").then(() => isChanged = false)',
     ],
     [
         [
@@ -555,6 +557,22 @@ return \Expansa\Facades\Form::enqueue(
                     ],
                 ],
             ],
+        ],
+        [
+            'type'     => 'custom',
+            'callback' => function () {
+                ?>
+	            <div class="expansa-form-actions" :class="isChanged && 'is-active'">
+		            <div class="expansa-form-actions-caption">
+			            <i class="ph ph-warning-circle"></i> <?php echo t('Unsaved changes'); ?>
+		            </div>
+		            <div class="expansa-form-actions-buttons">
+			            <button class="btn t-red" type="reset"><?php echo t('Discard'); ?></button>
+			            <button class="btn t-green" type="submit"><?php echo t('Save'); ?></button>
+		            </div>
+	            </div>
+                <?php
+            },
         ],
     ]
 );

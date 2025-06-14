@@ -171,6 +171,28 @@ var __webpack_modules__ = {
                     }
                 };
             }));
+            Alpine.magic('warnOnUnload', (() => {
+                let shouldBlock = false;
+                function blockInternalNavigation(event) {
+                    const target = event.target.closest('a[href]');
+                    if (target && shouldBlock) {
+                        event.preventDefault();
+                        document.body.classList.add('is-shake');
+                        setTimeout((() => {
+                            document.body.classList.remove('is-shake');
+                        }), 500);
+                    }
+                }
+                window.addEventListener('click', blockInternalNavigation, true);
+                return {
+                    add() {
+                        shouldBlock = true;
+                    },
+                    remove() {
+                        shouldBlock = false;
+                    }
+                };
+            }));
             Alpine.magic('copy', (el => subject => {
                 window.navigator.clipboard.writeText(subject).then((() => {
                     let classes = 'ph-copy ph-check'.split(' ');

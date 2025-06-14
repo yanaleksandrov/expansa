@@ -227,7 +227,66 @@ document.addEventListener( 'alpine:init', () => {
 				} )
 			}
 		};
-	} )
+	} );
+
+	/**
+	 * Alpine.js magic property `$warnOnUnload`.
+	 *
+	 * Provides methods to add or remove a global `beforeunload` event listener
+	 * that warns the user about unsaved changes when attempting to leave the page.
+	 *
+	 * Note: Modern browsers ignore custom text and show a generic confirmation dialog.
+	 *
+	 * Methods:
+	 *   - add(text: string): void
+	 *       Adds the `beforeunload` event listener with the specified message.
+	 *       The message triggers the browser's leave confirmation dialog.
+	 *
+	 *   - remove(): void
+	 *       Removes the `beforeunload` event listener, disabling the warning.
+	 *
+	 * Usage example in Alpine component:
+	 *   <form
+	 *     @input="$warnOnUnload.add('You have unsaved changes!')"
+	 *     @submit="$warnOnUnload.remove()"
+	 *   >
+	 *     ...
+	 *   </form>
+	 */
+	Alpine.magic('warnOnUnload', () => {
+		let shouldBlock = false;
+
+		function blockInternalNavigation(event) {
+			const target = event.target.closest('a[href]');
+			if (target && shouldBlock) {
+				event.preventDefault();
+
+				document.body.classList.add('is-shake');
+
+				setTimeout(() => {
+					document.body.classList.remove('is-shake');
+				}, 500);
+			}
+		}
+
+		window.addEventListener('click', blockInternalNavigation, true);
+
+		return {
+			/**
+			 * Enables blocking by setting a flag and adding a class to <body>.
+			 */
+			add() {
+				shouldBlock = true;
+			},
+
+			/**
+			 * Disables blocking and removes the class.
+			 */
+			remove() {
+				shouldBlock = false;
+			}
+		};
+	});
 
 	/**
 	 * Copy data to clipboard.
