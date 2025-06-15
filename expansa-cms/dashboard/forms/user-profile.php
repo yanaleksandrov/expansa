@@ -5,6 +5,7 @@ use App\User;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
+use Expansa\Facades\Form;
 
 $user  = User::current();
 $field = new Field($user);
@@ -14,7 +15,7 @@ $field = new Field($user);
  *
  * @since 2025.1
  */
-return \Expansa\Facades\Form::enqueue(
+return Form::enqueue(
     'user-profile',
     [
         'class'           => 'tab',

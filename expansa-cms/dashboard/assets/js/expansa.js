@@ -946,78 +946,99 @@ var __webpack_modules__ = {
                 })).observe(el);
             }));
             Alpine.directive('select', ((el, {expression}) => {
-                const settings = {
-                    showSearch: false,
-                    hideSelected: false,
-                    closeOnSelect: true,
-                    isAddable: false,
-                    placeholderText: el.getAttribute('placeholder')
-                };
-                if (el.hasAttribute('multiple')) {
-                    settings.hideSelected = true;
-                    settings.closeOnSelect = false;
+                const settings = JSON.parse(expression || '{}');
+                if (true) {
+                    function setPrefix(data) {
+                        const {image, flag, icon} = data.element.dataset;
+                        return [ icon && `<i class="${icon}"></i>`, image && `<img src="${image}" alt />`, flag && `<svg role="presentation"><use xlink:href="${expansa?.spriteFlagsUrl}#${flag}"></use></svg>` ].filter(Boolean).join('').trim();
+                    }
+                    try {
+                        const select = new Choices(el, {
+                            silent: false,
+                            renderChoiceLimit: -1,
+                            maxItemCount: -1,
+                            closeDropdownOnSelect: 'auto',
+                            singleModeForMultiSelect: false,
+                            addChoices: false,
+                            addItems: true,
+                            addItemFilter: value => !!value && value !== '',
+                            removeItems: true,
+                            removeItemButton: el.multiple,
+                            removeItemButtonAlignLeft: false,
+                            editItems: false,
+                            allowHTML: true,
+                            allowHtmlUserInput: false,
+                            duplicateItemsAllowed: false,
+                            delimiter: ',',
+                            paste: true,
+                            searchEnabled: true,
+                            searchChoices: true,
+                            searchFloor: 1,
+                            searchResultLimit: 7,
+                            searchFields: [ 'label', 'value' ],
+                            position: 'auto',
+                            resetScrollPosition: true,
+                            shouldSort: true,
+                            shouldSortItems: false,
+                            shadowRoot: null,
+                            placeholder: true,
+                            placeholderValue: null,
+                            searchPlaceholderValue: null,
+                            prependValue: null,
+                            appendValue: null,
+                            renderSelectedChoices: 'auto',
+                            loadingText: expansa.loadingText || 'Loading...',
+                            noResultsText: expansa.noResultsText || 'No results found',
+                            noChoicesText: expansa.noChoicesText || 'No choices to choose from',
+                            itemSelectText: '',
+                            uniqueItemText: expansa.uniqueItemText || 'Only unique values can be added',
+                            customAddItemText: expansa.customAddItemText || 'Only values matching specific conditions can be added',
+                            addItemText: (value, rawValue) => `Press Enter to add <b>"${value}"</b>`,
+                            removeItemIconText: () => `Remove item`,
+                            removeItemLabelText: (value, rawValue) => `Remove item: ${value}`,
+                            maxItemText: maxItemCount => `Only ${maxItemCount} values can be added`,
+                            valueComparer: (value1, value2) => value1 === value2,
+                            callbackOnInit: null,
+                            appendGroupInSearch: false,
+                            callbackOnCreateTemplates: (template, escapeForTemplate, getClassNames, allowHTML) => ({
+                                item: ({classNames}, data) => {
+                                    const baseClasses = [ ...getClassNames(classNames.item), ...getClassNames(data.highlighted ? classNames.highlightedState : classNames.itemSelectable), data.placeholder ? classNames.placeholder : '' ];
+                                    const attrs = [ 'data-item', `data-id="${data.id}"`, `data-value="${escapeForTemplate(data.value)}"`, data.active ? 'aria-selected="true"' : '', data.disabled ? 'aria-disabled="true"' : '' ].filter(Boolean).join(' ');
+                                    const prefix = setPrefix(data);
+                                    return template(`<div class="${baseClasses.join(' ')}" ${attrs}>${prefix}${escapeForTemplate(allowHTML, data.label)}</div>`);
+                                },
+                                choice: ({classNames, itemSelectText}, data) => {
+                                    const baseClasses = [ ...getClassNames(classNames.item), ...getClassNames(classNames.itemChoice), ...getClassNames(data.disabled ? classNames.itemDisabled : classNames.itemSelectable) ];
+                                    const attrs = {
+                                        'data-select-text': itemSelectText,
+                                        'data-choice': '',
+                                        'data-id': data.id,
+                                        'data-value': escapeForTemplate(data.value),
+                                        role: data.groupId > 0 ? 'treeitem' : 'option'
+                                    };
+                                    if (data.disabled) {
+                                        attrs['data-choice-disabled'] = '';
+                                        attrs['aria-disabled'] = 'true';
+                                    } else {
+                                        attrs['data-choice-selectable'] = '';
+                                    }
+                                    const attributesString = Object.entries(attrs).map((([key, val]) => val === '' ? key : `${key}="${val}"`)).join(' ');
+                                    const prefix = setPrefix(data);
+                                    let description = data.element.dataset.description || '';
+                                    if (description) {
+                                        description = `<span class="choices__description">${description}</span>`;
+                                    }
+                                    return template(`<div class="${baseClasses.join(' ')}" ${attributesString}>\n\t\t\t\t\t\t\t\t${prefix}<span class="choices__text">${escapeForTemplate(allowHTML, data.label + description)}</span>\n\t\t\t\t\t\t\t</div>`);
+                                },
+                                ...settings
+                            })
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                    return;
                 }
-                const custom = JSON.parse(expression || '{}');
-                if (typeof custom === 'object') {
-                    Object.assign(settings, custom);
-                }
-                try {
-                    let width = el.offsetWidth;
-                    let select = new SlimSelect({
-                        settings,
-                        select: el,
-                        events: {
-                            afterChange: () => {
-                                el.dispatchEvent(new Event('change', {
-                                    bubbles: true
-                                }));
-                            },
-                            addable: value => {
-                                if (settings.isAddable) {
-                                    return value;
-                                }
-                            }
-                        },
-                        data: Array.from(el.options).reduce(((acc, option) => {
-                            let image = option.getAttribute('data-image') || '', flag = option.getAttribute('data-flag') || '', icon = option.getAttribute('data-icon') || '', description = option.getAttribute('data-description') || '';
-                            image = image && `<img src="${image}" alt />`;
-                            flag = flag && `<svg><use xlink:href="${expansa?.spriteFlagsUrl}#${flag}"></use></svg>`;
-                            icon = icon && `<i class="${icon}"></i>`;
-                            description = description && `<span class="ss-description">${description}</span>`;
-                            let optionData = {
-                                text: option.text,
-                                value: option.value,
-                                html: `${image}${icon}${flag}<span class="ss-text">${option.text}${description}</span>`,
-                                selected: option.selected,
-                                display: true,
-                                disabled: false,
-                                mandatory: false,
-                                placeholder: false,
-                                class: '',
-                                style: '',
-                                data: {}
-                            };
-                            if (option.parentElement.tagName === 'OPTGROUP') {
-                                const optgroupLabel = option.parentElement.getAttribute('label');
-                                const optgroup = acc.find((item => item.label === optgroupLabel));
-                                if (optgroup) {
-                                    optgroup.options.push(optionData);
-                                } else {
-                                    acc.push({
-                                        label: optgroupLabel,
-                                        options: [ optionData ]
-                                    });
-                                }
-                            } else {
-                                acc.push(optionData);
-                            }
-                            return acc;
-                        }), [])
-                    });
-                    select.selectEl.nextSibling.style.minWidth = `${width}px`;
-                } catch (e) {
-                    console.error(e);
-                }
+                {}
             }));
             Alpine.data('builder', (() => ({
                 default: {

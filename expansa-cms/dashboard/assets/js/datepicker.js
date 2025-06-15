@@ -236,11 +236,11 @@ var __webpack_modules__ = {
                 separator: ',',
                 serialize: function serialize(date) {
                     return date;
-                    var dateStr = new Date(date).toLocaleDateString(), timeStr = new Date(date).toLocaleTimeString();
-                    if (this.get('time')) {
-                        return dateStr + '@' + timeStr.replace(/( \d{1,2}:\d{2} ):00/, '$1');
+                    {
+                        var dateStr, timeStr;
                     }
-                    return dateStr;
+                    {}
+                    {}
                 },
                 deserialize: function deserialize(str) {
                     return new Date(str);

@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "air-datepicker": "^3.5.3",
+    "choices.js": "^11.1.0",
     "croppr": "^2.3.1",
     "slim-select": "^2.8.2",
     "sortablejs": "^1.15.3"

@@ -313,7 +313,7 @@
       }
     }
 
-    &:not(:has([readonly])):focus-within {
+    &:not(:has([readonly])):not(:has(.choices)):focus-within {
       color: inherit;
       outline: 0;
       background-color: #fff;

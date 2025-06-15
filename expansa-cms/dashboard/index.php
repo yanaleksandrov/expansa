@@ -57,13 +57,13 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'mynaui', 'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'mynaui', 'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'choices', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
-        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
+        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'choices', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'expansa') {
@@ -75,6 +75,11 @@ new class
                         'locale'              => I18n::locale(),
                         'dateFormat'          => 'j M, Y',
                         'weekStart'           => 1,
+                        'loadingText'         => t('Loading...'),
+                        'noResultsText'       => t('No results found'),
+                        'noChoicesText'       => t('No choices to choose from'),
+                        'uniqueItemText'      => t('Only unique values can be added'),
+                        'customAddItemText'   => t('Only values matching specific conditions can be added'),
                         'showFilter'          => false,
                         'bulk'                => false,
                         'showMenu'            => false,
