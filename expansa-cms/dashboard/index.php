@@ -104,7 +104,7 @@ new class
                             'class' => 'dialog--sm',
                         ],
                         'apiKeyManagerDialog' => [
-                            'title' => t('Create/update new project'),
+                            'title' => t('Create/update API key'),
                             'class' => 'dialog--sm',
                         ],
                     ]

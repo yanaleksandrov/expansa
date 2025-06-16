@@ -7,7 +7,7 @@
 return \Expansa\Facades\Form::enqueue(
 	'api-keys-manager',
 	[
-		'class'           => 'dg g-7 p-7',
+		'class'           => 'dg g-6 p-6',
 		'x-data'          => '',
 		'@submit.prevent' => "\$ajax('post/create')",
 	],
@@ -23,7 +23,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'          => 'group',
 			'name'          => 'manage',
 			'label'         => '',
-			'class'         => 'dg g-7 gtc-4 sm:gtc-1',
+			'class'         => 'dg g-6 gtc-4 sm:gtc-1',
 			'label_class'   => '',
 			'content_class' => '',
 			'fields'        => [
@@ -74,7 +74,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'          => 'group',
 			'name'          => 'manage',
 			'label'         => '',
-			'class'         => 'dg g-7 gtc-4 sm:gtc-1',
+			'class'         => 'dg g-6 gtc-4 sm:gtc-1',
 			'label_class'   => '',
 			'content_class' => '',
 			'fields'        => [
@@ -129,7 +129,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'          => 'group',
 			'name'          => 'manage',
 			'label'         => '',
-			'class'         => 'dg g-7 gtc-4 sm:gtc-1',
+			'class'         => 'dg g-6 gtc-4 sm:gtc-1',
 			'label_class'   => '',
 			'content_class' => '',
 			'fields'        => [
@@ -174,13 +174,13 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'url',
 			'name'        => 'sites',
-			'label'       => t( 'Allowed websites' ),
+			'label'       => t( 'Allowed website' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'The list of sites from which it is allowed to accept requests. Empty, so everyone is allowed.' ),
+			'instruction' => t( 'Site domain from which it is allowed to accept requests. Empty, so everyone is allowed.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',

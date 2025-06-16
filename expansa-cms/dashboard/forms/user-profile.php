@@ -19,10 +19,9 @@ return Form::enqueue(
     'user-profile',
     [
         'class'           => 'tab',
-        'x-data'          => sprintf("{ isChanged: false, ...tab('%s') }", Safe::prop($_GET['tab'] ?? 'profile')),
-        '@reset'          => 'isChanged = false, $warnOnUnload.remove()',
-        '@change'         => 'isChanged = true, $warnOnUnload.add("Профиль не сохранён!")',
-	    '@submit.prevent' => '$ajax("user/update").then(() => isChanged = false)',
+        'x-data'          => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
+		'x-init'          => '$dirtyCheck.watch($el)',
+	    '@submit.prevent' => '$ajax("user/update").then(() => $dirtyCheck.remove($el))',
     ],
     [
         [
@@ -522,35 +521,40 @@ return Form::enqueue(
                             'name'     => 'title',
                             'type'     => 'custom',
                             'callback' => function () {
-                                Hook::add('expansa_dashboard_footer', function () {
+                                Hook::add('renderDashboardFooter', function () {
                                     echo view('dialogs/api-keys-manager');
                                 });
                                 ?>
-                                <div class="dg g-2 ga-4">
-                                    <p><?php echo t('Application passwords allow authentication via non-interactive systems, such as REST API, without providing your actual password. Application passwords can be easily revoked. They cannot be used for traditional logins to your website.'); ?></p>
+                                <div class="dg ga-4" x-data="{keys: [{title: 'Amplication', createdAt: 'Nov 15, 2022'}]}">
                                     <div>
-                                        <button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
-                                            <i class="ph ph-plus"></i> Add new key
-                                        </button>
+	                                    <p><?php echo t('Application passwords allow authentication via non-interactive systems, such as REST API, without providing your actual password. Application passwords can be easily revoked. They cannot be used for traditional logins to your website.'); ?></p>
+	                                    <p>
+		                                    <button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
+			                                    <i class="ph ph-plus"></i> <?php echo t('Add new key'); ?>
+		                                    </button>
+	                                    </p>
+	                                    <template x-for="(key, i) in keys">
+		                                    <div class="p-4 df fdr g-4 card card-border">
+			                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
+				                                    <path d="M160 18a78 78 0 0 0-73.8 103.3l-58.4 58.5A6 6 0 0 0 26 184v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 4.2-1.8l10.5-10.4A78 78 0 1 0 160 18Zm0 144a65.6 65.6 0 0 1-24.4-4.7 6 6 0 0 0-6.7 1.3L117.5 170H96a6 6 0 0 0-6 6v18H72a6 6 0 0 0-6 6v18H38v-31.5L97.4 127a6 6 0 0 0 1.3-6.7A66 66 0 1 1 160 162Zm30-86a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
+			                                    </svg>
+			                                    <div class="dg g-1">
+				                                    <h6 class="fs-15" x-text="key.title"></h6>
+				                                    <code class="fs-12 bg-green-lt t-green">
+					                                    <span class="badge badge--sm badge--green-lt">Active</span> SHA256:Ai2xqyVBORX9PJJigJxfrdzXfKPajJHZMYw3+dOo+nw
+					                                    <i class="ph ph-copy" title="<?php echo t('Copy'); ?>" @click="$copy()"></i>
+				                                    </code>
+				                                    <div class="fs-12 t-muted lh-xs"><?php echo t('Created at'); ?> <span x-text="key.createdAt"></span></div>
+			                                    </div>
+			                                    <div class="ml-auto">
+				                                    <button class="btn btn--outline" type="button" @click="keys.splice(i, 1);"><i class="ph ph-trash-simple"></i> Delete</button>
+			                                    </div>
+		                                    </div>
+	                                    </template>
+	                                    <p class="df aic g-1 t-red fs-13">
+		                                    <i class="ph ph-info"></i> <?php echo t('Expansa CMS support will never ask you to share your secret keys.'); ?>
+	                                    </p>
                                     </div>
-                                    <div class="p-4 df fdr g-4 card card-border">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
-                                            <path d="M160 18a78 78 0 0 0-73.8 103.3l-58.4 58.5A6 6 0 0 0 26 184v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 4.2-1.8l10.5-10.4A78 78 0 1 0 160 18Zm0 144a65.6 65.6 0 0 1-24.4-4.7 6 6 0 0 0-6.7 1.3L117.5 170H96a6 6 0 0 0-6 6v18H72a6 6 0 0 0-6 6v18H38v-31.5L97.4 127a6 6 0 0 0 1.3-6.7A66 66 0 1 1 160 162Zm30-86a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
-                                        </svg>
-                                        <div class="dg g-1">
-                                            <h6 class="fs-15">Amplication</h6>
-                                            <code class="fs-12 bg-green-lt t-green">
-                                                <span class="badge badge--sm badge--green-lt">Active</span> SHA256:Ai2xqyVBORX9PJJigJxfrdzXfKPajJHZMYw3+dOo+nw
-                                                <i class="ph ph-copy" title="<?php echo t('Copy'); ?>" @click="$copy()"></i>
-                                            </code>
-                                            <div class="fs-12 t-muted lh-xs">Added on Nov 15, 2022</div>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <button class="btn btn--outline" type="button"><i class="ph ph-trash-simple"></i> Delete</button>
-                                        </div>
-                                    </div>
-                                    inspiration: https://dribbble.com/shots/24532847--API-keys
-                                    <div class="df aic g-1 t-red fs-13"><i class="ph ph-info"></i> Expansa CMS support will never ask you to share your secret keys.</div>
                                 </div>
                                 <?php
                             },
@@ -563,7 +567,7 @@ return Form::enqueue(
             'type'     => 'custom',
             'callback' => function () {
                 ?>
-	            <div class="expansa-form-actions" :class="isChanged && 'is-active'">
+	            <div class="expansa-form-actions">
 		            <div class="expansa-form-actions-caption">
 			            <i class="ph ph-warning-circle"></i> <?php echo t('Unsaved changes'); ?>
 		            </div>

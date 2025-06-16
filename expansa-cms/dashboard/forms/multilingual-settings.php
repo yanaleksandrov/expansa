@@ -62,8 +62,7 @@ return Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'value'    => Option::get( 'site.language' ),
-                                'x-select' => '{"showSearch": 1}',
+                                'value' => Option::get( 'site.language' ),
                             ],
                             'options' => [
                                 'comments[default_status]' => [
@@ -153,8 +152,7 @@ return Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'value'    => Option::get( 'site.language' ),
-                        'x-select' => '{"showSearch": 1}',
+                        'value' => Option::get( 'site.language' ),
                     ],
                     'options' => $options,
                 ],

@@ -57,6 +57,10 @@
   &-bar-menu {
     flex: 1;
     max-width: 33.3333%;
+
+    @media (max-width: 640px) {
+      max-width: 50%;
+    }
   }
 
   &-bar-search {
@@ -70,6 +74,10 @@
     display: flex;
     justify-content: end;
     max-width: 33.3333%;
+
+    @media (max-width: 640px) {
+      max-width: 50%;
+    }
   }
 
   &-panel {
@@ -159,7 +167,7 @@
   border-radius: var(--expansa-border-radius--lg);
   overflow: hidden;
   height: 2.25rem;
-  gap: 0.5rem;
+  line-height: 1;
   padding: 0.125rem;
   font-size: 0.8125rem;
   position: fixed;
@@ -167,7 +175,7 @@
   top: 0.5rem;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s, transform 0.15s, top 0.15s;
+  transition: opacity 0.15s, transform 0.15s, top 0.15s, visibility 0s linear 0.15s;
   inset-inline: 0;
   justify-content: space-between;
   display: flex;
@@ -176,15 +184,27 @@
   max-width: 33.333333%;
   margin: 0 auto;
 
-  &.is-active {
+  @media (max-width: 1024px) {
+    height: 2.375rem;
+    padding-inline: 0.5rem;
+    min-width: calc(100vw - 6.5rem);
+    box-shadow: none;
+  }
+
+  body.is-unsaved & {
     top: 0.1875rem;
     opacity: 1;
     visibility: visible;
     transform: scale(1);
+    transition: opacity 0.15s, transform 0.15s, top 0.15s, visibility 0s linear 0s;
+
+    @media (max-width: 1024px) {
+      top: 0.4375rem;
+    }
   }
 
   body.is-shake & {
-    animation: shake 0.4s ease-in-out;
+    animation: shake 0.5s ease-in-out 0.15s;
   }
 
   &-caption {
@@ -205,8 +225,8 @@
   cursor: pointer;
   margin: 0 auto;
 
-  @media (max-width: 1024px) {
-    width: 1.875rem;
+  @media (max-width: 640px) {
+    display: none;
   }
 
   code {
@@ -225,6 +245,7 @@
     color: var(--expansa-text-muted);
     font-size: 0.8125rem;
     box-shadow: inset 0 1px 0 #fff;
+    white-space: nowrap;
 
     code {
       font-size: 9px;

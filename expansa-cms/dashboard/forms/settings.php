@@ -12,9 +12,10 @@ use Expansa\Facades\Safe;
 return Expansa\Facades\Form::enqueue(
 	'settings',
 	[
-		'class'   => 'tab tab--vertical',
-		'x-data'  => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
-		'@change' => '$ajax("option/update")',
+		'class'           => 'tab tab--vertical',
+		'x-data'          => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
+        'x-init'          => '$dirtyCheck.watch($el)',
+        '@submit.prevent' => '$ajax("option/update").then(() => $dirtyCheck.remove($el))',
 	],
 	[
 		[
@@ -216,7 +217,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'dates',
-					'label'         => t( 'Dates & time' ),
+					'label'         => t( 'Dates and time' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -231,13 +232,13 @@ return Expansa\Facades\Form::enqueue(
 										<span class="df aic jcsb fw-500"><?php echo t( 'Date Format' ); ?></span>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">April 3, 2021</span> <code class="badge badge--dark-lt">F j, Y</code>
+										<span><input class="mr-2" type="radio" name="item">April 3, 2021</span> <code class="badge badge--sm badge--dark-lt">F j, Y</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">2021-04-03</span> <code class="badge badge--dark-lt">Y-m-d</code>
+										<span><input class="mr-2" type="radio" name="item">2021-04-03</span> <code class="badge badge--sm badge--dark-lt">Y-m-d</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">04/03/2021</span> <code class="badge badge--dark-lt">m/d/Y</code>
+										<span><input class="mr-2" type="radio" name="item">04/03/2021</span> <code class="badge badge--sm badge--dark-lt">m/d/Y</code>
 									</label>
 									<label class="df aic jcsb">
 										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
@@ -257,13 +258,13 @@ return Expansa\Facades\Form::enqueue(
 										<span class="df aic jcsb fw-500"><?php echo t( 'Time Format' ); ?></span>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">17:22</span> <code class="badge badge--dark-lt">H:i</code>
+										<span><input class="mr-2" type="radio" name="item">17:22</span> <code class="badge badge--sm badge--dark-lt">H:i</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">5:22 PM</span> <code class="badge badge--dark-lt">g:i A</code>
+										<span><input class="mr-2" type="radio" name="item">5:22 PM</span> <code class="badge badge--sm badge--dark-lt">g:i A</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">12:50am</span> <code class="badge badge--dark-lt">g:ia</code>
+										<span><input class="mr-2" type="radio" name="item">12:50am</span> <code class="badge badge--sm badge--dark-lt">g:ia</code>
 									</label>
 									<label class="df aic jcsb">
 										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
@@ -707,5 +708,21 @@ return Expansa\Facades\Form::enqueue(
 				],
 			],
 		],
+        [
+            'type'     => 'custom',
+            'callback' => function () {
+                ?>
+				<div class="expansa-form-actions">
+					<div class="expansa-form-actions-caption">
+						<i class="ph ph-warning-circle"></i> <?php echo t('Unsaved changes'); ?>
+					</div>
+					<div class="expansa-form-actions-buttons">
+						<button class="btn t-red" type="reset"><?php echo t('Discard'); ?></button>
+						<button class="btn t-green" type="submit"><?php echo t('Save'); ?></button>
+					</div>
+				</div>
+                <?php
+            },
+        ],
 	]
 );

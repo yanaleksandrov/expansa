@@ -171,28 +171,46 @@ var __webpack_modules__ = {
                     }
                 };
             }));
-            Alpine.magic('warnOnUnload', (() => {
-                let shouldBlock = false;
-                function blockInternalNavigation(event) {
-                    const target = event.target.closest('a[href]');
-                    if (target && shouldBlock) {
-                        event.preventDefault();
-                        document.body.classList.add('is-shake');
-                        setTimeout((() => {
-                            document.body.classList.remove('is-shake');
-                        }), 500);
-                    }
+            let unsavedForms = new Map;
+            let dirtyCheckIsInitialized = false;
+            function watchForm(form) {
+                unsavedForms.set(form, true);
+            }
+            function markDirty(e) {
+                const form = e.target.closest('form');
+                if (form && unsavedForms.has(form)) {
+                    document.body.classList.add('is-unsaved');
                 }
-                window.addEventListener('click', blockInternalNavigation, true);
-                return {
-                    add() {
-                        shouldBlock = true;
-                    },
-                    remove() {
-                        shouldBlock = false;
+            }
+            function unmarkDirty(form) {
+                if (form && unsavedForms.has(form)) {
+                    document.body.classList.remove('is-unsaved');
+                }
+            }
+            function blockInternalNavigation(e) {
+                const target = e.target.closest('a[href]');
+                if (target && unsavedForms.size && document.body.classList.contains('is-unsaved')) {
+                    e.preventDefault();
+                    document.body.classList.add('is-shake');
+                    setTimeout((() => {
+                        document.body.classList.remove('is-shake');
+                    }), 500);
+                }
+            }
+            Alpine.magic('dirtyCheck', (() => ({
+                watch(form) {
+                    if (!dirtyCheckIsInitialized) {
+                        dirtyCheckIsInitialized = true;
+                        window.addEventListener('click', blockInternalNavigation, true);
+                        window.addEventListener('change', markDirty);
+                        window.addEventListener('reset', (e => unmarkDirty(e.target)));
                     }
-                };
-            }));
+                    form instanceof HTMLFormElement && watchForm(form);
+                },
+                remove(form) {
+                    form instanceof HTMLFormElement && unmarkDirty(form);
+                }
+            })));
             Alpine.magic('copy', (el => subject => {
                 window.navigator.clipboard.writeText(subject).then((() => {
                     let classes = 'ph-copy ph-check'.split(' ');
@@ -978,7 +996,7 @@ var __webpack_modules__ = {
                             searchFields: [ 'label', 'value' ],
                             position: 'auto',
                             resetScrollPosition: true,
-                            shouldSort: true,
+                            shouldSort: false,
                             shouldSortItems: false,
                             shadowRoot: null,
                             placeholder: true,

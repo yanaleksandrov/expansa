@@ -34,7 +34,7 @@ defined('EX_PATH') || exit;
 
 $prop = Safe::prop($attributes['name'] ?? $name);
 
-Hook::add('expansa_dashboard_footer', function () {
+Hook::add('renderDashboardFooter', function () {
     echo view('dialogs/selfie-maker');
 });
 ?>

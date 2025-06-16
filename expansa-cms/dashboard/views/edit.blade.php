@@ -14,7 +14,7 @@ if (! $table instanceof Expansa\Builders\Table) {
     return;
 }
 
-Hook::add('expansa_dashboard_footer', function () {
+Hook::add('renderDashboardFooter', function () {
     echo view('dialogs/emails-editor');
 });
 ?>
