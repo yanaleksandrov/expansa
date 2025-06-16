@@ -13,6 +13,7 @@ trait Triggers
     {
         return match ($command->name) {
             'createUlid' => $this->compileOnCreateUlid($table),
+            'createUuid' => $this->compileOnCreateUuid($table),
             'foreign'    => $this->compileOnDeleteCascade($command),
             default      => '',
         };
@@ -42,8 +43,27 @@ CREATE TRIGGER before_insert_$table->name
         BEGIN
             IF NEW.ulid IS NULL THEN
                 SET NEW.ulid = UPPER(
-                    CONCAT(UNHEX(CONV(ROUND(UNIX_TIMESTAMP(CURTIME(4))*1000), 10, 16)), RANDOM_BYTES(10))
+                    UPPER(CONCAT(LPAD(HEX(UNIX_TIMESTAMP(NOW(4)) * 1000), 12, '0'), HEX(RANDOM_BYTES(10))))
                 );
+            END IF;
+        END;";
+    }
+
+    protected function compileOnCreateUuid(Table $table): string
+    {
+        return "
+CREATE TRIGGER before_insert_$table->name
+    BEFORE INSERT ON <$table->name>
+    FOR EACH ROW
+        BEGIN
+            IF NEW.uuid IS NULL THEN
+                SET NEW.uuid = LOWER(CONCAT_WS('-',
+                    LPAD(HEX(FLOOR(UNIX_TIMESTAMP(NOW(4)) * 1000)), 12, '0'),
+                    CONCAT('7', SUBSTRING(HEX(RANDOM_BYTES(2)), 2)), -- version 7
+                    SUBSTRING(HEX(RANDOM_BYTES(2)), 1, 4),
+                    SUBSTRING(HEX(RANDOM_BYTES(2)), 1, 4),
+                    SUBSTRING(HEX(RANDOM_BYTES(6)), 1, 12)
+                ));
             END IF;
         END;";
     }

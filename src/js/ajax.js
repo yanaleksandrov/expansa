@@ -6,9 +6,10 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	const xhr = new XMLHttpRequest();
-	Alpine.magic( 'ajax', el => (route, data, progressCallback) => {
+	Alpine.magic( 'ajax', el => (route, payload, progressCallback) => {
 		document.addEventListener(route, ({detail: {data, resolve}}) => resolve(data));
+
+		const xhr = new XMLHttpRequest();
 
 		return new Promise(resolve => {
 			xhr.open(el.getAttribute('method')?.toUpperCase() ?? 'POST', expansa?.apiurl + route);
@@ -19,6 +20,10 @@ document.addEventListener( 'alpine:init', () => {
 			// regular ajax sending & request with file uploading
 			xhr.onloadstart = xhr.upload.onprogress = event => progressCallback?.(onProgress(event, xhr));
 			xhr.onloadend   = event => progressCallback?.(onProgress(event, xhr));
+			xhr.onerror     = event => {
+				console.error('XHR Error', event);
+				onloadEvent?.();
+			};
 			xhr.onload      = event => {
 				try {
 					let {data} = xhr.response;
@@ -43,7 +48,7 @@ document.addEventListener( 'alpine:init', () => {
 				onloadEvent && onloadEvent();
 			};
 
-			xhr.send(parseFormData(el, data));
+			xhr.send(parseFormData(el, payload));
 		});
 	});
 
@@ -71,7 +76,7 @@ document.addEventListener( 'alpine:init', () => {
 		}
 
 		if (data.end) {
-			console.log(data);
+			//console.log(data);
 		}
 
 		return data;
@@ -119,7 +124,10 @@ document.addEventListener( 'alpine:init', () => {
 			case 'TEXTAREA':
 			case 'SELECT':
 			case 'INPUT':
-				el.type !== 'file' && el.name && formData.append(el.name, el.value);
+				if (el.tagName === 'INPUT' && el.type === 'file') {
+					break;
+				}
+				el.name && formData.append(el.name, el.value);
 				break;
 		}
 

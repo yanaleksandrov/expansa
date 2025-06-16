@@ -26,7 +26,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'@change'  => '$ajax("media/upload", $el.files, e => percent = e.percent).then()',
+				'@change'  => '$ajax("media/upload", $el.files, e => percent = e.percent)',
 				'multiple' => true,
 			],
 		],

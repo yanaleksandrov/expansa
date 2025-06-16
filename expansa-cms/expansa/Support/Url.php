@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use App\Option;
+use App\Options;
 use Throwable;
 use RuntimeException;
 
@@ -19,11 +19,11 @@ class Url
     public function site(string $path = ''): string
     {
         try {
-            if (!class_exists(Option::class) || !defined('EX_DB_DRIVER')) {
+            if (!class_exists(Options::class) || !defined('EX_DB_DRIVER')) {
                 throw new RuntimeException(t('The Option class is not defined.'));
             }
 
-            $url = Option::get('site.url');
+            $url = Options::get('site.url');
         } catch (Throwable $e) {
             $protocol = match (true) {
                 isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',

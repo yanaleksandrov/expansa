@@ -1,14 +1,18 @@
 document.addEventListener('alpine:init', (() => {
     let onloadEvent = () => {};
-    const xhr = new XMLHttpRequest;
-    Alpine.magic('ajax', (el => (route, data, progressCallback) => {
+    Alpine.magic('ajax', (el => (route, payload, progressCallback) => {
         document.addEventListener(route, (({detail: {data, resolve}}) => resolve(data)));
+        const xhr = new XMLHttpRequest;
         return new Promise((resolve => {
             xhr.open(el.getAttribute('method')?.toUpperCase() ?? 'POST', expansa?.apiurl + route);
             xhr.withCredentials = true;
             xhr.responseType = 'json';
             xhr.onloadstart = xhr.upload.onprogress = event => progressCallback?.(onProgress(event, xhr));
             xhr.onloadend = event => progressCallback?.(onProgress(event, xhr));
+            xhr.onerror = event => {
+                console.error('XHR Error', event);
+                onloadEvent?.();
+            };
             xhr.onload = event => {
                 try {
                     let {data} = xhr.response;
@@ -31,7 +35,7 @@ document.addEventListener('alpine:init', (() => {
                 }
                 onloadEvent && onloadEvent();
             };
-            xhr.send(parseFormData(el, data));
+            xhr.send(parseFormData(el, payload));
         }));
     }));
     function onProgress(event, xhr) {
@@ -49,9 +53,7 @@ document.addEventListener('alpine:init', (() => {
             progress: type === 'progress',
             end: type === 'loadend'
         };
-        if (data.end) {
-            console.log(data);
-        }
+        if (data.end) {}
         return data;
     }
     const BYTES_IN_MB = 1048576;
@@ -81,7 +83,10 @@ document.addEventListener('alpine:init', (() => {
           case 'TEXTAREA':
           case 'SELECT':
           case 'INPUT':
-            el.type !== 'file' && el.name && formData.append(el.name, el.value);
+            if (el.tagName === 'INPUT' && el.type === 'file') {
+                break;
+            }
+            el.name && formData.append(el.name, el.value);
             break;
         }
         if (typeof data === 'object') {

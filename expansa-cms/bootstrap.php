@@ -41,11 +41,11 @@ Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
     require_once EX_PATH . 'dashboard/data/timezones.php';
     require_once EX_PATH . 'dashboard/data/languages.php';
 
-    // register default Expansa data
-    require_once EX_PATH . 'migrations.php';
-
     // the initial configuration of the application
     require_once EX_PATH . 'app.php';
+
+    // register default Expansa data
+    require_once EX_PATH . 'migrations.php';
 
     // register Expansa routes
     require_once EX_PATH . 'routes/api.php';

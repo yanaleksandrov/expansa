@@ -21,7 +21,7 @@ return Form::enqueue(
         'class'           => 'tab',
         'x-data'          => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
 		'x-init'          => '$dirtyCheck.watch($el)',
-	    '@submit.prevent' => '$ajax("user/update").then(() => $dirtyCheck.remove($el))',
+	    '@submit.prevent' => '$ajax("user/update", "", () => $dirtyCheck.remove($el))',
     ],
     [
         [
@@ -344,7 +344,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'x-select' => '{"showSearch": 1}',
+                                'x-select' => '',
                                 'value'    => $user->locale ?? '',
                             ],
                             'options'     => I18n::getLanguagesOptions(),

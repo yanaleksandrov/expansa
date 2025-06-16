@@ -1,6 +1,6 @@
 <?php
 
-use App\Option;
+use App\Options;
 use Expansa\Facades\Safe;
 
 $languages = Expansa\Patterns\Registry::get('languages');
@@ -62,20 +62,20 @@ return Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'value' => Option::get( 'site.language' ),
+                                'value' => Options::get( 'site.language' ),
                             ],
                             'options' => [
                                 'comments[default_status]' => [
                                     'content'     => t( 'The language is set from the directory name in pretty permalinks' ),
                                     'icon'        => 'ph ph-link',
                                     'description' => t('Example:') . '<code>' . url('/en/my-post/') . '</code>',
-                                    'checked'     => Option::get( 'comments.default_status', true ),
+                                    'checked'     => Options::get( 'comments.default_status', true ),
                                 ],
                                 'comments[require_name_email]' => [
                                     'content'     => t( 'The language is set from the subdomain name in pretty permalinks' ),
                                     'icon'        => 'ph ph-link',
                                     'description' => t('Example:') . '<code>https://en.greenapple.jewelry/my-post/</code>',
-                                    'checked'     => Option::get( 'comments.default_status', true ),
+                                    'checked'     => Options::get( 'comments.default_status', true ),
                                 ],
                             ],
                         ],
@@ -109,19 +109,19 @@ return Expansa\Facades\Form::enqueue(
                                     'content'     => t( 'Editor' ),
                                     'icon'        => 'ph ph-person-simple-run',
                                     'description' => t( 'It is up to search engines to honor this request.' ),
-                                    'checked'     => Option::get( 'comments.default_status', true ),
+                                    'checked'     => Options::get( 'comments.default_status', true ),
                                 ],
                                 'comments[require_name_email]' => [
                                     'content'     => t( 'Author' ),
                                     'icon'        => 'ph ph-person-simple-run',
                                     'description' => t( 'It is up to search engines to honor this request.' ),
-                                    'checked'     => Option::get( 'comments.default_status', true ),
+                                    'checked'     => Options::get( 'comments.default_status', true ),
                                 ],
                                 'comments[registration]' => [
                                     'content'     => t( 'Subscriber' ),
                                     'icon'        => 'ph ph-person-simple-run',
                                     'description' => t( 'It is up to search engines to honor this request.' ),
-                                    'checked'     => Option::get( 'comments.default_status', true ),
+                                    'checked'     => Options::get( 'comments.default_status', true ),
                                 ],
                             ],
                         ],
@@ -152,7 +152,7 @@ return Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'value' => Option::get( 'site.language' ),
+                        'value' => Options::get( 'site.language' ),
                     ],
                     'options' => $options,
                 ],
@@ -189,7 +189,7 @@ return Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'value'       => Option::get( 'site.tagline' ),
+                                'value'       => Options::get( 'site.tagline' ),
                                 'placeholder' => t( 'e.g. Just another Expansa site' ),
                             ],
                         ],
@@ -208,7 +208,7 @@ return Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'value'       => Option::get( 'site.tagline' ),
+                                'value'       => Options::get( 'site.tagline' ),
                                 'placeholder' => t( 'e.g. Just another Expansa site' ),
                             ],
                         ],

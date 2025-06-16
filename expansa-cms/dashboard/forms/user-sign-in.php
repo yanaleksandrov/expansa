@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
 	'user-sign-in',
 	[
 		'class'           => 'dg g-6',
-		'@submit.prevent' => '$ajax("user/sign-in").then()',
+		'@submit.prevent' => '$ajax("user/sign-in")',
 		'x-data'          => '',
 	],
 	[

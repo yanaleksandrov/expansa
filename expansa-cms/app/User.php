@@ -40,6 +40,8 @@ final class User
 
     public ?string $locale = '';
 
+    public string $bio = '';
+
     public string $registered = '';
 
     public string $visited = '';
@@ -194,14 +196,13 @@ final class User
                 'visited'    => 'datetime',
             ])->apply();
 
-            $userdata = array_filter($userdata);
-            if (Db::update(self::$table, $userdata)->rowCount()) {
-                if ($callback) {
-                    $callback(new Field($user));
-                }
+            Db::update(self::$table, array_filter($userdata));
 
-                return self::get($userID);
+            if ($callback) {
+                $callback(new Field($user));
             }
+
+            return self::get($userID);
         }
 
         return error('user-update', t('User not found.'));

@@ -22,16 +22,20 @@ trait Columns
 
     public function ulid(string $column = 'ulid'): Column
     {
-        $column = $this->addColumn('char(26)', $column)->unique();
+        $column = $this->addColumn('char(31)', $column)->unique();
 
         $this->commands[] = $this->addCommand('createUlid', ['column' => $column->getAttributes()]);
 
         return $column;
     }
 
-    public function uuid(string $column): Column
+    public function uuid(string $column = 'uuid'): Column
     {
-        return $this->addColumn('char(36)', $column);
+        $column = $this->addColumn('char(36)', $column);
+
+        $this->commands[] = $this->addCommand('createUuid', ['column' => $column->getAttributes()]);
+
+        return $column;
     }
 
     public function tinyInt(string $column, int $precision = 3): Column

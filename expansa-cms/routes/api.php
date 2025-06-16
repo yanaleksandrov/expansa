@@ -28,7 +28,7 @@ Route::prefix('/api', function () {
             App\Api\Extensions::class,
             App\Api\Files::class,
             App\Api\Media::class,
-            App\Api\Option::class,
+            App\Api\Options::class,
             App\Api\Post::class,
             App\Api\Posts::class,
             App\Api\System::class,

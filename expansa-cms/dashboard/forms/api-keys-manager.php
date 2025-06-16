@@ -7,9 +7,9 @@
 return \Expansa\Facades\Form::enqueue(
 	'api-keys-manager',
 	[
-		'class'           => 'dg g-6 p-6',
+		'class'           => 'dg g-7 p-7',
 		'x-data'          => '',
-		'@submit.prevent' => "\$ajax('post/create')",
+		'@submit.prevent' => '$ajax("post/create")',
 	],
 	[
 		[
@@ -23,7 +23,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'          => 'group',
 			'name'          => 'manage',
 			'label'         => '',
-			'class'         => 'dg g-6 gtc-4 sm:gtc-1',
+			'class'         => 'dg g-7 gtc-4 sm:gtc-1',
 			'label_class'   => '',
 			'content_class' => '',
 			'fields'        => [
@@ -74,7 +74,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'          => 'group',
 			'name'          => 'manage',
 			'label'         => '',
-			'class'         => 'dg g-6 gtc-4 sm:gtc-1',
+			'class'         => 'dg g-7 gtc-4 sm:gtc-1',
 			'label_class'   => '',
 			'content_class' => '',
 			'fields'        => [
@@ -129,7 +129,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'          => 'group',
 			'name'          => 'manage',
 			'label'         => '',
-			'class'         => 'dg g-6 gtc-4 sm:gtc-1',
+			'class'         => 'dg g-7 gtc-4 sm:gtc-1',
 			'label_class'   => '',
 			'content_class' => '',
 			'fields'        => [

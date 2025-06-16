@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api;
 
-use App\Option;
+use App\Options;
 use App\User;
 use Expansa\Facades\Db;
 use Expansa\Facades\Disk;
@@ -106,7 +106,21 @@ class System
          */
         $config = EX_PATH . 'env.php';
         if (! is_file($config)) {
-            Disk::file(EX_PATH . 'env.example.php')->copy('env')->get(EX_PATH . 'env.php')->rewrite(
+            $env = Disk::file(EX_PATH . 'env.example.php')->copy('env');
+            if ($env->errors) {
+                echo Json::encode(
+                    [
+                        'status'    => 200,
+                        'benchmark' => metrics()->time(),
+                        'memory'    => metrics()->memory(),
+                        'data'      => $env->errors,
+                        'errors'    => [],
+                    ]
+                );
+                exit;
+            }
+
+            Disk::file(EX_PATH . 'env.php')->rewrite(
                 array_combine(
                     [
                         'db.name',
@@ -133,21 +147,23 @@ class System
 
         Db::updateSchema();
 
-        /**
-         * Fill same options
-         *
-         * @since 2025.1
-         */
-        Option::update('site', $site);
-
-        $user = User::add($userdata);
-
-        User::login($userdata);
-
-        echo Json::encode(['installed' => $user instanceof User]);
-        exit;
+        $user = User::add([$userdata + ['locale' => '', 'is_verified' => true]]);
 
         if ($user instanceof User) {
+            $site['owner']['email'] = $user->email;
+
+            /**
+             * Fill same options
+             *
+             * @since 2025.1
+             */
+            Options::update('site', $site);
+
+            User::login($userdata);
+
+            echo Json::encode(['installed' => $user instanceof User]);
+            exit;
+
             echo Json::encode(
                 [
                     'status'    => 200,

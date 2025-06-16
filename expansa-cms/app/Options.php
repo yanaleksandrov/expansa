@@ -15,7 +15,7 @@ use LogicException;
  * Option class it is a self-contained class for creating, updating, and deleting options.
  * Uses static variables to store options, which allows to avoid using the object cache without losing performance.
  */
-final class Option
+final class Options
 {
     /**
      * DB table name.

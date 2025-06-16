@@ -4,7 +4,7 @@ namespace App\Api;
 
 use Expansa\Support\Arr;
 
-class Option
+class Options
 {
     /**
      * Create item.
@@ -40,7 +40,7 @@ class Option
         $options = Arr::exclude($_POST, [ 'nonce' ]);
         if ($options) {
             foreach ($options as $option => $value) {
-                \App\Option::update($option, $value);
+                \App\Options::update($option, $value);
             }
         }
 

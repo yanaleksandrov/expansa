@@ -9,7 +9,7 @@ return Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'dg g-6',
 		'x-data'          => '',
-		'@submit.prevent' => "\$ajax('user/sign-up')",
+		'@submit.prevent' => '$ajax("user/sign-up")',
 	],
 	[
 		[

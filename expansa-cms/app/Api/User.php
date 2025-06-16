@@ -40,34 +40,42 @@ class User
      *
      * @url    PUT api/user/{id}
      */
-    public function update(): array
+    public function update(): void
     {
         $currentUser = \App\User::current();
-        $userdata    = $_REQUEST + [ 'id' => $currentUser->id ];
+        $userdata    = $_POST + [ 'id' => $currentUser->id ];
+        $fields = Safe::data(
+            $_POST,
+            [
+                'bio'     => 'trim',
+                'toolbar' => 'bool',
+                'format'  => 'text',
+            ]
+        )->apply();
 
         \App\User::update($userdata, function (\App\Field $field) {
             $fields = Safe::data(
-                $_REQUEST,
+                $_POST,
                 [
                     'bio'     => 'trim',
                     'toolbar' => 'bool',
                     'format'  => 'text',
-                    'locale'  => 'locale',
                 ]
             )->apply();
 
             foreach ($fields as $key => $value) {
-                $field->mutate($key, $value);
+                $field->update($key, $value);
             }
         });
 
-        return [
-            [
-                'target'   => 'body',
-                'method'   => 'notify',
-                'fragment' => t('User is updated'),
+        echo Json::encode([
+            'data' => [
+                [
+                    'target' => 'body',
+                    'notify' => t('User is updated'),
+                ],
             ],
-        ];
+        ]);
     }
 
     /**

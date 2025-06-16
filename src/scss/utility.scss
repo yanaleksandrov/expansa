@@ -105,18 +105,18 @@
 // colors
 @each $name, $color in $colors {
   .t-#{'' + $name} {
-    color: $color !important;
+    color: $color;
   }
   .t-#{'' + $name}-lt {
-    color: #{$color}11 !important;
+    color: #{$color}11;
   }
 }
 @each $name, $color in $colors {
   .bg-#{'' + $name} {
-    background-color: $color !important;
+    background-color: $color;
   }
   .bg-#{'' + $name}-lt {
-    background-color: #{mix(rgba(255, 255, 255, 1), $color, 92%)} !important;
+    background-color: #{mix(rgba(255, 255, 255, 1), $color, 92%)};
   }
 }
 

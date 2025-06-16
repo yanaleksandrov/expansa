@@ -17,7 +17,7 @@ final class Manager extends HooksCollector
      */
     public function configure(string $path): void
     {
-        $paths = $this->discover($path);
+        $paths = is_file($path) ? [$path] : $this->discover($path);
 
         foreach ($paths as $path) {
             $fileContent = file_get_contents($path);

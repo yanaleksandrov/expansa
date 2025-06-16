@@ -23,7 +23,7 @@ return \Expansa\Facades\Form::enqueue(
     'import/documents',
     [
         'class'           => 'card card-border',
-        '@submit.prevent' => "\$ajax('import/documents').then(response => {completed = response})",
+        '@submit.prevent' => '$ajax("import/documents", "", response => {completed = response})',
         'x-data'          => '{project:"",completed:""}',
     ],
     [
