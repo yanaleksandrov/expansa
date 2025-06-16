@@ -83,7 +83,7 @@ final class Migrations
             $table->id();
             $table->bigInt('entity_id')->unsigned();
             $table->string('entity_table', 255);
-            $table->uuid()->unique();
+            $table->ulid()->unique();
             $table->string('slug', 255);
             //$table->string('locale', 10)->nullable()->default(null);
 
@@ -113,7 +113,7 @@ final class Migrations
     {
         Schema::create('users', function (Table $table) {
             $table->id();
-            $table->uuid()->unique();
+            $table->ulid()->unique();
             $table->string('login', 60)->unique();
             $table->string('password', 255);
             $table->string('nicename', 60);
