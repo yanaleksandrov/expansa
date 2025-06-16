@@ -43,7 +43,8 @@ Hook::add('testHook', 'applyTestHook');
 ### #2. Добавление через анонимную функцию
 
 ```php
-use Expansa\Facades\Hook;use Expansa\Hooks\Attributes\HookListenerAlias;
+use Expansa\Facades\Hook;
+use Expansa\Hooks\Attributes\HookListenerAlias;
 
 Hook::add('testHook', fn(&$var) => $var = 'foo');
 // или

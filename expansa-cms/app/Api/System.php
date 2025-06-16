@@ -147,7 +147,7 @@ class System
 
         Db::updateSchema();
 
-        $user = User::add([$userdata + ['locale' => '', 'is_verified' => true]]);
+        $user = User::add($userdata + ['locale' => '', 'is_verified' => true]);
 
         if ($user instanceof User) {
             $site['owner']['email'] = $user->email;

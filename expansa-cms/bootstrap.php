@@ -42,7 +42,7 @@ Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
     require_once EX_PATH . 'dashboard/data/languages.php';
 
     // the initial configuration of the application
-    require_once EX_PATH . 'app.php';
+    require_once EX_PATH . 'configs.php';
 
     // register default Expansa data
     require_once EX_PATH . 'migrations.php';
