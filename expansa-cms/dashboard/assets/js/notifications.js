@@ -1,4 +1,4 @@
-document.addEventListener('alpine:init', (() => {
+document.addEventListener('alpine:init', () => {
     const notificationHandle = {
         info: message => {
             Alpine.store('notifications').add(message, 'info');
@@ -13,15 +13,15 @@ document.addEventListener('alpine:init', (() => {
             Alpine.store('notifications').add(message, 'warning');
         },
         close: id => {
-            let items = Alpine.store('notifications'), index = items.findIndex((item => item.id === id));
+            let items = Alpine.store('notifications'), index = items.findIndex(item => item.id === id);
             if (index !== -1) {
                 items[index]['class'] += ' removed';
-                setTimeout((() => {
-                    index = items.findIndex((item => item.id === id));
+                setTimeout(() => {
+                    index = items.findIndex(item => item.id === id);
                     if (index !== -1) {
                         items.splice(index, 1);
                     }
-                }), 250);
+                }, 250);
             }
         },
         add: function(message, type = '', duration = 'auto') {
@@ -39,14 +39,14 @@ document.addEventListener('alpine:init', (() => {
                     class: type + '',
                     type: type + ''
                 });
-                setTimeout((() => items.forEach((item => item.class += ' init'))), 250);
+                setTimeout(() => items.forEach(item => item.class += ' init'), 250);
                 if (duration) {
-                    setTimeout((() => this.close(timestamp)), duration);
+                    setTimeout(() => this.close(timestamp), duration);
                 }
             }
         }
     };
     Alpine.store('notifications', []);
     Alpine.store('notification', notificationHandle);
-    Alpine.magic('notification', (() => notificationHandle));
-}));
+    Alpine.magic('notification', () => notificationHandle);
+});

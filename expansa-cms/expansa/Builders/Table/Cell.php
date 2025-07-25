@@ -110,15 +110,15 @@ class Cell
     /**
      * Get view template.
      *
-     * @param string $template
+     * @param string $filepath
      * @return Cell
      */
-    public function view(string $template): Cell
+    public function view(string $filepath): Cell
     {
-        if (file_exists($template)) {
-            $this->view = $template;
+        if (file_exists($filepath)) {
+            $this->view = $filepath;
         } else {
-            $this->view = sprintf('%s-%s', $this->view, $template);
+            $this->view = sprintf('%s-%s', $this->view, $filepath);
         }
 
         return $this;

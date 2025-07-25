@@ -2,7 +2,7 @@ var __webpack_modules__ = {
     910: function(module) {
         !function(e, r) {
             true ? module.exports = r() : 0;
-        }(this, (function() {
+        }(this, function() {
             return function(e) {
                 function r(n) {
                     if (t[n]) return t[n].exports;
@@ -65,12 +65,12 @@ var __webpack_modules__ = {
                         for (var w = l, S = O; S < M; S++) h[S] === p && (w += p);
                         e = e.slice(0, O) + w + e.slice(O, b);
                     }
-                    for (var _ = e.split(l).map((function(e, r) {
+                    for (var _ = e.split(l).map(function(e, r) {
                         return {
                             char: e,
                             isNew: r >= O && r < M
                         };
-                    })), j = b - 1; j >= 0; j--) {
+                    }), j = b - 1; j >= 0; j--) {
                         var V = _[j].char;
                         if (V !== p) {
                             var A = j >= O && C === x;
@@ -135,9 +135,9 @@ var __webpack_modules__ = {
                     var e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : s, r = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : l.placeholderChar;
                     if (!o(e)) throw new Error('Text-mask:convertMaskToPlaceholder; The mask property must be an array.');
                     if (e.indexOf(r) !== -1) throw new Error('Placeholder character must not be used as part of the mask. Please specify a character that is not present in your mask as your placeholder character.\n\n' + ('The placeholder character that was received is: ' + JSON.stringify(r) + '\n\n') + ('The mask that was received is: ' + JSON.stringify(e)));
-                    return e.map((function(e) {
+                    return e.map(function(e) {
                         return e instanceof RegExp ? r : e;
-                    })).join('');
+                    }).join('');
                 }
                 function o(e) {
                     return Array.isArray && Array.isArray(e) || e instanceof Array;
@@ -169,25 +169,25 @@ var __webpack_modules__ = {
                     if (T) return l;
                     var O = x && (t === s || s === c), M = 0, w = void 0, S = void 0;
                     if (O) M = l - k; else {
-                        var _ = s.toLowerCase(), j = f.toLowerCase(), V = j.substr(0, l).split(o), A = V.filter((function(e) {
+                        var _ = s.toLowerCase(), j = f.toLowerCase(), V = j.substr(0, l).split(o), A = V.filter(function(e) {
                             return _.indexOf(e) !== -1;
-                        }));
+                        });
                         S = A[A.length - 1];
-                        var E = a.substr(0, A.length).split(o).filter((function(e) {
+                        var E = a.substr(0, A.length).split(o).filter(function(e) {
                             return e !== d;
-                        })).length, N = c.substr(0, A.length).split(o).filter((function(e) {
+                        }).length, N = c.substr(0, A.length).split(o).filter(function(e) {
                             return e !== d;
-                        })).length, F = N !== E, I = void 0 !== a[A.length - 1] && void 0 !== c[A.length - 2] && a[A.length - 1] !== d && a[A.length - 1] !== c[A.length - 1] && a[A.length - 1] === c[A.length - 2];
+                        }).length, F = N !== E, I = void 0 !== a[A.length - 1] && void 0 !== c[A.length - 2] && a[A.length - 1] !== d && a[A.length - 1] !== c[A.length - 1] && a[A.length - 1] === c[A.length - 2];
                         !x && (F || I) && E > 0 && c.indexOf(S) > -1 && void 0 !== f[l] && (w = !0, S = f[l]);
-                        for (var L = v.map((function(e) {
+                        for (var L = v.map(function(e) {
                             return _[e];
-                        })), R = L.filter((function(e) {
+                        }), R = L.filter(function(e) {
                             return e === S;
-                        })).length, J = A.filter((function(e) {
+                        }).length, J = A.filter(function(e) {
                             return e === S;
-                        })).length, W = c.substr(0, c.indexOf(d)).split(o).filter((function(e, r) {
+                        }).length, W = c.substr(0, c.indexOf(d)).split(o).filter(function(e, r) {
                             return e === S && f[r] !== e;
-                        })).length, q = W + J + R + (w ? 1 : 0), z = 0, B = 0; B < C; B++) {
+                        }).length, q = W + J + R + (w ? 1 : 0), z = 0, B = 0; B < C; B++) {
                             var D = _[B];
                             if (M = B + 1, D === S && z++, z >= q) break;
                         }
@@ -269,9 +269,9 @@ var __webpack_modules__ = {
                     };
                 }
                 function i(e, r) {
-                    document.activeElement === e && (g ? b((function() {
+                    document.activeElement === e && (g ? b(function() {
                         return e.setSelectionRange(r, r, m);
-                    }), 0) : e.setSelectionRange(r, r, m));
+                    }, 0) : e.setSelectionRange(r, r, m));
                 }
                 function a(e) {
                     if ((0, p.isString)(e)) return e;
@@ -296,7 +296,7 @@ var __webpack_modules__ = {
                 r.default = o;
                 var s = t(4), f = n(s), d = t(2), c = n(d), p = t(3), v = t(1), h = '', m = 'none', y = 'object', g = 'undefined' != typeof navigator && /Android/i.test(navigator.userAgent), b = 'undefined' != typeof requestAnimationFrame ? requestAnimationFrame : setTimeout;
             } ]);
-        }));
+        });
     }
 };
 

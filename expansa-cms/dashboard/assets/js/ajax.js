@@ -1,9 +1,9 @@
-document.addEventListener('alpine:init', (() => {
+document.addEventListener('alpine:init', () => {
     let onloadEvent = () => {};
-    Alpine.magic('ajax', (el => (route, payload, progressCallback) => {
-        document.addEventListener(route, (({detail: {data, resolve}}) => resolve(data)));
+    Alpine.magic('ajax', el => (route, payload, progressCallback) => {
+        document.addEventListener(route, ({detail: {data, resolve}}) => resolve(data));
         const xhr = new XMLHttpRequest;
-        return new Promise((resolve => {
+        return new Promise(resolve => {
             xhr.open(el.getAttribute('method')?.toUpperCase() ?? 'POST', expansa?.apiurl + route);
             xhr.withCredentials = true;
             xhr.responseType = 'json';
@@ -28,7 +28,7 @@ document.addEventListener('alpine:init', (() => {
                         cancelable: true
                     }));
                     if (Array.isArray(data)) {
-                        data.forEach((item => parseFragment(item)));
+                        data.forEach(item => parseFragment(item));
                     }
                 } catch (e) {
                     console.error(e);
@@ -36,8 +36,8 @@ document.addEventListener('alpine:init', (() => {
                 onloadEvent && onloadEvent();
             };
             xhr.send(parseFormData(el, payload));
-        }));
-    }));
+        });
+    });
     function onProgress(event, xhr) {
         const {loaded = 0, total = 0, type} = event;
         const {response = '', status = '', responseURL = ''} = xhr;
@@ -72,12 +72,12 @@ document.addEventListener('alpine:init', (() => {
             let buttons = el.querySelectorAll('[type=\'submit\']');
             formData = new FormData(el);
             let inputs = el.querySelectorAll('input[type=\'file\']');
-            [ ...inputs ].forEach((input => {
+            [ ...inputs ].forEach(input => {
                 let files = input.files;
-                files && [ ...files ].forEach(((file, index) => formData.append(index, file)));
-            }));
-            buttons && buttons.forEach((button => button.classList.add('btn--load')));
-            onloadEvent = () => buttons && buttons.forEach((button => button.classList.remove('btn--load')));
+                files && [ ...files ].forEach((file, index) => formData.append(index, file));
+            });
+            buttons && buttons.forEach(button => button.classList.add('btn--load'));
+            onloadEvent = () => buttons && buttons.forEach(button => button.classList.remove('btn--load'));
             break;
 
           case 'TEXTAREA':
@@ -98,9 +98,9 @@ document.addEventListener('alpine:init', (() => {
     }
     function parseFragment(item) {
         const {target, ...rest} = item;
-        document.querySelectorAll(target).forEach((target => Object.entries(rest).forEach((([key, fragment]) => {
+        document.querySelectorAll(target).forEach(target => Object.entries(rest).forEach(([key, fragment]) => {
             const [method, delay] = key.split(':');
-            setTimeout((() => {
+            setTimeout(() => {
                 switch (method) {
                   case 'changeURL':
                     window.history.pushState(null, null, fragment || '');
@@ -174,7 +174,7 @@ document.addEventListener('alpine:init', (() => {
                     }
                     break;
                 }
-            }), Number(delay || 0));
-        }))));
+            }, Number(delay || 0));
+        }));
     }
-}));
+});

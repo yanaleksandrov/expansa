@@ -1,4 +1,4 @@
-document.addEventListener('alpine:init', (() => {
+document.addEventListener('alpine:init', () => {
     const searchParamsHandler = (param, value, isRemove) => {
         const url = new URL(window.location.href);
         const params = new URLSearchParams(url.search);
@@ -11,7 +11,7 @@ document.addEventListener('alpine:init', (() => {
         window.history.replaceState({}, '', url.toString());
     };
     const dialogHandler = (templateID, data = {}, dialogID = 'expansa-dialog') => {
-        setTimeout((() => {
+        setTimeout(() => {
             let template = document.querySelector(`#${templateID}`), dialog = document.querySelector(`#${dialogID}`);
             if (dialog && template) {
                 let content = dialog.querySelector('[data-content]');
@@ -28,9 +28,9 @@ document.addEventListener('alpine:init', (() => {
                 };
                 dialog.addEventListener('close', closeHandler);
             }
-        }), 25);
+        }, 25);
     };
-    Alpine.magic('dialog', (el => ({
+    Alpine.magic('dialog', el => ({
         init: async callback => {
             const url = new URL(window.location.href);
             const params = new URLSearchParams(url.search);
@@ -52,5 +52,5 @@ document.addEventListener('alpine:init', (() => {
                 document.body.style.overflow = '';
             }
         }
-    })));
-}));
+    }));
+});

@@ -11,7 +11,7 @@
         return setClassesFromString(el, value);
     }
     function setClassesFromString(el, classString) {
-        let missingClasses = classString => classString.split(' ').filter((i => !el.classList.contains(i))).filter(Boolean);
+        let missingClasses = classString => classString.split(' ').filter(i => !el.classList.contains(i)).filter(Boolean);
         let addClassesAndReturnUndo = classes => {
             el.classList.add(...classes);
             return () => el.classList.remove(...classes);
@@ -21,15 +21,15 @@
     }
     function setClassesFromObject(el, classObject) {
         let classes = Object.entries(classObject), split = classString => classString.split(' ').filter(Boolean);
-        let forAdd = classes.flatMap((([classString, bool]) => bool ? split(classString) : false)).filter(Boolean);
-        let forRemove = classes.flatMap((([classString, bool]) => !bool ? split(classString) : false)).filter(Boolean);
-        const added = forAdd.filter((i => !el.classList.contains(i) && (el.classList.add(i), 
-        true)));
-        const removed = forRemove.filter((i => el.classList.contains(i) && (el.classList.remove(i), 
-        true)));
+        let forAdd = classes.flatMap(([classString, bool]) => bool ? split(classString) : false).filter(Boolean);
+        let forRemove = classes.flatMap(([classString, bool]) => !bool ? split(classString) : false).filter(Boolean);
+        const added = forAdd.filter(i => !el.classList.contains(i) && (el.classList.add(i), 
+        true));
+        const removed = forRemove.filter(i => el.classList.contains(i) && (el.classList.remove(i), 
+        true));
         return () => {
-            removed.forEach((i => el.classList.add(i)));
-            added.forEach((i => el.classList.remove(i)));
+            removed.forEach(i => el.classList.add(i));
+            added.forEach(i => el.classList.remove(i));
         };
     }
     function setStyles(el, value) {
@@ -46,21 +46,21 @@
     }
     function setStylesFromObject(el, value) {
         let previousStyles = {};
-        Object.entries(value).forEach((([key, value]) => {
+        Object.entries(value).forEach(([key, value]) => {
             previousStyles[key] = el.style[key];
             if (!key.startsWith('--')) {
                 key = key.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
             }
             el.style.setProperty(key, value);
-        }));
-        setTimeout((() => el.style.length === 0 && el.removeAttribute('style')));
+        });
+        setTimeout(() => el.style.length === 0 && el.removeAttribute('style'));
         return () => setStyles(el, previousStyles);
     }
     function debounce(func, wait) {
         let timeout;
         return function(...args) {
             clearTimeout(timeout);
-            timeout = setTimeout((() => func.apply(this, args)), wait);
+            timeout = setTimeout(() => func.apply(this, args), wait);
         };
     }
     function pulsate(func, wait, immediate) {
@@ -73,7 +73,7 @@
     }
     function getAttributes(el) {
         const regexp = /^(v-|@|:)/;
-        return [ ...el.attributes ].filter((({name}) => regexp.test(name))).map((({name, value}) => {
+        return [ ...el.attributes ].filter(({name}) => regexp.test(name)).map(({name, value}) => {
             const startsWith = name.match(regexp)[0];
             const root = name.replace(startsWith, '');
             const parts = root.split('.');
@@ -84,14 +84,14 @@
                 expression: value,
                 modifiers: root.split('.').slice(1)
             };
-        }));
+        });
     }
     function updateAttribute(el, name, value) {
         if (name === 'value') {
             if (el.type === 'radio') {
                 el.checked = el.value === value;
             } else if (el.type === 'checkbox') {
-                el.checked = Array.isArray(value) ? value.some((val => val === el.value)) : !!value;
+                el.checked = Array.isArray(value) ? value.some(val => val === el.value) : !!value;
             } else if (el.tagName === 'SELECT') {
                 updateSelect(el, value);
             } else {
@@ -120,10 +120,10 @@
         el._x_undoAddedStyles = setStyles(el, value);
     }
     function updateSelect(el, value) {
-        const arrayWrappedValue = [].concat(value).map((value => value + ''));
-        Array.from(el.options).forEach((option => {
+        const arrayWrappedValue = [].concat(value).map(value => value + '');
+        Array.from(el.options).forEach(option => {
             option.selected = arrayWrappedValue.includes(option.value || option.text);
-        }));
+        });
     }
     function eventCreate(eventName, detail = {}) {
         return new CustomEvent(eventName, {
@@ -146,13 +146,13 @@
         return variable === '' || variable === null || Array.isArray(variable) && variable.length === 0 || typeof variable === 'object' && Object.keys(variable).length === 0;
     }
     function domReady() {
-        return new Promise((resolve => {
+        return new Promise(resolve => {
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', resolve);
             } else {
                 resolve();
             }
-        }));
+        });
     }
     function domWalk(el, callback) {
         callback(el);
@@ -167,7 +167,7 @@
     }
     function fetchProps(rootElement, data) {
         const fetched = [];
-        domWalk(rootElement, (el => getAttributes(el).forEach((attribute => {
+        domWalk(rootElement, el => getAttributes(el).forEach(attribute => {
             let {name, directive, expression, modifiers} = attribute;
             if (directive === 'v-prop') {
                 if (el.type === 'checkbox' && data[expression] === undefined) {
@@ -185,7 +185,7 @@
                     attribute
                 });
             }
-        }))));
+        }));
         document.dispatchEvent(eventCreate('x:fetched', {
             data,
             fetched
@@ -229,7 +229,7 @@
     function initInterceptors(data) {
         let isObject = val => typeof val === 'object' && !Array.isArray(val) && val !== null;
         let recurse = (obj, basePath = '') => {
-            Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach((([key, {value, enumerable}]) => {
+            Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach(([key, {value, enumerable}]) => {
                 if (enumerable === false || value === undefined) return;
                 let path = basePath === '' ? key : `${basePath}.${key}`;
                 if (typeof value === 'object' && value !== null && value._x_interceptor) {
@@ -239,7 +239,7 @@
                         recurse(value, path);
                     }
                 }
-            }));
+            });
         };
         return recurse(data);
     }
@@ -248,10 +248,10 @@
         datas[name] = callback;
     }
     function injectDataProviders(obj, context) {
-        Object.entries(datas).forEach((([name, callback]) => Object.defineProperty(obj, name, {
+        Object.entries(datas).forEach(([name, callback]) => Object.defineProperty(obj, name, {
             get: () => (...args) => callback.call(context, ...args),
             enumerable: false
-        })));
+        }));
         return obj;
     }
     class Component {
@@ -300,7 +300,7 @@
         }
         initialize(root, data, additionalHelperVariables) {
             const self = this;
-            domWalk(root, (el => getAttributes(el).forEach((attribute => {
+            domWalk(root, el => getAttributes(el).forEach(attribute => {
                 let {directive, event, expression, modifiers} = attribute;
                 if (event) {
                     self.registerListener(el, event, modifiers, expression);
@@ -320,16 +320,16 @@
                     }
                     x.directives[directive](el, output, attribute, x, self);
                 }
-            }))));
+            }));
         }
         refresh() {
             const self = this;
-            debounce((() => {
-                domWalk(self.root, (el => getAttributes(el).forEach((attribute => {
+            debounce(() => {
+                domWalk(self.root, el => getAttributes(el).forEach(attribute => {
                     let {directive, expression} = attribute;
                     if (directive === 'v-prop') {
                         let {output, deps} = self.evaluate(expression);
-                        if (self.concernedData.filter((i => deps.includes(i))).length > 0) {
+                        if (self.concernedData.filter(i => deps.includes(i)).length > 0) {
                             updateAttribute(el, 'value', output);
                             document.dispatchEvent(eventCreate('x:refreshed', {
                                 attribute,
@@ -346,13 +346,13 @@
                         } else {
                             [, deps] = expression.split(' in ');
                         }
-                        if (self.concernedData.filter((i => deps.includes(i))).length > 0) {
+                        if (self.concernedData.filter(i => deps.includes(i)).length > 0) {
                             x.directives[directive](el, output, attribute, x, self);
                         }
                     }
-                }))));
+                }));
                 self.concernedData = [];
-            }), 0)();
+            }, 0)();
         }
         registerListener(el, event, modifiers, expression) {
             const wrapHandler = (callback, wrapper) => e => wrapper(callback, e);
@@ -375,25 +375,25 @@
                 handler = debounce(handler, Number(getNextModifier(modifiers, 'delay').split('ms')[0]) || 250);
             }
             if (modifiers.includes('prevent')) {
-                handler = wrapHandler(handler, ((next, e) => {
+                handler = wrapHandler(handler, (next, e) => {
                     e.preventDefault();
                     next(e);
-                }));
+                });
             }
             if (modifiers.includes('stop')) {
-                handler = wrapHandler(handler, ((next, e) => {
+                handler = wrapHandler(handler, (next, e) => {
                     e.stopPropagation();
                     next(e);
-                }));
+                });
             }
             if (modifiers.includes('outside')) {
                 target = document;
-                handler = wrapHandler(handler, ((next, e) => {
+                handler = wrapHandler(handler, (next, e) => {
                     if (el.contains(e.target)) return;
                     if (el.offsetWidth < 1 && el.offsetHeight < 1) return;
                     if (e.target.isConnected === false) return;
                     next(e);
-                }));
+                });
             }
             if (modifiers.includes('once')) {
                 options.once = true;
@@ -402,23 +402,23 @@
                 handler(eventCreate(event, {}));
             }
             if (event === 'intersect') {
-                const observer = new IntersectionObserver((entries => entries.forEach((entry => {
+                const observer = new IntersectionObserver(entries => entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         handler(entry);
                         if (modifiers.includes('once')) {
                             observer.disconnect();
                         }
                     }
-                }))));
+                }));
                 observer.observe(el);
             }
             target.addEventListener(event, handler, options);
         }
         runListenerHandler(expression, e) {
             const methods = {};
-            Object.keys(x.methods).forEach((key => {
+            Object.keys(x.methods).forEach(key => {
                 methods[key] = x.methods[key](e, e.target, this);
-            }));
+            });
             let data = {}, el = e.target;
             while (el && !(data = el.__x_for_data)) {
                 el = el.parentElement;
@@ -439,22 +439,22 @@
             return new Proxy({}, {
                 get(object, property) {
                     let ref;
-                    domWalk(self.root, (el => el.getAttribute('v-ref') === property ? ref = el : null));
+                    domWalk(self.root, el => el.getAttribute('v-ref') === property ? ref = el : null);
                     return ref;
                 }
             });
         }
     }
     function extend(...args) {
-        args.forEach((fn => typeof fn === 'function' && fn()));
+        args.forEach(fn => typeof fn === 'function' && fn());
     }
     const scripts_x = {
         directives: {},
         methods: {},
         start: async function() {
             await domReady();
-            this.discoverComponents((el => this.initializeElement(el)));
-            this.listenUninitializedComponentsAtRunTime((el => this.initializeElement(el)));
+            this.discoverComponents(el => this.initializeElement(el));
+            this.listenUninitializedComponentsAtRunTime(el => this.initializeElement(el));
         },
         extend(...args) {
             extend(args);
@@ -463,7 +463,7 @@
             Array.from(document.querySelectorAll('[v-data]')).forEach(callback);
         },
         listenUninitializedComponentsAtRunTime: callback => {
-            let observer = new MutationObserver((mutations => mutations.forEach((mutation => Array.from(mutation.addedNodes).filter((node => node.nodeType === 1 && node.matches('[v-data]'))).forEach(callback)))));
+            let observer = new MutationObserver(mutations => mutations.forEach(mutation => Array.from(mutation.addedNodes).filter(node => node.nodeType === 1 && node.matches('[v-data]')).forEach(callback)));
             observer.observe(document.querySelector('body'), {
                 childList: true,
                 attributes: true,
@@ -542,7 +542,7 @@
         return null;
     }
     function isStorageModifier(modifiers) {
-        return [ 'cookie', 'local' ].some((modifier => modifiers.includes(modifier)));
+        return [ 'cookie', 'local' ].some(modifier => modifiers.includes(modifier));
     }
     function getStorageType(modifiers) {
         return modifiers.includes('cookie') ? 'cookie' : 'local';
@@ -578,7 +578,7 @@
             return value;
         }
     }
-    document.addEventListener('x:refreshed', (({detail}) => {
+    document.addEventListener('x:refreshed', ({detail}) => {
         const {modifiers, directive, expression} = detail.attribute;
         if (directive === 'v-prop' && isStorageModifier(modifiers)) {
             const type = getStorageType(modifiers);
@@ -595,18 +595,18 @@
                 });
             }
         }
-    }));
-    document.addEventListener('x:fetched', (({detail}) => {
+    });
+    document.addEventListener('x:fetched', ({detail}) => {
         const {data, fetched} = detail;
-        fetched.forEach((item => {
+        fetched.forEach(item => {
             const {attribute: {modifiers, directive, expression}} = item;
             if (directive === 'v-prop' && isStorageModifier(modifiers)) {
                 const type = getStorageType(modifiers);
                 const value = storage.get(expression, type);
                 data[expression] = castToType(data[expression], value || data[expression]);
             }
-        }));
-    }));
+        });
+    });
     const prefix = 'v-';
     function directive(name, callback) {
         name = `${prefix}${name}`;
@@ -617,7 +617,7 @@
         }
     }
     let contextStack = [];
-    directive('each', ((el, expression, attribute, x, component) => {
+    directive('each', (el, expression, attribute, x, component) => {
         if (typeof expression !== 'string') {
             return;
         }
@@ -627,7 +627,7 @@
         if (Number.isInteger(+items)) {
             dataItems = Array.from({
                 length: +items
-            }, ((_, i) => i + 1));
+            }, (_, i) => i + 1);
         } else {
             if (contextStack.length) {
                 items = items.replace(/^[^.]+/, `${contextStack[contextStack.length - 1]}`);
@@ -646,7 +646,7 @@
             }
             next.remove();
         }
-        Object.entries(dataItems ?? []).forEach((([key, dataItem], idx, array) => {
+        Object.entries(dataItems ?? []).forEach(([key, dataItem], idx, array) => {
             const clone = el.cloneNode(true);
             clone.removeAttribute('v-each');
             (async () => {
@@ -666,27 +666,27 @@
                     clone.insertAdjacentText('afterend', join);
                 }
             })();
-        }));
-    }));
-    directive('bind', ((el, expression, {name}, x, component) => {
+        });
+    });
+    directive('bind', (el, expression, {name}, x, component) => {
         if (name === ':attributes' && typeof expression === 'object') {
-            Object.entries(expression).forEach((([key, value]) => updateAttribute(el, key, value)));
+            Object.entries(expression).forEach(([key, value]) => updateAttribute(el, key, value));
         } else {
             updateAttribute(el, name.replace(':', ''), expression);
         }
-    }));
-    directive('html', ((el, expression, attribute, x, component) => {
+    });
+    directive('html', (el, expression, attribute, x, component) => {
         el.innerHTML = expression;
-    }));
-    directive('text', ((el, expression, attribute, x, component) => {
+    });
+    directive('text', (el, expression, attribute, x, component) => {
         el.innerText = expression;
-    }));
-    directive('show', ((el, expression, attribute, x, component) => {
+    });
+    directive('show', (el, expression, attribute, x, component) => {
         el.style.display = expression ? 'block' : 'none';
-    }));
-    directive('hide', ((el, expression, attribute, x, component) => {
+    });
+    directive('hide', (el, expression, attribute, x, component) => {
         el.style.display = expression ? 'block' : 'none';
-    }));
+    });
     const methods_prefix = '$';
     function method(name, callback) {
         name = `${methods_prefix}${name}`;
@@ -697,20 +697,20 @@
         }
     }
     const BYTES_IN_MB = 1048576;
-    method('ajax', ((e, el) => (url, options = {}, callback) => {
+    method('ajax', (e, el) => (url, options = {}, callback) => {
         let tagName = el.tagName.toLowerCase(), method = tagName === 'form' ? 'post' : 'get', data = tagName === 'form' ? new FormData(el) : new FormData, xhr = new XMLHttpRequest;
         switch (tagName) {
           case 'form':
-            Array.from(el.querySelectorAll('input[type=\'file\']')).forEach((input => {
-                input.files && [ ...input.files ].forEach((file => data.append(input.name, file)));
-            }));
+            Array.from(el.querySelectorAll('input[type=\'file\']')).forEach(input => {
+                input.files && [ ...input.files ].forEach(file => data.append(input.name, file));
+            });
             break;
 
           case 'textarea':
           case 'select':
           case 'input':
             if (el.type === 'file' && el.files) {
-                Array.from(el.files).forEach((file => data.append(el.name, file)));
+                Array.from(el.files).forEach(file => data.append(el.name, file));
             } else {
                 el.name && data.append(el.name, el.value);
             }
@@ -718,7 +718,7 @@
         }
         el.classList.add('is-load');
         let submits = el.querySelectorAll('[type="submit"]');
-        submits.forEach((submit => Object.assign(submit.style, {
+        submits.forEach(submit => Object.assign(submit.style, {
             'background-image': 'url("data:image/svg+xml;charset=UTF-8,%3csvg width=\'16\' height=\'16\' fill=\'none\' xmlns=\'http://www.w3.org/2000/svg\'%3e%3cstyle%3ecircle %7b animation: 4s a infinite linear, 3s o infinite linear;%7d%40keyframes a %7bfrom%7bstroke-dasharray:100 0%7d50%25%7bstroke-dasharray:0 100%7dto%7bstroke-dasharray:100 0%7d%7d%40keyframes o %7bfrom%7bstroke-dashoffset:75%7dto%7bstroke-dashoffset:375%7d%7d%3c/style%3e%3cpath d=\'M15 8A7 7 0 111 8a7 7 0 0114 0z\' stroke=\'%23fff\' stroke-opacity=\'.2\' stroke-width=\'2\'/%3e%3ccircle cx=\'8\' cy=\'8\' r=\'7\' stroke=\'%23fff\' stroke-opacity=\'.3\' stroke-width=\'2\'/%3e%3c/svg%3e")',
             'background-repeat': 'no-repeat',
             'background-position': 'center center',
@@ -726,8 +726,8 @@
             'pointer-events': 'none',
             color: 'transparent',
             transition: 'none'
-        })));
-        return new Promise((resolve => {
+        }));
+        return new Promise(resolve => {
             xhr.open(method, url);
             for (const i in options.headers) {
                 if (options.headers.hasOwnProperty(i)) {
@@ -736,14 +736,14 @@
             }
             xhr.withCredentials = options.credentials === 'include';
             xhr.onloadstart = xhr.upload.onprogress = event => callback?.(onProgress(event, xhr));
-            xhr.onloadend = event => resolve((() => callback?.(onProgress(event, xhr))));
+            xhr.onloadend = event => resolve(() => callback?.(onProgress(event, xhr)));
             xhr.send(data);
-        })).then((response => {
+        }).then(response => {
             el.classList.remove('is-load');
-            submits.forEach((submit => submit.removeAttribute('style')));
+            submits.forEach(submit => submit.removeAttribute('style'));
             return response();
-        }));
-    }));
+        });
+    });
     function onProgress(event, xhr) {
         const {loaded = 0, total = 0, type} = event;
         const {response = '', responseText = '', status = '', responseURL = ''} = xhr;
@@ -765,10 +765,10 @@
         return Math.round(number / BYTES_IN_MB * 100) / 100;
     }
     method('store', getStores);
-    method('dispatch', ((e, el) => (name, detail = {}) => {
+    method('dispatch', (e, el) => (name, detail = {}) => {
         el.dispatchEvent(eventCreate(name, detail));
-    }));
-    directive('sticky', ((el, expression, attribute, x, component) => {
+    });
+    directive('sticky', (el, expression, attribute, x, component) => {
         let style = el.parentElement.currentStyle || window.getComputedStyle(el.parentElement);
         if (style.position !== 'relative') {
             return false;
@@ -800,14 +800,14 @@
             el.setAttribute('style', 'position: sticky;' + value);
             lastScroll = window.scrollY;
         }
-        [ 'load', 'scroll', 'resize' ].forEach((event => window.addEventListener(event, (() => calcPosition()))));
-    }));
-    directive('autocomplete', ((el, expression, attribute, x, component) => {
+        [ 'load', 'scroll', 'resize' ].forEach(event => window.addEventListener(event, () => calcPosition()));
+    });
+    directive('autocomplete', (el, expression, attribute, x, component) => {
         el.setAttribute('readonly', true);
-        el.onfocus = () => setTimeout((() => el.removeAttribute('readonly')), 10);
+        el.onfocus = () => setTimeout(() => el.removeAttribute('readonly'), 10);
         el.onblur = () => el.setAttribute('readonly', true);
-    }));
-    directive('highlight', ((el, expression, {modifiers}, x, component) => {
+    });
+    directive('highlight', (el, expression, {modifiers}, x, component) => {
         let lang = modifiers[0] || 'html', wrapper = document.createElement('code');
         wrapper.classList.add('language-' + lang);
         wrapper.innerHTML = el.innerHTML;
@@ -815,8 +815,8 @@
         el.innerHTML = '';
         el.setAttribute('data-lang', lang.toUpperCase());
         el.appendChild(wrapper);
-    }));
-    directive('collapse', ((el, expression, attribute, x, component) => {
+    });
+    directive('collapse', (el, expression, attribute, x, component) => {
         function slide(el, isDown, duration) {
             if (typeof duration === 'undefined') duration = 200;
             if (typeof isDown === 'undefined') isDown = false;
@@ -826,8 +826,8 @@
             }
             let elProperties = [ 'height', 'paddingTop', 'paddingBottom', 'marginTop', 'marginBottom' ];
             let elStyles = window.getComputedStyle(el);
-            let {height, paddingTop, paddingBottom, marginTop, marginBottom} = elProperties.reduce(((acc, prop) => (acc[prop] = parseFloat(elStyles[prop]), 
-            acc)), {});
+            let {height, paddingTop, paddingBottom, marginTop, marginBottom} = elProperties.reduce((acc, prop) => (acc[prop] = parseFloat(elStyles[prop]), 
+            acc), {});
             let stepHeight = height / duration;
             let stepPaddingTop = paddingTop / duration;
             let stepPaddingBottom = paddingBottom / duration;
@@ -845,7 +845,7 @@
                 el.style.marginTop = `${isDown ? stepMarginTop * elapsed : marginTop - stepMarginTop * elapsed}px`;
                 el.style.marginBottom = `${isDown ? stepMarginBottom * elapsed : marginBottom - stepMarginBottom * elapsed}px`;
                 if (elapsed >= duration) {
-                    [ ...elProperties, 'overflow' ].forEach((prop => el.style[prop] = ''));
+                    [ ...elProperties, 'overflow' ].forEach(prop => el.style[prop] = '');
                     if (!isDown) {
                         el.style.display = 'none';
                     }
@@ -856,34 +856,34 @@
             window.requestAnimationFrame(step);
         }
         slide(el, expression);
-    }));
-    directive('anchor', ((el, expression, attribute, x, component) => {
+    });
+    directive('anchor', (el, expression, attribute, x, component) => {
         let hash = window.location.hash.replace('#', ''), anchor = el.innerText.toLowerCase().replaceAll(' ', '-');
         if (hash && hash === anchor) {
             el.scrollIntoView({
                 behavior: 'smooth'
             });
         }
-        el.addEventListener('click', (e => {
+        el.addEventListener('click', e => {
             e.preventDefault();
             window.location.hash = anchor;
             el.scrollIntoView({
                 behavior: 'smooth'
             });
-        }), false);
-        const observer = new IntersectionObserver((entries => {
-            entries.forEach((entry => {
+        }, false);
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
                 if (!entry.isIntersecting || entry.intersectionRatio !== 1) {
                     return;
                 }
                 window.location.hash = anchor;
-            }));
-        }), {
+            });
+        }, {
             threshold: 1
         });
         observer.observe(el);
-    }));
-    directive('listen', ((el, expression, attribute, x, component) => {
+    });
+    directive('listen', (el, expression, attribute, x, component) => {
         if (!expression) {
             return false;
         }
@@ -892,11 +892,11 @@
             icn.classList.add('playing');
             aud.play();
             aud.setAttribute('data-playing', 'true');
-            aud.addEventListener('ended', (function() {
+            aud.addEventListener('ended', function() {
                 _pause(aud, icn);
                 aud.parentNode.style.background = null;
                 return false;
-            }));
+            });
         }
         function _pause(aud, icn) {
             aud.pause();
@@ -915,7 +915,7 @@
         el.id = name + '-' + i;
         el.insertBefore(icn, el.firstChild);
         el.appendChild(aud);
-        document.addEventListener('click', (e => {
+        document.addEventListener('click', e => {
             let aud, elm, icn;
             if (e.target.className === name) {
                 aud = e.target.children[1];
@@ -948,13 +948,13 @@
                     }
                 })();
             }
-        }));
-    }));
-    directive('textarea', ((el, expression, attribute, x, component) => {
+        });
+    });
+    directive('textarea', (el, expression, attribute, x, component) => {
         if ('TEXTAREA' !== el.tagName.toUpperCase()) {
             return false;
         }
-        el.addEventListener('input', (() => {
+        el.addEventListener('input', () => {
             let max = parseInt(expression) || 99, rows = parseInt(el.value.split(/\r|\r\n|\n/).length);
             if (rows > max) {
                 return false;
@@ -962,15 +962,15 @@
             let styles = getComputedStyle(el, null), border = parseInt(styles.getPropertyValue('border-width')) * 4;
             el.style.height = 'auto';
             el.style.height = el.scrollHeight + border + 4 + 'px';
-        }), false);
-    }));
-    directive('tooltip', ((el, expression, {modifiers}, x, component) => {
+        }, false);
+    });
+    directive('tooltip', (el, expression, {modifiers}, x, component) => {
         let position, trigger;
         if (modifiers) {
-            modifiers.forEach((modifier => {
+            modifiers.forEach(modifier => {
                 position = [ 'top', 'right', 'bottom', 'left' ].includes(modifier) ? modifier : 'top';
                 trigger = [ 'hover', 'click' ].includes(modifier) ? modifier : 'hover';
-            }));
+            });
         }
         if (position && trigger) {
             try {
@@ -988,10 +988,10 @@
                 console.warn('You forgot to connect the library Drooltip.js');
             }
         }
-    }));
-    directive('progress', ((el, expression, {modifiers}, x, component) => {
-        new IntersectionObserver(((entries, observer) => {
-            entries.forEach((entry => {
+    });
+    directive('progress', (el, expression, {modifiers}, x, component) => {
+        new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     let [value = 100, from = 0, to = 100, duration = '0ms'] = modifiers;
                     let start = parseInt(from) / parseInt(value) * 100;
@@ -1000,16 +1000,16 @@
                         [end, start] = [ start, end ];
                     }
                     el.style.setProperty('--grafema-progress', (start < 0 ? 0 : start) + '%');
-                    setTimeout((() => {
+                    setTimeout(() => {
                         el.style.setProperty('--grafema-transition', ' width ' + duration);
                         el.style.setProperty('--grafema-progress', (end > 100 ? 100 : end) + '%');
-                    }), 500);
+                    }, 500);
                     observer.unobserve(el);
                 }
-            }));
-        })).observe(el);
-    }));
-    directive('select', ((el, expression, attribute, x, component) => {
+            });
+        }).observe(el);
+    });
+    directive('select', (el, expression, attribute, x, component) => {
         const settings = {
             showSearch: false,
             hideSelected: false,
@@ -1027,7 +1027,7 @@
             new SlimSelect({
                 settings,
                 select: el,
-                data: Array.from(el.options).reduce(((acc, option) => {
+                data: Array.from(el.options).reduce((acc, option) => {
                     let image = option.getAttribute('data-image'), icon = option.getAttribute('data-icon'), description = option.getAttribute('data-description') || '';
                     let images = image ? `<img src="${image}" alt />` : '', icons = icon ? `<i class="${icon}"></i>` : '', descriptions = description ? `<span class="ss-description">${description}</span>` : '', html = `${images}${icons}<span class="ss-text">${option.text}${descriptions}</span>`;
                     let optionData = {
@@ -1045,7 +1045,7 @@
                     };
                     if (option.parentElement.tagName === 'OPTGROUP') {
                         const optgroupLabel = option.parentElement.getAttribute('label');
-                        const optgroup = acc.find((item => item.label === optgroupLabel));
+                        const optgroup = acc.find(item => item.label === optgroupLabel);
                         if (optgroup) {
                             optgroup.options.push(optionData);
                         } else {
@@ -1058,13 +1058,13 @@
                         acc.push(optionData);
                     }
                     return acc;
-                }), [])
+                }, [])
             });
         } catch {
             console.error('The SlimSelect library is not connected');
         }
-    }));
-    directive('starter', ((el, expression, attribute, x, component) => {}));
+    });
+    directive('starter', (el, expression, attribute, x, component) => {});
     const reactivity_store = {
         data: {},
         effects: []
@@ -1075,7 +1075,7 @@
             dependencies: new Set(dependencies)
         };
         function updateDependencies(newDependencies) {
-            newDependencies.forEach((dep => effectData.dependencies.add(dep)));
+            newDependencies.forEach(dep => effectData.dependencies.add(dep));
         }
         callback();
         reactivity_store.effects.push(effectData);
@@ -1098,18 +1098,18 @@
         reactivity_store.data = reactiveData;
         return reactiveData;
     }
-    extend((() => directive('step', ((el, expression, attribute, x, component) => {
+    extend(() => directive('step', (el, expression, attribute, x, component) => {
         const wizard = getWizard(el, component);
         const step = wizard.getStep(el);
         const evaluateCheck = () => [ !!expression, {} ];
         if (step) {
             [step.isComplete, step.errors] = evaluateCheck();
-            effect((() => {
+            effect(() => {
                 console.log('Current Index:', wizard.currentIndex);
                 component.refresh();
-            }), Object.keys(wizard));
+            }, Object.keys(wizard));
         }
-    }))), (() => method('step', ((e, el, component) => getWizard(el, component)))));
+    }), () => method('step', (e, el, component) => getWizard(el, component)));
     let wizards = new WeakMap;
     let getWizard = (el, {root}) => {
         if (!wizards.has(root)) {
@@ -1217,7 +1217,7 @@
                     return this.current();
                 },
                 getStep(el) {
-                    let step = this.steps.find((step => step.el === el));
+                    let step = this.steps.find(step => step.el === el);
                     if (!step) {
                         el.setAttribute('v-show', 'console.log($step.current());$step.current().el === $el');
                         step = {
@@ -1242,7 +1242,7 @@
         }
         return null;
     };
-    method('pickadate', ((e, el) => options => {
+    method('pickadate', (e, el) => options => {
         try {
             options = Object.assign({}, {
                 inline: true,
@@ -1261,9 +1261,9 @@
         } catch (e) {
             console.error('X.js: "Datepicker" is not defined. Details: https:://github.com/text-mask/text-mask');
         }
-    }));
+    });
     let seconds = 0, isCountingDown = false;
-    method('countdown', (() => ({
+    method('countdown', () => ({
         start: (initialSeconds, processCallback, endCallback) => {
             if (isCountingDown) {
                 return;
@@ -1283,9 +1283,9 @@
             countdown();
         },
         second: seconds
-    })));
+    }));
     let stream = null;
-    method('stream', (() => ({
+    method('stream', () => ({
         check(refs) {
             let canvas = refs.canvas, video = refs.video, image = refs.image;
             if (!canvas) {
@@ -1310,10 +1310,10 @@
         },
         start(refs) {
             let video = refs.video;
-            const observer = new MutationObserver((mutations => {
+            const observer = new MutationObserver(mutations => {
                 for (let mutation of mutations) {
                     if (mutation.target === document.body && !stream) {
-                        setTimeout((async () => {
+                        setTimeout(async () => {
                             if (this.isVisible(video)) {
                                 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                                     video.srcObject = stream = await navigator.mediaDevices.getUserMedia({
@@ -1323,10 +1323,10 @@
                                     console.error('The browser does not support the getUserMedia API');
                                 }
                             }
-                        }), 500);
+                        }, 500);
                     }
                 }
-            }));
+            });
             observer.observe(document, {
                 childList: true,
                 subtree: true,
@@ -1354,12 +1354,12 @@
         },
         stop() {
             if (stream) {
-                stream.getTracks().forEach((track => track.stop()));
+                stream.getTracks().forEach(track => track.stop());
             }
             stream = null;
         }
-    })));
-    method('password', (() => ({
+    }));
+    method('password', () => ({
         min: {
             lowercase: 2,
             uppercase: 2,
@@ -1403,13 +1403,13 @@
         },
         generate() {
             let password = '', types = Object.keys(this.charsets);
-            types.forEach((type => {
+            types.forEach(type => {
                 let count = Math.max(this.min[type], 0), charset = this.charsets[type];
                 for (let i = 0; i < count; i++) {
                     let randomIndex = Math.floor(Math.random() * charset.length);
                     password += charset[randomIndex];
                 }
-            }));
+            });
             while (password.length < this.min.length) {
                 let randomIndex = Math.floor(Math.random() * types.length), charType = types[randomIndex], charset = this.charsets[charType], randomCharIndex = Math.floor(Math.random() * charset.length);
                 password += charset[randomCharIndex];
@@ -1430,8 +1430,8 @@
             }
             return array.join('');
         }
-    })));
-    method('mask', ((e, el) => mask => {
+    }));
+    method('mask', (e, el) => mask => {
         if (typeof mask === 'undefined') {
             let type = el.getAttribute('type');
             if (type) {
@@ -1473,7 +1473,7 @@
                     return new RegExp('[0-' + max.charAt(0) + ']');
                 }
                 let maskArr = mask.match(/(\{[^}]+?\})|(.)/g), position = -1;
-                maskArr = maskArr.map((symbol => {
+                maskArr = maskArr.map(symbol => {
                     ++position;
                     switch (symbol) {
                       case 'i':
@@ -1498,7 +1498,7 @@
                         }
                         return symbol;
                     }
-                }));
+                });
                 vanillaTextMask.maskInput({
                     inputElement: el,
                     guide: false,
@@ -1508,16 +1508,16 @@
                 console.error('X.js: "vanillaTextMask" is not defined. Details: https:://github.com/text-mask/text-mask');
             }
         }
-    }));
-    method('modal', ((e, el) => ({
+    });
+    method('modal', (e, el) => ({
         open: (id, animation) => {
-            setTimeout((() => {
+            setTimeout(() => {
                 let modal = document.getElementById(id);
                 if (modal) {
                     modal.classList.add('is-active', animation || 'fade');
                 }
                 document.body.style.overflow = 'hidden';
-            }), 25);
+            }, 25);
         },
         close: animation => {
             let modal = el.closest('.modal');
@@ -1526,8 +1526,8 @@
                 document.body.style.overflow = '';
             }
         }
-    })));
-    method('notice', ((e, el) => ({
+    }));
+    method('notice', (e, el) => ({
         items: [],
         add(message) {
             this.items.push({
@@ -1539,9 +1539,9 @@
         remove(notification) {
             console.log(notification);
             console.log(this.items);
-            this.items = this.items.filter((i => i.id !== notification.id));
+            this.items = this.items.filter(i => i.id !== notification.id);
         }
-    })));
+    }));
     store('notice', {
         items: {},
         duration: 4e3,
@@ -1563,7 +1563,7 @@
         close(id) {
             if (typeof this.items[id] !== 'undefined') {
                 this.items[id].selectors.push('hide');
-                setTimeout((() => delete this.items[id]), 1e3);
+                setTimeout(() => delete this.items[id], 1e3);
             }
         },
         add(message, type) {
@@ -1575,14 +1575,14 @@
                     closable: true,
                     selectors: [ type || 'info' ],
                     classes() {
-                        return this.selectors.map((x => 'notice__item--' + x)).join(' ');
+                        return this.selectors.map(x => 'notice__item--' + x).join(' ');
                     }
                 };
-                setTimeout((() => this.close(timestamp)), this.duration);
+                setTimeout(() => this.close(timestamp), this.duration);
             }
         }
     });
-    data('timer', ((endDate, startDate) => ({
+    data('timer', (endDate, startDate) => ({
         timer: null,
         end: endDate,
         day: '01',
@@ -1594,7 +1594,7 @@
             if (start < end) {
                 let diff = Math.round((end - start) / 1e3);
                 let t = this;
-                this.timer = pulsate((() => {
+                this.timer = pulsate(() => {
                     t.day = ('0' + parseInt(diff / (60 * 60 * 24), 10)).slice(-2);
                     t.hour = ('0' + parseInt(diff / (60 * 60) % 24, 10)).slice(-2);
                     t.min = ('0' + parseInt(diff / 60 % 60, 10)).slice(-2);
@@ -1602,18 +1602,18 @@
                     if (--diff < 0) {
                         t.days = t.hour = t.min = t.sec = '00';
                     }
-                }), 1e3, true);
+                }, 1e3, true);
             }
         }
-    })));
-    data('dropdown', (() => ({
+    }));
+    data('dropdown', () => ({
         open: false,
         toggle() {
             console.log(this);
             this.open = !this.open;
         }
-    })));
-    data('avatar', (() => ({
+    }));
+    data('avatar', () => ({
         content: '',
         image: '',
         add(event, callback) {
@@ -1639,12 +1639,12 @@
         getInitials(string, letters = 2) {
             const wordArray = string.split(' ').slice(0, letters);
             if (wordArray.length >= 2) {
-                return wordArray.reduce(((accumulator, currentValue) => `${accumulator}${currentValue[0].charAt(0)}`.toUpperCase()), '');
+                return wordArray.reduce((accumulator, currentValue) => `${accumulator}${currentValue[0].charAt(0)}`.toUpperCase(), '');
             }
             return wordArray[0].charAt(0).toUpperCase();
         }
-    })));
-    data('builder', (() => ({
+    }));
+    data('builder', () => ({
         default: {
             location: 'post',
             operator: '===',
@@ -1677,21 +1677,21 @@
             let groups = JSON.parse(JSON.stringify(this.groups));
             console.log(groups);
         }
-    })));
-    data('table', (() => ({
+    }));
+    data('table', () => ({
         init() {
-            document.addEventListener('keydown', (e => {
+            document.addEventListener('keydown', e => {
                 let key = window.event ? event : e;
                 if (!!key.shiftKey) {
                     this.selection.shift = true;
                 }
-            }));
-            document.addEventListener('keyup', (e => {
+            });
+            document.addEventListener('keyup', e => {
                 let key = window.event ? event : e;
                 if (!key.shiftKey) {
                     this.selection.shift = false;
                 }
-            }));
+            });
         },
         selection: {
             box: {},
@@ -1703,7 +1703,7 @@
             ['@change'](e) {
                 let inputs = document.querySelectorAll('input[name="item[]"]');
                 if (inputs.length) {
-                    inputs.forEach((input => input.checked = e.target.checked));
+                    inputs.forEach(input => input.checked = e.target.checked);
                 }
             }
         },
@@ -1732,7 +1732,7 @@
                 }
             }
         }
-    })));
+    }));
     window.x = scripts_x;
     window.x.start();
 })();

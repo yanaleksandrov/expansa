@@ -1309,7 +1309,11 @@ document.addEventListener( 'alpine:init', () => {
 		try {
 			let width  = el.offsetWidth;
 			let select = new SlimSelect({
-				settings,
+				settings: {
+					...settings,
+					contentPosition: 'fixed',
+					contentLocation: el.closest('dialog') ? el.parentElement : null,
+				},
 				select: el,
 				events: {
 					afterChange: () => {

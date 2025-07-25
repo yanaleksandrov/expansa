@@ -55,9 +55,9 @@ var __webpack_modules__ = {
                             }
                             clone = [];
                             visited[id] = clone;
-                            o.forEach((function(v, i) {
+                            o.forEach(function(v, i) {
                                 clone[i] = deepClone(v, visited);
-                            }));
+                            });
                             return clone;
 
                           default:
@@ -147,11 +147,11 @@ var __webpack_modules__ = {
                         }
                         var old = root[inside];
                         root[inside] = ret;
-                        _.languages.DFS(_.languages, (function(key, value) {
+                        _.languages.DFS(_.languages, function(key, value) {
                             if (value === old && key != inside) {
                                 this[key] = ret;
                             }
-                        }));
+                        });
                         return ret;
                     },
                     DFS: function DFS(o, callback, type, visited) {
@@ -301,9 +301,9 @@ var __webpack_modules__ = {
                 }
                 if (Array.isArray(o)) {
                     var s = '';
-                    o.forEach((function(e) {
+                    o.forEach(function(e) {
                         s += stringify(e, language);
-                    }));
+                    });
                     return s;
                 }
                 var env = {
@@ -489,7 +489,7 @@ var __webpack_modules__ = {
                     return _;
                 }
                 if (!_.disableWorkerMessageHandler) {
-                    _self.addEventListener('message', (function(evt) {
+                    _self.addEventListener('message', function(evt) {
                         var message = JSON.parse(evt.data);
                         var lang = message.language;
                         var code = message.code;
@@ -498,7 +498,7 @@ var __webpack_modules__ = {
                         if (immediateClose) {
                             _self.close();
                         }
-                    }), false);
+                    }, false);
                 }
                 return _;
             }
@@ -606,11 +606,11 @@ var __webpack_modules__ = {
         };
         Prism.languages.markup['tag'].inside['attr-value'].inside['entity'] = Prism.languages.markup['entity'];
         Prism.languages.markup['doctype'].inside['internal-subset'].inside = Prism.languages.markup;
-        Prism.hooks.add('wrap', (function(env) {
+        Prism.hooks.add('wrap', function(env) {
             if (env.type === 'entity') {
                 env.attributes['title'] = env.content.replace(/&amp;/, '&');
             }
-        }));
+        });
         Object.defineProperty(Prism.languages.markup.tag, 'addInlined', {
             value: function addInlined(tagName, lang) {
                 var includedCdataInside = {};
@@ -632,9 +632,9 @@ var __webpack_modules__ = {
                 };
                 var def = {};
                 def[tagName] = {
-                    pattern: RegExp(/(<__[^>]*>)(?:<!\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]>|(?!<!\[CDATA\[)[\s\S])*?(?=<\/__>)/.source.replace(/__/g, (function() {
+                    pattern: RegExp(/(<__[^>]*>)(?:<!\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]>|(?!<!\[CDATA\[)[\s\S])*?(?=<\/__>)/.source.replace(/__/g, function() {
                         return tagName;
-                    })), 'i'),
+                    }), 'i'),
                     lookbehind: true,
                     greedy: true,
                     inside
@@ -976,7 +976,7 @@ var __webpack_modules__ = {
                             return;
                         }
                         var tokenStack = env.tokenStack = [];
-                        env.code = env.code.replace(placeholderPattern, (function(match) {
+                        env.code = env.code.replace(placeholderPattern, function(match) {
                             if (typeof replaceFilter === 'function' && !replaceFilter(match)) {
                                 return match;
                             }
@@ -987,7 +987,7 @@ var __webpack_modules__ = {
                             }
                             tokenStack[i] = match;
                             return placeholder;
-                        }));
+                        });
                         env.grammar = Prism.languages.markup;
                     }
                 },
@@ -1307,16 +1307,16 @@ var __webpack_modules__ = {
                     }
                 }
             });
-            Prism.hooks.add('before-tokenize', (function(env) {
+            Prism.hooks.add('before-tokenize', function(env) {
                 if (!/<\?/.test(env.code)) {
                     return;
                 }
                 var phpPattern = /<\?(?:[^"'/#]|\/(?![*/])|("|')(?:\\[\s\S]|(?!\1)[^\\])*\1|(?:\/\/|#(?!\[))(?:[^?\n\r]|\?(?!>))*(?=$|\?>|[\r\n])|#\[|\/\*(?:[^*]|\*(?!\/))*(?:\*\/|$))*?(?:\?>|$)/g;
                 Prism.languages['markup-templating'].buildPlaceholders(env, 'php', phpPattern);
-            }));
-            Prism.hooks.add('after-tokenize', (function(env) {
+            });
+            Prism.hooks.add('after-tokenize', function(env) {
                 Prism.languages['markup-templating'].tokenizePlaceholders(env, 'php');
-            }));
+            });
         })(Prism);
         (function(Prism) {
             var javaDocLike = Prism.languages.javadoclike = {
@@ -1369,14 +1369,14 @@ var __webpack_modules__ = {
                 if (typeof languages === 'string') {
                     languages = [ languages ];
                 }
-                languages.forEach((function(lang) {
-                    docCommentSupport(lang, (function(pattern) {
+                languages.forEach(function(lang) {
+                    docCommentSupport(lang, function(pattern) {
                         if (!pattern.inside) {
                             pattern.inside = {};
                         }
                         pattern.inside.rest = docLanguage;
-                    }));
-                }));
+                    });
+                });
             }
             Object.defineProperty(javaDocLike, 'addSupport', {
                 value: addSupport
@@ -1471,13 +1471,13 @@ var __webpack_modules__ = {
             var braces = /(?:\{(?:\{(?:\{[^{}]*\}|[^{}])*\}|[^{}])*\})/.source;
             var spread = /(?:\{<S>*\.{3}(?:[^{}]|<BRACES>)*\})/.source;
             function re(source, flags) {
-                source = source.replace(/<S>/g, (function() {
+                source = source.replace(/<S>/g, function() {
                     return space;
-                })).replace(/<BRACES>/g, (function() {
+                }).replace(/<BRACES>/g, function() {
                     return braces;
-                })).replace(/<SPREAD>/g, (function() {
+                }).replace(/<SPREAD>/g, function() {
                     return spread;
-                }));
+                });
                 return RegExp(source, flags);
             }
             spread = re(spread).source;
@@ -1565,12 +1565,12 @@ var __webpack_modules__ = {
                     }
                 }
             };
-            Prism.hooks.add('after-tokenize', (function(env) {
+            Prism.hooks.add('after-tokenize', function(env) {
                 if (env.language !== 'jsx' && env.language !== 'tsx') {
                     return;
                 }
                 walkTokens(env.tokens);
-            }));
+            });
         })(Prism);
         Prism.languages.scss = Prism.languages.extend('css', {
             comment: {
@@ -1738,15 +1738,15 @@ var __webpack_modules__ = {
                 assumeViewportIndependence: true
             };
             function resizeElements(elements) {
-                elements = elements.filter((function(e) {
+                elements = elements.filter(function(e) {
                     var codeStyles = getStyles(e);
                     var whiteSpace = codeStyles['white-space'];
                     return whiteSpace === 'pre-wrap' || whiteSpace === 'pre-line';
-                }));
+                });
                 if (elements.length == 0) {
                     return;
                 }
-                var infos = elements.map((function(element) {
+                var infos = elements.map(function(element) {
                     var codeElement = element.querySelector('code');
                     var lineNumbersWrapper = element.querySelector('.line-numbers-rows');
                     if (!codeElement || !lineNumbersWrapper) {
@@ -1770,14 +1770,14 @@ var __webpack_modules__ = {
                         oneLinerHeight,
                         sizer: lineNumberSizer
                     };
-                })).filter(Boolean);
-                infos.forEach((function(info) {
+                }).filter(Boolean);
+                infos.forEach(function(info) {
                     var lineNumberSizer = info.sizer;
                     var lines = info.lines;
                     var lineHeights = info.lineHeights;
                     var oneLinerHeight = info.oneLinerHeight;
                     lineHeights[lines.length - 1] = undefined;
-                    lines.forEach((function(line, index) {
+                    lines.forEach(function(line, index) {
                         if (line && line.length > 1) {
                             var e = lineNumberSizer.appendChild(document.createElement('span'));
                             e.style.display = 'block';
@@ -1785,9 +1785,9 @@ var __webpack_modules__ = {
                         } else {
                             lineHeights[index] = oneLinerHeight;
                         }
-                    }));
-                }));
-                infos.forEach((function(info) {
+                    });
+                });
+                infos.forEach(function(info) {
                     var lineNumberSizer = info.sizer;
                     var lineHeights = info.lineHeights;
                     var childIndex = 0;
@@ -1796,16 +1796,16 @@ var __webpack_modules__ = {
                             lineHeights[i] = lineNumberSizer.children[childIndex++].getBoundingClientRect().height;
                         }
                     }
-                }));
-                infos.forEach((function(info) {
+                });
+                infos.forEach(function(info) {
                     var lineNumberSizer = info.sizer;
                     var wrapper = info.element.querySelector('.line-numbers-rows');
                     lineNumberSizer.style.display = 'none';
                     lineNumberSizer.innerHTML = '';
-                    info.lineHeights.forEach((function(height, lineNumber) {
+                    info.lineHeights.forEach(function(height, lineNumber) {
                         wrapper.children[lineNumber].style.height = height + 'px';
-                    }));
-                }));
+                    });
+                });
             }
             function getStyles(element) {
                 if (!element) {
@@ -1814,14 +1814,14 @@ var __webpack_modules__ = {
                 return window.getComputedStyle ? getComputedStyle(element) : element.currentStyle || null;
             }
             var lastWidth = undefined;
-            window.addEventListener('resize', (function() {
+            window.addEventListener('resize', function() {
                 if (config.assumeViewportIndependence && lastWidth === window.innerWidth) {
                     return;
                 }
                 lastWidth = window.innerWidth;
                 resizeElements(Array.prototype.slice.call(document.querySelectorAll('pre.' + PLUGIN_NAME)));
-            }));
-            Prism.hooks.add('complete', (function(env) {
+            });
+            Prism.hooks.add('complete', function(env) {
                 if (!env.code) {
                     return;
                 }
@@ -1852,11 +1852,11 @@ var __webpack_modules__ = {
                 env.element.appendChild(lineNumbersWrapper);
                 resizeElements([ pre ]);
                 Prism.hooks.run('line-numbers', env);
-            }));
-            Prism.hooks.add('line-numbers', (function(env) {
+            });
+            Prism.hooks.add('line-numbers', function(env) {
                 env.plugins = env.plugins || {};
                 env.plugins.lineNumbers = true;
-            }));
+            });
         })();
     }
 };

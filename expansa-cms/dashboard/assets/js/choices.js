@@ -140,9 +140,9 @@ var __webpack_modules__ = {
         var generateChars = function(length) {
             return Array.from({
                 length
-            }, (function() {
+            }, function() {
                 return getRandomNumber(0, 36).toString(36);
-            })).join('');
+            }).join('');
         };
         var generateId = function(element, prefix) {
             var id = element.id || element.name && ''.concat(element.name, '-').concat(generateChars(2)) || generateChars(4);
@@ -270,18 +270,18 @@ var __webpack_modules__ = {
         var diff = function(a, b) {
             var aKeys = Object.keys(a).sort();
             var bKeys = Object.keys(b).sort();
-            return aKeys.filter((function(i) {
+            return aKeys.filter(function(i) {
                 return bKeys.indexOf(i) < 0;
-            }));
+            });
         };
         var getClassNames = function(ClassNames) {
             return Array.isArray(ClassNames) ? ClassNames : [ ClassNames ];
         };
         var getClassNamesSelector = function(option) {
             if (option && Array.isArray(option)) {
-                return option.map((function(item) {
+                return option.map(function(item) {
                     return '.'.concat(item);
-                })).join('');
+                }).join('');
             }
             return '.'.concat(option);
         };
@@ -571,9 +571,9 @@ var __webpack_modules__ = {
                 var elementHeight = element.offsetHeight;
                 var elementPos = element.offsetTop + elementHeight;
                 var destination = direction > 0 ? this.element.scrollTop + elementPos - listScrollPosition : element.offsetTop;
-                requestAnimationFrame((function() {
+                requestAnimationFrame(function() {
                     _this._animateScroll(destination, direction);
-                }));
+                });
             };
             List.prototype._scrollDown = function(scrollPos, strength, destination) {
                 var easing = (destination - scrollPos) / strength;
@@ -602,9 +602,9 @@ var __webpack_modules__ = {
                     }
                 }
                 if (continueAnimation) {
-                    requestAnimationFrame((function() {
+                    requestAnimationFrame(function() {
                         _this._animateScroll(destination, direction);
-                    }));
+                    });
                 }
             };
             return List;
@@ -696,9 +696,9 @@ var __webpack_modules__ = {
         };
         var stringToHtmlClass = function(input) {
             if (typeof input === 'string') {
-                input = input.split(' ').filter((function(s) {
+                input = input.split(' ').filter(function(s) {
                     return s.length;
-                }));
+                });
             }
             if (Array.isArray(input) && input.length) {
                 return input;
@@ -728,9 +728,9 @@ var __webpack_modules__ = {
                     throw new TypeError('optGroup is not allowed');
                 }
                 var group = groupOrChoice;
-                var choices = group.choices.map((function(e) {
+                var choices = group.choices.map(function(e) {
                     return mapInputToChoice(e, false);
-                }));
+                });
                 var result_2 = {
                     id: 0,
                     label: unwrapStringForRaw(group.label) || group.value,
@@ -793,7 +793,7 @@ var __webpack_modules__ = {
             WrappedSelect.prototype.addOptions = function(choices) {
                 var _this = this;
                 var fragment = document.createDocumentFragment();
-                choices.forEach((function(obj) {
+                choices.forEach(function(obj) {
                     var choice = obj;
                     if (choice.element) {
                         return;
@@ -801,19 +801,19 @@ var __webpack_modules__ = {
                     var option = _this.template(choice);
                     fragment.appendChild(option);
                     choice.element = option;
-                }));
+                });
                 this.element.appendChild(fragment);
             };
             WrappedSelect.prototype.optionsAsChoices = function() {
                 var _this = this;
                 var choices = [];
-                this.element.querySelectorAll(':scope > option, :scope > optgroup').forEach((function(e) {
+                this.element.querySelectorAll(':scope > option, :scope > optgroup').forEach(function(e) {
                     if (isHtmlOption(e)) {
                         choices.push(_this._optionToChoice(e));
                     } else if (isHtmlOptgroup(e)) {
                         choices.push(_this._optgroupToChoice(e));
                     }
-                }));
+                });
                 return choices;
             };
             WrappedSelect.prototype._optionToChoice = function(option) {
@@ -842,9 +842,9 @@ var __webpack_modules__ = {
             WrappedSelect.prototype._optgroupToChoice = function(optgroup) {
                 var _this = this;
                 var options = optgroup.querySelectorAll('option');
-                var choices = Array.from(options).map((function(option) {
+                var choices = Array.from(options).map(function(option) {
                     return _this._optionToChoice(option);
-                }));
+                });
                 return {
                     id: 0,
                     label: optgroup.label || '',
@@ -992,27 +992,27 @@ var __webpack_modules__ = {
                         }
                     }
                     removeItem(action.item);
-                    state = state.filter((function(choice) {
+                    state = state.filter(function(choice) {
                         return choice.id !== action.item.id;
-                    }));
+                    });
                     break;
                 }
 
               case ActionType.REMOVE_CHOICE:
                 {
                     removeItem(action.choice);
-                    state = state.filter((function(item) {
+                    state = state.filter(function(item) {
                         return item.id !== action.choice.id;
-                    }));
+                    });
                     break;
                 }
 
               case ActionType.HIGHLIGHT_ITEM:
                 {
                     var highlighted = action.highlighted;
-                    var item = state.find((function(obj) {
+                    var item = state.find(function(obj) {
                         return obj.id === action.item.id;
-                    }));
+                    });
                     if (item && item.highlighted !== highlighted) {
                         item.highlighted = highlighted;
                         if (context) {
@@ -1074,13 +1074,13 @@ var __webpack_modules__ = {
                 {
                     action.choice.choiceEl = undefined;
                     if (action.choice.group) {
-                        action.choice.group.choices = action.choice.group.choices.filter((function(obj) {
+                        action.choice.group.choices = action.choice.group.choices.filter(function(obj) {
                             return obj.id !== action.choice.id;
-                        }));
+                        });
                     }
-                    state = state.filter((function(obj) {
+                    state = state.filter(function(obj) {
                         return obj.id !== action.choice.id;
-                    }));
+                    });
                     break;
                 }
 
@@ -1094,10 +1094,10 @@ var __webpack_modules__ = {
               case ActionType.FILTER_CHOICES:
                 {
                     var scoreLookup_1 = [];
-                    action.results.forEach((function(result) {
+                    action.results.forEach(function(result) {
                         scoreLookup_1[result.item.id] = result;
-                    }));
-                    state.forEach((function(choice) {
+                    });
+                    state.forEach(function(choice) {
                         var result = scoreLookup_1[choice.id];
                         if (result !== undefined) {
                             choice.score = result.score;
@@ -1111,18 +1111,18 @@ var __webpack_modules__ = {
                         if (context && context.appendGroupInSearch) {
                             choice.choiceEl = undefined;
                         }
-                    }));
+                    });
                     break;
                 }
 
               case ActionType.ACTIVATE_CHOICES:
                 {
-                    state.forEach((function(choice) {
+                    state.forEach(function(choice) {
                         choice.active = action.active;
                         if (context && context.appendGroupInSearch) {
                             choice.choiceEl = undefined;
                         }
-                    }));
+                    });
                     break;
                 }
 
@@ -1179,9 +1179,9 @@ var __webpack_modules__ = {
                 if (this._txn) {
                     this._changeSet = changes;
                 } else {
-                    this._listeners.forEach((function(l) {
+                    this._listeners.forEach(function(l) {
                         return l(changes);
-                    }));
+                    });
                 }
             };
             Store.prototype.subscribe = function(onChange) {
@@ -1193,21 +1193,21 @@ var __webpack_modules__ = {
                 var state = this._state;
                 var hasChanges = false;
                 var changes = this._changeSet || this.changeSet(false);
-                Object.keys(reducers).forEach((function(key) {
+                Object.keys(reducers).forEach(function(key) {
                     var stateUpdate = reducers[key](state[key], action, _this._context);
                     if (stateUpdate.update) {
                         hasChanges = true;
                         changes[key] = true;
                         state[key] = stateUpdate.state;
                     }
-                }));
+                });
                 if (hasChanges) {
                     if (this._txn) {
                         this._changeSet = changes;
                     } else {
-                        this._listeners.forEach((function(l) {
+                        this._listeners.forEach(function(l) {
                             return l(changes);
-                        }));
+                        });
                     }
                 }
             };
@@ -1221,9 +1221,9 @@ var __webpack_modules__ = {
                         var changeSet_1 = this._changeSet;
                         if (changeSet_1) {
                             this._changeSet = undefined;
-                            this._listeners.forEach((function(l) {
+                            this._listeners.forEach(function(l) {
                                 return l(changeSet_1);
-                            }));
+                            });
                         }
                     }
                 }
@@ -1244,9 +1244,9 @@ var __webpack_modules__ = {
             });
             Object.defineProperty(Store.prototype, 'highlightedActiveItems', {
                 get: function() {
-                    return this.items.filter((function(item) {
+                    return this.items.filter(function(item) {
                         return item.active && item.highlighted;
-                    }));
+                    });
                 },
                 enumerable: false,
                 configurable: true
@@ -1260,18 +1260,18 @@ var __webpack_modules__ = {
             });
             Object.defineProperty(Store.prototype, 'activeChoices', {
                 get: function() {
-                    return this.choices.filter((function(choice) {
+                    return this.choices.filter(function(choice) {
                         return choice.active;
-                    }));
+                    });
                 },
                 enumerable: false,
                 configurable: true
             });
             Object.defineProperty(Store.prototype, 'searchableChoices', {
                 get: function() {
-                    return this.choices.filter((function(choice) {
+                    return this.choices.filter(function(choice) {
                         return !choice.disabled && !choice.placeholder;
-                    }));
+                    });
                 },
                 enumerable: false,
                 configurable: true
@@ -1286,13 +1286,13 @@ var __webpack_modules__ = {
             Object.defineProperty(Store.prototype, 'activeGroups', {
                 get: function() {
                     var _this = this;
-                    return this.state.groups.filter((function(group) {
+                    return this.state.groups.filter(function(group) {
                         var isActive = group.active && !group.disabled;
-                        var hasActiveOptions = _this.state.choices.some((function(choice) {
+                        var hasActiveOptions = _this.state.choices.some(function(choice) {
                             return choice.active && !choice.disabled;
-                        }));
+                        });
                         return isActive && hasActiveOptions;
-                    }), []);
+                    }, []);
                 },
                 enumerable: false,
                 configurable: true
@@ -1301,14 +1301,14 @@ var __webpack_modules__ = {
                 return this._txn > 0;
             };
             Store.prototype.getChoiceById = function(id) {
-                return this.activeChoices.find((function(choice) {
+                return this.activeChoices.find(function(choice) {
                     return choice.id === id;
-                }));
+                });
             };
             Store.prototype.getGroupById = function(id) {
-                return this.groups.find((function(group) {
+                return this.groups.find(function(group) {
                     return group.id === id;
-                }));
+                });
             };
             return Store;
         }();
@@ -1330,20 +1330,20 @@ var __webpack_modules__ = {
             var t = Object.keys(e);
             if (Object.getOwnPropertySymbols) {
                 var o = Object.getOwnPropertySymbols(e);
-                r && (o = o.filter((function(r) {
+                r && (o = o.filter(function(r) {
                     return Object.getOwnPropertyDescriptor(e, r).enumerable;
-                }))), t.push.apply(t, o);
+                })), t.push.apply(t, o);
             }
             return t;
         }
         function _objectSpread2(e) {
             for (var r = 1; r < arguments.length; r++) {
                 var t = null != arguments[r] ? arguments[r] : {};
-                r % 2 ? ownKeys(Object(t), !0).forEach((function(r) {
+                r % 2 ? ownKeys(Object(t), !0).forEach(function(r) {
                     _defineProperty(e, r, t[r]);
-                })) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach((function(r) {
+                }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function(r) {
                     Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r));
-                }));
+                });
             }
             return e;
         }
@@ -1411,15 +1411,15 @@ var __webpack_modules__ = {
                 this._keys = [];
                 this._keyMap = {};
                 let totalWeight = 0;
-                keys.forEach((key => {
+                keys.forEach(key => {
                     let obj = createKey(key);
                     this._keys.push(obj);
                     this._keyMap[obj.id] = obj;
                     totalWeight += obj.weight;
-                }));
-                this._keys.forEach((key => {
+                });
+                this._keys.forEach(key => {
                     key.weight /= totalWeight;
-                }));
+                });
             }
             get(keyId) {
                 return this._keyMap[keyId];
@@ -1562,9 +1562,9 @@ var __webpack_modules__ = {
             setKeys(keys = []) {
                 this.keys = keys;
                 this._keysMap = {};
-                keys.forEach(((key, idx) => {
+                keys.forEach((key, idx) => {
                     this._keysMap[key.id] = idx;
-                }));
+                });
             }
             create() {
                 if (this.isCreated || !this.docs.length) {
@@ -1572,13 +1572,13 @@ var __webpack_modules__ = {
                 }
                 this.isCreated = true;
                 if (isString(this.docs[0])) {
-                    this.docs.forEach(((doc, docIndex) => {
+                    this.docs.forEach((doc, docIndex) => {
                         this._addString(doc, docIndex);
-                    }));
+                    });
                 } else {
-                    this.docs.forEach(((doc, docIndex) => {
+                    this.docs.forEach((doc, docIndex) => {
                         this._addObject(doc, docIndex);
-                    }));
+                    });
                 }
                 this.norm.clear();
             }
@@ -1618,7 +1618,7 @@ var __webpack_modules__ = {
                     i: docIndex,
                     $: {}
                 };
-                this.keys.forEach(((key, keyIndex) => {
+                this.keys.forEach((key, keyIndex) => {
                     let value = key.getFn ? key.getFn(doc) : this.getFn(doc, key.path);
                     if (!isDefined(value)) {
                         return;
@@ -1642,12 +1642,12 @@ var __webpack_modules__ = {
                                 };
                                 subRecords.push(subRecord);
                             } else if (isArray(value)) {
-                                value.forEach(((item, k) => {
+                                value.forEach((item, k) => {
                                     stack.push({
                                         nestedArrIndex: k,
                                         value: item
                                     });
-                                }));
+                                });
                             } else ;
                         }
                         record.$[keyIndex] = subRecords;
@@ -1658,7 +1658,7 @@ var __webpack_modules__ = {
                         };
                         record.$[keyIndex] = subRecord;
                     }
-                }));
+                });
                 this.records.push(record);
             }
             toJSON() {
@@ -1901,7 +1901,7 @@ var __webpack_modules__ = {
                 let allIndices = [];
                 let totalScore = 0;
                 let hasMatches = false;
-                this.chunks.forEach((({pattern, alphabet, startIndex}) => {
+                this.chunks.forEach(({pattern, alphabet, startIndex}) => {
                     const {isMatch, score, indices} = search(text, pattern, alphabet, {
                         location: location + startIndex,
                         distance,
@@ -1918,7 +1918,7 @@ var __webpack_modules__ = {
                     if (isMatch && indices) {
                         allIndices = [ ...allIndices, ...indices ];
                     }
-                }));
+                });
                 let result = {
                     isMatch: hasMatches,
                     score: hasMatches ? totalScore / this.chunks.length : 1
@@ -2140,8 +2140,8 @@ var __webpack_modules__ = {
         const SPACE_RE = / +(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/;
         const OR_TOKEN = '|';
         function parseQuery(pattern, options = {}) {
-            return pattern.split(OR_TOKEN).map((item => {
-                let query = item.trim().split(SPACE_RE).filter((item => item && !!item.trim()));
+            return pattern.split(OR_TOKEN).map(item => {
+                let query = item.trim().split(SPACE_RE).filter(item => item && !!item.trim());
                 let results = [];
                 for (let i = 0, len = query.length; i < len; i += 1) {
                     const queryItem = query[i];
@@ -2169,7 +2169,7 @@ var __webpack_modules__ = {
                     }
                 }
                 return results;
-            }));
+            });
         }
         const MultiMatchSet = new Set([ FuzzyMatch.type, IncludeMatch.type ]);
         class ExtendedSearch {
@@ -2271,9 +2271,9 @@ var __webpack_modules__ = {
         const isPath = query => !!query[KeyType.PATH];
         const isLeaf = query => !isArray(query) && isObject(query) && !isExpression(query);
         const convertToExplicit = query => ({
-            [LogicalOperator.AND]: Object.keys(query).map((key => ({
+            [LogicalOperator.AND]: Object.keys(query).map(key => ({
                 [key]: query[key]
-            })))
+            }))
         });
         function parse(query, options, {auto = true} = {}) {
             const next = query => {
@@ -2301,14 +2301,14 @@ var __webpack_modules__ = {
                     children: [],
                     operator: keys[0]
                 };
-                keys.forEach((key => {
+                keys.forEach(key => {
                     const value = query[key];
                     if (isArray(value)) {
-                        value.forEach((item => {
+                        value.forEach(item => {
                             node.children.push(next(item));
-                        }));
+                        });
                     }
-                }));
+                });
                 return node;
             };
             if (!isExpression(query)) {
@@ -2317,14 +2317,14 @@ var __webpack_modules__ = {
             return next(query);
         }
         function computeScore(results, {ignoreFieldNorm = Config.ignoreFieldNorm}) {
-            results.forEach((result => {
+            results.forEach(result => {
                 let totalScore = 1;
-                result.matches.forEach((({key, norm, score}) => {
+                result.matches.forEach(({key, norm, score}) => {
                     const weight = key ? key.weight : null;
                     totalScore *= Math.pow(score === 0 && weight ? Number.EPSILON : score, (weight || 1) * (ignoreFieldNorm ? 1 : norm));
-                }));
+                });
                 result.score = totalScore;
-            }));
+            });
         }
         function transformMatches(result, data) {
             const matches = result.matches;
@@ -2332,7 +2332,7 @@ var __webpack_modules__ = {
             if (!isDefined(matches)) {
                 return;
             }
-            matches.forEach((match => {
+            matches.forEach(match => {
                 if (!isDefined(match.indices) || !match.indices.length) {
                     return;
                 }
@@ -2348,7 +2348,7 @@ var __webpack_modules__ = {
                     obj.refIndex = match.idx;
                 }
                 data.matches.push(obj);
-            }));
+            });
         }
         function transformScore(result, data) {
             data.score = result.score;
@@ -2357,19 +2357,19 @@ var __webpack_modules__ = {
             const transformers = [];
             if (includeMatches) transformers.push(transformMatches);
             if (includeScore) transformers.push(transformScore);
-            return results.map((result => {
+            return results.map(result => {
                 const {idx} = result;
                 const data = {
                     item: docs[idx],
                     refIndex: idx
                 };
                 if (transformers.length) {
-                    transformers.forEach((transformer => {
+                    transformers.forEach(transformer => {
                         transformer(result, data);
-                    }));
+                    });
                 }
                 return data;
-            }));
+            });
         }
         class Fuse {
             constructor(docs, options = {}, index) {
@@ -2436,7 +2436,7 @@ var __webpack_modules__ = {
                 const searcher = createSearcher(query, this.options);
                 const {records} = this._myIndex;
                 const results = [];
-                records.forEach((({v: text, i: idx, n: norm}) => {
+                records.forEach(({v: text, i: idx, n: norm}) => {
                     if (!isDefined(text)) {
                         return;
                     }
@@ -2453,7 +2453,7 @@ var __webpack_modules__ = {
                             } ]
                         });
                     }
-                }));
+                });
                 return results;
             }
             _searchLogical(query) {
@@ -2490,7 +2490,7 @@ var __webpack_modules__ = {
                 const records = this._myIndex.records;
                 const resultMap = {};
                 const results = [];
-                records.forEach((({$: item, i: idx}) => {
+                records.forEach(({$: item, i: idx}) => {
                     if (isDefined(item)) {
                         let expResults = evaluate(expression, item, idx);
                         if (expResults.length) {
@@ -2502,30 +2502,30 @@ var __webpack_modules__ = {
                                 };
                                 results.push(resultMap[idx]);
                             }
-                            expResults.forEach((({matches}) => {
+                            expResults.forEach(({matches}) => {
                                 resultMap[idx].matches.push(...matches);
-                            }));
+                            });
                         }
                     }
-                }));
+                });
                 return results;
             }
             _searchObjectList(query) {
                 const searcher = createSearcher(query, this.options);
                 const {keys, records} = this._myIndex;
                 const results = [];
-                records.forEach((({$: item, i: idx}) => {
+                records.forEach(({$: item, i: idx}) => {
                     if (!isDefined(item)) {
                         return;
                     }
                     let matches = [];
-                    keys.forEach(((key, keyIndex) => {
+                    keys.forEach((key, keyIndex) => {
                         matches.push(...this._findMatches({
                             key,
                             value: item[keyIndex],
                             searcher
                         }));
-                    }));
+                    });
                     if (matches.length) {
                         results.push({
                             idx,
@@ -2533,7 +2533,7 @@ var __webpack_modules__ = {
                             matches
                         });
                     }
-                }));
+                });
                 return results;
             }
             _findMatches({key, value, searcher}) {
@@ -2542,7 +2542,7 @@ var __webpack_modules__ = {
                 }
                 let matches = [];
                 if (isArray(value)) {
-                    value.forEach((({v: text, i: idx, n: norm}) => {
+                    value.forEach(({v: text, i: idx, n: norm}) => {
                         if (!isDefined(text)) {
                             return;
                         }
@@ -2557,7 +2557,7 @@ var __webpack_modules__ = {
                                 indices
                             });
                         }
-                    }));
+                    });
                 } else {
                     const {v: text, n: norm} = value;
                     const {isMatch, score, indices} = searcher.searchIn(text);
@@ -2612,13 +2612,13 @@ var __webpack_modules__ = {
                     }
                 }
                 var results = this._fuse.search(needle);
-                return results.map((function(value, i) {
+                return results.map(function(value, i) {
                     return {
                         item: value.item,
                         score: value.score || 0,
                         rank: i + 1
                     };
-                }));
+                });
             };
             return SearchByFuse;
         }();
@@ -2942,9 +2942,9 @@ var __webpack_modules__ = {
                 this._lastAddedGroupId = 0;
                 var defaults = Choices.defaults;
                 this.config = __assign(__assign(__assign({}, defaults.allOptions), defaults.options), userConfig);
-                ObjectsInConfig.forEach((function(key) {
+                ObjectsInConfig.forEach(function(key) {
                     _this.config[key] = __assign(__assign(__assign({}, defaults.allOptions[key]), defaults.options[key]), userConfig[key]);
-                }));
+                });
                 var config = this.config;
                 if (!config.silent) {
                     this._validateConfig();
@@ -3061,9 +3061,9 @@ var __webpack_modules__ = {
                     return;
                 }
                 this.init();
-                this._initialItems = this._store.items.map((function(choice) {
+                this._initialItems = this._store.items.map(function(choice) {
                     return choice.value;
-                }));
+                });
             }
             Object.defineProperty(Choices, 'defaults', {
                 get: function() {
@@ -3148,9 +3148,9 @@ var __webpack_modules__ = {
                 if (!item || !item.id) {
                     return this;
                 }
-                var choice = this._store.items.find((function(c) {
+                var choice = this._store.items.find(function(c) {
                     return c.id === item.id;
-                }));
+                });
                 if (!choice || choice.highlighted) {
                     return this;
                 }
@@ -3167,9 +3167,9 @@ var __webpack_modules__ = {
                 if (!item || !item.id) {
                     return this;
                 }
-                var choice = this._store.items.find((function(c) {
+                var choice = this._store.items.find(function(c) {
                     return c.id === item.id;
-                }));
+                });
                 if (!choice || !choice.highlighted) {
                     return this;
                 }
@@ -3181,49 +3181,49 @@ var __webpack_modules__ = {
             };
             Choices.prototype.highlightAll = function() {
                 var _this = this;
-                this._store.withTxn((function() {
-                    _this._store.items.forEach((function(item) {
+                this._store.withTxn(function() {
+                    _this._store.items.forEach(function(item) {
                         if (!item.highlighted) {
                             _this._store.dispatch(highlightItem(item, true));
                             _this.passedElement.triggerEvent(EventType.highlightItem, _this._getChoiceForOutput(item));
                         }
-                    }));
-                }));
+                    });
+                });
                 return this;
             };
             Choices.prototype.unhighlightAll = function() {
                 var _this = this;
-                this._store.withTxn((function() {
-                    _this._store.items.forEach((function(item) {
+                this._store.withTxn(function() {
+                    _this._store.items.forEach(function(item) {
                         if (item.highlighted) {
                             _this._store.dispatch(highlightItem(item, false));
                             _this.passedElement.triggerEvent(EventType.highlightItem, _this._getChoiceForOutput(item));
                         }
-                    }));
-                }));
+                    });
+                });
                 return this;
             };
             Choices.prototype.removeActiveItemsByValue = function(value) {
                 var _this = this;
-                this._store.withTxn((function() {
-                    _this._store.items.filter((function(item) {
+                this._store.withTxn(function() {
+                    _this._store.items.filter(function(item) {
                         return item.value === value;
-                    })).forEach((function(item) {
+                    }).forEach(function(item) {
                         return _this._removeItem(item);
-                    }));
-                }));
+                    });
+                });
                 return this;
             };
             Choices.prototype.removeActiveItems = function(excludedId) {
                 var _this = this;
-                this._store.withTxn((function() {
-                    _this._store.items.filter((function(_a) {
+                this._store.withTxn(function() {
+                    _this._store.items.filter(function(_a) {
                         var id = _a.id;
                         return id !== excludedId;
-                    })).forEach((function(item) {
+                    }).forEach(function(item) {
                         return _this._removeItem(item);
-                    }));
-                }));
+                    });
+                });
                 return this;
             };
             Choices.prototype.removeHighlightedItems = function(runEvent) {
@@ -3231,14 +3231,14 @@ var __webpack_modules__ = {
                 if (runEvent === void 0) {
                     runEvent = false;
                 }
-                this._store.withTxn((function() {
-                    _this._store.highlightedActiveItems.forEach((function(item) {
+                this._store.withTxn(function() {
+                    _this._store.highlightedActiveItems.forEach(function(item) {
                         _this._removeItem(item);
                         if (runEvent) {
                             _this._triggerChange(item.value);
                         }
-                    }));
-                }));
+                    });
+                });
                 return this;
             };
             Choices.prototype.showDropdown = function(preventInputFocus) {
@@ -3249,7 +3249,7 @@ var __webpack_modules__ = {
                 if (preventInputFocus === undefined) {
                     preventInputFocus = !this._canSearch;
                 }
-                requestAnimationFrame((function() {
+                requestAnimationFrame(function() {
                     _this.dropdown.show();
                     var rect = _this.dropdown.element.getBoundingClientRect();
                     _this.containerOuter.open(rect.bottom, rect.height);
@@ -3257,7 +3257,7 @@ var __webpack_modules__ = {
                         _this.input.focus();
                     }
                     _this.passedElement.triggerEvent(EventType.showDropdown);
-                }));
+                });
                 return this;
             };
             Choices.prototype.hideDropdown = function(preventInputBlur) {
@@ -3265,7 +3265,7 @@ var __webpack_modules__ = {
                 if (!this.dropdown.isActive) {
                     return this;
                 }
-                requestAnimationFrame((function() {
+                requestAnimationFrame(function() {
                     _this.dropdown.hide();
                     _this.containerOuter.close();
                     if (!preventInputBlur && _this._canSearch) {
@@ -3273,14 +3273,14 @@ var __webpack_modules__ = {
                         _this.input.blur();
                     }
                     _this.passedElement.triggerEvent(EventType.hideDropdown);
-                }));
+                });
                 return this;
             };
             Choices.prototype.getValue = function(valueOnly) {
                 var _this = this;
-                var values = this._store.items.map((function(item) {
+                var values = this._store.items.map(function(item) {
                     return valueOnly ? item.value : _this._getChoiceForOutput(item);
-                }));
+                });
                 return this._isSelectOneElement || this.config.singleModeForMultiSelect ? values[0] : values;
             };
             Choices.prototype.setValue = function(items) {
@@ -3289,13 +3289,13 @@ var __webpack_modules__ = {
                     this._warnChoicesInitFailed('setValue');
                     return this;
                 }
-                this._store.withTxn((function() {
-                    items.forEach((function(value) {
+                this._store.withTxn(function() {
+                    items.forEach(function(value) {
                         if (value) {
                             _this._addChoice(mapInputToChoice(value, false));
                         }
-                    }));
-                }));
+                    });
+                });
                 this._searcher.reset();
                 return this;
             };
@@ -3308,13 +3308,13 @@ var __webpack_modules__ = {
                 if (this._isTextElement) {
                     return this;
                 }
-                this._store.withTxn((function() {
+                this._store.withTxn(function() {
                     var choiceValue = Array.isArray(value) ? value : [ value ];
-                    choiceValue.forEach((function(val) {
+                    choiceValue.forEach(function(val) {
                         return _this._findAndSelectChoiceByValue(val);
-                    }));
+                    });
                     _this.unhighlightAll();
-                }));
+                });
                 this._searcher.reset();
                 return this;
             };
@@ -3351,23 +3351,23 @@ var __webpack_modules__ = {
                 if (typeof choicesArrayOrFetcher === 'function') {
                     var fetcher_1 = choicesArrayOrFetcher(this);
                     if (typeof Promise === 'function' && fetcher_1 instanceof Promise) {
-                        return new Promise((function(resolve) {
+                        return new Promise(function(resolve) {
                             return requestAnimationFrame(resolve);
-                        })).then((function() {
+                        }).then(function() {
                             return _this._handleLoadingState(true);
-                        })).then((function() {
+                        }).then(function() {
                             return fetcher_1;
-                        })).then((function(data) {
+                        }).then(function(data) {
                             return _this.setChoices(data, value, label, replaceChoices, clearSearchFlag, replaceItems);
-                        })).catch((function(err) {
+                        }).catch(function(err) {
                             if (!_this.config.silent) {
                                 console.error(err);
                             }
-                        })).then((function() {
+                        }).then(function() {
                             return _this._handleLoadingState(false);
-                        })).then((function() {
+                        }).then(function() {
                             return _this;
-                        }));
+                        });
                     }
                     if (!Array.isArray(fetcher_1)) {
                         throw new TypeError('.setChoices first argument function must return either array of choices or Promise, got: '.concat(typeof fetcher_1));
@@ -3378,7 +3378,7 @@ var __webpack_modules__ = {
                     throw new TypeError('.setChoices must be called either with array of choices with a function resulting into Promise of array of choices');
                 }
                 this.containerOuter.removeLoadingState();
-                this._store.withTxn((function() {
+                this._store.withTxn(function() {
                     if (clearSearchFlag) {
                         _this._isSearching = false;
                     }
@@ -3387,7 +3387,7 @@ var __webpack_modules__ = {
                     }
                     var isDefaultValue = value === 'value';
                     var isDefaultLabel = label === 'label';
-                    choicesArrayOrFetcher.forEach((function(groupOrChoice) {
+                    choicesArrayOrFetcher.forEach(function(groupOrChoice) {
                         if ('choices' in groupOrChoice) {
                             var group = groupOrChoice;
                             if (!isDefaultLabel) {
@@ -3410,9 +3410,9 @@ var __webpack_modules__ = {
                                 _this._placeholderValue = unwrapStringForEscaped(choiceFull.label);
                             }
                         }
-                    }));
+                    });
                     _this.unhighlightAll();
-                }));
+                });
                 this._searcher.reset();
                 return this;
             };
@@ -3433,15 +3433,15 @@ var __webpack_modules__ = {
                     }
                     return this;
                 }
-                this._store.withTxn((function() {
+                this._store.withTxn(function() {
                     var choicesFromOptions = _this.passedElement.optionsAsChoices();
                     var existingItems = {};
                     if (!deselectAll) {
-                        _this._store.items.forEach((function(choice) {
+                        _this._store.items.forEach(function(choice) {
                             if (choice.id && choice.active && choice.selected) {
                                 existingItems[choice.value] = true;
                             }
-                        }));
+                        });
                     }
                     _this.clearStore(false);
                     var updateChoice = function(choice) {
@@ -3451,24 +3451,24 @@ var __webpack_modules__ = {
                             choice.selected = true;
                         }
                     };
-                    choicesFromOptions.forEach((function(groupOrChoice) {
+                    choicesFromOptions.forEach(function(groupOrChoice) {
                         if ('choices' in groupOrChoice) {
                             groupOrChoice.choices.forEach(updateChoice);
                             return;
                         }
                         updateChoice(groupOrChoice);
-                    }));
+                    });
                     _this._addPredefinedChoices(choicesFromOptions, selectFirstOption, withEvents);
                     if (_this._isSearching) {
                         _this._searchChoices(_this.input.value);
                     }
-                }));
+                });
                 return this;
             };
             Choices.prototype.removeChoice = function(value) {
-                var choice = this._store.choices.find((function(c) {
+                var choice = this._store.choices.find(function(c) {
                     return c.value === value;
-                }));
+                });
                 if (!choice) {
                     return this;
                 }
@@ -3492,22 +3492,22 @@ var __webpack_modules__ = {
                     if (clearItems) {
                         this.passedElement.element.replaceChildren('');
                     } else {
-                        this.passedElement.element.querySelectorAll(':not([selected])').forEach((function(el) {
+                        this.passedElement.element.querySelectorAll(':not([selected])').forEach(function(el) {
                             el.remove();
-                        }));
+                        });
                     }
                 }
                 this.itemList.element.replaceChildren('');
                 this.choiceList.element.replaceChildren('');
                 this._clearNotice();
-                this._store.withTxn((function() {
+                this._store.withTxn(function() {
                     var items = clearItems ? [] : _this._store.items;
                     _this._store.reset();
-                    items.forEach((function(item) {
+                    items.forEach(function(item) {
                         _this._store.dispatch(addChoice(item));
                         _this._store.dispatch(addItem(item));
-                    }));
-                }));
+                    });
+                });
                 this._searcher.reset();
                 return this;
             };
@@ -3576,18 +3576,18 @@ var __webpack_modules__ = {
                     renderLimit = config.renderChoiceLimit;
                 }
                 if (this._isSelectElement) {
-                    var backingOptions = activeChoices.filter((function(choice) {
+                    var backingOptions = activeChoices.filter(function(choice) {
                         return !choice.element;
-                    }));
+                    });
                     if (backingOptions.length) {
                         this.passedElement.addOptions(backingOptions);
                     }
                 }
                 var fragment = document.createDocumentFragment();
                 var renderableChoices = function(choices) {
-                    return choices.filter((function(choice) {
+                    return choices.filter(function(choice) {
                         return !choice.placeholder && (isSearching ? !!choice.rank : config.renderSelectedChoices || !choice.selected);
-                    }));
+                    });
                 };
                 var selectableChoices = false;
                 var renderChoices = function(choices, withinGroup, groupLabel) {
@@ -3599,7 +3599,7 @@ var __webpack_modules__ = {
                     var choiceLimit = choices.length;
                     choiceLimit = !withinGroup && renderLimit && choiceLimit > renderLimit ? renderLimit : choiceLimit;
                     choiceLimit--;
-                    choices.every((function(choice, index) {
+                    choices.every(function(choice, index) {
                         var dropdownItem = choice.choiceEl || _this._templates.choice(config, choice, config.itemSelectText, groupLabel);
                         choice.choiceEl = dropdownItem;
                         fragment.appendChild(dropdownItem);
@@ -3607,27 +3607,27 @@ var __webpack_modules__ = {
                             selectableChoices = true;
                         }
                         return index < choiceLimit;
-                    }));
+                    });
                 };
                 if (activeChoices.length) {
                     if (config.resetScrollPosition) {
-                        requestAnimationFrame((function() {
+                        requestAnimationFrame(function() {
                             return _this.choiceList.scrollToTop();
-                        }));
+                        });
                     }
                     if (!this._hasNonChoicePlaceholder && !isSearching && this._isSelectOneElement) {
-                        renderChoices(activeChoices.filter((function(choice) {
+                        renderChoices(activeChoices.filter(function(choice) {
                             return choice.placeholder && !choice.group;
-                        })), false, undefined);
+                        }), false, undefined);
                     }
                     if (activeGroups.length && !isSearching) {
                         if (config.shouldSort) {
                             activeGroups.sort(config.sorter);
                         }
-                        renderChoices(activeChoices.filter((function(choice) {
+                        renderChoices(activeChoices.filter(function(choice) {
                             return !choice.placeholder && !choice.group;
-                        })), false, undefined);
-                        activeGroups.forEach((function(group) {
+                        }), false, undefined);
+                        activeGroups.forEach(function(group) {
                             var groupChoices = renderableChoices(group.choices);
                             if (groupChoices.length) {
                                 if (group.label) {
@@ -3638,7 +3638,7 @@ var __webpack_modules__ = {
                                 }
                                 renderChoices(groupChoices, true, config.appendGroupInSearch && isSearching ? group.label : undefined);
                             }
-                        }));
+                        });
                     } else {
                         renderChoices(renderableChoices(activeChoices), false, undefined);
                     }
@@ -3699,21 +3699,21 @@ var __webpack_modules__ = {
                     itemList.append(fragment);
                     if (config.shouldSortItems && !this._isSelectOneElement) {
                         items.sort(config.sorter);
-                        items.forEach((function(item) {
+                        items.forEach(function(item) {
                             var el = itemFromList(item);
                             if (el) {
                                 el.remove();
                                 fragment.append(el);
                             }
-                        }));
+                        });
                         itemList.append(fragment);
                     }
                 }
                 if (this._isTextElement) {
-                    this.passedElement.value = items.map((function(_a) {
+                    this.passedElement.value = items.map(function(_a) {
                         var value = _a.value;
                         return value;
-                    })).join(config.delimiter);
+                    }).join(config.delimiter);
                 }
             };
             Choices.prototype._displayNotice = function(text, type, openDropdown) {
@@ -3790,19 +3790,19 @@ var __webpack_modules__ = {
                     return;
                 }
                 var id = element && parseDataSetId(element.parentElement);
-                var itemToRemove = id && items.find((function(item) {
+                var itemToRemove = id && items.find(function(item) {
                     return item.id === id;
-                }));
+                });
                 if (!itemToRemove) {
                     return;
                 }
-                this._store.withTxn((function() {
+                this._store.withTxn(function() {
                     _this._removeItem(itemToRemove);
                     _this._triggerChange(itemToRemove.value);
                     if (_this._isSelectOneElement && !_this._hasNonChoicePlaceholder) {
-                        var placeholderChoice = (_this.config.shouldSort ? _this._store.choices.reverse() : _this._store.choices).find((function(choice) {
+                        var placeholderChoice = (_this.config.shouldSort ? _this._store.choices.reverse() : _this._store.choices).find(function(choice) {
                             return choice.placeholder;
-                        }));
+                        });
                         if (placeholderChoice) {
                             _this._addItem(placeholderChoice);
                             _this.unhighlightAll();
@@ -3811,7 +3811,7 @@ var __webpack_modules__ = {
                             }
                         }
                     }
-                }));
+                });
             };
             Choices.prototype._handleItemAction = function(element, hasShiftKey) {
                 var _this = this;
@@ -3826,13 +3826,13 @@ var __webpack_modules__ = {
                 if (!id) {
                     return;
                 }
-                items.forEach((function(item) {
+                items.forEach(function(item) {
                     if (item.id === id && !item.highlighted) {
                         _this.highlightItem(item);
                     } else if (!hasShiftKey && item.highlighted) {
                         _this.unhighlightItem(item);
                     }
-                }));
+                });
                 this.input.focus();
             };
             Choices.prototype._handleChoiceAction = function(element) {
@@ -3847,11 +3847,11 @@ var __webpack_modules__ = {
                     if (!this._canAddItems()) {
                         return true;
                     }
-                    this._store.withTxn((function() {
+                    this._store.withTxn(function() {
                         _this._addItem(choice, true, true);
                         _this.clearInput();
                         _this.unhighlightAll();
-                    }));
+                    });
                     this._triggerChange(choice.value);
                 }
                 if (hasActiveDropdown && this.config.closeDropdownOnSelect) {
@@ -3866,9 +3866,9 @@ var __webpack_modules__ = {
                     return;
                 }
                 var lastItem = items[items.length - 1];
-                var hasHighlightedItems = items.some((function(item) {
+                var hasHighlightedItems = items.some(function(item) {
                     return item.highlighted;
-                }));
+                });
                 if (config.editItems && !hasHighlightedItems && lastItem) {
                     this.input.value = lastItem.value;
                     this.input.setWidth();
@@ -3886,22 +3886,22 @@ var __webpack_modules__ = {
                 var _this = this;
                 var config = this.config;
                 if (this._isTextElement) {
-                    this._presetChoices = config.items.map((function(e) {
+                    this._presetChoices = config.items.map(function(e) {
                         return mapInputToChoice(e, false);
-                    }));
+                    });
                     if (this.passedElement.value) {
-                        var elementItems = this.passedElement.value.split(config.delimiter).map((function(e) {
+                        var elementItems = this.passedElement.value.split(config.delimiter).map(function(e) {
                             return mapInputToChoice(e, false, _this.config.allowHtmlUserInput);
-                        }));
+                        });
                         this._presetChoices = this._presetChoices.concat(elementItems);
                     }
-                    this._presetChoices.forEach((function(choice) {
+                    this._presetChoices.forEach(function(choice) {
                         choice.selected = true;
-                    }));
+                    });
                 } else if (this._isSelectElement) {
-                    this._presetChoices = config.choices.map((function(e) {
+                    this._presetChoices = config.choices.map(function(e) {
                         return mapInputToChoice(e, true);
-                    }));
+                    });
                     var choicesFromOptions = this.passedElement.optionsAsChoices();
                     if (choicesFromOptions) {
                         (_a = this._presetChoices).push.apply(_a, choicesFromOptions);
@@ -3944,9 +3944,9 @@ var __webpack_modules__ = {
                             resultCount
                         });
                     }
-                } else if (this._store.choices.some((function(option) {
+                } else if (this._store.choices.some(function(option) {
                     return !option.active;
-                }))) {
+                })) {
                     this._stopSearch();
                 }
             };
@@ -3973,9 +3973,9 @@ var __webpack_modules__ = {
                     notice = resolveNoticeFunction(config.customAddItemText, value);
                 }
                 if (canAddItem) {
-                    var foundChoice = this._store.choices.find((function(choice) {
+                    var foundChoice = this._store.choices.find(function(choice) {
                         return config.valueComparer(choice.value, value);
-                    }));
+                    });
                     if (foundChoice) {
                         if (this._isSelectElement) {
                             this._displayNotice('', NoticeTypes.addChoice);
@@ -4196,7 +4196,7 @@ var __webpack_modules__ = {
                     return;
                 }
                 var addedItem = false;
-                this._store.withTxn((function() {
+                this._store.withTxn(function() {
                     addedItem = _this._findAndSelectChoiceByValue(value, true);
                     if (!addedItem) {
                         if (!_this._canAddUserChoices) {
@@ -4210,7 +4210,7 @@ var __webpack_modules__ = {
                     }
                     _this.clearInput();
                     _this.unhighlightAll();
-                }));
+                });
                 if (!addedItem) {
                     return;
                 }
@@ -4386,14 +4386,14 @@ var __webpack_modules__ = {
             };
             Choices.prototype._onFormReset = function() {
                 var _this = this;
-                this._store.withTxn((function() {
+                this._store.withTxn(function() {
                     _this.clearInput();
                     _this.hideDropdown();
                     _this.refresh(false, false, true);
                     if (_this._initialItems.length) {
                         _this.setChoiceByValue(_this._initialItems);
                     }
-                }));
+                });
             };
             Choices.prototype._highlightChoice = function(el) {
                 if (el === void 0) {
@@ -4406,10 +4406,10 @@ var __webpack_modules__ = {
                 var passedEl = el;
                 var highlightedState = this.config.classNames.highlightedState;
                 var highlightedChoices = Array.from(this.dropdown.element.querySelectorAll(getClassNamesSelector(highlightedState)));
-                highlightedChoices.forEach((function(choice) {
+                highlightedChoices.forEach(function(choice) {
                     removeClassesFromElement(choice, highlightedState);
                     choice.setAttribute('aria-selected', 'false');
-                }));
+                });
                 if (passedEl) {
                     this._highlightPosition = choices.indexOf(passedEl);
                 } else {
@@ -4475,9 +4475,9 @@ var __webpack_modules__ = {
                     throw new TypeError('Can not re-add a choice which has already been added');
                 }
                 var config = this.config;
-                if (!config.duplicateItemsAllowed && this._store.choices.find((function(c) {
+                if (!config.duplicateItemsAllowed && this._store.choices.find(function(c) {
                     return config.valueComparer(c.value, choice.value);
-                }))) {
+                })) {
                     return;
                 }
                 this._lastAddedChoiceId++;
@@ -4513,13 +4513,13 @@ var __webpack_modules__ = {
                 }
                 this._lastAddedGroupId++;
                 group.id = this._lastAddedGroupId;
-                group.choices.forEach((function(item) {
+                group.choices.forEach(function(item) {
                     item.group = group;
                     if (group.disabled) {
                         item.disabled = true;
                     }
                     _this._addChoice(item, withEvents);
-                }));
+                });
             };
             Choices.prototype._createTemplates = function() {
                 var _this = this;
@@ -4529,13 +4529,13 @@ var __webpack_modules__ = {
                     userTemplates = callbackOnCreateTemplates.call(this, strToEl, escapeForTemplate, getClassNames);
                 }
                 var templating = {};
-                Object.keys(this._templates).forEach((function(name) {
+                Object.keys(this._templates).forEach(function(name) {
                     if (name in userTemplates) {
                         templating[name] = userTemplates[name].bind(_this);
                     } else {
                         templating[name] = _this._templates[name].bind(_this);
                     }
-                }));
+                });
                 this._templates = templating;
             };
             Choices.prototype._createElements = function() {
@@ -4601,9 +4601,9 @@ var __webpack_modules__ = {
             };
             Choices.prototype._initStore = function() {
                 var _this = this;
-                this._store.subscribe(this._render).withTxn((function() {
+                this._store.subscribe(this._render).withTxn(function() {
                     _this._addPredefinedChoices(_this._presetChoices, _this._isSelectOneElement && !_this._hasNonChoicePlaceholder, false);
-                }));
+                });
                 if (!this._store.choices.length || this._isSelectOneElement && this._hasNonChoicePlaceholder) {
                     this._render();
                 }
@@ -4617,20 +4617,20 @@ var __webpack_modules__ = {
                     withEvents = true;
                 }
                 if (selectFirstOption) {
-                    var noSelectedChoices = choices.findIndex((function(choice) {
+                    var noSelectedChoices = choices.findIndex(function(choice) {
                         return choice.selected;
-                    })) === -1;
+                    }) === -1;
                     if (noSelectedChoices) {
-                        choices.some((function(choice) {
+                        choices.some(function(choice) {
                             if (choice.disabled || 'choices' in choice) {
                                 return false;
                             }
                             choice.selected = true;
                             return true;
-                        }));
+                        });
                     }
                 }
-                choices.forEach((function(item) {
+                choices.forEach(function(item) {
                     if ('choices' in item) {
                         if (_this._isSelectElement) {
                             _this._addGroup(item, withEvents);
@@ -4638,16 +4638,16 @@ var __webpack_modules__ = {
                     } else {
                         _this._addChoice(item, withEvents);
                     }
-                }));
+                });
             };
             Choices.prototype._findAndSelectChoiceByValue = function(value, userTriggered) {
                 var _this = this;
                 if (userTriggered === void 0) {
                     userTriggered = false;
                 }
-                var foundChoice = this._store.choices.find((function(choice) {
+                var foundChoice = this._store.choices.find(function(choice) {
                     return _this.config.valueComparer(choice.value, value);
-                }));
+                });
                 if (foundChoice && !foundChoice.disabled && !foundChoice.selected) {
                     this._addItem(foundChoice, true, userTriggered);
                     return true;
@@ -4685,10 +4685,10 @@ var __webpack_modules__ = {
         (function(global, factory) {
             typeof exports === 'object' && 'object' !== 'undefined' ? module.exports = factory() : typeof define === 'function' && __webpack_require__.amdO ? define(factory) : (global = typeof globalThis !== 'undefined' ? globalThis : global || self, 
             global.Choices = factory());
-        })(undefined, (function() {
+        })(undefined, function() {
             'use strict';
             return Choices;
-        }));
+        });
     }
 };
 

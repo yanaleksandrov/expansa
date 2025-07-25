@@ -2,7 +2,7 @@ var __webpack_modules__ = {
     974: function(module) {
         (function(global, factory) {
             true ? module.exports = factory() : 0;
-        })(this, (function() {
+        })(this, function() {
             'use strict';
             var _typeof = typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol' ? function(obj) {
                 return typeof obj;
@@ -154,10 +154,10 @@ var __webpack_modules__ = {
                 }
             }
             function setToStart(date) {
-                return transform(date, (function(d) {
+                return transform(date, function(d) {
                     if (d) d.setHours(0, 0, 0, 0);
                     return d;
-                }));
+                });
             }
             function dateRange(start, end) {
                 start = new Date(start);
@@ -409,9 +409,9 @@ var __webpack_modules__ = {
                         if ('#' == elem.substr(0, 1)) {
                             elem = document.getElementById(elem.substr(1));
                         } else {
-                            return $$(elem).map((function(el) {
+                            return $$(elem).map(function(el) {
                                 return new _this.constructor(el, opts);
-                            }));
+                            });
                         }
                     }
                     if (!elem) {
@@ -449,9 +449,9 @@ var __webpack_modules__ = {
                             templates: createTemplateRenderers.bind(this)
                         };
                         var fns = [ 'serialize', 'deserialize', 'onInit', 'onChange', 'onRender', 'setValue', 'getValue' ];
-                        fns.forEach((function(name) {
+                        fns.forEach(function(name) {
                             return _this2._set[name] = bindOptionFunctions.bind(this);
-                        }));
+                        });
                         this._renderers = {
                             select: tmpl([ '<select data-<%= type %>="<%= value %>" data-index="<%= index %>">', '<% options.forEach( function( o ) { %>', '<option value="<%= o.value %>"', '<%= o.selected ? " selected" : "" %> <%= o.disabled ? " disabled" : "" %>', '><%= o.text %></option>', '<% } ); %>', '</select>' ].join('')),
                             input: tmpl([ '<input type="text" data-<%= type %>="<%= value %>" data-index="<%= index %>" value="<%= value %>">' ].join(''))
@@ -480,17 +480,17 @@ var __webpack_modules__ = {
                         if (this._isInitialized) return;
                         this._highlighted = [];
                         if ('input' !== this._el.tagName.toLowerCase()) {
-                            this._el.addEventListener('click', (function() {
+                            this._el.addEventListener('click', function() {
                                 return _this3.toggle();
-                            }));
+                            });
                         } else {
-                            this._el.addEventListener('focus', (function() {
+                            this._el.addEventListener('focus', function() {
                                 return _this3.open();
-                            }));
+                            });
                         }
-                        document.addEventListener('mousedown', (function(e) {
+                        document.addEventListener('mousedown', function(e) {
                             if (!_this3.node.contains(e.target)) _this3.hide();
-                        }));
+                        });
                         this.node.onselectstart = function() {
                             return false;
                         };
@@ -514,20 +514,20 @@ var __webpack_modules__ = {
                                 this._highlighted = [ date ];
                                 this._dragStart = date;
                                 if (!opts.multiple) {
-                                    $$('[data-day].' + selector, this.wrapper).forEach((function(el) {
+                                    $$('[data-day].' + selector, this.wrapper).forEach(function(el) {
                                         removeClass(el, selector);
                                         removeClass(el, opts.classNames.start);
                                         removeClass(el, opts.classNames.end);
-                                    }));
+                                    });
                                 }
-                                $$('[data-day="' + date + '"]', this.wrapper).forEach((function(el) {
+                                $$('[data-day="' + date + '"]', this.wrapper).forEach(function(el) {
                                     addClass(el, opts.classNames.start);
                                     addClass(el, opts.classNames.end);
-                                }));
+                                });
                             } else {
-                                $$('[data-day="' + date + '"]', this.wrapper).forEach((function(el) {
+                                $$('[data-day="' + date + '"]', this.wrapper).forEach(function(el) {
                                     addClass(el, opts.classNames.end);
-                                }));
+                                });
                                 this._onmousemove(e);
                             }
                         }
@@ -539,19 +539,19 @@ var __webpack_modules__ = {
                         if (!(ranged || opts.multiple)) return;
                         var dateNode = closest(e.target, '[data-day]', this.wrapper), date = dateNode ? parseInt(dateNode.dataset.day, 10) : null;
                         if (date && this._dragStart) {
-                            this._highlighted = dateRange(this._dragStart, date).map((function(d) {
+                            this._highlighted = dateRange(this._dragStart, date).map(function(d) {
                                 return d.getTime();
-                            }));
+                            });
                             this._isDragging = date !== this._dragStart;
-                            $$('[data-day].' + selector, this.wrapper).forEach((function(el, key, arr) {
+                            $$('[data-day].' + selector, this.wrapper).forEach(function(el, key, arr) {
                                 var d = new Date(parseInt(el.dataset.day, 10));
                                 toggleClass(el, selector, !ranged && _this5.hasDate(d));
-                            }));
-                            this._highlighted.forEach((function(t) {
-                                $$('[data-day="' + t + '"]', _this5.wrapper).forEach((function(el) {
+                            });
+                            this._highlighted.forEach(function(t) {
+                                $$('[data-day="' + t + '"]', _this5.wrapper).forEach(function(el) {
                                     toggleClass(el, selector, !_this5._deselect);
-                                }));
-                            }));
+                                });
+                            });
                         }
                     }
                 }, {
@@ -559,9 +559,9 @@ var __webpack_modules__ = {
                     value: function _onmouseup(e) {
                         var opts = this._opts, ranged = opts.ranged, multiple = opts.multiple;
                         if (this._dragStart && closest(e.target, '[data-day]', this.node)) {
-                            var dates = this._highlighted.map((function(t) {
+                            var dates = this._highlighted.map(function(t) {
                                 return new Date(t);
-                            }));
+                            });
                             if (ranged || !multiple) {
                                 this.setDate(dates);
                             } else {
@@ -611,9 +611,9 @@ var __webpack_modules__ = {
                             el.onchange = function() {
                                 var part = el.dataset.period;
                                 var diff = el.value === 'am' ? -12 : 12;
-                                $$('[data-hour="' + part + '"] option', _this6.wrapper).forEach((function(el) {
+                                $$('[data-hour="' + part + '"] option', _this6.wrapper).forEach(function(el) {
                                     el.value = parseInt(el.value) + diff;
-                                }));
+                                });
                                 _this6.setTime(part, (_this6._time ? _this6._time[part][0] : 0) + diff);
                             };
                         }
@@ -672,10 +672,10 @@ var __webpack_modules__ = {
                     value: function get$$1(key) {
                         var _this7 = this;
                         if (arguments.length > 1) {
-                            return [].concat(Array.prototype.slice.call(arguments)).reduce((function(o, a) {
+                            return [].concat(Array.prototype.slice.call(arguments)).reduce(function(o, a) {
                                 o[a] = _this7.get(a);
                                 return o;
-                            }), {});
+                            }, {});
                         }
                         var val = this._opts[key];
                         if (isPlainObject(val)) {
@@ -810,21 +810,21 @@ var __webpack_modules__ = {
                         var _this8 = this;
                         var opts = this._opts, ranged = opts.ranged, multiple = opts.multiple;
                         var dates = [].concat(date);
-                        dates = dates.map((function(d) {
+                        dates = dates.map(function(d) {
                             return isValidDate(d) ? d : opts.deserialize(d);
-                        }));
-                        dates = dates.filter((function(d) {
+                        });
+                        dates = dates.filter(function(d) {
                             return isValidDate(d) && _this8.dateAllowed(d);
-                        }));
+                        });
                         if (ranged) {
                             dates = dates.concat(this.getDate()).sort(compareDates);
                             dates = dates.length ? dateRange(dates[0], dates.pop()) : [];
                         } else if (!multiple) {
                             dates = dates.slice(0, 1);
                         }
-                        dates.map((function(d) {
+                        dates.map(function(d) {
                             return setToStart(d).getTime();
-                        })).forEach((function(t) {
+                        }).forEach(function(t) {
                             var index = _this8._selected.indexOf(t);
                             var hasDate = index > -1;
                             if (!hasDate && force !== false) {
@@ -836,7 +836,7 @@ var __webpack_modules__ = {
                             } else if (hasDate && force !== true) {
                                 _this8._selected.splice(index, 1);
                             }
-                        }));
+                        });
                         this._update();
                     }
                 }, {
@@ -859,9 +859,9 @@ var __webpack_modules__ = {
                         var start = this._time ? this._time.start : [ 0, 0 ];
                         this._selected = (this._selected || []).sort();
                         if (opts.multiple || opts.ranged) {
-                            var sel = this._selected.map((function(t) {
+                            var sel = this._selected.map(function(t) {
                                 return new Date(t);
-                            }));
+                            });
                             if (opts.time && sel.length) {
                                 sel[0].setHours(start[0], start[1]);
                                 if (sel.length > 1) {
@@ -1163,15 +1163,15 @@ var __webpack_modules__ = {
                                             });
                                         }
                                         if (!long && hour >= 12) {
-                                            options.forEach((function(o) {
+                                            options.forEach(function(o) {
                                                 return o.selected = (o.value += 12) === hour;
-                                            }));
+                                            });
                                         } else if (!long) {}
                                     }
                                     console.log(options);
-                                    var text = options.filter((function(o) {
+                                    var text = options.filter(function(o) {
                                         return o.selected;
-                                    }))[0].text;
+                                    })[0].text;
                                     return _this11._renderers.select({
                                         index: 0,
                                         type: 'hour',
@@ -1198,9 +1198,9 @@ var __webpack_modules__ = {
                                         value: minute
                                     });
                                 } else {
-                                    var text = options.filter((function(o) {
+                                    var text = options.filter(function(o) {
                                         return o.selected;
-                                    }))[0].text;
+                                    })[0].text;
                                     return _this11._renderers.select({
                                         index: null,
                                         type: 'minute',
@@ -1237,7 +1237,7 @@ var __webpack_modules__ = {
             }();
             Datepicker.defaults = defaultOptions;
             return Datepicker;
-        }));
+        });
     }
 };
 

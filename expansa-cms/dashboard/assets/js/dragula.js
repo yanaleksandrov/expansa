@@ -6,7 +6,7 @@ var __webpack_modules__ = {
             } else {
                 var g;
             }
-        })((function() {
+        })(function() {
             var define, module, exports;
             return function() {
                 function r(e, n, t) {
@@ -22,10 +22,10 @@ var __webpack_modules__ = {
                             var p = n[i] = {
                                 exports: {}
                             };
-                            e[i][0].call(p.exports, (function(r) {
+                            e[i][0].call(p.exports, function(r) {
                                 var n = e[i][1][r];
                                 return o(n || r);
-                            }), p, p.exports, r, e, n, t);
+                            }, p, p.exports, r, e, n, t);
                         }
                         return n[i].exports;
                     }
@@ -684,9 +684,9 @@ var __webpack_modules__ = {
                         if (!fn) {
                             return;
                         }
-                        ticky((function run() {
+                        ticky(function run() {
                             fn.apply(ctx || null, args || []);
-                        }));
+                        });
                     };
                 }, {
                     ticky: 10
@@ -741,7 +741,7 @@ var __webpack_modules__ = {
                                 if (type === 'error' && opts.throws !== false && !et.length) {
                                     throw args.length === 1 ? args[0] : args;
                                 }
-                                et.forEach((function emitter(listen) {
+                                et.forEach(function emitter(listen) {
                                     if (opts.async) {
                                         debounce(listen, args, ctx);
                                     } else {
@@ -750,7 +750,7 @@ var __webpack_modules__ = {
                                     if (listen._once) {
                                         thing.off(type, listen);
                                     }
-                                }));
+                                });
                                 return thing;
                             };
                         };
@@ -1124,16 +1124,16 @@ var __webpack_modules__ = {
                             clearTimeout(item._idleTimeoutId);
                             var msecs = item._idleTimeout;
                             if (msecs >= 0) {
-                                item._idleTimeoutId = setTimeout((function onTimeout() {
+                                item._idleTimeoutId = setTimeout(function onTimeout() {
                                     if (item._onTimeout) item._onTimeout();
-                                }), msecs);
+                                }, msecs);
                             }
                         };
                         exports.setImmediate = typeof setImmediate === 'function' ? setImmediate : function(fn) {
                             var id = nextImmediateId++;
                             var args = arguments.length < 2 ? false : slice.call(arguments, 1);
                             immediateIds[id] = true;
-                            nextTick((function onNextTick() {
+                            nextTick(function onNextTick() {
                                 if (immediateIds[id]) {
                                     if (args) {
                                         fn.apply(null, args);
@@ -1142,7 +1142,7 @@ var __webpack_modules__ = {
                                     }
                                     exports.clearImmediate(id);
                                 }
-                            }));
+                            });
                             return id;
                         };
                         exports.clearImmediate = typeof clearImmediate === 'function' ? clearImmediate : function(id) {
@@ -1154,7 +1154,7 @@ var __webpack_modules__ = {
                     timers: 11
                 } ]
             }, {}, [ 2 ])(2);
-        }));
+        });
     }
 };
 

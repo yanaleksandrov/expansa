@@ -1,7 +1,7 @@
 var __webpack_modules__ = {
     826: function() {
-        document.addEventListener('alpine:init', (() => {
-            Alpine.directive('intersect', ((el, {value, expression, modifiers}, {evaluateLater, cleanup}) => {
+        document.addEventListener('alpine:init', () => {
+            Alpine.directive('intersect', (el, {value, expression, modifiers}, {evaluateLater, cleanup}) => {
                 function getThreshold(modifiers) {
                     if (modifiers.includes('full')) return .99;
                     if (modifiers.includes('half')) return .5;
@@ -24,7 +24,7 @@ var __webpack_modules__ = {
                     for (let i = 1; i < 5; i++) {
                         values.push(getLengthValue(modifiers[index + i] || ''));
                     }
-                    values = values.filter((v => v !== void 0));
+                    values = values.filter(v => v !== void 0);
                     return values.length ? values.join(' ').trim() : fallback;
                 }
                 let evaluate = evaluateLater(expression);
@@ -32,19 +32,19 @@ var __webpack_modules__ = {
                     rootMargin: getRootMargin(modifiers),
                     threshold: getThreshold(modifiers)
                 };
-                let observer = new IntersectionObserver((entries => {
-                    entries.forEach((entry => {
+                let observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
                         if (entry.isIntersecting === (value === 'leave')) {
                             return;
                         }
                         evaluate();
                         modifiers.includes('once') && observer.disconnect();
-                    }));
-                }), options);
+                    });
+                }, options);
                 observer.observe(el);
-                cleanup((() => observer.disconnect()));
-            }));
-            Alpine.directive('sticky', (el => {
+                cleanup(() => observer.disconnect());
+            });
+            Alpine.directive('sticky', el => {
                 let style = el.parentElement.currentStyle || window.getComputedStyle(el.parentElement);
                 if (style.position !== 'relative') {
                     return false;
@@ -76,16 +76,16 @@ var __webpack_modules__ = {
                     el.setAttribute('style', 'position: sticky;' + value);
                     lastScroll = window.scrollY;
                 }
-                window.addEventListener('load', (() => calcPosition()));
-                window.addEventListener('scroll', (() => calcPosition()));
-                window.addEventListener('resize', (() => calcPosition()));
-            }));
-            Alpine.directive('autocomplete', (el => {
+                window.addEventListener('load', () => calcPosition());
+                window.addEventListener('scroll', () => calcPosition());
+                window.addEventListener('resize', () => calcPosition());
+            });
+            Alpine.directive('autocomplete', el => {
                 el.setAttribute('readonly', true);
-                el.onfocus = () => setTimeout((() => el.removeAttribute('readonly')), 10);
+                el.onfocus = () => setTimeout(() => el.removeAttribute('readonly'), 10);
                 el.onblur = () => el.setAttribute('readonly', true);
-            }));
-            Alpine.directive('highlight', ((el, {modifiers}) => {
+            });
+            Alpine.directive('highlight', (el, {modifiers}) => {
                 let lang = modifiers[0] || 'html', wrapper = document.createElement('code');
                 wrapper.classList.add('language-' + lang);
                 wrapper.innerHTML = el.innerHTML;
@@ -93,8 +93,8 @@ var __webpack_modules__ = {
                 el.innerHTML = '';
                 el.setAttribute('data-lang', lang.toUpperCase());
                 el.appendChild(wrapper);
-            }));
-            Alpine.directive('collapse', ((el, {modifiers}) => {
+            });
+            Alpine.directive('collapse', (el, {modifiers}) => {
                 let duration = ((modifiers, key = 'duration', fallback = 350) => {
                     if (modifiers.indexOf(key) === -1) return fallback;
                     const rawValue = modifiers[modifiers.indexOf(key) + 1];
@@ -144,7 +144,7 @@ var __webpack_modules__ = {
                             end: {
                                 height: full + 'px'
                             }
-                        }, (() => el._x_isShown = true), (() => {}));
+                        }, () => el._x_isShown = true, () => {});
                     },
                     out(before = () => {}, after = () => {}) {
                         let full = el.getBoundingClientRect().height;
@@ -156,21 +156,21 @@ var __webpack_modules__ = {
                             end: {
                                 height: floor + 'px'
                             }
-                        }, (() => {}), (() => {
+                        }, () => {}, () => {
                             el._x_isShown = false;
                             if (el.style.height === `${floor}px`) {
-                                Alpine.nextTick((() => {
+                                Alpine.nextTick(() => {
                                     Alpine.setStyles(el, {
                                         display: 'none',
                                         overflow: 'hidden'
                                     });
                                     el.hidden = true;
-                                }));
+                                });
                             }
-                        }));
+                        });
                     }
                 };
-            }));
+            });
             let unsavedForms = new Map;
             let dirtyCheckIsInitialized = false;
             function watchForm(form) {
@@ -192,36 +192,36 @@ var __webpack_modules__ = {
                 if (target && unsavedForms.size && document.body.classList.contains('is-unsaved')) {
                     e.preventDefault();
                     document.body.classList.add('is-shake');
-                    setTimeout((() => {
+                    setTimeout(() => {
                         document.body.classList.remove('is-shake');
-                    }), 500);
+                    }, 500);
                 }
             }
-            Alpine.magic('dirtyCheck', (() => ({
+            Alpine.magic('dirtyCheck', () => ({
                 watch(form) {
                     if (!dirtyCheckIsInitialized) {
                         dirtyCheckIsInitialized = true;
                         window.addEventListener('click', blockInternalNavigation, true);
                         window.addEventListener('change', markDirty);
-                        window.addEventListener('reset', (e => unmarkDirty(e.target)));
+                        window.addEventListener('reset', e => unmarkDirty(e.target));
                     }
                     form instanceof HTMLFormElement && watchForm(form);
                 },
                 remove(form) {
                     form instanceof HTMLFormElement && unmarkDirty(form);
                 }
-            })));
-            Alpine.magic('copy', (el => subject => {
-                window.navigator.clipboard.writeText(subject).then((() => {
-                    let classes = 'ph-copy ph-check'.split(' ');
-                    classes.forEach((s => el.classList.toggle(s)));
-                    setTimeout((() => classes.forEach((s => el.classList.toggle(s)))), 1e3);
-                }), (() => {
-                    console.log('Oops, your browser is not support clipboard!');
-                }));
             }));
+            Alpine.magic('copy', el => subject => {
+                window.navigator.clipboard.writeText(subject).then(() => {
+                    let classes = 'ph-copy ph-check'.split(' ');
+                    classes.forEach(s => el.classList.toggle(s));
+                    setTimeout(() => classes.forEach(s => el.classList.toggle(s)), 1e3);
+                }, () => {
+                    console.log('Oops, your browser is not support clipboard!');
+                });
+            });
             let seconds = 0, isCountingDown = false;
-            Alpine.magic('countdown', (() => ({
+            Alpine.magic('countdown', () => ({
                 start: (initialSeconds, processCallback, endCallback) => {
                     if (isCountingDown) {
                         return;
@@ -241,9 +241,9 @@ var __webpack_modules__ = {
                     countdown();
                 },
                 second: seconds
-            })));
+            }));
             let stream = null;
-            Alpine.magic('stream', (() => ({
+            Alpine.magic('stream', () => ({
                 check(refs) {
                     let canvas = refs.canvas, video = refs.video, image = refs.image;
                     if (!canvas) {
@@ -268,10 +268,10 @@ var __webpack_modules__ = {
                 },
                 start(refs) {
                     let video = refs.video;
-                    const observer = new MutationObserver((mutations => {
+                    const observer = new MutationObserver(mutations => {
                         for (let mutation of mutations) {
                             if (mutation.target === document.body && !stream) {
-                                setTimeout((async () => {
+                                setTimeout(async () => {
                                     if (this.isVisible(video)) {
                                         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                                             video.srcObject = stream = await navigator.mediaDevices.getUserMedia({
@@ -281,10 +281,10 @@ var __webpack_modules__ = {
                                             console.error('The browser does not support the getUserMedia API');
                                         }
                                     }
-                                }), 500);
+                                }, 500);
                             }
                         }
-                    }));
+                    });
                     observer.observe(document, {
                         childList: true,
                         subtree: true,
@@ -314,58 +314,58 @@ var __webpack_modules__ = {
                 },
                 stop() {
                     if (stream) {
-                        stream.getTracks().forEach((track => track.stop()));
+                        stream.getTracks().forEach(track => track.stop());
                     }
                     stream = null;
                 }
-            })));
-            Alpine.directive('anchor', ((el, {value, expression, modifiers}, {evaluateLater, cleanup}) => {
+            }));
+            Alpine.directive('anchor', (el, {value, expression, modifiers}, {evaluateLater, cleanup}) => {
                 let hash = window.location.hash.replace('#', ''), anchor = el.innerText.toLowerCase().replaceAll(' ', '-');
                 if (hash && hash === anchor) {
                     el.scrollIntoView({
                         behavior: 'smooth'
                     });
                 }
-                el.addEventListener('click', (e => {
+                el.addEventListener('click', e => {
                     e.preventDefault();
                     window.location.hash = anchor;
                     el.scrollIntoView({
                         behavior: 'smooth'
                     });
-                }), false);
+                }, false);
                 let evaluate = evaluateLater(expression || null);
-                let observer = new IntersectionObserver((entries => {
-                    entries.forEach((entry => {
+                let observer = new IntersectionObserver(entries => {
+                    entries.forEach(entry => {
                         if (!entry.isIntersecting || entry.intersectionRatio !== 1) {
                             return;
                         }
                         evaluate();
                         window.location.hash = anchor;
-                    }));
-                }), {
+                    });
+                }, {
                     threshold: .5
                 });
                 observer.observe(el);
-                cleanup((() => observer.disconnect()));
-            }));
-            Alpine.directive('listen', ((el, {value, expression, modifiers}, {evaluateLater, effect}) => {
+                cleanup(() => observer.disconnect());
+            });
+            Alpine.directive('listen', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
                 if (!expression) {
                     return false;
                 }
                 let evaluate = evaluateLater(expression);
-                effect((() => {
-                    evaluate((content => {
+                effect(() => {
+                    evaluate(content => {
                         if (content) {
                             let name = 'listen-node';
                             function _play(aud, icn) {
                                 icn.classList.add('playing');
                                 aud.play();
                                 aud.setAttribute('data-playing', 'true');
-                                aud.addEventListener('ended', (function() {
+                                aud.addEventListener('ended', function() {
                                     _pause(aud, icn);
                                     aud.parentNode.style.background = null;
                                     return false;
-                                }));
+                                });
                             }
                             function _pause(aud, icn) {
                                 aud.pause();
@@ -384,7 +384,7 @@ var __webpack_modules__ = {
                             el.id = name + '-' + i;
                             el.insertBefore(icn, el.firstChild);
                             el.appendChild(aud);
-                            document.addEventListener('click', (e => {
+                            document.addEventListener('click', e => {
                                 let aud, elm, icn;
                                 if (e.target.className === name) {
                                     aud = e.target.children[1];
@@ -417,35 +417,35 @@ var __webpack_modules__ = {
                                         }
                                     })();
                                 }
-                            }));
-                            el.addEventListener('click', (() => {}), false);
+                            });
+                            el.addEventListener('click', () => {}, false);
                         }
-                    }));
-                }));
-            }));
-            Alpine.directive('textarea', ((el, {expression}) => {
+                    });
+                });
+            });
+            Alpine.directive('textarea', (el, {expression}) => {
                 if ('TEXTAREA' !== el.tagName.toUpperCase()) {
                     return false;
                 }
-                el.addEventListener('input', (() => {
+                el.addEventListener('input', () => {
                     let max = parseInt(expression) || 99, rows = parseInt(el.value.split(/\r|\r\n|\n/).length);
                     if (rows > max) {
                         return false;
                     }
                     el.style.height = 'auto';
                     el.style.height = `${el.scrollHeight}px`;
-                }), false);
-            }));
-            Alpine.directive('tooltip', ((el, {value, expression, modifiers}, {evaluateLater, effect}) => {
+                }, false);
+            });
+            Alpine.directive('tooltip', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
                 let evaluate = evaluateLater(expression);
-                effect((() => {
-                    evaluate((content => {
+                effect(() => {
+                    evaluate(content => {
                         let position, trigger;
                         if (modifiers) {
-                            modifiers.forEach((modifier => {
+                            modifiers.forEach(modifier => {
                                 position = [ 'top', 'right', 'bottom', 'left' ].includes(modifier) ? modifier : 'top';
                                 trigger = [ 'hover', 'click' ].includes(modifier) ? modifier : 'hover';
-                            }));
+                            });
                         }
                         if (position && trigger) {
                             new Drooltip({
@@ -459,15 +459,15 @@ var __webpack_modules__ = {
                                 callback: null
                             });
                         }
-                    }));
-                }));
-            }));
-            Alpine.directive('wizard', ((el, {value, expression, modifiers}, {Alpine: Alpine2, evaluate, cleanup}) => {
+                    });
+                });
+            });
+            Alpine.directive('wizard', (el, {value, expression, modifiers}, {Alpine: Alpine2, evaluate, cleanup}) => {
                 const wizard2 = getWizard(el, Alpine2);
                 const step = wizard2.getStep(el);
-                cleanup((() => step.cleanup()));
+                cleanup(() => step.cleanup());
                 const evaluateCheck = () => [ !!evaluate(expression), {} ];
-                Alpine2.effect((() => {
+                Alpine2.effect(() => {
                     step.evaluate = content => evaluate(content);
                     if (expression !== '') {
                         if (value === 'step') {
@@ -489,9 +489,9 @@ var __webpack_modules__ = {
                             step.title = expression;
                         }
                     }
-                }));
-            }));
-            Alpine.magic('wizard', ((el, {Alpine: Alpine2}) => getWizard(el, Alpine2)));
+                });
+            });
+            Alpine.magic('wizard', (el, {Alpine: Alpine2}) => getWizard(el, Alpine2));
             let wizards = new WeakMap;
             let getWizard = (el, Alpine) => {
                 const root = Alpine.closestRoot(el);
@@ -607,7 +607,7 @@ var __webpack_modules__ = {
                     return this.current();
                 },
                 getStep(el) {
-                    let step = this.steps.find((step2 => step2.el === el));
+                    let step = this.steps.find(step2 => step2.el === el);
                     if (!step) {
                         el.setAttribute('x-show', '$wizard.current().el === $el');
                         step = Alpine.reactive({
@@ -617,7 +617,7 @@ var __webpack_modules__ = {
                             is_complete: true,
                             errors: {},
                             cleanup: () => {
-                                this.steps = this.steps.filter((step2 => step2.el === el));
+                                this.steps = this.steps.filter(step2 => step2.el === el);
                             }
                         });
                         this.steps.push(step);
@@ -633,7 +633,7 @@ var __webpack_modules__ = {
                 }
                 return null;
             };
-            Alpine.magic('password', (() => ({
+            Alpine.magic('password', () => ({
                 min: {
                     lowercase: 2,
                     uppercase: 2,
@@ -678,13 +678,13 @@ var __webpack_modules__ = {
                 generate() {
                     let password = '';
                     let types = Object.keys(this.charsets);
-                    types.forEach((type => {
+                    types.forEach(type => {
                         let count = Math.max(this.min[type], 0), charset = this.charsets[type];
                         for (let i = 0; i < count; i++) {
                             let randomIndex = Math.floor(Math.random() * charset.length);
                             password += charset[randomIndex];
                         }
-                    }));
+                    });
                     while (password.length < this.min.length) {
                         let randomIndex = Math.floor(Math.random() * types.length), charType = types[randomIndex], charset = this.charsets[charType], randomCharIndex = Math.floor(Math.random() * charset.length);
                         password += charset[randomCharIndex];
@@ -705,8 +705,8 @@ var __webpack_modules__ = {
                     }
                     return array.join('');
                 }
-            })));
-            Alpine.data('avatar', (() => ({
+            }));
+            Alpine.data('avatar', () => ({
                 content: '',
                 image: '',
                 add(event, callback) {
@@ -732,34 +732,34 @@ var __webpack_modules__ = {
                 getInitials(string, letters = 2) {
                     const wordArray = string.split(' ').slice(0, letters);
                     if (wordArray.length >= 2) {
-                        return wordArray.reduce(((accumulator, currentValue) => `${accumulator}${currentValue[0].charAt(0)}`.toUpperCase()), '');
+                        return wordArray.reduce((accumulator, currentValue) => `${accumulator}${currentValue[0].charAt(0)}`.toUpperCase(), '');
                     }
                     return wordArray[0].charAt(0).toUpperCase();
                 }
-            })));
-            Alpine.directive('datepicker', ((el, {value, expression, modifiers}, {evaluateLater, effect}) => {
+            }));
+            Alpine.directive('datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
                 el.setAttribute('readonly', true);
                 let evaluate = evaluateLater(expression || '{}');
-                effect((() => {
-                    evaluate((options => {
+                effect(() => {
+                    evaluate(options => {
                         let format = expansa?.dateFormat, lang = expansa?.lang || navigator.language || navigator.userLanguage || 'en-US';
                         let translateWeekdays = length => Array.from({
                             length: 7
-                        }, ((_, i) => new Intl.DateTimeFormat(lang, {
+                        }, (_, i) => new Intl.DateTimeFormat(lang, {
                             weekday: length
-                        }).format(new Date(2024, 0, i + 1))));
+                        }).format(new Date(2024, 0, i + 1)));
                         let translateMonths = length => Array.from({
                             length: 12
-                        }, ((_, i) => {
+                        }, (_, i) => {
                             let month = new Intl.DateTimeFormat(lang, {
                                 month: length
                             }).format(new Date(2024, i, 1));
                             month = month.endsWith('.') ? month.slice(0, -1) : month;
                             return month.charAt(0).toUpperCase() + month.slice(1);
-                        }));
+                        });
                         let formatter = (date, format) => {
                             let s = date.toString(), f = date.getTime(), fullYear = date.getFullYear(), monthNumber = date.getMonth(), day = date.getDate(), hours = date.getHours(), minutes = date.getMinutes(), seconds = date.getSeconds();
-                            return format.replace(/a|A|d|D|F|g|G|h|H|i|I|j|l|L|m|M|n|s|S|t|T|U|w|y|Y|z|Z/g, (format => {
+                            return format.replace(/a|A|d|D|F|g|G|h|H|i|I|j|l|L|m|M|n|s|S|t|T|U|w|y|Y|z|Z/g, format => {
                                 switch (format) {
                                   case 'a':
                                     return hours > 11 ? 'pm' : 'am';
@@ -845,7 +845,7 @@ var __webpack_modules__ = {
                                   default:
                                     return -date.getTimezoneOffset() * 60;
                                 }
-                            }));
+                            });
                         };
                         let datepicker = new AirDatepicker(el, {
                             ...{
@@ -859,10 +859,10 @@ var __webpack_modules__ = {
                             ...options
                         });
                         console.log(datepicker);
-                    }));
-                }));
-            }));
-            Alpine.data('mask', (() => ({
+                    });
+                });
+            });
+            Alpine.data('mask', () => ({
                 run: mask => {
                     let elem = this.$el;
                     if (typeof mask === 'undefined') {
@@ -906,7 +906,7 @@ var __webpack_modules__ = {
                                 return new RegExp('[0-' + max.charAt(0) + ']');
                             }
                             let maskArr = mask.match(/(\{[^}]+?\})|(.)/g), position = -1;
-                            maskArr = maskArr.map((function(symbol) {
+                            maskArr = maskArr.map(function(symbol) {
                                 ++position;
                                 switch (symbol) {
                                   case 'i':
@@ -931,7 +931,7 @@ var __webpack_modules__ = {
                                     }
                                     return symbol;
                                 }
-                            }));
+                            });
                             vanillaTextMask.maskInput({
                                 inputElement: elem,
                                 guide: false,
@@ -942,10 +942,10 @@ var __webpack_modules__ = {
                         }
                     }
                 }
-            })));
-            Alpine.directive('progress', ((el, {modifiers}) => {
-                new IntersectionObserver(((entries, observer) => {
-                    entries.forEach((entry => {
+            }));
+            Alpine.directive('progress', (el, {modifiers}) => {
+                new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             let [value = 100, from = 0, to = 100, duration = '400ms'] = modifiers;
                             let start = parseInt(from) / parseInt(value) * 100;
@@ -954,16 +954,16 @@ var __webpack_modules__ = {
                                 [end, start] = [ start, end ];
                             }
                             el.style.setProperty('--expansa-progress', (start < 0 ? 0 : start) + '%');
-                            setTimeout((() => {
+                            setTimeout(() => {
                                 el.style.setProperty('--expansa-transition', ' width ' + duration);
                                 el.style.setProperty('--expansa-progress', (end > 100 ? 100 : end) + '%');
-                            }), 500);
+                            }, 500);
                             observer.unobserve(el);
                         }
-                    }));
-                })).observe(el);
-            }));
-            Alpine.directive('select', ((el, {expression}) => {
+                    });
+                }).observe(el);
+            });
+            Alpine.directive('select', (el, {expression}) => {
                 const settings = JSON.parse(expression || '{}');
                 if (true) {
                     function setPrefix(data) {
@@ -1040,7 +1040,7 @@ var __webpack_modules__ = {
                                     } else {
                                         attrs['data-choice-selectable'] = '';
                                     }
-                                    const attributesString = Object.entries(attrs).map((([key, val]) => val === '' ? key : `${key}="${val}"`)).join(' ');
+                                    const attributesString = Object.entries(attrs).map(([key, val]) => val === '' ? key : `${key}="${val}"`).join(' ');
                                     const prefix = setPrefix(data);
                                     let description = data.element.dataset.description || '';
                                     if (description) {
@@ -1057,8 +1057,8 @@ var __webpack_modules__ = {
                     return;
                 }
                 {}
-            }));
-            Alpine.data('builder', (() => ({
+            });
+            Alpine.data('builder', () => ({
                 default: {
                     location: 'post',
                     operator: '===',
@@ -1091,8 +1091,8 @@ var __webpack_modules__ = {
                     let groups = JSON.parse(JSON.stringify(this.groups));
                     console.log(groups);
                 }
-            })));
-            Alpine.data('sortable', (() => ({
+            }));
+            Alpine.data('sortable', () => ({
                 init() {
                     let nestedSortables = [].slice.call(document.querySelectorAll('.sortable'));
                     for (let i = 0; i < nestedSortables.length; i++) {
@@ -1109,8 +1109,8 @@ var __webpack_modules__ = {
                         });
                     }
                 }
-            })));
-            Alpine.data('tab', (id => ({
+            }));
+            Alpine.data('tab', id => ({
                 tab: id,
                 tabButton(id) {
                     return {
@@ -1134,21 +1134,21 @@ var __webpack_modules__ = {
                         }
                     };
                 }
-            })));
-            Alpine.data('table', (() => ({
+            }));
+            Alpine.data('table', () => ({
                 init() {
-                    document.addEventListener('keydown', (e => {
+                    document.addEventListener('keydown', e => {
                         let key = window.event ? event : e;
                         if (!!key.shiftKey) {
                             this.selection.shift = true;
                         }
-                    }));
-                    document.addEventListener('keyup', (e => {
+                    });
+                    document.addEventListener('keyup', e => {
                         let key = window.event ? event : e;
                         if (!key.shiftKey) {
                             this.selection.shift = false;
                         }
-                    }));
+                    });
                 },
                 selection: {
                     box: {},
@@ -1161,7 +1161,7 @@ var __webpack_modules__ = {
                         let checked = 0;
                         let inputs = document.querySelectorAll('input[name="item[]"]');
                         if (inputs.length) {
-                            inputs.forEach((input => (input.checked = e.target.checked, input.checked && checked++)));
+                            inputs.forEach(input => (input.checked = e.target.checked, input.checked && checked++));
                         }
                         this.bulk = checked > 0;
                     }
@@ -1170,7 +1170,7 @@ var __webpack_modules__ = {
                     ['@click'](e) {
                         let inputs = document.querySelectorAll('input[name="item[]"], input[x-bind="trigger"]');
                         if (inputs.length) {
-                            inputs.forEach((input => input.checked = false));
+                            inputs.forEach(input => input.checked = false);
                         }
                         this.bulk = false;
                     }
@@ -1202,8 +1202,8 @@ var __webpack_modules__ = {
                         this.bulk = checked.length > 0;
                     }
                 }
-            })));
-            Alpine.data('search', (() => ({
+            }));
+            Alpine.data('search', () => ({
                 searchInput: null,
                 searchButton: null,
                 currentIdx: -1,
@@ -1224,7 +1224,7 @@ var __webpack_modules__ = {
                         this.searchButton = this.$el;
                     },
                     ['@click']() {
-                        setTimeout((() => this.searchInput.focus()));
+                        setTimeout(() => this.searchInput.focus());
                     }
                 },
                 input: {
@@ -1247,8 +1247,8 @@ var __webpack_modules__ = {
                         this.links[this.currentIdx] && (window.location.href = this.links[this.currentIdx].url);
                     }
                 }
-            })));
-            Alpine.magic('password', (() => ({
+            }));
+            Alpine.magic('password', () => ({
                 min: {
                     lowercase: 2,
                     uppercase: 2,
@@ -1293,13 +1293,13 @@ var __webpack_modules__ = {
                 generate() {
                     let password = '';
                     let types = Object.keys(this.charsets);
-                    types.forEach((type => {
+                    types.forEach(type => {
                         let count = Math.max(this.min[type], 0), charset = this.charsets[type];
                         for (let i = 0; i < count; i++) {
                             let randomIndex = Math.floor(Math.random() * charset.length);
                             password += charset[randomIndex];
                         }
-                    }));
+                    });
                     while (password.length < this.min.length) {
                         let randomIndex = Math.floor(Math.random() * types.length), charType = types[randomIndex], charset = this.charsets[charType], randomCharIndex = Math.floor(Math.random() * charset.length);
                         password += charset[randomCharIndex];
@@ -1320,8 +1320,8 @@ var __webpack_modules__ = {
                     }
                     return array.join('');
                 }
-            })));
-            Alpine.data('timer', ((endDate, startDate) => ({
+            }));
+            Alpine.data('timer', (endDate, startDate) => ({
                 end: endDate,
                 day: '00',
                 hour: '00',
@@ -1332,7 +1332,7 @@ var __webpack_modules__ = {
                     if (start < end) {
                         let diff = Math.round((end - start) / 1e3);
                         let t = this;
-                        setInterval((function() {
+                        setInterval(function() {
                             t.day = ('0' + parseInt(diff / (60 * 60 * 24), 10)).slice(-2);
                             t.hour = ('0' + parseInt(diff / (60 * 60) % 24, 10)).slice(-2);
                             t.min = ('0' + parseInt(diff / 60 % 60, 10)).slice(-2);
@@ -1340,16 +1340,16 @@ var __webpack_modules__ = {
                             if (--diff < 0) {
                                 t.days = t.hour = t.min = t.sec = '00';
                             }
-                        }), 1e3);
+                        }, 1e3);
                     }
                 }
-            })));
-            Alpine.magic('safe', (() => ({
+            }));
+            Alpine.magic('safe', () => ({
                 slug(value) {
                     return value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').toLowerCase();
                 }
-            })));
-        }));
+            }));
+        });
     }
 };
 

@@ -5,9 +5,9 @@ function ownKeys(object, enumerableOnly) {
     if (Object.getOwnPropertySymbols) {
         var symbols = Object.getOwnPropertySymbols(object);
         if (enumerableOnly) {
-            symbols = symbols.filter((function(sym) {
+            symbols = symbols.filter(function(sym) {
                 return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-            }));
+            });
         }
         keys.push.apply(keys, symbols);
     }
@@ -18,15 +18,15 @@ function _objectSpread2(target) {
     for (var i = 1; i < arguments.length; i++) {
         var source = arguments[i] != null ? arguments[i] : {};
         if (i % 2) {
-            ownKeys(Object(source), true).forEach((function(key) {
+            ownKeys(Object(source), true).forEach(function(key) {
                 _defineProperty(target, key, source[key]);
-            }));
+            });
         } else if (Object.getOwnPropertyDescriptors) {
             Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
         } else {
-            ownKeys(Object(source)).forEach((function(key) {
+            ownKeys(Object(source)).forEach(function(key) {
                 Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-            }));
+            });
         }
     }
     return target;
@@ -445,9 +445,9 @@ function throttle(callback, ms) {
             } else {
                 callback.apply(_this, args);
             }
-            _throttleTimeout = setTimeout((function() {
+            _throttleTimeout = setTimeout(function() {
                 _throttleTimeout = void 0;
-            }), ms);
+            }, ms);
         }
     };
 }
@@ -492,7 +492,7 @@ function unsetRect(el) {
 
 function getChildContainingRectFromElement(container, options, ghostEl) {
     var rect = {};
-    Array.from(container.children).forEach((function(child) {
+    Array.from(container.children).forEach(function(child) {
         var _rect$left, _rect$top, _rect$right, _rect$bottom;
         if (!closest(child, options.draggable, container, false) || child.animated || child === ghostEl) return;
         var childRect = getRect(child);
@@ -500,7 +500,7 @@ function getChildContainingRectFromElement(container, options, ghostEl) {
         rect.top = Math.min((_rect$top = rect.top) !== null && _rect$top !== void 0 ? _rect$top : Infinity, childRect.top);
         rect.right = Math.max((_rect$right = rect.right) !== null && _rect$right !== void 0 ? _rect$right : -Infinity, childRect.right);
         rect.bottom = Math.max((_rect$bottom = rect.bottom) !== null && _rect$bottom !== void 0 ? _rect$bottom : -Infinity, childRect.bottom);
-    }));
+    });
     rect.width = rect.right - rect.left;
     rect.height = rect.bottom - rect.top;
     rect.x = rect.left;
@@ -517,7 +517,7 @@ function AnimationStateManager() {
             animationStates = [];
             if (!this.options.animation) return;
             var children = [].slice.call(this.el.children);
-            children.forEach((function(child) {
+            children.forEach(function(child) {
                 if (css(child, 'display') === 'none' || child === Sortable.ghost) return;
                 animationStates.push({
                     target: child,
@@ -532,7 +532,7 @@ function AnimationStateManager() {
                     }
                 }
                 child.fromRect = fromRect;
-            }));
+            });
         },
         addAnimationState: function addAnimationState(state) {
             animationStates.push(state);
@@ -550,7 +550,7 @@ function AnimationStateManager() {
                 return;
             }
             var animating = false, animationTime = 0;
-            animationStates.forEach((function(state) {
+            animationStates.forEach(function(state) {
                 var time = 0, target = state.target, fromRect = target.fromRect, toRect = getRect(target), prevFromRect = target.prevFromRect, prevToRect = target.prevToRect, animatingRect = state.rect, targetMatrix = matrix(target, true);
                 if (targetMatrix) {
                     toRect.top -= targetMatrix.f;
@@ -574,23 +574,23 @@ function AnimationStateManager() {
                     animating = true;
                     animationTime = Math.max(animationTime, time);
                     clearTimeout(target.animationResetTimer);
-                    target.animationResetTimer = setTimeout((function() {
+                    target.animationResetTimer = setTimeout(function() {
                         target.animationTime = 0;
                         target.prevFromRect = null;
                         target.fromRect = null;
                         target.prevToRect = null;
                         target.thisAnimationDuration = null;
-                    }), time);
+                    }, time);
                     target.thisAnimationDuration = time;
                 }
-            }));
+            });
             clearTimeout(animationCallbackId);
             if (!animating) {
                 if (typeof callback === 'function') callback();
             } else {
-                animationCallbackId = setTimeout((function() {
+                animationCallbackId = setTimeout(function() {
                     if (typeof callback === 'function') callback();
-                }), animationTime);
+                }, animationTime);
             }
             animationStates = [];
         },
@@ -606,13 +606,13 @@ function AnimationStateManager() {
                 css(target, 'transition', 'transform ' + duration + 'ms' + (this.options.easing ? ' ' + this.options.easing : ''));
                 css(target, 'transform', 'translate3d(0,0,0)');
                 typeof target.animated === 'number' && clearTimeout(target.animated);
-                target.animated = setTimeout((function() {
+                target.animated = setTimeout(function() {
                     css(target, 'transition', '');
                     css(target, 'transform', '');
                     target.animated = false;
                     target.animatingX = false;
                     target.animatingY = false;
-                }), duration);
+                }, duration);
             }
         }
     };
@@ -639,11 +639,11 @@ var PluginManager = {
                 plugin[option] = defaults[option];
             }
         }
-        plugins.forEach((function(p) {
+        plugins.forEach(function(p) {
             if (p.pluginName === plugin.pluginName) {
                 throw 'Sortable: Cannot mount plugin '.concat(plugin.pluginName, ' more than once');
             }
-        }));
+        });
         plugins.push(plugin);
     },
     pluginEvent: function pluginEvent(eventName, sortable, evt) {
@@ -653,7 +653,7 @@ var PluginManager = {
             _this.eventCanceled = true;
         };
         var eventNameGlobal = eventName + 'Global';
-        plugins.forEach((function(plugin) {
+        plugins.forEach(function(plugin) {
             if (!sortable[plugin.pluginName]) return;
             if (sortable[plugin.pluginName][eventNameGlobal]) {
                 sortable[plugin.pluginName][eventNameGlobal](_objectSpread2({
@@ -665,10 +665,10 @@ var PluginManager = {
                     sortable
                 }, evt));
             }
-        }));
+        });
     },
     initializePlugins: function initializePlugins(sortable, el, defaults, options) {
-        plugins.forEach((function(plugin) {
+        plugins.forEach(function(plugin) {
             var pluginName = plugin.pluginName;
             if (!sortable.options[pluginName] && !plugin.initializeByDefault) return;
             var initialized = new plugin(sortable, el, sortable.options);
@@ -676,7 +676,7 @@ var PluginManager = {
             initialized.options = sortable.options;
             sortable[pluginName] = initialized;
             _extends(defaults, initialized.defaults);
-        }));
+        });
         for (var option in sortable.options) {
             if (!sortable.options.hasOwnProperty(option)) continue;
             var modified = this.modifyOption(sortable, option, sortable.options[option]);
@@ -687,20 +687,20 @@ var PluginManager = {
     },
     getEventProperties: function getEventProperties(name, sortable) {
         var eventProperties = {};
-        plugins.forEach((function(plugin) {
+        plugins.forEach(function(plugin) {
             if (typeof plugin.eventProperties !== 'function') return;
             _extends(eventProperties, plugin.eventProperties.call(sortable[plugin.pluginName], name));
-        }));
+        });
         return eventProperties;
     },
     modifyOption: function modifyOption(sortable, name, value) {
         var modifiedValue;
-        plugins.forEach((function(plugin) {
+        plugins.forEach(function(plugin) {
             if (!sortable[plugin.pluginName]) return;
             if (plugin.optionListeners && typeof plugin.optionListeners[name] === 'function') {
                 modifiedValue = plugin.optionListeners[name].call(sortable[plugin.pluginName], value);
             }
-        }));
+        });
         return modifiedValue;
     }
 };
@@ -821,14 +821,14 @@ var documentExists = typeof document !== 'undefined', PositionGhostAbsolutely = 
     return dragElS1Opp === targetS1Opp || dragElS2Opp === targetS2Opp || dragElS1Opp + dragElOppLength / 2 === targetS1Opp + targetOppLength / 2;
 }, _detectNearestEmptySortable = function _detectNearestEmptySortable(x, y) {
     var ret;
-    sortables.some((function(sortable) {
+    sortables.some(function(sortable) {
         var threshold = sortable[expando].options.emptyInsertThreshold;
         if (!threshold || lastChild(sortable)) return;
         var rect = getRect(sortable), insideHorizontally = x >= rect.left - threshold && x <= rect.right + threshold, insideVertically = y >= rect.top - threshold && y <= rect.bottom + threshold;
         if (insideHorizontally && insideVertically) {
             return ret = sortable;
         }
-    }));
+    });
     return ret;
 }, _prepareGroup = function _prepareGroup(options) {
     function toFn(value, pull) {
@@ -871,7 +871,7 @@ var documentExists = typeof document !== 'undefined', PositionGhostAbsolutely = 
 };
 
 if (documentExists && !ChromeForAndroid) {
-    document.addEventListener('click', (function(evt) {
+    document.addEventListener('click', function(evt) {
         if (ignoreNextClick) {
             evt.preventDefault();
             evt.stopPropagation && evt.stopPropagation();
@@ -879,7 +879,7 @@ if (documentExists && !ChromeForAndroid) {
             ignoreNextClick = false;
             return false;
         }
-    }), true);
+    }, true);
 }
 
 var nearestEmptyInsertDetectEvent = function nearestEmptyInsertDetectEvent(evt) {
@@ -1037,7 +1037,7 @@ Sortable.prototype = {
                 return;
             }
         } else if (filter) {
-            filter = filter.split(',').some((function(criteria) {
+            filter = filter.split(',').some(function(criteria) {
                 criteria = closest(originalTarget, criteria.trim(), el, false);
                 if (criteria) {
                     _dispatchEvent({
@@ -1053,7 +1053,7 @@ Sortable.prototype = {
                     });
                     return true;
                 }
-            }));
+            });
             if (filter) {
                 preventOnFilter && evt.preventDefault();
                 return;
@@ -1105,9 +1105,9 @@ Sortable.prototype = {
                 });
                 toggleClass(dragEl, options.chosenClass, true);
             };
-            options.ignore.split(',').forEach((function(criteria) {
+            options.ignore.split(',').forEach(function(criteria) {
                 find(dragEl, criteria.trim(), _disableDraggable);
-            }));
+            });
             on(ownerDocument, 'dragover', nearestEmptyInsertDetectEvent);
             on(ownerDocument, 'mousemove', nearestEmptyInsertDetectEvent);
             on(ownerDocument, 'touchmove', nearestEmptyInsertDetectEvent);
@@ -1186,9 +1186,9 @@ Sortable.prototype = {
         }
         try {
             if (document.selection) {
-                _nextTick((function() {
+                _nextTick(function() {
                     document.selection.empty();
-                }));
+                });
             } else {
                 window.getSelection().removeAllRanges();
             }
@@ -1344,7 +1344,7 @@ Sortable.prototype = {
             toggleClass(cloneEl, this.options.chosenClass, false);
             Sortable.clone = cloneEl;
         }
-        _this.cloneId = _nextTick((function() {
+        _this.cloneId = _nextTick(function() {
             pluginEvent('clone', _this);
             if (Sortable.eventCanceled) return;
             if (!_this.options.removeCloneOnHide) {
@@ -1355,7 +1355,7 @@ Sortable.prototype = {
                 sortable: _this,
                 name: 'clone'
             });
-        }));
+        });
         !fallback && toggleClass(dragEl, options.dragClass, true);
         if (fallback) {
             ignoreNextClick = true;
@@ -1430,10 +1430,10 @@ Sortable.prototype = {
                 if (fromSortable === _this) {
                     _this._ignoreWhileAnimating = target;
                 }
-                _this.animateAll((function() {
+                _this.animateAll(function() {
                     dragOverEvent('dragOverAnimationComplete');
                     _this._ignoreWhileAnimating = null;
-                }));
+                });
                 if (_this !== fromSortable) {
                     fromSortable.animateAll();
                     fromSortable._ignoreWhileAnimating = null;
@@ -1724,9 +1724,9 @@ Sortable.prototype = {
     _nulling: function _nulling() {
         pluginEvent('nulling', this);
         rootEl = dragEl = parentEl = ghostEl = nextEl = cloneEl = lastDownEl = cloneHidden = tapEvt = touchEvt = moved = newIndex = newDraggableIndex = oldIndex = oldDraggableIndex = lastTarget = lastDirection = putSortable = activeGroup = Sortable.dragged = Sortable.ghost = Sortable.clone = Sortable.active = null;
-        savedInputChecked.forEach((function(el) {
+        savedInputChecked.forEach(function(el) {
             el.checked = true;
-        }));
+        });
         savedInputChecked.length = lastDx = lastDy = 0;
     },
     handleEvent: function handleEvent(evt) {
@@ -1761,19 +1761,19 @@ Sortable.prototype = {
     },
     sort: function sort(order, useAnimation) {
         var items = {}, rootEl = this.el;
-        this.toArray().forEach((function(id, i) {
+        this.toArray().forEach(function(id, i) {
             var el = rootEl.children[i];
             if (closest(el, this.options.draggable, rootEl, false)) {
                 items[id] = el;
             }
-        }), this);
+        }, this);
         useAnimation && this.captureAnimationState();
-        order.forEach((function(id) {
+        order.forEach(function(id) {
             if (items[id]) {
                 rootEl.removeChild(items[id]);
                 rootEl.appendChild(items[id]);
             }
-        }));
+        });
         useAnimation && this.animateAll();
     },
     save: function save() {
@@ -1810,9 +1810,9 @@ Sortable.prototype = {
             off(el, 'dragover', this);
             off(el, 'dragenter', this);
         }
-        Array.prototype.forEach.call(el.querySelectorAll('[draggable]'), (function(el) {
+        Array.prototype.forEach.call(el.querySelectorAll('[draggable]'), function(el) {
             el.removeAttribute('draggable');
-        }));
+        });
         this._onDrop();
         this._disableDelayedDragEvents();
         sortables.splice(sortables.indexOf(this.el), 1);
@@ -1972,11 +1972,11 @@ function _cancelNextTick(id) {
 }
 
 if (documentExists) {
-    on(document, 'touchmove', (function(evt) {
+    on(document, 'touchmove', function(evt) {
         if ((Sortable.active || awaitingDragStarted) && evt.cancelable) {
             evt.preventDefault();
         }
-    }));
+    });
 }
 
 Sortable.utils = {
@@ -2009,13 +2009,13 @@ Sortable.mount = function() {
         plugins[_key] = arguments[_key];
     }
     if (plugins[0].constructor === Array) plugins = plugins[0];
-    plugins.forEach((function(plugin) {
+    plugins.forEach(function(plugin) {
         if (!plugin.prototype || !plugin.prototype.constructor) {
             throw 'Sortable: Mounted plugin must be a constructor function, not '.concat({}.toString.call(plugin));
         }
         if (plugin.utils) Sortable.utils = _objectSpread2(_objectSpread2({}, Sortable.utils), plugin.utils);
         PluginManager.mount(plugin);
-    }));
+    });
 };
 
 Sortable.create = function(el, options) {
@@ -2090,14 +2090,14 @@ function AutoScrollPlugin() {
                 var ogElemScroller = getParentAutoScrollElement(elem, true);
                 if (scrolling && (!pointerElemChangedInterval || x !== lastAutoScrollX || y !== lastAutoScrollY)) {
                     pointerElemChangedInterval && clearPointerElemChangedInterval();
-                    pointerElemChangedInterval = setInterval((function() {
+                    pointerElemChangedInterval = setInterval(function() {
                         var newElem = getParentAutoScrollElement(document.elementFromPoint(x, y), true);
                         if (newElem !== ogElemScroller) {
                             ogElemScroller = newElem;
                             clearAutoScrolls();
                         }
                         autoScroll(evt, _this.options, newElem, fallback);
-                    }), 10);
+                    }, 10);
                     lastAutoScrollX = x;
                     lastAutoScrollY = y;
                 }
@@ -2117,9 +2117,9 @@ function AutoScrollPlugin() {
 }
 
 function clearAutoScrolls() {
-    autoScrolls.forEach((function(autoScroll) {
+    autoScrolls.forEach(function(autoScroll) {
         clearInterval(autoScroll.pid);
-    }));
+    });
     autoScrolls = [];
 }
 
@@ -2127,7 +2127,7 @@ function clearPointerElemChangedInterval() {
     clearInterval(pointerElemChangedInterval);
 }
 
-var autoScroll = throttle((function(evt, options, rootEl, isFallback) {
+var autoScroll = throttle(function(evt, options, rootEl, isFallback) {
     if (!options.scroll) return;
     var x = (evt.touches ? evt.touches[0] : evt).clientX, y = (evt.touches ? evt.touches[0] : evt).clientY, sens = options.scrollSensitivity, speed = options.scrollSpeed, winScroller = getWindowScrollingElement();
     var scrollThisInstance = false, scrollCustomFn;
@@ -2187,7 +2187,7 @@ var autoScroll = throttle((function(evt, options, rootEl, isFallback) {
         layersOut++;
     } while (options.bubbleScroll && currentParent !== winScroller && (currentParent = getParentAutoScrollElement(currentParent, false)));
     scrolling = scrollThisInstance;
-}), 30);
+}, 30);
 
 var drop = function drop(_ref) {
     var originalEvent = _ref.originalEvent, putSortable = _ref.putSortable, dragEl = _ref.dragEl, activeSortable = _ref.activeSortable, dispatchSortableEvent = _ref.dispatchSortableEvent, hideGhostForTarget = _ref.hideGhostForTarget, unhideGhostForTarget = _ref.unhideGhostForTarget;
@@ -2355,9 +2355,9 @@ function MultiDragPlugin() {
             setData: function setData(dataTransfer, dragEl) {
                 var data = '';
                 if (multiDragElements.length && multiDragSortable === sortable) {
-                    multiDragElements.forEach((function(multiDragElement, i) {
+                    multiDragElements.forEach(function(multiDragElement, i) {
                         data += (!i ? '' : ', ') + multiDragElement.textContent;
-                    }));
+                    });
                 } else {
                     data = dragEl.textContent;
                 }
@@ -2404,9 +2404,9 @@ function MultiDragPlugin() {
             var cloneNowShown = _ref4.cloneNowShown, rootEl = _ref4.rootEl, cancel = _ref4.cancel;
             if (!this.isMultiDrag) return;
             insertMultiDragClones(false, rootEl);
-            multiDragClones.forEach((function(clone) {
+            multiDragClones.forEach(function(clone) {
                 css(clone, 'display', '');
-            }));
+            });
             cloneNowShown();
             clonesHidden = false;
             cancel();
@@ -2415,12 +2415,12 @@ function MultiDragPlugin() {
             var _this = this;
             var sortable = _ref5.sortable, cloneNowHidden = _ref5.cloneNowHidden, cancel = _ref5.cancel;
             if (!this.isMultiDrag) return;
-            multiDragClones.forEach((function(clone) {
+            multiDragClones.forEach(function(clone) {
                 css(clone, 'display', 'none');
                 if (_this.options.removeCloneOnHide && clone.parentNode) {
                     clone.parentNode.removeChild(clone);
                 }
-            }));
+            });
             cloneNowHidden();
             clonesHidden = true;
             cancel();
@@ -2430,12 +2430,12 @@ function MultiDragPlugin() {
             if (!this.isMultiDrag && multiDragSortable) {
                 multiDragSortable.multiDrag._deselectMultiDrag();
             }
-            multiDragElements.forEach((function(multiDragElement) {
+            multiDragElements.forEach(function(multiDragElement) {
                 multiDragElement.sortableIndex = index(multiDragElement);
-            }));
-            multiDragElements = multiDragElements.sort((function(a, b) {
+            });
+            multiDragElements = multiDragElements.sort(function(a, b) {
                 return a.sortableIndex - b.sortableIndex;
-            }));
+            });
             dragStarted = true;
         },
         dragStarted: function dragStarted(_ref7) {
@@ -2445,31 +2445,31 @@ function MultiDragPlugin() {
             if (this.options.sort) {
                 sortable.captureAnimationState();
                 if (this.options.animation) {
-                    multiDragElements.forEach((function(multiDragElement) {
+                    multiDragElements.forEach(function(multiDragElement) {
                         if (multiDragElement === dragEl$1) return;
                         css(multiDragElement, 'position', 'absolute');
-                    }));
+                    });
                     var dragRect = getRect(dragEl$1, false, true, true);
-                    multiDragElements.forEach((function(multiDragElement) {
+                    multiDragElements.forEach(function(multiDragElement) {
                         if (multiDragElement === dragEl$1) return;
                         setRect(multiDragElement, dragRect);
-                    }));
+                    });
                     folding = true;
                     initialFolding = true;
                 }
             }
-            sortable.animateAll((function() {
+            sortable.animateAll(function() {
                 folding = false;
                 initialFolding = false;
                 if (_this2.options.animation) {
-                    multiDragElements.forEach((function(multiDragElement) {
+                    multiDragElements.forEach(function(multiDragElement) {
                         unsetRect(multiDragElement);
-                    }));
+                    });
                 }
                 if (_this2.options.sort) {
                     removeMultiDragElements();
                 }
-            }));
+            });
         },
         dragOver: function dragOver(_ref8) {
             var target = _ref8.target, completed = _ref8.completed, cancel = _ref8.cancel;
@@ -2481,7 +2481,7 @@ function MultiDragPlugin() {
         revert: function revert(_ref9) {
             var fromSortable = _ref9.fromSortable, rootEl = _ref9.rootEl, sortable = _ref9.sortable, dragRect = _ref9.dragRect;
             if (multiDragElements.length > 1) {
-                multiDragElements.forEach((function(multiDragElement) {
+                multiDragElements.forEach(function(multiDragElement) {
                     sortable.addAnimationState({
                         target: multiDragElement,
                         rect: folding ? getRect(multiDragElement) : dragRect
@@ -2489,7 +2489,7 @@ function MultiDragPlugin() {
                     unsetRect(multiDragElement);
                     multiDragElement.fromRect = dragRect;
                     fromSortable.removeAnimationState(multiDragElement);
-                }));
+                });
                 folding = false;
                 insertMultiDragElements(!this.options.removeCloneOnHide, rootEl);
             }
@@ -2504,11 +2504,11 @@ function MultiDragPlugin() {
                 initialFolding = false;
                 if (options.animation && multiDragElements.length > 1 && (folding || !isOwner && !activeSortable.options.sort && !putSortable)) {
                     var dragRectAbsolute = getRect(dragEl$1, false, true, true);
-                    multiDragElements.forEach((function(multiDragElement) {
+                    multiDragElements.forEach(function(multiDragElement) {
                         if (multiDragElement === dragEl$1) return;
                         setRect(multiDragElement, dragRectAbsolute);
                         parentEl.appendChild(multiDragElement);
-                    }));
+                    });
                     folding = true;
                 }
                 if (!isOwner) {
@@ -2519,14 +2519,14 @@ function MultiDragPlugin() {
                         var clonesHiddenBefore = clonesHidden;
                         activeSortable._showClone(sortable);
                         if (activeSortable.options.animation && !clonesHidden && clonesHiddenBefore) {
-                            multiDragClones.forEach((function(clone) {
+                            multiDragClones.forEach(function(clone) {
                                 activeSortable.addAnimationState({
                                     target: clone,
                                     rect: clonesFromRect
                                 });
                                 clone.fromRect = clonesFromRect;
                                 clone.thisAnimationDuration = null;
-                            }));
+                            });
                         }
                     } else {
                         activeSortable._showClone(sortable);
@@ -2536,9 +2536,9 @@ function MultiDragPlugin() {
         },
         dragOverAnimationCapture: function dragOverAnimationCapture(_ref11) {
             var dragRect = _ref11.dragRect, isOwner = _ref11.isOwner, activeSortable = _ref11.activeSortable;
-            multiDragElements.forEach((function(multiDragElement) {
+            multiDragElements.forEach(function(multiDragElement) {
                 multiDragElement.thisAnimationDuration = null;
-            }));
+            });
             if (activeSortable.options.animation && !isOwner && activeSortable.multiDrag.isMultiDrag) {
                 clonesFromRect = _extends({}, dragRect);
                 var dragMatrix = matrix(dragEl$1, true);
@@ -2587,9 +2587,9 @@ function MultiDragPlugin() {
                                 for (;i < n; i++) {
                                     if (~multiDragElements.indexOf(children[i])) continue;
                                     if (!closest(children[i], options.draggable, parentEl, false)) continue;
-                                    var filtered = filter && (typeof filter === 'function' ? filter.call(sortable, evt, children[i], sortable) : filter.split(',').some((function(criteria) {
+                                    var filtered = filter && (typeof filter === 'function' ? filter.call(sortable, evt, children[i], sortable) : filter.split(',').some(function(criteria) {
                                         return closest(children[i], criteria.trim(), parentEl, false);
-                                    })));
+                                    }));
                                     if (filtered) continue;
                                     toggleClass(children[i], options.selectedClass, true);
                                     multiDragElements.push(children[i]);
@@ -2628,7 +2628,7 @@ function MultiDragPlugin() {
                     if (!initialFolding) {
                         if (options.animation) {
                             dragEl$1.fromRect = dragRect;
-                            multiDragElements.forEach((function(multiDragElement) {
+                            multiDragElements.forEach(function(multiDragElement) {
                                 multiDragElement.thisAnimationDuration = null;
                                 if (multiDragElement !== dragEl$1) {
                                     var rect = folding ? getRect(multiDragElement) : dragRect;
@@ -2638,42 +2638,42 @@ function MultiDragPlugin() {
                                         rect
                                     });
                                 }
-                            }));
+                            });
                         }
                         removeMultiDragElements();
-                        multiDragElements.forEach((function(multiDragElement) {
+                        multiDragElements.forEach(function(multiDragElement) {
                             if (children[multiDragIndex]) {
                                 parentEl.insertBefore(multiDragElement, children[multiDragIndex]);
                             } else {
                                 parentEl.appendChild(multiDragElement);
                             }
                             multiDragIndex++;
-                        }));
+                        });
                         if (oldIndex === index(dragEl$1)) {
                             var update = false;
-                            multiDragElements.forEach((function(multiDragElement) {
+                            multiDragElements.forEach(function(multiDragElement) {
                                 if (multiDragElement.sortableIndex !== index(multiDragElement)) {
                                     update = true;
                                     return;
                                 }
-                            }));
+                            });
                             if (update) {
                                 dispatchSortableEvent('update');
                                 dispatchSortableEvent('sort');
                             }
                         }
                     }
-                    multiDragElements.forEach((function(multiDragElement) {
+                    multiDragElements.forEach(function(multiDragElement) {
                         unsetRect(multiDragElement);
-                    }));
+                    });
                     toSortable.animateAll();
                 }
                 multiDragSortable = toSortable;
             }
             if (rootEl === parentEl || putSortable && putSortable.lastPutMode !== 'clone') {
-                multiDragClones.forEach((function(clone) {
+                multiDragClones.forEach(function(clone) {
                     clone.parentNode && clone.parentNode.removeChild(clone);
-                }));
+                });
             }
         },
         nullingGlobal: function nullingGlobal() {
@@ -2740,7 +2740,7 @@ function MultiDragPlugin() {
         eventProperties: function eventProperties() {
             var _this3 = this;
             var oldIndicies = [], newIndicies = [];
-            multiDragElements.forEach((function(multiDragElement) {
+            multiDragElements.forEach(function(multiDragElement) {
                 oldIndicies.push({
                     multiDragElement,
                     index: multiDragElement.sortableIndex
@@ -2757,7 +2757,7 @@ function MultiDragPlugin() {
                     multiDragElement,
                     index: newIndex
                 });
-            }));
+            });
             return {
                 items: _toConsumableArray(multiDragElements),
                 clones: [].concat(multiDragClones),
@@ -2780,32 +2780,32 @@ function MultiDragPlugin() {
 }
 
 function insertMultiDragElements(clonesInserted, rootEl) {
-    multiDragElements.forEach((function(multiDragElement, i) {
+    multiDragElements.forEach(function(multiDragElement, i) {
         var target = rootEl.children[multiDragElement.sortableIndex + (clonesInserted ? Number(i) : 0)];
         if (target) {
             rootEl.insertBefore(multiDragElement, target);
         } else {
             rootEl.appendChild(multiDragElement);
         }
-    }));
+    });
 }
 
 function insertMultiDragClones(elementsInserted, rootEl) {
-    multiDragClones.forEach((function(clone, i) {
+    multiDragClones.forEach(function(clone, i) {
         var target = rootEl.children[clone.sortableIndex + (elementsInserted ? Number(i) : 0)];
         if (target) {
             rootEl.insertBefore(clone, target);
         } else {
             rootEl.appendChild(clone);
         }
-    }));
+    });
 }
 
 function removeMultiDragElements() {
-    multiDragElements.forEach((function(multiDragElement) {
+    multiDragElements.forEach(function(multiDragElement) {
         if (multiDragElement === dragEl$1) return;
         multiDragElement.parentNode && multiDragElement.parentNode.removeChild(multiDragElement);
-    }));
+    });
 }
 
 Sortable.mount(new AutoScrollPlugin);

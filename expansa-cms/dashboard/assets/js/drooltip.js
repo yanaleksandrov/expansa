@@ -119,7 +119,7 @@
                 };
                 xhr.send();
             } else if (type === 'jsonp') {
-                jsonp(url, (function(jsObject) {
+                jsonp(url, function(jsObject) {
                     var content;
                     if (json.slice(-2) === '()') {
                         content = window[json.replace('()', '')](jsObject);
@@ -127,24 +127,24 @@
                         content = jsObject[json];
                     }
                     updateDynamicContent(id, element, source, position, content);
-                }));
+                });
             }
         }
     }
     function updateDynamicContent(id, element, source, position, content) {
         element.querySelector('.content .drooltipLoader').classList.add('stop');
-        setTimeout((function() {
+        setTimeout(function() {
             element.querySelector('.content').classList.add('showDynamic');
-            setTimeout((function() {
+            setTimeout(function() {
                 element.querySelector('.content').innerHTML = content;
                 element.querySelector('.content').classList.remove('showDynamic');
                 getPosition(element, source, position, {
                     x: 0,
                     y: 0
                 });
-            }), 200);
+            }, 200);
             requests[id]['loaded'] = true;
-        }), 400);
+        }, 400);
     }
     function extendDefaults(source, properties) {
         var property;
@@ -259,7 +259,7 @@
         var callback = options['callback'];
         var animateEffect = options['animation'];
         getPosition(_['tooltip'], _['source'], _['options']['position']);
-        setTimeout((function() {
+        setTimeout(function() {
             elem.classList.remove('hideTooltip');
             if (elem.classList.contains('open') === false) {
                 if (standardAnimations.indexOf(animateEffect) === -1) {
@@ -269,14 +269,14 @@
                 }
             }
             elem.classList.add('open');
-            setTimeout((function() {
+            setTimeout(function() {
                 if (options['content']['type'] === 'ajax' || options['content']['type'] === 'jsonp' && requests[_['id']]['loaded'] === false) {
                     elem.style.transition = 'none';
                     requestsHandler(_['id'], elem);
                     element.style.transition = '';
                 }
-            }), 500);
-        }), 200);
+            }, 500);
+        }, 200);
     }
     function hideTooltip() {
         var _ = this;
@@ -288,7 +288,7 @@
         if (elem.classList.contains('animating') !== false) {
             timeout = 400;
         }
-        setTimeout((function() {
+        setTimeout(function() {
             if (elem.classList.contains('open') === true) {
                 if (standardAnimations.indexOf(animateEffect) === -1) {
                     window[animateEffect]('deanimate', _, callback);
@@ -297,17 +297,17 @@
                 }
                 elem.classList.remove('open');
             }
-        }), timeout);
+        }, timeout);
     }
     function floatEffect(fn, elem, callback) {
         if (fn === 'animate') {
             addStandardEffect(elem, 'bounce', null);
-            setTimeout((function() {
+            setTimeout(function() {
                 elem.classList.add('drooltipFloat');
                 if (callback !== null && callback !== undefined) {
                     window[callback]();
                 }
-            }), 100);
+            }, 100);
         } else {
             elem.classList.remove('drooltipFloat');
             removeStandardEffect(elem, 'bounce');
@@ -316,24 +316,24 @@
     function materialEffect(fn, elem, callback) {
         if (fn === 'animate') {
             elem.classList.add('drooltipMaterial');
-            setTimeout((function() {
+            setTimeout(function() {
                 elem.classList.remove('hideTooltip');
-                setTimeout((function() {
+                setTimeout(function() {
                     elem.classList.add('animate');
-                    setTimeout((function() {
+                    setTimeout(function() {
                         arrowDisplay(elem, 'show');
-                    }), 100);
-                }), 200);
-            }), 100);
+                    }, 100);
+                }, 200);
+            }, 100);
         } else {
             arrowDisplay(elem, 'hide');
-            setTimeout((function() {
+            setTimeout(function() {
                 elem.classList.remove('animate');
-                setTimeout((function() {
+                setTimeout(function() {
                     elem.classList.remove('drooltipMaterial');
                     elem.classList.add('hideTooltip');
-                }), 100);
-            }), 200);
+                }, 100);
+            }, 200);
         }
     }
     function addStandardEffect(elem, animateEffect, callback) {
@@ -349,15 +349,15 @@
         elem.classList.remove('out');
         elem.classList.add(animateEffectClass, 'animating');
         arrowDisplay(elem, 'show');
-        setTimeout((function() {
+        setTimeout(function() {
             elem.classList.remove('hideTooltip');
-            setTimeout((function() {
+            setTimeout(function() {
                 elem.classList.remove(animateEffectClass, 'animating');
-            }), 200);
+            }, 200);
             if (callback !== null && callback !== undefined) {
                 window[callback]();
             }
-        }), 200);
+        }, 200);
     }
     function removeStandardEffect(elem, animateEffect) {
         if (animateEffect === 'material') {
@@ -372,10 +372,10 @@
         elem.classList.add(animateEffectClass);
         elem.classList.add('out');
         arrowDisplay(elem, 'hide');
-        setTimeout((function() {
+        setTimeout(function() {
             elem.classList.add('hideTooltip');
             elem.classList.remove(animateEffectClass);
-        }), 400);
+        }, 400);
     }
     function arrowDisplay(elem, action) {
         if (action === 'show') {
@@ -408,36 +408,36 @@
         var mouseover = function(data) {
             var timeout = null;
             var exit = null;
-            window.addEventListener('mouseover', (function(e) {
+            window.addEventListener('mouseover', function(e) {
                 if (data['source'].contains(e.target) || data['tooltip'].contains(e.target)) {
                     clearTimeout(exit);
                 } else {
-                    exit = setTimeout((function() {
+                    exit = setTimeout(function() {
                         if (data['tooltip'].classList.contains('open')) {
                             hideTooltip.call(data);
                         }
-                    }), 200);
+                    }, 200);
                 }
-            }));
-            data['source'].addEventListener('mouseenter', (function(e) {
-                timeout = setTimeout((function() {
+            });
+            data['source'].addEventListener('mouseenter', function(e) {
+                timeout = setTimeout(function() {
                     showTooltip.call(data);
-                }), 200);
-            }));
-            data['source'].addEventListener('mouseleave', (function(e) {
+                }, 200);
+            });
+            data['source'].addEventListener('mouseleave', function(e) {
                 clearTimeout(timeout);
-            }));
+            });
         };
         mouseover(data);
     }
     function drooltipClick(data) {
-        window.addEventListener('click', (function(e) {
+        window.addEventListener('click', function(e) {
             if (data['source'].contains(e.target) || data['tooltip'].contains(e.target)) {
                 showTooltip.call(data);
             } else {
                 hideTooltip.call(data);
             }
-        }));
+        });
     }
     function animateOrDeanimate(fn, data) {
         if (fn === 'animate') {
@@ -579,9 +579,9 @@
 
 window.onload = function() {
     Drooltip.prototype.setTooltipsPos();
-    window.addEventListener('scroll', (function() {
+    window.addEventListener('scroll', function() {
         Drooltip.prototype.setTooltipsPos();
-    }), true);
+    }, true);
     window.onresize = function() {
         Drooltip.prototype.setTooltipsPos();
     };
