@@ -1,0 +1,96 @@
+.confirm-email {
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius--lg);
+  position: relative;
+  display: none;
+
+  i {
+    color: #d63939;
+    font-size: 1rem;
+  }
+
+  &.active {
+    display: flex;
+
+    &:before {
+      position: absolute;
+      content: '';
+      width: 2px;
+      inset-block: 0.75rem;
+      left: -1px;
+      border-radius: 1rem;
+      background-color: #d63939;
+    }
+  }
+
+  &-main {
+    display: grid;
+    gap: 0.5rem;
+    flex: 1;
+  }
+
+  &-top {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  &-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+
+    a {
+      line-height: 1.2em;
+      font-size: 0.9285714286em;
+      color: var(--expansa-text-muted);
+      text-decoration: underline;
+
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+
+  &-side {
+    display: grid;
+    flex: 1;
+    gap: 0.5rem;
+    min-width: 12rem;
+    margin-inline-end: auto;
+  }
+
+  &-title {
+    font-weight: 500;
+    line-height: 1;
+    margin-top: 0.125rem;
+  }
+
+  &-instruction {
+    line-height: 1.2em;
+    font-size: 0.9285714286em;
+    color: var(--expansa-text-muted);
+    font-weight: 400;
+  }
+
+  &-code {
+    display: flex;
+    gap: 0.25rem;
+    width: 8rem;
+    min-width: 8rem;
+
+    input {
+      padding-inline: 0.25rem;
+      border: 1px solid var(--expansa-border);
+      border-radius: var(--expansa-border-radius);
+      background-color: var(--expansa-bg);
+      -webkit-background-clip: initial !important;
+      height: 2.25rem;
+      text-align: center;
+      font-size: 1rem;
+    }
+  }
+}
