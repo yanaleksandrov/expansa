@@ -52,12 +52,12 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 			<span class="field-icon"><i class="{{ $icon }}"></i></span>
 		@endif
 		<input class="field-checkbox"<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'x-model.fill' => $prop, 'checked' => $checked ] ); ?>>
-		<span class="<?php echo $label_class; ?>">
+		<div class="<?php echo $label_class; ?>">
 			<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>
 				<span class="field-instruction"><?php echo $instruction; ?></span>
 			<?php endif; ?>
-		</span>
+		</div>
 	</div>
 	<?php
 	return ob_get_clean();
