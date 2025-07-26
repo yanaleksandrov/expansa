@@ -149,15 +149,19 @@ class Post
 
         $data = Db::get($type->table, '*', [ $field => $value ]);
 
-        foreach ($data as $key => $value) {
-            unset($data[ $key ]);
-            $data[ Safe::camelcase($key) ] = $value;
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                unset($data[ $key ]);
+                $data[ Safe::camelcase($key) ] = $value;
+            }
+
+            $data['slug']   = $type->public === true ? Slug::find($data['id'], $type->table) : '';
+            $data['fields'] = [];
+
+            return new Post(...$data);
         }
 
-        $data['slug']   = $type->public === true ? Slug::find($data['id'], $type->table) : '';
-        $data['fields'] = [];
-
-        return new Post(...$data);
+        return null;
     }
 
     /**
