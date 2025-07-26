@@ -265,14 +265,14 @@ final class Field
             } elseif ($value !== $existsFields[ $key ]) {
                 $updateData[ $key ] = "WHEN :key_$key THEN :value_$key";
 
-                $updateQuery[":key_{$key}"]   = $key;
-                $updateQuery[":value_{$key}"] = $value;
+                $updateQuery[":key_$key"]   = $key;
+                $updateQuery[":value_$key"] = $value;
             }
         }
 
         $deleteDate = array_diff(array_keys($existsFields ?? []), array_keys($fields));
         if ($deleteDate) {
-            $deleteDateParts = array_chunk($deleteDate, $chunkSize, false);
+            $deleteDateParts = array_chunk($deleteDate, $chunkSize);
             foreach ($deleteDateParts as $deleteDatePart) {
                 $result['deleted'] += Db::delete(
                     $this->table,
@@ -286,13 +286,15 @@ final class Field
             }
         }
 
+        print_r($insertData);
         if ($insertData) {
             $insertDataParts = array_chunk($insertData, $chunkSize, false);
-            foreach ($insertDataParts as $i => $insertDataPart) {
+            foreach ($insertDataParts as $insertDataPart) {
                 $result['inserted'] += Db::insert($this->table, $insertDataPart)->rowCount();
             }
         }
 
+        print_r($updateData);
         if ($updateData) {
             $updateDataParts  = array_chunk($updateData, $chunkSize, true);
             $updateQueryParts = array_chunk($updateQuery, $chunkSize * 2, true);

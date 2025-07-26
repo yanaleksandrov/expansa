@@ -44,26 +44,20 @@ class Post
             return array_filter($sitesList, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
         })->apply();
 
-        $title  = Safe::text($_POST['app-name'] ?? '');
+        $title  = Safe::text($_POST['title'] ?? '');
         $status = Safe::text($_POST['status'] ?? '');
         $type   = Safe::text($_POST['post-type'] ?? '');
         if (! $type) {
             throw new Exception(t('Post type is missing'));
         }
 
-        // TODO:: title make unique by user for "api-keys" post type
-//      $user = User::current();
-//      if ( $user instanceof User ) {
-//          $suffix = 1;
-//          while ( Expansa\Post::getByTitle( $type, $title ) instanceof Expansa\Post ) {
-//              $title = sprintf( '%s %s', $title, $suffix++ );
-//          }
-//      }
-
+        echo '<pre>';
+        print_r($_REQUEST);
+        echo '</pre>';
         $post = \App\Post::add($type, compact('title', 'status', 'fields'));
         echo '<pre>';
-        print_r($fields);
-        print_r($post);
+        var_dump($fields);
+        var_dump($post);
         echo '</pre>';
 
         return [
