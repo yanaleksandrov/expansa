@@ -57,13 +57,13 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'choices', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
-        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'choices', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
+        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'expansa') {

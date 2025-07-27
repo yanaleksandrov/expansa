@@ -983,9 +983,6 @@ var __webpack_modules__ = {
             });
             Alpine.directive('select', (el, {expression}) => {
                 const settings = JSON.parse(expression || '{}');
-                if (false) {
-                    var setPrefix;
-                }
                 try {
                     const select = new SlimSelect({
                         settings: {
