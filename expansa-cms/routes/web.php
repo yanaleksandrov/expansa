@@ -76,8 +76,8 @@ Route::get('/(.*)', function ($slug) {
 
             $table = new ($instances[$tableName] ?? App\Tables\Pages::class)();
 
-            if ($tableName === 'media') {
-                $slug  = 'media';
+            if ($tableName === 'files') {
+                $slug  = 'files';
                 $table = new App\Tables\Media();
             }
 

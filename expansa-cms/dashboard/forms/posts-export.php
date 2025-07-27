@@ -39,7 +39,7 @@ return Expansa\Facades\Form::enqueue(
 			],
 			'options' => [
 				'pages' => t( 'Pages' ),
-				'media' => t( 'Media' ),
+				'files' => t( 'Media' ),
 			],
 		],
 		[

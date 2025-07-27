@@ -232,27 +232,28 @@ document.addEventListener( 'alpine:init', () => {
 	/**
 	 * Alpine.js magic property `dirtyCheck` for tracking unsaved changes in forms.
 	 *
-	 * Provides methods to manually register or unregister forms for dirty state monitoring.
-	 * Automatically attaches event listeners on first use to track changes, resets,
-	 * and block navigation when forms have unsaved data.
+	 * Tracks initial state and compares it with current values to detect real changes.
+	 * If user reverts fields back to initial values, form becomes "clean" again.
 	 */
 	let unsavedForms = new Map();
 	let dirtyCheckIsInitialized = false;
 
-	function watchForm(form) {
-		unsavedForms.set(form, true);
+	function serializeForm(form) {
+		return JSON.stringify(Object.fromEntries(new FormData(form).entries()));
 	}
 
-	function markDirty(e) {
-		const form = e.target.closest('form');
-		if (form && unsavedForms.has(form)) {
+	function checkDirty(form) {
+		const initial = form.dataset.initialState;
+		const current = serializeForm(form);
+
+		if (initial !== current) {
+			unsavedForms.set(form, true);
 			document.body.classList.add('is-unsaved');
-		}
-	}
-
-	function unmarkDirty(form) {
-		if (form && unsavedForms.has(form)) {
-			document.body.classList.remove('is-unsaved');
+		} else {
+			unsavedForms.delete(form);
+			if (!unsavedForms.size) {
+				document.body.classList.remove('is-unsaved');
+			}
 		}
 	}
 
@@ -262,30 +263,51 @@ document.addEventListener( 'alpine:init', () => {
 			e.preventDefault();
 
 			document.body.classList.add('is-shake');
+
 			setTimeout(() => {
 				document.body.classList.remove('is-shake');
 			}, 500);
 		}
 	}
 
-	Alpine.magic('dirtyCheck', () => {
-		return {
-			watch(form) {
-				if (!dirtyCheckIsInitialized) {
-					dirtyCheckIsInitialized = true;
+	Alpine.magic('dirtyCheck', () => ({
+		watch(form) {
+			if (form instanceof HTMLFormElement && !dirtyCheckIsInitialized) {
+				dirtyCheckIsInitialized = true;
 
-					window.addEventListener('click', blockInternalNavigation, true);
-					window.addEventListener('change', markDirty);
-					window.addEventListener('reset', e => unmarkDirty(e.target));
-				}
+				window.addEventListener('click', blockInternalNavigation, true);
 
-				form instanceof HTMLFormElement && watchForm(form);
-			},
-			remove(form) {
-				form instanceof HTMLFormElement && unmarkDirty(form);
+				setTimeout(() => {
+					form.dataset.initialState = serializeForm(form);
+
+					form.addEventListener('input', () => checkDirty(form));
+					form.addEventListener('change', () => checkDirty(form));
+					form.addEventListener('reset', e => {
+						setTimeout(() => {
+							e.target.dataset.initialState = serializeForm(e.target);
+
+							unsavedForms.delete(e.target);
+
+							if (!unsavedForms.size) {
+								document.body.classList.remove('is-unsaved');
+							}
+						}, 0);
+					});
+				}, 50);
 			}
-		};
-	});
+		},
+		remove(form) {
+			if (form instanceof HTMLFormElement) {
+				unsavedForms.delete(form);
+
+				form.dataset.initialState = serializeForm(form);
+
+				if (!unsavedForms.size) {
+					document.body.classList.remove('is-unsaved');
+				}
+			}
+		}
+	}));
 
 	/**
 	 * Copy data to clipboard.
@@ -1035,7 +1057,6 @@ document.addEventListener( 'alpine:init', () => {
 					},
 					...options
 				});
-				console.log(datepicker)
 			});
 		});
 	});
@@ -1175,7 +1196,7 @@ document.addEventListener( 'alpine:init', () => {
 	Alpine.directive('select', (el, {expression}) => {
 		const settings = JSON.parse(expression || '{}');
 
-		if (1) {
+		if (0) {
 			function setPrefix(data) {
 				const { image, flag, icon } = data.element.dataset;
 
@@ -1307,8 +1328,7 @@ document.addEventListener( 'alpine:init', () => {
 		}
 
 		try {
-			let width  = el.offsetWidth;
-			let select = new SlimSelect({
+			const select = new SlimSelect({
 				settings: {
 					...settings,
 					contentPosition: 'fixed',
@@ -1316,9 +1336,6 @@ document.addEventListener( 'alpine:init', () => {
 				},
 				select: el,
 				events: {
-					afterChange: () => {
-						el.dispatchEvent(new Event('change', { bubbles: true }));
-					},
 					addable: value => {
 						if (settings.isAddable) {
 							return value;
@@ -1352,14 +1369,11 @@ document.addEventListener( 'alpine:init', () => {
 
 					if (option.parentElement.tagName === 'OPTGROUP') {
 						const optgroupLabel = option.parentElement.getAttribute('label');
-						const optgroup      = acc.find(item => item.label === optgroupLabel);
-						if (optgroup) {
-							optgroup.options.push(optionData);
+						const optgroupItems = acc.find(item => item.label === optgroupLabel);
+						if (optgroupItems) {
+							optgroupItems.options.push(optionData);
 						} else {
-							acc.push({
-								label: optgroupLabel,
-								options: [optionData]
-							});
+							acc.push({label: optgroupLabel, options: [optionData]});
 						}
 					} else {
 						acc.push(optionData);
@@ -1368,9 +1382,18 @@ document.addEventListener( 'alpine:init', () => {
 				}, []),
 			});
 
+			// Updating SlimSelect from actual native select element value
+			const form = el.closest('form');
+			const value = Array.from(el.selectedOptions).map((option) => option.value);
+			if (form) {
+				form.addEventListener('reset', () => {
+					setTimeout(() => select.setSelected(value, false), 0);
+				});
+			}
+
 			// TODO: при уменьшении экрана, элемент не помещается
 			// в то же время нужно соблюсти ширину как у нативного select
-			select.selectEl.nextSibling.style.minWidth = `${width}px`;
+			//select.selectEl.nextSibling.style.minWidth = `${el.offsetWidth}px`;
 		} catch(e) {
 			console.error(e);
 		}

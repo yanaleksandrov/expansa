@@ -41,7 +41,7 @@ class Media
             if ($postID instanceof Error) {
                 $errors[ $filename ] = Error::get();
             } else {
-                $posts[] = \App\Post::get('media', $postID);
+                $posts[] = \App\Post::get('files', $postID);
             }
         }
 

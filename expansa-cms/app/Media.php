@@ -25,7 +25,7 @@ final class Media
      */
     public static function get(array $args = []): string|array
     {
-        $args = [ 'type' => 'media', 'page' => 1, 'per_page' => 30, ...$args ];
+        $args = [ 'type' => 'files', 'page' => 1, 'per_page' => 30, ...$args ];
 
         return Query::apply($args, function ($posts) {
             if (! is_array($posts)) {
@@ -150,7 +150,7 @@ final class Media
         }
 
         return Post::add(
-            'media',
+            'files',
             [
                 'status' => 'publish',
                 'title'  => $originalFile->filename,

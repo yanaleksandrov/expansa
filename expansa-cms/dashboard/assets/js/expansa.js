@@ -173,18 +173,20 @@ var __webpack_modules__ = {
             });
             let unsavedForms = new Map;
             let dirtyCheckIsInitialized = false;
-            function watchForm(form) {
-                unsavedForms.set(form, true);
+            function serializeForm(form) {
+                return JSON.stringify(Object.fromEntries(new FormData(form).entries()));
             }
-            function markDirty(e) {
-                const form = e.target.closest('form');
-                if (form && unsavedForms.has(form)) {
+            function checkDirty(form) {
+                const initial = form.dataset.initialState;
+                const current = serializeForm(form);
+                if (initial !== current) {
+                    unsavedForms.set(form, true);
                     document.body.classList.add('is-unsaved');
-                }
-            }
-            function unmarkDirty(form) {
-                if (form && unsavedForms.has(form)) {
-                    document.body.classList.remove('is-unsaved');
+                } else {
+                    unsavedForms.delete(form);
+                    if (!unsavedForms.size) {
+                        document.body.classList.remove('is-unsaved');
+                    }
                 }
             }
             function blockInternalNavigation(e) {
@@ -199,16 +201,33 @@ var __webpack_modules__ = {
             }
             Alpine.magic('dirtyCheck', () => ({
                 watch(form) {
-                    if (!dirtyCheckIsInitialized) {
+                    if (form instanceof HTMLFormElement && !dirtyCheckIsInitialized) {
                         dirtyCheckIsInitialized = true;
                         window.addEventListener('click', blockInternalNavigation, true);
-                        window.addEventListener('change', markDirty);
-                        window.addEventListener('reset', e => unmarkDirty(e.target));
+                        setTimeout(() => {
+                            form.dataset.initialState = serializeForm(form);
+                            form.addEventListener('input', () => checkDirty(form));
+                            form.addEventListener('change', () => checkDirty(form));
+                            form.addEventListener('reset', e => {
+                                setTimeout(() => {
+                                    e.target.dataset.initialState = serializeForm(e.target);
+                                    unsavedForms.delete(e.target);
+                                    if (!unsavedForms.size) {
+                                        document.body.classList.remove('is-unsaved');
+                                    }
+                                }, 0);
+                            });
+                        }, 50);
                     }
-                    form instanceof HTMLFormElement && watchForm(form);
                 },
                 remove(form) {
-                    form instanceof HTMLFormElement && unmarkDirty(form);
+                    if (form instanceof HTMLFormElement) {
+                        unsavedForms.delete(form);
+                        form.dataset.initialState = serializeForm(form);
+                        if (!unsavedForms.size) {
+                            document.body.classList.remove('is-unsaved');
+                        }
+                    }
                 }
             }));
             Alpine.magic('copy', el => subject => {
@@ -858,7 +877,6 @@ var __webpack_modules__ = {
                             },
                             ...options
                         });
-                        console.log(datepicker);
                     });
                 });
             });
@@ -965,98 +983,70 @@ var __webpack_modules__ = {
             });
             Alpine.directive('select', (el, {expression}) => {
                 const settings = JSON.parse(expression || '{}');
-                if (true) {
-                    function setPrefix(data) {
-                        const {image, flag, icon} = data.element.dataset;
-                        return [ icon && `<i class="${icon}"></i>`, image && `<img src="${image}" alt />`, flag && `<svg role="presentation"><use xlink:href="${expansa?.spriteFlagsUrl}#${flag}"></use></svg>` ].filter(Boolean).join('').trim();
-                    }
-                    try {
-                        const select = new Choices(el, {
-                            silent: false,
-                            renderChoiceLimit: -1,
-                            maxItemCount: -1,
-                            closeDropdownOnSelect: 'auto',
-                            singleModeForMultiSelect: false,
-                            addChoices: false,
-                            addItems: true,
-                            addItemFilter: value => !!value && value !== '',
-                            removeItems: true,
-                            removeItemButton: el.multiple,
-                            removeItemButtonAlignLeft: false,
-                            editItems: false,
-                            allowHTML: true,
-                            allowHtmlUserInput: false,
-                            duplicateItemsAllowed: false,
-                            delimiter: ',',
-                            paste: true,
-                            searchEnabled: true,
-                            searchChoices: true,
-                            searchFloor: 1,
-                            searchResultLimit: 7,
-                            searchFields: [ 'label', 'value' ],
-                            position: 'auto',
-                            resetScrollPosition: true,
-                            shouldSort: false,
-                            shouldSortItems: false,
-                            shadowRoot: null,
-                            placeholder: true,
-                            placeholderValue: null,
-                            searchPlaceholderValue: null,
-                            prependValue: null,
-                            appendValue: null,
-                            renderSelectedChoices: 'auto',
-                            loadingText: expansa.loadingText || 'Loading...',
-                            noResultsText: expansa.noResultsText || 'No results found',
-                            noChoicesText: expansa.noChoicesText || 'No choices to choose from',
-                            itemSelectText: '',
-                            uniqueItemText: expansa.uniqueItemText || 'Only unique values can be added',
-                            customAddItemText: expansa.customAddItemText || 'Only values matching specific conditions can be added',
-                            addItemText: (value, rawValue) => `Press Enter to add <b>"${value}"</b>`,
-                            removeItemIconText: () => `Remove item`,
-                            removeItemLabelText: (value, rawValue) => `Remove item: ${value}`,
-                            maxItemText: maxItemCount => `Only ${maxItemCount} values can be added`,
-                            valueComparer: (value1, value2) => value1 === value2,
-                            callbackOnInit: null,
-                            appendGroupInSearch: false,
-                            callbackOnCreateTemplates: (template, escapeForTemplate, getClassNames, allowHTML) => ({
-                                item: ({classNames}, data) => {
-                                    const baseClasses = [ ...getClassNames(classNames.item), ...getClassNames(data.highlighted ? classNames.highlightedState : classNames.itemSelectable), data.placeholder ? classNames.placeholder : '' ];
-                                    const attrs = [ 'data-item', `data-id="${data.id}"`, `data-value="${escapeForTemplate(data.value)}"`, data.active ? 'aria-selected="true"' : '', data.disabled ? 'aria-disabled="true"' : '' ].filter(Boolean).join(' ');
-                                    const prefix = setPrefix(data);
-                                    return template(`<div class="${baseClasses.join(' ')}" ${attrs}>${prefix}${escapeForTemplate(allowHTML, data.label)}</div>`);
-                                },
-                                choice: ({classNames, itemSelectText}, data) => {
-                                    const baseClasses = [ ...getClassNames(classNames.item), ...getClassNames(classNames.itemChoice), ...getClassNames(data.disabled ? classNames.itemDisabled : classNames.itemSelectable) ];
-                                    const attrs = {
-                                        'data-select-text': itemSelectText,
-                                        'data-choice': '',
-                                        'data-id': data.id,
-                                        'data-value': escapeForTemplate(data.value),
-                                        role: data.groupId > 0 ? 'treeitem' : 'option'
-                                    };
-                                    if (data.disabled) {
-                                        attrs['data-choice-disabled'] = '';
-                                        attrs['aria-disabled'] = 'true';
-                                    } else {
-                                        attrs['data-choice-selectable'] = '';
-                                    }
-                                    const attributesString = Object.entries(attrs).map(([key, val]) => val === '' ? key : `${key}="${val}"`).join(' ');
-                                    const prefix = setPrefix(data);
-                                    let description = data.element.dataset.description || '';
-                                    if (description) {
-                                        description = `<span class="choices__description">${description}</span>`;
-                                    }
-                                    return template(`<div class="${baseClasses.join(' ')}" ${attributesString}>\n\t\t\t\t\t\t\t\t${prefix}<span class="choices__text">${escapeForTemplate(allowHTML, data.label + description)}</span>\n\t\t\t\t\t\t\t</div>`);
-                                },
-                                ...settings
-                            })
-                        });
-                    } catch (e) {
-                        console.error(e);
-                    }
-                    return;
+                if (false) {
+                    var setPrefix;
                 }
-                {}
+                try {
+                    const select = new SlimSelect({
+                        settings: {
+                            ...settings,
+                            contentPosition: 'fixed',
+                            contentLocation: el.closest('dialog') ? el.parentElement : null
+                        },
+                        select: el,
+                        events: {
+                            addable: value => {
+                                if (settings.isAddable) {
+                                    return value;
+                                }
+                            }
+                        },
+                        data: Array.from(el.options).reduce((acc, option) => {
+                            let image = option.getAttribute('data-image') || '', flag = option.getAttribute('data-flag') || '', icon = option.getAttribute('data-icon') || '', description = option.getAttribute('data-description') || '';
+                            image = image && `<img src="${image}" alt />`;
+                            flag = flag && `<svg><use xlink:href="${expansa?.spriteFlagsUrl}#${flag}"></use></svg>`;
+                            icon = icon && `<i class="${icon}"></i>`;
+                            description = description && `<span class="ss-description">${description}</span>`;
+                            let optionData = {
+                                text: option.text,
+                                value: option.value,
+                                html: `${image}${icon}${flag}<span class="ss-text">${option.text}${description}</span>`,
+                                selected: option.selected,
+                                display: true,
+                                disabled: false,
+                                mandatory: false,
+                                placeholder: false,
+                                class: '',
+                                style: '',
+                                data: {}
+                            };
+                            if (option.parentElement.tagName === 'OPTGROUP') {
+                                const optgroupLabel = option.parentElement.getAttribute('label');
+                                const optgroupItems = acc.find(item => item.label === optgroupLabel);
+                                if (optgroupItems) {
+                                    optgroupItems.options.push(optionData);
+                                } else {
+                                    acc.push({
+                                        label: optgroupLabel,
+                                        options: [ optionData ]
+                                    });
+                                }
+                            } else {
+                                acc.push(optionData);
+                            }
+                            return acc;
+                        }, [])
+                    });
+                    const form = el.closest('form');
+                    const value = Array.from(el.selectedOptions).map(option => option.value);
+                    if (form) {
+                        form.addEventListener('reset', () => {
+                            setTimeout(() => select.setSelected(value, false), 0);
+                        });
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
             });
             Alpine.data('builder', () => ({
                 default: {
