@@ -1189,9 +1189,9 @@ document.addEventListener( 'alpine:init', () => {
 	});
 
 	/**
-	 * Advanced select dropdown based on Choices.js library.
+	 * Advanced select dropdown based on SlimSelect.js library.
 	 *
-	 * @see https://github.com/Choices-js/Choices
+	 * @see https://github.com/brianvoe/slim-select
 	 */
 	Alpine.directive('select', (el, {expression}) => {
 		const settings = JSON.parse(expression || '{}');
@@ -1251,7 +1251,7 @@ document.addEventListener( 'alpine:init', () => {
 				}, []),
 			});
 
-			// Updating SlimSelect from actual native select element value
+			// updating SlimSelect from actual native select element value
 			const form = el.closest('form');
 			const value = Array.from(el.selectedOptions).map((option) => option.value);
 			if (form) {
