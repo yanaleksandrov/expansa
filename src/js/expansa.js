@@ -969,13 +969,11 @@ document.addEventListener( 'alpine:init', () => {
 	/**
 	 * Datepicker.
 	 *
-	 * Based on https://wwilsman.github.io/Datepicker.js/#methods
+	 * Based on https://github.com/t1m0n/air-datepicker
 	 *
 	 * @since 1.0
 	 */
 	Alpine.directive( 'datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
-		el.setAttribute('readonly', true);
-
 		let evaluate = evaluateLater(expression || '{}');
 		effect(() => {
 			evaluate( options => {
@@ -997,8 +995,8 @@ document.addEventListener( 'alpine:init', () => {
 					});
 				}
 
-				let formatter = (date, format) => {
-					let s           = date.toString(),
+				const formatter = (date, format) => {
+					let s             = date.toString(),
 						f           = date.getTime(),
 						fullYear    = date.getFullYear(),
 						monthNumber = date.getMonth(),
@@ -1046,17 +1044,21 @@ document.addEventListener( 'alpine:init', () => {
 					});
 				}
 
-				let datepicker = new AirDatepicker(el, {
-					...{
-						range: false,
-						inline: false,
-						multipleDatesSeparator: ' — ',
-						firstDay: expansa?.weekStart,
-						container: el.closest('div'),
-						view: 'days', // days, months or years
-					},
-					...options
-				});
+                try {
+                    new AirDatepicker(el, {
+                        range: false,
+                        inline: false,
+                        multipleDatesSeparator: ' — ',
+						locale: expansa?.datepicker,
+                        firstDay: expansa?.weekStart || 0,
+                        dateFormat: format,
+                        container: el.closest('div'),
+                        view: 'days', // days, months or years
+                        ...options
+                    });
+                } catch(e) {
+                    console.error(e);
+                }
 			});
 		});
 	});

@@ -6,7 +6,7 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="p-7 md:px-5">
+<div class="h-full bg-gray-lt p-7 md:px-5">
     <div class="mw-600 m-auto">
         <?php echo form('posts-import', EX_DASHBOARD . 'forms/posts-import.php'); ?>
     </div>

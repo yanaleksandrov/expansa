@@ -757,7 +757,6 @@ var __webpack_modules__ = {
                 }
             }));
             Alpine.directive('datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
-                el.setAttribute('readonly', true);
                 let evaluate = evaluateLater(expression || '{}');
                 effect(() => {
                     evaluate(options => {
@@ -776,7 +775,7 @@ var __webpack_modules__ = {
                             month = month.endsWith('.') ? month.slice(0, -1) : month;
                             return month.charAt(0).toUpperCase() + month.slice(1);
                         });
-                        let formatter = (date, format) => {
+                        const formatter = (date, format) => {
                             let s = date.toString(), f = date.getTime(), fullYear = date.getFullYear(), monthNumber = date.getMonth(), day = date.getDate(), hours = date.getHours(), minutes = date.getMinutes(), seconds = date.getSeconds();
                             return format.replace(/a|A|d|D|F|g|G|h|H|i|I|j|l|L|m|M|n|s|S|t|T|U|w|y|Y|z|Z/g, format => {
                                 switch (format) {
@@ -866,17 +865,22 @@ var __webpack_modules__ = {
                                 }
                             });
                         };
-                        let datepicker = new AirDatepicker(el, {
-                            ...{
+                        console.log(expansa?.datepicker);
+                        try {
+                            new AirDatepicker(el, {
                                 range: false,
                                 inline: false,
                                 multipleDatesSeparator: ' — ',
-                                firstDay: expansa?.weekStart,
+                                locale: expansa?.datepicker,
+                                firstDay: expansa?.weekStart || 0,
+                                dateFormat: format,
                                 container: el.closest('div'),
-                                view: 'days'
-                            },
-                            ...options
-                        });
+                                view: 'days',
+                                ...options
+                            });
+                        } catch (e) {
+                            console.error(e);
+                        }
                     });
                 });
             });

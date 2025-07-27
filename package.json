@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "air-datepicker": "^3.5.3",
+    "air-datepicker": "^3.6.0",
     "choices.js": "^11.1.0",
     "croppr": "^2.3.1",
     "slim-select": "^2.12.1",

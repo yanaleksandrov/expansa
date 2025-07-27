@@ -139,8 +139,7 @@ defined('EX_PATH') || exit;
         </div>
         <ul class="nav-editor-list">
             <li class="nav-editor-item">
-                <span class="nav-editor-item-text"><i
-                            class="ph ph-dots-six-vertical"></i> <span>Item 1 </span></span>
+                <span class="nav-editor-item-text"><i class="ph ph-dots-six-vertical"></i> <span>Item 1 </span></span>
                 <ul class="nav-editor-list">
                     <li class="nav-editor-item">
                         <span class="nav-editor-item-text"><i class="ph ph-dots-six-vertical"></i> Item 1.1</span>

@@ -221,19 +221,9 @@
   cursor: pointer;
   margin: 0 auto;
   position: relative;
-  transform: scale(1);
-  opacity: 1;
-  transition: all 0.15s linear 0.15s, opacity 0.1s linear 0.1s, visibility 0s linear 0s;
 
   @media (max-width: 640px) {
     display: none;
-  }
-
-  body.is-unsaved & {
-    visibility: visible;
-    opacity: 0;
-    transform: scale(0.95);
-    transition: all 0.15s, opacity 0.1s, visibility 0s linear 0s;
   }
 
   code {
@@ -253,6 +243,16 @@
     font-size: 0.8125rem;
     box-shadow: inset 0 1px 0 #fff;
     white-space: nowrap;
+    transform: scale(1);
+    opacity: 1;
+    transition: all 0.15s linear 0.15s, opacity 0.1s linear 0.1s, visibility 0s linear 0s;
+
+    body.is-unsaved & {
+      visibility: visible;
+      opacity: 0;
+      transform: scale(0.95);
+      transition: all 0.15s, opacity 0.1s, visibility 0s linear 0s;
+    }
 
     code {
       font-size: 9px;
