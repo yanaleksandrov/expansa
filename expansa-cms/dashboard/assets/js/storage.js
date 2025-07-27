@@ -161,7 +161,7 @@ class Selection {
     }
     update(x, y) {
         if (this.area) {
-            Array.from(this.container.querySelectorAll(this.selector)).forEach((node => {
+            Array.from(this.container.querySelectorAll(this.selector)).forEach(node => {
                 if (!this.nodes.includes(node)) {
                     if (this.area.isOver(node)) {
                         node.classList.add(this.classSelected);
@@ -169,7 +169,7 @@ class Selection {
                         node.classList.remove(this.classSelected);
                     }
                 }
-            }));
+            });
             this.area.resize(x, y);
             this.area.move(x, y);
         }
@@ -177,13 +177,13 @@ class Selection {
     end() {
         if (this.area) {
             let nodes = Array.from(this.container.querySelectorAll(this.selector));
-            this.selected = nodes.filter((node => this.area.isOver(node) && this.selected.indexOf(node) === -1));
-            this.nodes = this.nodes.concat(this.selected.filter((element => !this.nodes.includes(element))));
-            this.selected.forEach((element => {
+            this.selected = nodes.filter(node => this.area.isOver(node) && this.selected.indexOf(node) === -1);
+            this.nodes = this.nodes.concat(this.selected.filter(element => !this.nodes.includes(element)));
+            this.selected.forEach(element => {
                 if (!element.classList.contains(this.classSelected)) {
                     element.classList.add(this.classSelected);
                 }
-            }));
+            });
             this.area.destroy();
             this.area = null;
             if (typeof this.onSelectEnd === 'function') {
@@ -195,8 +195,8 @@ class Selection {
 
 const selection = Selection;
 
-document.addEventListener('alpine:init', (() => {
-    Alpine.directive('storage', ((el, {value, expression, modifiers}, {evaluateLater, cleanup}) => {
+document.addEventListener('alpine:init', () => {
+    Alpine.directive('storage', (el, {value, expression, modifiers}, {evaluateLater, cleanup}) => {
         new selection({
             container: el,
             selector: '.storage__item',
@@ -205,5 +205,5 @@ document.addEventListener('alpine:init', (() => {
                 console.log(selection);
             }
         });
-    }));
-}));
+    });
+});

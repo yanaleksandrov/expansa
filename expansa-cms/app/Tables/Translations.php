@@ -31,8 +31,8 @@ final class Translations extends Table
     public function cells(): array
     {
         return [
-            $this->cell('translation-source')->title(t('Source text')),
-            $this->cell('translation-value')->title(t('Translations')),
+            $this->cell('source')->title(t('Source text'))->view('raw'),
+            $this->cell('value')->title(t('Translations'))->view('text'),
         ];
     }
 
@@ -40,7 +40,7 @@ final class Translations extends Table
     {
         return [
             'title'       => t('Translations'),
-            'badge'       => t('completed :stringsCount from :allStringsCount', 56, 408, 25) . '<i class="t-green">(25%)</i>',
+            'badge'       => t('completed :stringsCount from :allStringsCount', 56, 408) . '<i class="t-green">(25%)</i>',
             'translation' => true,
         ];
     }

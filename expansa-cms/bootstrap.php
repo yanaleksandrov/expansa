@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Expansa\Facades\Debug;
 
 const EX_PATH                   = __DIR__ . '/';
-const EX_VERSION                = '2025.1';
+const EX_VERSION                = '2025.6';
 const EX_REQUIRED_PHP_VERSION   = '8.3';
 const EX_REQUIRED_MYSQL_VERSION = '8.0';
 const EX_REQUIRED_MEMORY        = 128;
@@ -41,11 +41,11 @@ Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
     require_once EX_PATH . 'dashboard/data/timezones.php';
     require_once EX_PATH . 'dashboard/data/languages.php';
 
+    // the initial configuration of the application
+    require_once EX_PATH . 'configs.php';
+
     // register default Expansa data
     require_once EX_PATH . 'migrations.php';
-
-    // the initial configuration of the application
-    require_once EX_PATH . 'app.php';
 
     // register Expansa routes
     require_once EX_PATH . 'routes/api.php';

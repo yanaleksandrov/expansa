@@ -2,7 +2,7 @@ var __webpack_modules__ = {
     908: function(module) {
         (function(global, factory) {
             true ? module.exports = factory() : 0;
-        })(this, (function() {
+        })(this, function() {
             'use strict';
             (function() {
                 var lastTime = 0;
@@ -14,9 +14,9 @@ var __webpack_modules__ = {
                 if (!window.requestAnimationFrame) window.requestAnimationFrame = function(callback, element) {
                     var currTime = (new Date).getTime();
                     var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-                    var id = window.setTimeout((function() {
+                    var id = window.setTimeout(function() {
                         callback(currTime + timeToCall);
-                    }), timeToCall);
+                    }, timeToCall);
                     lastTime = currTime + timeToCall;
                     return id;
                 };
@@ -561,7 +561,7 @@ var __webpack_modules__ = {
                     value: function redraw() {
                         var _this3 = this;
                         var width = Math.round(this.box.width()), height = Math.round(this.box.height()), x1 = Math.round(this.box.x1), y1 = Math.round(this.box.y1), x2 = Math.round(this.box.x2), y2 = Math.round(this.box.y2);
-                        window.requestAnimationFrame((function() {
+                        window.requestAnimationFrame(function() {
                             _this3.regionEl.style.transform = 'translate(' + x1 + 'px, ' + y1 + 'px)';
                             _this3.regionEl.style.width = width + 'px';
                             _this3.regionEl.style.height = height + 'px';
@@ -580,7 +580,7 @@ var __webpack_modules__ = {
                                 handle.el.style.transform = 'translate(' + Math.round(left) + 'px, ' + Math.round(top) + 'px)';
                                 handle.el.style.zIndex = foregroundHandleIndex == i ? 5 : 4;
                             }
-                        }));
+                        });
                     }
                 }, {
                     key: 'attachHandlerEvents',
@@ -1055,7 +1055,7 @@ var __webpack_modules__ = {
                 return Croppr;
             }(CropprCore);
             return Croppr$1;
-        }));
+        });
     }
 };
 

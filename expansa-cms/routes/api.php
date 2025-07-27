@@ -22,13 +22,13 @@ Route::before('GET|POST', '/api/.*', function () {
     $csrf->generate('token');
 });
 
-Route::middleware('/api', function () {
+Route::prefix('/api', function () {
     foreach (
         [
             App\Api\Extensions::class,
             App\Api\Files::class,
             App\Api\Media::class,
-            App\Api\Option::class,
+            App\Api\Options::class,
             App\Api\Post::class,
             App\Api\Posts::class,
             App\Api\System::class,

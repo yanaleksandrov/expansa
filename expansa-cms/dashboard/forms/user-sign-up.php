@@ -4,12 +4,12 @@
  *
  * @since 2025.1
  */
-return \Expansa\Facades\Form::enqueue(
+return Expansa\Facades\Form::enqueue(
 	'user-sign-up',
 	[
 		'class'           => 'dg g-6',
 		'x-data'          => '',
-		'@submit.prevent' => "\$ajax('user/sign-up')",
+		'@submit.prevent' => '$ajax("user/sign-up")',
 	],
 	[
 		[
@@ -90,7 +90,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'submit',
 			'name'        => 'sign-up',
-			'label'      => t( 'Sign Up' ),
+			'label'       => t( 'Sign Up' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
@@ -103,7 +103,7 @@ return \Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'class'     => 'btn btn--lg btn--primary btn--full',
-				'disabled'  => '',
+				'disabled'  => true,
 				':disabled' => '![login, email, password].every(i => i.trim())',
 			],
 		],

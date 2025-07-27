@@ -70,15 +70,14 @@ Route::get('/(.*)', function ($slug) {
                 'comments'    => App\Tables\Comments::class,
                 'translation' => App\Tables\Translations::class,
                 'emails'      => App\Tables\Emails::class,
-                'plugins'     => App\Tables\Plugins::class,
                 'users'       => App\Tables\Users::class,
                 'pages'       => App\Tables\Pages::class,
             ];
 
             $table = new ($instances[$tableName] ?? App\Tables\Pages::class)();
 
-            if ($tableName === 'media') {
-                $slug  = 'media';
+            if ($tableName === 'files') {
+                $slug  = 'files';
                 $table = new App\Tables\Media();
             }
 

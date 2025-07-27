@@ -108,7 +108,7 @@ Type::register(
 );
 
 Type::register(
-    key: 'media',
+    key: 'files',
     labelName: t('Storage'),
     labelNamePlural: t('Storage'),
     labelAllItems: t('Library'),

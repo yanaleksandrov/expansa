@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
 	'user-sign-in',
 	[
 		'class'           => 'dg g-6',
-		'@submit.prevent' => '$ajax("user/sign-in").then()',
+		'@submit.prevent' => '$ajax("user/sign-in")',
 		'x-data'          => '',
 	],
 	[
@@ -95,7 +95,7 @@ return \Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'class'     => 'btn btn--lg btn--primary btn--full',
-				'disabled'  => '',
+				'disabled'  => true,
 				':disabled' => '!login.trim() || !password.trim()',
 			],
 		],

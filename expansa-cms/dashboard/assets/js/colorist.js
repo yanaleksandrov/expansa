@@ -6,7 +6,7 @@ var __webpack_modules__ = {
                 !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = factory, __WEBPACK_AMD_DEFINE_RESULT__ = typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? __WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__) : __WEBPACK_AMD_DEFINE_FACTORY__, 
                 __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
             } else {}
-        })(this, (function() {
+        })(this, function() {
             'use strict';
             var tools = {};
             var hue_drag_started = false, alpha_drag_started = false, sat_drag_started = false;
@@ -39,46 +39,46 @@ var __webpack_modules__ = {
                     sat_width = tools.box.offsetWidth, sat_height = tools.box.offsetHeight, hue_height = tools.hue.offsetHeight;
                     this.setColors(this.options.default);
                     if (this.options.palette && !tools.dye.hasChildNodes()) {
-                        this.options.palette.forEach((function(clr, i) {
+                        this.options.palette.forEach(function(clr, i) {
                             tools.dye.insertAdjacentHTML('beforeend', '<i class="colorist__dye_point" style="color: ' + clr + '"></i>');
-                        }));
+                        });
                     }
-                    document.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', (function(e) {
+                    document.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', function(e) {
                         if (tools.colorist) {
                             if (!tools.colorist.contains(e.target)) {
                                 tools.colorist.parentNode.removeChild(tools.colorist);
                                 tools.colorist = null;
                             }
                         }
-                    }));
+                    });
                     tools.colorist.style.visibility = 'visible';
                     tools.colorist.style.opacity = 1;
                     if (this.options.palette && tools.dye.hasChildNodes()) {
                         var dye_points = document.querySelectorAll('.colorist__dye_point');
                         for (var dye_point of dye_points) {
-                            dye_point.addEventListener(isTouchCapable ? 'touchstart' : 'click', (function(e) {
+                            dye_point.addEventListener(isTouchCapable ? 'touchstart' : 'click', function(e) {
                                 colorist.setColors(e.target.style.color);
                                 tools.input.value = e.target.style.color;
                                 colorist.options.choosen(tools.input, e.target.style.color);
-                            }));
+                            });
                         }
                     }
-                    tools.hue.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', (function(e) {
+                    tools.hue.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', function(e) {
                         hue_drag_started = true;
                         tools.hue_point.classList.add('active');
                         colorist.setHuePickerValue(e);
-                    }));
-                    tools.alpha.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', (function(e) {
+                    });
+                    tools.alpha.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', function(e) {
                         alpha_drag_started = true;
                         tools.alpha_point.classList.add('active');
                         colorist.setAlphaPickerValue(e);
-                    }));
-                    tools.box.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', (function(e) {
+                    });
+                    tools.box.addEventListener(isTouchCapable ? 'touchstart' : 'mousedown', function(e) {
                         sat_drag_started = true;
                         tools.box_point.classList.add('active');
                         colorist.setSatPickerValue(e);
-                    }));
-                    document.addEventListener(isTouchCapable ? 'touchmove' : 'mousemove', (function(e) {
+                    });
+                    document.addEventListener(isTouchCapable ? 'touchmove' : 'mousemove', function(e) {
                         if (sat_drag_started) {
                             colorist.setSatPickerValue(e);
                         }
@@ -89,8 +89,8 @@ var __webpack_modules__ = {
                             colorist.setAlphaPickerValue(e);
                         }
                         colorist.setPickerIcon();
-                    }));
-                    document.addEventListener(isTouchCapable ? 'touchend' : 'mouseup', (function() {
+                    });
+                    document.addEventListener(isTouchCapable ? 'touchend' : 'mouseup', function() {
                         if (sat_drag_started) {
                             tools.box_point.classList.remove('active');
                             sat_drag_started = false;
@@ -104,7 +104,7 @@ var __webpack_modules__ = {
                             alpha_drag_started = false;
                         }
                         colorist.setPickerIcon();
-                    }));
+                    });
                 },
                 setColors: function(clr) {
                     var rgba = colorist.hexToRgba(clr);
@@ -205,9 +205,9 @@ var __webpack_modules__ = {
                 hexToRgba: function(hex) {
                     hex = hex.replace(/#/g, '');
                     if (hex.length === 3) {
-                        hex = hex.split('').map((function(hex) {
+                        hex = hex.split('').map(function(hex) {
                             return hex + hex;
-                        })).join('');
+                        }).join('');
                     }
                     var result = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})[\da-z]{0,0}$/i.exec(hex);
                     return result ? {
@@ -331,7 +331,7 @@ var __webpack_modules__ = {
                 }
             };
             return colorist;
-        }));
+        });
     }
 };
 

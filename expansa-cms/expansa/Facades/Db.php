@@ -14,7 +14,6 @@ use PDOStatement;
  * This class provides a facade for database interactions, offering a variety of methods to execute
  * common SQL operations such as querying, creating, dropping tables, and performing CRUD operations.
  * It also includes methods for more advanced operations like schema management and raw SQL execution.
- *
  * @method static PDOStatement query(string $statement, array $map = [])
  * @method static PDOStatement create(string $table, array $columns, array $options = null)
  * @method static PDOStatement drop(string $table)
@@ -39,6 +38,7 @@ use PDOStatement;
  * @method static array        schema(string $column = null)
  * @method static array        updateSchema()
  * @method static array        log()
+ * @method static bool         hasTable(string $tableName)
  */
 class Db extends Facade
 {

@@ -14,38 +14,38 @@ class Post
     /**
      * Class representing an entry entity.
      *
-     * @property int    $id          Unique identifier of the entry.
-     * @property string $title       The title of the entry.
-     * @property string $content     The content of the entry.
-     * @property int    $author      The ID of the author of the entry.
-     * @property int    $comments    The number of comments.
-     * @property int    $views       The number of views.
-     * @property string $status      The status of the entry.
-     * @property string $discussion  Unique identifier for the discussion.
-     * @property string $password    The password for protecting the entry.
-     * @property int    $parent      The ID of the parent entry.
-     * @property int    $position    The position of the entry (for sorting).
-     * @property string $createdAt   The creation date and time of the entry.
-     * @property string $updatedAt   The last update date and time of the entry.
-     * @property string $type        The type of the entry (e.g., "article", "page", etc.).
-     * @property string $table       The name of the database table.
-     * @property string $uuid        The unique string ID slug for the post.
-     * @property string $link        The full URL of the entry.
-     * @property string $slug        The unique URL slug for the entry.
-     * @property array  $fields      Additional custom fields.
+     * @property int    $id           Unique identifier of the entry.
+     * @property string $title        The title of the entry.
+     * @property string $content      The content of the entry.
+     * @property int    $authorId     The ID of the author of the entry.
+     * @property int    $parentId     The ID of the parent entry.
+     * @property int    $comments     The number of comments.
+     * @property int    $views        The number of views.
+     * @property int    $position     The position of the entry (for sorting).
+     * @property string $status       The status of the entry.
+     * @property string $discussion   Post discussion status.
+     * @property string $password     The password for protecting the entry.
+     * @property string $createdAt    The creation date and time of the entry.
+     * @property string $updatedAt    The last update date and time of the entry.
+     * @property string $type         The type of the entry (e.g., "article", "page", etc.).
+     * @property string $table        The name of the database table.
+     * @property string $uuid         The unique string ID slug for the post.
+     * @property string $link         The full URL of the entry.
+     * @property string $slug         The unique URL slug for the entry.
+     * @property array  $fields       Additional custom fields.
      */
     private function __construct(
         public int $id = 0,
         public string $title = '',
         public string $content = '',
-        public int $author = 0,
+        public int $authorId = 0,
+        public int $parentId = 0,
         public int $comments = 0,
         public int $views = 0,
-        public string $status = '',
-        public string $discussion = '',
-        public string $password = '',
-        public int $parent = 0,
         public int $position = 0,
+        public string $status = 'pending',
+        public string $discussion = 'open',
+        public string $password = '',
         public string $createdAt = '',
         public string $updatedAt = '',
         public string $type = '',
@@ -66,6 +66,7 @@ class Post
      */
     public static function add(string $type, array $args): ?Post
     {
+        $user = User::current();
         $type = Type::get($type);
         if (! $type instanceof Type) {
             throw new LogicException(t('Post type is not registered.'));
@@ -76,21 +77,16 @@ class Post
             [
                 'title'      => 'text',
                 'content'    => 'text',
-                'author'     => 'absint:0',
+                'author_id'  => 'absint:' . ($user->id ?? '0'),
+                'parent_id'  => 'absint:0',
                 'comments'   => 'absint:0',
                 'views'      => 'absint:0',
-                'status'     => 'text:draft',
-                'discussion' => 'text:open',
-                'password'   => 'text',
-                'parent'     => 'absint:0',
                 'position'   => 'absint:0',
+                'status'     => 'text:draft',
+                'discussion' => 'bool:open',
+                'password'   => 'text',
             ]
         )->apply();
-
-        $user = User::current();
-        if (! $data['author'] && $user instanceof User) {
-            $data['author'] = $user->id;
-        }
 
         // insert to DB
         Db::insert($type->table, array_diff_key($data, array_flip([ 'slug', 'fields' ])));
@@ -115,6 +111,7 @@ class Post
             }
 
             $fields = Safe::array($args['fields'] ?? []);
+            print_r($fields);
             if ($fields) {
                 ( new Field($post) )->import($fields);
             }
@@ -149,15 +146,19 @@ class Post
 
         $data = Db::get($type->table, '*', [ $field => $value ]);
 
-        foreach ($data as $key => $value) {
-            unset($data[ $key ]);
-            $data[ Safe::camelcase($key) ] = $value;
+        if (is_array($data)) {
+            foreach ($data as $key => $value) {
+                unset($data[ $key ]);
+                $data[ Safe::camelcase($key) ] = $value;
+            }
+
+            $data['slug']   = $type->public === true ? Slug::find($data['id'], $type->table) : '';
+            $data['fields'] = [];
+
+            return new Post(...$data);
         }
 
-        $data['slug']   = $type->public === true ? Slug::find($data['id'], $type->table) : '';
-        $data['fields'] = [];
-
-        return new Post(...$data);
+        return null;
     }
 
     /**

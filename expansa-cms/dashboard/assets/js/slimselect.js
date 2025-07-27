@@ -2,7 +2,7 @@ var __webpack_modules__ = {
     311: function(module) {
         (function(global, factory) {
             true ? module.exports = factory() : 0;
-        })(this, (function() {
+        })(this, function() {
             'use strict';
             class CssClasses {
                 constructor(classes) {
@@ -97,7 +97,7 @@ var __webpack_modules__ = {
                 return JSON.stringify(a) === JSON.stringify(b);
             }
             function kebabCase(str) {
-                const result = str.replace(/[A-Z\u00C0-\u00D6\u00D8-\u00DE]/g, (match => '-' + match.toLowerCase()));
+                const result = str.replace(/[A-Z\u00C0-\u00D6\u00D8-\u00DE]/g, match => '-' + match.toLowerCase());
                 return str[0] === str[0].toUpperCase() ? result.substring(1) : result;
             }
             class Optgroup {
@@ -121,6 +121,7 @@ var __webpack_modules__ = {
                     this.value = option.value === undefined ? option.text : option.value;
                     this.text = option.text || '';
                     this.html = option.html || '';
+                    this.defaultSelected = option.defaultSelected !== undefined ? option.defaultSelected : false;
                     this.selected = option.selected !== undefined ? option.selected : false;
                     this.display = option.display !== undefined ? option.display : true;
                     this.disabled = option.disabled !== undefined ? option.disabled : false;
@@ -175,13 +176,13 @@ var __webpack_modules__ = {
                 }
                 partialToFullData(data) {
                     let dataFinal = [];
-                    data.forEach((dataObj => {
+                    data.forEach(dataObj => {
                         if (dataObj instanceof Optgroup || 'label' in dataObj) {
                             let optOptions = [];
                             if ('options' in dataObj && dataObj.options) {
-                                dataObj.options.forEach((option => {
+                                dataObj.options.forEach(option => {
                                     optOptions.push(new Option(option));
-                                }));
+                                });
                             }
                             if (optOptions.length > 0) {
                                 dataFinal.push(new Optgroup(dataObj));
@@ -190,7 +191,7 @@ var __webpack_modules__ = {
                         if (dataObj instanceof Option || 'text' in dataObj) {
                             dataFinal.push(new Option(dataObj));
                         }
-                    }));
+                    });
                     return dataFinal;
                 }
                 setData(data) {
@@ -249,20 +250,20 @@ var __webpack_modules__ = {
                         firstOption.selected = true;
                         selectedObjects.push(firstOption);
                     }
-                    const selectedIds = selectedValues.map((value => {
+                    const selectedIds = selectedValues.map(value => {
                         var _a;
-                        return ((_a = selectedObjects.find((option => option[selectedType] === value))) === null || _a === void 0 ? void 0 : _a.id) || '';
-                    }));
+                        return ((_a = selectedObjects.find(option => option[selectedType] === value)) === null || _a === void 0 ? void 0 : _a.id) || '';
+                    });
                     this.selectedOrder = selectedIds;
                 }
                 getSelected() {
-                    return this.getSelectedOptions().map((option => option.id));
+                    return this.getSelectedOptions().map(option => option.id);
                 }
                 getSelectedValues() {
-                    return this.getSelectedOptions().map((option => option.value));
+                    return this.getSelectedOptions().map(option => option.value);
                 }
                 getSelectedOptions() {
-                    return this.filter((opt => opt.selected), false);
+                    return this.filter(opt => opt.selected, false);
                 }
                 getOptgroupByID(id) {
                     for (let dataObj of this.data) {
@@ -273,7 +274,7 @@ var __webpack_modules__ = {
                     return null;
                 }
                 getOptionByID(id) {
-                    let options = this.filter((opt => opt.id === id), false);
+                    let options = this.filter(opt => opt.id === id, false);
                     return options.length ? options[0] : null;
                 }
                 getSelectType() {
@@ -298,14 +299,14 @@ var __webpack_modules__ = {
                     if (search === '') {
                         return this.getData();
                     }
-                    return this.filter((opt => searchFilter(opt, search)), true);
+                    return this.filter(opt => searchFilter(opt, search), true);
                 }
                 filter(filter, includeOptgroup) {
                     const dataSearch = [];
-                    this.data.forEach((dataObj => {
+                    this.data.forEach(dataObj => {
                         if (dataObj instanceof Optgroup) {
                             let optOptions = [];
-                            dataObj.options.forEach((option => {
+                            dataObj.options.forEach(option => {
                                 if (!filter || filter(option)) {
                                     if (!includeOptgroup) {
                                         dataSearch.push(new Option(option));
@@ -313,7 +314,7 @@ var __webpack_modules__ = {
                                         optOptions.push(new Option(option));
                                     }
                                 }
-                            }));
+                            });
                             if (optOptions.length > 0) {
                                 let optgroup = new Optgroup(dataObj);
                                 optgroup.options = optOptions;
@@ -325,29 +326,29 @@ var __webpack_modules__ = {
                                 dataSearch.push(new Option(dataObj));
                             }
                         }
-                    }));
+                    });
                     return dataSearch;
                 }
                 selectedOrderOptions(options) {
                     const newOrder = [];
-                    this.selectedOrder.forEach((id => {
-                        const option = options.find((opt => opt.id === id));
+                    this.selectedOrder.forEach(id => {
+                        const option = options.find(opt => opt.id === id);
                         if (option) {
                             newOrder.push(option);
                         }
-                    }));
-                    options.forEach((option => {
+                    });
+                    options.forEach(option => {
                         let isIn = false;
-                        newOrder.forEach((selectedOption => {
+                        newOrder.forEach(selectedOption => {
                             if (option.id === selectedOption.id) {
                                 isIn = true;
                                 return;
                             }
-                        }));
+                        });
                         if (!isIn) {
                             newOrder.push(option);
                         }
-                    }));
+                    });
                     return newOrder;
                 }
             }
@@ -357,6 +358,7 @@ var __webpack_modules__ = {
                     this.settings = settings;
                     this.classes = classes;
                     this.callbacks = callbacks;
+                    this.lastSelectedOption = null;
                     this.main = this.mainDiv();
                     this.content = this.contentDiv();
                     this.updateClassStyles();
@@ -419,9 +421,10 @@ var __webpack_modules__ = {
                     }
                 }
                 updateAriaAttributes() {
+                    var _a;
                     this.main.main.role = 'combobox';
                     this.main.main.setAttribute('aria-haspopup', 'listbox');
-                    this.main.main.setAttribute('aria-controls', this.content.main.id);
+                    this.main.main.setAttribute('aria-controls', (_a = this.content.main.dataset.id) !== null && _a !== void 0 ? _a : '');
                     this.main.main.setAttribute('aria-expanded', 'false');
                     this.content.main.setAttribute('role', 'listbox');
                 }
@@ -545,7 +548,7 @@ var __webpack_modules__ = {
                     }
                 }
                 placeholder() {
-                    const placeholderOption = this.store.filter((o => o.placeholder), false);
+                    const placeholderOption = this.store.filter(o => o.placeholder, false);
                     let placeholderText = this.settings.placeholderText;
                     if (placeholderOption.length) {
                         if (placeholderOption[0].html !== '') {
@@ -568,7 +571,7 @@ var __webpack_modules__ = {
                     this.updateDeselectAll();
                 }
                 renderSingleValue() {
-                    const selected = this.store.filter((o => o.selected && !o.placeholder), false);
+                    const selected = this.store.filter(o => o.selected && !o.placeholder, false);
                     const selectedSingle = selected.length > 0 ? selected[0] : null;
                     if (!selectedSingle) {
                         this.main.values.innerHTML = this.placeholder().outerHTML;
@@ -590,7 +593,7 @@ var __webpack_modules__ = {
                 }
                 renderMultipleValues() {
                     let currentNodes = this.main.values.childNodes;
-                    let selectedOptions = this.store.filter((opt => opt.selected && opt.display), false);
+                    let selectedOptions = this.store.filter(opt => opt.selected && opt.display, false);
                     if (selectedOptions.length === 0) {
                         this.main.values.innerHTML = this.placeholder().outerHTML;
                         return;
@@ -620,7 +623,7 @@ var __webpack_modules__ = {
                         const node = currentNodes[i];
                         const id = node.getAttribute('data-id');
                         if (id) {
-                            const found = selectedOptions.filter((opt => opt.id === id), false);
+                            const found = selectedOptions.filter(opt => opt.id === id, false);
                             if (!found.length) {
                                 removeNodes.push(node);
                             }
@@ -628,11 +631,11 @@ var __webpack_modules__ = {
                     }
                     for (const n of removeNodes) {
                         n.classList.add(this.classes.valueOut);
-                        setTimeout((() => {
+                        setTimeout(() => {
                             if (this.main.values.hasChildNodes() && this.main.values.contains(n)) {
                                 this.main.values.removeChild(n);
                             }
-                        }), 100);
+                        }, 100);
                     }
                     currentNodes = this.main.values.childNodes;
                     for (let d = 0; d < selectedOptions.length; d++) {
@@ -668,6 +671,7 @@ var __webpack_modules__ = {
                     if (!option.mandatory) {
                         const deleteDiv = document.createElement('div');
                         deleteDiv.classList.add(this.classes.valueDelete);
+                        deleteDiv.setAttribute('tabindex', '0');
                         deleteDiv.onclick = e => {
                             e.preventDefault();
                             e.stopPropagation();
@@ -676,7 +680,7 @@ var __webpack_modules__ = {
                             }
                             let shouldDelete = true;
                             const before = this.store.getSelectedOptions();
-                            const after = before.filter((o => o.selected && o.id !== option.id), true);
+                            const after = before.filter(o => o.selected && o.id !== option.id, true);
                             if (this.settings.minSelected && after.length < this.settings.minSelected) {
                                 return;
                             }
@@ -712,6 +716,11 @@ var __webpack_modules__ = {
                         deleteSvg.appendChild(deletePath);
                         deleteDiv.appendChild(deleteSvg);
                         value.appendChild(deleteDiv);
+                        deleteDiv.onkeydown = e => {
+                            if (e.key === 'Enter') {
+                                deleteDiv.click();
+                            }
+                        };
                     }
                     return value;
                 }
@@ -766,9 +775,9 @@ var __webpack_modules__ = {
                     input.setAttribute('autocapitalize', 'off');
                     input.setAttribute('autocomplete', 'off');
                     input.setAttribute('autocorrect', 'off');
-                    input.oninput = debounce((e => {
+                    input.oninput = debounce(e => {
                         this.callbacks.search(e.target.value);
-                    }), 100);
+                    }, 100);
                     input.onkeydown = e => {
                         switch (e.key) {
                           case 'ArrowUp':
@@ -839,9 +848,9 @@ var __webpack_modules__ = {
                                 }
                                 this.callbacks.search('');
                                 if (this.settings.closeOnSelect) {
-                                    setTimeout((() => {
+                                    setTimeout(() => {
                                         this.callbacks.close();
-                                    }), 100);
+                                    }, 100);
                                 }
                             };
                             const addableValue = this.callbacks.addable(inputValue);
@@ -849,7 +858,7 @@ var __webpack_modules__ = {
                                 return;
                             }
                             if (addableValue instanceof Promise) {
-                                addableValue.then((value => {
+                                addableValue.then(value => {
                                     if (typeof value === 'string') {
                                         runFinish({
                                             text: value,
@@ -860,7 +869,7 @@ var __webpack_modules__ = {
                                     } else {
                                         runFinish(value);
                                     }
-                                }));
+                                });
                             } else if (typeof addableValue === 'string') {
                                 runFinish({
                                     text: addableValue,
@@ -983,7 +992,7 @@ var __webpack_modules__ = {
                         return;
                     }
                     if (this.settings.allowDeselect && !this.settings.isMultiple) {
-                        const placeholderOption = this.store.filter((o => o.placeholder), false);
+                        const placeholderOption = this.store.filter(o => o.placeholder, false);
                         if (!placeholderOption.length) {
                             this.store.addOption(new Option({
                                 text: '',
@@ -993,6 +1002,7 @@ var __webpack_modules__ = {
                             }), true);
                         }
                     }
+                    const fragment = document.createDocumentFragment();
                     for (const d of data) {
                         if (d instanceof Optgroup) {
                             const optgroupEl = document.createElement('div');
@@ -1032,23 +1042,23 @@ var __webpack_modules__ = {
                                 const selectAllCheck = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                                 selectAllCheck.setAttribute('d', this.classes.optgroupSelectAllCheck);
                                 selectAllSvg.appendChild(selectAllCheck);
-                                selectAll.addEventListener('click', (e => {
+                                selectAll.addEventListener('click', e => {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     const currentSelected = this.store.getSelected();
                                     if (allSelected) {
-                                        const newSelected = currentSelected.filter((s => {
+                                        const newSelected = currentSelected.filter(s => {
                                             for (const o of d.options) {
                                                 if (s === o.id) {
                                                     return false;
                                                 }
                                             }
                                             return true;
-                                        }));
+                                        });
                                         this.callbacks.setSelected(newSelected, true);
                                         return;
                                     } else {
-                                        const newSelected = currentSelected.concat(d.options.map((o => o.id)));
+                                        const newSelected = currentSelected.concat(d.options.map(o => o.id));
                                         for (const o of d.options) {
                                             if (!this.store.getOptionByID(o.id)) {
                                                 this.callbacks.addOption(o);
@@ -1057,7 +1067,7 @@ var __webpack_modules__ = {
                                         this.callbacks.setSelected(newSelected, true);
                                         return;
                                     }
-                                }));
+                                });
                                 optgroupActions.appendChild(selectAll);
                             }
                             if (d.closable !== 'off') {
@@ -1069,7 +1079,7 @@ var __webpack_modules__ = {
                                 optgroupClosable.appendChild(optgroupClosableSvg);
                                 const optgroupClosableArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                                 optgroupClosableSvg.appendChild(optgroupClosableArrow);
-                                if (d.options.some((o => o.selected)) || this.content.search.input.value.trim() !== '') {
+                                if (d.options.some(o => o.selected) || this.content.search.input.value.trim() !== '') {
                                     optgroupClosable.classList.add(this.classes.open);
                                     optgroupClosableArrow.setAttribute('d', this.classes.arrowOpen);
                                 } else if (d.closable === 'open') {
@@ -1079,7 +1089,7 @@ var __webpack_modules__ = {
                                     optgroupEl.classList.add(this.classes.close);
                                     optgroupClosableArrow.setAttribute('d', this.classes.arrowClose);
                                 }
-                                optgroupLabel.addEventListener('click', (e => {
+                                optgroupLabel.addEventListener('click', e => {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     if (optgroupEl.classList.contains(this.classes.close)) {
@@ -1091,19 +1101,20 @@ var __webpack_modules__ = {
                                         optgroupEl.classList.add(this.classes.close);
                                         optgroupClosableArrow.setAttribute('d', this.classes.arrowClose);
                                     }
-                                }));
+                                });
                                 optgroupActions.appendChild(optgroupClosable);
                             }
                             optgroupEl.appendChild(optgroupLabel);
                             for (const o of d.options) {
                                 optgroupEl.appendChild(this.option(o));
+                                fragment.appendChild(optgroupEl);
                             }
-                            this.content.list.appendChild(optgroupEl);
                         }
                         if (d instanceof Option) {
-                            this.content.list.appendChild(this.option(d));
+                            fragment.appendChild(this.option(d));
                         }
                     }
+                    this.content.list.appendChild(fragment);
                 }
                 option(option) {
                     if (option.placeholder) {
@@ -1117,9 +1128,9 @@ var __webpack_modules__ = {
                     optionEl.classList.add(this.classes.option);
                     optionEl.setAttribute('role', 'option');
                     if (option.class) {
-                        option.class.split(' ').forEach((dataClass => {
+                        option.class.split(' ').forEach(dataClass => {
                             optionEl.classList.add(dataClass);
-                        }));
+                        });
                     }
                     if (option.style) {
                         optionEl.style.cssText = option.style;
@@ -1151,7 +1162,7 @@ var __webpack_modules__ = {
                         optionEl.classList.remove(this.classes.selected);
                         optionEl.setAttribute('aria-selected', 'false');
                     }
-                    optionEl.addEventListener('click', (e => {
+                    optionEl.addEventListener('click', e => {
                         e.preventDefault();
                         e.stopPropagation();
                         const selectedOptions = this.store.getSelected();
@@ -1168,9 +1179,26 @@ var __webpack_modules__ = {
                         let after = [];
                         if (this.settings.isMultiple) {
                             if (option.selected) {
-                                after = before.filter((o => o.id !== elementID));
+                                after = before.filter(o => o.id !== elementID);
                             } else {
                                 after = before.concat(option);
+                                if (!this.settings.closeOnSelect) {
+                                    if (e.shiftKey && this.lastSelectedOption) {
+                                        const options = this.store.getDataOptions();
+                                        let lastClickedOptionIndex = options.findIndex(o => o.id === this.lastSelectedOption.id);
+                                        let currentOptionIndex = options.findIndex(o => o.id === option.id);
+                                        if (lastClickedOptionIndex >= 0 && currentOptionIndex >= 0) {
+                                            const startIndex = Math.min(lastClickedOptionIndex, currentOptionIndex);
+                                            const endIndex = Math.max(lastClickedOptionIndex, currentOptionIndex);
+                                            const afterRange = options.slice(startIndex, endIndex + 1);
+                                            if (afterRange.length > 0 && afterRange.length < this.settings.maxSelected) {
+                                                after = before.concat(afterRange.filter(a => !before.find(b => b.id === a.id)));
+                                            }
+                                        }
+                                    } else if (!option.selected) {
+                                        this.lastSelectedOption = option;
+                                    }
+                                }
                             }
                         }
                         if (!this.settings.isMultiple) {
@@ -1194,7 +1222,7 @@ var __webpack_modules__ = {
                             if (!this.store.getOptionByID(elementID)) {
                                 this.callbacks.addOption(option);
                             }
-                            this.callbacks.setSelected(after.map((o => o.id)), false);
+                            this.callbacks.setSelected(after.map(o => o.id), false);
                             if (this.settings.closeOnSelect) {
                                 this.callbacks.close();
                             }
@@ -1202,7 +1230,7 @@ var __webpack_modules__ = {
                                 this.callbacks.afterChange(after);
                             }
                         }
-                    }));
+                    });
                     return optionEl;
                 }
                 destroy() {
@@ -1419,6 +1447,7 @@ var __webpack_modules__ = {
                         value: option.value,
                         text: option.text,
                         html: option.dataset && option.dataset.html ? option.dataset.html : '',
+                        defaultSelected: option.defaultSelected,
                         selected: option.selected,
                         display: option.style.display !== 'none',
                         disabled: option.disabled,
@@ -1454,7 +1483,7 @@ var __webpack_modules__ = {
                     return options;
                 }
                 getSelectedValues() {
-                    return this.getSelectedOptions().map((option => option.value));
+                    return this.getSelectedOptions().map(option => option.value);
                 }
                 setSelected(ids) {
                     this.changeListen(false);
@@ -1508,11 +1537,11 @@ var __webpack_modules__ = {
                     }
                     if (classes) {
                         this.select.className = '';
-                        classes.forEach((c => {
+                        classes.forEach(c => {
                             if (c.trim() !== '') {
                                 this.select.classList.add(c.trim());
                             }
-                        }));
+                        });
                     }
                     this.changeListen(true);
                 }
@@ -1557,9 +1586,8 @@ var __webpack_modules__ = {
                     if (info.html !== '') {
                         optionEl.setAttribute('data-html', info.html);
                     }
-                    if (info.selected) {
-                        optionEl.selected = info.selected;
-                    }
+                    optionEl.defaultSelected = info.defaultSelected;
+                    optionEl.selected = info.selected;
                     if (info.disabled) {
                         optionEl.disabled = true;
                     }
@@ -1573,14 +1601,14 @@ var __webpack_modules__ = {
                         optionEl.setAttribute('data-mandatory', 'true');
                     }
                     if (info.class) {
-                        info.class.split(' ').forEach((optionClass => {
+                        info.class.split(' ').forEach(optionClass => {
                             optionEl.classList.add(optionClass);
-                        }));
+                        });
                     }
                     if (info.data && typeof info.data === 'object') {
-                        Object.keys(info.data).forEach((key => {
+                        Object.keys(info.data).forEach(key => {
                             optionEl.setAttribute('data-' + kebabCase(key), info.data[key]);
-                        }));
+                        });
                     }
                     return optionEl;
                 }
@@ -1650,18 +1678,18 @@ var __webpack_modules__ = {
                         beforeClose: undefined,
                         afterClose: undefined
                     };
-                    this.windowResize = debounce((() => {
+                    this.windowResize = debounce(() => {
                         if (!this.settings.isOpen && !this.settings.isFullOpen) {
                             return;
                         }
                         this.render.moveContent();
-                    }));
-                    this.windowScroll = debounce((() => {
+                    });
+                    this.windowScroll = debounce(() => {
                         if (!this.settings.isOpen && !this.settings.isFullOpen) {
                             return;
                         }
                         this.render.moveContent();
-                    }));
+                    });
                     this.documentClick = e => {
                         if (!this.settings.isOpen) {
                             return;
@@ -1712,7 +1740,7 @@ var __webpack_modules__ = {
                     this.select.updateSelect(this.settings.id, this.settings.style, this.settings.class);
                     this.select.hideUI();
                     this.select.onValueChange = options => {
-                        this.setSelected(options.map((option => option.id)));
+                        this.setSelected(options.map(option => option.id));
                     };
                     this.select.onClassChange = classes => {
                         this.settings.class = classes;
@@ -1804,7 +1832,7 @@ var __webpack_modules__ = {
                     if (this.settings.keepOrder) {
                         options = this.store.selectedOrderOptions(options);
                     }
-                    return options.map((option => option.value));
+                    return options.map(option => option.value);
                 }
                 setSelected(values, runAfterChange = true) {
                     const selected = this.store.getSelected();
@@ -1812,11 +1840,11 @@ var __webpack_modules__ = {
                     values = Array.isArray(values) ? values : [ values ];
                     const ids = [];
                     for (const value of values) {
-                        if (options.find((option => option.id == value))) {
+                        if (options.find(option => option.id == value)) {
                             ids.push(value);
                             continue;
                         }
-                        for (const option of options.filter((option => option.value == value))) {
+                        for (const option of options.filter(option => option.value == value)) {
                             ids.push(option.id);
                         }
                     }
@@ -1835,10 +1863,10 @@ var __webpack_modules__ = {
                 }
                 addOption(option) {
                     const selected = this.store.getSelected();
-                    if (!this.store.getDataOptions().some((o => {
+                    if (!this.store.getDataOptions().some(o => {
                         var _a;
                         return o.value === ((_a = option.value) !== null && _a !== void 0 ? _a : option.text);
-                    }))) {
+                    })) {
                         this.store.addOption(option);
                     }
                     const data = this.store.getData();
@@ -1861,7 +1889,7 @@ var __webpack_modules__ = {
                         this.render.searchFocus();
                     }
                     this.settings.isOpen = true;
-                    setTimeout((() => {
+                    setTimeout(() => {
                         if (this.events.afterOpen) {
                             this.events.afterOpen();
                         }
@@ -1869,7 +1897,7 @@ var __webpack_modules__ = {
                             this.settings.isFullOpen = true;
                         }
                         document.addEventListener('click', this.documentClick);
-                    }), this.settings.timeoutDelay);
+                    }, this.settings.timeoutDelay);
                     if (this.settings.contentPosition === 'absolute') {
                         if (this.settings.intervalMove) {
                             clearInterval(this.settings.intervalMove);
@@ -1891,12 +1919,12 @@ var __webpack_modules__ = {
                     this.render.mainFocus(eventType);
                     this.settings.isOpen = false;
                     this.settings.isFullOpen = false;
-                    setTimeout((() => {
+                    setTimeout(() => {
                         if (this.events.afterClose) {
                             this.events.afterClose();
                         }
                         document.removeEventListener('click', this.documentClick);
-                    }), this.settings.timeoutDelay);
+                    }, this.settings.timeoutDelay);
                     if (this.settings.intervalMove) {
                         clearInterval(this.settings.intervalMove);
                     }
@@ -1912,11 +1940,11 @@ var __webpack_modules__ = {
                     this.render.renderSearching();
                     const searchResp = this.events.search(value, this.store.getSelectedOptions());
                     if (searchResp instanceof Promise) {
-                        searchResp.then((data => {
+                        searchResp.then(data => {
                             this.render.renderOptions(this.store.partialToFullData(data));
-                        })).catch((err => {
+                        }).catch(err => {
                             this.render.renderError(typeof err === 'string' ? err : err.message);
-                        }));
+                        });
                         return;
                     } else if (Array.isArray(searchResp)) {
                         this.render.renderOptions(this.store.partialToFullData(searchResp));
@@ -1937,7 +1965,7 @@ var __webpack_modules__ = {
                 }
             }
             return SlimSelect;
-        }));
+        });
     }
 };
 

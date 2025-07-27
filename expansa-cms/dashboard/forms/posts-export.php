@@ -4,10 +4,10 @@
  *
  * @since 2025.1
  */
-return \Expansa\Facades\Form::enqueue(
+return Expansa\Facades\Form::enqueue(
 	'posts-export',
 	[
-		'class'           => 'card card-border px-8 pb-8 g-8',
+		'class'           => 'card card-border px-7 pb-7 g-7',
 		'@submit.prevent' => '$ajax("posts/export").then(response => output = response.output)',
 		'x-data'          => '{posts:[]}',
 	],
@@ -15,7 +15,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'name'        => 'title',
 			'type'        => 'header',
-			'class'       => 'pt-8 px-8 t-center',
+			'class'       => 'pt-7 px-7 t-center',
 			'label'       => t( 'Map fields for export' ),
 			'instruction' => t( 'Select fields from your CSV file that you want to map to fields in the posts, or that you want to ignore during import' ),
 		],
@@ -39,7 +39,7 @@ return \Expansa\Facades\Form::enqueue(
 			],
 			'options' => [
 				'pages' => t( 'Pages' ),
-				'media' => t( 'Media' ),
+				'files' => t( 'Media' ),
 			],
 		],
 		[
@@ -78,7 +78,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function () {
 				?>
-				<button type="submit" class="btn btn--primary btn--lg"><?php echo t( 'Export posts' ); ?></button>
+				<button type="submit" class="btn btn--primary"><?php echo t( 'Export posts' ); ?></button>
 				<?php
 			},
 		],

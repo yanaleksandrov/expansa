@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use App\Option;
+use App\Options;
 use DateTime;
 use Expansa\Facades\Db;
 
@@ -168,7 +168,7 @@ final class Is
             return false;
         }
 
-        return isset($schema[ EX_DB_PREFIX . Option::$table ]) && ! empty(Option::get('site.url'));
+        return isset($schema[ EX_DB_PREFIX . Options::$table ]) && ! empty(Options::get('site.url'));
     }
 
     /**

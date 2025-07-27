@@ -1,6 +1,6 @@
 <?php
 
-use App\Option;
+use App\Options;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
@@ -12,9 +12,10 @@ use Expansa\Facades\Safe;
 return Expansa\Facades\Form::enqueue(
 	'settings',
 	[
-		'class'   => 'tab tab--vertical',
-		'x-data'  => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
-		'@change' => '$ajax("option/update")',
+		'class'           => 'tab tab--vertical',
+		'x-data'          => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
+        'x-init'          => '$dirtyCheck.watch($el)',
+        '@submit.prevent' => '$ajax("options/update", "", () => $dirtyCheck.remove($el))',
 	],
 	[
 		[
@@ -47,7 +48,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value'       => Option::get( 'site.name' ),
+								'value'       => Options::get( 'site.name' ),
 								'required'    => true,
 								'placeholder' => t( 'e.g. Google' ),
 							],
@@ -67,7 +68,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value'       => Option::get( 'site.tagline' ),
+								'value'       => Options::get( 'site.tagline' ),
 								'placeholder' => t( 'e.g. Just another Expansa site' ),
 							],
 						],
@@ -86,7 +87,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value'    => Option::get( 'site.language' ),
+								'value'    => Options::get( 'site.language' ),
 								'x-select' => '{"showSearch": 1}',
 							],
 							'options' => I18n::getLanguagesOptions(),
@@ -106,7 +107,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value'       => Option::get( 'site.url' ),
+								'value'       => Options::get( 'site.url' ),
 								'placeholder' => t( 'e.g. Google' ),
 								'required'    => true,
 							],
@@ -136,7 +137,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value'    => Option::get( 'owner.email' ),
+								'value'    => Options::get( 'owner.email' ),
 								'required' => true,
 							],
 						],
@@ -170,13 +171,13 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Anyone can register' ),
 									'icon'        => 'ph ph-user-list',
 									'description' => t( 'An avatar is an image that can be associated with a user across multiple websites. In this area, you can choose to display avatars of users who interact with the site' ),
-									'checked'     => Option::get( 'users.membership', true ),
+									'checked'     => Options::get( 'users.membership', true ),
 								],
 								'users[moderate]' => [
 									'content'     => t( 'Must confirm' ),
 									'icon'        => 'ph ph-police-car',
 									'description' => t( 'Configure the account verification algorithm' ),
-									'checked'     => Option::get( 'users.moderate', false ),
+									'checked'     => Options::get( 'users.moderate', false ),
 								],
 							],
 						],
@@ -201,7 +202,7 @@ return Expansa\Facades\Form::enqueue(
 								],
 							],
 							'attributes'  => [
-								'value' => Option::get( 'users.role' ),
+								'value' => Options::get( 'users.role' ),
 							],
 							'options'     => [
 								'subscriber'    => t( 'Subscriber' ),
@@ -216,7 +217,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'dates',
-					'label'         => t( 'Dates & time' ),
+					'label'         => t( 'Dates and time' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -231,13 +232,13 @@ return Expansa\Facades\Form::enqueue(
 										<span class="df aic jcsb fw-500"><?php echo t( 'Date Format' ); ?></span>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">April 3, 2021</span> <code class="badge badge--dark-lt">F j, Y</code>
+										<span><input class="mr-2" type="radio" name="item">April 3, 2021</span> <code class="badge badge--sm badge--dark-lt">F j, Y</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">2021-04-03</span> <code class="badge badge--dark-lt">Y-m-d</code>
+										<span><input class="mr-2" type="radio" name="item">2021-04-03</span> <code class="badge badge--sm badge--dark-lt">Y-m-d</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">04/03/2021</span> <code class="badge badge--dark-lt">m/d/Y</code>
+										<span><input class="mr-2" type="radio" name="item">04/03/2021</span> <code class="badge badge--sm badge--dark-lt">m/d/Y</code>
 									</label>
 									<label class="df aic jcsb">
 										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
@@ -257,13 +258,13 @@ return Expansa\Facades\Form::enqueue(
 										<span class="df aic jcsb fw-500"><?php echo t( 'Time Format' ); ?></span>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">17:22</span> <code class="badge badge--dark-lt">H:i</code>
+										<span><input class="mr-2" type="radio" name="item">17:22</span> <code class="badge badge--sm badge--dark-lt">H:i</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">5:22 PM</span> <code class="badge badge--dark-lt">g:i A</code>
+										<span><input class="mr-2" type="radio" name="item">5:22 PM</span> <code class="badge badge--sm badge--dark-lt">g:i A</code>
 									</label>
 									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">12:50am</span> <code class="badge badge--dark-lt">g:ia</code>
+										<span><input class="mr-2" type="radio" name="item">12:50am</span> <code class="badge badge--sm badge--dark-lt">g:ia</code>
 									</label>
 									<label class="df aic jcsb">
 										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
@@ -288,7 +289,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value' => Option::get( 'week-starts-on' ),
+								'value' => Options::get( 'week-starts-on' ),
 							],
 							'options' => [
 								'0' => t( 'Sunday' ),
@@ -315,7 +316,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value' => Option::get( 'timezone' ),
+								'value' => Options::get( 'timezone' ),
 							],
 							'options' => [
 								'subscriber'    => t( 'Subscriber' ),
@@ -364,7 +365,7 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Discourage search engines from indexing this site' ),
 									'icon'        => 'ph ph-globe-hemisphere-west',
 									'description' => t( 'It is up to search engines to honor this request.' ),
-									'checked'     => Option::get( 'discourage', false ),
+									'checked'     => Options::get( 'discourage', false ),
 								],
 							],
 						],
@@ -407,31 +408,31 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Allow people to submit comments on new posts' ),
 									'icon'        => 'ph ph-chat-dots',
 									'description' => t( 'Individual posts may override these settings. Changes here will only be applied to new posts.' ),
-									'checked'     => Option::get( 'comments.default_status', true ),
+									'checked'     => Options::get( 'comments.default_status', true ),
 								],
 								'comments[require_name_email]' => [
 									'content'     => t( 'Comment author must fill out name and email' ),
 									'icon'        => 'ph ph-textbox',
 									'description' => t( 'If disabled, only the name is required' ),
-									'checked'     => Option::get( 'comments.default_status' ),
+									'checked'     => Options::get( 'comments.default_status' ),
 								],
 								'comments[registration]' => [
 									'content'     => t( 'Users must be registered and logged in to comment' ),
 									'icon'        => 'ph ph-browser',
 									'description' => '',
-									'checked'     => Option::get( 'comments.default_status' ),
+									'checked'     => Options::get( 'comments.default_status' ),
 								],
 								'comments[close_comments_for_old_posts]' => [
-									'content'     => t( 'Automatically close comments on posts older than %s days', '<i class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></i>' ),
+									'content'     => t( 'Automatically close comments on posts older than %s days', '<label class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></label>' ),
 									'icon'        => 'ph ph-hourglass-medium',
 									'description' => '',
-									'checked'     => Option::get( 'comments.default_status' ),
+									'checked'     => Options::get( 'comments.default_status' ),
 								],
 								'comments[thread_comments]' => [
-									'content'     => t( 'Enable threaded (nested) comments %s levels deep', '<i class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></i>' ),
+									'content'     => t( 'Enable threaded (nested) comments %s levels deep', '<label class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></label>' ),
 									'icon'        => 'ph ph-stack',
 									'description' => '',
-									'checked'     => Option::get( 'comments.default_status' ),
+									'checked'     => Options::get( 'comments.default_status' ),
 								],
 							],
 						],
@@ -465,13 +466,13 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Anyone posts a comment' ),
 									'icon'        => 'ph ph-chats',
 									'description' => t( 'Individual posts may override these settings. Changes here will only be applied to new posts.' ),
-									'checked'     => Option::get( 'comments.default_status', true ),
+									'checked'     => Options::get( 'comments.default_status', true ),
 								],
 								'comments[notify_moderation]' => [
 									'content'     => t( 'A comment is held for moderation' ),
 									'icon'        => 'ph ph-detective',
 									'description' => '',
-									'checked'     => Option::get( 'comments.default_status' ),
+									'checked'     => Options::get( 'comments.default_status' ),
 								],
 							],
 						],
@@ -505,13 +506,13 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Comment must be manually approved' ),
 									'icon'        => 'ph ph-chats',
 									'description' => t( 'Individual posts may override these settings. Changes here will only be applied to new posts.' ),
-									'checked'     => Option::get( 'comments.moderation', true ),
+									'checked'     => Options::get( 'comments.moderation', true ),
 								],
 								'comments[previously_approved]' => [
 									'content'     => t( 'Comment author must have a previously approved comment' ),
 									'icon'        => 'ph ph-user-check',
 									'description' => '',
-									'checked'     => Option::get( 'comments.previously_approved' ),
+									'checked'     => Options::get( 'comments.previously_approved' ),
 								],
 							],
 						],
@@ -545,7 +546,7 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Show Avatars' ),
 									'icon'        => 'ph ph-smiley',
 									'description' => t( 'An avatar is an image that can be associated with a user across multiple websites. In this area, you can choose to display avatars of users who interact with the site.' ),
-									'checked'     => Option::get( 'avatars.show', true ),
+									'checked'     => Options::get( 'avatars.show', true ),
 								],
 							],
 						],
@@ -611,14 +612,14 @@ return Expansa\Facades\Form::enqueue(
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
-							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.format == \'' . Option::get( 'images.format' ) . '\'">Convert existing images</button>',
+							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.format == \'' . Options::get( 'images.format' ) . '\'">Convert existing images</button>',
 							'instruction' => t( 'If you change the value, the formats of already uploaded images will remain unchanged, the new value will be applied only to new images.' ),
 							'tooltip'     => t( 'Can lead to loss of detail and image quality, as well as increase the cost of your hosting resources' ),
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value' => Option::get( 'images.format' ),
+								'value' => Options::get( 'images.format' ),
 							],
 							'options'     => [
 								''     => t( 'Do not convert' ),
@@ -633,7 +634,7 @@ return Expansa\Facades\Form::enqueue(
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
-							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.organization.trim() == \'' . Option::get( 'images.organization', 'yearmonth' ) . '\'">Convert existing files</button>',
+							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.organization.trim() == \'' . Options::get( 'images.organization', 'yearmonth' ) . '\'">Convert existing files</button>',
 							'instruction' => t( 'Changing this value does not change the storage structure of existing files, but only for new files.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
@@ -680,7 +681,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value'    => Option::get( 'permalinks.pages.single' ),
+								'value'    => Options::get( 'permalinks.pages.single' ),
 								'required' => true,
 							],
 						],
@@ -699,7 +700,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value'    => Option::get( 'permalinks.pages.categories' ),
+								'value'    => Options::get( 'permalinks.pages.categories' ),
 								'required' => true,
 							],
 						],
@@ -707,5 +708,21 @@ return Expansa\Facades\Form::enqueue(
 				],
 			],
 		],
+        [
+            'type'     => 'custom',
+            'callback' => function () {
+                ?>
+				<div class="expansa-form-actions">
+					<div class="expansa-form-actions-caption">
+						<i class="ph ph-warning-circle"></i> <?php echo t('Unsaved changes'); ?>
+					</div>
+					<div class="expansa-form-actions-buttons">
+						<button class="btn t-red" type="reset"><?php echo t('Discard'); ?></button>
+						<button class="btn t-green" type="submit"><?php echo t('Save'); ?></button>
+					</div>
+				</div>
+                <?php
+            },
+        ],
 	]
 );

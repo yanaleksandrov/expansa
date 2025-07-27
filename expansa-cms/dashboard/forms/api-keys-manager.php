@@ -4,12 +4,12 @@
  *
  * @since 2025.1
  */
-return \Expansa\Facades\Form::enqueue(
+return Expansa\Facades\Form::enqueue(
 	'api-keys-manager',
 	[
 		'class'           => 'dg g-7 p-7',
 		'x-data'          => '',
-		'@submit.prevent' => "\$ajax('post/create')",
+		'@submit.prevent' => '$ajax("post/create")',
 	],
 	[
 		[
@@ -29,7 +29,7 @@ return \Expansa\Facades\Form::enqueue(
 			'fields'        => [
 				[
 					'type'        => 'text',
-					'name'        => 'app-name',
+					'name'        => 'title',
 					'label'       => t( 'App name' ),
 					'class'       => '',
 					'label_class' => '',
@@ -60,9 +60,7 @@ return \Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [
-						'value' => '',
-					],
+					'attributes'  => [],
 					'options'     => [
 						'publish' => t( 'Active' ),
 						'draft'   => t( 'Disabled' ),
@@ -172,21 +170,22 @@ return \Expansa\Facades\Form::enqueue(
 			],
 		],
 		[
-			'type'        => 'url',
+			'type'        => 'textarea',
 			'name'        => 'sites',
-			'label'       => t( 'Allowed websites' ),
+			'label'       => t( 'Allowed website' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'The list of sites from which it is allowed to accept requests. Empty, so everyone is allowed.' ),
+			'instruction' => t( 'Site domain from which it is allowed to accept requests. Empty, so everyone is allowed.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
 				'value'       => '',
+                'rows'        => 1,
 				'placeholder' => 'e.g: https://google.com',
 			],
 		],
@@ -196,7 +195,7 @@ return \Expansa\Facades\Form::enqueue(
 				?>
 				<div class="df jcsb g-2">
 					<button type="button" class="btn btn--outline" @click="$dialog.close()"><?php echo t( 'Cancel' ); ?></button>
-					<button type="submit" class="btn btn--primary" :disabled="appName === ''">
+					<button type="submit" class="btn btn--primary" disabled :disabled="title === ''">
 						<i class="ph ph-plug"></i> <?php echo t( 'Save project' ); ?>
 					</button>
 				</div>

@@ -155,7 +155,7 @@
     align-items: center;
     font-weight: 500;
     white-space: nowrap;
-    color: var(--expansa-secondary);
+    color: var(--expansa-text-secondary);
 
     &:hover,
     &.active {
@@ -257,7 +257,7 @@
       height: auto;
       padding: 0.4rem 0.8rem;
       width: 100%;
-      border-radius: var(--expansa-border-radius-lg);
+      border-radius: var(--expansa-border-radius--lg);
 
       &:after {
         content: none;
@@ -357,7 +357,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--expansa-secondary);
+  color: var(--expansa-text-secondary);
   text-align: center;
   text-transform: uppercase;
   vertical-align: bottom;
@@ -443,7 +443,7 @@
 }
 
 .badge {
-  color: var(--expansa-secondary);
+  color: var(--expansa-text-secondary);
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;
@@ -508,7 +508,7 @@
       border: 1px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
-      color: var(--expansa-secondary);
+      color: var(--expansa-text-secondary);
       position: absolute;
       width: 1em;
       height: 1em;
@@ -787,7 +787,7 @@
     gap: 0.5rem;
     grid-template-columns: repeat(1, 1fr) !important;
     padding: 1rem 1rem 0.85rem;
-    border-radius: var(--expansa-border-radius-lg);
+    border-radius: var(--expansa-border-radius--lg);
     position: relative;
     top: 0;
     transition: box-shadow 0.25s;

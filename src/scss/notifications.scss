@@ -25,7 +25,6 @@
     width: fit-content;
     max-width: 22rem;
     position: relative;
-    right: 1rem;
     padding-top: 0.2rem;
 
     &.init {
@@ -43,7 +42,7 @@
     line-height: 1.3em;
     background-color: var(--expansa-white, #FFFFFF);
     border: 1px solid var(--expansa-border, #DFE2E3);
-    border-radius: var(--expansa-border-radius-xl, 0.5rem);
+    border-radius: var(--expansa-border-radius--xl, 0.5rem);
     box-shadow: 0 3px 3px -3px rgba(0, 0, 0, .1);
     align-items: flex-start;
     display: flex;

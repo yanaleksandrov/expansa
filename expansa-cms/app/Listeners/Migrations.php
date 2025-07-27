@@ -24,7 +24,8 @@ final class Migrations
     public function createPostsTable(string $postType): void
     {
         Schema::create($postType, function (Table $table) {
-            $statuses = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
+            $statuses   = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
+            $discussion = ['open', 'closed'];
 
             $table->id();
             $table->text('title');
@@ -35,7 +36,7 @@ final class Migrations
             $table->smallInt('views')->unsigned()->default(0);
             $table->mediumInt('position')->unsigned()->default(0);
             $table->enum('status', $statuses)->default('pending');
-            $table->bool('discussable')->default(1);
+            $table->enum('discussion', $discussion)->default('open');
             $table->string('password', 255);
             $table->timestamps();
 
@@ -83,7 +84,7 @@ final class Migrations
             $table->id();
             $table->bigInt('entity_id')->unsigned();
             $table->string('entity_table', 255);
-            $table->ulid()->unique();
+            $table->uuid()->unique();
             $table->string('slug', 255);
             //$table->string('locale', 10)->nullable()->default(null);
 
@@ -113,7 +114,7 @@ final class Migrations
     {
         Schema::create('users', function (Table $table) {
             $table->id();
-            $table->ulid()->unique();
+            $table->uuid()->unique();
             $table->string('login', 60)->unique();
             $table->string('password', 255);
             $table->string('nicename', 60);

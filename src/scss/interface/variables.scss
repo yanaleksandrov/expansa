@@ -8,19 +8,22 @@
   --expansa-bg-active: rgba(134, 134, 134, 0.06);
   --expansa-bg-light: rgba(255, 255, 255, 0.85);
 
-  --expansa-secondary: #5f6873;
   --expansa-info: #1871ba;
   --expansa-warning: #f76707;
   --expansa-error: #d63939;
   --expansa-dark: #1e1e1e;
+  --expansa-text-secondary: #5f6873;
   --expansa-text-muted: #71777F;
   --expansa-placeholder: #9aa0a9;
 
   --expansa-border: #dfe2e3;
   --expansa-border-hover: #ccced3;
+
+  --expansa-border-radius--xs: 0.275rem;
+  --expansa-border-radius--sm: 0.35rem;
   --expansa-border-radius: 0.4rem;
-  --expansa-border-radius-lg: 0.5rem;
-  --expansa-border-radius-xl: 0.6rem;
+  --expansa-border-radius--lg: 0.5rem;
+  --expansa-border-radius--xl: 0.625rem;
 
   --expansa-box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
 
@@ -32,13 +35,17 @@
   --expansa-primary-hover: #1867ea;
   --expansa-primary-active: #004fd1;
 
+  --expansa-secondary: #1e1e1e;
+  --expansa-secondary-hover: #3a3a3a;
+  --expansa-secondary-active: #000000;
+
   --expansa-success: #39b64d;
   --expansa-success-hover: #51c263;
   --expansa-success-active: #2eae43;
 
-  --expansa-danger: #d63939;
-  --expansa-danger-hover: #d85757;
-  --expansa-danger-active: #c32e2e;
+  --expansa-danger: #cb2c2c;
+  --expansa-danger-hover: #d32828;
+  --expansa-danger-active: #b52020;
 
   --expansa-font-text: system-ui;
   --expansa-font-code: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Ubuntu Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;

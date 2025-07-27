@@ -1,156 +1,221 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\Http;
 
-use Expansa\Http\Cookie\Jar;
-use Expansa\Http\Exception\HttpException;
-use Expansa\Http\Exception\HttpStatuses;
-use Expansa\Http\Response\Headers;
+use Expansa\Http\Contracts\Request as RequestContract;
+use Expansa\Http\Contracts\Response as ResponseContract;
+use Expansa\Cookie\Cookie;
 
-/**
- * HTTP response class
- * Contains a response from Requests::request()
- *
- * @package Expansa\Http
- */
-class Response
+class Response implements ResponseContract
 {
-    /**
-     * Response body
-     *
-     * @var string
-     */
-    public string $body = '';
+    protected string $version = '1.1';
 
-    /**
-     * Raw HTTP data from the transport
-     *
-     * @var string
-     */
-    public string $raw = '';
+    protected string $charset = 'utf-8';
 
-    /**
-     * Headers, as an associative array
-     *
-     * @var Headers|array Array-like object representing headers
-     */
-    public Headers|array $headers = [];
+    protected array $cookies = [];
 
-    /**
-     * Status code, false if non-blocking
-     *
-     * @var int|bool
-     */
-    public int|bool $statusCode = false;
+    protected array $headers = [];
 
-    /**
-     * Protocol version, false if non-blocking
-     *
-     * @var float|bool
-     */
-    public float|bool $protocolVersion = false;
+    protected int $statusCode = 200;
 
-    /**
-     * Whether the request succeeded or not
-     *
-     * @var bool
-     */
-    public bool $success = false;
+    protected string $statusText = '';
 
-    /**
-     * Number of redirects the request used
-     *
-     * @var int
-     */
-    public int $redirects = 0;
+    protected ?string $content = null;
 
-    /**
-     * URL requested
-     *
-     * @var string
-     */
-    public string $url = '';
-
-    /**
-     * Previous requests (from redirects)
-     *
-     * @var array Array of Response objects
-     */
-    public array $history = [];
-
-    /**
-     * Cookies from the request
-     *
-     * @var Jar|array Array-like object representing a cookie jar
-     */
-    public Jar|array $cookies = [];
-
-    /**
-     * Constructor
-     */
-    public function __construct()
+    public function __construct(string $content = '', int $statusCode = 200, array $headers = [])
     {
-        $this->headers = new Headers();
-        $this->cookies = new Jar();
+        $this->setContent($content)
+             ->setStatusCode($statusCode)
+             ->setHeaders($headers);
     }
 
-    /**
-     * Is the response a redirect?
-     *
-     * @return bool True if redirect (3xx status), false if not.
-     */
-    public function isRedirect(): bool
+    public function setStatusCode(int $statusCode): static
     {
-        $code = $this->statusCode;
-        return is_int($code) && (in_array($code, [300, 301, 302, 303, 307], true) || ($code > 307 && $code < 400));
+        $this->statusCode = $statusCode;
+
+        return $this;
     }
 
-    /**
-     * Throws an exception if the request was not successful
-     *
-     * @param bool $allowRedirects Set false to throw on a 3xx as well
-     * @throws HttpException If `$allowRedirects` is false, and code is 3xx (`response.no_redirects`)
-     * @throws HttpStatuses On non-successful status code. Exception class corresponds to "Status" + code.
-     */
-    public function throwForStatus(bool $allowRedirects = true): void
+    public function code(int $statusCode): static
     {
-        if ($this->isRedirect()) {
-            if ($allowRedirects !== true) {
-                throw new HttpException('Redirection not allowed', 'response.no_redirects', $this);
+        return $this->setStatusCode($statusCode);
+    }
+
+    public function setHeader(string $name, string $value): static
+    {
+        $this->headers[$name] = $value;
+
+        return $this;
+    }
+
+    public function header(string $name, string $value): static
+    {
+        return $this->setHeader($name, $value);
+    }
+
+    public function setHeaders(array $headers = []): static
+    {
+        $this->headers = array_merge($this->headers, $headers);
+
+        return $this;
+    }
+
+    public function withHeaders(array $headers = []): static
+    {
+        return $this->setHeaders($headers);
+    }
+
+    public function headers(array $headers = []): static
+    {
+        return $this->setHeaders($headers);
+    }
+
+    public function clearCookies(): void
+    {
+        $this->cookies = [];
+    }
+
+    public function getCookies(): array
+    {
+        return $this->cookies;
+    }
+
+    public function setCookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, string $sameSite = null): static
+    {
+        if (is_string($cookie)) {
+            $expires = ($minutes === 0) ? 0 : time() + ($minutes * 60);
+
+            $cookie = new Cookie($cookie, $value, $expires, $path, $domain, $secure, $httpOnly, $sameSite);
+        }
+
+        $this->cookies[] = $cookie;
+
+        return $this;
+    }
+
+    public function cookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, string $sameSite = null): static
+    {
+        return $this->setCookie($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
+    }
+
+    public function withoutCookie(Cookie|string $cookie, $path = null, $domain = null): static
+    {
+        if (is_string($cookie)) {
+            $cookie = new Cookie($cookie, '', -2628000, $path, $domain);
+        }
+
+        return $this->setCookie($cookie);
+    }
+
+    public function setContent(?string $content): static
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+
+    public function getContent(): string
+    {
+        return $this->content ?? '';
+    }
+
+    public function content(mixed $content = null): static|string|null
+    {
+        if (is_null($content)) {
+            return $this->getContent();
+        }
+
+        return $this->setContent($content);
+    }
+
+    public function json(array $data, int $statusCode = 200, array $headers = []): static
+    {
+        $this->content = json_encode($data, JSON_UNESCAPED_UNICODE);
+
+        $this->header('Content-Type', 'application/json');
+
+        return $this->setStatusCode($statusCode)->setHeaders($headers);
+    }
+
+    public function prepare(RequestContract $request): static
+    {
+        if ($request->isMethod('HEAD')) {
+            $this->setContent(null);
+        }
+
+        return $this;
+    }
+
+    public function send(): static
+    {
+        $this->sendHeaders()->sendContent();
+
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();
+        } elseif (!in_array(PHP_SAPI, ['cli', 'phpdbg'], true)) {
+            static::closeOutputBuffers(0, true);
+        }
+
+        return $this;
+    }
+
+    protected function sendHeaders(): static
+    {
+        // headers have already been sent by the developer
+        if (headers_sent()) {
+            return $this;
+        }
+
+        // headers
+        foreach ($this->headers as $name => $value) {
+            if (strtolower($name) == 'content-type') {
+                header($name . ': ' . $value . '; charset=' . $this->charset, false, $this->statusCode);
+            } else {
+                header($name . ': ' . $value, false, $this->statusCode);
             }
-        } elseif (!$this->success) {
-            $exception = HttpStatuses::getClass($this->statusCode);
-            throw new $exception(null, $this);
+        }
+
+        foreach ($this->cookies as $cookie) {
+            header("Set-Cookie: " . (string) $cookie, false, $this->statusCode);
+        }
+
+        header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode);
+
+        return $this;
+    }
+
+    protected function sendContent(): static
+    {
+        echo $this->getContent();
+
+        return $this;
+    }
+
+    public static function closeOutputBuffers(int $targetLevel, bool $flush): void
+    {
+        $status = ob_get_status(true);
+        $level  = count($status);
+        $flags  = PHP_OUTPUT_HANDLER_REMOVABLE | ($flush ? PHP_OUTPUT_HANDLER_FLUSHABLE : PHP_OUTPUT_HANDLER_CLEANABLE);
+
+        while ($level-- > $targetLevel && ($s = $status[$level]) && (!isset($s['del']) ? !isset($s['flags']) || ($s['flags'] & $flags) === $flags : $s['del'])) {
+            if ($flush) {
+                ob_end_flush();
+                flush();
+            } else {
+                ob_end_clean();
+            }
         }
     }
 
-    /**
-     * JSON decode the response body.
-     * The method parameters are the same as those for the PHP native `json_decode()` function.
-     *
-     * @link https://php.net/json-decode
-     * @param bool|null $associative Optional. When `true`, JSON objects will be returned as associative arrays;
-     *                               When `false`, JSON objects will be returned as objects.
-     *                               When `null`, JSON objects will be returned as associative arrays
-     *                               or objects depending on whether `JSON_OBJECT_AS_ARRAY` is set in the flags.
-     *                               Defaults to `true` (in contrast to the PHP native default of `null`).
-     * @param int       $depth       Optional. Maximum nesting depth of the structure being decoded.
-     *                               Defaults to `512`.
-     * @param int       $options     Optional. Bitmask of JSON_BIGINT_AS_STRING, JSON_INVALID_UTF8_IGNORE,
-     *                               JSON_INVALID_UTF8_SUBSTITUTE, JSON_OBJECT_AS_ARRAY, JSON_THROW_ON_ERROR.
-     *                               Defaults to `0` (no options set).
-     * @return array
-     * @throws HttpException If `$this->body` is not valid json.
-     */
-    public function decodeBody(bool|null $associative = true, int $depth = 512, int $options = 0): array
+    public function isRedirect(string $location = null): bool
     {
-        $data = json_decode($this->body, $associative, $depth, $options);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            $last_error = json_last_error_msg();
-            throw new HttpException('Unable to parse JSON data: ' . $last_error, 'response.invalid', $this);
-        }
-
-        return $data;
+        return in_array(
+            $this->statusCode,
+            [201, 301, 302, 303, 307, 308]
+        ) && (null === $location || $location == ($this->headers['Location'] ?? null));
     }
 }

@@ -65,7 +65,7 @@
             if (!el._x_effects) {
                 el._x_effects = new Set;
                 el._x_runEffects = () => {
-                    el._x_effects.forEach((i => i()));
+                    el._x_effects.forEach(i => i());
                 };
             }
             el._x_effects.add(effectReference);
@@ -83,19 +83,19 @@
     function watch(getter, callback) {
         let firstTime = true;
         let oldValue;
-        let effectReference = effect((() => {
+        let effectReference = effect(() => {
             let value = getter();
             JSON.stringify(value);
             if (!firstTime) {
-                queueMicrotask((() => {
+                queueMicrotask(() => {
                     callback(value, oldValue);
                     oldValue = value;
-                }));
+                });
             } else {
                 oldValue = value;
             }
             firstTime = false;
-        }));
+        });
         return () => release(effectReference);
     }
     var onAttributeAddeds = [];
@@ -123,12 +123,12 @@
     }
     function cleanupAttributes(el, names) {
         if (!el._x_attributeCleanups) return;
-        Object.entries(el._x_attributeCleanups).forEach((([name, value]) => {
+        Object.entries(el._x_attributeCleanups).forEach(([name, value]) => {
             if (names === void 0 || names.includes(name)) {
-                value.forEach((i => i()));
+                value.forEach(i => i());
                 delete el._x_attributeCleanups[name];
             }
-        }));
+        });
     }
     function cleanupElement(el) {
         if (el._x_cleanups) {
@@ -154,13 +154,13 @@
     var queuedMutations = [];
     function flushObserver() {
         let records = observer.takeRecords();
-        queuedMutations.push((() => records.length > 0 && onMutate(records)));
+        queuedMutations.push(() => records.length > 0 && onMutate(records));
         let queueLengthWhenTriggered = queuedMutations.length;
-        queueMicrotask((() => {
+        queueMicrotask(() => {
             if (queuedMutations.length === queueLengthWhenTriggered) {
                 while (queuedMutations.length > 0) queuedMutations.shift()();
             }
-        }));
+        });
     }
     function mutateDom(callback) {
         if (!currentlyObserving) return callback();
@@ -191,8 +191,8 @@
         for (let i = 0; i < mutations.length; i++) {
             if (mutations[i].target._x_ignoreMutationObserver) continue;
             if (mutations[i].type === 'childList') {
-                mutations[i].addedNodes.forEach((node => node.nodeType === 1 && addedNodes.add(node)));
-                mutations[i].removedNodes.forEach((node => node.nodeType === 1 && removedNodes.add(node)));
+                mutations[i].addedNodes.forEach(node => node.nodeType === 1 && addedNodes.add(node));
+                mutations[i].removedNodes.forEach(node => node.nodeType === 1 && removedNodes.add(node));
             }
             if (mutations[i].type === 'attributes') {
                 let el = mutations[i].target;
@@ -219,33 +219,33 @@
                 }
             }
         }
-        removedAttributes.forEach(((attrs, el) => {
+        removedAttributes.forEach((attrs, el) => {
             cleanupAttributes(el, attrs);
-        }));
-        addedAttributes.forEach(((attrs, el) => {
-            onAttributeAddeds.forEach((i => i(el, attrs)));
-        }));
+        });
+        addedAttributes.forEach((attrs, el) => {
+            onAttributeAddeds.forEach(i => i(el, attrs));
+        });
         for (let node of removedNodes) {
             if (addedNodes.has(node)) continue;
-            onElRemoveds.forEach((i => i(node)));
+            onElRemoveds.forEach(i => i(node));
         }
-        addedNodes.forEach((node => {
+        addedNodes.forEach(node => {
             node._x_ignoreSelf = true;
             node._x_ignore = true;
-        }));
+        });
         for (let node of addedNodes) {
             if (removedNodes.has(node)) continue;
             if (!node.isConnected) continue;
             delete node._x_ignoreSelf;
             delete node._x_ignore;
-            onElAddeds.forEach((i => i(node)));
+            onElAddeds.forEach(i => i(node));
             node._x_ignore = true;
             node._x_ignoreSelf = true;
         }
-        addedNodes.forEach((node => {
+        addedNodes.forEach(node => {
             delete node._x_ignoreSelf;
             delete node._x_ignore;
-        }));
+        });
         addedNodes = null;
         removedNodes = null;
         addedAttributes = null;
@@ -257,7 +257,7 @@
     function addScopeToNode(node, data2, referenceNode) {
         node._x_dataStack = [ data2, ...closestDataStack(referenceNode || node) ];
         return () => {
-            node._x_dataStack = node._x_dataStack.filter((i => i !== data2));
+            node._x_dataStack = node._x_dataStack.filter(i => i !== data2);
         };
     }
     function closestDataStack(node) {
@@ -277,18 +277,18 @@
     }
     var mergeProxyTrap = {
         ownKeys({objects}) {
-            return Array.from(new Set(objects.flatMap((i => Object.keys(i)))));
+            return Array.from(new Set(objects.flatMap(i => Object.keys(i))));
         },
         has({objects}, name) {
             if (name == Symbol.unscopables) return false;
-            return objects.some((obj => Object.prototype.hasOwnProperty.call(obj, name) || Reflect.has(obj, name)));
+            return objects.some(obj => Object.prototype.hasOwnProperty.call(obj, name) || Reflect.has(obj, name));
         },
         get({objects}, name, thisProxy) {
             if (name == 'toJSON') return collapseProxies;
-            return Reflect.get(objects.find((obj => Reflect.has(obj, name))) || {}, name, thisProxy);
+            return Reflect.get(objects.find(obj => Reflect.has(obj, name)) || {}, name, thisProxy);
         },
         set({objects}, name, value, thisProxy) {
-            const target = objects.find((obj => Object.prototype.hasOwnProperty.call(obj, name))) || objects[objects.length - 1];
+            const target = objects.find(obj => Object.prototype.hasOwnProperty.call(obj, name)) || objects[objects.length - 1];
             const descriptor = Object.getOwnPropertyDescriptor(target, name);
             if (descriptor?.set && descriptor?.get) return Reflect.set(target, name, value, thisProxy);
             return Reflect.set(target, name, value);
@@ -296,15 +296,15 @@
     };
     function collapseProxies() {
         let keys = Reflect.ownKeys(this);
-        return keys.reduce(((acc, key) => {
+        return keys.reduce((acc, key) => {
             acc[key] = Reflect.get(this, key);
             return acc;
-        }), {});
+        }, {});
     }
     function initInterceptors(data2) {
         let isObject2 = val => typeof val === 'object' && !Array.isArray(val) && val !== null;
         let recurse = (obj, basePath = '') => {
-            Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach((([key, {value, enumerable}]) => {
+            Object.entries(Object.getOwnPropertyDescriptors(obj)).forEach(([key, {value, enumerable}]) => {
                 if (enumerable === false || value === void 0) return;
                 if (typeof value === 'object' && value !== null && value.__v_skip) return;
                 let path = basePath === '' ? key : `${basePath}.${key}`;
@@ -315,7 +315,7 @@
                         recurse(value, path);
                     }
                 }
-            }));
+            });
         };
         return recurse(data2);
     }
@@ -324,7 +324,7 @@
             initialValue: void 0,
             _x_interceptor: true,
             initialize(data2, path, key) {
-                return callback(this.initialValue, (() => get(data2, path)), (value => set(data2, path, value)), path, key);
+                return callback(this.initialValue, () => get(data2, path), value => set(data2, path, value), path, key);
             }
         };
         mutateObj(obj);
@@ -343,7 +343,7 @@
         };
     }
     function get(obj, path) {
-        return path.split('.').reduce(((carry, segment) => carry[segment]), obj);
+        return path.split('.').reduce((carry, segment) => carry[segment], obj);
     }
     function set(obj, path, value) {
         if (typeof path === 'string') path = path.split('.');
@@ -359,7 +359,7 @@
         magics[name] = callback;
     }
     function injectMagics(obj, el) {
-        Object.entries(magics).forEach((([name, callback]) => {
+        Object.entries(magics).forEach(([name, callback]) => {
             let memoizedUtilities = null;
             function getUtilities() {
                 if (memoizedUtilities) {
@@ -380,7 +380,7 @@
                 },
                 enumerable: false
             });
-        }));
+        });
         return obj;
     }
     function tryCatch(el, expression, callback, ...args) {
@@ -398,9 +398,9 @@
             expression
         });
         console.warn(`Alpine Expression Error: ${error2.message}\n\n${expression ? 'Expression: "' + expression + '"\n\n' : ''}`, el);
-        setTimeout((() => {
+        setTimeout(() => {
             throw error2;
-        }), 0);
+        }, 0);
     }
     var shouldAutoEvaluateFunctions = true;
     function dontAutoEvaluateFunctions(callback) {
@@ -412,7 +412,7 @@
     }
     function evaluate(el, expression, extras = {}) {
         let result;
-        evaluateLater(el, expression)((value => result = value), extras);
+        evaluateLater(el, expression)(value => result = value, extras);
         return result;
     }
     function evaluateLater(...args) {
@@ -440,7 +440,7 @@
         if (evaluatorMemo[expression]) {
             return evaluatorMemo[expression];
         }
-        let AsyncFunction = Object.getPrototypeOf((async function() {})).constructor;
+        let AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
         let rightSideSafeExpression = /^[\n\s]*if.*\(.*\)/.test(expression.trim()) || /^(let|const)\s/.test(expression.trim()) ? `(async()=>{ ${expression} })()` : expression;
         const safeAsyncFunction = () => {
             try {
@@ -465,14 +465,14 @@
             func.finished = false;
             let completeScope = mergeProxies([ scope2, ...dataStack ]);
             if (typeof func === 'function') {
-                let promise = func(func, completeScope).catch((error2 => handleError(error2, el, expression)));
+                let promise = func(func, completeScope).catch(error2 => handleError(error2, el, expression));
                 if (func.finished) {
                     runIfTypeOfFunction(receiver, func.result, completeScope, params, el);
                     func.result = void 0;
                 } else {
-                    promise.then((result => {
+                    promise.then(result => {
                         runIfTypeOfFunction(receiver, result, completeScope, params, el);
-                    })).catch((error2 => handleError(error2, el, expression))).finally((() => func.result = void 0));
+                    }).catch(error2 => handleError(error2, el, expression)).finally(() => func.result = void 0);
                 }
             }
         };
@@ -481,12 +481,12 @@
         if (shouldAutoEvaluateFunctions && typeof value === 'function') {
             let result = value.apply(scope2, params);
             if (result instanceof Promise) {
-                result.then((i => runIfTypeOfFunction(receiver, i, scope2, params))).catch((error2 => handleError(error2, el, value)));
+                result.then(i => runIfTypeOfFunction(receiver, i, scope2, params)).catch(error2 => handleError(error2, el, value));
             } else {
                 receiver(result);
             }
         } else if (typeof value === 'object' && value instanceof Promise) {
-            value.then((i => receiver(i)));
+            value.then(i => receiver(i));
         } else {
             receiver(value);
         }
@@ -518,28 +518,28 @@
     function directives(el, attributes, originalAttributeOverride) {
         attributes = Array.from(attributes);
         if (el._x_virtualDirectives) {
-            let vAttributes = Object.entries(el._x_virtualDirectives).map((([name, value]) => ({
+            let vAttributes = Object.entries(el._x_virtualDirectives).map(([name, value]) => ({
                 name,
                 value
-            })));
+            }));
             let staticAttributes = attributesOnly(vAttributes);
-            vAttributes = vAttributes.map((attribute => {
-                if (staticAttributes.find((attr => attr.name === attribute.name))) {
+            vAttributes = vAttributes.map(attribute => {
+                if (staticAttributes.find(attr => attr.name === attribute.name)) {
                     return {
                         name: `x-bind:${attribute.name}`,
                         value: `"${attribute.value}"`
                     };
                 }
                 return attribute;
-            }));
+            });
             attributes = attributes.concat(vAttributes);
         }
         let transformedAttributeMap = {};
-        let directives2 = attributes.map(toTransformedAttributes(((newName, oldName) => transformedAttributeMap[newName] = oldName))).filter(outNonAlpineAttributes).map(toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort(byPriority);
-        return directives2.map((directive2 => getDirectiveHandler(el, directive2)));
+        let directives2 = attributes.map(toTransformedAttributes((newName, oldName) => transformedAttributeMap[newName] = oldName)).filter(outNonAlpineAttributes).map(toParsedDirectives(transformedAttributeMap, originalAttributeOverride)).sort(byPriority);
+        return directives2.map(directive2 => getDirectiveHandler(el, directive2));
     }
     function attributesOnly(attributes) {
-        return Array.from(attributes).map(toTransformedAttributes()).filter((attr => !outNonAlpineAttributes(attr)));
+        return Array.from(attributes).map(toTransformedAttributes()).filter(attr => !outNonAlpineAttributes(attr));
     }
     var isDeferringHandlers = false;
     var directiveHandlerStacks = new Map;
@@ -572,7 +572,7 @@
             evaluateLater: evaluateLater.bind(evaluateLater, el),
             evaluate: evaluate.bind(evaluate, el)
         };
-        let doCleanup = () => cleanups.forEach((i => i()));
+        let doCleanup = () => cleanups.forEach(i => i());
         return [ utilities, doCleanup ];
     }
     function getDirectiveHandler(el, directive2) {
@@ -599,7 +599,7 @@
     var into = i => i;
     function toTransformedAttributes(callback = () => {}) {
         return ({name, value}) => {
-            let {name: newName, value: newValue} = attributeTransformers.reduce(((carry, transform) => transform(carry)), {
+            let {name: newName, value: newValue} = attributeTransformers.reduce((carry, transform) => transform(carry), {
                 name,
                 value
             });
@@ -627,7 +627,7 @@
             return {
                 type: typeMatch ? typeMatch[1] : null,
                 value: valueMatch ? valueMatch[1] : null,
-                modifiers: modifiers.map((i => i.replace('.', ''))),
+                modifiers: modifiers.map(i => i.replace('.', '')),
                 expression: value,
                 original
             };
@@ -650,11 +650,11 @@
     }
     function walk(el, callback) {
         if (typeof ShadowRoot === 'function' && el instanceof ShadowRoot) {
-            Array.from(el.children).forEach((el2 => walk(el2, callback)));
+            Array.from(el.children).forEach(el2 => walk(el2, callback));
             return;
         }
         let skip = false;
-        callback(el, (() => skip = true));
+        callback(el, () => skip = true);
         if (skip) return;
         let node = el.firstElementChild;
         while (node) {
@@ -673,27 +673,27 @@
         dispatch(document, 'alpine:init');
         dispatch(document, 'alpine:initializing');
         startObservingMutations();
-        onElAdded((el => initTree(el, walk)));
-        onElRemoved((el => destroyTree(el)));
-        onAttributesAdded(((el, attrs) => {
-            directives(el, attrs).forEach((handle => handle()));
-        }));
+        onElAdded(el => initTree(el, walk));
+        onElRemoved(el => destroyTree(el));
+        onAttributesAdded((el, attrs) => {
+            directives(el, attrs).forEach(handle => handle());
+        });
         let outNestedComponents = el => !closestRoot(el.parentElement, true);
-        Array.from(document.querySelectorAll(allSelectors().join(','))).filter(outNestedComponents).forEach((el => {
+        Array.from(document.querySelectorAll(allSelectors().join(','))).filter(outNestedComponents).forEach(el => {
             initTree(el);
-        }));
+        });
         dispatch(document, 'alpine:initialized');
-        setTimeout((() => {
+        setTimeout(() => {
             warnAboutMissingPlugins();
-        }));
+        });
     }
     var rootSelectorCallbacks = [];
     var initSelectorCallbacks = [];
     function rootSelectors() {
-        return rootSelectorCallbacks.map((fn => fn()));
+        return rootSelectorCallbacks.map(fn => fn());
     }
     function allSelectors() {
-        return rootSelectorCallbacks.concat(initSelectorCallbacks).map((fn => fn()));
+        return rootSelectorCallbacks.concat(initSelectorCallbacks).map(fn => fn());
     }
     function addRootSelector(selectorCallback) {
         rootSelectorCallbacks.push(selectorCallback);
@@ -702,10 +702,10 @@
         initSelectorCallbacks.push(selectorCallback);
     }
     function closestRoot(el, includeInitSelectors = false) {
-        return findClosest(el, (element => {
+        return findClosest(el, element => {
             const selectors = includeInitSelectors ? allSelectors() : rootSelectors();
-            if (selectors.some((selector => element.matches(selector)))) return true;
-        }));
+            if (selectors.some(selector => element.matches(selector))) return true;
+        });
     }
     function findClosest(el, callback) {
         if (!el) return;
@@ -715,54 +715,54 @@
         return findClosest(el.parentElement, callback);
     }
     function isRoot(el) {
-        return rootSelectors().some((selector => el.matches(selector)));
+        return rootSelectors().some(selector => el.matches(selector));
     }
     var initInterceptors2 = [];
     function interceptInit(callback) {
         initInterceptors2.push(callback);
     }
     function initTree(el, walker = walk, intercept = () => {}) {
-        deferHandlingDirectives((() => {
-            walker(el, ((el2, skip) => {
+        deferHandlingDirectives(() => {
+            walker(el, (el2, skip) => {
                 intercept(el2, skip);
-                initInterceptors2.forEach((i => i(el2, skip)));
-                directives(el2, el2.attributes).forEach((handle => handle()));
+                initInterceptors2.forEach(i => i(el2, skip));
+                directives(el2, el2.attributes).forEach(handle => handle());
                 el2._x_ignore && skip();
-            }));
-        }));
+            });
+        });
     }
     function destroyTree(root, walker = walk) {
-        walker(root, (el => {
+        walker(root, el => {
             cleanupAttributes(el);
             cleanupElement(el);
-        }));
+        });
     }
     function warnAboutMissingPlugins() {
         let pluginDirectives = [ [ 'ui', 'dialog', [ '[x-dialog], [x-popover]' ] ], [ 'anchor', 'anchor', [ '[x-anchor]' ] ], [ 'sort', 'sort', [ '[x-sort]' ] ] ];
-        pluginDirectives.forEach((([plugin2, directive2, selectors]) => {
+        pluginDirectives.forEach(([plugin2, directive2, selectors]) => {
             if (directiveExists(directive2)) return;
-            selectors.some((selector => {
+            selectors.some(selector => {
                 if (document.querySelector(selector)) {
                     warn(`found "${selector}", but missing ${plugin2} plugin`);
                     return true;
                 }
-            }));
-        }));
+            });
+        });
     }
     var tickStack = [];
     var isHolding = false;
     function nextTick(callback = () => {}) {
-        queueMicrotask((() => {
-            isHolding || setTimeout((() => {
+        queueMicrotask(() => {
+            isHolding || setTimeout(() => {
                 releaseNextTicks();
-            }));
-        }));
-        return new Promise((res => {
-            tickStack.push((() => {
+            });
+        });
+        return new Promise(res => {
+            tickStack.push(() => {
                 callback();
                 res();
-            }));
-        }));
+            });
+        });
     }
     function releaseNextTicks() {
         isHolding = false;
@@ -783,7 +783,7 @@
     }
     function setClassesFromString(el, classString) {
         let split = classString2 => classString2.split(' ').filter(Boolean);
-        let missingClasses = classString2 => classString2.split(' ').filter((i => !el.classList.contains(i))).filter(Boolean);
+        let missingClasses = classString2 => classString2.split(' ').filter(i => !el.classList.contains(i)).filter(Boolean);
         let addClassesAndReturnUndo = classes => {
             el.classList.add(...classes);
             return () => {
@@ -795,25 +795,25 @@
     }
     function setClassesFromObject(el, classObject) {
         let split = classString => classString.split(' ').filter(Boolean);
-        let forAdd = Object.entries(classObject).flatMap((([classString, bool]) => bool ? split(classString) : false)).filter(Boolean);
-        let forRemove = Object.entries(classObject).flatMap((([classString, bool]) => !bool ? split(classString) : false)).filter(Boolean);
+        let forAdd = Object.entries(classObject).flatMap(([classString, bool]) => bool ? split(classString) : false).filter(Boolean);
+        let forRemove = Object.entries(classObject).flatMap(([classString, bool]) => !bool ? split(classString) : false).filter(Boolean);
         let added = [];
         let removed = [];
-        forRemove.forEach((i => {
+        forRemove.forEach(i => {
             if (el.classList.contains(i)) {
                 el.classList.remove(i);
                 removed.push(i);
             }
-        }));
-        forAdd.forEach((i => {
+        });
+        forAdd.forEach(i => {
             if (!el.classList.contains(i)) {
                 el.classList.add(i);
                 added.push(i);
             }
-        }));
+        });
         return () => {
-            removed.forEach((i => el.classList.add(i)));
-            added.forEach((i => el.classList.remove(i)));
+            removed.forEach(i => el.classList.add(i));
+            added.forEach(i => el.classList.remove(i));
         };
     }
     function setStyles(el, value) {
@@ -824,18 +824,18 @@
     }
     function setStylesFromObject(el, value) {
         let previousStyles = {};
-        Object.entries(value).forEach((([key, value2]) => {
+        Object.entries(value).forEach(([key, value2]) => {
             previousStyles[key] = el.style[key];
             if (!key.startsWith('--')) {
                 key = kebabCase(key);
             }
             el.style.setProperty(key, value2);
-        }));
-        setTimeout((() => {
+        });
+        setTimeout(() => {
             if (el.style.length === 0) {
                 el.removeAttribute('style');
             }
-        }));
+        });
         return () => {
             setStyles(el, previousStyles);
         };
@@ -861,7 +861,7 @@
             }
         };
     }
-    directive('transition', ((el, {value, modifiers, expression}, {evaluate: evaluate2}) => {
+    directive('transition', (el, {value, modifiers, expression}, {evaluate: evaluate2}) => {
         if (typeof expression === 'function') expression = evaluate2(expression);
         if (expression === false) return;
         if (!expression || typeof expression === 'boolean') {
@@ -869,7 +869,7 @@
         } else {
             registerTransitionsFromClassString(el, expression, value);
         }
-    }));
+    });
     function registerTransitionsFromClassString(el, classString, stage) {
         registerTransitionObject(el, setClasses, '');
         let directiveStorageMap = {
@@ -900,10 +900,10 @@
         let transitioningIn = doesntSpecify || modifiers.includes('in') || [ 'enter' ].includes(stage);
         let transitioningOut = doesntSpecify || modifiers.includes('out') || [ 'leave' ].includes(stage);
         if (modifiers.includes('in') && !doesntSpecify) {
-            modifiers = modifiers.filter(((i, index) => index < modifiers.indexOf('out')));
+            modifiers = modifiers.filter((i, index) => index < modifiers.indexOf('out'));
         }
         if (modifiers.includes('out') && !doesntSpecify) {
-            modifiers = modifiers.filter(((i, index) => index > modifiers.indexOf('out')));
+            modifiers = modifiers.filter((i, index) => index > modifiers.indexOf('out'));
         }
         let wantsAll = !modifiers.includes('opacity') && !modifiers.includes('scale');
         let wantsOpacity = wantsAll || modifiers.includes('opacity');
@@ -990,31 +990,31 @@
             }
             return;
         }
-        el._x_hidePromise = el._x_transition ? new Promise(((resolve, reject) => {
-            el._x_transition.out((() => {}), (() => resolve(hide)));
-            el._x_transitioning && el._x_transitioning.beforeCancel((() => reject({
+        el._x_hidePromise = el._x_transition ? new Promise((resolve, reject) => {
+            el._x_transition.out(() => {}, () => resolve(hide));
+            el._x_transitioning && el._x_transitioning.beforeCancel(() => reject({
                 isFromCancelledTransition: true
-            })));
-        })) : Promise.resolve(hide);
-        queueMicrotask((() => {
+            }));
+        }) : Promise.resolve(hide);
+        queueMicrotask(() => {
             let closest = closestHide(el);
             if (closest) {
                 if (!closest._x_hideChildren) closest._x_hideChildren = [];
                 closest._x_hideChildren.push(el);
             } else {
-                nextTick2((() => {
+                nextTick2(() => {
                     let hideAfterChildren = el2 => {
-                        let carry = Promise.all([ el2._x_hidePromise, ...(el2._x_hideChildren || []).map(hideAfterChildren) ]).then((([i]) => i()));
+                        let carry = Promise.all([ el2._x_hidePromise, ...(el2._x_hideChildren || []).map(hideAfterChildren) ]).then(([i]) => i());
                         delete el2._x_hidePromise;
                         delete el2._x_hideChildren;
                         return carry;
                     };
-                    hideAfterChildren(el).catch((e => {
+                    hideAfterChildren(el).catch(e => {
                         if (!e.isFromCancelledTransition) throw e;
-                    }));
-                }));
+                    });
+                });
             }
-        }));
+        });
     };
     function closestHide(el) {
         let parent = el.parentNode;
@@ -1050,8 +1050,8 @@
     }
     function performTransition(el, stages) {
         let interrupted, reachedBefore, reachedEnd;
-        let finish = once((() => {
-            mutateDom((() => {
+        let finish = once(() => {
+            mutateDom(() => {
                 interrupted = true;
                 if (!reachedBefore) stages.before();
                 if (!reachedEnd) {
@@ -1061,45 +1061,45 @@
                 stages.after();
                 if (el.isConnected) stages.cleanup();
                 delete el._x_transitioning;
-            }));
-        }));
+            });
+        });
         el._x_transitioning = {
             beforeCancels: [],
             beforeCancel(callback) {
                 this.beforeCancels.push(callback);
             },
-            cancel: once((function() {
+            cancel: once(function() {
                 while (this.beforeCancels.length) {
                     this.beforeCancels.shift()();
                 }
                 finish();
-            })),
+            }),
             finish
         };
-        mutateDom((() => {
+        mutateDom(() => {
             stages.start();
             stages.during();
-        }));
+        });
         holdNextTicks();
-        requestAnimationFrame((() => {
+        requestAnimationFrame(() => {
             if (interrupted) return;
             let duration = Number(getComputedStyle(el).transitionDuration.replace(/,.*/, '').replace('s', '')) * 1e3;
             let delay = Number(getComputedStyle(el).transitionDelay.replace(/,.*/, '').replace('s', '')) * 1e3;
             if (duration === 0) duration = Number(getComputedStyle(el).animationDuration.replace('s', '')) * 1e3;
-            mutateDom((() => {
+            mutateDom(() => {
                 stages.before();
-            }));
+            });
             reachedBefore = true;
-            requestAnimationFrame((() => {
+            requestAnimationFrame(() => {
                 if (interrupted) return;
-                mutateDom((() => {
+                mutateDom(() => {
                     stages.end();
-                }));
+                });
                 releaseNextTicks();
                 setTimeout(el._x_transitioning.finish, duration + delay);
                 reachedEnd = true;
-            }));
-        }));
+            });
+        });
     }
     function modifierValue(modifiers, key, fallback) {
         if (modifiers.indexOf(key) === -1) return fallback;
@@ -1131,13 +1131,13 @@
         interceptors.push(callback);
     }
     function cloneNode(from, to) {
-        interceptors.forEach((i => i(from, to)));
+        interceptors.forEach(i => i(from, to));
         isCloning = true;
-        dontRegisterReactiveSideEffects((() => {
-            initTree(to, ((el, callback) => {
-                callback(el, (() => {}));
-            }));
-        }));
+        dontRegisterReactiveSideEffects(() => {
+            initTree(to, (el, callback) => {
+                callback(el, () => {});
+            });
+        });
         isCloning = false;
     }
     var isCloningLegacy = false;
@@ -1145,30 +1145,30 @@
         if (!newEl._x_dataStack) newEl._x_dataStack = oldEl._x_dataStack;
         isCloning = true;
         isCloningLegacy = true;
-        dontRegisterReactiveSideEffects((() => {
+        dontRegisterReactiveSideEffects(() => {
             cloneTree(newEl);
-        }));
+        });
         isCloning = false;
         isCloningLegacy = false;
     }
     function cloneTree(el) {
         let hasRunThroughFirstEl = false;
         let shallowWalker = (el2, callback) => {
-            walk(el2, ((el3, skip) => {
+            walk(el2, (el3, skip) => {
                 if (hasRunThroughFirstEl && isRoot(el3)) return skip();
                 hasRunThroughFirstEl = true;
                 callback(el3, skip);
-            }));
+            });
         };
         initTree(el, shallowWalker);
     }
     function dontRegisterReactiveSideEffects(callback) {
         let cache = effect;
-        overrideEffect(((callback2, el) => {
+        overrideEffect((callback2, el) => {
             let storedEffect = cache(callback2);
             release(storedEffect);
             return () => {};
-        }));
+        });
         callback();
         overrideEffect(cache);
     }
@@ -1218,7 +1218,7 @@
                 el.value = String(value);
             } else {
                 if (Array.isArray(value)) {
-                    el.checked = value.some((val => checkedAttrLooseCompare(val, el.value)));
+                    el.checked = value.some(val => checkedAttrLooseCompare(val, el.value));
                 } else {
                     el.checked = !!value;
                 }
@@ -1261,13 +1261,13 @@
         }
     }
     function updateSelect(el, value) {
-        const arrayWrappedValue = [].concat(value).map((value2 => value2 + ''));
-        Array.from(el.options).forEach((option => {
+        const arrayWrappedValue = [].concat(value).map(value2 => value2 + '');
+        Array.from(el.options).forEach(option => {
             option.selected = arrayWrappedValue.includes(option.value);
-        }));
+        });
     }
     function camelCase(subject) {
-        return subject.toLowerCase().replace(/-(\w)/g, ((match, char) => char.toUpperCase()));
+        return subject.toLowerCase().replace(/-(\w)/g, (match, char) => char.toUpperCase());
     }
     function checkedAttrLooseCompare(valueA, valueB) {
         return valueA == valueB;
@@ -1297,7 +1297,7 @@
         if (el._x_inlineBindings && el._x_inlineBindings[name] !== void 0) {
             let binding = el._x_inlineBindings[name];
             binding.extract = extract;
-            return dontAutoEvaluateFunctions((() => evaluate(el, binding.expression)));
+            return dontAutoEvaluateFunctions(() => evaluate(el, binding.expression));
         }
         return getAttributeBinding(el, name, fallback);
     }
@@ -1329,7 +1329,7 @@
             if (!inThrottle) {
                 func.apply(context, args);
                 inThrottle = true;
-                setTimeout((() => inThrottle = false), limit);
+                setTimeout(() => inThrottle = false, limit);
             }
         };
     }
@@ -1337,7 +1337,7 @@
         let firstRun = true;
         let outerHash;
         let innerHash;
-        let reference = effect((() => {
+        let reference = effect(() => {
             let outer = outerGet();
             let inner = innerGet();
             if (firstRun) {
@@ -1354,7 +1354,7 @@
             }
             outerHash = JSON.stringify(outerGet());
             innerHash = JSON.stringify(innerGet());
-        }));
+        });
         return () => {
             release(reference);
         };
@@ -1364,7 +1364,7 @@
     }
     function plugin(callback) {
         let callbacks = Array.isArray(callback) ? callback : [ callback ];
-        callbacks.forEach((i => i(alpine_default)));
+        callbacks.forEach(i => i(alpine_default));
     }
     var stores = {};
     var isReactive = false;
@@ -1396,36 +1396,36 @@
         return () => {};
     }
     function injectBindingProviders(obj) {
-        Object.entries(binds).forEach((([name, callback]) => {
+        Object.entries(binds).forEach(([name, callback]) => {
             Object.defineProperty(obj, name, {
                 get() {
                     return (...args) => callback(...args);
                 }
             });
-        }));
+        });
         return obj;
     }
     function applyBindingsObject(el, obj, original) {
         let cleanupRunners = [];
         while (cleanupRunners.length) cleanupRunners.pop()();
-        let attributes = Object.entries(obj).map((([name, value]) => ({
+        let attributes = Object.entries(obj).map(([name, value]) => ({
             name,
             value
-        })));
+        }));
         let staticAttributes = attributesOnly(attributes);
-        attributes = attributes.map((attribute => {
-            if (staticAttributes.find((attr => attr.name === attribute.name))) {
+        attributes = attributes.map(attribute => {
+            if (staticAttributes.find(attr => attr.name === attribute.name)) {
                 return {
                     name: `x-bind:${attribute.name}`,
                     value: `"${attribute.value}"`
                 };
             }
             return attribute;
-        }));
-        directives(el, attributes, original).map((handle => {
+        });
+        directives(el, attributes, original).map(handle => {
             cleanupRunners.push(handle.runCleanups);
             handle();
-        }));
+        });
         return () => {
             while (cleanupRunners.length) cleanupRunners.pop()();
         };
@@ -1435,14 +1435,14 @@
         datas[name] = callback;
     }
     function injectDataProviders(obj, context) {
-        Object.entries(datas).forEach((([name, callback]) => {
+        Object.entries(datas).forEach(([name, callback]) => {
             Object.defineProperty(obj, name, {
                 get() {
                     return (...args) => callback.bind(context)(...args);
                 },
                 enumerable: false
             });
-        }));
+        });
         return obj;
     }
     var Alpine = {
@@ -1543,11 +1543,11 @@
         };
     };
     var camelizeRE = /-(\w)/g;
-    var camelize = cacheStringFunction((str => str.replace(camelizeRE, ((_, c) => c ? c.toUpperCase() : ''))));
+    var camelize = cacheStringFunction(str => str.replace(camelizeRE, (_, c) => c ? c.toUpperCase() : ''));
     var hyphenateRE = /\B([A-Z])/g;
-    var hyphenate = cacheStringFunction((str => str.replace(hyphenateRE, '-$1').toLowerCase()));
-    var capitalize = cacheStringFunction((str => str.charAt(0).toUpperCase() + str.slice(1)));
-    var toHandlerKey = cacheStringFunction((str => str ? `on${capitalize(str)}` : ``));
+    var hyphenate = cacheStringFunction(str => str.replace(hyphenateRE, '-$1').toLowerCase());
+    var capitalize = cacheStringFunction(str => str.charAt(0).toUpperCase() + str.slice(1));
+    var toHandlerKey = cacheStringFunction(str => str ? `on${capitalize(str)}` : ``);
     var hasChanged = (value, oldValue) => value !== oldValue && (value === value || oldValue === oldValue);
     var targetMap = new WeakMap;
     var effectStack = [];
@@ -1661,21 +1661,21 @@
         const effects = new Set;
         const add2 = effectsToAdd => {
             if (effectsToAdd) {
-                effectsToAdd.forEach((effect3 => {
+                effectsToAdd.forEach(effect3 => {
                     if (effect3 !== activeEffect || effect3.allowRecurse) {
                         effects.add(effect3);
                     }
-                }));
+                });
             }
         };
         if (type === 'clear') {
             depsMap.forEach(add2);
         } else if (key === 'length' && isArray(target)) {
-            depsMap.forEach(((dep, key2) => {
+            depsMap.forEach((dep, key2) => {
                 if (key2 === 'length' || key2 >= newValue) {
                     add2(dep);
                 }
-            }));
+            });
         } else {
             if (key !== void 0) {
                 add2(depsMap.get(key));
@@ -1729,13 +1729,13 @@
         effects.forEach(run);
     }
     var isNonTrackableKeys = makeMap(`__proto__,__v_isRef,__isVue`);
-    var builtInSymbols = new Set(Object.getOwnPropertyNames(Symbol).map((key => Symbol[key])).filter(isSymbol));
+    var builtInSymbols = new Set(Object.getOwnPropertyNames(Symbol).map(key => Symbol[key]).filter(isSymbol));
     var get2 = createGetter();
     var readonlyGet = createGetter(true);
     var arrayInstrumentations = createArrayInstrumentations();
     function createArrayInstrumentations() {
         const instrumentations = {};
-        [ 'includes', 'indexOf', 'lastIndexOf' ].forEach((key => {
+        [ 'includes', 'indexOf', 'lastIndexOf' ].forEach(key => {
             instrumentations[key] = function(...args) {
                 const arr = toRaw(this);
                 for (let i = 0, l = this.length; i < l; i++) {
@@ -1748,15 +1748,15 @@
                     return res;
                 }
             };
-        }));
-        [ 'push', 'pop', 'shift', 'unshift', 'splice' ].forEach((key => {
+        });
+        [ 'push', 'pop', 'shift', 'unshift', 'splice' ].forEach(key => {
             instrumentations[key] = function(...args) {
                 pauseTracking();
                 const res = toRaw(this)[key].apply(this, args);
                 resetTracking();
                 return res;
             };
-        }));
+        });
         return instrumentations;
     }
     function createGetter(isReadonly = false, shallow = false) {
@@ -1960,7 +1960,7 @@
             const rawTarget = toRaw(target);
             const wrap = isShallow ? toShallow : isReadonly ? toReadonly : toReactive;
             !isReadonly && track(rawTarget, 'iterate', ITERATE_KEY);
-            return target.forEach(((value, key) => callback.call(thisArg, wrap(value), wrap(key), observed)));
+            return target.forEach((value, key) => callback.call(thisArg, wrap(value), wrap(key), observed));
         };
     }
     function createIterableMethod(method, isReadonly, isShallow) {
@@ -2061,12 +2061,12 @@
             forEach: createForEach(true, true)
         };
         const iteratorMethods = [ 'keys', 'values', 'entries', Symbol.iterator ];
-        iteratorMethods.forEach((method => {
+        iteratorMethods.forEach(method => {
             mutableInstrumentations2[method] = createIterableMethod(method, false, false);
             readonlyInstrumentations2[method] = createIterableMethod(method, true, false);
             shallowInstrumentations2[method] = createIterableMethod(method, false, true);
             shallowReadonlyInstrumentations2[method] = createIterableMethod(method, true, true);
-        }));
+        });
         return [ mutableInstrumentations2, readonlyInstrumentations2, shallowInstrumentations2, shallowReadonlyInstrumentations2 ];
     }
     var [mutableInstrumentations, readonlyInstrumentations, shallowInstrumentations, shallowReadonlyInstrumentations] = createInstrumentations();
@@ -2156,31 +2156,31 @@
     function isRef(r) {
         return Boolean(r && r.__v_isRef === true);
     }
-    magic('nextTick', (() => nextTick));
-    magic('dispatch', (el => dispatch.bind(dispatch, el)));
-    magic('watch', ((el, {evaluateLater: evaluateLater2, cleanup: cleanup2}) => (key, callback) => {
+    magic('nextTick', () => nextTick);
+    magic('dispatch', el => dispatch.bind(dispatch, el));
+    magic('watch', (el, {evaluateLater: evaluateLater2, cleanup: cleanup2}) => (key, callback) => {
         let evaluate2 = evaluateLater2(key);
         let getter = () => {
             let value;
-            evaluate2((i => value = i));
+            evaluate2(i => value = i);
             return value;
         };
         let unwatch = watch(getter, callback);
         cleanup2(unwatch);
-    }));
+    });
     magic('store', getStores);
-    magic('data', (el => scope(el)));
-    magic('root', (el => closestRoot(el)));
-    magic('refs', (el => {
+    magic('data', el => scope(el));
+    magic('root', el => closestRoot(el));
+    magic('refs', el => {
         if (el._x_refs_proxy) return el._x_refs_proxy;
         el._x_refs_proxy = mergeProxies(getArrayOfRefObject(el));
         return el._x_refs_proxy;
-    }));
+    });
     function getArrayOfRefObject(el) {
         let refObjects = [];
-        findClosest(el, (i => {
+        findClosest(el, i => {
             if (i._x_refs) refObjects.push(i._x_refs);
-        }));
+        });
         return refObjects;
     }
     var globalIdMemo = {};
@@ -2189,59 +2189,59 @@
         return ++globalIdMemo[name];
     }
     function closestIdRoot(el, name) {
-        return findClosest(el, (element => {
+        return findClosest(el, element => {
             if (element._x_ids && element._x_ids[name]) return true;
-        }));
+        });
     }
     function setIdRoot(el, name) {
         if (!el._x_ids) el._x_ids = {};
         if (!el._x_ids[name]) el._x_ids[name] = findAndIncrementId(name);
     }
-    magic('id', ((el, {cleanup: cleanup2}) => (name, key = null) => {
+    magic('id', (el, {cleanup: cleanup2}) => (name, key = null) => {
         let cacheKey = `${name}${key ? `-${key}` : ''}`;
-        return cacheIdByNameOnElement(el, cacheKey, cleanup2, (() => {
+        return cacheIdByNameOnElement(el, cacheKey, cleanup2, () => {
             let root = closestIdRoot(el, name);
             let id = root ? root._x_ids[name] : findAndIncrementId(name);
             return key ? `${name}-${id}-${key}` : `${name}-${id}`;
-        }));
-    }));
-    interceptClone(((from, to) => {
+        });
+    });
+    interceptClone((from, to) => {
         if (from._x_id) {
             to._x_id = from._x_id;
         }
-    }));
+    });
     function cacheIdByNameOnElement(el, cacheKey, cleanup2, callback) {
         if (!el._x_id) el._x_id = {};
         if (el._x_id[cacheKey]) return el._x_id[cacheKey];
         let output = callback();
         el._x_id[cacheKey] = output;
-        cleanup2((() => {
+        cleanup2(() => {
             delete el._x_id[cacheKey];
-        }));
+        });
         return output;
     }
-    magic('el', (el => el));
+    magic('el', el => el);
     warnMissingPluginMagic('Focus', 'focus', 'focus');
     warnMissingPluginMagic('Persist', 'persist', 'persist');
     function warnMissingPluginMagic(name, magicName, slug) {
-        magic(magicName, (el => warn(`You can't use [$${magicName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el)));
+        magic(magicName, el => warn(`You can't use [$${magicName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
     }
-    directive('modelable', ((el, {expression}, {effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup2}) => {
+    directive('modelable', (el, {expression}, {effect: effect3, evaluateLater: evaluateLater2, cleanup: cleanup2}) => {
         let func = evaluateLater2(expression);
         let innerGet = () => {
             let result;
-            func((i => result = i));
+            func(i => result = i);
             return result;
         };
         let evaluateInnerSet = evaluateLater2(`${expression} = __placeholder`);
-        let innerSet = val => evaluateInnerSet((() => {}), {
+        let innerSet = val => evaluateInnerSet(() => {}, {
             scope: {
                 __placeholder: val
             }
         });
         let initialValue = innerGet();
         innerSet(initialValue);
-        queueMicrotask((() => {
+        queueMicrotask(() => {
             if (!el._x_model) return;
             el._x_removeModelListeners['default']();
             let outerGet = el._x_model.get;
@@ -2262,9 +2262,9 @@
                 }
             });
             cleanup2(releaseEntanglement);
-        }));
-    }));
-    directive('teleport', ((el, {modifiers, expression}, {cleanup: cleanup2}) => {
+        });
+    });
+    directive('teleport', (el, {modifiers, expression}, {cleanup: cleanup2}) => {
         if (el.tagName.toLowerCase() !== 'template') warn('x-teleport can only be used on a <template> tag', el);
         let target = getTarget(expression);
         let clone2 = el.content.cloneNode(true).firstElementChild;
@@ -2273,12 +2273,12 @@
         el.setAttribute('data-teleport-template', true);
         clone2.setAttribute('data-teleport-target', true);
         if (el._x_forwardEvents) {
-            el._x_forwardEvents.forEach((eventName => {
-                clone2.addEventListener(eventName, (e => {
+            el._x_forwardEvents.forEach(eventName => {
+                clone2.addEventListener(eventName, e => {
                     e.stopPropagation();
                     el.dispatchEvent(new e.constructor(e.type, e));
-                }));
-            }));
+                });
+            });
         }
         addScopeToNode(clone2, {}, el);
         let placeInDom = (clone3, target2, modifiers2) => {
@@ -2290,38 +2290,38 @@
                 target2.appendChild(clone3);
             }
         };
-        mutateDom((() => {
+        mutateDom(() => {
             placeInDom(clone2, target, modifiers);
-            skipDuringClone((() => {
+            skipDuringClone(() => {
                 initTree(clone2);
                 clone2._x_ignore = true;
-            }))();
-        }));
+            })();
+        });
         el._x_teleportPutBack = () => {
             let target2 = getTarget(expression);
-            mutateDom((() => {
+            mutateDom(() => {
                 placeInDom(el._x_teleport, target2, modifiers);
-            }));
+            });
         };
-        cleanup2((() => clone2.remove()));
-    }));
+        cleanup2(() => clone2.remove());
+    });
     var teleportContainerDuringClone = document.createElement('div');
     function getTarget(expression) {
-        let target = skipDuringClone((() => document.querySelector(expression)), (() => teleportContainerDuringClone))();
+        let target = skipDuringClone(() => document.querySelector(expression), () => teleportContainerDuringClone)();
         if (!target) warn(`Cannot find x-teleport element for selector: "${expression}"`);
         return target;
     }
     var handler = () => {};
     handler.inline = (el, {modifiers}, {cleanup: cleanup2}) => {
         modifiers.includes('self') ? el._x_ignoreSelf = true : el._x_ignore = true;
-        cleanup2((() => {
+        cleanup2(() => {
             modifiers.includes('self') ? delete el._x_ignoreSelf : delete el._x_ignore;
-        }));
+        });
     };
     directive('ignore', handler);
-    directive('effect', skipDuringClone(((el, {expression}, {effect: effect3}) => {
+    directive('effect', skipDuringClone((el, {expression}, {effect: effect3}) => {
         effect3(evaluateLater(el, expression));
-    })));
+    }));
     function on(el, event, modifiers, callback) {
         let listenerTarget = el;
         let handler4 = e => callback(e);
@@ -2343,41 +2343,41 @@
             let wait = isNumeric(nextModifier.split('ms')[0]) ? Number(nextModifier.split('ms')[0]) : 250;
             handler4 = throttle(handler4, wait);
         }
-        if (modifiers.includes('prevent')) handler4 = wrapHandler(handler4, ((next, e) => {
+        if (modifiers.includes('prevent')) handler4 = wrapHandler(handler4, (next, e) => {
             e.preventDefault();
             next(e);
-        }));
-        if (modifiers.includes('stop')) handler4 = wrapHandler(handler4, ((next, e) => {
+        });
+        if (modifiers.includes('stop')) handler4 = wrapHandler(handler4, (next, e) => {
             e.stopPropagation();
             next(e);
-        }));
+        });
         if (modifiers.includes('once')) {
-            handler4 = wrapHandler(handler4, ((next, e) => {
+            handler4 = wrapHandler(handler4, (next, e) => {
                 next(e);
                 listenerTarget.removeEventListener(event, handler4, options);
-            }));
+            });
         }
         if (modifiers.includes('away') || modifiers.includes('outside')) {
             listenerTarget = document;
-            handler4 = wrapHandler(handler4, ((next, e) => {
+            handler4 = wrapHandler(handler4, (next, e) => {
                 if (el.contains(e.target)) return;
                 if (e.target.isConnected === false) return;
                 if (el.offsetWidth < 1 && el.offsetHeight < 1) return;
                 if (el._x_isShown === false) return;
                 next(e);
-            }));
+            });
         }
-        if (modifiers.includes('self')) handler4 = wrapHandler(handler4, ((next, e) => {
+        if (modifiers.includes('self')) handler4 = wrapHandler(handler4, (next, e) => {
             e.target === el && next(e);
-        }));
-        handler4 = wrapHandler(handler4, ((next, e) => {
+        });
+        handler4 = wrapHandler(handler4, (next, e) => {
             if (isKeyEvent(event)) {
                 if (isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers)) {
                     return;
                 }
             }
             next(e);
-        }));
+        });
         listenerTarget.addEventListener(event, handler4, options);
         return () => {
             listenerTarget.removeEventListener(event, handler4, options);
@@ -2387,7 +2387,7 @@
         return subject.replace(/-/g, '.');
     }
     function camelCase2(subject) {
-        return subject.toLowerCase().replace(/-(\w)/g, ((match, char) => char.toUpperCase()));
+        return subject.toLowerCase().replace(/-(\w)/g, (match, char) => char.toUpperCase());
     }
     function isNumeric(subject) {
         return !Array.isArray(subject) && !isNaN(subject);
@@ -2400,7 +2400,7 @@
         return [ 'keydown', 'keyup' ].includes(event);
     }
     function isListeningForASpecificKeyThatHasntBeenPressed(e, modifiers) {
-        let keyModifiers = modifiers.filter((i => ![ 'window', 'document', 'prevent', 'stop', 'once', 'capture' ].includes(i)));
+        let keyModifiers = modifiers.filter(i => ![ 'window', 'document', 'prevent', 'stop', 'once', 'capture' ].includes(i));
         if (keyModifiers.includes('debounce')) {
             let debounceIndex = keyModifiers.indexOf('debounce');
             keyModifiers.splice(debounceIndex, isNumeric((keyModifiers[debounceIndex + 1] || 'invalid-wait').split('ms')[0]) ? 2 : 1);
@@ -2412,13 +2412,13 @@
         if (keyModifiers.length === 0) return false;
         if (keyModifiers.length === 1 && keyToModifiers(e.key).includes(keyModifiers[0])) return false;
         const systemKeyModifiers = [ 'ctrl', 'shift', 'alt', 'meta', 'cmd', 'super' ];
-        const selectedSystemKeyModifiers = systemKeyModifiers.filter((modifier => keyModifiers.includes(modifier)));
-        keyModifiers = keyModifiers.filter((i => !selectedSystemKeyModifiers.includes(i)));
+        const selectedSystemKeyModifiers = systemKeyModifiers.filter(modifier => keyModifiers.includes(modifier));
+        keyModifiers = keyModifiers.filter(i => !selectedSystemKeyModifiers.includes(i));
         if (selectedSystemKeyModifiers.length > 0) {
-            const activelyPressedKeyModifiers = selectedSystemKeyModifiers.filter((modifier => {
+            const activelyPressedKeyModifiers = selectedSystemKeyModifiers.filter(modifier => {
                 if (modifier === 'cmd' || modifier === 'super') modifier = 'meta';
                 return e[`${modifier}Key`];
-            }));
+            });
             if (activelyPressedKeyModifiers.length === selectedSystemKeyModifiers.length) {
                 if (keyToModifiers(e.key).includes(keyModifiers[0])) return false;
             }
@@ -2446,11 +2446,11 @@
             underscore: '_'
         };
         modifierToKeyMap[key] = key;
-        return Object.keys(modifierToKeyMap).map((modifier => {
+        return Object.keys(modifierToKeyMap).map(modifier => {
             if (modifierToKeyMap[modifier] === key) return modifier;
-        })).filter((modifier => modifier));
+        }).filter(modifier => modifier);
     }
-    directive('model', ((el, {modifiers, expression}, {effect: effect3, cleanup: cleanup2}) => {
+    directive('model', (el, {modifiers, expression}, {effect: effect3, cleanup: cleanup2}) => {
         let scopeTarget = el;
         if (modifiers.includes('parent')) {
             scopeTarget = el.parentNode;
@@ -2466,16 +2466,16 @@
         }
         let getValue = () => {
             let result;
-            evaluateGet((value => result = value));
+            evaluateGet(value => result = value);
             return isGetterSetter(result) ? result.get() : result;
         };
         let setValue = value => {
             let result;
-            evaluateGet((value2 => result = value2));
+            evaluateGet(value2 => result = value2);
             if (isGetterSetter(result)) {
                 result.set(value);
             } else {
-                evaluateSet((() => {}), {
+                evaluateSet(() => {}, {
                     scope: {
                         __placeholder: value
                     }
@@ -2483,14 +2483,14 @@
             }
         };
         if (typeof expression === 'string' && el.type === 'radio') {
-            mutateDom((() => {
+            mutateDom(() => {
                 if (!el.hasAttribute('name')) el.setAttribute('name', expression);
-            }));
+            });
         }
         var event = el.tagName.toLowerCase() === 'select' || [ 'checkbox', 'radio' ].includes(el.type) || modifiers.includes('lazy') ? 'change' : 'input';
-        let removeListener = isCloning ? () => {} : on(el, event, modifiers, (e => {
+        let removeListener = isCloning ? () => {} : on(el, event, modifiers, e => {
             setValue(getInputValue(el, modifiers, e, getValue()));
-        }));
+        });
         if (modifiers.includes('fill')) {
             if (typeof expression === 'string') {
                 let value = '', xData = Alpine.$data(el);
@@ -2505,9 +2505,9 @@
                         let obj = {
                             ...xData[key]
                         };
-                        obj[rest[0]] = rest.slice(1).reduceRight(((accumulator, current) => ({
+                        obj[rest[0]] = rest.slice(1).reduceRight((accumulator, current) => ({
                             [current]: accumulator
-                        })), value);
+                        }), value);
                         value = obj;
                     }
                     xData[key] = value;
@@ -2521,14 +2521,14 @@
         }
         if (!el._x_removeModelListeners) el._x_removeModelListeners = {};
         el._x_removeModelListeners['default'] = removeListener;
-        cleanup2((() => el._x_removeModelListeners['default']()));
+        cleanup2(() => el._x_removeModelListeners['default']());
         if (el.form) {
-            let removeResetListener = on(el.form, 'reset', [], (e => {
-                nextTick((() => el._x_model && el._x_model.set(getInputValue(el, modifiers, {
+            let removeResetListener = on(el.form, 'reset', [], e => {
+                nextTick(() => el._x_model && el._x_model.set(getInputValue(el, modifiers, {
                     target: el
-                }, getValue()))));
-            }));
-            cleanup2((() => removeResetListener()));
+                }, getValue())));
+            });
+            cleanup2(() => removeResetListener());
         }
         el._x_model = {
             get() {
@@ -2541,17 +2541,17 @@
         el._x_forceModelUpdate = value => {
             if (value === void 0 && typeof expression === 'string' && expression.match(/\./)) value = '';
             window.fromModel = true;
-            mutateDom((() => bind(el, 'value', value)));
+            mutateDom(() => bind(el, 'value', value));
             delete window.fromModel;
         };
-        effect3((() => {
+        effect3(() => {
             let value = getValue();
             if (modifiers.includes('unintrusive') && document.activeElement.isSameNode(el)) return;
             el._x_forceModelUpdate(value);
-        }));
-    }));
+        });
+    });
     function getInputValue(el, modifiers, event, currentValue) {
-        return mutateDom((() => {
+        return mutateDom(() => {
             if (event instanceof CustomEvent && event.detail !== void 0) return event.detail !== null && event.detail !== void 0 ? event.detail : event.target.value; else if (el.type === 'checkbox') {
                 if (Array.isArray(currentValue)) {
                     let newValue = null;
@@ -2562,23 +2562,23 @@
                     } else {
                         newValue = event.target.value;
                     }
-                    return event.target.checked ? currentValue.includes(newValue) ? currentValue : currentValue.concat([ newValue ]) : currentValue.filter((el2 => !checkedAttrLooseCompare2(el2, newValue)));
+                    return event.target.checked ? currentValue.includes(newValue) ? currentValue : currentValue.concat([ newValue ]) : currentValue.filter(el2 => !checkedAttrLooseCompare2(el2, newValue));
                 } else {
                     return event.target.checked;
                 }
             } else if (el.tagName.toLowerCase() === 'select' && el.multiple) {
                 if (modifiers.includes('number')) {
-                    return Array.from(event.target.selectedOptions).map((option => {
+                    return Array.from(event.target.selectedOptions).map(option => {
                         let rawValue = option.value || option.text;
                         return safeParseNumber(rawValue);
-                    }));
+                    });
                 } else if (modifiers.includes('boolean')) {
-                    return Array.from(event.target.selectedOptions).map((option => {
+                    return Array.from(event.target.selectedOptions).map(option => {
                         let rawValue = option.value || option.text;
                         return safeParseBoolean(rawValue);
-                    }));
+                    });
                 }
-                return Array.from(event.target.selectedOptions).map((option => option.value || option.text));
+                return Array.from(event.target.selectedOptions).map(option => option.value || option.text);
             } else {
                 let newValue;
                 if (el.type === 'radio') {
@@ -2600,7 +2600,7 @@
                     return newValue;
                 }
             }
-        }));
+        });
     }
     function safeParseNumber(rawValue) {
         let number = rawValue ? parseFloat(rawValue) : null;
@@ -2615,46 +2615,46 @@
     function isGetterSetter(value) {
         return value !== null && typeof value === 'object' && typeof value.get === 'function' && typeof value.set === 'function';
     }
-    directive('cloak', (el => queueMicrotask((() => mutateDom((() => el.removeAttribute(prefix('cloak'))))))));
-    addInitSelector((() => `[${prefix('init')}]`));
-    directive('init', skipDuringClone(((el, {expression}, {evaluate: evaluate2}) => {
+    directive('cloak', el => queueMicrotask(() => mutateDom(() => el.removeAttribute(prefix('cloak')))));
+    addInitSelector(() => `[${prefix('init')}]`);
+    directive('init', skipDuringClone((el, {expression}, {evaluate: evaluate2}) => {
         if (typeof expression === 'string') {
             return !!expression.trim() && evaluate2(expression, {}, false);
         }
         return evaluate2(expression, {}, false);
-    })));
-    directive('text', ((el, {expression}, {effect: effect3, evaluateLater: evaluateLater2}) => {
-        let evaluate2 = evaluateLater2(expression);
-        effect3((() => {
-            evaluate2((value => {
-                mutateDom((() => {
-                    el.textContent = value;
-                }));
-            }));
-        }));
     }));
-    directive('html', ((el, {expression}, {effect: effect3, evaluateLater: evaluateLater2}) => {
+    directive('text', (el, {expression}, {effect: effect3, evaluateLater: evaluateLater2}) => {
         let evaluate2 = evaluateLater2(expression);
-        effect3((() => {
-            evaluate2((value => {
-                mutateDom((() => {
+        effect3(() => {
+            evaluate2(value => {
+                mutateDom(() => {
+                    el.textContent = value;
+                });
+            });
+        });
+    });
+    directive('html', (el, {expression}, {effect: effect3, evaluateLater: evaluateLater2}) => {
+        let evaluate2 = evaluateLater2(expression);
+        effect3(() => {
+            evaluate2(value => {
+                mutateDom(() => {
                     el.innerHTML = value;
                     el._x_ignoreSelf = true;
                     initTree(el);
                     delete el._x_ignoreSelf;
-                }));
-            }));
-        }));
-    }));
+                });
+            });
+        });
+    });
     mapAttributes(startingWith(':', into(prefix('bind:'))));
     var handler2 = (el, {value, modifiers, expression, original}, {effect: effect3, cleanup: cleanup2}) => {
         if (!value) {
             let bindingProviders = {};
             injectBindingProviders(bindingProviders);
             let getBindings = evaluateLater(el, expression);
-            getBindings((bindings => {
+            getBindings(bindings => {
                 applyBindingsObject(el, bindings, original);
-            }), {
+            }, {
                 scope: bindingProviders
             });
             return;
@@ -2664,16 +2664,16 @@
             return;
         }
         let evaluate2 = evaluateLater(el, expression);
-        effect3((() => evaluate2((result => {
+        effect3(() => evaluate2(result => {
             if (result === void 0 && typeof expression === 'string' && expression.match(/\./)) {
                 result = '';
             }
-            mutateDom((() => bind(el, value, result, modifiers)));
-        }))));
-        cleanup2((() => {
+            mutateDom(() => bind(el, value, result, modifiers));
+        }));
+        cleanup2(() => {
             el._x_undoAddedClasses && el._x_undoAddedClasses();
             el._x_undoAddedStyles && el._x_undoAddedStyles();
-        }));
+        });
     };
     handler2.inline = (el, {value, modifiers, expression}) => {
         if (!value) return;
@@ -2687,8 +2687,8 @@
     function storeKeyForXFor(el, expression) {
         el._x_keyExpression = expression;
     }
-    addRootSelector((() => `[${prefix('data')}]`));
-    directive('data', ((el, {expression}, {cleanup: cleanup2}) => {
+    addRootSelector(() => `[${prefix('data')}]`);
+    directive('data', (el, {expression}, {cleanup: cleanup2}) => {
         if (shouldSkipRegisteringDataDuringClone(el)) return;
         expression = expression === '' ? '{}' : expression;
         let magicContext = {};
@@ -2704,37 +2704,37 @@
         initInterceptors(reactiveData);
         let undo = addScopeToNode(el, reactiveData);
         reactiveData['init'] && evaluate(el, reactiveData['init']);
-        cleanup2((() => {
+        cleanup2(() => {
             reactiveData['destroy'] && evaluate(el, reactiveData['destroy']);
             undo();
-        }));
-    }));
-    interceptClone(((from, to) => {
+        });
+    });
+    interceptClone((from, to) => {
         if (from._x_dataStack) {
             to._x_dataStack = from._x_dataStack;
             to.setAttribute('data-has-alpine-state', true);
         }
-    }));
+    });
     function shouldSkipRegisteringDataDuringClone(el) {
         if (!isCloning) return false;
         if (isCloningLegacy) return true;
         return el.hasAttribute('data-has-alpine-state');
     }
-    directive('show', ((el, {modifiers, expression}, {effect: effect3}) => {
+    directive('show', (el, {modifiers, expression}, {effect: effect3}) => {
         let evaluate2 = evaluateLater(el, expression);
         if (!el._x_doHide) el._x_doHide = () => {
-            mutateDom((() => {
+            mutateDom(() => {
                 el.style.setProperty('display', 'none', modifiers.includes('important') ? 'important' : void 0);
-            }));
+            });
         };
         if (!el._x_doShow) el._x_doShow = () => {
-            mutateDom((() => {
+            mutateDom(() => {
                 if (el.style.length === 1 && el.style.display === 'none') {
                     el.removeAttribute('style');
                 } else {
                     el.style.removeProperty('display');
                 }
-            }));
+            });
         };
         let hide = () => {
             el._x_doHide();
@@ -2745,42 +2745,42 @@
             el._x_isShown = true;
         };
         let clickAwayCompatibleShow = () => setTimeout(show);
-        let toggle = once((value => value ? show() : hide()), (value => {
+        let toggle = once(value => value ? show() : hide(), value => {
             if (typeof el._x_toggleAndCascadeWithTransitions === 'function') {
                 el._x_toggleAndCascadeWithTransitions(el, value, show, hide);
             } else {
                 value ? clickAwayCompatibleShow() : hide();
             }
-        }));
+        });
         let oldValue;
         let firstTime = true;
-        effect3((() => evaluate2((value => {
+        effect3(() => evaluate2(value => {
             if (!firstTime && value === oldValue) return;
             if (modifiers.includes('immediate')) value ? clickAwayCompatibleShow() : hide();
             toggle(value);
             oldValue = value;
             firstTime = false;
-        }))));
-    }));
-    directive('for', ((el, {expression}, {effect: effect3, cleanup: cleanup2}) => {
+        }));
+    });
+    directive('for', (el, {expression}, {effect: effect3, cleanup: cleanup2}) => {
         let iteratorNames = parseForExpression(expression);
         let evaluateItems = evaluateLater(el, iteratorNames.items);
         let evaluateKey = evaluateLater(el, el._x_keyExpression || 'index');
         el._x_prevKeys = [];
         el._x_lookup = {};
-        effect3((() => loop(el, iteratorNames, evaluateItems, evaluateKey)));
-        cleanup2((() => {
-            Object.values(el._x_lookup).forEach((el2 => el2.remove()));
+        effect3(() => loop(el, iteratorNames, evaluateItems, evaluateKey));
+        cleanup2(() => {
+            Object.values(el._x_lookup).forEach(el2 => el2.remove());
             delete el._x_prevKeys;
             delete el._x_lookup;
-        }));
-    }));
+        });
+    });
     function loop(el, iteratorNames, evaluateItems, evaluateKey) {
         let isObject2 = i => typeof i === 'object' && !Array.isArray(i);
         let templateEl = el;
-        evaluateItems((items => {
+        evaluateItems(items => {
             if (isNumeric3(items) && items >= 0) {
-                items = Array.from(Array(items).keys(), (i => i + 1));
+                items = Array.from(Array(items).keys(), i => i + 1);
             }
             if (items === void 0) items = [];
             let lookup = el._x_lookup;
@@ -2788,26 +2788,26 @@
             let scopes = [];
             let keys = [];
             if (isObject2(items)) {
-                items = Object.entries(items).map((([key, value]) => {
+                items = Object.entries(items).map(([key, value]) => {
                     let scope2 = getIterationScopeVariables(iteratorNames, value, key, items);
-                    evaluateKey((value2 => {
+                    evaluateKey(value2 => {
                         if (keys.includes(value2)) warn('Duplicate key on x-for', el);
                         keys.push(value2);
-                    }), {
+                    }, {
                         scope: {
                             index: key,
                             ...scope2
                         }
                     });
                     scopes.push(scope2);
-                }));
+                });
             } else {
                 for (let i = 0; i < items.length; i++) {
                     let scope2 = getIterationScopeVariables(iteratorNames, items[i], i, items);
-                    evaluateKey((value => {
+                    evaluateKey(value => {
                         if (keys.includes(value)) warn('Duplicate key on x-for', el);
                         keys.push(value);
-                    }), {
+                    }, {
                         scope: {
                             index: i,
                             ...scope2
@@ -2824,7 +2824,7 @@
                 let key = prevKeys[i];
                 if (keys.indexOf(key) === -1) removes.push(key);
             }
-            prevKeys = prevKeys.filter((key => !removes.includes(key)));
+            prevKeys = prevKeys.filter(key => !removes.includes(key));
             let lastKey = 'template';
             for (let i = 0; i < keys.length; i++) {
                 let key = keys[i];
@@ -2857,7 +2857,7 @@
                 let elInSpot = lookup[keyInSpot];
                 let elForSpot = lookup[keyForSpot];
                 let marker = document.createElement('div');
-                mutateDom((() => {
+                mutateDom(() => {
                     if (!elForSpot) warn(`x-for ":key" is undefined or invalid`, templateEl, keyForSpot, lookup);
                     elForSpot.after(marker);
                     elInSpot.after(elForSpot);
@@ -2865,7 +2865,7 @@
                     marker.before(elInSpot);
                     elInSpot._x_currentIfEl && elInSpot.after(elInSpot._x_currentIfEl);
                     marker.remove();
-                }));
+                });
                 elForSpot._x_refreshXForScope(scopes[keys.indexOf(keyForSpot)]);
             }
             for (let i = 0; i < adds.length; i++) {
@@ -2878,14 +2878,14 @@
                 let reactiveScope = reactive(scope2);
                 addScopeToNode(clone2, reactiveScope, templateEl);
                 clone2._x_refreshXForScope = newScope => {
-                    Object.entries(newScope).forEach((([key2, value]) => {
+                    Object.entries(newScope).forEach(([key2, value]) => {
                         reactiveScope[key2] = value;
-                    }));
+                    });
                 };
-                mutateDom((() => {
+                mutateDom(() => {
                     lastEl.after(clone2);
-                    skipDuringClone((() => initTree(clone2)))();
-                }));
+                    skipDuringClone(() => initTree(clone2))();
+                });
                 if (typeof key === 'object') {
                     warn('x-for key cannot be an object, it must be a string or an integer', templateEl);
                 }
@@ -2895,7 +2895,7 @@
                 lookup[sames[i]]._x_refreshXForScope(scopes[keys.indexOf(sames[i])]);
             }
             templateEl._x_prevKeys = keys;
-        }));
+        });
     }
     function parseForExpression(expression) {
         let forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
@@ -2921,15 +2921,15 @@
     function getIterationScopeVariables(iteratorNames, item, index, items) {
         let scopeVariables = {};
         if (/^\[.*\]$/.test(iteratorNames.item) && Array.isArray(item)) {
-            let names = iteratorNames.item.replace('[', '').replace(']', '').split(',').map((i => i.trim()));
-            names.forEach(((name, i) => {
+            let names = iteratorNames.item.replace('[', '').replace(']', '').split(',').map(i => i.trim());
+            names.forEach((name, i) => {
                 scopeVariables[name] = item[i];
-            }));
+            });
         } else if (/^\{.*\}$/.test(iteratorNames.item) && !Array.isArray(item) && typeof item === 'object') {
-            let names = iteratorNames.item.replace('{', '').replace('}', '').split(',').map((i => i.trim()));
-            names.forEach((name => {
+            let names = iteratorNames.item.replace('{', '').replace('}', '').split(',').map(i => i.trim());
+            names.forEach(name => {
                 scopeVariables[name] = item[name];
-            }));
+            });
         } else {
             scopeVariables[iteratorNames.item] = item;
         }
@@ -2945,27 +2945,27 @@
         let root = closestRoot(el);
         if (!root._x_refs) root._x_refs = {};
         root._x_refs[expression] = el;
-        cleanup2((() => delete root._x_refs[expression]));
+        cleanup2(() => delete root._x_refs[expression]);
     };
     directive('ref', handler3);
-    directive('if', ((el, {expression}, {effect: effect3, cleanup: cleanup2}) => {
+    directive('if', (el, {expression}, {effect: effect3, cleanup: cleanup2}) => {
         if (el.tagName.toLowerCase() !== 'template') warn('x-if can only be used on a <template> tag', el);
         let evaluate2 = evaluateLater(el, expression);
         let show = () => {
             if (el._x_currentIfEl) return el._x_currentIfEl;
             let clone2 = el.content.cloneNode(true).firstElementChild;
             addScopeToNode(clone2, {}, el);
-            mutateDom((() => {
+            mutateDom(() => {
                 el.after(clone2);
-                skipDuringClone((() => initTree(clone2)))();
-            }));
+                skipDuringClone(() => initTree(clone2))();
+            });
             el._x_currentIfEl = clone2;
             el._x_undoIf = () => {
-                walk(clone2, (node => {
+                walk(clone2, node => {
                     if (!!node._x_effects) {
                         node._x_effects.forEach(dequeueJob);
                     }
-                }));
+                });
                 clone2.remove();
                 delete el._x_currentIfEl;
             };
@@ -2976,43 +2976,43 @@
             el._x_undoIf();
             delete el._x_undoIf;
         };
-        effect3((() => evaluate2((value => {
+        effect3(() => evaluate2(value => {
             value ? show() : hide();
-        }))));
-        cleanup2((() => el._x_undoIf && el._x_undoIf()));
-    }));
-    directive('id', ((el, {expression}, {evaluate: evaluate2}) => {
+        }));
+        cleanup2(() => el._x_undoIf && el._x_undoIf());
+    });
+    directive('id', (el, {expression}, {evaluate: evaluate2}) => {
         let names = evaluate2(expression);
-        names.forEach((name => setIdRoot(el, name)));
-    }));
-    interceptClone(((from, to) => {
+        names.forEach(name => setIdRoot(el, name));
+    });
+    interceptClone((from, to) => {
         if (from._x_ids) {
             to._x_ids = from._x_ids;
         }
-    }));
+    });
     mapAttributes(startingWith('@', into(prefix('on:'))));
-    directive('on', skipDuringClone(((el, {value, modifiers, expression}, {cleanup: cleanup2}) => {
+    directive('on', skipDuringClone((el, {value, modifiers, expression}, {cleanup: cleanup2}) => {
         let evaluate2 = expression ? evaluateLater(el, expression) : () => {};
         if (el.tagName.toLowerCase() === 'template') {
             if (!el._x_forwardEvents) el._x_forwardEvents = [];
             if (!el._x_forwardEvents.includes(value)) el._x_forwardEvents.push(value);
         }
-        let removeListener = on(el, value, modifiers, (e => {
-            evaluate2((() => {}), {
+        let removeListener = on(el, value, modifiers, e => {
+            evaluate2(() => {}, {
                 scope: {
                     $event: e
                 },
                 params: [ e ]
             });
-        }));
-        cleanup2((() => removeListener()));
-    })));
+        });
+        cleanup2(() => removeListener());
+    }));
     warnMissingPluginDirective('Collapse', 'collapse', 'collapse');
     warnMissingPluginDirective('Intersect', 'intersect', 'intersect');
     warnMissingPluginDirective('Focus', 'trap', 'focus');
     warnMissingPluginDirective('Mask', 'mask', 'mask');
     function warnMissingPluginDirective(name, directiveName, slug) {
-        directive(directiveName, (el => warn(`You can't use [x-${directiveName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el)));
+        directive(directiveName, el => warn(`You can't use [x-${directiveName}] without first installing the "${name}" plugin here: https://alpinejs.dev/plugins/${slug}`, el));
     }
     alpine_default.setEvaluator(normalEvaluator);
     alpine_default.setReactivityEngine({
@@ -3023,7 +3023,7 @@
     });
     var src_default = alpine_default;
     window.Alpine = src_default;
-    queueMicrotask((() => {
+    queueMicrotask(() => {
         src_default.start();
-    }));
+    });
 })();

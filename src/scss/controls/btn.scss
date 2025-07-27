@@ -1,12 +1,12 @@
 @import '../constants/index.scss';
 
 .btn {
-  color: inherit;
+  color: var(--expansa-dark);
   font: inherit;
   font-weight: 500;
   overflow: hidden;
   position: relative;
-  padding: 0 1em;
+  padding: 0 0.875em;
   outline: 0;
   gap: 0.3em !important;
   display: inline-flex;
@@ -15,7 +15,7 @@
   white-space: nowrap;
   min-width: fit-content;
   width: fit-content;
-  border-radius: 0.6em;
+  border-radius: var(--expansa-border-radius);
   text-decoration: none;
   transition: background-color 0.15s;
   -webkit-user-select: none;
@@ -26,19 +26,9 @@
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
-  background-image: radial-gradient(100% 100% at 15% 0%, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
 
   > * {
     font-size: inherit;
-  }
-
-  &:hover {
-    background-color: var(--expansa-bg-universal);
-  }
-
-  &:active {
-    border-color: rgb(27 31 36 / 15%);
-    background-color: var(--expansa-bg-hover);
   }
 
   @each $suffix, $properties in $btnSizes {
@@ -50,18 +40,18 @@
   }
 
   &--primary,
+  &--secondary,
   &--success,
   &--danger {
+    color: var(--expansa-white);
     box-shadow: 0 1px 1px #fff3 inset, 0 -1px 1px #0003 inset;
   }
 
   &--primary {
     background-color: var(--expansa-primary);
-    color: var(--expansa-white);
 
     &:hover {
       background-color: var(--expansa-primary-hover);
-      color: var(--expansa-white);
     }
 
     &:active {
@@ -69,13 +59,23 @@
     }
   }
 
+  &--secondary {
+    background-color: var(--expansa-secondary);
+
+    &:hover {
+      background-color: var(--expansa-secondary-hover);
+    }
+
+    &:active {
+      background-color: var(--expansa-secondary-active);
+    }
+  }
+
   &--success {
     background-color: var(--expansa-success);
-    color: var(--expansa-white);
 
     &:hover {
       background-color: var(--expansa-success-hover);
-      color: var(--expansa-white);
     }
 
     &:active {
@@ -85,11 +85,9 @@
 
   &--danger {
     background-color: var(--expansa-danger);
-    color: var(--expansa-white);
 
     &:hover {
       background-color: var(--expansa-danger-hover);
-      color: var(--expansa-white);
     }
 
     &:active {
@@ -139,6 +137,7 @@
     }
 
     &[class*="primary"]:hover:before,
+    &[class*="secondary"]:hover:before,
     &[class*="success"]:hover:before,
     &[class*="danger"]:hover:before {
       color: var(--expansa-white);
@@ -163,16 +162,17 @@
       border: 1.5px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
-      color: var(--expansa-secondary);
+      color: var(--expansa-dark);
       position: absolute;
       width: 1em;
       height: 1em;
       inset: 0;
       margin: auto;
-      animation: spinner-border .5s linear infinite;
+      animation: spinner-border 0.5s linear infinite;
     }
 
     &[class*="primary"]:after,
+    &[class*="secondary"]:after,
     &[class*="success"]:after,
     &[class*="danger"]:after {
       color: var(--expansa-white);

@@ -6,7 +6,7 @@ var __webpack_modules__ = {
                 !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = factory, __WEBPACK_AMD_DEFINE_RESULT__ = typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? __WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__) : __WEBPACK_AMD_DEFINE_FACTORY__, 
                 __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
             } else {}
-        })((function() {
+        })(function() {
             'use strict';
             var VERSION = '14.6.4';
             function isValidFormatter(entry) {
@@ -22,9 +22,9 @@ var __webpack_modules__ = {
                 e.preventDefault();
             }
             function unique(array) {
-                return array.filter((function(a) {
+                return array.filter(function(a) {
                     return !this[a] ? this[a] = true : false;
-                }), {});
+                }, {});
             }
             function closest(value, to) {
                 return Math.round(value / to) * to;
@@ -45,9 +45,9 @@ var __webpack_modules__ = {
             function addClassFor(element, className, duration) {
                 if (duration > 0) {
                     addClass(element, className);
-                    setTimeout((function() {
+                    setTimeout(function() {
                         removeClass(element, className);
-                    }), duration);
+                    }, duration);
                 }
             }
             function limit(a) {
@@ -235,13 +235,13 @@ var __webpack_modules__ = {
                     }
                 }
                 if (ordered.length && typeof ordered[0][0] === 'object') {
-                    ordered.sort((function(a, b) {
+                    ordered.sort(function(a, b) {
                         return a[0][0] - b[0][0];
-                    }));
+                    });
                 } else {
-                    ordered.sort((function(a, b) {
+                    ordered.sort(function(a, b) {
                         return a[0] - b[0];
-                    }));
+                    });
                 }
                 for (index = 0; index < ordered.length; index++) {
                     handleEntryPoint(ordered[index][1], ordered[index][0], this);
@@ -602,11 +602,11 @@ var __webpack_modules__ = {
                     if (parsed.tooltips.length !== parsed.handles) {
                         throw new Error('noUiSlider (' + VERSION + '): must pass a formatter for all handles.');
                     }
-                    parsed.tooltips.forEach((function(formatter) {
+                    parsed.tooltips.forEach(function(formatter) {
                         if (typeof formatter !== 'boolean' && (typeof formatter !== 'object' || typeof formatter.to !== 'function')) {
                             throw new Error('noUiSlider (' + VERSION + '): \'tooltips\' must be passed a formatter or \'false\'.');
                         }
-                    }));
+                    });
                 }
             }
             function testAriaFormat(parsed, entry) {
@@ -762,7 +762,7 @@ var __webpack_modules__ = {
                 if (options.format && !options.ariaFormat) {
                     options.ariaFormat = options.format;
                 }
-                Object.keys(tests).forEach((function(name) {
+                Object.keys(tests).forEach(function(name) {
                     if (!isSet(options[name]) && defaults[name] === undefined) {
                         if (tests[name].r) {
                             throw new Error('noUiSlider (' + VERSION + '): \'' + name + '\' is required.');
@@ -770,7 +770,7 @@ var __webpack_modules__ = {
                         return true;
                     }
                     tests[name].t(parsed, !isSet(options[name]) ? defaults[name] : options[name]);
-                }));
+                });
                 parsed.pips = options.pips;
                 var d = document.createElement('div');
                 var msPrefix = d.style.msTransform !== undefined;
@@ -820,9 +820,9 @@ var __webpack_modules__ = {
                     handle.setAttribute('data-handle', handleNumber);
                     if (options.keyboardSupport) {
                         handle.setAttribute('tabindex', '0');
-                        handle.addEventListener('keydown', (function(event) {
+                        handle.addEventListener('keydown', function(event) {
                             return eventKeydown(event, handleNumber);
-                        }));
+                        });
                     }
                     handle.setAttribute('role', 'slider');
                     handle.setAttribute('aria-orientation', options.ort ? 'vertical' : 'horizontal');
@@ -886,18 +886,18 @@ var __webpack_modules__ = {
                 function removeTooltips() {
                     if (scope_Tooltips) {
                         removeEvent('update' + INTERNAL_EVENT_NS.tooltips);
-                        scope_Tooltips.forEach((function(tooltip) {
+                        scope_Tooltips.forEach(function(tooltip) {
                             if (tooltip) {
                                 removeElement(tooltip);
                             }
-                        }));
+                        });
                         scope_Tooltips = null;
                     }
                 }
                 function tooltips() {
                     removeTooltips();
                     scope_Tooltips = scope_Handles.map(addTooltip);
-                    bindEvent('update' + INTERNAL_EVENT_NS.tooltips, (function(values, handleNumber, unencoded) {
+                    bindEvent('update' + INTERNAL_EVENT_NS.tooltips, function(values, handleNumber, unencoded) {
                         if (!scope_Tooltips[handleNumber]) {
                             return;
                         }
@@ -906,12 +906,12 @@ var __webpack_modules__ = {
                             formattedValue = options.tooltips[handleNumber].to(unencoded[handleNumber]);
                         }
                         scope_Tooltips[handleNumber].innerHTML = formattedValue;
-                    }));
+                    });
                 }
                 function aria() {
                     removeEvent('update' + INTERNAL_EVENT_NS.aria);
-                    bindEvent('update' + INTERNAL_EVENT_NS.aria, (function(values, handleNumber, unencoded, tap, positions) {
-                        scope_HandleNumbers.forEach((function(index) {
+                    bindEvent('update' + INTERNAL_EVENT_NS.aria, function(values, handleNumber, unencoded, tap, positions) {
+                        scope_HandleNumbers.forEach(function(index) {
                             var handle = scope_Handles[index];
                             var min = checkHandlePosition(scope_Locations, index, 0, true, true, true);
                             var max = checkHandlePosition(scope_Locations, index, 100, true, true, true);
@@ -924,8 +924,8 @@ var __webpack_modules__ = {
                             handle.children[0].setAttribute('aria-valuemax', max);
                             handle.children[0].setAttribute('aria-valuenow', now);
                             handle.children[0].setAttribute('aria-valuetext', text);
-                        }));
-                    }));
+                        });
+                    });
                 }
                 function getGroup(mode, values, stepped) {
                     if (mode === 'range' || mode === 'steps') {
@@ -945,15 +945,15 @@ var __webpack_modules__ = {
                         mode = 'positions';
                     }
                     if (mode === 'positions') {
-                        return values.map((function(value) {
+                        return values.map(function(value) {
                             return scope_Spectrum.fromStepping(stepped ? scope_Spectrum.getStep(value) : value);
-                        }));
+                        });
                     }
                     if (mode === 'values') {
                         if (stepped) {
-                            return values.map((function(value) {
+                            return values.map(function(value) {
                                 return scope_Spectrum.fromStepping(scope_Spectrum.getStep(scope_Spectrum.toStepping(value)));
-                            }));
+                            });
                         }
                         return values;
                     }
@@ -968,9 +968,9 @@ var __webpack_modules__ = {
                     var ignoreFirst = false;
                     var ignoreLast = false;
                     var prevPct = 0;
-                    group = unique(group.slice().sort((function(a, b) {
+                    group = unique(group.slice().sort(function(a, b) {
                         return a - b;
-                    })));
+                    }));
                     if (group[0] !== firstInRange) {
                         group.unshift(firstInRange);
                         ignoreFirst = true;
@@ -979,7 +979,7 @@ var __webpack_modules__ = {
                         group.push(lastInRange);
                         ignoreLast = true;
                     }
-                    group.forEach((function(current, index) {
+                    group.forEach(function(current, index) {
                         var step;
                         var i;
                         var q;
@@ -1025,7 +1025,7 @@ var __webpack_modules__ = {
                             }
                             prevPct = newPct;
                         }
-                    }));
+                    });
                     return indexes;
                 }
                 function addMarking(spread, filterFunc, formatter) {
@@ -1064,9 +1064,9 @@ var __webpack_modules__ = {
                             node.innerHTML = formatter.to(value);
                         }
                     }
-                    Object.keys(spread).forEach((function(offset) {
+                    Object.keys(spread).forEach(function(offset) {
                         addSpread(offset, spread[offset][0], spread[offset][1]);
-                    }));
+                    });
                     return element;
                 }
                 function removePips() {
@@ -1120,12 +1120,12 @@ var __webpack_modules__ = {
                         callback(e, data);
                     };
                     var methods = [];
-                    events.split(' ').forEach((function(eventName) {
+                    events.split(' ').forEach(function(eventName) {
                         element.addEventListener(eventName, method, supportsPassive ? {
                             passive: true
                         } : false);
                         methods.push([ eventName, method ]);
-                    }));
+                    });
                     return methods;
                 }
                 function fixEvent(e, pageOffset, eventTarget) {
@@ -1179,7 +1179,7 @@ var __webpack_modules__ = {
                 function getClosestHandle(clickedPosition) {
                     var smallestDifference = 100;
                     var handleNumber = false;
-                    scope_Handles.forEach((function(handle, index) {
+                    scope_Handles.forEach(function(handle, index) {
                         if (isHandleDisabled(index)) {
                             return;
                         }
@@ -1192,7 +1192,7 @@ var __webpack_modules__ = {
                             handleNumber = index;
                             smallestDifference = differenceWithThisHandle;
                         }
-                    }));
+                    });
                     return handleNumber;
                 }
                 function documentLeave(event, data) {
@@ -1213,9 +1213,9 @@ var __webpack_modules__ = {
                         removeClass(data.handle, options.cssClasses.active);
                         scope_ActiveHandlesCount -= 1;
                     }
-                    data.listeners.forEach((function(c) {
+                    data.listeners.forEach(function(c) {
                         scope_DocumentElement.removeEventListener(c[0], c[1]);
-                    }));
+                    });
                     if (scope_ActiveHandlesCount === 0) {
                         removeClass(scope_Target, options.cssClasses.drag);
                         setZindex();
@@ -1224,11 +1224,11 @@ var __webpack_modules__ = {
                             scope_Body.removeEventListener('selectstart', preventDefault);
                         }
                     }
-                    data.handleNumbers.forEach((function(handleNumber) {
+                    data.handleNumbers.forEach(function(handleNumber) {
                         fireEvent('change', handleNumber);
                         fireEvent('set', handleNumber);
                         fireEvent('end', handleNumber);
-                    }));
+                    });
                 }
                 function eventStart(event, data) {
                     if (data.handleNumbers.some(isHandleDisabled)) {
@@ -1276,9 +1276,9 @@ var __webpack_modules__ = {
                         }
                         scope_Body.addEventListener('selectstart', preventDefault, false);
                     }
-                    data.handleNumbers.forEach((function(handleNumber) {
+                    data.handleNumbers.forEach(function(handleNumber) {
                         fireEvent('start', handleNumber);
-                    }));
+                    });
                 }
                 function eventTap(event) {
                     event.stopPropagation();
@@ -1306,13 +1306,13 @@ var __webpack_modules__ = {
                     var proposal = calcPointToPercentage(event.calcPoint);
                     var to = scope_Spectrum.getStep(proposal);
                     var value = scope_Spectrum.fromStepping(to);
-                    Object.keys(scope_Events).forEach((function(targetEvent) {
+                    Object.keys(scope_Events).forEach(function(targetEvent) {
                         if ('hover' === targetEvent.split('.')[0]) {
-                            scope_Events[targetEvent].forEach((function(callback) {
+                            scope_Events[targetEvent].forEach(function(callback) {
                                 callback.call(scope_Self, value);
-                            }));
+                            });
                         }
-                    }));
+                    });
                 }
                 function eventKeydown(event, handleNumber) {
                     if (isSliderDisabled() || isHandleDisabled(handleNumber)) {
@@ -1371,11 +1371,11 @@ var __webpack_modules__ = {
                 }
                 function bindSliderEvents(behaviour) {
                     if (!behaviour.fixed) {
-                        scope_Handles.forEach((function(handle, index) {
+                        scope_Handles.forEach(function(handle, index) {
                             attachEvent(actions.start, handle.children[0], eventStart, {
                                 handleNumbers: [ index ]
                             });
-                        }));
+                        });
                     }
                     if (behaviour.tap) {
                         attachEvent(actions.start, scope_Base, eventTap, {});
@@ -1386,7 +1386,7 @@ var __webpack_modules__ = {
                         });
                     }
                     if (behaviour.drag) {
-                        scope_Connects.forEach((function(connect, index) {
+                        scope_Connects.forEach(function(connect, index) {
                             if (connect === false || index === 0 || index === scope_Connects.length - 1) {
                                 return;
                             }
@@ -1398,22 +1398,22 @@ var __webpack_modules__ = {
                                 eventHolders.push(handleBefore.children[0]);
                                 eventHolders.push(handleAfter.children[0]);
                             }
-                            eventHolders.forEach((function(eventHolder) {
+                            eventHolders.forEach(function(eventHolder) {
                                 attachEvent(actions.start, eventHolder, eventStart, {
                                     handles: [ handleBefore, handleAfter ],
                                     handleNumbers: [ index - 1, index ]
                                 });
-                            }));
-                        }));
+                            });
+                        });
                     }
                 }
                 function bindEvent(namespacedEvent, callback) {
                     scope_Events[namespacedEvent] = scope_Events[namespacedEvent] || [];
                     scope_Events[namespacedEvent].push(callback);
                     if (namespacedEvent.split('.')[0] === 'update') {
-                        scope_Handles.forEach((function(a, index) {
+                        scope_Handles.forEach(function(a, index) {
                             fireEvent('update', index);
-                        }));
+                        });
                     }
                 }
                 function isInternalNamespace(namespace) {
@@ -1422,7 +1422,7 @@ var __webpack_modules__ = {
                 function removeEvent(namespacedEvent) {
                     var event = namespacedEvent && namespacedEvent.split('.')[0];
                     var namespace = event ? namespacedEvent.substring(event.length) : namespacedEvent;
-                    Object.keys(scope_Events).forEach((function(bind) {
+                    Object.keys(scope_Events).forEach(function(bind) {
                         var tEvent = bind.split('.')[0];
                         var tNamespace = bind.substring(tEvent.length);
                         if ((!event || event === tEvent) && (!namespace || namespace === tNamespace)) {
@@ -1430,17 +1430,17 @@ var __webpack_modules__ = {
                                 delete scope_Events[bind];
                             }
                         }
-                    }));
+                    });
                 }
                 function fireEvent(eventName, handleNumber, tap) {
-                    Object.keys(scope_Events).forEach((function(targetEvent) {
+                    Object.keys(scope_Events).forEach(function(targetEvent) {
                         var eventType = targetEvent.split('.')[0];
                         if (eventName === eventType) {
-                            scope_Events[targetEvent].forEach((function(callback) {
+                            scope_Events[targetEvent].forEach(function(callback) {
                                 callback.call(scope_Self, scope_Values.map(options.format.to), handleNumber, scope_Values.slice(), tap || false, scope_Locations.slice(), scope_Self);
-                            }));
+                            });
                         }
-                    }));
+                    });
                 }
                 function checkHandlePosition(reference, handleNumber, to, lookBackward, lookForward, getValue) {
                     var distance;
@@ -1494,7 +1494,7 @@ var __webpack_modules__ = {
                         handleNumbers.reverse();
                     }
                     if (handleNumbers.length > 1) {
-                        handleNumbers.forEach((function(handleNumber, o) {
+                        handleNumbers.forEach(function(handleNumber, o) {
                             var to = checkHandlePosition(proposals, handleNumber, proposals[handleNumber] + proposal, b[o], f[o], false);
                             if (to === false) {
                                 proposal = 0;
@@ -1502,19 +1502,19 @@ var __webpack_modules__ = {
                                 proposal = to - proposals[handleNumber];
                                 proposals[handleNumber] = to;
                             }
-                        }));
+                        });
                     } else {
                         b = f = [ true ];
                     }
                     var state = false;
-                    handleNumbers.forEach((function(handleNumber, o) {
+                    handleNumbers.forEach(function(handleNumber, o) {
                         state = setHandle(handleNumber, locations[handleNumber] + proposal, b[o], f[o]) || state;
-                    }));
+                    });
                     if (state) {
-                        handleNumbers.forEach((function(handleNumber) {
+                        handleNumbers.forEach(function(handleNumber) {
                             fireEvent('update', handleNumber);
                             fireEvent('slide', handleNumber);
-                        }));
+                        });
                     }
                 }
                 function transformDirection(a, b) {
@@ -1530,11 +1530,11 @@ var __webpack_modules__ = {
                     updateConnect(handleNumber + 1);
                 }
                 function setZindex() {
-                    scope_HandleNumbers.forEach((function(handleNumber) {
+                    scope_HandleNumbers.forEach(function(handleNumber) {
                         var dir = scope_Locations[handleNumber] > 50 ? -1 : 1;
                         var zIndex = 3 + (scope_Handles.length + dir * handleNumber);
                         scope_Handles[handleNumber].style.zIndex = zIndex;
-                    }));
+                    });
                 }
                 function setHandle(handleNumber, to, lookBackward, lookForward, exactInput) {
                     if (!exactInput) {
@@ -1584,22 +1584,22 @@ var __webpack_modules__ = {
                     if (options.animate && !isInit) {
                         addClassFor(scope_Target, options.cssClasses.tap, options.animationDuration);
                     }
-                    scope_HandleNumbers.forEach((function(handleNumber) {
+                    scope_HandleNumbers.forEach(function(handleNumber) {
                         setHandle(handleNumber, resolveToValue(values[handleNumber], handleNumber), true, false, exactInput);
-                    }));
+                    });
                     var i = scope_HandleNumbers.length === 1 ? 0 : 1;
                     for (;i < scope_HandleNumbers.length; ++i) {
-                        scope_HandleNumbers.forEach((function(handleNumber) {
+                        scope_HandleNumbers.forEach(function(handleNumber) {
                             setHandle(handleNumber, scope_Locations[handleNumber], true, true, exactInput);
-                        }));
+                        });
                     }
                     setZindex();
-                    scope_HandleNumbers.forEach((function(handleNumber) {
+                    scope_HandleNumbers.forEach(function(handleNumber) {
                         fireEvent('update', handleNumber);
                         if (values[handleNumber] !== null && fireSetEvent) {
                             fireEvent('set', handleNumber);
                         }
-                    }));
+                    });
                 }
                 function valueReset(fireSetEvent) {
                     valueSet(options.start, fireSetEvent);
@@ -1677,17 +1677,17 @@ var __webpack_modules__ = {
                 function updateOptions(optionsToUpdate, fireSetEvent) {
                     var v = valueGet();
                     var updateAble = [ 'margin', 'limit', 'padding', 'range', 'animate', 'snap', 'step', 'format', 'pips', 'tooltips' ];
-                    updateAble.forEach((function(name) {
+                    updateAble.forEach(function(name) {
                         if (optionsToUpdate[name] !== undefined) {
                             originalOptions[name] = optionsToUpdate[name];
                         }
-                    }));
+                    });
                     var newOptions = testOptions(originalOptions);
-                    updateAble.forEach((function(name) {
+                    updateAble.forEach(function(name) {
                         if (optionsToUpdate[name] !== undefined) {
                             options[name] = newOptions[name];
                         }
-                    }));
+                    });
                     scope_Spectrum = newOptions.spectrum;
                     options.margin = newOptions.margin;
                     options.limit = newOptions.limit;
@@ -1764,7 +1764,7 @@ var __webpack_modules__ = {
                 cssClasses,
                 create: initialize
             };
-        }));
+        });
     }
 };
 

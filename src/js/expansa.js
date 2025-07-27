@@ -227,7 +227,87 @@ document.addEventListener( 'alpine:init', () => {
 				} )
 			}
 		};
-	} )
+	} );
+
+	/**
+	 * Alpine.js magic property `dirtyCheck` for tracking unsaved changes in forms.
+	 *
+	 * Tracks initial state and compares it with current values to detect real changes.
+	 * If user reverts fields back to initial values, form becomes "clean" again.
+	 */
+	let unsavedForms = new Map();
+	let dirtyCheckIsInitialized = false;
+
+	function serializeForm(form) {
+		return JSON.stringify(Object.fromEntries(new FormData(form).entries()));
+	}
+
+	function checkDirty(form) {
+		const initial = form.dataset.initialState;
+		const current = serializeForm(form);
+
+		if (initial !== current) {
+			unsavedForms.set(form, true);
+			document.body.classList.add('is-unsaved');
+		} else {
+			unsavedForms.delete(form);
+			if (!unsavedForms.size) {
+				document.body.classList.remove('is-unsaved');
+			}
+		}
+	}
+
+	function blockInternalNavigation(e) {
+		const target = e.target.closest('a[href]');
+		if (target && unsavedForms.size && document.body.classList.contains('is-unsaved')) {
+			e.preventDefault();
+
+			document.body.classList.add('is-shake');
+
+			setTimeout(() => {
+				document.body.classList.remove('is-shake');
+			}, 500);
+		}
+	}
+
+	Alpine.magic('dirtyCheck', () => ({
+		watch(form) {
+			if (form instanceof HTMLFormElement && !dirtyCheckIsInitialized) {
+				dirtyCheckIsInitialized = true;
+
+				window.addEventListener('click', blockInternalNavigation, true);
+
+				setTimeout(() => {
+					form.dataset.initialState = serializeForm(form);
+
+					form.addEventListener('input', () => checkDirty(form));
+					form.addEventListener('change', () => checkDirty(form));
+					form.addEventListener('reset', e => {
+						setTimeout(() => {
+							e.target.dataset.initialState = serializeForm(e.target);
+
+							unsavedForms.delete(e.target);
+
+							if (!unsavedForms.size) {
+								document.body.classList.remove('is-unsaved');
+							}
+						}, 0);
+					});
+				}, 50);
+			}
+		},
+		remove(form) {
+			if (form instanceof HTMLFormElement) {
+				unsavedForms.delete(form);
+
+				form.dataset.initialState = serializeForm(form);
+
+				if (!unsavedForms.size) {
+					document.body.classList.remove('is-unsaved');
+				}
+			}
+		}
+	}));
 
 	/**
 	 * Copy data to clipboard.
@@ -977,7 +1057,6 @@ document.addEventListener( 'alpine:init', () => {
 					},
 					...options
 				});
-				console.log(datepicker)
 			});
 		});
 	});
@@ -1110,39 +1189,153 @@ document.addEventListener( 'alpine:init', () => {
 	});
 
 	/**
-	 * Advanced select dropdown based on SlimSelect library.
+	 * Advanced select dropdown based on Choices.js library.
 	 *
-	 * @see   https://github.com/brianvoe/slim-select
-	 * @since 1.0
+	 * @see https://github.com/Choices-js/Choices
 	 */
 	Alpine.directive('select', (el, {expression}) => {
-		const settings = {
-			showSearch: false,
-			hideSelected: false,
-			closeOnSelect: true,
-			isAddable: false,
-			placeholderText: el.getAttribute('placeholder'),
-		};
+		const settings = JSON.parse(expression || '{}');
 
-		if (el.hasAttribute('multiple')) {
-			settings.hideSelected = true;
-			settings.closeOnSelect = false;
-		}
+		if (0) {
+			function setPrefix(data) {
+				const { image, flag, icon } = data.element.dataset;
 
-		const custom = JSON.parse(expression || '{}');
-		if (typeof custom === 'object') {
-			Object.assign(settings, custom);
+				return [
+					icon && `<i class="${icon}"></i>`,
+					image && `<img src="${image}" alt />`,
+					flag && `<svg role="presentation"><use xlink:href="${expansa?.spriteFlagsUrl}#${flag}"></use></svg>`,
+				].filter(Boolean).join('').trim();
+			}
+
+			try {
+				const select = new Choices(el, {
+					silent: false,
+					renderChoiceLimit: -1,
+					maxItemCount: -1,
+					closeDropdownOnSelect: 'auto',
+					singleModeForMultiSelect: false,
+					addChoices: false,
+					addItems: true,
+					addItemFilter: (value) => !!value && value !== '',
+					removeItems: true,
+					removeItemButton: el.multiple,
+					removeItemButtonAlignLeft: false,
+					editItems: false,
+					allowHTML: true,
+					allowHtmlUserInput: false,
+					duplicateItemsAllowed: false,
+					delimiter: ',',
+					paste: true,
+					searchEnabled: true,
+					searchChoices: true,
+					searchFloor: 1,
+					searchResultLimit: 7,
+					searchFields: ['label', 'value'],
+					position: 'auto',
+					resetScrollPosition: true,
+					shouldSort: false,
+					shouldSortItems: false,
+					shadowRoot: null,
+					placeholder: true,
+					placeholderValue: null,
+					searchPlaceholderValue: null,
+					prependValue: null,
+					appendValue: null,
+					renderSelectedChoices: 'auto',
+					loadingText: expansa.loadingText || 'Loading...',
+					noResultsText: expansa.noResultsText || 'No results found',
+					noChoicesText: expansa.noChoicesText || 'No choices to choose from',
+					itemSelectText: '',
+					uniqueItemText: expansa.uniqueItemText || 'Only unique values can be added',
+					customAddItemText: expansa.customAddItemText || 'Only values matching specific conditions can be added',
+					addItemText: (value, rawValue) => {
+						return `Press Enter to add <b>"${value}"</b>`;
+					},
+					removeItemIconText: () => `Remove item`,
+					removeItemLabelText: (value, rawValue) => `Remove item: ${value}`,
+					maxItemText: (maxItemCount) => {
+						return `Only ${maxItemCount} values can be added`;
+					},
+					valueComparer: (value1, value2) => {
+						return value1 === value2;
+					},
+					callbackOnInit: null,
+					appendGroupInSearch: false,
+					callbackOnCreateTemplates: (template, escapeForTemplate, getClassNames, allowHTML) => ({
+						item: ({ classNames }, data) => {
+							const baseClasses = [
+								...getClassNames(classNames.item),
+								...getClassNames(data.highlighted ? classNames.highlightedState : classNames.itemSelectable),
+								data.placeholder ? classNames.placeholder : ''
+							];
+
+							const attrs = [
+								'data-item',
+								`data-id="${data.id}"`,
+								`data-value="${escapeForTemplate(data.value)}"`,
+								data.active ? 'aria-selected="true"' : '',
+								data.disabled ? 'aria-disabled="true"' : ''
+							].filter(Boolean).join(' ');
+
+							const prefix = setPrefix(data);
+
+							return template(`<div class="${baseClasses.join(' ')}" ${attrs}>${prefix}${escapeForTemplate(allowHTML, data.label)}</div>`);
+						},
+						choice: ({ classNames, itemSelectText }, data) => {
+							const baseClasses = [
+								...getClassNames(classNames.item),
+								...getClassNames(classNames.itemChoice),
+								...getClassNames(data.disabled ? classNames.itemDisabled : classNames.itemSelectable),
+							];
+
+							const attrs = {
+								'data-select-text': itemSelectText,
+								'data-choice': '',
+								'data-id': data.id,
+								'data-value': escapeForTemplate(data.value),
+								'role': data.groupId > 0 ? 'treeitem' : 'option',
+							};
+
+							if (data.disabled) {
+								attrs['data-choice-disabled'] = '';
+								attrs['aria-disabled'] = 'true';
+							} else {
+								attrs['data-choice-selectable'] = '';
+							}
+
+							const attributesString = Object.entries(attrs)
+								.map(([key, val]) => (val === '' ? key : `${key}="${val}"`))
+								.join(' ');
+
+							const prefix = setPrefix(data);
+
+							let description = data.element.dataset.description || '';
+							if (description) {
+								description = `<span class="choices__description">${description}</span>`;
+							}
+
+							return template(`<div class="${baseClasses.join(' ')}" ${attributesString}>
+								${prefix}<span class="choices__text">${escapeForTemplate(allowHTML, data.label + description)}</span>
+							</div>`);
+						},
+						...settings
+					})
+				});
+			} catch (e) {
+				console.error(e);
+			}
+			return;
 		}
 
 		try {
-			let width  = el.offsetWidth;
-			let select = new SlimSelect({
-				settings,
+			const select = new SlimSelect({
+				settings: {
+					...settings,
+					contentPosition: 'fixed',
+					contentLocation: el.closest('dialog') ? el.parentElement : null,
+				},
 				select: el,
 				events: {
-					afterChange: () => {
-						el.dispatchEvent(new Event('change', { bubbles: true }));
-					},
 					addable: value => {
 						if (settings.isAddable) {
 							return value;
@@ -1176,14 +1369,11 @@ document.addEventListener( 'alpine:init', () => {
 
 					if (option.parentElement.tagName === 'OPTGROUP') {
 						const optgroupLabel = option.parentElement.getAttribute('label');
-						const optgroup      = acc.find(item => item.label === optgroupLabel);
-						if (optgroup) {
-							optgroup.options.push(optionData);
+						const optgroupItems = acc.find(item => item.label === optgroupLabel);
+						if (optgroupItems) {
+							optgroupItems.options.push(optionData);
 						} else {
-							acc.push({
-								label: optgroupLabel,
-								options: [optionData]
-							});
+							acc.push({label: optgroupLabel, options: [optionData]});
 						}
 					} else {
 						acc.push(optionData);
@@ -1192,9 +1382,18 @@ document.addEventListener( 'alpine:init', () => {
 				}, []),
 			});
 
+			// Updating SlimSelect from actual native select element value
+			const form = el.closest('form');
+			const value = Array.from(el.selectedOptions).map((option) => option.value);
+			if (form) {
+				form.addEventListener('reset', () => {
+					setTimeout(() => select.setSelected(value, false), 0);
+				});
+			}
+
 			// TODO: при уменьшении экрана, элемент не помещается
 			// в то же время нужно соблюсти ширину как у нативного select
-			select.selectEl.nextSibling.style.minWidth = `${width}px`;
+			//select.selectEl.nextSibling.style.minWidth = `${el.offsetWidth}px`;
 		} catch(e) {
 			console.error(e);
 		}

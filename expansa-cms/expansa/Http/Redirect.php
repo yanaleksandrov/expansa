@@ -7,9 +7,6 @@ namespace Expansa\Http;
 use Expansa\Facades\Hook;
 use InvalidArgumentException;
 
-/**
- * @package Expansa\Http
- */
 final class Redirect
 {
     private array $values = [];

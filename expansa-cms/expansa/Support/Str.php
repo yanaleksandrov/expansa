@@ -208,6 +208,33 @@ class Str
      */
     public static function singularize(string $word): string
     {
+        $ignore = [
+            // materials and substances
+            'water', 'air', 'sand', 'sugar', 'salt', 'rice', 'flour', 'oil', 'butter',
+            'cheese', 'milk', 'coffee', 'tea', 'honey', 'meat', 'fish', 'sheep',
+
+            // abstract concepts and states
+            'information', 'advice', 'knowledge', 'news', 'progress', 'work', 'homework', 'luck',
+            'happiness', 'freedom', 'education', 'music', 'poetry', 'patience', 'traffic', 'press', 'sms',
+
+            // money and economic concepts
+            'money', 'currency', 'wealth', 'commerce', 'trade',
+
+            // food and drinks (in general sense)
+            'bread', 'food', 'juice', 'wine', 'beer',
+
+            // languages and academic subjects
+            'english', 'french', 'mathematics', 'physics', 'chemistry',
+
+            // others
+            'furniture', 'equipment', 'species', 'series', 'software', 'hardware', 'clothing',
+            'luggage', 'weather', 'machinery',
+        ];
+
+        if (isset($ignore[strtolower(substr(strtolower($word), -1))])) {
+            return $word;
+        }
+
         $singular = [
             '/(quiz)zes$/i'                                                    => '\\1',
             '/(matr)ices$/i'                                                   => '\\1ix',
@@ -234,11 +261,6 @@ class Str
             '/(n)ews$/i'                                                       => '\\1ews',
             '/s$/i'                                                            => '',
         ];
-
-        $ignore = ['equipment', 'information', 'rice', 'money', 'species', 'series', 'fish', 'sheep', 'press', 'sms'];
-        if (isset($ignore[strtolower(substr(strtolower($word), -1))])) {
-            return $word;
-        }
 
         foreach ($singular as $rule => $replacement) {
             if (preg_match($rule, $word)) {

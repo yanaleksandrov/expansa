@@ -1029,6 +1029,21 @@ class Builder extends BuilderAbstract
     }
 
     /**
+     * Check database hase table.
+     *
+     * @param string $tableName
+     * @return bool
+     */
+    public function hasTable(string $tableName): bool
+    {
+        $schema = $this->schema();
+        if (empty($schema[$tableName])) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Get database schema
      *
      * @see https://stackoverflow.com/questions/52642542/how-to-extract-column-name-and-type-from-mysql

@@ -13,6 +13,7 @@ use Expansa\Database\Schema\Traits\Commands;
  *
  * @method Column id(string $column = 'id') Add an auto-incrementing primary key column
  * @method Column ulid(string $column = 'ulid') Add a ULID column
+ * @method Column uuid(string $column = 'uuid') Add a UUID column
  * @method Column tinyInt(string $column, int $precision = 3) Add a TINYINT column
  * @method Column smallInt(string $column, int $precision = 5) Add a SMALLINT column
  * @method Column mediumInt(string $column, int $precision = 8) Add a MEDIUMINT column
@@ -29,7 +30,6 @@ use Expansa\Database\Schema\Traits\Commands;
  * @method Column mediumText(string $column) Add a MEDIUMTEXT column
  * @method Column text(string $column) Add a TEXT column
  * @method Column longText(string $column) Add a LONGTEXT column
- * @method Column uuid(string $column) Add a UUID column
  * @method Column json(string $column) Add a JSON column
  * @method Column enum(string $column, array $allowed) Add an ENUM column
  * @method Column date(string $column) Add a DATE column
@@ -38,7 +38,6 @@ use Expansa\Database\Schema\Traits\Commands;
  * @method Column timestamp(string $column) Add a TIMESTAMP column
  * @method void   timestamps() Add created_at and updated_at columns
  * @method Column addColumn(string $type, string $name, array $parameters = []) Add a new column to the table
- *
  * @method static create() Add a create command for the table
  * @method static rename(string $to) Add a rename command for the table
  * @method static drop() Add a drop command for the table

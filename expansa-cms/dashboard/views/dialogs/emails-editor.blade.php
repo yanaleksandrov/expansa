@@ -17,7 +17,7 @@ defined('EX_PATH') || exit;
         <div class="email-preview">
             <?php
             echo view(
-                'views/mails/wrappers',
+                'mails/wrappers',
                 [
                     'body_template' => 'views/mails/reset-password',
                 ]

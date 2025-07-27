@@ -3,7 +3,7 @@
  *
  * License: MIT <https://opensource.org/licenses/MIT>
  *
- * @version 2.7.0
+ * @version 2.12.1
  * @source  https://github.com/brianvoe/slim-select
  * @author	Brian Voelker
  */
