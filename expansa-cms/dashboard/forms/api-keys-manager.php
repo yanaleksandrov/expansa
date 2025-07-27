@@ -145,9 +145,7 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [
-						'value' => '',
-					],
+					'attributes'  => [],
 				],
 				[
 					'type'        => 'date',
@@ -163,9 +161,7 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [
-						'value' => '',
-					],
+					'attributes'  => [],
 				],
 			],
 		],

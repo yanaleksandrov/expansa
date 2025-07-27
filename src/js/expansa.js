@@ -967,100 +967,42 @@ document.addEventListener( 'alpine:init', () => {
 	}));
 
 	/**
-	 * Datepicker.
+	 * Alpine.js directive: datepicker.
+	 *
+	 * Initializes an AirDatepicker instance on the element with reactive options.
 	 *
 	 * Based on https://github.com/t1m0n/air-datepicker
 	 *
 	 * @since 1.0
 	 */
 	Alpine.directive( 'datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
+		let datepickerInstance;
+
 		let evaluate = evaluateLater(expression || '{}');
-		effect(() => {
-			evaluate( options => {
-				let format = expansa?.dateFormat,
-					lang   = (expansa?.lang || navigator.language || navigator.userLanguage || 'en-US');
 
-				let translateWeekdays = length => {
-					return Array.from({ length: 7 }, (_, i) => {
-						return new Intl.DateTimeFormat(lang, { weekday: length }).format(new Date(2024, 0, i + 1));
-					});
-				}
+		effect(() => evaluate(options => {
+			if (datepickerInstance) {
+				datepickerInstance.destroy();
+			}
 
-				let translateMonths = length => {
-					return Array.from({ length: 12 }, (_, i) => {
-						let month = new Intl.DateTimeFormat(lang, { month: length }).format(new Date(2024, i, 1));
-							month = month.endsWith('.') ? month.slice(0, -1) : month;
+			try {
+				datepickerInstance = new AirDatepicker(el, {
+					range: false,
+					inline: false,
+					multipleDatesSeparator: ' — ',
+					locale: expansa?.datepicker || undefined,
+					firstDay: expansa?.weekStart || 0,
+					dateFormat: expansa?.dateFormat || 'yyyy-MM-dd',
+					container: el.closest('div'),
+					view: 'days',
+					...options
+				});
+			} catch(e) {
+				console.error(e);
+			}
+		}));
 
-						return month.charAt(0).toUpperCase() + month.slice(1);
-					});
-				}
-
-				const formatter = (date, format) => {
-					let s             = date.toString(),
-						f           = date.getTime(),
-						fullYear    = date.getFullYear(),
-						monthNumber = date.getMonth(),
-						day         = date.getDate(),
-						hours       = date.getHours(),
-						minutes     = date.getMinutes(),
-						seconds     = date.getSeconds();
-
-					return format.replace( /a|A|d|D|F|g|G|h|H|i|I|j|l|L|m|M|n|s|S|t|T|U|w|y|Y|z|Z/g, format => {
-						switch ( format ) {
-							case 'a' : return hours > 11 ? 'pm' : 'am';
-							case 'A' : return hours > 11 ? 'PM' : 'AM';
-							case 'd' : return ( '0' + day ).slice(-2);
-							case 'D' : return translateWeekdays('short')[ date.getDay() ];
-							case 'F' : return translateMonths('long')[ monthNumber ];
-							case 'g' : return ( s = ( hours || 12 ) ) > 12 ? s - 12 : s;
-							case 'G' : return hours;
-							case 'h' : return ( '0' + ( ( s = hours || 12 ) > 12 ? s - 12 : s ) ).slice(-2);
-							case 'H' : return ( '0' + hours ).slice(-2);
-							case 'i' : return ( '0' + minutes ).slice(-2);
-							case 'I' : return (() => {
-								let a = new Date(fullYear, 0),
-									c = Date.UTC(fullYear, 0),
-									b = new Date(fullYear, 6),
-									d = Date.UTC(fullYear, 6);
-								return ((a - c) !== (b - d)) ? 1 : 0;
-							})();
-							case 'j' : return day;
-							case 'l' : return translateWeekdays('long')[ date.getDay() ];
-							case 'L' : return ( s = fullYear ) % 4 === 0 && ( s % 100 !== 0 || s % 400 === 0 ) ? 1 : 0;
-							case 'm' : return ( '0' + ( monthNumber + 1 ) ).slice(-2);
-							case 'M' : return translateMonths('short')[ monthNumber ];
-							case 'n' : return monthNumber + 1;
-							case 's' : return ( '0' + seconds ).slice(-2);
-							case 'S' : return [ 'th', 'st', 'nd', 'rd' ][ ( s = day ) < 4 ? s : 0 ];
-							case 't' : return (new Date(fullYear, monthNumber, 0)).getDate();
-							case 'T' : return 'UTC';
-							case 'U' : return ( '' + f ).slice( 0, -3 );
-							case 'w' : return date.getDay();
-							case 'y' : return ( '' + fullYear ).slice(-2);
-							case 'Y' : return fullYear;
-							case 'z' : return Math.ceil((date - new Date(fullYear, 0, 1)) / 86400000);
-							default : return -date.getTimezoneOffset() * 60;
-						}
-					});
-				}
-
-                try {
-                    new AirDatepicker(el, {
-                        range: false,
-                        inline: false,
-                        multipleDatesSeparator: ' — ',
-						locale: expansa?.datepicker,
-                        firstDay: expansa?.weekStart || 0,
-                        dateFormat: format,
-                        container: el.closest('div'),
-                        view: 'days', // days, months or years
-                        ...options
-                    });
-                } catch(e) {
-                    console.error(e);
-                }
-			});
-		});
+		return () => datepickerInstance && datepickerInstance.destroy();
 	});
 
 	/**
