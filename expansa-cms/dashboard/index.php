@@ -2,10 +2,15 @@
 
 namespace Dashboard;
 
+use App\Field;
+use App\Post;
+use App\Query\Query;
+use App\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
+use Expansa\Facades\Safe;
 use Expansa\Support\Is;
 
 new class
@@ -63,7 +68,10 @@ new class
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
-        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
+        $user   = User::current();
+        $userId = $user->id ?? 0;
+
+        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'expansa') {
@@ -71,6 +79,55 @@ new class
                     'expansa_dashboard_data',
                     [
                         'apiurl'              => url('/api/'),
+                        'apiKeys'             => Query::apply(
+                            [
+                                'type'      => 'api-keys',
+                                'per_page'  => 25,
+                                'author_id' => $userId,
+                                'fields'    => ['id', 'title', 'status', 'createdAt', 'updatedAt'],
+                            ],
+                            function ($query, $items) {
+                                $posts = [];
+
+                                foreach ($items as $i => $item) {
+                                    foreach ((array) $item as $key => $value) {
+                                        if (!in_array($key, ['title', 'status', 'createdAt', 'updatedAt'], true)) {
+                                            continue;
+                                        }
+
+                                        if (in_array($key, ['createdAt', 'updatedAt'], true)) {
+                                            $date = new \DateTime($value);
+                                            if ($date instanceof \DateTime) {
+                                                $value = $date->format('j F, Y');
+                                            }
+                                        }
+
+                                        $posts[$i][$key] = $value;
+                                    }
+
+                                    $fields = (new Field($item))->get();
+                                    if ($fields) {
+                                        foreach ($fields as $field => $values) {
+                                            $key = Safe::camelcase($field);
+                                            if (!isset($key, $values[0])) {
+                                                continue;
+                                            }
+
+                                            if (in_array($key, ['endDate', 'startDate'], true)) {
+                                                $date = \DateTime::createFromFormat('Y-m-d', $values[0]);
+                                                if ($date instanceof \DateTime) {
+                                                    $values[0] = $date->format('j F, Y');
+                                                }
+                                            }
+
+                                            $posts[$i][$key] = $values[0];
+                                        }
+                                    }
+                                }
+
+                                return $posts;
+                            }
+                        ),
                         'items'               => [],
                         'locale'              => I18n::locale(),
                         'dateFormat'          => 'd MMMM, yyyy',

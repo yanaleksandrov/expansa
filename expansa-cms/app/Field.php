@@ -63,7 +63,7 @@ final class Field
             $object instanceof Post => [
                 $object->id,
                 'post_id',
-                sprintf('%s_fields', $object->table),
+                sprintf('%s_fields', $object->type),
                 sprintf('post-fields-%d', $object->id),
             ],
             default => [ null, null, null, null ],
@@ -75,9 +75,9 @@ final class Field
      *
      * Benchmark when there are 1 million rows: 1 time - 0.00068 sec, 100000 times - 0.05 sec
      *
-     * @param string      $key      The key of the field to retrieve. If empty, get all fields of object.
-     * @param bool        $isSingle Whether to limit the result to a single value (default: true).
-     * @return mixed                The field value or null if the object ID is not set.
+     * @param string  $key       The key of the field to retrieve. If empty, get all fields of object.
+     * @param bool    $isSingle  Whether to limit the result to a single value (default: true).
+     * @return mixed             The field value or null if the object ID is not set.
      */
     public function get(mixed $key = '', bool $isSingle = true): mixed
     {
@@ -286,7 +286,6 @@ final class Field
             }
         }
 
-        print_r($insertData);
         if ($insertData) {
             $insertDataParts = array_chunk($insertData, $chunkSize, false);
             foreach ($insertDataParts as $insertDataPart) {
@@ -294,7 +293,6 @@ final class Field
             }
         }
 
-        print_r($updateData);
         if ($updateData) {
             $updateDataParts  = array_chunk($updateData, $chunkSize, true);
             $updateQueryParts = array_chunk($updateQuery, $chunkSize * 2, true);

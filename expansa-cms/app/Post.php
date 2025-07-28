@@ -32,9 +32,9 @@ class Post
      * @property string $uuid         The unique string ID slug for the post.
      * @property string $link         The full URL of the entry.
      * @property string $slug         The unique URL slug for the entry.
-     * @property array  $fields       Additional custom fields.
+     * @property Field $field
      */
-    private function __construct(
+    public function __construct(
         public int $id = 0,
         public string $title = '',
         public string $content = '',
@@ -53,7 +53,7 @@ class Post
         public string $uuid = '',
         public string $link = '',
         public string $slug = '',
-        public array $fields = []
+        public ?Field $field = null,
     ) {} // phpcs:ignore
 
     /**
@@ -111,7 +111,6 @@ class Post
             }
 
             $fields = Safe::array($args['fields'] ?? []);
-            print_r($fields);
             if ($fields) {
                 ( new Field($post) )->import($fields);
             }
@@ -152,8 +151,7 @@ class Post
                 $data[ Safe::camelcase($key) ] = $value;
             }
 
-            $data['slug']   = $type->public === true ? Slug::find($data['id'], $type->table) : '';
-            $data['fields'] = [];
+            $data['slug'] = $type->public === true ? Slug::find($data['id'], $type->table) : '';
 
             return new Post(...$data);
         }

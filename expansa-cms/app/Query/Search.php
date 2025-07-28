@@ -362,7 +362,7 @@ class Search
     }
 
     /**
-     * Remove any leading or trailing operators, we don't need them and they don't apply here
+     * Remove any leading or trailing operators, we don't need them, and they don't apply here
      * Also works within brackets.
      */
     protected function removeLeadingTrailingOperators(array $tokens): array
@@ -374,13 +374,28 @@ class Search
             if (
                 in_array($element, [static::AND_TOKEN, static::OR_TOKEN, static::AND_TOKEN_CHARACTER, static::OR_TOKEN_CHARACTER, static::NOT_TOKEN, static::NOT_TOKEN_CHARACTER], true)
                 && (
-                    ( ( ! isset($tokens[$key - 1]) || ( in_array($tokens[$key - 1], $stopOperators, true) || $tokens[$key - 1] === static::LEFT_BRACKET_TOKEN_CHARACTER ) ) && $element !== static::NOT_TOKEN && $element !== static::NOT_TOKEN_CHARACTER )
-                    || ( ! isset($tokens[$key + 1]) || ( in_array($tokens[$key + 1], $stopOperators, true) || $tokens[$key + 1] === static::RIGHT_BRACKET_TOKEN_CHARACTER ) )
+                    (
+                        ( ! isset($tokens[$key - 1]) || ( in_array($tokens[$key - 1], $stopOperators, true) || $tokens[$key - 1] === static::LEFT_BRACKET_TOKEN_CHARACTER ) )
+                        &&
+                        $element !== static::NOT_TOKEN
+                        &&
+                        $element !== static::NOT_TOKEN_CHARACTER
+                    )
+                    ||
+                    ( ! isset($tokens[$key + 1]) || ( in_array($tokens[$key + 1], $stopOperators, true) || $tokens[$key + 1] === static::RIGHT_BRACKET_TOKEN_CHARACTER ) )
                 )
             ) {
                 $arrayTouched = true;
+
                 unset($tokens[$key]);
-                if (( $element === static::NOT_TOKEN || $element === static::NOT_TOKEN_CHARACTER ) && isset($tokens[$key - 1]) && in_array($tokens[$key - 1], $stopOperators, true)) {
+
+                if (
+                    ( $element === static::NOT_TOKEN || $element === static::NOT_TOKEN_CHARACTER )
+                    &&
+                    isset($tokens[$key - 1])
+                    &&
+                    in_array($tokens[$key - 1], $stopOperators, true)
+                ) {
                     unset($tokens[$key - 1]);
                 }
             }

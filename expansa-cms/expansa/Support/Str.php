@@ -50,7 +50,7 @@ class Str
 
     public static function random(int $length): string
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
         $string = '';
         for ($i = 0; $i < $length; $i++) {

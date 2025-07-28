@@ -5,7 +5,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.directive( 'intersect', (el, { value, expression, modifiers }, { evaluateLater, cleanup }) => {
+	Alpine.directive('intersect', (el, { value, expression, modifiers }, { evaluateLater, cleanup }) => {
 		function getThreshold(modifiers) {
 			if (modifiers.includes('full'))
 				return 0.99;
@@ -22,7 +22,7 @@ document.addEventListener( 'alpine:init', () => {
 		}
 		function getLengthValue(rawValue) {
 			let match = rawValue.match(/^(-?[0-9]+)(px|%)?$/);
-			return match ? match[1] + (match[2] || "px") : void 0;
+			return match ? match[1] + (match[2] || 'px') : void 0;
 		}
 		function getRootMargin(modifiers) {
 			const key      = 'margin';
@@ -506,95 +506,92 @@ document.addEventListener( 'alpine:init', () => {
 	 * @since 1.0
 	 */
 	Alpine.directive('listen', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
-		if ( ! expression ) {
+		if (!expression) {
 			return false;
 		}
 
 		let evaluate = evaluateLater(expression);
-		effect(() => {
-			evaluate(content => {
-				if ( content ) {
-					let name = "listen-node";
 
-					function _play( aud, icn ) {
-						icn.classList.add("playing");
-						aud.play();
-						aud.setAttribute( "data-playing", "true" );
-						aud.addEventListener("ended", function() {
-							_pause( aud, icn );
-							aud.parentNode.style.background = null;
-							return false;
-						});
-					}
+		effect(() => evaluate(content => {
+			if (!content) {
+				return;
+			}
 
-					function _pause( aud, icn ) {
-						aud.pause();
-						aud.setAttribute( "data-playing", "false" );
-						icn.classList.remove("playing");
-					}
+			let name = 'listen-node';
 
-					let aud, icn;
-					let css = document.createElement("style");
-					css.type = "text/css";
-					css.innerHTML = ".listen-node {display: inline-block; background:rgba(0, 0, 0, 0.05); padding: 1px 8px 2px; border-radius:3px; cursor: pointer;} .listen-node i {font-size: 0.65em; border: 0.5em solid transparent; border-left: 0.75em solid; display: inline-block; margin-right: 2px;margin-bottom: 1px;} .listen-node .playing { border: 0; border-left: 0.75em double; border-right: 0.5em solid transparent; height: 1em;}";
-					document.getElementsByTagName("head")[0].appendChild(css);
+			function _play( aud, icn ) {
+				icn.classList.add("playing");
+				aud.play();
+				aud.setAttribute( "data-playing", "true" );
+				aud.addEventListener("ended", function() {
+					_pause( aud, icn );
+					aud.parentNode.style.background = null;
+					return false;
+				});
+			}
 
-					aud = document.createElement( 'audio' );
-					icn = document.createElement( 'i' );
+			function _pause( aud, icn ) {
+				aud.pause();
+				aud.setAttribute( "data-playing", "false" );
+				icn.classList.remove("playing");
+			}
 
-					aud.src = el.getAttribute( "data-src" );
-					aud.setAttribute( "data-playing", "false" );
+			let aud, icn;
+			let css = document.createElement("style");
+			css.type = "text/css";
+			css.innerHTML = ".listen-node {display: inline-block; background:rgba(0, 0, 0, 0.05); padding: 1px 8px 2px; border-radius:3px; cursor: pointer;} .listen-node i {font-size: 0.65em; border: 0.5em solid transparent; border-left: 0.75em solid; display: inline-block; margin-right: 2px;margin-bottom: 1px;} .listen-node .playing { border: 0; border-left: 0.75em double; border-right: 0.5em solid transparent; height: 1em;}";
+			document.getElementsByTagName("head")[0].appendChild(css);
 
-					el.id = name + "-" + i;
-					el.insertBefore( icn, el.firstChild );
-					el.appendChild( aud );
+			aud = document.createElement( 'audio' );
+			icn = document.createElement( 'i' );
 
-					document.addEventListener( 'click', e => {
-						let aud, elm, icn;
-						if ( e.target.className === name ) {
-							aud = e.target.children[1];
-							elm = e.target;
-							icn = e.target.children[0];
-						}
-						else if ( e.target.parentElement && e.target.parentElement.className === name ) {
-							aud = e.target.parentElement.children[1];
-							elm = e.target.parentElement;
-							icn = e.target;
-						}
+			aud.src = el.getAttribute( "data-src" );
+			aud.setAttribute( "data-playing", "false" );
 
-						if (aud && elm && icn) {
-							aud.srt = parseInt( elm.getAttribute( 'data-start' ) ) || 0;
-							aud.end = parseInt( elm.getAttribute( 'data-end' ) ) || aud.duration;
+			el.id = name + "-" + i;
+			el.insertBefore( icn, el.firstChild );
+			el.appendChild( aud );
 
-							if ( aud && aud.getAttribute( "data-playing" ) === "false" ) {
-								if ( aud.srt > aud.currentTime || aud.end < aud.currentTime ) {
-									aud.currentTime = aud.srt;
-								}
-								_play( aud, icn );
-							} else {
-								_pause( aud, icn );
-							}
-
-							(function loop() {
-								let d = requestAnimationFrame( loop );
-								let percent = (((aud.currentTime - aud.srt) * 100) / (aud.end - aud.srt));
-								percent = percent < 100 ? percent : 100;
-								elm.style.background = "linear-gradient(to right, rgba(0, 0, 0, 0.1)" + percent + "%, rgba(0, 0, 0, 0.05)" + percent + "%)";
-
-								if ( aud.end < aud.currentTime ) {
-									_pause( aud, icn );
-									cancelAnimationFrame( d );
-								}
-							})();
-						}
-					} );
-
-					el.addEventListener( 'click', () => {
-
-					}, false )
+			document.addEventListener('click', e => {
+				let aud, elm, icn;
+				if ( e.target.className === name ) {
+					aud = e.target.children[1];
+					elm = e.target;
+					icn = e.target.children[0];
 				}
-			})
-		})
+				else if ( e.target.parentElement && e.target.parentElement.className === name ) {
+					aud = e.target.parentElement.children[1];
+					elm = e.target.parentElement;
+					icn = e.target;
+				}
+
+				if (aud && elm && icn) {
+					aud.srt = parseInt( elm.getAttribute( 'data-start' ) ) || 0;
+					aud.end = parseInt( elm.getAttribute( 'data-end' ) ) || aud.duration;
+
+					if ( aud && aud.getAttribute( "data-playing" ) === "false" ) {
+						if ( aud.srt > aud.currentTime || aud.end < aud.currentTime ) {
+							aud.currentTime = aud.srt;
+						}
+						_play( aud, icn );
+					} else {
+						_pause( aud, icn );
+					}
+
+					(function loop() {
+						let d = requestAnimationFrame( loop );
+						let percent = (((aud.currentTime - aud.srt) * 100) / (aud.end - aud.srt));
+						percent = percent < 100 ? percent : 100;
+						elm.style.background = "linear-gradient(to right, rgba(0, 0, 0, 0.1)" + percent + "%, rgba(0, 0, 0, 0.05)" + percent + "%)";
+
+						if ( aud.end < aud.currentTime ) {
+							_pause( aud, icn );
+							cancelAnimationFrame( d );
+						}
+					})();
+				}
+			});
+		}));
 	});
 
 	/**
@@ -626,17 +623,17 @@ document.addEventListener( 'alpine:init', () => {
 	 */
 	Alpine.directive( 'tooltip', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
 		let evaluate = evaluateLater(expression);
-		effect(() => {
-			evaluate( content => {
-				let position, trigger;
-				if (modifiers) {
-					modifiers.forEach(modifier => {
-						position = [ 'top', 'right', 'bottom', 'left' ].includes( modifier ) ? modifier : 'top';
-						trigger  = [ 'hover', 'click' ].includes( modifier ) ? modifier : 'hover';
-					});
-				}
 
-				if (position && trigger) {
+		effect(() => evaluate(content => {
+			let position, trigger;
+
+			modifiers && modifiers.forEach(modifier => {
+				position = [ 'top', 'right', 'bottom', 'left' ].includes( modifier ) ? modifier : 'top';
+				trigger  = [ 'hover', 'click' ].includes( modifier ) ? modifier : 'hover';
+			});
+
+			if (position && trigger) {
+				try {
 					new Drooltip({
 						element: el,
 						trigger: trigger,
@@ -647,9 +644,11 @@ document.addEventListener( 'alpine:init', () => {
 						content: content || null,
 						callback: null
 					});
+				} catch (e) {
+					console.error(e);
 				}
-			});
-		});
+			}
+		}));
 	});
 
 	/**
@@ -975,7 +974,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.directive( 'datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
+	Alpine.directive('datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
 		let datepickerInstance;
 
 		let evaluate = evaluateLater(expression || '{}');
@@ -1094,7 +1093,7 @@ document.addEventListener( 'alpine:init', () => {
 						guide: false,
 						mask: maskArr,
 					} );
-				} catch( e ) {
+				} catch(e) {
 					console.error( 'Errors: check the library connection, "vanillaTextMask" is not defined. Details: https:://github.com/text-mask/text-mask' );
 				}
 			}
@@ -1261,10 +1260,10 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'sortable', () => ({
+	Alpine.data('sortable', () => ({
 		init() {
-			let nestedSortables = [].slice.call( document.querySelectorAll( '.sortable' ) );
-			for( let i = 0; i < nestedSortables.length; i++ ) {
+			let nestedSortables = [].slice.call(document.querySelectorAll('.sortable'));
+			for(let i = 0; i < nestedSortables.length; i++) {
 				new Sortable(nestedSortables[i],{
 					multiDrag: true,
 					selectedClass: 'is-active',
@@ -1285,7 +1284,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'tab', (id) => ({
+	Alpine.data('tab', (id) => ({
 		tab: id,
 		tabButton(id) {
 			return {
@@ -1303,14 +1302,14 @@ document.addEventListener( 'alpine:init', () => {
 				[':class']() {
 					return this.tab === id ? 'active' : '';
 				},
-			};
+			}
 		},
 		tabContent(id) {
 			return {
 				['x-show']() {
 					return this.tab === id;
 				},
-			};
+			}
 		}
 	}));
 
@@ -1319,7 +1318,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'table', () => ({
+	Alpine.data('table', () => ({
 		init() {
 			document.addEventListener( 'keydown', e => {
 				let key = window.event ? event : e;
@@ -1341,7 +1340,7 @@ document.addEventListener( 'alpine:init', () => {
 		},
 		bulk: false,
 		trigger: {
-			['@change']( e ) {
+			['@change'](e) {
 				let checked = 0;
 				let inputs  = document.querySelectorAll( 'input[name="item[]"]' );
 				if (inputs.length) {
@@ -1351,7 +1350,7 @@ document.addEventListener( 'alpine:init', () => {
 			},
 		},
 		reset: {
-			['@click']( e ) {
+			['@click'](e) {
 				let inputs = document.querySelectorAll( 'input[name="item[]"], input[x-bind="trigger"]' );
 				if (inputs.length) {
 					inputs.forEach(input => input.checked = false);
@@ -1360,7 +1359,7 @@ document.addEventListener( 'alpine:init', () => {
 			},
 		},
 		switcher: {
-			['@click']( e ) {
+			['@click'](e) {
 				let checkboxes = document.querySelectorAll( 'input[name="item[]"]' );
 				let nodeList   = Array.prototype.slice.call( document.getElementsByClassName( 'cb' ) );
 
@@ -1398,7 +1397,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'search', () => ({
+	Alpine.data('search', () => ({
 		searchInput: null,
 		searchButton: null,
 		currentIdx: -1,
@@ -1445,110 +1444,11 @@ document.addEventListener( 'alpine:init', () => {
 	}));
 
 	/**
-	 * Password
-	 *
-	 * @since 1.0
-	 */
-	Alpine.magic('password', () => ({
-		min: {
-			lowercase: 2,
-			uppercase: 2,
-			special: 2,
-			digit: 2,
-			length: 12
-		},
-		valid: {
-			lowercase: false,
-			uppercase: false,
-			special: false,
-			digit: false,
-			length: false
-		},
-		charsets: {
-			lowercase: 'abcdefghijklmnopqrstuvwxyz',
-			uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-			special: '!@#$^&*(){|}~',
-			digit: '0123456789'
-		},
-		switch(value) {
-			return !(!!value);
-		},
-		check(value) {
-			let matchCount = 0;
-			let totalCount = 0;
-
-			for (const charset in this.charsets) {
-				let requiredCount = this.min[charset],
-					charsetRegex  = new RegExp(`[${this.charsets[charset]}]`, 'g'),
-					charsetCount  = (value.match(charsetRegex) || []).length;
-				matchCount += Math.min(charsetCount, requiredCount);
-				totalCount += requiredCount;
-
-				this.valid[charset] = charsetCount >= requiredCount;
-			}
-
-			if (value.length >= this.min.length) {
-				matchCount += 1;
-				totalCount += 1;
-				this.valid.length = value.length >= this.min.length;
-			}
-
-			return Object.assign(
-				{
-					progress: totalCount === 0 ? totalCount : (matchCount / totalCount) * 100,
-				},
-				this.valid
-			)
-		},
-		generate() {
-			let password = '';
-			let types = Object.keys(this.charsets);
-
-			types.forEach(type => {
-				let count   = Math.max(this.min[type], 0),
-					charset = this.charsets[type];
-
-				for (let i = 0; i < count; i++) {
-					let randomIndex = Math.floor(Math.random() * charset.length);
-					password += charset[randomIndex];
-				}
-			});
-
-			while (password.length < this.min.length) {
-				let randomIndex = Math.floor(Math.random() * types.length),
-					charType    = types[randomIndex],
-					charset     = this.charsets[charType],
-					randomCharIndex = Math.floor(Math.random() * charset.length);
-				password += charset[randomCharIndex];
-			}
-			this.check(password);
-
-			return this.shuffle(password);
-		},
-		shuffle(password) {
-			let array = password.split('');
-			let currentIndex = array.length;
-			let temporaryValue, randomIndex;
-
-			while (currentIndex !== 0) {
-				randomIndex = Math.floor(Math.random() * currentIndex);
-				currentIndex -= 1;
-
-				temporaryValue = array[currentIndex];
-				array[currentIndex] = array[randomIndex];
-				array[randomIndex] = temporaryValue;
-			}
-
-			return array.join('');
-		},
-	}));
-
-	/**
 	 * Counting time in four different units: seconds, minutes, hours and days.
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'timer', (endDate, startDate) => ({
+	Alpine.data('timer', (endDate, startDate) => ({
 		end: endDate, // format: '2021-31-12T14:58:31+00:00'
 		day:  '00',
 		hour: '00',
@@ -1586,14 +1486,14 @@ document.addEventListener( 'alpine:init', () => {
 	Alpine.magic('safe', () => ({
 		slug(value) {
 			return value
-				.toString()                                              // Convert the input to a string
-				.normalize('NFD')                                  // Normalize the string (separate characters and diacritical marks)
+				.toString()                                                // Convert the input to a string
+				.normalize('NFD')                                    // Normalize the string (separate characters and diacritical marks)
 				.replace(/[\u0300-\u036f]/g, '')    // Remove diacritical marks
 				.replace(/[^\p{L}\p{N}\s-]/gu, '')  // Remove everything except letters, numbers, spaces, and hyphens (Unicode support)
-				.trim()                                                  // Trim leading and trailing whitespace
+				.trim()                                                   // Trim leading and trailing whitespace
 				.replace(/\s+/g, '-')               // Replace spaces with hyphens
 				.replace(/-+/g, '-')                // Remove consecutive hyphens
-				.toLowerCase();                                          // Convert the string to lowercase
+				.toLowerCase();                                           // Convert the string to lowercase
 		},
 	}));
-} );
+});

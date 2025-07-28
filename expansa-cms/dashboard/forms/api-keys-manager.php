@@ -8,17 +8,9 @@ return Expansa\Facades\Form::enqueue(
 	'api-keys-manager',
 	[
 		'class'           => 'dg g-7 p-7',
-		'x-data'          => '',
-		'@submit.prevent' => '$ajax("post/create")',
+		'@submit.prevent' => '$ajax("apikey/create", "", e => e.end && ($dialog.close(), apiKeys.unshift(e.raw?.post)))',
 	],
 	[
-		[
-			'type'       => 'hidden',
-			'name'       => 'post-type',
-			'attributes' => [
-				'value' => 'api-keys',
-			],
-		],
 		[
 			'type'          => 'group',
 			'name'          => 'manage',

@@ -372,75 +372,73 @@ var __webpack_modules__ = {
                     return false;
                 }
                 let evaluate = evaluateLater(expression);
-                effect(() => {
-                    evaluate(content => {
-                        if (content) {
-                            let name = 'listen-node';
-                            function _play(aud, icn) {
-                                icn.classList.add('playing');
-                                aud.play();
-                                aud.setAttribute('data-playing', 'true');
-                                aud.addEventListener('ended', function() {
+                effect(() => evaluate(content => {
+                    if (!content) {
+                        return;
+                    }
+                    let name = 'listen-node';
+                    function _play(aud, icn) {
+                        icn.classList.add('playing');
+                        aud.play();
+                        aud.setAttribute('data-playing', 'true');
+                        aud.addEventListener('ended', function() {
+                            _pause(aud, icn);
+                            aud.parentNode.style.background = null;
+                            return false;
+                        });
+                    }
+                    function _pause(aud, icn) {
+                        aud.pause();
+                        aud.setAttribute('data-playing', 'false');
+                        icn.classList.remove('playing');
+                    }
+                    let aud, icn;
+                    let css = document.createElement('style');
+                    css.type = 'text/css';
+                    css.innerHTML = '.listen-node {display: inline-block; background:rgba(0, 0, 0, 0.05); padding: 1px 8px 2px; border-radius:3px; cursor: pointer;} .listen-node i {font-size: 0.65em; border: 0.5em solid transparent; border-left: 0.75em solid; display: inline-block; margin-right: 2px;margin-bottom: 1px;} .listen-node .playing { border: 0; border-left: 0.75em double; border-right: 0.5em solid transparent; height: 1em;}';
+                    document.getElementsByTagName('head')[0].appendChild(css);
+                    aud = document.createElement('audio');
+                    icn = document.createElement('i');
+                    aud.src = el.getAttribute('data-src');
+                    aud.setAttribute('data-playing', 'false');
+                    el.id = name + '-' + i;
+                    el.insertBefore(icn, el.firstChild);
+                    el.appendChild(aud);
+                    document.addEventListener('click', e => {
+                        let aud, elm, icn;
+                        if (e.target.className === name) {
+                            aud = e.target.children[1];
+                            elm = e.target;
+                            icn = e.target.children[0];
+                        } else if (e.target.parentElement && e.target.parentElement.className === name) {
+                            aud = e.target.parentElement.children[1];
+                            elm = e.target.parentElement;
+                            icn = e.target;
+                        }
+                        if (aud && elm && icn) {
+                            aud.srt = parseInt(elm.getAttribute('data-start')) || 0;
+                            aud.end = parseInt(elm.getAttribute('data-end')) || aud.duration;
+                            if (aud && aud.getAttribute('data-playing') === 'false') {
+                                if (aud.srt > aud.currentTime || aud.end < aud.currentTime) {
+                                    aud.currentTime = aud.srt;
+                                }
+                                _play(aud, icn);
+                            } else {
+                                _pause(aud, icn);
+                            }
+                            (function loop() {
+                                let d = requestAnimationFrame(loop);
+                                let percent = (aud.currentTime - aud.srt) * 100 / (aud.end - aud.srt);
+                                percent = percent < 100 ? percent : 100;
+                                elm.style.background = 'linear-gradient(to right, rgba(0, 0, 0, 0.1)' + percent + '%, rgba(0, 0, 0, 0.05)' + percent + '%)';
+                                if (aud.end < aud.currentTime) {
                                     _pause(aud, icn);
-                                    aud.parentNode.style.background = null;
-                                    return false;
-                                });
-                            }
-                            function _pause(aud, icn) {
-                                aud.pause();
-                                aud.setAttribute('data-playing', 'false');
-                                icn.classList.remove('playing');
-                            }
-                            let aud, icn;
-                            let css = document.createElement('style');
-                            css.type = 'text/css';
-                            css.innerHTML = '.listen-node {display: inline-block; background:rgba(0, 0, 0, 0.05); padding: 1px 8px 2px; border-radius:3px; cursor: pointer;} .listen-node i {font-size: 0.65em; border: 0.5em solid transparent; border-left: 0.75em solid; display: inline-block; margin-right: 2px;margin-bottom: 1px;} .listen-node .playing { border: 0; border-left: 0.75em double; border-right: 0.5em solid transparent; height: 1em;}';
-                            document.getElementsByTagName('head')[0].appendChild(css);
-                            aud = document.createElement('audio');
-                            icn = document.createElement('i');
-                            aud.src = el.getAttribute('data-src');
-                            aud.setAttribute('data-playing', 'false');
-                            el.id = name + '-' + i;
-                            el.insertBefore(icn, el.firstChild);
-                            el.appendChild(aud);
-                            document.addEventListener('click', e => {
-                                let aud, elm, icn;
-                                if (e.target.className === name) {
-                                    aud = e.target.children[1];
-                                    elm = e.target;
-                                    icn = e.target.children[0];
-                                } else if (e.target.parentElement && e.target.parentElement.className === name) {
-                                    aud = e.target.parentElement.children[1];
-                                    elm = e.target.parentElement;
-                                    icn = e.target;
+                                    cancelAnimationFrame(d);
                                 }
-                                if (aud && elm && icn) {
-                                    aud.srt = parseInt(elm.getAttribute('data-start')) || 0;
-                                    aud.end = parseInt(elm.getAttribute('data-end')) || aud.duration;
-                                    if (aud && aud.getAttribute('data-playing') === 'false') {
-                                        if (aud.srt > aud.currentTime || aud.end < aud.currentTime) {
-                                            aud.currentTime = aud.srt;
-                                        }
-                                        _play(aud, icn);
-                                    } else {
-                                        _pause(aud, icn);
-                                    }
-                                    (function loop() {
-                                        let d = requestAnimationFrame(loop);
-                                        let percent = (aud.currentTime - aud.srt) * 100 / (aud.end - aud.srt);
-                                        percent = percent < 100 ? percent : 100;
-                                        elm.style.background = 'linear-gradient(to right, rgba(0, 0, 0, 0.1)' + percent + '%, rgba(0, 0, 0, 0.05)' + percent + '%)';
-                                        if (aud.end < aud.currentTime) {
-                                            _pause(aud, icn);
-                                            cancelAnimationFrame(d);
-                                        }
-                                    })();
-                                }
-                            });
-                            el.addEventListener('click', () => {}, false);
+                            })();
                         }
                     });
-                });
+                }));
             });
             Alpine.directive('textarea', (el, {expression}) => {
                 if ('TEXTAREA' !== el.tagName.toUpperCase()) {
@@ -457,16 +455,14 @@ var __webpack_modules__ = {
             });
             Alpine.directive('tooltip', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
                 let evaluate = evaluateLater(expression);
-                effect(() => {
-                    evaluate(content => {
-                        let position, trigger;
-                        if (modifiers) {
-                            modifiers.forEach(modifier => {
-                                position = [ 'top', 'right', 'bottom', 'left' ].includes(modifier) ? modifier : 'top';
-                                trigger = [ 'hover', 'click' ].includes(modifier) ? modifier : 'hover';
-                            });
-                        }
-                        if (position && trigger) {
+                effect(() => evaluate(content => {
+                    let position, trigger;
+                    modifiers && modifiers.forEach(modifier => {
+                        position = [ 'top', 'right', 'bottom', 'left' ].includes(modifier) ? modifier : 'top';
+                        trigger = [ 'hover', 'click' ].includes(modifier) ? modifier : 'hover';
+                    });
+                    if (position && trigger) {
+                        try {
                             new Drooltip({
                                 element: el,
                                 trigger,
@@ -477,9 +473,11 @@ var __webpack_modules__ = {
                                 content: content || null,
                                 callback: null
                             });
+                        } catch (e) {
+                            console.error(e);
                         }
-                    });
-                });
+                    }
+                }));
             });
             Alpine.directive('wizard', (el, {value, expression, modifiers}, {Alpine: Alpine2, evaluate, cleanup}) => {
                 const wizard2 = getWizard(el, Alpine2);
@@ -1134,79 +1132,6 @@ var __webpack_modules__ = {
                     ['@keydown.enter']() {
                         this.links[this.currentIdx] && (window.location.href = this.links[this.currentIdx].url);
                     }
-                }
-            }));
-            Alpine.magic('password', () => ({
-                min: {
-                    lowercase: 2,
-                    uppercase: 2,
-                    special: 2,
-                    digit: 2,
-                    length: 12
-                },
-                valid: {
-                    lowercase: false,
-                    uppercase: false,
-                    special: false,
-                    digit: false,
-                    length: false
-                },
-                charsets: {
-                    lowercase: 'abcdefghijklmnopqrstuvwxyz',
-                    uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-                    special: '!@#$^&*(){|}~',
-                    digit: '0123456789'
-                },
-                switch(value) {
-                    return !!!value;
-                },
-                check(value) {
-                    let matchCount = 0;
-                    let totalCount = 0;
-                    for (const charset in this.charsets) {
-                        let requiredCount = this.min[charset], charsetRegex = new RegExp(`[${this.charsets[charset]}]`, 'g'), charsetCount = (value.match(charsetRegex) || []).length;
-                        matchCount += Math.min(charsetCount, requiredCount);
-                        totalCount += requiredCount;
-                        this.valid[charset] = charsetCount >= requiredCount;
-                    }
-                    if (value.length >= this.min.length) {
-                        matchCount += 1;
-                        totalCount += 1;
-                        this.valid.length = value.length >= this.min.length;
-                    }
-                    return Object.assign({
-                        progress: totalCount === 0 ? totalCount : matchCount / totalCount * 100
-                    }, this.valid);
-                },
-                generate() {
-                    let password = '';
-                    let types = Object.keys(this.charsets);
-                    types.forEach(type => {
-                        let count = Math.max(this.min[type], 0), charset = this.charsets[type];
-                        for (let i = 0; i < count; i++) {
-                            let randomIndex = Math.floor(Math.random() * charset.length);
-                            password += charset[randomIndex];
-                        }
-                    });
-                    while (password.length < this.min.length) {
-                        let randomIndex = Math.floor(Math.random() * types.length), charType = types[randomIndex], charset = this.charsets[charType], randomCharIndex = Math.floor(Math.random() * charset.length);
-                        password += charset[randomCharIndex];
-                    }
-                    this.check(password);
-                    return this.shuffle(password);
-                },
-                shuffle(password) {
-                    let array = password.split('');
-                    let currentIndex = array.length;
-                    let temporaryValue, randomIndex;
-                    while (currentIndex !== 0) {
-                        randomIndex = Math.floor(Math.random() * currentIndex);
-                        currentIndex -= 1;
-                        temporaryValue = array[currentIndex];
-                        array[currentIndex] = array[randomIndex];
-                        array[randomIndex] = temporaryValue;
-                    }
-                    return array.join('');
                 }
             }));
             Alpine.data('timer', (endDate, startDate) => ({

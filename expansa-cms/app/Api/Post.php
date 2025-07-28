@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Api;
 
 use Expansa\Facades\Safe;
-use PHPMailer\PHPMailer\Exception;
 
 class Post
 {
@@ -24,41 +23,28 @@ class Post
     /**
      * Create item.
      *
-     * @url    POST api/posts
-     * @throws Exception
+     * @url POST api/posts
      */
     public function create(): array
     {
-        $fields = Safe::data(
+        $data = Safe::data(
             $_POST ?? [],
             [
-                'limits'     => 'absint',
-                'period'     => 'text',
-                'start-date' => 'datetime',
-                'end-date'   => 'datetime',
-                'sites'      => 'trim|sitesList',
+                'post-type' => 'text',
+                'title'     => 'text',
+                'status'    => 'text',
             ]
-        )->extend('sitesList', function ($value) {
-            $sitesList = array_map('trim', explode(',', $value));
+        )->apply();
 
-            return array_filter($sitesList, fn($url) => filter_var($url, FILTER_VALIDATE_URL));
-        })->apply();
+        [$type, $args] = [array_shift($data), $data];
 
-        $title  = Safe::text($_POST['title'] ?? '');
-        $status = Safe::text($_POST['status'] ?? '');
-        $type   = Safe::text($_POST['post-type'] ?? '');
-        if (! $type) {
-            throw new Exception(t('Post type is missing'));
+        if (!$type) {
+            return [
+                'method' => t('Post type is missing'),
+            ];
         }
 
-        echo '<pre>';
-        print_r($_REQUEST);
-        echo '</pre>';
-        $post = \App\Post::add($type, compact('title', 'status', 'fields'));
-        echo '<pre>';
-        var_dump($fields);
-        var_dump($post);
-        echo '</pre>';
+        \App\Post::add($type, $args);
 
         return [
             'method' => 'POST create user',
