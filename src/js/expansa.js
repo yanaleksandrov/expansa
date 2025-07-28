@@ -5,7 +5,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.directive( 'intersect', (el, { value, expression, modifiers }, { evaluateLater, cleanup }) => {
+	Alpine.directive('intersect', (el, { value, expression, modifiers }, { evaluateLater, cleanup }) => {
 		function getThreshold(modifiers) {
 			if (modifiers.includes('full'))
 				return 0.99;
@@ -22,7 +22,7 @@ document.addEventListener( 'alpine:init', () => {
 		}
 		function getLengthValue(rawValue) {
 			let match = rawValue.match(/^(-?[0-9]+)(px|%)?$/);
-			return match ? match[1] + (match[2] || "px") : void 0;
+			return match ? match[1] + (match[2] || 'px') : void 0;
 		}
 		function getRootMargin(modifiers) {
 			const key      = 'margin';
@@ -506,95 +506,92 @@ document.addEventListener( 'alpine:init', () => {
 	 * @since 1.0
 	 */
 	Alpine.directive('listen', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
-		if ( ! expression ) {
+		if (!expression) {
 			return false;
 		}
 
 		let evaluate = evaluateLater(expression);
-		effect(() => {
-			evaluate(content => {
-				if ( content ) {
-					let name = "listen-node";
 
-					function _play( aud, icn ) {
-						icn.classList.add("playing");
-						aud.play();
-						aud.setAttribute( "data-playing", "true" );
-						aud.addEventListener("ended", function() {
-							_pause( aud, icn );
-							aud.parentNode.style.background = null;
-							return false;
-						});
-					}
+		effect(() => evaluate(content => {
+			if (!content) {
+				return;
+			}
 
-					function _pause( aud, icn ) {
-						aud.pause();
-						aud.setAttribute( "data-playing", "false" );
-						icn.classList.remove("playing");
-					}
+			let name = 'listen-node';
 
-					let aud, icn;
-					let css = document.createElement("style");
-					css.type = "text/css";
-					css.innerHTML = ".listen-node {display: inline-block; background:rgba(0, 0, 0, 0.05); padding: 1px 8px 2px; border-radius:3px; cursor: pointer;} .listen-node i {font-size: 0.65em; border: 0.5em solid transparent; border-left: 0.75em solid; display: inline-block; margin-right: 2px;margin-bottom: 1px;} .listen-node .playing { border: 0; border-left: 0.75em double; border-right: 0.5em solid transparent; height: 1em;}";
-					document.getElementsByTagName("head")[0].appendChild(css);
+			function _play( aud, icn ) {
+				icn.classList.add("playing");
+				aud.play();
+				aud.setAttribute( "data-playing", "true" );
+				aud.addEventListener("ended", function() {
+					_pause( aud, icn );
+					aud.parentNode.style.background = null;
+					return false;
+				});
+			}
 
-					aud = document.createElement( 'audio' );
-					icn = document.createElement( 'i' );
+			function _pause( aud, icn ) {
+				aud.pause();
+				aud.setAttribute( "data-playing", "false" );
+				icn.classList.remove("playing");
+			}
 
-					aud.src = el.getAttribute( "data-src" );
-					aud.setAttribute( "data-playing", "false" );
+			let aud, icn;
+			let css = document.createElement("style");
+			css.type = "text/css";
+			css.innerHTML = ".listen-node {display: inline-block; background:rgba(0, 0, 0, 0.05); padding: 1px 8px 2px; border-radius:3px; cursor: pointer;} .listen-node i {font-size: 0.65em; border: 0.5em solid transparent; border-left: 0.75em solid; display: inline-block; margin-right: 2px;margin-bottom: 1px;} .listen-node .playing { border: 0; border-left: 0.75em double; border-right: 0.5em solid transparent; height: 1em;}";
+			document.getElementsByTagName("head")[0].appendChild(css);
 
-					el.id = name + "-" + i;
-					el.insertBefore( icn, el.firstChild );
-					el.appendChild( aud );
+			aud = document.createElement( 'audio' );
+			icn = document.createElement( 'i' );
 
-					document.addEventListener( 'click', e => {
-						let aud, elm, icn;
-						if ( e.target.className === name ) {
-							aud = e.target.children[1];
-							elm = e.target;
-							icn = e.target.children[0];
-						}
-						else if ( e.target.parentElement && e.target.parentElement.className === name ) {
-							aud = e.target.parentElement.children[1];
-							elm = e.target.parentElement;
-							icn = e.target;
-						}
+			aud.src = el.getAttribute( "data-src" );
+			aud.setAttribute( "data-playing", "false" );
 
-						if (aud && elm && icn) {
-							aud.srt = parseInt( elm.getAttribute( 'data-start' ) ) || 0;
-							aud.end = parseInt( elm.getAttribute( 'data-end' ) ) || aud.duration;
+			el.id = name + "-" + i;
+			el.insertBefore( icn, el.firstChild );
+			el.appendChild( aud );
 
-							if ( aud && aud.getAttribute( "data-playing" ) === "false" ) {
-								if ( aud.srt > aud.currentTime || aud.end < aud.currentTime ) {
-									aud.currentTime = aud.srt;
-								}
-								_play( aud, icn );
-							} else {
-								_pause( aud, icn );
-							}
-
-							(function loop() {
-								let d = requestAnimationFrame( loop );
-								let percent = (((aud.currentTime - aud.srt) * 100) / (aud.end - aud.srt));
-								percent = percent < 100 ? percent : 100;
-								elm.style.background = "linear-gradient(to right, rgba(0, 0, 0, 0.1)" + percent + "%, rgba(0, 0, 0, 0.05)" + percent + "%)";
-
-								if ( aud.end < aud.currentTime ) {
-									_pause( aud, icn );
-									cancelAnimationFrame( d );
-								}
-							})();
-						}
-					} );
-
-					el.addEventListener( 'click', () => {
-
-					}, false )
+			document.addEventListener('click', e => {
+				let aud, elm, icn;
+				if ( e.target.className === name ) {
+					aud = e.target.children[1];
+					elm = e.target;
+					icn = e.target.children[0];
 				}
-			})
-		})
+				else if ( e.target.parentElement && e.target.parentElement.className === name ) {
+					aud = e.target.parentElement.children[1];
+					elm = e.target.parentElement;
+					icn = e.target;
+				}
+
+				if (aud && elm && icn) {
+					aud.srt = parseInt( elm.getAttribute( 'data-start' ) ) || 0;
+					aud.end = parseInt( elm.getAttribute( 'data-end' ) ) || aud.duration;
+
+					if ( aud && aud.getAttribute( "data-playing" ) === "false" ) {
+						if ( aud.srt > aud.currentTime || aud.end < aud.currentTime ) {
+							aud.currentTime = aud.srt;
+						}
+						_play( aud, icn );
+					} else {
+						_pause( aud, icn );
+					}
+
+					(function loop() {
+						let d = requestAnimationFrame( loop );
+						let percent = (((aud.currentTime - aud.srt) * 100) / (aud.end - aud.srt));
+						percent = percent < 100 ? percent : 100;
+						elm.style.background = "linear-gradient(to right, rgba(0, 0, 0, 0.1)" + percent + "%, rgba(0, 0, 0, 0.05)" + percent + "%)";
+
+						if ( aud.end < aud.currentTime ) {
+							_pause( aud, icn );
+							cancelAnimationFrame( d );
+						}
+					})();
+				}
+			});
+		}));
 	});
 
 	/**
@@ -626,17 +623,17 @@ document.addEventListener( 'alpine:init', () => {
 	 */
 	Alpine.directive( 'tooltip', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
 		let evaluate = evaluateLater(expression);
-		effect(() => {
-			evaluate( content => {
-				let position, trigger;
-				if (modifiers) {
-					modifiers.forEach(modifier => {
-						position = [ 'top', 'right', 'bottom', 'left' ].includes( modifier ) ? modifier : 'top';
-						trigger  = [ 'hover', 'click' ].includes( modifier ) ? modifier : 'hover';
-					});
-				}
 
-				if (position && trigger) {
+		effect(() => evaluate(content => {
+			let position, trigger;
+
+			modifiers && modifiers.forEach(modifier => {
+				position = [ 'top', 'right', 'bottom', 'left' ].includes( modifier ) ? modifier : 'top';
+				trigger  = [ 'hover', 'click' ].includes( modifier ) ? modifier : 'hover';
+			});
+
+			if (position && trigger) {
+				try {
 					new Drooltip({
 						element: el,
 						trigger: trigger,
@@ -647,9 +644,11 @@ document.addEventListener( 'alpine:init', () => {
 						content: content || null,
 						callback: null
 					});
+				} catch (e) {
+					console.error(e);
 				}
-			});
-		});
+			}
+		}));
 	});
 
 	/**
@@ -967,98 +966,42 @@ document.addEventListener( 'alpine:init', () => {
 	}));
 
 	/**
-	 * Datepicker.
+	 * Alpine.js directive: datepicker.
 	 *
-	 * Based on https://wwilsman.github.io/Datepicker.js/#methods
+	 * Initializes an AirDatepicker instance on the element with reactive options.
+	 *
+	 * Based on https://github.com/t1m0n/air-datepicker
 	 *
 	 * @since 1.0
 	 */
-	Alpine.directive( 'datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
-		el.setAttribute('readonly', true);
+	Alpine.directive('datepicker', (el, {value, expression, modifiers}, {evaluateLater, effect}) => {
+		let datepickerInstance;
 
 		let evaluate = evaluateLater(expression || '{}');
-		effect(() => {
-			evaluate( options => {
-				let format = expansa?.dateFormat,
-					lang   = (expansa?.lang || navigator.language || navigator.userLanguage || 'en-US');
 
-				let translateWeekdays = length => {
-					return Array.from({ length: 7 }, (_, i) => {
-						return new Intl.DateTimeFormat(lang, { weekday: length }).format(new Date(2024, 0, i + 1));
-					});
-				}
+		effect(() => evaluate(options => {
+			if (datepickerInstance) {
+				datepickerInstance.destroy();
+			}
 
-				let translateMonths = length => {
-					return Array.from({ length: 12 }, (_, i) => {
-						let month = new Intl.DateTimeFormat(lang, { month: length }).format(new Date(2024, i, 1));
-							month = month.endsWith('.') ? month.slice(0, -1) : month;
-
-						return month.charAt(0).toUpperCase() + month.slice(1);
-					});
-				}
-
-				let formatter = (date, format) => {
-					let s           = date.toString(),
-						f           = date.getTime(),
-						fullYear    = date.getFullYear(),
-						monthNumber = date.getMonth(),
-						day         = date.getDate(),
-						hours       = date.getHours(),
-						minutes     = date.getMinutes(),
-						seconds     = date.getSeconds();
-
-					return format.replace( /a|A|d|D|F|g|G|h|H|i|I|j|l|L|m|M|n|s|S|t|T|U|w|y|Y|z|Z/g, format => {
-						switch ( format ) {
-							case 'a' : return hours > 11 ? 'pm' : 'am';
-							case 'A' : return hours > 11 ? 'PM' : 'AM';
-							case 'd' : return ( '0' + day ).slice(-2);
-							case 'D' : return translateWeekdays('short')[ date.getDay() ];
-							case 'F' : return translateMonths('long')[ monthNumber ];
-							case 'g' : return ( s = ( hours || 12 ) ) > 12 ? s - 12 : s;
-							case 'G' : return hours;
-							case 'h' : return ( '0' + ( ( s = hours || 12 ) > 12 ? s - 12 : s ) ).slice(-2);
-							case 'H' : return ( '0' + hours ).slice(-2);
-							case 'i' : return ( '0' + minutes ).slice(-2);
-							case 'I' : return (() => {
-								let a = new Date(fullYear, 0),
-									c = Date.UTC(fullYear, 0),
-									b = new Date(fullYear, 6),
-									d = Date.UTC(fullYear, 6);
-								return ((a - c) !== (b - d)) ? 1 : 0;
-							})();
-							case 'j' : return day;
-							case 'l' : return translateWeekdays('long')[ date.getDay() ];
-							case 'L' : return ( s = fullYear ) % 4 === 0 && ( s % 100 !== 0 || s % 400 === 0 ) ? 1 : 0;
-							case 'm' : return ( '0' + ( monthNumber + 1 ) ).slice(-2);
-							case 'M' : return translateMonths('short')[ monthNumber ];
-							case 'n' : return monthNumber + 1;
-							case 's' : return ( '0' + seconds ).slice(-2);
-							case 'S' : return [ 'th', 'st', 'nd', 'rd' ][ ( s = day ) < 4 ? s : 0 ];
-							case 't' : return (new Date(fullYear, monthNumber, 0)).getDate();
-							case 'T' : return 'UTC';
-							case 'U' : return ( '' + f ).slice( 0, -3 );
-							case 'w' : return date.getDay();
-							case 'y' : return ( '' + fullYear ).slice(-2);
-							case 'Y' : return fullYear;
-							case 'z' : return Math.ceil((date - new Date(fullYear, 0, 1)) / 86400000);
-							default : return -date.getTimezoneOffset() * 60;
-						}
-					});
-				}
-
-				let datepicker = new AirDatepicker(el, {
-					...{
-						range: false,
-						inline: false,
-						multipleDatesSeparator: ' — ',
-						firstDay: expansa?.weekStart,
-						container: el.closest('div'),
-						view: 'days', // days, months or years
-					},
+			try {
+				datepickerInstance = new AirDatepicker(el, {
+					range: false,
+					inline: false,
+					multipleDatesSeparator: ' — ',
+					locale: expansa?.datepicker || undefined,
+					firstDay: expansa?.weekStart || 0,
+					dateFormat: expansa?.dateFormat || 'yyyy-MM-dd',
+					container: el.closest('div'),
+					view: 'days',
 					...options
 				});
-			});
-		});
+			} catch(e) {
+				console.error(e);
+			}
+		}));
+
+		return () => datepickerInstance && datepickerInstance.destroy();
 	});
 
 	/**
@@ -1150,7 +1093,7 @@ document.addEventListener( 'alpine:init', () => {
 						guide: false,
 						mask: maskArr,
 					} );
-				} catch( e ) {
+				} catch(e) {
 					console.error( 'Errors: check the library connection, "vanillaTextMask" is not defined. Details: https:://github.com/text-mask/text-mask' );
 				}
 			}
@@ -1189,143 +1132,12 @@ document.addEventListener( 'alpine:init', () => {
 	});
 
 	/**
-	 * Advanced select dropdown based on Choices.js library.
+	 * Advanced select dropdown based on SlimSelect.js library.
 	 *
-	 * @see https://github.com/Choices-js/Choices
+	 * @see https://github.com/brianvoe/slim-select
 	 */
 	Alpine.directive('select', (el, {expression}) => {
 		const settings = JSON.parse(expression || '{}');
-
-		if (0) {
-			function setPrefix(data) {
-				const { image, flag, icon } = data.element.dataset;
-
-				return [
-					icon && `<i class="${icon}"></i>`,
-					image && `<img src="${image}" alt />`,
-					flag && `<svg role="presentation"><use xlink:href="${expansa?.spriteFlagsUrl}#${flag}"></use></svg>`,
-				].filter(Boolean).join('').trim();
-			}
-
-			try {
-				const select = new Choices(el, {
-					silent: false,
-					renderChoiceLimit: -1,
-					maxItemCount: -1,
-					closeDropdownOnSelect: 'auto',
-					singleModeForMultiSelect: false,
-					addChoices: false,
-					addItems: true,
-					addItemFilter: (value) => !!value && value !== '',
-					removeItems: true,
-					removeItemButton: el.multiple,
-					removeItemButtonAlignLeft: false,
-					editItems: false,
-					allowHTML: true,
-					allowHtmlUserInput: false,
-					duplicateItemsAllowed: false,
-					delimiter: ',',
-					paste: true,
-					searchEnabled: true,
-					searchChoices: true,
-					searchFloor: 1,
-					searchResultLimit: 7,
-					searchFields: ['label', 'value'],
-					position: 'auto',
-					resetScrollPosition: true,
-					shouldSort: false,
-					shouldSortItems: false,
-					shadowRoot: null,
-					placeholder: true,
-					placeholderValue: null,
-					searchPlaceholderValue: null,
-					prependValue: null,
-					appendValue: null,
-					renderSelectedChoices: 'auto',
-					loadingText: expansa.loadingText || 'Loading...',
-					noResultsText: expansa.noResultsText || 'No results found',
-					noChoicesText: expansa.noChoicesText || 'No choices to choose from',
-					itemSelectText: '',
-					uniqueItemText: expansa.uniqueItemText || 'Only unique values can be added',
-					customAddItemText: expansa.customAddItemText || 'Only values matching specific conditions can be added',
-					addItemText: (value, rawValue) => {
-						return `Press Enter to add <b>"${value}"</b>`;
-					},
-					removeItemIconText: () => `Remove item`,
-					removeItemLabelText: (value, rawValue) => `Remove item: ${value}`,
-					maxItemText: (maxItemCount) => {
-						return `Only ${maxItemCount} values can be added`;
-					},
-					valueComparer: (value1, value2) => {
-						return value1 === value2;
-					},
-					callbackOnInit: null,
-					appendGroupInSearch: false,
-					callbackOnCreateTemplates: (template, escapeForTemplate, getClassNames, allowHTML) => ({
-						item: ({ classNames }, data) => {
-							const baseClasses = [
-								...getClassNames(classNames.item),
-								...getClassNames(data.highlighted ? classNames.highlightedState : classNames.itemSelectable),
-								data.placeholder ? classNames.placeholder : ''
-							];
-
-							const attrs = [
-								'data-item',
-								`data-id="${data.id}"`,
-								`data-value="${escapeForTemplate(data.value)}"`,
-								data.active ? 'aria-selected="true"' : '',
-								data.disabled ? 'aria-disabled="true"' : ''
-							].filter(Boolean).join(' ');
-
-							const prefix = setPrefix(data);
-
-							return template(`<div class="${baseClasses.join(' ')}" ${attrs}>${prefix}${escapeForTemplate(allowHTML, data.label)}</div>`);
-						},
-						choice: ({ classNames, itemSelectText }, data) => {
-							const baseClasses = [
-								...getClassNames(classNames.item),
-								...getClassNames(classNames.itemChoice),
-								...getClassNames(data.disabled ? classNames.itemDisabled : classNames.itemSelectable),
-							];
-
-							const attrs = {
-								'data-select-text': itemSelectText,
-								'data-choice': '',
-								'data-id': data.id,
-								'data-value': escapeForTemplate(data.value),
-								'role': data.groupId > 0 ? 'treeitem' : 'option',
-							};
-
-							if (data.disabled) {
-								attrs['data-choice-disabled'] = '';
-								attrs['aria-disabled'] = 'true';
-							} else {
-								attrs['data-choice-selectable'] = '';
-							}
-
-							const attributesString = Object.entries(attrs)
-								.map(([key, val]) => (val === '' ? key : `${key}="${val}"`))
-								.join(' ');
-
-							const prefix = setPrefix(data);
-
-							let description = data.element.dataset.description || '';
-							if (description) {
-								description = `<span class="choices__description">${description}</span>`;
-							}
-
-							return template(`<div class="${baseClasses.join(' ')}" ${attributesString}>
-								${prefix}<span class="choices__text">${escapeForTemplate(allowHTML, data.label + description)}</span>
-							</div>`);
-						},
-						...settings
-					})
-				});
-			} catch (e) {
-				console.error(e);
-			}
-			return;
-		}
 
 		try {
 			const select = new SlimSelect({
@@ -1382,7 +1194,7 @@ document.addEventListener( 'alpine:init', () => {
 				}, []),
 			});
 
-			// Updating SlimSelect from actual native select element value
+			// updating SlimSelect from actual native select element value
 			const form = el.closest('form');
 			const value = Array.from(el.selectedOptions).map((option) => option.value);
 			if (form) {
@@ -1448,10 +1260,10 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'sortable', () => ({
+	Alpine.data('sortable', () => ({
 		init() {
-			let nestedSortables = [].slice.call( document.querySelectorAll( '.sortable' ) );
-			for( let i = 0; i < nestedSortables.length; i++ ) {
+			let nestedSortables = [].slice.call(document.querySelectorAll('.sortable'));
+			for(let i = 0; i < nestedSortables.length; i++) {
 				new Sortable(nestedSortables[i],{
 					multiDrag: true,
 					selectedClass: 'is-active',
@@ -1472,7 +1284,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'tab', (id) => ({
+	Alpine.data('tab', (id) => ({
 		tab: id,
 		tabButton(id) {
 			return {
@@ -1490,14 +1302,14 @@ document.addEventListener( 'alpine:init', () => {
 				[':class']() {
 					return this.tab === id ? 'active' : '';
 				},
-			};
+			}
 		},
 		tabContent(id) {
 			return {
 				['x-show']() {
 					return this.tab === id;
 				},
-			};
+			}
 		}
 	}));
 
@@ -1506,7 +1318,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'table', () => ({
+	Alpine.data('table', () => ({
 		init() {
 			document.addEventListener( 'keydown', e => {
 				let key = window.event ? event : e;
@@ -1528,7 +1340,7 @@ document.addEventListener( 'alpine:init', () => {
 		},
 		bulk: false,
 		trigger: {
-			['@change']( e ) {
+			['@change'](e) {
 				let checked = 0;
 				let inputs  = document.querySelectorAll( 'input[name="item[]"]' );
 				if (inputs.length) {
@@ -1538,7 +1350,7 @@ document.addEventListener( 'alpine:init', () => {
 			},
 		},
 		reset: {
-			['@click']( e ) {
+			['@click'](e) {
 				let inputs = document.querySelectorAll( 'input[name="item[]"], input[x-bind="trigger"]' );
 				if (inputs.length) {
 					inputs.forEach(input => input.checked = false);
@@ -1547,7 +1359,7 @@ document.addEventListener( 'alpine:init', () => {
 			},
 		},
 		switcher: {
-			['@click']( e ) {
+			['@click'](e) {
 				let checkboxes = document.querySelectorAll( 'input[name="item[]"]' );
 				let nodeList   = Array.prototype.slice.call( document.getElementsByClassName( 'cb' ) );
 
@@ -1585,7 +1397,7 @@ document.addEventListener( 'alpine:init', () => {
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'search', () => ({
+	Alpine.data('search', () => ({
 		searchInput: null,
 		searchButton: null,
 		currentIdx: -1,
@@ -1632,110 +1444,11 @@ document.addEventListener( 'alpine:init', () => {
 	}));
 
 	/**
-	 * Password
-	 *
-	 * @since 1.0
-	 */
-	Alpine.magic('password', () => ({
-		min: {
-			lowercase: 2,
-			uppercase: 2,
-			special: 2,
-			digit: 2,
-			length: 12
-		},
-		valid: {
-			lowercase: false,
-			uppercase: false,
-			special: false,
-			digit: false,
-			length: false
-		},
-		charsets: {
-			lowercase: 'abcdefghijklmnopqrstuvwxyz',
-			uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-			special: '!@#$^&*(){|}~',
-			digit: '0123456789'
-		},
-		switch(value) {
-			return !(!!value);
-		},
-		check(value) {
-			let matchCount = 0;
-			let totalCount = 0;
-
-			for (const charset in this.charsets) {
-				let requiredCount = this.min[charset],
-					charsetRegex  = new RegExp(`[${this.charsets[charset]}]`, 'g'),
-					charsetCount  = (value.match(charsetRegex) || []).length;
-				matchCount += Math.min(charsetCount, requiredCount);
-				totalCount += requiredCount;
-
-				this.valid[charset] = charsetCount >= requiredCount;
-			}
-
-			if (value.length >= this.min.length) {
-				matchCount += 1;
-				totalCount += 1;
-				this.valid.length = value.length >= this.min.length;
-			}
-
-			return Object.assign(
-				{
-					progress: totalCount === 0 ? totalCount : (matchCount / totalCount) * 100,
-				},
-				this.valid
-			)
-		},
-		generate() {
-			let password = '';
-			let types = Object.keys(this.charsets);
-
-			types.forEach(type => {
-				let count   = Math.max(this.min[type], 0),
-					charset = this.charsets[type];
-
-				for (let i = 0; i < count; i++) {
-					let randomIndex = Math.floor(Math.random() * charset.length);
-					password += charset[randomIndex];
-				}
-			});
-
-			while (password.length < this.min.length) {
-				let randomIndex = Math.floor(Math.random() * types.length),
-					charType    = types[randomIndex],
-					charset     = this.charsets[charType],
-					randomCharIndex = Math.floor(Math.random() * charset.length);
-				password += charset[randomCharIndex];
-			}
-			this.check(password);
-
-			return this.shuffle(password);
-		},
-		shuffle(password) {
-			let array = password.split('');
-			let currentIndex = array.length;
-			let temporaryValue, randomIndex;
-
-			while (currentIndex !== 0) {
-				randomIndex = Math.floor(Math.random() * currentIndex);
-				currentIndex -= 1;
-
-				temporaryValue = array[currentIndex];
-				array[currentIndex] = array[randomIndex];
-				array[randomIndex] = temporaryValue;
-			}
-
-			return array.join('');
-		},
-	}));
-
-	/**
 	 * Counting time in four different units: seconds, minutes, hours and days.
 	 *
 	 * @since 1.0
 	 */
-	Alpine.data( 'timer', (endDate, startDate) => ({
+	Alpine.data('timer', (endDate, startDate) => ({
 		end: endDate, // format: '2021-31-12T14:58:31+00:00'
 		day:  '00',
 		hour: '00',
@@ -1773,14 +1486,14 @@ document.addEventListener( 'alpine:init', () => {
 	Alpine.magic('safe', () => ({
 		slug(value) {
 			return value
-				.toString()                                              // Convert the input to a string
-				.normalize('NFD')                                  // Normalize the string (separate characters and diacritical marks)
+				.toString()                                                // Convert the input to a string
+				.normalize('NFD')                                    // Normalize the string (separate characters and diacritical marks)
 				.replace(/[\u0300-\u036f]/g, '')    // Remove diacritical marks
 				.replace(/[^\p{L}\p{N}\s-]/gu, '')  // Remove everything except letters, numbers, spaces, and hyphens (Unicode support)
-				.trim()                                                  // Trim leading and trailing whitespace
+				.trim()                                                   // Trim leading and trailing whitespace
 				.replace(/\s+/g, '-')               // Replace spaces with hyphens
 				.replace(/-+/g, '-')                // Remove consecutive hyphens
-				.toLowerCase();                                          // Convert the string to lowercase
+				.toLowerCase();                                           // Convert the string to lowercase
 		},
 	}));
-} );
+});

@@ -44,6 +44,7 @@ class User
     {
         $currentUser = \App\User::current();
         $userdata    = $_POST + [ 'id' => $currentUser->id ];
+
         $fields = Safe::data(
             $_POST,
             [

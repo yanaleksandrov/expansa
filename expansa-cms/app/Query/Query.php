@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Query;
 
+use App\Post;
 use App\Post\Type;
 use App\User;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
-use InvalidArgumentException;
 
 class Query
 {
@@ -27,6 +27,13 @@ class Query
     public array $query = [];
 
     /**
+     * Query vars set by the user.
+     *
+     * @var int
+     */
+    public static int $foundRows = 0;
+
+    /**
      * Parse a query string and set query type booleans.
      *
      * @param array $query {
@@ -34,7 +41,6 @@ class Query
      *
      *     @type string|string[]  $type            A post type slug (string) or array of post type slugs.
      *                                                 * `[ 'pages', 'your_custom_type' ]` - array of names (label) of custom post type.
-     *                                                 * `[ 'any' ]` - includes all type that have the searchable=true parameter specified.
      *                                                 * `pages` - by default.
      *
      *     @type string           $author_nicename User 'nicename'.
@@ -102,7 +108,7 @@ class Query
      *                                             This is done to sort by several columns at the same time.
      *                                             The syntax is as follows: `'orderby' => [ 'title' => 'ASC', 'views' => 'DESC' ]`
      *     @type int              $page            Pagination page number. Show posts that normally should have been shown on the pagination X page.
-     *     @type int|int[]        $per_page        The number of posts per page.
+     *     @type int|int[]        $perPage        The number of posts per page.
      *     @type int              $offset          How many posts to skip from the top of the selection (top indent).
      *                                             You can set the indentation from the first post in the query results.
      *                                             For example, a standard query returns 10 posts, if you add the parameter `offset=1`
@@ -137,7 +143,7 @@ class Query
                 'views'           => '',
                 // order
                 'order'           => 'DESC',
-                'orderby'         => 'created',
+                'orderby'         => 'created_at',
                 // pagination, offset, dates & fields
                 'page'            => 1,
                 'per_page'        => 10,
@@ -149,16 +155,6 @@ class Query
         );
 
         /**
-         * Main part of query for post types
-         * TODO: add checking existing post types (remove type from array if not exist)
-         */
-        if (! empty($args['type'])) {
-            $types = array_map('Expansa\Facades\Safe', is_array($args['type']) ? $args['type'] : [ $args['type'] ]);
-        } else {
-            throw new InvalidArgumentException(t('"Type" parameter can not be empty.'));
-        }
-
-        /**
          * Parse search parameter.
          */
         $search = ( new Search($args) )->parse($args['s'] ?? '');
@@ -166,51 +162,47 @@ class Query
         /**
          * Parse custom fields.
          */
-        $custom_fields_added = false;
-        $custom_fields       = self::parseFields($args);
-
-        $the_types = [];
-        if ($types === [ 'any' ]) {
-            $types = array_keys(Type::fetch([ 'searchable' => true ]));
+        $custom_fields = self::parseFields($args);
+        if ($custom_fields) {
+            $where[] = $custom_fields;
         }
 
-        foreach ($types as $type) {
-            if (! Type::exist($type)) {
+        /**
+         * Builds the main SQL query for the specified post types.
+         */
+        $queries = [];
+
+        $postTypes = Safe::array($args['type'] ?? []);
+        foreach ($postTypes as $postType) {
+            $postTypeKey   = Safe::trim($postType);
+            $postTypeTable = Safe::snakecase($postType);
+
+            if (! Type::exist($postTypeKey)) {
                 continue;
             }
 
-            $join  = '';
-            $table = EX_DB_PREFIX . $type;
-            if ($custom_fields) {
-                $join = " INNER JOIN `{$table}_fields` ON ({$table}.ID = {$table}_fields.post_id)";
-                if (! $custom_fields_added) {
-                    $where[]             = $custom_fields;
-                    $custom_fields_added = true;
-                }
-            }
+            $table = EX_DB_PREFIX . $postTypeTable;
+            $join = $custom_fields ? " INNER JOIN `{$table}_fields` ON ($table.id = {$table}_fields.post_id)" : '';
 
-            $start_pos   = strlen(EX_DB_PREFIX) + 1;
-            $the_types[] = "SELECT *, SUBSTRING('{$table}', {$start_pos}, 99) AS type FROM `{$table}`" . $join . $search;
+            $queries[] = trim("SELECT *, '$postTypeTable' AS type FROM `$table` $join $search");
         }
-        $the_types = implode(' UNION ', $the_types);
 
-        $query = "
-		SELECT SQL_CALC_FOUND_ROWS * FROM
-			(
-				{$the_types}
-			) AS t
-		";
+        if (!$queries) {
+            return [];
+        }
+
+        $query = sprintf('SELECT SQL_CALC_FOUND_ROWS * FROM (%s) AS t', implode(' UNION ALL ', $queries));
 
         /**
          * Code for creating the WHERE part of an SQL query.
          *
          * Authors/users stuff, posts IDs & parents posts IDs
          */
-        $nicename = trim($args['nicename'] ?? '');
+        $nicename = Safe::text($args['nicename'] ?? '');
         $user     = $nicename ? User::get($nicename, 'nicename') : null;
         if ($user instanceof User) {
             $author__in         = (array) ( $args['author__in'] ?? [] );
-            $args['author__in'] = $author__in + [ (int) ( $user->id ?? 0 ) ];
+            $args['author__in'] = $author__in + [ $user->id ];
         }
 
         $fields = [
@@ -223,9 +215,10 @@ class Query
         ];
 
         foreach ($fields as $field => $column) {
-            $values   = (array) ( $args[ $field ] ?? [] );
+            $values = Safe::array($args[ $field ] ?? []);
+
             $values   = implode(',', array_map('intval', array_unique($values)));
-            $operator = strpos($field, 'not') === false ? 'IN' : 'NOT IN';
+            $operator = str_contains($field, 'not') ? 'NOT IN' : 'IN';
             if ($column && $values) {
                 $where[] = sprintf('t.%s %s (%s)', $column, $operator, $values);
             }
@@ -234,25 +227,25 @@ class Query
         /**
          * Post title
          */
-        $title = Safe::html($args['title'] ?? '');
-        if (! empty($title)) {
-            $where[] = "t.title = '" . $title . "'";
+        $title = Safe::text($args['title'] ?? '');
+        if ($title) {
+            $where[] = "t.title = '$title'";
         }
 
         /**
-         * Post status
+         * Post statuses.
          */
-        $allowed_statuses = Type::getStatuses();
-        $statuses         = (array) ( $args['status'] ?? [] );
-        $the_statuses     = [];
+        $allowedStatuses = Type::fetch();
+        $statuses        = Safe::array($args['status'] ?? []);
+        $theStatuses     = [];
         foreach ($statuses as $status) {
-            if (in_array($status, $allowed_statuses, true)) {
-                $the_statuses[] = sprintf("'%s'", $status);
+            if (in_array($status, $allowedStatuses, true)) {
+                $theStatuses[] = sprintf("'%s'", $status);
             }
         }
 
-        if ($the_statuses) {
-            $where[] = 't.status IN (' . implode(',', $the_statuses) . ')';
+        if ($theStatuses) {
+            $where[] = 't.status IN (' . implode(',', $theStatuses) . ')';
         }
 
         /**
@@ -261,7 +254,7 @@ class Query
         $slug        = Safe::slug($args['slug'] ?? '');
         $slug_strict = Safe::bool($args['slug_strict'] ?? true);
         if (! empty($slug)) {
-            $where[] = $slug_strict ? "t.slug = '{$slug}'" : "t.slug REGEXP '^{$slug}(-[[:digit:]]+)?$'";
+            $where[] = $slug_strict ? "t.slug = '$slug'" : "t.slug REGEXP '^$slug(-[[:digit:]]+)?$'";
         }
 
         /**
@@ -298,9 +291,9 @@ class Query
         /**
          * Matching by posts discussion status.
          */
-        $discussion = trim((string) ( $args['discussion'] ?? '' ));
+        $discussion = Safe::trim($args['discussion'] ?? '');
         if ($discussion) {
-            $where[] = "t.discussion = '{$discussion}'";
+            $where[] = "t.discussion = '$discussion'";
         }
 
         /**
@@ -319,7 +312,7 @@ class Query
 			' . implode(' AND ', $where);
         }
 
-        $query .= ' GROUP BY t.ID, type';
+        $query .= ' GROUP BY t.id, type';
 
         /**
          * Order.
@@ -337,23 +330,31 @@ class Query
             $query .= sprintf(' LIMIT %s', $limit);
         }
 
-        $query = Db::query($query)->fetchAll(\PDO::FETCH_ASSOC);
+        /**
+         * Run query.
+         */
+        $data = Db::query($query);
+        if ($data) {
+            $items = $data->fetchAll(\PDO::FETCH_ASSOC);
+            foreach ($items as $i => $item) {
+                $item = array_combine(array_map([Safe::class, 'camelcase'], array_keys($item)), $item);
 
-        //      var_dump( Db::last() );
-        //      var_dump( Db::error );
+                $items[ $i ] = new Post(...$item);
+            }
 
-        //$this->request = Db::last();
+            $foundRows = Db::query('SELECT FOUND_ROWS()')->fetchAll(\PDO::FETCH_NUM);
+            if ($foundRows) {
+                self::$foundRows = intval($found_posts[0][0] ?? 0);
+            }
 
-        $found_posts = Db::query('SELECT FOUND_ROWS()')->fetchAll(\PDO::FETCH_NUM);
-        if ($found_posts) {
-            //$this->found_posts = intval( $found_posts[0][0] ?? 0 );
+            if (is_callable($callback)) {
+                $items = call_user_func($callback, $query, $items);
+            }
+
+            return $items;
         }
 
-        if (is_callable($callback)) {
-            $query = call_user_func($callback, $query);
-        }
-
-        return $query;
+        return [];
     }
 
     /**
@@ -369,7 +370,7 @@ class Query
      * when 'compare' is 'BETWEEN' or 'NOT BETWEEN', arrays of two valid values are required.
      * See individual argument descriptions for accepted values.
      *
-     * @param array  $date_query {
+     * @param array  $dateQuery {
      *     Array of date query clauses.
      *
      *     @type string $relation Optional. The boolean relationship between the date queries. Accepts 'OR' or 'AND'. Default 'OR'.
@@ -396,21 +397,21 @@ class Query
      *     }
      * }
      */
-    protected static function parseDates($date_query, $table = 'pages'): string
+    protected static function parseDates(array $dateQuery, $table = 'pages'): string
     {
         $where = [];
 
-        if (empty($date_query) || ! is_array($date_query) || empty($table)) {
+        if (empty($dateQuery) || empty($table)) {
             return '';
         }
 
         $date        = new \DateTime();
         $table       = EX_DB_PREFIX . $table;
         $schema      = Db::schema();
-        $relation    = 'OR' === strtoupper($date_query['relation'] ?? 'AND') ? 'OR' : 'AND';
+        $relation    = 'OR' === strtoupper($dateQuery['relation'] ?? 'AND') ? 'OR' : 'AND';
         $comparisons = [ '=', '!=', '>', '>=', '<', '<=', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' ];
 
-        foreach ($date_query as $clause) {
+        foreach ($dateQuery as $clause) {
             $comparison    = strtoupper(strval(! empty($clause['compare']) ? $clause['compare'] : '='));
             $column        = strtolower(strval(! empty($clause['column']) ? $clause['column'] : 'created'));
             $column_format = strtolower($schema[ $table ][ $column ] ?? '');
@@ -531,7 +532,7 @@ class Query
      * @param  array  $args
      * @return string
      */
-    protected static function parseFields($args): string
+    protected static function parseFields(array $args): string
     {
         $fields = $args['fields'] ?? [];
         if (! is_array($fields) || empty($fields)) {
@@ -617,29 +618,25 @@ class Query
      * @param  array $args
      * @return string
      */
-    protected static function parseLimit($args): string
+    protected static function parseLimit(array $args): string
     {
         $default_per_page = 10;
         $page             = max(1, abs(intval($args['page'] ?? 1)));
         $offset           = max(0, abs(intval($args['offset'] ?? 0)));
-        $per_page         = $args['per_page'] ?? $default_per_page;
-        if (is_array($per_page)) {
+        $perPage         = $args['per_page'] ?? $default_per_page;
+        if (is_array($perPage)) {
             // устанавливаем значение по умолчанию, если первый элемент не существует
-            $per_page = ( isset($per_page[1]) ) ? $per_page : [ 1 => $default_per_page ] + $per_page;
-            ksort($per_page); // сортируем массив по ключам
+            $perPage = ( isset($perPage[1]) ) ? $perPage : [ 1 => $default_per_page ] + $perPage;
+            ksort($perPage); // сортируем массив по ключам
 
             $offset += array_reduce(
                 range(1, $page),
-                function ($carry, $item) use ($per_page, $page) {
-                    $max_key = max(
-                        array_filter(
-                            array_keys($per_page),
-                            function ($key) use ($item) {
-                                return $key <= $item;
-                            }
-                        )
-                    ); // получаем максимальный ключ, который не превышает текущей страницы
-                    $value   = $per_page[ $max_key ]; // получаем количество элементов на странице
+                function ($carry, $item) use ($perPage, $page) {
+                    // получаем максимальный ключ, который не превышает текущей страницы
+                    $max_key = max(array_filter(array_keys($perPage), fn($k) => $k <= $item));
+
+                    // получаем количество элементов на странице
+                    $value = $perPage[ $max_key ];
                     if ($item !== $page) {
                         $carry += $value;
                     }
@@ -650,20 +647,20 @@ class Query
 
             $max_key   = max(
                 array_filter(
-                    array_keys($per_page),
+                    array_keys($perPage),
                     function ($key) use ($page) {
                         return $key <= $page;
                     }
                 )
             ); // получаем максимальный ключ, который не превышает текущей страницы
-            $per_pages = $per_page[ $max_key ]; // получаем количество элементов на странице
+            $perPages = $perPage[ $max_key ]; // получаем количество элементов на странице
         } else {
-            $per_pages = $per_page;
-            $offset   += ( $page - 1 ) * $per_page; // считаем смещение для текущей страницы
+            $perPages = $perPage;
+            $offset   += ( $page - 1 ) * $perPage; // считаем смещение для текущей страницы
         }
-        $per_page = max(1, abs(intval($per_pages))); // устанавливаем количество элементов на странице
+        $perPage = max(1, abs(intval($perPages))); // устанавливаем количество элементов на странице
 
-        return sprintf('%d, %d', $offset, $per_page);
+        return sprintf('%d, %d', $offset, $perPage);
     }
 
     /**
@@ -689,7 +686,7 @@ class Query
      * @param  string $order
      * @return string          Table-prefixed value to used in the ORDER clause.
      */
-    protected static function parseOrderBy($orderby, $args, $order = 'DESC'): string
+    protected static function parseOrderBy(string $orderby, array $args, string $order = 'DESC'): string
     {
         if (is_array($orderby)) {
             $the_order_by = [];
@@ -707,21 +704,21 @@ class Query
             case 'modified':
             case 'comments':
             case 'views':
-                $orderby = "t.{$orderby}";
+                $orderby = "t.$orderby";
                 break;
             case 'rand':
                 $orderby = 'RAND()';
                 break;
             case 'post__in':
                 $post_in = $args['post__in'] ?? [];
-                $orderby = 'FIELD(t.ID,' . implode(',', array_map('intval', $post_in)) . ')';
+                $orderby = 'FIELD(t.id,' . implode(',', array_map('intval', $post_in)) . ')';
                 break;
             case 'parent__in':
                 $parent_in = $args['parent__in'] ?? [];
-                $orderby   = 'FIELD(t.parent,' . implode(',', array_map('intval', $parent_in)) . ')';
+                $orderby   = 'FIELD(t.parent_id,' . implode(',', array_map('intval', $parent_in)) . ')';
                 break;
             default:
-                $orderby = 't.created';
+                $orderby = 't.created_at';
                 break;
         }
 

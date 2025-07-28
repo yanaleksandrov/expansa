@@ -116,7 +116,7 @@
     background-color: $color !important;
   }
   .bg-#{'' + $name}-lt {
-    background-color: #{mix(rgba(255, 255, 255, 1), $color, 92%)} !important;
+    background-color: #{mix(rgba(255, 255, 255, 1), $color, 93%)} !important;
   }
 }
 
@@ -129,6 +129,10 @@
     max-width: #{$size/16}rem;
     width: 100%;
   }
+}
+
+.h-full {
+  height: 100%;
 }
 
 // styles for width, gap, paddings & margins

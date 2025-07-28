@@ -95,7 +95,7 @@ final class Sanitizer
                 $data = match (true) {
                     is_callable($extension)         => $extension($value, $this),
                     is_callable([ $this, $method ]) => $this->{$method}($value),
-                    default                           => null
+                    default                         => null
                 };
 
                 if (! empty($key)) {
@@ -214,11 +214,14 @@ final class Sanitizer
     }
 
     /**
-     * Leads a variable to json string.
+     * Normalizes a value to a MySQL-compatible datetime string.
      *
-     * @param mixed $value Value to change
-     * @return string
-     * @throws \Exception
+     * Attempts to parse the given value using the format 'Y-m-d H:i:s'.
+     * Returns the formatted datetime string if valid, or an empty string otherwise.
+     *
+     * @param mixed $value Input value to convert.
+     * @return string Normalized datetime string or empty string if invalid.
+     * @throws \Exception If DateTime creation fails unexpectedly.
      */
     public static function datetime(mixed $value): string
     {

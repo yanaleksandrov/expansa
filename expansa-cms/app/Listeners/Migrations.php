@@ -47,13 +47,13 @@ final class Migrations
             $table->index(['title', 'content']); // TODO: fulltext index
         });
 
-        $this->createFieldsTable($postType);
+        $this->createFieldsTable($postType, 'posts');
     }
 
-    private function createFieldsTable(string $name): void
+    private function createFieldsTable(string $name, ?string $idColumnName = null): void
     {
-        Schema::create($name . '_fields', function (Table $table) use ($name) {
-            $column = sprintf("%s_id", Str::singularize($name));
+        Schema::create($name . '_fields', function (Table $table) use ($name, $idColumnName) {
+            $column = sprintf("%s_id", Str::singularize($idColumnName ?? $name));
 
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);

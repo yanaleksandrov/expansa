@@ -9,7 +9,7 @@ $options = [];
 foreach ($languages as $language) {
     $locale = strtolower($language['locale'] ?? '');
     $url    = url();
-    $input  = '<span class="field--xs field--outline"><samp class="field-item dif h-2 mw-80"><input type="text" value="' . $locale .'"></samp></span>';
+    $input  = '<label class="field--xs field--outline"><samp class="field-item dif h-2 mw-80"><input type="text" value="' . $locale .'"></samp></label>';
 
     $options[$language['locale']] = [
         'content'     => "{$language['name']} - {$language['native']}",

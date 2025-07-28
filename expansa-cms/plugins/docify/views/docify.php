@@ -112,7 +112,7 @@ return \Expansa\Facades\Form::enqueue(
     ]
 );
 ?>
-<div class="expansa-main p-7 bg-gray-lt">
+<div class="p-7">
     <div class="mw-600 m-auto">
         <?php echo form('documents', EX_DASHBOARD . 'import/documents.php'); ?>
     </div>

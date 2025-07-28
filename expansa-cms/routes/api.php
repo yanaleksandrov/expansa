@@ -25,6 +25,7 @@ Route::before('GET|POST', '/api/.*', function () {
 Route::prefix('/api', function () {
     foreach (
         [
+            App\Api\Apikey::class,
             App\Api\Extensions::class,
             App\Api\Files::class,
             App\Api\Media::class,

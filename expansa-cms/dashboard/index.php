@@ -2,10 +2,15 @@
 
 namespace Dashboard;
 
+use App\Field;
+use App\Post;
+use App\Query\Query;
+use App\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
+use Expansa\Facades\Safe;
 use Expansa\Support\Is;
 
 new class
@@ -57,13 +62,16 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'choices', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
-        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'datepicker', 'slimselect', 'choices', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
+        $user   = User::current();
+        $userId = $user->id ?? 0;
+
+        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'expansa') {
@@ -71,9 +79,120 @@ new class
                     'expansa_dashboard_data',
                     [
                         'apiurl'              => url('/api/'),
+                        'apiKeys'             => Query::apply(
+                            [
+                                'type'      => 'api-keys',
+                                'per_page'  => 25,
+                                'author_id' => $userId,
+                                'fields'    => ['id', 'title', 'status', 'createdAt', 'updatedAt'],
+                            ],
+                            function ($query, $items) {
+                                $posts = [];
+
+                                foreach ($items as $i => $item) {
+                                    foreach ((array) $item as $key => $value) {
+                                        if (!in_array($key, ['title', 'status', 'createdAt', 'updatedAt'], true)) {
+                                            continue;
+                                        }
+
+                                        if (in_array($key, ['createdAt', 'updatedAt'], true)) {
+                                            $date = new \DateTime($value);
+                                            if ($date instanceof \DateTime) {
+                                                $value = $date->format('j F, Y');
+                                            }
+                                        }
+
+                                        $posts[$i][$key] = $value;
+                                    }
+
+                                    $fields = (new Field($item))->get();
+                                    if ($fields) {
+                                        foreach ($fields as $field => $values) {
+                                            $key = Safe::camelcase($field);
+                                            if (!isset($key, $values[0])) {
+                                                continue;
+                                            }
+
+                                            if (in_array($key, ['endDate', 'startDate'], true)) {
+                                                $date = \DateTime::createFromFormat('Y-m-d', $values[0]);
+                                                if ($date instanceof \DateTime) {
+                                                    $values[0] = $date->format('j F, Y');
+                                                }
+                                            }
+
+                                            $posts[$i][$key] = $values[0];
+                                        }
+                                    }
+                                }
+
+                                return $posts;
+                            }
+                        ),
                         'items'               => [],
                         'locale'              => I18n::locale(),
-                        'dateFormat'          => 'j M, Y',
+                        'dateFormat'          => 'd MMMM, yyyy',
+                        'datepicker'          => [
+                            'days'        => [
+                                t('Sunday'),
+                                t('Monday'),
+                                t('Tuesday'),
+                                t('Wednesday'),
+                                t('Thursday'),
+                                t('Friday'),
+                                t('Saturday')
+                            ],
+                            'daysShort'   => [
+                                t('Sun'),
+                                t('Mon'),
+                                t('Tue'),
+                                t('Wed'),
+                                t('Thu'),
+                                t('Fri'),
+                                t('Sat')
+                            ],
+                            'daysMin'     => [
+                                t('Su'),
+                                t('Mo'),
+                                t('Tu'),
+                                t('We'),
+                                t('Th'),
+                                t('Fr'),
+                                t('Sa')
+                            ],
+                            'months'      => [
+                                t('January'),
+                                t('February'),
+                                t('March'),
+                                t('April'),
+                                t('May'),
+                                t('June'),
+                                t('July'),
+                                t('August'),
+                                t('September'),
+                                t('October'),
+                                t('November'),
+                                t('December')
+                            ],
+                            'monthsShort' => [
+                                t('Jan'),
+                                t('Feb'),
+                                t('Mar'),
+                                t('Apr'),
+                                t('May'),
+                                t('Jun'),
+                                t('Jul'),
+                                t('Aug'),
+                                t('Sep'),
+                                t('Oct'),
+                                t('Nov'),
+                                t('Dec')
+                            ],
+                            'today'       => t('Today'),
+                            'clear'       => t('Clear'),
+                            'dateFormat'  => 'MM/dd/yyyy',
+                            'timeFormat'  => 'hh:mm aa',
+                            'firstDay'    => 0,
+                        ],
                         'weekStart'           => 1,
                         'loadingText'         => t('Loading...'),
                         'noResultsText'       => t('No results found'),

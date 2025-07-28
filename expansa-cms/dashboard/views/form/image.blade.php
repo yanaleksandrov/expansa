@@ -36,7 +36,7 @@ $prop = Safe::prop($attributes['name'] ?? $name);
 
 Hook::add('renderDashboardFooter', function () {
     echo view('dialogs/selfie-maker');
-});
+}, 5);
 ?>
 <div class="<?php echo $class; ?>">
 	<div class="df aife g-4">

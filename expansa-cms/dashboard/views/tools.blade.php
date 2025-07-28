@@ -6,6 +6,6 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="expansa-main p-7 bg-gray-lt">
+<div class="p-7">
     <?php echo form('tools-list', EX_DASHBOARD . 'forms/tools-list.php'); ?>
 </div>
