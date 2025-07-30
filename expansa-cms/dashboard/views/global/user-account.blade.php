@@ -1,6 +1,6 @@
 <?php
 
-use App\User;
+use App\Models\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
@@ -14,12 +14,12 @@ use Expansa\Facades\Safe;
 defined('EX_PATH') || exit;
 
 [$class, $rating, $reviews] = Safe::data(
-	$__data ?? [],
-	[
-		'class' => 'class:df aic g-1',
-		'rating' => 'float',
-		'reviews' => 'absint',
-	]
+    $__data ?? [],
+    [
+        'class' => 'class:df aic g-1',
+        'rating' => 'float',
+        'reviews' => 'absint',
+    ]
 )->values();
 
 $user = User::current();
@@ -33,33 +33,35 @@ ob_start();
 <?php
 $label = ob_get_clean();
 
-echo view('form/details', [
-    'label'       => $label,
-	'instruction' => '',
-	'content'     => Tree::include('dashboard-user-menu', $test = function ($items, $tree) use (&$test) {
-		if (empty($items) || !is_array($items)) {
-			return false;
-		}
-		?>
-		<ul class="user-menu">
-			<?php
-			foreach ($items as $item) {
-				ob_start();
-			if (empty($item['url'])) {
-				?>
-			<li class="user-menu-divider">%title$s</li>
-				<?php
-			} else {
-				?>
-			<li class="user-menu-item">
-				<a class="user-menu-link" href="%url$s"><i class="%icon$s"></i> %title$s</a>
-			</li>
-				<?php
-			}
-				echo $tree->vsprintf(ob_get_clean(), $item);
-			}
-			?>
-		</ul>
-		<?php
-	}),
-]);
+echo view('form/details', ['label' => $label,
+    'instruction' => '',
+'content' => Tree::include ('dashboard-user-menu', $test = function ($items, $tree)
+
+use (&$test)
+
+{
+    if (empty($items) || !is_array($items)) {
+        return false;
+    }
+    ?>
+<ul class="user-menu">
+        <?php
+    foreach ($items as $item) {
+        ob_start();
+    if (empty($item['url'])) {
+        ?>
+    <li class="user-menu-divider">%title$s</li>
+        <?php
+    } else {
+        ?>
+    <li class="user-menu-item">
+        <a class="user-menu-link" href="%url$s"><i class="%icon$s"></i> %title$s</a>
+    </li>
+        <?php
+    }
+        echo $tree->vsprintf(ob_get_clean(), $item);
+    }
+        ?>
+</ul>
+    <?php
+}),]);

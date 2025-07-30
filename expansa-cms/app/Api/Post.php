@@ -44,7 +44,7 @@ class Post
             ];
         }
 
-        \App\Post::add($type, $args);
+        \App\Models\Post::add($type, $args);
 
         return [
             'method' => 'POST create user',

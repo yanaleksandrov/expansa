@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use App\Options;
+use App\Models\Options;
 use DateTime;
 use Expansa\Facades\Db;
 

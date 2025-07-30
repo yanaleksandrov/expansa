@@ -28,6 +28,7 @@ final class Migrations
             $discussion = ['open', 'closed'];
 
             $table->id();
+            $table->uuid()->unique();
             $table->text('title');
             $table->text('content');
             $table->bigInt('author_id')->unsigned()->default(0);

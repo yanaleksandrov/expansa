@@ -2,10 +2,9 @@
 
 namespace Dashboard;
 
-use App\Field;
-use App\Post;
+use App\Models\Field;
+use App\Models\User;
 use App\Query\Query;
-use App\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
@@ -84,14 +83,13 @@ new class
                                 'type'      => 'api-keys',
                                 'per_page'  => 25,
                                 'author_id' => $userId,
-                                'fields'    => ['id', 'title', 'status', 'createdAt', 'updatedAt'],
                             ],
                             function ($query, $items) {
                                 $posts = [];
 
                                 foreach ($items as $i => $item) {
                                     foreach ((array) $item as $key => $value) {
-                                        if (!in_array($key, ['title', 'status', 'createdAt', 'updatedAt'], true)) {
+                                        if (!in_array($key, ['uuid', 'title', 'status', 'createdAt', 'updatedAt'], true)) {
                                             continue;
                                         }
 

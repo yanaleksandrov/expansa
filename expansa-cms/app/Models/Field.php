@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Models;
 
+use App\Models;
 use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 
@@ -48,25 +49,21 @@ final class Field
      */
     public function __construct(mixed $object)
     {
+        $table = $object->table ?? '';
+        if (method_exists($object, 'getTable')) {
+            $table = $object->getTable();
+        }
+
         [
             $this->entityId,
             $this->entityColumn,
             $this->table,
             $this->cacheGroup,
         ] = match (true) {
-            $object instanceof User => [
-                $object->id,
-                'user_id',
-                sprintf('%s_fields', $object::$table),
-                sprintf('user-fields-%d', $object->id),
-            ],
-            $object instanceof Post => [
-                $object->id,
-                'post_id',
-                sprintf('%s_fields', $object->type),
-                sprintf('post-fields-%d', $object->id),
-            ],
-            default => [ null, null, null, null ],
+            $object instanceof User => [ $object->id, 'user_id', "{$object::$table}_fields", "{$table}_fields_$object->id" ],
+            $object instanceof Models\Apikey,
+            $object instanceof Post => [ $object->id, 'post_id', "{$table}_fields", "{$table}_fields_$object->id" ],
+            default                 => [ null, null, null, null ],
         };
     }
 
@@ -274,7 +271,7 @@ final class Field
         if ($deleteDate) {
             $deleteDateParts = array_chunk($deleteDate, $chunkSize);
             foreach ($deleteDateParts as $deleteDatePart) {
-                $result['deleted'] += Db::delete(
+                $results = Db::delete(
                     $this->table,
                     [
                         'AND' => [
@@ -282,14 +279,21 @@ final class Field
                             'key'               => $deleteDatePart,
                         ],
                     ]
-                )->rowCount();
+                );
+
+                if ($results) {
+                    $result['inserted'] += $results->rowCount();
+                }
             }
         }
 
         if ($insertData) {
-            $insertDataParts = array_chunk($insertData, $chunkSize, false);
+            $insertDataParts = array_chunk($insertData, $chunkSize);
             foreach ($insertDataParts as $insertDataPart) {
-                $result['inserted'] += Db::insert($this->table, $insertDataPart)->rowCount();
+                $results = Db::insert($this->table, $insertDataPart);
+                if ($results) {
+                    $result['inserted'] += $results->rowCount();
+                }
             }
         }
 
@@ -301,11 +305,11 @@ final class Field
                 $inPart   = implode(', ', array_map(fn($k) => ":key_$k", array_keys($updateDataPart)));
 
                 $sql = "
-				UPDATE <{$this->table}> 
+				UPDATE <$this->table> 
 					SET value = CASE `key`
 						{$whenPart}
 					END
-					WHERE `key` IN ({$inPart})
+					WHERE `key` IN ($inPart)
 				";
 
                 $result['updated'] += Db::query($sql, $updateQueryParts[ $i ])->rowCount();
@@ -323,6 +327,6 @@ final class Field
      */
     protected function isEmpty(mixed $value): bool
     {
-        return $value === null || $value === '' || ( is_array($value) && empty($value) );
+        return $value === null || $value === '' || (is_array($value) && empty($value));
     }
 }

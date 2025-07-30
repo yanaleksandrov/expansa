@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Api;
 
-use App\Options;
-use App\User;
+use App\Models\Options;
+use App\Models\User;
 use Expansa\Facades\Db;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Hook;

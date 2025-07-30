@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Query;
 
-use App\Post;
+use App\Models\Post;
+use App\Models\User;
 use App\Post\Type;
-use App\User;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 
@@ -162,9 +162,9 @@ class Query
         /**
          * Parse custom fields.
          */
-        $custom_fields = self::parseFields($args);
-        if ($custom_fields) {
-            $where[] = $custom_fields;
+        $customFields = self::parseFields($args);
+        if ($customFields) {
+            $where[] = $customFields;
         }
 
         /**
@@ -182,7 +182,7 @@ class Query
             }
 
             $table = EX_DB_PREFIX . $postTypeTable;
-            $join = $custom_fields ? " INNER JOIN `{$table}_fields` ON ($table.id = {$table}_fields.post_id)" : '';
+            $join = $customFields ? " INNER JOIN `{$table}_fields` ON ($table.id = {$table}_fields.post_id)" : '';
 
             $queries[] = trim("SELECT *, '$postTypeTable' AS type FROM `$table` $join $search");
         }

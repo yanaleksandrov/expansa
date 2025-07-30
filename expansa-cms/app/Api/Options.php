@@ -40,7 +40,7 @@ class Options
         $options = Arr::exclude($_POST, [ 'nonce' ]);
         if ($options) {
             foreach ($options as $option => $value) {
-                \App\Options::update($option, $value);
+                \App\Models\Options::update($option, $value);
             }
         }
 

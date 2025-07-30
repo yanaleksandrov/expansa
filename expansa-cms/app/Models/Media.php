@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Models;
 
 use App\Query\Query;
+use App\Url;
 use Exception;
 use Expansa\Error;
 use Expansa\Facades\Disk;

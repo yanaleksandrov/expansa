@@ -15,7 +15,7 @@ class Media
      */
     public static function get(): array
     {
-        $media = \App\Media::get(
+        $media = \App\Models\Media::get(
             [
                 'per_page' => 60,
             ]
@@ -37,11 +37,11 @@ class Media
         $posts  = [];
         foreach ($_FILES as $file) {
             $filename = $file['name'] ?? '';
-            $postID   = \App\Media::upload($file);
+            $postID   = \App\Models\Media::upload($file);
             if ($postID instanceof Error) {
                 $errors[ $filename ] = Error::get();
             } else {
-                $posts[] = \App\Post::get('files', $postID);
+                $posts[] = \App\Models\Post::get('files', $postID);
             }
         }
 

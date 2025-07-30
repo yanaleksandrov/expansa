@@ -66,9 +66,16 @@ class Type
         public int $menuPosition = 10,
     )
     {
-        $postType = Safe::kebabcase($key);
+        $postType = Safe::trim($key);
+
+        if (!preg_match('/^[a-z_-]+$/', $postType)) {
+            throw new InvalidArgumentException(
+                t('Post type key "%s" must use only lowercase letters, dashes and underscores.', $postType)
+            );
+        }
+
         if (empty($postType) || strlen($postType) > 20) {
-            throw new InvalidArgumentException(t('Post type key is empty or exceeds 20 characters'));
+            throw new InvalidArgumentException(t('Post type key is empty or exceeds 20 characters.'));
         }
 
         $this->labelName       ??= t('Page');

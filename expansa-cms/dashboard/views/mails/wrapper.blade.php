@@ -1,6 +1,6 @@
 <?php
 
-use App\Options;
+use App\Models\Options;
 
 /**
  * Email wrapper template can be overridden by copying it to themes/yourtheme/dashboard/views/mail/wrapper.php

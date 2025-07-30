@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Models;
 
-use Exception;
 use App\User\Roles;
 use App\User\Traits;
+use Exception;
 use Expansa\Debug\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;

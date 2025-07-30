@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Api;
 
+use App\Models\Field;
+use App\Models\Post;
 use DateTime;
-use App\Post;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Support\Str;
@@ -56,10 +57,56 @@ class Apikey
         $title  = Safe::text($_POST['title'] ?? '');
         $status = Safe::text($_POST['status'] ?? '');
 
+        $apiKey = \App\Models\Apikey::create($_POST);
+        $post = $apiKey->find(1);
+        //print_r(get_post_meta(1, 'limits'));
+        //print_r($post->field->limits);
+        print_r($post->field->get());
+        echo $post->createdAt;
+        exit;
+
         $post = Post::add('api-keys', compact('title', 'status', 'fields'));
+
         if ($post instanceof Post) {
+            $postData = [];
+            foreach ((array) $post as $key => $value) {
+                if (!in_array($key, ['uuid', 'title', 'status', 'createdAt', 'updatedAt'], true)) {
+                    continue;
+                }
+
+                if (in_array($key, ['createdAt', 'updatedAt'], true)) {
+                    $date = new \DateTime($value);
+                    if ($date instanceof \DateTime) {
+                        $value = $date->format('j F, Y');
+                    }
+                }
+
+                $postData[$key] = $value;
+            }
+
+            $fields = (new Field($post))->get();
+            print_r($post);
+            print_r($fields);
+            if ($fields) {
+                foreach ($fields as $field => $values) {
+                    $key = Safe::camelcase($field);
+                    if (!isset($key, $values[0])) {
+                        continue;
+                    }
+
+                    if (in_array($key, ['endDate', 'startDate'], true)) {
+                        $date = \DateTime::createFromFormat('Y-m-d', $values[0]);
+                        if ($date instanceof \DateTime) {
+                            $values[0] = $date->format('j F, Y');
+                        }
+                    }
+
+                    $postData[$key] = $values[0];
+                }
+            }
+
             echo Json::encode([
-                'post' => $post,
+                'post' => $postData,
                 'data' => [
                     [
                         'target' => 'body',
@@ -69,10 +116,6 @@ class Apikey
             ]);
             exit;
         }
-        echo '<pre>';
-        var_dump($fields);
-        var_dump($post);
-        echo '</pre>';
 
         return [
             'method' => 'POST create user',

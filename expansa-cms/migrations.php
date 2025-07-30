@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\User;
+use App\Models\User;
 use App\Post\Type;
 use App\User\Roles;
 

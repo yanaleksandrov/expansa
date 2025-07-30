@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Models;
 
 use App\Post\Type;
 use Expansa\Facades\Db;
@@ -54,7 +54,10 @@ class Post
         public string $link = '',
         public string $slug = '',
         public ?Field $field = null,
-    ) {} // phpcs:ignore
+    )
+    {
+        $this->table = Safe::tablename($this->type);
+    }
 
     /**
      * Add new post.

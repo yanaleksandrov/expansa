@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use App\Options;
-use Throwable;
+use App\Models\Options;
 use RuntimeException;
+use Throwable;
 
 class Url
 {

@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Post;
-use App\Slug;
-use App\User;
+use App\Models\Slug;
+use App\Models\User;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
 use Expansa\Support\Is;
