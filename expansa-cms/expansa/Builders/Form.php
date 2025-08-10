@@ -13,7 +13,7 @@ use InvalidArgumentException;
  *
  * @package Expansa
  */
-final class Form
+class Form
 {
     public static array $forms = [];
 

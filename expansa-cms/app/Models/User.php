@@ -16,7 +16,7 @@ use Expansa\Support\Hash;
 use Expansa\Support\Is;
 use Random\RandomException;
 
-final class User
+class User
 {
     use Traits;
 

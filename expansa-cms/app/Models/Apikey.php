@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Expansa\Database\Model;
+use Expansa\Database\Model\HasTimestamps;
+use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 
 /**
  * Class Apikey
- *
  * Represents an API key entity with metadata and content information.
  *
  * @property int    $id          The primary identifier of the API key.
@@ -27,9 +28,12 @@ use Expansa\Facades\Db;
  * @property string $createdAt   The date and time when the API key was created.
  * @property string $updatedAt   The date and time when the API key was last updated.
  * @property Field  $field       A custom field object attached to the API key.
+ * @property Meta   $meta        A custom field object attached to the API key.
  */
 class Apikey extends Model
 {
+    use HasTimestamps;
+
     /**
      * The database table associated with the model.
      *
@@ -62,6 +66,13 @@ class Apikey extends Model
         );
     }
 
+    protected function meta(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            get: fn($value) => $value instanceof Meta ? $value : new Meta($this)
+        );
+    }
+
     protected function createdAt(): Model\Attribute
     {
         return Model\Attribute::make(
@@ -77,14 +88,5 @@ class Apikey extends Model
     protected function updatedAt(): Model\Attribute
     {
         return $this->createdAt();
-    }
-
-    public function find(int|string $value, string $column = 'id'): ?Apikey
-    {
-        $data = Db::get($this->table, '*', [$column => $value]);
-        if (is_array($data)) {
-            return new self($data);
-        }
-        return null;
     }
 }

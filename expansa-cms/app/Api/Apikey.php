@@ -57,11 +57,20 @@ class Apikey
         $title  = Safe::text($_POST['title'] ?? '');
         $status = Safe::text($_POST['status'] ?? '');
 
-        $apiKey = \App\Models\Apikey::create($_POST);
-        $post = $apiKey->find(1);
+        $post = \App\Models\Apikey::find(2);
+        print_r($post);
         //print_r(get_post_meta(1, 'limits'));
         //print_r($post->field->limits);
-        print_r($post->field->get());
+
+        $start = microtime(true);
+        for ($i = 0; $i < 100000; $i++) {
+            $fields = $post->meta->get();
+        }
+        $end = microtime(true);
+        print_r($fields);
+
+        $elapsed = $end - $start;
+        echo "Elapsed time: $elapsed seconds\n";
         echo $post->createdAt;
         exit;
 

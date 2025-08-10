@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Expansa\Database\Model;
+use Expansa\Facades\Cache;
+use Expansa\Facades\Db;
 
 /**
  * Class Meta
@@ -24,23 +26,46 @@ class Meta extends Model
      */
     protected string $table;
 
-    /**
-     * Fields allowed for mass assignment.
-     *
-     * @var array<int, string>
-     */
-    protected array $fillable = ['*'];
+    protected Model $post;
 
-    /**
-     * Create a new Meta instance.
-     *
-     * @param string               $table      The database table name.
-     * @param array<string,mixed>  $attributes Initial model attributes.
-     */
-    public function __construct(string $table, array $attributes = [])
+    public function __construct(Model $post, array $attributes = [])
     {
         parent::__construct($attributes);
 
-        $this->table = $table;
+        $this->post  = $post;
+        $this->table = "{$post->getTable()}_fields";
+    }
+
+    /**
+     * Retrieves the value of a specific field for the associated object.
+     *
+     * Benchmark when there are 1 million rows: 1 time - 0.00068 sec, 100000 times - 0.31 sec.
+     *
+     * @param string $key      The key of the field to retrieve. If empty, get all fields of object.
+     * @param bool   $isSingle Whether to limit the result to a single value (default: true).
+     *
+     * @return mixed The field value or null if the object ID is not set.
+     */
+    public function get(string $key = '', bool $isSingle = true): mixed
+    {
+        $fields = Cache::get("{$this->post->id}", $this->table, function () {
+            $items = Db::select($this->table, ['key', 'value'], ['post_id' => $this->post->id]);
+
+            if (!is_array($items)) {
+                return null;
+            }
+
+            $result = [];
+            foreach ($items as ['key' => $key, 'value' => $value]) {
+                $result[$key][] = $value;
+            }
+            return $result;
+        });
+
+        if ($key === '') {
+            return $fields;
+        }
+
+        return $isSingle ? ($fields[$key][0] ?? null) : ($fields[$key] ?? null);
     }
 }

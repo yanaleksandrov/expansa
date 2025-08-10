@@ -16,7 +16,7 @@ use Expansa\Patterns;
 /**
  * Expansa administration Media API.
  */
-final class Media
+class Media
 {
     /**
      * Get media files.

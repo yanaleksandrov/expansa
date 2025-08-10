@@ -7,7 +7,7 @@ namespace App\Models;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 
-final class Slug
+class Slug
 {
     /**
      * DB table name.
@@ -116,7 +116,7 @@ final class Slug
      */
     public static function delete(string $value, string $by = 'slug'): bool
     {
-        if (! in_array($by, ['uuid', 'entity_id', 'entity_table', 'slug'], true)) {
+        if (! in_array($by, ['entity_id', 'entity_table', 'slug'], true)) {
             return false;
         }
         return Db::delete(self::$table, [$by => $value])->rowCount() > 0;

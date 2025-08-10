@@ -96,6 +96,20 @@ Route::get('/(.*)', function ($slug) {
         //$content = $content->render();
     }
 
+//    $start = microtime(true);
+//    for ($i = 0; $i < 1; $i++) {
+//        $key = App\Models\Apikey::find(1);
+//    }
+//    $end = microtime(true);
+//    print_r($key);
+//
+//    $elapsed = $end - $start;
+//    echo "Elapsed time: $elapsed seconds\n";
+//    if ($key) {
+//        $key->delete();
+//    }
+//    exit;
+
     /**
      * Expansa page is fully loaded.
      *

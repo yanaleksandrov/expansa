@@ -7,7 +7,6 @@ namespace Expansa\Database;
 use Exception;
 use Expansa\Database\Model\HasAttributes;
 use Expansa\Database\Model\HasGuardAttributes;
-use Expansa\Database\Model\HasTimestamps;
 use Expansa\Support\Str;
 use stdClass;
 
@@ -15,15 +14,17 @@ use stdClass;
  * Base data model class with support for attributes, mass assignment protection,
  * timestamps, and soft deletes.
  *
- * @property string|null $updatedAt Timestamp of the last update
- * @property string|null $createdAt Timestamp of creation
- * @property string|null $deletedAt Timestamp of soft deletion
+ * @method static static|null find(int|string $value, string $by = 'id') Find a model by primary key or specified field.
+ * @method static static|null add(array $attributes)                     Create a new record.
+ * @method int                delete()                                   Delete records by primary key.
+ *
+ * @property string|null $updatedAt Timestamp of the last update.
+ * @property string|null $createdAt Timestamp of creation.
  */
 class Model
 {
     use HasAttributes;
     use HasGuardAttributes;
-    use HasTimestamps;
 
     /**
      * The database table associated with the model.
@@ -69,7 +70,7 @@ class Model
      * @param array<string, mixed>|stdClass $attributes Attributes to fill the model with.
      * @return static
      */
-    public static function create(array|stdClass $attributes): static
+    protected static function create(array|stdClass $attributes): static
     {
         return new static($attributes);
     }
@@ -130,6 +131,21 @@ class Model
     }
 
     /**
+     * Get the table associated with the model.
+     *
+     * @return string
+     */
+    public function getTable(): string
+    {
+        return Str::snake($this->table);
+    }
+
+    public function getFillable(): array
+    {
+        return $this->fillable;
+    }
+
+    /**
      * Magic getter to access attributes.
      *
      * @param string $name
@@ -153,12 +169,45 @@ class Model
     }
 
     /**
-     * Get the table associated with the model.
+     * Handle dynamic static method calls on the model class.
      *
-     * @return string
+     * This magic method intercepts static method calls that are not explicitly defined
+     * in the model class. If the called method exists in the Query class, it delegates
+     * the call to a new Query instance for the current model class, passing all arguments.
+     * Otherwise, it throws an Exception.
+     *
+     * @param string $method    The name of the static method being called.
+     * @param array  $arguments The arguments passed to the static method.
+     *
+     * @return mixed The result of the corresponding Query method call.
+     *
+     * @throws Exception If the method does not exist in the Query class.
      */
-    public function getTable(): string
+    public static function __callStatic(string $method, array $arguments)
     {
-        return Str::snake($this->table);
+        if (method_exists(Query::class, $method)) {
+            return (new Query(new static()))->$method(...$arguments);
+        }
+        throw new Exception("Method $method does not exist in " . static::class);
+    }
+
+    /**
+     * Magic instance method handler.
+     *
+     * Delegates instance method calls to the Query class if method exists,
+     * passing the current model instance.
+     *
+     * @param string $method    Method name called.
+     * @param array  $arguments Arguments passed.
+     * @return mixed
+     *
+     * @throws Exception When the called method does not exist in Query
+     */
+    public function __call(string $method, array $arguments)
+    {
+        if (method_exists(Query::class, $method)) {
+            return (new Query($this))->$method(...$arguments);
+        }
+        throw new Exception("Method $method does not exist in " . static::class);
     }
 }

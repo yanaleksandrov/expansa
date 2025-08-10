@@ -85,7 +85,6 @@ final class Migrations
             $table->id();
             $table->bigInt('entity_id')->unsigned();
             $table->string('entity_table', 255);
-            $table->uuid()->unique();
             $table->string('slug', 255);
             //$table->string('locale', 10)->nullable()->default(null);
 

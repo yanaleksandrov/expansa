@@ -7,7 +7,7 @@ namespace App\Models;
 /**
  * Core class for managing taxonomies.
  */
-final class Taxonomy
+class Taxonomy
 {
     /**
      * DB table name.

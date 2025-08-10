@@ -12,7 +12,7 @@ use Expansa\Facades\Db;
  * Represents a field associated with an object, allowing for retrieval, addition,
  * updating, and deletion of field values in a database.
  */
-final class Field
+class Field
 {
     /**
      * The ID of the associated object.

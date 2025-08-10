@@ -7,7 +7,7 @@ namespace App\Models;
 /**
  * Core class for managing plugins.
  */
-final class Term
+class Term
 {
     /**
      * @param string $term
