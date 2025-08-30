@@ -86,12 +86,13 @@ body {
   }
 
   &-header {
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
     color: var(--expansa-error);
     width: 100%;
     margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    align-content: baseline;
   }
 
   &-title {

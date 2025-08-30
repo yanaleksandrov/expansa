@@ -58,20 +58,17 @@ class Apikey
         $status = Safe::text($_POST['status'] ?? '');
 
         $post = \App\Models\Apikey::find(2);
-        print_r($post);
-        //print_r(get_post_meta(1, 'limits'));
         //print_r($post->field->limits);
 
         $start = microtime(true);
-        for ($i = 0; $i < 100000; $i++) {
-            $fields = $post->meta->get();
+        for ($i = 0; $i < 1; $i++) {
+            //$fields = $post->field->add(['mytostsss' => 'Hello World!']);
+            var_dump($post->field->delete('terter'));
         }
         $end = microtime(true);
-        print_r($fields);
 
         $elapsed = $end - $start;
         echo "Elapsed time: $elapsed seconds\n";
-        echo $post->createdAt;
         exit;
 
         $post = Post::add('api-keys', compact('title', 'status', 'fields'));

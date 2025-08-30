@@ -7,13 +7,12 @@ namespace App\Models;
 use Expansa\Database\Model;
 
 /**
- * Class Comment
- *
  * Represents a user comment on a post, including nested replies, author details,
  * status tracking, and reaction metrics.
  *
  * @property int         $id          Unique identifier for the comment.
  * @property int         $postId      ID of the post this comment belongs to.
+ * @property string      $postType    The type of the post this comment belongs to.
  * @property int         $parentId    ID of the parent comment (0 if top-level).
  * @property int         $authorId    ID of the registered author (0 if guest).
  * @property string      $authorName  Display name of the comment's author.
@@ -28,10 +27,11 @@ use Expansa\Database\Model;
  * @property int|null    $rating      Optional numeric rating (e.g., for reviews).
  * @property string      $createdAt   Creation timestamp.
  * @property string      $updatedAt   Last update timestamp.
+ * @property string      $deletedAt   Item deleted timestamp.
  *
  * @package App\Models
  */
-class Comments extends Model
+class Comment extends Model
 {
     /**
      * The database table associated with the model.

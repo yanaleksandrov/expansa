@@ -92,8 +92,8 @@ Route::get('/(.*)', function ($slug) {
             'table'  => $table ?? null,
             'entity' => $entity,
         ]);
-        $content = (new Expansa\Support\Html())->beautify($content->render());
-        //$content = $content->render();
+        //$content = (new Expansa\Support\Html())->beautify($content->render());
+        $content = $content->render();
     }
 
 //    $start = microtime(true);

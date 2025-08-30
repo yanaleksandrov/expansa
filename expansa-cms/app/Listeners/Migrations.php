@@ -142,6 +142,7 @@ final class Migrations
         Schema::create('comments', function (Table $table) {
             $table->id();
             $table->bigInt('post_id')->unsigned()->default(0);
+            $table->string('post_type', 64)->default('');
             $table->bigInt('parent_id')->unsigned()->default(0);
             $table->bigInt('author_id')->unsigned()->default(0);
             $table->string('author_name', 64)->default('');
@@ -149,15 +150,17 @@ final class Migrations
             $table->string('author_ip', 39)->default('');
             $table->string('author_agent', 255)->default('');
             $table->string('locale', 10)->nullable()->default(null);
-            $table->enum('status', ['pending', 'approved', 'spam', 'rejected', 'trash'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'spam', 'rejected'])->default('pending');
             $table->text('content');
             $table->smallInt('likes')->unsigned()->default(0);
             $table->smallInt('dislikes')->unsigned()->default(0);
             $table->smallInt('rating')->unsigned()->nullable()->default(null);
             $table->timestamps();
+            $table->timestamp('deleted_at');
 
             // indexes
             $table->index('post_id');
+            $table->index('post_type');
             $table->index('parent_id');
             $table->index('author_id');
             $table->index('locale');
@@ -166,6 +169,8 @@ final class Migrations
             $table->index('dislikes');
             $table->index('rating');
             $table->index('created_at');
+            $table->index('updated_at');
+            $table->index('deleted_at');
         });
     }
 
