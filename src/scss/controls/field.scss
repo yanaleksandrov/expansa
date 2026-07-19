@@ -5,20 +5,6 @@
   gap: 0.25em;
   align-content: start;
 
-  &--button {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 0.25rem;
-    background-color: var(--expansa-bg);
-    border-radius: var(--expansa-border-radius--xl);
-    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  }
-
-  &--grid {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
   &-icon {
     transition: background-color 0.2s;
   }
@@ -417,6 +403,86 @@
       .field-label {
         font-weight: 500;
       }
+    }
+  }
+
+  &--button {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.25rem;
+    background-color: var(--expansa-bg);
+    border-radius: var(--expansa-border-radius--xl);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  }
+
+  &--grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &--timezone {
+    border: 1px solid var(--expansa-border);
+    border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+    background-color: var(--expansa-white);
+    gap: 0;
+    overflow: hidden;
+
+    .field-label {
+      padding: 0.8em;
+      line-height: 1;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .field-item {
+      padding: 0.8em;
+      background-color: var(--expansa-bg) !important;
+      height: auto;
+      border-radius: 0;
+      border-inline: none;
+      border-bottom: none;
+      overflow: hidden;
+      position: relative;
+      margin: 0;
+    }
+
+    .field-inputs {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      padding: 0.8em;
+
+      input {
+        flex: 1;
+        width: initial !important;
+        min-width: initial !important;
+        max-width: initial !important;
+        border: none !important;
+        background-color: transparent !important;
+        border-radius: 0 !important;
+        outline: none !important;
+        height: 100% !important;
+
+        &:checked,
+        &:hover {
+          opacity: 0.15;
+          background-color: var(--expansa-primary) !important;
+        }
+      }
+    }
+
+    .field-map {
+      width: 100%;
+      min-width: 100%;
+      height: auto;
+      border-block: 1px solid var(--expansa-border);
+    }
+
+    .field-bottom {
+      display: flex;
+      padding: 0.8em;
+      gap: 0.8em;
     }
   }
 }
