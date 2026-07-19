@@ -51,6 +51,20 @@ class Memory
     }
 
     /**
+     * Sets a value in the cache for a given key and group.
+     *
+     * @param string     $key   The cache item key.
+     * @param mixed|null $value The value to store in the cache.
+     * @param string     $group The cache group or namespace. Defaults to 'default'.
+     *
+     * @return mixed Returns the value that was set.
+     */
+    public function set(string $key, mixed $value, string $group = 'default'): mixed
+    {
+        return self::$cache[$group][$key]['value'] = $value;
+    }
+
+    /**
      * Retrieves data from the cache.
      *
      * @param string $key

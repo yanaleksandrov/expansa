@@ -37,6 +37,7 @@ body {
     overflow: hidden;
     word-break: break-all;
     max-height: 53em;
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
     p {
       margin-block: 0.5rem;
@@ -86,17 +87,19 @@ body {
   }
 
   &-header {
-    display: flex;
-    align-items: center;
     gap: 0.5rem;
     color: var(--expansa-error);
     width: 100%;
     margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: 1.5rem 1fr;
+    align-content: baseline;
   }
 
   &-title {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
     font-weight: 400;
+    line-height: 125%;
   }
 
   &-content {

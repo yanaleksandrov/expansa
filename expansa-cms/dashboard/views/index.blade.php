@@ -1,6 +1,6 @@
 <?php
 
-use App\Options;
+use App\Models\Options;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
@@ -66,7 +66,8 @@ $table = $__data['table'] ?? null;
 
     <div class="expansa-panel">
         <a href="<?php echo url(); ?>" target="_blank">
-            <img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34" alt="Expansa Logo">
+            <img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34"
+                 alt="Expansa Logo">
         </a>
         <?php echo view('menu-panel'); ?>
     </div>

@@ -45,6 +45,7 @@
       transition: all 0.25s linear;
       border: 1px solid transparent;
       border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
       &.active,
       &:hover {
@@ -165,6 +166,7 @@
   box-shadow: inset 0 1px 0 #fff;
   background-color: var(--expansa-bg-dark);
   border-radius: var(--expansa-border-radius--lg);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   overflow: hidden;
   height: 2.25rem;
   line-height: 1;
@@ -233,6 +235,7 @@
   &-btn {
     background-color: var(--expansa-bg-dark);
     border-radius: var(--expansa-border-radius--lg);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     overflow: hidden;
     height: 2.25rem;
     display: flex;
@@ -266,6 +269,7 @@
     padding: 4px;
     background-color: var(--expansa-white);
     border-radius: var(--expansa-border-radius--xl);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     position: fixed;
     width: calc(100vw - 1.5rem);
     max-width: 40rem;
@@ -297,6 +301,7 @@
     text-transform: uppercase;
     font-weight: 500;
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
     i {
       min-width: 1.25rem;
@@ -307,6 +312,7 @@
       background-color: var(--expansa-white);
       border: 1px solid var(--expansa-border);
       border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     }
   }
 
@@ -331,6 +337,7 @@
     justify-content: space-between;
     color: inherit !important;
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
     &:hover {
       background-color: var(--expansa-bg);
@@ -412,6 +419,7 @@
 
   &__link {
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     color: inherit !important;
     padding: 0.375rem 0.5rem 0.375rem 0.75rem;
     position: relative;
@@ -450,6 +458,7 @@
     gap: 0.4rem;
     transition: border, background-color 0.3s !important;
     border-radius: var(--expansa-border-radius--lg);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
     &:hover {
       background-color: var(--expansa-bg-light);
@@ -638,6 +647,7 @@
     display: grid;
     background-color: var(--expansa-bg);
     border-radius: var(--expansa-border-radius--xl);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     border: 1px solid var(--expansa-border);
     margin-bottom: auto;
   }
@@ -647,6 +657,7 @@
     gap: 1rem;
     background-color: var(--expansa-white);
     border-radius: var(--expansa-border-radius--xl);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     padding: 1rem;
     overflow: hidden;
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, .025);
@@ -754,6 +765,7 @@
     padding-block-start: calc(100% - 6rem);
     background: no-repeat 50% / cover;
     border-radius: var(--expansa-border-radius--lg);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     margin-bottom: 0.5rem;
     position: relative;
     overflow: hidden;
@@ -824,6 +836,7 @@
     align-items: center;
     border: 1px solid transparent;
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     color: var(--expansa-dark) !important;
     display: flex;
     gap: .4rem;
@@ -914,6 +927,7 @@
     padding: 1rem 1.25rem;
     background-color: var(--expansa-bg);
     border-bottom-right-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
     @media (max-width: 640px) {
       border-radius: 0;

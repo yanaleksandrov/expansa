@@ -42,7 +42,7 @@ class User
      */
     public function update(): void
     {
-        $currentUser = \App\User::current();
+        $currentUser = \App\Models\User::current();
         $userdata    = $_POST + [ 'id' => $currentUser->id ];
 
         $fields = Safe::data(
@@ -54,20 +54,13 @@ class User
             ]
         )->apply();
 
-        \App\User::update($userdata, function (\App\Field $field) {
-            $fields = Safe::data(
-                $_POST,
-                [
-                    'bio'     => 'trim',
-                    'toolbar' => 'bool',
-                    'format'  => 'text',
-                ]
-            )->apply();
+        $user = \App\Models\User::update($userdata);
 
+        if ($user instanceof \App\Models\User) {
             foreach ($fields as $key => $value) {
-                $field->update($key, $value);
+                $user->field->update($key, $value);
             }
-        });
+        }
 
         echo Json::encode([
             'data' => [
@@ -98,7 +91,7 @@ class User
      */
     public static function signIn(): string
     {
-        $user = \App\User::login($_POST);
+        $user = \App\Models\User::login($_POST);
         if ($user instanceof \Expansa\Debug\Error) {
             echo Json::encode([
                 'data' => [
@@ -124,10 +117,10 @@ class User
      *
      * @since 2025.1
      */
-    public static function signUp(): array|\App\User
+    public static function signUp(): array|\App\Models\User
     {
-        $user = \App\User::add($_REQUEST ?? []);
-        if ($user instanceof \App\User) {
+        $user = \App\Models\User::add($_REQUEST ?? []);
+        if ($user instanceof \App\Models\User) {
             return [
                 'signed-up' => true,
                 [
@@ -148,8 +141,8 @@ class User
     public static function resetPassword(): array
     {
         $email = Safe::email($_REQUEST['email'] ?? '');
-        $user  = \App\User::get($email, 'email');
-        if ($user instanceof \App\User) {
+        $user  = \App\Models\User::get($email, 'email');
+        if ($user instanceof \App\Models\User) {
             $mail_is_sent = Mail::send(
                 $email,
                 t('Instructions for reset password'),

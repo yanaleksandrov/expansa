@@ -1,11 +1,11 @@
 <?php
 
-use App\Field;
-use App\User;
+use App\Models\Field;
+use App\Models\User;
+use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
-use Expansa\Facades\Form;
 
 $user  = User::current();
 $field = new Field($user);
@@ -245,8 +245,8 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'rows'        => count(explode("\n", $field->get('bio') ?? '')),
-                                'value'       => $field->get('bio'),
+                                'rows'        => count(explode("\n", $field->find('bio') ?? '')),
+                                'value'       => $field->find('bio'),
                                 'placeholder' => t('A few words about yourself'),
                             ],
                         ],
@@ -286,21 +286,21 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'value' => $field->get('format'),
+                                'value' => $field->find('format'),
                             ],
                             'options'     => [
                                 'light' => [
                                     'content'     => t('Light mode'),
                                     'icon'        => 'ph ph-user-list',
                                     'description' => t('This theme will be active when your system is set to “light mode”'),
-                                    'checked'     => $field->get('format') === 'light',
+                                    'checked'     => $field->find('format') === 'light',
                                     'image'       => url('dashboard/assets/images/dashboard-light.svg'),
                                 ],
                                 'dark'  => [
                                     'content'     => t('Dark mode'),
                                     'icon'        => 'ph ph-police-car',
                                     'description' => t('This theme will be active when your system is set to “night mode”'),
-                                    'checked'     => $field->get('format') === 'dark',
+                                    'checked'     => $field->find('format') === 'dark',
                                     'image'       => url('dashboard/assets/images/dashboard-dark.svg'),
                                 ],
                             ],
@@ -330,7 +330,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'checked' => $field->get('toolbar'),
+                                'checked' => $field->find('toolbar'),
                             ],
                             'options'     => [],
                         ],
@@ -548,32 +548,49 @@ return Form::enqueue(
 			                                    <i class="ph ph-plus"></i> <?php echo t('Add new key'); ?>
 		                                    </button>
 	                                    </p>
-	                                    <template x-for="(key, i) in apiKeys">
-		                                    <div class="p-4 df fdr g-4 mb-2 card card-border">
-			                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
-				                                    <path d="M160 18a78 78 0 0 0-73.8 103.3l-58.4 58.5A6 6 0 0 0 26 184v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 4.2-1.8l10.5-10.4A78 78 0 1 0 160 18Zm0 144a65.6 65.6 0 0 1-24.4-4.7 6 6 0 0 0-6.7 1.3L117.5 170H96a6 6 0 0 0-6 6v18H72a6 6 0 0 0-6 6v18H38v-31.5L97.4 127a6 6 0 0 0 1.3-6.7A66 66 0 1 1 160 162Zm30-86a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
-			                                    </svg>
-			                                    <div class="dg g-1">
-				                                    <h6 class="fs-14" x-text="key.title"></h6>
-				                                    <code class="fs-12 df aic g-3 bg-green-lt t-green">
-					                                    <span class="badge badge--sm badge--green-lt"><?php echo t('Active'); ?></span> <span x-text="key.token"></span>
-					                                    <i class="fs-14 ph ph-copy" title="<?php echo t('Copy'); ?>" @click="$copy(key.token)"></i>
-				                                    </code>
-				                                    <div class="fs-12 t-muted lh-xs"><?php echo t('Created at'); ?> <span x-text="key.createdAt"></span></div>
-			                                    </div>
-			                                    <div class="ml-auto">
-				                                    <button class="btn btn--sm btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
-					                                    <i class="ph ph-pen"></i> <?php echo t('Edit'); ?>
-				                                    </button>
-				                                    <button class="btn btn--sm btn--icon t-red" type="button" @click="$ajax('apikey/delete', '{id: key.id}', e => e.end && apiKeys.splice(i, 1))">
-					                                    <i class="ph ph-trash"></i>
-				                                    </button>
-			                                    </div>
+	                                    <template x-if="apiKeys.length">
+		                                    <div>
+			                                    <template x-for="(key, i) in apiKeys">
+				                                    <div class="p-4 df fdr g-4 mb-2 card card-border">
+					                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
+						                                    <path d="M160 18a78 78 0 0 0-73.8 103.3l-58.4 58.5A6 6 0 0 0 26 184v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 4.2-1.8l10.5-10.4A78 78 0 1 0 160 18Zm0 144a65.6 65.6 0 0 1-24.4-4.7 6 6 0 0 0-6.7 1.3L117.5 170H96a6 6 0 0 0-6 6v18H72a6 6 0 0 0-6 6v18H38v-31.5L97.4 127a6 6 0 0 0 1.3-6.7A66 66 0 1 1 160 162Zm30-86a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
+					                                    </svg>
+					                                    <div class="dg g-1">
+						                                    <h6 class="fs-14" x-text="key.title"></h6>
+						                                    <code class="fs-12 df aic g-3 bg-green-lt t-green">
+							                                    <span class="badge badge--sm badge--green-lt"><?php echo t('Active'); ?></span> <span x-text="key.token"></span>
+							                                    <i class="fs-14 ph ph-copy" title="<?php echo t('Copy'); ?>" @click="$copy(key.token)"></i>
+						                                    </code>
+						                                    <div class="fs-12 t-muted lh-xs"><?php echo t('Created at'); ?> <span x-text="key.createdAt"></span></div>
+					                                    </div>
+					                                    <div class="ml-auto">
+						                                    <button class="btn btn--sm btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
+							                                    <i class="ph ph-pen"></i> <?php echo t('Edit'); ?>
+						                                    </button>
+						                                    <button class="btn btn--sm btn--icon t-red" type="button" @click="$ajax('apikey/delete', key, e => e.end && apiKeys.splice(i, 1))">
+							                                    <i class="ph ph-trash"></i>
+						                                    </button>
+					                                    </div>
+				                                    </div>
+			                                    </template>
+			                                    <p class="df aic g-1 t-red fs-13">
+				                                    <i class="ph ph-info"></i> <?php echo t('Expansa support team will never ask you to share your secret keys.'); ?>
+			                                    </p>
 		                                    </div>
 	                                    </template>
-	                                    <p class="df aic g-1 t-red fs-13">
-		                                    <i class="ph ph-info"></i> <?php echo t('Expansa support team will never ask you to share your secret keys.'); ?>
-	                                    </p>
+	                                    <template x-if="!apiKeys.length">
+                                            <?php
+                                            echo view(
+                                                'global/state',
+                                                [
+                                                    'icon'        => 'ufo',
+                                                    'class'       => 'dg jic m-auto t-center p-7',
+                                                    'title'       => t('API keys not found'),
+                                                    'description' => t('To begin, click "Add new key" to create your first API key.'),
+                                                ]
+                                            );
+                                            ?>
+	                                    </template>
                                     </div>
                                 </div>
                                 <?php

@@ -80,6 +80,7 @@ input {
   &[type="radio"] {
     position: relative;
     border-radius: calc(var(--expansa-border-radius) / 1.5);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     background-color: var(--expansa-white);
     border: 1px solid var(--expansa-border);
     clear: none;

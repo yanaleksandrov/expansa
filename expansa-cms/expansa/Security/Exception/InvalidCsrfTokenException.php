@@ -15,4 +15,4 @@ use Exception;
  *
  * @package Expansa\Security
  */
-class InvalidCsrfTokenException extends Exception {}
+class InvalidCsrfTokenException extends Exception {} // phpcs:ignore

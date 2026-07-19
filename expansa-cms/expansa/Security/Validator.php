@@ -11,41 +11,7 @@ use DateTime;
  *
     print_r(
         Validator::data(
-            [
-                'field1'  => '2',
-                'field2'  => '',
-                'field3'  => '',
-                'field4'  => '',
-                'field5'  => '',
-                'field6'  => '',
-                'field7'  => '',
-                'field8'  => '',
-                'field9'  => '',
-                'field10' => '',
-                'field11' => '',
-                'field12' => '',
-                'field13' => '',
-                'field14' => '',
-                'field15' => '',
-                'field16' => '',
-                'field17' => '',
-                'field18' => '',
-                'field19' => '',
-                'field20' => '1234567',
-                'field21' => '',
-                'field22' => '15',
-                'field23' => '8',
-                'field24' => '',
-                'field25' => '',
-                'field26' => '',
-                'field27' => '',
-                'field28' => '',
-                'field29' => '',
-                'field30' => '',
-
-                'field31' => '12:25:114',
-                'field32' => '',
-            ],
+            $_POST,
             [
                 'field1'  => 'accepted',
                 'field2'  => 'alpha',
@@ -83,15 +49,15 @@ use DateTime;
             ]
         )->extend(
             'time',
-            t( 'Time must be in \'%s\' format.' ),
-            function( $validator, $value, $comparison_value ) {
-                $time = DateTime::createFromFormat( $comparison_value, $value );
+            t( 'Time must be in \'%s\' format' ),
+            function( $validator, $value, $comparisonValue ) {
+                $time = DateTime::createFromFormat( $comparisonValue, $value );
 
-                return $time && $time->format( $comparison_value ) === $value;
+                return $time && $time->format( $comparisonValue ) === $value;
             }
         )->extend(
             'array',
-            t( 'This is not array.' ),
+            t( 'This is not array' ),
             function( $validator, $value ) {
                 return is_array( $value );
             }
@@ -113,7 +79,7 @@ final class Validator
      *
      * @var array
      */
-    public array $messages = [];
+    protected array $messages = [];
 
     /**
      * List for custom rules for extend validation
@@ -127,7 +93,7 @@ final class Validator
      *
      * @var array
      */
-    public array $errors = [];
+    protected array $errors = [];
 
     /**
      * Setup validation
@@ -137,51 +103,49 @@ final class Validator
      * @param bool  $break  Flag to stop validation if the first error is found.
      */
     public function __construct(
-        public array $fields = [],
-        public array $rules = [],
-        public bool $break = false
+        protected array $fields = [],
+        protected array $rules = [],
+        protected bool $break = false
     )
     {
-        $this->messages = array_merge(
-            $this->messages,
-            [
-                'accepted'     => t('Must be accepted.'),
-                'alpha'        => t('Must contain only letters.'),
-                'alphanumeric' => t('Must contain only letters and/or numbers.'),
-                'hex'          => t('The color format should be :format.', 'HEX'),
-                'hsl'          => t('The color format should be :format.', 'HSL'),
-                'hsla'         => t('The color format should be :format.', 'HSLA'),
-                'rgb'          => t('The color format should be :format.', 'RGB'),
-                'rgba'         => t('The color format should be :format.', 'RGBA'),
-                'date'         => t('Is not a valid date.'),
-                'later'        => t('Must be date after \'%s\'.'),
-                'earlier'      => t('Must be date before \'%s\'.'),
-                'different'    => t('Must be different than \'%s\'.'),
-                'email'        => t('Is not a valid email address.'),
-                'equals'       => t('Must be the same as \'%s\'.'),
-                'ip'           => t('Is not a valid IP address.'),
-                'ipv4'         => t('Is not a valid IPv4 address.'),
-                'ipv6'         => t('Is not a valid IPv6 address.'),
-                'length'       => t('Must be %d characters long.'),
-                'lengthMin'    => t('Must be at least %d characters long.'),
-                'lengthMax'    => t('Must not exceed %d characters.'),
-                'mac'          => t('Is not a valid MAC address.'),
-                'max'          => t('Must be no more than %s.'),
-                'min'          => t('Must be at least %s.'),
-                'numeric'      => t('Must be numeric.'),
-                'required'     => t('Is required.'),
-                'regex'        => t('The field is not valid format.'),
-                'similar'      => t('Value of this field must be same with \'%s\'.'),
-                'slug'         => t('Must contain only letters, numbers, dashes and underscores.'),
-                'tld'          => t('Is not a valid top-level domain (TLD).'),
-                'url'          => t('Is not a valid URL.'),
-                'uuid'         => t('Is not a valid UUID.'),
-                'type'         => t('This type of file is not allowed.'),
-                'minSize'      => t('File size is too small. Must be greater than or equal to %s.'),
-                'maxSize'      => t('File size is too big. Must be less than %s.'),
-                'extension'    => t('Invalid file extension. Accepted extensions are: %s.'),
-            ]
-        );
+        $this->messages = [
+            'accepted'     => t('Must be accepted.'),
+            'alpha'        => t('Must contain only letters.'),
+            'alphanumeric' => t('Must contain only letters and/or numbers.'),
+            'hex'          => t('The color format should be :format.', 'HEX'),
+            'hsl'          => t('The color format should be :format.', 'HSL'),
+            'hsla'         => t('The color format should be :format.', 'HSLA'),
+            'rgb'          => t('The color format should be :format.', 'RGB'),
+            'rgba'         => t('The color format should be :format.', 'RGBA'),
+            'date'         => t('Is not a valid date.'),
+            'later'        => t("Must be date after '%s'."),
+            'earlier'      => t("Must be date before '%s'."),
+            'different'    => t("Must be different than '%s'."),
+            'email'        => t('Is not a valid email address.'),
+            'equals'       => t("Must be the same as '%s'."),
+            'ip'           => t('Is not a valid IP address.'),
+            'ipv4'         => t('Is not a valid IPv4 address.'),
+            'ipv6'         => t('Is not a valid IPv6 address.'),
+            'length'       => t('Must be %d characters long.'),
+            'lengthMin'    => t('Must be at least %d characters long.'),
+            'lengthMax'    => t('Must not exceed %d characters.'),
+            'mac'          => t('Is not a valid MAC address.'),
+            'max'          => t('Must be no more than %s.'),
+            'min'          => t('Must be at least %s.'),
+            'numeric'      => t('Must be numeric.'),
+            'required'     => t('Is required.'),
+            'regex'        => t('The field is not valid format.'),
+            'similar'      => t("Value of this field must be same with '%s'."),
+            'slug'         => t('Must contain only letters, numbers, dashes and underscores.'),
+            'tld'          => t('Is not a valid top-level domain (TLD).'),
+            'url'          => t('Is not a valid URL.'),
+            'uuid'         => t('Is not a valid UUID.'),
+            'type'         => t('This type of file is not allowed.'),
+            'minSize'      => t('File size is too small. Must be greater than or equal to %s.'),
+            'maxSize'      => t('File size is too big. Must be less than %s.'),
+            'extension'    => t('Invalid file extension. Accepted extensions are: %s.'),
+            ...$this->messages,
+        ];
     }
 
     /**
@@ -200,24 +164,25 @@ final class Validator
     /**
      * Apply validation
      *
-     * @return array|Validator
+     * @return Validator
      */
-    public function apply(): array|Validator
+    public function apply(): self
     {
         foreach ($this->rules as $field => $rules) {
             $rules = explode('|', $rules);
+
             foreach ($rules as $rule) {
-                [ $method, $comparison_value ] = explode(':', $rule, 2) + [ null, null ];
+                [ $method, $comparisonValue ] = explode(':', $rule, 2) + [ null, null ];
 
                 // checking the value for compliance with the condition
                 $value      = $this->fields[ $field ] ?? '';
-                $comparison = $this->fields[ $comparison_value ] ?? $comparison_value;
+                $comparison = $this->fields[ $comparisonValue ] ?? $comparisonValue;
 
-                // check if $comparison_value is a list of data
-                $comparison_value_array = explode(',', $comparison_value ?? '');
-                if (count($comparison_value_array) > 1) {
-                    $comparison       = $comparison_value_array;
-                    $comparison_value = implode(', ', $comparison);
+                // check if $comparisonValue is a list of data
+                $comparisonValue_array = explode(',', $comparisonValue ?? '');
+                if (count($comparisonValue_array) > 1) {
+                    $comparison       = $comparisonValue_array;
+                    $comparisonValue = implode(', ', $comparison);
                 }
 
                 // run class methods
@@ -234,7 +199,7 @@ final class Validator
                 // fetch error message
                 $message = $this->messages[ $key ] ?? ( $this->messages[ $method ] ?? '' );
                 if (isset($error) && ! $error && $message) {
-                    $this->errors[ $field ][] = sprintf($message, $comparison_value);
+                    $this->errors[ $field ][] = sprintf($message, $comparisonValue);
                 }
 
                 // if option is active, skip other errors
@@ -244,11 +209,27 @@ final class Validator
             }
         }
 
-        if (empty($this->errors)) {
-            return $this->fields;
-        }
-
         return $this;
+    }
+
+    /**
+     * Check data is valid.
+     *
+     * @return bool
+     */
+    public function isValid(): bool
+    {
+        return empty($this->errors);
+    }
+
+    /**
+     * Check data is invalid.
+     *
+     * @return array
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
     }
 
     /**
@@ -259,7 +240,7 @@ final class Validator
      * @param callable|null $callback
      * @return Validator
      */
-    public function extend(string $type, string $message, ?callable $callback = null): Validator
+    public function extend(string $type, string $message, ?callable $callback = null): self
     {
         $this->messages[ $type ] = $message;
         if (is_callable($callback)) {
@@ -417,15 +398,15 @@ final class Validator
      * Validate that two values match
      *
      * @param int|string $value
-     * @param int|string $comparison_value
+     * @param int|string $comparisonValue
      * @return bool
      */
-    protected function equals(int|string $value, int|string $comparison_value): bool
+    protected function equals(int|string $value, int|string $comparisonValue): bool
     {
         if (is_string($value)) {
-            return $value === strval($comparison_value);
+            return $value === strval($comparisonValue);
         }
-        return $value === intval($comparison_value);
+        return $value === intval($comparisonValue);
     }
 
     /**
@@ -465,36 +446,36 @@ final class Validator
      * Validate the length of a string
      *
      * @param mixed $value
-     * @param mixed $length
+     * @param mixed $comparisonValue
      * @return bool
      */
-    protected function length(mixed $value, mixed $length): bool
+    protected function length(mixed $value, mixed $comparisonValue): bool
     {
-        return mb_strlen($value) === intval($length);
+        return mb_strlen($value) === intval($comparisonValue);
     }
 
     /**
      * Validate the length of a string (min)
      *
      * @param mixed $value
-     * @param mixed $length
+     * @param mixed $comparisonValue
      * @return bool
      */
-    protected function lengthMin(mixed $value, mixed $length): bool
+    protected function lengthMin(mixed $value, mixed $comparisonValue): bool
     {
-        return mb_strlen($value) >= intval($length);
+        return mb_strlen($value) >= intval($comparisonValue);
     }
 
     /**
      * Validate the length of a string (max)
      *
      * @param mixed $value
-     * @param mixed $length
+     * @param mixed $comparisonValue
      * @return bool
      */
-    protected function lengthMax(mixed $value, mixed $length): bool
+    protected function lengthMax(mixed $value, mixed $comparisonValue): bool
     {
-        return mb_strlen($value) <= intval($length);
+        return mb_strlen($value) <= intval($comparisonValue);
     }
 
     /**
@@ -512,36 +493,36 @@ final class Validator
      * Validate the value is less than a maximum value
      *
      * @param mixed $value
-     * @param mixed $maximum_value
+     * @param mixed $maximumValue
      * @return bool
      */
-    protected function max(mixed $value, mixed $maximum_value): bool
+    protected function max(mixed $value, mixed $maximumValue): bool
     {
         if (function_exists('bccomp')) {
-            $value         = strval($value);
-            $maximum_value = strval($maximum_value);
+            $value        = strval($value);
+            $maximumValue = strval($maximumValue);
 
-            return ! ( bccomp($value, $maximum_value, 14) === 1 );
+            return ! ( bccomp($value, $maximumValue, 14) === 1 );
         }
-        return $maximum_value <= $value;
+        return $maximumValue <= $value;
     }
 
     /**
      * Validate the value is greater than a minimum value.
      *
      * @param mixed $value
-     * @param mixed $minimum_value
+     * @param mixed $minimumValue
      * @return bool
      */
-    protected function min(mixed $value, mixed $minimum_value): bool
+    protected function min(mixed $value, mixed $minimumValue): bool
     {
         if (function_exists('bccomp')) {
-            $value         = strval($value);
-            $minimum_value = strval($minimum_value);
+            $value        = strval($value);
+            $minimumValue = strval($minimumValue);
 
-            return ! ( bccomp($minimum_value, $value, 14) >= 0 );
+            return ! ( bccomp($minimumValue, $value, 14) >= 0 );
         }
-        return $minimum_value >= $value;
+        return $minimumValue >= $value;
     }
 
     /**
@@ -582,12 +563,12 @@ final class Validator
      * Validate that a field value same as value of other field
      *
      * @param mixed $value
-     * @param mixed $comparison_value
+     * @param mixed $comparisonValue
      * @return bool
      */
-    protected function similar(mixed $value, mixed $comparison_value): bool
+    protected function similar(mixed $value, mixed $comparisonValue): bool
     {
-        return $value === $comparison_value;
+        return $value === $comparisonValue;
     }
 
     /**
@@ -674,43 +655,43 @@ final class Validator
      * Validate file extension
      *
      * @param string $value
-     * @param array|string $extensions
+     * @param array|string $comparisonValue
      * @return bool
      */
-    protected function extension(string $value, array|string $extensions): bool
+    protected function extension(string $value, array|string $comparisonValue): bool
     {
-        return $this->in(pathinfo($value, PATHINFO_EXTENSION), (array) $extensions);
+        return $this->in(pathinfo($value, PATHINFO_EXTENSION), (array) $comparisonValue);
     }
 
     /**
      * Validate file minimum size
      *
      * @param mixed $value
-     * @param int|string $minsize
+     * @param int|string $comparisonValue
      * @return bool
      */
-    protected function minSize(mixed $value, int|string $minsize): bool
+    protected function minSize(mixed $value, int|string $comparisonValue): bool
     {
         $units = [ 'b', 'kb', 'mb', 'gb' ];
-        if (is_string($minsize)) {
-            $minsize = (int) $minsize * pow(1024, array_search(strtolower(substr($minsize, -2)), $units, true));
+        if (is_string($comparisonValue)) {
+            $comparisonValue = (int) $comparisonValue * pow(1024, array_search(strtolower(substr($comparisonValue, -2)), $units, true));
         }
-        return intval($value) <= intval($minsize);
+        return intval($value) <= intval($comparisonValue);
     }
 
     /**
      * Validate file maximum size
      *
      * @param int $value
-     * @param int|string $maxsize
+     * @param int|string $comparisonValue
      * @return bool
      */
-    protected function maxSize(mixed $value, int|string $maxsize): bool
+    protected function maxSize(mixed $value, int|string $comparisonValue): bool
     {
         $units = [ 'b', 'kb', 'mb', 'gb' ];
-        if (is_string($maxsize)) {
-            $maxsize = (int) $maxsize * pow(1024, array_search(strtolower(substr($maxsize, -2)), $units, true));
+        if (is_string($comparisonValue)) {
+            $comparisonValue = (int) $comparisonValue * pow(1024, array_search(strtolower(substr($comparisonValue, -2)), $units, true));
         }
-        return intval($value) >= intval($maxsize);
+        return intval($value) >= intval($comparisonValue);
     }
 }

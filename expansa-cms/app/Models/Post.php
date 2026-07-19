@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Models;
 
 use App\Post\Type;
+use Expansa\Database\Model;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use LogicException;
@@ -54,7 +55,10 @@ class Post
         public string $link = '',
         public string $slug = '',
         public ?Field $field = null,
-    ) {} // phpcs:ignore
+    )
+    {
+        $this->table = Safe::tablename($this->type);
+    }
 
     /**
      * Add new post.
@@ -151,7 +155,7 @@ class Post
                 $data[ Safe::camelcase($key) ] = $value;
             }
 
-            $data['slug'] = $type->public === true ? Slug::find($data['id'], $type->table) : '';
+            $data['slug'] = $type->public === true ? Slug::get($data['id'], $type->table) : '';
 
             return new Post(...$data);
         }
@@ -170,9 +174,5 @@ class Post
     public static function delete(string $type, mixed $value, string $by = 'id'): bool
     {
         return Db::delete($type, [ $by => $value ])->rowCount() > 0;
-    }
-
-    public static function update(int $id, string $type, array $args)
-    {
     }
 }

@@ -16,6 +16,7 @@
   min-width: fit-content;
   width: fit-content;
   border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   text-decoration: none;
   transition: background-color 0.15s;
   -webkit-user-select: none;

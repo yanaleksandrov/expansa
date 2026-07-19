@@ -8,7 +8,7 @@ return Expansa\Facades\Form::enqueue(
 	'api-keys-manager',
 	[
 		'class'           => 'dg g-7 p-7',
-		'@submit.prevent' => '$ajax("apikey/create", "", e => e.end && ($dialog.close(), apiKeys.unshift(e.raw?.post)))',
+		'@submit.prevent' => '$ajax("apikey/create", "", e => e.end && (apiKeys.unshift(e.raw?.post), $dialog.closes()))',
 	],
 	[
 		[
@@ -160,7 +160,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'textarea',
 			'name'        => 'sites',
-			'label'       => t( 'Allowed website' ),
+			'label'       => t( 'Allowed websites' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

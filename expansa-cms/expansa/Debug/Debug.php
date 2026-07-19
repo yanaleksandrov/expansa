@@ -44,7 +44,7 @@ class Debug
 
         $description = t('Find on line :lineNumber in file :filepath', $e->getLine(), $e->getFile());
         $description = preg_replace('/[a-z0-9_\-]*\.php/i', '$1<u>$0</u>', $description);
-        $description = preg_replace('/[0-9]/i', '$1<em>$0</em>', $description);
+        $description = preg_replace('/(\d+)/', '<em>$1</em>', $description);
         $description = preg_replace('/[\(\)#\[\]\':]/i', '$1<ss>$0</ss>', $description);
 
         $traces     = [];

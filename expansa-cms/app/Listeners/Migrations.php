@@ -28,6 +28,7 @@ final class Migrations
             $discussion = ['open', 'closed'];
 
             $table->id();
+            $table->uuid()->unique();
             $table->text('title');
             $table->text('content');
             $table->bigInt('author_id')->unsigned()->default(0);
@@ -84,7 +85,6 @@ final class Migrations
             $table->id();
             $table->bigInt('entity_id')->unsigned();
             $table->string('entity_table', 255);
-            $table->uuid()->unique();
             $table->string('slug', 255);
             //$table->string('locale', 10)->nullable()->default(null);
 
@@ -115,19 +115,30 @@ final class Migrations
         Schema::create('users', function (Table $table) {
             $table->id();
             $table->uuid()->unique();
+
+            // authentication
             $table->string('login', 60)->unique();
             $table->string('password', 255);
-            $table->string('nicename', 60);
-            $table->string('firstname', 60);
-            $table->string('lastname', 60);
-            $table->string('showname', 255);
+
+            // profile
+            $table->string('nicename', 60)->nullable();
+            $table->string('firstname', 60)->nullable();
+            $table->string('lastname', 60)->nullable();
+            $table->string('showname', 255)->nullable();
             $table->string('email', 100)->unique();
             $table->string('locale', 10)->nullable()->default(null);
-            $table->bool('is_verified')->default(0);
+
+            // status and verification
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('verification_token', 100);
-            $table->string('password_reset_token', 100);
-            $table->dateTime('visited_at')->useCurrent();
+            $table->bool('is_verified')->default(0);
+
+            // tokens for email verification and password reset
+            $table->string('verification_token', 100)->nullable();
+            $table->timestamp('verification_token_expires_at')->nullable();
+            $table->string('password_reset_token', 100)->nullable();
+            $table->timestamp('password_reset_expires_at')->nullable();
+
+            // activity tracking
             $table->timestamps();
 
             // indexes
@@ -142,6 +153,7 @@ final class Migrations
         Schema::create('comments', function (Table $table) {
             $table->id();
             $table->bigInt('post_id')->unsigned()->default(0);
+            $table->string('post_type', 64)->default('');
             $table->bigInt('parent_id')->unsigned()->default(0);
             $table->bigInt('author_id')->unsigned()->default(0);
             $table->string('author_name', 64)->default('');
@@ -149,15 +161,17 @@ final class Migrations
             $table->string('author_ip', 39)->default('');
             $table->string('author_agent', 255)->default('');
             $table->string('locale', 10)->nullable()->default(null);
-            $table->enum('status', ['pending', 'approved', 'spam', 'rejected', 'trash'])->default('pending');
+            $table->enum('status', ['pending', 'approved', 'spam', 'rejected'])->default('pending');
             $table->text('content');
             $table->smallInt('likes')->unsigned()->default(0);
             $table->smallInt('dislikes')->unsigned()->default(0);
             $table->smallInt('rating')->unsigned()->nullable()->default(null);
             $table->timestamps();
+            $table->timestamp('deleted_at');
 
             // indexes
             $table->index('post_id');
+            $table->index('post_type');
             $table->index('parent_id');
             $table->index('author_id');
             $table->index('locale');
@@ -166,6 +180,8 @@ final class Migrations
             $table->index('dislikes');
             $table->index('rating');
             $table->index('created_at');
+            $table->index('updated_at');
+            $table->index('deleted_at');
         });
     }
 

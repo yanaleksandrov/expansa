@@ -40,6 +40,15 @@
         <exclude name="Generic.Commenting.DocComment.NonParamGroup"/>
     </rule>
 
+    <!-- Обрабатывает максимальную длину строк -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="130"/>
+            <property name="absoluteLineLimit" value="130"/>
+            <property name="ignoreComments" value="false"/>
+        </properties>
+    </rule>
+
     <!-- Предотвращает использование инлайновых управляющих конструкций -->
     <rule ref="Generic.ControlStructures.InlineControlStructure"/>
 

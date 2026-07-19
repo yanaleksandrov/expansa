@@ -3,6 +3,7 @@
   padding: 1rem;
   border: 1px solid var(--expansa-border);
   border-radius: var(--expansa-border-radius--lg);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   position: relative;
   display: none;
 
@@ -86,6 +87,7 @@
       padding-inline: 0.25rem;
       border: 1px solid var(--expansa-border);
       border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
       background-color: var(--expansa-bg);
       -webkit-background-clip: initial !important;
       height: 2.25rem;

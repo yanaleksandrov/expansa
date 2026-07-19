@@ -2,10 +2,9 @@
 
 namespace Dashboard;
 
-use App\Field;
-use App\Post;
+use App\Models\Field;
+use App\Models\User;
 use App\Query\Query;
-use App\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
@@ -62,7 +61,7 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
@@ -84,14 +83,13 @@ new class
                                 'type'      => 'api-keys',
                                 'per_page'  => 25,
                                 'author_id' => $userId,
-                                'fields'    => ['id', 'title', 'status', 'createdAt', 'updatedAt'],
                             ],
                             function ($query, $items) {
                                 $posts = [];
 
                                 foreach ($items as $i => $item) {
                                     foreach ((array) $item as $key => $value) {
-                                        if (!in_array($key, ['title', 'status', 'createdAt', 'updatedAt'], true)) {
+                                        if (!in_array($key, ['uuid', 'title', 'status', 'createdAt', 'updatedAt'], true)) {
                                             continue;
                                         }
 
@@ -105,7 +103,7 @@ new class
                                         $posts[$i][$key] = $value;
                                     }
 
-                                    $fields = (new Field($item))->get();
+                                    $fields = (new Field($item))->find();
                                     if ($fields) {
                                         foreach ($fields as $field => $values) {
                                             $key = Safe::camelcase($field);

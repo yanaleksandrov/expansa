@@ -13,7 +13,7 @@ if (! Is::installed()) {
         Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
     }
 
-    foreach (['expansa', 'ajax', 'alpine'] as $script) {
+    foreach (['expansa', 'ajax', 'slimselect', 'alpine'] as $script) {
         $data = [];
         if ($script === 'expansa') {
             $data['data'] = [

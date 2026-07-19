@@ -159,6 +159,7 @@ samp {
 code {
   width: fit-content;
   border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   padding: 0.25rem 0.5rem;
   line-height: 1.45;
   background: var(--expansa-bg-universal, hsla(244, 52%, 14%, 0.02));
@@ -168,6 +169,7 @@ pre {
   color: hsl(230, 8%, 24%);
   box-shadow: 0 -1px 0 0 rgb(0 0 0 / 5%) inset;
   border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   margin: 0.5em 0;
   padding: 1.25rem 1.5em;
   padding-inline-start: 4.5em;
@@ -311,6 +313,7 @@ select {
 
   &[x-select] {
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
   &[multiple][x-select] {

@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App;
+namespace App\Models;
+
+use Expansa\Database\Model;
 
 /**
  * Core class for managing plugins.
  */
-final class Term
+class Term extends Model
 {
     /**
      * @param string $term
