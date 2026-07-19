@@ -67,13 +67,13 @@ class Markdown
     {
         return preg_replace_callback(
             '{
-                ^(\#{1,6})    # $1 = string of #\'s
+                ^(\#{1,6})   # $1 = string of #\'s
                 [ ]*
                 (.+?)        # $2 = Header text
                 [ ]*
-                \#*            # optional closing #\'s (not counted)
+                \#*          # optional closing #\'s (not counted)
                 \n+
-            }xm',           # 'm' modifier allows ^ and $ to match the start and end of each line (multiline)
+            }xm',            # 'm' modifier allows ^ and $ to match the start and end of each line (multiline)
             function ($matches) {
                 $level = strlen($matches[1]);  // Длина символов '#' для определения уровня заголовка
                 return "<h{$level}>{$matches[2]}</h{$level}>";  // Возвращаем HTML для заголовка

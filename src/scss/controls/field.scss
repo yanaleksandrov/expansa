@@ -11,6 +11,7 @@
     padding: 0.25rem;
     background-color: var(--expansa-bg);
     border-radius: var(--expansa-border-radius--xl);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
   &--grid {
@@ -45,6 +46,7 @@
     gap: 0.5em;
     border: 1px solid var(--expansa-border);
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     background-color: var(--expansa-bg);
     transition: background-color 0.2s;
 
@@ -130,6 +132,7 @@
       &[type="checkbox"] {
         border: 1px solid var(--expansa-border);
         border-radius: calc(var(--expansa-border-radius) / 1.5);
+        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         margin: 0 0 auto;
         height: auto;
 
@@ -215,6 +218,7 @@
 
         &:focus-within {
           border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
           border-color: var(--expansa-border) !important;
           box-shadow: none !important;
           background-color: var(--expansa-bg) !important;
@@ -228,10 +232,12 @@
 
         &:not(:only-child):first-child {
           border-radius: var(--expansa-border-radius) var(--expansa-border-radius) 0 0;
+          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         }
 
         &:not(:only-child):last-child {
           border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         }
 
         &:hover {

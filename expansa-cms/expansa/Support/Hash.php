@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Support;
 
 use Exception;
+use Throwable;
 use Random\RandomException;
 
 /**
@@ -20,8 +21,8 @@ class Hash
      *                                Default true.
      * @param bool $extraSpecialChars Optional. Whether to include other special characters.
      *                                Used when generating secret keys and salts. Default false.
-     * @return string The random password
-     * @throws RandomException
+     *
+     * @return string The random password.
      */
     public static function generate(int $length = 12, bool $specialChars = true, bool $extraSpecialChars = false): string
     {
@@ -37,7 +38,7 @@ class Hash
 
         $password = '';
         for ($i = 0; $i < $length; ++$i) {
-            $password .= substr($chars, random_int(0, strlen($chars) - 1), 1);
+            $password .= $chars[mt_rand(0, strlen($chars) - 1)];
         }
 
         return $password;

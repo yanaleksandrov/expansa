@@ -61,7 +61,7 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'slimselect', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
@@ -103,7 +103,7 @@ new class
                                         $posts[$i][$key] = $value;
                                     }
 
-                                    $fields = (new Field($item))->get();
+                                    $fields = (new Field($item))->find();
                                     if ($fields) {
                                         foreach ($fields as $field => $values) {
                                             $key = Safe::camelcase($field);

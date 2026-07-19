@@ -85,17 +85,19 @@ class System
         $siteurl  = $protocol . $_SERVER['SERVER_NAME'];
 
         [ $site, $userdata, $database ] = Safe::data($_POST, [
-            'site.name'     => 'trim',
-            'site.tagline'  => 'trim',
-            'site.url'      => "url:$siteurl",
-            'user.login'    => 'trim',
-            'user.email'    => 'email',
-            'user.password' => 'trim',
-            'db.database'   => 'trim',
-            'db.username'   => 'trim',
-            'db.password'   => 'trim',
-            'db.host'       => 'trim',
-            'db.prefix'     => 'snakecase',
+            'site.name'        => 'trim',
+            'site.tagline'     => 'trim',
+            'site.url'         => "url:$siteurl",
+            'user.is_verified' => 'bool',
+            'user.email'       => 'email',
+            'user.locale'      => 'locale',
+            'user.login'       => 'trim',
+            'user.password'    => 'trim',
+            'db.database'      => 'trim',
+            'db.username'      => 'trim',
+            'db.password'      => 'trim',
+            'db.host'          => 'trim',
+            'db.prefix'        => 'snakecase',
         ])->values();
 
         /**
@@ -147,17 +149,18 @@ class System
 
         Db::updateSchema();
 
-        $user = User::add($userdata + ['locale' => '', 'is_verified' => true]);
+        $user = User::create($userdata + ['test' => 235446]);
 
-        if ($user instanceof User) {
-            $site['owner']['email'] = $user->email;
+        print_r($user);
+        if ($user->isValid()) {
+            $user->save();
 
             /**
              * Fill same options
              *
              * @since 2025.1
              */
-            Options::update('site', $site);
+            Options::update('site', $site + ['owner' => ['email' => $user->email]]);
 
             User::login($userdata);
 
@@ -180,6 +183,7 @@ class System
                 ]
             );
         }
+
         exit;
     }
 }

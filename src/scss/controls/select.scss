@@ -8,13 +8,16 @@
   --ss-highlight-color: #fffb8c;
   --ss-success-color: #00b755;
   --ss-error-color: #dc3545;
-  --ss-main-height: 30;
   --ss-content-height: 300;
   --ss-spacing-l: 7px;
   --ss-spacing-m: 5px;
   --ss-spacing-s: 3px;
   --ss-animation-timing: 0.2s;
   --ss-border-radius: var(--expansa-border-radius);
+
+  &-hide {
+    display: none !important;
+  }
 
   &-main {
     display: flex;
@@ -32,28 +35,41 @@
     outline: 0;
     border: 1px solid var(--expansa-border);
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     transition: color, box-shadow 0.2s ease;
     height: 1.875rem;
     padding-inline: 0.85em 2.25em;
     white-space: nowrap;
     background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 54%;
     background-size: 0.8em;
+    box-sizing: border-box;
 
     select[multiple] + & {
       padding-inline-start: 0.25em;
     }
 
-    &.ss-open-below {
-      color: inherit;
-      outline: 0;
-      background-color: #fff;
-      border-color: var(--expansa-link);
-      box-shadow: 0 0 0 1px var(--expansa-link);
+    &.ss-disabled {
+      background-color: var(--ss-disabled-color);
+      cursor: not-allowed;
+    }
+
+    &.ss-disabled .ss-values .ss-disabled {
+      color: var(--ss-font-color);
+    }
+
+    &.ss-disabled .ss-values .ss-value .ss-value-delete {
+      cursor: not-allowed;
     }
 
     &.ss-open-above,
     &.ss-open-below {
       border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+      color: inherit;
+      outline: 0;
+      background-color: #fff;
+      border-color: var(--expansa-link);
+      box-shadow: 0 0 0 1px var(--expansa-link);
     }
 
     .ss-arrow {
@@ -62,15 +78,28 @@
 
     .ss-values {
       gap: 3px;
+      display: inline-flex;
+      flex-wrap: wrap;
+      flex: 1 1 100%;
 
       .ss-placeholder {
         color: var(--expansa-text-muted);
+        display: flex;
+        padding: var(--ss-spacing-s) var(--ss-spacing-m) var(--ss-spacing-s) var(--ss-spacing-m);
+        margin: auto 0 auto 0;
+        line-height: 1em;
+        align-items: center;
+        width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
 
       .ss-single {
         margin: 0;
-        align-items: center;
         gap: 0.5em;
+        align-items: center;
+        display: flex;
 
         i {
           background-color: #EBF5FA;
@@ -112,6 +141,21 @@
       .ss-value {
         background-color: rgba(32, 107, 196, 0.1);
         height: 25px;
+        display: flex;
+        user-select: none;
+        align-items: center;
+        width: fit-content;
+        border-radius: var(--ss-border-radius);
+        animation-name: ss-valueIn;
+        animation-duration: var(--ss-animation-timing);
+        animation-timing-function: ease-out;
+        animation-fill-mode: both;
+
+        &.ss-value-out {
+          animation-name: ss-valueOut;
+          animation-duration: var(--ss-animation-timing);
+          animation-timing-function: ease-out;
+        }
 
         .ss-value-delete,
         .ss-value-text {
@@ -122,6 +166,10 @@
         }
 
         .ss-value-text {
+          font-size: 12px;
+          color: var(--ss-bg-color);
+          line-height: 1;
+          padding: var(--ss-spacing-s) var(--ss-spacing-m);
           padding-inline-end: 0;
         }
 
@@ -129,15 +177,68 @@
           border-radius: 3px;
           margin: 0 3px 0 6px;
           transition: background-color 0.3s;
+          display: flex;
+          align-items: center;
+          height: var(--ss-spacing-l);
+          width: var(--ss-spacing-l);
+          padding: var(--ss-spacing-s) var(--ss-spacing-m);
+          cursor: pointer;
+          border-left: solid 1px var(--ss-bg-color);
+          box-sizing: content-box;
 
           &:hover {
             border-radius: 3px;
             background-color: rgb(255 255 255 / 60%);
           }
 
-          svg path {
-            stroke: var(--expansa-primary);
+          svg {
+            height: var(--ss-spacing-l);
+            width: var(--ss-spacing-l);
+
+            path {
+              fill: none;
+              stroke: var(--expansa-primary);
+              stroke-width: 18;
+              stroke-linecap: round;
+              stroke-linejoin: round;
+            }
           }
+        }
+      }
+
+      .ss-max {
+        display: flex;
+        user-select: none;
+        align-items: center;
+        width: fit-content;
+        font-size: 12px;
+        color: var(--ss-bg-color);
+        line-height: 1;
+        padding: var(--ss-spacing-s) var(--ss-spacing-m);
+        background-color: var(--ss-primary-color);
+        border-radius: var(--ss-border-radius);
+      }
+    }
+
+    .ss-deselect {
+      display: flex;
+      align-self: center;
+      justify-content: flex-end;
+      flex: 0 1 auto;
+      width: 8px;
+      height: 8px;
+      margin: 0 var(--ss-spacing-m) 0 var(--ss-spacing-m);
+
+      svg {
+        width: 8px;
+        height: 8px;
+
+        path {
+          fill: none;
+          stroke: var(--ss-font-color);
+          stroke-width: 20;
+          stroke-linecap: round;
+          stroke-linejoin: round;
         }
       }
     }
@@ -153,27 +254,47 @@
     transition: transform .3s, opacity .15s;
     visibility: hidden;
     top: -9999rem;
+    display: flex;
+    height: auto;
+    flex-direction: column;
+    width: auto;
+    max-height: var(--ss-content-height);
+    box-sizing: border-box;
+    overflow: hidden;
+    z-index: 10000;
+
+    &.ss-relative {
+      position: relative;
+      height: 100%;
+    }
 
     &.ss-open-above,
     &.ss-open-below {
       border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+      transform: translateY(4px);
       visibility: visible;
     }
 
     &.ss-open-above {
       transform: translateY(-4px);
+      flex-direction: column-reverse;
+      transform-origin: center bottom;
     }
 
     &.ss-open-below {
-      transform: translateY(4px);
+      opacity: 1;
+      transform-origin: center top;
     }
 
     .ss-search {
       padding: 3px;
+      flex: 0 1 auto;
+      display: flex;
+      flex-direction: row;
 
       input {
         -webkit-appearance: textfield;
-        -webkit-box-sizing: border-box;
         background-color: var(--expansa-white);
         border-radius: 0.3rem;
         box-sizing: border-box;
@@ -189,29 +310,177 @@
         height: 1.875rem;
         min-height: 1.875rem;
         padding: 0.2rem 0.7rem;
+        min-width: 0;
+        border: 1px solid var(--ss-border-color);
+        background-position: calc(100% - 0.65rem);
+
+        &::placeholder {
+          color: var(--ss-font-placeholder-color);
+          vertical-align: middle;
+        }
 
         &:focus {
           box-shadow: none !important;
+        }
+      }
+
+      .ss-addable {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        flex: 0 0 auto;
+        height: auto;
+        margin: 0 0 0 var(--ss-spacing-m);
+        border: 1px solid var(--ss-border-color);
+        border-radius: var(--ss-border-radius);
+
+        svg {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          flex: 0 1 auto;
+          width: 12px;
+          height: 12px;
+          margin: auto var(--ss-spacing-m) auto var(--ss-spacing-m);
+
+          path {
+            fill: none;
+            stroke: var(--ss-font-color);
+            stroke-width: 18;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+          }
         }
       }
     }
 
     .ss-list {
       max-height: 60vh;
-    }
+      flex: 1 1 auto;
+      height: auto;
+      overflow-x: hidden;
+      overflow-y: auto;
 
-    .ss-list .ss-optgroup .ss-optgroup-label {
-      background-color: var(--expansa-bg-universal);
-      border-bottom: 1px solid var(--expansa-border);
-      border-top: 1px solid var(--expansa-border);
-      padding: 0.45rem 0.85rem;
-      font-size: 0.95em;
-      color: var(--expansa-text-muted);
+      .ss-error {
+        color: var(--ss-error-color);
+        padding: var(--ss-spacing-l);
+      }
 
-      .ss-optgroup-label-text {
-        font-weight: 400;
-        font-size: 0.75rem;
-        line-height: 1;
+      .ss-searching {
+        color: var(--ss-font-color);
+        padding: var(--ss-spacing-l);
+      }
+
+      .ss-optgroup.ss-close .ss-option {
+        display: none !important;
+      }
+
+      .ss-optgroup .ss-optgroup-label {
+        background-color: var(--expansa-bg-universal);
+        border-bottom: 1px solid var(--expansa-border);
+        border-top: 1px solid var(--expansa-border);
+        padding: 0.45rem 0.85rem;
+        font-size: 0.95em;
+        color: var(--expansa-text-muted);
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+
+        .ss-optgroup-label-text {
+          font-weight: 400;
+          font-size: 0.75rem;
+          line-height: 1;
+          flex: 1 1 auto;
+          color: var(--ss-font-color);
+        }
+
+        &:has(.ss-arrow) {
+          cursor: pointer;
+        }
+
+        .ss-optgroup-actions {
+          flex: 0 1 auto;
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: center;
+          gap: var(--ss-spacing-m);
+
+          .ss-selectall {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: row;
+            cursor: pointer;
+
+            &:hover {
+              opacity: .5;
+            }
+
+            &.ss-selected svg path {
+              stroke: var(--ss-error-color);
+            }
+
+            span {
+              flex: 0 1 auto;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 60%;
+              text-align: center;
+              padding: 0 var(--ss-spacing-s) 0 0;
+
+              svg {
+                flex: 0 1 auto;
+                width: 13px;
+                height: 13px;
+
+                &:first-child {
+                  stroke-width: 5;
+                }
+
+                &:last-child {
+                  stroke-width: 11;
+                }
+
+                path {
+                  fill: none;
+                  stroke: var(--ss-success-color);
+                  stroke-linecap: round;
+                  stroke-linejoin: round;
+                }
+              }
+            }
+          }
+
+          .ss-closable {
+            flex: 0 1 auto;
+            display: flex;
+            flex-direction: row;
+            cursor: pointer;
+
+            .ss-arrow {
+              flex: 1 1 auto;
+              width: 10px;
+              height: 10px;
+
+              path {
+                fill: none;
+                stroke: var(--ss-font-color);
+                stroke-width: 18;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                transition-timing-function: ease-out;
+                transition: var(--ss-animation-timing);
+              }
+            }
+          }
+        }
+
+        .ss-option {
+          padding: var(--ss-spacing-s) var(--ss-spacing-s) var(--ss-spacing-s) calc(var(--ss-spacing-l)*3);
+        }
       }
     }
 
@@ -221,6 +490,9 @@
       font-size: 0.95em;
       color: var(--expansa-dark);
       background-color: var(--expansa-white);
+      display: flex;
+      cursor: pointer;
+      user-select: none;
     }
 
     .ss-list .ss-option:hover {
@@ -290,5 +562,29 @@
     .ss-list .ss-option .ss-search-highlight {
       background-color: var(--expansa-white);
     }
+  }
+}
+
+@keyframes ss-valueIn {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ss-valueOut {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0);
+    opacity: 0;
   }
 }

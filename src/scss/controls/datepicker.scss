@@ -32,6 +32,7 @@
     color: #333;
     margin-top: 2px;
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     position: relative;
     z-index: 1;
     background: white;
@@ -152,6 +153,7 @@
 
   &__timebox select {
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     font: inherit;
     margin: 0 3px;
     padding: 7px 20px 7px 7px;
@@ -168,6 +170,7 @@
   &__timebox input{
     font: inherit;
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     padding: 5px 8px;
     line-height: 1;
     outline: none;
@@ -202,6 +205,7 @@
   &__day > span:hover{
     background: #6190e81a;
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
   &__day.is-today > span {
@@ -221,11 +225,13 @@
   &__day.is-start > span {
     border-top-left-radius: var(--expansa-border-radius);
     border-bottom-left-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
   &__day.is-end > span {
     border-top-right-radius: var(--expansa-border-radius);
     border-bottom-right-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
   &__day.is-disabled,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database;
 
+use Exception;
 use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 
@@ -29,13 +30,6 @@ use Expansa\Facades\Db;
  */
 class Query
 {
-    /**
-     * The database connection.
-     *
-     * @var string
-     */
-    protected string $connection;
-
     public function __construct(
         /**
          * The fully qualified class name of the Eloquent model.
@@ -46,32 +40,6 @@ class Query
     ) {} // phpcs:ignore
 
     /**
-     * Add (create) a new record with given attributes.
-     *
-     * @param array<string, mixed> $attributes
-     * @return Model|null Created model instance or null on failure.
-     */
-    public function add(array $attributes): ?Model
-    {
-        // leaving only the allowed attributes
-        $fillable = $this->model->getFillable();
-        if ($fillable) {
-            $attributes = array_intersect_key($attributes, array_flip($fillable));
-        }
-
-        $result = Db::insert($this->model->getTable(), $attributes);
-        if ($result) {
-            $id = Db::id();
-            if ($id) {
-                return $this->find($id);
-            }
-
-            return $this->model::create($attributes);
-        }
-        return null;
-    }
-
-    /**
      * Find a record by primary key or another field value.
      *
      * This method attempts to retrieve a model instance matching the given value
@@ -79,9 +47,10 @@ class Query
      *
      * @param int|string $value The value to search for (e.g., primary key).
      * @param string     $by    The field name to search by. Defaults to 'id'.
+     *
      * @return Model|null Returns the model instance if found; otherwise, null.
      */
-    public function find(int|string $value, string $by = 'id'): ?Model
+    public function get(int|string $value, string $by = 'id'): ?Model
     {
         return Cache::get("$value", $this->model->getTable(), function () use ($value, $by) {
             $data = Db::get($this->model->getTable(), '*', [$by => $value]);
@@ -97,7 +66,7 @@ class Query
      *
      * @return array<int, array<string, mixed>>
      */
-    public function get(): array
+    public function find(): array
     {
     }
 
@@ -123,23 +92,20 @@ class Query
     }
 
     /**
-     * Update matching records.
-     *
-     * @param  array<string, mixed>  $values
-     * @return int  Number of affected rows
-     */
-    public function update(array $values): int
-    {
-    }
-
-    /**
      * Save the current record (insert or update).
      *
-     * @param  array<string, mixed>  $attributes
-     * @return bool
+     * @return null|Model
      */
-    public function save(array $attributes): bool
+    public function save(): ?Model
     {
+        $result = Db::insert($this->model->getTable(), $this->model->getAttributes());
+        if ($result) {
+            $id = Db::id();
+            if ($id) {
+                return $this->model;
+            }
+        }
+        return null;
     }
 
     /**
@@ -154,5 +120,20 @@ class Query
             return $results->rowCount();
         }
         return 0;
+    }
+
+    /**
+     * Check if a record exists in the database based on given fields.
+     *
+     * @param array $data An associative array of field names and values to match.
+     * @return bool Returns true if at least one record matches the fields, false otherwise.
+     */
+    public function exists(array $data): bool
+    {
+        $results = Db::select($this->model->getTable(), '*', ['OR' => $data]);
+        if ($results) {
+            return true;
+        }
+        return false;
     }
 }

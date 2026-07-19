@@ -245,8 +245,8 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'rows'        => count(explode("\n", $field->get('bio') ?? '')),
-                                'value'       => $field->get('bio'),
+                                'rows'        => count(explode("\n", $field->find('bio') ?? '')),
+                                'value'       => $field->find('bio'),
                                 'placeholder' => t('A few words about yourself'),
                             ],
                         ],
@@ -286,21 +286,21 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'value' => $field->get('format'),
+                                'value' => $field->find('format'),
                             ],
                             'options'     => [
                                 'light' => [
                                     'content'     => t('Light mode'),
                                     'icon'        => 'ph ph-user-list',
                                     'description' => t('This theme will be active when your system is set to “light mode”'),
-                                    'checked'     => $field->get('format') === 'light',
+                                    'checked'     => $field->find('format') === 'light',
                                     'image'       => url('dashboard/assets/images/dashboard-light.svg'),
                                 ],
                                 'dark'  => [
                                     'content'     => t('Dark mode'),
                                     'icon'        => 'ph ph-police-car',
                                     'description' => t('This theme will be active when your system is set to “night mode”'),
-                                    'checked'     => $field->get('format') === 'dark',
+                                    'checked'     => $field->find('format') === 'dark',
                                     'image'       => url('dashboard/assets/images/dashboard-dark.svg'),
                                 ],
                             ],
@@ -330,7 +330,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'checked' => $field->get('toolbar'),
+                                'checked' => $field->find('toolbar'),
                             ],
                             'options'     => [],
                         ],

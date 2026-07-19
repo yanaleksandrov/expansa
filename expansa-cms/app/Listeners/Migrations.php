@@ -115,19 +115,30 @@ final class Migrations
         Schema::create('users', function (Table $table) {
             $table->id();
             $table->uuid()->unique();
+
+            // authentication
             $table->string('login', 60)->unique();
             $table->string('password', 255);
-            $table->string('nicename', 60);
-            $table->string('firstname', 60);
-            $table->string('lastname', 60);
-            $table->string('showname', 255);
+
+            // profile
+            $table->string('nicename', 60)->nullable();
+            $table->string('firstname', 60)->nullable();
+            $table->string('lastname', 60)->nullable();
+            $table->string('showname', 255)->nullable();
             $table->string('email', 100)->unique();
             $table->string('locale', 10)->nullable()->default(null);
-            $table->bool('is_verified')->default(0);
+
+            // status and verification
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('verification_token', 100);
-            $table->string('password_reset_token', 100);
-            $table->dateTime('visited_at')->useCurrent();
+            $table->bool('is_verified')->default(0);
+
+            // tokens for email verification and password reset
+            $table->string('verification_token', 100)->nullable();
+            $table->timestamp('verification_token_expires_at')->nullable();
+            $table->string('password_reset_token', 100)->nullable();
+            $table->timestamp('password_reset_expires_at')->nullable();
+
+            // activity tracking
             $table->timestamps();
 
             // indexes

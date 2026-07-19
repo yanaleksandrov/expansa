@@ -41,7 +41,7 @@ class Apikey extends Model
     /**
      * Fields allowed for mass assignment.
      *
-     * @var array<int, string>
+     * @var array<string>
      */
     protected array $fillable = [
         'title',

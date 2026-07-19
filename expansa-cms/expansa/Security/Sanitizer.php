@@ -60,10 +60,12 @@ final class Sanitizer
     /**
      * Apply sanitizer.
      *
-     * @return array
+     * @param string $return Field for return.
+     * @return mixed
      */
-    public function apply(): array
+    public function apply(string $return = ''): mixed
     {
+        // TODO: !!! if rule not exists throw an Exception
         foreach ($this->rules as $field => $rulesList) {
             $rules = explode('|', $rulesList);
 
@@ -105,6 +107,10 @@ final class Sanitizer
                 }
             }
             unset($key);
+        }
+
+        if ($return) {
+            return $this->data[$return] ?? null;
         }
 
         return $this->data;
@@ -251,7 +257,7 @@ final class Sanitizer
      */
     public static function html(mixed $value): string
     {
-        return trim(htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
+        return trim(htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
     }
 
     /**
@@ -333,6 +339,7 @@ final class Sanitizer
     public static function price(mixed $value): float
     {
         $sanitized = 0;
+
         if (is_scalar($value)) {
             $sanitized = self::trim($value);
             $sanitized = preg_replace('/[^0-9.,]/', '', $sanitized);
@@ -386,7 +393,7 @@ final class Sanitizer
 
         // remove percent-encoded characters
         while (preg_match('/%[a-fA-F0-9]{2}/', $value)) {
-            $value = preg_replace_callback('/%[a-fA-F0-9]{2}/', fn($matches) => '', $value);
+            $value = preg_replace('/%[a-fA-F0-9]{2}/', '', $value);
         }
 
         // clean up any extra spaces after removing percent-encoded characters
@@ -452,7 +459,7 @@ final class Sanitizer
      */
     public static function tag(mixed $value): string
     {
-        // limit to a-z, '-'.
+        // limit to a-z, '-'
         return preg_replace('/[^a-z-]/', '', self::trim($value));
     }
 
@@ -530,7 +537,7 @@ final class Sanitizer
      */
     public static function ucfirst(mixed $value): string
     {
-        return ucfirst(self::trim($value));
+        return ucfirst(self::trim($value)); // TODO: for php 8.4+ change to mb_ucfirst
     }
 
     /**
@@ -659,7 +666,7 @@ final class Sanitizer
             } elseif (1 === $j) {
                 $emailNoSpamAddress .= $value[ $i ];
             } elseif (2 === $j) {
-                $emailNoSpamAddress .= '%' . zeroise(dechex(ord($value[ $i ])), 2);
+                $emailNoSpamAddress .= sprintf('%%%02X', ord($value[$i]));
             }
         }
         return str_replace('@', '&#64;', $emailNoSpamAddress);

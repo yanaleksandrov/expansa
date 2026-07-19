@@ -5,26 +5,28 @@ declare(strict_types=1);
 namespace Expansa\Database;
 
 use Exception;
-use Expansa\Database\Model\HasAttributes;
-use Expansa\Database\Model\HasGuardAttributes;
-use Expansa\Support\Str;
+use Expansa\Facades\Safe;
+use Expansa\Database\Model\HasSanitizing;
 use stdClass;
 
 /**
- * Base data model class with support for attributes, mass assignment protection,
- * timestamps, and soft deletes.
+ * Base data model class with support for attributes, mass assignment protection, timestamps, and soft deletes.
  *
- * @method static static|null find(int|string $value, string $by = 'id') Find a model by primary key or specified field.
- * @method static static|null add(array $attributes)                     Create a new record.
- * @method int                delete()                                   Delete records by primary key.
+ * @method static static|null get(mixed $value, string $by = 'id') Find a model by primary key or specified field.
+ * @method static static      fill(array $data)                    Create a model by...
+ * @method static bool        exists(array $data)                  Check record is existing.
+ * @method int                save()                               Delete records by primary key.
+ * @method int                delete()                             Delete records by primary key.
  *
  * @property string|null $updatedAt Timestamp of the last update.
  * @property string|null $createdAt Timestamp of creation.
  */
-class Model
+abstract class Model
 {
-    use HasAttributes;
-    use HasGuardAttributes;
+    use Model\HasAttributes {
+        setAttribute as protected traitSetAttribute;
+    }
+    use Model\HasGuardAttributes;
 
     /**
      * The database table associated with the model.
@@ -34,45 +36,18 @@ class Model
     protected string $table;
 
     /**
-     * List of attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected array $fillable = [];
-
-    /**
-     * List of attributes hidden from serialization.
-     *
-     * @var array<int, string>
-     */
-    protected array $hidden = [];
-
-    /**
-     * Array of model attributes.
-     *
-     * @var array<string, mixed>
-     */
-    protected array $attributes = [];
-
-    /**
-     * Model constructor.
-     *
-     * @param array<string, mixed>|stdClass $attributes Initial attributes.
-     */
-    public function __construct(array $attributes = [])
-    {
-        $this->attributes = $attributes;
-    }
-
-    /**
      * Create a new model instance with the given attributes.
      *
      * @param array<string, mixed>|stdClass $attributes Attributes to fill the model with.
      * @return static
      */
-    protected static function create(array|stdClass $attributes): static
+    public static function create(array|stdClass $attributes): static
     {
-        return new static($attributes);
+        $model = new static();
+
+        $model->attributes = (array) $attributes;
+
+        return $model;
     }
 
     /**
@@ -99,29 +74,23 @@ class Model
      */
     public function fill(array $attributes): static
     {
-        if (empty($attributes)) {
+        if (!$attributes) {
             return $this;
         }
 
-        $error = function (string|array $keys) {
-            throw new Exception(sprintf(
-                'Add [%s] to fillable property to allow mass assignment on [%s].',
-                implode(", ", (array) $keys),
-                get_class($this)
-            ));
-        };
+        if ($this->isTotallyGuarded()) {
+            $keys = $this->fillable
+                ? array_diff(array_keys($attributes), array_keys(array_flip($this->fillable)))
+                : array_keys($attributes);
 
-        if ($this->totallyGuarded()) {
-            $error(
-                (count($this->fillable) === 0)
-                    ? array_keys($attributes)
-                    : array_diff(array_keys($attributes), array_keys(array_flip($this->fillable)))
+            throw new Exception(
+                sprintf('Add [%s] to fillable property to allow mass assignment on [%s].', implode(", ", $keys), get_class($this))
             );
         }
 
         foreach ($attributes as $key => $val) {
             if (! $this->isFillable($key)) {
-                $error($key);
+                continue;
             }
 
             $this->setAttribute($key, $val);
@@ -131,18 +100,36 @@ class Model
     }
 
     /**
+     * Sets the value of an attribute applying the defined sanitization rules.
+     *
+     * If a rule is defined for the attribute in $sanitize, it will be applied.
+     * Supports static methods from the Safe class or callable rules.
+     *
+     * @param string $key   The attribute name
+     * @param mixed  $value The value to set
+     *
+     * @return static
+     */
+    public function setAttribute(string $key, mixed $value): static
+    {
+        var_dump($key);
+        if (in_array(HasSanitizing::class, class_uses(self::class), true)) {
+            $rule = $this->getSanitizerRules()[$key] ?? '';
+            if ($rule) {
+                $value = Safe::data($this->attributes + [$key => $value], [$key => $rule])->apply($key);
+            }
+        }
+        return $this->traitSetAttribute($key, $value);
+    }
+
+    /**
      * Get the table associated with the model.
      *
      * @return string
      */
     public function getTable(): string
     {
-        return Str::snake($this->table);
-    }
-
-    public function getFillable(): array
-    {
-        return $this->fillable;
+        return Safe::snakecase($this->table);
     }
 
     /**

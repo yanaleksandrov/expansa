@@ -19,11 +19,13 @@
   --expansa-border: #dfe2e3;
   --expansa-border-hover: #ccced3;
 
-  --expansa-border-radius--xs: 0.275rem;
-  --expansa-border-radius--sm: 0.35rem;
-  --expansa-border-radius: 0.4rem;
-  --expansa-border-radius--lg: 0.5rem;
-  --expansa-border-radius--xl: 0.625rem;
+  --expansa-corner-shape-superellipse: 1.825;
+  --expansa-border-radius-scale: 1;
+  --expansa-border-radius--xs: calc(0.275rem * var(--expansa-border-radius-scale));
+  --expansa-border-radius--sm: calc(0.35rem * var(--expansa-border-radius-scale));
+  --expansa-border-radius: calc(0.4rem * var(--expansa-border-radius-scale));
+  --expansa-border-radius--lg: calc(0.5rem * var(--expansa-border-radius-scale));
+  --expansa-border-radius--xl: calc(0.625rem * var(--expansa-border-radius-scale));
 
   --expansa-box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
 
@@ -49,4 +51,10 @@
 
   --expansa-font-text: system-ui;
   --expansa-font-code: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Ubuntu Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
+}
+
+@supports (corner-shape: squircle) {
+  :root {
+    --expansa-border-radius-scale: 1.75;
+  }
 }

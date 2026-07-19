@@ -10,11 +10,14 @@ trait HasAttributes
 {
     protected static array $attributeMutatorCache = [];
 
+    /**
+     * Array of model attributes.
+     *
+     * @var array<string, mixed>
+     */
     protected array $attributes = [];
 
     protected array $originals = [];
-
-    protected array $casts = [];
 
     public function getAttributes(): array
     {
@@ -50,6 +53,41 @@ trait HasAttributes
         }
 
         return $this;
+    }
+
+    public function syncOriginals(): void
+    {
+        $this->originals = $this->attributes;
+    }
+
+    public function isChanged(): bool
+    {
+        foreach ($this->attributes as $key => $val) {
+            if (! $this->originalIsEquivalent($key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function getChanges(): array
+    {
+        return array_filter($this->attributes, function ($key) {
+            return ! $this->originalIsEquivalent($key);
+        }, ARRAY_FILTER_USE_KEY);
+    }
+
+    public function only(mixed $keys): array
+    {
+        $result = [];
+
+        $keys = is_array($keys) ? $keys : func_get_args();
+
+        foreach ($keys as $key) {
+            $result[$key] = $this->getAttribute($key);
+        }
+
+        return $result;
     }
 
     protected function hasMutator(string $key): bool
@@ -107,29 +145,6 @@ trait HasAttributes
         $this->attributes[$key] = call_user_func($attribute->set, $value, $this->attributes);
     }
 
-    public function syncOriginals(): void
-    {
-        $this->originals = $this->attributes;
-    }
-
-    public function isChanged(): bool
-    {
-        foreach ($this->attributes as $key => $val) {
-            if (! $this->originalIsEquivalent($key)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function getChanges(): array
-    {
-        return array_filter($this->attributes, function ($key) {
-            return ! $this->originalIsEquivalent($key);
-        }, ARRAY_FILTER_USE_KEY);
-    }
-
     protected function originalIsEquivalent(string $key): bool
     {
         if (! array_key_exists($key, $this->originals)) {
@@ -137,26 +152,12 @@ trait HasAttributes
         }
 
         $attribute = $this->attributes[$key] ?? null;
-        $original = $this->originals[$key] ?? null;
+        $original  = $this->originals[$key] ?? null;
 
         if ($attribute === $original) {
             return true;
         }
 
         return false;
-    }
-
-    // Возвращает массив атрибутов по списку ключей
-    public function only(mixed $keys): array
-    {
-        $result = [];
-
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        foreach ($keys as $key) {
-            $result[$key] = $this->getAttribute($key);
-        }
-
-        return $result;
     }
 }

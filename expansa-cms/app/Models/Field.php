@@ -9,9 +9,9 @@ use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 
 /**
- * Class Meta
+ * Class Fields
  *
- * A dynamic meta model that can be bound to any database table.
+ * A dynamic fields model that can be bound to any database table.
  * Used to store and retrieve additional metadata fields for a parent model.
  *
  * Features:
@@ -56,7 +56,7 @@ class Field extends Model
      *
      * @return mixed The field value or null if the object ID is not set.
      */
-    public function get(string $key = '', bool $isSingle = true): mixed
+    public function find(string $key = '', bool $isSingle = true): mixed
     {
         $postId = $this->post->id;
         if (! $postId) {

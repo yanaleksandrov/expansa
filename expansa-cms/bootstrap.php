@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Debug;
+use Expansa\Facades\Route;
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.6';
@@ -49,5 +50,18 @@ Debug::start(EX_DEBUG, EX_DEBUG_VIEW, function () {
 
     // register Expansa routes
     require_once EX_PATH . 'routes/api.php';
-    require_once EX_PATH . 'routes/web.php';
+
+    /**
+     * Registers a base app route for handling all GET HTTP requests.
+     *
+     * @since 2025.1
+     */
+    Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
+
+    /**
+     * Launch routing & output page.
+     *
+     * @since 2025.1
+     */
+    Route::run();
 });

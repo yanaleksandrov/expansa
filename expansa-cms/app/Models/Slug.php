@@ -4,17 +4,29 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Model;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 
-class Slug
+class Slug extends Model
 {
     /**
-     * DB table name.
+     * The database table associated with the model.
      *
      * @var string
      */
-    private static string $table = 'slugs';
+    protected string $table = 'slugs';
+
+    /**
+     * Fields allowed for mass assignment.
+     *
+     * @var array<string>
+     */
+    protected array $fillable = [
+        'entity_id',
+        'entity_table',
+        'slug',
+    ];
 
     /**
      * Add new slug.
@@ -92,7 +104,7 @@ class Slug
      */
     public static function get(string $slug): mixed
     {
-        return Db::get(self::$table, '*', ['slug' => $slug]);
+        return Db::get((new self())->getTable(), '*', ['slug' => $slug]);
     }
 
     /**
@@ -104,7 +116,7 @@ class Slug
      */
     public static function update(string $slug, string $newSlug): bool
     {
-        return Db::update(self::$table, ['slug' => $newSlug], ['slug[=]' => $slug])->rowCount() === 1;
+        return Db::update((new self())->getTable(), ['slug' => $newSlug], ['slug[=]' => $slug])->rowCount() === 1;
     }
 
     /**

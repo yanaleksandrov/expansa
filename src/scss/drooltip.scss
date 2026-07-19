@@ -44,6 +44,7 @@
   z-index: 0;
   border: 1px solid var(--expansa-border);
   border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   transform-origin: inherit;
 }
 

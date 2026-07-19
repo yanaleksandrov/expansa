@@ -13,6 +13,7 @@
   &--described {
     border: 1px solid var(--expansa-border);
     border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     background-color: var(--expansa-bg);
     padding: 1rem;
     overflow: hidden;
@@ -37,6 +38,7 @@
       border-top: 1px solid var(--expansa-border);
       border-bottom: 1px solid var(--expansa-border);
       border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
       pointer-events: none;
       position: static;
       user-select: none;

@@ -132,48 +132,89 @@ class Translator extends Locale
     }
 
     /**
-     * Translate with formatting. Use instead php placeholders like %s and %d, human-readable strings.
-     * The function support converting to lowercase, uppercase & first letter to uppercase.
-     * To write the placeholder and the suffix together, use the '\' slash.
+     * Translates and formats a string using human-readable placeholders.
      *
-     * For example:
+     * This function provides an alternative to native PHP formatting by introducing
+     * descriptive placeholders while still supporting the traditional `%s` and `%d`.
+     * Placeholders can also apply automatic case transformation and attach suffixes.
      *
-     * t( 'Hi, :Firstname, you have :count\st none closed ":TASKNAME" task', 'john', 1, 'test' );
-     * return 'Hi, John, you have 1st none closed "TEST" task';
+     * ### Placeholder Features:
+     * - `:placeholder` — human-readable basic replacement.
+     * - `::placeholder` — replacement with automatic case transformation:
+     *   - If the placeholder is lowercase → result is converted to lowercase.
+     *   - If the placeholder is uppercase → result is converted to uppercase.
+     *   - If the placeholder starts with uppercase → result is capitalized (title case).
+     * - `:placeholder\suffix` — attaches a suffix (e.g. `:count\st` → `1st`).
+     * - `%s`, `%d` — traditional PHP-style placeholders are fully supported.
      *
-     * For security purposes, you can't use html, but can use base markdown layout: bold, italic, headers, image & link:
+     * ### Missing Values:
+     * - If not enough arguments are provided, unused placeholders (`:name`, `::NAME`, `%s`, `%d`, etc.)
+     *   will remain unchanged in the output string.
      *
-     * t( '##Hi, *my name* is John, [view my profile](:profileLink).', 'http://example.com');
-     * return '<h2>Hi, <em>my name</em> is John, <a href="http://example.com">view my profile</a></h2>';
+     * ### Markdown Support:
+     * - Direct HTML is disallowed for security reasons.
+     * - Instead, a limited subset of Markdown is supported:
+     *   - **Bold**, *italic*, `#` headers, `![image]`, and `[link](url)`.
+     * - Markdown is automatically converted into safe HTML output.
      *
-     * @param string $string
-     * @param mixed ...$args
-     * @return string
+     * ### Examples:
+     *
+     * ```php
+     * t('Hi, ::Firstname, you have :count\st none closed "::TASKNAME" task.', 'john', 1, 'test');
+     * // Returns: 'Hi, John, you have 1st none closed "TEST" task'
+     *
+     * t('##Hi, *my name* is John, [view my profile](:profileLink).', 'http://example.com');
+     * // Returns: "<h2>Hi, <em>my name</em> is John, <a href="http://example.com">view my profile</a></h2>"
+     *
+     * t('User %s has %d new messages.', 'Alice', 5);
+     * // Returns: "User Alice has 5 new messages."
+     *
+     * t('Hello, :name, you have %d tasks.');
+     * // Returns: "Hello, :name, you have %d tasks." (placeholders remain unchanged)
+     * ```
+     *
+     * @param string $string The translation string containing placeholders and optional Markdown.
+     * @param mixed  ...$args Values to be inserted into placeholders, in order of appearance.
+     *
+     * @return string The formatted and safely rendered string with replacements applied.
      */
     public function _t(string $string, mixed ...$args): string
     {
         $string = htmlentities($string);
-        $string = preg_replace_callback('/(:{1,2})(\w+)(?:\\\\([^:]+))?|%[sd]/u', function ($matches) use (&$args) {
-            if ($matches[0] === '%s' || $matches[0] === '%d') {
-                return array_shift($args);
-            }
 
-            $placeholder = $matches[2] ?? '';
-            $suffix      = $matches[3] ?? '';
+        if ($args) {
+            $string = preg_replace_callback(
+                '{
+                    (:{1,2})           # (1) One or two colons (:: or :) — marks a placeholder
+                    (\w+)              # (2) Placeholder name: one or more letters, digits, or underscores
+                    (?:\\\\([^:]+))?   # (3) Optional suffix: a backslash followed by any characters except a colon
+                    |                  # OR
+                    %[sd]              # Special format placeholders: %s (string) or %d (digit/integer)
+                }ux',
+                function ($matches) use (&$args) {
+                    if ($matches[0] === '%s' || $matches[0] === '%d') {
+                        return array_shift($args);
+                    }
 
-            $value = array_shift($args);
+                    $placeholder = $matches[2] ?? '';
+                    $suffix      = $matches[3] ?? '';
 
-            if ($matches[1] === '::') {
-                $replacement = match (true) {
-                    mb_strtolower($placeholder) === $placeholder => mb_strtolower($value),
-                    mb_strtoupper($placeholder) === $placeholder => mb_strtoupper($value),
-                    default => mb_convert_case($value, MB_CASE_TITLE, 'UTF-8'),
-                };
-                return $replacement . $suffix;
-            }
+                    $value = array_shift($args);
 
-            return $value . $suffix;
-        }, $string);
+                    if ($matches[1] === '::') {
+                        $replacement = match (true) {
+                            mb_strtolower($placeholder) === $placeholder => mb_strtolower($value),
+                            mb_strtoupper($placeholder) === $placeholder => mb_strtoupper($value),
+                            default => mb_convert_case($value, MB_CASE_TITLE, 'UTF-8'),
+                        };
+                        return $replacement . $suffix;
+                    }
+
+                    return $value . $suffix;
+                },
+                $string
+            );
+        }
 
         return Markdown::render($string);
     }

@@ -4,87 +4,193 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\User\Roles;
-use App\User\Traits;
+use DateTime;
 use Exception;
+use App\User\Roles;
+use Expansa\Database\Model;
 use Expansa\Debug\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
-use Expansa\Security\Validator as SecurityValidator;
 use Expansa\Support\Hash;
 use Expansa\Support\Is;
-use Random\RandomException;
 
-class User
+/**
+ * Class User represents a user in the system. Handles authentication,
+ * profile information, verification, and activity tracking.
+ *
+ * @property int           $id                         Unique identifier of the user.
+ * @property string        $uuid                       Universally unique identifier.
+ * @property string        $login                      User login (unique).
+ * @property string        $password                   Hashed user password.
+ * @property string        $nicename                   Short display name.
+ * @property string        $firstname                  User first name.
+ * @property string        $lastname                   User last name.
+ * @property string        $showname                   Full display name.
+ * @property string        $email                      User email address (unique).
+ * @property string|null   $locale                     User locale/language.
+ * @property string        $status                     User status ('active' or 'inactive').
+ * @property bool          $isVerified                 Whether the user has verified their email.
+ * @property string|null   $verificationToken          Token used for email verification.
+ * @property DateTime|null $verificationTokenExpiresAt Expiration datetime of verification token.
+ * @property string|null   $passwordResetToken         Token used for password reset.
+ * @property DateTime|null $passwordResetExpiresAt     Expiration datetime of password reset token.
+ * @property string        $createdAt                  The date and time when the user was created.
+ * @property string        $updatedAt                  The date and time when the user was last updated.
+ * @property Field         $field                      A dynamic meta field instance associated with the API key.
+ */
+class User extends Model
 {
-    use Traits;
+    use Model\HasSanitizing;
+    use Model\HasValidation;
+    use Model\HasTimestamps;
 
-    public static string $table = 'users';
+    /**
+     * The database table associated with the model.
+     *
+     * @var string
+     */
+    protected string $table = 'users';
 
-    public int $id = 0;
+    /**
+     * Fields allowed for mass assignment.
+     *
+     * @var array<string>
+     */
+    protected array $fillable = [
+        'login',
+        'password',
+        'nicename',
+        'firstname',
+        'lastname',
+        'showname',
+        'email',
+        'locale',
+        'status',
+        'is_verified',
+        'verification_token',
+        'verification_token_expires_at',
+        'password_reset_token',
+        'password_reset_expires_at',
+    ];
 
-    public string $login = '';
+    /**
+     * A list of attributes that can only be created once, and then left unchanged.
+     *
+     * @var array<string>
+     */
+    protected array $readonly = [
+        'login',
+    ];
 
-    public string $password = '';
+    /**
+     * Session key
+     *
+     * @var string
+     */
+    private static string $session_id = EX_DB_PREFIX . 'user_logged';
 
-    public string $nicename = '';
+    /**
+     * Current user data.
+     */
+    private static self $current;
 
-    public string $firstname = '';
+    /**
+     * Array of rules for sanitize properties.
+     *
+     * @return array<string, string>
+     */
+    protected function getSanitizerRules(): array
+    {
+        return [
+            'login'       => 'login',
+            'password'    => 'trim',
+            'nicename'    => 'slug:$login',
+            'firstname'   => 'ucfirst',
+            'lastname'    => 'ucfirst',
+            'showname'    => 'ucfirst:$login',
+            'email'       => 'email',
+            'locale'      => 'locale',
+            'status'      => 'trim',
+            'is_verified' => 'bool',
+        ];
+    }
 
-    public string $lastname = '';
+    /**
+     * An array of rules for validation when creating and updating a model.
+     *
+     * @return array<string, string>
+     */
+    protected function validatorRules(): array
+    {
+        return [
+            'login'    => 'lengthMin:3|lengthMax:60',
+            'password' => 'required',
+            'email'    => 'email|unique',
+        ];
+    }
 
-    public string $showname = '';
+    /**
+     * Extend with custom validation rules.
+     *
+     * @return void
+     */
+    protected function validatorExtend(): void
+    {
+        $this->validator->extend(
+            'email:unique',
+            t('Sorry, that user email address or login is already used!'),
+            fn() => ! $this->exists(
+                [
+                    'login' => $this->login,
+                    'email' => $this->email,
+                ]
+            )
+        );
+    }
 
-    public string $email = '';
+    protected function password(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            set: fn($value) => password_hash($value ?: Hash::generate(), PASSWORD_DEFAULT)
+        );
+    }
 
-    public ?string $locale = '';
+    protected function nicename(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            set: fn($value) => (new self())->generateUniqueNicename($value)
+        );
+    }
 
-    public string $bio = '';
-
-    public string $registered = '';
-
-    public string $visited = '';
-
-    public array $fields;
-
-    public array $roles = [];
-
-    public array $capabilities = [];
+    protected function field(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            get: fn($value) => $value instanceof Field ? $value : new Field($this)
+        );
+    }
 
     /**
      * Retrieves user info by a given field.
      *
-     * @param string|int    $value    A value for $field. A user ID, slug, email address, or login name.
-     * @param string        $getBy    The field to retrieve the user with. ID | login | email | nicename.
-     * @param callable|null $callback
+     * @param string|int $value A value for $by field. A user ID, UUID, slug, email address, or login name.
+     * @param string     $by    The field to retrieve the user with. ID | login | email | nicename.
      * @return User|Error
      */
-    public static function get(string|int $value, string $getBy = 'id', ?callable $callback = null): User|Error
+    public static function get(string|int $value, string $by = 'id'): User|Error
     {
         try {
             if (empty($value)) {
-                throw new Exception(t('You are trying to find a user with an empty :getByField.', $getBy));
+                throw new Exception(t('You are trying to find a user with an empty :getByField.', $by));
             }
 
-            if (! in_array($getBy, [ 'id', 'login', 'email', 'nicename' ], true)) {
-                throw new Exception(t('To get a user, use an ID, login, email or nicename.'));
+            $by = mb_strtolower($by);
+            if (! in_array($by, [ 'id', 'uuid', 'login', 'email', 'nicename' ], true)) {
+                throw new Exception(t('Use an ID, UUID, login, email, or nicename to get a user.'));
             }
 
-            $users    = Db::select(self::$table, '*', [ $getBy => $value ], [ 'LIMIT' => 1 ]);
-            $userdata = (array) ( $users[0] ?? [] );
-            if ($userdata) {
-                $user = new self();
-                foreach ($userdata as $field => $value) {
-                    if (property_exists($user, $field)) {
-                        $user->$field = $value;
-                    }
-                }
-
-                if ($callback) {
-                    $callback(new Field($user));
-                }
-
+            $user = parent::get($value, $by);
+            if ($user instanceof User) {
                 return $user;
             }
 
@@ -95,83 +201,13 @@ class User
     }
 
     /**
-     * Insert a user into the database.
-     * The showname & nickname fields should not be left empty, because nickname
-     * is part of the URL of the user's page, and showname is displayed as the name.
-     * Therefore, we generate it based on the login.
-     *
-     * @param array         $userdata
-     * @param callable|null $callback
-     * @return User|Error The newly created user's ID or an Error object if the user could not be created.
-     * @throws RandomException
-     */
-    public static function add(array $userdata, ?callable $callback = null): User|Error
-    {
-
-        $userdata = Safe::data($userdata, [
-            'login'    => 'login',
-            'password' => 'trim',
-            'email'    => 'email',
-            'showname' => 'ucfirst:$login',
-            'nicename' => 'slug:$login|unique',
-        ])->extend('unique', function ($value) {
-            $suffix = 1;
-            while (Db::select(self::$table, 'id', [ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
-                $suffix++;
-            }
-            return sprintf('%s%s', $value, $suffix > 1 ? "-$suffix" : '');
-        })->apply();
-
-        // validate incoming user data
-        $userdata = Validator::data(
-            $userdata,
-            [
-                'login'    => 'lengthMin:3|lengthMax:60',
-                'password' => 'required',
-                'email'    => 'email|unique',
-            ]
-        )->extend(
-            'email:unique',
-            t('Sorry, that email address or login is already used!'),
-            fn($validator) => ! self::exists(
-                [
-                    'login' => $validator->fields['login'],
-                    'email' => $validator->fields['email'],
-                ]
-            )
-        )->apply();
-
-        if ($userdata instanceof SecurityValidator) {
-            return error('user-add', $userdata->errors);
-        }
-
-        [ $login, $password ] = array_values($userdata);
-        $userdata['password'] = $password ? password_hash($password, PASSWORD_DEFAULT) : Hash::generate();
-
-        $user_count = Db::insert(self::$table, $userdata)->rowCount();
-        if ($user_count !== 1) {
-            return error('user-add', t('Something went wrong, it was not possible to add a user.'));
-        }
-
-        $user = self::get($login, 'login');
-
-        if ($callback) {
-            $callback(new Field($user));
-        }
-
-        return $user;
-    }
-
-    /**
      * Update a user in the database. If no ID is found in the received array,
      * the function passes the work to the add method.
      *
      * @param array         $userdata
-     * @param callable|null $callback
      * @return User|Error
-     * @throws RandomException
      */
-    public static function update(array $userdata, ?callable $callback = null): User|Error
+    public static function update(array $userdata): User|Error
     {
         $userID = Safe::absint($userdata['id'] ?? 0);
         if (! $userID) {
@@ -196,11 +232,7 @@ class User
                 'visited'    => 'datetime',
             ])->apply();
 
-            Db::update(self::$table, array_filter($userdata));
-
-            if ($callback) {
-                $callback(new Field($user));
-            }
+            Db::update((new self())->table, array_filter($userdata));
 
             return self::get($userID);
         }
@@ -231,8 +263,9 @@ class User
         }
 
         if ($reassign) {
+            // TODO: add functionality for reassign
         }
-        return Db::delete(self::$table, $fields)->rowCount();
+        return Db::delete((new self())->table, $fields)->rowCount();
     }
 
     /**
@@ -261,21 +294,6 @@ class User
         }
 
         return self::$current;
-    }
-
-    /**
-     * Searches for users by the specified parameters
-     *
-     * @param array $fields
-     * @return bool Array of fields and values to search for users.
-     */
-    public static function exists(array $fields): bool
-    {
-        $users = Db::select(self::$table, '*', [ 'OR' => $fields ]);
-        if ($users) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -333,39 +351,35 @@ class User
      *
      * @return   bool
      */
-    public static function logged(): bool
+    public static function isLogged(): bool
     {
-        $userID = abs((int) session()->get(self::$session_id));
-        if ($userID) {
-            return true;
-        }
-        return false;
+        return (bool) abs((int) session()->get(self::$session_id));
     }
 
     /**
      * Authorizes the user by password and login/email.
      *
-     * @param array $userdata
+     * @param array $data
      * @return User|Error
      */
-    public static function login(array $userdata): User|Error
+    public static function login(array $data): User|Error
     {
-        $userdata = Safe::data($userdata, [
+        $data = Safe::data($data, [
             'login'    => 'login',
             'password' => 'trim',
             'remember' => 'bool',
         ])->apply();
 
-        $userdata = Validator::data($userdata, [
+        $userdata = Validator::data($data, [
             'login'    => 'lengthMin:3|lengthMax:60',
             'password' => 'required',
         ])->apply();
 
-        if ($userdata instanceof SecurityValidator) {
-            return error('user-login', $userdata->errors);
+        if (!$userdata->isValid()) {
+            return error('user-login', $userdata->getErrors());
         }
 
-        [ $loginOrEmail, $password, $remember ] = array_values($userdata);
+        [ $loginOrEmail, $password, $remember ] = array_values($data);
 
         $field = Is::email($loginOrEmail) ? 'email' : 'login';
         $user  = User::get($loginOrEmail, $field);
@@ -390,7 +404,7 @@ class User
      */
     public static function logout(): void
     {
-        if (session()->isStarted()) {
+        if (!session()->isStarted()) {
             session()->start();
         }
 
@@ -405,5 +419,25 @@ class User
             );
         }
         session()->set(self::$session_id, null);
+    }
+
+    /**
+     * Generate a unique nicename by appending a numeric suffix if needed.
+     *
+     * This method checks the database for existing entries with the same nicename
+     * and increments the suffix until a unique value is found.
+     *
+     * @param string $value The base value to generate a unique nicename from.
+     * @return string A unique nicename with a numeric suffix if necessary.
+     */
+    private function generateUniqueNicename(string $value): string
+    {
+        $suffix = 1;
+
+        while (Db::select((new self())->table, 'id', [ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
+            $suffix++;
+        }
+
+        return sprintf('%s%s', $value, $suffix > 1 ? "-$suffix" : '');
     }
 }

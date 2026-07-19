@@ -10,7 +10,7 @@ use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use LogicException;
 
-class Post extends Model
+class Post
 {
     /**
      * Class representing an entry entity.
@@ -155,7 +155,7 @@ class Post extends Model
                 $data[ Safe::camelcase($key) ] = $value;
             }
 
-            $data['slug'] = $type->public === true ? Slug::find($data['id'], $type->table) : '';
+            $data['slug'] = $type->public === true ? Slug::get($data['id'], $type->table) : '';
 
             return new Post(...$data);
         }

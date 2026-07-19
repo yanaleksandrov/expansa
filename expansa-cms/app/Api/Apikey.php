@@ -57,7 +57,7 @@ class Apikey
         $title  = Safe::text($_POST['title'] ?? '');
         $status = Safe::text($_POST['status'] ?? '');
 
-        $post = \App\Models\Apikey::find(2);
+        $post = \App\Models\Apikey::get(2);
         //print_r($post->field->limits);
 
         $start = microtime(true);

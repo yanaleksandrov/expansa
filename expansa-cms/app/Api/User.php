@@ -54,20 +54,13 @@ class User
             ]
         )->apply();
 
-        \App\Models\User::update($userdata, function (\App\Models\Field $field) {
-            $fields = Safe::data(
-                $_POST,
-                [
-                    'bio'     => 'trim',
-                    'toolbar' => 'bool',
-                    'format'  => 'text',
-                ]
-            )->apply();
+        $user = \App\Models\User::update($userdata);
 
+        if ($user instanceof \App\Models\User) {
             foreach ($fields as $key => $value) {
-                $field->update($key, $value);
+                $user->field->update($key, $value);
             }
-        });
+        }
 
         echo Json::encode([
             'data' => [
