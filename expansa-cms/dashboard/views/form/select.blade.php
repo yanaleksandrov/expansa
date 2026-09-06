@@ -42,7 +42,7 @@ unset( $attributes['value'] );
 				$click = sprintf( "%s = '%s'", $prop, $value );
 				$show  = sprintf( "%s !== '%s'", $prop, $value );
 				?>
-				<span class="ml-auto t-red" @click="<?php echo $click; ?>" u-show="<?php echo $show; ?>" u-cloak><?php echo t( 'Reset' ); ?></span>
+				<span class="ml-auto t-red" @click="<?php echo $click; ?>" u-show="<?php echo $show; ?>" hidden><?php echo t( 'Reset' ); ?></span>
 				<?php
 			endif;
 			$tooltip && printf( ' <i class="ph ph-info" u-tooltip.click.prevent="\'%s\'"></i>', $tooltip );

@@ -13,9 +13,9 @@ if (! Is::installed()) {
         Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
     }
 
-    foreach (['expansa', 'ajax', 'slimselect', 'alpine'] as $script) {
+    foreach (['youla-expansa', 'youla-ajax', 'youla-select', 'youla'] as $script) {
         $data = [];
-        if ($script === 'expansa') {
+        if ($script === 'youla') {
             $data['data'] = [
                 'apiurl'         => url('/api/'),
                 'spriteFlagsUrl' => url('/dashboard/assets/sprites/flags.svg'),

@@ -32,11 +32,11 @@ return \Expansa\Facades\Form::enqueue(
             'type'     => 'custom',
             'callback' => function () {
                 ?>
-                <div class="progress" :style="'--expansa-progress:' + $wizard.progress().progress"></div>
+                <div class="progress" :style="'--expansa-progress:' + progress().progress"></div>
                 <div class="p-8 pt-7 pb-7 df aic jcsb">
-                    <span u-text="$wizard.current().title"><?php echo t('Choose project'); ?></span>
+                    <span u-text="current().title"><?php echo t('Choose project'); ?></span>
                     <span class="t-muted">
-                        step <strong u-text="$wizard.progress().current">1</strong> from <strong u-text="$wizard.progress().total">2</strong>
+                        step <strong u-text="progress().current">1</strong> from <strong u-text="progress().total">2</strong>
                     </span>
                 </div>
                 <div class="card-hr"></div>
@@ -88,7 +88,7 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'          => 'pl-8 pr-8',
-                'u-cloak'        => true,
+                'hidden'        => true,
                 'u-wizard:title' => t('Project import is completed'),
             ],
             'fields'     => [

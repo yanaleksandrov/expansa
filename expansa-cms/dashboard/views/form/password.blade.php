@@ -38,20 +38,20 @@ $attributes = [
 	...$attributes,
 	'name'          => $name,
 	':type'         => "show ? 'password' : 'text'",
-	'@input.window' => $generator ? 'data = $password.check(' . $prop . ')' : '',
+	'@input.window' => $generator ? 'data = p.check(' . $prop . ')' : '',
 ];
 ?>
-<div class="{{ $class }}" u-data="{show: true, data: {}}">
+<div class="{{ $class }}" u-data="password as p">
 	<div class="{{ $labelClass }}">
 		{!! $label !!}
 		@if($generator)
-			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = $password.generate(); $dispatch('input')">{{ t( 'Generate' ) }}</div>
+			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = p.generate(); $dispatch('input')">{{ t( 'Generate' ) }}</div>
 		@endif
 	</div>
 	<div class="field-item">
 		<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
 		@if($switcher)
-			<i class="ph" :class="show ? 'ph-eye-closed' : 'ph-eye'" @click="show = $password.switch(show)"></i>
+			<i class="ph" :class="show ? 'ph-eye-closed' : 'ph-eye'" @click="show = p.switch(show)"></i>
 		@endif
 		@if($copy)
 			<i class="ph ph-copy" title="{{ t( 'Copy' ) }}" u-copy="{{ $prop }}"></i>

@@ -51,7 +51,7 @@ class Field
             $field['attributes'] = Safe::array($field['attributes'] ?? []);
 
             match ($type) {
-                'step'     => $field['attributes']['u-wizard:step'] ??= '',
+                'step'     => $field['attributes']['u-step'] ??= '',
                 'textarea' => $field['attributes']['u-textarea'] ??= '',
                 'select'   => $field['attributes']['u-select'] ??= '',
                 'date'     => $field['attributes']['u-datepicker'] ??= '',
@@ -60,7 +60,7 @@ class Field
             };
 
             if (! in_array($type, [ 'tab', 'step', 'group', 'submit' ], true)) {
-                $field['attributes'] = ['type' => $type, 'name' => $name, 'u-model.fill' => $prop, ...$field['attributes']];
+                $field['attributes'] = ['type' => $type, 'name' => $name, 'u-prop' => $prop, ...$field['attributes']];
             }
 
             if (in_array($type, [ 'tab', 'step', 'group' ], true)) {
@@ -173,7 +173,7 @@ class Field
         if ($expressions) {
             return [
                 'u-show'  => implode(' && ', array_column($expressions, 'expression')),
-                'u-cloak' => Safe::bool(in_array(false, array_column($expressions, 'match'), true)),
+                'hidden' => Safe::bool(in_array(false, array_column($expressions, 'match'), true)),
             ];
         }
         return [];

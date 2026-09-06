@@ -5,7 +5,7 @@
                 true ? module.exports = t() : 0;
             }(this, function() {
                 return function() {
-                    'use strict';
+                    "use strict";
                     var e = {
                         d: function(t, i) {
                             for (var s in i) e.o(i, s) && !e.o(t, s) && Object.defineProperty(t, s, {
@@ -23,49 +23,49 @@
                         }
                     });
                     var i = {
-                        days: 'days',
-                        months: 'months',
-                        years: 'years',
-                        day: 'day',
-                        month: 'month',
-                        year: 'year',
-                        eventChangeViewDate: 'changeViewDate',
-                        eventChangeCurrentView: 'changeCurrentView',
-                        eventChangeFocusDate: 'changeFocusDate',
-                        eventChangeSelectedDate: 'changeSelectedDate',
-                        eventChangeTime: 'changeTime',
-                        eventChangeLastSelectedDate: 'changeLastSelectedDate',
-                        actionSelectDate: 'selectDate',
-                        actionUnselectDate: 'unselectDate',
-                        cssClassWeekend: '-weekend-'
+                        days: "days",
+                        months: "months",
+                        years: "years",
+                        day: "day",
+                        month: "month",
+                        year: "year",
+                        eventChangeViewDate: "changeViewDate",
+                        eventChangeCurrentView: "changeCurrentView",
+                        eventChangeFocusDate: "changeFocusDate",
+                        eventChangeSelectedDate: "changeSelectedDate",
+                        eventChangeTime: "changeTime",
+                        eventChangeLastSelectedDate: "changeLastSelectedDate",
+                        actionSelectDate: "selectDate",
+                        actionUnselectDate: "unselectDate",
+                        cssClassWeekend: "-weekend-"
                     }, s = {
-                        classes: '',
+                        classes: "",
                         inline: !1,
                         locale: {
-                            days: [ 'Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота' ],
-                            daysShort: [ 'Вос', 'Пон', 'Вто', 'Сре', 'Чет', 'Пят', 'Суб' ],
-                            daysMin: [ 'Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб' ],
-                            months: [ 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' ],
-                            monthsShort: [ 'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек' ],
-                            today: 'Сегодня',
-                            clear: 'Очистить',
-                            dateFormat: 'dd.MM.yyyy',
-                            timeFormat: 'HH:mm',
+                            days: [ "Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота" ],
+                            daysShort: [ "Вос", "Пон", "Вто", "Сре", "Чет", "Пят", "Суб" ],
+                            daysMin: [ "Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб" ],
+                            months: [ "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь" ],
+                            monthsShort: [ "Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек" ],
+                            today: "Сегодня",
+                            clear: "Очистить",
+                            dateFormat: "dd.MM.yyyy",
+                            timeFormat: "HH:mm",
                             firstDay: 1
                         },
                         startDate: new Date,
-                        firstDay: '',
+                        firstDay: "",
                         weekends: [ 6, 0 ],
-                        dateFormat: '',
-                        altField: '',
-                        altFieldDateFormat: 'T',
+                        dateFormat: "",
+                        altField: "",
+                        altFieldDateFormat: "T",
                         toggleSelected: !0,
                         keyboardNav: !0,
                         selectedDates: !1,
-                        container: '',
+                        container: "",
                         isMobile: !1,
                         visible: !1,
-                        position: 'bottom left',
+                        position: "bottom left",
                         offset: 12,
                         view: i.days,
                         minView: i.days,
@@ -75,29 +75,29 @@
                         showOtherYears: !0,
                         selectOtherYears: !0,
                         moveToOtherYearsOnSelect: !0,
-                        minDate: '',
-                        maxDate: '',
+                        minDate: "",
+                        maxDate: "",
                         disableNavWhenOutOfRange: !0,
                         multipleDates: !1,
-                        multipleDatesSeparator: ', ',
+                        multipleDatesSeparator: ", ",
                         range: !1,
                         dynamicRange: !0,
                         buttons: !1,
-                        monthsField: 'monthsShort',
-                        showEvent: 'focus',
+                        monthsField: "monthsShort",
+                        showEvent: "focus",
                         autoClose: !1,
                         fixedHeight: !1,
                         prevHtml: '<svg><path d="M 17,12 l -5,5 l 5,5"></path></svg>',
                         nextHtml: '<svg><path d="M 14,12 l 5,5 l -5,5"></path></svg>',
                         navTitles: {
-                            days: 'MMMM, <i>yyyy</i>',
-                            months: 'yyyy',
-                            years: 'yyyy1 - yyyy2'
+                            days: "MMMM, <i>yyyy</i>",
+                            months: "yyyy",
+                            years: "yyyy1 - yyyy2"
                         },
                         timepicker: !1,
                         onlyTimepicker: !1,
-                        dateTimeSeparator: ' ',
-                        timeFormat: '',
+                        dateTimeSeparator: " ",
+                        timeFormat: "",
                         minHours: 0,
                         maxHours: 24,
                         minMinutes: 0,
@@ -114,11 +114,11 @@
                     };
                     function a(e) {
                         let t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : document;
-                        return 'string' == typeof e ? t.querySelector(e) : e;
+                        return "string" == typeof e ? t.querySelector(e) : e;
                     }
                     function n() {
-                        let {tagName: e = 'div', className: t = '', innerHtml: i = '', id: s = '', attrs: a = {}} = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, n = document.createElement(e);
-                        return t && n.classList.add(...t.split(' ')), s && (n.id = s), i && (n.innerHTML = i), 
+                        let {tagName: e = "div", className: t = "", innerHtml: i = "", id: s = "", attrs: a = {}} = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, n = document.createElement(e);
+                        return t && n.classList.add(...t.split(" ")), s && (n.id = s), i && (n.innerHTML = i), 
                         a && r(n, a), n;
                     }
                     function r(e, t) {
@@ -133,9 +133,9 @@
                         return {
                             year: e.getFullYear(),
                             month: e.getMonth(),
-                            fullMonth: e.getMonth() + 1 < 10 ? '0' + (e.getMonth() + 1) : e.getMonth() + 1,
+                            fullMonth: e.getMonth() + 1 < 10 ? "0" + (e.getMonth() + 1) : e.getMonth() + 1,
                             date: e.getDate(),
-                            fullDate: e.getDate() < 10 ? '0' + e.getDate() : e.getDate(),
+                            fullDate: e.getDate() < 10 ? "0" + e.getDate() : e.getDate(),
                             day: e.getDay(),
                             hours: t,
                             fullHours: d(t),
@@ -143,17 +143,17 @@
                             dayPeriod: s,
                             fullHours12: d(i),
                             minutes: e.getMinutes(),
-                            fullMinutes: e.getMinutes() < 10 ? '0' + e.getMinutes() : e.getMinutes()
+                            fullMinutes: e.getMinutes() < 10 ? "0" + e.getMinutes() : e.getMinutes()
                         };
                     }
                     function l(e) {
                         return {
-                            dayPeriod: e > 11 ? 'pm' : 'am',
+                            dayPeriod: e > 11 ? "pm" : "am",
                             hours: e % 12 == 0 ? 12 : e % 12
                         };
                     }
                     function d(e) {
-                        return e < 10 ? '0' + e : e;
+                        return e < 10 ? "0" + e : e;
                     }
                     function c(e) {
                         let t = 10 * Math.floor(e.getFullYear() / 10);
@@ -163,8 +163,8 @@
                         let e = [];
                         for (var t = arguments.length, i = new Array(t), s = 0; s < t; s++) i[s] = arguments[s];
                         return i.forEach(t => {
-                            if ('object' == typeof t) for (let i in t) t[i] && e.push(i); else t && e.push(t);
-                        }), e.join(' ');
+                            if ("object" == typeof t) for (let i in t) t[i] && e.push(i); else t && e.push(t);
+                        }), e.join(" ");
                     }
                     function p(e, t) {
                         let s = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : i.days;
@@ -185,7 +185,7 @@
                     }
                     function g(e) {
                         let t = !(arguments.length > 1 && void 0 !== arguments[1]) || arguments[1], i = new Date(e.getTime());
-                        return 'boolean' != typeof t || t || function(e) {
+                        return "boolean" != typeof t || t || function(e) {
                             e.setHours(0, 0, 0, 0);
                         }(i), i;
                     }
@@ -203,7 +203,7 @@
                     function w(e) {
                         for (var t = arguments.length, i = new Array(t > 1 ? t - 1 : 0), s = 1; s < t; s++) i[s - 1] = arguments[s];
                         return i.filter(e => e).forEach(t => {
-                            for (let [i, s] of Object.entries(t)) if (void 0 !== s && '[object Object]' === s.toString()) {
+                            for (let [i, s] of Object.entries(t)) if (void 0 !== s && "[object Object]" === s.toString()) {
                                 let t = void 0 !== e[i] ? e[i].toString() : void 0, a = s.toString(), n = Array.isArray(s) ? [] : {};
                                 e[i] = e[i] ? t !== a ? n : e[i] : n, w(e[i], s);
                             } else e[i] = s;
@@ -211,27 +211,27 @@
                     }
                     function b(e) {
                         let t = e;
-                        return e instanceof Date || ('string' == typeof e && /^\d{4}-\d{2}-\d{2}$/.test(e) && (e += 'T00:00:00'), 
+                        return e instanceof Date || ("string" == typeof e && /^\d{4}-\d{2}-\d{2}$/.test(e) && (e += "T00:00:00"), 
                         t = new Date(e)), isNaN(t.getTime()) && (console.log(`Unable to convert value "${e}" to Date object`), 
                         t = !1), t;
                     }
                     function $(e) {
-                        let t = '\\s|\\.|-|/|\\\\|,|\\$|\\!|\\?|:|;';
-                        return new RegExp('(^|>|' + t + ')(' + e + ')($|<|' + t + ')', 'g');
+                        let t = "\\s|\\.|-|/|\\\\|,|\\$|\\!|\\?|:|;";
+                        return new RegExp("(^|>|" + t + ")(" + e + ")($|<|" + t + ")", "g");
                     }
                     function k(e, t, i) {
                         return (t = function(e) {
                             var t = function(e, t) {
-                                if ('object' != typeof e || null === e) return e;
+                                if ("object" != typeof e || null === e) return e;
                                 var i = e[Symbol.toPrimitive];
                                 if (void 0 !== i) {
-                                    var s = i.call(e, 'string');
-                                    if ('object' != typeof s) return s;
-                                    throw new TypeError('@@toPrimitive must return a primitive value.');
+                                    var s = i.call(e, "string");
+                                    if ("object" != typeof s) return s;
+                                    throw new TypeError("@@toPrimitive must return a primitive value.");
                                 }
                                 return String(e);
                             }(e);
-                            return 'symbol' == typeof t ? t : String(t);
+                            return "symbol" == typeof t ? t : String(t);
                         }(t)) in e ? Object.defineProperty(e, t, {
                             value: i,
                             enumerable: !0,
@@ -242,21 +242,21 @@
                     class C {
                         constructor() {
                             let {type: e, date: t, dp: i, opts: s, body: a} = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
-                            k(this, 'focus', () => {
-                                this.$cell.classList.add('-focus-'), this.focused = !0;
-                            }), k(this, 'removeFocus', () => {
-                                this.$cell.classList.remove('-focus-'), this.focused = !1;
-                            }), k(this, 'select', () => {
-                                this.$cell.classList.add('-selected-'), this.selected = !0;
-                            }), k(this, 'removeSelect', () => {
-                                this.$cell.classList.remove('-selected-', '-range-from-', '-range-to-'), this.selected = !1;
-                            }), k(this, 'onChangeSelectedDate', () => {
+                            k(this, "focus", () => {
+                                this.$cell.classList.add("-focus-"), this.focused = !0;
+                            }), k(this, "removeFocus", () => {
+                                this.$cell.classList.remove("-focus-"), this.focused = !1;
+                            }), k(this, "select", () => {
+                                this.$cell.classList.add("-selected-"), this.selected = !0;
+                            }), k(this, "removeSelect", () => {
+                                this.$cell.classList.remove("-selected-", "-range-from-", "-range-to-"), this.selected = !1;
+                            }), k(this, "onChangeSelectedDate", () => {
                                 this.isDisabled || (this._handleSelectedStatus(), this.opts.range && this._handleRangeStatus());
-                            }), k(this, 'onChangeFocusDate', e => {
+                            }), k(this, "onChangeFocusDate", e => {
                                 if (!e) return void (this.focused && this.removeFocus());
                                 let t = p(e, this.date, this.type);
                                 t ? this.focus() : !t && this.focused && this.removeFocus(), this.opts.range && this._handleRangeStatus();
-                            }), k(this, 'render', () => (this.$cell.innerHTML = this._getHtml(), this._handleClasses(), 
+                            }), k(this, "render", () => (this.$cell.innerHTML = this._getHtml(), this._handleClasses(), 
                             this.$cell)), this.type = e, this.singleType = this.type.slice(0, -1), this.date = t, 
                             this.dp = i, this.opts = s, this.body = a, this.customData = !1, this.init();
                         }
@@ -280,43 +280,43 @@
                             let {year: t, month: i, fullMonth: s, date: a, fullDate: r} = o(this.date), h = (null === (e = this.customData) || void 0 === e ? void 0 : e.attrs) || {};
                             this.$cell = n({
                                 attrs: {
-                                    'data-year': t,
-                                    'data-month': i,
-                                    'data-date': a,
-                                    'data-iso-date': `${t}-${s}-${r}`,
+                                    "data-year": t,
+                                    "data-month": i,
+                                    "data-date": a,
+                                    "data-iso-date": `${t}-${s}-${r}`,
                                     ...h
                                 }
                             }), this.$cell.adpCell = this;
                         }
                         _getClassName() {
                             var e;
-                            let t = new Date, {selectOtherMonths: s, selectOtherYears: a} = this.opts, {minDate: n, maxDate: r, isDateDisabled: h} = this.dp, {day: l} = o(this.date), d = this._isOutOfMinMaxRange(), c = h(this.date), m = u('air-datepicker-cell', `-${this.singleType}-`, {
-                                '-current-': p(t, this.date, this.type),
-                                '-min-date-': n && p(n, this.date, this.type),
-                                '-max-date-': r && p(r, this.date, this.type)
-                            }), v = '';
+                            let t = new Date, {selectOtherMonths: s, selectOtherYears: a} = this.opts, {minDate: n, maxDate: r, isDateDisabled: h} = this.dp, {day: l} = o(this.date), d = this._isOutOfMinMaxRange(), c = h(this.date), m = u("air-datepicker-cell", `-${this.singleType}-`, {
+                                "-current-": p(t, this.date, this.type),
+                                "-min-date-": n && p(n, this.date, this.type),
+                                "-max-date-": r && p(r, this.date, this.type)
+                            }), v = "";
                             switch (this.type) {
                               case i.days:
                                 v = u({
-                                    '-weekend-': this.dp.isWeekend(l),
-                                    '-other-month-': this.isOtherMonth,
-                                    '-disabled-': this.isOtherMonth && !s || d || c
+                                    "-weekend-": this.dp.isWeekend(l),
+                                    "-other-month-": this.isOtherMonth,
+                                    "-disabled-": this.isOtherMonth && !s || d || c
                                 });
                                 break;
 
                               case i.months:
                                 v = u({
-                                    '-disabled-': d
+                                    "-disabled-": d
                                 });
                                 break;
 
                               case i.years:
                                 v = u({
-                                    '-other-decade-': this.isOtherDecade,
-                                    '-disabled-': d || this.isOtherDecade && !a
+                                    "-other-decade-": this.isOtherDecade,
+                                    "-disabled-": d || this.isOtherDecade && !a
                                 });
                             }
-                            return u(m, v, null === (e = this.customData) || void 0 === e ? void 0 : e.classes).split(' ');
+                            return u(m, v, null === (e = this.customData) || void 0 === e ? void 0 : e.classes).split(" ");
                         }
                         _getHtml() {
                             var e;
@@ -324,13 +324,13 @@
                             if (null !== (e = this.customData) && void 0 !== e && e.html) return this.customData.html;
                             switch (this.type) {
                               case i.days:
-                                return !n && this.isOtherMonth ? '' : a;
+                                return !n && this.isOtherMonth ? "" : a;
 
                               case i.months:
                                 return this.dp.locale[this.opts.monthsField][s];
 
                               case i.years:
-                                return !r && this.isOtherDecade ? '' : t;
+                                return !r && this.isOtherDecade ? "" : t;
                             }
                         }
                         _isOutOfMinMaxRange() {
@@ -342,19 +342,19 @@
                         }
                         _handleRangeStatus() {
                             const {selectedDates: e, focusDate: t, rangeDateTo: i, rangeDateFrom: s} = this.dp, a = e.length;
-                            if (this.$cell.classList.remove('-range-from-', '-range-to-', '-in-range-'), !a) return;
+                            if (this.$cell.classList.remove("-range-from-", "-range-to-", "-in-range-"), !a) return;
                             let n = s, r = i;
                             if (1 === a && t) {
                                 const i = m(t, e[0]);
                                 n = i ? e[0] : t, r = i ? t : e[0];
                             }
                             let h = u({
-                                '-in-range-': n && r && (o = this.date, l = n, d = r, m(o, l) && v(o, d)),
-                                '-range-from-': n && p(this.date, n, this.type),
-                                '-range-to-': r && p(this.date, r, this.type)
+                                "-in-range-": n && r && (o = this.date, l = n, d = r, m(o, l) && v(o, d)),
+                                "-range-from-": n && p(this.date, n, this.type),
+                                "-range-to-": r && p(this.date, r, this.type)
                             });
                             var o, l, d;
-                            h && this.$cell.classList.add(...h.split(' '));
+                            h && this.$cell.classList.add(...h.split(" "));
                         }
                         _handleSelectedStatus() {
                             let e = this.dp._checkIfDateIsSelected(this.date, this.type);
@@ -364,11 +364,11 @@
                             p(this.dp.focusDate, this.date, this.type) && this.focus();
                         }
                         _handleClasses() {
-                            this.$cell.setAttribute('class', ''), this._handleInitialFocusStatus(), this.dp.hasSelectedDates && (this._handleSelectedStatus(), 
+                            this.$cell.setAttribute("class", ""), this._handleInitialFocusStatus(), this.dp.hasSelectedDates && (this._handleSelectedStatus(), 
                             this.dp.opts.range && this._handleRangeStatus()), this.$cell.classList.add(...this._getClassName());
                         }
                         get isDisabled() {
-                            return this.$cell.matches('.-disabled-');
+                            return this.$cell.matches(".-disabled-");
                         }
                         get isOtherMonth() {
                             return this.dp.isOtherMonth(this.date);
@@ -380,16 +380,16 @@
                     function _(e, t, i) {
                         return (t = function(e) {
                             var t = function(e, t) {
-                                if ('object' != typeof e || null === e) return e;
+                                if ("object" != typeof e || null === e) return e;
                                 var i = e[Symbol.toPrimitive];
                                 if (void 0 !== i) {
-                                    var s = i.call(e, 'string');
-                                    if ('object' != typeof s) return s;
-                                    throw new TypeError('@@toPrimitive must return a primitive value.');
+                                    var s = i.call(e, "string");
+                                    if ("object" != typeof s) return s;
+                                    throw new TypeError("@@toPrimitive must return a primitive value.");
                                 }
                                 return String(e);
                             }(e);
-                            return 'symbol' == typeof t ? t : String(t);
+                            return "symbol" == typeof t ? t : String(t);
                         }(t)) in e ? Object.defineProperty(e, t, {
                             value: i,
                             enumerable: !0,
@@ -402,37 +402,37 @@
                         [i.months]: `<div class="air-datepicker-body--cells -${i.months}-"></div>`,
                         [i.years]: `<div class="air-datepicker-body--cells -${i.years}-"></div>`
                     };
-                    const S = '.air-datepicker-cell';
+                    const S = ".air-datepicker-cell";
                     class T {
                         constructor(e) {
                             let {dp: t, type: s, opts: a} = e;
-                            _(this, 'handleClick', e => {
+                            _(this, "handleClick", e => {
                                 let t = e.target.closest(S).adpCell;
                                 if (t.isDisabled) return;
                                 if (!this.dp.isMinViewReached) return void this.dp.down();
                                 let i = this.dp._checkIfDateIsSelected(t.date, t.type);
                                 i ? this.dp._handleAlreadySelectedDates(i, t.date) : this.dp.selectDate(t.date);
-                            }), _(this, 'handleDayNameClick', e => {
-                                let t = e.target.getAttribute('data-day-index');
+                            }), _(this, "handleDayNameClick", e => {
+                                let t = e.target.getAttribute("data-day-index");
                                 this.opts.onClickDayName({
                                     dayIndex: Number(t),
                                     datepicker: this.dp
                                 });
-                            }), _(this, 'onChangeCurrentView', e => {
+                            }), _(this, "onChangeCurrentView", e => {
                                 e !== this.type ? this.hide() : (this.show(), this.render());
-                            }), _(this, 'onMouseOverCell', e => {
+                            }), _(this, "onMouseOverCell", e => {
                                 let t = y(e.target, S);
                                 this.dp.setFocusDate(!!t && t.adpCell.date);
-                            }), _(this, 'onMouseOutCell', () => {
+                            }), _(this, "onMouseOutCell", () => {
                                 this.dp.setFocusDate(!1);
-                            }), _(this, 'onClickBody', e => {
+                            }), _(this, "onClickBody", e => {
                                 let {onClickDayName: t} = this.opts, i = e.target;
-                                i.closest(S) && this.handleClick(e), t && i.closest('.air-datepicker-body--day-name') && this.handleDayNameClick(e);
-                            }), _(this, 'onMouseDown', e => {
+                                i.closest(S) && this.handleClick(e), t && i.closest(".air-datepicker-body--day-name") && this.handleDayNameClick(e);
+                            }), _(this, "onMouseDown", e => {
                                 this.pressed = !0;
                                 let t = y(e.target, S), i = t && t.adpCell;
                                 p(i.date, this.dp.rangeDateFrom) && (this.rangeFromFocused = !0), p(i.date, this.dp.rangeDateTo) && (this.rangeToFocused = !0);
-                            }), _(this, 'onMouseMove', e => {
+                            }), _(this, "onMouseMove", e => {
                                 if (!this.pressed || !this.dp.isMinViewReached) return;
                                 e.preventDefault();
                                 let t = y(e.target, S), i = t && t.adpCell, {selectedDates: s, rangeDateTo: a, rangeDateFrom: n} = this.dp;
@@ -448,9 +448,9 @@
                                         r.setHours(e), r.setMinutes(t), this.dp.rangeDateTo = r, this.dp.replaceDate(a, r);
                                     }
                                 }
-                            }), _(this, 'onMouseUp', () => {
+                            }), _(this, "onMouseUp", () => {
                                 this.pressed = !1, this.rangeFromFocused = !1, this.rangeToFocused = !1;
-                            }), _(this, 'onChangeViewDate', (e, t) => {
+                            }), _(this, "onChangeViewDate", (e, t) => {
                                 if (!this.isVisible) return;
                                 let s = c(e), a = c(t);
                                 switch (this.dp.currentView) {
@@ -466,11 +466,11 @@
                                     if (s[0] === a[0] && s[1] === a[1]) return;
                                 }
                                 this.render();
-                            }), _(this, 'render', () => {
+                            }), _(this, "render", () => {
                                 this.destroyCells(), this._generateCells(), this.cells.forEach(e => {
                                     this.$cells.appendChild(e.render());
                                 });
-                            }), this.dp = t, this.type = s, this.opts = a, this.cells = [], this.$el = '', this.pressed = !1, 
+                            }), this.dp = t, this.type = s, this.opts = a, this.cells = [], this.$el = "", this.pressed = !1, 
                             this.isVisible = !0, this.init();
                         }
                         init() {
@@ -479,9 +479,9 @@
                         }
                         _bindEvents() {
                             let {range: e, dynamicRange: t} = this.opts;
-                            D(this.$el, 'mouseover', this.onMouseOverCell), D(this.$el, 'mouseout', this.onMouseOutCell), 
-                            D(this.$el, 'click', this.onClickBody), e && t && (D(this.$el, 'mousedown', this.onMouseDown), 
-                            D(this.$el, 'mousemove', this.onMouseMove), D(window.document, 'mouseup', this.onMouseUp));
+                            D(this.$el, "mouseover", this.onMouseOverCell), D(this.$el, "mouseout", this.onMouseOutCell), 
+                            D(this.$el, "click", this.onClickBody), e && t && (D(this.$el, "mousedown", this.onMouseDown), 
+                            D(this.$el, "mousemove", this.onMouseMove), D(window.document, "mouseup", this.onMouseUp));
                         }
                         _bindDatepickerEvents() {
                             this.dp.on(i.eventChangeViewDate, this.onChangeViewDate), this.dp.on(i.eventChangeCurrentView, this.onChangeCurrentView);
@@ -490,15 +490,15 @@
                             this.$el = n({
                                 className: `air-datepicker-body -${this.type}-`,
                                 innerHtml: M[this.type]
-                            }), this.$names = a('.air-datepicker-body--day-names', this.$el), this.$cells = a('.air-datepicker-body--cells', this.$el);
+                            }), this.$names = a(".air-datepicker-body--day-names", this.$el), this.$cells = a(".air-datepicker-body--cells", this.$el);
                         }
                         _getDayNamesHtml() {
-                            let e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : this.dp.locale.firstDay, t = '', s = this.dp.isWeekend, {onClickDayName: a} = this.opts, n = e, r = 0;
+                            let e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : this.dp.locale.firstDay, t = "", s = this.dp.isWeekend, {onClickDayName: a} = this.opts, n = e, r = 0;
                             for (;r < 7; ) {
                                 let e = n % 7;
-                                t += `<div class="${u('air-datepicker-body--day-name', {
+                                t += `<div class="${u("air-datepicker-body--day-name", {
                                     [i.cssClassWeekend]: s(e),
-                                    '-clickable-': !!a
+                                    "-clickable-": !!a
                                 })}" data-day-index='${e}'>${this.dp.locale.daysMin[e]}</div>`, r++, n++;
                             }
                             return t;
@@ -522,13 +522,13 @@
                             });
                         }
                         show() {
-                            this.isVisible = !0, this.$el.classList.remove('-hidden-');
+                            this.isVisible = !0, this.$el.classList.remove("-hidden-");
                         }
                         hide() {
-                            this.isVisible = !1, this.$el.classList.add('-hidden-');
+                            this.isVisible = !1, this.$el.classList.add("-hidden-");
                         }
                         destroyCells() {
-                            this.cells.forEach(e => e.destroy()), this.cells = [], this.$cells.innerHTML = '';
+                            this.cells.forEach(e => e.destroy()), this.cells = [], this.$cells.innerHTML = "";
                         }
                         destroy() {
                             this.destroyCells(), this.dp.off(i.eventChangeViewDate, this.onChangeViewDate), 
@@ -577,16 +577,16 @@
                     function F(e, t, i) {
                         return (t = function(e) {
                             var t = function(e, t) {
-                                if ('object' != typeof e || null === e) return e;
+                                if ("object" != typeof e || null === e) return e;
                                 var i = e[Symbol.toPrimitive];
                                 if (void 0 !== i) {
-                                    var s = i.call(e, 'string');
-                                    if ('object' != typeof s) return s;
-                                    throw new TypeError('@@toPrimitive must return a primitive value.');
+                                    var s = i.call(e, "string");
+                                    if ("object" != typeof s) return s;
+                                    throw new TypeError("@@toPrimitive must return a primitive value.");
                                 }
                                 return String(e);
                             }(e);
-                            return 'symbol' == typeof t ? t : String(t);
+                            return "symbol" == typeof t ? t : String(t);
                         }(t)) in e ? Object.defineProperty(e, t, {
                             value: i,
                             enumerable: !0,
@@ -597,28 +597,28 @@
                     class V {
                         constructor(e) {
                             let {dp: t, opts: i} = e;
-                            F(this, 'onClickNav', e => {
-                                let t = y(e.target, '.air-datepicker-nav--action');
+                            F(this, "onClickNav", e => {
+                                let t = y(e.target, ".air-datepicker-nav--action");
                                 if (!t) return;
                                 let i = t.dataset.action;
                                 this.dp[i]();
-                            }), F(this, 'onChangeViewDate', () => {
+                            }), F(this, "onChangeViewDate", () => {
                                 this.render(), this._resetNavStatus(), this.handleNavStatus();
-                            }), F(this, 'onChangeCurrentView', () => {
+                            }), F(this, "onChangeCurrentView", () => {
                                 this.render(), this._resetNavStatus(), this.handleNavStatus();
-                            }), F(this, 'onClickNavTitle', () => {
+                            }), F(this, "onClickNavTitle", () => {
                                 this.dp.isFinalView || this.dp.up();
-                            }), F(this, 'update', () => {
+                            }), F(this, "update", () => {
                                 let {prevHtml: e, nextHtml: t} = this.opts;
                                 this.$prev.innerHTML = e, this.$next.innerHTML = t, this._resetNavStatus(), this.render(), 
                                 this.handleNavStatus();
-                            }), F(this, 'renderDelay', () => {
+                            }), F(this, "renderDelay", () => {
                                 setTimeout(this.render);
-                            }), F(this, 'render', () => {
+                            }), F(this, "render", () => {
                                 this.$title.innerHTML = this._getTitle(), function(e, t) {
                                     for (let i in t) t[i] ? e.classList.add(i) : e.classList.remove(i);
                                 }(this.$title, {
-                                    '-disabled-': this.dp.isFinalView
+                                    "-disabled-": this.dp.isFinalView
                                 });
                             }), this.dp = t, this.opts = i, this.init();
                         }
@@ -627,11 +627,11 @@
                             this.handleNavStatus(), this._bindEvents(), this._bindDatepickerEvents();
                         }
                         _defineDOM() {
-                            this.$title = a('.air-datepicker-nav--title', this.$el), this.$prev = a('[data-action="prev"]', this.$el), 
+                            this.$title = a(".air-datepicker-nav--title", this.$el), this.$prev = a('[data-action="prev"]', this.$el), 
                             this.$next = a('[data-action="next"]', this.$el);
                         }
                         _bindEvents() {
-                            this.$el.addEventListener('click', this.onClickNav), this.$title.addEventListener('click', this.onClickNavTitle);
+                            this.$el.addEventListener("click", this.onClickNav), this.$title.addEventListener("click", this.onClickNavTitle);
                         }
                         _bindDatepickerEvents() {
                             this.dp.on(i.eventChangeViewDate, this.onChangeViewDate), this.dp.on(i.eventChangeCurrentView, this.onChangeCurrentView), 
@@ -645,13 +645,13 @@
                         }
                         _createElement() {
                             this.$el = n({
-                                tagName: 'nav',
-                                className: 'air-datepicker-nav'
+                                tagName: "nav",
+                                className: "air-datepicker-nav"
                             });
                         }
                         _getTitle() {
                             let {dp: e, opts: t} = this, i = t.navTitles[e.currentView];
-                            return 'function' == typeof i ? i(e) : e.formatDate(e.viewDate, i);
+                            return "function" == typeof i ? i(e) : e.formatDate(e.viewDate, i);
                         }
                         handleNavStatus() {
                             let {disableNavWhenOutOfRange: e} = this.opts, {minDate: t, maxDate: s} = this.dp;
@@ -659,23 +659,23 @@
                             let {year: a, month: n} = this.dp.parsedViewDate, r = !!t && o(t), h = !!s && o(s);
                             switch (this.dp.currentView) {
                               case i.days:
-                                t && r.month >= n && r.year >= a && this._disableNav('prev'), s && h.month <= n && h.year <= a && this._disableNav('next');
+                                t && r.month >= n && r.year >= a && this._disableNav("prev"), s && h.month <= n && h.year <= a && this._disableNav("next");
                                 break;
 
                               case i.months:
-                                t && r.year >= a && this._disableNav('prev'), s && h.year <= a && this._disableNav('next');
+                                t && r.year >= a && this._disableNav("prev"), s && h.year <= a && this._disableNav("next");
                                 break;
 
                               case i.years:
                                 {
                                     let e = c(this.dp.viewDate);
-                                    t && r.year >= e[0] && this._disableNav('prev'), s && h.year <= e[1] && this._disableNav('next');
+                                    t && r.year >= e[0] && this._disableNav("prev"), s && h.year <= e[1] && this._disableNav("next");
                                     break;
                                 }
                             }
                         }
                         _disableNav(e) {
-                            a('[data-action="' + e + '"]', this.$el).classList.add('-disabled-');
+                            a('[data-action="' + e + '"]', this.$el).classList.add("-disabled-");
                         }
                         _resetNavStatus() {
                             !function(e) {
@@ -683,7 +683,7 @@
                                 e.length ? e.forEach(e => {
                                     e.classList.remove(...i);
                                 }) : e.classList.remove(...i);
-                            }(this.$el.querySelectorAll('.air-datepicker-nav--action'), '-disabled-');
+                            }(this.$el.querySelectorAll(".air-datepicker-nav--action"), "-disabled-");
                         }
                         _buildBaseHtml() {
                             let {prevHtml: e, nextHtml: t} = this.opts;
@@ -691,7 +691,7 @@
                         }
                         get isNavIsFunction() {
                             let {navTitles: e} = this.opts;
-                            return Object.keys(e).find(t => 'function' == typeof e[t]);
+                            return Object.keys(e).find(t => "function" == typeof e[t]);
                         }
                     }
                     var x = {
@@ -714,35 +714,35 @@
                         }
                         createElement() {
                             this.$el = n({
-                                className: 'air-datepicker-buttons'
+                                className: "air-datepicker-buttons"
                             });
                         }
                         destroy() {
                             this.$el.parentNode.removeChild(this.$el);
                         }
                         clearHtml() {
-                            return this.$el.innerHTML = '', this;
+                            return this.$el.innerHTML = "", this;
                         }
                         generateButtons() {
                             let {buttons: e} = this.opts;
                             Array.isArray(e) || (e = [ e ]), e.forEach(e => {
                                 let t = e;
-                                'string' == typeof e && x[e] && (t = x[e]);
+                                "string" == typeof e && x[e] && (t = x[e]);
                                 let i = this.createButton(t);
                                 t.onClick && this.attachEventToButton(i, t.onClick), this.$el.appendChild(i);
                             });
                         }
                         attachEventToButton(e, t) {
-                            e.addEventListener('click', () => {
+                            e.addEventListener("click", () => {
                                 t(this.dp);
                             });
                         }
                         createButton(e) {
-                            let {content: t, className: i, tagName: s = 'button', attrs: a = {}} = e;
+                            let {content: t, className: i, tagName: s = "button", attrs: a = {}} = e;
                             return n({
                                 tagName: s,
-                                innerHtml: `<span tabindex='-1'>${'function' == typeof t ? t(this.dp) : t}</span>`,
-                                className: u('air-datepicker-button', i),
+                                innerHtml: `<span tabindex='-1'>${"function" == typeof t ? t(this.dp) : t}</span>`,
+                                className: u("air-datepicker-button", i),
                                 attrs: a
                             });
                         }
@@ -753,16 +753,16 @@
                     function E(e, t, i) {
                         return (t = function(e) {
                             var t = function(e, t) {
-                                if ('object' != typeof e || null === e) return e;
+                                if ("object" != typeof e || null === e) return e;
                                 var i = e[Symbol.toPrimitive];
                                 if (void 0 !== i) {
-                                    var s = i.call(e, 'string');
-                                    if ('object' != typeof s) return s;
-                                    throw new TypeError('@@toPrimitive must return a primitive value.');
+                                    var s = i.call(e, "string");
+                                    if ("object" != typeof s) return s;
+                                    throw new TypeError("@@toPrimitive must return a primitive value.");
                                 }
                                 return String(e);
                             }(e);
-                            return 'symbol' == typeof t ? t : String(t);
+                            return "symbol" == typeof t ? t : String(t);
                         }(t)) in e ? Object.defineProperty(e, t, {
                             value: i,
                             enumerable: !0,
@@ -773,29 +773,29 @@
                     class L {
                         constructor() {
                             let {opts: e, dp: t} = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {};
-                            E(this, 'toggleTimepickerIsActive', e => {
+                            E(this, "toggleTimepickerIsActive", e => {
                                 this.dp.timepickerIsActive = e;
-                            }), E(this, 'onChangeSelectedDate', e => {
+                            }), E(this, "onChangeSelectedDate", e => {
                                 let {date: t, updateTime: i = !1} = e;
                                 t && (this.setMinMaxTime(t), this.setCurrentTime(!!i && t), this.addTimeToDate(t));
-                            }), E(this, 'onChangeLastSelectedDate', e => {
+                            }), E(this, "onChangeLastSelectedDate", e => {
                                 e && (this.setTime(e), this.render());
-                            }), E(this, 'onChangeInputRange', e => {
+                            }), E(this, "onChangeInputRange", e => {
                                 let t = e.target;
-                                this[t.getAttribute('name')] = t.value, this.updateText(), this.dp.trigger(i.eventChangeTime, {
+                                this[t.getAttribute("name")] = t.value, this.updateText(), this.dp.trigger(i.eventChangeTime, {
                                     hours: this.hours,
                                     minutes: this.minutes
                                 });
-                            }), E(this, 'onMouseEnterLeave', e => {
-                                let t = e.target.getAttribute('name'), i = this.$minutesText;
-                                'hours' === t && (i = this.$hoursText), i.classList.toggle('-focus-');
-                            }), E(this, 'onFocus', () => {
+                            }), E(this, "onMouseEnterLeave", e => {
+                                let t = e.target.getAttribute("name"), i = this.$minutesText;
+                                "hours" === t && (i = this.$hoursText), i.classList.toggle("-focus-");
+                            }), E(this, "onFocus", () => {
                                 this.toggleTimepickerIsActive(!0);
-                            }), E(this, 'onBlur', () => {
+                            }), E(this, "onBlur", () => {
                                 this.toggleTimepickerIsActive(!1);
                             }), this.opts = e, this.dp = t;
                             let {timeFormat: s} = this.dp.locale;
-                            s && (s.match($('h')) || s.match($('hh'))) && (this.ampm = !0), this.init();
+                            s && (s.match($("h")) || s.match($("hh"))) && (this.ampm = !0), this.init();
                         }
                         init() {
                             this.setTime(this.dp.lastSelectedDate || this.dp.viewDate), this.createElement(), 
@@ -806,16 +806,16 @@
                             this.dp.on(i.eventChangeSelectedDate, this.onChangeSelectedDate), this.dp.on(i.eventChangeLastSelectedDate, this.onChangeLastSelectedDate);
                         }
                         bindDOMEvents() {
-                            let e = 'input';
-                            navigator.userAgent.match(/trident/gi) && (e = 'change'), D(this.$ranges, e, this.onChangeInputRange), 
-                            D(this.$ranges, 'mouseenter', this.onMouseEnterLeave), D(this.$ranges, 'mouseleave', this.onMouseEnterLeave), 
-                            D(this.$ranges, 'focus', this.onFocus), D(this.$ranges, 'mousedown', this.onFocus), 
-                            D(this.$ranges, 'blur', this.onBlur);
+                            let e = "input";
+                            navigator.userAgent.match(/trident/gi) && (e = "change"), D(this.$ranges, e, this.onChangeInputRange), 
+                            D(this.$ranges, "mouseenter", this.onMouseEnterLeave), D(this.$ranges, "mouseleave", this.onMouseEnterLeave), 
+                            D(this.$ranges, "focus", this.onFocus), D(this.$ranges, "mousedown", this.onFocus), 
+                            D(this.$ranges, "blur", this.onBlur);
                         }
                         createElement() {
                             this.$el = n({
-                                className: u('air-datepicker-time', {
-                                    '-am-pm-': this.dp.ampm
+                                className: u("air-datepicker-time", {
+                                    "-am-pm-": this.dp.ampm
                                 })
                             });
                         }
@@ -825,13 +825,13 @@
                         }
                         buildHtml() {
                             let {ampm: e, hours: t, displayHours: i, minutes: s, minHours: a, minMinutes: n, maxHours: r, maxMinutes: h, dayPeriod: o, opts: {hoursStep: l, minutesStep: c}} = this;
-                            this.$el.innerHTML = `<div class="air-datepicker-time--current">   <span class="air-datepicker-time--current-hours">${d(i)}</span>   <span class="air-datepicker-time--current-colon">:</span>   <span class="air-datepicker-time--current-minutes">${d(s)}</span>   ` + (e ? `<span class='air-datepicker-time--current-ampm'>${o}</span>` : '') + '</div><div class="air-datepicker-time--sliders">   <div class="air-datepicker-time--row">' + `      <input type="range" name="hours" value="${t}" min="${a}" max="${r}" step="${l}"/>   </div>   <div class="air-datepicker-time--row">` + `      <input type="range" name="minutes" value="${s}" min="${n}" max="${h}" step="${c}"/>   </div></div>`;
+                            this.$el.innerHTML = `<div class="air-datepicker-time--current">   <span class="air-datepicker-time--current-hours">${d(i)}</span>   <span class="air-datepicker-time--current-colon">:</span>   <span class="air-datepicker-time--current-minutes">${d(s)}</span>   ` + (e ? `<span class='air-datepicker-time--current-ampm'>${o}</span>` : "") + '</div><div class="air-datepicker-time--sliders">   <div class="air-datepicker-time--row">' + `      <input type="range" name="hours" value="${t}" min="${a}" max="${r}" step="${l}"/>   </div>   <div class="air-datepicker-time--row">` + `      <input type="range" name="minutes" value="${s}" min="${n}" max="${h}" step="${c}"/>   </div></div>`;
                         }
                         defineDOM() {
                             let e = e => a(e, this.$el);
                             this.$ranges = this.$el.querySelectorAll('[type="range"]'), this.$hours = e('[name="hours"]'), 
-                            this.$minutes = e('[name="minutes"]'), this.$hoursText = e('.air-datepicker-time--current-hours'), 
-                            this.$minutesText = e('.air-datepicker-time--current-minutes'), this.$ampm = e('.air-datepicker-time--current-ampm');
+                            this.$minutes = e('[name="minutes"]'), this.$hoursText = e(".air-datepicker-time--current-hours"), 
+                            this.$minutesText = e(".air-datepicker-time--current-minutes"), this.$ampm = e(".air-datepicker-time--current-ampm");
                         }
                         setTime(e) {
                             this.setMinMaxTime(e), this.setCurrentTime(e);
@@ -890,16 +890,16 @@
                     function A(e, t, i) {
                         return (t = function(e) {
                             var t = function(e, t) {
-                                if ('object' != typeof e || null === e) return e;
+                                if ("object" != typeof e || null === e) return e;
                                 var i = e[Symbol.toPrimitive];
                                 if (void 0 !== i) {
-                                    var s = i.call(e, 'string');
-                                    if ('object' != typeof s) return s;
-                                    throw new TypeError('@@toPrimitive must return a primitive value.');
+                                    var s = i.call(e, "string");
+                                    if ("object" != typeof s) return s;
+                                    throw new TypeError("@@toPrimitive must return a primitive value.");
                                 }
                                 return String(e);
                             }(e);
-                            return 'symbol' == typeof t ? t : String(t);
+                            return "symbol" == typeof t ? t : String(t);
                         }(t)) in e ? Object.defineProperty(e, t, {
                             value: i,
                             enumerable: !0,
@@ -910,8 +910,8 @@
                     class O {
                         constructor(e) {
                             let {dp: t, opts: i} = e;
-                            A(this, 'pressedKeys', new Set), A(this, 'hotKeys', new Map([ [ [ [ 'Control', 'ArrowRight' ], [ 'Control', 'ArrowUp' ] ], e => e.month++ ], [ [ [ 'Control', 'ArrowLeft' ], [ 'Control', 'ArrowDown' ] ], e => e.month-- ], [ [ [ 'Shift', 'ArrowRight' ], [ 'Shift', 'ArrowUp' ] ], e => e.year++ ], [ [ [ 'Shift', 'ArrowLeft' ], [ 'Shift', 'ArrowDown' ] ], e => e.year-- ], [ [ [ 'Alt', 'ArrowRight' ], [ 'Alt', 'ArrowUp' ] ], e => e.year += 10 ], [ [ [ 'Alt', 'ArrowLeft' ], [ 'Alt', 'ArrowDown' ] ], e => e.year -= 10 ], [ [ 'Control', 'Shift', 'ArrowUp' ], (e, t) => t.up() ] ])), 
-                            A(this, 'handleHotKey', e => {
+                            A(this, "pressedKeys", new Set), A(this, "hotKeys", new Map([ [ [ [ "Control", "ArrowRight" ], [ "Control", "ArrowUp" ] ], e => e.month++ ], [ [ [ "Control", "ArrowLeft" ], [ "Control", "ArrowDown" ] ], e => e.month-- ], [ [ [ "Shift", "ArrowRight" ], [ "Shift", "ArrowUp" ] ], e => e.year++ ], [ [ [ "Shift", "ArrowLeft" ], [ "Shift", "ArrowDown" ] ], e => e.year-- ], [ [ [ "Alt", "ArrowRight" ], [ "Alt", "ArrowUp" ] ], e => e.year += 10 ], [ [ [ "Alt", "ArrowLeft" ], [ "Alt", "ArrowDown" ] ], e => e.year -= 10 ], [ [ "Control", "Shift", "ArrowUp" ], (e, t) => t.up() ] ])), 
+                            A(this, "handleHotKey", e => {
                                 let t = this.hotKeys.get(e), i = o(this.getInitialFocusDate());
                                 t(i, this.dp);
                                 let {year: s, month: a, date: n} = i, r = h(new Date(s, a));
@@ -920,7 +920,7 @@
                                 this.dp.setFocusDate(l, {
                                     viewDateTransition: !0
                                 });
-                            }), A(this, 'isHotKeyPressed', () => {
+                            }), A(this, "isHotKeyPressed", () => {
                                 let e = !1, t = this.pressedKeys.size, i = e => this.pressedKeys.has(e);
                                 for (let [s] of this.hotKeys) {
                                     if (e) break;
@@ -932,22 +932,22 @@
                                     }
                                 }
                                 return e;
-                            }), A(this, 'isArrow', e => e >= 37 && e <= 40), A(this, 'onKeyDown', e => {
+                            }), A(this, "isArrow", e => e >= 37 && e <= 40), A(this, "onKeyDown", e => {
                                 if (!this.dp.visible && !this.dp.treatAsInline) return;
                                 let {key: t, which: i} = e, {dp: s, dp: {focusDate: a}, opts: n} = this;
                                 this.registerKey(t);
                                 let r = this.isHotKeyPressed();
                                 if (r) return e.preventDefault(), void this.handleHotKey(r);
                                 if (this.isArrow(i)) return e.preventDefault(), void this.focusNextCell(t);
-                                if ('Enter' === t) {
+                                if ("Enter" === t) {
                                     if (s.currentView !== n.minView) return void s.down();
                                     if (a) {
                                         let e = s._checkIfDateIsSelected(a);
                                         return void (e ? s._handleAlreadySelectedDates(e, a) : s.selectDate(a));
                                     }
                                 }
-                                'Escape' === t && this.dp.hide();
-                            }), A(this, 'onKeyUp', e => {
+                                "Escape" === t && this.dp.hide();
+                            }), A(this, "onKeyUp", e => {
                                 this.removeKey(e.key);
                             }), this.dp = t, this.opts = i, this.init();
                         }
@@ -956,11 +956,11 @@
                         }
                         bindKeyboardEvents() {
                             let {$el: e} = this.dp;
-                            e.addEventListener('keydown', this.onKeyDown), e.addEventListener('keyup', this.onKeyUp);
+                            e.addEventListener("keydown", this.onKeyDown), e.addEventListener("keyup", this.onKeyUp);
                         }
                         destroy() {
                             let {$el: e} = this.dp;
-                            e.removeEventListener('keydown', this.onKeyDown), e.removeEventListener('keyup', this.onKeyUp), 
+                            e.removeEventListener("keydown", this.onKeyDown), e.removeEventListener("keyup", this.onKeyUp), 
                             this.hotKeys = null, this.pressedKeys = null;
                         }
                         getInitialFocusDate() {
@@ -982,19 +982,19 @@
                         focusNextCell(e) {
                             let t = this.getInitialFocusDate(), {currentView: s} = this.dp, {days: a, months: n, years: r} = i, h = o(t), l = h.year, d = h.month, c = h.date;
                             switch (e) {
-                              case 'ArrowLeft':
+                              case "ArrowLeft":
                                 s === a && (c -= 1), s === n && (d -= 1), s === r && (l -= 1);
                                 break;
 
-                              case 'ArrowUp':
+                              case "ArrowUp":
                                 s === a && (c -= 7), s === n && (d -= 3), s === r && (l -= 4);
                                 break;
 
-                              case 'ArrowRight':
+                              case "ArrowRight":
                                 s === a && (c += 1), s === n && (d += 1), s === r && (l += 1);
                                 break;
 
-                              case 'ArrowDown':
+                              case "ArrowDown":
                                 s === a && (c += 7), s === n && (d += 3), s === r && (l += 4);
                             }
                             let u = this.dp.getClampedDate(new Date(l, d, c));
@@ -1029,16 +1029,16 @@
                     function I(e, t, i) {
                         return (t = function(e) {
                             var t = function(e, t) {
-                                if ('object' != typeof e || null === e) return e;
+                                if ("object" != typeof e || null === e) return e;
                                 var i = e[Symbol.toPrimitive];
                                 if (void 0 !== i) {
-                                    var s = i.call(e, 'string');
-                                    if ('object' != typeof s) return s;
-                                    throw new TypeError('@@toPrimitive must return a primitive value.');
+                                    var s = i.call(e, "string");
+                                    if ("object" != typeof s) return s;
+                                    throw new TypeError("@@toPrimitive must return a primitive value.");
                                 }
                                 return String(e);
                             }(e);
-                            return 'symbol' == typeof t ? t : String(t);
+                            return "symbol" == typeof t ? t : String(t);
                         }(t)) in e ? Object.defineProperty(e, t, {
                             value: i,
                             enumerable: !0,
@@ -1046,17 +1046,17 @@
                             writable: !0
                         }) : e[t] = i, e;
                     }
-                    let P = '', j = '', B = !1;
+                    let P = "", j = "", B = !1;
                     class R {
                         static buildGlobalContainer(e) {
                             B = !0, P = n({
                                 className: e,
                                 id: e
-                            }), a('body').appendChild(P);
+                            }), a("body").appendChild(P);
                         }
                         constructor(e, t) {
                             var r = this;
-                            if (I(this, 'viewIndexes', [ i.days, i.months, i.years ]), I(this, 'next', () => {
+                            if (I(this, "viewIndexes", [ i.days, i.months, i.years ]), I(this, "next", () => {
                                 let {year: e, month: t} = this.parsedViewDate;
                                 switch (this.currentView) {
                                   case i.days:
@@ -1070,7 +1070,7 @@
                                   case i.years:
                                     this.setViewDate(new Date(e + 10, 0, 1));
                                 }
-                            }), I(this, 'prev', () => {
+                            }), I(this, "prev", () => {
                                 let {year: e, month: t} = this.parsedViewDate;
                                 switch (this.currentView) {
                                   case i.days:
@@ -1084,19 +1084,19 @@
                                   case i.years:
                                     this.setViewDate(new Date(e - 10, 0, 1));
                                 }
-                            }), I(this, '_finishHide', () => {
+                            }), I(this, "_finishHide", () => {
                                 this.hideAnimation = !1, this._destroyComponents(), this.$container.removeChild(this.$datepicker);
-                            }), I(this, 'setPosition', function(e) {
+                            }), I(this, "setPosition", function(e) {
                                 let t = arguments.length > 1 && void 0 !== arguments[1] && arguments[1];
-                                if ('function' == typeof (e = e || r.opts.position)) return void (r.customHide = e({
+                                if ("function" == typeof (e = e || r.opts.position)) return void (r.customHide = e({
                                     $datepicker: r.$datepicker,
                                     $target: r.$el,
                                     $pointer: r.$pointer,
                                     isViewChange: t,
                                     done: r._finishHide
                                 }));
-                                let i, s, {isMobile: a} = r.opts, n = r.$el.getBoundingClientRect(), h = r.$el.getBoundingClientRect(), o = r.$datepicker.offsetParent, l = r.$el.offsetParent, d = r.$datepicker.getBoundingClientRect(), c = e.split(' '), u = window.scrollY, p = window.scrollX, m = r.opts.offset, v = c[0], g = c[1];
-                                if (a) r.$datepicker.style.cssText = 'left: 50%; top: 50%'; else {
+                                let i, s, {isMobile: a} = r.opts, n = r.$el.getBoundingClientRect(), h = r.$el.getBoundingClientRect(), o = r.$datepicker.offsetParent, l = r.$el.offsetParent, d = r.$datepicker.getBoundingClientRect(), c = e.split(" "), u = window.scrollY, p = window.scrollX, m = r.opts.offset, v = c[0], g = c[1];
+                                if (a) r.$datepicker.style.cssText = "left: 50%; top: 50%"; else {
                                     if (o === l && o !== document.body && (h = {
                                         top: r.$el.offsetTop,
                                         left: r.$el.offsetLeft,
@@ -1112,67 +1112,67 @@
                                         }, u = 0, p = 0;
                                     }
                                     switch (v) {
-                                      case 'top':
+                                      case "top":
                                         i = h.top - d.height - m;
                                         break;
 
-                                      case 'right':
+                                      case "right":
                                         s = h.left + h.width + m;
                                         break;
 
-                                      case 'bottom':
+                                      case "bottom":
                                         i = h.top + h.height + m;
                                         break;
 
-                                      case 'left':
+                                      case "left":
                                         s = h.left - d.width - m;
                                     }
                                     switch (g) {
-                                      case 'top':
+                                      case "top":
                                         i = h.top;
                                         break;
 
-                                      case 'right':
+                                      case "right":
                                         s = h.left + h.width - d.width;
                                         break;
 
-                                      case 'bottom':
+                                      case "bottom":
                                         i = h.top + h.height - d.height;
                                         break;
 
-                                      case 'left':
+                                      case "left":
                                         s = h.left;
                                         break;
 
-                                      case 'center':
+                                      case "center":
                                         /left|right/.test(v) ? i = h.top + h.height / 2 - d.height / 2 : s = h.left + h.width / 2 - d.width / 2;
                                     }
                                     r.$datepicker.style.cssText = `left: ${s + p}px; top: ${i + u}px`;
                                 }
-                            }), I(this, '_setInputValue', () => {
+                            }), I(this, "_setInputValue", () => {
                                 let {opts: e, $altField: t, locale: {dateFormat: i}} = this, {altFieldDateFormat: s, altField: a} = e;
                                 a && t && (t.value = this._getInputValue(s)), this.$el.value = this._getInputValue(i), 
-                                this.$el.dispatchEvent(new Event('change'));
-                            }), I(this, '_getInputValue', e => {
+                                this.$el.dispatchEvent(new Event("change"));
+                            }), I(this, "_getInputValue", e => {
                                 let {selectedDates: t, opts: i} = this, {multipleDates: s, multipleDatesSeparator: a} = i;
-                                if (!t.length) return '';
-                                let n = 'function' == typeof e, r = n ? e(s ? t : t[0]) : t.map(t => this.formatDate(t, e));
+                                if (!t.length) return "";
+                                let n = "function" == typeof e, r = n ? e(s ? t : t[0]) : t.map(t => this.formatDate(t, e));
                                 return r = n ? r : r.join(a), r;
-                            }), I(this, '_checkIfDateIsSelected', function(e) {
+                            }), I(this, "_checkIfDateIsSelected", function(e) {
                                 let t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : i.days, s = !1;
                                 return r.selectedDates.some(i => {
                                     let a = p(e, i, t);
                                     return s = a && i, a;
                                 }), s;
-                            }), I(this, '_scheduleCallAfterTransition', e => {
+                            }), I(this, "_scheduleCallAfterTransition", e => {
                                 this._cancelScheduledCall(), e && e(!1), this._onTransitionEnd = () => {
                                     e && e(!0);
-                                }, this.$datepicker.addEventListener('transitionend', this._onTransitionEnd, {
+                                }, this.$datepicker.addEventListener("transitionend", this._onTransitionEnd, {
                                     once: !0
                                 });
-                            }), I(this, '_cancelScheduledCall', () => {
-                                this.$datepicker.removeEventListener('transitionend', this._onTransitionEnd);
-                            }), I(this, 'setViewDate', e => {
+                            }), I(this, "_cancelScheduledCall", () => {
+                                this.$datepicker.removeEventListener("transitionend", this._onTransitionEnd);
+                            }), I(this, "setViewDate", e => {
                                 if (!((e = b(e)) instanceof Date)) return;
                                 if (p(e, this.viewDate)) return;
                                 let t = this.viewDate;
@@ -1187,10 +1187,10 @@
                                     });
                                 }
                                 this.trigger(i.eventChangeViewDate, e, t);
-                            }), I(this, 'setFocusDate', function(e) {
+                            }), I(this, "setFocusDate", function(e) {
                                 let t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                                 (!e || (e = b(e)) instanceof Date) && (r.focusDate = e, r.trigger(i.eventChangeFocusDate, e, t));
-                            }), I(this, 'setCurrentView', function(e) {
+                            }), I(this, "setCurrentView", function(e) {
                                 let t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                                 if (r.viewIndexes.includes(e)) {
                                     if (r.currentView = e, r.elIsInput && r.visible && r.setPosition(void 0, !0), r.trigger(i.eventChangeCurrentView, e), 
@@ -1204,18 +1204,18 @@
                                     }
                                     r.opts.onChangeView && !t.silent && r.opts.onChangeView(e);
                                 }
-                            }), I(this, '_updateLastSelectedDate', e => {
+                            }), I(this, "_updateLastSelectedDate", e => {
                                 this.lastSelectedDate = e, this.trigger(i.eventChangeLastSelectedDate, e);
-                            }), I(this, 'destroy', () => {
+                            }), I(this, "destroy", () => {
                                 if (this.isDestroyed) return;
                                 let {showEvent: e, isMobile: t} = this.opts, i = this.$datepicker.parentNode;
                                 i && i.removeChild(this.$datepicker), this.$el.removeEventListener(e, this._onFocus), 
-                                this.$el.removeEventListener('blur', this._onBlur), window.removeEventListener('resize', this._onResize), 
+                                this.$el.removeEventListener("blur", this._onBlur), window.removeEventListener("resize", this._onResize), 
                                 t && this._removeMobileAttributes(), this.keyboardNav && this.keyboardNav.destroy(), 
                                 this.views = null, this.nav = null, this.$datepicker = null, this.opts = {}, this.$customContainer = null, 
                                 this.viewDate = null, this.focusDate = null, this.selectedDates = [], this.rangeDateFrom = null, 
                                 this.rangeDateTo = null, this.isDestroyed = !0;
-                            }), I(this, 'update', function() {
+                            }), I(this, "update", function() {
                                 let e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : {}, t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, s = w({}, r.opts), {silent: a} = t;
                                 w(r.opts, e);
                                 let {timepicker: n, buttons: h, range: o, selectedDates: l, isMobile: d} = r.opts, c = r.visible || r.treatAsInline;
@@ -1230,37 +1230,37 @@
                                 !s.buttons && h ? r._addButtons() : s.buttons && !h ? (r.buttons.destroy(), r.$buttons.parentNode.removeChild(r.$buttons)) : c && s.buttons && h && r.buttons.clearHtml().render(), 
                                 !s.isMobile && d ? (r.treatAsInline || j || r._createMobileOverlay(), r._addMobileAttributes(), 
                                 r.visible && r._showMobileOverlay()) : s.isMobile && !d && (r._removeMobileAttributes(), 
-                                r.visible && (j.classList.remove('-active-'), 'function' != typeof r.opts.position && r.setPosition())), 
+                                r.visible && (j.classList.remove("-active-"), "function" != typeof r.opts.position && r.setPosition())), 
                                 c && (r.nav.update(), r.views[r.currentView].render(), r.currentView === i.days && r.views[r.currentView].renderDayNames());
-                            }), I(this, 'disableDate', (e, t) => {
+                            }), I(this, "disableDate", (e, t) => {
                                 (Array.isArray(e) ? e : [ e ]).forEach(e => {
                                     let i = b(e);
                                     if (!i) return;
-                                    let s = t ? 'delete' : 'add';
-                                    this.disabledDates[s](this.formatDate(i, 'yyyy-MM-dd'));
+                                    let s = t ? "delete" : "add";
+                                    this.disabledDates[s](this.formatDate(i, "yyyy-MM-dd"));
                                     let a = this.getCell(i, this.currentViewSingular);
                                     a && a.adpCell.render();
                                 }, []);
-                            }), I(this, 'enableDate', e => {
+                            }), I(this, "enableDate", e => {
                                 this.disableDate(e, !0);
-                            }), I(this, 'isDateDisabled', e => {
+                            }), I(this, "isDateDisabled", e => {
                                 let t = b(e);
-                                return this.disabledDates.has(this.formatDate(t, 'yyyy-MM-dd'));
-                            }), I(this, 'isOtherMonth', e => {
+                                return this.disabledDates.has(this.formatDate(t, "yyyy-MM-dd"));
+                            }), I(this, "isOtherMonth", e => {
                                 let {month: t} = o(e);
                                 return t !== this.parsedViewDate.month;
-                            }), I(this, 'isOtherYear', e => {
+                            }), I(this, "isOtherYear", e => {
                                 let {year: t} = o(e);
                                 return t !== this.parsedViewDate.year;
-                            }), I(this, 'isOtherDecade', e => {
+                            }), I(this, "isOtherDecade", e => {
                                 let {year: t} = o(e), [i, s] = c(this.viewDate);
                                 return t < i || t > s;
-                            }), I(this, '_onChangeSelectedDate', e => {
+                            }), I(this, "_onChangeSelectedDate", e => {
                                 let {silent: t} = e;
                                 setTimeout(() => {
                                     this._setInputValue(), this.opts.onSelect && !t && this._triggerOnSelect();
                                 });
-                            }), I(this, '_onChangeFocusedDate', function(e) {
+                            }), I(this, "_onChangeFocusedDate", function(e) {
                                 let {viewDateTransition: t} = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {};
                                 if (!e) return;
                                 let i = !1;
@@ -1269,46 +1269,46 @@
                                     datepicker: r,
                                     date: e
                                 });
-                            }), I(this, '_onChangeTime', e => {
+                            }), I(this, "_onChangeTime", e => {
                                 let {hours: t, minutes: i} = e, s = new Date, {lastSelectedDate: a, opts: {onSelect: n}} = this, r = a;
                                 a || (r = s);
                                 let h = this.getCell(r, this.currentViewSingular), o = h && h.adpCell;
                                 o && o.isDisabled || (r.setHours(t), r.setMinutes(i), a ? (this._setInputValue(), 
                                 n && this._triggerOnSelect()) : this.selectDate(r));
-                            }), I(this, '_onFocus', e => {
+                            }), I(this, "_onFocus", e => {
                                 this.visible || this.show();
-                            }), I(this, '_onBlur', e => {
+                            }), I(this, "_onBlur", e => {
                                 this.inFocus || !this.visible || this.opts.isMobile || this.hide();
-                            }), I(this, '_onMouseDown', e => {
+                            }), I(this, "_onMouseDown", e => {
                                 this.inFocus = !0;
-                            }), I(this, '_onMouseUp', e => {
+                            }), I(this, "_onMouseUp", e => {
                                 this.inFocus = !1, this.$el.focus();
-                            }), I(this, '_onResize', () => {
-                                this.visible && 'function' != typeof this.opts.position && this.setPosition();
-                            }), I(this, '_onClickOverlay', () => {
+                            }), I(this, "_onResize", () => {
+                                this.visible && "function" != typeof this.opts.position && this.setPosition();
+                            }), I(this, "_onClickOverlay", () => {
                                 this.visible && this.hide();
-                            }), I(this, 'getViewDates', function() {
+                            }), I(this, "getViewDates", function() {
                                 let e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : i.days;
                                 return T.getDatesFunction(e)(r);
-                            }), I(this, 'isWeekend', e => this.opts.weekends.includes(e)), I(this, 'getClampedDate', e => {
+                            }), I(this, "isWeekend", e => this.opts.weekends.includes(e)), I(this, "getClampedDate", e => {
                                 let {minDate: t, maxDate: i} = this, s = e;
                                 return i && m(e, i) ? s = i : t && v(e, t) && (s = t), s;
                             }), this.$el = a(e), !this.$el) return;
                             this.$datepicker = n({
-                                className: 'air-datepicker'
+                                className: "air-datepicker"
                             }), this.opts = w({}, s, t), this.$customContainer = !!this.opts.container && a(this.opts.container), 
                             this.$altField = a(this.opts.altField || !1);
                             let {view: h, startDate: l} = this.opts;
-                            l || (this.opts.startDate = new Date), 'INPUT' === this.$el.nodeName && (this.elIsInput = !0), 
+                            l || (this.opts.startDate = new Date), "INPUT" === this.$el.nodeName && (this.elIsInput = !0), 
                             this.inited = !1, this.visible = !1, this.viewDate = b(this.opts.startDate), this.focusDate = !1, 
-                            this.initialReadonly = this.$el.getAttribute('readonly'), this.customHide = !1, 
+                            this.initialReadonly = this.$el.getAttribute("readonly"), this.customHide = !1, 
                             this.currentView = h, this.selectedDates = [], this.disabledDates = new Set, this.isDestroyed = !1, 
-                            this.views = {}, this.keys = [], this.rangeDateFrom = '', this.rangeDateTo = '', 
+                            this.views = {}, this.keys = [], this.rangeDateFrom = "", this.rangeDateTo = "", 
                             this.timepickerIsActive = !1, this.treatAsInline = this.opts.inline || !this.elIsInput, 
                             this.init();
                         }
                         init() {
-                            let {opts: e, treatAsInline: t, opts: {inline: i, isMobile: s, selectedDates: n, keyboardNav: r, onlyTimepicker: h}} = this, o = a('body');
+                            let {opts: e, treatAsInline: t, opts: {inline: i, isMobile: s, selectedDates: n, keyboardNav: r, onlyTimepicker: h}} = this, o = a("body");
                             (!B || B && P && !o.contains(P)) && !i && this.elIsInput && !this.$customContainer && R.buildGlobalContainer(R.defaultGlobalContainerId), 
                             !s || j || t || this._createMobileOverlay(), this._handleLocale(), this._bindSubEvents(), 
                             this._createMinMaxDates(), this._limitViewDateByMaxMinDates(), this.elIsInput && (i || this._bindEvents(), 
@@ -1317,18 +1317,18 @@
                                 opts: e
                             }))), n && this.selectDate(n, {
                                 silent: !0
-                            }), this.opts.visible && !t && this.show(), s && !t && this.$el.setAttribute('readonly', !0), 
+                            }), this.opts.visible && !t && this.show(), s && !t && this.$el.setAttribute("readonly", !0), 
                             t && this._createComponents();
                         }
                         _createMobileOverlay() {
                             j = n({
-                                className: 'air-datepicker-overlay'
+                                className: "air-datepicker-overlay"
                             }), P.appendChild(j);
                         }
                         _createComponents() {
                             let {opts: e, treatAsInline: t, opts: {inline: i, buttons: s, timepicker: a, position: n, classes: r, onlyTimepicker: h, isMobile: o}} = this;
-                            this._buildBaseHtml(), this.elIsInput && (i || this._setPositionClasses(n)), !i && this.elIsInput || this.$datepicker.classList.add('-inline-'), 
-                            r && this.$datepicker.classList.add(...r.split(' ')), h && this.$datepicker.classList.add('-only-timepicker-'), 
+                            this._buildBaseHtml(), this.elIsInput && (i || this._setPositionClasses(n)), !i && this.elIsInput || this.$datepicker.classList.add("-inline-"), 
+                            r && this.$datepicker.classList.add(...r.split(" ")), h && this.$datepicker.classList.add("-only-timepicker-"), 
                             o && !t && this._addMobileAttributes(), this.views[this.currentView] = new T({
                                 dp: this,
                                 type: this.currentView,
@@ -1344,12 +1344,12 @@
                             this.views = {}, this.nav.destroy(), this.timepicker && this.timepicker.destroy();
                         }
                         _addMobileAttributes() {
-                            j.addEventListener('click', this._onClickOverlay), this.$datepicker.classList.add('-is-mobile-'), 
-                            this.$el.setAttribute('readonly', !0);
+                            j.addEventListener("click", this._onClickOverlay), this.$datepicker.classList.add("-is-mobile-"), 
+                            this.$el.setAttribute("readonly", !0);
                         }
                         _removeMobileAttributes() {
-                            j.removeEventListener('click', this._onClickOverlay), this.$datepicker.classList.remove('-is-mobile-'), 
-                            this.initialReadonly || '' === this.initialReadonly || this.$el.removeAttribute('readonly');
+                            j.removeEventListener("click", this._onClickOverlay), this.$datepicker.classList.remove("-is-mobile-"), 
+                            this.initialReadonly || "" === this.initialReadonly || this.$el.removeAttribute("readonly");
                         }
                         _createMinMaxDates() {
                             let {minDate: e, maxDate: t} = this.opts;
@@ -1357,7 +1357,7 @@
                         }
                         _addTimepicker() {
                             this.$timepicker = n({
-                                className: 'air-datepicker--time'
+                                className: "air-datepicker--time"
                             }), this.$datepicker.appendChild(this.$timepicker), this.timepicker = new L({
                                 dp: this,
                                 opts: this.opts
@@ -1365,7 +1365,7 @@
                         }
                         _addButtons() {
                             this.$buttons = n({
-                                className: 'air-datepicker--buttons'
+                                className: "air-datepicker--buttons"
                             }), this.$datepicker.appendChild(this.$buttons), this.buttons = new H({
                                 dp: this,
                                 opts: this.opts
@@ -1380,30 +1380,30 @@
                             var t, i;
                             this.elIsInput ? e ? (t = this.$datepicker, (i = this.$el).parentNode.insertBefore(t, i.nextSibling)) : this.$container.appendChild(this.$datepicker) : this.$el.appendChild(this.$datepicker), 
                             this.$datepicker.innerHTML = '<i class="air-datepicker--pointer"></i><div class="air-datepicker--navigation"></div><div class="air-datepicker--content"></div>', 
-                            this.$content = a('.air-datepicker--content', this.$datepicker), this.$pointer = a('.air-datepicker--pointer', this.$datepicker), 
-                            this.$nav = a('.air-datepicker--navigation', this.$datepicker);
+                            this.$content = a(".air-datepicker--content", this.$datepicker), this.$pointer = a(".air-datepicker--pointer", this.$datepicker), 
+                            this.$nav = a(".air-datepicker--navigation", this.$datepicker);
                         }
                         _handleLocale() {
                             let {locale: e, dateFormat: t, firstDay: i, timepicker: s, onlyTimepicker: a, timeFormat: n, dateTimeSeparator: r} = this.opts;
                             var h;
                             this.locale = (h = e, JSON.parse(JSON.stringify(h))), t && (this.locale.dateFormat = t), 
-                            void 0 !== n && '' !== n && (this.locale.timeFormat = n);
+                            void 0 !== n && "" !== n && (this.locale.timeFormat = n);
                             let {timeFormat: o} = this.locale;
-                            if ('' !== i && (this.locale.firstDay = i), s && 'function' != typeof t) {
-                                let e = o ? r : '';
-                                this.locale.dateFormat = [ this.locale.dateFormat, o || '' ].join(e);
+                            if ("" !== i && (this.locale.firstDay = i), s && "function" != typeof t) {
+                                let e = o ? r : "";
+                                this.locale.dateFormat = [ this.locale.dateFormat, o || "" ].join(e);
                             }
-                            a && 'function' != typeof t && (this.locale.dateFormat = this.locale.timeFormat);
+                            a && "function" != typeof t && (this.locale.dateFormat = this.locale.timeFormat);
                         }
                         _setPositionClasses(e) {
-                            if ('function' == typeof e) return void this.$datepicker.classList.add('-custom-position-');
-                            let t = (e = e.split(' '))[0], i = `air-datepicker -${t}-${e[1]}- -from-${t}-`;
-                            this.$datepicker.classList.add(...i.split(' '));
+                            if ("function" == typeof e) return void this.$datepicker.classList.add("-custom-position-");
+                            let t = (e = e.split(" "))[0], i = `air-datepicker -${t}-${e[1]}- -from-${t}-`;
+                            this.$datepicker.classList.add(...i.split(" "));
                         }
                         _bindEvents() {
-                            this.$el.addEventListener(this.opts.showEvent, this._onFocus), this.$el.addEventListener('blur', this._onBlur), 
-                            this.$datepicker.addEventListener('mousedown', this._onMouseDown), this.$datepicker.addEventListener('mouseup', this._onMouseUp), 
-                            window.addEventListener('resize', this._onResize);
+                            this.$el.addEventListener(this.opts.showEvent, this._onFocus), this.$el.addEventListener("blur", this._onBlur), 
+                            this.$datepicker.addEventListener("mousedown", this._onMouseDown), this.$datepicker.addEventListener("mouseup", this._onMouseUp), 
+                            window.addEventListener("resize", this._onResize);
                         }
                         _limitViewDateByMaxMinDates() {
                             let {viewDate: e, minDate: t, maxDate: i} = this;
@@ -1439,10 +1439,10 @@
                             return i;
                         }
                         down(e) {
-                            this._handleUpDownActions(e, 'down');
+                            this._handleUpDownActions(e, "down");
                         }
                         up(e) {
-                            this._handleUpDownActions(e, 'up');
+                            this._handleUpDownActions(e, "up");
                         }
                         selectDate(e) {
                             let t, s = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : {}, {currentView: a, parsedViewDate: n, selectedDates: r} = this, {updateTime: h, silent: o} = s, {moveToOtherMonthsOnSelect: l, moveToOtherYearsOnSelect: d, multipleDates: c, range: u, autoClose: p, onBeforeSelect: v} = this.opts, g = r.length;
@@ -1468,7 +1468,7 @@
                                     break;
 
                                   case 2:
-                                    this.selectedDates = [ e ], this.rangeDateFrom = e, this.rangeDateTo = '';
+                                    this.selectedDates = [ e ], this.rangeDateFrom = e, this.rangeDateTo = "";
                                     break;
 
                                   default:
@@ -1488,9 +1488,9 @@
                         unselectDate(e) {
                             let t = this.selectedDates, s = this;
                             if ((e = b(e)) instanceof Date) return t.some((a, n) => {
-                                if (p(a, e)) return t.splice(n, 1), s.selectedDates.length ? (s.rangeDateTo = '', 
-                                s.rangeDateFrom = t[0], s._updateLastSelectedDate(s.selectedDates[s.selectedDates.length - 1])) : (s.rangeDateFrom = '', 
-                                s.rangeDateTo = '', s._updateLastSelectedDate(!1)), this.trigger(i.eventChangeSelectedDate, {
+                                if (p(a, e)) return t.splice(n, 1), s.selectedDates.length ? (s.rangeDateTo = "", 
+                                s.rangeDateFrom = t[0], s._updateLastSelectedDate(s.selectedDates[s.selectedDates.length - 1])) : (s.rangeDateFrom = "", 
+                                s.rangeDateTo = "", s._updateLastSelectedDate(!1)), this.trigger(i.eventChangeSelectedDate, {
                                     action: i.actionUnselectDate,
                                     date: e
                                 }), !0;
@@ -1518,18 +1518,18 @@
                         show() {
                             let {onShow: e, isMobile: t} = this.opts;
                             this._cancelScheduledCall(), this.visible || this.hideAnimation || this._createComponents(), 
-                            this.setPosition(this.opts.position), this.$datepicker.classList.add('-active-'), 
+                            this.setPosition(this.opts.position), this.$datepicker.classList.add("-active-"), 
                             this.visible = !0, e && this._scheduleCallAfterTransition(e), t && this._showMobileOverlay();
                         }
                         hide() {
                             let {onHide: e, isMobile: t} = this.opts, i = this._hasTransition();
-                            this.visible = !1, this.hideAnimation = !0, this.$datepicker.classList.remove('-active-'), 
+                            this.visible = !1, this.hideAnimation = !0, this.$datepicker.classList.remove("-active-"), 
                             this.customHide && this.customHide(), this.elIsInput && this.$el.blur(), this._scheduleCallAfterTransition(t => {
                                 !this.customHide && (t && i || !t && !i) && this._finishHide(), e && e(t);
-                            }), t && j.classList.remove('-active-');
+                            }), t && j.classList.remove("-active-");
                         }
                         _triggerOnSelect() {
-                            let e = [], t = [], {selectedDates: i, locale: s, opts: {onSelect: a, multipleDates: n, range: r}} = this, h = n || r, o = 'function' == typeof s.dateFormat;
+                            let e = [], t = [], {selectedDates: i, locale: s, opts: {onSelect: a, multipleDates: n, range: r}} = this, h = n || r, o = "function" == typeof s.dateFormat;
                             i.length && (e = i.map(g), t = o ? n ? s.dateFormat(e) : e.map(e => s.dateFormat(e)) : e.map(e => this.formatDate(e, s.dateFormat))), 
                             a({
                                 date: h ? e : e[0],
@@ -1538,7 +1538,7 @@
                             });
                         }
                         _handleAlreadySelectedDates(e, t) {
-                            let {selectedDates: i, rangeDateFrom: s, rangeDateTo: a} = this, {range: n, toggleSelected: r} = this.opts, h = i.length, o = 'function' == typeof r ? r({
+                            let {selectedDates: i, rangeDateFrom: s, rangeDateTo: a} = this, {range: n, toggleSelected: r} = this.opts, h = i.length, o = "function" == typeof r ? r({
                                 datepicker: this,
                                 date: t
                             }) : r, l = Boolean(n && 1 === h && e), d = l ? g(t) : t;
@@ -1546,7 +1546,7 @@
                         }
                         _handleUpDownActions(e, t) {
                             if (!((e = b(e || this.focusDate || this.viewDate)) instanceof Date)) return;
-                            let i = 'up' === t ? this.viewIndex + 1 : this.viewIndex - 1;
+                            let i = "up" === t ? this.viewIndex + 1 : this.viewIndex - 1;
                             i > 2 && (i = 2), i < 0 && (i = 0), this.setViewDate(new Date(e.getFullYear(), e.getMonth(), 1)), 
                             this.setCurrentView(this.viewIndexes[i]);
                         }
@@ -1561,10 +1561,10 @@
                             return this.views[this.currentView] ? this.views[this.currentView].$el.querySelector(l[t]) : void 0;
                         }
                         _showMobileOverlay() {
-                            j.classList.add('-active-');
+                            j.classList.add("-active-");
                         }
                         _hasTransition() {
-                            return window.getComputedStyle(this.$datepicker).getPropertyValue('transition-duration').split(', ').reduce((e, t) => parseFloat(t) + e, 0) > 0;
+                            return window.getComputedStyle(this.$datepicker).getPropertyValue("transition-duration").split(", ").reduce((e, t) => parseFloat(t) + e, 0) > 0;
                         }
                         get shouldUpdateDOM() {
                             return this.visible || this.treatAsInline;
@@ -1600,14 +1600,14 @@
                         }
                     }
                     var K;
-                    return I(R, 'defaults', s), I(R, 'version', '3.6.0'), I(R, 'defaultGlobalContainerId', 'air-datepicker-global-container'), 
+                    return I(R, "defaults", s), I(R, "version", "3.6.0"), I(R, "defaultGlobalContainerId", "air-datepicker-global-container"), 
                     K = R.prototype, Object.assign(K, N), t.default;
                 }();
             });
         }
     };
     var __webpack_module_cache__ = {};
-    function __nested_webpack_require_101121__(moduleId) {
+    function __webpack_require__(moduleId) {
         var cachedModule = __webpack_module_cache__[moduleId];
         if (cachedModule !== undefined) {
             return cachedModule.exports;
@@ -1615,30 +1615,30 @@
         var module = __webpack_module_cache__[moduleId] = {
             exports: {}
         };
-        __webpack_modules__[moduleId].call(module.exports, module, module.exports, __nested_webpack_require_101121__);
+        __webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
         return module.exports;
     }
     !function() {
-        __nested_webpack_require_101121__.n = function(module) {
+        __webpack_require__.n = function(module) {
             var getter = module && module.__esModule ? function() {
-                return module['default'];
+                return module["default"];
             } : function() {
                 return module;
             };
-            __nested_webpack_require_101121__.d(getter, {
+            __webpack_require__.d(getter, {
                 a: getter
             });
             return getter;
         };
     }();
     !function() {
-        __nested_webpack_require_101121__.d = function(exports, definition) {
+        __webpack_require__.d = function(exports, definition) {
             if (Array.isArray(definition)) {
                 var i = 0;
                 while (i < definition.length) {
                     var key = definition[i++];
                     var binding = definition[i++];
-                    if (!__nested_webpack_require_101121__.o(exports, key)) {
+                    if (!__webpack_require__.o(exports, key)) {
                         if (binding === 0) {
                             Object.defineProperty(exports, key, {
                                 enumerable: true,
@@ -1656,7 +1656,7 @@
                 }
             } else {
                 for (var key in definition) {
-                    if (__nested_webpack_require_101121__.o(definition, key) && !__nested_webpack_require_101121__.o(exports, key)) {
+                    if (__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
                         Object.defineProperty(exports, key, {
                             enumerable: true,
                             get: definition[key]
@@ -1667,32 +1667,32 @@
         };
     }();
     !function() {
-        __nested_webpack_require_101121__.o = function(obj, prop) {
+        __webpack_require__.o = function(obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
         };
     }();
     !function() {
-        'use strict';
-        var air_datepicker = __nested_webpack_require_101121__(327);
-        var air_datepicker_default = __nested_webpack_require_101121__.n(air_datepicker);
+        "use strict";
+        var air_datepicker = __webpack_require__(327);
+        var air_datepicker_default = __webpack_require__.n(air_datepicker);
         var index_es = air_datepicker_default();
-        document.addEventListener('youla:init', () => {
-            Youla.directive('pickadate', (el, output) => {
-                const options = output && typeof output === 'object' ? output : {};
+        document.addEventListener("youla:init", () => {
+            Youla.directive("pickadate", (el, output) => {
+                const options = output && typeof output === "object" ? output : {};
                 if (el._x_pickadate) {
                     el._x_pickadate.destroy();
                 }
                 el._x_pickadate = new index_es(el, {
                     range: false,
                     inline: false,
-                    multipleDatesSeparator: ' — ',
+                    multipleDatesSeparator: " — ",
                     ...window.expansa?.datepicker ? {
                         locale: window.expansa.datepicker
                     } : {},
                     firstDay: window.expansa?.weekStart || 0,
-                    dateFormat: window.expansa?.dateFormat || 'yyyy-MM-dd',
-                    container: el.closest('div'),
-                    view: 'days',
+                    dateFormat: window.expansa?.dateFormat || "yyyy-MM-dd",
+                    container: el.closest("div"),
+                    view: "days",
                     ...options
                 });
             });

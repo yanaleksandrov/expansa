@@ -5,15 +5,15 @@ return \Expansa\Facades\Form::enqueue(
     [
         'class'           => 'dg g-2',
         '@submit.prevent' => '$ajax("system/install").then(response => installed = response)',
-        'u-data'          => '{approved: {}, site: {}, db: {}, user: {}, installed: false}',
-        'u-init'          => '$watch("installed", () => $wizard.goNext())',
+        'u-data'          => '{...step, approved: {}, site: {}, db: {}, user: {}, installed: false}',
+        'u-init'          => '$watch("installed", () => goNext())',
     ],
     [
         [
             'type'       => 'step',
             'attributes' => [
-                'class'         => 'dg g-8 pt-8',
-                'u-wizard:step' => 'site.name?.trim()',
+                'class'  => 'dg g-8 pt-8',
+                'u-step' => 'site.name?.trim()',
             ],
             'fields'     => [
                 [
@@ -66,31 +66,15 @@ return \Expansa\Facades\Form::enqueue(
                         'placeholder'    => t('Example: Just another Expansa site'),
                         'u-autocomplete' => '',
                     ],
-                ],
-                [
-                    'type'        => 'timezone',
-                    'name'        => 'timezone',
-                    'label'       => t('Time Zone'),
-                    'class'       => '',
-                    'label_class' => '',
-                    'reset'       => 0,
-                    'before'      => '',
-                    'after'       => '',
-                    'instruction' => t('Choose the time zone that matches your location.'),
-                    'tooltip'     => '',
-                    'copy'        => 0,
-                    'validator'   => '',
-                    'conditions'  => [],
-                    'attributes'  => [],
-                ],
+                ]
             ],
         ],
         [
             'type'       => 'step',
             'attributes' => [
                 'class'           => 'dg g-8 pt-8',
-                'u-cloak'         => true,
-                'u-wizard:step'   => '[db.database, db.username, db.password, db.host, db.prefix].every(value => value !== undefined && value.trim())',
+                'hidden'          => true,
+                'u-step'          => '[db.database, db.username, db.password, db.host, db.prefix].every(value => value !== undefined && value.trim())',
                 'u-wizard:action' => 'approved = {}',
             ],
             'fields'     => [
@@ -223,9 +207,9 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'           => 'dg g-8 pt-8',
-                'u-wizard:step'   => 'Object.values(approved).every(Boolean) === true',
+                'u-step'   => 'Object.values(approved).every(Boolean) === true',
                 'u-wizard:action' => '$ajax("system/test", db).then(response => approved = response)',
-                'u-cloak'         => true,
+                'hidden'         => true,
             ],
             'fields'     => [
                 [
@@ -249,8 +233,8 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'         => 'dg g-8 pt-8',
-                'u-cloak'       => true,
-                'u-wizard:step' => '[user.login, user.email, user.password].every(value => value !== undefined && value.trim())',
+                'hidden'       => true,
+                'u-step' => '[user.login, user.email, user.password].every(value => value !== undefined && value.trim())',
             ],
             'fields'     => [
                 [
@@ -380,7 +364,7 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'   => 'dg g-8 pt-8',
-                'u-cloak' => true,
+                'hidden' => true,
             ],
             'fields'     => [
                 [
@@ -398,16 +382,16 @@ return \Expansa\Facades\Form::enqueue(
             'callback' => function () {
                 ?>
                 <div class="py-8 df jcsb g-2">
-                    <button type="button" class="btn btn--outline" u-show="$wizard.isNotLast()" :disabled="$wizard.cannotGoBack()" @click="$wizard.goBack()" disabled>
+                    <button type="button" class="btn btn--outline" u-show="isNotLast()" :disabled="cannotGoBack()" @click="goBack()" disabled>
                         <?php echo t('Back'); ?>
                     </button>
-                    <button type="button" class="btn btn--primary" u-show="$wizard.isNotLast() && !$wizard.isStep(3)" :disabled="$wizard.cannotGoNext()" @click="$wizard.goNext()" disabled>
+                    <button type="button" class="btn btn--primary" u-show="isNotLast() && !isStep(3)" :disabled="cannotGoNext()" @click="goNext()" disabled>
                         <?php echo t('Continue'); ?>
                     </button>
-                    <button type="submit" class="btn btn--primary" u-show="$wizard.isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" u-cloak disabled>
+                    <button type="submit" class="btn btn--primary" u-show="isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" hidden disabled>
                         <?php echo t('Install Expansa'); ?>
                     </button>
-                    <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" u-show="$wizard.isLast()" u-cloak><?php echo t('Go to dashboard'); ?></a>
+                    <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" u-show="isLast()" hidden><?php echo t('Go to dashboard'); ?></a>
                 </div>
                 <?php
             },
