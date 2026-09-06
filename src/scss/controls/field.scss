@@ -5,20 +5,6 @@
   gap: 0.25em;
   align-content: start;
 
-  &--button {
-    display: flex;
-    flex-wrap: wrap;
-    padding: 0.25rem;
-    background-color: var(--expansa-bg);
-    border-radius: var(--expansa-border-radius--xl);
-    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  }
-
-  &--grid {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
   &-icon {
     transition: background-color 0.2s;
   }
@@ -417,6 +403,50 @@
       .field-label {
         font-weight: 500;
       }
+    }
+  }
+
+  &--button {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0.25rem;
+    background-color: var(--expansa-bg);
+    border-radius: var(--expansa-border-radius--xl);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  }
+
+  &--grid {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  &--timezone {
+    overflow: hidden;
+
+    .field-label {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .field-item {
+      padding: 0.8em;
+      background-color: var(--expansa-bg) !important;
+      height: auto;
+      overflow: hidden;
+      position: relative;
+      margin: 0;
+    }
+
+    .field-map {
+      width: 100%;
+      min-width: 100%;
+      height: auto;
+    }
+
+    .field-bottom {
+      display: flex;
+      padding-top: 0.4em;
+      gap: 0.8em;
     }
   }
 }

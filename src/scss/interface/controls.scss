@@ -425,6 +425,7 @@
 
   &--rounded {
     border-radius: 100rem;
+    corner-shape: initial;
   }
 
   &--list {
@@ -447,7 +448,7 @@
   }
 
   &--list-stacked .avatar {
-    margin-inline-end: -.5rem !important;
+    margin-inline-end: -0.5rem !important;
     box-shadow: 0 0 0 3px #ffffff;
   }
 }
