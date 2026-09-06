@@ -28,7 +28,7 @@ return Expansa\Facades\Form::enqueue(
     'multilingual-settings',
     [
         'class'   => 'tab tab--vertical',
-        'x-data'  => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'general')),
+        'u-data'  => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'general')),
         '@change' => '$ajax("user/update")',
     ],
     [

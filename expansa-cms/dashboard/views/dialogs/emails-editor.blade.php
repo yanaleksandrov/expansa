@@ -9,7 +9,7 @@
 defined('EX_PATH') || exit;
 ?>
 <!-- email editor template start -->
-<template id="tmpl-email-editor" x-init="$dialog.init(() => emailDialog)">
+<template id="tmpl-email-editor" u-init="$dialog.init(() => emailDialog)">
     <div class="email">
         <div class="email-form">
             <?php echo form('emails-creator', EX_DASHBOARD . 'forms/emails-creator.php'); ?>

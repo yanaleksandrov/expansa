@@ -13,12 +13,12 @@ use Expansa\Builders\Form;
 ?>
 <div class="expansa-main">
     <div class="attributes">
-        <form class="attributes-wrapper" x-data="{values: []}">
+        <form class="attributes-wrapper" u-data="{values: []}">
             <div class="attributes-editor">
                 <h5 class="attributes-title">
                     <a class="btn btn--icon btn--sm" href="<?php echo url('/dashboard/attributes'); ?>"><i class="ph ph-arrow-left"></i></a>
                     <span class="fw-600 mr-auto"><?php echo t('Add new attribute'); ?></span>
-                    <button class="btn btn--danger" type="button" hidden x-cloak><?php echo t('Delete'); ?></button>
+                    <button class="btn btn--danger" type="button" hidden u-cloak><?php echo t('Delete'); ?></button>
                     <button class="btn btn--primary" type="submit" disabled><?php echo t('Save'); ?></button>
                 </h5>
                 <div class="attributes-description">
@@ -27,7 +27,7 @@ use Expansa\Builders\Form;
                 <?php Form::make(EX_PLUGINS . 'ecommerce/core/attributes.php', true); ?>
             </div>
             <div class="attributes-side">
-                <div x-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
+                <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
                 <div class="attributes-list">
                     <?php
                     echo view(
@@ -55,20 +55,20 @@ use Expansa\Builders\Form;
                     );
                     ?>
                     <div class="attributes-values">
-                        <template x-if="values.length">
-                            <template x-for="(value, i) in values" :key="i">
+                        <template u-if="values.length">
+                            <template u-for="(value, i) in values" :key="i">
                                 <div class="attributes-value">
                                     <div class="attributes-value-title">
-                                        <input type="text" :name="`values.${i}.title`" x-model="value.title" placeholder="<?php echo t('Title'); ?>" required>
+                                        <input type="text" :name="`values.${i}.title`" u-model="value.title" placeholder="<?php echo t('Title'); ?>" required>
                                     </div>
                                     <div class="attributes-value-slug">
-                                        <input type="text" :name="`values.${i}.slug`" x-model="value.slug" placeholder="<?php echo t('Slug'); ?>" required>
+                                        <input type="text" :name="`values.${i}.slug`" u-model="value.slug" placeholder="<?php echo t('Slug'); ?>" required>
                                     </div>
                                     <div class="btn btn--icon t-red" @click="values.splice(i, 1)"><i class="ph ph-trash"></i></div>
                                 </div>
                             </template>
                         </template>
-                        <template x-if="!values.length">
+                        <template u-if="!values.length">
                             <?php
                             echo view(
                                 'global/state',

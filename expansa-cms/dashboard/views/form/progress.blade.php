@@ -36,7 +36,7 @@ defined('EX_PATH') || exit;
 	<div class="<?php echo $label_class; ?>">
 		<?php echo $label; ?>
 	</div>
-	<div class="progress" x-progress.<?php printf( '%d.%d.%d.%d', $max, $min, $value, $speed ); ?>ms></div>
+	<div class="progress" u-progress.<?php printf( '%d.%d.%d.%d', $max, $min, $value, $speed ); ?>ms></div>
 	<?php if ( $instruction ) : ?>
 		<div class="mt-1 fw-500 lh-xs"><?php echo $instruction; ?></div>
 	<?php endif; ?>

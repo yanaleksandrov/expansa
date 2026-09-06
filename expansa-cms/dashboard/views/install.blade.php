@@ -6,7 +6,7 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="mw-400" x-data="expansa">
+<div class="mw-400" u-data="expansa">
     <div class="df jcc">
         <img src="{{ url('/dashboard/assets/images/logo-grid.svg') }}" width="200" height="117" alt="Expansa CMS">
     </div>

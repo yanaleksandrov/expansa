@@ -13,7 +13,7 @@ echo tree('dashboard-main-menu', $test = function ($items, $tree) use (&$test) {
 
     $id    = strval($items[0]['parent_id'] ?? '');
     $depth = intval($items[0]['depth'] ?? 0);
-    $class = $depth === 0 ? 'class="nav" x-data="{i:\'' . $id . '\'}" x-sticky' : 'class="nav__list" x-show="i === \'' . $id . '\'" x-collapse x-cloak';
+    $class = $depth === 0 ? 'class="nav" u-data="{i:\'' . $id . '\'}" u-sticky' : 'class="nav__list" u-show="i === \'' . $id . '\'" u-collapse u-cloak';
     ?>
     <ul <?php echo $class; ?>>
         <?php

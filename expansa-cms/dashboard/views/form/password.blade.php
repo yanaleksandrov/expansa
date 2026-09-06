@@ -41,7 +41,7 @@ $attributes = [
 	'@input.window' => $generator ? 'data = $password.check(' . $prop . ')' : '',
 ];
 ?>
-<div class="{{ $class }}" x-data="{show: true, data: {}}">
+<div class="{{ $class }}" u-data="{show: true, data: {}}">
 	<div class="{{ $labelClass }}">
 		{!! $label !!}
 		@if($generator)
@@ -54,7 +54,7 @@ $attributes = [
 			<i class="ph" :class="show ? 'ph-eye-closed' : 'ph-eye'" @click="show = $password.switch(show)"></i>
 		@endif
 		@if($copy)
-			<i class="ph ph-copy" title="{{ t( 'Copy' ) }}" x-copy="{{ $prop }}"></i>
+			<i class="ph ph-copy" title="{{ t( 'Copy' ) }}" u-copy="{{ $prop }}"></i>
 		@endif
 	</div>
 	@if($instruction)

@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
 	'posts-actions',
 	[
 		'class'           => 'df fww g-1',
-		'x-data'          => '{email: ""}',
+		'u-data'          => '{email: ""}',
 		'@submit.prevent' => '$ajax("items/options")',
 	],
 	[

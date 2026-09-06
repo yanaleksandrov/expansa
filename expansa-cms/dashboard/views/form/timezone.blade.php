@@ -47,7 +47,7 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{$prop}})"></i>
 		@endif
 		@if($tooltip)
-			<i class="ph ph-info" x-tooltip.click.prevent="'{{$tooltip}}'"></i>
+			<i class="ph ph-info" u-tooltip.click.prevent="'{{$tooltip}}'"></i>
 		@endif
 
 		{!! $before !!}

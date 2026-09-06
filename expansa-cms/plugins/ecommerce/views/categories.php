@@ -12,7 +12,7 @@ use Expansa\Builders\Form;
 ?>
 <div class="expansa-main">
     <div class="attributes">
-        <form class="attributes-wrapper" x-data="{values: []}">
+        <form class="attributes-wrapper" u-data="{values: []}">
             <div class="attributes-editor">
                 <h5 class="attributes-title">
                     <span class="fw-600 mr-auto"><?php echo t('Products Categories'); ?></span>
@@ -26,19 +26,19 @@ use Expansa\Builders\Form;
                 <?php Form::make(EX_PLUGINS . 'ecommerce/core/categories.php', true); ?>
             </div>
             <div class="attributes-side">
-                <div x-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
+                <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
                 <div class="attributes-list">
                     <div class="attributes-values">
-                        <template x-if="values.length">
-                            <template x-for="(value, i) in values" :key="i">
+                        <template u-if="values.length">
+                            <template u-for="(value, i) in values" :key="i">
                                 <a class="attributes-value">
-                                    <span class="attributes-value-title" x-text="`values.${i}.title`"></span>
-                                    <span class="attributes-value-slug" x-text="`values.${i}.slug`"></span>
+                                    <span class="attributes-value-title" u-text="`values.${i}.title`"></span>
+                                    <span class="attributes-value-slug" u-text="`values.${i}.slug`"></span>
                                     <div class="btn btn--icon" @click="values.splice(i, 1)"><i class="ph ph-pen"></i></div>
                                 </a>
                             </template>
                         </template>
-                        <template x-if="!values.length">
+                        <template u-if="!values.length">
                             <?php
                             echo view(
                                 'global/state',

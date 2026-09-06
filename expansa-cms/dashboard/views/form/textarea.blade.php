@@ -36,7 +36,7 @@ $attributes['rows'] ??= 1;
 
 unset( $attributes['value'] );
 ?>
-<div class="<?php echo $class; ?>"<?php echo $conditions ? " x-show=\"{$conditions}\" x-cloak" : ''; ?>>
+<div class="<?php echo $class; ?>"<?php echo $conditions ? " u-show=\"{$conditions}\" u-cloak" : ''; ?>>
 	<?php if ( $label ) : ?>
 		<span class="<?php echo $label_class; ?>"><?php echo $label; ?></span>
 	<?php endif; ?>
@@ -52,7 +52,7 @@ unset( $attributes['value'] );
 		}
 		if ( $tooltip ) {
 			?>
-			<i class="ph ph-info" x-tooltip.click.prevent="'<?php echo $tooltip; ?>'"></i>
+			<i class="ph ph-info" u-tooltip.click.prevent="'<?php echo $tooltip; ?>'"></i>
 			<?php
 		}
 		?>

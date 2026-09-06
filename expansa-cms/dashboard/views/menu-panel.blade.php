@@ -16,7 +16,7 @@ echo tree('dashboard-panel-menu', $test = function ($items, $tree) use (&$test) 
         foreach ($items as $item) {
             ob_start();
             ?>
-            <li class="panel__item" x-tooltip.hover.right="'%title$s'">
+            <li class="panel__item" u-tooltip.hover.right="'%title$s'">
                 <a class="panel__link" href="%url$s"><i class="%icon$s"></i></a>
             </li>
             <?php

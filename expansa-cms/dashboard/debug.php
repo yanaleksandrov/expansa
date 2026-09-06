@@ -48,7 +48,7 @@ use Expansa\Facades\Safe;
 					<li class="errors-navigation-item"><code><strong><?php echo $trace->line; ?>:</strong></code> <?php echo $trace->file; ?></li>
 	            <?php endforeach; ?>
 			</ul>
-			<pre class="errors-source" x-highlight.php><code class="language-php"><?php echo Safe::markup( $code ?? '' ); ?></code></pre>
+			<pre class="errors-source" u-highlight.php><code class="language-php"><?php echo Safe::markup( $code ?? '' ); ?></code></pre>
 		</div>
 	</div>
 

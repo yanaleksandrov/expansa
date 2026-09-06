@@ -13,7 +13,7 @@ use Expansa\Builders\Form;
 ?>
 <div class="expansa-main">
     <div class="attributes">
-        <form class="attributes-wrapper" x-data="{attributes: []}">
+        <form class="attributes-wrapper" u-data="{attributes: []}">
             <div class="attributes-editor">
                 <h5 class="attributes-title">
                     <a class="btn btn--icon btn--sm" href="<?php echo url('/dashboard/orders'); ?>"><i class="ph ph-arrow-left"></i></a>

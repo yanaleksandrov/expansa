@@ -43,7 +43,7 @@ final class Plugins extends Table
     {
         return [
             $this->cell('cb')
-                ->title('<input type="checkbox" x-bind="trigger" />')
+                ->title('<input type="checkbox" u-bind="trigger" />')
                 ->fixedWidth('1rem')
                 ->view('cb'),
             $this->cell('image')

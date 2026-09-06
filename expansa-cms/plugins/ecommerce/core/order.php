@@ -36,7 +36,7 @@ return \Expansa\Facades\Form::enqueue(
                     'conditions'  => [],
                     'attributes'  => [
                         'value'    => $user->locale ?? '',
-                        'x-select' => '{"showSearch": 1}',
+                        'u-select' => '{"showSearch": 1}',
                     ],
                     'options'     => [
                         'select' => t('Ian Aleksandrov'),
@@ -206,7 +206,7 @@ return \Expansa\Facades\Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'value'    => $user->locale ?? '',
-                                'x-select' => '{"showSearch": 1}',
+                                'u-select' => '{"showSearch": 1}',
                             ],
                             'options'     => [
                                 'select' => t('United States'),
@@ -228,7 +228,7 @@ return \Expansa\Facades\Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'value'    => $user->locale ?? '',
-                                'x-select' => '{"showSearch": 1}',
+                                'u-select' => '{"showSearch": 1}',
                             ],
                             'options'     => [
                                 'select' => t('United States'),

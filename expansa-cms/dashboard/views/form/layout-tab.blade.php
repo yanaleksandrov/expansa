@@ -28,7 +28,7 @@ if (empty($content)) {
 }
 ?>
 <!-- tab "<?php echo $name; ?>" start -->
-<div class="tab__content <?php echo $class_content; ?>" x-bind="tabContent('<?php echo $name; ?>')" x-cloak>
+<div class="tab__content <?php echo $class_content; ?>" u-bind="tabContent('<?php echo $name; ?>')" u-cloak>
 	<?php if ( $caption || $description ) : ?>
 		<div class="dg mb-8">
 			<?php if ( $caption ) : ?>

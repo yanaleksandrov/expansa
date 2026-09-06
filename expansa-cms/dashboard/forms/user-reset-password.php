@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
 	'user-reset-password',
 	[
 		'class'           => 'dg g-6',
-		'x-data'          => '{email: ""}',
+		'u-data'          => '{email: ""}',
 		'@submit.prevent' => '$ajax("user/reset-password")',
 	],
 	[
@@ -36,7 +36,7 @@ return \Expansa\Facades\Form::enqueue(
 			'attributes'  => [
 				'placeholder'    => t( 'Enter your email address' ),
 				'required'       => true,
-				'x-autocomplete' => '',
+				'u-autocomplete' => '',
 			],
 		],
 		[

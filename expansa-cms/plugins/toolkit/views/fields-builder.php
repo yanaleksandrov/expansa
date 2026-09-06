@@ -13,7 +13,7 @@ if (! defined('EX_PATH')) {
 }
 ?>
 <div class="expansa-main">
-    <div class="fields-builder" x-data>
+    <div class="fields-builder" u-data>
         <div class="fields-builder__side">
             <div class="fields-builder__header">
                 <h4>Fields Builder</h4>
@@ -35,7 +35,7 @@ if (! defined('EX_PATH')) {
                                 'value'       => '',
                                 'reset'       => false,
                                 'attributes'  => [
-                                    'x-select' => '{"showSearch":0}',
+                                    'u-select' => '{"showSearch":0}',
                                 ],
                                 'options'     => [
                                     '25'  => 25,
@@ -50,9 +50,9 @@ if (! defined('EX_PATH')) {
                     </div>
                 </div>
                 <div class="fields-builder__title">
-                    Code Preview <i class="ph ph-copy" title="<?php echo t('Copy to clipboard'); ?>" x-copy="$refs.code.innerText"></i>
+                    Code Preview <i class="ph ph-copy" title="<?php echo t('Copy to clipboard'); ?>" u-copy="$refs.code.innerText"></i>
                 </div>
-                <pre x-ref="code" x-highlight.php>
+                <pre u-ref="code" u-highlight.php>
 echo view(
     'templates/form/image',
     [
@@ -63,7 +63,7 @@ echo view(
         'value'       =&gt; '',
         'reset'       =&gt; false,
         'attributes'  =&gt; [
-            'x-select' =&gt; '{"showSearch":1}',
+            'u-select' =&gt; '{"showSearch":1}',
         ],
         'options'     =&gt; [
             '25'  =&gt; 25,

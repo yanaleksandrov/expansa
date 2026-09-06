@@ -40,15 +40,15 @@ Hook::add('renderDashboardFooter', function () {
 ?>
 <div class="<?php echo $class; ?>">
 	<div class="df aife g-4">
-		<div class="image" x-data="avatar, tabs = 'upload'" x-init="content = 'Yan Aleksandrov'">
-			<input type="file" id="fileInputs" x-ref="input" @change="add($event, () => $dialog.open('crop-image'))" hidden>
-			<span class="image__close" @click="remove" x-show="image" title="{{ t('Remove image') }}" x-cloak>
+		<div class="image" u-data="avatar, tabs = 'upload'" u-init="content = 'Yan Aleksandrov'">
+			<input type="file" id="fileInputs" u-ref="input" @change="add($event, () => $dialog.open('crop-image'))" hidden>
+			<span class="image__close" @click="remove" u-show="image" title="{{ t('Remove image') }}" u-cloak>
 				<i class="ph ph-x"></i>
 			</span>
 			<div class="image__container">
 				<label for="fileInputs">
 					<span class="avatar avatar--xl" :style="image && `background-image: url(${image})`">
-						<span x-text="getInitials(content)" x-show="!image"></span>
+						<span u-text="getInitials(content)" u-show="!image"></span>
 					</span>
 				</label>
 				<span class="image__action" @click="$dialog.open('take-selfie', takeSelfieDialog)" title="{{ t('You can take a selfie. Allow the browser to access the camera') }}"><i class="ph ph-webcam"></i></span>

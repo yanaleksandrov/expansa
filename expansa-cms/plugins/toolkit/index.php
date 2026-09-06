@@ -77,7 +77,7 @@ return new class extends Plugin
             'builder/fields',
             [
                 'class'  => 'dg p-7 g-7',
-                'x-data' => "{type: '', tab:'general'}",
+                'u-data' => "{type: '', tab:'general'}",
             ],
             [
                 [

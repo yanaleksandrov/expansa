@@ -9,7 +9,7 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'dg g-4',
 		'@submit.prevent' => '$ajax("posts/filter")',
-		'x-sticky'        => '',
+		'u-sticky'        => '',
 	],
 	[
 		[
