@@ -19,8 +19,8 @@ return Form::enqueue(
     'user-profile',
     [
         'class'           => 'tab',
-        'x-data'          => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
-		'x-init'          => '$dirtyCheck.watch($el)',
+        'u-data'          => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
+		'u-init'          => '$dirtyCheck.watch($el)',
 	    '@submit.prevent' => '$ajax("user/update", "", () => $dirtyCheck.remove($el))',
     ],
     [
@@ -93,7 +93,7 @@ return Form::enqueue(
                             'attributes'  => [
                                 'value'          => $user->email ?? '',
                                 'placeholder'    => t('e.g. user@gmail.com'),
-                                'x-autocomplete' => '',
+                                'u-autocomplete' => '',
                             ],
                         ],
                         [
@@ -359,7 +359,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'x-select' => '',
+                                'u-select' => '',
                                 'value'    => $user->locale ?? '',
                             ],
                             'options'     => I18n::getLanguagesOptions(),
@@ -481,7 +481,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'x-autocomplete' => '',
+                                'u-autocomplete' => '',
                                 'placeholder'    => t('Old password'),
                             ],
                             'switcher'    => 1,
@@ -548,20 +548,20 @@ return Form::enqueue(
 			                                    <i class="ph ph-plus"></i> <?php echo t('Add new key'); ?>
 		                                    </button>
 	                                    </p>
-	                                    <template x-if="apiKeys.length">
+	                                    <template u-if="apiKeys.length">
 		                                    <div>
-			                                    <template x-for="(key, i) in apiKeys">
+			                                    <template u-for="(key, i) in apiKeys">
 				                                    <div class="p-4 df fdr g-4 mb-2 card card-border">
 					                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
 						                                    <path d="M160 18a78 78 0 0 0-73.8 103.3l-58.4 58.5A6 6 0 0 0 26 184v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 4.2-1.8l10.5-10.4A78 78 0 1 0 160 18Zm0 144a65.6 65.6 0 0 1-24.4-4.7 6 6 0 0 0-6.7 1.3L117.5 170H96a6 6 0 0 0-6 6v18H72a6 6 0 0 0-6 6v18H38v-31.5L97.4 127a6 6 0 0 0 1.3-6.7A66 66 0 1 1 160 162Zm30-86a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
 					                                    </svg>
 					                                    <div class="dg g-1">
-						                                    <h6 class="fs-14" x-text="key.title"></h6>
+						                                    <h6 class="fs-14" u-text="key.title"></h6>
 						                                    <code class="fs-12 df aic g-3 bg-green-lt t-green">
-							                                    <span class="badge badge--sm badge--green-lt"><?php echo t('Active'); ?></span> <span x-text="key.token"></span>
+							                                    <span class="badge badge--sm badge--green-lt"><?php echo t('Active'); ?></span> <span u-text="key.token"></span>
 							                                    <i class="fs-14 ph ph-copy" title="<?php echo t('Copy'); ?>" @click="$copy(key.token)"></i>
 						                                    </code>
-						                                    <div class="fs-12 t-muted lh-xs"><?php echo t('Created at'); ?> <span x-text="key.createdAt"></span></div>
+						                                    <div class="fs-12 t-muted lh-xs"><?php echo t('Created at'); ?> <span u-text="key.createdAt"></span></div>
 					                                    </div>
 					                                    <div class="ml-auto">
 						                                    <button class="btn btn--sm btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
@@ -578,7 +578,7 @@ return Form::enqueue(
 			                                    </p>
 		                                    </div>
 	                                    </template>
-	                                    <template x-if="!apiKeys.length">
+	                                    <template u-if="!apiKeys.length">
                                             <?php
                                             echo view(
                                                 'global/state',

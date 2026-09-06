@@ -18,7 +18,7 @@ Hook::add('renderDashboardFooter', function () {
     echo view('dialogs/emails-editor');
 });
 ?>
-<div class="table" x-data="table" style="{{ $table->stylize($table->cells) }}">
+<div class="table" u-data="table" style="{{ $table->stylize($table->cells) }}">
     <div class="table__header">
         <?php echo view('table/header', $table->headData()); ?>
 

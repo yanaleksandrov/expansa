@@ -28,11 +28,11 @@ if ( empty( $template ) ) {
 				<table border="0" cellpadding="0" cellspacing="0" style="width: 100%">
 					<tr>
 						<td style="padding: 2rem; text-align: center; ">
-							<template x-if="title">
-								<h3 style="margin: 0;" x-text="title"></h3>
+							<template u-if="title">
+								<h3 style="margin: 0;" u-text="title"></h3>
 							</template>
-							<template x-if="subtitle">
-								<p style="color: #7e848b; max-width: 320px; margin: 10px auto 0;" x-text="subtitle"></p>
+							<template u-if="subtitle">
+								<p style="color: #7e848b; max-width: 320px; margin: 10px auto 0;" u-text="subtitle"></p>
 							</template>
 						</td>
 					</tr>
@@ -49,19 +49,19 @@ if ( empty( $template ) ) {
 						</td>
 					</tr>
 					<tr>
-						<td style="padding: 2rem;" x-html="content"></td>
+						<td style="padding: 2rem;" u-html="content"></td>
 					</tr>
-					<template x-if="bottom">
+					<template u-if="bottom">
 						<tr>
-							<td style="opacity: 0.75; font-size: 12px; text-align: center; padding: 0 2rem 2rem;" x-html="bottom"></td>
+							<td style="opacity: 0.75; font-size: 12px; text-align: center; padding: 0 2rem 2rem;" u-html="bottom"></td>
 						</tr>
 					</template>
 				</table>
 			</td>
 		</tr>
-		<template x-if="footer">
+		<template u-if="footer">
 			<tr>
-				<td style="opacity: 0.75; font-size: 11px; line-height: 145%; text-align: center; padding: 1rem 2rem 0;" x-html="footer"></td>
+				<td style="opacity: 0.75; font-size: 11px; line-height: 145%; text-align: center; padding: 1rem 2rem 0;" u-html="footer"></td>
 			</tr>
 		</template>
 	</tbody>

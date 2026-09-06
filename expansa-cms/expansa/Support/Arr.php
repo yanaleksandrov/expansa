@@ -215,9 +215,6 @@ class Arr
             'readonly',
             'required',
             'selected',
-
-            'v-cloak',
-            'x-cloak',
         ];
 
         $atts = [];
@@ -235,7 +232,7 @@ class Arr
             } else {
                 $atts[] = match ($attribute) {
                     'value' => sprintf('%s="%s"', $attribute, $value),
-                    default => $value ? sprintf('%s="%s"', $attribute, $value) : ( str_starts_with($attribute, 'x-') ? $attribute : '' ),
+                    default => $value ? sprintf('%s="%s"', $attribute, $value) : ( str_starts_with($attribute, 'u-') ? $attribute : '' ),
                 };
             }
         }

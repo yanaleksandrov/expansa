@@ -13,8 +13,8 @@ return Expansa\Facades\Form::enqueue(
 	'settings',
 	[
 		'class'           => 'tab tab--vertical',
-		'x-data'          => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
-        'x-init'          => '$dirtyCheck.watch($el)',
+		'u-data'          => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
+        'u-init'          => '$dirtyCheck.watch($el)',
         '@submit.prevent' => '$ajax("options/update", "", () => $dirtyCheck.remove($el))',
 	],
 	[
@@ -88,7 +88,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'value'    => Options::get( 'site.language' ),
-								'x-select' => '{"showSearch": 1}',
+								'u-select' => '{"showSearch": 1}',
 							],
 							'options' => I18n::getLanguagesOptions(),
 						],

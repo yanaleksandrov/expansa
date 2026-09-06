@@ -5,15 +5,15 @@ return \Expansa\Facades\Form::enqueue(
     [
         'class'           => 'dg g-2',
         '@submit.prevent' => '$ajax("system/install").then(response => installed = response)',
-        'x-data'          => '{approved: {}, site: {}, db: {}, user: {}, installed: false}',
-        'x-init'          => '$watch("installed", () => $wizard.goNext())',
+        'u-data'          => '{approved: {}, site: {}, db: {}, user: {}, installed: false}',
+        'u-init'          => '$watch("installed", () => $wizard.goNext())',
     ],
     [
         [
             'type'       => 'step',
             'attributes' => [
                 'class'         => 'dg g-8 pt-8',
-                'x-wizard:step' => 'site.name?.trim()',
+                'u-wizard:step' => 'site.name?.trim()',
             ],
             'fields'     => [
                 [
@@ -45,7 +45,7 @@ return \Expansa\Facades\Form::enqueue(
                     'attributes'  => [
                         'placeholder'    => t('Example: My Blog'),
                         'required'       => true,
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                 ],
                 [
@@ -64,7 +64,7 @@ return \Expansa\Facades\Form::enqueue(
                     'conditions'  => [],
                     'attributes'  => [
                         'placeholder'    => t('Example: Just another Expansa site'),
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                 ],
                 [
@@ -89,9 +89,9 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'           => 'dg g-8 pt-8',
-                'x-cloak'         => true,
-                'x-wizard:step'   => '[db.database, db.username, db.password, db.host, db.prefix].every(value => value !== undefined && value.trim())',
-                'x-wizard:action' => 'approved = {}',
+                'u-cloak'         => true,
+                'u-wizard:step'   => '[db.database, db.username, db.password, db.host, db.prefix].every(value => value !== undefined && value.trim())',
+                'u-wizard:action' => 'approved = {}',
             ],
             'fields'     => [
                 [
@@ -122,7 +122,7 @@ return \Expansa\Facades\Form::enqueue(
                     'attributes'  => [
                         'placeholder'    => t('database_name'),
                         'required'       => true,
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                 ],
                 [
@@ -142,7 +142,7 @@ return \Expansa\Facades\Form::enqueue(
                     'attributes'  => [
                         'placeholder'    => t('user_name'),
                         'required'       => true,
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                 ],
                 [
@@ -162,7 +162,7 @@ return \Expansa\Facades\Form::enqueue(
                     'attributes'  => [
                         'placeholder'    => t('Password'),
                         'required'       => true,
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                 ],
                 [
@@ -191,7 +191,7 @@ return \Expansa\Facades\Form::enqueue(
                                 'value'          => 'localhost',
                                 'placeholder'    => t('Hostname'),
                                 'required'       => true,
-                                'x-autocomplete' => '',
+                                'u-autocomplete' => '',
                             ],
                         ],
                         [
@@ -212,7 +212,7 @@ return \Expansa\Facades\Form::enqueue(
                                 'value'          => 'expansa_',
                                 'placeholder'    => t('Prefix'),
                                 'required'       => true,
-                                'x-autocomplete' => '',
+                                'u-autocomplete' => '',
                             ],
                         ],
                     ],
@@ -223,9 +223,9 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'           => 'dg g-8 pt-8',
-                'x-wizard:step'   => 'Object.values(approved).every(Boolean) === true',
-                'x-wizard:action' => '$ajax("system/test", db).then(response => approved = response)',
-                'x-cloak'         => true,
+                'u-wizard:step'   => 'Object.values(approved).every(Boolean) === true',
+                'u-wizard:action' => '$ajax("system/test", db).then(response => approved = response)',
+                'u-cloak'         => true,
             ],
             'fields'     => [
                 [
@@ -249,8 +249,8 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'         => 'dg g-8 pt-8',
-                'x-cloak'       => true,
-                'x-wizard:step' => '[user.login, user.email, user.password].every(value => value !== undefined && value.trim())',
+                'u-cloak'       => true,
+                'u-wizard:step' => '[user.login, user.email, user.password].every(value => value !== undefined && value.trim())',
             ],
             'fields'     => [
                 [
@@ -300,7 +300,7 @@ return \Expansa\Facades\Form::enqueue(
                         'placeholder'    => t('Enter email'),
                         '@change'        => "user.login = user.email.split('@')[0]",
                         'required'       => true,
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                 ],
                 [
@@ -318,7 +318,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'x-select' => '{"showSearch": 1}',
+                        'u-select' => '{"showSearch": 1}',
                         'required' => true,
                     ],
                     'options'     => Expansa\Facades\I18n::getLanguagesOptions(),
@@ -340,7 +340,7 @@ return \Expansa\Facades\Form::enqueue(
                     'attributes'  => [
                         'placeholder'    => t('Enter login'),
                         'required'       => true,
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                 ],
                 [
@@ -360,7 +360,7 @@ return \Expansa\Facades\Form::enqueue(
                     'attributes'  => [
                         'placeholder'    => t('Password'),
                         'required'       => true,
-                        'x-autocomplete' => '',
+                        'u-autocomplete' => '',
                     ],
                     // password
                     'switcher'    => 1,
@@ -380,7 +380,7 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'   => 'dg g-8 pt-8',
-                'x-cloak' => true,
+                'u-cloak' => true,
             ],
             'fields'     => [
                 [
@@ -398,16 +398,16 @@ return \Expansa\Facades\Form::enqueue(
             'callback' => function () {
                 ?>
                 <div class="py-8 df jcsb g-2">
-                    <button type="button" class="btn btn--outline" x-show="$wizard.isNotLast()" :disabled="$wizard.cannotGoBack()" @click="$wizard.goBack()" disabled>
+                    <button type="button" class="btn btn--outline" u-show="$wizard.isNotLast()" :disabled="$wizard.cannotGoBack()" @click="$wizard.goBack()" disabled>
                         <?php echo t('Back'); ?>
                     </button>
-                    <button type="button" class="btn btn--primary" x-show="$wizard.isNotLast() && !$wizard.isStep(3)" :disabled="$wizard.cannotGoNext()" @click="$wizard.goNext()" disabled>
+                    <button type="button" class="btn btn--primary" u-show="$wizard.isNotLast() && !$wizard.isStep(3)" :disabled="$wizard.cannotGoNext()" @click="$wizard.goNext()" disabled>
                         <?php echo t('Continue'); ?>
                     </button>
-                    <button type="submit" class="btn btn--primary" x-show="$wizard.isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" x-cloak disabled>
+                    <button type="submit" class="btn btn--primary" u-show="$wizard.isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" u-cloak disabled>
                         <?php echo t('Install Expansa'); ?>
                     </button>
-                    <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" x-show="$wizard.isLast()" x-cloak><?php echo t('Go to dashboard'); ?></a>
+                    <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" u-show="$wizard.isLast()" u-cloak><?php echo t('Go to dashboard'); ?></a>
                 </div>
                 <?php
             },

@@ -26,17 +26,17 @@ defined('EX_PATH') || exit;
 
 $attributes['type'] = 'file';
 ?>
-<div class="<?php echo $class; ?>" x-data="{<?php echo $name; ?>: []}">
-	<div class="dg g-1" x-media>
+<div class="<?php echo $class; ?>" u-data="{<?php echo $name; ?>: []}">
+	<div class="dg g-1" u-media>
 		<?php if ( $label ) : ?>
 			<span class="<?php echo $label_class; ?>"><?php Safe::html( $label ); ?></span>
 		<?php endif; ?>
-		<template x-for="(item, id) in <?php echo $name; ?>">
-			<img class="" :src="item.url" x-init="console.log(item.url)" alt="" width="200" height="200">
+		<template u-for="(item, id) in <?php echo $name; ?>">
+			<img class="" :src="item.url" u-init="console.log(item.url)" alt="" width="200" height="200">
 		</template>
 		<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
 		<?php if ( $tooltip ) : ?>
-			<i class="ph ph-info" x-tooltip.click.prevent="'<?php echo $tooltip; ?>'"></i>
+			<i class="ph ph-info" u-tooltip.click.prevent="'<?php echo $tooltip; ?>'"></i>
 		<?php endif; ?>
 	</div>
 	<?php if ( $description ) : ?>

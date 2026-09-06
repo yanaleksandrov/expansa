@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
     'posts-creator',
     [
         'class'           => 'builder',
-        'x-data'          => 'builder',
+        'u-data'          => 'builder',
         '@submit.prevent' => 'submit()',
     ],
     [

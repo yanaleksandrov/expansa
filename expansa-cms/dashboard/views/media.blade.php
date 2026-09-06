@@ -21,15 +21,15 @@ Hook::add('renderDashboardFooter', function () {
 
 echo view('table/header', $table->headData());
 ?>
-<div class="storage" v-data="{items: {}}">
-    <div class="storage__item" v-each.lazy="(item, i) in items" @click="$dialog.open('tmpl-media-editor', item)">
-        <template v-if="item.url || item.icon">
+<div class="storage" u-data="{items: {}}">
+    <div class="storage__item" u-each.lazy="(item, i) in items" @click="$dialog.open('tmpl-media-editor', item)">
+        <template u-if="item.url || item.icon">
             <img class="storage__image" :src="item.sizes?.thumbnail?.url || item.url || item.icon" width="200" height="200" alt>
             <div class="storage__meta">
-                <div class="storage__data" v-text="item.sizeHumanize"></div>
+                <div class="storage__data" u-text="item.sizeHumanize"></div>
             </div>
         </template>
-        <template v-if="!item.url && !item.icon">
+        <template u-if="!item.url && !item.icon">
             <img class="storage__image" src="{{ url('/dashboard/assets/images/files/broken.svg') }}" title="{{ t('Image is broken') }}" width="40" height="40" alt>
         </template>
     </div>
@@ -43,9 +43,9 @@ echo view('table/header', $table->headData());
         </div>
     @endforeach
 
-    <div v-hide="items.length === 0">
+    <div u-hide="items.length === 0">
         <?php echo view('global/state', $table->notFoundData()); ?>
     </div>
 
-    <div x-intersect="$ajax('media/get', '', ({posts}) => items = posts)"></div>
+    <div u-intersect="$ajax('media/get', '', ({posts}) => items = posts)"></div>
 </div>

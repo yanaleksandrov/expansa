@@ -11,7 +11,7 @@ return \Expansa\Facades\Form::enqueue(
 	'emails-creator',
 	[
 		'@submit.window' => '$ajax("import-email")',
-		'x-data'         => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
+		'u-data'         => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
 	],
 	[
 		[

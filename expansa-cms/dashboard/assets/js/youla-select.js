@@ -1,50 +1,50 @@
 (function() {
-    "use strict";
+    'use strict';
     class CssClasses {
         constructor(classes) {
             if (!classes) {
                 classes = {};
             }
-            this.main = classes.main || "ss-main";
-            this.placeholder = classes.placeholder || "ss-placeholder";
-            this.values = classes.values || "ss-values";
-            this.single = classes.single || "ss-single";
-            this.max = classes.max || "ss-max";
-            this.value = classes.value || "ss-value";
-            this.valueText = classes.valueText || "ss-value-text";
-            this.valueDelete = classes.valueDelete || "ss-value-delete";
-            this.valueOut = classes.valueOut || "ss-value-out";
-            this.deselect = classes.deselect || "ss-deselect";
-            this.deselectPath = classes.deselectPath || "M10,10 L90,90 M10,90 L90,10";
-            this.arrow = classes.arrow || "ss-arrow";
-            this.arrowClose = classes.arrowClose || "M10,30 L50,70 L90,30";
-            this.arrowOpen = classes.arrowOpen || "M10,70 L50,30 L90,70";
-            this.content = classes.content || "ss-content";
-            this.openAbove = classes.openAbove || "ss-open-above";
-            this.openBelow = classes.openBelow || "ss-open-below";
-            this.search = classes.search || "ss-search";
-            this.searchHighlighter = classes.searchHighlighter || "ss-search-highlight";
-            this.searching = classes.searching || "ss-searching";
-            this.addable = classes.addable || "ss-addable";
-            this.addablePath = classes.addablePath || "M50,10 L50,90 M10,50 L90,50";
-            this.list = classes.list || "ss-list";
-            this.optgroup = classes.optgroup || "ss-optgroup";
-            this.optgroupLabel = classes.optgroupLabel || "ss-optgroup-label";
-            this.optgroupLabelText = classes.optgroupLabelText || "ss-optgroup-label-text";
-            this.optgroupActions = classes.optgroupActions || "ss-optgroup-actions";
-            this.optgroupSelectAll = classes.optgroupSelectAll || "ss-selectall";
-            this.optgroupSelectAllBox = classes.optgroupSelectAllBox || "M60,10 L10,10 L10,90 L90,90 L90,50";
-            this.optgroupSelectAllCheck = classes.optgroupSelectAllCheck || "M30,45 L50,70 L90,10";
-            this.optgroupClosable = classes.optgroupClosable || "ss-closable";
-            this.option = classes.option || "ss-option";
-            this.optionDelete = classes.optionDelete || "M10,10 L90,90 M10,90 L90,10";
-            this.highlighted = classes.highlighted || "ss-highlighted";
-            this.open = classes.open || "ss-open";
-            this.close = classes.close || "ss-close";
-            this.selected = classes.selected || "ss-selected";
-            this.error = classes.error || "ss-error";
-            this.disabled = classes.disabled || "ss-disabled";
-            this.hide = classes.hide || "ss-hide";
+            this.main = classes.main || 'ss-main';
+            this.placeholder = classes.placeholder || 'ss-placeholder';
+            this.values = classes.values || 'ss-values';
+            this.single = classes.single || 'ss-single';
+            this.max = classes.max || 'ss-max';
+            this.value = classes.value || 'ss-value';
+            this.valueText = classes.valueText || 'ss-value-text';
+            this.valueDelete = classes.valueDelete || 'ss-value-delete';
+            this.valueOut = classes.valueOut || 'ss-value-out';
+            this.deselect = classes.deselect || 'ss-deselect';
+            this.deselectPath = classes.deselectPath || 'M10,10 L90,90 M10,90 L90,10';
+            this.arrow = classes.arrow || 'ss-arrow';
+            this.arrowClose = classes.arrowClose || 'M10,30 L50,70 L90,30';
+            this.arrowOpen = classes.arrowOpen || 'M10,70 L50,30 L90,70';
+            this.content = classes.content || 'ss-content';
+            this.openAbove = classes.openAbove || 'ss-open-above';
+            this.openBelow = classes.openBelow || 'ss-open-below';
+            this.search = classes.search || 'ss-search';
+            this.searchHighlighter = classes.searchHighlighter || 'ss-search-highlight';
+            this.searching = classes.searching || 'ss-searching';
+            this.addable = classes.addable || 'ss-addable';
+            this.addablePath = classes.addablePath || 'M50,10 L50,90 M10,50 L90,50';
+            this.list = classes.list || 'ss-list';
+            this.optgroup = classes.optgroup || 'ss-optgroup';
+            this.optgroupLabel = classes.optgroupLabel || 'ss-optgroup-label';
+            this.optgroupLabelText = classes.optgroupLabelText || 'ss-optgroup-label-text';
+            this.optgroupActions = classes.optgroupActions || 'ss-optgroup-actions';
+            this.optgroupSelectAll = classes.optgroupSelectAll || 'ss-selectall';
+            this.optgroupSelectAllBox = classes.optgroupSelectAllBox || 'M60,10 L10,10 L10,90 L90,90 L90,50';
+            this.optgroupSelectAllCheck = classes.optgroupSelectAllCheck || 'M30,45 L50,70 L90,10';
+            this.optgroupClosable = classes.optgroupClosable || 'ss-closable';
+            this.option = classes.option || 'ss-option';
+            this.optionDelete = classes.optionDelete || 'M10,10 L90,90 M10,90 L90,10';
+            this.highlighted = classes.highlighted || 'ss-highlighted';
+            this.open = classes.open || 'ss-open';
+            this.close = classes.close || 'ss-close';
+            this.selected = classes.selected || 'ss-selected';
+            this.error = classes.error || 'ss-error';
+            this.disabled = classes.disabled || 'ss-disabled';
+            this.hide = classes.hide || 'ss-hide';
         }
     }
     function generateID() {
@@ -93,16 +93,16 @@
         return JSON.stringify(a) === JSON.stringify(b);
     }
     function kebabCase(str) {
-        const result = str.replace(/[A-Z\u00C0-\u00D6\u00D8-\u00DE]/g, match => "-" + match.toLowerCase());
+        const result = str.replace(/[A-Z\u00C0-\u00D6\u00D8-\u00DE]/g, match => '-' + match.toLowerCase());
         return str[0] === str[0].toUpperCase() ? result.substring(1) : result;
     }
     class Optgroup {
         constructor(optgroup) {
-            this.id = !optgroup.id || optgroup.id === "" ? generateID() : optgroup.id;
-            this.label = optgroup.label || "";
+            this.id = !optgroup.id || optgroup.id === '' ? generateID() : optgroup.id;
+            this.label = optgroup.label || '';
             this.selectAll = optgroup.selectAll === undefined ? false : optgroup.selectAll;
-            this.selectAllText = optgroup.selectAllText || "Select All";
-            this.closable = optgroup.closable || "off";
+            this.selectAllText = optgroup.selectAllText || 'Select All';
+            this.closable = optgroup.closable || 'off';
             this.options = [];
             if (optgroup.options) {
                 for (const o of optgroup.options) {
@@ -113,24 +113,24 @@
     }
     class Option {
         constructor(option) {
-            this.id = !option.id || option.id === "" ? generateID() : option.id;
+            this.id = !option.id || option.id === '' ? generateID() : option.id;
             this.value = option.value === undefined ? option.text : option.value;
-            this.text = option.text || "";
-            this.html = option.html || "";
+            this.text = option.text || '';
+            this.html = option.html || '';
             this.defaultSelected = option.defaultSelected !== undefined ? option.defaultSelected : false;
             this.selected = option.selected !== undefined ? option.selected : false;
             this.display = option.display !== undefined ? option.display : true;
             this.disabled = option.disabled !== undefined ? option.disabled : false;
             this.mandatory = option.mandatory !== undefined ? option.mandatory : false;
             this.placeholder = option.placeholder !== undefined ? option.placeholder : false;
-            this.class = option.class || "";
-            this.style = option.style || "";
+            this.class = option.class || '';
+            this.style = option.style || '';
             this.data = option.data || {};
         }
     }
     class Store {
         constructor(type, data) {
-            this.selectType = "single";
+            this.selectType = 'single';
             this.data = [];
             this.selectedOrder = [];
             this.selectType = type;
@@ -138,14 +138,14 @@
         }
         validateDataArray(data) {
             if (!Array.isArray(data)) {
-                return new Error("Data must be an array");
+                return new Error('Data must be an array');
             }
             for (let dataObj of data) {
-                if (dataObj instanceof Optgroup || "label" in dataObj) {
-                    if (!("label" in dataObj)) {
-                        return new Error("Optgroup must have a label");
+                if (dataObj instanceof Optgroup || 'label' in dataObj) {
+                    if (!('label' in dataObj)) {
+                        return new Error('Optgroup must have a label');
                     }
-                    if ("options" in dataObj && dataObj.options) {
+                    if ('options' in dataObj && dataObj.options) {
                         for (let option of dataObj.options) {
                             const validationError = this.validateOption(option);
                             if (validationError) {
@@ -153,29 +153,29 @@
                             }
                         }
                     }
-                } else if (dataObj instanceof Option || "text" in dataObj) {
+                } else if (dataObj instanceof Option || 'text' in dataObj) {
                     const validationError = this.validateOption(dataObj);
                     if (validationError) {
                         return validationError;
                     }
                 } else {
-                    return new Error("Data object must be a valid optgroup or option");
+                    return new Error('Data object must be a valid optgroup or option');
                 }
             }
             return null;
         }
         validateOption(option) {
-            if (!("text" in option)) {
-                return new Error("Option must have a text");
+            if (!('text' in option)) {
+                return new Error('Option must have a text');
             }
             return null;
         }
         partialToFullData(data) {
             let dataFinal = [];
             data.forEach(dataObj => {
-                if (dataObj instanceof Optgroup || "label" in dataObj) {
+                if (dataObj instanceof Optgroup || 'label' in dataObj) {
                     let optOptions = [];
-                    if ("options" in dataObj && dataObj.options) {
+                    if ('options' in dataObj && dataObj.options) {
                         dataObj.options.forEach(option => {
                             optOptions.push(new Option(option));
                         });
@@ -184,7 +184,7 @@
                         dataFinal.push(new Optgroup(dataObj));
                     }
                 }
-                if (dataObj instanceof Option || "text" in dataObj) {
+                if (dataObj instanceof Option || 'text' in dataObj) {
                     dataFinal.push(new Option(dataObj));
                 }
             });
@@ -192,8 +192,8 @@
         }
         setData(data) {
             this.data = this.partialToFullData(data);
-            if (this.selectType === "single") {
-                this.setSelectedBy("id", this.getSelected());
+            if (this.selectType === 'single') {
+                this.setSelectedBy('id', this.getSelected());
             }
         }
         getData() {
@@ -223,7 +223,7 @@
                         option.selected = hasSelected ? false : selectedValues.includes(option[selectedType]);
                         if (option.selected) {
                             selectedObjects.push(option);
-                            if (this.selectType === "single") {
+                            if (this.selectType === 'single') {
                                 hasSelected = true;
                             }
                         }
@@ -236,19 +236,19 @@
                     dataObj.selected = hasSelected ? false : selectedValues.includes(dataObj[selectedType]);
                     if (dataObj.selected) {
                         selectedObjects.push(dataObj);
-                        if (this.selectType === "single") {
+                        if (this.selectType === 'single') {
                             hasSelected = true;
                         }
                     }
                 }
             }
-            if (this.selectType === "single" && firstOption && !hasSelected) {
+            if (this.selectType === 'single' && firstOption && !hasSelected) {
                 firstOption.selected = true;
                 selectedObjects.push(firstOption);
             }
             const selectedIds = selectedValues.map(value => {
                 var _a;
-                return ((_a = selectedObjects.find(option => option[selectedType] === value)) === null || _a === void 0 ? void 0 : _a.id) || "";
+                return ((_a = selectedObjects.find(option => option[selectedType] === value)) === null || _a === void 0 ? void 0 : _a.id) || '';
             });
             this.selectedOrder = selectedIds;
         }
@@ -292,7 +292,7 @@
         }
         search(search, searchFilter) {
             search = search.trim();
-            if (search === "") {
+            if (search === '') {
                 return this.getData();
             }
             return this.filter(opt => searchFilter(opt, search), true);
@@ -372,9 +372,9 @@
             this.content.search.input.disabled = true;
         }
         open() {
-            this.main.arrow.path.setAttribute("d", this.classes.arrowOpen);
-            this.main.main.classList.add(this.settings.openPosition === "up" ? this.classes.openAbove : this.classes.openBelow);
-            this.main.main.setAttribute("aria-expanded", "true");
+            this.main.arrow.path.setAttribute('d', this.classes.arrowOpen);
+            this.main.main.classList.add(this.settings.openPosition === 'up' ? this.classes.openAbove : this.classes.openBelow);
+            this.main.main.setAttribute('aria-expanded', 'true');
             this.moveContent();
             const selectedOptions = this.store.getSelectedOptions();
             if (selectedOptions.length) {
@@ -388,70 +388,70 @@
         close() {
             this.main.main.classList.remove(this.classes.openAbove);
             this.main.main.classList.remove(this.classes.openBelow);
-            this.main.main.setAttribute("aria-expanded", "false");
+            this.main.main.setAttribute('aria-expanded', 'false');
             this.content.main.classList.remove(this.classes.openAbove);
             this.content.main.classList.remove(this.classes.openBelow);
-            this.main.arrow.path.setAttribute("d", this.classes.arrowClose);
+            this.main.arrow.path.setAttribute('d', this.classes.arrowClose);
         }
         updateClassStyles() {
-            this.main.main.className = "";
-            this.main.main.removeAttribute("style");
-            this.content.main.className = "";
-            this.content.main.removeAttribute("style");
+            this.main.main.className = '';
+            this.main.main.removeAttribute('style');
+            this.content.main.className = '';
+            this.content.main.removeAttribute('style');
             this.main.main.classList.add(this.classes.main);
             this.content.main.classList.add(this.classes.content);
-            if (this.settings.style !== "") {
+            if (this.settings.style !== '') {
                 this.main.main.style.cssText = this.settings.style;
                 this.content.main.style.cssText = this.settings.style;
             }
             if (this.settings.class.length) {
                 for (const c of this.settings.class) {
-                    if (c.trim() !== "") {
+                    if (c.trim() !== '') {
                         this.main.main.classList.add(c.trim());
                         this.content.main.classList.add(c.trim());
                     }
                 }
             }
-            if (this.settings.contentPosition === "relative" || this.settings.contentPosition === "fixed") {
-                this.content.main.classList.add("ss-" + this.settings.contentPosition);
+            if (this.settings.contentPosition === 'relative' || this.settings.contentPosition === 'fixed') {
+                this.content.main.classList.add('ss-' + this.settings.contentPosition);
             }
         }
         updateAriaAttributes() {
             var _a;
-            this.main.main.role = "combobox";
-            this.main.main.setAttribute("aria-haspopup", "listbox");
-            this.main.main.setAttribute("aria-controls", (_a = this.content.main.dataset.id) !== null && _a !== void 0 ? _a : "");
-            this.main.main.setAttribute("aria-expanded", "false");
-            this.content.main.setAttribute("role", "listbox");
+            this.main.main.role = 'combobox';
+            this.main.main.setAttribute('aria-haspopup', 'listbox');
+            this.main.main.setAttribute('aria-controls', (_a = this.content.main.dataset.id) !== null && _a !== void 0 ? _a : '');
+            this.main.main.setAttribute('aria-expanded', 'false');
+            this.content.main.setAttribute('role', 'listbox');
         }
         mainDiv() {
             var _a;
-            const main = document.createElement("div");
+            const main = document.createElement('div');
             main.dataset.id = this.settings.id;
-            main.setAttribute("aria-label", this.settings.ariaLabel);
+            main.setAttribute('aria-label', this.settings.ariaLabel);
             main.tabIndex = 0;
             main.onkeydown = e => {
                 switch (e.key) {
-                  case "ArrowUp":
-                  case "ArrowDown":
+                  case 'ArrowUp':
+                  case 'ArrowDown':
                     this.callbacks.open();
-                    e.key === "ArrowDown" ? this.highlight("down") : this.highlight("up");
+                    e.key === 'ArrowDown' ? this.highlight('down') : this.highlight('up');
                     return false;
 
-                  case "Tab":
+                  case 'Tab':
                     this.callbacks.close();
                     return true;
 
-                  case "Enter":
-                  case " ":
+                  case 'Enter':
+                  case ' ':
                     this.callbacks.open();
-                    const highlighted = this.content.list.querySelector("." + this.classes.highlighted);
+                    const highlighted = this.content.list.querySelector('.' + this.classes.highlighted);
                     if (highlighted) {
                         highlighted.click();
                     }
                     return false;
 
-                  case "Escape":
+                  case 'Escape':
                     this.callbacks.close();
                     return false;
                 }
@@ -466,10 +466,10 @@
                 }
                 this.settings.isOpen ? this.callbacks.close() : this.callbacks.open();
             };
-            const values = document.createElement("div");
+            const values = document.createElement('div');
             values.classList.add(this.classes.values);
             main.appendChild(values);
-            const deselect = document.createElement("div");
+            const deselect = document.createElement('div');
             deselect.classList.add(this.classes.deselect);
             const selectedOptions = (_a = this.store) === null || _a === void 0 ? void 0 : _a.getSelectedOptions();
             if (!this.settings.allowDeselect || this.settings.isMultiple && selectedOptions && selectedOptions.length <= 0) {
@@ -494,7 +494,7 @@
                         this.updateDeselectAll();
                     } else {
                         const firstOption = this.store.getFirstOption();
-                        const id = firstOption ? firstOption.id : "";
+                        const id = firstOption ? firstOption.id : '';
                         this.callbacks.setSelected(id, false);
                     }
                     if (this.settings.closeOnSelect) {
@@ -505,26 +505,26 @@
                     }
                 }
             };
-            const deselectSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            deselectSvg.setAttribute("viewBox", "0 0 100 100");
-            const deselectPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            deselectPath.setAttribute("d", this.classes.deselectPath);
+            const deselectSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            deselectSvg.setAttribute('viewBox', '0 0 100 100');
+            const deselectPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            deselectPath.setAttribute('d', this.classes.deselectPath);
             deselectSvg.appendChild(deselectPath);
             deselect.appendChild(deselectSvg);
             main.appendChild(deselect);
-            const arrow = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             arrow.classList.add(this.classes.arrow);
-            arrow.setAttribute("viewBox", "0 0 100 100");
-            const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            arrowPath.setAttribute("d", this.classes.arrowClose);
+            arrow.setAttribute('viewBox', '0 0 100 100');
+            const arrowPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            arrowPath.setAttribute('d', this.classes.arrowClose);
             if (this.settings.alwaysOpen) {
                 arrow.classList.add(this.classes.hide);
             }
             arrow.appendChild(arrowPath);
             main.appendChild(arrow);
             return {
-                main: main,
-                values: values,
+                main,
+                values,
                 deselect: {
                     main: deselect,
                     svg: deselectSvg,
@@ -537,7 +537,7 @@
             };
         }
         mainFocus(eventType) {
-            if (eventType !== "click") {
+            if (eventType !== 'click') {
                 this.main.main.focus({
                     preventScroll: true
                 });
@@ -547,13 +547,13 @@
             const placeholderOption = this.store.filter(o => o.placeholder, false);
             let placeholderText = this.settings.placeholderText;
             if (placeholderOption.length) {
-                if (placeholderOption[0].html !== "") {
+                if (placeholderOption[0].html !== '') {
                     placeholderText = placeholderOption[0].html;
-                } else if (placeholderOption[0].text !== "") {
+                } else if (placeholderOption[0].text !== '') {
                     placeholderText = placeholderOption[0].text;
                 }
             }
-            const placeholder = document.createElement("div");
+            const placeholder = document.createElement('div');
             placeholder.classList.add(this.classes.placeholder);
             placeholder.innerHTML = placeholderText;
             return placeholder;
@@ -572,7 +572,7 @@
             if (!selectedSingle) {
                 this.main.values.innerHTML = this.placeholder().outerHTML;
             } else {
-                const singleValue = document.createElement("div");
+                const singleValue = document.createElement('div');
                 singleValue.classList.add(this.classes.single);
                 if (selectedSingle.html) {
                     singleValue.innerHTML = selectedSingle.html;
@@ -594,19 +594,19 @@
                 this.main.values.innerHTML = this.placeholder().outerHTML;
                 return;
             } else {
-                const placeholder = this.main.values.querySelector("." + this.classes.placeholder);
+                const placeholder = this.main.values.querySelector('.' + this.classes.placeholder);
                 if (placeholder) {
                     placeholder.remove();
                 }
             }
             if (selectedOptions.length > this.settings.maxValuesShown) {
-                const singleValue = document.createElement("div");
+                const singleValue = document.createElement('div');
                 singleValue.classList.add(this.classes.max);
-                singleValue.textContent = this.settings.maxValuesMessage.replace("{number}", selectedOptions.length.toString());
+                singleValue.textContent = this.settings.maxValuesMessage.replace('{number}', selectedOptions.length.toString());
                 this.main.values.innerHTML = singleValue.outerHTML;
                 return;
             } else {
-                const maxValuesMessage = this.main.values.querySelector("." + this.classes.max);
+                const maxValuesMessage = this.main.values.querySelector('.' + this.classes.max);
                 if (maxValuesMessage) {
                     maxValuesMessage.remove();
                 }
@@ -617,7 +617,7 @@
             let removeNodes = [];
             for (let i = 0; i < currentNodes.length; i++) {
                 const node = currentNodes[i];
-                const id = node.getAttribute("data-id");
+                const id = node.getAttribute('data-id');
                 if (id) {
                     const found = selectedOptions.filter(opt => opt.id === id, false);
                     if (!found.length) {
@@ -650,24 +650,24 @@
                         } else if (d === 0) {
                             this.main.values.insertBefore(this.multipleValue(selectedOptions[d]), currentNodes[d]);
                         } else {
-                            currentNodes[d - 1].insertAdjacentElement("afterend", this.multipleValue(selectedOptions[d]));
+                            currentNodes[d - 1].insertAdjacentElement('afterend', this.multipleValue(selectedOptions[d]));
                         }
                     }
                 }
             }
         }
         multipleValue(option) {
-            const value = document.createElement("div");
+            const value = document.createElement('div');
             value.classList.add(this.classes.value);
             value.dataset.id = option.id;
-            const text = document.createElement("div");
+            const text = document.createElement('div');
             text.classList.add(this.classes.valueText);
             text.textContent = option.text;
             value.appendChild(text);
             if (!option.mandatory) {
-                const deleteDiv = document.createElement("div");
+                const deleteDiv = document.createElement('div');
                 deleteDiv.classList.add(this.classes.valueDelete);
-                deleteDiv.setAttribute("tabindex", "0");
+                deleteDiv.setAttribute('tabindex', '0');
                 deleteDiv.onclick = e => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -705,15 +705,15 @@
                         this.updateDeselectAll();
                     }
                 };
-                const deleteSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                deleteSvg.setAttribute("viewBox", "0 0 100 100");
-                const deletePath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                deletePath.setAttribute("d", this.classes.optionDelete);
+                const deleteSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                deleteSvg.setAttribute('viewBox', '0 0 100 100');
+                const deletePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                deletePath.setAttribute('d', this.classes.optionDelete);
                 deleteSvg.appendChild(deletePath);
                 deleteDiv.appendChild(deleteSvg);
                 value.appendChild(deleteDiv);
                 deleteDiv.onkeydown = e => {
-                    if (e.key === "Enter") {
+                    if (e.key === 'Enter') {
                         deleteDiv.click();
                     }
                 };
@@ -721,88 +721,88 @@
             return value;
         }
         contentDiv() {
-            const main = document.createElement("div");
+            const main = document.createElement('div');
             main.dataset.id = this.settings.id;
             const search = this.searchDiv();
             main.appendChild(search.main);
             const list = this.listDiv();
             main.appendChild(list);
             return {
-                main: main,
-                search: search,
-                list: list
+                main,
+                search,
+                list
             };
         }
         moveContent() {
-            if (this.settings.contentPosition === "relative") {
+            if (this.settings.contentPosition === 'relative') {
                 this.moveContentBelow();
                 return;
             }
-            if (this.settings.openPosition === "down") {
+            if (this.settings.openPosition === 'down') {
                 this.moveContentBelow();
                 return;
-            } else if (this.settings.openPosition === "up") {
+            } else if (this.settings.openPosition === 'up') {
                 this.moveContentAbove();
                 return;
             }
-            if (this.putContent() === "up") {
+            if (this.putContent() === 'up') {
                 this.moveContentAbove();
             } else {
                 this.moveContentBelow();
             }
         }
         searchDiv() {
-            const main = document.createElement("div");
-            const input = document.createElement("input");
-            const addable = document.createElement("div");
+            const main = document.createElement('div');
+            const input = document.createElement('input');
+            const addable = document.createElement('div');
             main.classList.add(this.classes.search);
             const searchReturn = {
-                main: main,
-                input: input
+                main,
+                input
             };
             if (!this.settings.showSearch) {
                 main.classList.add(this.classes.hide);
                 input.readOnly = true;
             }
-            input.type = "search";
+            input.type = 'search';
             input.placeholder = this.settings.searchPlaceholder;
             input.tabIndex = -1;
-            input.setAttribute("aria-label", this.settings.searchPlaceholder);
-            input.setAttribute("autocapitalize", "off");
-            input.setAttribute("autocomplete", "off");
-            input.setAttribute("autocorrect", "off");
+            input.setAttribute('aria-label', this.settings.searchPlaceholder);
+            input.setAttribute('autocapitalize', 'off');
+            input.setAttribute('autocomplete', 'off');
+            input.setAttribute('autocorrect', 'off');
             input.oninput = debounce(e => {
                 this.callbacks.search(e.target.value);
             }, 100);
             input.onkeydown = e => {
                 switch (e.key) {
-                  case "ArrowUp":
-                  case "ArrowDown":
-                    e.key === "ArrowDown" ? this.highlight("down") : this.highlight("up");
+                  case 'ArrowUp':
+                  case 'ArrowDown':
+                    e.key === 'ArrowDown' ? this.highlight('down') : this.highlight('up');
                     return false;
 
-                  case "Tab":
+                  case 'Tab':
                     this.callbacks.close();
                     return true;
 
-                  case "Escape":
+                  case 'Escape':
                     this.callbacks.close();
                     return false;
 
-                  case " ":
-                    const highlighted = this.content.list.querySelector("." + this.classes.highlighted);
+                  case ' ':
+                    const highlighted = this.content.list.querySelector('.' + this.classes.highlighted);
                     if (highlighted) {
                         highlighted.click();
                         return false;
                     }
                     return true;
 
-                  case "Enter":
+                  case 'Enter':
                     if (this.callbacks.addable) {
                         addable.click();
                         return false;
                     } else {
-                        const highlighted = this.content.list.querySelector("." + this.classes.highlighted);
+                        const highlighted = this.content.list.querySelector('.' + this.classes.highlighted);
                         if (highlighted) {
                             highlighted.click();
                             return false;
@@ -815,10 +815,10 @@
             main.appendChild(input);
             if (this.callbacks.addable) {
                 addable.classList.add(this.classes.addable);
-                const plus = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                plus.setAttribute("viewBox", "0 0 100 100");
-                const plusPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                plusPath.setAttribute("d", this.classes.addablePath);
+                const plus = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                plus.setAttribute('viewBox', '0 0 100 100');
+                const plusPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                plusPath.setAttribute('d', this.classes.addablePath);
                 plus.appendChild(plusPath);
                 addable.appendChild(plus);
                 addable.onclick = e => {
@@ -828,7 +828,7 @@
                         return;
                     }
                     const inputValue = this.content.search.input.value.trim();
-                    if (inputValue === "") {
+                    if (inputValue === '') {
                         this.content.search.input.focus();
                         return;
                     }
@@ -842,7 +842,7 @@
                         } else {
                             this.callbacks.setSelected([ newOption.id ], true);
                         }
-                        this.callbacks.search("");
+                        this.callbacks.search('');
                         if (this.settings.closeOnSelect) {
                             setTimeout(() => {
                                 this.callbacks.close();
@@ -855,10 +855,10 @@
                     }
                     if (addableValue instanceof Promise) {
                         addableValue.then(value => {
-                            if (typeof value === "string") {
+                            if (typeof value === 'string') {
                                 runFinish({
                                     text: value,
-                                    value: value
+                                    value
                                 });
                             } else if (addableValue instanceof Error) {
                                 this.renderError(addableValue.message);
@@ -866,7 +866,7 @@
                                 runFinish(value);
                             }
                         });
-                    } else if (typeof addableValue === "string") {
+                    } else if (typeof addableValue === 'string') {
                         runFinish({
                             text: addableValue,
                             value: addableValue
@@ -891,15 +891,15 @@
             this.content.search.input.focus();
         }
         getOptions(notPlaceholder = false, notDisabled = false, notHidden = false) {
-            let query = "." + this.classes.option;
+            let query = '.' + this.classes.option;
             if (notPlaceholder) {
-                query += ":not(." + this.classes.placeholder + ")";
+                query += ':not(.' + this.classes.placeholder + ')';
             }
             if (notDisabled) {
-                query += ":not(." + this.classes.disabled + ")";
+                query += ':not(.' + this.classes.disabled + ')';
             }
             if (notHidden) {
-                query += ":not(." + this.classes.hide + ")";
+                query += ':not(.' + this.classes.hide + ')';
             }
             return Array.from(this.content.list.querySelectorAll(query));
         }
@@ -934,17 +934,17 @@
                     prevOption.classList.remove(this.classes.highlighted);
                     const prevParent = prevOption.parentElement;
                     if (prevParent && prevParent.classList.contains(this.classes.open)) {
-                        const optgroupLabel = prevParent.querySelector("." + this.classes.optgroupLabel);
+                        const optgroupLabel = prevParent.querySelector('.' + this.classes.optgroupLabel);
                         if (optgroupLabel) {
                             optgroupLabel.click();
                         }
                     }
-                    let selectOption = options[dir === "down" ? i + 1 < options.length ? i + 1 : 0 : i - 1 >= 0 ? i - 1 : options.length - 1];
+                    let selectOption = options[dir === 'down' ? i + 1 < options.length ? i + 1 : 0 : i - 1 >= 0 ? i - 1 : options.length - 1];
                     selectOption.classList.add(this.classes.highlighted);
                     this.ensureElementInView(this.content.list, selectOption);
                     const selectParent = selectOption.parentElement;
                     if (selectParent && selectParent.classList.contains(this.classes.close)) {
-                        const optgroupLabel = selectParent.querySelector("." + this.classes.optgroupLabel);
+                        const optgroupLabel = selectParent.querySelector('.' + this.classes.optgroupLabel);
                         if (optgroupLabel) {
                             optgroupLabel.click();
                         }
@@ -952,35 +952,35 @@
                     return;
                 }
             }
-            options[dir === "down" ? 0 : options.length - 1].classList.add(this.classes.highlighted);
-            this.ensureElementInView(this.content.list, options[dir === "down" ? 0 : options.length - 1]);
+            options[dir === 'down' ? 0 : options.length - 1].classList.add(this.classes.highlighted);
+            this.ensureElementInView(this.content.list, options[dir === 'down' ? 0 : options.length - 1]);
         }
         listDiv() {
-            const options = document.createElement("div");
+            const options = document.createElement('div');
             options.classList.add(this.classes.list);
             return options;
         }
         renderError(error) {
-            this.content.list.innerHTML = "";
-            const errorDiv = document.createElement("div");
+            this.content.list.innerHTML = '';
+            const errorDiv = document.createElement('div');
             errorDiv.classList.add(this.classes.error);
             errorDiv.textContent = error;
             this.content.list.appendChild(errorDiv);
         }
         renderSearching() {
-            this.content.list.innerHTML = "";
-            const searchingDiv = document.createElement("div");
+            this.content.list.innerHTML = '';
+            const searchingDiv = document.createElement('div');
             searchingDiv.classList.add(this.classes.searching);
             searchingDiv.textContent = this.settings.searchingText;
             this.content.list.appendChild(searchingDiv);
         }
         renderOptions(data) {
-            this.content.list.innerHTML = "";
+            this.content.list.innerHTML = '';
             if (data.length === 0) {
-                const noResults = document.createElement("div");
+                const noResults = document.createElement('div');
                 noResults.classList.add(this.classes.search);
                 if (this.callbacks.addable) {
-                    noResults.innerHTML = this.settings.addableText.replace("{value}", this.content.search.input.value);
+                    noResults.innerHTML = this.settings.addableText.replace('{value}', this.content.search.input.value);
                 } else {
                     noResults.innerHTML = this.settings.searchText;
                 }
@@ -991,8 +991,8 @@
                 const placeholderOption = this.store.filter(o => o.placeholder, false);
                 if (!placeholderOption.length) {
                     this.store.addOption(new Option({
-                        text: "",
-                        value: "",
+                        text: '',
+                        value: '',
                         selected: false,
                         placeholder: true
                     }), true);
@@ -1001,20 +1001,20 @@
             const fragment = document.createDocumentFragment();
             for (const d of data) {
                 if (d instanceof Optgroup) {
-                    const optgroupEl = document.createElement("div");
+                    const optgroupEl = document.createElement('div');
                     optgroupEl.classList.add(this.classes.optgroup);
-                    const optgroupLabel = document.createElement("div");
+                    const optgroupLabel = document.createElement('div');
                     optgroupLabel.classList.add(this.classes.optgroupLabel);
                     optgroupEl.appendChild(optgroupLabel);
-                    const optgroupLabelText = document.createElement("div");
+                    const optgroupLabelText = document.createElement('div');
                     optgroupLabelText.classList.add(this.classes.optgroupLabelText);
                     optgroupLabelText.textContent = d.label;
                     optgroupLabel.appendChild(optgroupLabelText);
-                    const optgroupActions = document.createElement("div");
+                    const optgroupActions = document.createElement('div');
                     optgroupActions.classList.add(this.classes.optgroupActions);
                     optgroupLabel.appendChild(optgroupActions);
                     if (this.settings.isMultiple && d.selectAll) {
-                        const selectAll = document.createElement("div");
+                        const selectAll = document.createElement('div');
                         selectAll.classList.add(this.classes.optgroupSelectAll);
                         let allSelected = true;
                         for (const o of d.options) {
@@ -1026,19 +1026,19 @@
                         if (allSelected) {
                             selectAll.classList.add(this.classes.selected);
                         }
-                        const selectAllText = document.createElement("span");
+                        const selectAllText = document.createElement('span');
                         selectAllText.textContent = d.selectAllText;
                         selectAll.appendChild(selectAllText);
-                        const selectAllSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        selectAllSvg.setAttribute("viewBox", "0 0 100 100");
+                        const selectAllSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        selectAllSvg.setAttribute('viewBox', '0 0 100 100');
                         selectAll.appendChild(selectAllSvg);
-                        const selectAllBox = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                        selectAllBox.setAttribute("d", this.classes.optgroupSelectAllBox);
+                        const selectAllBox = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        selectAllBox.setAttribute('d', this.classes.optgroupSelectAllBox);
                         selectAllSvg.appendChild(selectAllBox);
-                        const selectAllCheck = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                        selectAllCheck.setAttribute("d", this.classes.optgroupSelectAllCheck);
+                        const selectAllCheck = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        selectAllCheck.setAttribute('d', this.classes.optgroupSelectAllCheck);
                         selectAllSvg.appendChild(selectAllCheck);
-                        selectAll.addEventListener("click", e => {
+                        selectAll.addEventListener('click', e => {
                             e.preventDefault();
                             e.stopPropagation();
                             const currentSelected = this.store.getSelected();
@@ -1066,36 +1066,36 @@
                         });
                         optgroupActions.appendChild(selectAll);
                     }
-                    if (d.closable !== "off") {
-                        const optgroupClosable = document.createElement("div");
+                    if (d.closable !== 'off') {
+                        const optgroupClosable = document.createElement('div');
                         optgroupClosable.classList.add(this.classes.optgroupClosable);
-                        const optgroupClosableSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        optgroupClosableSvg.setAttribute("viewBox", "0 0 100 100");
+                        const optgroupClosableSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        optgroupClosableSvg.setAttribute('viewBox', '0 0 100 100');
                         optgroupClosableSvg.classList.add(this.classes.arrow);
                         optgroupClosable.appendChild(optgroupClosableSvg);
-                        const optgroupClosableArrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        const optgroupClosableArrow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                         optgroupClosableSvg.appendChild(optgroupClosableArrow);
-                        if (d.options.some(o => o.selected) || this.content.search.input.value.trim() !== "") {
+                        if (d.options.some(o => o.selected) || this.content.search.input.value.trim() !== '') {
                             optgroupClosable.classList.add(this.classes.open);
-                            optgroupClosableArrow.setAttribute("d", this.classes.arrowOpen);
-                        } else if (d.closable === "open") {
+                            optgroupClosableArrow.setAttribute('d', this.classes.arrowOpen);
+                        } else if (d.closable === 'open') {
                             optgroupEl.classList.add(this.classes.open);
-                            optgroupClosableArrow.setAttribute("d", this.classes.arrowOpen);
-                        } else if (d.closable === "close") {
+                            optgroupClosableArrow.setAttribute('d', this.classes.arrowOpen);
+                        } else if (d.closable === 'close') {
                             optgroupEl.classList.add(this.classes.close);
-                            optgroupClosableArrow.setAttribute("d", this.classes.arrowClose);
+                            optgroupClosableArrow.setAttribute('d', this.classes.arrowClose);
                         }
-                        optgroupLabel.addEventListener("click", e => {
+                        optgroupLabel.addEventListener('click', e => {
                             e.preventDefault();
                             e.stopPropagation();
                             if (optgroupEl.classList.contains(this.classes.close)) {
                                 optgroupEl.classList.remove(this.classes.close);
                                 optgroupEl.classList.add(this.classes.open);
-                                optgroupClosableArrow.setAttribute("d", this.classes.arrowOpen);
+                                optgroupClosableArrow.setAttribute('d', this.classes.arrowOpen);
                             } else {
                                 optgroupEl.classList.remove(this.classes.open);
                                 optgroupEl.classList.add(this.classes.close);
-                                optgroupClosableArrow.setAttribute("d", this.classes.arrowClose);
+                                optgroupClosableArrow.setAttribute('d', this.classes.arrowClose);
                             }
                         });
                         optgroupActions.appendChild(optgroupClosable);
@@ -1114,32 +1114,32 @@
         }
         option(option) {
             if (option.placeholder) {
-                const placeholder = document.createElement("div");
+                const placeholder = document.createElement('div');
                 placeholder.classList.add(this.classes.option);
                 placeholder.classList.add(this.classes.hide);
                 return placeholder;
             }
-            const optionEl = document.createElement("div");
+            const optionEl = document.createElement('div');
             optionEl.dataset.id = option.id;
             optionEl.classList.add(this.classes.option);
-            optionEl.setAttribute("role", "option");
+            optionEl.setAttribute('role', 'option');
             if (option.class) {
-                option.class.split(" ").forEach(dataClass => {
+                option.class.split(' ').forEach(dataClass => {
                     optionEl.classList.add(dataClass);
                 });
             }
             if (option.style) {
                 optionEl.style.cssText = option.style;
             }
-            if (this.settings.searchHighlight && this.content.search.input.value.trim() !== "") {
-                optionEl.innerHTML = this.highlightText(option.html !== "" ? option.html : option.text, this.content.search.input.value, this.classes.searchHighlighter);
-            } else if (option.html !== "") {
+            if (this.settings.searchHighlight && this.content.search.input.value.trim() !== '') {
+                optionEl.innerHTML = this.highlightText(option.html !== '' ? option.html : option.text, this.content.search.input.value, this.classes.searchHighlighter);
+            } else if (option.html !== '') {
                 optionEl.innerHTML = option.html;
             } else {
                 optionEl.textContent = option.text;
             }
             if (this.settings.showOptionTooltips && optionEl.textContent) {
-                optionEl.setAttribute("title", optionEl.textContent);
+                optionEl.setAttribute('title', optionEl.textContent);
             }
             if (!option.display) {
                 optionEl.classList.add(this.classes.hide);
@@ -1152,13 +1152,13 @@
             }
             if (option.selected) {
                 optionEl.classList.add(this.classes.selected);
-                optionEl.setAttribute("aria-selected", "true");
-                this.main.main.setAttribute("aria-activedescendant", optionEl.id);
+                optionEl.setAttribute('aria-selected', 'true');
+                this.main.main.setAttribute('aria-activedescendant', optionEl.id);
             } else {
                 optionEl.classList.remove(this.classes.selected);
-                optionEl.setAttribute("aria-selected", "false");
+                optionEl.setAttribute('aria-selected', 'false');
             }
-            optionEl.addEventListener("click", e => {
+            optionEl.addEventListener('click', e => {
                 e.preventDefault();
                 e.stopPropagation();
                 const selectedOptions = this.store.getSelected();
@@ -1235,7 +1235,7 @@
         }
         highlightText(str, search, className) {
             let completedString = str;
-            const regex = new RegExp("(?![^<]*>)(" + search.trim() + ")(?![^<]*>[^<>]*</)", "i");
+            const regex = new RegExp('(?![^<]*>)(' + search.trim() + ')(?![^<]*>[^<>]*</)', 'i');
             if (!str.match(regex)) {
                 return str;
             }
@@ -1253,10 +1253,10 @@
             this.content.main.classList.remove(this.classes.openBelow);
             this.content.main.classList.add(this.classes.openAbove);
             const containerRect = this.main.main.getBoundingClientRect();
-            this.content.main.style.margin = "-" + (mainHeight + contentHeight - 1) + "px 0px 0px 0px";
-            this.content.main.style.top = containerRect.top + containerRect.height + (this.settings.contentPosition === "fixed" ? 0 : window.scrollY) + "px";
-            this.content.main.style.left = containerRect.left + (this.settings.contentPosition === "fixed" ? 0 : window.scrollX) + "px";
-            this.content.main.style.width = containerRect.width + "px";
+            this.content.main.style.margin = '-' + (mainHeight + contentHeight - 1) + 'px 0px 0px 0px';
+            this.content.main.style.top = containerRect.top + containerRect.height + (this.settings.contentPosition === 'fixed' ? 0 : window.scrollY) + 'px';
+            this.content.main.style.left = containerRect.left + (this.settings.contentPosition === 'fixed' ? 0 : window.scrollX) + 'px';
+            this.content.main.style.width = containerRect.width + 'px';
         }
         moveContentBelow() {
             this.main.main.classList.remove(this.classes.openAbove);
@@ -1264,11 +1264,11 @@
             this.content.main.classList.remove(this.classes.openAbove);
             this.content.main.classList.add(this.classes.openBelow);
             const containerRect = this.main.main.getBoundingClientRect();
-            this.content.main.style.margin = "-1px 0px 0px 0px";
-            if (this.settings.contentPosition !== "relative") {
-                this.content.main.style.top = containerRect.top + containerRect.height + (this.settings.contentPosition === "fixed" ? 0 : window.scrollY) + "px";
-                this.content.main.style.left = containerRect.left + (this.settings.contentPosition === "fixed" ? 0 : window.scrollX) + "px";
-                this.content.main.style.width = containerRect.width + "px";
+            this.content.main.style.margin = '-1px 0px 0px 0px';
+            if (this.settings.contentPosition !== 'relative') {
+                this.content.main.style.top = containerRect.top + containerRect.height + (this.settings.contentPosition === 'fixed' ? 0 : window.scrollY) + 'px';
+                this.content.main.style.left = containerRect.left + (this.settings.contentPosition === 'fixed' ? 0 : window.scrollX) + 'px';
+                this.content.main.style.width = containerRect.width + 'px';
             }
         }
         ensureElementInView(container, element) {
@@ -1289,12 +1289,12 @@
             const spaceBelow = window.innerHeight - (mainRect.top + mainHeight);
             if (spaceBelow <= contentHeight) {
                 if (mainRect.top > contentHeight) {
-                    return "up";
+                    return 'up';
                 } else {
-                    return "down";
+                    return 'down';
                 }
             }
-            return "down";
+            return 'down';
         }
         updateDeselectAll() {
             if (!this.store || !this.settings) {
@@ -1319,7 +1319,7 @@
             this.observer = null;
             this.select = select;
             this.valueChange = this.valueChange.bind(this);
-            this.select.addEventListener("change", this.valueChange, {
+            this.select.addEventListener('change', this.valueChange, {
                 passive: true
             });
             this.observer = new MutationObserver(this.observeCall.bind(this));
@@ -1333,13 +1333,13 @@
         }
         hideUI() {
             this.select.tabIndex = -1;
-            this.select.style.display = "none";
-            this.select.setAttribute("aria-hidden", "true");
+            this.select.style.display = 'none';
+            this.select.setAttribute('aria-hidden', 'true');
         }
         showUI() {
-            this.select.removeAttribute("tabindex");
-            this.select.style.display = "";
-            this.select.removeAttribute("aria-hidden");
+            this.select.removeAttribute('tabindex');
+            this.select.style.display = '';
+            this.select.removeAttribute('aria-hidden');
         }
         changeListen(listen) {
             this.listen = listen;
@@ -1373,28 +1373,28 @@
             let optgroupOptionChanged = false;
             for (const m of mutations) {
                 if (m.target === this.select) {
-                    if (m.attributeName === "disabled") {
+                    if (m.attributeName === 'disabled') {
                         disabledChanged = true;
                     }
-                    if (m.attributeName === "class") {
+                    if (m.attributeName === 'class') {
                         classChanged = true;
                     }
-                    if (m.type === "childList") {
+                    if (m.type === 'childList') {
                         for (const n of m.addedNodes) {
-                            if (n.nodeName === "OPTION" && n.value === this.select.value) {
-                                this.select.dispatchEvent(new Event("change"));
+                            if (n.nodeName === 'OPTION' && n.value === this.select.value) {
+                                this.select.dispatchEvent(new Event('change'));
                                 break;
                             }
                         }
                         optgroupOptionChanged = true;
                     }
                 }
-                if (m.target.nodeName === "OPTGROUP" || m.target.nodeName === "OPTION") {
+                if (m.target.nodeName === 'OPTGROUP' || m.target.nodeName === 'OPTION') {
                     optgroupOptionChanged = true;
                 }
             }
             if (classChanged && this.onClassChange) {
-                this.onClassChange(this.select.className.split(" "));
+                this.onClassChange(this.select.className.split(' '));
             }
             if (disabledChanged && this.onDisabledChange) {
                 this.changeListen(false);
@@ -1411,10 +1411,10 @@
             let data = [];
             const nodes = this.select.childNodes;
             for (const n of nodes) {
-                if (n.nodeName === "OPTGROUP") {
+                if (n.nodeName === 'OPTGROUP') {
                     data.push(this.getDataFromOptgroup(n));
                 }
-                if (n.nodeName === "OPTION") {
+                if (n.nodeName === 'OPTION') {
                     data.push(this.getDataFromOption(n));
                 }
             }
@@ -1424,14 +1424,14 @@
             let data = {
                 id: optgroup.id,
                 label: optgroup.label,
-                selectAll: optgroup.dataset ? optgroup.dataset.selectall === "true" : false,
-                selectAllText: optgroup.dataset ? optgroup.dataset.selectalltext : "Select all",
-                closable: optgroup.dataset ? optgroup.dataset.closable : "off",
+                selectAll: optgroup.dataset ? optgroup.dataset.selectall === 'true' : false,
+                selectAllText: optgroup.dataset ? optgroup.dataset.selectalltext : 'Select all',
+                closable: optgroup.dataset ? optgroup.dataset.closable : 'off',
                 options: []
             };
             const options = optgroup.childNodes;
             for (const o of options) {
-                if (o.nodeName === "OPTION") {
+                if (o.nodeName === 'OPTION') {
                     data.options.push(this.getDataFromOption(o));
                 }
             }
@@ -1442,13 +1442,13 @@
                 id: option.id,
                 value: option.value,
                 text: option.text,
-                html: option.dataset && option.dataset.html ? option.dataset.html : "",
+                html: option.dataset && option.dataset.html ? option.dataset.html : '',
                 defaultSelected: option.defaultSelected,
                 selected: option.selected,
-                display: option.style.display !== "none",
+                display: option.style.display !== 'none',
                 disabled: option.disabled,
-                mandatory: option.dataset ? option.dataset.mandatory === "true" : false,
-                placeholder: option.dataset.placeholder === "true",
+                mandatory: option.dataset ? option.dataset.mandatory === 'true' : false,
+                placeholder: option.dataset.placeholder === 'true',
                 class: option.className,
                 style: option.style.cssText,
                 data: option.dataset
@@ -1458,10 +1458,10 @@
             let options = [];
             const opts = this.select.childNodes;
             for (const o of opts) {
-                if (o.nodeName === "OPTGROUP") {
+                if (o.nodeName === 'OPTGROUP') {
                     const optgroupOptions = o.childNodes;
                     for (const oo of optgroupOptions) {
-                        if (oo.nodeName === "OPTION") {
+                        if (oo.nodeName === 'OPTION') {
                             const option = oo;
                             if (option.selected) {
                                 options.push(this.getDataFromOption(option));
@@ -1469,7 +1469,7 @@
                         }
                     }
                 }
-                if (o.nodeName === "OPTION") {
+                if (o.nodeName === 'OPTION') {
                     const option = o;
                     if (option.selected) {
                         options.push(this.getDataFromOption(option));
@@ -1485,17 +1485,17 @@
             this.changeListen(false);
             const options = this.select.childNodes;
             for (const o of options) {
-                if (o.nodeName === "OPTGROUP") {
+                if (o.nodeName === 'OPTGROUP') {
                     const optgroup = o;
                     const optgroupOptions = optgroup.childNodes;
                     for (const oo of optgroupOptions) {
-                        if (oo.nodeName === "OPTION") {
+                        if (oo.nodeName === 'OPTION') {
                             const option = oo;
                             option.selected = ids.includes(option.id);
                         }
                     }
                 }
-                if (o.nodeName === "OPTION") {
+                if (o.nodeName === 'OPTION') {
                     const option = o;
                     option.selected = ids.includes(option.id);
                 }
@@ -1506,17 +1506,17 @@
             this.changeListen(false);
             const options = this.select.childNodes;
             for (const o of options) {
-                if (o.nodeName === "OPTGROUP") {
+                if (o.nodeName === 'OPTGROUP') {
                     const optgroup = o;
                     const optgroupOptions = optgroup.childNodes;
                     for (const oo of optgroupOptions) {
-                        if (oo.nodeName === "OPTION") {
+                        if (oo.nodeName === 'OPTION') {
                             const option = oo;
                             option.selected = values.includes(option.value);
                         }
                     }
                 }
-                if (o.nodeName === "OPTION") {
+                if (o.nodeName === 'OPTION') {
                     const option = o;
                     option.selected = values.includes(option.value);
                 }
@@ -1532,9 +1532,9 @@
                 this.select.style.cssText = style;
             }
             if (classes) {
-                this.select.className = "";
+                this.select.className = '';
                 classes.forEach(c => {
-                    if (c.trim() !== "") {
+                    if (c.trim() !== '') {
                         this.select.classList.add(c.trim());
                     }
                 });
@@ -1543,7 +1543,7 @@
         }
         updateOptions(data) {
             this.changeListen(false);
-            this.select.innerHTML = "";
+            this.select.innerHTML = '';
             for (const d of data) {
                 if (d instanceof Optgroup) {
                     this.select.appendChild(this.createOptgroup(d));
@@ -1552,19 +1552,19 @@
                     this.select.appendChild(this.createOption(d));
                 }
             }
-            this.select.dispatchEvent(new Event("change", {
+            this.select.dispatchEvent(new Event('change', {
                 bubbles: true
             }));
             this.changeListen(true);
         }
         createOptgroup(optgroup) {
-            const optgroupEl = document.createElement("optgroup");
+            const optgroupEl = document.createElement('optgroup');
             optgroupEl.id = optgroup.id;
             optgroupEl.label = optgroup.label;
             if (optgroup.selectAll) {
-                optgroupEl.dataset.selectAll = "true";
+                optgroupEl.dataset.selectAll = 'true';
             }
-            if (optgroup.closable !== "off") {
+            if (optgroup.closable !== 'off') {
                 optgroupEl.dataset.closable = optgroup.closable;
             }
             if (optgroup.options) {
@@ -1575,12 +1575,12 @@
             return optgroupEl;
         }
         createOption(info) {
-            const optionEl = document.createElement("option");
+            const optionEl = document.createElement('option');
             optionEl.id = info.id;
             optionEl.value = info.value;
             optionEl.textContent = info.text;
-            if (info.html !== "") {
-                optionEl.setAttribute("data-html", info.html);
+            if (info.html !== '') {
+                optionEl.setAttribute('data-html', info.html);
             }
             optionEl.defaultSelected = info.defaultSelected;
             optionEl.selected = info.selected;
@@ -1588,29 +1588,29 @@
                 optionEl.disabled = true;
             }
             if (!info.display) {
-                optionEl.style.display = "none";
+                optionEl.style.display = 'none';
             }
             if (info.placeholder) {
-                optionEl.setAttribute("data-placeholder", "true");
+                optionEl.setAttribute('data-placeholder', 'true');
             }
             if (info.mandatory) {
-                optionEl.setAttribute("data-mandatory", "true");
+                optionEl.setAttribute('data-mandatory', 'true');
             }
             if (info.class) {
-                info.class.split(" ").forEach(optionClass => {
+                info.class.split(' ').forEach(optionClass => {
                     optionEl.classList.add(optionClass);
                 });
             }
-            if (info.data && typeof info.data === "object") {
+            if (info.data && typeof info.data === 'object') {
                 Object.keys(info.data).forEach(key => {
-                    optionEl.setAttribute("data-" + kebabCase(key), info.data[key]);
+                    optionEl.setAttribute('data-' + kebabCase(key), info.data[key]);
                 });
             }
             return optionEl;
         }
         destroy() {
             this.changeListen(false);
-            this.select.removeEventListener("change", this.valueChange);
+            this.select.removeEventListener('change', this.valueChange);
             if (this.observer) {
                 this.observer.disconnect();
                 this.observer = null;
@@ -1621,8 +1621,8 @@
     }
     class Settings {
         constructor(settings) {
-            this.id = "";
-            this.style = "";
+            this.id = '';
+            this.style = '';
             this.class = [];
             this.isMultiple = false;
             this.isOpen = false;
@@ -1631,23 +1631,23 @@
             if (!settings) {
                 settings = {};
             }
-            this.id = "ss-" + generateID();
-            this.style = settings.style || "";
+            this.id = 'ss-' + generateID();
+            this.style = settings.style || '';
             this.class = settings.class || [];
             this.disabled = settings.disabled !== undefined ? settings.disabled : false;
             this.alwaysOpen = settings.alwaysOpen !== undefined ? settings.alwaysOpen : false;
             this.showSearch = settings.showSearch !== undefined ? settings.showSearch : true;
             this.focusSearch = settings.focusSearch !== undefined ? settings.focusSearch : true;
-            this.ariaLabel = settings.ariaLabel || "Combobox";
-            this.searchPlaceholder = settings.searchPlaceholder || "Search";
-            this.searchText = settings.searchText || "No Results";
-            this.searchingText = settings.searchingText || "Searching...";
+            this.ariaLabel = settings.ariaLabel || 'Combobox';
+            this.searchPlaceholder = settings.searchPlaceholder || 'Search';
+            this.searchText = settings.searchText || 'No Results';
+            this.searchingText = settings.searchingText || 'Searching...';
             this.searchHighlight = settings.searchHighlight !== undefined ? settings.searchHighlight : false;
             this.closeOnSelect = settings.closeOnSelect !== undefined ? settings.closeOnSelect : true;
             this.contentLocation = settings.contentLocation || document.body;
-            this.contentPosition = settings.contentPosition || "absolute";
-            this.openPosition = settings.openPosition || "auto";
-            this.placeholderText = settings.placeholderText !== undefined ? settings.placeholderText : "Select Value";
+            this.contentPosition = settings.contentPosition || 'absolute';
+            this.openPosition = settings.openPosition || 'auto';
+            this.placeholderText = settings.placeholderText !== undefined ? settings.placeholderText : 'Select Value';
             this.allowDeselect = settings.allowDeselect !== undefined ? settings.allowDeselect : false;
             this.hideSelected = settings.hideSelected !== undefined ? settings.hideSelected : false;
             this.keepOrder = settings.keepOrder !== undefined ? settings.keepOrder : false;
@@ -1656,7 +1656,7 @@
             this.maxSelected = settings.maxSelected || 1e3;
             this.timeoutDelay = settings.timeoutDelay || 200;
             this.maxValuesShown = settings.maxValuesShown || 20;
-            this.maxValuesMessage = settings.maxValuesMessage || "{number} selected";
+            this.maxValuesMessage = settings.maxValuesMessage || '{number} selected';
             this.addableText = settings.addableText || 'Press "Enter" to add {value}';
         }
     }
@@ -1699,16 +1699,16 @@
                     this.close();
                 }
             };
-            this.selectEl = typeof config.select === "string" ? document.querySelector(config.select) : config.select;
+            this.selectEl = typeof config.select === 'string' ? document.querySelector(config.select) : config.select;
             if (!this.selectEl) {
                 if (config.events && config.events.error) {
-                    config.events.error(new Error("Could not find select element"));
+                    config.events.error(new Error('Could not find select element'));
                 }
                 return;
             }
-            if (this.selectEl.tagName !== "SELECT") {
+            if (this.selectEl.tagName !== 'SELECT') {
                 if (config.events && config.events.error) {
-                    config.events.error(new Error("Element isnt of type select"));
+                    config.events.error(new Error('Element isnt of type select'));
                 }
                 return;
             }
@@ -1717,7 +1717,7 @@
             }
             this.settings = new Settings(config.settings);
             this.cssClasses = new CssClasses(config.cssClasses);
-            const debounceEvents = [ "afterChange", "beforeOpen", "afterOpen", "beforeClose", "afterClose" ];
+            const debounceEvents = [ 'afterChange', 'beforeOpen', 'afterOpen', 'beforeClose', 'afterClose' ];
             for (const key in config.events) {
                 if (!config.events.hasOwnProperty(key)) {
                     continue;
@@ -1731,7 +1731,7 @@
             this.settings.disabled = ((_a = config.settings) === null || _a === void 0 ? void 0 : _a.disabled) ? config.settings.disabled : this.selectEl.disabled;
             this.settings.isMultiple = this.selectEl.multiple;
             this.settings.style = this.selectEl.style.cssText;
-            this.settings.class = this.selectEl.className.split(" ");
+            this.settings.class = this.selectEl.className.split(' ');
             this.select = new Select(this.selectEl);
             this.select.updateSelect(this.settings.id, this.settings.style, this.settings.class);
             this.select.hideUI();
@@ -1752,7 +1752,7 @@
             this.select.onOptionsChange = data => {
                 this.setData(data);
             };
-            this.store = new Store(this.settings.isMultiple ? "multiple" : "single", config.data ? config.data : this.select.getData());
+            this.store = new Store(this.settings.isMultiple ? 'multiple' : 'single', config.data ? config.data : this.select.getData());
             if (config.data) {
                 this.select.updateOptions(this.store.getData());
             }
@@ -1769,21 +1769,21 @@
             this.render = new Render(this.settings, this.cssClasses, this.store, renderCallbacks);
             this.render.renderValues();
             this.render.renderOptions(this.store.getData());
-            const selectAriaLabel = this.selectEl.getAttribute("aria-label");
-            const selectAriaLabelledBy = this.selectEl.getAttribute("aria-labelledby");
+            const selectAriaLabel = this.selectEl.getAttribute('aria-label');
+            const selectAriaLabelledBy = this.selectEl.getAttribute('aria-labelledby');
             if (selectAriaLabel) {
-                this.render.main.main.setAttribute("aria-label", selectAriaLabel);
+                this.render.main.main.setAttribute('aria-label', selectAriaLabel);
             } else if (selectAriaLabelledBy) {
-                this.render.main.main.setAttribute("aria-labelledby", selectAriaLabelledBy);
+                this.render.main.main.setAttribute('aria-labelledby', selectAriaLabelledBy);
             }
             if (this.selectEl.parentNode) {
                 this.selectEl.parentNode.insertBefore(this.render.main.main, this.selectEl.nextSibling);
             }
-            window.addEventListener("resize", this.windowResize, false);
-            if (this.settings.openPosition === "auto") {
-                window.addEventListener("scroll", this.windowScroll, false);
+            window.addEventListener('resize', this.windowResize, false);
+            if (this.settings.openPosition === 'auto') {
+                window.addEventListener('scroll', this.windowScroll, false);
             }
-            document.addEventListener("visibilitychange", this.windowVisibilityChange);
+            document.addEventListener('visibilitychange', this.windowVisibilityChange);
             if (this.settings.disabled) {
                 this.disable();
             }
@@ -1844,11 +1844,11 @@
                     ids.push(option.id);
                 }
             }
-            this.store.setSelectedBy("id", ids);
+            this.store.setSelectedBy('id', ids);
             const data = this.store.getData();
             this.select.updateOptions(data);
             this.render.renderValues();
-            if (this.render.content.search.input.value !== "") {
+            if (this.render.content.search.input.value !== '') {
                 this.search(this.render.content.search.input.value);
             } else {
                 this.render.renderOptions(data);
@@ -1892,9 +1892,9 @@
                 if (this.settings.isOpen) {
                     this.settings.isFullOpen = true;
                 }
-                document.addEventListener("click", this.documentClick);
+                document.addEventListener('click', this.documentClick);
             }, this.settings.timeoutDelay);
-            if (this.settings.contentPosition === "absolute") {
+            if (this.settings.contentPosition === 'absolute') {
                 if (this.settings.intervalMove) {
                     clearInterval(this.settings.intervalMove);
                 }
@@ -1909,8 +1909,8 @@
                 this.events.beforeClose();
             }
             this.render.close();
-            if (this.render.content.search.input.value !== "") {
-                this.search("");
+            if (this.render.content.search.input.value !== '') {
+                this.search('');
             }
             this.render.mainFocus(eventType);
             this.settings.isOpen = false;
@@ -1919,7 +1919,7 @@
                 if (this.events.afterClose) {
                     this.events.afterClose();
                 }
-                document.removeEventListener("click", this.documentClick);
+                document.removeEventListener('click', this.documentClick);
             }, this.settings.timeoutDelay);
             if (this.settings.intervalMove) {
                 clearInterval(this.settings.intervalMove);
@@ -1930,7 +1930,7 @@
                 this.render.content.search.input.value = value;
             }
             if (!this.events.search) {
-                this.render.renderOptions(value === "" ? this.store.getData() : this.store.search(value, this.events.searchFilter));
+                this.render.renderOptions(value === '' ? this.store.getData() : this.store.search(value, this.events.searchFilter));
                 return;
             }
             this.render.renderSearching();
@@ -1939,64 +1939,64 @@
                 searchResp.then(data => {
                     this.render.renderOptions(this.store.partialToFullData(data));
                 }).catch(err => {
-                    this.render.renderError(typeof err === "string" ? err : err.message);
+                    this.render.renderError(typeof err === 'string' ? err : err.message);
                 });
                 return;
             } else if (Array.isArray(searchResp)) {
                 this.render.renderOptions(this.store.partialToFullData(searchResp));
             } else {
-                this.render.renderError("Search event must return a promise or an array of data");
+                this.render.renderError('Search event must return a promise or an array of data');
             }
         }
         destroy() {
-            document.removeEventListener("click", this.documentClick);
-            window.removeEventListener("resize", this.windowResize, false);
-            if (this.settings.openPosition === "auto") {
-                window.removeEventListener("scroll", this.windowScroll, false);
+            document.removeEventListener('click', this.documentClick);
+            window.removeEventListener('resize', this.windowResize, false);
+            if (this.settings.openPosition === 'auto') {
+                window.removeEventListener('scroll', this.windowScroll, false);
             }
-            document.removeEventListener("visibilitychange", this.windowVisibilityChange);
+            document.removeEventListener('visibilitychange', this.windowVisibilityChange);
             this.store.setData([]);
             this.render.destroy();
             this.select.destroy();
         }
     }
     window.SlimSelect = SlimSelect;
-    document.addEventListener("youla:init", () => {
-        Youla.directive("select", (el, output) => {
+    document.addEventListener('youla:init', () => {
+        Youla.directive('select', (el, output) => {
             const settings = {
                 showSearch: false,
                 hideSelected: false,
                 closeOnSelect: true
             };
-            if (el.hasAttribute("multiple")) {
+            if (el.hasAttribute('multiple')) {
                 settings.hideSelected = true;
                 settings.closeOnSelect = false;
             }
-            Object.assign(settings, output && typeof output === "object" ? output : {});
+            Object.assign(settings, output && typeof output === 'object' ? output : {});
             const data = Array.from(el.options).reduce((acc, option) => {
-                const image = option.getAttribute("data-image");
-                const icon = option.getAttribute("data-icon");
-                const description = option.getAttribute("data-description") || "";
-                const html = `${image ? `<img src="${image}" alt />` : ""}${icon ? `<i class="${icon}"></i>` : ""}` + `<span class="ss-text">${option.text}${description ? `<span class="ss-description">${description}</span>` : ""}</span>`;
+                const image = option.getAttribute('data-image');
+                const icon = option.getAttribute('data-icon');
+                const description = option.getAttribute('data-description') || '';
+                const html = `${image ? `<img src="${image}" alt />` : ''}${icon ? `<i class="${icon}"></i>` : ''}` + `<span class="ss-text">${option.text}${description ? `<span class="ss-description">${description}</span>` : ''}</span>`;
                 const optionData = {
                     text: option.text,
                     value: option.value,
-                    html: html,
+                    html,
                     selected: option.selected,
                     display: true,
                     disabled: false,
                     mandatory: false,
                     placeholder: false,
-                    class: "",
-                    style: "",
+                    class: '',
+                    style: '',
                     data: {}
                 };
-                if (option.parentElement.tagName === "OPTGROUP") {
-                    const label = option.parentElement.getAttribute("label");
+                if (option.parentElement.tagName === 'OPTGROUP') {
+                    const label = option.parentElement.getAttribute('label');
                     let group = acc.find(item => item.label === label);
                     if (!group) {
                         group = {
-                            label: label,
+                            label,
                             options: []
                         };
                         acc.push(group);
@@ -2009,9 +2009,9 @@
             }, []);
             try {
                 new SlimSelect({
-                    settings: settings,
+                    settings,
                     select: el,
-                    data: data
+                    data
                 });
             } catch {
                 console.error('Youla.js: "SlimSelect" is not defined — u-select requires SlimSelect to be loaded.');

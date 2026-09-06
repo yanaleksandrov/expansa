@@ -29,7 +29,7 @@ defined('EX_PATH') || exit;
 	]
 )->values();
 ?>
-<div class="plugins__item" x-data="<?php printf( '{installed: %s, active: %s}', $installed ? 'true' : 'false', $active ? 'true' : 'false' ); ?>">
+<div class="plugins__item" u-data="<?php printf( '{installed: %s, active: %s}', $installed ? 'true' : 'false', $active ? 'true' : 'false' ); ?>">
 	<div class="plugins__card">
 		<div class="plugins__image" style="background-image: url(<?php echo $screenshot; ?>)"></div>
 		<div class="plugins__data">
@@ -40,8 +40,8 @@ defined('EX_PATH') || exit;
 			</div>
 		</div>
 		<div class="plugins__action">
-			<button class="btn btn--outline"<?php ( $installed && $active ) && print( ' x-cloak' ); ?>><?php echo t( 'Install' ); ?></button>
-			<button class="btn btn--primary"<?php ( $installed && ! $active ) && print( ' x-cloak' ); ?>><?php echo t( 'Activate' ); ?></button>
+			<button class="btn btn--outline"<?php ( $installed && $active ) && print( ' u-cloak' ); ?>><?php echo t( 'Install' ); ?></button>
+			<button class="btn btn--primary"<?php ( $installed && ! $active ) && print( ' u-cloak' ); ?>><?php echo t( 'Activate' ); ?></button>
 		</div>
 	</div>
 	<div class="plugins__info">

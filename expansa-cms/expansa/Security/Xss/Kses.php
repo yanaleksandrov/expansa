@@ -220,7 +220,7 @@ class Kses
         ],
         'select'     => [
             'class'    => 1,
-            'x-select' => 1,
+            'u-select' => 1,
         ],
         'option'     => [
             'value'    => 1,

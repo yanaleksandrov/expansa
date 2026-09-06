@@ -22,5 +22,5 @@ defined('EX_PATH') || exit;
 ?>
 <div<?php echo Arr::toHtmlAtts($attributes); ?>>
     Published
-    <div x-text="item.<?php echo $prop; ?>"></div>
+    <div u-text="item.<?php echo $prop; ?>"></div>
 </div>

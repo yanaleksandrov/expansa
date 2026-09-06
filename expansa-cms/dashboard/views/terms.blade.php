@@ -16,7 +16,7 @@ $table = new App\Tables\Terms();
     </div>
     <div class="terms-main">
         @if($table->data)
-            <div class="table" x-data="table">
+            <div class="table" u-data="table">
                 <div class="table__head" style="{{ $table->stylize($table->cells) }}">
                     @foreach($table->cells as $cell)
                         <?php echo view('table/cell-head', [ 'cell' => $cell ]); ?>

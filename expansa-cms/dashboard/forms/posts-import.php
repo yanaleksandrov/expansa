@@ -9,7 +9,7 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'card card-border',
 		'@submit.prevent' => '$ajax("posts/import").then(response => output = response.output,$wizard.goNext())',
-		'x-data'          => '{fields: "", output: ""}',
+		'u-data'          => '{fields: "", output: ""}',
 	],
 	[
 		[
@@ -19,9 +19,9 @@ return \Expansa\Facades\Form::enqueue(
 				?>
 				<div class="progress" :style="'--expansa-progress:' + $wizard.progress().progress"></div>
 				<div class="p-7 df aic jcsb">
-					<span x-text="$wizard.current().title"><?php echo t( 'Upload CSV file' ); ?></span>
+					<span u-text="$wizard.current().title"><?php echo t( 'Upload CSV file' ); ?></span>
 					<span class="t-muted">
-						step <strong x-text="$wizard.progress().current">1</strong> from <strong x-text="$wizard.progress().total">2</strong>
+						step <strong u-text="$wizard.progress().current">1</strong> from <strong u-text="$wizard.progress().total">2</strong>
 					</span>
 				</div>
 				<div class="card-hr"></div>
@@ -32,8 +32,8 @@ return \Expansa\Facades\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'pl-7 pr-7',
-				'x-wizard:step'  => 'fields.trim()',
-				'x-wizard:title' => t( 'Upload CSV file' ),
+				'u-wizard:step'  => 'fields.trim()',
+				'u-wizard:title' => t( 'Upload CSV file' ),
 			],
 			'fields' => [
 				[
@@ -68,9 +68,9 @@ return \Expansa\Facades\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'pl-7 pr-7',
-				'x-cloak'        => true,
-				'x-wizard:step'  => 'output.trim()',
-				'x-wizard:title' => t( 'Column mapping' ),
+				'u-cloak'        => true,
+				'u-wizard:step'  => 'output.trim()',
+				'u-wizard:title' => t( 'Column mapping' ),
 			],
 			'fields' => [
 				[
@@ -82,7 +82,7 @@ return \Expansa\Facades\Form::enqueue(
 				],
 				[
 					'type'     => 'custom',
-					'callback' => fn () => '<div class="dg g-6" x-html="fields"></div>',
+					'callback' => fn () => '<div class="dg g-6" u-html="fields"></div>',
 				],
 			],
 		],
@@ -90,9 +90,9 @@ return \Expansa\Facades\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'dg p-7',
-				'x-html'         => 'output',
-				'x-cloak'        => true,
-				'x-wizard:title' => t( 'Import is completed' ),
+				'u-html'         => 'output',
+				'u-cloak'        => true,
+				'u-wizard:title' => t( 'Import is completed' ),
 			],
 		],
 		[
@@ -100,10 +100,10 @@ return \Expansa\Facades\Form::enqueue(
 			'callback' => function () {
 				?>
 				<!-- buttons -->
-				<div class="p-7 df jcsb g-2" x-show="!output.trim()">
-					<button type="button" class="btn btn--outline" :disabled="$wizard.cannotGoBack()" x-show="$wizard.isNotLast()" @click="$wizard.goBack()" disabled><?php echo t( 'Back' ); ?></button>
-					<button type="button" class="btn btn--primary" :disabled="$wizard.cannotGoNext()" x-show="$wizard.isFirst()" @click="$wizard.goNext()" disabled><?php echo t( 'Continue' ); ?></button>
-					<button type="submit" class="btn btn--primary" x-show="$wizard.isStep(1)" x-cloak><?php echo t( 'Run the importer' ); ?></button>
+				<div class="p-7 df jcsb g-2" u-show="!output.trim()">
+					<button type="button" class="btn btn--outline" :disabled="$wizard.cannotGoBack()" u-show="$wizard.isNotLast()" @click="$wizard.goBack()" disabled><?php echo t( 'Back' ); ?></button>
+					<button type="button" class="btn btn--primary" :disabled="$wizard.cannotGoNext()" u-show="$wizard.isFirst()" @click="$wizard.goNext()" disabled><?php echo t( 'Continue' ); ?></button>
+					<button type="submit" class="btn btn--primary" u-show="$wizard.isStep(1)" u-cloak><?php echo t( 'Run the importer' ); ?></button>
 				</div>
 				<?php
 			},

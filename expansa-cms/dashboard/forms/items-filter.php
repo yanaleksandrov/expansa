@@ -8,8 +8,8 @@ return \Expansa\Facades\Form::enqueue(
 	'items-filter',
 	[
 		'class'           => 'table__filter',
-		'x-show'          => 'showFilter === true',
-		'x-cloak'         => true,
+		'u-show'          => 'showFilter === true',
+		'u-cloak'         => true,
 		'@submit.prevent' => '$ajax("items/filter")',
 	],
 	[

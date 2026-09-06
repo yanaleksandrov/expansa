@@ -34,12 +34,12 @@ $themes  = Expansa\Facades\Extensions::get('theme');
     </h4>
     <?php endif; ?>
     <div class="df aic g-1">
-        <div class="df aic g-1" x-show="!bulk">
+        <div class="df aic g-1" u-show="!bulk">
             <?php if ($filter) : ?>
                 <div class="df aic g-1">
                     <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '{{ t('Reset Filter') }}' : '<?php echo t( 'Filter' ); ?>'">
                         <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
-                        <span x-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'"><?php echo t('Filter'); ?></span>
+                        <span u-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'"><?php echo t('Filter'); ?></span>
                     </button>
                     <?php
                     echo view(
@@ -131,7 +131,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                             'validator' => '',
                             'conditions' => [],
                             'attributes' => [
-                                'x-select' => '',
+                                'u-select' => '',
                                 'name' => 'language',
                             ],
                             'options' => I18n::getLanguagesOptions(),
@@ -156,8 +156,8 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                             'conditions' => [],
                             'attributes' => [
                                 'name' => 'project',
-                                'x-model.fill' => 'project',
-                                'x-select' => '',
+                                'u-model.fill' => 'project',
+                                'u-select' => '',
                             ],
                             'options' => [
                                 'core' => [
@@ -201,9 +201,9 @@ $themes  = Expansa\Facades\Extensions::get('theme');
         </div>
 
         <?php if ($actions) : ?>
-        <div class="df aic g-1" x-show="bulk" x-cloak>
+        <div class="df aic g-1" u-show="bulk" u-cloak>
                 <?php echo form('posts-actions', EX_DASHBOARD . 'forms/posts-actions.php'); ?>
-            <button type="button" class="btn btn--sm t-red" x-bind="reset"><i
+            <button type="button" class="btn btn--sm t-red" u-bind="reset"><i
                         class="ph ph-trash"></i> <?php echo t('Reset'); ?></button>
         </div>
         <?php endif; ?>

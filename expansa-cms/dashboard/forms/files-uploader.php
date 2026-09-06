@@ -8,7 +8,7 @@ return Expansa\Facades\Form::enqueue(
 	'files-uploader',
 	[
 		'class'  => 'dg g-6 p-6',
-	    'x-data' => '{percent: 0, uploader: null}',
+	    'u-data' => '{percent: 0, uploader: null}',
     ],
 	[
 		[
@@ -52,7 +52,7 @@ return Expansa\Facades\Form::enqueue(
 			'attributes'  => [
 				'placeholder' => t( 'Each URL must be from a new line' ),
 				'@change'     => '$ajax("media/grab", {urls}).then(response => files = response)',
-				'x-textarea'  => 19,
+				'u-textarea'  => 19,
 			],
 		],
 	]

@@ -300,9 +300,6 @@ final class Sanitizer
             'readonly',
             'required',
             'selected',
-
-            'v-cloak',
-            'x-cloak',
         ];
 
         $atts = [];
@@ -322,7 +319,7 @@ final class Sanitizer
                     'value' => sprintf('%s="%s"', $attribute, $value),
                     default => $value
                         ? sprintf('%s="%s"', $attribute, $value)
-                        : ( str_starts_with($attribute, 'x-') ? $attribute : '' ),
+                        : ( str_starts_with($attribute, 'u-') ? $attribute : '' ),
                 };
             }
         }

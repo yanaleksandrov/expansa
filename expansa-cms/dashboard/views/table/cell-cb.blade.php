@@ -13,4 +13,4 @@ defined('EX_PATH') || exit;
 
 $prop = Safe::prop($__data['key'] ?? '');
 ?>
-<input type="checkbox" :name="`items[${i}]`" x-bind="switcher"/>
+<input type="checkbox" :name="`items[${i}]`" u-bind="switcher"/>

@@ -70,7 +70,7 @@ new class
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['expansa', 'air-datepicker', 'notifications', 'ajax', 'slimselect', 'drooltip', 'dragula', 'croppr', 'dialog', 'storage', 'alpine', 'sortable', 'x'];
+        $scripts = ['youla-expansa', 'youla-extensions', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'dialog', 'storage', 'sortable', 'youla'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'expansa') {

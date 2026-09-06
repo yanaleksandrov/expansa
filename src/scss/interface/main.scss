@@ -88,10 +88,7 @@ template {
   display: none !important;
 }
 
-[x-cloak],
-[v-hide],
-[v-each],
-[v-each\.lazy] {
+[u-each] {
   display: none !important;
 }
 
@@ -254,7 +251,7 @@ textarea {
     resize: none;
     transition: none;
 
-    &:not([x-autocomplete]) {
+    &:not([u-autocomplete]) {
       cursor: initial;
       color: var(--expansa-text-muted) !important;
     }
@@ -311,12 +308,12 @@ select {
     background-size: 0.8em;
   }
 
-  &[x-select] {
+  &[u-select] {
     border-radius: var(--expansa-border-radius);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
-  &[multiple][x-select] {
+  &[multiple][u-select] {
     max-height: 1.875rem;
     line-height: 1.2;
   }

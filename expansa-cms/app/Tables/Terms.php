@@ -29,7 +29,7 @@ final class Terms extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')->title('<input type="checkbox" x-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
+            $this->cell('cb')->title('<input type="checkbox" u-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
             $this->cell('image')->title(t('Image'))->fixedWidth('2.5rem')->view('image'),
             $this->cell('title')->title(t('Title'))->view('title'),
             $this->cell('slug')->title(t('Slug'))->view('raw'),

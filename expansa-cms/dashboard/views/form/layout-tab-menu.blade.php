@@ -19,7 +19,7 @@ if (count($fields) === 0) {
     return;
 }
 ?>
-<ul class="<?php echo trim( sprintf( 'tab__nav %s', $classMenu ) ); ?>" x-sticky>
+<ul class="<?php echo trim( sprintf( 'tab__nav %s', $classMenu ) ); ?>" u-sticky>
 	<?php
 	foreach ( $fields as $field ) :
 		[ $prop, $label, $icon, $class ] = Safe::data(
@@ -32,7 +32,7 @@ if (count($fields) === 0) {
             ]
         )->values();
 		?>
-		<li class="<?php echo trim( sprintf( 'tab__title %s', $class ) ); ?>" x-bind="tabButton('<?php echo $prop; ?>')">
+		<li class="<?php echo trim( sprintf( 'tab__title %s', $class ) ); ?>" u-bind="tabButton('<?php echo $prop; ?>')">
 			<?php $icon && printf( '<i class="%s"></i> ', $icon ); ?>
 			<?php echo $label; ?>
 

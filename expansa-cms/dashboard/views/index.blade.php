@@ -44,7 +44,7 @@ $table = $__data['table'] ?? null;
     Hook::call('renderDashboardHeader');
     ?>
 </head>
-<body x-data="expansa" @keydown.window.prevent.ctrl.s="$notification.add(notifications.ctrlS)">
+<body u-data="expansa" @keydown.window.prevent.ctrl.s="$notification.add(notifications.ctrlS)">
 <div class="expansa" :class="showMenu && 'active'">
     <div class="expansa-bar">
         <div class="expansa-bar-burger" :class="showMenu && 'active'" @click="showMenu = !showMenu">
@@ -90,8 +90,8 @@ $table = $__data['table'] ?? null;
 <div class="dialog" :class="$store.dialog?.class" id="expansa-dialog">
     <div class="dialog-wrapper" @click.outside="$dialog.close()">
         <div class="dialog-header">
-            <template x-if="$store.dialog?.title">
-                <h6 class="dialog-title" x-text="$store.dialog.title"></h6>
+            <template u-if="$store.dialog?.title">
+                <h6 class="dialog-title" u-text="$store.dialog.title"></h6>
             </template>
             <button class="dialog-close" type="button" @click="$dialog.close()"></button>
         </div>
@@ -100,21 +100,21 @@ $table = $__data['table'] ?? null;
 </div>
 
 <!-- notifications start -->
-<template x-if="$store.notifications.length">
+<template u-if="$store.notifications.length">
     <div class="notifications">
-        <template x-for="(notification, i) in $store.notifications">
+        <template u-for="(notification, i) in $store.notifications">
             <div class="notifications-item" :class="notification.class"
                  :style="`--notice-scale: ${1 - ($store.notifications.length - i - 1) * 0.005}`">
                 <div class="notifications-wrapper">
-                    <template x-if="notification.type">
+                    <template u-if="notification.type">
                         <div class="notifications-icon">
-                            <i class="ph ph-bell-ringing t-gray" x-show="notification.type === 'info'"></i>
-                            <i class="ph ph-siren t-red" x-show="notification.type === 'error'"></i>
-                            <i class="ph ph-check t-green" x-show="notification.type === 'success'"></i>
-                            <i class="ph ph-shield-warning t-orange" x-show="notification.type === 'warning'"></i>
+                            <i class="ph ph-bell-ringing t-gray" u-show="notification.type === 'info'"></i>
+                            <i class="ph ph-siren t-red" u-show="notification.type === 'error'"></i>
+                            <i class="ph ph-check t-green" u-show="notification.type === 'success'"></i>
+                            <i class="ph ph-shield-warning t-orange" u-show="notification.type === 'warning'"></i>
                         </div>
                     </template>
-                    <div class="notifications-text" x-text="notification.message"></div>
+                    <div class="notifications-text" u-text="notification.message"></div>
                     <div class="notifications-close"
                          :style="notification.duration && `--notice-animation: ${notification.animation}`"
                          @click="$notification.close(notification.id)"></div>

@@ -24,7 +24,7 @@ return \Expansa\Facades\Form::enqueue(
     [
         'class'           => 'card card-border',
         '@submit.prevent' => '$ajax("import/documents", "", response => {completed = response})',
-        'x-data'          => '{project:"",completed:""}',
+        'u-data'          => '{project:"",completed:""}',
     ],
     [
         [
@@ -34,9 +34,9 @@ return \Expansa\Facades\Form::enqueue(
                 ?>
                 <div class="progress" :style="'--expansa-progress:' + $wizard.progress().progress"></div>
                 <div class="p-8 pt-7 pb-7 df aic jcsb">
-                    <span x-text="$wizard.current().title"><?php echo t('Choose project'); ?></span>
+                    <span u-text="$wizard.current().title"><?php echo t('Choose project'); ?></span>
                     <span class="t-muted">
-                        step <strong x-text="$wizard.progress().current">1</strong> from <strong x-text="$wizard.progress().total">2</strong>
+                        step <strong u-text="$wizard.progress().current">1</strong> from <strong u-text="$wizard.progress().total">2</strong>
                     </span>
                 </div>
                 <div class="card-hr"></div>
@@ -47,7 +47,7 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'          => 'pl-8 pr-8',
-                'x-wizard:title' => t('Choose project'),
+                'u-wizard:title' => t('Choose project'),
             ],
             'fields'     => [
                 [
@@ -88,13 +88,13 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'          => 'pl-8 pr-8',
-                'x-cloak'        => true,
-                'x-wizard:title' => t('Project import is completed'),
+                'u-cloak'        => true,
+                'u-wizard:title' => t('Project import is completed'),
             ],
             'fields'     => [
                 [
                     'type'     => 'custom',
-                    'callback' => fn () => '<div class="dg" x-html="completed"></div>',
+                    'callback' => fn () => '<div class="dg" u-html="completed"></div>',
                 ],
             ],
         ],

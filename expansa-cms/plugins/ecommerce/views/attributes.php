@@ -12,7 +12,7 @@ use Expansa\Builders\Form;
 ?>
 <div class="expansa-main">
 	<div class="attributes">
-		<form class="attributes-wrapper" x-data="{attributes: []}">
+		<form class="attributes-wrapper" u-data="{attributes: []}">
 			<div class="attributes-editor">
 				<h5 class="attributes-title">
 					<span class="fw-600 mr-auto"><?php echo t( 'Attributes' ); ?></span>
@@ -26,19 +26,19 @@ use Expansa\Builders\Form;
 				<?php Form::make( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
 			</div>
 			<div class="attributes-side">
-				<div x-text="`<?php echo t_attr( ':attributesCount items', '${attributes.length}' ); ?>`">0 items</div>
+				<div u-text="`<?php echo t_attr( ':attributesCount items', '${attributes.length}' ); ?>`">0 items</div>
 				<div class="attributes-list">
 					<div class="attributes-values">
-						<template x-if="attributes.length">
-							<template x-for="(value, i) in attributes" :key="i">
+						<template u-if="attributes.length">
+							<template u-for="(value, i) in attributes" :key="i">
 								<a class="attributes-value">
-									<span class="attributes-value-title" x-text="`attributes.${i}.title`"></span>
-									<span class="attributes-value-slug" x-text="`attributes.${i}.slug`"></span>
+									<span class="attributes-value-title" u-text="`attributes.${i}.title`"></span>
+									<span class="attributes-value-slug" u-text="`attributes.${i}.slug`"></span>
 									<div class="btn btn--icon" @click="attributes.splice(i, 1)"><i class="ph ph-pen"></i></div>
 								</a>
 							</template>
 						</template>
-						<template x-if="!attributes.length">
+						<template u-if="!attributes.length">
 							<?php
 							echo view(
 								'global/state',

@@ -12,11 +12,11 @@ if ( ! defined( 'EX_PATH' ) ) {
 ?>
 <!-- selfie maker start -->
 <template id="take-selfie">
-	<div class="p-7 t-center" x-data="{second: '', showImg: ''}">
-		<div x-init="$stream.start($refs)" style="position: relative; overflow: hidden;">
-			<video x-ref="video" class="db mw" autoplay style="object-fit: cover; aspect-ratio: 4/3;"></video>
-			<canvas x-ref="canvas" x-show="!showImg" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 60%);"></canvas>
-			<img x-ref="image" x-show="showImg" x-cloak alt="" src="/dashboard/assets/images/1x1.png" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 98%);">
+	<div class="p-7 t-center" u-data="{second: '', showImg: ''}">
+		<div u-init="$stream.start($refs)" style="position: relative; overflow: hidden;">
+			<video u-ref="video" class="db mw" autoplay style="object-fit: cover; aspect-ratio: 4/3;"></video>
+			<canvas u-ref="canvas" u-show="!showImg" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 60%);"></canvas>
+			<img u-ref="image" u-show="showImg" u-cloak alt="" src="/dashboard/assets/images/1x1.png" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 98%);">
 		</div>
 		<div
 			class="fs-48"
@@ -25,7 +25,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			:style="second && 'position: fixed; top: 1rem; left: 0; right: 0; margin: 0 auto; transition: all 1s; animation: ticker 1s ease infinite;'"
 		></div>
 
-		<div x-show="!showImg">
+		<div u-show="!showImg">
 			<h6><?php echo t( 'Center your face' ); ?></h6>
 			<div class="fs-14 t-muted mt-2 pl-4 pr-4">
 				<?php echo t( 'Align your face to the center of the selfie area and then take a photo' ); ?>
@@ -36,7 +36,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 			</div>
 		</div>
 
-		<div x-show="showImg">
+		<div u-show="showImg">
 			<h6><?php echo t( 'Check quality' ); ?></h6>
 			<div class="fs-14 t-muted mt-2 pl-4 pr-4">
 				<?php echo t( 'Make sure your face is not blurred or out of the frame before continuing' ); ?>

@@ -51,16 +51,16 @@ class Field
             $field['attributes'] = Safe::array($field['attributes'] ?? []);
 
             match ($type) {
-                'step'     => $field['attributes']['x-wizard:step'] ??= '',
-                'textarea' => $field['attributes']['x-textarea'] ??= '',
-                'select'   => $field['attributes']['x-select'] ??= '',
-                'date'     => $field['attributes']['x-datepicker'] ??= '',
+                'step'     => $field['attributes']['u-wizard:step'] ??= '',
+                'textarea' => $field['attributes']['u-textarea'] ??= '',
+                'select'   => $field['attributes']['u-select'] ??= '',
+                'date'     => $field['attributes']['u-datepicker'] ??= '',
                 'submit'   => $field['attributes']['name'] ??= $name,
                 default    => '',
             };
 
             if (! in_array($type, [ 'tab', 'step', 'group', 'submit' ], true)) {
-                $field['attributes'] = ['type' => $type, 'name' => $name, 'x-model.fill' => $prop, ...$field['attributes']];
+                $field['attributes'] = ['type' => $type, 'name' => $name, 'u-model.fill' => $prop, ...$field['attributes']];
             }
 
             if (in_array($type, [ 'tab', 'step', 'group' ], true)) {
@@ -172,8 +172,8 @@ class Field
 
         if ($expressions) {
             return [
-                'x-show'  => implode(' && ', array_column($expressions, 'expression')),
-                'x-cloak' => Safe::bool(in_array(false, array_column($expressions, 'match'), true)),
+                'u-show'  => implode(' && ', array_column($expressions, 'expression')),
+                'u-cloak' => Safe::bool(in_array(false, array_column($expressions, 'match'), true)),
             ];
         }
         return [];

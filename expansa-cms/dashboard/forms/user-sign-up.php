@@ -8,7 +8,7 @@ return Expansa\Facades\Form::enqueue(
 	'user-sign-up',
 	[
 		'class'           => 'dg g-6',
-		'x-data'          => '',
+		'u-data'          => '',
 		'@submit.prevent' => '$ajax("user/sign-up")',
 	],
 	[

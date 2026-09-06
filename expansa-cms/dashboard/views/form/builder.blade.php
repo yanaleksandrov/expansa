@@ -114,9 +114,9 @@ if ( ! defined( 'EX_PATH' ) ) {
 			);
 			?>
 		</div>
-		<template x-for="(group, key) in groups">
+		<template u-for="(group, key) in groups">
 			<div class="builder-group" data-or="{{ t(' or ') }}">
-				<template x-for="(rule, i) in group.rules">
+				<template u-for="(rule, i) in group.rules">
 					<div class="builder__rules">
 						<div class="dg g-1">
 							<select class="select" :name="`group.rules[${i}][location]`">
@@ -146,13 +146,13 @@ if ( ! defined( 'EX_PATH' ) ) {
 								<option value="administrator">Administrator</option>
 							</select>
 						</div>
-						<div class="dg g-1" x-show="group.rules.length > 1">
+						<div class="dg g-1" u-show="group.rules.length > 1">
 							<button type="button" class="btn btn--icon t-red" @click="removeRule(key,i)"><i class="ph ph-trash-simple"></i></button>
 						</div>
 					</div>
 				</template>
 				<div class="builder__buttons">
-					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" x-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php echo t( 'Remove Group' ); ?></button>
+					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" u-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php echo t( 'Remove Group' ); ?></button>
 					<button type="button" class="btn btn--sm t-purple ml-auto" @click="addRule(key)"><i class="ph ph-plus"></i> <?php echo t( 'add rule' ); ?></button>
 				</div>
 			</div>

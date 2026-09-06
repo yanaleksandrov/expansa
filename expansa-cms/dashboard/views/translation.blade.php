@@ -15,7 +15,7 @@ echo view('table/header', $table->headData());
 ?>
 
 @if($table->data)
-    <form class="translation" method="POST" @input.debounce.500ms="$ajax('translations/update',{project})" v-data="{items: {}}">
+    <form class="translation" method="POST" @input.debounce.500ms="$ajax('translations/update',{project})" u-data="{items: {}}">
         <div class="translation-head">
             @foreach($table->cells as $i => $cell)
                 <div class="translation-{{ $i === 0 ? 'source' : 'value' }}">
@@ -23,17 +23,17 @@ echo view('table/header', $table->headData());
                 </div>
             @endforeach
         </div>
-        <div class="translation-grid" v-each.lazy="item in items" v-init="console.log(item)">
-            <div class="translation-source" v-text="item.source">{{ $item['source'] ?? '' }}</div>
+        <div class="translation-grid" u-each.lazy="item in items" u-init="console.log(item)">
+            <div class="translation-source" u-text="item.source">{{ $item['source'] ?? '' }}</div>
             <label class="translation-value">
-                <textarea rows="1" x-textarea="7" :value="item.value">{{ $item['value'] ?? '' }}</textarea>
+                <textarea rows="1" u-textarea="7" :value="item.value">{{ $item['value'] ?? '' }}</textarea>
             </label>
         </div>
         @foreach($table->data as $item)
             <div class="translation-grid">
                 <div class="translation-source">{{ $item['source'] ?? '' }}</div>
                 <label class="translation-value">
-                    <textarea name="`translations[${item.source}]`" rows="1" x-textarea="7">{{ $item['value'] ?? '' }}</textarea>
+                    <textarea name="`translations[${item.source}]`" rows="1" u-textarea="7">{{ $item['value'] ?? '' }}</textarea>
                 </label>
             </div>
         @endforeach

@@ -29,7 +29,7 @@ defined('EX_PATH') || exit;
                     'conditions' => [],
                     'attributes' => [
                         'name' => 'menu-editing',
-                        'x-select' => '',
+                        'u-select' => '',
                     ],
                     'options' => [
                         'type' => t('Top Left'),
@@ -43,10 +43,10 @@ defined('EX_PATH') || exit;
             <a class="fw-500 fs-13" href="#"><?php echo t('Create a new menu'); ?></a>
         </div>
         <h6><?php echo t('Add menu items'); ?></h6>
-        <div class="accordion" x-data="{expanded: false}">
+        <div class="accordion" u-data="{expanded: false}">
             <div class="accordion-item">
                 <div class="accordion-title" @click="expanded = ! expanded">Pages</div>
-                <div class="accordion-panel" x-show="expanded" x-collapse x-cloak>
+                <div class="accordion-panel" u-show="expanded" u-collapse u-cloak>
                     content
                 </div>
             </div>
@@ -99,7 +99,7 @@ defined('EX_PATH') || exit;
                     'conditions' => [],
                     'attributes' => [
                         'name' => 'menu-location',
-                        'x-select' => '',
+                        'u-select' => '',
                         'multiple' => 1,
                         'required' => 1,
                         'placeholder' => t('Choose location'),
@@ -193,27 +193,27 @@ defined('EX_PATH') || exit;
         </ul>
     </div>
     <div class="nav-editor-tools">
-        <!--			<template x-ref="treeTemplate">-->
-        <!--				<ul class="nav-editor-list" x-data="{items: [{title: 'Test 1', children:[{title: 'Test 2'}, {title: 'Test 3'}]}]}">-->
-        <!--					<template x-for="item in items.children">-->
+        <!--			<template u-ref="treeTemplate">-->
+        <!--				<ul class="nav-editor-list" u-data="{items: [{title: 'Test 1', children:[{title: 'Test 2'}, {title: 'Test 3'}]}]}">-->
+        <!--					<template u-for="item in items.children">-->
         <!--						<li class="nav-editor-item">-->
-        <!--							<span class="nav-editor-item-text"><i class="ph ph-dots-six-vertical"></i> <span x-text="item.title"></span></span>-->
+        <!--							<span class="nav-editor-item-text"><i class="ph ph-dots-six-vertical"></i> <span u-text="item.title"></span></span>-->
         <!--						</li>-->
-        <!--						<template x-html="$refs.treeTemplate.innerHTML" x-data="{items: item.children}"></template>-->
+        <!--						<template u-html="$refs.treeTemplate.innerHTML" u-data="{items: item.children}"></template>-->
         <!--					</template>-->
         <!--				</ul>-->
         <!--			</template>-->
 
-        <!--			<template x-if="elements.length" x-data="{items:[], elements: [{title: 'Test 1', children:[]},{title: 'Test 2', children:[{title: 'Test 2.1'}, {title: 'Test 2.2'}]}]}">-->
-        <!--				<ul class="nav-editor-list" x-init="items = elements.slice()">-->
-        <!--					<template x-ref="treeTemplate" x-for="item in items" :key="item.title">-->
+        <!--			<template u-if="elements.length" u-data="{items:[], elements: [{title: 'Test 1', children:[]},{title: 'Test 2', children:[{title: 'Test 2.1'}, {title: 'Test 2.2'}]}]}">-->
+        <!--				<ul class="nav-editor-list" u-init="items = elements.slice()">-->
+        <!--					<template u-ref="treeTemplate" u-for="item in items" :key="item.title">-->
         <!--						<li class="nav-editor-item">-->
         <!--							<span class="nav-editor-item-text">-->
         <!--								<i class="ph ph-dots-six-vertical"></i>-->
-        <!--								<span x-text="item.title"></span>-->
+        <!--								<span u-text="item.title"></span>-->
         <!--							</span>-->
-        <!--							<template x-if="item.children">-->
-        <!--								<ul class="nav-editor-list" x-html="$refs.treeTemplate.innerHTML" x-data="{items: item.children}"></ul>-->
+        <!--							<template u-if="item.children">-->
+        <!--								<ul class="nav-editor-list" u-html="$refs.treeTemplate.innerHTML" u-data="{items: item.children}"></ul>-->
         <!--							</template>-->
         <!--						</li>-->
         <!--					</template>-->

@@ -1,11 +1,11 @@
 (function() {
-    "use strict";
-    const PLACEMENTS = [ "top", "bottom", "left", "right", "auto" ];
-    const TRIGGERS = [ "hover", "click", "focus" ];
-    const VARIANT_PREFIX = "style-";
+    'use strict';
+    const PLACEMENTS = [ 'top', 'bottom', 'left', 'right', 'auto' ];
+    const TRIGGERS = [ 'hover', 'click', 'focus' ];
+    const VARIANT_PREFIX = 'style-';
     const OFFSET = 8;
     const MARGIN = 4;
-    const TOOLTIP_CLASS = "u-tooltip";
+    const TOOLTIP_CLASS = 'u-tooltip';
     const EXIT_FALLBACK = 200;
     const trackedElements = new Map;
     const visibleTooltips = new Set;
@@ -51,15 +51,15 @@
             return;
         }
         globalListenersAttached = true;
-        window.addEventListener("scroll", scheduleReposition, {
+        window.addEventListener('scroll', scheduleReposition, {
             passive: true,
             capture: true
         });
-        window.addEventListener("resize", scheduleReposition, {
+        window.addEventListener('resize', scheduleReposition, {
             passive: true
         });
-        window.visualViewport?.addEventListener("resize", scheduleReposition);
-        window.visualViewport?.addEventListener("scroll", scheduleReposition);
+        window.visualViewport?.addEventListener('resize', scheduleReposition);
+        window.visualViewport?.addEventListener('scroll', scheduleReposition);
     }
     function toTopViewportRect(el, rect) {
         let view = el.ownerDocument.defaultView;
@@ -79,10 +79,10 @@
             top: rect.top + offsetTop,
             left: rect.left + offsetLeft
         };
-        if ("bottom" in rect) {
+        if ('bottom' in rect) {
             translated.bottom = rect.bottom + offsetTop;
         }
-        if ("right" in rect) {
+        if ('right' in rect) {
             translated.right = rect.right + offsetLeft;
         }
         return translated;
@@ -115,38 +115,38 @@
             right: viewport.width - anchorRect.right
         };
         let resolved = placement;
-        if (placement === "auto" || !boxes[placement]) {
+        if (placement === 'auto' || !boxes[placement]) {
             const bySpace = Object.keys(space).sort((a, b) => space[b] - space[a]);
             resolved = bySpace.find(side => {
-                const needed = side === "top" || side === "bottom" ? size.height : size.width;
+                const needed = side === 'top' || side === 'bottom' ? size.height : size.width;
                 return space[side] >= needed + offset;
             }) || bySpace[0];
         }
-        let {top: top, left: left} = boxes[resolved];
+        let {top, left} = boxes[resolved];
         left = Math.min(Math.max(left, MARGIN), Math.max(viewport.width - size.width - MARGIN, MARGIN));
         top = Math.min(Math.max(top, MARGIN), Math.max(viewport.height - size.height - MARGIN, MARGIN));
         return {
-            top: top,
-            left: left,
+            top,
+            left,
             placement: resolved
         };
     }
     class TooltipInstance {
         constructor(el, content, placement, trigger, delay = 250, variant = null) {
             Object.assign(this, {
-                el: el,
-                content: content,
-                placement: placement,
-                trigger: trigger,
-                delay: delay,
-                variant: variant,
+                el,
+                content,
+                placement,
+                trigger,
+                delay,
+                variant,
                 visible: false
             });
-            this.tooltip = Object.assign(document.createElement("div"), {
+            this.tooltip = Object.assign(document.createElement('div'), {
                 id: `${TOOLTIP_CLASS}-${++uid}`,
                 innerHTML: content
             });
-            this.tooltip.setAttribute("role", "tooltip");
+            this.tooltip.setAttribute('role', 'tooltip');
             this.syncClasses();
             this.attachTriggers();
             trackedElements.set(el, this);
@@ -195,22 +195,22 @@
         }
         attachTriggers() {
             const el = this.el;
-            if (this.trigger === "click") {
-                this.detach = bind([ [ el, "click", () => this.toggle() ] ]);
+            if (this.trigger === 'click') {
+                this.detach = bind([ [ el, 'click', () => this.toggle() ] ]);
                 return;
             }
-            const listeners = [ [ el, "focus", () => this.activate() ], [ el, "blur", () => this.deactivate() ] ];
-            if (this.trigger === "hover") {
-                listeners.push([ el, "mouseenter", () => {
+            const listeners = [ [ el, 'focus', () => this.activate() ], [ el, 'blur', () => this.deactivate() ] ];
+            if (this.trigger === 'hover') {
+                listeners.push([ el, 'mouseenter', () => {
                     if (this.delay > 0) {
                         this.hoverTimer = setTimeout(() => this.activate(), this.delay);
                     } else {
                         this.activate();
                     }
-                } ], [ el, "mouseleave", () => {
+                } ], [ el, 'mouseleave', () => {
                     clearTimeout(this.hoverTimer);
                     this.deactivate();
-                } ], [ el, "touchstart", () => {
+                } ], [ el, 'touchstart', () => {
                     clearTimeout(this.hoverTimer);
                     this.activate();
                 }, {
@@ -235,7 +235,7 @@
                 width: vv?.width ?? window.innerWidth,
                 height: vv?.height ?? window.innerHeight
             };
-            const {top: top, left: left, placement: placement} = computePosition(anchorRect, size, this.placement, viewport);
+            const {top, left, placement} = computePosition(anchorRect, size, this.placement, viewport);
             this.tooltip.style.top = `${top}px`;
             this.tooltip.style.left = `${left}px`;
             this.resolvedPlacement = placement;
@@ -252,7 +252,7 @@
             if (this.variant) {
                 classes.push(`${TOOLTIP_CLASS}--${this.variant}`);
             }
-            this.tooltip.className = classes.join(" ");
+            this.tooltip.className = classes.join(' ');
         }
         show() {
             if (this.visible || !this.content) {
@@ -260,33 +260,33 @@
             }
             this.visible = true;
             this.cancelExit();
-            this.animationState = "in";
-            this.tooltip.style.visibility = "hidden";
+            this.animationState = 'in';
+            this.tooltip.style.visibility = 'hidden';
             document.body.appendChild(this.tooltip);
             this.reposition();
-            this.tooltip.style.visibility = "visible";
-            this.el.setAttribute("aria-describedby", this.tooltip.id);
+            this.tooltip.style.visibility = 'visible';
+            this.el.setAttribute('aria-describedby', this.tooltip.id);
             visibleTooltips.add(this);
             ensureGlobalListeners();
-            this.detachDocListeners = bind([ [ document, "click", e => {
+            this.detachDocListeners = bind([ [ document, 'click', e => {
                 if (!this.el.contains(e.target) && !this.tooltip.contains(e.target)) {
                     this.deactivate();
                 }
-            }, true ], [ document, "keydown", e => e.key === "Escape" && this.deactivate() ] ]);
+            }, true ], [ document, 'keydown', e => e.key === 'Escape' && this.deactivate() ] ]);
         }
         hide() {
             if (!this.visible) {
                 return;
             }
             this.visible = false;
-            this.el.removeAttribute("aria-describedby");
+            this.el.removeAttribute('aria-describedby');
             visibleTooltips.delete(this);
             this.detachDocListeners?.();
             this.detachDocListeners = null;
-            this.animationState = "out";
+            this.animationState = 'out';
             this.syncClasses();
             this.onExitEnd = () => this.cancelExit();
-            this.tooltip.addEventListener("animationend", this.onExitEnd, {
+            this.tooltip.addEventListener('animationend', this.onExitEnd, {
                 once: true
             });
             this.exitTimer = setTimeout(this.onExitEnd, EXIT_FALLBACK);
@@ -294,7 +294,7 @@
         cancelExit() {
             clearTimeout(this.exitTimer);
             if (this.onExitEnd) {
-                this.tooltip.removeEventListener("animationend", this.onExitEnd);
+                this.tooltip.removeEventListener('animationend', this.onExitEnd);
                 this.onExitEnd = null;
             }
             this.animationState = null;
@@ -320,13 +320,13 @@
             delete this.el._x_tooltip;
         }
     }
-    document.addEventListener("youla:init", () => {
-        Youla.directive("tooltip", (el, output, {modifiers: modifiers, duration: duration}) => {
-            const placement = modifiers.find(m => PLACEMENTS.includes(m)) || "auto";
-            const trigger = modifiers.find(m => TRIGGERS.includes(m)) || "hover";
+    document.addEventListener('youla:init', () => {
+        Youla.directive('tooltip', (el, output, {modifiers, duration}) => {
+            const placement = modifiers.find(m => PLACEMENTS.includes(m)) || 'auto';
+            const trigger = modifiers.find(m => TRIGGERS.includes(m)) || 'hover';
             const variant = modifiers.find(m => m.startsWith(VARIANT_PREFIX))?.slice(VARIANT_PREFIX.length) || null;
-            const delay = duration?.unit === "ms" ? duration.value : 250;
-            const content = output == null ? "" : String(output);
+            const delay = duration?.unit === 'ms' ? duration.value : 250;
+            const content = output == null ? '' : String(output);
             const instance = el._x_tooltip;
             if (!instance) {
                 el._x_tooltip = new TooltipInstance(el, content, placement, trigger, delay, variant);
