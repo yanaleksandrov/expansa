@@ -6,7 +6,7 @@ namespace Expansa\View\Compilers\Traits;
 
 trait CompileIncludes
 {
-    protected function compileInclude($expression): string
+    protected function compileInclude(string $expression): string
     {
         $expression = $this->stripBrackets($expression);
 

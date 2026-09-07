@@ -10,10 +10,21 @@
                 }
                 return el ? el.__x : null;
             }
-            Youla.directive("step", (el, output, _, component) => {
+            const REQUIRED_FIELDS_SELECTOR = "input[required], select[required], textarea[required]";
+            Youla.directive("step", (el, output, attribute, component) => {
                 const wizard = component.data;
                 const step = wizard.getStep(el);
-                const isComplete = !!output;
+                const required = attribute.modifiers.includes("required");
+                if (required && !el._x_stepRequiredBound) {
+                    el._x_stepRequiredBound = true;
+                    el.querySelectorAll(REQUIRED_FIELDS_SELECTOR).forEach(field => {
+                        [ "input", "change" ].forEach(event => field.addEventListener(event, () => component.refresh(true)));
+                    });
+                }
+                let isComplete = required && attribute.expression.trim() === "" ? true : !!output;
+                if (required) {
+                    isComplete = isComplete && [ ...el.querySelectorAll(REQUIRED_FIELDS_SELECTOR) ].every(field => field.checkValidity());
+                }
                 if (step.isComplete !== isComplete) {
                     step.isComplete = isComplete;
                     component.refresh(true);

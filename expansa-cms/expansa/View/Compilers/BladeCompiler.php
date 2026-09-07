@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\View\Compilers;
 
+use Exception;
 use Expansa\View\Compilers\Traits\CompileCommon;
 use Expansa\View\Compilers\Traits\CompileHtml;
 use Expansa\View\Compilers\Traits\CompileIncludes;
@@ -17,23 +18,24 @@ class BladeCompiler
     use CompileLayout;
     use CompileHtml;
 
-    //protected Finder $finder;
     protected ?string $path = null;
 
     protected array $rawBlocks = [];
 
     protected array $layouts = [];
 
-    //protected Factory $factory;
-
     public function __construct(
         protected bool $shouldCache = true,
         protected ?string $cacheDir = null
     ) {} // phpcs:ignore
 
+    /**
+     * No-op: compiled directives reach the Factory through the shared "$__env"
+     * variable (see CompileIncludes/CompileLayout) instead of a stored reference,
+     * so the compiler itself never needs to hold on to one.
+     */
     public function setFactory(Factory $factory): void
     {
-        //$this->factory = $factory;
     }
 
     public function setCachePath(string $path): void
@@ -61,13 +63,13 @@ class BladeCompiler
         return true;
     }
 
-    public function compile(string $path = null): void
+    public function compile(?string $path = null): void
     {
-        if (! is_null($path)) {
+        if ($path !== null) {
             $this->setPath($path);
         }
 
-        if (is_null($this->path)) {
+        if ($this->path === null) {
             return;
         }
 
@@ -90,7 +92,7 @@ class BladeCompiler
         return $content;
     }
 
-    protected function storeRawBlocks($content): string
+    protected function storeRawBlocks(string $content): string
     {
         $content = $this->storeRawVerbatimBlocks($content);
         $content = $this->storeRawPhpBlocks($content);
@@ -98,7 +100,7 @@ class BladeCompiler
         return $this->storeRawEchoBlocks($content);
     }
 
-    protected function compileRawBlocks($content): string
+    protected function compileRawBlocks(string $content): string
     {
         foreach ($this->rawBlocks as $num => $value) {
             $content = str_replace("__THIS_IS_RAW_BLOCK__{$num}__", $value, $content);
@@ -135,19 +137,11 @@ class BladeCompiler
             'escaped' => ['{{', '}}'],
         ];
 
-        if (0) {
-            // beautify html source code
-            $content = preg_replace('/^[\t ]*(?=@if)/m', '', $content);
-            $content = preg_replace('/^[\t ]*(?=@endif\s*<\/)/m', '', $content);
-            $content = preg_replace('/}}\s*(?=@if)/m', "}}\n", $content);
-            $content = preg_replace("/(@if\([^\)]*\))(\s*)(\t|\x20{4})(<\w+)/", "$1$2$4", $content);
-        }
-
         foreach ($echos as $type => $tags) {
             $pattern = sprintf('/(@)?%s\s*(.+?)\s*%s/s', $tags[0], $tags[1]);
 
             $content = preg_replace_callback($pattern, function ($match) use ($type) {
-                if ($match[1] == '@') {
+                if ($match[1] === '@') {
                     return substr($match[0], 1);
                 }
 
@@ -168,13 +162,13 @@ class BladeCompiler
         return $content;
     }
 
-    protected function getRawBlockPlaceholder($value): string
+    protected function getRawBlockPlaceholder(string $value): string
     {
         $num = array_push($this->rawBlocks, $value) - 1;
         return "__THIS_IS_RAW_BLOCK__{$num}__";
     }
 
-    protected function compileStatements($content): string
+    protected function compileStatements(string $content): string
     {
         $pattern = "/
             @(?<name>@?[a-z]+)
@@ -193,7 +187,7 @@ class BladeCompiler
         }, $content);
     }
 
-    protected function stripBrackets($expression): string
+    protected function stripBrackets(string $expression): string
     {
         return trim($expression, '()');
     }
@@ -212,8 +206,8 @@ class BladeCompiler
 
     public function getCompiledPath(string $path): string
     {
-        if (is_null($this->cacheDir)) {
-            throw new \Exception('Cache path not configured.');
+        if ($this->cacheDir === null) {
+            throw new Exception('Cache path not configured.');
         }
         return rtrim($this->cacheDir, '/') . '/' . sha1($path) . ".php";
     }

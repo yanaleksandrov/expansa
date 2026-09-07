@@ -26,7 +26,7 @@ final class Web
             if ($slug !== 'install') {
                 redirect('install');
             }
-            echo (new \Expansa\Support\Html())->beautify(view('welcome', ['slug' => 'install'])->render());
+            echo view('welcome', ['slug' => 'install'])->beautify()->render();
             exit;
         }
 
@@ -97,7 +97,7 @@ final class Web
                 'table'  => $table ?? null,
                 'entity' => $entity,
             ]);
-            $content = (new \Expansa\Support\Html())->beautify($content->render());
+            $content = $content->beautify()->render();
         }
 
 //    $start = microtime(true);

@@ -8,6 +8,7 @@ use Throwable;
 
 class PhpEngine extends Engine
 {
+    #[\Override]
     public function get(string $path, array $data = []): string
     {
         $this->lastRendered = $path;
@@ -36,7 +37,7 @@ class PhpEngine extends Engine
         })();
     }
 
-    protected function handleException(Throwable $e, $obLevel): void
+    protected function handleException(Throwable $e, int $obLevel): void
     {
         while (ob_get_level() > $obLevel) {
             ob_end_clean();

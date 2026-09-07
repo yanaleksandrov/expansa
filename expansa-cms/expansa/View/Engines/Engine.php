@@ -30,6 +30,11 @@ abstract class Engine
     }
 
     /**
+     * Render the view at $path with $data available to it.
+     */
+    abstract public function get(string $path, array $data = []): string;
+
+    /**
      * Get the last view that was rendered.
      *
      * @return string

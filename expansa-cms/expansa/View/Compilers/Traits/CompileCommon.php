@@ -6,9 +6,9 @@ namespace Expansa\View\Compilers\Traits;
 
 trait CompileCommon
 {
-    protected function compilePhp(string $expression = null): string
+    protected function compilePhp(?string $expression = null): string
     {
-        if (! is_null($expression)) {
+        if ($expression !== null) {
             return "<?php $expression; ?>";
         }
         return '<?php ';
@@ -19,17 +19,17 @@ trait CompileCommon
         return ' ?>';
     }
 
-    protected function compileIf($expression): string
+    protected function compileIf(?string $expression): string
     {
         return "<?php if $expression: ?>";
     }
 
-    protected function compileUnless($expression): string
+    protected function compileUnless(?string $expression): string
     {
         return "<?php if (! $expression): ?>";
     }
 
-    protected function compileElseif($expression): string
+    protected function compileElseif(?string $expression): string
     {
         return "<?php elseif $expression: ?>";
     }
@@ -49,7 +49,7 @@ trait CompileCommon
         return '<?php endif; ?>';
     }
 
-    protected function compileWhile($expression): string
+    protected function compileWhile(?string $expression): string
     {
         return "<?php while $expression: ?>";
     }
@@ -59,7 +59,7 @@ trait CompileCommon
         return '<?php endwhile; ?>';
     }
 
-    protected function compileFor($expression): string
+    protected function compileFor(?string $expression): string
     {
         return "<?php for $expression: ?>";
     }
@@ -69,7 +69,7 @@ trait CompileCommon
         return '<?php endfor; ?>';
     }
 
-    protected function compileForeach($expression): string
+    protected function compileForeach(?string $expression): string
     {
         return "<?php foreach $expression: ?>";
     }
@@ -79,12 +79,12 @@ trait CompileCommon
         return '<?php endforeach; ?>';
     }
 
-    protected function compileSwitch($expression): string
+    protected function compileSwitch(?string $expression): string
     {
         return "<?php switch $expression: ?>";
     }
 
-    protected function compileCase($expression): string
+    protected function compileCase(?string $expression): string
     {
         return "<?php case $expression: ?>";
     }
@@ -99,7 +99,7 @@ trait CompileCommon
         return '<?php endswitch; ?>';
     }
 
-    protected function compileIsset($expression): string
+    protected function compileIsset(?string $expression): string
     {
         return "<?php if(isset{$expression}):  ?>";
     }
@@ -109,7 +109,7 @@ trait CompileCommon
         return '<?php endif; ?>';
     }
 
-    protected function compileEmpty($expression): string
+    protected function compileEmpty(?string $expression): string
     {
         return "<?php if(empty{$expression}):  ?>";
     }

@@ -6,7 +6,7 @@ namespace Expansa\View\Compilers\Traits;
 
 trait CompileLayout
 {
-    public function compileExtends($name): string
+    public function compileExtends(string $name): string
     {
         $name = $this->stripBrackets($name);
 
@@ -15,7 +15,7 @@ trait CompileLayout
         return '';
     }
 
-    public function compileSection($name): string
+    public function compileSection(string $name): string
     {
         $name = $this->stripBrackets($name);
         return "<?php \$__env->startSection($name); ?>";
@@ -36,7 +36,7 @@ trait CompileLayout
         return "<?php echo \$__env->yieldSection(); ?>";
     }
 
-    public function compileYield($name): string
+    public function compileYield(string $name): string
     {
         $name = $this->stripBrackets($name);
 

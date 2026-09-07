@@ -6,16 +6,16 @@ namespace Expansa\View\Compilers\Traits;
 
 trait CompileHtml
 {
-    protected function compileSelected($expression): string
+    protected function compileSelected(?string $expression): string
     {
-        $expression = is_null($expression) ? '([])' : $expression;
+        $expression ??= '([])';
 
         return "<?php if($expression) echo 'selected' ?>";
     }
 
-    protected function compileChecked($expression): string
+    protected function compileChecked(?string $expression): string
     {
-        $expression = is_null($expression) ? '([])' : $expression;
+        $expression ??= '([])';
 
         return "<?php if($expression) echo 'checked' ?>";
     }
