@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Controllers\Web;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
+use Expansa\Facades\Route;
 use Expansa\Support\Is;
 
 // launch the installer if Expansa is not installed.
@@ -28,6 +30,7 @@ if (! Is::installed()) {
 
     // register Expansa routes
     require_once EX_PATH . 'routes/api.php';
-    require_once EX_PATH . 'routes/web.php';
+    Route::get('/(.*)', [Web::class, 'index']);
+    Route::run();
     exit;
 }

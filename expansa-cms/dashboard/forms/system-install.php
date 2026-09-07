@@ -206,8 +206,9 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'         => 'dg g-8 pt-8',
+                'method'        => 'post',
                 'u-step'        => 'isCompatible',
-                'u-step:action' => '$ajax("system/test", db).then(response => ({ isCompatible, compat } = response))',
+                'u-step:action' => '$ajax.post("system/test", db).then(response => ({ isCompatible, compat } = response))',
                 'hidden'        => true,
             ],
             'fields'     => [
