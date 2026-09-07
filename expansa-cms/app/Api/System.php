@@ -51,21 +51,26 @@ class System
                 $connected = $connection instanceof \Expansa\Database\Query\Builder;
             }
 
+            $compat = array_map(
+                fn($requirement) => match ($requirement) {
+                    'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
+                    'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
+                    'mysql'      => $mysql,
+                    'connection' => $connected,
+                    default      => extension_loaded($requirement),
+                },
+                array_combine($requirements, $requirements)
+            );
+
             echo Json::encode(
                 [
                     'status'    => 200,
                     'benchmark' => metrics()->time(),
                     'memory'    => metrics()->memory(),
-                    'data'      => array_map(
-                        fn($requirement) => match ($requirement) {
-                            'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
-                            'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
-                            'mysql'      => $mysql,
-                            'connection' => $connected,
-                            default      => extension_loaded($requirement),
-                        },
-                        array_combine($requirements, $requirements)
-                    ),
+                    'data'      => [
+                        'isCompatible' => ! in_array(false, $compat, true),
+                        'compat'       => $compat,
+                    ],
                     'errors'    => [],
                 ]
             );

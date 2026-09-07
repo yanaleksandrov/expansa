@@ -4,8 +4,8 @@ return \Expansa\Facades\Form::enqueue(
     'system-install',
     [
         'class'           => 'dg g-2',
-        '@submit.prevent' => '$ajax("system/install").then(response => installed = response)',
-        'u-data'          => '{...step, approved: {}, installed: false}',
+        '@submit.prevent' => '$ajax("system/install").then(() => goto(5))',
+        'u-data'          => '{...step, compat: {}, isCompatible: false}',
     ],
     [
         [
@@ -74,7 +74,7 @@ return \Expansa\Facades\Form::enqueue(
                 'class'           => 'dg g-8 pt-8',
                 'hidden'          => true,
                 'u-step.required' => '',
-                'u-step:action'   => 'approved = {}',
+                'u-step:action'   => 'compat = {}; isCompatible = false',
             ],
             'fields'     => [
                 [
@@ -206,8 +206,8 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'         => 'dg g-8 pt-8',
-                'u-step'        => 'Object.keys(approved).length && Object.values(approved).every(Boolean)',
-                'u-step:action' => '$ajax("system/test", db).then(response => approved = response)',
+                'u-step'        => 'isCompatible',
+                'u-step:action' => '$ajax("system/test", db).then(response => ({ isCompatible, compat } = response))',
                 'hidden'        => true,
             ],
             'fields'     => [
