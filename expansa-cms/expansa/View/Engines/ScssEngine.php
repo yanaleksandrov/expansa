@@ -10,6 +10,8 @@ class ScssEngine extends Engine
 {
     public function get(string $path, array $data = []): string
     {
+        $this->lastRendered = $path;
+
         return $this->evaluatePath($path, $data);
     }
 

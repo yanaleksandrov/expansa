@@ -45,6 +45,10 @@ class Finder
         if (str_contains($view, '::')) {
             list($ns, $name) = explode("::", $view);
 
+            if (! isset($this->namespaces[$ns])) {
+                return null;
+            }
+
             return $this->views[$view] = $this->findInPaths($name, $this->namespaces[$ns]);
         }
 
@@ -193,14 +197,14 @@ class Finder
                 continue;
             }
 
-            if ($file = $this->resolveFilename($filename)) {
+            if ($file = $this->resolveFile($filename)) {
                 $view = $prefix . (empty($prefix) ? '' : '.') . $file['name'];
 
                 if (! empty($namespace)) {
                     $view = $namespace . '::' . $view;
                 }
 
-                $this->cache[ $view ] = array_merge($file, [
+                $this->views[ $view ] = array_merge($file, [
                     'path' => realpath($path . '/' . $filename),
                 ]);
             }

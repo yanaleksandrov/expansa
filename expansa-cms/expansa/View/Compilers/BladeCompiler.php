@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Expansa\View\Compilers;
 
 use Expansa\View\Compilers\Traits\CompileCommon;
-use Expansa\View\Compilers\Traits\CompileConditions;
 use Expansa\View\Compilers\Traits\CompileHtml;
 use Expansa\View\Compilers\Traits\CompileIncludes;
 use Expansa\View\Compilers\Traits\CompileLayout;
@@ -14,7 +13,6 @@ use Expansa\View\Factory;
 class BladeCompiler
 {
     use CompileCommon;
-    use CompileConditions;
     use CompileIncludes;
     use CompileLayout;
     use CompileHtml;
@@ -73,7 +71,7 @@ class BladeCompiler
             return;
         }
 
-        $content = $this->compileString(file_get_contents($path));
+        $content = $this->compileString(file_get_contents($this->path));
 
         $this->saveCompiledToCache($content);
     }

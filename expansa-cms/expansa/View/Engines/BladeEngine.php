@@ -29,6 +29,8 @@ class BladeEngine extends PhpEngine
 
     public function get(string $path, array $data = []): string
     {
+        $this->lastRendered = $path;
+
         if ($this->compiler->isExpired($path)) {
             $this->compiler->compile($path);
         }

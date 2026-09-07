@@ -8,6 +8,8 @@ class FileEngine extends Engine
 {
     public function get(string $path): string
     {
+        $this->lastRendered = $path;
+
         return file_get_contents($path);
     }
 }

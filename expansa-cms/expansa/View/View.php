@@ -45,7 +45,7 @@ class View
 
     public function getPath(): string
     {
-        return $this->name;
+        return $this->path;
     }
 
     public function getData(): array
