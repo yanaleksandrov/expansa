@@ -14,9 +14,17 @@
     function getDirective(name) {
         return directives[name];
     }
+    const compiledCache = new Map;
     function saferEval(expression, dataContext, additionalHelperVariables = {}, noReturn = false) {
-        expression = noReturn ? `with($data){${expression}}` : `with($data){return (${expression})}`;
-        return new Function([ '$data', ...Object.keys(additionalHelperVariables) ], expression)(dataContext, ...Object.values(additionalHelperVariables));
+        const helperNames = Object.keys(additionalHelperVariables);
+        const cacheKey = `${noReturn ? 1 : 0}:${helperNames.join(',')}:${expression}`;
+        let fn = compiledCache.get(cacheKey);
+        if (!fn) {
+            const body = noReturn ? `with($data){${expression}}` : `with($data){return (${expression})}`;
+            fn = new Function([ '$data', ...helperNames ], body);
+            compiledCache.set(cacheKey, fn);
+        }
+        return fn(dataContext, ...Object.values(additionalHelperVariables));
     }
     function isNode(value) {
         return !!value && typeof value === 'object' && typeof value.nodeType === 'number';
@@ -113,12 +121,22 @@
             otherVariables
         };
     }
+    const EACH_EXPRESSION = /^\(?([\w]+)(?:,\s*(\w+))?\)?\s+in\s+(.*?)(?:\s+join\s+'([^']+)')?$/;
+    function parseEachExpression(expression) {
+        const [, item, index = 'key', items, join] = expression.match(EACH_EXPRESSION) || [];
+        return {
+            item,
+            index,
+            items,
+            join
+        };
+    }
     directive('each', (el, output, attribute, component, additionalHelperVariables = {}) => {
         const {expression} = attribute;
         if (typeof expression !== 'string') {
             return;
         }
-        let [, item, index = 'key', items, join] = expression.match(/^\(?([\w]+)(?:,\s*(\w+))?\)?\s+in\s+(.*?)(?:\s+join\s+'([^']+)')?$/) || [];
+        const {item, index, items, join} = parseEachExpression(expression);
         const {magicVariables, otherVariables} = splitMagicVariables(additionalHelperVariables);
         let dataItems;
         if (Number.isInteger(+items)) {
@@ -211,7 +229,11 @@
                 return e[SYSTEM_MODIFIER_KEYS[modifier]] === true;
             }
             const expected = KEY_ALIASES[modifier] || modifier;
-            return typeof e.key === 'string' && e.key.toLowerCase() === expected.toLowerCase();
+            if (typeof e.key === 'string' && e.key.toLowerCase() === expected.toLowerCase()) {
+                return true;
+            }
+            const expectedCode = /^[a-z]$/i.test(modifier) ? `Key${modifier.toUpperCase()}` : /^[0-9]$/.test(modifier) ? `Digit${modifier}` : modifier === 'space' ? 'Space' : expected;
+            return typeof e.code === 'string' && e.code === expectedCode;
         });
     }
     function setClasses(el, value) {
@@ -301,7 +323,13 @@
         };
     }
     function getAttributes(el) {
-        return [ ...el.attributes ].filter(({name}) => ATTRIBUTE_PREFIX.test(name)).map(({name, value}) => parseAttribute(name, value));
+        const matching = [ ...el.attributes ].filter(({name}) => ATTRIBUTE_PREFIX.test(name));
+        const fingerprint = matching.map(({name, value}) => `${name}=${value}`).join('\0');
+        if (el.__x_attrs && el.__x_attrsFingerprint === fingerprint) {
+            return el.__x_attrs;
+        }
+        el.__x_attrsFingerprint = fingerprint;
+        return el.__x_attrs = matching.map(({name, value}) => parseAttribute(name, value));
     }
     function updateAttribute(el, name, value) {
         if (isEventHandlerAttribute(el, name)) {
@@ -885,15 +913,16 @@
         }
         resolveAttributes(el) {
             const self = this;
-            const additionalHelperVariables = {
-                ...getForData(el),
-                ...this.getAliasVariables(),
-                ...this.getMagicVariables(el)
-            };
+            let additionalHelperVariables;
             return getAttributes(el).flatMap(attribute => {
                 if (attribute.directive !== 'u-bind') {
                     return [ attribute ];
                 }
+                additionalHelperVariables ??= {
+                    ...getForData(el),
+                    ...this.getAliasVariables(),
+                    ...this.getMagicVariables(el)
+                };
                 let bindings;
                 try {
                     ({output: bindings} = self.evaluate(attribute.expression, additionalHelperVariables));
@@ -943,7 +972,9 @@
             let output = expression, deps = [];
             if (directive === 'u-each') {
                 if (withDeps) {
-                    [, deps] = expression.split(' in ');
+                    const {items} = parseEachExpression(expression);
+                    const [rootIdentifier] = (items ?? '').match(/^[A-Za-z_$][\w$]*/) ?? [];
+                    deps = rootIdentifier ? [ rootIdentifier ] : [];
                 }
             } else if (!literal) {
                 try {
@@ -972,12 +1003,16 @@
                     return;
                 }
                 el.__x_initialized = true;
+                const attributes = self.resolveAttributes(el);
+                if (attributes.length === 0) {
+                    return;
+                }
                 const additionalHelperVariables = {
                     ...getForData(el),
                     ...self.getAliasVariables(),
                     ...self.getMagicVariables(el)
                 };
-                self.resolveAttributes(el).forEach(attribute => {
+                attributes.forEach(attribute => {
                     let {directive, event, expression, modifiers, bind} = attribute;
                     let propExpression;
                     if (directive === 'u-prop') {
@@ -1001,18 +1036,28 @@
                 const force = self.pendingForceRefresh;
                 self.pendingForceRefresh = false;
                 domWalk(self.root, el => {
+                    const attributes = self.resolveAttributes(el);
+                    if (attributes.length === 0) {
+                        return;
+                    }
                     const additionalHelperVariables = {
                         ...getForData(el),
                         ...self.getAliasVariables(),
                         ...self.getMagicVariables(el)
                     };
-                    self.resolveAttributes(el).forEach(attribute => {
-                        const {directive, bind} = attribute;
+                    attributes.forEach(attribute => {
+                        const {directive, bind, name} = attribute;
                         if (bind || getDirective(directive)) {
+                            el.__x_deps ??= {};
+                            const previousDeps = el.__x_deps[name];
+                            if (!force && previousDeps && !previousDeps.some(dep => self.concernedData.includes(dep))) {
+                                return;
+                            }
                             const {output, deps} = self.computeOutput(attribute, additionalHelperVariables, {
                                 withDeps: true
                             });
-                            if (force || self.concernedData.some(dep => deps.includes(dep))) {
+                            el.__x_deps[name] = deps;
+                            if (force || !previousDeps || self.concernedData.some(dep => deps.includes(dep))) {
                                 self.applyAttribute(el, attribute, output, additionalHelperVariables);
                             }
                         }
@@ -1141,7 +1186,6 @@
             let observer = new MutationObserver(mutations => mutations.forEach(mutation => Array.from(mutation.addedNodes).filter(node => node.nodeType === 1 && hasDirective(node, 'u-data')).forEach(callback)));
             observer.observe(document.querySelector('body'), {
                 childList: true,
-                attributes: true,
                 subtree: true
             });
         },
