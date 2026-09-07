@@ -53,7 +53,7 @@
         const children = Array.from(iframeBody ? iframeBody.children : el.children);
         for (const node of children) {
             if (hasDirective(node, 'u-data')) {
-                return;
+                continue;
             }
             if (node.hasAttribute('u-each')) {
                 callback(node);
@@ -698,6 +698,13 @@
     function isUnsafeKey(key) {
         return UNSAFE_KEYS.has(key);
     }
+    function parsePropPath(path) {
+        return path.match(/[^.[\]]+/g) || [];
+    }
+    function toJsPropAccessor(path) {
+        const [head, ...rest] = parsePropPath(path);
+        return rest.reduce((accessor, key) => `${accessor}[${JSON.stringify(key)}]`, head);
+    }
     function setNestedObjectValue(array, lastValue) {
         if (array.length === 0) {
             return lastValue;
@@ -720,9 +727,9 @@
         return result;
     }
     function getNestedObjectValue(obj, path) {
-        return path.split('.').reduce((acc, key) => isUnsafeKey(key) ? undefined : acc?.[key], obj);
+        return parsePropPath(path).reduce((acc, key) => isUnsafeKey(key) ? undefined : acc?.[key], obj);
     }
-    function hydrateProps(rootElement, data) {
+    function hydrateProps(rootElement, data, parent) {
         domWalk(rootElement, el => getAttributes(el).filter(({directive}) => directive === 'u-prop').forEach(attribute => {
             let {expression, modifiers} = attribute;
             if (![ 'input', 'select', 'textarea' ].includes(el.tagName.toLowerCase())) {
@@ -731,25 +738,27 @@
             if (!el.hasAttribute('name')) {
                 el.setAttribute('name', expression.replace(/\.(\w+)/g, '[$1]'));
             }
-            let [key, ...prop] = expression.split('.');
-            if (isUnsafeKey(key)) {
-                console.warn(`Youla.js: u-prop expression "${expression}" uses unsafe key "${key}" — skipped.`);
+            let [key, ...prop] = parsePropPath(expression);
+            const unsafeKey = [ key, ...prop ].find(isUnsafeKey);
+            if (unsafeKey) {
+                console.warn(`Youla.js: u-prop expression "${expression}" uses unsafe key "${unsafeKey}" — skipped.`);
                 return;
             }
-            if (data[key] === undefined) {
+            const owner = parent && key in parent.scope ? parent.scope : data;
+            if (owner[key] === undefined) {
                 let fields = [];
                 if (el.type === 'checkbox') {
                     fields = closestDirective(el, 'u-data').querySelectorAll(`[${CSS.escape(attribute.name)}="${expression.replace(/["\\]/g, '\\$&')}"]`);
                 }
-                data[key] = setNestedObjectValue(prop, fields.length > 1 ? [] : '');
+                owner[key] = setNestedObjectValue(prop, fields.length > 1 ? [] : '');
             }
-            let value = generateExpressionForProp(el, data, attribute);
-            saferEval(value, withMagicVariables(data, createMagicVariables(rootElement, el)));
+            let value = generateExpressionForProp(el, owner, attribute);
+            saferEval(value, withMagicVariables(owner, createMagicVariables(rootElement, el)));
             if (isStorageModifier(modifiers)) {
                 const type = getStorageType(modifiers);
                 const value = storage.get(expression, type);
                 if (value) {
-                    data[expression] = castToType(data[expression], value);
+                    owner[expression] = castToType(owner[expression], value);
                 }
             }
         }));
@@ -757,26 +766,27 @@
     }
     function generateExpressionForProp(el, data, attribute) {
         let {expression, modifiers} = attribute;
+        const accessor = toJsPropAccessor(expression);
         let rightSideOfExpression, tag = el.tagName.toLowerCase();
         if (el.type === 'checkbox') {
             let value = getNestedObjectValue(data, expression);
             if (Array.isArray(value)) {
-                rightSideOfExpression = `$el.checked ? ${expression}.concat([$el.value]) : [...${expression}.splice(0, ${expression}.indexOf($el.value)), ...${expression}.splice(${expression}.indexOf($el.value)+1)]`;
+                rightSideOfExpression = `$el.checked ? ${accessor}.concat([$el.value]) : [...${accessor}.splice(0, ${accessor}.indexOf($el.value)), ...${accessor}.splice(${accessor}.indexOf($el.value)+1)]`;
             } else {
                 rightSideOfExpression = `$el.checked`;
             }
         } else if (el.type === 'radio') {
-            rightSideOfExpression = `$el.checked ? $el.value : (typeof ${expression} !== 'undefined' ? ${expression} : '')`;
+            rightSideOfExpression = `$el.checked ? $el.value : (typeof ${accessor} !== 'undefined' ? ${accessor} : '')`;
         } else if (tag === 'select' && el.multiple) {
             rightSideOfExpression = `Array.from($el.selectedOptions).map(option => ${modifiers.includes('number') ? 'parseFloat(option.value || option.text)' : 'option.value || option.text'})`;
         } else if (modifiers.includes('number')) {
-            return `($el.value = $el.value.replace(/[^\\d]/g, ''), $data.${expression} = $el.value === '' ? '' : parseFloat($el.value))`;
+            return `($el.value = $el.value.replace(/[^\\d]/g, ''), $data.${accessor} = $el.value === '' ? '' : parseFloat($el.value))`;
         } else if (modifiers.includes('trim')) {
             rightSideOfExpression = `($el.value = $el.value.replace(/^\\s+|\\s+$/g, ''), $el.value)`;
         } else {
             rightSideOfExpression = '$el.value';
         }
-        return `$data.${expression} = ${rightSideOfExpression}`;
+        return `$data.${accessor} = ${rightSideOfExpression}`;
     }
     let datas = {};
     function data(name, callback) {
@@ -835,7 +845,7 @@
             this.storageType = isStorageModifier(modifiers) ? getStorageType(modifiers) : null;
             this.storageExpire = this.storageType ? getNextModifier(modifiers, this.storageType) : null;
             this.rawData = saferEval(this.name || '{}', dataProviderContext);
-            this.rawData = hydrateProps(el, this.rawData);
+            this.rawData = hydrateProps(el, this.rawData, this.parent);
             if (this.storageType) {
                 const saved = storage.get(`u-data:${this.name}`, this.storageType);
                 if (saved) {
@@ -976,6 +986,12 @@
                     const [rootIdentifier] = (items ?? '').match(/^[A-Za-z_$][\w$]*/) ?? [];
                     deps = rootIdentifier ? [ rootIdentifier ] : [];
                 }
+            } else if (directive === 'u-prop') {
+                output = getNestedObjectValue(this.scope, expression);
+                if (withDeps) {
+                    const [rootIdentifier] = parsePropPath(expression);
+                    deps = rootIdentifier ? [ rootIdentifier ] : [];
+                }
             } else if (!literal) {
                 try {
                     ({output, deps} = this.evaluate(expression, additionalHelperVariables));
@@ -1031,15 +1047,23 @@
         }
         refresh(force = false) {
             const self = this;
-            this.pendingForceRefresh = this.pendingForceRefresh || force;
+            if (force instanceof HTMLElement) {
+                this.pendingForceElements ??= new Set;
+                this.pendingForceElements.add(force);
+            } else {
+                this.pendingForceRefresh = this.pendingForceRefresh || force;
+            }
             this.scheduleRefresh ??= debounce(() => {
                 const force = self.pendingForceRefresh;
+                const forceElements = self.pendingForceElements;
                 self.pendingForceRefresh = false;
+                self.pendingForceElements = null;
                 domWalk(self.root, el => {
                     const attributes = self.resolveAttributes(el);
                     if (attributes.length === 0) {
                         return;
                     }
+                    const elementForced = force || !!forceElements?.has(el);
                     const additionalHelperVariables = {
                         ...getForData(el),
                         ...self.getAliasVariables(),
@@ -1048,16 +1072,17 @@
                     attributes.forEach(attribute => {
                         const {directive, bind, name} = attribute;
                         if (bind || getDirective(directive)) {
+                            const alwaysSync = directive === 'u-prop';
                             el.__x_deps ??= {};
                             const previousDeps = el.__x_deps[name];
-                            if (!force && previousDeps && !previousDeps.some(dep => self.concernedData.includes(dep))) {
+                            if (!elementForced && !alwaysSync && previousDeps && !previousDeps.some(dep => self.concernedData.includes(dep))) {
                                 return;
                             }
                             const {output, deps} = self.computeOutput(attribute, additionalHelperVariables, {
                                 withDeps: true
                             });
                             el.__x_deps[name] = deps;
-                            if (force || !previousDeps || self.concernedData.some(dep => deps.includes(dep))) {
+                            if (elementForced || alwaysSync || !previousDeps || self.concernedData.some(dep => deps.includes(dep))) {
                                 self.applyAttribute(el, attribute, output, additionalHelperVariables);
                             }
                         }

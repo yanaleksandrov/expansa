@@ -1977,8 +1977,9 @@
             const data = Array.from(el.options).reduce((acc, option) => {
                 const image = option.getAttribute('data-image');
                 const icon = option.getAttribute('data-icon');
+                const flag = option.getAttribute('data-flag');
                 const description = option.getAttribute('data-description') || '';
-                const html = `${image ? `<img src="${image}" alt />` : ''}${icon ? `<i class="${icon}"></i>` : ''}` + `<span class="ss-text">${option.text}${description ? `<span class="ss-description">${description}</span>` : ''}</span>`;
+                const html = [ flag && window.youla?.flagsUrl && `<svg><use xlink:href="${window.youla.flagsUrl}#${flag}"></use></svg>`, image && `<img src="${image}" alt />`, icon && `<i class="${icon}"></i>`, `<span class="ss-text">${option.text}${description && `<span class="ss-description">${description}</span>`}</span>` ].join('');
                 const optionData = {
                     text: option.text,
                     value: option.value,

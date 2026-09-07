@@ -17,8 +17,8 @@ if (! Is::installed()) {
         $data = [];
         if ($script === 'youla') {
             $data['data'] = [
-                'apiurl'         => url('/api/'),
-                'spriteFlagsUrl' => url('/dashboard/assets/sprites/flags.svg'),
+                'apiurl'   => url('/api/'),
+                'flagsUrl' => url('/dashboard/assets/sprites/flags.svg'),
             ];
         }
         Asset::script($script, url("/dashboard/assets/js/$script$suffix.js"), $data);

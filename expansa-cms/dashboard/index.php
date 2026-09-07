@@ -73,7 +73,7 @@ new class
         $scripts = ['youla-expansa', 'youla-extensions', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'dialog', 'storage', 'sortable', 'youla'];
         foreach ($scripts as $script) {
             $data = [];
-            if ($script === 'expansa') {
+            if ($script === 'youla') {
                 $data['data'] = Hook::call(
                     'expansa_dashboard_data',
                     [
@@ -200,7 +200,7 @@ new class
                         'showFilter'          => false,
                         'bulk'                => false,
                         'showMenu'            => false,
-                        'spriteFlagsUrl'      => url('/dashboard/assets/sprites/flags.svg'),
+                        'flagsUrl'            => url('/dashboard/assets/sprites/flags.svg'),
                         'notifications'       => [
                             'ctrlS' => t_attr('Expansa saves the changes automatically, so there is no need to press ⌘ + S'),
                         ],

@@ -5,7 +5,7 @@ return \Expansa\Facades\Form::enqueue(
     [
         'class'           => 'dg g-2',
         '@submit.prevent' => '$ajax("system/install").then(response => installed = response)',
-        'u-data'          => '{...step, approved: {}, site: {}, db: {}, user: {}, installed: false}',
+        'u-data'          => '{...step, approved: {}, installed: false}',
     ],
     [
         [
@@ -362,8 +362,9 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'       => 'step',
             'attributes' => [
-                'class'   => 'dg g-8 pt-8',
+                'class'  => 'dg g-8 pt-8',
                 'hidden' => true,
+                'u-step' => '',
             ],
             'fields'     => [
                 [
@@ -384,10 +385,10 @@ return \Expansa\Facades\Form::enqueue(
                     <button type="button" class="btn btn--outline" u-show="isNotLast()" :disabled="cannotGoBack()" @click="goBack()" disabled>
                         <?php echo t('Back'); ?>
                     </button>
-                    <button type="button" class="btn btn--primary" u-show="isNotLast() && !isStep(3)" :disabled="cannotGoNext()" @click="goNext()" disabled>
+                    <button type="button" class="btn btn--primary" u-show="isSteps([1, 3])" :disabled="cannotGoNext()" @click="goNext()" disabled>
                         <?php echo t('Continue'); ?>
                     </button>
-                    <button type="submit" class="btn btn--primary" u-show="isStep(3)" :disabled="!['login', 'email', 'password'].every(key => user[key].trim())" hidden disabled>
+                    <button type="submit" class="btn btn--primary" u-show="isStep(4)" :disabled="cannotGoNext()" hidden disabled>
                         <?php echo t('Install Expansa'); ?>
                     </button>
                     <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" u-show="isLast()" hidden><?php echo t('Go to dashboard'); ?></a>

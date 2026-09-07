@@ -708,8 +708,19 @@ final class Html
                 array_splice($content, 0, 0, $this->input[$tagStart - 1]);
             }
             $tagEnd = $this->pos - 1;
-            if (in_array($this->input[$tagEnd + 1], $this->whitespace, true)) {
-                $content[] = $this->input[$tagEnd + 1];
+            if (in_array($this->input[$tagEnd + 1] ?? '', $this->whitespace, true)) {
+                // Only keep it as a real word separator - not when it's just trailing
+                // whitespace before the parent's own closing tag (e.g. an inline
+                // "<i>*</i>    </div>"), which would otherwise leave a meaningless
+                // "</i> </div>" gap between two closing tags.
+                $restLen         = strspn($this->input, self::WHITESPACE_CHARS, $tagEnd + 1);
+                $afterWhitespace = $tagEnd + 1 + $restLen;
+                $followedByClosingTag = ($this->input[$afterWhitespace] ?? '') === '<'
+                    && ($this->input[$afterWhitespace + 1] ?? '') === '/';
+
+                if (! $followedByClosingTag) {
+                    $content[] = $this->input[$tagEnd + 1];
+                }
             }
             $this->tagType = 'SINGLE';
             $this->lastSingleWasUnformatted = true;

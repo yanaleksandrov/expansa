@@ -18,7 +18,7 @@
                 if (required && !el._x_stepRequiredBound) {
                     el._x_stepRequiredBound = true;
                     el.querySelectorAll(REQUIRED_FIELDS_SELECTOR).forEach(field => {
-                        [ 'input', 'change' ].forEach(event => field.addEventListener(event, () => component.refresh(true)));
+                        [ 'input', 'change' ].forEach(event => field.addEventListener(event, () => component.refresh(el)));
                     });
                 }
                 let isComplete = required && attribute.expression.trim() === '' ? true : !!output;
@@ -27,15 +27,14 @@
                 }
                 if (step.isComplete !== isComplete) {
                     step.isComplete = isComplete;
-                    component.refresh(true);
                 }
             });
             Youla.data('step', () => ({
                 steps: [],
-                currentIndex: 0,
+                currentIndex: 1,
                 progress() {
                     const total = this.steps.length;
-                    const current = Math.min(this.currentIndex + 1, total);
+                    const current = Math.min(this.currentIndex, total);
                     let complete = 0;
                     for (let index = 0; index < current; index++) {
                         if (this.steps[index].isComplete) {
@@ -53,9 +52,8 @@
                     };
                 },
                 stepAt(index) {
-                    return this.steps[index] || {
-                        el: null,
-                        title: null
+                    return this.steps[index - 1] || {
+                        el: null
                     };
                 },
                 current() {
@@ -68,13 +66,16 @@
                     return this.stepAt(this.nextIndex());
                 },
                 previousIndex() {
-                    return this.currentIndex - 1 >= 0 ? this.currentIndex - 1 : null;
+                    return this.currentIndex - 1 >= 1 ? this.currentIndex - 1 : null;
                 },
                 nextIndex() {
-                    return this.currentIndex + 1 < this.steps.length ? this.currentIndex + 1 : null;
+                    return this.currentIndex + 1 <= this.steps.length ? this.currentIndex + 1 : null;
                 },
                 isStep(index) {
                     return Array.isArray(index) ? index.includes(this.currentIndex) : index === this.currentIndex;
+                },
+                isSteps(...values) {
+                    return values.some(value => Array.isArray(value) ? this.currentIndex >= value[0] && this.currentIndex <= value[1] : value === this.currentIndex);
                 },
                 isFirst() {
                     return this.previousIndex() === null;
@@ -130,12 +131,12 @@
                 },
                 goto(index) {
                     const previousIndex = this.currentIndex;
-                    if (index !== null && this.steps[index] !== void 0) {
+                    if (index !== null && this.steps[index - 1] !== void 0) {
                         this.currentIndex = index;
                     }
                     this.render();
                     if (this.currentIndex !== previousIndex) {
-                        this.runAction(this.steps[this.currentIndex]);
+                        this.runAction(this.steps[this.currentIndex - 1]);
                     }
                     return this.current();
                 },
@@ -149,24 +150,22 @@
                 },
                 render() {
                     this.steps.forEach((step, index) => {
-                        const isHidden = index !== this.currentIndex;
+                        const isHidden = index + 1 !== this.currentIndex;
                         if (step.el.hidden !== isHidden) {
                             step.el.hidden = isHidden;
                         }
                     });
                 },
                 getStep(el) {
-                    let step = el._x_step;
-                    if (!step) {
-                        step = el._x_step = {
+                    let index = el._x_stepIndex;
+                    if (index === undefined) {
+                        index = el._x_stepIndex = this.steps.push({
                             el,
-                            title: '',
                             isComplete: true
-                        };
-                        this.steps.push(step);
+                        }) - 1;
                         this.render();
                     }
-                    return step;
+                    return this.steps[index];
                 }
             }));
         })();
