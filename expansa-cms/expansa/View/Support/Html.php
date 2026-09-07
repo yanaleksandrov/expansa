@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Support;
+namespace Expansa\View\Support;
 
 /**
  * This file is part of Expansa CMS.
@@ -37,6 +37,9 @@ final class Html
 	private string $prevTagText = '';
 
 	private string $prevTagType = '';
+
+	/** True while the TK_TAG_SINGLE just parsed is an "unformatted" inline tag (e.g. <i>...</i>) swallowed whole, as opposed to a genuine void element like <input> or a comment. */
+	private bool $lastSingleWasUnformatted = false;
 
     private int $newlines = 0;
 
@@ -157,21 +160,19 @@ final class Html
 	 */
     public function minify(string $input): string
     {
-        return preg_replace(
-            [
-                '/\>[^\S ]+/s',     // strip whitespaces after tags, except space
-                '/[^\S ]+\</s',     // strip whitespaces before tags, except space
-                '/(\s)+/s',         // shorten multiple whitespace sequences
-                '/<!--(.|\s)*?-->/', // Remove HTML comments
-            ],
-            [
-                '>',
-                '<',
-                '\\1',
-                '',
-            ],
-            $input
-        );
+        $input = preg_replace('/<!--(.|\s)*?-->/', '', $input); // remove comments first
+
+        // A whitespace run between two tags that contains a newline is pure
+        // source indentation (e.g. "<div>\n    <span>"), not a separator
+        // anyone actually meant to keep - drop it entirely rather than
+        // collapsing it to a lone space that was never really there.
+        $input = preg_replace('/>[ \t]*[\r\n][ \t\r\n]*</', '><', $input);
+
+        // Everything else - a same-line gap between tags someone actually typed
+        // (e.g. "<b>A</b> <i>B</i>"), or repeated whitespace inside text content -
+        // collapses to a single space; browsers already render any whitespace
+        // run as one space, so this never changes how the page looks.
+        return preg_replace('/\s+/', ' ', $input);
     }
 
 	/**
@@ -206,8 +207,6 @@ final class Html
                         $this->indentContent = false;
                     }
                     $this->currentMode = 'CONTENT';
-                    $this->prevTagText = $this->tokenText;
-					$this->prevTagType = $this->tokenType;
                     break;
                 case 'TK_TAG_STYLE':
                 case 'TK_TAG_SCRIPT':
@@ -227,12 +226,22 @@ final class Html
                         preg_match('/(?:<|{{#)\s*(\w+)/', $this->lastAppendedChunk, $matches);
                         $tagExtractedFromLastOutput = $matches[0] ?? null;
 
+                        // A closing tag only counts as "no content" (e.g. <div></div>, keep
+                        // it on one line) when the tag directly before it was THIS element's
+                        // own opening tag with nothing in between. If the previous tag was
+                        // itself a closing tag (or a single tag), $prevTagText still held the
+                        // last-opened tag from anywhere up the tree - comparing tag *names*
+                        // alone then false-positives on any two same-named nested elements
+                        // closing back to back (e.g. nested <div>s), suppressing the newline
+                        // between them and collapsing "</div>\n</div>" into "</div></div>".
                         $isTagWithContent = true;
-						preg_match( '/<([a-zA-Z0-9]+)[^>]*>/', $this->prevTagText, $openingMatches );
-						preg_match( '/<\/([a-zA-Z0-9]+)[^>]*>/', $this->tokenText, $closingMatches );
-						if ( $openingMatches[1] === $closingMatches[1] && $this->lastText === '' ) {
-							$isTagWithContent = false;
-						}
+                        if ($this->prevTagType === 'TK_TAG_START') {
+                        	preg_match( '/<([a-zA-Z0-9]+)[^>]*>/', $this->prevTagText, $openingMatches );
+							preg_match( '/<\/([a-zA-Z0-9]+)[^>]*>/', $this->tokenText, $closingMatches );
+							if ( ($openingMatches[1] ?? null) === ($closingMatches[1] ?? null) && $this->lastText === '' ) {
+								$isTagWithContent = false;
+							}
+                        }
 
                         if (
                         	! $skipTags &&
@@ -315,6 +324,27 @@ final class Html
 
             $this->lastToken = $this->tokenType;
             $this->lastText  = $this->tokenText;
+
+            // Tracks the last opening/closing tag seen so TK_TAG_END can tell "my own
+            // opening tag precedes me directly" (a genuinely empty element, e.g.
+            // <div></div>) apart from "something else precedes me" - another tag's
+            // closer (two elements ending back to back, e.g. </div></div>) or a real
+            // child element (e.g. <div><input></div>) - see the TK_TAG_END case above.
+            //
+            // A TK_TAG_SINGLE only counts as "something else" when it's a genuine void
+            // element or comment ($lastSingleWasUnformatted === false); an "unformatted"
+            // inline tag like <i> (see $options['unformatted']) is captured whole - open
+            // tag, content, and close - as a single TK_TAG_SINGLE token that never
+            // represents a real ancestor, so it's skipped entirely (prevTag* is left
+            // untouched) - counting it here would make e.g. "<div>text <i>*</i></div>"
+            // forget that <div>'s own opening tag is what actually precedes its closer.
+            if ($this->tokenType === 'TK_TAG_START' || $this->tokenType === 'TK_TAG_END') {
+                $this->prevTagText = $this->tokenText;
+                $this->prevTagType = $this->tokenType;
+            } elseif ($this->tokenType === 'TK_TAG_SINGLE' && ! $this->lastSingleWasUnformatted) {
+                $this->prevTagText = $this->tokenText;
+                $this->prevTagType = $this->tokenType; // 'TK_TAG_SINGLE', deliberately not 'TK_TAG_START'
+            }
         }
 
         return $this->collapseTextOnlyElements($this->output);
@@ -656,6 +686,7 @@ final class Html
             || in_array($tagCheck, $this->singleToken, true)) { // if this tag name is a single tag type (either in the list or has a closing /)
             if ( ! $peek) {
                 $this->tagType = 'SINGLE';
+                $this->lastSingleWasUnformatted = false;
             }
         } elseif ($tagCheck === 'script') {
             if ( ! $peek) {
@@ -681,10 +712,12 @@ final class Html
                 $content[] = $this->input[$tagEnd + 1];
             }
             $this->tagType = 'SINGLE';
+            $this->lastSingleWasUnformatted = true;
         } elseif ($tagCheck && $tagCheck[0] === '!') { // peek for <! comment
             // for comments content is already correct.
             if ( ! $peek) {
                 $this->tagType = 'SINGLE';
+                $this->lastSingleWasUnformatted = false;
                 $this->traverseWhitespace();
             }
         } elseif ( ! $peek) {

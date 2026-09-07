@@ -51,7 +51,6 @@ class Field
             $field['attributes'] = Safe::array($field['attributes'] ?? []);
 
             match ($type) {
-                'step'     => $field['attributes']['u-step'] ??= '',
                 'textarea' => $field['attributes']['u-textarea'] ??= '',
                 'select'   => $field['attributes']['u-select'] ??= '',
                 'date'     => $field['attributes']['u-datepicker'] ??= '',

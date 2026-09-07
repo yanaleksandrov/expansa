@@ -11,8 +11,8 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'       => 'step',
             'attributes' => [
-                'class'  => 'dg g-8 pt-8',
-                'u-step' => 'site.name?.trim()',
+                'class'           => 'dg g-8 pt-8',
+                'u-step.required' => '',
             ],
             'fields'     => [
                 [
@@ -73,8 +73,8 @@ return \Expansa\Facades\Form::enqueue(
             'attributes' => [
                 'class'           => 'dg g-8 pt-8',
                 'hidden'          => true,
-                'u-step'          => '[db.database, db.username, db.password, db.host, db.prefix].every(value => value !== undefined && value.trim())',
-                'u-step:action' => 'approved = {}',
+                'u-step.required' => '',
+                'u-step:action'   => 'approved = {}',
             ],
             'fields'     => [
                 [
@@ -231,9 +231,9 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'       => 'step',
             'attributes' => [
-                'class'         => 'dg g-8 pt-8',
-                'hidden'       => true,
-                'u-step' => '[user.login, user.email, user.password].every(value => value !== undefined && value.trim())',
+                'class'           => 'dg g-8 pt-8',
+                'hidden'          => true,
+                'u-step.required' => '',
             ],
             'fields'     => [
                 [
