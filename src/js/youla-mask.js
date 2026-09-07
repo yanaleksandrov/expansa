@@ -220,15 +220,7 @@
                 }
             });
         }
-        Youla.directive("mask", (el, output) => {
-            if (!(el instanceof HTMLInputElement)) {
-                console.warn('Youla.js: "u-mask" requires an <input>.');
-                return;
-            }
-            const mode = output instanceof RegExp ? "regexp" : typeof output === "string" && output ? "pattern" : "auto";
-            if (el._x_mask && el._x_mask.mode === mode && el._x_mask.output === output) {
-                return;
-            }
+        function applyMask(el, mode, output) {
             el._x_mask?.destroy();
             if (mode === "pattern") {
                 const textMask = new TextMask(el, rawValue => buildMaskTokens(output, rawValue));
@@ -261,6 +253,17 @@
                 output: output,
                 destroy: () => el.removeEventListener("input", onInput)
             };
+        }
+        Youla.directive("mask", (el, output) => {
+            if (!(el instanceof HTMLInputElement)) {
+                console.warn('Youla.js: "u-mask" requires an <input>.');
+                return;
+            }
+            const mode = output instanceof RegExp ? "regexp" : typeof output === "string" && output ? "pattern" : "auto";
+            if (el._x_mask && el._x_mask.mode === mode && el._x_mask.output === output) {
+                return;
+            }
+            applyMask(el, mode, output);
         });
     });
 })();

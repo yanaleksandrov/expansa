@@ -6,7 +6,6 @@ return \Expansa\Facades\Form::enqueue(
         'class'           => 'dg g-2',
         '@submit.prevent' => '$ajax("system/install").then(response => installed = response)',
         'u-data'          => '{...step, approved: {}, site: {}, db: {}, user: {}, installed: false}',
-        'u-init'          => '$watch("installed", () => goNext())',
     ],
     [
         [
@@ -75,7 +74,7 @@ return \Expansa\Facades\Form::enqueue(
                 'class'           => 'dg g-8 pt-8',
                 'hidden'          => true,
                 'u-step'          => '[db.database, db.username, db.password, db.host, db.prefix].every(value => value !== undefined && value.trim())',
-                'u-wizard:action' => 'approved = {}',
+                'u-step:action' => 'approved = {}',
             ],
             'fields'     => [
                 [
@@ -206,10 +205,10 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'       => 'step',
             'attributes' => [
-                'class'           => 'dg g-8 pt-8',
-                'u-step'   => 'Object.values(approved).every(Boolean) === true',
-                'u-wizard:action' => '$ajax("system/test", db).then(response => approved = response)',
-                'hidden'         => true,
+                'class'         => 'dg g-8 pt-8',
+                'u-step'        => 'Object.keys(approved).length && Object.values(approved).every(Boolean)',
+                'u-step:action' => '$ajax("system/test", db).then(response => approved = response)',
+                'hidden'        => true,
             ],
             'fields'     => [
                 [

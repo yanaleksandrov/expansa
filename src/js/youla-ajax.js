@@ -1,7 +1,7 @@
 (function() {
     document.addEventListener("youla:init", () => {
         const BYTES_IN_MB = 1048576;
-        Youla.baseURL ??= "";
+        Youla.baseURL ??= (typeof youla !== "undefined" ? youla?.apiurl : null) ?? "";
         Youla.method("ajax", (e, el) => (route, payload, onProgress, options = {}) => {
             abortPrevious(el);
             const xhr = el.__ajax = new XMLHttpRequest;

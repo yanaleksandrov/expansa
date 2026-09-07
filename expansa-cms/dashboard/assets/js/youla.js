@@ -799,7 +799,9 @@
                 modifiers: []
             };
             const [, dataExpression, alias] = expression.trim().match(/^([\s\S]+?)\s+as\s+([A-Za-z_$][\w$]*)$/) || [];
+            const parentEl = closestDirective(el.parentElement, 'u-data');
             this.root = el;
+            this.parent = parentEl ? parentEl.__x : null;
             this.name = (dataExpression ?? expression).trim();
             this.alias = alias || null;
             this.storageType = isStorageModifier(modifiers) ? getStorageType(modifiers) : null;
@@ -831,6 +833,32 @@
                 });
             }
         }
+        get scope() {
+            if (!this.parent) {
+                return this.data;
+            }
+            if (!this._scope) {
+                const self = this;
+                this._scope = new Proxy({}, {
+                    has: (_, prop) => prop in self.data || prop in self.parent.scope,
+                    get: (_, prop) => {
+                        if (prop === RAW) {
+                            return toRaw(self.data);
+                        }
+                        return prop in self.data ? self.data[prop] : self.parent.scope[prop];
+                    },
+                    set: (_, prop, value) => {
+                        if (prop in self.data || !(prop in self.parent.scope)) {
+                            self.data[prop] = value;
+                        } else {
+                            self.parent.scope[prop] = value;
+                        }
+                        return true;
+                    }
+                });
+            }
+            return this._scope;
+        }
         evaluate(expressionOrFn, additionalHelperVariables) {
             let deps = [];
             const makeProxy = data => new Proxy(data, {
@@ -845,7 +873,7 @@
                     return target[prop];
                 }
             });
-            const proxiedData = makeProxy(this.data);
+            const proxiedData = makeProxy(this.scope);
             const {magicVariables, otherVariables} = splitMagicVariables(additionalHelperVariables);
             const trackedHelperVariables = Object.fromEntries(Object.entries(otherVariables).map(([key, value]) => [ key, typeof value === 'object' && value !== null && !isNode(value) ? makeProxy(value) : value ]));
             const contextData = withMagicVariables(proxiedData, magicVariables);
@@ -1068,7 +1096,7 @@
             }
         }
         invokeListener(expressionOrFn, e, target) {
-            const contextData = withMagicVariables(this.data, this.getMagicVariables(target, e));
+            const contextData = withMagicVariables(this.scope, this.getMagicVariables(target, e));
             if (typeof expressionOrFn === 'function') {
                 expressionOrFn.call(contextData, e);
                 return;

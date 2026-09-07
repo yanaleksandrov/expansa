@@ -1973,6 +1973,7 @@
                 settings.closeOnSelect = false;
             }
             Object.assign(settings, output && typeof output === "object" ? output : {});
+            el._x_slimSelect?.destroy();
             const data = Array.from(el.options).reduce((acc, option) => {
                 const image = option.getAttribute("data-image");
                 const icon = option.getAttribute("data-icon");
@@ -2008,7 +2009,7 @@
                 return acc;
             }, []);
             try {
-                new SlimSelect({
+                el._x_slimSelect = new SlimSelect({
                     settings: settings,
                     select: el,
                     data: data

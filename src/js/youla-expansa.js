@@ -1,6 +1,15 @@
 (function() {
     document.addEventListener("youla:init", () => {
         (() => {
+            function hasUData(el) {
+                return [ ...el.attributes ].some(({name: name}) => name === "u-data" || name.startsWith("u-data."));
+            }
+            function closestComponent(el) {
+                while (el && !hasUData(el)) {
+                    el = el.parentElement;
+                }
+                return el ? el.__x : null;
+            }
             Youla.directive("step", (el, output, _, component) => {
                 const wizard = component.data;
                 const step = wizard.getStep(el);
@@ -109,11 +118,23 @@
                     this.goto(this.previousIndex());
                 },
                 goto(index) {
+                    const previousIndex = this.currentIndex;
                     if (index !== null && this.steps[index] !== void 0) {
                         this.currentIndex = index;
                     }
                     this.render();
+                    if (this.currentIndex !== previousIndex) {
+                        this.runAction(this.steps[this.currentIndex]);
+                    }
                     return this.current();
+                },
+                runAction(step) {
+                    const expression = step?.el.getAttribute("u-step:action");
+                    if (!expression) {
+                        return;
+                    }
+                    const component = closestComponent(step.el);
+                    component?.invokeListener(expression, null, step.el);
                 },
                 render() {
                     this.steps.forEach((step, index) => {
@@ -716,6 +737,10 @@
             }
         }));
         Youla.directive("highlight", (el, output, {modifiers: modifiers}) => {
+            if (el._x_highlighted) {
+                return;
+            }
+            el._x_highlighted = true;
             const lang = modifiers[0] || "html";
             const wrapper = document.createElement("code");
             wrapper.className = `language-${lang}`;
@@ -725,12 +750,20 @@
             el.replaceChildren(wrapper);
         });
         Youla.directive("noautofill", el => {
+            if (el._x_noautofill) {
+                return;
+            }
+            el._x_noautofill = true;
             const lock = () => el.readOnly = true;
             lock();
             el.addEventListener("focus", () => requestAnimationFrame(() => el.readOnly = false));
             el.addEventListener("blur", lock);
         });
         Youla.directive("sticky", el => {
+            if (el._x_sticky) {
+                return;
+            }
+            el._x_sticky = true;
             const parent = el.parentElement;
             if (getComputedStyle(parent).position !== "relative") {
                 console.warn('Youla.js: "u-sticky" requires its parent to have position: relative.');
@@ -782,9 +815,10 @@
             requestAnimationFrame(step);
         });
         Youla.directive("textarea", (el, output) => {
-            if (el.tagName !== "TEXTAREA") {
+            if (el.tagName !== "TEXTAREA" || el._x_textarea) {
                 return;
             }
+            el._x_textarea = true;
             el.addEventListener("input", () => {
                 const maxRows = parseInt(output) || 99;
                 if (el.value.split(/\r\n|\r|\n/).length > maxRows) {

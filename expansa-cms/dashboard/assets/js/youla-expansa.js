@@ -1,6 +1,15 @@
 (function() {
     document.addEventListener('youla:init', () => {
         (() => {
+            function hasUData(el) {
+                return [ ...el.attributes ].some(({name}) => name === 'u-data' || name.startsWith('u-data.'));
+            }
+            function closestComponent(el) {
+                while (el && !hasUData(el)) {
+                    el = el.parentElement;
+                }
+                return el ? el.__x : null;
+            }
             Youla.directive('step', (el, output, _, component) => {
                 const wizard = component.data;
                 const step = wizard.getStep(el);
@@ -109,11 +118,23 @@
                     this.goto(this.previousIndex());
                 },
                 goto(index) {
+                    const previousIndex = this.currentIndex;
                     if (index !== null && this.steps[index] !== void 0) {
                         this.currentIndex = index;
                     }
                     this.render();
+                    if (this.currentIndex !== previousIndex) {
+                        this.runAction(this.steps[this.currentIndex]);
+                    }
                     return this.current();
+                },
+                runAction(step) {
+                    const expression = step?.el.getAttribute('u-step:action');
+                    if (!expression) {
+                        return;
+                    }
+                    const component = closestComponent(step.el);
+                    component?.invokeListener(expression, null, step.el);
                 },
                 render() {
                     this.steps.forEach((step, index) => {

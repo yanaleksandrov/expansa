@@ -14,9 +14,17 @@
     function getDirective(name) {
         return directives[name];
     }
+    const compiledCache = new Map;
     function saferEval(expression, dataContext, additionalHelperVariables = {}, noReturn = false) {
-        expression = noReturn ? `with($data){${expression}}` : `with($data){return (${expression})}`;
-        return new Function([ "$data", ...Object.keys(additionalHelperVariables) ], expression)(dataContext, ...Object.values(additionalHelperVariables));
+        const helperNames = Object.keys(additionalHelperVariables);
+        const cacheKey = `${noReturn ? 1 : 0}:${helperNames.join(",")}:${expression}`;
+        let fn = compiledCache.get(cacheKey);
+        if (!fn) {
+            const body = noReturn ? `with($data){${expression}}` : `with($data){return (${expression})}`;
+            fn = new Function([ "$data", ...helperNames ], body);
+            compiledCache.set(cacheKey, fn);
+        }
+        return fn(dataContext, ...Object.values(additionalHelperVariables));
     }
     function isNode(value) {
         return !!value && typeof value === "object" && typeof value.nodeType === "number";
@@ -799,7 +807,9 @@
                 modifiers: []
             };
             const [, dataExpression, alias] = expression.trim().match(/^([\s\S]+?)\s+as\s+([A-Za-z_$][\w$]*)$/) || [];
+            const parentEl = closestDirective(el.parentElement, "u-data");
             this.root = el;
+            this.parent = parentEl ? parentEl.__x : null;
             this.name = (dataExpression ?? expression).trim();
             this.alias = alias || null;
             this.storageType = isStorageModifier(modifiers) ? getStorageType(modifiers) : null;
@@ -831,6 +841,32 @@
                 });
             }
         }
+        get scope() {
+            if (!this.parent) {
+                return this.data;
+            }
+            if (!this._scope) {
+                const self = this;
+                this._scope = new Proxy({}, {
+                    has: (_, prop) => prop in self.data || prop in self.parent.scope,
+                    get: (_, prop) => {
+                        if (prop === RAW) {
+                            return toRaw(self.data);
+                        }
+                        return prop in self.data ? self.data[prop] : self.parent.scope[prop];
+                    },
+                    set: (_, prop, value) => {
+                        if (prop in self.data || !(prop in self.parent.scope)) {
+                            self.data[prop] = value;
+                        } else {
+                            self.parent.scope[prop] = value;
+                        }
+                        return true;
+                    }
+                });
+            }
+            return this._scope;
+        }
         evaluate(expressionOrFn, additionalHelperVariables) {
             let deps = [];
             const makeProxy = data => new Proxy(data, {
@@ -845,7 +881,7 @@
                     return target[prop];
                 }
             });
-            const proxiedData = makeProxy(this.data);
+            const proxiedData = makeProxy(this.scope);
             const {magicVariables: magicVariables, otherVariables: otherVariables} = splitMagicVariables(additionalHelperVariables);
             const trackedHelperVariables = Object.fromEntries(Object.entries(otherVariables).map(([key, value]) => [ key, typeof value === "object" && value !== null && !isNode(value) ? makeProxy(value) : value ]));
             const contextData = withMagicVariables(proxiedData, magicVariables);
@@ -979,12 +1015,18 @@
                         ...self.getMagicVariables(el)
                     };
                     self.resolveAttributes(el).forEach(attribute => {
-                        const {directive: directive, bind: bind} = attribute;
+                        const {directive: directive, bind: bind, name: name} = attribute;
                         if (bind || getDirective(directive)) {
+                            el.__x_deps ??= {};
+                            const previousDeps = el.__x_deps[name];
+                            if (!force && previousDeps && !previousDeps.some(dep => self.concernedData.includes(dep))) {
+                                return;
+                            }
                             const {output: output, deps: deps} = self.computeOutput(attribute, additionalHelperVariables, {
                                 withDeps: true
                             });
-                            if (force || self.concernedData.some(dep => deps.includes(dep))) {
+                            el.__x_deps[name] = deps;
+                            if (force || !previousDeps || self.concernedData.some(dep => deps.includes(dep))) {
                                 self.applyAttribute(el, attribute, output, additionalHelperVariables);
                             }
                         }
@@ -1068,7 +1110,7 @@
             }
         }
         invokeListener(expressionOrFn, e, target) {
-            const contextData = withMagicVariables(this.data, this.getMagicVariables(target, e));
+            const contextData = withMagicVariables(this.scope, this.getMagicVariables(target, e));
             if (typeof expressionOrFn === "function") {
                 expressionOrFn.call(contextData, e);
                 return;
@@ -1113,7 +1155,6 @@
             let observer = new MutationObserver(mutations => mutations.forEach(mutation => Array.from(mutation.addedNodes).filter(node => node.nodeType === 1 && hasDirective(node, "u-data")).forEach(callback)));
             observer.observe(document.querySelector("body"), {
                 childList: true,
-                attributes: true,
                 subtree: true
             });
         },

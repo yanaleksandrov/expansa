@@ -1686,11 +1686,11 @@
                     range: false,
                     inline: false,
                     multipleDatesSeparator: " — ",
-                    ...window.expansa?.datepicker ? {
-                        locale: window.expansa.datepicker
+                    ...window.youla?.datepicker ? {
+                        locale: window.youla.datepicker
                     } : {},
-                    firstDay: window.expansa?.weekStart || 0,
-                    dateFormat: window.expansa?.dateFormat || "yyyy-MM-dd",
+                    firstDay: window.youla?.weekStart || 0,
+                    dateFormat: window.youla?.dateFormat || "yyyy-MM-dd",
                     container: el.closest("div"),
                     view: "days",
                     ...options
