@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use DateTime;
-use Exception;
+use App\Post\Type;
 use App\User\Roles;
+use Exception;
 use Expansa\Cookie\Cookie;
 use Expansa\Database\Model;
-use Expansa\Database\Query;
 use Expansa\Debug\Error;
+use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use Expansa\Support\Hash;
 use Expansa\Support\Is;
@@ -93,7 +94,6 @@ class User extends Model
         'verification_token_expires_at',
         'password_reset_token',
         'password_reset_expires_at',
-        'deleted_at',
     ];
 
     /**
@@ -277,25 +277,18 @@ class User extends Model
      */
     public static function find(string|int $value, string $by = 'id'): User|Error
     {
-        try {
-            if (empty($value)) {
-                throw new Exception(t('You are trying to find a user with an empty :getByField.', $by));
-            }
-
-            $by = mb_strtolower($by);
-            if (! in_array($by, [ 'id', 'uuid', 'login', 'email', 'nicename' ], true)) {
-                throw new Exception(t('Use an ID, UUID, login, email, or nicename to get a user.'));
-            }
-
-            $user = parent::get($value, $by);
-            if ($user instanceof User) {
-                return $user;
-            }
-
-            throw new Exception(t('User not found.'));
-        } catch (Exception $e) {
-            return error('user-get', $e->getMessage());
+        if (empty($value)) {
+            return error('user-find', t('You are trying to find a user with an empty :getByField.', $by));
         }
+
+        $by = mb_strtolower($by);
+        if (! in_array($by, [ 'id', 'uuid', 'login', 'email', 'nicename' ], true)) {
+            return error('user-find', t('Use an ID, UUID, login, email, or nicename to get a user.'));
+        }
+
+        $user = parent::get($value, $by);
+
+        return $user instanceof User ? $user : error('user-find', t('User not found.'));
     }
 
     /**
@@ -307,10 +300,13 @@ class User extends Model
      */
     public static function create(array $userdata): User|Error
     {
-        // The `status` column has a DB-level default, but the `status:in`
-        // validation rule requires an explicit value — without this, create()
-        // would reject any request that just omits status altogether.
-        $userdata += ['status' => self::STATUS_ACTIVE];
+        // Both defaults below only take effect if the key is entirely absent:
+        // fill() only calls setAttribute() (and so only runs sanitizers/mutators)
+        // for keys actually present in $userdata. Without this, a caller that
+        // omits 'status' fails the status:in validation rule, and one that
+        // omits 'nicename' gets a null nicename instead of one derived from
+        // login (see nicename()'s 'slug:$login' sanitizer rule).
+        $userdata += ['status' => self::STATUS_ACTIVE, 'nicename' => ''];
 
         $user = new self()->fill($userdata);
 
@@ -326,7 +322,9 @@ class User extends Model
             $user->roles = [$role];
         }
 
-        $user->save();
+        if (! $user->save() instanceof self) {
+            return error('user-add', t('Failed to save the user to the database.'));
+        }
 
         return $user;
     }
@@ -344,32 +342,33 @@ class User extends Model
         // ignores both — no need to strip them from $userdata by hand.
         $this->fill($userdata);
 
-        $this->save();
+        if (! $this->save() instanceof self) {
+            return error('user-update', t('Failed to save the user to the database.'));
+        }
 
         return $this;
     }
 
     /**
-     * Remove this user, optionally reassigning their posts and links to
-     * another user first.
+     * Reassign all posts, across every registered post type, from this user
+     * to another. Useful to call before deleting a user, since deletion
+     * itself (via {@see \Expansa\Database\Query::delete()}) does not touch
+     * content ownership.
      *
-     * If the $reassign parameter is not assigned to a User ID, then all posts will
-     * be deleted of that user. The action {@see 'delete_user'} that is passed the User ID
-     * being deleted will be run after the posts are either reassigned or deleted.
-     * The user meta will also be deleted that are for that User ID.
-     *
-     * @param  int $reassign Optional. Reassign posts to new User ID.
-     * @return bool          True once removed.
+     * @param int $newUserId ID of the user to become the new author.
+     * @return int           Number of post types whose rows were reassigned.
      */
-    public function delete(int $reassign = 0): bool
+    public function reassign(int $newUserId): int
     {
-        if ($reassign) {
-            // TODO: add functionality for reassign
+        $reassigned = 0;
+
+        foreach (Type::fetch() as $type) {
+            $result = Db::update($type->table, ['author_id' => $newUserId], ['author_id' => $this->id]);
+
+            $reassigned += $result && $result->rowCount() ? 1 : 0;
         }
 
-        // Not $this->delete(): that would recurse into this very method
-        // instead of reaching Model::__call()'s fallback to Query::delete().
-        return new Query($this)->delete() > 0;
+        return $reassigned;
     }
 
     /**
@@ -484,25 +483,19 @@ class User extends Model
         $remember     = Safe::bool($data['remember'] ?? false);
 
         $field = Is::email($loginOrEmail) ? 'email' : 'login';
+        $user  = User::find($loginOrEmail, $field);
 
-        $user = User::find($loginOrEmail, $field);
+        if (! $user instanceof User) {
+            return error('user-login', t('User not found: invalid login or email.'));
+        }
 
-        if ($user instanceof User) {
-
-            if (password_verify($password, $user->password)) {
-                self::setAuthCookie(
-                    $user,
-                    time() + ($remember ? self::COOKIE_TTL_LONG : self::COOKIE_TTL_SHORT),
-                    $remember
-                );
-
-                return self::$current = $user;
-            }
-
+        if (! password_verify($password, $user->password)) {
             return error('user-login', t('User password is incorrect.'));
         }
 
-        return error('user-login', t('User not found: invalid login or email.'));
+        self::setAuthCookie($user, time() + ($remember ? self::COOKIE_TTL_LONG : self::COOKIE_TTL_SHORT), $remember);
+
+        return self::$current = $user;
     }
 
     /**

@@ -15,11 +15,11 @@ use stdClass;
  * Base data model class with support for attributes, mass assignment protection, timestamps, and soft deletes.
  *
  * @method static static|null get(mixed $value, string $by = 'id') Find a model by primary key or specified field.
- * @method static static      fill(array $data)                    Create a model by...
+ * @method static static      fill(array $data)                    Fill the model with the given attributes.
  * @method static bool        exists(array $data)                  Check record is existing.
- * @method int                save()                               Delete records by primary key.
- * @method int                delete()                             Delete records by primary key.
- * @method int                restore()                            Restore a soft-deleted record.
+ * @method null|static         save()                                Insert or update the record and return the fresh model.
+ * @method int                delete()                              Delete the record by primary key.
+ * @method int                restore()                             Restore a soft-deleted record.
  *
  * @property string|null $updatedAt Timestamp of the last update.
  * @property string|null $createdAt Timestamp of creation.

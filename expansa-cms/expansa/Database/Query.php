@@ -220,7 +220,10 @@ class Query
         if ($id) {
             $changes = $this->model->getChanges();
             if ($changes) {
-                Db::update($this->model->getTable(), $changes, ['id' => $id]);
+                if (! Db::update($this->model->getTable(), $changes, ['id' => $id])) {
+                    return null;
+                }
+
                 Cache::forget("$id", $this->model->getTable());
             }
 

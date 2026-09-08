@@ -10,6 +10,32 @@ use Expansa\Security\Xss\Kses;
 final class Sanitizer
 {
     /**
+     * Values treated as "false" by {@see self::bool()}.
+     */
+    private const array FALSY_VALUES = ['false', false, '0', 0, '', null, 'off'];
+
+    /**
+     * HTML attributes rendered bare (present/absent) rather than as name="value"
+     * by {@see self::attributes()}.
+     */
+    private const array BOOLEAN_ATTRIBUTES = [
+        'accesskey', 'async', 'autofocus', 'autoplay', 'checked', 'contenteditable',
+        'controls', 'disabled', 'draggable', 'hidden', 'ismap', 'loop', 'multiple',
+        'readonly', 'required', 'selected',
+    ];
+
+    /**
+     * [method, defaultValue, isOwnMethod] triples per raw rule-list string ('trim',
+     * 'slug:$login|trim', ...), keyed by that string. The same handful of rule strings are
+     * declared once per model (in getSanitizerRules()) but re-parsed and re-checked with
+     * is_callable() on every single attribute write, since Model::setAttribute() calls apply()
+     * once per attribute — this memoizes both in one lookup instead of two.
+     *
+     * @var array<string, list<array{0: string, 1: ?string, 2: bool}>>
+     */
+    private static array $parsedRulesCache = [];
+
+    /**
      * Sanitized data.
      *
      * @var array
@@ -58,6 +84,29 @@ final class Sanitizer
     }
 
     /**
+     * Splits a rule-list string ('trim', 'slug:$login|trim', ...) into its ['method', defaultValue,
+     * isOwnMethod] triples, one per '|'-separated rule. Cached per raw string — see
+     * {@see self::$parsedRulesCache}.
+     *
+     * @return list<array{0: string, 1: ?string, 2: bool}>
+     */
+    private static function parseRuleList(string $rulesList): array
+    {
+        if (isset(self::$parsedRulesCache[$rulesList])) {
+            return self::$parsedRulesCache[$rulesList];
+        }
+
+        $parsed = [];
+        foreach (explode('|', $rulesList) as $rule) {
+            $parts    = explode(':', $rule, 2);
+            $method   = $parts[0];
+            $parsed[] = [$method, $parts[1] ?? null, is_callable([self::class, $method])];
+        }
+
+        return self::$parsedRulesCache[$rulesList] = $parsed;
+    }
+
+    /**
      * Apply sanitizer.
      *
      * @param string $return Field for return.
@@ -67,46 +116,54 @@ final class Sanitizer
     {
         // TODO: !!! if rule not exists throw an Exception
         foreach ($this->rules as $field => $rulesList) {
-            $rules = explode('|', $rulesList);
+            $key = null;
 
             // add support dot notation
             if (str_contains($field, '.')) {
-                [ $field, $key ] = explode('.', $field, 2) + [ null, null ];
+                $parts = explode('.', $field, 2);
+                $field = $parts[0];
+                $key   = $parts[1] ?? null;
             }
 
-            foreach ($rules as $rule) {
-                [ $method, $defaultValue ] = explode(':', $rule, 2) + [ null, null ];
+            foreach (self::parseRuleList($rulesList) as [$method, $defaultValue, $isOwnMethod]) {
+                $extension = $this->extensions[$method] ?? null;
+                $value     = $key !== null
+                    ? $this->data[$field][$key] ?? $this->fields[$field][$key] ?? null
+                    : $this->data[$field] ?? $this->fields[$field] ?? null;
 
-                $extension = isset($this->extensions[$method]) ? $this->extensions[$method] : null;
-                if (! empty($key)) {
-                    $value = $this->data[$field][$key] ?? ( $this->fields[$field][$key] ?? null );
-                } else {
-                    $value = $this->data[$field] ?? ( $this->fields[$field] ?? null );
-                }
-
-                // set default value if incoming is empty & default is not empty
-                if (empty($value) && ! empty($defaultValue)) {
+                // Apply the rule's default only when the incoming value is genuinely
+                // absent (null or an empty string) and a default was actually given.
+                // empty() would also treat legitimate values like 0, '0', or false as
+                // "missing" — e.g. Post::add()'s 'parent_id' => 'absint:0' default
+                // string '0' is itself empty(), which used to skip this branch
+                // entirely and silently disable that default.
+                if (($value ?? '') === '' && ($defaultValue ?? '') !== '') {
                     $value = $defaultValue;
 
                     // substring "$" at the beginning, means that the default value must be taken from another field
                     if (str_starts_with($defaultValue, '$')) {
-                        $value = $this->data[ trim($defaultValue, '$') ] ?? '';
+                        $referencedField = trim($defaultValue, '$');
+
+                        // Prefer the referenced field's own already-sanitized result (set if it was
+                        // processed earlier in this same batch), falling back to its raw incoming
+                        // value — needed when the referenced field isn't part of this call's $rules
+                        // at all, e.g. Model::setAttribute() sanitizing one attribute at a time.
+                        $value = $this->data[$referencedField] ?? $this->fields[$referencedField] ?? '';
                     }
                 }
 
                 $data = match (true) {
-                    is_callable($extension)         => $extension($value, $this),
-                    is_callable([ $this, $method ]) => $this->{$method}($value),
-                    default                         => null
+                    is_callable($extension) => $extension($value, $this),
+                    $isOwnMethod             => self::{$method}($value),
+                    default                  => null
                 };
 
-                if (! empty($key)) {
+                if ($key !== null) {
                     $this->data[$field][$key] = $data;
                 } else {
                     $this->data[$field] = $data;
                 }
             }
-            unset($key);
         }
 
         if ($return) {
@@ -205,7 +262,7 @@ final class Sanitizer
      */
     public static function bool(mixed $value): bool
     {
-        return ! in_array($value, ['false', false, '0', 0, '', null, 'off'], true);
+        return ! in_array($value, self::FALSY_VALUES, true);
     }
 
     /**
@@ -227,15 +284,17 @@ final class Sanitizer
      *
      * @param mixed $value Input value to convert.
      * @return string Normalized datetime string or empty string if invalid.
-     * @throws \Exception If DateTime creation fails unexpectedly.
      */
     public static function datetime(mixed $value): string
     {
-        $format = 'Y-m-d H:i:s';
-        if ($value) {
-            $datetime = \DateTime::createFromFormat($format, $value);
+        if (! is_scalar($value) || $value === '') {
+            return '';
         }
-        return isset($datetime) && $datetime instanceof \DateTime ? $datetime->format($format) : '';
+
+        $format   = 'Y-m-d H:i:s';
+        $datetime = \DateTime::createFromFormat($format, (string) $value);
+
+        return $datetime instanceof \DateTime ? $datetime->format($format) : '';
     }
 
     /**
@@ -283,25 +342,6 @@ final class Sanitizer
             return '';
         }
 
-        $booleanAttributes = [
-            'accesskey',
-            'async',
-            'autofocus',
-            'autoplay',
-            'checked',
-            'contenteditable',
-            'controls',
-            'disabled',
-            'draggable',
-            'hidden',
-            'ismap',
-            'loop',
-            'multiple',
-            'readonly',
-            'required',
-            'selected',
-        ];
-
         $atts = [];
         foreach ($attributes as $attribute => $value) {
             $attribute = trim(htmlspecialchars((string) $attribute, ENT_QUOTES));
@@ -310,7 +350,7 @@ final class Sanitizer
                 continue;
             }
 
-            if (in_array($attribute, $booleanAttributes, true)) {
+            if (in_array($attribute, self::BOOLEAN_ATTRIBUTES, true)) {
                 if ($value) {
                     $atts[] = $attribute;
                 }
@@ -335,15 +375,27 @@ final class Sanitizer
      */
     public static function price(mixed $value): float
     {
-        $sanitized = 0;
-
-        if (is_scalar($value)) {
-            $sanitized = self::trim($value);
-            $sanitized = preg_replace('/[^0-9.,]/', '', $sanitized);
-            $sanitized = str_replace(',', '.', $sanitized);
+        if (! is_scalar($value)) {
+            return 0.0;
         }
 
-        return floatval($sanitized);
+        $sanitized = preg_replace('/[^0-9.,]/', '', self::trim($value));
+
+        $lastComma = strrpos($sanitized, ',');
+        $lastDot   = strrpos($sanitized, '.');
+
+        // Both separators present: whichever appears last is the decimal point
+        // ("1,234.56" or "1.234,56"), the other is a thousands separator and is
+        // dropped entirely — blindly turning every ',' into '.' (the old
+        // behavior) mangled "1,234.56" into 1.234, silently losing the cents
+        // and three orders of magnitude.
+        if ($lastComma !== false && $lastDot !== false) {
+            $sanitized = $lastComma > $lastDot
+                ? str_replace('.', '', $sanitized)
+                : str_replace(',', '', $sanitized);
+        }
+
+        return (float) str_replace(',', '.', $sanitized);
     }
 
     /**
@@ -534,7 +586,7 @@ final class Sanitizer
      */
     public static function ucfirst(mixed $value): string
     {
-        return ucfirst(self::trim($value)); // TODO: for php 8.4+ change to mb_ucfirst
+        return mb_ucfirst(self::trim($value));
     }
 
     /**
@@ -595,14 +647,8 @@ final class Sanitizer
      */
     public static function kebabcase(mixed $value): string
     {
-        $value = self::trim($value);
-
-        // replacing spaces with hyphens
-        $str = preg_replace('/\s+/', '-', $value);
-        $str = preg_replace('/_/', '-', $str);
-
-        // insert underscores before each capital letter
-        $str = preg_replace('/(.)(?=[A-Z])/u', '$1-', $str);
+        // replacing spaces and underscores with hyphens
+        $str = preg_replace(['/[\s_]+/', '/(.)(?=[A-Z])/u'], ['-', '$1-'], self::trim($value));
 
         return strtolower($str);
     }
@@ -615,11 +661,7 @@ final class Sanitizer
      */
     public static function flatcase(mixed $value): string
     {
-        $value = self::trim($value);
-
-        $str = preg_replace(['-', '_', ' '], '', $value);
-
-        return strtolower($str);
+        return strtolower(str_replace(['-', '_', ' '], '', self::trim($value)));
     }
 
     /**
