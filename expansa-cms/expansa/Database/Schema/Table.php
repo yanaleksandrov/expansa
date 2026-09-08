@@ -47,6 +47,7 @@ use Expansa\Database\Schema\Traits\Commands;
  * @method static primary(string|array $columns, string $index = null) Add a primary key command
  * @method static index(string|array $columns, string $index = null) Add an index command
  * @method static unique(string|array $columns, string $index = null) Add a unique index command
+ * @method static fulltext(string|array $columns, string $index = null) Add a FULLTEXT index command
  * @method static dropPrimary(string|array $index) Drop a primary key
  * @method static dropIndex(string|array $index) Drop an index
  * @method static dropUnique(string|array $index) Drop a unique index

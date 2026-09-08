@@ -39,6 +39,7 @@ use Expansa\Support\Is;
  * @property DateTime      $updatedAt                  The date and time when the user was last updated.
  * @property DateTime|null $deletedAt                  The date and time when the user was soft-deleted, if at all.
  * @property Field         $field                      A dynamic meta field instance associated with the user.
+ * @property TypedField    $typedField                 A typed, indexable meta field instance for the same user.
  * @property array<string> $roles                      Role names assigned to the user (see App\User\Roles).
  */
 class User extends Model
@@ -49,6 +50,7 @@ class User extends Model
     use Model\HasReadonlyAttributes;
     use Model\HasHiddenAttributes;
     use Model\HasSoftDeletes;
+    use Model\HasFieldEav;
 
     /**
      * The "active" value of the `status` column.
@@ -65,6 +67,14 @@ class User extends Model
      * option is configured.
      */
     private const string DEFAULT_ROLE = 'subscriber';
+
+    /**
+     * One-to-many with Field/TypedField: the foreign key column, shared by every "users_fields*"
+     * table (the "many" side), that points back to this user (see Model\HasFieldEav, Model\HasFieldTyped).
+     *
+     * @var string
+     */
+    public string $fieldsForeignKey = 'user_id';
 
     /**
      * The database table associated with the model.
@@ -232,17 +242,6 @@ class User extends Model
     {
         return Model\Attribute::make(
             get: fn($value) => (bool) $value
-        );
-    }
-
-    /**
-     * Lazily resolves the dynamic per-user meta storage for arbitrary,
-     * non-structural fields (see Field) — not the same thing as roles().
-     */
-    protected function field(): Model\Attribute
-    {
-        return Model\Attribute::make(
-            get: fn($value) => $value instanceof Field ? $value : new Field($this)
         );
     }
 

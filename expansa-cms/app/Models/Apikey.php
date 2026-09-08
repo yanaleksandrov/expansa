@@ -30,6 +30,7 @@ use Expansa\Database\Model\HasTimestamps;
 class Apikey extends Model
 {
     use HasTimestamps;
+    use Model\HasFieldEav;
 
     /**
      * The database table associated with the model.
@@ -37,6 +38,14 @@ class Apikey extends Model
      * @var string
      */
     protected string $table = 'api_keys';
+
+    /**
+     * One-to-many with Field: the foreign key column on api_keys_fields (the "many" side) that
+     * points back to this API key (see Model\HasFieldEav).
+     *
+     * @var string
+     */
+    public string $fieldsForeignKey = 'api_key_id';
 
     /**
      * Fields allowed for mass assignment.
@@ -55,13 +64,6 @@ class Apikey extends Model
         'discussion',
         'password',
     ];
-
-    protected function field(): Model\Attribute
-    {
-        return Model\Attribute::make(
-            get: fn($value) => $value instanceof Field ? $value : new Field($this)
-        );
-    }
 
     protected function createdAt(): Model\Attribute
     {

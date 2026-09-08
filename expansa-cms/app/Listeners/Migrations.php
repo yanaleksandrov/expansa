@@ -45,7 +45,7 @@ final class Migrations
             $table->index('author_id');
             $table->index('parent_id');
             $table->index('status');
-            $table->index(['title', 'content']); // TODO: fulltext index
+            $table->fulltext(['title', 'content']);
         });
 
         $this->createFieldsTable($postType, 'posts');
@@ -63,6 +63,63 @@ final class Migrations
 
             // indexes
             $table->index([$column, 'key']);
+            $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
+        });
+    }
+
+    /**
+     * The four typed sibling tables for {@see \App\Models\TypedField} — see there for what each
+     * one is for. Additive to {@see createFieldsTable()}, never a replacement for it: a model
+     * using {@see \Expansa\Database\Model\HasFieldTyped} keeps its regular "{name}_fields" table
+     * too, for everything that doesn't need indexed filtering/sorting/search.
+     */
+    private function createTypedFieldsTable(string $name, ?string $idColumnName = null): void
+    {
+        $column = sprintf("%s_id", Str::singularize($idColumnName ?? $name));
+
+        Schema::create($name . '_fields_scalar', function (Table $table) use ($name, $column) {
+            $table->id();
+            $table->bigInt($column)->unsigned()->default(0);
+            $table->string('key', 255)->default(null);
+            $table->bigInt('value_int')->nullable();
+            $table->decimal('value_decimal', 20, 6)->nullable();
+
+            $table->index([$column, 'key']);
+            $table->index(['key', 'value_int']);
+            $table->index(['key', 'value_decimal']);
+            $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
+        });
+
+        Schema::create($name . '_fields_datetime', function (Table $table) use ($name, $column) {
+            $table->id();
+            $table->bigInt($column)->unsigned()->default(0);
+            $table->string('key', 255)->default(null);
+            $table->datetime('value');
+
+            $table->index([$column, 'key']);
+            $table->index(['key', 'value']);
+            $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
+        });
+
+        Schema::create($name . '_fields_varchar', function (Table $table) use ($name, $column) {
+            $table->id();
+            $table->bigInt($column)->unsigned()->default(0);
+            $table->string('key', 255)->default(null);
+            $table->string('value', 255);
+
+            $table->index([$column, 'key']);
+            $table->index(['key', 'value']);
+            $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
+        });
+
+        Schema::create($name . '_fields_text', function (Table $table) use ($name, $column) {
+            $table->id();
+            $table->bigInt($column)->unsigned()->default(0);
+            $table->string('key', 255)->default(null);
+            $table->mediumText('value');
+
+            $table->index([$column, 'key']);
+            $table->fulltext('value');
             $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
         });
     }
@@ -149,6 +206,7 @@ final class Migrations
         });
 
         $this->createFieldsTable('users');
+        $this->createTypedFieldsTable('users');
     }
 
     private function createCommentsTable(): void

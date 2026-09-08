@@ -13,6 +13,15 @@ class Memory
     use Traits;
 
     /**
+     * Cap on entries per group — without it, a long-running process (Scheduler::work(), a bulk
+     * export) that touches many distinct keys grows this cache without bound. Evicts the oldest
+     * entry (FIFO, not true LRU) once a group hits this size.
+     *
+     * @var int
+     */
+    private const MAX_ENTRIES_PER_GROUP = 5000;
+
+    /**
      * Adds data to the cache.
      *
      * @param string $key
@@ -29,6 +38,12 @@ class Memory
 
         if (isset(self::$cache[ $group ][ $key ])) {
             return self::$cache[ $group ][ $key ]['value'];
+        }
+
+        if (count(self::$cache[ $group ] ?? []) >= self::MAX_ENTRIES_PER_GROUP) {
+            // unset(), not array_shift() — the latter always rebuilds the whole array (O(n),
+            // even for string keys), while dropping one known key is a plain O(1) hash removal.
+            unset(self::$cache[ $group ][ array_key_first(self::$cache[ $group ]) ]);
         }
 
         self::$cache[ $group ][ $key ] = [
@@ -61,6 +76,10 @@ class Memory
      */
     public function set(string $key, mixed $value, string $group = 'default'): mixed
     {
+        if (! isset(self::$cache[ $group ][ $key ]) && count(self::$cache[ $group ] ?? []) >= self::MAX_ENTRIES_PER_GROUP) {
+            unset(self::$cache[ $group ][ array_key_first(self::$cache[ $group ]) ]);
+        }
+
         return self::$cache[$group][$key]['value'] = $value;
     }
 
