@@ -111,10 +111,10 @@ final class Sanitizer
      *
      * @param string $return Field for return.
      * @return mixed
+     * @throws \Exception If a rule names neither a real Sanitizer method nor a registered extension.
      */
     public function apply(string $return = ''): mixed
     {
-        // TODO: !!! if rule not exists throw an Exception
         foreach ($this->rules as $field => $rulesList) {
             $key = null;
 
@@ -155,7 +155,10 @@ final class Sanitizer
                 $data = match (true) {
                     is_callable($extension) => $extension($value, $this),
                     $isOwnMethod             => self::{$method}($value),
-                    default                  => null
+                    default                  => throw new \Exception(
+                        "Sanitizer rule '$method' (field '$field') does not exist. " .
+                        "Register it first via ->extend('$method', ...) if it's meant to be custom."
+                    ),
                 };
 
                 if ($key !== null) {

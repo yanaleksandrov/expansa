@@ -224,6 +224,19 @@ class User extends Model
     }
 
     /**
+     * Guarantees a real bool on read regardless of how the value got here — the
+     * sanitizer's 'is_verified' => 'bool' rule only runs on fill()/setAttribute(),
+     * not on hydration from the database, so a freshly-fetched user's raw value is
+     * whatever the driver returns for TINYINT(1) (an int), not a PHP bool.
+     */
+    protected function isVerified(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            get: fn($value) => (bool) $value
+        );
+    }
+
+    /**
      * Lazily resolves the dynamic per-user meta storage for arbitrary,
      * non-structural fields (see Field) — not the same thing as roles().
      */
@@ -485,12 +498,10 @@ class User extends Model
         $field = Is::email($loginOrEmail) ? 'email' : 'login';
         $user  = User::find($loginOrEmail, $field);
 
-        if (! $user instanceof User) {
-            return error('user-login', t('User not found: invalid login or email.'));
-        }
-
-        if (! password_verify($password, $user->password)) {
-            return error('user-login', t('User password is incorrect.'));
+        // Same message for "no such account" and "wrong password": telling them
+        // apart would let an attacker enumerate which logins/emails are registered.
+        if (! $user instanceof User || ! password_verify($password, $user->password)) {
+            return error('user-login', t('These credentials do not match our records.'));
         }
 
         self::setAuthCookie($user, time() + ($remember ? self::COOKIE_TTL_LONG : self::COOKIE_TTL_SHORT), $remember);

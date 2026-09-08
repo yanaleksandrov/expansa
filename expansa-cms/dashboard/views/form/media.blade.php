@@ -13,8 +13,8 @@ defined('EX_PATH') || exit;
 [$type, $name, $label, $label_class, $class, $description, $attributes, $tooltip] = Safe::data(
     $__data ?? [],
     [
-		'type'        => 'key:text',
-		'name'        => 'attribute|key',
+		'type'        => 'id:text',
+		'name'        => 'attribute|id',
 		'label'       => 'trim:field',
 		'label_class' => 'class:df aic jcsb fw-500',
 		'class'       => 'class:dg g-1',
