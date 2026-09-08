@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
 	'posts-import',
 	[
 		'class'           => 'card card-border',
-		'@submit.prevent' => '$ajax("posts/import").then(response => output = response.output,goNext())',
+		'@submit.prevent' => '$ajax.post("posts/import").then(response => output = response.output,goNext())',
 		'u-data'          => '{fields: "", output: ""}',
 	],
 	[
@@ -59,7 +59,7 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'accept'  => '.csv,.txt',
-						'@change' => '$ajax("files/upload").then(response => fields = response.fields,goNext())',
+						'@change' => '$ajax.post("files/upload").then(response => fields = response.fields,goNext())',
 					],
 				],
 			],

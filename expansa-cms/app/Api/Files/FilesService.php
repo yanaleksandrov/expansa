@@ -11,7 +11,7 @@ use Expansa\Filesystem\File;
 
 /**
  * Handles the CSV file upload step of the posts importer (dashboard/forms/posts-import.php,
- * `$ajax("files/upload")`, which expects `response.fields`).
+ * `$ajax.post("files/upload")`, which expects `response.fields`).
  *
  * The old code both `echo`'d the rendered field-mapping form (view()) and then, separately,
  * tried to build it again through form() — which doesn't accept the samples/filepath data

@@ -21,7 +21,7 @@ return Form::enqueue(
         'class'           => 'tab',
         'u-data'          => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
 		'u-init'          => '$dirtyCheck.watch($el)',
-	    '@submit.prevent' => '$ajax("user/update", "", () => $dirtyCheck.remove($el))',
+	    '@submit.prevent' => '$ajax.post("user/update", "", () => $dirtyCheck.remove($el))',
     ],
     [
         [
@@ -48,7 +48,7 @@ return Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'name'    => 'avatar',
-                                '@change' => '[...$refs.uploader.files].map(file => $ajax("upload/media").then(response => files.unshift(response[0])))',
+                                '@change' => '[...$refs.uploader.files].map(file => $ajax.post("upload/media").then(response => files.unshift(response[0])))',
                             ],
                         ]
                     );
@@ -506,7 +506,7 @@ return Form::enqueue(
                             'attributes'  => [
                                 'type'      => 'button',
                                 'class'     => 'btn btn--primary btn--full',
-                                '@click'    => '$ajax("user/password-update", $data)',
+                                '@click'    => '$ajax.post("user/password-update", $data)',
                                 'disabled'  => '',
                                 ':disabled' => '!(passwordNew && passwordOld)',
                             ],
@@ -567,7 +567,7 @@ return Form::enqueue(
 						                                    <button class="btn btn--sm btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
 							                                    <i class="ph ph-pen"></i> <?php echo t('Edit'); ?>
 						                                    </button>
-						                                    <button class="btn btn--sm btn--icon t-red" type="button" @click="$ajax('apikey/delete', key, e => e.end && apiKeys.splice(i, 1))">
+						                                    <button class="btn btn--sm btn--icon t-red" type="button" @click="$ajax.post('apikey/delete', key, e => e.end && apiKeys.splice(i, 1))">
 							                                    <i class="ph ph-trash"></i>
 						                                    </button>
 					                                    </div>

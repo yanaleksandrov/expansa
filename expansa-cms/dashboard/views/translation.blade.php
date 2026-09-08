@@ -15,7 +15,7 @@ echo view('table/header', $table->headData());
 ?>
 
 @if($table->data)
-    <form class="translation" method="POST" @input.debounce.500ms="$ajax('translations/update',{project})" u-data="{items: {}}">
+    <form class="translation" method="POST" @input.debounce.500ms="$ajax.post('translations/update',{project})" u-data="{items: {}}">
         <div class="translation-head">
             @foreach($table->cells as $i => $cell)
                 <div class="translation-{{ $i === 0 ? 'source' : 'value' }}">

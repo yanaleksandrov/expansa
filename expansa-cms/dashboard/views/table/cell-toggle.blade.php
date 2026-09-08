@@ -34,7 +34,7 @@ $prop  = Safe::prop($__data['key'] ?? []);
 			'conditions'  => [],
 			'attributes'  => [
 				':checked' => "item.$prop === true",
-				'@change'  => '$ajax("plugin/deactivate")',
+				'@change'  => '$ajax.post("plugin/deactivate")',
 			],
 		]
 	);

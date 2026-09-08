@@ -4,7 +4,7 @@ return \Expansa\Facades\Form::enqueue(
     'system-install',
     [
         'class'           => 'dg g-2',
-        '@submit.prevent' => '$ajax("system/install").then(() => goto(5))',
+        '@submit.prevent' => '$ajax.post("system/install").then(() => goto(5))',
         'u-data'          => '{...step, compat: {}, isCompatible: false}',
     ],
     [

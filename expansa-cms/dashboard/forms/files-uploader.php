@@ -26,7 +26,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'@change'  => '$ajax("media/upload", $el.files, e => percent = e.percent)',
+				'@change'  => '$ajax.post("media/upload", $el.files, e => percent = e.percent)',
 				'multiple' => true,
 			],
 		],
@@ -51,7 +51,7 @@ return Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'placeholder' => t( 'Each URL must be from a new line' ),
-				'@change'     => '$ajax("media/grab", {urls}).then(response => files = response)',
+				'@change'     => '$ajax.post("media/grab", {urls}).then(response => files = response)',
 				'u-textarea'  => 19,
 			],
 		],

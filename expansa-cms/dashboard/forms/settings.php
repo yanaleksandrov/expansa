@@ -15,7 +15,7 @@ return Expansa\Facades\Form::enqueue(
 		'class'           => 'tab tab--vertical',
 		'u-data'          => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
         'u-init'          => '$dirtyCheck.watch($el)',
-        '@submit.prevent' => '$ajax("options/update", "", () => $dirtyCheck.remove($el))',
+        '@submit.prevent' => '$ajax.post("options/update", "", () => $dirtyCheck.remove($el))',
 	],
 	[
 		[

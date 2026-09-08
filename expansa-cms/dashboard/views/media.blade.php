@@ -47,5 +47,5 @@ echo view('table/header', $table->headData());
         <?php echo view('global/state', $table->notFoundData()); ?>
     </div>
 
-    <div u-intersect="$ajax('media/get', '', ({posts}) => items = posts)"></div>
+    <div u-intersect="$ajax.post('media/get', '', ({posts}) => items = posts)"></div>
 </div>

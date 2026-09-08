@@ -10,7 +10,7 @@ use Expansa\Facades\Safe;
 return \Expansa\Facades\Form::enqueue(
 	'emails-creator',
 	[
-		'@submit.window' => '$ajax("import-email")',
+		'@submit.window' => '$ajax.post("import-email")',
 		'u-data'         => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
 	],
 	[
@@ -247,7 +247,7 @@ return \Expansa\Facades\Form::enqueue(
 					'attributes'  => [
 						'type'      => 'button',
 						'class'     => 'btn',
-						'@click'    => '$ajax("email/send", {email: email})',
+						'@click'    => '$ajax.post("email/send", {email: email})',
 						':disabled' => '!email',
 					],
 				],

@@ -193,7 +193,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                         ]
                     );
                     ?>
-                <button type="button" class="btn btn--sm btn--outline" @click="$ajax('translations/get', {project}).then(data => items = data.items)">
+                <button type="button" class="btn btn--sm btn--outline" @click="$ajax.post('translations/get', {project}).then(data => items = data.items)">
                     <i class="ph ph-scan"></i> <?php echo t('Scan'); ?>
                 </button>
             </div>
