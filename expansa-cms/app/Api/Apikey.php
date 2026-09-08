@@ -90,7 +90,7 @@ class Apikey
                 $postData[$key] = $value;
             }
 
-            $fields = (new Field($post))->get();
+            $fields = new Field($post)->get();
             print_r($post);
             print_r($fields);
             if ($fields) {

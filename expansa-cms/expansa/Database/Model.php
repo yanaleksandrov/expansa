@@ -173,7 +173,7 @@ abstract class Model
     public static function __callStatic(string $method, array $arguments)
     {
         if (method_exists(Query::class, $method)) {
-            return (new Query(new static()))->$method(...$arguments);
+            return new Query(new static())->$method(...$arguments);
         }
         throw new Exception("Method $method does not exist in " . static::class);
     }
@@ -193,7 +193,7 @@ abstract class Model
     public function __call(string $method, array $arguments)
     {
         if (method_exists(Query::class, $method)) {
-            return (new Query($this))->$method(...$arguments);
+            return new Query($this)->$method(...$arguments);
         }
         throw new Exception("Method $method does not exist in " . static::class);
     }

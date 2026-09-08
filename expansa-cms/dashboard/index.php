@@ -106,7 +106,7 @@ new class
                                         $posts[$i][$key] = $value;
                                     }
 
-                                    $fields = (new Field($item))->find();
+                                    $fields = new Field($item)->find();
                                     if ($fields) {
                                         foreach ($fields as $field => $values) {
                                             $key = Safe::camelcase($field);

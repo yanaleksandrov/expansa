@@ -111,7 +111,7 @@ if (! function_exists('form')) {
         if (is_file($path)) {
             require_once $path;
         }
-        return (new Expansa\Builders\Form())->make($uid);
+        return new Expansa\Builders\Form()->make($uid);
     }
 }
 

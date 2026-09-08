@@ -71,7 +71,7 @@ class Size
         $newHeight = $this->height;
 
         if ($preserveAspect) {
-            $calculatedHeight = max(1, (int) round($newWidth / (new Size($originalWidth, $originalHeight))->aspectRatio()));
+            $calculatedHeight = max(1, (int) round($newWidth / new Size($originalWidth, $originalHeight)->aspectRatio()));
             $newHeight = $doNotUpsize ? min($calculatedHeight, $originalHeight) : $calculatedHeight;
         }
 
@@ -98,7 +98,7 @@ class Size
         $newWidth = $this->width;
 
         if ($preserveAspect) {
-            $calculatedWidth = max(1, (int) round($newHeight * (new Size($originalWidth, $originalHeight))->aspectRatio()));
+            $calculatedWidth = max(1, (int) round($newHeight * new Size($originalWidth, $originalHeight)->aspectRatio()));
             $newWidth = $doNotUpsize ? min($calculatedWidth, $originalWidth) : $calculatedWidth;
         }
 

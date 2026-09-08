@@ -35,9 +35,9 @@ class View
         $content = $this->engine->get($this->path, $this->data);
 
         if ($this->shouldBeautify) {
-            $content = (new Html($this->beautifyOptions))->beautify($content);
+            $content = new Html($this->beautifyOptions)->beautify($content);
         } elseif ($this->shouldMinify) {
-            $content = (new Html())->minify($content);
+            $content = new Html()->minify($content);
         }
 
         return $content;

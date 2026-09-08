@@ -46,7 +46,7 @@ Route::prefix('/api', function () {
     ) {
         $methods = get_class_methods($class);
         foreach ($methods as $method) {
-            $classname = (new ReflectionClass($class))->getShortName();
+            $classname = new ReflectionClass($class)->getShortName();
             $prefix    = Safe::lowercase($classname);
             $endpoint  = Safe::kebabcase($method);
 

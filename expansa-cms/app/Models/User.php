@@ -159,7 +159,7 @@ class User extends Model
     protected function nicename(): Model\Attribute
     {
         return Model\Attribute::make(
-            set: fn($value) => (new self())->generateUniqueNicename($value)
+            set: fn($value) => new self()->generateUniqueNicename($value)
         );
     }
 
@@ -232,7 +232,7 @@ class User extends Model
                 'visited'    => 'datetime',
             ])->apply();
 
-            Db::update((new self())->table, array_filter($userdata));
+            Db::update(new self()->table, array_filter($userdata));
 
             return self::get($userID);
         }
@@ -265,7 +265,7 @@ class User extends Model
         if ($reassign) {
             // TODO: add functionality for reassign
         }
-        return Db::delete((new self())->table, $fields)->rowCount();
+        return Db::delete(new self()->table, $fields)->rowCount();
     }
 
     /**
@@ -434,7 +434,7 @@ class User extends Model
     {
         $suffix = 1;
 
-        while (Db::select((new self())->table, 'id', [ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
+        while (Db::select(new self()->table, 'id', [ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
             $suffix++;
         }
 

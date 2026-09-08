@@ -324,7 +324,7 @@ class Manager
 
         if ($optimizer) {
             $this->driver->optimize(
-                (new OptimizerChain())
+                new OptimizerChain()
                     ->addOptimizer($optimizer)
                     ->setTimeout(60)
             );

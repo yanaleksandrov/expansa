@@ -153,7 +153,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
                 $this->errors[] = t('Failed to update the timestamps for ":filePath".', $this->path);
             }
 
-            $this->modified = (new DateTime())->setTimestamp($time)->format('Y-m-d H:i:s');
+            $this->modified = new DateTime()->setTimestamp($time)->format('Y-m-d H:i:s');
         }
         return $this;
     }

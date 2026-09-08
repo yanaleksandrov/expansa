@@ -86,7 +86,7 @@ class Storage extends EntryHandler
     public function upload(array $file): string
     {
         $maxFileSize = $this->getMaxUploadSizeInBytes();
-        $mimeTypes   = (new MimeType())->typesList;
+        $mimeTypes   = new MimeType()->typesList;
         $mimes       = implode(',', array_values($mimeTypes));
         $extensions  = str_replace('|', ',', implode(',', array_keys($mimeTypes)));
 

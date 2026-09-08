@@ -155,7 +155,7 @@ class Directory extends EntryHandler implements CommonInterface, DirectoryInterf
             $toPath   = $to . DIRECTORY_SEPARATOR . $item;
 
             if (is_dir($fromPath)) {
-                (new self($fromPath))->copy($toPath);
+                new self($fromPath)->copy($toPath);
             } else {
                 copy($fromPath, $toPath);
             }

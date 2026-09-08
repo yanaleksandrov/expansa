@@ -51,7 +51,7 @@ final class VerifyCsrfToken
         try {
             $this->csrf()->check(self::KEY, $token, 3600);
         } catch (InvalidCsrfTokenException) {
-            $response = (new Response())->json(['message' => t('Invalid or missing CSRF token.')], 403);
+            $response = new Response()->json(['message' => t('Invalid or missing CSRF token.')], 403);
 
             // HEAD must never carry a body — Response::prepare(Request) would normally
             // enforce this, kept here as a plain check instead of pulling in a Request.

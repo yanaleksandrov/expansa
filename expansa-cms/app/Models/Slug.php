@@ -104,7 +104,7 @@ class Slug extends Model
      */
     public static function get(string $slug): mixed
     {
-        return Db::get((new self())->getTable(), '*', ['slug' => $slug]);
+        return Db::get(new self()->getTable(), '*', ['slug' => $slug]);
     }
 
     /**
@@ -116,7 +116,7 @@ class Slug extends Model
      */
     public static function update(string $slug, string $newSlug): bool
     {
-        return Db::update((new self())->getTable(), ['slug' => $newSlug], ['slug[=]' => $slug])->rowCount() === 1;
+        return Db::update(new self()->getTable(), ['slug' => $newSlug], ['slug[=]' => $slug])->rowCount() === 1;
     }
 
     /**

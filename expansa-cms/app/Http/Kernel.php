@@ -42,20 +42,20 @@ final class Kernel
         $request = Request::createFromGlobals();
 
         try {
-            $result = (new $controller())->{$method}($request, ...$params);
+            $result = new $controller()->{$method}($request, ...$params);
 
             $response = $result instanceof Response
                 ? $result
-                : (new Response())->json(self::withMetrics(['data' => $result]));
+                : new Response()->json(self::withMetrics(['data' => $result]));
         } catch (HttpException $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationException) {
                 $payload['errors'] = $e->getErrors();
             }
 
-            $response = (new Response())->json(self::withMetrics($payload), $e->getStatusCode());
+            $response = new Response()->json(self::withMetrics($payload), $e->getStatusCode());
         } catch (Throwable $e) {
-            $response = (new Response())->json(self::withMetrics([
+            $response = new Response()->json(self::withMetrics([
                 'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
             ]), 500);
         }
