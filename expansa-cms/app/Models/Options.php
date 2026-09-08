@@ -4,46 +4,126 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use Expansa\Error;
-use Expansa\Facades\Db;
+use Expansa\Database\Model;
+use Expansa\Database\Query;
+use Expansa\Debug\Error;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 use LogicException;
 
 /**
- * Option class it is a self-contained class for creating, updating, and deleting options.
- * Uses static variables to store options, which allows to avoid using the object cache without losing performance.
+ * Represents a single row in the `options` table (one top-level settings key and its value),
+ * the same way {@see User} represents one row in `users` — plus the public-facing key/value
+ * facade on top of it (dot-notation access, an in-memory process cache, required defaults).
+ *
+ * A "dotted" key (e.g. "site.name") addresses a nested path inside one row's `value`, not a
+ * row of its own — {@see self::get()}/{@see self::add()}/{@see self::update()}/{@see self::delete()}
+ * are that facade and predate this class becoming a Model; they now do their persistence via
+ * `fill()`/`save()`/`parent::get()` like every other model here, instead of raw `Db::` calls.
+ *
+ * Two of those facade methods — `get()` and `delete()` — happen to share a name with the
+ * generic per-row lookup/delete {@see \Expansa\Database\Query} would otherwise expose through
+ * {@see Model}'s magic methods. That generic behavior is reached from inside this class via
+ * `parent::get(...)` (bypassing this class's own override, exactly like {@see User::find()}
+ * does) and, for delete, by calling {@see Query} directly — see {@see self::delete()}. Because
+ * of that same collision, this class has no separate User-style instance `update()`/`delete()`;
+ * the facade methods below are the only ones, and they already do the fill/validate/save work.
+ *
+ * @property int    $id    Unique identifier of the option record.
+ * @property string $key   The option's top-level key (unique).
+ * @property mixed  $value The option's value. Stored JSON-encoded so any type round-trips,
+ *                         including options written before this model existed (see value()).
  */
-class Options
+class Options extends Model
 {
+    use Model\HasSanitizing;
+    use Model\HasValidation;
+
     /**
-     * DB table name.
+     * The database table associated with the model.
      *
      * @var string
      */
-    public static string $table = 'options';
+    protected string $table = 'options';
 
     /**
-     * Options list
+     * Fields allowed for mass assignment.
      *
-     * @var   array
+     * @var array<string>
+     */
+    protected array $fillable = [
+        'key',
+        'value',
+    ];
+
+    /**
+     * Options list, keyed by top-level option key, already JSON-decoded.
+     *
+     * @var array
      */
     private static array $options = [];
 
     /**
-     * Required options that cannot be deleted.
-     *
-     * @var   array
-     */
-    private static array $required = [];
-
-    /**
      * Suspend setting.
      *
-     * @var   bool
+     * @var bool
      */
     private static bool $suspend = false;
+
+    /**
+     * Array of rules for sanitize properties.
+     *
+     * @return array<string, string>
+     */
+    protected function getSanitizerRules(): array
+    {
+        return [
+            'key' => 'id',
+        ];
+    }
+
+    /**
+     * An array of rules for validation when creating and updating a model.
+     *
+     * @return array<string, string>
+     */
+    protected function validatorRules(): array
+    {
+        return [
+            'key' => 'required',
+        ];
+    }
+
+    /**
+     * Extend with custom validation rules.
+     *
+     * @return void
+     */
+    protected function validatorExtend(): void {}
+
+    /**
+     * JSON-encodes on write so any value type round-trips, and JSON-decodes on read.
+     *
+     * Falls back to the raw stored string when it isn't valid JSON — options written
+     * before every value was JSON-encoded stored bare scalars (e.g. "UTF-8"), which
+     * aren't valid JSON syntax and would otherwise silently decode to null.
+     */
+    protected function value(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            get: function ($value) {
+                if (! is_string($value)) {
+                    return $value;
+                }
+
+                $decoded = Json::decode($value, true);
+
+                return $decoded === null && $value !== 'null' ? $value : $decoded;
+            },
+            set: fn($value) => Json::encode($value)
+        );
+    }
 
     /**
      * Get all options.
@@ -51,12 +131,8 @@ class Options
     public static function fetch(): array
     {
         if (empty(self::$options)) {
-            $options = Db::select(self::$table, '*');
-            if ($options) {
-                $options = array_column($options, 'value', 'key');
-                foreach ($options as $key => $value) {
-                    self::$options[ $key ] = Json::decode($value, true);
-                }
+            foreach (self::all() as $option) {
+                self::$options[$option->key] = $option->value;
             }
         }
         return self::$options;
@@ -98,20 +174,13 @@ class Options
             self::$options[ $option ] = $value;
         }
 
-        /**
-         * Encode to json for array or object.
-         */
-        if (is_array($value) || is_object($value)) {
-            $value = Json::encode($value);
+        $record = new self()->fill(['key' => $option, 'value' => $value]);
+
+        if (! $record->isValid()) {
+            return false;
         }
 
-        return Db::insert(
-            self::$table,
-            [
-                'key'   => $option,
-                'value' => $value,
-            ]
-        )->rowCount();
+        return $record->save() instanceof self ? 1 : false;
     }
 
     /**
@@ -157,14 +226,15 @@ class Options
             self::$options[ $option ] = $value;
         }
 
-        /**
-         * Encode to json for array or object.
-         */
-        if (is_array($value) || is_object($value)) {
-            $value = Json::encode($value);
+        // Bypasses this class's own get() facade — see the class docblock.
+        $record = parent::get($option, 'key');
+        if (! $record instanceof self) {
+            return false;
         }
 
-        return Db::update(self::$table, [ 'value' => $value ], [ 'key[=]' => $option ])->rowCount();
+        $record->fill(['value' => $value]);
+
+        return $record->save() instanceof self ? 1 : false;
     }
 
     /**
@@ -222,12 +292,15 @@ class Options
             unset(self::$options[ $option ]);
         }
 
-        return Db::delete(
-            self::$table,
-            [
-                'key' => $option,
-            ]
-        )->rowCount();
+        // Bypasses this class's own get() facade — see the class docblock.
+        $record = parent::get($option, 'key');
+        if (! $record instanceof self) {
+            return 0;
+        }
+
+        // Goes through Query directly, not $record->delete() — this class's own delete()
+        // facade (this very method) would otherwise shadow it. See the class docblock.
+        return new Query($record)->delete();
     }
 
     /**
@@ -276,9 +349,9 @@ class Options
     public function suspendAddition(bool $suspend): bool
     {
         if (false === $suspend) {
-            $options = Db::select(self::$table, '*');
-            if ($options) {
-                self::$options = array_column($options, 'value', 'key');
+            self::$options = [];
+            foreach (self::all() as $option) {
+                self::$options[$option->key] = $option->value;
             }
         }
         return self::$suspend = $suspend;

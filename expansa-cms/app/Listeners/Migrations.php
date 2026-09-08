@@ -19,6 +19,8 @@ final class Migrations
         $this->createOptionsTable();
         $this->createCommentsTable();
         $this->createTaxonomiesTable();
+        $this->createMediaTable();
+        $this->createApiKeysTable();
     }
 
     public function createPostsTable(string $postType): void

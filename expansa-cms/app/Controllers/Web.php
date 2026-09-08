@@ -58,8 +58,8 @@ final class Web
             $slug = 'welcome';
         } else {
             // try to get entity from slug
-            $entity = Slug::get($slug);
-            if (!$entity) {
+            $entity = Slug::find($slug);
+            if (! $entity instanceof Slug) {
                 //$page = '404';
             }
 

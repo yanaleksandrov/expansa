@@ -19,7 +19,7 @@ class Memory
      *
      * @var int
      */
-    private const MAX_ENTRIES_PER_GROUP = 5000;
+    private const int MAX_ENTRIES_PER_GROUP = 5000;
 
     /**
      * Adds data to the cache.
