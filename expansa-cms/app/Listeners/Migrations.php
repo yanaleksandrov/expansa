@@ -129,6 +129,7 @@ final class Migrations
             $table->string('locale', 10)->nullable()->default(null);
 
             // status and verification
+            $table->json('roles')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->bool('is_verified')->default(0);
 
@@ -140,9 +141,11 @@ final class Migrations
 
             // activity tracking
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
 
             // indexes
             $table->index('nicename');
+            $table->index('deleted_at');
         });
 
         $this->createFieldsTable('users');

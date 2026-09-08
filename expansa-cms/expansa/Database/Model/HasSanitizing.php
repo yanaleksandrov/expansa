@@ -28,11 +28,6 @@ trait HasSanitizing
      */
     final protected function sanitize(): static
     {
-        echo '<pre>';
-        var_dump(23124235);
-        print_r($this->getAttributes());
-        print_r($this->getSanitizerRules());
-        echo '</pre>';
         $data = new Sanitizer($this->getAttributes(), $this->getSanitizerRules())->apply();
 
         $this->setAttributes($data);

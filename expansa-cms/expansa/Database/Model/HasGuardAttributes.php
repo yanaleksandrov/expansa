@@ -13,7 +13,7 @@ namespace Expansa\Database\Model;
  * Usage example:
  *
  *     YourModel::$unguarded = true;
- *     YourModel::create($data);
+ *     YourModel::make($data);
  *     YourModel::$unguarded = false;
  */
 trait HasGuardAttributes

@@ -127,7 +127,7 @@ final class SystemService
 
         Db::updateSchema();
 
-        $user = User::create($userdata);
+        $user = User::make($userdata);
 
         if (!$user->isValid()) {
             throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());

@@ -6,7 +6,9 @@ namespace Expansa\Database;
 
 use Exception;
 use Expansa\Facades\Safe;
+use Expansa\Database\Model\HasReadonlyAttributes;
 use Expansa\Database\Model\HasSanitizing;
+use Expansa\Support\Str;
 use stdClass;
 
 /**
@@ -17,11 +19,12 @@ use stdClass;
  * @method static bool        exists(array $data)                  Check record is existing.
  * @method int                save()                               Delete records by primary key.
  * @method int                delete()                             Delete records by primary key.
+ * @method int                restore()                            Restore a soft-deleted record.
  *
  * @property string|null $updatedAt Timestamp of the last update.
  * @property string|null $createdAt Timestamp of creation.
  */
-abstract class Model
+abstract class Model implements \JsonSerializable
 {
     use Model\HasAttributes {
         setAttribute as protected traitSetAttribute;
@@ -36,12 +39,16 @@ abstract class Model
     protected string $table;
 
     /**
-     * Create a new model instance with the given attributes.
+     * Build a new, unguarded, unsaved model instance from trusted attributes.
+     *
+     * Bypasses mass-assignment protection and sanitizing entirely — for
+     * internal/trusted data only (e.g. install-time setup). Nothing is
+     * persisted; call save() on the result to actually write it.
      *
      * @param array<string, mixed>|stdClass $attributes Attributes to fill the model with.
      * @return static
      */
-    public static function create(array|stdClass $attributes): static
+    public static function make(array|stdClass $attributes): static
     {
         $model = new static();
 
@@ -112,13 +119,30 @@ abstract class Model
      */
     public function setAttribute(string $key, mixed $value): static
     {
-        var_dump($key);
-        if (in_array(HasSanitizing::class, class_uses(self::class), true)) {
-            $rule = $this->getSanitizerRules()[$key] ?? '';
+        $traits   = class_uses(static::class);
+        $snakeKey = Str::snake($key);
+
+        if (
+            in_array(HasReadonlyAttributes::class, $traits, true) &&
+            $this->isReadonly($snakeKey) &&
+            isset($this->attributes[$snakeKey])
+        ) {
+            return $this;
+        }
+
+        if (in_array(HasSanitizing::class, $traits, true)) {
+            $rule = $this->getSanitizerRules()[$snakeKey] ?? '';
             if ($rule) {
-                $value = Safe::data($this->attributes + [$key => $value], [$key => $rule])->apply($key);
+                // [$key => $value] goes first: for an attribute that's already
+                // set, array + keeps the LEFT side on key collision, so this is
+                // what makes the new value actually win instead of being
+                // silently re-sanitized back to whatever was already stored.
+                // The rest of $this->attributes is still merged in after, for
+                // rules that reference a sibling field (e.g. 'slug:$login').
+                $value = Safe::data([$key => $value] + $this->attributes, [$key => $rule])->apply($key);
             }
         }
+
         return $this->traitSetAttribute($key, $value);
     }
 
@@ -130,6 +154,30 @@ abstract class Model
     public function getTable(): string
     {
         return Safe::snakecase($this->table);
+    }
+
+    /**
+     * Get the model's attributes as a plain array.
+     *
+     * Overridden by Model\HasHiddenAttributes for models that need to keep
+     * sensitive attributes (passwords, tokens, ...) out of this — getAttributes()
+     * itself is never filtered, so persistence is unaffected either way.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return $this->getAttributes();
+    }
+
+    /**
+     * Specify the data that should be serialized to JSON.
+     *
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
     }
 
     /**

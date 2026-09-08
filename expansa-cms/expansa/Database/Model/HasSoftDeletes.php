@@ -10,13 +10,13 @@ trait HasSoftDeletes
 
     protected bool $softDelete = true;
 
-    public function delete(): static
+    /**
+     * Get the name of the "deleted at" column.
+     *
+     * @return string
+     */
+    public function getDeletedAtColumn(): string
     {
-        return $this->setAttribute($this->deletedAt, date('Y-m-d H:i:s'));
-    }
-
-    public function restore(): static
-    {
-        return $this->setAttribute($this->deletedAt, null);
+        return $this->deletedAt;
     }
 }

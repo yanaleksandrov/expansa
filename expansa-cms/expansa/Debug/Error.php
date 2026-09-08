@@ -15,7 +15,7 @@ namespace Expansa\Debug;
  *   $message - is a message for the user.
  *   $data    - is an instruction for the developer.
  */
-class Error
+class Error implements \JsonSerializable
 {
     /**
      * Errors list storage.
@@ -25,6 +25,15 @@ class Error
     private static array $errors = [];
 
     /**
+     * The code this particular instance was constructed with — kept so
+     * jsonSerialize() (and any other per-instance read) reflects only this
+     * error, not the whole cross-request registry in self::$errors.
+     *
+     * @var string
+     */
+    private string $code;
+
+    /**
      * Add an error or append additional message to an existing error.
      *
      * @param string $code          Error code.
@@ -32,6 +41,8 @@ class Error
      */
     public function __construct(string $code, string|array $message = '')
     {
+        $this->code = $code;
+
         if (is_array($message)) {
             self::$errors[$code] = array_merge(self::$errors[$code] ?? [], $message);
         } else {
@@ -74,5 +85,19 @@ class Error
     public function exists(): bool
     {
         return ! empty(self::$errors);
+    }
+
+    /**
+     * Specify the data that should be serialized to JSON — just this
+     * instance's own code and messages, not the whole shared registry.
+     *
+     * @return array{code: string, message: array}
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'code'    => $this->code,
+            'message' => $this->get($this->code),
+        ];
     }
 }

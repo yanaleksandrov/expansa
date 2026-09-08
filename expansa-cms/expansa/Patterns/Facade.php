@@ -65,16 +65,20 @@ class Facade
      */
     protected static function getResolvedClassInstance(): mixed
     {
-        $classNamespace = static::getStaticClassAccessor();
+        // Decorated once, here, so the lookup below and the store inside
+        // resolveClassNameSpace() share the exact same cache key — they used to
+        // decorate at different points, so the two never matched and every call
+        // resolved (and instantiated) a brand new instance instead of reusing one.
+        $classNamespace = self::classNamespaceDecorator(static::getStaticClassAccessor());
 
-        return self::getClass($classNamespace) ?: self::resolveClassNamespace($classNamespace);
+        return self::getClass($classNamespace) ?: self::resolveClassNameSpace($classNamespace);
     }
 
     /**
      * Resolver for service class namespace.
      * Set the resolved service class instance to the class property.
      *
-     * @param string $classNamespace
+     * @param string $classNamespace Already decorated with a leading backslash.
      * @return mixed
      * @throws FacadeException
      */
@@ -88,7 +92,6 @@ class Facade
             throw new FacadeException('The class namespace is not exist and can not be resolved.');
         }
 
-        $classNamespace = self::classNamespaceDecorator($classNamespace);
         $classArguments = static::getConstructorArgs();
 
         $classInstance  = new $classNamespace(...$classArguments);

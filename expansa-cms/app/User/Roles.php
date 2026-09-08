@@ -9,83 +9,76 @@ use InvalidArgumentException;
 /**
  * Base class used to implement the API for user roles and their capabilities.
  *
- * The role option is simple, the structure is organized by role name that store
- * the name in value of the 'name' key. The capabilities are stored as an array
- * in the value of the 'capabilities' key. Example:
+ * Roles are keyed by name, each holding a display name and a plain list of
+ * granted capability names. Example:
  * [
- *    'rolename' => [
- *       'name'         => 'rolename',
- *       'capabilities' => []
- *    ]
+ *    'editor' => [
+ *       'name'         => 'Editor',
+ *       'capabilities' => ['read', 'types_edit'],
+ *    ],
  * ]
  */
 class Roles
 {
     /**
-     * Object list of roles and capabilities.
+     * Registered roles, keyed by role name.
      *
-     * @var array[]
+     * @var array<string, array{name: string, capabilities: array<string>}>
      */
     private static array $roles = [];
 
     /**
-     * Add role name with list of capabilities.
+     * Register a role with its list of capabilities. Does nothing if the
+     * role already exists.
      *
-     * Updates the list of roles, if the role doesn't already exist.
-     *
-     * The capabilities are defined in the following format `array( 'read' => true );`
-     * To explicitly deny a role a capability you set the value for that capability to false.
-     *
-     * @param string $display_name Role display name.
-     * @param mixed  $capabilities List of capabilities keyed by the capability name, e.g. ['edit_posts', 'delete_posts'].
-     *                             You can specify the ID of an existing role as the value.
-     *                             In this case, the capabilities of the specified role are copied to the new one.
+     * @param string       $role         Role name (used as its unique key).
+     * @param string       $displayName  Role display name.
+     * @param string|array $capabilities Capability names, e.g. ['edit_posts', 'delete_posts'],
+     *                                   or the name of an existing role to copy capabilities from.
+     * @return bool True if the role was registered, false if it already existed.
      */
-    public static function register(string $role, string $display_name, mixed $capabilities): bool
+    public static function register(string $role, string $displayName, string|array $capabilities): bool
     {
-        $roles = self::fetch();
-        if (!isset($roles[$role])) {
-            if (is_string($capabilities)) {
-                if (isset($roles[$capabilities])) {
-                    $capabilities = $roles[$capabilities]['capabilities'];
-                } else {
-                    throw new InvalidArgumentException(
-                        t('You are trying to copy capabilities from a non exists role.')
-                    );
-                }
-            }
-
-            self::$roles[$role] = [
-                'name'         => $display_name,
-                'capabilities' => $capabilities,
-            ];
-
-            return true;
+        if (isset(self::$roles[$role])) {
+            return false;
         }
-        return false;
+
+        if (is_string($capabilities)) {
+            if (! isset(self::$roles[$capabilities])) {
+                throw new InvalidArgumentException(t('You are trying to copy capabilities from a non exists role.'));
+            }
+            $capabilities = self::$roles[$capabilities]['capabilities'];
+        }
+
+        self::$roles[$role] = [
+            'name'         => $displayName,
+            'capabilities' => $capabilities,
+        ];
+
+        return true;
     }
 
     /**
-     * Retrieve role object by name.
+     * Retrieve a role by name, or every registered role when none is given.
      *
      * @param string $role
-     * @return null|array Role object if found, null if the role does not exist
+     * @return array Role data if found, an empty array if it doesn't exist
+     *               (or the full role list when $role is omitted).
      */
-    public static function get(string $role = ''): ?array
+    public static function get(string $role = ''): array
     {
-        return isset($role) ? self::$roles[$role] ?? [] : self::$roles;
+        return $role === '' ? self::$roles : self::$roles[$role] ?? [];
     }
 
     /**
-     * Remove role.
+     * Remove a role.
      *
      * @param string $role
      * @return bool
      */
     public static function delete(string $role): bool
     {
-        $roles = self::fetch();
-        if (! isset($roles[$role])) {
+        if (! isset(self::$roles[$role])) {
             return false;
         }
 
@@ -95,30 +88,28 @@ class Roles
     }
 
     /**
-     * Set capability to role.
+     * Grant one or more capabilities to a role.
      *
-     * @param string $role
-     * @param mixed $capability Single capability or capabilities array
+     * @param string       $role
+     * @param string|array $capability Single capability or a list of capabilities.
      * @return bool
      */
-    public static function set(string $role, mixed $capability): bool
+    public static function set(string $role, string|array $capability): bool
     {
-        $roles = self::fetch();
-        if (! isset($roles[$role])) {
+        if (! isset(self::$roles[$role])) {
             throw new InvalidArgumentException(t('You are trying set capability for non exists role.'));
         }
 
-        if (is_array($capability)) {
-            self::$roles[$role]['capabilities'] = array_merge($roles[$role]['capabilities'], $capability);
-        } else {
-            self::$roles[$role]['capabilities'][] = $capability;
-        }
+        self::$roles[$role]['capabilities'] = array_values(array_unique([
+            ...self::$roles[$role]['capabilities'],
+            ...(array) $capability,
+        ]));
 
         return true;
     }
 
     /**
-     * Remove capability from role.
+     * Remove a capability from a role.
      *
      * @param string $role
      * @param string $capability
@@ -126,56 +117,42 @@ class Roles
      */
     public static function unset(string $role, string $capability): bool
     {
-        $roles = self::fetch();
-        if (! isset($roles[$role])) {
+        if (! isset(self::$roles[$role])) {
             throw new InvalidArgumentException(t('You are trying unset capability for non exists role.'));
         }
 
-        unset($roles[$role]['capabilities'][$capability]);
+        self::$roles[$role]['capabilities'] = array_values(
+            array_diff(self::$roles[$role]['capabilities'], [$capability])
+        );
 
         return true;
     }
 
     /**
-     * Whether role name is currently in the list of available roles.
+     * Whether a role name is currently registered.
      *
      * @param string $role
      * @return bool
      */
     public static function exists(string $role): bool
     {
-        $roles = self::fetch();
-
-        return isset($roles[$role]);
+        return isset(self::$roles[$role]);
     }
 
     /**
-     * Whether role name is currently in the list of available roles.
+     * Whether a role has any of the given capabilities.
      *
-     * @param string $role
-     * @param $capabilities
+     * @param string       $role
+     * @param string|array $capabilities Single capability or a list of capabilities.
      * @return bool
      */
-    public static function hasCap(string $role, $capabilities): bool
+    public static function hasCap(string $role, string|array $capabilities): bool
     {
-        $roles = self::fetch();
-        $role  = $roles[$role] ?? [];
-        if (empty($role)) {
+        $granted = self::$roles[$role]['capabilities'] ?? [];
+        if (! $granted) {
             return false;
         }
 
-        if (is_scalar($capabilities)) {
-            $capabilities = [$capabilities];
-        }
-
-        return count(array_intersect($capabilities, $role['capabilities'])) > 0;
-    }
-
-    /**
-     * Get all roles.
-     */
-    private static function fetch(): array
-    {
-        return self::$roles;
+        return array_any((array) $capabilities, fn($capability) => in_array($capability, $granted, true));
     }
 }

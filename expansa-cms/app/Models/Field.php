@@ -7,6 +7,7 @@ namespace App\Models;
 use Expansa\Database\Model;
 use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
+use Expansa\Support\Str;
 
 /**
  * Class Fields
@@ -33,6 +34,16 @@ class Field extends Model
     protected Model $post;
 
     /**
+     * Name of the foreign key column on the metadata table that references
+     * the parent row. All post types share a single "post_id" column
+     * (createFieldsTable() is called with an explicit 'posts' override for
+     * them); every other model gets its own "{singular table name}_id".
+     *
+     * @var string
+     */
+    protected string $column;
+
+    /**
      * Constructor.
      *
      * @param Model $post       The parent model instance for which meta is created.
@@ -40,10 +51,14 @@ class Field extends Model
      */
     public function __construct(Model $post, array $attributes = [])
     {
-        parent::__construct($attributes);
+        // Not parent::__construct(): Model declares no constructor of its own
+        // (nor does anything above it), so there's nothing to call — PHP treats
+        // that as a hard error ("Cannot call constructor"), not a silent no-op.
+        $this->setAttributes($attributes);
 
-        $this->post  = $post;
-        $this->table = "{$post->getTable()}_fields";
+        $this->post   = $post;
+        $this->table  = "{$post->getTable()}_fields";
+        $this->column = $post instanceof Post ? 'post_id' : Str::singularize($post->getTable()) . '_id';
     }
 
     /**
@@ -64,7 +79,7 @@ class Field extends Model
         }
 
         $fields = Cache::get("$postId", $this->table, function () use ($postId) {
-            $items = Db::select($this->table, ['key', 'value'], ['post_id' => $postId]);
+            $items = Db::select($this->table, ['key', 'value'], [$this->column => $postId]);
 
             if (!is_array($items)) {
                 return null;
@@ -111,7 +126,7 @@ class Field extends Model
                     $this->table,
                     'key',
                     [
-                        'post_id' => $postId,
+                        $this->column => $postId,
                         'key'     => array_keys($attributes),
                     ]
                 ) ?? []
@@ -134,7 +149,7 @@ class Field extends Model
             }
 
             $rowsToInsert[] = [
-                'post_id' => $postId,
+                $this->column => $postId,
                 'key'     => $key,
                 'value'   => $value,
             ];
@@ -174,7 +189,7 @@ class Field extends Model
         }
 
         $data       = [ 'value' => $oldValue ? [ $oldValue => $value ] : $value ];
-        $conditions = [ 'key' => $key, 'post_id' => $postId ];
+        $conditions = [ 'key' => $key, $this->column => $postId ];
 
         $result = $oldValue
             ? Db::replace($this->table, $data, $conditions)
@@ -204,7 +219,7 @@ class Field extends Model
             return false;
         }
 
-        $conditions = ['post_id' => $postId];
+        $conditions = [$this->column => $postId];
 
         if ($key) {
             $conditions['key'] = $key;
@@ -287,7 +302,7 @@ class Field extends Model
             }
 
             $insertItem = [
-                'post_id' => $postId,
+                $this->column => $postId,
                 'key'     => $key,
                 'value'   => $value,
             ];
@@ -310,7 +325,7 @@ class Field extends Model
                     $this->table,
                     [
                         'AND' => [
-                            'post_id' => $postId,
+                            $this->column => $postId,
                             'key'     => $deleteDatePart,
                         ],
                     ]

@@ -14,16 +14,13 @@ final class UserService
 {
     public function update(array $input): array
     {
-        $currentUser = User::current();
-        $userdata    = $input + ['id' => $currentUser->id];
-
         $fields = Safe::data($input, [
             'bio'     => 'trim',
             'toolbar' => 'bool',
             'format'  => 'text',
         ])->apply();
 
-        $user = User::update($userdata);
+        $user = User::current()->update($input);
 
         if ($user instanceof User) {
             foreach ($fields as $key => $value) {
@@ -62,7 +59,7 @@ final class UserService
     /** Same redirect-fragment key fix as signIn() — was `method`/`fragment`, now `redirect`. */
     public function signUp(array $input): array|User
     {
-        $user = User::add($input);
+        $user = User::create($input);
 
         if ($user instanceof User) {
             return [
@@ -75,7 +72,7 @@ final class UserService
     }
 
     /**
-     * Fixed return type: User::get() returns User|Error, but this was declared to
+     * Fixed return type: User::find() returns User|Error, but this was declared to
      * return only `array` — under strict_types, any reset request for an email that
      * doesn't match a user (a routine, expected case, not an edge case) would throw
      * a TypeError instead of the intended "no matching account" behavior.
@@ -83,7 +80,7 @@ final class UserService
     public function resetPassword(array $input): array|Error
     {
         $email = Safe::email($input['email'] ?? '');
-        $user  = User::get($email, 'email');
+        $user  = User::find($email, 'email');
 
         if ($user instanceof User) {
             $mailIsSent = Mail::send(

@@ -9,16 +9,16 @@ namespace Expansa\Database\Model;
  *
  * Provides support for readonly attributes in a model. Readonly attributes can
  * be set once (typically during creation) but cannot be modified afterwards.
+ *
+ * The consuming class must declare its own `protected array $readonly = [...]`
+ * — this trait deliberately does not declare that property itself. PHP treats
+ * a class redeclaring a typed trait property with a different default value as
+ * an incompatible declaration (a fatal error), and since every user of this
+ * trait needs its own list of readonly attributes, the property has to live
+ * solely on the consuming class.
  */
 trait HasReadonlyAttributes
 {
-    /**
-     * List of readonly attributes. Can be set once, cannot be modified afterwards.
-     *
-     * @var array<string>
-     */
-    protected array $readonly = [];
-
     /**
      * Checks if an attribute is readonly.
      *
@@ -46,6 +46,7 @@ trait HasReadonlyAttributes
         }
 
         $this->$key = $value;
+
         return true;
     }
 }
