@@ -1,47 +1,37 @@
 <?php
 
-namespace App\Api;
+declare(strict_types=1);
 
+namespace App\Api\Media;
+
+use App\Models\Media;
+use App\Models\Post;
 use Expansa\Debug\Error;
 use Expansa\Facades\Disk;
 use Expansa\Support\Str;
 
-class Media
+final class MediaService
 {
-    /**
-     * Get media files.
-     *
-     * @since 2025.1
-     */
-    public static function get(): array
+    public function list(): array
     {
-        $media = \App\Models\Media::get(
-            [
-                'per_page' => 60,
-            ]
-        );
-
         return [
-            'posts' => $media,
+            'posts' => Media::get(['per_page' => 60]),
         ];
     }
 
-    /**
-     * Upload new file to media.
-     *
-     * @since 2025.1
-     */
-    public static function upload(): array
+    public function upload(array $files): array
     {
         $errors = [];
         $posts  = [];
-        foreach ($_FILES as $file) {
+
+        foreach ($files as $file) {
             $filename = $file['name'] ?? '';
-            $postID   = \App\Models\Media::upload($file);
-            if ($postID instanceof Error) {
-                $errors[ $filename ] = Error::get();
+            $postId   = Media::upload($file);
+
+            if ($postId instanceof Error) {
+                $errors[$filename] = Error::get();
             } else {
-                $posts[] = \App\Models\Post::get('files', $postID);
+                $posts[] = Post::get('files', $postId);
             }
         }
 
@@ -53,17 +43,12 @@ class Media
         ];
     }
 
-    /**
-     * Upload files from external url.
-     *
-     * @since 2025.1
-     */
-    public static function grab(): array
+    public function grab(string $urls): array
     {
         $errors = [];
         $files  = [];
-        $urls   = Str::extractUrls($_POST['urls'] ?? '');
-        echo '<pre>';
+        $urls   = Str::extractUrls($urls);
+
         if ($urls) {
             $filepath = sprintf('%si/original/', EX_STORAGE);
 
@@ -71,7 +56,6 @@ class Media
                 $files[$url] = Disk::file($filepath)->grab($url);
             }
         }
-        print_r($files);
 
         return [
             'notice'   => empty($errors) ? t('%d files have been successfully uploaded to the library', count($files)) : '',

@@ -23,6 +23,7 @@ use Expansa\Patterns\Facade;
  * @method static void run(object|callable $callback = null)
  * @method static void set404(object|callable|string $matchFn, object|callable $callback = null)
  * @method static void trigger404(mixed $match = null)
+ * @method static string getCurrentUri()
  */
 class Route extends Facade
 {

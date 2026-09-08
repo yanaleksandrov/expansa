@@ -1,27 +1,30 @@
 <?php
 
-namespace App\Api;
+declare(strict_types=1);
 
-use Expansa\Dir;
+namespace App\Api\Translations;
+
+use Expansa\Facades\Disk;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
-use Expansa\Facades\Disk;
 
-class Translations
+final class TranslationsService
 {
     /**
-     * Get media files.
+     * Scans a project's PHP files for translatable strings (t()/t_attr()/_c() calls).
      *
-     * @since 2025.1
+     * Fixed from the legacy code: it referenced `Dir` and `File` classes that don't
+     * exist anywhere in the framework (would fatal the moment this ran) — the real,
+     * equivalent API is Disk::dir()->files() / Disk::file()->read().
      */
-    public static function get(): array
+    public function get(string $project): array
     {
-        $dirpath = Safe::path(EX_PATH . ( $_POST['project'] ?? '' ));
-        $paths   = ( new Dir($dirpath) )->getFiles('*.php', 10);
+        $dirpath = Safe::path(EX_PATH . $project);
+        $paths   = Disk::dir($dirpath)->files('*.php', 10);
 
         $result = [];
         foreach ($paths as $path) {
-            $content = ( new File($path) )->read();
+            $content = Disk::file($path)->read();
 
             $pattern = '/I18n::   # Match the literal "I18n::"
                 (?:_?t|_?t_attr)  # Non-capturing group, matches "_t(f)" or "_t(f)_attr" functions
@@ -34,14 +37,14 @@ class Translations
                 \s*               # Match any whitespace characters (optional)
                 (?:,\s*[^)]+)?    # Optionally match additional parameters before closing parenthesis
                 \)                # Match the closing parenthesis
-            /ux';                 # Enable extended mode and Unicode support
+            /ux';                 // Enable extended mode and Unicode support
 
             preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
 
             // extracting the found strings into a separate array
             $i18nStrings = array_map(fn($match) => $match[1] ?? '', $matches);
             if ($i18nStrings) {
-                $result = [ ...$result, ...$i18nStrings ];
+                $result = [...$result, ...$i18nStrings];
             }
 
             // regular expression pattern with comments
@@ -58,9 +61,9 @@ class Translations
             preg_match_all($pattern, $content, $matches);
 
             // extracting the found strings
-            $i18nStrings = array_filter([ $matches[2] ?? null, $matches[4] ?? null ]);
+            $i18nStrings = array_filter([$matches[2] ?? null, $matches[4] ?? null]);
             if ($i18nStrings) {
-                $result = [ ...$result, ...$i18nStrings ];
+                $result = [...$result, ...$i18nStrings];
             }
 
             usort($result, fn($a, $b) => strcasecmp($a, $b));
@@ -68,39 +71,28 @@ class Translations
 
         $result = array_values(array_unique($result));
 
-        $result = array_map(function ($item) {
-            return [
-                'source' => $item,
-                'value'  => '',
-            ];
-        }, $result);
+        $result = array_map(fn($item) => [
+            'source' => $item,
+            'value'  => '',
+        ], $result);
 
         return [
             'items' => $result,
         ];
     }
 
-    /**
-     * Update item by ID.
-     *
-     * @url    PUT api/posts/$id
-     */
-    public static function update(): array
+    public function update(array $input): array
     {
-        [ $project, $translations ] = Safe::data(
-            $_REQUEST,
-            [
-                'project'      => 'trim',
-                'translations' => 'array',
-            ]
-        )->values();
+        [$project, $translations] = Safe::data($input, [
+            'project'      => 'trim',
+            'translations' => 'array',
+        ])->values();
 
         if ($project && $translations) {
-            $content  = Json::encode($translations);
             $filepath = sprintf('%s/%s.json', EX_I18N . $project, 'ru');
-
-            $file = Disk::file($filepath)->write($content, false);
+            Disk::file($filepath)->write(Json::encode($translations), false);
         }
+
         return [];
     }
 }

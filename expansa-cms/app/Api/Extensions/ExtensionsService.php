@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Api;
+declare(strict_types=1);
 
-class Extensions
+namespace App\Api\Extensions;
+
+/**
+ * Hardcoded mock data for the extensions marketplace UI prototype — moved verbatim
+ * from the old App\Api\Extensions::get(), nothing real to fix here.
+ */
+final class ExtensionsService
 {
-    /**
-     * Get all items.
-     *
-     * @url    GET api/extensions
-     */
-    public static function get(): array
+    public function list(): array
     {
         return [
             'items' => [
