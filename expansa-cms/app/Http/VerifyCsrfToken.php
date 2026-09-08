@@ -36,6 +36,12 @@ final class VerifyCsrfToken
     private const string KEY = 'token';
 
     /**
+     * Csrf::generate()/check() build the cookie name as $sessionPrefix . KEY — this
+     * override makes it `x_csrf_token`, the exact name youla-ajax.js reads.
+     */
+    private const string COOKIE_PREFIX = 'x_csrf_';
+
+    /**
      * Route "before" middleware. Ends the request with a 403 JSON response on failure —
      * unlike the previous version, a failed check no longer lets the request continue.
      */
@@ -76,6 +82,6 @@ final class VerifyCsrfToken
 
     private function csrf(): Csrf
     {
-        return new Csrf(new NativeCookieProvider());
+        return new Csrf(new NativeCookieProvider(), self::COOKIE_PREFIX);
     }
 }
