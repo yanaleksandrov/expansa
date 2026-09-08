@@ -102,7 +102,7 @@ trait HasAttributes
             return static::$attributeMutatorCache[static::class][$method] = false;
         }
 
-        $returnType = (new \ReflectionMethod($this, $method))->getReturnType();
+        $returnType = new \ReflectionMethod($this, $method)->getReturnType();
 
         return static::$attributeMutatorCache[static::class][$method] =
             $returnType instanceof \ReflectionNamedType &&

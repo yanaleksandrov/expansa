@@ -1607,7 +1607,7 @@
         }
     };
     var __webpack_module_cache__ = {};
-    function __nested_webpack_require_102730__(moduleId) {
+    function __nested_webpack_require_101121__(moduleId) {
         var cachedModule = __webpack_module_cache__[moduleId];
         if (cachedModule !== undefined) {
             return cachedModule.exports;
@@ -1615,30 +1615,30 @@
         var module = __webpack_module_cache__[moduleId] = {
             exports: {}
         };
-        __webpack_modules__[moduleId].call(module.exports, module, module.exports, __nested_webpack_require_102730__);
+        __webpack_modules__[moduleId].call(module.exports, module, module.exports, __nested_webpack_require_101121__);
         return module.exports;
     }
     !function() {
-        __nested_webpack_require_102730__.n = function(module) {
+        __nested_webpack_require_101121__.n = function(module) {
             var getter = module && module.__esModule ? function() {
                 return module['default'];
             } : function() {
                 return module;
             };
-            __nested_webpack_require_102730__.d(getter, {
+            __nested_webpack_require_101121__.d(getter, {
                 a: getter
             });
             return getter;
         };
     }();
     !function() {
-        __nested_webpack_require_102730__.d = function(exports, definition) {
+        __nested_webpack_require_101121__.d = function(exports, definition) {
             if (Array.isArray(definition)) {
                 var i = 0;
                 while (i < definition.length) {
                     var key = definition[i++];
                     var binding = definition[i++];
-                    if (!__nested_webpack_require_102730__.o(exports, key)) {
+                    if (!__nested_webpack_require_101121__.o(exports, key)) {
                         if (binding === 0) {
                             Object.defineProperty(exports, key, {
                                 enumerable: true,
@@ -1656,7 +1656,7 @@
                 }
             } else {
                 for (var key in definition) {
-                    if (__nested_webpack_require_102730__.o(definition, key) && !__nested_webpack_require_102730__.o(exports, key)) {
+                    if (__nested_webpack_require_101121__.o(definition, key) && !__nested_webpack_require_101121__.o(exports, key)) {
                         Object.defineProperty(exports, key, {
                             enumerable: true,
                             get: definition[key]
@@ -1667,14 +1667,14 @@
         };
     }();
     !function() {
-        __nested_webpack_require_102730__.o = function(obj, prop) {
+        __nested_webpack_require_101121__.o = function(obj, prop) {
             return Object.prototype.hasOwnProperty.call(obj, prop);
         };
     }();
     !function() {
         'use strict';
-        var air_datepicker = __nested_webpack_require_102730__(327);
-        var air_datepicker_default = __nested_webpack_require_102730__.n(air_datepicker);
+        var air_datepicker = __nested_webpack_require_101121__(327);
+        var air_datepicker_default = __nested_webpack_require_101121__.n(air_datepicker);
         var index_es = air_datepicker_default();
         document.addEventListener('youla:init', () => {
             Youla.directive('pickadate', (el, output) => {
@@ -1686,11 +1686,11 @@
                     range: false,
                     inline: false,
                     multipleDatesSeparator: ' — ',
-                    ...window.expansa?.datepicker ? {
-                        locale: window.expansa.datepicker
+                    ...window.youla?.datepicker ? {
+                        locale: window.youla.datepicker
                     } : {},
-                    firstDay: window.expansa?.weekStart || 0,
-                    dateFormat: window.expansa?.dateFormat || 'yyyy-MM-dd',
+                    firstDay: window.youla?.weekStart || 0,
+                    dateFormat: window.youla?.dateFormat || 'yyyy-MM-dd',
                     container: el.closest('div'),
                     view: 'days',
                     ...options

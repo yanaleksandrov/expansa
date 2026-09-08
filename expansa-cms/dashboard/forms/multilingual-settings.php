@@ -29,7 +29,7 @@ return Expansa\Facades\Form::enqueue(
     [
         'class'   => 'tab tab--vertical',
         'u-data'  => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'general')),
-        '@change' => '$ajax("user/update")',
+        '@change' => '$ajax.post("user/update")',
     ],
     [
         [

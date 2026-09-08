@@ -320,23 +320,24 @@
             delete this.el._x_tooltip;
         }
     }
+    function tooltipDirective(el, output, {modifiers, duration}) {
+        const placement = modifiers.find(m => PLACEMENTS.includes(m)) || 'auto';
+        const trigger = modifiers.find(m => TRIGGERS.includes(m)) || 'hover';
+        const variant = modifiers.find(m => m.startsWith(VARIANT_PREFIX))?.slice(VARIANT_PREFIX.length) || null;
+        const delay = duration?.unit === 'ms' ? duration.value : 250;
+        const content = output == null ? '' : String(output);
+        const instance = el._x_tooltip;
+        if (!instance) {
+            el._x_tooltip = new TooltipInstance(el, content, placement, trigger, delay, variant);
+            return;
+        }
+        instance.updateContent(content);
+        instance.updatePlacement(placement);
+        instance.updateTrigger(trigger);
+        instance.updateDelay(delay);
+        instance.updateVariant(variant);
+    }
     document.addEventListener('youla:init', () => {
-        Youla.directive('tooltip', (el, output, {modifiers, duration}) => {
-            const placement = modifiers.find(m => PLACEMENTS.includes(m)) || 'auto';
-            const trigger = modifiers.find(m => TRIGGERS.includes(m)) || 'hover';
-            const variant = modifiers.find(m => m.startsWith(VARIANT_PREFIX))?.slice(VARIANT_PREFIX.length) || null;
-            const delay = duration?.unit === 'ms' ? duration.value : 250;
-            const content = output == null ? '' : String(output);
-            const instance = el._x_tooltip;
-            if (!instance) {
-                el._x_tooltip = new TooltipInstance(el, content, placement, trigger, delay, variant);
-                return;
-            }
-            instance.updateContent(content);
-            instance.updatePlacement(placement);
-            instance.updateTrigger(trigger);
-            instance.updateDelay(delay);
-            instance.updateVariant(variant);
-        });
+        Youla.directive('tooltip', tooltipDirective);
     });
 })();

@@ -1,62 +1,81 @@
 (function() {
     document.addEventListener('youla:init', () => {
         const BYTES_IN_MB = 1048576;
-        Youla.baseURL ??= '';
-        Youla.method('ajax', (e, el) => (route, payload, onProgress, options = {}) => {
-            abortPrevious(el);
-            const xhr = el.__ajax = new XMLHttpRequest;
-            const url = /^https?:\/\//.test(route) ? route : Youla.baseURL + route;
-            const done = toggleLoading(el);
-            xhr.open((el.getAttribute('method') || (el.tagName === 'FORM' ? 'POST' : 'GET')).toUpperCase(), url);
-            xhr.withCredentials = options.credentials ?? true;
-            Object.entries(options.headers || {}).forEach(([name, value]) => xhr.setRequestHeader(name, value));
-            xhr.onloadstart = xhr.upload.onprogress = event => onProgress?.(readProgress(event, xhr));
-            xhr.onloadend = event => {
-                onProgress?.(readProgress(event, xhr));
-                done();
-            };
-            return new Promise((resolve, reject) => {
-                xhr.__reject = reject;
-                xhr.onerror = () => reject(new Error('Youla.js: "$ajax" network error.'));
-                xhr.onload = () => {
-                    const parsed = parseJSON(xhr.responseText);
-                    if (xhr.status < 200 || xhr.status >= 300) {
-                        reject(Object.assign(new Error(`Youla.js: "$ajax" failed with status ${xhr.status}.`), {
-                            status: xhr.status,
-                            data: parsed ?? xhr.responseText
-                        }));
-                        return;
+        Youla.baseURL ??= (typeof youla !== 'undefined' ? youla?.apiurl : null) ?? '';
+        Youla.method('ajax', (e, el) => {
+            const ajax = (method, route, payload, onProgress, options = {}) => {
+                abortPrevious(el);
+                const xhr = el.__ajax = new XMLHttpRequest;
+                const url = /^https?:\/\//.test(route) ? route : Youla.baseURL + route;
+                const done = toggleLoading(el);
+                xhr.open(method, url);
+                xhr.withCredentials = options.credentials ?? true;
+                if (![ 'GET', 'HEAD' ].includes(method) && isSameOrigin(url)) {
+                    const token = readCookie('x_csrf_token');
+                    if (token) {
+                        xhr.setRequestHeader('X-CSRF-Token', token);
                     }
-                    const data = parsed?.data ?? parsed ?? xhr.responseText;
-                    let settled = false;
-                    const override = value => {
-                        settled = true;
-                        resolve(value);
-                    };
-                    try {
-                        document.dispatchEvent(new CustomEvent(`ajax:${route}`, {
-                            detail: {
-                                data,
-                                el,
-                                resolve: override
-                            },
-                            bubbles: true,
-                            composed: true,
-                            cancelable: true
-                        }));
-                        if (Array.isArray(data)) {
-                            data.forEach(applyFragment);
-                        }
-                    } catch (error) {
-                        console.error('Youla.js: "$ajax" fragment handling failed.', error);
-                    }
-                    if (!settled) {
-                        resolve(data);
-                    }
+                }
+                Object.entries(options.headers || {}).forEach(([name, value]) => xhr.setRequestHeader(name, value));
+                xhr.onloadstart = xhr.upload.onprogress = event => onProgress?.(readProgress(event, xhr));
+                xhr.onloadend = event => {
+                    onProgress?.(readProgress(event, xhr));
+                    done();
                 };
-                xhr.send(buildRequestBody(el, payload));
-            });
+                return new Promise((resolve, reject) => {
+                    xhr.__reject = reject;
+                    xhr.onerror = () => reject(new Error('Youla.js: "$ajax" network error.'));
+                    xhr.onload = () => {
+                        const parsed = parseJSON(xhr.responseText);
+                        if (xhr.status < 200 || xhr.status >= 300) {
+                            reject(Object.assign(new Error(`Youla.js: "$ajax" failed with status ${xhr.status}.`), {
+                                status: xhr.status,
+                                data: parsed ?? xhr.responseText
+                            }));
+                            return;
+                        }
+                        const data = parsed?.data ?? parsed ?? xhr.responseText;
+                        let settled = false;
+                        const override = value => {
+                            settled = true;
+                            resolve(value);
+                        };
+                        try {
+                            document.dispatchEvent(new CustomEvent(`ajax:${route}`, {
+                                detail: {
+                                    data,
+                                    el,
+                                    resolve: override
+                                },
+                                bubbles: true,
+                                composed: true,
+                                cancelable: true
+                            }));
+                            if (Array.isArray(data)) {
+                                data.forEach(applyFragment);
+                            }
+                        } catch (error) {
+                            console.error('Youla.js: "$ajax" fragment handling failed.', error);
+                        }
+                        if (!settled) {
+                            resolve(data);
+                        }
+                    };
+                    xhr.send(buildRequestBody(el, payload));
+                });
+            };
+            return [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE' ].reduce((methods, method) => ({
+                ...methods,
+                [method.toLowerCase()]: (route, payload, onProgress, options) => ajax(method, route, payload, onProgress, options)
+            }), {});
         });
+        function readCookie(name) {
+            const match = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+            return match ? decodeURIComponent(match[1]) : null;
+        }
+        function isSameOrigin(url) {
+            return new URL(url, window.location.href).origin === window.location.origin;
+        }
         function abortPrevious(el) {
             const xhr = el.__ajax;
             if (!xhr) {

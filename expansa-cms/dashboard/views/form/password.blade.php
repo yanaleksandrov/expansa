@@ -36,22 +36,22 @@ defined('EX_PATH') || exit;
 $prop = Safe::prop($attributes['name'] ?? $name);
 $attributes = [
 	...$attributes,
-	'name'          => $name,
-	':type'         => "show ? 'password' : 'text'",
-	'@input.window' => $generator ? 'data = $password.check(' . $prop . ')' : '',
+	'name'   => $name,
+	':type'  => "visible ? 'text' : 'password'",
+	'@input' => $generator ? 'check(' . $prop . ')' : '',
 ];
 ?>
-<div class="{{ $class }}" u-data="{show: true, data: {}}">
+<div class="{{ $class }}" u-data="password">
 	<div class="{{ $labelClass }}">
 		{!! $label !!}
 		@if($generator)
-			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = $password.generate(); $dispatch('input')">{{ t( 'Generate' ) }}</div>
+			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = generate()">{{ t( 'Generate' ) }}</div>
 		@endif
 	</div>
 	<div class="field-item">
 		<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
 		@if($switcher)
-			<i class="ph" :class="show ? 'ph-eye-closed' : 'ph-eye'" @click="show = $password.switch(show)"></i>
+			<i class="ph" :class="visible ? 'ph-eye-closed' : 'ph-eye'" @click="visible = !visible"></i>
 		@endif
 		@if($copy)
 			<i class="ph ph-copy" title="{{ t( 'Copy' ) }}" u-copy="{{ $prop }}"></i>
@@ -61,12 +61,12 @@ $attributes = [
 		<div class="field-instruction">{!! $instruction !!}</div>
 	@endif
 	@if($indicator)
-		<div class="dg g-2 gtc-5 mt-2">
-			<i class="pt-1" :class="data.progress > <?php echo 100 / 5; ?> ? 'bg-red' : 'bg-muted-lt'"></i>
-			<i class="pt-1" :class="data.progress > <?php echo 100 / 5 * 2; ?> ? 'bg-amber' : 'bg-muted-lt'"></i>
-			<i class="pt-1" :class="data.progress > <?php echo 100 / 5 * 3; ?> ? 'bg-orange' : 'bg-muted-lt'"></i>
-			<i class="pt-1" :class="data.progress > <?php echo 100 / 5 * 4; ?> ? 'bg-green' : 'bg-muted-lt'"></i>
-			<i class="pt-1" :class="data.progress === 100 ? 'bg-green' : 'bg-muted-lt'"></i>
+		<div class="dg g-1 gtc-5 mt-1">
+			<i class="pt-1" :class="progress > <?php echo 100 / 5; ?> ? 'bg-red' : 'bg-muted-lt'"></i>
+			<i class="pt-1" :class="progress > <?php echo 100 / 5 * 2; ?> ? 'bg-amber' : 'bg-muted-lt'"></i>
+			<i class="pt-1" :class="progress > <?php echo 100 / 5 * 3; ?> ? 'bg-orange' : 'bg-muted-lt'"></i>
+			<i class="pt-1" :class="progress > <?php echo 100 / 5 * 4; ?> ? 'bg-green' : 'bg-muted-lt'"></i>
+			<i class="pt-1" :class="progress === 100 ? 'bg-green' : 'bg-muted-lt'"></i>
 		</div>
 	@endif
 	@if($characters)
@@ -85,8 +85,8 @@ $attributes = [
                     continue;
                 }
                 ?>
-				<div class="df aifs g-2" :class="data.{{ $character }} && 't-green'">
-					<i class="ph" :class="data.{{ $character }} ? 'ph-check' : 'ph-x'"></i> <span><?php printf( $messages[$character], $count ); ?></span>
+				<div class="df aifs g-2" :class="valid.{{ $character }} && 't-green'">
+					<i class="ph" :class="valid.{{ $character }} ? 'ph-check' : 'ph-x'"></i> <span><?php printf( $messages[$character], $count ); ?></span>
 				</div>
 			<?php } ?>
 		</div>

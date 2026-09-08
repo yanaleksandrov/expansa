@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Routing;
 
+use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
 
@@ -20,11 +21,34 @@ class Router
     private array $notFoundCallback = [];
 
     /**
-     * The route patterns and their handling functions
+     * Literal (no `{param}`, no raw regex) route patterns, keyed by method then by the
+     * exact pattern string, for an O(1) lookup instead of a linear regex scan. Most
+     * routes in practice are literal (`/system/test`, `/post/create`, ...).
      *
      * @var array
      */
-    private array $afterRoutes = [];
+    private array $staticRoutes = [];
+
+    /**
+     * Genuinely dynamic route patterns (`{param}` or a hand-written regex like `/(.*)`),
+     * keyed by method, then by their literal prefix — the part of the pattern before the
+     * first placeholder/regex character (`/post/{id}` -> `/post`; a prefix-less pattern
+     * like `/(.*)` buckets under `''`). Dispatch only has to scan the bucket matching the
+     * request's own prefix plus the `''` (catch-all) bucket, instead of every dynamic
+     * route in the app — see handleDynamic(). Each entry also carries a `seq` so merging
+     * those two buckets can still be scanned in original registration order.
+     *
+     * @var array
+     */
+    private array $dynamicRoutes = [];
+
+    /**
+     * Registration order counter — lets handleDynamic() restore first-registered-wins
+     * order after merging a prefix bucket with the catch-all bucket.
+     *
+     * @var int
+     */
+    private int $routeSequence = 0;
 
     /**
      * The before middleware route patterns and their handling functions
@@ -91,11 +115,23 @@ class Router
         $pattern = $this->baseRoute . '/' . trim($pattern, '/');
         $pattern = $this->baseRoute ? rtrim($pattern, '/') : $pattern;
 
+        if ($this->isLiteralPattern($pattern)) {
+            foreach (explode('|', $methods) as $method) {
+                $this->staticRoutes[$method][$pattern] = $fn;
+            }
+            return;
+        }
+
+        $route = [
+            'pattern' => $pattern,
+            'regex'   => $this->compileRegex($pattern),
+            'fn'      => $fn,
+            'seq'     => $this->routeSequence++,
+        ];
+        $prefix = $this->literalPrefix($pattern);
+
         foreach (explode('|', $methods) as $method) {
-            $this->afterRoutes[$method][] = [
-                'pattern' => $pattern,
-                'fn'      => $fn,
-            ];
+            $this->dynamicRoutes[$method][$prefix][] = $route;
         }
     }
 
@@ -174,6 +210,58 @@ class Router
     public function options(string $pattern, callable|array $fn): void
     {
         $this->match('OPTIONS', $pattern, $fn);
+    }
+
+    /**
+     * Reflects a Controller class and registers a route per public method.
+     *
+     * A handful of method names are recognised as CRUD (index/show/create/update/delete)
+     * and get real REST verbs, with `/{id}` appended where a single item is addressed.
+     * Anything else becomes a named RPC-style action: `POST /{resource}/{kebab-method}`.
+     *
+     * This class only handles the naming/verb convention — it doesn't call the controller
+     * itself. That's the $dispatch callback's job: it receives ($controller, $method, $params)
+     * for whichever route matched, and decides what actually happens (building the request,
+     * turning the return value or a thrown exception into a response, etc).
+     *
+     * @param string      $controller Fully qualified Controller class name.
+     * @param callable    $dispatch   Called as $dispatch($controller, $method, $params) on match.
+     * @param string|null $name       Resource path segment; derived from the class name
+     *                                (SystemController -> system) when omitted.
+     */
+    public function register(string $controller, callable $dispatch, ?string $name = null): void
+    {
+        $crud = [
+            'index'  => ['GET', ''],
+            'show'   => ['GET', '/{id}'],
+            'create' => ['POST', ''],
+            'update' => ['PUT', '/{id}'],
+            'delete' => ['DELETE', '/{id}'],
+        ];
+
+        $shortName = new ReflectionClass($controller)->getShortName();
+        $resource  = $name ?? strtolower(preg_replace('/Controller$/', '', $shortName));
+
+        foreach (get_class_methods($controller) as $method) {
+            if ($method === '__construct') {
+                continue;
+            }
+
+            [$verb, $suffix] = $crud[$method] ?? ['POST', '/' . $this->kebabCase($method)];
+
+            $this->match($verb, "/$resource$suffix", fn (...$params) => $dispatch($controller, $method, $params));
+        }
+    }
+
+    /**
+     * Converts a camelCase method name into a kebab-case URL segment (signIn -> sign-in).
+     */
+    private function kebabCase(string $value): string
+    {
+        $value = preg_replace('/_/', '-', trim($value));
+        $value = preg_replace('/(.)(?=[A-Z])/u', '$1-', $value);
+
+        return strtolower($value);
     }
 
     /**
@@ -300,19 +388,22 @@ class Router
             $this->handle($this->beforeRoutes[$requestedMethod]);
         }
 
-        // Handle all routes
-        $numHandled = 0;
-        if (isset($this->afterRoutes[$requestedMethod])) {
-            $numHandled = $this->handle($this->afterRoutes[$requestedMethod], true);
+        // Handle all routes: an O(1) lookup for a literal match; only a genuinely dynamic
+        // pattern falls back to handleDynamic(), which itself only scans the bucket that
+        // could plausibly match instead of every dynamic route in the app.
+        $uri      = $this->getCurrentUri();
+        $staticFn = $this->staticRoutes[$requestedMethod][$uri] ?? null;
+
+        if ($staticFn !== null) {
+            $this->invoke($staticFn);
+            $numHandled = 1;
+        } else {
+            $numHandled = $this->handleDynamic($requestedMethod, $uri);
         }
 
         // If no route was handled, trigger the 404 (if any)
         if ($numHandled === 0) {
-            if (isset($this->afterRoutes[$requestedMethod])) {
-                $this->trigger404($this->afterRoutes[$requestedMethod]);
-            } else {
-                $this->trigger404();
-            }
+            $this->trigger404();
         } elseif ($callback && is_callable($callback)) {
             $callback($this);
         }
@@ -363,21 +454,7 @@ class Router
 
                 // is fallback route match?
                 if ($isMatch) {
-                    // Rework matches to only contain the matches, not the orig string
-                    $matches = array_slice($matches, 1);
-
-                    // Extract the matched URL parameters (and only the parameters)
-                    array_map(function ($match, $index) use ($matches) {
-                        // We have a following parameter: take the substring from the current param
-                        // position until the next one's position (thank you PREG_OFFSET_CAPTURE)
-                        if (isset($matches[$index + 1][0][1]) && $matches[$index + 1][0][1] > -1) {
-                            return trim(substr($match[0][0], 0, $matches[$index + 1][0][1] - $match[0][1]), '/');
-                        }
-
-                        return isset($match[0][0]) && $match[0][1] != -1 ? trim($match[0][0], '/') : null;
-                    }, $matches, array_keys($matches));
-
-                    $this->invoke($route_callable);
+                    $this->invoke($route_callable, $this->extractParams($matches));
 
                     ++$numHandled;
                 }
@@ -470,22 +547,8 @@ class Router
 
             // is there a valid match?
             if ($isMatch) {
-                // Rework matches to only contain the matches, not the orig string
-                $matches = array_slice($matches, 1);
-
-                // Extract the matched URL parameters (and only the parameters)
-                $params = array_map(function ($match, $index) use ($matches) {
-                    // We have a following parameter: take the substring from the current param
-                    // position until the next one's position (thank you PREG_OFFSET_CAPTURE)
-                    if (isset($matches[$index + 1][0][1]) && $matches[$index + 1][0][1] > -1) {
-                        return trim(substr($match[0][0], 0, $matches[$index + 1][0][1] - $match[0][1]), '/');
-                    }
-
-                    return isset($match[0][0]) && $match[0][1] != -1 ? trim($match[0][0], '/') : null;
-                }, $matches, array_keys($matches));
-
                 // Call the handling function with the URL parameters if the desired input is callable
-                $this->invoke($route['fn'], $params);
+                $this->invoke($route['fn'], $this->extractParams($matches));
 
                 ++$numHandled;
 
@@ -498,6 +561,52 @@ class Router
 
         // Return the number of routes handled
         return $numHandled;
+    }
+
+    /**
+     * Matches the current URI against dynamic (non-literal) routes only — literal ones
+     * are already handled by the O(1) lookup in run(). Scans only the bucket sharing the
+     * URI's own literal prefix plus the `''` (catch-all) bucket, in original registration
+     * order, instead of every dynamic pattern registered for this method.
+     */
+    private function handleDynamic(string $method, string $uri): int
+    {
+        $candidates = $this->dynamicRoutes[$method][$this->literalPrefix($uri)] ?? [];
+        $catchAll   = $this->dynamicRoutes[$method][''] ?? [];
+
+        if ($candidates && $catchAll) {
+            $candidates = array_merge($candidates, $catchAll);
+
+            usort($candidates, fn ($a, $b) => $a['seq'] <=> $b['seq']);
+        } elseif ($catchAll) {
+            $candidates = $catchAll;
+        }
+
+        foreach ($candidates as $route) {
+            if (preg_match_all($route['regex'], $uri, $matches, PREG_OFFSET_CAPTURE)) {
+                $this->invoke($route['fn'], $this->extractParams($matches));
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Turns preg_match_all's PREG_OFFSET_CAPTURE output into the plain param list a
+     * route handler receives — same reconstruction handle() has always used.
+     */
+    private function extractParams(array $matches): array
+    {
+        $matches = array_slice($matches, 1);
+
+        return array_map(function ($match, $index) use ($matches) {
+            if (isset($matches[$index + 1][0][1]) && $matches[$index + 1][0][1] > -1) {
+                return trim(substr($match[0][0], 0, $matches[$index + 1][0][1] - $match[0][1]), '/');
+            }
+
+            return isset($match[0][0]) && $match[0][1] != -1 ? trim($match[0][0], '/') : null;
+        }, $matches, array_keys($matches));
     }
 
     private function invoke($fn, $params = []): void
@@ -531,5 +640,37 @@ class Router
                 // The controller class is not available or the class does not have the method $method
             }
         }
+    }
+
+    /**
+     * A pattern is literal when it consists *only* of characters that can never carry
+     * regex meaning — letters, digits, `-`, `_`, `/`. Deliberately an allow-list, not a
+     * deny-list of "the regex metacharacters I could think of": a route pattern is free
+     * to use `{param}` today or any other placeholder/regex syntax tomorrow (`{id:\d+}`,
+     * `[0-9]+`, `*`, whatever) — anything not on the allow-list simply falls back to the
+     * regex path unchanged instead of being silently (and incorrectly) treated as literal.
+     */
+    private function isLiteralPattern(string $pattern): bool
+    {
+        return (bool) preg_match('#^[A-Za-z0-9_/-]*$#', $pattern);
+    }
+
+    /**
+     * Converts `{param}` placeholders into the regex Router has always matched routes
+     * with, and compiles it once at registration instead of on every dispatch.
+     */
+    private function compileRegex(string $pattern): string
+    {
+        return '#^' . preg_replace('/\/{(.*?)}/', '/(.*?)', $pattern) . '$#';
+    }
+
+    /**
+     * The literal path segment a dynamic pattern starts with, e.g. `/post/{id}` -> `/post`.
+     * A pattern with no literal lead-in at all (a hand-written `/(.*)`) buckets under `''`
+     * — dispatch always checks that bucket too, so it still matches anything it used to.
+     */
+    private function literalPrefix(string $pattern): string
+    {
+        return preg_match('#^(/[A-Za-z0-9_-]+)#', $pattern, $m) ? $m[1] : '';
     }
 }

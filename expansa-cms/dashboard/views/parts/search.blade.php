@@ -14,7 +14,7 @@
 	<div class="expansa-search-box">
 		<div class="field field--lg field--outline">
 			<label class="field-item">
-				<input class="expansa-search-input" type="search" name="search" placeholder="{{ t('Search...') }}" u-bind="input" @input.debounce.250ms="$ajax('search').then(() => links = [{url: '', text: 'Страницы'}, {url: '/dashboard/themes', text: 'Привет'}, {url: '/dashboard/plugins', text: 'Привет'}])">
+				<input class="expansa-search-input" type="search" name="search" placeholder="{{ t('Search...') }}" u-bind="input" @input.debounce.250ms="$ajax.post('search').then(() => links = [{url: '', text: 'Страницы'}, {url: '/dashboard/themes', text: 'Привет'}, {url: '/dashboard/plugins', text: 'Привет'}])">
 			</label>
 		</div>
 		<template u-if="links.length">

@@ -51,7 +51,7 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 		@if($icon)
 			<span class="field-icon"><i class="{{ $icon }}"></i></span>
 		@endif
-		<input class="field-checkbox"<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'u-model.fill' => $prop, 'checked' => $checked ] ); ?>>
+		<input class="field-checkbox"<?php echo Arr::toHtmlAtts( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'u-prop' => $prop, 'checked' => $checked ] ); ?>>
 		<div class="<?php echo $label_class; ?>">
 			<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>

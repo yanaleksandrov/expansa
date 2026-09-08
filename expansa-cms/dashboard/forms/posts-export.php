@@ -8,7 +8,7 @@ return Expansa\Facades\Form::enqueue(
 	'posts-export',
 	[
 		'class'           => 'card card-border px-7 pb-7 g-7',
-		'@submit.prevent' => '$ajax("posts/export").then(response => output = response.output)',
+		'@submit.prevent' => '$ajax.post("posts/export").then(response => output = response.output)',
 		'u-data'          => '{posts:[]}',
 	],
 	[

@@ -1,21 +1,40 @@
 (function() {
     document.addEventListener('youla:init', () => {
         (() => {
-            Youla.directive('step', (el, output, _, component) => {
+            function hasUData(el) {
+                return [ ...el.attributes ].some(({name}) => name === 'u-data' || name.startsWith('u-data.'));
+            }
+            function closestComponent(el) {
+                while (el && !hasUData(el)) {
+                    el = el.parentElement;
+                }
+                return el ? el.__x : null;
+            }
+            const REQUIRED_FIELDS_SELECTOR = 'input[required], select[required], textarea[required]';
+            Youla.directive('step', (el, output, attribute, component) => {
                 const wizard = component.data;
                 const step = wizard.getStep(el);
-                const isComplete = !!output;
+                const required = attribute.modifiers.includes('required');
+                if (required && !el._x_stepRequiredBound) {
+                    el._x_stepRequiredBound = true;
+                    el.querySelectorAll(REQUIRED_FIELDS_SELECTOR).forEach(field => {
+                        [ 'input', 'change' ].forEach(event => field.addEventListener(event, () => component.refresh(el)));
+                    });
+                }
+                let isComplete = required && attribute.expression.trim() === '' ? true : !!output;
+                if (required) {
+                    isComplete = isComplete && [ ...el.querySelectorAll(REQUIRED_FIELDS_SELECTOR) ].every(field => field.checkValidity());
+                }
                 if (step.isComplete !== isComplete) {
                     step.isComplete = isComplete;
-                    component.refresh(true);
                 }
             });
             Youla.data('step', () => ({
                 steps: [],
-                currentIndex: 0,
+                currentIndex: 1,
                 progress() {
                     const total = this.steps.length;
-                    const current = Math.min(this.currentIndex + 1, total);
+                    const current = Math.min(this.currentIndex, total);
                     let complete = 0;
                     for (let index = 0; index < current; index++) {
                         if (this.steps[index].isComplete) {
@@ -33,9 +52,8 @@
                     };
                 },
                 stepAt(index) {
-                    return this.steps[index] || {
-                        el: null,
-                        title: null
+                    return this.steps[index - 1] || {
+                        el: null
                     };
                 },
                 current() {
@@ -48,13 +66,16 @@
                     return this.stepAt(this.nextIndex());
                 },
                 previousIndex() {
-                    return this.currentIndex - 1 >= 0 ? this.currentIndex - 1 : null;
+                    return this.currentIndex - 1 >= 1 ? this.currentIndex - 1 : null;
                 },
                 nextIndex() {
-                    return this.currentIndex + 1 < this.steps.length ? this.currentIndex + 1 : null;
+                    return this.currentIndex + 1 <= this.steps.length ? this.currentIndex + 1 : null;
                 },
                 isStep(index) {
                     return Array.isArray(index) ? index.includes(this.currentIndex) : index === this.currentIndex;
+                },
+                isSteps(...values) {
+                    return values.some(value => Array.isArray(value) ? this.currentIndex >= value[0] && this.currentIndex <= value[1] : value === this.currentIndex);
                 },
                 isFirst() {
                     return this.previousIndex() === null;
@@ -109,32 +130,42 @@
                     this.goto(this.previousIndex());
                 },
                 goto(index) {
-                    if (index !== null && this.steps[index] !== void 0) {
+                    const previousIndex = this.currentIndex;
+                    if (index !== null && this.steps[index - 1] !== void 0) {
                         this.currentIndex = index;
                     }
                     this.render();
+                    if (this.currentIndex !== previousIndex) {
+                        this.runAction(this.steps[this.currentIndex - 1]);
+                    }
                     return this.current();
+                },
+                runAction(step) {
+                    const expression = step?.el.getAttribute('u-step:action');
+                    if (!expression) {
+                        return;
+                    }
+                    const component = closestComponent(step.el);
+                    component?.invokeListener(expression, null, step.el);
                 },
                 render() {
                     this.steps.forEach((step, index) => {
-                        const isHidden = index !== this.currentIndex;
+                        const isHidden = index + 1 !== this.currentIndex;
                         if (step.el.hidden !== isHidden) {
                             step.el.hidden = isHidden;
                         }
                     });
                 },
                 getStep(el) {
-                    let step = el._x_step;
-                    if (!step) {
-                        step = el._x_step = {
+                    let index = el._x_stepIndex;
+                    if (index === undefined) {
+                        index = el._x_stepIndex = this.steps.push({
                             el,
-                            title: '',
                             isComplete: true
-                        };
-                        this.steps.push(step);
+                        }) - 1;
                         this.render();
                     }
-                    return step;
+                    return this.steps[index];
                 }
             }));
         })();
@@ -144,20 +175,20 @@
                 items: {},
                 duration: 7e3,
                 hovering: false,
-                info(message) {
-                    this.add(message, 'info');
+                info(message, duration) {
+                    this.add(message, 'info', duration);
                 },
-                success(message) {
-                    this.add(message, 'success');
+                success(message, duration) {
+                    this.add(message, 'success', duration);
                 },
-                warning(message) {
-                    this.add(message, 'warning');
+                warning(message, duration) {
+                    this.add(message, 'warning', duration);
                 },
-                error(message) {
-                    this.add(message, 'error');
+                error(message, duration) {
+                    this.add(message, 'error', duration);
                 },
-                loading(message) {
-                    this.add(message, 'loading');
+                loading(message, duration) {
+                    this.add(message, 'loading', duration);
                 },
                 pause() {
                     this.hovering = true;
@@ -175,7 +206,7 @@
                 },
                 schedule(id) {
                     let item = this.items[id];
-                    if (item && !item.timer) {
+                    if (item && !item.timer && item.duration) {
                         item.startedAt = Date.now();
                         item.timer = setTimeout(() => this.close(id), item.remaining);
                     }
@@ -200,17 +231,22 @@
                         }, 1e3);
                     }
                 },
-                add(message, type) {
+                add(message, type, duration) {
                     if (message) {
                         let timestamp = Date.now();
+                        if (duration === 'auto') {
+                            duration = Math.max(message.length * 70, 1500);
+                        } else if (duration === void 0) {
+                            duration = this.duration;
+                        }
                         this.items = {
                             ...this.items,
                             [timestamp]: {
                                 message,
                                 closable: true,
                                 selectors: [ type || 'info' ],
-                                duration: this.duration,
-                                remaining: this.duration,
+                                duration,
+                                remaining: duration,
                                 startedAt: Date.now(),
                                 timer: null,
                                 classes() {
@@ -220,6 +256,93 @@
                         };
                         if (!this.hovering) {
                             this.schedule(timestamp);
+                        }
+                    }
+                }
+            }));
+        })();
+        (() => {
+            Youla.variable('dialog', () => document.querySelector('[u-data="dialog"]')?.__x?.data);
+            const searchParamsHandler = (param, value, isRemove) => {
+                const url = new URL(window.location.href);
+                const params = new URLSearchParams(url.search);
+                if (isRemove) {
+                    params.delete(param);
+                } else {
+                    params.set(param, value);
+                }
+                url.search = params.toString();
+                window.history.replaceState({}, '', url.toString());
+            };
+            let uid = 0;
+            let scrollY = 0;
+            function lockScroll() {
+                scrollY = window.scrollY;
+                Object.assign(document.body.style, {
+                    position: 'fixed',
+                    top: `-${scrollY}px`,
+                    width: '100%',
+                    overflow: 'hidden'
+                });
+            }
+            function unlockScroll() {
+                Object.assign(document.body.style, {
+                    position: '',
+                    top: '',
+                    width: '',
+                    overflow: ''
+                });
+                window.scrollTo({
+                    top: scrollY,
+                    left: 0,
+                    behavior: 'instant'
+                });
+            }
+            Youla.data('dialog', root => ({
+                stack: [],
+                open(templateID, data = {}) {
+                    setTimeout(() => {
+                        let template = document.getElementById(templateID);
+                        if (!template) {
+                            return;
+                        }
+                        const isBase = this.stack.length === 0;
+                        this.stack.push({
+                            id: ++uid,
+                            content: template.innerHTML,
+                            ...data
+                        });
+                        if (isBase) {
+                            lockScroll();
+                        }
+                        root.dispatchEvent(new Event('open', {
+                            bubbles: true
+                        }));
+                        if (isBase) {
+                            searchParamsHandler('dialog', templateID, false);
+                        }
+                    }, 25);
+                },
+                close(id) {
+                    const target = id ?? this.stack.at(-1)?.id;
+                    this.stack = this.stack.filter(dialog => dialog.id !== target);
+                    root.dispatchEvent(new Event('close', {
+                        bubbles: true
+                    }));
+                    if (this.stack.length === 0) {
+                        unlockScroll();
+                        searchParamsHandler('dialog', null, true);
+                    }
+                },
+                clear() {
+                    [ ...this.stack ].forEach(entry => this.close(entry.id));
+                },
+                async init(templateID, callback) {
+                    const params = new URLSearchParams(window.location.search);
+                    if (templateID && params.get('dialog') === templateID && callback) {
+                        const data = await callback();
+                        if (data) {
+                            this.open(templateID, data);
                         }
                     }
                 }
@@ -609,6 +732,158 @@
                     sync();
                 }
             };
+        });
+        Youla.method('copy', (e, el) => (subject, classes) => {
+            window.navigator.clipboard.writeText(subject).then(() => {
+                const classes = classes || [ 'ph-copy', 'ph-check' ];
+                const classesToggle = () => classes.forEach(s => el.classList.toggle(s));
+                classesToggle();
+                setTimeout(classesToggle, 1e3);
+            });
+        });
+        Youla.method('safe', () => ({
+            slug(value) {
+                return value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').toLowerCase();
+            }
+        }));
+        Youla.directive('highlight', (el, output, {modifiers}) => {
+            if (el._x_highlighted) {
+                return;
+            }
+            el._x_highlighted = true;
+            const lang = modifiers[0] || 'html';
+            const wrapper = document.createElement('code');
+            wrapper.className = `language-${lang}`;
+            wrapper.append(...el.childNodes);
+            el.classList.add('line-numbers');
+            el.setAttribute('data-lang', lang.toUpperCase());
+            el.replaceChildren(wrapper);
+        });
+        Youla.directive('noautofill', el => {
+            if (el._x_noautofill) {
+                return;
+            }
+            el._x_noautofill = true;
+            const lock = () => el.readOnly = true;
+            lock();
+            el.addEventListener('focus', () => requestAnimationFrame(() => el.readOnly = false));
+            el.addEventListener('blur', lock);
+        });
+        Youla.directive('sticky', el => {
+            if (el._x_sticky) {
+                return;
+            }
+            el._x_sticky = true;
+            const parent = el.parentElement;
+            if (getComputedStyle(parent).position !== 'relative') {
+                console.warn('Youla.js: "u-sticky" requires its parent to have position: relative.');
+                return;
+            }
+            const paddingTop = parseInt(getComputedStyle(parent).paddingTop) + 42;
+            const paddingBottom = parseInt(getComputedStyle(parent).paddingBottom);
+            let top = paddingTop;
+            let lastScroll = window.scrollY;
+            const reposition = () => {
+                const rect = el.getBoundingClientRect();
+                const overflow = rect.height - window.innerHeight;
+                const delta = window.scrollY - lastScroll;
+                lastScroll = window.scrollY;
+                if (overflow <= 0 || rect.top > top) {
+                    return;
+                }
+                top = Math.min(paddingTop, Math.max(-overflow - paddingBottom, top - delta));
+                el.style.top = `${top}px`;
+            };
+            el.style.position = 'sticky';
+            el.style.top = `${paddingTop}px`;
+            [ 'load', 'scroll', 'resize' ].forEach(event => window.addEventListener(event, reposition));
+        });
+        Youla.directive('collapse', (el, output) => {
+            const isOpen = !!output;
+            const duration = 200;
+            const props = [ 'height', 'paddingTop', 'paddingBottom', 'marginTop', 'marginBottom' ];
+            el.style.overflow = 'hidden';
+            if (isOpen) {
+                el.style.display = 'block';
+            }
+            const from = Object.fromEntries(props.map(prop => [ prop, parseFloat(getComputedStyle(el)[prop]) ]));
+            let start;
+            function step(timestamp) {
+                start ??= timestamp;
+                const elapsed = Math.min(timestamp - start, duration);
+                const ratio = isOpen ? elapsed / duration : 1 - elapsed / duration;
+                props.forEach(prop => el.style[prop] = `${from[prop] * ratio}px`);
+                if (elapsed < duration) {
+                    requestAnimationFrame(step);
+                } else {
+                    if (!isOpen) {
+                        el.style.display = 'none';
+                    }
+                    [ ...props, 'overflow' ].forEach(prop => el.style[prop] = '');
+                }
+            }
+            requestAnimationFrame(step);
+        });
+        Youla.directive('textarea', (el, output) => {
+            if (el.tagName !== 'TEXTAREA' || el._x_textarea) {
+                return;
+            }
+            el._x_textarea = true;
+            el.addEventListener('input', () => {
+                const maxRows = parseInt(output) || 99;
+                if (el.value.split(/\r\n|\r|\n/).length > maxRows) {
+                    return;
+                }
+                const border = parseInt(getComputedStyle(el).borderWidth) * 4;
+                el.style.height = 'auto';
+                el.style.height = `${el.scrollHeight + border + 4}px`;
+            });
+        });
+        Youla.directive('progress', (el, output, {modifiers, duration, expression}) => {
+            const [rawFrom = 0, rawTo = 100] = modifiers;
+            const from = parseInt(rawFrom);
+            const bound = expression !== '' && !isNaN(parseFloat(output));
+            const to = bound ? parseFloat(output) : parseInt(rawTo);
+            if (isNaN(from) || isNaN(to)) {
+                console.warn('Youla.js: "u-progress" requires numeric from/to modifiers as percentages (or a numeric bound value), e.g. u-progress.20.80.600ms.');
+                return;
+            }
+            const start = Math.min(Math.max(from, 0), 100);
+            const end = Math.min(Math.max(to, 0), 100);
+            const transitionDuration = duration ? `${duration.value}${duration.unit}` : '0ms';
+            const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const apply = (percent, animate) => {
+                if (animate && !reducedMotion()) {
+                    el.style.setProperty('--youla-progress-transition', `width ${transitionDuration}`);
+                }
+                el.style.setProperty('--youla-progress', `${percent}%`);
+            };
+            if (el._x_progress?.revealed) {
+                el._x_progress.end = end;
+                apply(end, true);
+                return;
+            }
+            if (el._x_progress) {
+                el._x_progress.end = end;
+                return;
+            }
+            el._x_progress = {
+                revealed: false,
+                end
+            };
+            new IntersectionObserver(([entry], observer) => {
+                if (!entry.isIntersecting) {
+                    return;
+                }
+                observer.unobserve(el);
+                el._x_progress.revealed = true;
+                el.style.setProperty('--youla-progress', `${start}%`);
+                if (reducedMotion()) {
+                    apply(el._x_progress.end, false);
+                    return;
+                }
+                setTimeout(() => apply(el._x_progress.end, true), 500);
+            }).observe(el);
         });
     });
 })();

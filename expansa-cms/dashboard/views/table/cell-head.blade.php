@@ -15,7 +15,7 @@ defined('EX_PATH') || exit;
 	(array) $__data['cell'] ?? [],
 	[
 		'key'      => 'class',
-		'cell'     => 'key',
+		'cell'     => 'id',
 		'title'    => 'trim',
 		'sortable' => 'bool',
 	]

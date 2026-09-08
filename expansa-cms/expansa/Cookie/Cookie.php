@@ -6,37 +6,104 @@ namespace Expansa\Cookie;
 
 use Expansa\Cookie\Exception\CookieException;
 
+/**
+ * A single HTTP cookie: validates its own name/sameSite, normalizes its own
+ * expiry/path, and renders itself to a Set-Cookie header value via __toString().
+ */
 class Cookie
 {
-    public const SAMESITE_NONE = 'none';
-    public const SAMESITE_LAX = 'lax';
-    public const SAMESITE_STRICT = 'strict';
+    /**
+     * Cookie is not sent with cross-site requests at all.
+     */
+    public const string SAME_SITE_NONE = 'none';
 
     /**
-     * @throws CookieException
+     * Cookie is withheld only on cross-site subrequests (e.g. images, iframes).
      */
-    public function __construct(
-        protected string $name,
-        protected string $value = '',
-        protected int $expires = 0,
-        protected string $path = '',
-        protected string $domain = '',
-        protected bool $secure = false,
-        protected bool $httpOnly = false,
-        protected ?string $sameSite = null
-    )
-    {
-        $this->setName($name);
-        $this->setValue($value);
-        $this->setPath($path);
-        $this->setExpires($expires);
-        $this->setSameSite($sameSite);
+    public const string SAME_SITE_LAX = 'lax';
+
+    /**
+     * Cookie is never sent with any cross-site request.
+     */
+    public const string SAME_SITE_STRICT = 'strict';
+
+    /**
+     * Seconds remaining until expiry, floored at zero. Purely derived from
+     * $expires, so it's a virtual property — nothing to store.
+     */
+    public int $maxAge {
+        get => max($this->expires - time(), 0);
     }
 
+    public function __construct(
+
+        /**
+         * Cookie name (letters, digits, "._-" only).
+         */
+        public string $name {
+            set {
+                if (! preg_match("/^([A-z0-9._-]+)$/i", $value)) {
+                    throw new CookieException('The "name" parameter value contains illegal characters.');
+                }
+                $this->name = $value;
+            }
+        },
+
+        /**
+         * Cookie value; empty means "delete this cookie".
+         */
+        public string $value = '',
+
+        /**
+         * Expiry as a Unix timestamp, or 0 for a session cookie.
+         */
+        public int $expires = 0 {
+            set => max($value, 0);
+        },
+
+        /**
+         * URL path the cookie applies to; empty falls back to "/".
+         */
+        public string $path = '' {
+            set => $value === '' ? '/' : $value;
+        },
+
+        /**
+         * Domain the cookie applies to.
+         */
+        public string $domain = '',
+
+        /**
+         * Only send the cookie over HTTPS.
+         */
+        public bool $secure = false,
+
+        /**
+         * Hide the cookie from JavaScript.
+         */
+        public bool $httpOnly = false,
+
+        /**
+         * One of Cookie::SAME_SITE_*, or null to omit it.
+         */
+        public ?string $sameSite = null {
+            set {
+                if (! in_array($value, [self::SAME_SITE_NONE, self::SAME_SITE_LAX, self::SAME_SITE_STRICT, null], true)) {
+                    throw new CookieException('The "sameSite" parameter value is not valid.');
+                }
+                $this->sameSite = $value;
+            }
+        }
+    ) {} // phpcs:ignore
+
+    /**
+     * Render as a Set-Cookie header value (everything after "Set-Cookie: ").
+     *
+     * @return string
+     */
     public function __toString(): string
     {
-        $str = $this->name;
-        $str .= '=';
+        $str = $this->name . '=';
 
         if (empty($this->value)) {
             $str .= 'deleted; expires=' . gmdate('D, d M Y H:i:s T', time() - 31536001) . '; Max-Age=0';
@@ -44,7 +111,7 @@ class Cookie
             $str .= rawurlencode($this->value);
 
             if ($this->expires > 0) {
-                $str .= '; expires=' . gmdate('D, d M Y H:i:s T', $this->expires) . '; Max-Age=' . $this->getMaxAge();
+                $str .= '; expires=' . gmdate('D, d M Y H:i:s T', $this->expires) . '; Max-Age=' . $this->maxAge;
             }
         }
 
@@ -64,7 +131,7 @@ class Cookie
             $str .= '; httponly';
         }
 
-        if (! is_null($this->sameSite)) {
+        if ($this->sameSite !== null) {
             $str .= '; samesite=' . $this->sameSite;
         }
 
@@ -72,166 +139,43 @@ class Cookie
     }
 
     /**
-     * @throws CookieException
+     * Determine whether the current request is served over HTTPS, so the
+     * "secure" attribute can be enabled without hard-coding it per call site.
+     *
+     * @return bool
      */
-    public function name(string $name = null)
+    public static function isSecureRequest(): bool
     {
-        if (is_null($name)) {
-            return $this->getName();
-        }
-
-        $this->setName($name);
+        return (! empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+            || ($_SERVER['SERVER_PORT'] ?? null) == 443
+            || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
     }
 
     /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
+     * Read a cookie the client sent with the current request.
+     *
      * @param string $name
-     * @throws CookieException
+     * @param mixed  $default
+     * @return mixed
      */
-    public function setName(string $name): void
+    public static function get(string $name, mixed $default = null): mixed
     {
-        if (! preg_match("/^([A-z0-9._-]+)$/i", $name)) {
-            throw new CookieException('The "name" parameter value contains illegal characters.');
-        }
-        $this->name = $name;
-    }
-
-    public function value(string $value = null)
-    {
-        if (is_null($value)) {
-            return $this->getValue();
-        }
-        $this->setValue($value);
+        return $_COOKIE[$name] ?? $default;
     }
 
     /**
-     * @return string
+     * Send a cookie to the browser right now, via a raw Set-Cookie header.
+     *
+     * Bypasses the CookieJar facade (Cookie::queue()): its queue survives
+     * between calls, but nothing in the framework reads it back and turns it
+     * into a Set-Cookie header, so a cookie handed to it would still silently
+     * never reach the client.
+     *
+     * @param Cookie $cookie
+     * @return void
      */
-    public function getValue(): string
+    public static function send(Cookie $cookie): void
     {
-        return $this->value;
-    }
-
-    /**
-     * @param string $value
-     */
-    public function setValue(string $value): void
-    {
-        $this->value = $value;
-    }
-
-    /**
-     * @return int
-     */
-    public function getExpires(): int
-    {
-        return $this->expires;
-    }
-
-    /**
-     * @param int $expires
-     */
-    public function setExpires(int $expires): void
-    {
-        $this->expires = max($expires, 0);
-    }
-
-    /**
-     * @return int
-     */
-    public function getMaxAge(): int
-    {
-        return max($this->expires - time(), 0);
-    }
-
-    /**
-     * @return string
-     */
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    /**
-     * @param string $path
-     */
-    public function setPath(string $path): void
-    {
-        $this->path = empty($path) ? DIRECTORY_SEPARATOR : $path;
-    }
-
-    /**
-     * @return string
-     */
-    public function getDomain(): string
-    {
-        return $this->domain;
-    }
-
-    /**
-     * @param string $domain
-     */
-    public function setDomain(string $domain): void
-    {
-        $this->domain = $domain;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSecure(): bool
-    {
-        return $this->secure;
-    }
-
-    /**
-     * @param bool $secure
-     */
-    public function setSecure(bool $secure): void
-    {
-        $this->secure = $secure;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isHttpOnly(): bool
-    {
-        return $this->httpOnly;
-    }
-
-    /**
-     * @param bool $httpOnly
-     */
-    public function setHttpOnly(bool $httpOnly): void
-    {
-        $this->httpOnly = $httpOnly;
-    }
-
-    /**
-     * @return string
-     */
-    public function getSameSite(): string
-    {
-        return $this->sameSite;
-    }
-
-    /**
-     * @param string|null $sameSite
-     * @throws CookieException
-     */
-    public function setSameSite(?string $sameSite): void
-    {
-        if (! in_array($sameSite, [self::SAMESITE_NONE, self::SAMESITE_LAX, self::SAMESITE_STRICT, null])) {
-            throw new CookieException('The "sameSite" parameter value is not valid.');
-        }
-        $this->sameSite = $sameSite;
+        header('Set-Cookie: ' . (string) $cookie, false);
     }
 }

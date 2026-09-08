@@ -9,7 +9,7 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'dg g-6',
 		'u-data'          => '{email: ""}',
-		'@submit.prevent' => '$ajax("user/reset-password")',
+		'@submit.prevent' => '$ajax.post("user/reset-password")',
 	],
 	[
 		[

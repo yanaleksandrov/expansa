@@ -26,7 +26,7 @@ final class Web
             if ($slug !== 'install') {
                 redirect('install');
             }
-            echo view('welcome', ['slug' => 'install']);
+            echo view('welcome', ['slug' => 'install'])->beautify()->render();
             exit;
         }
 
@@ -58,8 +58,8 @@ final class Web
             $slug = 'welcome';
         } else {
             // try to get entity from slug
-            $entity = Slug::get($slug);
-            if (!$entity) {
+            $entity = Slug::find($slug);
+            if (! $entity instanceof Slug) {
                 //$page = '404';
             }
 
@@ -97,8 +97,7 @@ final class Web
                 'table'  => $table ?? null,
                 'entity' => $entity,
             ]);
-            //$content = (new Expansa\Support\Html())->beautify($content->render());
-            $content = $content->render();
+            $content = $content->beautify()->render();
         }
 
 //    $start = microtime(true);

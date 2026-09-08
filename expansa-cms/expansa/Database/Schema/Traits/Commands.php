@@ -82,6 +82,21 @@ trait Commands
         return $this;
     }
 
+    /**
+     * A FULLTEXT index — for a text/mediumtext/longtext column that needs MATCH() AGAINST()
+     * search instead of exact-match/range lookups. The compiler already knew how to emit one
+     * (see Compilers/Indexes.php); this was the only missing piece to reach it from a migration,
+     * same shape as index()/unique() above.
+     */
+    public function fulltext(string|array $columns, string $index = null): static
+    {
+        $index = $index ?: $this->createIndexName('fulltext', (array) $columns);
+
+        $this->addCommand('fulltext', compact('index', 'columns'));
+
+        return $this;
+    }
+
     public function dropPrimary(string|array $index): static
     {
         return $this->dropIndexCommand(__FUNCTION__, 'primary', $index);

@@ -199,7 +199,7 @@ class Query
          * Authors/users stuff, posts IDs & parents posts IDs
          */
         $nicename = Safe::text($args['nicename'] ?? '');
-        $user     = $nicename ? User::get($nicename, 'nicename') : null;
+        $user     = $nicename ? User::find($nicename, 'nicename') : null;
         if ($user instanceof User) {
             $author__in         = (array) ( $args['author__in'] ?? [] );
             $args['author__in'] = $author__in + [ $user->id ];

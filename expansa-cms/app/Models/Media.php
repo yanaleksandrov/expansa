@@ -142,7 +142,7 @@ class Media
                 );
 
                 Image::load($file->path)->crop($width, $height)->save($filepathResize);
-                (new Image())->fromFile($file->path)->thumbnail($width, $height)->toFile($filepathResize, $file->mime);
+                new Image()->fromFile($file->path)->thumbnail($width, $height)->toFile($filepathResize, $file->mime);
             }
         }
 

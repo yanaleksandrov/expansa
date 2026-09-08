@@ -104,12 +104,14 @@ class Post
              * Add slug just if post type is public.
              */
             if ($type->public === true) {
-                $slug = Slug::add($post->id, $type->table, Safe::slug($args['slug'] ?? $data['title']));
-                if ($slug) {
-                    $slug = Slug::get($slug);
+                $slug = Slug::create([
+                    'entity_id'    => $post->id,
+                    'entity_table' => $type->table,
+                    'slug'         => Safe::slug($args['slug'] ?? $data['title']),
+                ]);
 
-                    $post->slug = $slug['slug'];
-                    $post->uuid = $slug['uuid'];
+                if ($slug instanceof Slug) {
+                    $post->slug = $slug->slug;
                     $post->link = '';
                 }
             }
@@ -125,9 +127,9 @@ class Post
 
     public static function getBySlug(string $value): ?Post
     {
-        $slug = Slug::get($value);
-        if (! empty($slug['entity_table'])) {
-            return self::get(Safe::tablename($slug['entity_table']), $slug['entity_id']);
+        $slug = Slug::find($value, 'slug');
+        if ($slug instanceof Slug) {
+            return self::get(Safe::tablename($slug->entityTable), $slug->entityId);
         }
         return null;
     }

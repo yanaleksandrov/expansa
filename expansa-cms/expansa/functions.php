@@ -111,7 +111,7 @@ if (! function_exists('form')) {
         if (is_file($path)) {
             require_once $path;
         }
-        return (new Expansa\Builders\Form())->make($uid);
+        return new Expansa\Builders\Form()->make($uid);
     }
 }
 
@@ -160,5 +160,21 @@ if (! function_exists('error')) {
     function error(string $code, string|array $message = ''): Expansa\Debug\Error
     {
         return new Expansa\Debug\Error($code, $message);
+    }
+}
+
+if (! function_exists('value')) {
+    /**
+     * Resolve a value: returns it as-is, or calls it (with the given args) if it's a Closure.
+     * Lets a caller pass an expensive default lazily, e.g. `value($default)` instead of
+     * always evaluating $default even when it turns out not to be needed.
+     *
+     * @param mixed $value
+     * @param mixed ...$args
+     * @return mixed
+     */
+    function value(mixed $value, mixed ...$args): mixed
+    {
+        return $value instanceof Closure ? $value(...$args) : $value;
     }
 }

@@ -47,7 +47,7 @@ class Csv
         string $linebreak = 'auto'
     ): array
     {
-        return (new self($delimiter, $enclosure, $linebreak))->toArray($filepathOrData);
+        return new self($delimiter, $enclosure, $linebreak)->toArray($filepathOrData);
     }
 
     /**
@@ -66,7 +66,7 @@ class Csv
         string $linebreak = "\r\n"
     ): string
     {
-        return (new self($delimiter, $enclosure, $linebreak))->fromArray($items);
+        return new self($delimiter, $enclosure, $linebreak)->fromArray($items);
     }
 
     /**

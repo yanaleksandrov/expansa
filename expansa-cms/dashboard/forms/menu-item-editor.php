@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
 	'menu-item-editor',
 	[
 		'class'           => 'dg g-4',
-		'@submit.prevent' => '$ajax("posts/filter")',
+		'@submit.prevent' => '$ajax.post("posts/filter")',
 		'u-sticky'        => '',
 	],
 	[

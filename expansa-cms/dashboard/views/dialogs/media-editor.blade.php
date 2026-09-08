@@ -8,7 +8,7 @@
 defined('EX_PATH') || exit;
 ?>
 <!-- media editor template start -->
-<template id="tmpl-media-editor" u-init="$dialog.init(() => $ajax('media/get'))">
+<template id="tmpl-media-editor" u-init="$dialog.init(() => $ajax.post('media/get'))">
     <div class="media-editor">
         <div class="media-editor-main">
             <img class="media-editor-image" :src="$store.dialog.url" :alt="$store.dialog.filename"

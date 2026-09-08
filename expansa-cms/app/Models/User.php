@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use DateTime;
-use Exception;
+use App\Post\Type;
 use App\User\Roles;
+use Expansa\Cookie\Cookie;
 use Expansa\Database\Model;
 use Expansa\Debug\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
-use Expansa\Facades\Validator;
 use Expansa\Support\Hash;
 use Expansa\Support\Is;
 
@@ -29,21 +29,52 @@ use Expansa\Support\Is;
  * @property string        $showname                   Full display name.
  * @property string        $email                      User email address (unique).
  * @property string|null   $locale                     User locale/language.
- * @property string        $status                     User status ('active' or 'inactive').
+ * @property string        $status                     User status (see User::STATUS_* constants).
  * @property bool          $isVerified                 Whether the user has verified their email.
  * @property string|null   $verificationToken          Token used for email verification.
  * @property DateTime|null $verificationTokenExpiresAt Expiration datetime of verification token.
  * @property string|null   $passwordResetToken         Token used for password reset.
  * @property DateTime|null $passwordResetExpiresAt     Expiration datetime of password reset token.
- * @property string        $createdAt                  The date and time when the user was created.
- * @property string        $updatedAt                  The date and time when the user was last updated.
- * @property Field         $field                      A dynamic meta field instance associated with the API key.
+ * @property DateTime      $createdAt                  The date and time when the user was created.
+ * @property DateTime      $updatedAt                  The date and time when the user was last updated.
+ * @property DateTime|null $deletedAt                  The date and time when the user was soft-deleted, if at all.
+ * @property Field         $field                      A dynamic meta field instance associated with the user.
+ * @property TypedField    $typedField                 A typed, indexable meta field instance for the same user.
+ * @property array<string> $roles                      Role names assigned to the user (see App\User\Roles).
  */
 class User extends Model
 {
     use Model\HasSanitizing;
     use Model\HasValidation;
     use Model\HasTimestamps;
+    use Model\HasReadonlyAttributes;
+    use Model\HasHiddenAttributes;
+    use Model\HasSoftDeletes;
+    use Model\HasFieldEav;
+
+    /**
+     * The "active" value of the `status` column.
+     */
+    public const string STATUS_ACTIVE = 'active';
+
+    /**
+     * The "inactive" value of the `status` column.
+     */
+    public const string STATUS_INACTIVE = 'inactive';
+
+    /**
+     * Role assigned to a new user when none is given and no `users.role`
+     * option is configured.
+     */
+    private const string DEFAULT_ROLE = 'subscriber';
+
+    /**
+     * One-to-many with Field/TypedField: the foreign key column, shared by every "users_fields*"
+     * table (the "many" side), that points back to this user (see Model\HasFieldEav, Model\HasFieldTyped).
+     *
+     * @var string
+     */
+    public string $fieldsForeignKey = 'user_id';
 
     /**
      * The database table associated with the model.
@@ -80,20 +111,43 @@ class User extends Model
      * @var array<string>
      */
     protected array $readonly = [
+        'id',
+        'uuid',
         'login',
     ];
 
     /**
-     * Session key
+     * A list of attributes excluded from the model's array/JSON representation.
+     *
+     * @var array<string>
+     */
+    protected array $hidden = [
+        'password',
+        'verification_token',
+        'password_reset_token',
+    ];
+
+    /**
+     * Name of the cookie that carries the signed authentication token.
      *
      * @var string
      */
-    private static string $session_id = EX_DB_PREFIX . 'user_logged';
+    private static string $cookieName = EX_DB_PREFIX . 'auth';
 
     /**
-     * Current user data.
+     * Lifetime of the authentication cookie when "remember me" is not checked.
      */
-    private static self $current;
+    private const int COOKIE_TTL_SHORT = 172800; // 2 days
+
+    /**
+     * Lifetime of the authentication cookie when "remember me" is checked.
+     */
+    private const int COOKIE_TTL_LONG = 1209600; // 14 days
+
+    /**
+     * Current user data, cached for the lifetime of the request.
+     */
+    private static ?User $current = null;
 
     /**
      * Array of rules for sanitize properties.
@@ -127,6 +181,7 @@ class User extends Model
             'login'    => 'lengthMin:3|lengthMax:60',
             'password' => 'required',
             'email'    => 'email|unique',
+            'status'   => 'in:' . self::STATUS_ACTIVE . ',' . self::STATUS_INACTIVE,
         ];
     }
 
@@ -147,8 +202,18 @@ class User extends Model
                 ]
             )
         );
+
+        $this->validator->extend(
+            'status:in',
+            t('Status must be either :active or :inactive.', self::STATUS_ACTIVE, self::STATUS_INACTIVE)
+        );
     }
 
+    /**
+     * Hashes the password before it's stored. Falls back to a random secret
+     * (see Hash::generate()) if an empty value is given, rather than storing
+     * the hash of an empty string.
+     */
     protected function password(): Model\Attribute
     {
         return Model\Attribute::make(
@@ -156,17 +221,61 @@ class User extends Model
         );
     }
 
+    /**
+     * Derives a unique, URL-safe nicename from whatever value is set,
+     * appending a numeric suffix if it would otherwise collide.
+     */
     protected function nicename(): Model\Attribute
     {
         return Model\Attribute::make(
-            set: fn($value) => (new self())->generateUniqueNicename($value)
+            set: fn($value) => $this->generateUniqueNicename($value)
         );
     }
 
-    protected function field(): Model\Attribute
+    /**
+     * Guarantees a real bool on read regardless of how the value got here — the
+     * sanitizer's 'is_verified' => 'bool' rule only runs on fill()/setAttribute(),
+     * not on hydration from the database, so a freshly-fetched user's raw value is
+     * whatever the driver returns for TINYINT(1) (an int), not a PHP bool.
+     */
+    protected function isVerified(): Model\Attribute
     {
         return Model\Attribute::make(
-            get: fn($value) => $value instanceof Field ? $value : new Field($this)
+            get: fn($value) => (bool) $value
+        );
+    }
+
+    /**
+     * Role names assigned to the user, stored as a JSON array in its own
+     * `roles` column — not a Field/meta entry, and not mass-assignable (see
+     * assignRole()/removeRole(): granting a role has security implications
+     * that a public fillable attribute shouldn't be exposed to).
+     */
+    protected function roles(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            get: fn($value) => $value ? json_decode($value, true) : [],
+            set: fn($value) => json_encode(array_values(array_unique((array) $value)))
+        );
+    }
+
+    /**
+     * Exposes the raw stored timestamp as a DateTime instead of a string.
+     */
+    protected function verificationTokenExpiresAt(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            get: fn($value) => $value ? new DateTime($value) : null
+        );
+    }
+
+    /**
+     * Exposes the raw stored timestamp as a DateTime instead of a string.
+     */
+    protected function passwordResetExpiresAt(): Model\Attribute
+    {
+        return Model\Attribute::make(
+            get: fn($value) => $value ? new DateTime($value) : null
         );
     }
 
@@ -177,119 +286,118 @@ class User extends Model
      * @param string     $by    The field to retrieve the user with. ID | login | email | nicename.
      * @return User|Error
      */
-    public static function get(string|int $value, string $by = 'id'): User|Error
+    public static function find(string|int $value, string $by = 'id'): User|Error
     {
-        try {
-            if (empty($value)) {
-                throw new Exception(t('You are trying to find a user with an empty :getByField.', $by));
-            }
-
-            $by = mb_strtolower($by);
-            if (! in_array($by, [ 'id', 'uuid', 'login', 'email', 'nicename' ], true)) {
-                throw new Exception(t('Use an ID, UUID, login, email, or nicename to get a user.'));
-            }
-
-            $user = parent::get($value, $by);
-            if ($user instanceof User) {
-                return $user;
-            }
-
-            throw new Exception(t('User not found.'));
-        } catch (Exception $e) {
-            return error('user-get', $e->getMessage());
+        if (empty($value)) {
+            return error('user-find', t('You are trying to find a user with an empty :getByField.', $by));
         }
+
+        $by = mb_strtolower($by);
+        if (! in_array($by, [ 'id', 'uuid', 'login', 'email', 'nicename' ], true)) {
+            return error('user-find', t('Use an ID, UUID, login, email, or nicename to get a user.'));
+        }
+
+        $user = parent::get($value, $by);
+
+        return $user instanceof User ? $user : error('user-find', t('User not found.'));
     }
 
     /**
-     * Update a user in the database. If no ID is found in the received array,
-     * the function passes the work to the add method.
+     * Create a new user in the database.
      *
-     * @param array         $userdata
+     * @param array $userdata
      * @return User|Error
      */
-    public static function update(array $userdata): User|Error
+    public static function create(array $userdata): User|Error
     {
-        $userID = Safe::absint($userdata['id'] ?? 0);
-        if (! $userID) {
-            return self::add($userdata);
+        // Only takes effect if the key is entirely absent — fill() sanitizes/mutates only keys $userdata actually has.
+        $userdata += ['status' => self::STATUS_ACTIVE, 'nicename' => ''];
+
+        $user = new self()->fill($userdata);
+
+        if (! $user->isValid()) {
+            return error('user-add', $user->getValidatorErrors());
         }
 
-        // remove unchanged parameters of the user
-        unset($userdata['id']);
-        unset($userdata['login']);
-
-        $user = self::get($userID);
-        if ($user instanceof User) {
-            $userdata = Safe::data($userdata, [
-                'password'   => 'trim',
-                'nicename'   => 'trim',
-                'firstname'  => 'tags',
-                'lastname'   => 'tags',
-                'showname'   => 'tags',
-                'email'      => 'email',
-                'locale'     => 'locale',
-                'registered' => 'datetime',
-                'visited'    => 'datetime',
-            ])->apply();
-
-            Db::update((new self())->table, array_filter($userdata));
-
-            return self::get($userID);
+        // Not mass-assignable (see roles()) — read the raw input so a caller can still request a role, falling back to the default.
+        $role = $userdata['role'] ?? Options::get('users.role', self::DEFAULT_ROLE);
+        if (Roles::exists($role)) {
+            $user->roles = [$role];
         }
 
-        return error('user-update', t('User not found.'));
+        if (! $user->save() instanceof self) {
+            return error('user-add', t('Failed to save the user to the database.'));
+        }
+
+        return $user;
     }
 
     /**
-     * Remove user and optionally reassign posts and links to another user.
+     * Update this user in the database with the given attributes.
      *
-     * If the $reassign parameter is not assigned to a User ID, then all posts will
-     * be deleted of that user. The action {@see 'delete_user'} that is passed the User ID
-     * being deleted will be run after the posts are either reassigned or deleted.
-     * The user meta will also be deleted that are for that User ID.
-     *
-     * @param  int   $userID   User ID.
-     * @param  int   $reassign Optional. Reassign posts to new User ID.
-     * @return Error|int       The number of remote users or false.
+     * @param array $userdata
+     * @return User|Error
      */
-    public static function delete(int $userID, int $reassign = 0): Error|int
+    public function update(array $userdata): User|Error
     {
-        $fields = [
-            'id' => abs($userID),
-        ];
+        // 'id' isn't fillable and 'login' is readonly, so fill() already ignores both.
+        $this->fill($userdata);
 
-        if (! self::exists($fields)) {
-            return error('user-delete', t('The user you are trying to delete does not exist.'));
+        if (! $this->save() instanceof self) {
+            return error('user-update', t('Failed to save the user to the database.'));
         }
 
-        if ($reassign) {
-            // TODO: add functionality for reassign
-        }
-        return Db::delete((new self())->table, $fields)->rowCount();
+        return $this;
     }
 
     /**
-     * Получает данные текущего, зарегистрированного пользователя.
+     * Reassign all posts, across every registered post type, from this user
+     * to another. Useful to call before deleting a user, since deletion
+     * itself (via {@see \Expansa\Database\Query::delete()}) does not touch
+     * content ownership.
+     *
+     * @param int $newUserId ID of the user to become the new author.
+     * @return int           Number of post types whose rows were reassigned.
+     */
+    public function reassign(int $newUserId): int
+    {
+        $reassigned = 0;
+
+        foreach (Type::fetch() as $type) {
+            $result = Db::update($type->table, ['author_id' => $newUserId], ['author_id' => $this->id]);
+
+            $reassigned += $result && $result->rowCount() ? 1 : 0;
+        }
+
+        return $reassigned;
+    }
+
+    /**
+     * Retrieves data of the current, logged-in user.
+     *
+     * Authentication is resolved from a signed cookie rather than a server-side
+     * session, so anonymous traffic (e.g. bots) never causes anything to be
+     * written on the server.
      *
      * @param callable|null $callback
-     * @return User|Error|null
+     * @return User|null
      */
-    public static function current(?callable $callback = null): User|Error|null
+    public static function current(?callable $callback = null): ?User
     {
-        if (self::$current) {
+        if (self::$current !== null) {
             return self::$current;
         }
 
-        if (!session()->isStarted()) {
-            session()->start();
+        $cookie = Cookie::get(self::$cookieName, '');
+        if ($cookie) {
+            self::$current = self::verifyAuthCookie($cookie);
+
+            if (! self::$current instanceof self) {
+                self::clearAuthCookie();
+            }
         }
 
-        $userID = session()->get(self::$session_id);
-        if ($userID) {
-            self::$current = self::get($userID);
-        }
-
-        if ($callback) {
+        if ($callback && self::$current instanceof self) {
             $callback(new Field(self::$current));
         }
 
@@ -297,63 +405,70 @@ class User extends Model
     }
 
     /**
-     * Returns whether a particular user has the specified capability.
+     * Returns whether this user has the specified capability.
      *
-     * @param integer $userID User ID.
      * @param string $capabilities Capability name.
-     * @return   bool              Whether the user has the given capability.
+     * @return bool                Whether the user has the given capability.
      */
-    public static function can(int $userID, string $capabilities): bool
+    public function can(string $capabilities): bool
     {
-        $roles = [];
-        $user  = self::current();
-        if ($user->id === $userID) {
-            $roles = $user->roles ?? [];
-        } else {
-            $user = self::get($userID);
-            if ($user) {
-                $roles = $user->roles ?? [];
-            }
-        }
-
-        if (is_array($roles)) {
-            foreach ($roles as $role) {
-                return Roles::hasCap($role, $capabilities);
-            }
-        }
-        return false;
+        return array_any($this->roles, fn($role) => Roles::hasCap($role, $capabilities));
     }
 
     /**
-     * Checks whether the user is with the specified role.
+     * Checks whether this user has the specified role.
      *
-     * @param integer $userID User ID.
-     * @param string $role    Role name.
-     * @return bool           The user has a role.
+     * @param string $role Role name.
+     * @return bool        The user has a role.
      */
-    public static function is(int $userID, string $role): bool
+    public function hasRole(string $role): bool
     {
-        $roles = [];
-        $user  = self::current();
-        if ($user->id === $userID) {
-            $roles = $user->roles ?? [];
-        } else {
-            $user = self::get($userID);
-            if ($user) {
-                $roles = $user->roles ?? [];
-            }
-        }
-        return in_array($role, $roles, true);
+        return in_array($role, $this->roles, true);
     }
 
     /**
-     * Проверяет, авторизован ли пользователь в этом сеансе.
+     * Assign a registered role to this user. Does nothing (returns true) if
+     * the user already has that role.
      *
-     * @return   bool
+     * @param string $role Role name, as registered via App\User\Roles::register().
+     * @return Error|bool  True once assigned.
+     */
+    public function assignRole(string $role): Error|bool
+    {
+        if (! Roles::exists($role)) {
+            return error('user-assign-role', t('That role is not registered.'));
+        }
+
+        if (in_array($role, $this->roles, true)) {
+            return true;
+        }
+
+        $this->roles = [...$this->roles, $role];
+
+        return $this->save() instanceof self;
+    }
+
+    /**
+     * Remove a role from this user.
+     *
+     * @param string $role Role name to remove.
+     * @return Error|bool
+     */
+    public function removeRole(string $role): Error|bool
+    {
+        $this->roles = array_diff($this->roles, [$role]);
+
+        return $this->save() instanceof self;
+    }
+
+    /**
+     * Checks whether the current request carries a valid authentication cookie.
+     *
+     * @return bool
      */
     public static function isLogged(): bool
     {
-        return (bool) abs((int) session()->get(self::$session_id));
+        return self::current() instanceof self;
     }
 
     /**
@@ -364,61 +479,115 @@ class User extends Model
      */
     public static function login(array $data): User|Error
     {
-        $data = Safe::data($data, [
-            'login'    => 'login',
-            'password' => 'trim',
-            'remember' => 'bool',
-        ])->apply();
-
-        $userdata = Validator::data($data, [
-            'login'    => 'lengthMin:3|lengthMax:60',
-            'password' => 'required',
-        ])->apply();
-
-        if (!$userdata->isValid()) {
-            return error('user-login', $userdata->getErrors());
-        }
-
-        [ $loginOrEmail, $password, $remember ] = array_values($data);
+        $loginOrEmail = Safe::login($data['login'] ?? '');
+        $password     = Safe::trim($data['password'] ?? '');
+        $remember     = Safe::bool($data['remember'] ?? false);
 
         $field = Is::email($loginOrEmail) ? 'email' : 'login';
-        $user  = User::get($loginOrEmail, $field);
-        if ($user instanceof User) {
-            if (password_verify($password, $user->password)) {
-                if (!session()->isStarted()) {
-                    session()->start();
-                }
-                session()->set(self::$session_id, $user->id);
+        $user  = User::find($loginOrEmail, $field);
 
-                return self::$current = $user;
-            }
-
-            return error('user-login', t('User password is incorrect.'));
+        // Same message for both cases — telling them apart would let an attacker enumerate registered logins/emails.
+        if (! $user instanceof User || ! password_verify($password, $user->password)) {
+            return error('user-login', t('These credentials do not match our records.'));
         }
 
-        return error('user-login', t('User not found: invalid login or email.'));
+        self::setAuthCookie($user, time() + ($remember ? self::COOKIE_TTL_LONG : self::COOKIE_TTL_SHORT), $remember);
+
+        return self::$current = $user;
     }
 
     /**
-     * Де-авторизует текущего пользователя.
+     * Logs out the current user by discarding the authentication cookie.
+     *
+     * @return void
      */
     public static function logout(): void
     {
-        if (!session()->isStarted()) {
-            session()->start();
+        self::clearAuthCookie();
+
+        self::$current = null;
+    }
+
+    /**
+     * Sign an authentication payload for the given user.
+     *
+     * The user's password hash is folded into the signature, so changing the
+     * password (or rotating EX_AUTH_KEY) invalidates every cookie issued before.
+     *
+     * @param User $user       The user to issue the cookie for.
+     * @param int  $expiration Unix timestamp after which the cookie is no longer valid.
+     * @return string
+     */
+    private static function signAuthCookie(User $user, int $expiration): string
+    {
+        $payload = "$user->login|$expiration";
+
+        return $payload . '|' . hash_hmac('sha256', $payload . '|' . $user->password, EX_AUTH_KEY);
+    }
+
+    /**
+     * Verify a signed authentication cookie and resolve it to a user.
+     *
+     * @param string $cookie Raw cookie value.
+     * @return User|null The user if the cookie is valid and not expired, null otherwise.
+     */
+    private static function verifyAuthCookie(string $cookie): ?User
+    {
+        // login is matched greedily, so a "|" inside it can't desynchronize the trailing timestamp/hmac.
+        if (! preg_match('/^(.+)\|(\d+)\|([a-f0-9]{64})$/', $cookie, $matches)) {
+            return null;
         }
 
-        self::$current = [];
-
-        $userID = abs((int) session()->get(self::$session_id));
-        if ($userID) {
-            self::update(
-                [
-                    'id' => $userID,
-                ]
-            );
+        [ , $login, $expiration, $hmac ] = $matches;
+        if ((int) $expiration < time()) {
+            return null;
         }
-        session()->set(self::$session_id, null);
+
+        $user = self::find($login, 'login');
+        if (! $user instanceof self) {
+            return null;
+        }
+
+        $expected = hash_hmac('sha256', "$login|$expiration|$user->password", EX_AUTH_KEY);
+
+        return hash_equals($expected, $hmac) ? $user : null;
+    }
+
+    /**
+     * Issue the signed authentication cookie for the given user.
+     *
+     * @param User $user       The user that has just logged in.
+     * @param int  $expiration Unix timestamp embedded in and validated against the signature.
+     * @param bool $remember   Whether the cookie should survive browser restarts.
+     * @return void
+     */
+    private static function setAuthCookie(User $user, int $expiration, bool $remember): void
+    {
+        Cookie::send(new Cookie(
+            name: self::$cookieName,
+            value: self::signAuthCookie($user, $expiration),
+            expires: $remember ? $expiration : 0,
+            path: '/',
+            secure: Cookie::isSecureRequest(),
+            httpOnly: true,
+            sameSite: Cookie::SAME_SITE_LAX,
+        ));
+    }
+
+    /**
+     * Discard the authentication cookie.
+     *
+     * @return void
+     */
+    private static function clearAuthCookie(): void
+    {
+        Cookie::send(new Cookie(
+            name: self::$cookieName,
+            path: '/',
+            secure: Cookie::isSecureRequest(),
+            httpOnly: true,
+            sameSite: Cookie::SAME_SITE_LAX,
+        ));
     }
 
     /**
@@ -434,7 +603,7 @@ class User extends Model
     {
         $suffix = 1;
 
-        while (Db::select((new self())->table, 'id', [ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
+        while ($this->exists([ 'nicename' => $value . ( $suffix > 1 ? "-$suffix" : '' ) ])) {
             $suffix++;
         }
 

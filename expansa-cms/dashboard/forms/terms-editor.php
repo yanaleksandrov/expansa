@@ -8,7 +8,7 @@ return \Expansa\Facades\Form::enqueue(
 	'terms-editor',
 	[
 		'class'           => 'dg g-6',
-		'@submit.prevent' => '$ajax("posts/filter")',
+		'@submit.prevent' => '$ajax.post("posts/filter")',
 		'u-sticky'        => '',
 	],
 	[

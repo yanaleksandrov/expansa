@@ -42,7 +42,7 @@ Hook::add('renderDashboardFooter', function () {
 	<div class="df aife g-4">
 		<div class="image" u-data="avatar, tabs = 'upload'" u-init="content = 'Yan Aleksandrov'">
 			<input type="file" id="fileInputs" u-ref="input" @change="add($event, () => $dialog.open('crop-image'))" hidden>
-			<span class="image__close" @click="remove" u-show="image" title="{{ t('Remove image') }}" u-cloak>
+			<span class="image__close" @click="remove" u-show="image" title="{{ t('Remove image') }}" hidden>
 				<i class="ph ph-x"></i>
 			</span>
 			<div class="image__container">

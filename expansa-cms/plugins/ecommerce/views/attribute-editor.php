@@ -18,7 +18,7 @@ use Expansa\Builders\Form;
                 <h5 class="attributes-title">
                     <a class="btn btn--icon btn--sm" href="<?php echo url('/dashboard/attributes'); ?>"><i class="ph ph-arrow-left"></i></a>
                     <span class="fw-600 mr-auto"><?php echo t('Add new attribute'); ?></span>
-                    <button class="btn btn--danger" type="button" hidden u-cloak><?php echo t('Delete'); ?></button>
+                    <button class="btn btn--danger" type="button" hidden hidden><?php echo t('Delete'); ?></button>
                     <button class="btn btn--primary" type="submit" disabled><?php echo t('Save'); ?></button>
                 </h5>
                 <div class="attributes-description">

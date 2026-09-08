@@ -21,12 +21,12 @@ class Factory
     protected static array $sectionStack = [];
 
     public function __construct(
-        protected Finder $finder,
-        protected EngineManager $engine,
+        protected readonly Finder $finder,
+        protected readonly EngineManager $engine,
         array $config
     )
     {
-        $this->cache = is_bool($config['cache']) && $config['cache'];
+        $this->cache = (bool) ($config['cache'] ?? false);
 
         if (isset($config['cache_path'])) {
             if (!is_dir($config['cache_path'])) {
@@ -42,7 +42,7 @@ class Factory
     {
         $file = $this->finder->find($view);
 
-        if (is_null($file)) {
+        if ($file === null) {
             throw new ViewException("File '$view' does not exist!");
         }
 
@@ -85,9 +85,9 @@ class Factory
         return $this->finder->exists($view);
     }
 
-    public function startSection(string $name, string $content = null): void
+    public function startSection(string $name, ?string $content = null): void
     {
-        if (is_null($content)) {
+        if ($content === null) {
             ob_start();
             static::$sectionStack[] = $name;
         } else {
@@ -103,7 +103,7 @@ class Factory
         static::$sectionContents[$name] = $content;
     }
 
-    public function stopSection($overwrite = false): string
+    public function stopSection(bool $overwrite = false): string
     {
         if (empty(static::$sectionStack)) {
             throw new \InvalidArgumentException('Cannot end a section without first starting one.');
@@ -120,7 +120,7 @@ class Factory
         return $name;
     }
 
-    public function yieldSection()
+    public function yieldSection(): string
     {
         if (empty(static::$sectionStack)) {
             return '';
@@ -130,7 +130,7 @@ class Factory
         return $this->yieldContent($name);
     }
 
-    public function yieldContent($name)
+    public function yieldContent(string $name): string
     {
         return static::$sectionContents[$name] ?? '';
     }

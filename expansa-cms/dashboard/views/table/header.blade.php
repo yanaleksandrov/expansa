@@ -156,7 +156,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                             'conditions' => [],
                             'attributes' => [
                                 'name' => 'project',
-                                'u-model.fill' => 'project',
+                                'u-prop' => 'project',
                                 'u-select' => '',
                             ],
                             'options' => [
@@ -193,7 +193,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                         ]
                     );
                     ?>
-                <button type="button" class="btn btn--sm btn--outline" @click="$ajax('translations/get', {project}).then(data => items = data.items)">
+                <button type="button" class="btn btn--sm btn--outline" @click="$ajax.post('translations/get', {project}).then(data => items = data.items)">
                     <i class="ph ph-scan"></i> <?php echo t('Scan'); ?>
                 </button>
             </div>
@@ -201,7 +201,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
         </div>
 
         <?php if ($actions) : ?>
-        <div class="df aic g-1" u-show="bulk" u-cloak>
+        <div class="df aic g-1" u-show="bulk" hidden>
                 <?php echo form('posts-actions', EX_DASHBOARD . 'forms/posts-actions.php'); ?>
             <button type="button" class="btn btn--sm t-red" u-bind="reset"><i
                         class="ph ph-trash"></i> <?php echo t('Reset'); ?></button>

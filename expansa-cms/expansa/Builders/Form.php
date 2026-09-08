@@ -71,7 +71,7 @@ class Form
 
     public function parse(array $fields): string
     {
-        return (new Field())->parse($fields);
+        return new Field()->parse($fields);
     }
 
     /**

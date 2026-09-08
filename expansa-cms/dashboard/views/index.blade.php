@@ -44,7 +44,7 @@ $table = $__data['table'] ?? null;
     Hook::call('renderDashboardHeader');
     ?>
 </head>
-<body u-data="expansa" @keydown.window.prevent.ctrl.s="$notification.add(notifications.ctrlS)">
+<body u-data="youla" @keydown.window.prevent.ctrl.s="$notification.add(notifications.ctrlS)">
 <div class="expansa" :class="showMenu && 'active'">
     <div class="expansa-bar">
         <div class="expansa-bar-burger" :class="showMenu && 'active'" @click="showMenu = !showMenu">

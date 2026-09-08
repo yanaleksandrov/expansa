@@ -16,7 +16,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		<div u-init="$stream.start($refs)" style="position: relative; overflow: hidden;">
 			<video u-ref="video" class="db mw" autoplay style="object-fit: cover; aspect-ratio: 4/3;"></video>
 			<canvas u-ref="canvas" u-show="!showImg" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 60%);"></canvas>
-			<img u-ref="image" u-show="showImg" u-cloak alt="" src="/dashboard/assets/images/1x1.png" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 98%);">
+			<img u-ref="image" u-show="showImg" hidden alt="" src="/dashboard/assets/images/1x1.png" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 98%);">
 		</div>
 		<div
 			class="fs-48"

@@ -82,7 +82,7 @@ class Script extends Provider
 
         $return = '';
         if ($asset->data && $data) {
-            $return = sprintf("<script>const %s = %s</script>\n", $key, $data);
+            $return = sprintf("<script>var %s = %s</script>\n", $key, $data);
         }
         return $return . sprintf("	<script%s></script>\n", $this->sanitizeAttributes($atts));
     }

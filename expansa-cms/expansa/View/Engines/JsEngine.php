@@ -6,8 +6,9 @@ namespace Expansa\View\Engines;
 
 class JsEngine extends FileEngine
 {
-    public function get(string $path): string
+    #[\Override]
+    public function get(string $path, array $data = []): string
     {
-        return '<script>'.parent::get($path).'</script>';
+        return '<script>' . parent::get($path) . '</script>';
     }
 }

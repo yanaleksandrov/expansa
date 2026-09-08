@@ -9,8 +9,8 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'table__filter',
 		'u-show'          => 'showFilter === true',
-		'u-cloak'         => true,
-		'@submit.prevent' => '$ajax("items/filter")',
+		'hidden'         => true,
+		'@submit.prevent' => '$ajax.post("items/filter")',
 	],
 	[
 		[

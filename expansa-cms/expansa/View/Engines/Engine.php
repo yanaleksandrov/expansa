@@ -17,7 +17,7 @@ abstract class Engine
      *
      * @var string
      */
-    protected string $lastRendered;
+    protected string $lastRendered = '';
 
     public function setCache(bool $shouldCache, string $cachePath): void
     {
@@ -28,6 +28,11 @@ abstract class Engine
     public function setFactory(Factory $factory): void
     {
     }
+
+    /**
+     * Render the view at $path with $data available to it.
+     */
+    abstract public function get(string $path, array $data = []): string;
 
     /**
      * Get the last view that was rendered.

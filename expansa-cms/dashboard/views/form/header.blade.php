@@ -15,7 +15,7 @@ defined('EX_PATH') || exit;
     $__data ?? [],
     [
         'label'       => 'trim',
-        'name'        => 'key',
+        'name'        => 'id',
         'class'       => 'class:t-center',
         'instruction' => 'trim',
     ]

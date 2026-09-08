@@ -6,8 +6,11 @@ namespace Expansa\View\Engines;
 
 class FileEngine extends Engine
 {
-    public function get(string $path): string
+    #[\Override]
+    public function get(string $path, array $data = []): string
     {
+        $this->lastRendered = $path;
+
         return file_get_contents($path);
     }
 }

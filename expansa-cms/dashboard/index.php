@@ -2,6 +2,7 @@
 
 namespace Dashboard;
 
+use App\Http\VerifyCsrfToken;
 use App\Models\Field;
 use App\Models\User;
 use App\Query\Query;
@@ -19,6 +20,8 @@ new class
         if (!defined('EX_IS_DASHBOARD')) {
             define('EX_IS_DASHBOARD', true);
         }
+
+        VerifyCsrfToken::seed();
 
         foreach (
             [
@@ -73,7 +76,7 @@ new class
         $scripts = ['youla-expansa', 'youla-extensions', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'dialog', 'storage', 'sortable', 'youla'];
         foreach ($scripts as $script) {
             $data = [];
-            if ($script === 'expansa') {
+            if ($script === 'youla') {
                 $data['data'] = Hook::call(
                     'expansa_dashboard_data',
                     [
@@ -103,7 +106,7 @@ new class
                                         $posts[$i][$key] = $value;
                                     }
 
-                                    $fields = (new Field($item))->find();
+                                    $fields = new Field($item)->find();
                                     if ($fields) {
                                         foreach ($fields as $field => $values) {
                                             $key = Safe::camelcase($field);
@@ -200,7 +203,7 @@ new class
                         'showFilter'          => false,
                         'bulk'                => false,
                         'showMenu'            => false,
-                        'spriteFlagsUrl'      => url('/dashboard/assets/sprites/flags.svg'),
+                        'flagsUrl'            => url('/dashboard/assets/sprites/flags.svg'),
                         'notifications'       => [
                             'ctrlS' => t_attr('Expansa saves the changes automatically, so there is no need to press ⌘ + S'),
                         ],

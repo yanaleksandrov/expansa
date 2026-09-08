@@ -85,21 +85,36 @@ class Csrf
             throw new InvalidCsrfTokenException('Invalid CSRF session token');
         }
 
-        if (! $multiple) {
-            $this->session->set($this->sessionPrefix . $key, $token);
-        }
-
-        if ($this->referralHash() !== substr(base64_decode($sessionToken), 10, 40)) {
-            throw new InvalidCsrfTokenException('Invalid CSRF token');
-        }
-
-        if ($token !== $sessionToken) {
+        if (
+            $this->referralHash() !== substr(base64_decode($sessionToken), 10, 40)
+            ||
+            $token !== $sessionToken
+        ) {
             throw new InvalidCsrfTokenException('Invalid CSRF token');
         }
 
         // check for token expiration
         if (is_int($timespan) && ( intval(substr(base64_decode($sessionToken), 0, 10)) + $timespan ) < time()) {
             throw new InvalidCsrfTokenException('CSRF token has expired');
+        }
+
+        // Only reached once every check above has passed — refreshing (or rotating) the
+        // stored token before that point let a single bad/forged submission overwrite a
+        // still-valid session token, breaking every legitimate request that followed it.
+        //
+        // Re-minting a fresh token here (not re-storing the same $token) is what makes
+        // expiration actually slide: the token's own embedded timestamp is what the
+        // expiration check above compares against time(), and it never changes on its
+        // own — re-storing the same value would keep refreshing the cookie's Max-Age
+        // forever while the token itself still silently expired exactly $timespan
+        // seconds after it was first minted, no matter how active the session was.
+        if (! $multiple) {
+            try {
+                $this->session->set($this->sessionPrefix . $key, $this->createToken());
+            } catch (RandomException) {
+                // Keep the still-valid current token rather than fail an otherwise
+                // legitimate request over an inability to mint its replacement.
+            }
         }
     }
 

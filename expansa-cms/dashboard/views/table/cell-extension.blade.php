@@ -40,8 +40,8 @@ defined('EX_PATH') || exit;
 			</div>
 		</div>
 		<div class="plugins__action">
-			<button class="btn btn--outline"<?php ( $installed && $active ) && print( ' u-cloak' ); ?>><?php echo t( 'Install' ); ?></button>
-			<button class="btn btn--primary"<?php ( $installed && ! $active ) && print( ' u-cloak' ); ?>><?php echo t( 'Activate' ); ?></button>
+			<button class="btn btn--outline"<?php ( $installed && $active ) && print( ' hidden' ); ?>><?php echo t( 'Install' ); ?></button>
+			<button class="btn btn--primary"<?php ( $installed && ! $active ) && print( ' hidden' ); ?>><?php echo t( 'Activate' ); ?></button>
 		</div>
 	</div>
 	<div class="plugins__info">

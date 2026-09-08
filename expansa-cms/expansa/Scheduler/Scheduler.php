@@ -179,7 +179,7 @@ class Scheduler
      */
     private function addSchedulerVerboseOutput(string $string): void
     {
-        $now = '[' . (new DateTime('now'))->format('c') . '] ';
+        $now = '[' . new DateTime('now')->format('c') . '] ';
         $this->outputSchedule[] = $now . $string;
 
         // Print to stdoutput in light gray

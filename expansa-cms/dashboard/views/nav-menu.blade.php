@@ -46,7 +46,7 @@ defined('EX_PATH') || exit;
         <div class="accordion" u-data="{expanded: false}">
             <div class="accordion-item">
                 <div class="accordion-title" @click="expanded = ! expanded">Pages</div>
-                <div class="accordion-panel" u-show="expanded" u-collapse u-cloak>
+                <div class="accordion-panel" u-show="expanded" u-collapse hidden>
                     content
                 </div>
             </div>
