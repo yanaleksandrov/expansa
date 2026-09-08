@@ -2,6 +2,7 @@
 
 namespace Dashboard;
 
+use App\Http\VerifyCsrfToken;
 use App\Models\Field;
 use App\Models\User;
 use App\Query\Query;
@@ -19,6 +20,8 @@ new class
         if (!defined('EX_IS_DASHBOARD')) {
             define('EX_IS_DASHBOARD', true);
         }
+
+        VerifyCsrfToken::seed();
 
         foreach (
             [

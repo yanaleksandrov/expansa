@@ -7,10 +7,15 @@
                 abortPrevious(el);
                 const xhr = el.__ajax = new XMLHttpRequest;
                 const url = /^https?:\/\//.test(route) ? route : Youla.baseURL + route;
+                const method = (options.method || el.getAttribute('method') || (el.tagName === 'FORM' ? 'POST' : 'GET')).toUpperCase();
                 const done = toggleLoading(el);
-                xhr.open((options.method || el.getAttribute('method') || (el.tagName === 'FORM' ? 'POST' : 'GET')).toUpperCase(), url);
+                xhr.open(method, url);
                 xhr.withCredentials = options.credentials ?? true;
-                Object.entries(options.headers || {}).forEach(([name, value]) => xhr.setRequestHeader(name, value));
+                const headers = {
+                    ...csrfHeader(method),
+                    ...options.headers
+                };
+                Object.entries(headers).forEach(([name, value]) => xhr.setRequestHeader(name, value));
                 xhr.onloadstart = xhr.upload.onprogress = event => onProgress?.(readProgress(event, xhr));
                 xhr.onloadend = event => {
                     onProgress?.(readProgress(event, xhr));
@@ -66,6 +71,20 @@
             });
             return ajax;
         });
+        function csrfHeader(method) {
+            if ([ 'GET', 'HEAD' ].includes(method)) {
+                return {};
+            }
+            // Read live, every call — never cache this in a variable. The server may
+            // have refreshed the cookie on the previous response; a stale copy is
+            // exactly what caused "works once, fails on the next request".
+            const token = readCookie('expansa_token');
+            return token ? { 'X-CSRF-Token': token } : {};
+        }
+        function readCookie(name) {
+            const match = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
+            return match ? decodeURIComponent(match[1]) : null;
+        }
         function abortPrevious(el) {
             const xhr = el.__ajax;
             if (!xhr) {

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Controllers\Web;
+use App\Http\VerifyCsrfToken;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
@@ -10,6 +11,8 @@ use Expansa\Support\Is;
 
 // launch the installer if Expansa is not installed.
 if (! Is::installed()) {
+    VerifyCsrfToken::seed();
+
     $suffix = ! Is::debug() ? '.min' : '';
     foreach (['expansa', 'controls', 'utility', 'phosphor'] as $style) {
         Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
