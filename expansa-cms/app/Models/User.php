@@ -7,7 +7,6 @@ namespace App\Models;
 use DateTime;
 use App\Post\Type;
 use App\User\Roles;
-use Exception;
 use Expansa\Cookie\Cookie;
 use Expansa\Database\Model;
 use Expansa\Debug\Error;
@@ -309,16 +308,10 @@ class User extends Model
      *
      * @param array $userdata
      * @return User|Error
-     * @throws Exception
      */
     public static function create(array $userdata): User|Error
     {
-        // Both defaults below only take effect if the key is entirely absent:
-        // fill() only calls setAttribute() (and so only runs sanitizers/mutators)
-        // for keys actually present in $userdata. Without this, a caller that
-        // omits 'status' fails the status:in validation rule, and one that
-        // omits 'nicename' gets a null nicename instead of one derived from
-        // login (see nicename()'s 'slug:$login' sanitizer rule).
+        // Only takes effect if the key is entirely absent — fill() sanitizes/mutates only keys $userdata actually has.
         $userdata += ['status' => self::STATUS_ACTIVE, 'nicename' => ''];
 
         $user = new self()->fill($userdata);
@@ -327,9 +320,7 @@ class User extends Model
             return error('user-add', $user->getValidatorErrors());
         }
 
-        // Not mass-assignable (see roles()) — read directly off the raw input
-        // so a caller can still request a specific role, falling back to the
-        // configured default for self-registration.
+        // Not mass-assignable (see roles()) — read the raw input so a caller can still request a role, falling back to the default.
         $role = $userdata['role'] ?? Options::get('users.role', self::DEFAULT_ROLE);
         if (Roles::exists($role)) {
             $user->roles = [$role];
@@ -347,12 +338,10 @@ class User extends Model
      *
      * @param array $userdata
      * @return User|Error
-     * @throws Exception
      */
     public function update(array $userdata): User|Error
     {
-        // 'id' isn't fillable and 'login' is readonly, so fill() already
-        // ignores both — no need to strip them from $userdata by hand.
+        // 'id' isn't fillable and 'login' is readonly, so fill() already ignores both.
         $this->fill($userdata);
 
         if (! $this->save() instanceof self) {
@@ -476,7 +465,7 @@ class User extends Model
     /**
      * Checks whether the current request carries a valid authentication cookie.
      *
-     * @return   bool
+     * @return bool
      */
     public static function isLogged(): bool
     {
@@ -498,8 +487,7 @@ class User extends Model
         $field = Is::email($loginOrEmail) ? 'email' : 'login';
         $user  = User::find($loginOrEmail, $field);
 
-        // Same message for "no such account" and "wrong password": telling them
-        // apart would let an attacker enumerate which logins/emails are registered.
+        // Same message for both cases — telling them apart would let an attacker enumerate registered logins/emails.
         if (! $user instanceof User || ! password_verify($password, $user->password)) {
             return error('user-login', t('These credentials do not match our records.'));
         }
@@ -511,6 +499,8 @@ class User extends Model
 
     /**
      * Logs out the current user by discarding the authentication cookie.
+     *
+     * @return void
      */
     public static function logout(): void
     {
@@ -544,8 +534,7 @@ class User extends Model
      */
     private static function verifyAuthCookie(string $cookie): ?User
     {
-        // login is matched greedily, so a "|" inside it (however unlikely) can't
-        // desynchronize the trailing timestamp/hmac, which always have a fixed shape.
+        // login is matched greedily, so a "|" inside it can't desynchronize the trailing timestamp/hmac.
         if (! preg_match('/^(.+)\|(\d+)\|([a-f0-9]{64})$/', $cookie, $matches)) {
             return null;
         }
