@@ -150,7 +150,16 @@
     min-width: 100%;
   }
 
-  &--load {
+  &--icon {
+    padding: 0;
+    aspect-ratio: 1 / 1;
+  }
+
+  &--rounded {
+    border-radius: 3rem;
+  }
+
+  &.is-load {
     position: relative;
     color: transparent !important;
     text-shadow: none !important;
@@ -178,15 +187,6 @@
     &[class*="danger"]:after {
       color: var(--expansa-white);
     }
-  }
-
-  &--icon {
-    padding: 0;
-    aspect-ratio: 1 / 1;
-  }
-
-  &--rounded {
-    border-radius: 3rem;
   }
 }
 

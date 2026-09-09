@@ -10,6 +10,10 @@ use Expansa\Support\Str;
 
 final class Migrations
 {
+    public const array VISIBILITY_STATUSES = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
+
+    public const array DISCUSSIONS_STATUSES = ['open', 'closed'];
+
     public function createMainDatabaseTables(): void
     {
         $this->createCacheTable();
@@ -26,9 +30,6 @@ final class Migrations
     public function createPostsTable(string $postType): void
     {
         Schema::create($postType, function (Table $table) {
-            $statuses   = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
-            $discussion = ['open', 'closed'];
-
             $table->id();
             $table->uuid()->unique();
             $table->text('title');
@@ -38,8 +39,8 @@ final class Migrations
             $table->smallInt('comments')->unsigned()->default(0);
             $table->smallInt('views')->unsigned()->default(0);
             $table->mediumInt('position')->unsigned()->default(0);
-            $table->enum('status', $statuses)->default('pending');
-            $table->enum('discussion', $discussion)->default('open');
+            $table->enum('status', self::VISIBILITY_STATUSES)->default('pending');
+            $table->enum('discussion', self::DISCUSSIONS_STATUSES)->default('open');
             $table->string('password', 255);
             $table->timestamps();
 
@@ -267,6 +268,74 @@ final class Migrations
 
             // indexes
             $table->index('term_id');
+        });
+    }
+
+    private function createMediaTable(): void
+    {
+        Schema::create('media', function (Table $table) {
+            $table->id();
+
+            $table->string('filename');
+            $table->string('disk', 50)->default('local');
+            $table->string('path');
+
+            // File information
+            $table->string('mime_type', 100);
+            $table->string('extension', 20)->nullable();
+            $table->bigInt('size')->unsigned()->default(0);
+            $table->string('hash', 64)->nullable(); // for check duplicates
+
+            // Image/video information
+            $table->int('width')->unsigned()->nullable();
+            $table->int('height')->unsigned()->nullable();
+            $table->int('duration')->unsigned()->nullable();
+
+            $table->string('title')->nullable();
+            $table->text('caption')->nullable();
+            $table->text('description')->nullable();
+            $table->string('alt')->nullable();
+
+            // Ownership
+            $table->bigInt('user_id')->nullable();
+
+            // File status
+            $table->enum('status', self::VISIBILITY_STATUSES)->default('published');
+            $table->enum('discussion', self::DISCUSSIONS_STATUSES)->default('open');
+            $table->string('password', 255);
+
+            $table->timestamps();
+
+            // indexes
+            $table->index('mime_type');
+            $table->index('user_id');
+            $table->index('status');
+            $table->index('hash');
+        });
+    }
+
+    private function createApiKeysTable(): void
+    {
+        Schema::create('api_keys', function (Table $table) {
+            $table->id();
+
+            $table->bigInt('user_id')->unsigned();
+
+            $table->string('name');
+            $table->string('prefix', 12);
+            $table->string('key_hash', 64)->unique();
+
+            $table->bool('active')->default(true);
+
+            $table->json('abilities')->nullable();
+
+            $table->timestamp('last_used_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+
+            $table->timestamps();
+
+            $table->index('user_id');
+            $table->index('active');
         });
     }
 }

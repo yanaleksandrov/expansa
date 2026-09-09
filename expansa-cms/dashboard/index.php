@@ -64,7 +64,7 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
@@ -73,7 +73,7 @@ new class
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla-expansa', 'youla-extensions', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'dialog', 'storage', 'sortable', 'youla'];
+        $scripts = ['youla-ajax', 'youla-expansa', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'storage', 'sortable', 'youla'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'youla') {

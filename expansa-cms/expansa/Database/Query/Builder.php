@@ -1072,7 +1072,7 @@ class Builder extends BuilderAbstract
             }
         }
 
-        if (isset($this->schema[$col])) {
+        if ($col && isset($this->schema[$col])) {
             return $this->schema[$col];
         }
         return $this->schema;

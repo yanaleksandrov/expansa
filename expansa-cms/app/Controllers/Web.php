@@ -100,20 +100,6 @@ final class Web
             $content = $content->beautify()->render();
         }
 
-//    $start = microtime(true);
-//    for ($i = 0; $i < 1; $i++) {
-//        $key = App\Models\Apikey::get(1);
-//    }
-//    $end = microtime(true);
-//    print_r($key);
-//
-//    $elapsed = $end - $start;
-//    echo "Elapsed time: $elapsed seconds\n";
-//    if ($key) {
-//        $key->delete();
-//    }
-//    exit;
-
         /**
          * Expansa page is fully loaded.
          *

@@ -99,6 +99,7 @@ final class SystemService
             'user.locale'      => 'locale',
             'user.login'       => 'trim',
             'user.password'    => 'trim',
+            'user.status'      => 'trim:active',
             'db.database'      => 'trim',
             'db.username'      => 'trim',
             'db.password'      => 'trim',
@@ -140,7 +141,8 @@ final class SystemService
         User::login($userdata);
 
         return [
-            ['target' => 'body', 'redirect' => url('installed')],
+            'target'   => 'body',
+            'redirect' => url('installed')
         ];
     }
 
