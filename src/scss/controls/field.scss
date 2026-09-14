@@ -1,4 +1,4 @@
-@import '../constants/index';
+@use '../constants/index' as constants;
 
 .field {
   display: grid;
@@ -36,7 +36,7 @@
     background-color: var(--expansa-bg);
     transition: background-color 0.2s;
 
-    @each $suffix, $properties in $fieldSizes {
+    @each $suffix, $properties in constants.$fieldSizes {
       .field#{$suffix} & {
         @each $property, $value in $properties {
           #{$property}: #{$value};

@@ -1,4 +1,4 @@
-@import '../constants/index.scss';
+@use '../constants/index.scss' as constants;
 
 .btn {
   color: var(--expansa-dark);
@@ -32,7 +32,7 @@
     font-size: inherit;
   }
 
-  @each $suffix, $properties in $btnSizes {
+  @each $suffix, $properties in constants.$btnSizes {
     &#{$suffix} {
       @each $property, $value in $properties {
         #{$property}: #{$value};

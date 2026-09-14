@@ -1211,8 +1211,8 @@
         reactive: reactive,
         variable: variable,
         start: async function() {
-            document.dispatchEvent(createEvent("youla:init"));
             await domReady();
+            document.dispatchEvent(createEvent("youla:init"));
             this.componentDiscover(el => this.componentInitialize(el));
             this.componentWatch(el => this.componentInitialize(el));
         },

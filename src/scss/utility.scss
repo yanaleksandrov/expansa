@@ -1,11 +1,14 @@
-@import 'constants';
+@use 'sass:math';
+@use "sass:color";
+@use "sass:string";
+@use 'constants';
 
 @function str-split($string, $separator) {
-  $i: str-index($string, $separator);
+  $i: string.index($string, $separator);
   @if $i != null {
-    @return str-insert(str-slice($string, 1, 1), str-slice(str-split(str-slice($string, $i + str-length($separator)), $separator), 1, 1), 100);
+    @return string.insert(string.slice($string, 1, 1), string.slice(str-split(string.slice($string, $i + string.length($separator)), $separator), 1, 1), 100);
   }
-  @return str-slice($string, 1, 1);
+  @return string.slice($string, 1, 1);
 }
 
 // display
@@ -78,7 +81,7 @@
 // font-size
 @each $size in (96, 64, 48, 40, 32, 24, 18, 17, 16, 15, 14, 13, 12, 11) {
   .fs-#{$size} {
-    font-size: #{$size/16}rem;
+    font-size: #{math.div($size, 16)}rem;
   }
 }
 
@@ -103,7 +106,7 @@
 }
 
 // colors
-@each $name, $color in $colors {
+@each $name, $color in constants.$colors {
   .t-#{'' + $name} {
     color: $color !important;
   }
@@ -111,12 +114,12 @@
     color: #{$color}11 !important;
   }
 }
-@each $name, $color in $colors {
+@each $name, $color in constants.$colors {
   .bg-#{'' + $name} {
     background-color: $color !important;
   }
   .bg-#{'' + $name}-lt {
-    background-color: #{mix(rgba(255, 255, 255, 1), $color, 93%)} !important;
+    background-color: #{color.mix(rgba(255, 255, 255, 1), $color, 93%)} !important;
   }
 }
 
@@ -126,7 +129,7 @@
 }
 @each $size in (40, 80, 120, 160, 200, 240, 280, 320, 360, 400, 440, 480, 520, 560, 600, 640, 680, 720, 760, 800, 1000, 1200, 1400, 1600) {
   .mw-#{$size} {
-    max-width: #{$size/16}rem;
+    max-width: #{math.div($size, 16)}rem;
     width: 100%;
   }
 }
@@ -165,7 +168,7 @@
     ) {
       $loop: 8;
       $prefix: $size;
-      $letter: str-slice($selector, 1, 1);
+      $letter: string.slice($selector, 1, 1);
 
       @if $selector == w or $selector == gtc or $selector == ga {
         $loop: 12;
