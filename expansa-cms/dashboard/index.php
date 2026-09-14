@@ -73,7 +73,7 @@ new class
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla-ajax', 'youla-expansa', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'storage', 'sortable', 'youla'];
+        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'storage', 'sortable'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'youla') {
