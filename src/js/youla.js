@@ -965,6 +965,9 @@
         observeData(data) {
             this.concernedData = [];
             return makeObservable(data, (prop, force) => {
+                if (this._mounting) {
+                    return;
+                }
                 if (force) {
                     this.refresh(true);
                     this.persist();
@@ -1014,36 +1017,45 @@
         }
         initialize(root) {
             const self = this;
-            domWalk(root, el => {
-                if (el.__x_initialized) {
-                    return;
-                }
-                el.__x_initialized = true;
-                const attributes = self.resolveAttributes(el);
-                if (attributes.length === 0) {
-                    return;
-                }
-                const additionalHelperVariables = {
-                    ...getForData(el),
-                    ...self.getAliasVariables(),
-                    ...self.getMagicVariables(el)
-                };
-                attributes.forEach(attribute => {
-                    let {directive: directive, event: event, expression: expression, modifiers: modifiers, bind: bind} = attribute;
-                    let propExpression;
-                    if (directive === "u-prop") {
-                        propExpression = generateExpressionForProp(el, self.data, attribute);
-                        event = [ "select-multiple", "select", "checkbox", "radio" ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
+            this._mounting = true;
+            try {
+                domWalk(root, el => {
+                    if (el.__x_initialized) {
+                        return;
                     }
-                    if (event) {
-                        self.attachListener(el, event, directive === "u-prop" ? [] : modifiers, propExpression || expression);
+                    el.__x_initialized = true;
+                    const attributes = self.resolveAttributes(el);
+                    if (attributes.length === 0) {
+                        return;
                     }
-                    if (bind || getDirective(directive)) {
-                        const {output: output} = self.computeOutput(attribute, additionalHelperVariables);
-                        self.applyAttribute(el, attribute, output, additionalHelperVariables);
-                    }
+                    const additionalHelperVariables = {
+                        ...getForData(el),
+                        ...self.getAliasVariables(),
+                        ...self.getMagicVariables(el)
+                    };
+                    attributes.forEach(attribute => {
+                        let {directive: directive, event: event, expression: expression, modifiers: modifiers, bind: bind} = attribute;
+                        let propExpression;
+                        if (directive === "u-prop") {
+                            propExpression = generateExpressionForProp(el, self.data, attribute);
+                            event = [ "select-multiple", "select", "checkbox", "radio" ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
+                        }
+                        if (event) {
+                            self.attachListener(el, event, directive === "u-prop" ? [] : modifiers, propExpression || expression);
+                        }
+                        if (bind || getDirective(directive)) {
+                            const {output: output, deps: deps} = self.computeOutput(attribute, additionalHelperVariables, {
+                                withDeps: true
+                            });
+                            el.__x_deps ??= {};
+                            el.__x_deps[attribute.name] = deps;
+                            self.applyAttribute(el, attribute, output, additionalHelperVariables);
+                        }
+                    });
                 });
-            });
+            } finally {
+                this._mounting = false;
+            }
         }
         refresh(force = false) {
             const self = this;
