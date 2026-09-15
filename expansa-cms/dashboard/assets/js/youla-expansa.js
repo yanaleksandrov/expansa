@@ -172,7 +172,7 @@
         (() => {
             Youla.variable('notice', () => document.querySelector('[u-data="notice"]')?.__x?.data);
             Youla.data('notice', () => ({
-                items: {},
+                items: [],
                 duration: 7e3,
                 hovering: false,
                 info(message, duration) {
@@ -192,7 +192,7 @@
                 },
                 pause() {
                     this.hovering = true;
-                    Object.values(this.items).forEach(item => {
+                    this.items.forEach(item => {
                         if (item.timer) {
                             clearTimeout(item.timer);
                             item.timer = null;
@@ -202,10 +202,10 @@
                 },
                 resume() {
                     this.hovering = false;
-                    Object.keys(this.items).forEach(id => this.schedule(id));
+                    this.items.forEach(item => this.schedule(item.id));
                 },
                 schedule(id) {
-                    let item = this.items[id];
+                    let item = this.items.find(item => item.id === id);
                     if (item && !item.timer && item.duration) {
                         item.startedAt = Date.now();
                         item.timer = setTimeout(() => this.close(id), item.remaining);
@@ -215,47 +215,41 @@
                     return item.duration - item.remaining + (item.timer ? Date.now() - item.startedAt : 0);
                 },
                 close(id) {
-                    let item = this.items[id];
+                    let item = this.items.find(item => item.id === id);
                     if (typeof item !== 'undefined') {
                         clearTimeout(item.timer);
-                        this.items = {
-                            ...this.items,
-                            [id]: {
-                                ...item,
-                                selectors: [ ...item.selectors, 'hide' ]
-                            }
-                        };
+                        this.items = this.items.map(item => item.id === id ? {
+                            ...item,
+                            selectors: [ ...item.selectors, 'hide' ]
+                        } : item);
                         setTimeout(() => {
-                            let {[id]: omit, ...rest} = this.items;
-                            this.items = rest;
+                            this.items = this.items.filter(item => item.id !== id);
                         }, 1e3);
                     }
                 },
                 add(message, type, duration) {
                     if (message) {
-                        let timestamp = Date.now();
+                        let id = Date.now();
                         if (duration === 'auto') {
                             duration = Math.max(message.length * 70, 1500);
                         } else if (duration === void 0) {
                             duration = this.duration;
                         }
-                        this.items = {
-                            ...this.items,
-                            [timestamp]: {
-                                message,
-                                closable: true,
-                                selectors: [ type || 'info' ],
-                                duration,
-                                remaining: duration,
-                                startedAt: Date.now(),
-                                timer: null,
-                                classes() {
-                                    return this.selectors.map(x => 'notice__item--' + x).join(' ');
-                                }
+                        this.items = [ ...this.items, {
+                            id,
+                            message,
+                            closable: true,
+                            selectors: [ type || 'info' ],
+                            duration,
+                            remaining: duration,
+                            startedAt: Date.now(),
+                            timer: null,
+                            classes() {
+                                return this.selectors.map(x => 'is-' + x).join(' ');
                             }
-                        };
+                        } ];
                         if (!this.hovering) {
-                            this.schedule(timestamp);
+                            this.schedule(id);
                         }
                     }
                 }

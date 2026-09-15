@@ -432,7 +432,7 @@ class Request implements \ArrayAccess, RequestContract
         return $this->getUri();
     }
 
-    public function server(string $key = null, mixed $default = null): mixed
+    public function server(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->server->all();
@@ -441,7 +441,7 @@ class Request implements \ArrayAccess, RequestContract
         return $this->server->get($key, $default);
     }
 
-    public function headers(string $key = null, mixed $default = null): mixed
+    public function headers(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->headers->all();
@@ -468,7 +468,7 @@ class Request implements \ArrayAccess, RequestContract
         return true;
     }
 
-    public function cookies(string $key = null, mixed $default = null): mixed
+    public function cookies(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->cookies->all();
@@ -482,7 +482,7 @@ class Request implements \ArrayAccess, RequestContract
         return $this->cookies->get($key, $default);
     }
 
-    public function query(string $key = null, mixed $default = null): mixed
+    public function query(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->query->all();
@@ -491,7 +491,7 @@ class Request implements \ArrayAccess, RequestContract
         return $this->query->get($key, $default);
     }
 
-    public function post(string $key = null, mixed $default = null): mixed
+    public function post(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->post->all();
@@ -500,7 +500,7 @@ class Request implements \ArrayAccess, RequestContract
         return $this->post->get($key, $default);
     }
 
-    public function json(string $key = null, mixed $default = null): mixed
+    public function json(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->json->all();
@@ -509,7 +509,7 @@ class Request implements \ArrayAccess, RequestContract
         return $this->json->get($key, $default);
     }
 
-    public function files(string $key = null, mixed $default = null): mixed
+    public function files(?string $key = null, mixed $default = null): mixed
     {
         if (is_null($key)) {
             return $this->files->all();
@@ -533,7 +533,7 @@ class Request implements \ArrayAccess, RequestContract
         return array_merge($this->query(), $this->post(), $this->json(), $this->files());
     }
 
-    public function input(string $key = null, mixed $default = null): mixed
+    public function input(?string $key = null, mixed $default = null): mixed
     {
         $input = $this->all();
 
@@ -598,7 +598,7 @@ class Request implements \ArrayAccess, RequestContract
         return Arr::hasAny($this->all(), $keys);
     }
 
-    public function whenHas(string $key, callable $callback, callable $default = null): static
+    public function whenHas(string $key, callable $callback, ?callable $default = null): static
     {
         if ($this->has($key)) {
             $callback(Arr::get($this->all(), $key));
@@ -650,7 +650,7 @@ class Request implements \ArrayAccess, RequestContract
         return false;
     }
 
-    public function whenFilled(string $key, callable $callback, callable $default = null): static
+    public function whenFilled(string $key, callable $callback, ?callable $default = null): static
     {
         $value = Arr::get($this->all(), $key);
 
@@ -672,7 +672,7 @@ class Request implements \ArrayAccess, RequestContract
         return ! $this->has($keys);
     }
 
-    public function whenMissing(string $key, callable $callback, callable $default = null): static
+    public function whenMissing(string $key, callable $callback, ?callable $default = null): static
     {
         if (Arr::missing($this->all(), $key)) {
             $callback();
@@ -920,7 +920,7 @@ class Request implements \ArrayAccess, RequestContract
         return isset($accepts[0]) && (str_contains($accepts[0], '/json') || str_contains($accepts[0], '+json'));
     }
 
-    public function getAcceptedLanguages(string|array $languages = null): array
+    public function getAcceptedLanguages(string|array|null $languages = null): array
     {
         if (is_null($this->acceptLanguages)) {
             $this->acceptLanguages = [];
@@ -978,7 +978,7 @@ class Request implements \ArrayAccess, RequestContract
         return $this;
     }
 
-    public function route(Route $route = null): static|Route|null
+    public function route(?Route $route = null): static|Route|null
     {
         if (is_null($route)) {
             return $this->getRoute();
@@ -1000,7 +1000,7 @@ class Request implements \ArrayAccess, RequestContract
         };
     }
 
-    public function user(string $guard = null): mixed
+    public function user(?string $guard = null): mixed
     {
         return call_user_func($this->getUserResolver(), $guard);
     }

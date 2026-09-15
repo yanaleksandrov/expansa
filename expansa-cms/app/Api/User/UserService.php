@@ -29,7 +29,10 @@ final class UserService
         }
 
         return [
-            ['target' => 'body', 'notify' => t('User is updated')],
+            [
+                'target' => 'body',
+                'notify' => t('User is updated')
+            ],
         ];
     }
 
@@ -47,12 +50,18 @@ final class UserService
 
         if ($user instanceof Error) {
             return [
-                ['target' => 'body', 'notify' => $user->get('user-login')[0]],
+                [
+                    'target' => 'body',
+                    'notify' => $user->get('user-login')[0]
+                ],
             ];
         }
 
         return [
-            ['target' => 'body', 'redirect' => url('dashboard')],
+            [
+                'target' => 'body',
+                'redirect' => url('dashboard')
+            ],
         ];
     }
 

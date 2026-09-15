@@ -8,7 +8,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 ?>
-<main class="mw-360" u-data="{password: ''}">
+<main class="mw-360" u-data>
 	<a href="{{ url() }}" class="df jcc mb-4" target="_blank">
 		<img src="{{ url('dashboard/assets/images/logo-grid.svg') }}" width="212" height="124" alt="Expansa CMS">
 	</a>
@@ -41,22 +41,15 @@ if ( ! defined( 'EX_PATH' ) ) {
 </main>
 
 <div class="notifications" u-data="notice" @mouseenter="pause()" @mouseleave="resume()">
-	<div u-each="(item, id) in items" class="notifications-item" :class="item.classes()" :style="`--notice-scale: ${1 - ($store.notifications.length - i - 1) * 0.005}`">
+	<div u-each="(item, index) in items" class="notifications-item" :class="item.classes()" :style="`--notice-scale: ${1 - (items.length - index - 1) * 0.005}`">
 		<div class="notifications-wrapper">
-			<svg class="notice__spinner" viewBox="0 0 24 24" width="24" height="24">
-				<circle cx="12" cy="12" r="11" @load="$el.style.animationDuration = item.duration + 'ms'; $el.style.animationDelay = '-' + elapsed(item) + 'ms'"></circle>
-			</svg>
-			<i
-				class="ph"
-				:class="{
-					'ph-bell-ringing t-gray': notification.type === 'info',
-					'ph-siren t-red': notification.type === 'error',
-					'ph-check t-green': notification.type === 'success',
-					'ph-shield-warning t-orange': notification.type === 'warning',
-				}"
-			></i>
+			<i class="ph" :class="`ph-${item.type === 'info' ? 'bell-ringing' : item.type === 'error' ? 'siren' : item.type === 'success' ? 'check' : 'shield-warning'} t-${item.type === 'info' ? 'gray' : item.type === 'error' ? 'red' : item.type === 'success' ? 'green' : 'orange'}`"></i>
 			<div class="notifications-text" u-text="item.message"></div>
-			<button type="button" class="notifications-close" :style="notification.duration && `--notice-animation: ${notification.animation}`" u-show="item.closable" @click="close(id)"></button>
+			<button type="button" class="notifications-close" u-show="item.closable" @click="close(item.id)">
+				<svg class="notifications-spinner" viewBox="0 0 24 24" width="24" height="24">
+					<circle cx="12" cy="12" r="11" @load="$el.style.animationDuration = item.duration + 'ms'; $el.style.animationDelay = '-' + elapsed(item) + 'ms'"></circle>
+				</svg>
+			</button>
 		</div>
 	</div>
 </div>

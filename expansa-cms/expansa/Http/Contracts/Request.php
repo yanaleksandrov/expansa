@@ -57,25 +57,25 @@ interface Request
 
     public function uri();
 
-    public function server(string $key = null, mixed $default = null): mixed;
+    public function server(?string $key = null, mixed $default = null): mixed;
 
-    public function headers(string $key = null, mixed $default = null): mixed;
+    public function headers(?string $key = null, mixed $default = null): mixed;
 
     public function header(string $key, mixed $default = null): mixed;
 
     public function hasHeader(string|array $keys): bool;
 
-    public function cookies(string $key = null, mixed $default = null): mixed;
+    public function cookies(?string $key = null, mixed $default = null): mixed;
 
     public function cookie(string $key, mixed $default = null): mixed;
 
-    public function query(string $key = null, mixed $default = null): mixed;
+    public function query(?string $key = null, mixed $default = null): mixed;
 
-    public function post(string $key = null, mixed $default = null): mixed;
+    public function post(?string $key = null, mixed $default = null): mixed;
 
-    public function json(string $key = null, mixed $default = null): mixed;
+    public function json(?string $key = null, mixed $default = null): mixed;
 
-    public function files(string $key = null, mixed $default = null): mixed;
+    public function files(?string $key = null, mixed $default = null): mixed;
 
     public function file(string $key, mixed $default = null): mixed;
 
@@ -83,7 +83,7 @@ interface Request
 
     public function all(): array;
 
-    public function input(string $key = null, mixed $default = null): mixed;
+    public function input(?string $key = null, mixed $default = null): mixed;
 
     public function only(string|array $keys): array;
 
@@ -93,7 +93,7 @@ interface Request
 
     public function hasAny(string|array $keys): bool;
 
-    public function whenHas(string $key, callable $callback, callable $default = null): static;
+    public function whenHas(string $key, callable $callback, ?callable $default = null): static;
 
     public function filled(string|array $keys): bool;
 
@@ -101,11 +101,11 @@ interface Request
 
     public function anyFilled(string|array $keys): bool;
 
-    public function whenFilled(string $key, callable $callback, callable $default = null): static;
+    public function whenFilled(string $key, callable $callback, ?callable $default = null): static;
 
     public function missing(string|array $keys): bool;
 
-    public function whenMissing(string $key, callable $callback, callable $default = null): static;
+    public function whenMissing(string $key, callable $callback, ?callable $default = null): static;
 
     public function string(string $key, ?string $default = ''): ?string;
 
@@ -153,7 +153,7 @@ interface Request
 
     public function wantsJson(): bool;
 
-    public function getAcceptedLanguages(string|array $languages = null): array;
+    public function getAcceptedLanguages(string|array|null $languages = null): array;
 
     public function acceptLanguage(string $language): bool;
 

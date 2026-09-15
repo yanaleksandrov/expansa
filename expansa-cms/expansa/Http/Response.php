@@ -82,7 +82,7 @@ class Response implements ResponseContract
         return $this->cookies;
     }
 
-    public function setCookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, string $sameSite = null): static
+    public function setCookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, ?string $sameSite = null): static
     {
         if (is_string($cookie)) {
             $expires = ($minutes === 0) ? 0 : time() + ($minutes * 60);
@@ -95,7 +95,7 @@ class Response implements ResponseContract
         return $this;
     }
 
-    public function cookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, string $sameSite = null): static
+    public function cookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, ?string $sameSite = null): static
     {
         return $this->setCookie($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
     }
@@ -211,7 +211,7 @@ class Response implements ResponseContract
         }
     }
 
-    public function isRedirect(string $location = null): bool
+    public function isRedirect(?string $location = null): bool
     {
         return in_array(
             $this->statusCode,
