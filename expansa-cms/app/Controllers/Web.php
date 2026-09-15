@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App;
 use App\Models\Slug;
 use App\Models\User;
+use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Support\Is;
 
@@ -26,7 +27,11 @@ final class Web
             if ($slug !== 'install') {
                 redirect('install');
             }
-            echo view('welcome', ['slug' => 'install'])->beautify()->render();
+            $welcome = view('welcome', ['slug' => 'install']);
+
+            Asset::discover($welcome->getPath());
+
+            echo $welcome->beautify()->render();
             exit;
         }
 
@@ -97,6 +102,10 @@ final class Web
                 'table'  => $table ?? null,
                 'entity' => $entity,
             ]);
+
+            // Auto-connect co-located CSS/JS for this page's template - see Manager::discover().
+            Asset::discover($content->getPath());
+
             $content = $content->beautify()->render();
         }
 

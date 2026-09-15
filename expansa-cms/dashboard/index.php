@@ -6,6 +6,7 @@ use App\Http\VerifyCsrfToken;
 use App\Models\Field;
 use App\Models\User;
 use App\Query\Query;
+use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
@@ -70,10 +71,41 @@ new class
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
+        /**
+         * Auto-connect vendor JS per form field, so it loads only on pages that render that
+         * field instead of on every dashboard page. Everything else keeps the default
+         * co-located convention. date/range/color share form/input.blade.php, so Field::parse()
+         * passes the original subtype as $context['type'] to tell them apart.
+         *
+         * @since 2025.1
+         */
+        Manager::configure(function (string $file, array $context = []) use ($suffix): array {
+            if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/form/')) {
+                return Manager::defaultStructure($file);
+            }
+
+            $template      = basename($file, '.blade.php');
+            $inputType     = $context['type'] ?? '';
+            $dateTimeTypes = ['date', 'datetime-local', 'time', 'month', 'week'];
+
+            $vendor = match (true) {
+                $template === 'select'                   => 'youla-select',
+                $template !== 'input'                    => null,
+                $inputType === 'color'                   => 'youla-filler',
+                in_array($inputType, $dateTimeTypes, true) => 'youla-pickadate',
+                $inputType === 'range'                   => 'youla-ranger',
+                default                                  => null,
+            };
+
+            return $vendor === null
+                ? Manager::defaultStructure($file)
+                : ['js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js"];
+        });
+
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'storage', 'sortable'];
+        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-tooltip'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'youla') {

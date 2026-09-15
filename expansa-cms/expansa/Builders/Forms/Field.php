@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms;
 
+use Expansa\Facades\Asset;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Facades\View;
@@ -78,6 +79,9 @@ class Field
                 $field['attributes']['type'] = 'text';
             }
 
+            // Kept before the collapse below so discover() can still tell input subtypes apart.
+            $inputType = $type;
+
             if (in_array($type, [ 'color', 'date', 'datetime-local', 'email', 'month', 'range', 'search', 'tel', 'text', 'time', 'url', 'week' ], true)) {
                 $type = 'input';
             }
@@ -91,8 +95,15 @@ class Field
                 $field['conditions'] = $this->conditions($field['conditions'], $fields);
             }
 
-            $prefix   = in_array($type, [ 'tab', 'step', 'group' ], true) ? 'layout-' : '';
-            $content .= View::make("form/{$prefix}{$type}", $field);
+            $prefix = in_array($type, [ 'tab', 'step', 'group' ], true) ? 'layout-' : '';
+            $view   = View::make("form/{$prefix}{$type}", $field);
+
+            // Auto-connect vendor JS/CSS for this field template (see Manager::discover()).
+            // $inputType also doubles as the uid, so subtypes sharing form/input.blade.php
+            // (date, range, color, ...) don't collide on that shared basename.
+            Asset::discover($view->getPath(), $inputType, ['type' => $inputType]);
+
+            $content .= $view;
         }
         return $content;
     }

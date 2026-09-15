@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Console;
 
+use Expansa\Console\Commands\AssetClean;
 use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
 use Expansa\Console\Commands\Index;
@@ -66,6 +67,9 @@ class Terminal
 	    if ($this->getCommand('env') === null) {
 		    $this->addCommand(new Env($this));
 	    }
+        if ($this->getCommand('asset:clean') === null) {
+            $this->addCommand(new AssetClean($this));
+        }
         return $this;
     }
 

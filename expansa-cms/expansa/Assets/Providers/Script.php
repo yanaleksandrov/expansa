@@ -33,9 +33,8 @@ class Script extends Provider
      * @param string $language     Specifies the language of the script (deprecated, not recommended for use).
      * @param string $event        Specifies an event that will trigger the script (deprecated, not recommended for use)
      * @param string $path         Local path to the script for internal reference.
-     * @param string $id
      * @param string $version
-     * @param array  $dependencies Array of assets that are required before this script.
+     * @param array  $dependencies uid's (or full ids) of assets that are required before this script.
      * @param bool   $toFooter     Output before close body tag.
      */
     public function __construct(
@@ -52,46 +51,91 @@ class Script extends Provider
         public string $language = '',
         public string $event = '',
         public string $path = '',
-        public string $id = '',
         public string $version = '',
         public array $dependencies = [],
         public bool $toFooter = true,
     )
     {
-        $this->path = $this->toPath($src);
-        $this->id   = sprintf('%s-%s', $this->uid, pathinfo($this->path, PATHINFO_EXTENSION));
+        $this->path = self::toPath($src);
 
         foreach ($data as $name => $value) {
-            if (property_exists($this, $name)) {
+            if ($name !== 'id' && property_exists($this, $name)) {
                 $this->$name = $value;
             }
         }
     }
 
     /**
-     * Renders the script tag with the specified attributes and optional data.
-     *
-     * @param Provider $asset The asset to be rendered.
-     * @return string The HTML script tag with the corresponding attributes.
+     * Unique id of this asset within the manager: `{uid}-{extension}`.
      */
-    public function render(Provider $asset): string
-    {
-        $key  = $this->sanitizeConst($asset->uid);
-        $atts = array_diff_key((array) $asset, array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
-        $data = json_encode($asset->data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
-
-        $return = '';
-        if ($asset->data && $data) {
-            $return = sprintf("<script>var %s = %s</script>\n", $key, $data);
-        }
-        return $return . sprintf("	<script%s></script>\n", $this->sanitizeAttributes($atts));
+    public string $id {
+        get => sprintf('%s-%s', $this->uid, pathinfo($this->path ?: $this->src, PATHINFO_EXTENSION));
     }
 
     /**
-     * Minifies the JavaScript code by removing comments and unnecessary spaces.
+     * Renders the script tag with the specified attributes and optional data. $inline embeds
+     * the content directly instead of a `src`; $minify runs it through minify() first either
+     * way. No effect on an asset with no local file to read.
+     *
+     * @param Provider $asset The asset to be rendered.
+     * @param bool     $minify
+     * @param bool     $inline
+     * @return string The HTML script tag with the corresponding attributes.
+     */
+    public function render(Provider $asset, bool $minify = false, bool $inline = false): string
+    {
+        $return  = $this->preamble($asset);
+        $content = ($minify || $inline) ? $this->readContent($asset, $minify) : null;
+
+        if ($inline && $content !== null) {
+            return $return . $this->renderInline($asset, $content);
+        }
+
+        $attributes = array_diff_key(get_object_vars($asset), array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
+
+        if ($minify && $content !== null) {
+            // Null means the write failed (disk full, permissions, ...) - keep the original
+            // src rather than link to a cached file that was never actually written.
+            $attributes['src'] = $this->cacheMinifiedFile($asset->uid, $content, 'js') ?? $attributes['src'];
+        }
+
+        return $return . sprintf("	<script%s></script>\n", $this->sanitizeAttributes($attributes));
+    }
+
+    /**
+     * Embed already-computed JS $content directly as a `<script>` tag, keeping only the
+     * attributes that still make sense without a src (id, class, type).
+     */
+    public function renderInline(Provider $asset, string $content): string
+    {
+        $attributes = array_intersect_key(get_object_vars($asset), array_flip(['id', 'class', 'type']));
+
+        return sprintf("	<script%s>%s</script>\n", $this->sanitizeAttributes($attributes), $content);
+    }
+
+    /**
+     * `data`, if any, as `<script>var uid = {...}</script>` before the main tag. Rendered
+     * separately rather than folded into the (possibly cached/combined) file content, since
+     * `data` is per-render state - baking it into a cached bundle would change that bundle's
+     * hash, and thus its filename, on every request where the data differs.
+     */
+    public function preamble(Provider $asset): string
+    {
+        $data = json_encode($asset->data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+
+        return ($asset->data && $data)
+            ? sprintf("<script>var %s = %s</script>\n", $this->sanitizeConst($asset->uid), $data)
+            : '';
+    }
+
+    /**
+     * No-op: safe JS minification needs real tokenization (a `//` or `/*` may be inside a
+     * string or regex literal), which a regex-based pass can't tell apart without risking
+     * corrupting the code. Override this (or register a custom provider) with a real
+     * minifier/tokenizer if you need actual JS minification.
      *
      * @param string $code The JavaScript code to be minified.
-     * @return string The minified JavaScript code.
+     * @return string The code, unchanged.
      */
     public function minify(string $code): string
     {
