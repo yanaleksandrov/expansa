@@ -35,6 +35,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'name',
                         'required' => 1,
                     ],
                 ],
@@ -53,6 +54,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'slug',
                         'required' => 1,
                     ],
                 ],
@@ -81,6 +83,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'type',
                         'value' => $user->locale ?? '',
                     ],
                     'options'     => [
@@ -105,6 +108,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'image',
                         'value'       => '',
                     ],
                 ],
@@ -122,7 +126,7 @@ return \Expansa\Facades\Form::enqueue(
                     'copy'        => 0,
                     'validator'   => '',
                     'conditions'  => [],
-                    'attributes'  => [],
+                    'attributes'  => [ 'u-prop' => 'description' ],
                 ],
             ],
         ],

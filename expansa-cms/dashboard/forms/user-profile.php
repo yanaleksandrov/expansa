@@ -47,6 +47,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'avatar',
                                 'name'    => 'avatar',
                                 '@change' => '[...$refs.uploader.files].map(file => $ajax.post("upload/media").then(response => files.unshift(response[0])))',
                             ],
@@ -91,6 +92,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'email',
                                 'value'          => $user->email ?? '',
                                 'placeholder'    => t('e.g. user@gmail.com'),
                                 'u-autocomplete' => '',
@@ -110,6 +112,7 @@ return Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
+                            'attributes'  => [ 'u-prop' => 'confirm' ],
                         ],
                     ],
                 ],
@@ -136,6 +139,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'login',
                                 'value'       => $user->login ?? '',
                                 'placeholder' => t('e.g. admin'),
                                 'required'    => true,
@@ -157,6 +161,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'nicename',
                                 'value'       => $user->nicename ?? '',
                                 'placeholder' => t('Username'),
                                 'required'    => true,
@@ -177,6 +182,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'firstname',
                                 'value'       => $user->firstname ?? '',
                                 'placeholder' => t('e.g. John'),
                                 '@input'      => 'showname = `${firstname} ${lastname}`',
@@ -197,6 +203,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'lastname',
                                 'value'       => $user->lastname ?? '',
                                 'placeholder' => t('e.g. Doe'),
                                 '@input'      => 'showname = `${firstname} ${lastname}`',
@@ -217,6 +224,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'showname',
                                 'value' => $user->showname ?? '',
                             ],
                         ],
@@ -245,6 +253,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'bio',
                                 'rows'        => count(explode("\n", $field->find('bio') ?? '')),
                                 'value'       => $field->find('bio'),
                                 'placeholder' => t('A few words about yourself'),
@@ -286,6 +295,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'format',
                                 'value' => $field->find('format'),
                             ],
                             'options'     => [
@@ -330,6 +340,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'toolbar',
                                 'checked' => $field->find('toolbar'),
                             ],
                             'options'     => [],
@@ -359,6 +370,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'locale',
                                 'u-select' => '',
                                 'value'    => $user->locale ?? '',
                             ],
@@ -427,6 +439,7 @@ return Form::enqueue(
                                 </div>
                                 <?php
                             },
+                            'attributes'  => [ 'u-prop' => 'title' ],
                         ],
                     ],
                 ],
@@ -453,6 +466,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'passwordNew',
                                 'placeholder' => t('New password'),
                             ],
                             'switcher'    => 1,
@@ -481,6 +495,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'passwordOld',
                                 'u-autocomplete' => '',
                                 'placeholder'    => t('Old password'),
                             ],
@@ -595,6 +610,7 @@ return Form::enqueue(
                                 </div>
                                 <?php
                             },
+                            'attributes'  => [ 'u-prop' => 'title' ],
                         ],
                     ],
                 ],

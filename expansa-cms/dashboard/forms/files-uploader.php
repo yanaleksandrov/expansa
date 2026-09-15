@@ -26,6 +26,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop'   => 'files',
 				'@change'  => '$ajax.post("media/upload", $el.files, e => percent = e.percent)',
 				'multiple' => true,
 			],
@@ -34,6 +35,9 @@ return Expansa\Facades\Form::enqueue(
 			'name'     => 'progress',
 			'type'     => 'custom',
 			'callback' => fn () => '<div class="progress" :style="{\'--expansa-progress\':`${percent}%`}"></div>',
+			'attributes'  => [
+                'u-prop' => 'progress'
+            ],
 		],
 		[
 			'type'        => 'textarea',
@@ -50,6 +54,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop'      => 'urls',
 				'placeholder' => t( 'Each URL must be from a new line' ),
 				'@change'     => '$ajax.post("media/grab", {urls}).then(response => files = response)',
 				'u-textarea'  => 19,

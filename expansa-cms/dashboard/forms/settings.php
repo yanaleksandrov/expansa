@@ -48,6 +48,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'site.name',
 								'value'       => Options::get( 'site.name' ),
 								'required'    => true,
 								'placeholder' => t( 'e.g. Google' ),
@@ -68,6 +69,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'site.tagline',
 								'value'       => Options::get( 'site.tagline' ),
 								'placeholder' => t( 'e.g. Just another Expansa site' ),
 							],
@@ -87,6 +89,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'site.language',
 								'value'    => Options::get( 'site.language' ),
 								'u-select' => '{"showSearch": 1}',
 							],
@@ -107,6 +110,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'site.url',
 								'value'       => Options::get( 'site.url' ),
 								'placeholder' => t( 'e.g. Google' ),
 								'required'    => true,
@@ -137,6 +141,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'owner.email',
 								'value'    => Options::get( 'owner.email' ),
 								'required' => true,
 							],
@@ -165,7 +170,7 @@ return Expansa\Facades\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [],
+							'attributes'  => [ 'u-prop' => '' ],
 							'options'     => [
 								'users[membership]' => [
 									'content'     => t( 'Anyone can register' ),
@@ -202,6 +207,7 @@ return Expansa\Facades\Form::enqueue(
 								],
 							],
 							'attributes'  => [
+								'u-prop' => 'users.role',
 								'value' => Options::get( 'users.role' ),
 							],
 							'options'     => [
@@ -247,6 +253,7 @@ return Expansa\Facades\Form::enqueue(
 								</div>
 								<?php
 							},
+							'attributes'  => [ 'u-prop' => 'dateFormat' ],
 						],
 						[
 							'name'     => 'time-format',
@@ -273,6 +280,7 @@ return Expansa\Facades\Form::enqueue(
 								</div>
 								<?php
 							},
+							'attributes'  => [ 'u-prop' => 'timeFormat' ],
 						],
 						[
 							'type'        => 'select',
@@ -289,6 +297,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'weekStartsOn',
 								'value' => Options::get( 'week-starts-on' ),
 							],
 							'options' => [
@@ -316,6 +325,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'timezone',
 								'value' => Options::get( 'timezone' ),
 							],
 							'options' => [
@@ -359,7 +369,7 @@ return Expansa\Facades\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [],
+							'attributes'  => [ 'u-prop' => 'discourage' ],
 							'options'     => [
 								'discourage' => [
 									'content'     => t( 'Discourage search engines from indexing this site' ),
@@ -402,7 +412,7 @@ return Expansa\Facades\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [],
+							'attributes'  => [ 'u-prop' => 'comments' ],
 							'options'     => [
 								'comments[default_status]' => [
 									'content'     => t( 'Allow people to submit comments on new posts' ),
@@ -460,7 +470,7 @@ return Expansa\Facades\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [],
+							'attributes'  => [ 'u-prop' => 'comments.notifyPosts' ],
 							'options'     => [
 								'comments[notify_posts]' => [
 									'content'     => t( 'Anyone posts a comment' ),
@@ -500,7 +510,7 @@ return Expansa\Facades\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [],
+							'attributes'  => [ 'u-prop' => 'comments' ],
 							'options'     => [
 								'comments[moderation]' => [
 									'content'     => t( 'Comment must be manually approved' ),
@@ -540,7 +550,7 @@ return Expansa\Facades\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [],
+							'attributes'  => [ 'u-prop' => 'avatars.show' ],
 							'options'     => [
 								'avatars[show]' => [
 									'content'     => t( 'Show Avatars' ),
@@ -565,6 +575,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'avatars.type',
 								'value' => 'mystery',
 							],
 							'options'     => [
@@ -619,6 +630,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'images.format',
 								'value' => Options::get( 'images.format' ),
 							],
 							'options'     => [
@@ -640,7 +652,7 @@ return Expansa\Facades\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [],
+							'attributes'  => [ 'u-prop' => 'images.organization' ],
 							'options'     => [
 								'yearmonth' => t( 'Into month- and year-based folders' ),
 								'hash'      => t( 'Into hash-based folders' ),
@@ -681,6 +693,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'permalinks.pages.single',
 								'value'    => Options::get( 'permalinks.pages.single' ),
 								'required' => true,
 							],
@@ -700,6 +713,7 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
+								'u-prop' => 'permalinks.pages.categories',
 								'value'    => Options::get( 'permalinks.pages.categories' ),
 								'required' => true,
 							],

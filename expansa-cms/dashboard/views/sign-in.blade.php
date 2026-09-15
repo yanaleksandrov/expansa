@@ -8,7 +8,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 ?>
-<main class="mw-360" u-data>
+<main class="mw-360" u-data="{password: ''}">
 	<a href="{{ url() }}" class="df jcc mb-4" target="_blank">
 		<img src="{{ url('dashboard/assets/images/logo-grid.svg') }}" width="212" height="124" alt="Expansa CMS">
 	</a>
@@ -39,3 +39,24 @@ if ( ! defined( 'EX_PATH' ) ) {
 		</div>
 	</template>
 </main>
+
+<div class="notifications" u-data="notice" @mouseenter="pause()" @mouseleave="resume()">
+	<div u-each="(item, id) in items" class="notifications-item" :class="item.classes()" :style="`--notice-scale: ${1 - ($store.notifications.length - i - 1) * 0.005}`">
+		<div class="notifications-wrapper">
+			<svg class="notice__spinner" viewBox="0 0 24 24" width="24" height="24">
+				<circle cx="12" cy="12" r="11" @load="$el.style.animationDuration = item.duration + 'ms'; $el.style.animationDelay = '-' + elapsed(item) + 'ms'"></circle>
+			</svg>
+			<i
+				class="ph"
+				:class="{
+					'ph-bell-ringing t-gray': notification.type === 'info',
+					'ph-siren t-red': notification.type === 'error',
+					'ph-check t-green': notification.type === 'success',
+					'ph-shield-warning t-orange': notification.type === 'warning',
+				}"
+			></i>
+			<div class="notifications-text" u-text="item.message"></div>
+			<button type="button" class="notifications-close" :style="notification.duration && `--notice-animation: ${notification.animation}`" u-show="item.closable" @click="close(id)"></button>
+		</div>
+	</div>
+</div>

@@ -108,7 +108,7 @@ return new class extends Plugin
                                     'after'       => '',
                                     'tooltip'     => '',
                                     'instruction' => '',
-                                    'attributes'  => [],
+                                    'attributes'  => [ 'u-prop' => 'type' ],
                                     'options'     => [
                                         'main'       => [
                                             'label'   => t('Basic'),
@@ -259,6 +259,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => t('This is the name which will appear on the EDIT page'),
                                     'attributes'  => [
+                                        'u-prop' => 'label',
                                         'value'       => 'Title',
                                         'placeholder' => t('Field label'),
                                     ],
@@ -272,6 +273,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => t('Single word, no spaces. Underscores and dashes allowed'),
                                     'attributes'  => [
+                                        'u-prop' => 'name',
                                         'value'       => '',
                                         'placeholder' => t('Field label'),
                                     ],
@@ -285,6 +287,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => t('Appears when creating a new post'),
                                     'attributes'  => [
+                                        'u-prop' => 'value',
                                         'value' => '',
                                     ],
                                 ],
@@ -308,6 +311,7 @@ return new class extends Plugin
                                             'value'    => ['select'],
                                         ],
                                     ],
+                                    'attributes'  => [ 'u-prop' => 'options' ],
                                 ],
                             ],
                         ],
@@ -332,7 +336,7 @@ return new class extends Plugin
                                     'after'       => '',
                                     'tooltip'     => '',
                                     'instruction' => t('The form will not be saved if it is not filled in'),
-                                    'attributes'  => [],
+                                    'attributes'  => [ 'u-prop' => 'required' ],
                                     'conditions'  => [],
                                     'options'     => [],
                                 ],
@@ -355,6 +359,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => '',
                                     'attributes'  => [
+                                        'u-prop' => 'labelClass',
                                         'placeholder' => t('e.g. df aic fs-12 t-muted'),
                                     ],
                                 ],
@@ -367,6 +372,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => '',
                                     'attributes'  => [
+                                        'u-prop' => 'before',
                                         'placeholder' => t('e.g. <i class="ph ph-bug"></i>'),
                                     ],
                                 ],
@@ -379,6 +385,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => '',
                                     'attributes'  => [
+                                        'u-prop' => 'after',
                                         'placeholder' => t('e.g. Mb'),
                                     ],
                                 ],
@@ -389,7 +396,7 @@ return new class extends Plugin
                                     'label_class' => 'df aic fs-12 t-muted',
                                     'value'       => '',
                                     'reset'       => false,
-                                    'attributes'  => [],
+                                    'attributes'  => [ 'u-prop' => 'reset' ],
                                     'options'     => [
                                         'yes' => t('Yes'),
                                         'no'  => t('No'),
@@ -402,7 +409,7 @@ return new class extends Plugin
                                     'label_class' => 'df aic fs-12 t-muted',
                                     'value'       => '',
                                     'reset'       => false,
-                                    'attributes'  => [],
+                                    'attributes'  => [ 'u-prop' => 'copy' ],
                                     'options'     => [
                                         'yes' => t('Yes'),
                                         'no'  => t('No'),
@@ -421,7 +428,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'placeholder' => t('e.g. Mb'),
                                     'instruction' => t('Use this field to output instructions or additional explanations'),
-                                    'attributes'  => [],
+                                    'attributes'  => [ 'u-prop' => 'description' ],
                                     'conditions'  => [],
                                 ],
                             ],

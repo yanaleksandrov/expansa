@@ -18,6 +18,7 @@ return Expansa\Facades\Form::enqueue(
 			'class'       => 'pt-7 px-7 t-center',
 			'label'       => t( 'Map fields for export' ),
 			'instruction' => t( 'Select fields from your CSV file that you want to map to fields in the posts, or that you want to ignore during import' ),
+			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
 			'type'        => 'select',
@@ -34,6 +35,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'types',
 				'value'    => 'pages',
 				'multiple' => true,
 			],
@@ -57,6 +59,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'format',
 				'value' => 'csv',
 			],
 			'options'     => [

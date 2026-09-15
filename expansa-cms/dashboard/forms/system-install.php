@@ -21,11 +21,13 @@ return \Expansa\Facades\Form::enqueue(
                     'name'        => 'title',
                     'class'       => 't-center',
                     'instruction' => t('This is installation wizard. Before start, you need to set some settings. Please fill the information about your website.'),
+                    'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
                     'name'  => 'website-data',
                     'type'  => 'divider',
                     'label' => t('Website data'),
+                    'attributes'  => [ 'u-prop' => 'websiteData' ],
                 ],
                 [
                     'type'        => 'text',
@@ -42,6 +44,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'site.name',
                         'placeholder'    => t('Example: My Blog'),
                         'required'       => true,
                         'u-autocomplete' => '',
@@ -62,6 +65,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'site.tagline',
                         'placeholder'    => t('Example: Just another Expansa site'),
                         'u-autocomplete' => '',
                     ],
@@ -82,11 +86,13 @@ return \Expansa\Facades\Form::enqueue(
                     'type'        => 'header',
                     'label'       => t('Step 1: Database'),
                     'instruction' => t('Information about connecting to the database. If you are not sure about it, contact your hosting provider.'),
+                    'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
                     'name'  => 'credits',
                     'type'  => 'divider',
                     'label' => t('Database credits'),
+                    'attributes'  => [ 'u-prop' => 'credits' ],
                 ],
                 [
                     'type'        => 'text',
@@ -103,6 +109,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'db.database',
                         'placeholder'    => t('database_name'),
                         'required'       => true,
                         'u-autocomplete' => '',
@@ -123,6 +130,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'db.username',
                         'placeholder'    => t('user_name'),
                         'required'       => true,
                         'u-autocomplete' => '',
@@ -143,6 +151,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'db.password',
                         'placeholder'    => t('Password'),
                         'required'       => true,
                         'u-autocomplete' => '',
@@ -171,6 +180,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'db.host',
                                 'value'          => 'localhost',
                                 'placeholder'    => t('Hostname'),
                                 'required'       => true,
@@ -192,6 +202,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'db.prefix',
                                 'value'          => 'expansa_',
                                 'placeholder'    => t('Prefix'),
                                 'required'       => true,
@@ -217,15 +228,18 @@ return \Expansa\Facades\Form::enqueue(
                     'type'        => 'header',
                     'label'       => t('Step 2: System check'),
                     'instruction' => t('This is an important step that will help make sure that your server is ready for installation and properly configured.'),
+                    'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
                     'name'  => 'website-data',
                     'type'  => 'divider',
                     'label' => t('System check'),
+                    'attributes'  => [ 'u-prop' => 'websiteData' ],
                 ],
                 [
                     'name' => 'checker',
                     'type' => 'checker',
+                    'attributes'  => [ 'u-prop' => 'checker' ],
                 ],
             ],
         ],
@@ -242,11 +256,13 @@ return \Expansa\Facades\Form::enqueue(
                     'type'        => 'header',
                     'label'       => t('Step 3: Create account'),
                     'instruction' => t('Almost everything is ready! The last step: add website owner information.'),
+                    'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
                     'name'  => 'user-credits',
                     'type'  => 'divider',
                     'label' => t('Owner credits'),
+                    'attributes'  => [ 'u-prop' => 'userCredits' ],
                 ],
                 [
                     'type'        => 'hidden',
@@ -263,6 +279,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'user.isVerified',
                         'value' => true,
                     ],
                 ],
@@ -281,6 +298,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'user.email',
                         'placeholder'    => t('Enter email'),
                         '@change'        => "user.login = user.email.split('@')[0]",
                         'required'       => true,
@@ -302,6 +320,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'user.locale',
                         'u-select' => '{"showSearch": 1}',
                         'required' => true,
                     ],
@@ -322,6 +341,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'user.login',
                         'placeholder'    => t('Enter login'),
                         'required'       => true,
                         'u-autocomplete' => '',
@@ -342,6 +362,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'user.password',
                         'placeholder'    => t('Password'),
                         'required'       => true,
                         'u-autocomplete' => '',

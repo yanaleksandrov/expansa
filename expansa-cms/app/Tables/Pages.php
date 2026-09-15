@@ -89,7 +89,7 @@ final class Pages extends Table
                     'copy'        => 0,
                     'validator'   => '',
                     'conditions'  => [],
-                    'attributes'  => [],
+                    'attributes'  => [ 'u-prop' => 'authors' ],
                     'options'     => [
                         ''                => t('Select an author'),
                         'user-registered' => t('New user registered'),
@@ -110,6 +110,7 @@ final class Pages extends Table
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'date',
                         'readonly'    => true,
                         'placeholder' => t('Select dates'),
                     ],

@@ -27,6 +27,7 @@ return \Expansa\Facades\Form::enqueue(
 				<div class="card-hr"></div>
 				<?php
 			},
+			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
 			'type'       => 'step',
@@ -42,6 +43,7 @@ return \Expansa\Facades\Form::enqueue(
 					'class'       => 'p-7 t-center',
 					'label'       => t( 'Import posts from a CSV file' ),
 					'instruction' => t( 'This tool allows you to import (or merge) posts data to your website from a CSV or TXT file. %sDownload%s the file for an example or choose a file from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
+					'attributes'  => [ 'u-prop' => 'title' ],
 				],
 				[
 					'type'        => 'uploader',
@@ -58,6 +60,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'uploader',
 						'accept'  => '.csv,.txt',
 						'@change' => '$ajax.post("files/upload").then(response => fields = response.fields,goNext())',
 					],
@@ -79,6 +82,7 @@ return \Expansa\Facades\Form::enqueue(
 					'class'       => 'p-7 t-center',
 					'label'       => t( 'Map CSV fields to posts' ),
 					'instruction' => t( 'Select fields from your CSV file that you want to map to fields in the posts, or that you want to ignore during import' ),
+					'attributes'  => [ 'u-prop' => 'title' ],
 				],
 				[
 					'type'     => 'custom',

@@ -27,7 +27,7 @@ class Field
     public array $defaults     = [];
 
     /**
-     * Get fields html from array.
+     * Get fields HTML from array.
      *
      * @param array $fields
      * @param int $step
@@ -59,7 +59,7 @@ class Field
             };
 
             if (! in_array($type, [ 'tab', 'step', 'group', 'submit' ], true)) {
-                $field['attributes'] = ['type' => $type, 'name' => $name, 'u-prop' => $prop, ...$field['attributes']];
+                $field['attributes'] = ['type' => $type, 'name' => $name, ...$field['attributes']];
             }
 
             if (in_array($type, [ 'tab', 'step', 'group' ], true)) {

@@ -20,6 +20,7 @@ return \Expansa\Facades\Form::enqueue(
 				<h6><?php echo t( 'Menu item data' ); ?></h6>
 				<?php
 			},
+			'attributes'  => [ 'u-prop' => 'instructions' ],
 		],
 		[
 			'type'        => 'text',
@@ -37,6 +38,7 @@ return \Expansa\Facades\Form::enqueue(
 			'tooltip'     => '',
 			'instruction' => '',
 			'attributes'  => [
+				'u-prop' => 'title',
 				'@input' => 'slug = $safe.slug(title)',
 			],
 			'conditions'  => [],
@@ -56,7 +58,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => '',
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'classes' ],
 			'conditions'  => [],
 		],
 		[
@@ -74,7 +76,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => '',
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'linkTarget' ],
 			'conditions'  => [],
 		],
 		[
@@ -92,7 +94,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => t( 'The description will be displayed in the menu if the active theme supports it.' ),
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'description' ],
 			'conditions'  => [],
 		],
 	]

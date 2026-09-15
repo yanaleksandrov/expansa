@@ -19,6 +19,7 @@ return \Expansa\Facades\Form::enqueue(
 			'class'       => 'px-8 t-center',
 			'label'       => t( 'Tools Page' ),
 			'instruction' => t( 'Here are additional tools for working with Expansa. To start, select a tool from the list below:' ),
+			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
 			'name'     => 'title',
@@ -72,6 +73,7 @@ return \Expansa\Facades\Form::enqueue(
 				</div>
 				<?php
 			},
+			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
 			'name'        => 'title',
@@ -82,6 +84,7 @@ return \Expansa\Facades\Form::enqueue(
 				'If the tool you need is not in the list, look in the [plugin catalog](:pluginsCatalogLink) to see if such a tool is available.',
 				url( 'dashboard/plugins' )
 			),
+			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 	],
 );

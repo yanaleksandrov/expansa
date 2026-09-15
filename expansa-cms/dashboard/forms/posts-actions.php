@@ -26,7 +26,9 @@ return \Expansa\Facades\Form::enqueue(
 			'copy'        => 0,
 			'validator'   => '',
 			'conditions'  => [],
-			'attributes'  => [],
+			'attributes'  => [
+                'u-prop' => 'action'
+            ],
 			'options' => [
 				''      => t( 'Bulk Actions' ),
 				'edit'  => t( 'Edit' ),
@@ -49,7 +51,8 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'class' => 'btn btn--sm btn--primary',
+				'u-prop' => 'uid',
+				'class'  => 'btn btn--sm btn--primary',
 			],
 		],
 	]

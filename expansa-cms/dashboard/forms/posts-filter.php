@@ -28,6 +28,7 @@ return \Expansa\Facades\Form::enqueue(
 			'tooltip'     => '',
 			'instruction' => t( '25% used of 2GB' ),
 			'attributes'  => [
+				'u-prop' => 'progress',
 				'placeholder' => t( 'e.g. image name' ),
 			],
 			'conditions'  => [],
@@ -51,6 +52,7 @@ return \Expansa\Facades\Form::enqueue(
 			'tooltip'     => '',
 			'instruction' => '',
 			'attributes'  => [
+				'u-prop' => 's',
 				'placeholder' => t( 'e.g. image name' ),
 			],
 			'conditions'  => [],
@@ -70,7 +72,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => '',
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'types' ],
 			'conditions'  => [],
 			'options' => [
 				'svg'    => t( 'SVG %s', '<i class="badge badge--blue-lt ml-auto">56</i>' ),
@@ -95,7 +97,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => '',
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'authors' ],
 			'conditions'  => [],
 			'options' => [
 				''                => t( 'Select an author' ),

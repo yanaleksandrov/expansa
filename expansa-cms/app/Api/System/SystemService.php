@@ -141,8 +141,8 @@ final class SystemService
         User::login($userdata);
 
         return [
-            'target'   => 'body',
-            'redirect' => url('installed')
+            'target'        => 'body',
+            'redirect:7000' => url('installed')
         ];
     }
 

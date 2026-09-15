@@ -62,6 +62,7 @@ return Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'site.language',
                                 'value' => Options::get( 'site.language' ),
                             ],
                             'options' => [
@@ -103,7 +104,7 @@ return Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'comments' ],
                             'options'     => [
                                 'comments[default_status]' => [
                                     'content'     => t( 'Editor' ),
@@ -152,6 +153,7 @@ return Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'site.language',
                         'value' => Options::get( 'site.language' ),
                     ],
                     'options' => $options,
@@ -189,6 +191,7 @@ return Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'site.tagline',
                                 'value'       => Options::get( 'site.tagline' ),
                                 'placeholder' => t( 'e.g. Just another Expansa site' ),
                             ],
@@ -208,6 +211,7 @@ return Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'site.tagline',
                                 'value'       => Options::get( 'site.tagline' ),
                                 'placeholder' => t( 'e.g. Just another Expansa site' ),
                             ],
