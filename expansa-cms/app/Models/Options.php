@@ -174,7 +174,7 @@ class Options extends Model
             self::$options[ $option ] = $value;
         }
 
-        $record = self::fill(['key' => $option, 'value' => $value]);
+        $record = new self(['key' => $option, 'value' => $value]);
 
         if (! $record->isValid()) {
             return false;
@@ -232,7 +232,7 @@ class Options extends Model
             return false;
         }
 
-        $record->fillAttributes(['value' => $value]);
+        $record->fill(['value' => $value]);
 
         return $record->save() instanceof self ? 1 : false;
     }

@@ -77,7 +77,7 @@ class Query
         return Cache::get("$value", $this->model->getTable(), function () use ($value, $by) {
             $data = Db::get($this->model->getTable(), '*', $this->scopedWheres([$by => $value]));
             if (is_array($data)) {
-                return $this->model::newFrom($data);
+                return $this->model::make($data);
             }
             return null;
         });
@@ -92,7 +92,7 @@ class Query
     {
         $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres($this->wheres)) ?? [];
 
-        return array_map(fn(array $row) => $this->model::newFrom($row), $rows);
+        return array_map(fn(array $row) => $this->model::make($row), $rows);
     }
 
     /**
@@ -104,7 +104,7 @@ class Query
     {
         $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres(array_merge($this->wheres, ['LIMIT' => 1]))) ?? [];
 
-        return isset($rows[0]) ? $this->model::newFrom($rows[0]) : null;
+        return isset($rows[0]) ? $this->model::make($rows[0]) : null;
     }
 
     /**
@@ -116,7 +116,7 @@ class Query
     {
         $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres([])) ?? [];
 
-        return array_map(fn(array $row) => $this->model::newFrom($row), $rows);
+        return array_map(fn(array $row) => $this->model::make($row), $rows);
     }
 
     /**

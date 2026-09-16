@@ -38,11 +38,33 @@ abstract class Model implements \JsonSerializable
     protected string $table;
 
     /**
-     * Build a new, unguarded, unsaved model instance from trusted attributes.
+     * Build a new, unsaved instance, optionally filled with the given attributes -
+     * sanitized and passed through each attribute's mutator, exactly like calling
+     * {@see self::fill()} on an empty instance (which is exactly what this does).
+     * `new User($data)` is the "new + fill" idiom; call save() on the result to persist it.
      *
-     * Bypasses mass-assignment protection and sanitizing entirely — for
-     * internal/trusted data only (e.g. install-time setup). Nothing is
-     * persisted; call save() on the result to actually write it.
+     * @param array<string, mixed> $attributes
+     * @throws Exception if attributes are not fillable
+     */
+    public function __construct(array $attributes = [])
+    {
+        $this->fill($attributes);
+    }
+
+    /**
+     * Build a new model instance from trusted attributes, bypassing mass-assignment
+     * protection and sanitizing/mutators entirely - for internal/trusted data only
+     * (a value already in its final form: a hashed password, a deduped nicename, a
+     * row just read from the database, ...), never raw user input. See {@see self::fill()}
+     * for the opposite - the one to reach for whenever the data didn't originate in
+     * your own trusted code.
+     *
+     * A truthy 'id' in $attributes is treated as "this row already exists in the
+     * database" and syncs originals accordingly, so a later save() diffs against
+     * these values (an update with nothing actually changed becomes a no-op)
+     * instead of treating every attribute as dirty. This is what Query::get()/
+     * find()/first()/all() rely on to hydrate rows. Without an 'id', the instance
+     * is treated as brand new and unsaved - call save() to insert it.
      *
      * @param array<string, mixed>|stdClass $attributes Attributes to fill the model with.
      * @return static
@@ -53,55 +75,30 @@ abstract class Model implements \JsonSerializable
 
         $model->attributes = (array) $attributes;
 
-        return $model;
-    }
-
-    /**
-     * Create a new model instance from an array or stdClass and sync originals.
-     *
-     * @param array<string, mixed>|stdClass $attributes
-     * @return static
-     */
-    public static function newFrom(array|stdClass $attributes): static
-    {
-        $model = new static();
-
-        $model->setAttributes((array) $attributes)->syncOriginals();
+        if (! empty($model->attributes['id'])) {
+            $model->syncOriginals();
+        }
 
         return $model;
     }
 
     /**
-     * Build a new, unsaved model instance filled with the given attributes - sanitized and
-     * passed through each attribute's mutator (unlike {@see self::make()}/{@see self::newFrom()},
-     * which treat the data as already-final and skip both, since they're meant for trusted
-     * data such as a freshly-fetched database row). Call save() on the result to persist it.
+     * Mass-assign the given attributes - sanitized and passed through each attribute's
+     * mutator (e.g. User's password gets hashed) - unlike {@see self::make()}, which
+     * treats the data as already-final and skips both. This is the one to use for raw
+     * user/API input.
      *
-     * To mass-assign attributes onto a model that already exists (e.g. inside an update()
-     * method), use the instance method {@see self::fillAttributes()} instead - this one always
-     * builds a fresh instance, so calling it on `$this` would silently fill-and-discard a new
-     * one instead of touching the model you meant to update.
-     *
-     * @param array<string, mixed> $attributes
-     * @return static
-     * @throws Exception if attributes are not fillable
-     */
-    public static function fill(array $attributes): static
-    {
-        return new static()->fillAttributes($attributes);
-    }
-
-    /**
-     * Mass-assign the given attributes onto this instance - the same sanitizing/mutator
-     * pipeline as {@see self::fill()}, but applied in place instead of to a new instance.
-     * This is the one to call from an update() method, on `$this` or on a model already
-     * fetched from the database.
+     * Always an instance method - there's no separate static entry point. For a brand
+     * new record, construct one and let the constructor call this for you: `new User($data)`
+     * (see {@see self::__construct()}). To mass-assign onto a model that already exists -
+     * `$this` inside an update()-style method, or one already fetched from the database -
+     * call `$model->fill($data)` directly; it mutates that same instance in place.
      *
      * @param array<string, mixed> $attributes
      * @return static
      * @throws Exception if attributes are not fillable
      */
-    public function fillAttributes(array $attributes): static
+    public function fill(array $attributes): static
     {
         if (!$attributes) {
             return $this;

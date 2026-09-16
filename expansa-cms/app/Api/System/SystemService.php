@@ -128,9 +128,10 @@ final class SystemService
 
         Db::updateSchema();
 
-        // fill(), unlike make(), routes through setAttribute() - required so the
-        // password attribute's set-mutator actually hashes it before it's saved.
-        $user = User::fill($userdata);
+        // The constructor calls fill() internally, which routes through setAttribute() -
+        // required so the password attribute's set-mutator actually hashes it before it's
+        // saved (unlike make(), which bypasses that entirely for already-trusted data).
+        $user = new User($userdata);
 
         if (!$user->isValid()) {
             throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());

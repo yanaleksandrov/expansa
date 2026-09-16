@@ -172,7 +172,7 @@ class Comment extends Model
     {
         $data += ['status' => self::STATUS_PENDING];
 
-        $comment = self::fill($data);
+        $comment = new self($data);
 
         if (! $comment->isValid()) {
             return error('comment-add', $comment->getValidatorErrors());
@@ -193,7 +193,7 @@ class Comment extends Model
      */
     public function update(array $data): Comment|Error
     {
-        $this->fillAttributes($data);
+        $this->fill($data);
 
         if (! $this->isValid()) {
             return error('comment-update', $this->getValidatorErrors());
