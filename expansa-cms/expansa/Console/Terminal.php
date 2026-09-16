@@ -7,6 +7,7 @@ namespace Expansa\Console;
 use Expansa\Console\Commands\AssetClean;
 use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
+use Expansa\Console\Commands\HooksList;
 use Expansa\Console\Commands\Index;
 use Expansa\Console\Output\Writer;
 
@@ -69,6 +70,9 @@ class Terminal
 	    }
         if ($this->getCommand('asset:clean') === null) {
             $this->addCommand(new AssetClean($this));
+        }
+        if ($this->getCommand('hooks:list') === null) {
+            $this->addCommand(new HooksList($this));
         }
         return $this;
     }

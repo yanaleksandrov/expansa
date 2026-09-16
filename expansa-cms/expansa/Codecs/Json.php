@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Codecs;
 
 /**
- * Class Json
+ * Class JSON.
  *
  * Provides methods for encoding and decoding JSON data.
  * This class is intended for handling JSON serialization and deserialization
