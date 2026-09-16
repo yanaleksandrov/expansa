@@ -6,6 +6,7 @@ use App\Http\VerifyCsrfToken;
 use App\Models\Field;
 use App\Models\User;
 use App\Query\Query;
+use App\Support\DashboardFavicons;
 use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
@@ -24,39 +25,7 @@ new class
 
         VerifyCsrfToken::seed();
 
-        foreach (
-            [
-                'favicon'   => [
-                    'href'  => url('/dashboard/assets/favicon/favicon-96x96.png'),
-                    'rel'   => 'icon',
-                    'type'  => 'image/png',
-                    'sizes' => '96x96',
-                ],
-                'favicon-svg'  => [
-                    'href' => url('/dashboard/assets/favicon/favicon.svg'),
-                    'rel'  => 'icon',
-                    'type' => 'image/svg+xml',
-                ],
-                'favicon-ico'  => [
-                    'href' => url('/dashboard/assets/favicon/favicon.ico'),
-                    'rel'  => 'shortcut icon',
-                    'type' => '',
-                ],
-                'favicon-apple' => [
-                    'href'  => url('/dashboard/assets/favicon/apple-touch-icon.png'),
-                    'rel'   => 'apple-touch-icon',
-                    'sizes' => '180x180',
-                    'type'  => '',
-                ],
-                'manifest'  => [
-                    'href' => url('/dashboard/assets/favicon/site.webmanifest'),
-                    'rel'  => 'manifest',
-                    'type' => '',
-                ],
-            ] as $uid => $asset
-        ) {
-            Asset::style($uid, $asset['href'], $asset);
-        }
+        DashboardFavicons::enqueue();
 
         /**
          * Include CSS styles & JS scripts.
@@ -105,7 +74,7 @@ new class
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-tooltip'];
+        $scripts = ['youla', 'youla-ajax', 'youla-expansa'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'youla') {

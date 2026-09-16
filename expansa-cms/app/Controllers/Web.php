@@ -52,9 +52,11 @@ final class Web
             redirect('dashboard');
         }
 
-        // include & launch dashboard
+        // include & launch the lightweight auth bootstrap - not the full dashboard, since
+        // none of its admin-only assets (menus, tables, vendor JS for dashboard form
+        // fields, ...) are reachable from a page a logged-out visitor can see.
         if (in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && !User::isLogged()) {
-            require_once EX_PATH . 'dashboard/index.php';
+            require_once EX_PATH . 'dashboard/auth.php';
 
             $page = 'welcome';
         }

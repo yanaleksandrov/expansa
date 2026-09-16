@@ -11,12 +11,12 @@ final class Assets
 {
     public function renderDashboardHeader(): void
     {
-        Asset::render(['toFooter' => false], combine: true, minify: true, inline: false);
+        Asset::render(['toFooter' => false], combine: false, minify: false, inline: false);
     }
 
     public function renderDashboardFooter(): void
     {
-        Asset::render(['toFooter' => true], combine: true, minify: true, inline: false);
+        Asset::render(['toFooter' => true], combine: false, minify: false, inline: false);
     }
 
     public function dashboardLoaded(string $content): string

@@ -313,7 +313,7 @@ class User extends Model
         // Only takes effect if the key is entirely absent — fill() sanitizes/mutates only keys $userdata actually has.
         $userdata += ['status' => self::STATUS_ACTIVE, 'nicename' => ''];
 
-        $user = new self()->fill($userdata);
+        $user = self::fill($userdata);
 
         if (! $user->isValid()) {
             return error('user-add', $user->getValidatorErrors());
@@ -340,8 +340,8 @@ class User extends Model
      */
     public function update(array $userdata): User|Error
     {
-        // 'id' isn't fillable and 'login' is readonly, so fill() already ignores both.
-        $this->fill($userdata);
+        // 'id' isn't fillable and 'login' is readonly, so fillAttributes() already ignores both.
+        $this->fillAttributes($userdata);
 
         if (! $this->save() instanceof self) {
             return error('user-update', t('Failed to save the user to the database.'));

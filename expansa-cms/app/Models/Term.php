@@ -132,7 +132,7 @@ class Term extends Model
         // Only takes effect if the key is entirely absent — fill() sanitizes/mutates only keys $data actually has.
         $data += ['slug' => ''];
 
-        $term = new self()->fill($data);
+        $term = self::fill($data);
 
         if (! $term->isValid()) {
             return error('term-add', $term->getValidatorErrors());
@@ -153,7 +153,7 @@ class Term extends Model
      */
     public function update(array $data): Term|Error
     {
-        $this->fill($data);
+        $this->fillAttributes($data);
 
         if (! $this->isValid()) {
             return error('term-update', $this->getValidatorErrors());

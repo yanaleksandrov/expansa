@@ -98,7 +98,7 @@ class Taxonomy extends Model
     {
         $data += ['count' => 0, 'parent' => 0];
 
-        $taxonomy = new self()->fill($data);
+        $taxonomy = self::fill($data);
 
         if (! $taxonomy->isValid()) {
             return error('taxonomy-add', $taxonomy->getValidatorErrors());
@@ -119,7 +119,7 @@ class Taxonomy extends Model
      */
     public function update(array $data): Taxonomy|Error
     {
-        $this->fill($data);
+        $this->fillAttributes($data);
 
         if (! $this->isValid()) {
             return error('taxonomy-update', $this->getValidatorErrors());

@@ -15,11 +15,10 @@ use stdClass;
  * Base data model class with support for attributes, mass assignment protection, timestamps, and soft deletes.
  *
  * @method static static|null get(mixed $value, string $by = 'id') Find a model by primary key or specified field.
- * @method static static      fill(array $data)                    Fill the model with the given attributes.
  * @method static bool        exists(array $data)                  Check record is existing.
- * @method null|static         save()                                Insert or update the record and return the fresh model.
- * @method int                delete()                              Delete the record by primary key.
- * @method int                restore()                             Restore a soft-deleted record.
+ * @method null|static        save()                               Insert or update the record and return the fresh model.
+ * @method int                delete()                             Delete the record by primary key.
+ * @method int                restore()                            Restore a soft-deleted record.
  *
  * @property string|null $updatedAt Timestamp of the last update.
  * @property string|null $createdAt Timestamp of creation.
@@ -73,13 +72,36 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Fill the model with an array of attributes.
+     * Build a new, unsaved model instance filled with the given attributes - sanitized and
+     * passed through each attribute's mutator (unlike {@see self::make()}/{@see self::newFrom()},
+     * which treat the data as already-final and skip both, since they're meant for trusted
+     * data such as a freshly-fetched database row). Call save() on the result to persist it.
+     *
+     * To mass-assign attributes onto a model that already exists (e.g. inside an update()
+     * method), use the instance method {@see self::fillAttributes()} instead - this one always
+     * builds a fresh instance, so calling it on `$this` would silently fill-and-discard a new
+     * one instead of touching the model you meant to update.
      *
      * @param array<string, mixed> $attributes
      * @return static
      * @throws Exception if attributes are not fillable
      */
-    public function fill(array $attributes): static
+    public static function fill(array $attributes): static
+    {
+        return new static()->fillAttributes($attributes);
+    }
+
+    /**
+     * Mass-assign the given attributes onto this instance - the same sanitizing/mutator
+     * pipeline as {@see self::fill()}, but applied in place instead of to a new instance.
+     * This is the one to call from an update() method, on `$this` or on a model already
+     * fetched from the database.
+     *
+     * @param array<string, mixed> $attributes
+     * @return static
+     * @throws Exception if attributes are not fillable
+     */
+    public function fillAttributes(array $attributes): static
     {
         if (!$attributes) {
             return $this;
