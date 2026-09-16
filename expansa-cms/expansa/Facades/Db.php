@@ -16,38 +16,48 @@ use PDOStatement;
  * It also includes methods for more advanced operations like schema management and raw SQL execution.
  *
  * @method static PDOStatement query(string $statement, array $map = [])
- * @method static PDOStatement create(string $table, array $columns, array $options = null)
+ * @method static PDOStatement create(string $table, array $columns, ?array $options = null)
  * @method static PDOStatement drop(string $table)
  * @method static PDOStatement rename(string $table, string $to)
  * @method static PDOStatement insert(string $table, array $values, ?string $primaryKey = null)
- * @method static PDOStatement update(string $table, array $data, array $where = null)
+ * @method static PDOStatement update(string $table, array $data, ?array $where = null)
  * @method static PDOStatement delete(string $table, Raw|array $where)
- * @method static PDOStatement replace(string $table, array $columns, array $where = null)
- * @method static mixed        get(string $table, array $join = null, array|string $columns = null, array $where = null)
- * @method static bool         has(string $table, array $join, array $where = null)
- * @method static array        rand(string $table, array $join = null, array|string $columns = null, array $where = null)
- * @method static null|int     count(string $table, array $join = null, string $column = null, array $where = null)
- * @method static null|array   select(string $table, string|array $join, array|string $columns = null, array $where = null)
- * @method static null|string  avg(string $table, array $join, string $column = null, array $where = null)
- * @method static null|string  max(string $table, array $join, string $column = null, array $where = null)
- * @method static null|string  min(string $table, array $join, string $column = null, array $where = null)
- * @method static null|string  sum(string $table, array $join, string $column = null, array $where = null)
+ * @method static PDOStatement replace(string $table, array $columns, ?array $where = null)
+ * @method static mixed        get(string $table, $join = null, array|string|null $columns = null, ?array $where = null)
+ * @method static bool         has(string $table, array $join, ?array $where = null)
+ * @method static array        rand(string $table, ?array $join = null, array|string|null $columns = null, ?array $where = null)
+ * @method static null|int     count(string $table, ?array $join = null, ?string $column = null, ?array $where = null)
+ * @method static null|array   select(string $table, $join, array|string|null $columns = null, ?array $where = null)
+ * @method static null|string  avg(string $table, array $join, ?string $column = null, ?array $where = null)
+ * @method static null|string  max(string $table, array $join, ?string $column = null, ?array $where = null)
+ * @method static null|string  min(string $table, array $join, ?string $column = null, ?array $where = null)
+ * @method static null|string  sum(string $table, array $join, ?string $column = null, ?array $where = null)
  * @method static null|string  id(?string $name = null)
  * @method static Raw          raw(string $string, array $map = [])
  * @method static string       quote(string $string)
  * @method static string       version()
- * @method static array        schema(string $column = null)
+ * @method static array        schema(?string $col = null)
  * @method static array        updateSchema()
  * @method static array        log()
  * @method static bool         hasTable(string $tableName)
  */
 class Db extends Facade
 {
+    /**
+     * @return string
+     */
     protected static function getStaticClassAccessor(): string
     {
         return '\Expansa\Database\Query\Builder';
     }
 
+    /**
+     * Connection options read from the application's own env config - the one legitimate place
+     * this happens; everything downstream (Query\Builder and below) receives them as plain
+     * constructor arguments instead of reading the constants itself.
+     *
+     * @return array{0: array<string, mixed>}
+     */
     protected static function getConstructorArgs(): array
     {
         return [

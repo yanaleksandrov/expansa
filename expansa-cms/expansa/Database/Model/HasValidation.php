@@ -7,17 +7,17 @@ namespace Expansa\Database\Model;
 use Expansa\Security\Validator;
 
 /**
- * Trait provides validation rules for create & update model. Classes using this
- * trait must implement the `validate` method.
- *
- * @package Expansa\Database\Model
+ * Trait provides validation rules for create & update model. Classes using this trait must
+ * implement `validatorRules()` and `validatorExtend()`; `validate()` itself is already provided.
  */
 trait HasValidation
 {
     /**
-     * Validator class instance.
+     * The last Validator built by {@see self::validate()} - cached for the model's lifetime, so
+     * isValid() immediately followed by getValidatorErrors() (the common pattern) doesn't
+     * validate twice.
      *
-     * @return null|Validator
+     * @var null|Validator
      */
     protected ?Validator $validator = null;
 
@@ -35,11 +35,17 @@ trait HasValidation
      */
     abstract protected function validatorExtend(): void;
 
+    /**
+     * @return bool
+     */
     final public function isValid(): bool
     {
         return $this->validate()->isValid();
     }
 
+    /**
+     * @return array<string, array<int, string>>
+     */
     final public function getValidatorErrors(): array
     {
         return $this->validate()->getErrors();
@@ -56,6 +62,10 @@ trait HasValidation
      */
     protected function validate(bool $break = false): Validator
     {
+        if ($this->validator !== null) {
+            return $this->validator;
+        }
+
         $this->validator = new Validator($this->getAttributes(), $this->validatorRules(), $break);
 
         $this->validatorExtend();

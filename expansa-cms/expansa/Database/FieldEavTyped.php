@@ -29,6 +29,9 @@ class FieldEavTyped extends FieldEav
      * Physical name of one of the five typed tables, e.g. "users_fields_int" — built off the
      * inherited $fieldsForeignTable ("users_fields"), which here is a shared prefix rather than a
      * table of its own.
+     *
+     * @param string $suffix One of self::TABLES.
+     * @return string
      */
     private function table(string $suffix): string
     {
@@ -39,6 +42,8 @@ class FieldEavTyped extends FieldEav
      * Cache group, distinct from Field's own $fieldsForeignTable: without this, both stores would
      * overwrite each other's cached data in Memory's process-local array the moment they're both
      * used for the same owner in one request.
+     *
+     * @var string
      */
     private string $cacheGroup {
         get => $this->cacheGroup ??= "{$this->fieldsForeignTable}_typed";
@@ -68,6 +73,7 @@ class FieldEavTyped extends FieldEav
      * before it actually reached that many characters, routing it to the text table needlessly
      * early.
      *
+     * @param mixed $value
      * @return array{0: string, 1: mixed} [table suffix, cast value]
      */
     private function route(mixed $value): array
@@ -86,6 +92,10 @@ class FieldEavTyped extends FieldEav
      * One insert row for $key/$value - every typed table shares the same [fk, key, value] shape,
      * so there's nothing left to special-case per table (unlike the old shared scalar table,
      * which needed one of two columns nulled out depending on which type actually applied).
+     *
+     * @param string $key
+     * @param mixed  $value Already cast by {@see self::route()}.
+     * @return array<string, mixed>
      */
     private function row(string $key, mixed $value): array
     {

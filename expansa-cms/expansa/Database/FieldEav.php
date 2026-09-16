@@ -27,20 +27,31 @@ class FieldEav
 
     /**
      * Name of the metadata table for the owner, e.g. "users_fields".
+     *
+     * @var string
      */
     public string $fieldsForeignTable {
         get => $this->fieldsForeignTable ??= $this->owner->getTable() . '_fields';
     }
 
     /**
-     * Foreign key column on that table pointing back to the owner, e.g. "user_id".
+     * Foreign key column on that table pointing back to the owner, e.g. "user_id". Memoized like
+     * $fieldsForeignTable above: derived from the owner's table name, which never changes for the
+     * lifetime of a model instance. Safe unlike $ownerId below, whose value legitimately changes.
+     *
+     * @var string
      */
     public string $fieldsForeignKey {
-        get => $this->owner->getFieldColumn();
+        get => $this->fieldsForeignKey ??= $this->owner->getFieldColumn();
     }
 
     /**
-     * Primary key of the owner, or 0 if it hasn't been persisted yet.
+     * Primary key of the owner, or 0 if it hasn't been persisted yet. Deliberately NOT memoized
+     * with ??=, unlike $fieldsForeignTable/$fieldsForeignKey above: getId() legitimately changes
+     * from 0 to a real id once the owner is saved (e.g. `$field = $user->field; $user->save();
+     * $field->add(...)`), and 0 is not null so ??= would never re-evaluate past the first read.
+     *
+     * @var int
      */
     public int $ownerId {
         get => $this->owner->getId();

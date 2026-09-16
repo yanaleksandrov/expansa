@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use InvalidArgumentException;
+use Expansa\Database\Exception\InvalidArgumentException;
 use PDO;
 use PDOStatement;
 
@@ -445,7 +445,7 @@ abstract class BuilderAbstract
             $isIntKey = is_int($key);
             $isArrayValue = is_array($value);
 
-            if (!$isIntKey && $isArrayValue && $root && count(array_keys($columns)) === 1) {
+            if (!$isIntKey && $isArrayValue && $root && count($columns) === 1) {
                 $stack[] = $this->columnQuote($key);
                 $stack[] = $this->columnPush($value, $map, false, $isJoin);
             } elseif ($isArrayValue) {
@@ -831,7 +831,7 @@ abstract class BuilderAbstract
         string $table,
         array &$map,
         array|string $join,
-        array|string &$columns = null,
+        array|string|null &$columns = null,
         ?array $where = null,
         ?string $columnFn = null
     ): string
@@ -935,11 +935,13 @@ abstract class BuilderAbstract
             }
 
             if (is_string($relation)) {
-                $relation = 'USING ("' . $relation . '")';
+                // columnQuote() both validates and quotes - USING() used to interpolate the
+                // column name(s) directly, unlike every other identifier in this method.
+                $relation = 'USING (' . $this->columnQuote($relation) . ')';
             } elseif (is_array($relation)) {
                 // For ['column1', 'column2']
                 if (isset($relation[0])) {
-                    $relation = 'USING ("' . implode('", "', $relation) . '")';
+                    $relation = 'USING (' . implode(', ', array_map($this->columnQuote(...), $relation)) . ')';
                 } else {
                     $joins = [];
 
@@ -1012,7 +1014,7 @@ abstract class BuilderAbstract
                     [$columnKey, $keyMatch['type']] :
                     [$columnKey];
             } elseif (!is_int($key) && is_array($value)) {
-                if ($root && count(array_keys($columns)) === 1) {
+                if ($root && count($columns) === 1) {
                     $stack[$key] = [$key, 'String'];
                 }
 
@@ -1047,19 +1049,22 @@ abstract class BuilderAbstract
             $columnsKey = array_keys($columns);
 
             if (count($columnsKey) === 1 && is_array($columns[$columnsKey[0]])) {
-                $indexKey = array_keys($columns)[0];
+                $indexKey = $columnsKey[0];
                 $dataKey = preg_replace("/^" . $this::COLUMN_PATTERN . "\./u", '', $indexKey);
                 $currentStack = [];
 
-                foreach ($data as $item) {
-                    $this->dataMap($data, $columns[$indexKey], $columnMap, $currentStack, false, $result);
-                    $index = $data[$dataKey];
+                // $data is a single already-fetched row (see Builder::select()'s per-row call), so
+                // this runs exactly once per row - not once per column. It used to loop
+                // `foreach ($data as $item)` with $item unused, redoing this identical work (and the
+                // recursive dataMap() call) once per column in the row, each pass overwriting the
+                // same $result[$index]/$stack[$index] entry with the same value.
+                $this->dataMap($data, $columns[$indexKey], $columnMap, $currentStack, false, $result);
+                $index = $data[$dataKey];
 
-                    if (isset($result)) {
-                        $result[$index] = $currentStack;
-                    } else {
-                        $stack[$index] = $currentStack;
-                    }
+                if (isset($result)) {
+                    $result[$index] = $currentStack;
+                } else {
+                    $stack[$index] = $currentStack;
                 }
             } else {
                 $currentStack = [];
@@ -1155,9 +1160,9 @@ abstract class BuilderAbstract
     protected function aggregate(
         string $type,
         string $table,
-        array $join = null,
-        string $column = null,
-        array $where = null
+        ?array $join = null,
+        ?string $column = null,
+        ?array $where = null
     ): ?string
     {
         $map   = [];

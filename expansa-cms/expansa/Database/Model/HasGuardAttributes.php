@@ -75,11 +75,11 @@ trait HasGuardAttributes
             return true;
         }
 
-        if (in_array($key, $this->guarded)) {
+        if (in_array($key, $this->guarded, true)) {
             return false;
         }
 
-        return in_array($key, $this->fillable);
+        return in_array($key, $this->fillable, true);
     }
 
     /**
@@ -94,7 +94,7 @@ trait HasGuardAttributes
             return false;
         }
 
-        return ($this->guarded === ['*']) || in_array($key, $this->guarded);
+        return ($this->guarded === ['*']) || in_array($key, $this->guarded, true);
     }
 
     /**

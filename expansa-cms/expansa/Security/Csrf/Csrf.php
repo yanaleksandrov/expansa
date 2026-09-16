@@ -72,7 +72,7 @@ class Csrf
      *
      * @throws InvalidCsrfTokenException
      */
-    public function check(string $key, string $token, int $timespan = null, bool $multiple = false): void
+    public function check(string $key, string $token, ?int $timespan = null, bool $multiple = false): void
     {
         $key = $this->sanitizeKey($key);
 

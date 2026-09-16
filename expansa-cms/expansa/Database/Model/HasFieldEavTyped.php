@@ -30,7 +30,16 @@ trait HasFieldEavTyped
     private static array $fieldColumnCache = [];
 
     /**
+     * The FieldEavTyped instance backing $model->field, memoized per model instance - see field() below.
+     *
+     * @var ?FieldEavTyped
+     */
+    private ?FieldEavTyped $fieldEavInstance = null;
+
+    /**
      * Primary key of this record, or 0 if it hasn't been persisted yet.
+     *
+     * @return int
      */
     public function getId(): int
     {
@@ -40,6 +49,8 @@ trait HasFieldEavTyped
     /**
      * Foreign key column name other tables use to reference this model — cached per class since
      * it never changes for a given table, only computed (Str::singularize()) on the first call.
+     *
+     * @return string
      */
     public function getFieldColumn(): string
     {
@@ -48,12 +59,16 @@ trait HasFieldEavTyped
 
     /**
      * Lazily resolves the typed per-row meta storage (see FieldEavTyped) - the typed
-     * alternative to {@see HasFieldEav::field()}, not a second property alongside it.
+     * alternative to {@see HasFieldEav::field()}, not a second property alongside it. Memoized on
+     * $fieldEavInstance - see {@see HasFieldEav::field()}'s docblock for why the $value the
+     * Attribute mutator receives can't be used for this instead.
+     *
+     * @return Attribute
      */
     protected function field(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $value instanceof FieldEavTyped ? $value : new FieldEavTyped($this)
+            get: fn() => $this->fieldEavInstance ??= new FieldEavTyped($this)
         );
     }
 }

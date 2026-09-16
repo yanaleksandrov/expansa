@@ -378,7 +378,7 @@ class Router
      * @param null|callable|object $callback Function to run after route handling (post-middleware).
      * @return bool
      */
-    public function run(callable|object $callback = null): bool
+    public function run(callable|object|null $callback = null): bool
     {
         // Define which method we need to handle
         $requestedMethod = $this->getRequestMethod();
@@ -423,7 +423,7 @@ class Router
      * @param callable|object|string $matchFn The function to be executed
      * @param null|callable|array    $fn      The function to be executed
      */
-    public function set404(callable|object|string $matchFn, callable|array $fn = null): void
+    public function set404(callable|object|string $matchFn, callable|array|null $fn = null): void
     {
         if (! is_null($fn)) {
             $this->notFoundCallback[$matchFn] = $fn;

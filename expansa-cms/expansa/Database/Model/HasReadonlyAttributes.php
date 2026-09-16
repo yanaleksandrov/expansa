@@ -28,24 +28,27 @@ trait HasReadonlyAttributes
      */
     protected function isReadonly(string $key): bool
     {
-        return in_array($key, $this->readonly);
+        return in_array($key, $this->readonly, true);
     }
 
     /**
-     * Sets a value for a readonly attribute.
+     * Sets $key unless it's readonly and already has a value - a no-op returning false rather
+     * than throwing, since a readonly violation here is expected (re-fill()ing an existing
+     * model) rather than exceptional. Checks/writes through {@see Model\HasAttributes::$attributes}
+     * (via getAttributes()/setAttribute()), not a same-named dynamic property: the latter would
+     * silently miss every existing value, since isset() on an undeclared property is always false.
      *
-     * @param string $key Attribute name
-     * @param mixed $value Value to assign.
-     *
-     * @return bool True if the value was assigned, false if the attribute is readonly and already set
+     * @param string $key   Attribute name (already snake_case, same convention as isReadonly()).
+     * @param mixed  $value Value to assign.
+     * @return bool True if the value was assigned, false if the attribute is readonly and already set.
      */
     protected function setAttributeReadonly(string $key, mixed $value): bool
     {
-        if ($this->isReadonly($key) && isset($this->$key)) {
+        if ($this->isReadonly($key) && array_key_exists($key, $this->getAttributes())) {
             return false;
         }
 
-        $this->$key = $value;
+        $this->setAttribute($key, $value);
 
         return true;
     }

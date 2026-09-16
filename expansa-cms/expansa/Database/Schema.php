@@ -17,6 +17,9 @@ use Expansa\Patterns\Facade;
  */
 class Schema extends Facade
 {
+    /**
+     * @return string
+     */
     protected static function getStaticClassAccessor(): string
     {
         return '\Expansa\Database\Schema\Builder';
@@ -26,6 +29,8 @@ class Schema extends Facade
      * Reuses the Db facade's own resolved connection instead of separately reading the
      * application's config and opening a second one - the framework has no config of its own
      * to read, only what's already been given to Db.
+     *
+     * @return array{0: \Expansa\Database\Query\Builder}
      */
     protected static function getConstructorArgs(): array
     {

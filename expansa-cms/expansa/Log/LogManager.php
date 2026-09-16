@@ -30,12 +30,12 @@ class LogManager implements LoggerInterface
         return $this->drivers;
     }
 
-    public function channel(string $channel = null): LoggerInterface
+    public function channel(?string $channel = null): LoggerInterface
     {
         return $this->driver($channel);
     }
 
-    public function driver(string $driver = null): LoggerInterface
+    public function driver(?string $driver = null): LoggerInterface
     {
         $driver = empty($driver) ? $this->getDefaultDriver() : $driver;
 
@@ -56,7 +56,7 @@ class LogManager implements LoggerInterface
         throw new \Exception("Logging driver [{$driver}] not found.");
     }
 
-    public function forgetChannel(string $name = null): static
+    public function forgetChannel(?string $name = null): static
     {
         $driver = empty($name) ? $this->getDefaultDriver() : $name;
 
@@ -134,7 +134,7 @@ class LogManager implements LoggerInterface
         return $config;
     }
 
-    public function shareContext(array $context = null): static|array
+    public function shareContext(?array $context = null): static|array
     {
         if (is_null($context)) {
             return $this->sharedContext;

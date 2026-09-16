@@ -30,7 +30,16 @@ trait HasFieldEav
     private static array $fieldColumnCache = [];
 
     /**
+     * The FieldEav instance backing $model->field, memoized per model instance - see field() below.
+     *
+     * @var ?FieldEav
+     */
+    private ?FieldEav $fieldEavInstance = null;
+
+    /**
      * Primary key of this record, or 0 if it hasn't been persisted yet.
+     *
+     * @return int
      */
     public function getId(): int
     {
@@ -40,6 +49,8 @@ trait HasFieldEav
     /**
      * Foreign key column name other tables use to reference this model — cached per class since
      * it never changes for a given table, only computed (Str::singularize()) on the first call.
+     *
+     * @return string
      */
     public function getFieldColumn(): string
     {
@@ -48,12 +59,19 @@ trait HasFieldEav
 
     /**
      * Lazily resolves the dynamic per-row meta storage for arbitrary, non-structural fields
-     * (see FieldEav) — not the same thing as roles().
+     * (see FieldEav) — not the same thing as roles(). Memoized on $fieldEavInstance, not via the
+     * $value the Attribute mutator receives: getAttribute() never writes a get closure's return
+     * value back into $attributes, so `$value instanceof FieldEav` was never actually true and a
+     * fresh FieldEav (and a fresh copy of its own memoized $fieldsForeignTable/$fieldsForeignKey)
+     * was allocated on every single `$model->field` access, e.g. once per iteration of
+     * `foreach ($rows as $row) { $row->field->add(...); }`.
+     *
+     * @return Attribute
      */
     protected function field(): Attribute
     {
         return Attribute::make(
-            get: fn($value) => $value instanceof FieldEav ? $value : new FieldEav($this)
+            get: fn() => $this->fieldEavInstance ??= new FieldEav($this)
         );
     }
 }

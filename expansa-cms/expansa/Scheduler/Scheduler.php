@@ -76,7 +76,7 @@ class Scheduler
      * @param null|string $id   Optional custom identifier
      * @return Job
      */
-    public function call(callable $fn, array $args = [], string $id = null): Job
+    public function call(callable $fn, array $args = [], ?string $id = null): Job
     {
         $job = new Job($fn, $args, $id);
 

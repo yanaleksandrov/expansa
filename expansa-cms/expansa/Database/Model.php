@@ -19,9 +19,6 @@ use stdClass;
  * @method null|static        save()                               Insert or update the record and return the fresh model.
  * @method int                delete()                             Delete the record by primary key.
  * @method int                restore()                            Restore a soft-deleted record.
- *
- * @property string|null $updatedAt Timestamp of the last update.
- * @property string|null $createdAt Timestamp of creation.
  */
 abstract class Model implements \JsonSerializable
 {
@@ -36,6 +33,33 @@ abstract class Model implements \JsonSerializable
      * @var string
      */
     protected string $table;
+
+    /**
+     * Per-(class, trait) cache for {@see self::usesTrait()}.
+     *
+     * @var array<class-string, array<class-string, bool>>
+     */
+    private static array $traitCache = [];
+
+    /**
+     * Per-class cache for {@see self::getTable()}.
+     *
+     * @var array<class-string, string>
+     */
+    private static array $tableCache = [];
+
+    /**
+     * Whether this model's class, or any ancestor, `use`s $trait. Unlike a bare class_uses()
+     * call (which only sees traits used directly by the exact class, not inherited ones), this
+     * walks the full parent chain, and caches the result - a class's traits never change at runtime.
+     */
+    public function usesTrait(string $trait): bool
+    {
+        return self::$traitCache[static::class][$trait] ??= array_any(
+            [static::class, ...(class_parents(static::class) ?: [])],
+            fn($class) => in_array($trait, class_uses($class), true)
+        );
+    }
 
     /**
      * Build a new, unsaved instance, optionally filled with the given attributes -
@@ -126,10 +150,9 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Sets the value of an attribute applying the defined sanitization rules.
-     *
-     * If a rule is defined for the attribute in $sanitize, it will be applied.
-     * Supports static methods from the Safe class or callable rules.
+     * Sets $key, applying its sanitizer rule (see {@see Model\HasSanitizing::getSanitizerRules()})
+     * and mutator (see {@see Model\Attribute}), if either is declared. No-ops if $key is
+     * readonly and already has a value (see {@see Model\HasReadonlyAttributes}).
      *
      * @param string $key   The attribute name
      * @param mixed  $value The value to set
@@ -138,19 +161,20 @@ abstract class Model implements \JsonSerializable
      */
     public function setAttribute(string $key, mixed $value): static
     {
-        $traits   = class_uses(static::class);
         $snakeKey = Str::snake($key);
 
         if (
-            in_array(HasReadonlyAttributes::class, $traits, true) &&
-            $this->isReadonly($snakeKey) &&
+            $this->usesTrait(HasReadonlyAttributes::class)
+            &&
+            $this->isReadonly($snakeKey)
+            &&
             isset($this->attributes[$snakeKey])
         ) {
             return $this;
         }
 
-        if (in_array(HasSanitizing::class, $traits, true)) {
-            $rule = $this->getSanitizerRules()[$snakeKey] ?? '';
+        if ($this->usesTrait(HasSanitizing::class)) {
+            $rule = $this->sanitizerRules()[$snakeKey] ?? '';
             if ($rule) {
                 // [$key => $value] goes first: for an attribute that's already
                 // set, array + keeps the LEFT side on key collision, so this is
@@ -166,13 +190,16 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Get the table associated with the model.
+     * Get the table associated with the model. Cached per class: $table is a fixed class
+     * property (never reassigned per-instance by any Model subclass), but Safe::snakecase()
+     * itself runs 3 preg_replace passes with no memoization of its own, and this is called
+     * repeatedly per Query call (Query::get()/find()/save()/... each read it 1-2x).
      *
      * @return string
      */
     public function getTable(): string
     {
-        return Safe::snakecase($this->table);
+        return self::$tableCache[static::class] ??= Safe::snakecase($this->table);
     }
 
     /**

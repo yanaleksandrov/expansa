@@ -10,24 +10,15 @@ use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 
 /**
- * Class Query
+ * A fluent query builder scoped to one Model instance - finding by primary key or where
+ * conditions, aggregations, chunking, soft deletes, and save()/delete()/restore(). Rows come
+ * back hydrated via {@see Model::make()}, with full attribute mutators/accessors applied.
  *
- * A standalone query builder / ORM-like class that mimics Laravel 12 Eloquent model methods.
+ * Application code normally never constructs this directly: {@see Model::__callStatic()} and
+ * {@see Model::__call()} build one on demand for any Query method called on the model itself,
+ * e.g. `User::get(1)` or `$user->save()`.
  *
- * This class provides a fluent interface for querying and manipulating records of a given Model.
- * It supports common ORM operations such as finding by primary key, filtering with where conditions,
- * aggregations, chunking results, and managing soft deletes.
- *
- * The Query instance is tightly coupled with a specific Model class, passed via constructor,
- * allowing returned results to be hydrated as Model instances with full attribute casting and accessors.
- *
- * Example usage:
- * ```php
- * $user  = (new Query(User::class))->find(1);
- * $users = (new Query(User::class))->get();
- * ```
- *
- * Caching is integrated for find operations to optimize repeated lookups.
+ * get() results are cached; the rest of the Query methods query the database directly on every call.
  */
 class Query
 {
@@ -53,19 +44,20 @@ class Query
     protected bool $onlyTrashed = false;
 
     public function __construct(
+
         /**
-         * The fully qualified class name of the Eloquent model.
-         *
-         * @var Model
+         * The model instance this query is scoped to.
          */
         protected readonly Model $model
     ) {} // phpcs:ignore
 
     /**
-     * Find a record by primary key or another field value.
-     *
-     * This method attempts to retrieve a model instance matching the given value
-     * for the specified field, using caching to optimize repeated lookups.
+     * Find a record by primary key or another field value. Only an 'id' lookup is cached -
+     * caching by any other field would need the field name folded into the cache key (two
+     * different fields can share the same value, e.g. a nicename that happens to equal another
+     * row's id) and, more importantly, {@see self::save()}/{@see self::delete()}/{@see self::restore()}
+     * below only ever invalidate the "id" entry - a row cached under a different field would
+     * keep serving stale data after being changed.
      *
      * @param int|string $value The value to search for (e.g., primary key).
      * @param string     $by    The field name to search by. Defaults to 'id'.
@@ -74,13 +66,13 @@ class Query
      */
     public function get(int|string $value, string $by = 'id'): ?Model
     {
-        return Cache::get("$value", $this->model->getTable(), function () use ($value, $by) {
+        $fetch = function () use ($value, $by) {
             $data = Db::get($this->model->getTable(), '*', $this->scopedWheres([$by => $value]));
-            if (is_array($data)) {
-                return $this->model::make($data);
-            }
-            return null;
-        });
+
+            return is_array($data) ? $this->model::make($data) : null;
+        };
+
+        return $by === 'id' ? Cache::get("$value", $this->model->getTable(), $fetch) : $fetch();
     }
 
     /**
@@ -92,7 +84,7 @@ class Query
     {
         $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres($this->wheres)) ?? [];
 
-        return array_map(fn(array $row) => $this->model::make($row), $rows);
+        return array_map($this->model::make(...), $rows);
     }
 
     /**
@@ -116,7 +108,7 @@ class Query
     {
         $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres([])) ?? [];
 
-        return array_map(fn(array $row) => $this->model::make($row), $rows);
+        return array_map($this->model::make(...), $rows);
     }
 
     /**
@@ -165,7 +157,7 @@ class Query
      */
     protected function scopedWheres(array $where): array
     {
-        if (! in_array(HasSoftDeletes::class, class_uses($this->model), true)) {
+        if (! $this->model->usesTrait(HasSoftDeletes::class)) {
             return $where;
         }
 
@@ -259,7 +251,7 @@ class Query
      */
     public function delete(): int
     {
-        if (in_array(HasSoftDeletes::class, class_uses($this->model), true)) {
+        if ($this->model->usesTrait(HasSoftDeletes::class)) {
             $results = Db::update(
                 $this->model->getTable(),
                 [$this->model->getDeletedAtColumn() => date('Y-m-d H:i:s')],
@@ -282,7 +274,7 @@ class Query
      */
     public function restore(): int
     {
-        if (! in_array(HasSoftDeletes::class, class_uses($this->model), true)) {
+        if (! $this->model->usesTrait(HasSoftDeletes::class)) {
             return 0;
         }
 
@@ -305,10 +297,6 @@ class Query
      */
     public function exists(array $data): bool
     {
-        $results = Db::select($this->model->getTable(), '*', ['OR' => $data]);
-        if ($results) {
-            return true;
-        }
-        return false;
+        return (bool) Db::select($this->model->getTable(), 'id', ['OR' => $data, 'LIMIT' => 1]);
     }
 }
