@@ -35,27 +35,17 @@ abstract class Model implements \JsonSerializable
     protected string $table;
 
     /**
-     * Per-(class, trait) cache for {@see self::usesTrait()}.
-     *
-     * @var array<class-string, array<class-string, bool>>
-     */
-    private static array $traitCache = [];
-
-    /**
-     * Per-class cache for {@see self::getTable()}.
-     *
-     * @var array<class-string, string>
-     */
-    private static array $tableCache = [];
-
-    /**
      * Whether this model's class, or any ancestor, `use`s $trait. Unlike a bare class_uses()
      * call (which only sees traits used directly by the exact class, not inherited ones), this
      * walks the full parent chain, and caches the result - a class's traits never change at runtime.
      */
     public function usesTrait(string $trait): bool
     {
-        return self::$traitCache[static::class][$trait] ??= array_any(
+        // Scoped to this method only - no other method reads or resets this cache. Keyed by
+        // static::class since this one method body is shared by every Model subclass.
+        static $cache = [];
+
+        return $cache[static::class][$trait] ??= array_any(
             [static::class, ...(class_parents(static::class) ?: [])],
             fn($class) => in_array($trait, class_uses($class), true)
         );
@@ -199,7 +189,11 @@ abstract class Model implements \JsonSerializable
      */
     public function getTable(): string
     {
-        return self::$tableCache[static::class] ??= Safe::snakecase($this->table);
+        // Scoped to this method only - no other method reads or resets this cache. Keyed by
+        // static::class since this one method body is shared by every Model subclass.
+        static $cache = [];
+
+        return $cache[static::class] ??= Safe::snakecase($this->table);
     }
 
     /**

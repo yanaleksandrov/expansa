@@ -9,13 +9,6 @@ use Expansa\Support\Str;
 trait HasAttributes
 {
     /**
-     * Per-(class, method) cache backing {@see self::hasMutator()}.
-     *
-     * @var array<class-string, array<string, bool>>
-     */
-    protected static array $attributeMutatorCache = [];
-
-    /**
      * Array of model attributes.
      *
      * @var array<string, mixed>
@@ -156,17 +149,20 @@ trait HasAttributes
      */
     protected function hasMutator(string $method): bool
     {
-        if (isset(static::$attributeMutatorCache[static::class][$method])) {
-            return static::$attributeMutatorCache[static::class][$method];
+        // Scoped to this method only - no other method reads or resets this cache.
+        static $cache = [];
+
+        if (isset($cache[static::class][$method])) {
+            return $cache[static::class][$method];
         }
 
         if (! method_exists($this, $method)) {
-            return static::$attributeMutatorCache[static::class][$method] = false;
+            return $cache[static::class][$method] = false;
         }
 
         $returnType = new \ReflectionMethod($this, $method)->getReturnType();
 
-        return static::$attributeMutatorCache[static::class][$method] =
+        return $cache[static::class][$method] =
             $returnType instanceof \ReflectionNamedType &&
             $returnType->getName() === Attribute::class;
     }

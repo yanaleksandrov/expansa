@@ -7,13 +7,6 @@ namespace Expansa\Database\Model;
 trait HasSanitizing
 {
     /**
-     * Per-class cache backing {@see self::sanitizerRules()}.
-     *
-     * @var array<class-string, array<string, string>>
-     */
-    private static array $sanitizerRulesCache = [];
-
-    /**
      * Returns the sanitization rules for this model.
      *
      * Example:
@@ -36,7 +29,10 @@ trait HasSanitizing
      */
     protected function sanitizerRules(): array
     {
-        return self::$sanitizerRulesCache[static::class] ??= $this->getSanitizerRules();
+        // Scoped to this method only - no other method reads or resets this cache.
+        static $cache = [];
+
+        return $cache[static::class] ??= $this->getSanitizerRules();
     }
 
     /**

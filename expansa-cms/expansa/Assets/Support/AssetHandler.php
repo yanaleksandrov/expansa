@@ -9,11 +9,6 @@ use Expansa\Assets\Abstracts\Provider;
 trait AssetHandler
 {
     /**
-     * Dirs {@see self::cacheMinifiedFile()} already confirmed exist this request.
-     */
-    protected static array $ensuredCacheDirs = [];
-
-    /**
      * Above this many bytes, {@see self::readContent()} skips caching in APCu. APCu is one
      * fixed-size shared segment for every small hot item on the box (not just ours); a large
      * blob eats a disproportionate share of it, fragments the segment (making even smaller
@@ -158,13 +153,16 @@ trait AssetHandler
      */
     public function cacheMinifiedFile(string $name, string $content, string $extension): ?string
     {
+        // Dirs already confirmed to exist this request - scoped to this method only.
+        static $ensuredCacheDirs = [];
+
         $dir = rtrim(EX_PATH, '/\\') . "/cache/assets/$extension";
 
-        if (! isset(self::$ensuredCacheDirs[$dir])) {
+        if (! isset($ensuredCacheDirs[$dir])) {
             if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {
                 return null;
             }
-            self::$ensuredCacheDirs[$dir] = true;
+            $ensuredCacheDirs[$dir] = true;
         }
 
         $file = sprintf('%s/%s-%s.%s', $dir, $this->sanitizeId($name), substr(sha1($content), 0, 12), $extension);

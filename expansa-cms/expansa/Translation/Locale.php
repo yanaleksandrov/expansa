@@ -14,13 +14,6 @@ namespace Expansa\Translation;
 class Locale
 {
     /**
-     * Stores the locale determined from the HTTP request.
-     *
-     * @var string
-     */
-    private static string $locale;
-
-    /**
      * Get local from HTTP.
      *
      * @param string $default
@@ -28,9 +21,12 @@ class Locale
      */
     protected function getLocale(string $default = 'en-US'): string
     {
-        if (! isset(self::$locale) && function_exists('locale_accept_from_http')) {
-            self::$locale = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $default);
+        // Scoped to this method only - no other method reads or resets the detected locale.
+        static $locale;
+
+        if (! isset($locale) && function_exists('locale_accept_from_http')) {
+            $locale = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $default);
         }
-        return str_replace('_', '-', self::$locale ?? $default);
+        return str_replace('_', '-', $locale ?? $default);
     }
 }

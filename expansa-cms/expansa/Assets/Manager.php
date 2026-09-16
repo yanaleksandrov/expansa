@@ -56,23 +56,9 @@ class Manager
     protected static ?Closure $configure = null;
 
     /**
-     * Per-(file, uid, context) memo of {@see self::discover()}'s resolved candidates, so
-     * discovering the same file repeatedly (e.g. one field template rendered many times on a
-     * form) stats the disk once and replays the result. Assumes {@see self::configure()} isn't
-     * swapped mid-request.
-     *
-     * @var array<string, array<string, string>>
+     * Bumped by {@see self::enqueue()}/{@see self::dequeue()} on an actual change (not a dedup no-op).
      */
-    protected static array $discovered = [];
-
-    /** sortDependencies(self::$assets), cached until {@see self::$assetsRevision} changes. */
-    private static ?array $sorted = null;
-
-    /** Bumped by {@see self::enqueue()}/{@see self::dequeue()} on an actual change (not a dedup no-op). */
     private static int $assetsRevision = 0;
-
-    /** Revision {@see self::$sorted} was computed at. */
-    private static int $sortedRevision = -1;
 
     /**
      * Register (or override) the provider responsible for a given extension/provider key.
@@ -255,22 +241,27 @@ class Manager
      */
     public function discover(string $file, ?string $uid = null, array $context = []): void
     {
+        // Per-(file, uid, context) memo, scoped to this method only, so discovering the same
+        // file repeatedly (e.g. one field template rendered many times on a form) stats the
+        // disk once and replays the result. Assumes configure() isn't swapped mid-request.
+        static $discovered = [];
+
         $uid ??= $this->sanitizeId(basename(self::stripTemplateExtension($file)));
 
         $key = $file . "\0" . $uid . "\0" . serialize($context);
 
-        if (! isset(self::$discovered[$key])) {
-            self::$discovered[$key] = $this->resolveDiscoverable($file, $context);
+        if (! isset($discovered[$key])) {
+            $discovered[$key] = $this->resolveDiscoverable($file, $context);
         }
 
-        foreach (self::$discovered[$key] as $extension => $path) {
+        foreach ($discovered[$key] as $extension => $path) {
             $this->enqueue($uid, $this->toUrl($path), $extension);
         }
     }
 
     /**
      * The actual (filesystem-touching) resolution behind {@see self::discover()}, split out so
-     * it only ever runs once per distinct (file, uid, context) - see {@see self::$discovered}.
+     * it only ever runs once per distinct (file, uid, context) - see that method's memo cache.
      *
      * @return array<string, string> extension => path, only candidates that exist on disk.
      */
@@ -407,6 +398,7 @@ class Manager
         }
 
         static $defaults = [];
+
         $class = $asset::class;
         if (! isset($defaults[$class])) {
             $defaults[$class] = [];
@@ -554,18 +546,22 @@ class Manager
 
     /**
      * Shared filtering logic behind {@see self::render()}. Sorts (and caches the sort of)
-     * self::$assets, then applies $filter - see {@see self::$sorted}.
+     * self::$assets, then applies $filter, re-sorting only when self::$assetsRevision changed.
      *
      * @return array<string, Provider>
      */
     private function filter(array $filter): array
     {
-        if (self::$sorted === null || self::$sortedRevision !== self::$assetsRevision) {
-            self::$sorted         = $this->sortDependencies(self::$assets);
-            self::$sortedRevision = self::$assetsRevision;
+        // Scoped to this method only - no other method reads or resets this sort cache.
+        static $sorted = null;
+        static $sortedRevision = -1;
+
+        if ($sorted === null || $sortedRevision !== self::$assetsRevision) {
+            $sorted         = $this->sortDependencies(self::$assets);
+            $sortedRevision = self::$assetsRevision;
         }
 
-        return array_filter(self::$sorted, function (Provider $asset) use ($filter) {
+        return array_filter($sorted, function (Provider $asset) use ($filter) {
             foreach ($filter as $key => $value) {
                 if (! property_exists($asset, $key)) {
                     continue;

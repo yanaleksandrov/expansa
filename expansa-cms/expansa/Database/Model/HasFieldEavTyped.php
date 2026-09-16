@@ -25,11 +25,6 @@ use Expansa\Support\Str;
 trait HasFieldEavTyped
 {
     /**
-     * @var array<class-string, string>
-     */
-    private static array $fieldColumnCache = [];
-
-    /**
      * The FieldEavTyped instance backing $model->field, memoized per model instance - see field() below.
      *
      * @var ?FieldEavTyped
@@ -54,7 +49,10 @@ trait HasFieldEavTyped
      */
     public function getFieldColumn(): string
     {
-        return self::$fieldColumnCache[static::class] ??= Str::singularize($this->getTable()) . '_id';
+        // Scoped to this method only - no other method reads or resets this cache.
+        static $cache = [];
+
+        return $cache[static::class] ??= Str::singularize($this->getTable()) . '_id';
     }
 
     /**

@@ -25,17 +25,6 @@ final class Sanitizer
     ];
 
     /**
-     * [method, defaultValue, isOwnMethod] triples per raw rule-list string ('trim',
-     * 'slug:$login|trim', ...), keyed by that string. The same handful of rule strings are
-     * declared once per model (in getSanitizerRules()) but re-parsed and re-checked with
-     * is_callable() on every single attribute write, since Model::setAttribute() calls apply()
-     * once per attribute — this memoizes both in one lookup instead of two.
-     *
-     * @var array<string, list<array{0: string, 1: ?string, 2: bool}>>
-     */
-    private static array $parsedRulesCache = [];
-
-    /**
      * Sanitized data.
      *
      * @var array
@@ -85,15 +74,20 @@ final class Sanitizer
 
     /**
      * Splits a rule-list string ('trim', 'slug:$login|trim', ...) into its ['method', defaultValue,
-     * isOwnMethod] triples, one per '|'-separated rule. Cached per raw string — see
-     * {@see self::$parsedRulesCache}.
+     * isOwnMethod] triples, one per '|'-separated rule. Cached per raw string - the same handful
+     * of rule strings are declared once per model (in getSanitizerRules()) but re-parsed and
+     * re-checked with is_callable() on every single attribute write, since Model::setAttribute()
+     * calls apply() once per attribute.
      *
      * @return list<array{0: string, 1: ?string, 2: bool}>
      */
     private static function parseRuleList(string $rulesList): array
     {
-        if (isset(self::$parsedRulesCache[$rulesList])) {
-            return self::$parsedRulesCache[$rulesList];
+        // Scoped to this method only - no other method reads or resets this cache.
+        static $cache = [];
+
+        if (isset($cache[$rulesList])) {
+            return $cache[$rulesList];
         }
 
         $parsed = [];
@@ -103,7 +97,7 @@ final class Sanitizer
             $parsed[] = [$method, $parts[1] ?? null, is_callable([self::class, $method])];
         }
 
-        return self::$parsedRulesCache[$rulesList] = $parsed;
+        return $cache[$rulesList] = $parsed;
     }
 
     /**
