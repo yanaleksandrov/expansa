@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use Expansa\Database\Query\Builder;
 use Expansa\Database\Schema;
 use Expansa\Database\Schema\Table;
 use Expansa\Support\Str;
@@ -71,25 +72,38 @@ final class Migrations
     }
 
     /**
-     * The four typed sibling tables for {@see \App\Models\TypedField} — see there for what each
-     * one is for. Additive to {@see createFieldsTable()}, never a replacement for it: a model
-     * using {@see \Expansa\Database\Model\HasFieldTyped} keeps its regular "{name}_fields" table
-     * too, for everything that doesn't need indexed filtering/sorting/search.
+     * The five typed sibling tables for {@see \Expansa\Database\FieldEavTyped} — see there for
+     * what each one is for. Additive to {@see createFieldsTable()}, never a replacement for it: a
+     * model using {@see \Expansa\Database\Model\HasFieldEavTyped} keeps its regular "{name}_fields"
+     * table too, for everything that doesn't need indexed filtering/sorting/search.
+     *
+     * int and decimal get their own tables rather than sharing one with two nullable columns -
+     * see FieldEavTyped's own docblock for why (BIGINT's range vs DECIMAL's fractional part can't
+     * both fit one column).
      */
     private function createTypedFieldsTable(string $name, ?string $idColumnName = null): void
     {
         $column = sprintf("%s_id", Str::singularize($idColumnName ?? $name));
 
-        Schema::create($name . '_fields_scalar', function (Table $table) use ($name, $column) {
+        Schema::create($name . '_fields_int', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
             $table->string('key', 255)->default(null);
-            $table->bigInt('value_int')->nullable();
-            $table->decimal('value_decimal', 20, 6)->nullable();
+            $table->bigInt('value');
 
             $table->index([$column, 'key']);
-            $table->index(['key', 'value_int']);
-            $table->index(['key', 'value_decimal']);
+            $table->index(['key', 'value']);
+            $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
+        });
+
+        Schema::create($name . '_fields_decimal', function (Table $table) use ($name, $column) {
+            $table->id();
+            $table->bigInt($column)->unsigned()->default(0);
+            $table->string('key', 255)->default(null);
+            $table->decimal('value', 20, 6);
+
+            $table->index([$column, 'key']);
+            $table->index(['key', 'value']);
             $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
         });
 
@@ -104,11 +118,15 @@ final class Migrations
             $table->foreign($column)->references('id')->on($name)->onDeleteCascade();
         });
 
+        // 'value' is sized to Builder::MAX_INDEXABLE_LENGTH, not an arbitrary length - it has to
+        // match FieldEavTyped::route()'s own varchar/text cutoff, or a value routed here as
+        // "short enough for varchar" could still be too long for the column that's supposed to
+        // hold it.
         Schema::create($name . '_fields_varchar', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
             $table->string('key', 255)->default(null);
-            $table->string('value', 255);
+            $table->string('value', Builder::MAX_INDEXABLE_LENGTH);
 
             $table->index([$column, 'key']);
             $table->index(['key', 'value']);
@@ -209,7 +227,7 @@ final class Migrations
         });
 
         $this->createFieldsTable('users');
-        $this->createTypedFieldsTable('users');
+        //$this->createTypedFieldsTable('users');
     }
 
     private function createCommentsTable(): void

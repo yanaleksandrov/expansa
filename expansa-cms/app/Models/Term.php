@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Contracts\Fieldable;
+use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Debug\Error;
 
@@ -11,27 +13,19 @@ use Expansa\Debug\Error;
  * Represents a taxonomy term: a reusable name/slug pair (e.g. a category or tag)
  * that {@see Taxonomy} attaches usage count and hierarchy to.
  *
- * @property int    $id        Unique identifier of the term.
- * @property string $name      Display name of the term.
- * @property string $slug      URL-safe, unique identifier derived from the name.
- * @property int    $termGroup Arbitrary grouping ID for terms meant to be treated as synonyms.
- * @property Field  $field     A dynamic meta field instance associated with the term.
+ * @property int      $id        Unique identifier of the term.
+ * @property string   $name      Display name of the term.
+ * @property string   $slug      URL-safe, unique identifier derived from the name.
+ * @property int      $termGroup Arbitrary grouping ID for terms meant to be treated as synonyms.
+ * @property FieldEav $field     A dynamic meta field instance associated with the term.
  *
  * @package App\Models
  */
-class Term extends Model
+class Term extends Model implements Fieldable
 {
     use Model\HasSanitizing;
     use Model\HasValidation;
     use Model\HasFieldEav;
-
-    /**
-     * One-to-many with Field: the foreign key column on "terms_fields" (the "many" side)
-     * that points back to this term (see Model\HasFieldEav).
-     *
-     * @var string
-     */
-    public string $fieldsForeignKey = 'term_id';
 
     /**
      * The database table associated with the model.

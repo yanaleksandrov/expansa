@@ -24,6 +24,10 @@ class Builder extends BuilderAbstract
             $this->prefix = $options['prefix'];
         }
 
+        $this->database  = $options['database'] ?? $options['database_name'] ?? '';
+        $this->charset   = $options['charset'] ?? '';
+        $this->collation = $options['collation'] ?? '';
+
         if (isset($options['testMode']) && $options['testMode'] === true) {
             $this->testMode = true;
             return;
@@ -1060,7 +1064,7 @@ class Builder extends BuilderAbstract
 				WHERE
 				    TABLE_SCHEMA = :database',
                 [
-                    ':database' => EX_DB_NAME, // TODO: компонент фреймворка ничего не должен знать про константу
+                    ':database' => $this->database,
                 ]
             );
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Schema\Compilers;
 
+use Expansa\Database\Query\Builder;
 use Expansa\Database\Schema\Table;
 use Expansa\Patterns\Fluent;
 
@@ -46,9 +47,9 @@ trait Indexes
                         ($index !== 'UNIQUE')
                     )
                     &&
-                    $textColumnLength > EX_DB_MAX_INDEX_LENGTH
+                    $textColumnLength > Builder::MAX_INDEXABLE_LENGTH
                 ) {
-                    $keys[] = sprintf("`$column`(%d)", EX_DB_MAX_INDEX_LENGTH);
+                    $keys[] = sprintf("`$column`(%d)", Builder::MAX_INDEXABLE_LENGTH);
                     if ($index === 'UNIQUE') {
                         $isHasIndexLength = true;
                     }

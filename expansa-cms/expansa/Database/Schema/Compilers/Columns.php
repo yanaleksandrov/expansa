@@ -10,12 +10,12 @@ trait Columns
 {
     protected function compileCharset(): string
     {
-        return EX_DB_CHARSET ?? '';
+        return $this->connection->charset;
     }
 
     protected function compileCollate(): string
     {
-        return EX_DB_COLLATION ?? '';
+        return $this->connection->collation;
     }
 
     protected function compileUniqueness(Column $column): string

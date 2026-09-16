@@ -3,12 +3,12 @@
 namespace Dashboard;
 
 use App\Http\VerifyCsrfToken;
-use App\Models\Field;
 use App\Models\User;
 use App\Query\Query;
 use App\Support\DashboardFavicons;
 use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
+use Expansa\Database\FieldEav;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
@@ -107,7 +107,7 @@ new class
                                         $posts[$i][$key] = $value;
                                     }
 
-                                    $fields = new Field($item)->find();
+                                    $fields = new FieldEav($item)->find();
                                     if ($fields) {
                                         foreach ($fields as $field => $values) {
                                             $key = Safe::camelcase($field);

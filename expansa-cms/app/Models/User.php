@@ -8,6 +8,8 @@ use DateTime;
 use App\Post\Type;
 use App\User\Roles;
 use Expansa\Cookie\Cookie;
+use Expansa\Database\Contracts\Fieldable;
+use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Debug\Error;
 use Expansa\Facades\Db;
@@ -38,11 +40,10 @@ use Expansa\Support\Is;
  * @property DateTime      $createdAt                  The date and time when the user was created.
  * @property DateTime      $updatedAt                  The date and time when the user was last updated.
  * @property DateTime|null $deletedAt                  The date and time when the user was soft-deleted, if at all.
- * @property Field         $field                      A dynamic meta field instance associated with the user.
- * @property TypedField    $typedField                 A typed, indexable meta field instance for the same user.
+ * @property FieldEav      $field                      A dynamic meta field instance associated with the user.
  * @property array<string> $roles                      Role names assigned to the user (see App\User\Roles).
  */
-class User extends Model
+class User extends Model implements Fieldable
 {
     use Model\HasSanitizing;
     use Model\HasValidation;
@@ -67,14 +68,6 @@ class User extends Model
      * option is configured.
      */
     private const string DEFAULT_ROLE = 'subscriber';
-
-    /**
-     * One-to-many with Field/TypedField: the foreign key column, shared by every "users_fields*"
-     * table (the "many" side), that points back to this user (see Model\HasFieldEav, Model\HasFieldTyped).
-     *
-     * @var string
-     */
-    public string $fieldsForeignKey = 'user_id';
 
     /**
      * The database table associated with the model.
@@ -398,7 +391,7 @@ class User extends Model
         }
 
         if ($callback && self::$current instanceof self) {
-            $callback(new Field(self::$current));
+            $callback(self::$current->field);
         }
 
         return self::$current;

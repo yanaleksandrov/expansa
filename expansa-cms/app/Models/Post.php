@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Post\Type;
+use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
@@ -118,7 +119,7 @@ class Post
 
             $fields = Safe::array($args['fields'] ?? []);
             if ($fields) {
-                ( new Field($post) )->import($fields);
+                ( new FieldEav($post) )->import($fields);
             }
         }
 

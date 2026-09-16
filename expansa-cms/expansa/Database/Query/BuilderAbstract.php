@@ -25,6 +25,28 @@ abstract class BuilderAbstract
     public string $type = '';
 
     /**
+     * The database name this connection was opened against.
+     *
+     * @var string
+     */
+    public string $database = '';
+
+    /**
+     * Connection charset, e.g. "utf8mb4" - set from the options this connection was built
+     * with, never read from anywhere else (see {@see \Expansa\Database\Schema\Compilers\Columns}).
+     *
+     * @var string
+     */
+    public string $charset = '';
+
+    /**
+     * Connection collation, e.g. "utf8mb4_general_ci" - same sourcing as {@see self::$charset}.
+     *
+     * @var string
+     */
+    public string $collation = '';
+
+    /**
      * Table prefix.
      *
      * @var string
@@ -149,6 +171,21 @@ abstract class BuilderAbstract
      * @var string
      */
     protected const ALIAS_PATTERN = "[\p{L}_][\p{L}\p{N}@$#\-_]*";
+
+    /**
+     * Longest string a CHAR/VARCHAR/TEXT column can be indexed over in utf8mb4 without the
+     * index itself exceeding InnoDB's key-prefix limit: 3072 bytes ÷ 4 bytes/char (utf8mb4's
+     * max) = 768. Safe for every database version this framework requires (see
+     * EX_REQUIRED_MYSQL_VERSION) - MySQL 8.0+/MariaDB 10.2+ both default to the DYNAMIC row
+     * format, where that 3072-byte prefix is always available, not the older 767-byte one.
+     *
+     * A framework-owned constant, not read from the application's own config: it's a fact
+     * about the database engine version the framework already requires, not a per-project
+     * preference, so there's nothing for an application to sensibly override it with.
+     *
+     * @var int
+     */
+    public const int MAX_INDEXABLE_LENGTH = 768;
 
     /**
      * Execute the raw statement.

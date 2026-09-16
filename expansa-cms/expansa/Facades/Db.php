@@ -52,16 +52,17 @@ class Db extends Facade
     {
         return [
             [
-                'driver'   => EX_DB_DRIVER,
-                'database' => EX_DB_NAME,
-                'username' => EX_DB_USERNAME,
-                'password' => EX_DB_PASSWORD,
-                'host'     => EX_DB_HOST,
-                'prefix'   => EX_DB_PREFIX,
-                'charset'  => EX_DB_CHARSET,
-                'testMode' => EX_DB_LOGGING,
-                'port'     => EX_DB_PORT,
-                'error'    => EX_DB_ERROR_MODE,
+                'driver'    => EX_DB_DRIVER,
+                'database'  => EX_DB_NAME,
+                'username'  => EX_DB_USERNAME,
+                'password'  => EX_DB_PASSWORD,
+                'host'      => EX_DB_HOST,
+                'prefix'    => EX_DB_PREFIX,
+                'charset'   => EX_DB_CHARSET,
+                'collation' => EX_DB_COLLATION,
+                'testMode'  => EX_DB_LOGGING,
+                'port'      => EX_DB_PORT,
+                'error'     => EX_DB_ERROR_MODE,
             ],
         ];
     }
@@ -79,5 +80,18 @@ class Db extends Facade
         } catch (InvalidArgumentException $e) {
             return null;
         }
+    }
+
+    /**
+     * The connection Builder this facade itself resolves to - connected on first access, using
+     * the exact same application-configured credentials as any other Db:: call. Lets other
+     * framework components (e.g. {@see \Expansa\Database\Schema}) reuse this one connection
+     * instead of separately reading the application's config and opening a second connection.
+     *
+     * @return Builder
+     */
+    public static function instance(): Builder
+    {
+        return static::getResolvedClassInstance();
     }
 }

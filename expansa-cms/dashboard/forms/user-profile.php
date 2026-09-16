@@ -1,14 +1,12 @@
 <?php
 
-use App\Models\Field;
 use App\Models\User;
 use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
-$user  = User::current();
-$field = new Field($user);
+$user = User::current();
 
 /**
  * Profile page.
@@ -254,8 +252,8 @@ return Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop' => 'bio',
-                                'rows'        => count(explode("\n", $field->find('bio') ?? '')),
-                                'value'       => $field->find('bio'),
+                                'rows'        => count(explode("\n", $user->field->find('bio') ?? '')),
+                                'value'       => $user->field->find('bio'),
                                 'placeholder' => t('A few words about yourself'),
                             ],
                         ],
@@ -296,21 +294,21 @@ return Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop' => 'format',
-                                'value' => $field->find('format'),
+                                'value' => $user->field->find('format'),
                             ],
                             'options'     => [
                                 'light' => [
                                     'content'     => t('Light mode'),
                                     'icon'        => 'ph ph-user-list',
                                     'description' => t('This theme will be active when your system is set to “light mode”'),
-                                    'checked'     => $field->find('format') === 'light',
+                                    'checked'     => $user->field->find('format') === 'light',
                                     'image'       => url('dashboard/assets/images/dashboard-light.svg'),
                                 ],
                                 'dark'  => [
                                     'content'     => t('Dark mode'),
                                     'icon'        => 'ph ph-police-car',
                                     'description' => t('This theme will be active when your system is set to “night mode”'),
-                                    'checked'     => $field->find('format') === 'dark',
+                                    'checked'     => $user->field->find('format') === 'dark',
                                     'image'       => url('dashboard/assets/images/dashboard-dark.svg'),
                                 ],
                             ],
@@ -341,7 +339,7 @@ return Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop' => 'toolbar',
-                                'checked' => $field->find('toolbar'),
+                                'checked' => $user->field->find('toolbar'),
                             ],
                             'options'     => [],
                         ],
