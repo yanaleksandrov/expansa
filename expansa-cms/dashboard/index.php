@@ -403,7 +403,7 @@ new class
                 [
                     'id'       => 'divider-workspace',
                     'title'    => t('Workspace'),
-                    'position' => 0,
+                    'position' => -20,
                 ],
                 [
                     'id'           => 'chat',
@@ -411,12 +411,12 @@ new class
                     'title'        => t('Chat'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-chat-circle-text',
-                    'position'     => 10,
+                    'position'     => -10,
                 ],
                 [
                     'id'       => 'divider-content',
                     'title'    => t('Content'),
-                    'position' => 100,
+                    'position' => 10,
                 ],
                 [
                     'id'           => 'dialogs',
