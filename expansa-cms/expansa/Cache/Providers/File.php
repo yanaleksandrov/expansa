@@ -5,17 +5,25 @@ declare(strict_types=1);
 namespace Expansa\Cache\Providers;
 
 use DateTime;
+use Expansa\Cache\Concerns\Locks;
+use Expansa\Cache\Concerns\Memoizes;
+use Expansa\Cache\Concerns\Serializes;
 use Expansa\Cache\Contracts\Provider;
-use Expansa\Cache\Traits;
 
 /**
  * A cache provider backed by plain files on disk — one file per key, one directory per group.
  * Needs no extension or server, just a writable directory; survives past a single process like
  * Database/Redis/Memcached, at the cost of a filesystem round-trip per call.
+ *
+ * A request-local L1 memo (see Memoizes) sits in front of the filesystem: a key read twice in
+ * the same request costs one file open, not two — this is the slowest backend per call, so it
+ * benefits from the memo the most.
  */
 class File implements Provider
 {
-    use Traits;
+    use Locks;
+    use Memoizes;
+    use Serializes;
 
     public function __construct(private readonly string $directory = EX_PATH . 'storage/cache/')
     {
@@ -24,10 +32,15 @@ class File implements Provider
     /**
      * $expiry accepts an absolute DateTime or a relative time string (e.g. "+1 day").
      */
+    #[\Override]
     public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): mixed
     {
-        if (isset(self::$locks[ $group ][ $key ])) {
+        if ($this->isLocked($group, $key)) {
             return false;
+        }
+
+        if ($this->hasMemoized($group, $key)) {
+            return $this->memoized($group, $key);
         }
 
         if (is_string($expiry)) {
@@ -37,10 +50,17 @@ class File implements Provider
         $entry = $this->read($key, $group);
 
         if ($entry !== null) {
-            return $entry['value'];
+            return $this->memoize($group, $key, $entry['value']);
         }
 
-        $this->write($key, $group, $value, $expiry?->getTimestamp());
+        // An expiry already in the past is never actually stored (or memoized), matching every
+        // other provider's behavior of an add()'d-then-immediately-expired entry never being
+        // visible to a later get().
+        if ($expiry === null || $expiry->getTimestamp() > time()) {
+            $this->write($key, $group, $value, $expiry?->getTimestamp());
+
+            return $this->memoize($group, $key, $value);
+        }
 
         return $value;
     }
@@ -49,19 +69,28 @@ class File implements Provider
      * Sets a value in the cache for a given key and group. The value never expires — use add()
      * with an $expiry for a TTL-bound entry.
      */
+    #[\Override]
     public function set(string $key, mixed $value, string $group = 'default'): mixed
     {
         $this->write($key, $group, $value, null);
 
-        return $value;
+        return $this->memoize($group, $key, $value);
     }
 
+    /**
+     * Retrieves data from the cache, optionally populating it via $callback on a miss.
+     */
+    #[\Override]
     public function get(string $key, string $group = 'default', ?callable $callback = null): mixed
     {
+        if ($this->hasMemoized($group, $key)) {
+            return $this->memoized($group, $key);
+        }
+
         $entry = $this->read($key, $group);
 
         if ($entry !== null) {
-            return $entry['value'];
+            return $this->memoize($group, $key, $entry['value']);
         }
 
         if ($callback !== null) {
@@ -71,6 +100,10 @@ class File implements Provider
         return null;
     }
 
+    /**
+     * Retrieves and removes data from the cache.
+     */
+    #[\Override]
     public function pull(string $key, string $group = 'default'): mixed
     {
         $value = $this->get($key, $group);
@@ -80,24 +113,21 @@ class File implements Provider
         return $value;
     }
 
-    public function suspend(callable $callback, string $key, string $group = 'default'): void
-    {
-        self::$locks[ $group ][ $key ] = true;
-
-        $callback();
-
-        unset(self::$locks[ $group ][ $key ]);
-    }
-
+    /**
+     * Clears data from the cache. An empty $key clears the whole group.
+     */
+    #[\Override]
     public function forget(string $key = '', string $group = 'default'): bool
     {
         if ($key !== '') {
             @unlink($this->path($key, $group));
+            $this->forgetMemoized($group, $key);
 
             return true;
         }
 
         $this->removeDirectory($this->directory($group));
+        $this->forgetMemoizedGroup($group);
 
         return true;
     }
@@ -105,6 +135,7 @@ class File implements Provider
     /**
      * Increases the value of a key by a given amount, preserving its expiry if any.
      */
+    #[\Override]
     public function increase(string $key, int|float $amount = 1, string $group = 'default'): bool
     {
         if ($key === '') {
@@ -117,11 +148,18 @@ class File implements Provider
             return false;
         }
 
-        $this->write($key, $group, $entry['value'] + $amount, $entry['expiry']);
+        $value = $entry['value'] + $amount;
+
+        $this->write($key, $group, $value, $entry['expiry']);
+        $this->memoize($group, $key, $value);
 
         return true;
     }
 
+    /**
+     * Decreases the value of a key by a given amount.
+     */
+    #[\Override]
     public function decrease(string $key, int|float $amount = 1, string $group = 'default'): bool
     {
         return $this->increase($key, -$amount, $group);
@@ -136,9 +174,9 @@ class File implements Provider
     {
         foreach (glob(rtrim($this->directory, '/\\') . '/*', GLOB_ONLYDIR) ?: [] as $groupDir) {
             foreach (glob($groupDir . '/*.cache') ?: [] as $path) {
-                $entry = @unserialize((string) file_get_contents($path));
+                $entry = $this->decode($path);
 
-                if (is_array($entry) && $entry['expiry'] !== null && $entry['expiry'] <= time()) {
+                if ($entry !== null && $entry['expiry'] !== null && $entry['expiry'] <= time()) {
                     @unlink($path);
                 }
             }
@@ -158,9 +196,9 @@ class File implements Provider
             return null;
         }
 
-        $entry = @unserialize((string) file_get_contents($path));
+        $entry = $this->decode($path);
 
-        if (! is_array($entry) || ! array_key_exists('value', $entry)) {
+        if ($entry === null) {
             return null;
         }
 
@@ -171,6 +209,24 @@ class File implements Provider
         }
 
         return $entry;
+    }
+
+    /**
+     * Reads and decodes a cache file's raw contents, without regard to expiry.
+     *
+     * @return array{value: mixed, expiry: int|null}|null
+     */
+    private function decode(string $path): ?array
+    {
+        $contents = @file_get_contents($path);
+
+        if ($contents === false) {
+            return null;
+        }
+
+        $entry = $this->unserializeValue($contents);
+
+        return is_array($entry) && array_key_exists('value', $entry) ? $entry : null;
     }
 
     /**
@@ -187,10 +243,13 @@ class File implements Provider
         $path = $this->path($key, $group);
         $tmp  = $path . '.' . uniqid('', true) . '.tmp';
 
-        file_put_contents($tmp, serialize(['value' => $value, 'expiry' => $expiry]));
+        file_put_contents($tmp, $this->serializeValue(['value' => $value, 'expiry' => $expiry]));
         rename($tmp, $path);
     }
 
+    /**
+     * Deletes every cache file in $dir along with the directory itself.
+     */
     private function removeDirectory(string $dir): void
     {
         foreach (glob($dir . '/*.cache') ?: [] as $path) {
@@ -200,6 +259,9 @@ class File implements Provider
         @rmdir($dir);
     }
 
+    /**
+     * The on-disk directory for $group, sanitized to a safe path segment.
+     */
     private function directory(string $group): string
     {
         $group = preg_replace('/[^A-Za-z0-9_-]/', '_', $group) ?: 'default';
@@ -207,6 +269,10 @@ class File implements Provider
         return rtrim($this->directory, '/\\') . '/' . $group;
     }
 
+    /**
+     * The on-disk file path for $key/$group. Hashed so an arbitrary key is always a safe
+     * filename.
+     */
     private function path(string $key, string $group): string
     {
         return $this->directory($group) . '/' . sha1($key) . '.cache';
