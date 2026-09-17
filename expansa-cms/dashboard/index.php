@@ -34,7 +34,7 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor', 'chat',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
@@ -58,12 +58,11 @@ new class
             $dateTimeTypes = ['date', 'datetime-local', 'time', 'month', 'week'];
 
             $vendor = match (true) {
-                $template === 'select'                   => 'youla-select',
-                $template !== 'input'                    => null,
-                $inputType === 'color'                   => 'youla-filler',
+                $template === 'select'                           => 'youla-select',
+                $inputType === 'color'                           => 'youla-filler',
                 in_array($inputType, $dateTimeTypes, true) => 'youla-pickadate',
-                $inputType === 'range'                   => 'youla-ranger',
-                default                                  => null,
+                $inputType === 'range'                           => 'youla-ranger',
+                default                                          => null,
             };
 
             return $vendor === null
@@ -74,7 +73,7 @@ new class
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla', 'youla-ajax', 'youla-expansa'];
+        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-chat'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'youla') {
@@ -407,18 +406,17 @@ new class
                     'position' => 0,
                 ],
                 [
-                    'id'           => 'profile',
-                    'url'          => 'profile',
-                    'title'        => t('Profile'),
+                    'id'           => 'chat',
+                    'url'          => 'chat',
+                    'title'        => t('Chat'),
                     'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-user-focus',
-                    'position'     => 0,
-                    'count'        => 5,
+                    'icon'         => 'ph ph-chat-circle-text',
+                    'position'     => 10,
                 ],
                 [
                     'id'       => 'divider-content',
                     'title'    => t('Content'),
-                    'position' => 10,
+                    'position' => 100,
                 ],
                 [
                     'id'           => 'dialogs',

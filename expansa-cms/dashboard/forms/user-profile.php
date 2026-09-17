@@ -17,9 +17,9 @@ return Form::enqueue(
     'user-profile',
     [
         'class'           => 'tab',
-        'u-data'          => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
-		'u-init'          => '$dirtyCheck.watch($el)',
-	    '@submit.prevent' => '$ajax.post("user/update", "", () => $dirtyCheck.remove($el))',
+        'u-data'          => 'tab',
+		'@load'           => '$dirty.watch($el)',
+	    '@submit.prevent' => '$ajax.post("user/update", "", () => $dirty.remove($el))',
     ],
     [
         [

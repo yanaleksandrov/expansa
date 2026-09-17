@@ -44,6 +44,11 @@ final class Web
             require_once EX_PATH . 'dashboard/index.php';
 
             $slug = str_replace('dashboard/', '', $slug);
+
+            // land on the chat page by default (bare "dashboard" or "dashboard/" slug).
+            if ($slug === '' || $slug === $dashboard) {
+                $slug = 'chat';
+            }
         }
 
         // not allow some slugs for logged user, they are reserved.
