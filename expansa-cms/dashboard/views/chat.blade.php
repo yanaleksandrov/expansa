@@ -9,24 +9,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 ?>
 <div class="chat" u-data="chat">
-	<aside class="chat-sidebar">
-		<button type="button" class="btn btn--primary chat-sidebar-new" u-bind="newProcessButton">
-			<i class="ph ph-plus"></i> <?php echo t( 'New process' ); ?>
-		</button>
-
-		<div class="chat-sidebar-title"><?php echo t( 'Processes' ); ?></div>
-
-		<div class="chat-sidebar-list">
-			<button type="button" class="chat-sidebar-item" u-each="(process, i) in processes" u-bind="processItem(process)">
-				<i class="ph ph-chat-circle-text"></i>
-				<span class="chat-sidebar-item-body">
-					<span class="chat-sidebar-item-title" u-bind="processTitle(process)"></span>
-					<span class="chat-sidebar-item-time" u-bind="processTime(process)"></span>
-				</span>
-			</button>
-		</div>
-	</aside>
-
 	<section class="chat-main">
 		<div class="chat-progress" u-bind="progressBar">
 			<div class="chat-progress-bar"></div>
@@ -67,4 +49,22 @@ if ( ! defined( 'EX_PATH' ) ) {
 			</button>
 		</div>
 	</section>
+
+	<aside class="chat-sidebar">
+		<button type="button" class="btn btn--primary chat-sidebar-new" u-bind="newProcessButton">
+			<i class="ph ph-plus"></i> <?php echo t( 'New process' ); ?>
+		</button>
+
+		<div class="chat-sidebar-title"><?php echo t( 'Processes' ); ?></div>
+
+		<div class="chat-sidebar-list">
+			<button type="button" class="chat-sidebar-item" u-each="(process, i) in processes" u-bind="processItem(process)">
+				<i class="ph ph-chat-circle-text"></i>
+				<span class="chat-sidebar-item-body">
+					<span class="chat-sidebar-item-title" u-bind="processTitle(process)"></span>
+					<span class="chat-sidebar-item-time" u-bind="processTime(process)"></span>
+				</span>
+			</button>
+		</div>
+	</aside>
 </div>
