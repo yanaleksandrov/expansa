@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Expansa\Cache\Providers;
 
 use DateTime;
+use Expansa\Cache\Contracts\Provider;
 use Expansa\Cache\Traits;
-use Expansa\Facades\Db;
 
-class Memory
+class Memory implements Provider
 {
     use Traits;
 
@@ -22,27 +22,36 @@ class Memory
     private const int MAX_ENTRIES_PER_GROUP = 5000;
 
     /**
-     * Adds data to the cache.
+     * Adds data to the cache. $expiry accepts an absolute DateTime or a relative time string
+     * (e.g. "+1 day", "+30 minutes") — anything the DateTime constructor understands.
      *
      * @param string $key
      * @param mixed $value
-     * @param DateTime|null $expiry TODO: add string support, like "+1 day"
      * @param string $group
+     * @param DateTime|string|null $expiry
      * @return mixed
      */
-    public function add(string $key, mixed $value, string $group = 'default', ?DateTime $expiry = null): mixed
+    public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): mixed
     {
         if (isset(self::$locks[ $group ][ $key ])) {
             return false;
         }
 
-        if (isset(self::$cache[ $group ][ $key ])) {
-            return self::$cache[ $group ][ $key ]['value'];
+        if (is_string($expiry)) {
+            $expiry = new DateTime($expiry);
+        }
+
+        $entry = self::$cache[ $group ][ $key ] ?? null;
+
+        if ($entry !== null) {
+            if ($entry['expiry'] === null || $entry['expiry'] > time()) {
+                return $entry['value'];
+            }
+            unset(self::$cache[ $group ][ $key ]);
         }
 
         if (count(self::$cache[ $group ] ?? []) >= self::MAX_ENTRIES_PER_GROUP) {
-            // unset(), not array_shift() — the latter always rebuilds the whole array (O(n),
-            // even for string keys), while dropping one known key is a plain O(1) hash removal.
+            // Dropping one known key is O(1); array_shift() would rebuild the whole array.
             unset(self::$cache[ $group ][ array_key_first(self::$cache[ $group ]) ]);
         }
 
@@ -51,22 +60,12 @@ class Memory
             'expiry' => $expiry?->getTimestamp(),
         ];
 
-        if ($expiry instanceof DateTime) {
-            Db::insert(
-                self::$table,
-                [
-                    'key'        => $key,
-                    'value'      => $value,
-                    'expiration' => $expiry->getTimestamp(),
-                ]
-            );
-        }
-
         return $value;
     }
 
     /**
-     * Sets a value in the cache for a given key and group.
+     * Sets a value in the cache for a given key and group. The value never expires — use add()
+     * with an $expiry for a TTL-bound entry.
      *
      * @param string     $key   The cache item key.
      * @param mixed|null $value The value to store in the cache.
@@ -80,25 +79,36 @@ class Memory
             unset(self::$cache[ $group ][ array_key_first(self::$cache[ $group ]) ]);
         }
 
-        return self::$cache[$group][$key]['value'] = $value;
+        // set() always means "no expiry", even if the key previously had one via add().
+        self::$cache[ $group ][ $key ]['expiry'] = null;
+
+        return self::$cache[ $group ][ $key ]['value'] = $value;
     }
 
     /**
-     * Retrieves data from the cache.
+     * Retrieves data from the cache. An entry whose expiry has passed is treated as a miss and
+     * evicted.
      *
      * @param string $key
-     * @param callable|null $callback
      * @param string $group
+     * @param callable|null $callback
      * @return mixed
      */
     public function get(string $key, string $group = 'default', ?callable $callback = null): mixed
     {
-        if (isset(self::$cache[ $group ][ $key ])) {
-            return self::$cache[ $group ][ $key ]['value'];
+        // Fetch once instead of isset() + a second lookup for the value.
+        $entry = self::$cache[ $group ][ $key ] ?? null;
+
+        if ($entry !== null) {
+            if ($entry['expiry'] === null || $entry['expiry'] > time()) {
+                return $entry['value'];
+            }
+            unset(self::$cache[ $group ][ $key ]);
         }
 
-        if (is_callable($callback)) {
-            return $this->add($key, call_user_func($callback), $group);
+        // $callback is already callable|null-typed, so a plain null check suffices here.
+        if ($callback !== null) {
+            return $this->add($key, $callback(), $group);
         }
 
         return null;
@@ -115,7 +125,7 @@ class Memory
     {
         $value = $this->get($key, $group);
 
-        $this->forget($key);
+        $this->forget($key, $group);
 
         return $value;
     }
@@ -123,15 +133,15 @@ class Memory
     /**
      * Suspend the addition of data to the cache.
      *
-     * @param string $key
      * @param callable $callback
+     * @param string $key
      * @param string $group
      */
     public function suspend(callable $callback, string $key, string $group = 'default'): void
     {
         self::$locks[ $group ][ $key ] = true;
 
-        call_user_func($callback);
+        $callback();
 
         unset(self::$locks[ $group ][ $key ]);
     }
@@ -145,7 +155,8 @@ class Memory
      */
     public function forget(string $key = '', string $group = 'default'): bool
     {
-        if ($key) {
+        // Strict comparison: a key literally "0" is falsy and must not wipe the whole group.
+        if ($key !== '') {
             unset(self::$cache[ $group ][ $key ]);
         } else {
             self::$cache[ $group ] = [];
@@ -154,38 +165,46 @@ class Memory
     }
 
     /**
-     * Increases the value of a key by a given amount.
+     * Increases the value of a key by a given amount. Expiry, if any, is preserved.
      *
      * @param string $key
      * @param int|float $amount
      * @param string $group
-     * @return mixed
+     * @return bool
      */
     public function increase(string $key, int|float $amount = 1, string $group = 'default'): bool
     {
-        if ($key && is_numeric(self::$cache[ $group ][ $key ]['value'] ?? null)) {
-            self::$cache[ $group ][ $key ]['value'] += $amount;
-
-            return true;
+        // Strict comparison — a key literally named "0" is falsy and must not be rejected here.
+        if ($key === '') {
+            return false;
         }
-        return false;
+
+        // Read via the nested path, not a local var, to avoid a COW copy on the '+=' write below.
+        $expiry = self::$cache[ $group ][ $key ]['expiry'] ?? null;
+
+        if ($expiry !== null && $expiry <= time()) {
+            return false;
+        }
+
+        if (! is_numeric(self::$cache[ $group ][ $key ]['value'] ?? null)) {
+            return false;
+        }
+
+        self::$cache[ $group ][ $key ]['value'] += $amount;
+
+        return true;
     }
 
     /**
-     * Decreases the value of a key by a given amount.
+     * Decreases the value of a key by a given amount. Expiry, if any, is preserved.
      *
      * @param string $key
      * @param int|float $amount
      * @param string $group
-     * @return mixed
+     * @return bool
      */
     public function decrease(string $key, int|float $amount = 1, string $group = 'default'): bool
     {
-        if ($key && is_numeric(self::$cache[ $group ][ $key ]['value'] ?? null)) {
-            self::$cache[ $group ][ $key ]['value'] -= $amount;
-
-            return true;
-        }
-        return false;
+        return $this->increase($key, -$amount, $group);
     }
 }

@@ -53,7 +53,7 @@ use Expansa\Facades\Safe;
 	</div>
 
 	<script id="prism-js" src="/dashboard/assets/js/prism.min.js"></script>
-	<script id="expansa-js" src="/dashboard/assets/js/expansa.min.js"></script>
-	<script id="alpine-js" src="/dashboard/assets/js/alpine.min.js"></script>
+	<script id="youla-js" src="/dashboard/assets/js/youla.js"></script>
+	<script id="youla-expansa-js" src="/dashboard/assets/js/youla-expansa.js"></script>
 </body>
 </html>

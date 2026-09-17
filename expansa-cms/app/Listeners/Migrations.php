@@ -150,7 +150,7 @@ final class Migrations
         Schema::create('cache', function (Table $table) {
             $table->string('key', 191)->primary();
             $table->mediumText('value');
-            $table->datetime('expiry_at');
+            $table->datetime('expiry_at')->nullable();
 
             // indexes
             $table->index('expiry_at');
