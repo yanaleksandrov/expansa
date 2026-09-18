@@ -73,7 +73,9 @@ return \Expansa\Facades\Form::enqueue(
 				</div>
 				<?php
 			},
-			'attributes'  => [ 'u-prop' => 'title' ],
+			'attributes'  => [
+				'u-prop' => 'title'
+			],
 		],
 		[
 			'name'        => 'title',
@@ -84,7 +86,9 @@ return \Expansa\Facades\Form::enqueue(
 				'If the tool you need is not in the list, look in the [plugin catalog](:pluginsCatalogLink) to see if such a tool is available.',
 				url( 'dashboard/plugins' )
 			),
-			'attributes'  => [ 'u-prop' => 'title' ],
+			'attributes'  => [
+				'u-prop' => 'title'
+			],
 		],
 	],
 );

@@ -13,7 +13,7 @@ return Expansa\Facades\Form::enqueue(
 	'settings',
 	[
 		'class'           => 'tab tab--vertical',
-		'u-data'          => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
+		'u-data'          => 'tab',
         'u-init'          => '$dirty.watch($el)',
         '@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
 	],

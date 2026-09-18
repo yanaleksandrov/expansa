@@ -119,10 +119,12 @@ return \Expansa\Facades\Form::enqueue(
 			], array_keys($samples), $samples),
 		],
 		[
-			'name'     => 'custom',
-			'type'     => 'custom',
-			'callback' => fn () => '<input type="hidden" value="' . $filepath . '" name="filename">',
-			'attributes'  => [ 'u-prop' => 'custom' ],
+			'name'       => 'custom',
+			'type'       => 'custom',
+			'callback'   => fn () => '<input type="hidden" value="' . $filepath . '" name="filename">',
+			'attributes' => [
+                'u-prop' => 'custom'
+            ],
 		],
 	]
 );

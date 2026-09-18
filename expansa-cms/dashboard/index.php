@@ -436,6 +436,14 @@ new class
                     'parent_id'    => 'dialogs',
                 ],
                 [
+                    'id'           => 'field-groups',
+                    'url'          => 'field-groups',
+                    'title'        => t('Custom Fields'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-stack',
+                    'position'     => 250,
+                ],
+                [
                     'id'       => 'divider-customization',
                     'title'    => t('Customization'),
                     'position' => 300,

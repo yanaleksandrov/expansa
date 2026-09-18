@@ -4,39 +4,36 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Hidden extends Field
+/**
+ * Renders `form/hidden.blade.php` - stores a fixed or computed value without displaying an input.
+ */
+class Hidden extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'hidden',
+            label: t('Hidden'),
+            category: 'advanced',
+            icon: 'ph ph-eye-slash',
+            description: t('Stores a fixed or computed value without displaying an input to the user.'),
+            defaults: [
+                'name'       => '',
+                'attributes' => ['type' => 'hidden'],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ['type' => 'text', 'name' => 'name', 'label' => t('Name'), 'attributes' => ['required' => true]],
+            ['type' => 'text', 'name' => 'attributes.value', 'label' => t('Value')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

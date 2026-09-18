@@ -4,39 +4,37 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class LayoutGroup extends Field
+/**
+ * Renders `form/layout-group.blade.php` - groups nested fields together in a responsive grid.
+ * Nested fields are parsed into `$field['content']` by {@see \Expansa\Builders\Forms\Field::parse()}
+ * before this class ever sees them.
+ */
+class LayoutGroup extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'layout-group',
+            label: t('Group'),
+            category: 'layout',
+            icon: 'ph ph-squares-four',
+            description: t('Groups nested fields together in a responsive grid.'),
+            defaults: [
+                'label'  => '',
+                'fields' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ['type' => 'text', 'name' => 'label', 'label' => t('Label')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

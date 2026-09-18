@@ -20,12 +20,12 @@ class Tree
     /**
      * Tree structures list.
      */
-    public array $list;
+    public array $list = [];
 
     /**
      * Tree structure name.
      */
-    public string $name;
+    public string $name = '';
 
     /**
      * TODO: The maximum number of items to crawl.
@@ -174,7 +174,7 @@ class Tree
             }
         }
 
-        // TODO: неправильно сортирует, если у всех элементов значение position одинаковое
+        // TODO: sorts incorrectly when every element shares the same `position` value.
         return Arr::sort($tree, 'position');
     }
 

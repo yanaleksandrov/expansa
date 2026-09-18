@@ -4,39 +4,38 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Details extends Field
+/**
+ * Renders `form/details.blade.php` - a collapsible `<details>` block, typically used
+ * to group optional or advanced content.
+ */
+class Details extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'details',
+            label: t('Details'),
+            category: 'layout',
+            icon: 'ph ph-caret-circle-down',
+            description: t('A collapsible block for grouping optional or advanced content.'),
+            defaults: [
+                'label'       => '',
+                'instruction' => '',
+                'content'     => '',
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ['type' => 'text', 'name' => 'label', 'label' => t('Summary'), 'attributes' => ['required' => true]],
+            ['type' => 'textarea', 'name' => 'instruction', 'label' => t('Description')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

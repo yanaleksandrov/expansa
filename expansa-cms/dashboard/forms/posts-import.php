@@ -33,7 +33,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'pl-7 pr-7',
-				'u-step'  => 'fields.trim()',
+				'u-step'         => 'fields.trim()',
 				'u-wizard:title' => t( 'Upload CSV file' ),
 			],
 			'fields' => [
@@ -60,7 +60,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'u-prop' => 'uploader',
+						'u-prop'  => 'uploader',
 						'accept'  => '.csv,.txt',
 						'@change' => '$ajax.post("files/upload").then(response => fields = response.fields,goNext())',
 					],
@@ -71,8 +71,8 @@ return \Expansa\Facades\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'pl-7 pr-7',
-				'hidden'        => true,
-				'u-step'  => 'output.trim()',
+				'hidden'         => true,
+				'u-step'         => 'output.trim()',
 				'u-wizard:title' => t( 'Column mapping' ),
 			],
 			'fields' => [

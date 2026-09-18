@@ -35,8 +35,8 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop' => 'email',
-				'placeholder' => t( 'Enter user email' ),
+                'placeholder' => t( 'Enter user email' ),
+				'u-prop'      => 'email',
 				'@change'     => "login = email.split('@')[0]",
 				'required'    => true,
 			],
@@ -56,8 +56,8 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop' => 'login',
 				'placeholder' => t( 'Enter user login' ),
+                'u-prop'      => 'login',
 				'required'    => true,
 			],
 		],
@@ -76,8 +76,8 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop' => 'password',
 				'placeholder' => t( 'Password' ),
+                'u-prop'      => 'password',
 				'required'    => true,
 			],
 			'switcher'   => 1,

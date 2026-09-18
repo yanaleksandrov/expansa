@@ -26,6 +26,7 @@ final class Migrations
         $this->createTaxonomiesTable();
         $this->createMediaTable();
         $this->createApiKeysTable();
+        $this->createFieldGroupsTable();
     }
 
     public function createPostsTable(string $postType): void
@@ -329,6 +330,28 @@ final class Migrations
             $table->index('user_id');
             $table->index('status');
             $table->index('hash');
+        });
+    }
+
+    /**
+     * Field groups for the ACF-style Custom Fields builder: a group of fields (stored as one
+     * JSON document, the same shape {@see \Expansa\Builders\Forms\Field::parse()} already
+     * consumes) plus its location rules (built by the `builder` field type).
+     */
+    private function createFieldGroupsTable(): void
+    {
+        Schema::create('field_groups', function (Table $table) {
+            $table->id();
+            $table->string('title', 255);
+            $table->string('slug', 255)->unique();
+            $table->json('location')->nullable();
+            $table->json('fields')->nullable();
+            $table->mediumInt('position')->unsigned()->default(0);
+            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->timestamps();
+
+            // indexes
+            $table->index('status');
         });
     }
 

@@ -34,8 +34,8 @@ return Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'u-prop' => 'title',
 						'placeholder' => '',
+						'u-prop'      => 'title',
 						'required'    => true,
 					],
 				],
@@ -85,8 +85,8 @@ return Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'limits',
-						'value' => 10,
-						'min'   => 1,
+						'value'  => 10,
+						'min'    => 1,
 					],
 				],
 				[
@@ -105,7 +105,7 @@ return Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'period',
-						'value' => '',
+						'value'  => '',
 					],
 					'options'     => [
 						'second' => t( 'per second' ),
@@ -140,7 +140,9 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [ 'u-prop' => 'startDate' ],
+					'attributes'  => [
+						'u-prop' => 'startDate',
+					],
 				],
 				[
 					'type'        => 'date',
@@ -156,7 +158,9 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [ 'u-prop' => 'endDate' ],
+					'attributes'  => [
+						'u-prop' => 'endDate',
+					],
 				],
 			],
 		],

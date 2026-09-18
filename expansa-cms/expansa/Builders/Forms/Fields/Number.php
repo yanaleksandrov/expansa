@@ -4,39 +4,45 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Number extends Field
+/**
+ * Renders `form/number.blade.php` - a numeric input with increment/decrement controls.
+ */
+class Number extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'number',
+            label: t('Number'),
+            category: 'basic',
+            icon: 'ph ph-hash',
+            description: t('A numeric input with increment/decrement controls.'),
+            defaults: [
+                'name'       => '',
+                'label'      => '',
+                'attributes' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ...$this->baseSettings(),
+            ['type' => 'number', 'name' => 'attributes.min', 'label' => t('Minimum value')],
+            ['type' => 'number', 'name' => 'attributes.max', 'label' => t('Maximum value')],
+            ['type' => 'number', 'name' => 'attributes.step', 'label' => t('Step')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
+        $rules = array_filter([
+            'numeric',
+            isset($field['attributes']['min']) ? 'min:' . $field['attributes']['min'] : '',
+            isset($field['attributes']['max']) ? 'max:' . $field['attributes']['max'] : '',
+        ]);
 
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [($field['name'] ?? '') => $this->withRequired($field, implode('|', $rules))];
     }
 }

@@ -4,39 +4,33 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Image extends Field
+/**
+ * Renders `form/image.blade.php` - a single image/avatar uploader with camera capture support.
+ */
+class Image extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'image',
+            label: t('Image'),
+            category: 'media',
+            icon: 'ph ph-user-circle',
+            description: t('A single image/avatar uploader with camera capture support.'),
+            defaults: [
+                'name'  => '',
+                'label' => '',
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return $this->baseSettings(false);
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

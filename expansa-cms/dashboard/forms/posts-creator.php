@@ -27,7 +27,7 @@ return \Expansa\Facades\Form::enqueue(
             'validator'   => '',
             'conditions'  => [],
             'attributes'  => [
-                'u-prop' => 'title',
+                'u-prop'      => 'title',
                 'rows'        => 1,
                 'required'    => true,
                 'placeholder' => t('Add title...'),
@@ -48,7 +48,7 @@ return \Expansa\Facades\Form::enqueue(
             'validator'   => '',
             'conditions'  => [],
             'attributes'  => [
-                'u-prop' => 'permalink',
+                'u-prop'   => 'permalink',
                 'required' => true,
             ],
         ],
@@ -67,7 +67,7 @@ return \Expansa\Facades\Form::enqueue(
             'validator'   => '',
             'conditions'  => [],
             'attributes'  => [
-                'u-prop' => 'excerpt',
+                'u-prop'      => 'excerpt',
                 'rows'        => 1,
                 'value'       => '',
                 'placeholder' => t('Write an excerpt (optional)...'),
@@ -89,7 +89,7 @@ return \Expansa\Facades\Form::enqueue(
             'conditions'  => [],
             'attributes'  => [
                 'u-prop' => 'status',
-                'value' => 'publish',
+                'value'  => 'publish',
             ],
             'options'     => [
                 'publish' => t('Publish'),
@@ -113,7 +113,7 @@ return \Expansa\Facades\Form::enqueue(
             'conditions'  => [],
             'attributes'  => [
                 'u-prop' => 'visibility',
-                'value' => 'public',
+                'value'  => 'public',
             ],
             'options'     => [
                 'public'  => t('Public'),
@@ -136,7 +136,7 @@ return \Expansa\Facades\Form::enqueue(
             'validator'   => '',
             'conditions'  => [],
             'attributes'  => [
-                'u-prop' => 'from',
+                'u-prop'      => 'from',
                 'placeholder' => t('e.g. Just another Expansa site'),
             ],
         ],
@@ -155,7 +155,7 @@ return \Expansa\Facades\Form::enqueue(
             'validator'   => '',
             'conditions'  => [],
             'attributes'  => [
-                'u-prop' => 'to',
+                'u-prop'      => 'to',
                 'placeholder' => t('e.g. Just another Expansa site'),
             ],
         ],

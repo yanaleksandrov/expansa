@@ -4,39 +4,33 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class LayoutTabMenu extends Field
+/**
+ * Renders `form/layout-tab-menu.blade.php` - the navigation menu for a set of
+ * {@see LayoutTab} fields. Expects the full fields array under `fields`.
+ */
+class LayoutTabMenu extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'layout-tab-menu',
+            label: t('Tab Menu'),
+            category: 'layout',
+            icon: 'ph ph-list',
+            description: t('Navigation menu rendered above a set of tab fields.'),
+            defaults: [
+                'fields' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

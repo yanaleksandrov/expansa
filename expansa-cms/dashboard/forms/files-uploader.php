@@ -32,10 +32,10 @@ return Expansa\Facades\Form::enqueue(
 			],
 		],
 		[
-			'name'     => 'progress',
-			'type'     => 'custom',
-			'callback' => fn () => '<div class="progress" :style="{\'--expansa-progress\':`${percent}%`}"></div>',
-			'attributes'  => [
+			'name'       => 'progress',
+			'type'       => 'custom',
+			'callback'   => fn () => '<div class="progress" :style="{\'--expansa-progress\':`${percent}%`}"></div>',
+			'attributes' => [
                 'u-prop' => 'progress'
             ],
 		],

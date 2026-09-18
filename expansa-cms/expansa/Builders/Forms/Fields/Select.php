@@ -4,39 +4,42 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Select extends Field
+/**
+ * Renders `form/select.blade.php` - a dropdown list, with support for `<optgroup>` via nested options.
+ */
+class Select extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'select',
+            label: t('Select'),
+            category: 'choice',
+            icon: 'ph ph-list',
+            description: t('A dropdown list for selecting one value.'),
+            defaults: [
+                'name'       => '',
+                'label'      => '',
+                'options'    => [],
+                'attributes' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ...$this->baseSettings(),
+            [
+                'type'  => 'repeater',
+                'name'  => 'options',
+                'label' => t('Options'),
+            ],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [($field['name'] ?? '') => $this->withRequired($field)];
     }
 }

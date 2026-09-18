@@ -4,39 +4,36 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Submit extends Field
+/**
+ * Renders `form/submit.blade.php` - a submit button.
+ */
+class Submit extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'submit',
+            label: t('Submit'),
+            category: 'basic',
+            icon: 'ph ph-paper-plane-tilt',
+            description: t('A submit button that sends the form.'),
+            defaults: [
+                'name'       => 'submit',
+                'label'      => t('Submit'),
+                'attributes' => ['type' => 'submit'],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ['type' => 'text', 'name' => 'label', 'label' => t('Button text'), 'attributes' => ['required' => true]],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

@@ -9,7 +9,7 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'table__filter',
 		'u-show'          => 'showFilter === true',
-		'hidden'         => true,
+		'hidden'          => true,
 		'@submit.prevent' => '$ajax.post("items/filter")',
 	],
 	[
@@ -28,7 +28,7 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop' => 's',
+				'u-prop'      => 's',
 				'placeholder' => t( 'e.g. search text' ),
 			],
 		],
