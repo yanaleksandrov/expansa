@@ -46,9 +46,7 @@ $locations = $__data['locations'] ?? [];
 							</select>
 						</div>
 						<div class="dg g-1">
-							<select class="field" u-prop="rule.value" u-select>
-								<option u-each="(label, value) in (valueOptions[rule.location] || {})" :value="value" u-text="label"></option>
-							</select>
+							<select class="field" u-html="locationValueOptions(rule)" u-prop="rule.value" u-select></select>
 						</div>
 						<div class="dg g-1" u-show="group.rules.length > 1">
 							<button type="button" class="btn btn--icon t-red" @click="removeRule(key, i)"><i class="ph ph-trash-simple"></i></button>

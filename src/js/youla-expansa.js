@@ -636,6 +636,10 @@ document.addEventListener('youla:init', ()=> {
             .replace(/[^a-z0-9]+/g, '_')
             .replace(/^_+|_+$/g, '');
 
+        const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        })[char]);
+
         return {
             id: state.id || 0,
             title: state.title || '',
@@ -666,6 +670,18 @@ document.addEventListener('youla:init', ()=> {
             },
             removeRule(key, index) {
                 this.groups[key].rules.splice(index, 1);
+            },
+            // Rendered via u-html (before u-prop in the tag, so it runs first) rather than a
+            // nested u-each on <option>: that each's clones are appended asynchronously, so
+            // the <select>'s own u-prop would apply its value before any <option> existed to
+            // select, i.e. every rule's "value" field would appear reset/blank each time any
+            // group/rule anywhere on the page was added or removed (u-each rebuilds the whole
+            // list on every mutation, hitting this race for every existing rule at once).
+            locationValueOptions(rule) {
+                const options = this.valueOptions[rule.location] || {};
+                return Object.entries(options)
+                    .map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
+                    .join('');
             },
 
             addField(type) {

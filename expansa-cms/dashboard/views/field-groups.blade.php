@@ -166,11 +166,6 @@ $state = [
                     </label>
                 </div>
 
-                <div class="card-hr"><?php echo t('Location Rules'); ?></div>
-                <p class="t-muted fs-13"><?php echo t('Show this field group when any of these rule groups match (rules within a group must all match).'); ?></p>
-
-                <?php echo view('form/builder', ['locations' => $locations]); ?>
-
                 <div class="card-hr"><?php echo t('Fields'); ?></div>
 
                 <div class="dg g-3">
@@ -206,6 +201,11 @@ $state = [
                 </div>
 
                 <button type="button" class="btn btn--sm btn--outline" @click="addField('text')"><i class="ph ph-plus"></i> <?php echo t('Add field'); ?></button>
+
+                <div class="card-hr"><?php echo t('Location Rules'); ?></div>
+                <p class="t-muted fs-13"><?php echo t('Show this field group when any of these rule groups match (rules within a group must all match).'); ?></p>
+
+                <?php echo view('form/builder', ['locations' => $locations]); ?>
 
                 <div class="df g-2 mt-4">
                     <button type="submit" class="btn btn--primary"><?php echo t('Save Field Group'); ?></button>

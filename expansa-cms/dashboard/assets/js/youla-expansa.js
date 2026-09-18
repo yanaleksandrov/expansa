@@ -513,6 +513,13 @@ document.addEventListener('youla:init', () => {
             options: ''
         });
         const slugifyName = label => String(label || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            '\'': '&#39;'
+        }[char]));
         return {
             id: state.id || 0,
             title: state.title || '',
@@ -544,6 +551,10 @@ document.addEventListener('youla:init', () => {
             },
             removeRule(key, index) {
                 this.groups[key].rules.splice(index, 1);
+            },
+            locationValueOptions(rule) {
+                const options = this.valueOptions[rule.location] || {};
+                return Object.entries(options).map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
             },
             addField(type) {
                 this.fields.push(blankField(type));
