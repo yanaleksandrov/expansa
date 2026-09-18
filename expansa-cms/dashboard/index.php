@@ -288,12 +288,12 @@ new class
                     'title'        => t('Sign out'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-sign-out',
-                    'position'     => 0,
+                    'position'     => 100,
                 ],
                 [
                     'id'       => 'divider-content',
                     'title'    => '',
-                    'position' => 10,
+                    'position' => 200,
                 ],
                 [
                     'id'           => 'profile',
@@ -301,28 +301,12 @@ new class
                     'title'        => t('Profile'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-gear',
-                    'position'     => 20,
-                ],
-                [
-                    'id'           => 'profile',
-                    'url'          => 'profile',
-                    'title'        => t('Set yourself as %saway%s', '<strong>', '</strong>'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-moon-stars',
-                    'position'     => 30,
-                ],
-                [
-                    'id'           => 'dialogs',
-                    'url'          => 'comments',
-                    'title'        => t('Pause notifications'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-bell-slash',
-                    'position'     => 40,
+                    'position'     => 300,
                 ],
                 [
                     'id'       => 'divider-content',
                     'title'    => '',
-                    'position' => 50,
+                    'position' => 400,
                 ],
                 [
                     'id'           => 'comments',
@@ -330,7 +314,7 @@ new class
                     'title'        => t('Add account'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-user-plus',
-                    'position'     => 60,
+                    'position'     => 500,
                 ],
                 [
                     'id'           => 'comments',
@@ -338,7 +322,7 @@ new class
                     'title'        => t('Igor Ivanov'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-user-plus',
-                    'position'     => 70,
+                    'position'     => 600,
                 ],
             ]
         ));
@@ -434,6 +418,14 @@ new class
                     'icon'         => '',
                     'position'     => 0,
                     'parent_id'    => 'dialogs',
+                ],
+                [
+                    'id'           => 'field-groups',
+                    'url'          => 'field-groups',
+                    'title'        => t('Custom Fields'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-stack',
+                    'position'     => 250,
                 ],
                 [
                     'id'       => 'divider-customization',

@@ -94,10 +94,13 @@ class Form
      */
     public function override(string $uid, callable $function): \Expansa\Builders\Forms\Form
     {
-        $form = self::$forms[$uid];
-        if (is_callable($function)) {
-            $function($form);
+        $form = self::$forms[$uid] ?? null;
+        if (! $form instanceof \Expansa\Builders\Forms\Form) {
+            throw new InvalidArgumentException(t('The form with ":formUid" ID does not exist.', $uid));
         }
+
+        $function($form);
+
         return $form;
     }
 }

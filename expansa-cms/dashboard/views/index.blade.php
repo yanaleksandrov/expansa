@@ -87,7 +87,7 @@ $table = $__data['table'] ?? null;
     </div>
 
     <!-- dialog windows start -->
-    <div class="dialog" :class="$store.dialog?.class" id="expansa-dialog">
+    <div class="dialog" u-data="dialog" :class="$store.dialog?.class" id="expansa-dialog">
         <div class="dialog-wrapper" @click.outside="$dialog.close()">
             <div class="dialog-header">
                 <template u-if="$store.dialog?.title">

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Api\Apikey\ApikeyController;
 use App\Api\Extensions\ExtensionsController;
+use App\Api\FieldGroups\FieldGroupsController;
 use App\Api\Files\FilesController;
 use App\Api\Media\MediaController;
 use App\Api\Options\OptionsController;
@@ -54,6 +55,7 @@ Route::prefix('/api', function () {
         [
             ApikeyController::class,
             ExtensionsController::class,
+            FieldGroupsController::class,
             FilesController::class,
             MediaController::class,
             OptionsController::class,
@@ -69,7 +71,7 @@ Route::prefix('/api', function () {
             }
 
             $classname = new ReflectionClass($class)->getShortName();
-            $prefix    = Safe::lowercase(preg_replace('/Controller$/', '', $classname));
+            $prefix    = Safe::kebabcase(preg_replace('/Controller$/', '', $classname));
             $endpoint  = Safe::kebabcase($method);
 
             Route::post("/$prefix/$endpoint", fn (...$params) => Kernel::dispatch($class, $method, $params));

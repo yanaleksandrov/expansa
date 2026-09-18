@@ -4,35 +4,44 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Checkbox extends Field
+/**
+ * Renders `form/checkbox.blade.php` - one checkbox, or a set of checkboxes when `options` is given.
+ */
+class Checkbox extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'checkbox',
+            label: t('Checkbox'),
+            category: 'choice',
+            icon: 'ph ph-check-square',
+            description: t('One or more checkboxes for boolean or multi-select values.'),
+            defaults: [
+                'name'       => '',
+                'label'      => '',
+                'options'    => [],
+                'attributes' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
+        return [
+            ...$this->baseSettings(),
+            [
+                'type'  => 'repeater',
+                'name'  => 'options',
+                'label' => t('Options'),
+            ],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-    }
+        $multiple = ! empty($field['options']);
 
-    public function settings()
-    {
-    }
-
-    public function validate()
-    {
+        return [($field['name'] ?? '') => $this->withRequired($field, $multiple ? 'array' : 'accepted')];
     }
 }

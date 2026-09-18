@@ -18,7 +18,9 @@ return \Expansa\Facades\Form::enqueue(
 			'label'       => t( 'Reset password' ),
 			'class'       => 't-center',
 			'instruction' => t( 'Enter the email address that you used to register. We will send you an email that will allow you to reset your password.' ),
-			'attributes'  => [ 'u-prop' => 'title' ],
+			'attributes'  => [
+                'u-prop' => 'title'
+            ],
 		],
 		[
 			'type'        => 'email',
@@ -35,8 +37,8 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop' => 'email',
 				'placeholder'    => t( 'Enter your email address' ),
+                'u-prop'         => 'email',
 				'required'       => true,
 				'u-autocomplete' => '',
 			],

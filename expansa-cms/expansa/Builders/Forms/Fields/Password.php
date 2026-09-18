@@ -4,39 +4,54 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Password extends Field
+/**
+ * Renders `form/password.blade.php` - a password input with an optional visibility
+ * switcher, strength indicator and generator.
+ */
+class Password extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'password',
+            label: t('Password'),
+            category: 'basic',
+            icon: 'ph ph-lock-key',
+            description: t('A password input with an optional visibility switcher, strength indicator and generator.'),
+            defaults: [
+                'name'       => '',
+                'label'      => '',
+                'switcher'   => true,
+                'indicator'  => false,
+                'generator'  => false,
+                'attributes' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ...$this->baseSettings(),
+            $this->toggle('switcher', t('Show visibility switcher')),
+            $this->toggle('indicator', t('Show strength indicator')),
+            $this->toggle('generator', t('Show password generator')),
+        ];
     }
 
-    public function render()
+    /**
+     * A single checkbox settings row, e.g. "Show visibility switcher".
+     */
+    private function toggle(string $name, string $label): array
     {
-
+        return ['type' => 'checkbox', 'name' => $name, 'label' => '', 'options' => [$name => ['content' => $label]]];
     }
 
-    public function settings()
+    public function validate(array $field = []): array
     {
+        $minLength = $field['characters']['length'] ?? null;
+        $rule      = $minLength ? 'lengthMin:' . (int) $minLength : '';
 
-    }
-
-    public function validate()
-    {
-
+        return [($field['name'] ?? '') => $this->withRequired($field, $rule)];
     }
 }

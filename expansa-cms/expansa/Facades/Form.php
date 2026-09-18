@@ -11,7 +11,7 @@ use Expansa\Patterns\Facade;
  *
  * @method static void   configure(array $fields)
  * @method static string parse(array $fields)
- * @method static string make(string $uid, array $attributes = [], array $fields = [])
+ * @method static string make(string $uid)
  * @method static string enqueue(string $uid, array $attributes = [], array $fields = [])
  * @method static \Expansa\Builders\Form override(string $uid, callable $function)
  */

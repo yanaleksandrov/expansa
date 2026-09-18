@@ -4,39 +4,34 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Divider extends Field
+/**
+ * Renders `form/divider.blade.php` - a plain horizontal divider, optionally labeled.
+ */
+class Divider extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'divider',
+            label: t('Divider'),
+            category: 'layout',
+            icon: 'ph ph-minus',
+            description: t('A horizontal divider used to visually separate sections of a form.'),
+            defaults: [
+                'label' => '',
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ['type' => 'text', 'name' => 'label', 'label' => t('Label')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

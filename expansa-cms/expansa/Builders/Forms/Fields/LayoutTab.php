@@ -4,39 +4,40 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class LayoutTab extends Field
+/**
+ * Renders `form/layout-tab.blade.php` - a single tab panel of a tabbed form,
+ * paired with {@see LayoutTabMenu} for its navigation.
+ */
+class LayoutTab extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'layout-tab',
+            label: t('Tab'),
+            category: 'layout',
+            icon: 'ph ph-tabs',
+            description: t('A single tab panel of a tabbed form.'),
+            defaults: [
+                'name'        => '',
+                'label'       => '',
+                'instruction' => '',
+                'fields'      => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ['type' => 'text', 'name' => 'label', 'label' => t('Tab label'), 'attributes' => ['required' => true]],
+            ['type' => 'text', 'name' => 'icon', 'label' => t('Icon')],
+            ['type' => 'text', 'name' => 'instruction', 'label' => t('Description')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

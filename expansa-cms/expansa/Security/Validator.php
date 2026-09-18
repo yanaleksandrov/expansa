@@ -176,7 +176,7 @@ final class Validator
 
                 // checking the value for compliance with the condition
                 $value      = $this->fields[ $field ] ?? '';
-                $comparison = $this->fields[ $comparisonValue ] ?? $comparisonValue;
+                $comparison = $comparisonValue !== null ? ($this->fields[ $comparisonValue ] ?? $comparisonValue) : null;
 
                 // check if $comparisonValue is a list of data
                 $comparisonValue_array = explode(',', $comparisonValue ?? '');
@@ -270,7 +270,7 @@ final class Validator
      */
     protected function alpha(string $value): bool
     {
-        return preg_match('/^([a-z])+$/i', $value);
+        return preg_match('/^([a-z])+$/i', $value) === 1;
     }
 
     /**
@@ -281,7 +281,7 @@ final class Validator
      */
     protected function alphanumeric(string|int $value): bool
     {
-        return preg_match('/^([a-z0-9])+$/i', $value);
+        return preg_match('/^([a-z0-9])+$/i', (string) $value) === 1;
     }
 
     /**
@@ -556,7 +556,7 @@ final class Validator
      */
     protected function regex(mixed $value, mixed $regexp): bool
     {
-        return preg_match($regexp, $value);
+        return preg_match((string) $regexp, (string) $value) === 1;
     }
 
     /**
@@ -579,7 +579,13 @@ final class Validator
      */
     protected function slug($value): bool
     {
-        return ! is_array($value) && str_contains($value, '/') ? false : preg_match('/^([-a-z0-9_-])+$/i', $value);
+        if (is_array($value)) {
+            return false;
+        }
+
+        $value = (string) $value;
+
+        return ! str_contains($value, '/') && preg_match('/^([-a-z0-9_-])+$/i', $value) === 1;
     }
 
     /**

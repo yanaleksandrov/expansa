@@ -4,39 +4,32 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class LayoutStep extends Field
+/**
+ * Renders `form/layout-step.blade.php` - a single step of a multi-step (wizard) form.
+ */
+class LayoutStep extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'layout-step',
+            label: t('Step'),
+            category: 'layout',
+            icon: 'ph ph-list-numbers',
+            description: t('A single step of a multi-step (wizard) form.'),
+            defaults: [
+                'fields' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

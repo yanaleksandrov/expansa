@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Builders;
 
 use Expansa\Builders\Table\Abstracts\TableBase;
-use Expansa\Facades\Safe;
-use Expansa\Facades\View;
-use Expansa\Support\Arr;
 use Expansa\Builders\Table\Cell;
-use Expansa\Builders\Table\Row;
+use Expansa\Facades\Safe;
 
 /**
  * Class Table.
@@ -44,7 +41,7 @@ abstract class Table extends TableBase
     }
 
     /**
-     * Calculate grid css styles.
+     * Calculate grid CSS styles.
      *
      * @param array $columns
      * @return string

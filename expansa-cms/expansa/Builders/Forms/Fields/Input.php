@@ -4,39 +4,53 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Input extends Field
+/**
+ * Renders `form/input.blade.php`, shared by every plain HTML5 input subtype
+ * (text, color, date, datetime-local, email, month, range, search, tel, time, url, week).
+ * The concrete subtype is carried in `$field['attributes']['type']`, not on this class.
+ */
+class Input extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'input',
+            label: t('Text'),
+            category: 'basic',
+            icon: 'ph ph-text-t',
+            description: t('A basic single-line text input, useful for storing short string values.'),
+            defaults: [
+                'name'       => '',
+                'label'      => '',
+                'attributes' => ['type' => 'text'],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ...$this->baseSettings(),
+            [
+                'type'  => 'text',
+                'name'  => 'attributes.placeholder',
+                'label' => t('Placeholder'),
+            ],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
+        $rule = match ($field['attributes']['type'] ?? 'text') {
+            'email'                    => 'email',
+            'url'                      => 'url',
+            'range'                    => 'numeric',
+            'date', 'datetime-local',
+            'month', 'week', 'time'    => 'date',
+            'color'                    => 'hex',
+            default                    => '',
+        };
 
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [($field['name'] ?? '') => $this->withRequired($field, $rule)];
     }
 }

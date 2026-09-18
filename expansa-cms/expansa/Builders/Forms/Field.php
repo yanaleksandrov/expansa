@@ -11,22 +11,6 @@ use Expansa\Facades\View;
 
 class Field
 {
-    public string $type        = '';
-
-    public string $label       = '';
-
-    public string $category    = '';
-
-    public string $icon        = '';
-
-    public string $description = '';
-
-    public string $preview     = '';
-
-    public string $view        = '';
-
-    public array $defaults     = [];
-
     /**
      * Get fields HTML from array.
      *
@@ -40,7 +24,6 @@ class Field
 
         foreach ($fields as $field) {
             $name = Safe::name($field['name'] ?? '');
-            $prop = Safe::prop($field['name'] ?? '');
             $type = Safe::id($field['type'] ?? '');
 
             if ($type === 'tab' && ! isset($startTab)) {
@@ -82,7 +65,11 @@ class Field
             // Kept before the collapse below so discover() can still tell input subtypes apart.
             $inputType = $type;
 
-            if (in_array($type, [ 'color', 'date', 'datetime-local', 'email', 'month', 'range', 'search', 'tel', 'text', 'time', 'url', 'week' ], true)) {
+            $inputSubtypes = [
+                'color', 'date', 'datetime-local', 'email', 'month',
+                'range', 'search', 'tel', 'text', 'time', 'url', 'week',
+            ];
+            if (in_array($type, $inputSubtypes, true)) {
                 $type = 'input';
             }
 
@@ -144,9 +131,9 @@ class Field
 
             $safeValue    = Safe::attribute($value);
             $attributeVal = match (gettype($value)) {
-                'boolean' => $value === true ? 'true' : 'false',
-                'string'  => "'$safeValue'",
-                'integer' => $value,
+                'boolean'          => $value === true ? 'true' : 'false',
+                'integer', 'double' => $value,
+                default            => "'$safeValue'",
             };
 
             $values = Json::encode($value);
@@ -182,7 +169,7 @@ class Field
 
         if ($expressions) {
             return [
-                'u-show'  => implode(' && ', array_column($expressions, 'expression')),
+                'u-show' => implode(' && ', array_column($expressions, 'expression')),
                 'hidden' => Safe::bool(in_array(false, array_column($expressions, 'match'), true)),
             ];
         }
