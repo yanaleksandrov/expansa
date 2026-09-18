@@ -35,7 +35,7 @@ return \Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'type' ],
 					'options'     => Type::options(),
 				],
 				[
@@ -52,7 +52,7 @@ return \Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'status' ],
 					'options'     => Status::get(),
 				],
 				[
@@ -69,7 +69,7 @@ return \Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'author' ],
 					'options'     => [
 						'1' => 'Yan Aleksandrov',
 					],
@@ -97,7 +97,7 @@ return \Expansa\Facades\Form::enqueue(
 				'after'       => '',
 				'tooltip'     => '',
 				'instruction' => t( 'Sample: %s', '<samp>' . $sample . '</samp>' ),
-				'attributes'  => [],
+				'attributes'  => [ 'u-prop' => 'map.' . $index ],
 				'conditions'  => [],
 				'options'     => [
 					''         => t( 'No import' ),
@@ -122,6 +122,7 @@ return \Expansa\Facades\Form::enqueue(
 			'name'     => 'custom',
 			'type'     => 'custom',
 			'callback' => fn () => '<input type="hidden" value="' . $filepath . '" name="filename">',
+			'attributes'  => [ 'u-prop' => 'custom' ],
 		],
 	]
 );

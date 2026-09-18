@@ -133,7 +133,7 @@ class Slug extends Model
      */
     public static function create(array $data): Slug|Error
     {
-        $slug = new self()->fill($data);
+        $slug = new self($data);
 
         if (! $slug->isValid()) {
             return error('slug-add', $slug->getValidatorErrors());

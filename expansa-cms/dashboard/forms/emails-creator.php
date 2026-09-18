@@ -40,6 +40,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'event',
 						'value'    => '',
 						'required' => true,
 					],
@@ -63,6 +64,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'subject',
 						'value'       => '',
 						'required'    => true,
 						'placeholder' => t( 'Email subject' ),
@@ -83,6 +85,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'title',
 						'value'       => t( 'Your are registered' ),
 						'required'    => true,
 						'placeholder' => t( 'Mail title...' ),
@@ -103,6 +106,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'subtitle',
 						'value'       => t( 'We have received a new registration request. Read the instructions.' ),
 						'required'    => true,
 						'placeholder' => t( 'Subtitle' ),
@@ -123,6 +127,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'content',
 						'value'       => '',
 						'rows'        => 1,
 						'required'    => true,
@@ -144,6 +149,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'recipients',
 						'value'       => '',
 						'rows'        => 1,
 						'required'    => true,
@@ -178,6 +184,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'bottom',
 						'value'       => t( 'Team, PO Box 16122, Collins Street West, <a href="#" target="_blank">Victoria 8007, Australia</a>' ),
 						'placeholder' => t( 'N/A' ),
 					],
@@ -197,6 +204,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'footer',
 						'value'       => t( 'This message is generated automatically. Don\'t reply it. All rights reserved © 2024' ),
 						'placeholder' => t( 'N/A' ),
 					],
@@ -228,7 +236,7 @@ return \Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'email' ],
 				],
 				[
 					'type'        => 'submit',
@@ -281,6 +289,7 @@ return \Expansa\Facades\Form::enqueue(
 						</div>
 						<?php
 					},
+					'attributes'  => [ 'u-prop' => 'instructions' ],
 				],
 			],
 		],

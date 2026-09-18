@@ -18,7 +18,7 @@ if (! Is::installed()) {
         Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
     }
 
-    foreach (['youla-expansa', 'youla-ajax', 'youla-select', 'youla'] as $script) {
+    foreach (['youla', 'youla-ajax', 'youla-select', 'youla-expansa'] as $script) {
         $data = [];
         if ($script === 'youla') {
             $data['data'] = [

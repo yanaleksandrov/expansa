@@ -220,13 +220,14 @@
                 break;
 
               case 'notify':
-                if (value) {
-                    document.dispatchEvent(new CustomEvent('ajax:notify', {
-                        detail: value,
-                        bubbles: true
-                    }));
+                {
+                    const notice = document.querySelector('[u-data="notice"]')?.__x?.data;
+                    if (value && notice) {
+                        const [message, type = 'info', duration] = Array.isArray(value) ? value : [ value ];
+                        notice.add(message, type, duration);
+                    }
+                    break;
                 }
-                break;
             }
         }
     });

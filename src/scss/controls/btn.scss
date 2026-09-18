@@ -1,4 +1,4 @@
-@import '../constants/index.scss';
+@use '../constants/index.scss' as constants;
 
 .btn {
   color: var(--expansa-dark);
@@ -8,6 +8,7 @@
   position: relative;
   padding: 0 0.875em;
   outline: 0;
+  border: none;
   gap: 0.3em !important;
   display: inline-flex;
   align-items: center;
@@ -32,7 +33,7 @@
     font-size: inherit;
   }
 
-  @each $suffix, $properties in $btnSizes {
+  @each $suffix, $properties in constants.$btnSizes {
     &#{$suffix} {
       @each $property, $value in $properties {
         #{$property}: #{$value};
@@ -150,7 +151,16 @@
     min-width: 100%;
   }
 
-  &--load {
+  &--icon {
+    padding: 0;
+    aspect-ratio: 1 / 1;
+  }
+
+  &--rounded {
+    border-radius: 3rem;
+  }
+
+  &.is-load {
     position: relative;
     color: transparent !important;
     text-shadow: none !important;
@@ -178,15 +188,6 @@
     &[class*="danger"]:after {
       color: var(--expansa-white);
     }
-  }
-
-  &--icon {
-    padding: 0;
-    aspect-ratio: 1 / 1;
-  }
-
-  &--rounded {
-    border-radius: 3rem;
   }
 }
 

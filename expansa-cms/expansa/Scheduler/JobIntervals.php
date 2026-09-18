@@ -47,7 +47,7 @@ trait JobIntervals
      * @param null|int|string $minute When set, specifies that the job will be run every $minute minutes
      * @return self
      */
-    public function everyMinute(int|string $minute = null): static
+    public function everyMinute(int|string|null $minute = null): static
     {
         $minuteExpression = '*';
         if ($minute !== null) {
@@ -385,11 +385,11 @@ trait JobIntervals
      * @return array
      */
     private function validateCronSequence(
-        int|string $minute = null,
-        int|string $hour = null,
-        int|string $day = null,
-        int|string $month = null,
-        int|string $weekday = null
+        int|string|null $minute = null,
+        int|string|null $hour = null,
+        int|string|null $day = null,
+        int|string|null $month = null,
+        int|string|null $weekday = null
     ): array
     {
         return [

@@ -99,6 +99,7 @@ final class SystemService
             'user.locale'      => 'locale',
             'user.login'       => 'trim',
             'user.password'    => 'trim',
+            'user.status'      => 'trim:active',
             'db.database'      => 'trim',
             'db.username'      => 'trim',
             'db.password'      => 'trim',
@@ -127,7 +128,10 @@ final class SystemService
 
         Db::updateSchema();
 
-        $user = User::make($userdata);
+        // The constructor calls fill() internally, which routes through setAttribute() -
+        // required so the password attribute's set-mutator actually hashes it before it's
+        // saved (unlike make(), which bypasses that entirely for already-trusted data).
+        $user = new User($userdata);
 
         if (!$user->isValid()) {
             throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());
@@ -140,7 +144,8 @@ final class SystemService
         User::login($userdata);
 
         return [
-            ['target' => 'body', 'redirect' => url('installed')],
+            'target'        => 'body',
+            'redirect:7000' => url('installed')
         ];
     }
 

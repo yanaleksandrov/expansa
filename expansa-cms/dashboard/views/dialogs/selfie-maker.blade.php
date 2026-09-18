@@ -20,8 +20,8 @@ if ( ! defined( 'EX_PATH' ) ) {
 		</div>
 		<div
 			class="fs-48"
-			x-show="second > 0"
-			x-text="second"
+			u-show="second > 0"
+			u-text="second"
 			:style="second && 'position: fixed; top: 1rem; left: 0; right: 0; margin: 0 auto; transition: all 1s; animation: ticker 1s ease infinite;'"
 		></div>
 

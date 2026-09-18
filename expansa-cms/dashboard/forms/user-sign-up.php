@@ -18,6 +18,7 @@ return Expansa\Facades\Form::enqueue(
 			'name'        => 'title',
 			'class'       => '',
 			'instruction' => t( 'After creating an account, more platform features will be available to you' ),
+			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
 			'type'        => 'email',
@@ -34,6 +35,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'email',
 				'placeholder' => t( 'Enter user email' ),
 				'@change'     => "login = email.split('@')[0]",
 				'required'    => true,
@@ -54,6 +56,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'login',
 				'placeholder' => t( 'Enter user login' ),
 				'required'    => true,
 			],
@@ -73,6 +76,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'password',
 				'placeholder' => t( 'Password' ),
 				'required'    => true,
 			],

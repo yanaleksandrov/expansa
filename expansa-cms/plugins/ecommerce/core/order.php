@@ -35,6 +35,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'customer',
                         'value'    => $user->locale ?? '',
                         'u-select' => '{"showSearch": 1}',
                     ],
@@ -57,6 +58,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'datetime',
                         'required' => 1,
                     ],
                 ],
@@ -140,7 +142,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'firstname' ],
                         ],
                         [
                             'type'        => 'text',
@@ -156,7 +158,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'lastname' ],
                         ],
                         [
                             'type'        => 'text',
@@ -172,7 +174,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'company' ],
                         ],
                         [
                             'type'        => 'text',
@@ -188,7 +190,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'address' ],
                         ],
                         [
                             'type'        => 'select',
@@ -205,6 +207,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'country',
                                 'value'    => $user->locale ?? '',
                                 'u-select' => '{"showSearch": 1}',
                             ],
@@ -227,6 +230,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'country',
                                 'value'    => $user->locale ?? '',
                                 'u-select' => '{"showSearch": 1}',
                             ],
@@ -248,7 +252,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'city' ],
                         ],
                         [
                             'type'        => 'text',
@@ -264,7 +268,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'zip' ],
                         ],
                         [
                             'type'        => 'text',
@@ -280,7 +284,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'address' ],
                         ],
                         [
                             'type'        => 'text',
@@ -296,7 +300,7 @@ return \Expansa\Facades\Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
-                            'attributes'  => [],
+                            'attributes'  => [ 'u-prop' => 'address' ],
                         ],
                         [
                             'type'        => 'textarea',
@@ -313,6 +317,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'note',
                                 'placeholder' => t('Customer notes about the order'),
                             ],
                         ],

@@ -8,12 +8,6 @@ use Random\RandomException;
 
 class Str
 {
-    protected static array $shakeCache = [];
-
-    protected static array $studlyCache = [];
-
-    protected static array $camelCache = [];
-
     public static function length(string $string): int
     {
         return mb_strlen($string, 'UTF-8');
@@ -62,10 +56,13 @@ class Str
 
     public static function snake(string $value, string $delimiter = '_'): string
     {
+        // Scoped to this method only - no other method reads or resets this memoization cache.
+        static $cache = [];
+
         $key = crc32($value);
 
-        if (isset(static::$shakeCache[$key][$delimiter])) {
-            return static::$shakeCache[$key][$delimiter];
+        if (isset($cache[$key][$delimiter])) {
+            return $cache[$key][$delimiter];
         }
 
         if (! ctype_lower($value)) {
@@ -74,7 +71,7 @@ class Str
             $value = static::lower(preg_replace('/(.)(?=[A-Z])/u', '$1' . $delimiter, $value));
         }
 
-        return self::$shakeCache[$key][$delimiter] = $value;
+        return $cache[$key][$delimiter] = $value;
     }
 
     public static function lower(string $value): string
@@ -109,10 +106,13 @@ class Str
 
     public static function studly(string $value): string
     {
+        // Scoped to this method only - no other method reads or resets this memoization cache.
+        static $cache = [];
+
         $key = crc32($value);
 
-        if (isset(static::$studlyCache[$key])) {
-            return static::$studlyCache[$key];
+        if (isset($cache[$key])) {
+            return $cache[$key];
         }
 
         $words = explode(" ", str_replace(['_', '-'], ' ', $value));
@@ -121,18 +121,21 @@ class Str
             $words[$k] = static::ucfirst($v);
         };
 
-        return static::$studlyCache[$key] = implode($words);
+        return $cache[$key] = implode($words);
     }
 
     public static function camel(string $value): string
     {
+        // Scoped to this method only - no other method reads or resets this memoization cache.
+        static $cache = [];
+
         $key = crc32($value);
 
-        if (isset(static::$camelCache[$key])) {
-            return static::$camelCache[$key];
+        if (isset($cache[$key])) {
+            return $cache[$key];
         }
 
-        return static::$camelCache[$key] = static::lcfirst(static::studly($value));
+        return $cache[$key] = static::lcfirst(static::studly($value));
     }
 
     public static function title(string $value): string
@@ -185,7 +188,7 @@ class Str
         return $result;
     }
 
-    public static function substr($string, int $start, int $length = null): string
+    public static function substr(string $string, int $start, ?int $length = null): string
     {
         return mb_substr($string, $start, $length, 'UTF-8');
     }

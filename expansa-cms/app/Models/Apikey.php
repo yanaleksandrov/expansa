@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Contracts\Fieldable;
+use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Database\Model\HasTimestamps;
 
@@ -25,9 +27,9 @@ use Expansa\Database\Model\HasTimestamps;
  * @property string  $createdAt  The date and time when the API key was created.
  * @property string  $updatedAt  The date and time when the API key was last updated.
  * @property array   $comment    A list of users comments associated with the API key.
- * @property Field   $field      A dynamic meta field instance associated with the API key.
+ * @property FieldEav $field     A dynamic meta field instance associated with the API key.
  */
-class Apikey extends Model
+class Apikey extends Model implements Fieldable
 {
     use HasTimestamps;
     use Model\HasFieldEav;
@@ -38,14 +40,6 @@ class Apikey extends Model
      * @var string
      */
     protected string $table = 'api_keys';
-
-    /**
-     * One-to-many with Field: the foreign key column on api_keys_fields (the "many" side) that
-     * points back to this API key (see Model\HasFieldEav).
-     *
-     * @var string
-     */
-    public string $fieldsForeignKey = 'api_key_id';
 
     /**
      * Fields allowed for mass assignment.

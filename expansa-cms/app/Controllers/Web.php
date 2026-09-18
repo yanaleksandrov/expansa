@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App;
 use App\Models\Slug;
 use App\Models\User;
+use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Support\Is;
 
@@ -26,7 +27,11 @@ final class Web
             if ($slug !== 'install') {
                 redirect('install');
             }
-            echo view('welcome', ['slug' => 'install'])->beautify()->render();
+            $welcome = view('welcome', ['slug' => 'install']);
+
+            Asset::discover($welcome->getPath());
+
+            echo $welcome->beautify()->render();
             exit;
         }
 
@@ -39,6 +44,11 @@ final class Web
             require_once EX_PATH . 'dashboard/index.php';
 
             $slug = str_replace('dashboard/', '', $slug);
+
+            // land on the chat page by default (bare "dashboard" or "dashboard/" slug).
+            if ($slug === '' || $slug === $dashboard) {
+                $slug = 'chat';
+            }
         }
 
         // not allow some slugs for logged user, they are reserved.
@@ -47,9 +57,11 @@ final class Web
             redirect('dashboard');
         }
 
-        // include & launch dashboard
+        // include & launch the lightweight auth bootstrap - not the full dashboard, since
+        // none of its admin-only assets (menus, tables, vendor JS for dashboard form
+        // fields, ...) are reachable from a page a logged-out visitor can see.
         if (in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && !User::isLogged()) {
-            require_once EX_PATH . 'dashboard/index.php';
+            require_once EX_PATH . 'dashboard/auth.php';
 
             $page = 'welcome';
         }
@@ -97,22 +109,12 @@ final class Web
                 'table'  => $table ?? null,
                 'entity' => $entity,
             ]);
+
+            // Auto-connect co-located CSS/JS for this page's template - see Manager::discover().
+            Asset::discover($content->getPath());
+
             $content = $content->beautify()->render();
         }
-
-//    $start = microtime(true);
-//    for ($i = 0; $i < 1; $i++) {
-//        $key = App\Models\Apikey::get(1);
-//    }
-//    $end = microtime(true);
-//    print_r($key);
-//
-//    $elapsed = $end - $start;
-//    echo "Elapsed time: $elapsed seconds\n";
-//    if ($key) {
-//        $key->delete();
-//    }
-//    exit;
 
         /**
          * Expansa page is fully loaded.

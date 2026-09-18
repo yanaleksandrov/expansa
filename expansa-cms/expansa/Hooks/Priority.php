@@ -4,11 +4,32 @@ declare(strict_types=1);
 
 namespace Expansa\Hooks;
 
+/**
+ * Well-known priority values for hook listeners.
+ *
+ * Listeners run in ascending priority order, so a lower value runs earlier. These constants are
+ * only convenient defaults - any integer, including negative ones, is a valid priority.
+ */
 class Priority
 {
-    public const HIGH = 100;
+    /**
+     * Runs before listeners registered with the default priority.
+     *
+     * @var int
+     */
+    public const int HIGH = 100;
 
-    public const BASE = 200;
+    /**
+     * Default priority used when none is specified.
+     *
+     * @var int
+     */
+    public const int BASE = 200;
 
-    public const LOW = 300;
+    /**
+     * Runs after listeners registered with the default priority.
+     *
+     * @var int
+     */
+    public const int LOW = 300;
 }

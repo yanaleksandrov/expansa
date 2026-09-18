@@ -10,7 +10,7 @@ use Expansa\Patterns\Facade;
 /**
  * Cache facade class providing static methods for caching operations.
  *
- * @method static mixed add(string $key, mixed $value, string $group = 'default', ?DateTime $expiry = null)
+ * @method static mixed add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null)
  * @method static mixed set(string $key, mixed $value, string $group = 'default')
  * @method static mixed get(string $key, string $group = 'default', ?callable $callback = null)
  * @method static mixed pull(string $key, string $group = 'default')

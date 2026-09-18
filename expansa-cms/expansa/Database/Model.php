@@ -15,14 +15,10 @@ use stdClass;
  * Base data model class with support for attributes, mass assignment protection, timestamps, and soft deletes.
  *
  * @method static static|null get(mixed $value, string $by = 'id') Find a model by primary key or specified field.
- * @method static static      fill(array $data)                    Fill the model with the given attributes.
  * @method static bool        exists(array $data)                  Check record is existing.
- * @method null|static         save()                                Insert or update the record and return the fresh model.
- * @method int                delete()                              Delete the record by primary key.
- * @method int                restore()                             Restore a soft-deleted record.
- *
- * @property string|null $updatedAt Timestamp of the last update.
- * @property string|null $createdAt Timestamp of creation.
+ * @method null|static        save()                               Insert or update the record and return the fresh model.
+ * @method int                delete()                             Delete the record by primary key.
+ * @method int                restore()                            Restore a soft-deleted record.
  */
 abstract class Model implements \JsonSerializable
 {
@@ -39,11 +35,50 @@ abstract class Model implements \JsonSerializable
     protected string $table;
 
     /**
-     * Build a new, unguarded, unsaved model instance from trusted attributes.
+     * Whether this model's class, or any ancestor, `use`s $trait. Unlike a bare class_uses()
+     * call (which only sees traits used directly by the exact class, not inherited ones), this
+     * walks the full parent chain, and caches the result - a class's traits never change at runtime.
+     */
+    public function usesTrait(string $trait): bool
+    {
+        // Scoped to this method only - no other method reads or resets this cache. Keyed by
+        // static::class since this one method body is shared by every Model subclass.
+        static $cache = [];
+
+        return $cache[static::class][$trait] ??= array_any(
+            [static::class, ...(class_parents(static::class) ?: [])],
+            fn($class) => in_array($trait, class_uses($class), true)
+        );
+    }
+
+    /**
+     * Build a new, unsaved instance, optionally filled with the given attributes -
+     * sanitized and passed through each attribute's mutator, exactly like calling
+     * {@see self::fill()} on an empty instance (which is exactly what this does).
+     * `new User($data)` is the "new + fill" idiom; call save() on the result to persist it.
      *
-     * Bypasses mass-assignment protection and sanitizing entirely — for
-     * internal/trusted data only (e.g. install-time setup). Nothing is
-     * persisted; call save() on the result to actually write it.
+     * @param array<string, mixed> $attributes
+     * @throws Exception if attributes are not fillable
+     */
+    public function __construct(array $attributes = [])
+    {
+        $this->fill($attributes);
+    }
+
+    /**
+     * Build a new model instance from trusted attributes, bypassing mass-assignment
+     * protection and sanitizing/mutators entirely - for internal/trusted data only
+     * (a value already in its final form: a hashed password, a deduped nicename, a
+     * row just read from the database, ...), never raw user input. See {@see self::fill()}
+     * for the opposite - the one to reach for whenever the data didn't originate in
+     * your own trusted code.
+     *
+     * A truthy 'id' in $attributes is treated as "this row already exists in the
+     * database" and syncs originals accordingly, so a later save() diffs against
+     * these values (an update with nothing actually changed becomes a no-op)
+     * instead of treating every attribute as dirty. This is what Query::get()/
+     * find()/first()/all() rely on to hydrate rows. Without an 'id', the instance
+     * is treated as brand new and unsaved - call save() to insert it.
      *
      * @param array<string, mixed>|stdClass $attributes Attributes to fill the model with.
      * @return static
@@ -54,26 +89,24 @@ abstract class Model implements \JsonSerializable
 
         $model->attributes = (array) $attributes;
 
+        if (! empty($model->attributes['id'])) {
+            $model->syncOriginals();
+        }
+
         return $model;
     }
 
     /**
-     * Create a new model instance from an array or stdClass and sync originals.
+     * Mass-assign the given attributes - sanitized and passed through each attribute's
+     * mutator (e.g. User's password gets hashed) - unlike {@see self::make()}, which
+     * treats the data as already-final and skips both. This is the one to use for raw
+     * user/API input.
      *
-     * @param array<string, mixed>|stdClass $attributes
-     * @return static
-     */
-    public static function newFrom(array|stdClass $attributes): static
-    {
-        $model = new static();
-
-        $model->setAttributes((array) $attributes)->syncOriginals();
-
-        return $model;
-    }
-
-    /**
-     * Fill the model with an array of attributes.
+     * Always an instance method - there's no separate static entry point. For a brand
+     * new record, construct one and let the constructor call this for you: `new User($data)`
+     * (see {@see self::__construct()}). To mass-assign onto a model that already exists -
+     * `$this` inside an update()-style method, or one already fetched from the database -
+     * call `$model->fill($data)` directly; it mutates that same instance in place.
      *
      * @param array<string, mixed> $attributes
      * @return static
@@ -107,10 +140,9 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Sets the value of an attribute applying the defined sanitization rules.
-     *
-     * If a rule is defined for the attribute in $sanitize, it will be applied.
-     * Supports static methods from the Safe class or callable rules.
+     * Sets $key, applying its sanitizer rule (see {@see Model\HasSanitizing::getSanitizerRules()})
+     * and mutator (see {@see Model\Attribute}), if either is declared. No-ops if $key is
+     * readonly and already has a value (see {@see Model\HasReadonlyAttributes}).
      *
      * @param string $key   The attribute name
      * @param mixed  $value The value to set
@@ -119,19 +151,20 @@ abstract class Model implements \JsonSerializable
      */
     public function setAttribute(string $key, mixed $value): static
     {
-        $traits   = class_uses(static::class);
         $snakeKey = Str::snake($key);
 
         if (
-            in_array(HasReadonlyAttributes::class, $traits, true) &&
-            $this->isReadonly($snakeKey) &&
+            $this->usesTrait(HasReadonlyAttributes::class)
+            &&
+            $this->isReadonly($snakeKey)
+            &&
             isset($this->attributes[$snakeKey])
         ) {
             return $this;
         }
 
-        if (in_array(HasSanitizing::class, $traits, true)) {
-            $rule = $this->getSanitizerRules()[$snakeKey] ?? '';
+        if ($this->usesTrait(HasSanitizing::class)) {
+            $rule = $this->sanitizerRules()[$snakeKey] ?? '';
             if ($rule) {
                 // [$key => $value] goes first: for an attribute that's already
                 // set, array + keeps the LEFT side on key collision, so this is
@@ -147,13 +180,20 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Get the table associated with the model.
+     * Get the table associated with the model. Cached per class: $table is a fixed class
+     * property (never reassigned per-instance by any Model subclass), but Safe::snakecase()
+     * itself runs 3 preg_replace passes with no memoization of its own, and this is called
+     * repeatedly per Query call (Query::get()/find()/save()/... each read it 1-2x).
      *
      * @return string
      */
     public function getTable(): string
     {
-        return Safe::snakecase($this->table);
+        // Scoped to this method only - no other method reads or resets this cache. Keyed by
+        // static::class since this one method body is shared by every Model subclass.
+        static $cache = [];
+
+        return $cache[static::class] ??= Safe::snakecase($this->table);
     }
 
     /**

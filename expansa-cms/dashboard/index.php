@@ -3,10 +3,12 @@
 namespace Dashboard;
 
 use App\Http\VerifyCsrfToken;
-use App\Models\Field;
 use App\Models\User;
 use App\Query\Query;
+use App\Support\DashboardFavicons;
+use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
+use Expansa\Database\FieldEav;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
@@ -23,39 +25,7 @@ new class
 
         VerifyCsrfToken::seed();
 
-        foreach (
-            [
-                'favicon'   => [
-                    'href'  => url('/dashboard/assets/favicon/favicon-96x96.png'),
-                    'rel'   => 'icon',
-                    'type'  => 'image/png',
-                    'sizes' => '96x96',
-                ],
-                'favicon-svg'  => [
-                    'href' => url('/dashboard/assets/favicon/favicon.svg'),
-                    'rel'  => 'icon',
-                    'type' => 'image/svg+xml',
-                ],
-                'favicon-ico'  => [
-                    'href' => url('/dashboard/assets/favicon/favicon.ico'),
-                    'rel'  => 'shortcut icon',
-                    'type' => '',
-                ],
-                'favicon-apple' => [
-                    'href'  => url('/dashboard/assets/favicon/apple-touch-icon.png'),
-                    'rel'   => 'apple-touch-icon',
-                    'sizes' => '180x180',
-                    'type'  => '',
-                ],
-                'manifest'  => [
-                    'href' => url('/dashboard/assets/favicon/site.webmanifest'),
-                    'rel'  => 'manifest',
-                    'type' => '',
-                ],
-            ] as $uid => $asset
-        ) {
-            Asset::style($uid, $asset['href'], $asset);
-        }
+        DashboardFavicons::enqueue();
 
         /**
          * Include CSS styles & JS scripts.
@@ -64,16 +34,46 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'air-datepicker', 'colorist', 'drooltip', 'dialog', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor',
+            'phosphor', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor', 'chat',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
         }
 
+        /**
+         * Auto-connect vendor JS per form field, so it loads only on pages that render that
+         * field instead of on every dashboard page. Everything else keeps the default
+         * co-located convention. date/range/color share form/input.blade.php, so Field::parse()
+         * passes the original subtype as $context['type'] to tell them apart.
+         *
+         * @since 2025.1
+         */
+        Manager::configure(function (string $file, array $context = []) use ($suffix): array {
+            if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/form/')) {
+                return Manager::defaultStructure($file);
+            }
+
+            $template      = basename($file, '.blade.php');
+            $inputType     = $context['type'] ?? '';
+            $dateTimeTypes = ['date', 'datetime-local', 'time', 'month', 'week'];
+
+            $vendor = match (true) {
+                $template === 'select'                           => 'youla-select',
+                $inputType === 'color'                           => 'youla-filler',
+                in_array($inputType, $dateTimeTypes, true) => 'youla-pickadate',
+                $inputType === 'range'                           => 'youla-ranger',
+                default                                          => null,
+            };
+
+            return $vendor === null
+                ? Manager::defaultStructure($file)
+                : ['js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js"];
+        });
+
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla-expansa', 'youla-extensions', 'youla-filler', 'youla-pickadate', 'youla-ranger', 'youla-select', 'youla-tooltip', 'croppr', 'dialog', 'storage', 'sortable', 'youla'];
+        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-chat'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'youla') {
@@ -106,7 +106,7 @@ new class
                                         $posts[$i][$key] = $value;
                                     }
 
-                                    $fields = new Field($item)->find();
+                                    $fields = new FieldEav($item)->find();
                                     if ($fields) {
                                         foreach ($fields as $field => $values) {
                                             $key = Safe::camelcase($field);
@@ -403,16 +403,15 @@ new class
                 [
                     'id'       => 'divider-workspace',
                     'title'    => t('Workspace'),
-                    'position' => 0,
+                    'position' => -20,
                 ],
                 [
-                    'id'           => 'profile',
-                    'url'          => 'profile',
-                    'title'        => t('Profile'),
+                    'id'           => 'chat',
+                    'url'          => 'chat',
+                    'title'        => t('Chat'),
                     'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-user-focus',
-                    'position'     => 0,
-                    'count'        => 5,
+                    'icon'         => 'ph ph-chat-circle-text',
+                    'position'     => -10,
                 ],
                 [
                     'id'       => 'divider-content',

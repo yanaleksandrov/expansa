@@ -33,6 +33,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'alt',
 						':value' => '$store.dialog.filename',
 					],
 				],
@@ -61,6 +62,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'title',
 						':value' => '$store.dialog.filename',
 					],
 				],
@@ -88,7 +90,7 @@ return \Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'caption' ],
 				],
 			],
 		],
@@ -115,6 +117,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'description',
 						':value' => '$store.dialog.content',
 					],
 				],
@@ -143,6 +146,7 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'url',
 						':value'   => '$store.dialog.url',
 						'readonly' => true,
 					],

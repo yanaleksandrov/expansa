@@ -42,7 +42,7 @@ class Tree
      * @param string $name
      * @param callable|null $function
      */
-    public static function attach(string $name, callable $function = null): void
+    public static function attach(string $name, ?callable $function = null): void
     {
         $tree = self::init($name);
         $name = Safe::html($name);

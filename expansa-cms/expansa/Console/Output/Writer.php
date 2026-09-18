@@ -142,6 +142,17 @@ trait Writer
     }
 
     /**
+     * Displayed width of a table cell, so multi-byte text still lines up column-for-column.
+     *
+     * @param string $text
+     * @return int
+     */
+    protected function strlen(string $text): int
+    {
+        return mb_strlen($text);
+    }
+
+    /**
      * Creates a well formatted table.
      *
      * @param array<array<Stringable|scalar>> $tbody Table body rows

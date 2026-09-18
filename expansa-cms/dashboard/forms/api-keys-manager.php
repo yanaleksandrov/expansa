@@ -34,6 +34,7 @@ return Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'title',
 						'placeholder' => '',
 						'required'    => true,
 					],
@@ -52,7 +53,7 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'status' ],
 					'options'     => [
 						'publish' => t( 'Active' ),
 						'draft'   => t( 'Disabled' ),
@@ -83,6 +84,7 @@ return Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'limits',
 						'value' => 10,
 						'min'   => 1,
 					],
@@ -102,6 +104,7 @@ return Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
+						'u-prop' => 'period',
 						'value' => '',
 					],
 					'options'     => [
@@ -137,7 +140,7 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'startDate' ],
 				],
 				[
 					'type'        => 'date',
@@ -153,7 +156,7 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [],
+					'attributes'  => [ 'u-prop' => 'endDate' ],
 				],
 			],
 		],
@@ -172,6 +175,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'sites',
 				'value'       => '',
                 'rows'        => 1,
 				'placeholder' => 'e.g: https://google.com',

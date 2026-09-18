@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Api\Apikey;
 
-use App\Models\Field;
 use App\Models\Post;
 use DateTime;
+use Expansa\Database\FieldEav;
 use Expansa\Facades\Safe;
 use Expansa\Http\Response;
 use Expansa\Support\Str;
@@ -61,7 +61,7 @@ final class ApikeyService
             $postData[$key] = $value;
         }
 
-        $keyFields = (new Field($post))->get();
+        $keyFields = (new FieldEav($post))->get();
         if ($keyFields) {
             foreach ($keyFields as $field => $values) {
                 $key = Safe::camelcase($field);

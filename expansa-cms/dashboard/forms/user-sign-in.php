@@ -9,7 +9,6 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'dg g-6',
 		'@submit.prevent' => '$ajax.post("user/sign-in")',
-		'u-data'          => '',
 	],
 	[
 		[
@@ -18,6 +17,7 @@ return \Expansa\Facades\Form::enqueue(
 			'name'        => 'title',
 			'class'       => '',
 			'instruction' => t( 'Sign in to access to your dashboard and site settings.' ),
+			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
 			'type'        => 'text',
@@ -34,7 +34,9 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'login',
 				'placeholder' => t( 'Enter login or email' ),
+                'required'    => 1,
 			],
 		],
 		[
@@ -52,6 +54,7 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop.up'   => 'password',
 				'placeholder' => t( 'Password' ),
 				'required'    => 1,
 			],
@@ -75,6 +78,7 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 'remember',
 				'checked' => true,
 			],
 			'options' => [],

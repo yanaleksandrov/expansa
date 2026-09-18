@@ -4,88 +4,93 @@ declare(strict_types=1);
 
 namespace Expansa\Hooks;
 
+use Closure;
 use Expansa\Hooks\Attributes\AttributesReader;
 use ReflectionException;
 
+/**
+ * Storage layer for {@see Manager}: keeps registered listeners, builds their identifiers and
+ * hands them back sorted by priority, caching the sorted order until listeners for that hook change.
+ */
 abstract class HooksCollector
 {
     use AttributesReader;
 
+    /**
+     * All registered listeners, keyed by hook name and then by listener id.
+     *
+     * @var array<string, array<string, array{key: string, function: callable, source: array{file: string, line: int|string}, priority: int}>>
+     */
     protected static array $hooks = [];
 
     /**
-     * Returns unique ID for a given hook name and function
+     * Priority-sorted listeners per hook name, memoized until {@see self::$hooks} changes for that name.
      *
-     * This is used as a unique identifier for remove()
+     * @var array<string, list<array{key: string, function: callable, source: array{file: string, line: int|string}, priority: int}>>
+     */
+    protected static array $sorted = [];
+
+    /**
+     * Returns a unique id for a given hook name and function.
      *
-     * @param string $hookName
-     * @param mixed  $function String with function name, anonymous function, array with class & method
+     * This is used as a unique identifier for flush(). A closure carrying #[HookListenerAlias]
+     * is identified by its alias instead of its object id, so flush() can later target it by
+     * that same alias string - otherwise anonymous functions have no stable identity to remove by.
+     *
+     * @param string                $hookName Name of hook.
+     * @param string|array|callable $function String with function name, closure, or [object|class, method] array.
      *
      * @return string
      * @throws ReflectionException
      */
-    protected function makeId(string $hookName, mixed $function): string
+    protected function makeId(string $hookName, string|array|callable $function): string
     {
-        return match (true) {
-            is_string($function) => md5($hookName . $function),
-            is_array($function)  => md5(spl_object_hash($function[0]) . $function[1]),
-            default              => md5(spl_object_hash($function)),
+        $identity = match (true) {
+            is_string($function)            => $function,
+            $function instanceof Closure    => $this->getAlias($function) ?? (string) spl_object_id($function),
+            is_object($function)            => (string) spl_object_id($function),
+            is_object($function[0] ?? null) => spl_object_id($function[0]) . '::' . $function[1],
+            default                         => implode('::', $function),
         };
 
-        $function = match (true) {
-            is_array($function) && is_object($function[0]) => spl_object_hash($function[0]),
-            is_array($function) && isset($function[0])     => spl_object_hash($function[0]),
-            $function instanceof \Closure                  => $this->getAlias($function),
-            default                                        => $function,
-        };
-
-        return md5(sprintf('%s::%s', $hookName, $function));
+        return hash('xxh3', $hookName . '::' . $identity);
     }
 
     /**
-     * Returns array of all hooks or for a specific hook type
+     * Returns the listeners of a given hook name, sorted by priority in ascending order.
      *
-     * This method exists simply to reindex array keys when calling getFilters()
+     * The sorted order is cached and reused until a listener is added to or removed from that
+     * hook name, since sorting on every {@see Manager::call()} would otherwise repeat the same
+     * work for hooks that fire many times per request.
      *
-     * @param $name (Name of hook to return, or NULL for all)
+     * @param string $name Name of hook.
      *
-     * @return array
+     * @return list<array{key: string, function: callable, source: array{file: string, line: int|string}, priority: int}>
      */
-    protected function getHooks(?string $name = null): array
+    protected function sortedHooks(string $name): array
     {
-        $hooks = self::$hooks;
-
-        if (null === $name) {
-            foreach ($hooks as $hook => $functions) {
-                $hooks[$hook] = array_values($functions);
-            }
-            return $hooks;
-        }
-
-        if (isset($hooks[$name])) {
-            return array_values($hooks[$name]);
-        }
-
-        return [];
+        return self::$sorted[$name] ??= self::multisort(array_values(self::$hooks[$name] ?? []), 'priority');
     }
 
     /**
      * Sort a multidimensional array by a given key in ascending (optionally, descending) order.
      *
-     * @param array  $array      Original array
-     * @param string $key        Key name to sort by
-     * @param bool   $descending Sort descending
+     * @param array  $array      Original array.
+     * @param string $key        Key name to sort by.
+     * @param bool   $descending Sort descending.
      *
      * @return array
      */
     public static function multisort(array $array, string $key, bool $descending = false): array
     {
-        $columns = array_column($array, $key);
-        if (false === $descending) {
-            array_multisort($columns, SORT_ASC, $array, SORT_NUMERIC);
-        } else {
-            array_multisort($columns, SORT_DESC, $array, SORT_NUMERIC);
-        }
+        // Picking the comparator once, instead of branching on $descending inside it, keeps that
+        // branch out of every pairwise comparison usort() makes.
+        $comparator = $descending
+            ? static fn (array $a, array $b): int => $b[$key] <=> $a[$key]
+            : static fn (array $a, array $b): int => $a[$key] <=> $b[$key];
+
+        usort($array, $comparator);
+
         return $array;
     }
 }

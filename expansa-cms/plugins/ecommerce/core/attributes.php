@@ -36,6 +36,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'name',
                         'required' => 1,
                     ],
                 ],
@@ -55,6 +56,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'slug',
                         'required' => 1,
                     ],
                 ],
@@ -72,7 +74,7 @@ return \Expansa\Facades\Form::enqueue(
                     'copy'        => 0,
                     'validator'   => '',
                     'conditions'  => [],
-                    'attributes'  => [],
+                    'attributes'  => [ 'u-prop' => 'description' ],
                 ],
                 [
                     'type'        => 'select',
@@ -89,6 +91,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'type',
                         'value' => $user->locale ?? '',
                     ],
                     'options'     => [
@@ -112,7 +115,7 @@ return \Expansa\Facades\Form::enqueue(
                     'copy'        => 0,
                     'validator'   => '',
                     'conditions'  => [],
-                    'attributes'  => [],
+                    'attributes'  => [ 'u-prop' => 'unit' ],
                 ],
             ],
         ],
@@ -139,6 +142,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
+                        'u-prop' => 'assignments',
                         'value' => $user->locale ?? '',
                     ],
                     'options'     => [
@@ -162,7 +166,7 @@ return \Expansa\Facades\Form::enqueue(
             'copy'        => 0,
             'validator'   => '',
             'conditions'  => [],
-            'attributes'  => [],
+            'attributes'  => [ 'u-prop' => 'unique' ],
             'options'     => [
                 'unique' => [
                     'content'     => t('Uniqueness'),
@@ -186,7 +190,7 @@ return \Expansa\Facades\Form::enqueue(
             'copy'        => 0,
             'validator'   => '',
             'conditions'  => [],
-            'attributes'  => [],
+            'attributes'  => [ 'u-prop' => 'filterable' ],
             'options'     => [
                 'filterable' => [
                     'content'     => t('Filterable'),

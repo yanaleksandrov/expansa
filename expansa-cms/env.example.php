@@ -2,10 +2,6 @@
 /**
  * Constants for database name, user, password, host, prefix & charset.
  *
- * Indexes have a maximum size of 767 bytes. Historically, we haven't had to worry about this.
- * Utf8mb4 uses 4 bytes for each character. This means that an index that used to have room for
- * floor(767/3) = 255 characters now only has room for floor(767/4) = 191 characters.
- *
  * @since 2025.1
  */
 const EX_DB_DRIVER           = 'mysql';
@@ -17,7 +13,6 @@ const EX_DB_PREFIX           = 'db.prefix';
 const EX_DB_CHARSET          = 'utf8mb4';
 const EX_DB_COLLATION        = 'utf8mb4_general_ci';
 const EX_DB_PORT             = 21;
-const EX_DB_MAX_INDEX_LENGTH = 191;
 // It is disabled by default for better performance.
 const EX_DB_LOGGING          = false;
 // Error handling strategies when the error has occurred.

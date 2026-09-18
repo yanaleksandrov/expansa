@@ -20,6 +20,7 @@ return \Expansa\Facades\Form::enqueue(
 				<h6><?php echo t( 'Add New Category' ); ?></h6>
 				<?php
 			},
+			'attributes'  => [ 'u-prop' => 'instructions' ],
 		],
 		[
 			'type'        => 'text',
@@ -37,6 +38,7 @@ return \Expansa\Facades\Form::enqueue(
 			'tooltip'     => '',
 			'instruction' => t( 'The name is how it appears on your site' ),
 			'attributes'  => [
+				'u-prop' => 'title',
 				'@input' => 'slug = $safe.slug(title)',
 			],
 			'conditions'  => [],
@@ -56,7 +58,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => t( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ),
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'slug' ],
 			'conditions'  => [],
 		],
 		[
@@ -74,7 +76,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => t( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ),
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'parent' ],
 			'conditions'  => [],
 			'options' => [
 				'' => t( 'None' ),
@@ -95,7 +97,7 @@ return \Expansa\Facades\Form::enqueue(
 			'after'       => '',
 			'tooltip'     => '',
 			'instruction' => t( 'The description is not prominent by default; however, some themes may show it.' ),
-			'attributes'  => [],
+			'attributes'  => [ 'u-prop' => 'description' ],
 			'conditions'  => [],
 		],
 		[

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use DateTime;
 use Expansa\Database\Model;
 use Expansa\Debug\Error;
 
@@ -26,8 +27,8 @@ use Expansa\Debug\Error;
  * @property int         $likes       Number of likes.
  * @property int         $dislikes    Number of dislikes.
  * @property int|null    $rating      Optional numeric rating (e.g., for reviews).
- * @property string      $createdAt   Creation timestamp.
- * @property string      $updatedAt   Last update timestamp.
+ * @property DateTime    $createdAt   Creation timestamp.
+ * @property DateTime    $updatedAt   Last update timestamp.
  * @property string|null $deletedAt   Item deleted timestamp.
  *
  * @package App\Models
@@ -172,7 +173,7 @@ class Comment extends Model
     {
         $data += ['status' => self::STATUS_PENDING];
 
-        $comment = new self()->fill($data);
+        $comment = new self($data);
 
         if (! $comment->isValid()) {
             return error('comment-add', $comment->getValidatorErrors());

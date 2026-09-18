@@ -9,31 +9,28 @@ use Expansa\Patterns\Fluent;
 
 trait Triggers
 {
+    /**
+     * Compiles a CREATE TRIGGER statement for a ulid()/uuid() column command, or "" for anything
+     * else - a 'foreign' command compiles to a real FOREIGN KEY constraint instead, see
+     * {@see Indexes::compileForeignKey()}.
+     *
+     * @param Table  $table
+     * @param Fluent $command One entry from $table->commands.
+     * @return string
+     */
     protected function compileTriggers(Table $table, Fluent $command): string
     {
         return match ($command->name) {
             'createUlid' => $this->compileOnCreateUlid($table),
             'createUuid' => $this->compileOnCreateUuid($table),
-            'foreign'    => $this->compileOnDeleteCascade($command),
             default      => '',
         };
     }
 
-    protected function compileOnDeleteCascade(Fluent $command): string
-    {
-        if (!isset($command->on, $command->column, $command->references)) {
-            return '';
-        }
-
-        return "
-CREATE TRIGGER cascade_delete_{$command->on}
-    AFTER DELETE ON <$command->on>
-    FOR EACH ROW
-        BEGIN
-            DELETE FROM <{$command->on}_fields> WHERE $command->column = OLD.$command->references;
-        END;";
-    }
-
+    /**
+     * @param Table $table
+     * @return string
+     */
     protected function compileOnCreateUlid(Table $table): string
     {
         return "
@@ -49,6 +46,10 @@ CREATE TRIGGER before_insert_$table->name
         END;";
     }
 
+    /**
+     * @param Table $table
+     * @return string
+     */
     protected function compileOnCreateUuid(Table $table): string
     {
         return "

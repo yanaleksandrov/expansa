@@ -1,14 +1,12 @@
 <?php
 
-use App\Models\Field;
 use App\Models\User;
 use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
-$user  = User::current();
-$field = new Field($user);
+$user = User::current();
 
 /**
  * Profile page.
@@ -19,9 +17,9 @@ return Form::enqueue(
     'user-profile',
     [
         'class'           => 'tab',
-        'u-data'          => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'profile')),
-		'u-init'          => '$dirtyCheck.watch($el)',
-	    '@submit.prevent' => '$ajax.post("user/update", "", () => $dirtyCheck.remove($el))',
+        'u-data'          => 'tab',
+		'@load'           => '$dirty.watch($el)',
+	    '@submit.prevent' => '$ajax.post("user/update", "", () => $dirty.remove($el))',
     ],
     [
         [
@@ -47,6 +45,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'avatar',
                                 'name'    => 'avatar',
                                 '@change' => '[...$refs.uploader.files].map(file => $ajax.post("upload/media").then(response => files.unshift(response[0])))',
                             ],
@@ -91,6 +90,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'email',
                                 'value'          => $user->email ?? '',
                                 'placeholder'    => t('e.g. user@gmail.com'),
                                 'u-autocomplete' => '',
@@ -110,6 +110,7 @@ return Form::enqueue(
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
+                            'attributes'  => [ 'u-prop' => 'confirm' ],
                         ],
                     ],
                 ],
@@ -136,6 +137,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'login',
                                 'value'       => $user->login ?? '',
                                 'placeholder' => t('e.g. admin'),
                                 'required'    => true,
@@ -157,6 +159,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'nicename',
                                 'value'       => $user->nicename ?? '',
                                 'placeholder' => t('Username'),
                                 'required'    => true,
@@ -177,6 +180,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'firstname',
                                 'value'       => $user->firstname ?? '',
                                 'placeholder' => t('e.g. John'),
                                 '@input'      => 'showname = `${firstname} ${lastname}`',
@@ -197,6 +201,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'lastname',
                                 'value'       => $user->lastname ?? '',
                                 'placeholder' => t('e.g. Doe'),
                                 '@input'      => 'showname = `${firstname} ${lastname}`',
@@ -217,6 +222,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'showname',
                                 'value' => $user->showname ?? '',
                             ],
                         ],
@@ -245,8 +251,9 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'rows'        => count(explode("\n", $field->find('bio') ?? '')),
-                                'value'       => $field->find('bio'),
+                                'u-prop' => 'bio',
+                                'rows'        => count(explode("\n", $user->field->find('bio') ?? '')),
+                                'value'       => $user->field->find('bio'),
                                 'placeholder' => t('A few words about yourself'),
                             ],
                         ],
@@ -286,21 +293,22 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'value' => $field->find('format'),
+                                'u-prop' => 'format',
+                                'value' => $user->field->find('format'),
                             ],
                             'options'     => [
                                 'light' => [
                                     'content'     => t('Light mode'),
                                     'icon'        => 'ph ph-user-list',
                                     'description' => t('This theme will be active when your system is set to “light mode”'),
-                                    'checked'     => $field->find('format') === 'light',
+                                    'checked'     => $user->field->find('format') === 'light',
                                     'image'       => url('dashboard/assets/images/dashboard-light.svg'),
                                 ],
                                 'dark'  => [
                                     'content'     => t('Dark mode'),
                                     'icon'        => 'ph ph-police-car',
                                     'description' => t('This theme will be active when your system is set to “night mode”'),
-                                    'checked'     => $field->find('format') === 'dark',
+                                    'checked'     => $user->field->find('format') === 'dark',
                                     'image'       => url('dashboard/assets/images/dashboard-dark.svg'),
                                 ],
                             ],
@@ -330,7 +338,8 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'checked' => $field->find('toolbar'),
+                                'u-prop' => 'toolbar',
+                                'checked' => $user->field->find('toolbar'),
                             ],
                             'options'     => [],
                         ],
@@ -359,6 +368,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'locale',
                                 'u-select' => '',
                                 'value'    => $user->locale ?? '',
                             ],
@@ -427,6 +437,7 @@ return Form::enqueue(
                                 </div>
                                 <?php
                             },
+                            'attributes'  => [ 'u-prop' => 'title' ],
                         ],
                     ],
                 ],
@@ -453,6 +464,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'passwordNew',
                                 'placeholder' => t('New password'),
                             ],
                             'switcher'    => 1,
@@ -481,6 +493,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
+                                'u-prop' => 'passwordOld',
                                 'u-autocomplete' => '',
                                 'placeholder'    => t('Old password'),
                             ],
@@ -595,6 +608,7 @@ return Form::enqueue(
                                 </div>
                                 <?php
                             },
+                            'attributes'  => [ 'u-prop' => 'title' ],
                         ],
                     ],
                 ],

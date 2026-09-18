@@ -24,6 +24,10 @@ class Builder extends BuilderAbstract
             $this->prefix = $options['prefix'];
         }
 
+        $this->database  = $options['database'] ?? $options['database_name'] ?? '';
+        $this->charset   = $options['charset'] ?? '';
+        $this->collation = $options['collation'] ?? '';
+
         if (isset($options['testMode']) && $options['testMode'] === true) {
             $this->testMode = true;
             return;
@@ -343,7 +347,7 @@ class Builder extends BuilderAbstract
      * @param null|array $options Additional table options for creating a table.
      * @return PDOStatement|null
      */
-    public function create(string $table, array $columns, array $options = null): ?PDOStatement
+    public function create(string $table, array $columns, ?array $options = null): ?PDOStatement
     {
         $stack = [];
         $tableOption = '';
@@ -414,7 +418,7 @@ class Builder extends BuilderAbstract
      * @param null|array        $where
      * @return array|null
      */
-    public function select(string $table, $join, array|string $columns = null, array $where = null): ?array
+    public function select(string $table, $join, array|string|null $columns = null, ?array $where = null): ?array
     {
         $map       = [];
         $result    = [];
@@ -504,13 +508,18 @@ class Builder extends BuilderAbstract
             $values = [$values];
         }
 
+        // Deduped via array keys (a hash lookup per column), not array_unique() over every row's
+        // flattened keys (which would sort the whole N-rows x M-columns list just to dedupe it) -
+        // same resulting column set and order (first occurrence wins either way), far cheaper for
+        // a bulk multi-row insert.
+        $columnSet = [];
         foreach ($values as $data) {
             foreach ($data as $key => $value) {
-                $columns[] = $key;
+                $columnSet[$key] = true;
             }
         }
 
-        $columns = array_unique($columns);
+        $columns = array_keys($columnSet);
 
         foreach ($values as $data) {
             $values = [];
@@ -589,7 +598,7 @@ class Builder extends BuilderAbstract
      * @param null|array $where
      * @return PDOStatement|null
      */
-    public function update(string $table, array $data, array $where = null): ?PDOStatement
+    public function update(string $table, array $data, ?array $where = null): ?PDOStatement
     {
         $fields = [];
         $map = [];
@@ -673,7 +682,7 @@ class Builder extends BuilderAbstract
      * @return PDOStatement|null
      * @throws InvalidArgumentException
      */
-    public function replace(string $table, array $columns, array $where = null): ?PDOStatement
+    public function replace(string $table, array $columns, ?array $where = null): ?PDOStatement
     {
         $map   = [];
         $stack = [];
@@ -710,7 +719,7 @@ class Builder extends BuilderAbstract
      * @param null|array        $where
      * @return mixed
      */
-    public function get(string $table, $join = null, array|string $columns = null, array $where = null): mixed
+    public function get(string $table, $join = null, array|string|null $columns = null, ?array $where = null): mixed
     {
         $map          = [];
         $result       = [];
@@ -765,7 +774,7 @@ class Builder extends BuilderAbstract
      * @param null|array $where
      * @return bool
      */
-    public function has(string $table, array $join, array $where = null): bool
+    public function has(string $table, array $join, ?array $where = null): bool
     {
         $map = [];
         $column = null;
@@ -794,7 +803,7 @@ class Builder extends BuilderAbstract
      * @param null|array        $where
      * @return array
      */
-    public function rand(string $table, array $join = null, array|string $columns = null, array $where = null): array
+    public function rand(string $table, ?array $join = null, array|string|null $columns = null, ?array $where = null): array
     {
         $orderRaw = $this->raw(
             $this->type === 'mysql' ? 'RAND()'
@@ -823,7 +832,7 @@ class Builder extends BuilderAbstract
      * @param null|array  $where
      * @return int|null
      */
-    public function count(string $table, array $join = null, string $column = null, array $where = null): ?int
+    public function count(string $table, ?array $join = null, ?string $column = null, ?array $where = null): ?int
     {
         return (int) $this->aggregate('COUNT', $table, $join, $column, $where);
     }
@@ -837,7 +846,7 @@ class Builder extends BuilderAbstract
      * @param null|array  $where
      * @return null|string
      */
-    public function avg(string $table, array $join, string $column = null, array $where = null): ?string
+    public function avg(string $table, array $join, ?string $column = null, ?array $where = null): ?string
     {
         return $this->aggregate('AVG', $table, $join, $column, $where);
     }
@@ -851,7 +860,7 @@ class Builder extends BuilderAbstract
      * @param null|array  $where
      * @return null|string
      */
-    public function max(string $table, array $join, string $column = null, array $where = null): ?string
+    public function max(string $table, array $join, ?string $column = null, ?array $where = null): ?string
     {
         return $this->aggregate('MAX', $table, $join, $column, $where);
     }
@@ -865,7 +874,7 @@ class Builder extends BuilderAbstract
      * @param null|array  $where
      * @return null|string
      */
-    public function min(string $table, array $join, string $column = null, array $where = null): ?string
+    public function min(string $table, array $join, ?string $column = null, ?array $where = null): ?string
     {
         return $this->aggregate('MIN', $table, $join, $column, $where);
     }
@@ -879,7 +888,7 @@ class Builder extends BuilderAbstract
      * @param null|array  $where
      * @return null|string
      */
-    public function sum(string $table, array $join, string $column = null, array $where = null): ?string
+    public function sum(string $table, array $join, ?string $column = null, ?array $where = null): ?string
     {
         return $this->aggregate('SUM', $table, $join, $column, $where);
     }
@@ -1048,7 +1057,7 @@ class Builder extends BuilderAbstract
      *
      * @see https://stackoverflow.com/questions/52642542/how-to-extract-column-name-and-type-from-mysql
      */
-    public function schema(string $col = null): array
+    public function schema(?string $col = null): array
     {
         if (! $this->schema) {
             $query = $this->query(
@@ -1060,7 +1069,7 @@ class Builder extends BuilderAbstract
 				WHERE
 				    TABLE_SCHEMA = :database',
                 [
-                    ':database' => EX_DB_NAME, // TODO: компонент фреймворка ничего не должен знать про константу
+                    ':database' => $this->database,
                 ]
             );
 
@@ -1072,12 +1081,18 @@ class Builder extends BuilderAbstract
             }
         }
 
-        if (isset($this->schema[$col])) {
+        if ($col && isset($this->schema[$col])) {
             return $this->schema[$col];
         }
         return $this->schema;
     }
 
+    /**
+     * Forces {@see self::schema()} to re-query INFORMATION_SCHEMA instead of reusing its
+     * request-lifetime cache - for after a migration changes the schema mid-request.
+     *
+     * @return array
+     */
     public function updateSchema(): array
     {
         $this->schema = [];

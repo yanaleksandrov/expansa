@@ -2,47 +2,59 @@
 
 declare(strict_types=1);
 
-namespace App\Models;
+namespace Expansa\Database;
 
-use Expansa\Database\Model;
+use Expansa\Database\Contracts\Fieldable;
 use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 
 /**
- * A dynamic key/value meta-fields store bound to any Model that `use`s {@see Model\HasFieldEav}
- * (User, Apikey, ...) — one "{owner_table}_fields" table per owner table. Always lazy: built only
- * on first access to the owner's field() accessor, never at construction time. $fieldsForeignTable,
- * $fieldsForeignKey and $ownerId below are hook-only properties that forward straight to $owner.
+ * A dynamic key/value meta-fields store bound to anything {@see Fieldable} (a Model that `use`s
+ * {@see Model\HasFieldEav}, or any other class implementing the contract) — one
+ * "{owner_table}_fields" table per owner table. Always lazy: built only on first access to the
+ * owner's field() accessor, never at construction time. $fieldsForeignTable, $fieldsForeignKey
+ * and $ownerId below are hook-only properties that forward straight to $owner.
  */
-class Field extends Model
+class FieldEav
 {
     public function __construct(
 
         /**
-         * The Model this store belongs to.
+         * The Fieldable this store belongs to.
          */
-        protected Model $owner
+        protected Fieldable $owner
     ) {} // phpcs:ignore
 
     /**
      * Name of the metadata table for the owner, e.g. "users_fields".
+     *
+     * @var string
      */
     public string $fieldsForeignTable {
         get => $this->fieldsForeignTable ??= $this->owner->getTable() . '_fields';
     }
 
     /**
-     * Foreign key column on that table pointing back to the owner, e.g. "user_id".
+     * Foreign key column on that table pointing back to the owner, e.g. "user_id". Memoized like
+     * $fieldsForeignTable above: derived from the owner's table name, which never changes for the
+     * lifetime of a model instance. Safe unlike $ownerId below, whose value legitimately changes.
+     *
+     * @var string
      */
     public string $fieldsForeignKey {
-        get => $this->owner->fieldsForeignKey;
+        get => $this->fieldsForeignKey ??= $this->owner->getFieldColumn();
     }
 
     /**
-     * Primary key of the owner, or 0 if it hasn't been persisted yet.
+     * Primary key of the owner, or 0 if it hasn't been persisted yet. Deliberately NOT memoized
+     * with ??=, unlike $fieldsForeignTable/$fieldsForeignKey above: getId() legitimately changes
+     * from 0 to a real id once the owner is saved (e.g. `$field = $user->field; $user->save();
+     * $field->add(...)`), and 0 is not null so ??= would never re-evaluate past the first read.
+     *
+     * @var int
      */
     public int $ownerId {
-        get => (int) ($this->owner->id ?? 0);
+        get => $this->owner->getId();
     }
 
     /**
@@ -92,7 +104,7 @@ class Field extends Model
     /**
      * The owner's field set exactly as find() would cache it, without querying — null means
      * find() hasn't warmed the cache yet, not that the owner has no fields. protected, not
-     * private: {@see TypedField} extends this class and reuses it unchanged.
+     * private: {@see FieldEavTyped} extends this class and reuses it unchanged.
      *
      * @return array<string, array<int, mixed>>|null
      */

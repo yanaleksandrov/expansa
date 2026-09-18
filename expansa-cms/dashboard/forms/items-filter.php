@@ -28,6 +28,7 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
+				'u-prop' => 's',
 				'placeholder' => t( 'e.g. search text' ),
 			],
 		],

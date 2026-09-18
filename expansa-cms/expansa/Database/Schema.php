@@ -17,26 +17,23 @@ use Expansa\Patterns\Facade;
  */
 class Schema extends Facade
 {
+    /**
+     * @return string
+     */
     protected static function getStaticClassAccessor(): string
     {
         return '\Expansa\Database\Schema\Builder';
     }
 
+    /**
+     * Reuses the Db facade's own resolved connection instead of separately reading the
+     * application's config and opening a second one - the framework has no config of its own
+     * to read, only what's already been given to Db.
+     *
+     * @return array{0: \Expansa\Database\Query\Builder}
+     */
     protected static function getConstructorArgs(): array
     {
-        return [
-            Db::connection([
-                'driver'   => EX_DB_DRIVER,
-                'database' => EX_DB_NAME,
-                'username' => EX_DB_USERNAME,
-                'password' => EX_DB_PASSWORD,
-                'host'     => EX_DB_HOST,
-                'prefix'   => EX_DB_PREFIX,
-                'charset'  => EX_DB_CHARSET,
-                'testMode' => EX_DB_LOGGING,
-                'port'     => EX_DB_PORT,
-                'error'    => EX_DB_ERROR_MODE,
-            ])
-        ];
+        return [Db::instance()];
     }
 }

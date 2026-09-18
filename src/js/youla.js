@@ -145,7 +145,7 @@
             }, (_, i) => i + 1);
         } else {
             try {
-                dataItems = saferEval(`${items}`, withMagicVariables(component.data, magicVariables), otherVariables);
+                dataItems = saferEval(`${items}`, withMagicVariables(component.scope, magicVariables), otherVariables);
             } catch (error) {
                 return;
             }
@@ -197,7 +197,8 @@
         });
     }
     function getNextModifier(modifiers, modifierAfter, defaultValue = "") {
-        return modifiers[modifiers.indexOf(modifierAfter) + 1] || defaultValue;
+        const index = modifiers.indexOf(modifierAfter);
+        return index === -1 ? defaultValue : modifiers[index + 1] || defaultValue;
     }
     const KEY_ALIASES = {
         enter: "Enter",
@@ -386,7 +387,7 @@
         get: (name, type = "local") => {
             if (!name) return;
             if (type === "cookie") {
-                let matches = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/([.$?*|{}()\[\]\\\/+^])/g, "\\$1") + "=([^;]*)"));
+                let matches = document.cookie.match(new RegExp("(?:^|; )" + encodeURIComponent(name).replace(/([.$?*|{}()\[\]\\\/+^])/g, "\\$1") + "=([^;]*)"));
                 if (matches) {
                     let res = decodeURIComponent(matches[1]);
                     try {
@@ -406,7 +407,12 @@
                     localStorage.removeItem(name);
                     return;
                 }
-                return unwrapped !== undefined ? unwrapped : raw;
+                const stored = unwrapped !== undefined ? unwrapped : raw;
+                try {
+                    return JSON.parse(stored);
+                } catch (e) {
+                    return stored;
+                }
             }
         },
         set: (name, value, type = "local", options = {
@@ -420,10 +426,13 @@
                 options = Object.assign({
                     samesite: "Lax"
                 }, options);
+                if (!value) {
+                    options.expires = new Date(0);
+                }
                 if (options.expires instanceof Date) {
                     options.expires = options.expires.toUTCString();
                 }
-                let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+                let updatedCookie = encodeURIComponent(name) + "=" + (value ? encodeURIComponent(value) : "");
                 for (let optionKey in options) {
                     updatedCookie += "; " + optionKey;
                     let optionValue = options[optionKey];
@@ -479,7 +488,9 @@
             return Boolean(value);
 
           case "object":
-            if (a instanceof Date) {
+            if (a === null) {
+                return value;
+            } else if (a instanceof Date) {
                 return new Date(value);
             } else if (Array.isArray(a)) {
                 return Array.from(value);
@@ -488,9 +499,6 @@
             }
 
           case "undefined":
-            if (a === null) {
-                return null;
-            }
             return value === "true" ? true : value === "false" ? false : value;
 
           default:
@@ -729,7 +737,7 @@
     function getNestedObjectValue(obj, path) {
         return parsePropPath(path).reduce((acc, key) => isUnsafeKey(key) ? undefined : acc?.[key], obj);
     }
-    function hydrateProps(rootElement, data, parent) {
+    function hydrateProps(rootElement, data, parent, providerName = null) {
         domWalk(rootElement, el => getAttributes(el).filter(({directive: directive}) => directive === "u-prop").forEach(attribute => {
             let {expression: expression, modifiers: modifiers} = attribute;
             if (![ "input", "select", "textarea" ].includes(el.tagName.toLowerCase())) {
@@ -744,8 +752,11 @@
                 console.warn(`Youla.js: u-prop expression "${expression}" uses unsafe key "${unsafeKey}" — skipped.`);
                 return;
             }
-            const owner = parent && key in parent.scope ? parent.scope : data;
+            const owner = modifiers.includes("up") ? parent ? parent.scope : data : parent && key in parent.scope ? parent.scope : data;
             if (owner[key] === undefined) {
+                if (providerName && owner === data && key === providerName) {
+                    console.warn(`Youla.js: u-prop="${expression}" on <${rootElement.tagName.toLowerCase()} u-data="${providerName}"> names its field after the very provider it's nested in — "${providerName}" (registered via Youla.data()) never declared a "${key}" field itself, so this likely wasn't meant to invoke that provider at all. Check its own fields for what you meant (e.g. "value"), or rename this field if the collision is accidental.`);
+                }
                 let fields = [];
                 if (el.type === "checkbox") {
                     fields = closestDirective(el, "u-data").querySelectorAll(`[${CSS.escape(attribute.name)}="${expression.replace(/["\\]/g, "\\$&")}"]`);
@@ -798,6 +809,9 @@
         });
         return obj;
     }
+    function isDataProvider(name) {
+        return !!name && Object.prototype.hasOwnProperty.call(datas, name);
+    }
     let disconnectObserver;
     const disconnectCleanups = new Map;
     function cleanupOnDisconnect(el, cleanup) {
@@ -840,12 +854,14 @@
             const parentEl = closestDirective(el.parentElement, "u-data");
             this.root = el;
             this.parent = parentEl ? parentEl.__x : null;
+            this.children = [];
+            this.parent?.children.push(this);
             this.name = (dataExpression ?? expression).trim();
             this.alias = alias || null;
             this.storageType = isStorageModifier(modifiers) ? getStorageType(modifiers) : null;
             this.storageExpire = this.storageType ? getNextModifier(modifiers, this.storageType) : null;
             this.rawData = saferEval(this.name || "{}", dataProviderContext);
-            this.rawData = hydrateProps(el, this.rawData, this.parent);
+            this.rawData = hydrateProps(el, this.rawData, this.parent, isDataProvider(this.name) ? this.name : null);
             if (this.storageType) {
                 const saved = storage.get(`u-data:${this.name}`, this.storageType);
                 if (saved) {
@@ -928,11 +944,7 @@
                 if (attribute.directive !== "u-bind") {
                     return [ attribute ];
                 }
-                additionalHelperVariables ??= {
-                    ...getForData(el),
-                    ...this.getAliasVariables(),
-                    ...this.getMagicVariables(el)
-                };
+                additionalHelperVariables ??= this.getHelperVariables(el);
                 let bindings;
                 try {
                     ({output: bindings} = self.evaluate(attribute.expression, additionalHelperVariables));
@@ -950,7 +962,7 @@
                     }
                     const isPlainAttribute = !parsed.directive && !parsed.event && !parsed.bind;
                     if (parsed.directive && !getDirective(parsed.directive)) {
-                        el.setAttribute(name, isFn ? value.call(self.data) : value);
+                        el.setAttribute(name, isFn ? value.call(self.scope) : value);
                         return [];
                     }
                     return [ {
@@ -965,6 +977,9 @@
         observeData(data) {
             this.concernedData = [];
             return makeObservable(data, (prop, force) => {
+                if (this._mounting) {
+                    return;
+                }
                 if (force) {
                     this.refresh(true);
                     this.persist();
@@ -1014,36 +1029,41 @@
         }
         initialize(root) {
             const self = this;
-            domWalk(root, el => {
-                if (el.__x_initialized) {
-                    return;
-                }
-                el.__x_initialized = true;
-                const attributes = self.resolveAttributes(el);
-                if (attributes.length === 0) {
-                    return;
-                }
-                const additionalHelperVariables = {
-                    ...getForData(el),
-                    ...self.getAliasVariables(),
-                    ...self.getMagicVariables(el)
-                };
-                attributes.forEach(attribute => {
-                    let {directive: directive, event: event, expression: expression, modifiers: modifiers, bind: bind} = attribute;
-                    let propExpression;
-                    if (directive === "u-prop") {
-                        propExpression = generateExpressionForProp(el, self.data, attribute);
-                        event = [ "select-multiple", "select", "checkbox", "radio" ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
+            this._mounting = true;
+            try {
+                domWalk(root, el => {
+                    if (el.__x_initialized) {
+                        return;
                     }
-                    if (event) {
-                        self.attachListener(el, event, directive === "u-prop" ? [] : modifiers, propExpression || expression);
+                    el.__x_initialized = true;
+                    const attributes = self.resolveAttributes(el);
+                    if (attributes.length === 0) {
+                        return;
                     }
-                    if (bind || getDirective(directive)) {
-                        const {output: output} = self.computeOutput(attribute, additionalHelperVariables);
-                        self.applyAttribute(el, attribute, output, additionalHelperVariables);
-                    }
+                    const additionalHelperVariables = self.getHelperVariables(el);
+                    attributes.forEach(attribute => {
+                        let {directive: directive, event: event, expression: expression, modifiers: modifiers, bind: bind} = attribute;
+                        let propExpression;
+                        if (directive === "u-prop") {
+                            propExpression = generateExpressionForProp(el, self.scope, attribute);
+                            event = [ "select-multiple", "select", "checkbox", "radio" ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
+                        }
+                        if (event) {
+                            self.attachListener(el, event, directive === "u-prop" ? [] : modifiers, propExpression || expression);
+                        }
+                        if (bind || getDirective(directive)) {
+                            const {output: output, deps: deps} = self.computeOutput(attribute, additionalHelperVariables, {
+                                withDeps: true
+                            });
+                            el.__x_deps ??= {};
+                            el.__x_deps[attribute.name] = deps;
+                            self.applyAttribute(el, attribute, output, additionalHelperVariables);
+                        }
+                    });
                 });
-            });
+            } finally {
+                this._mounting = false;
+            }
         }
         refresh(force = false) {
             const self = this;
@@ -1058,39 +1078,52 @@
                 const forceElements = self.pendingForceElements;
                 self.pendingForceRefresh = false;
                 self.pendingForceElements = null;
-                domWalk(self.root, el => {
-                    const attributes = self.resolveAttributes(el);
-                    if (attributes.length === 0) {
-                        return;
-                    }
-                    const elementForced = force || !!forceElements?.has(el);
-                    const additionalHelperVariables = {
-                        ...getForData(el),
-                        ...self.getAliasVariables(),
-                        ...self.getMagicVariables(el)
-                    };
-                    attributes.forEach(attribute => {
-                        const {directive: directive, bind: bind, name: name} = attribute;
-                        if (bind || getDirective(directive)) {
-                            const alwaysSync = directive === "u-prop";
-                            el.__x_deps ??= {};
-                            const previousDeps = el.__x_deps[name];
-                            if (!elementForced && !alwaysSync && previousDeps && !previousDeps.some(dep => self.concernedData.includes(dep))) {
-                                return;
-                            }
-                            const {output: output, deps: deps} = self.computeOutput(attribute, additionalHelperVariables, {
-                                withDeps: true
-                            });
-                            el.__x_deps[name] = deps;
-                            if (elementForced || alwaysSync || !previousDeps || self.concernedData.some(dep => deps.includes(dep))) {
-                                self.applyAttribute(el, attribute, output, additionalHelperVariables);
-                            }
-                        }
-                    });
-                });
-                self.concernedData = [];
+                self.flush(force, forceElements);
             }, 0);
             this.scheduleRefresh();
+        }
+        flush(force, forceElements) {
+            const self = this;
+            domWalk(self.root, el => {
+                const attributes = self.resolveAttributes(el);
+                if (attributes.length === 0) {
+                    return;
+                }
+                const elementForced = force || !!forceElements?.has(el);
+                const additionalHelperVariables = self.getHelperVariables(el);
+                attributes.forEach(attribute => {
+                    const {directive: directive, bind: bind, name: name} = attribute;
+                    if (bind || getDirective(directive)) {
+                        const alwaysSync = directive === "u-prop";
+                        el.__x_deps ??= {};
+                        const previousDeps = el.__x_deps[name];
+                        if (!elementForced && !alwaysSync && previousDeps && !previousDeps.some(dep => self.concernedData.includes(dep))) {
+                            return;
+                        }
+                        const {output: output, deps: deps} = self.computeOutput(attribute, additionalHelperVariables, {
+                            withDeps: true
+                        });
+                        el.__x_deps[name] = deps;
+                        if (elementForced || alwaysSync || !previousDeps || self.concernedData.some(dep => deps.includes(dep))) {
+                            self.applyAttribute(el, attribute, output, additionalHelperVariables);
+                        }
+                    }
+                });
+            });
+            self.children = self.children.filter(child => child.root.isConnected);
+            if (force) {
+                self.children.forEach(child => child.flush(true));
+            } else if (self.concernedData.length > 0) {
+                self.children.forEach(child => {
+                    self.concernedData.forEach(prop => {
+                        if (!child.concernedData.includes(prop)) {
+                            child.concernedData.push(prop);
+                        }
+                    });
+                    child.flush(false);
+                });
+            }
+            self.concernedData = [];
         }
         attachListener(el, event, modifiers, expression) {
             const wrapHandler = (callback, wrapper) => e => wrapper(callback, e);
@@ -1188,6 +1221,13 @@
         getMagicVariables(el, event) {
             return createMagicVariables(this.root, el, event);
         }
+        getHelperVariables(el) {
+            return {
+                ...getForData(el),
+                ...this.getAliasVariables(),
+                ...this.getMagicVariables(el)
+            };
+        }
     }
     const Youla = {
         data: data,
@@ -1199,8 +1239,8 @@
         reactive: reactive,
         variable: variable,
         start: async function() {
-            document.dispatchEvent(createEvent("youla:init"));
             await domReady();
+            document.dispatchEvent(createEvent("youla:init"));
             this.componentDiscover(el => this.componentInitialize(el));
             this.componentWatch(el => this.componentInitialize(el));
         },
@@ -1208,7 +1248,11 @@
             Array.from(document.querySelectorAll("*")).filter(el => hasDirective(el, "u-data")).forEach(callback);
         },
         componentWatch: callback => {
-            let observer = new MutationObserver(mutations => mutations.forEach(mutation => Array.from(mutation.addedNodes).filter(node => node.nodeType === 1 && hasDirective(node, "u-data")).forEach(callback)));
+            let observer = new MutationObserver(mutations => mutations.forEach(mutation => Array.from(mutation.addedNodes).filter(node => node.nodeType === 1).forEach(node => {
+                const descendants = Array.from(node.querySelectorAll("*")).filter(el => hasDirective(el, "u-data"));
+                const found = hasDirective(node, "u-data") ? [ node, ...descendants ] : descendants;
+                found.filter(el => !el.__x).forEach(callback);
+            })));
             observer.observe(document.querySelector("body"), {
                 childList: true,
                 subtree: true

@@ -42,6 +42,7 @@ return \Expansa\Facades\Form::enqueue(
                 <div class="card-hr"></div>
                 <?php
             },
+            'attributes'  => [ 'u-prop' => 'title' ],
         ],
         [
             'type'       => 'step',
@@ -56,6 +57,7 @@ return \Expansa\Facades\Form::enqueue(
                     'class'       => 'p-8 t-center',
                     'label'       => t('Select the project you want to export to docs'),
                     'instruction' => t('This tool allows you to convert docblock comments into docs pages. You can also use markdown.'),
+                    'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
                     'type'        => 'select',
@@ -70,7 +72,7 @@ return \Expansa\Facades\Form::enqueue(
                     'after'       => '',
                     'tooltip'     => '',
                     'instruction' => '',
-                    'attributes'  => [],
+                    'attributes'  => [ 'u-prop' => 'project' ],
                     'conditions'  => [],
                     'options'     => [
                         'optgroup' => [
