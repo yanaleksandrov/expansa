@@ -16,16 +16,26 @@ if ( ! defined( 'EX_PATH' ) ) {
 
 		<div class="chat-messages">
 			<div class="chat-empty" u-bind="emptyState">
-				<i class="ph ph-sparkle chat-empty-icon"></i>
-				<h6><?php echo t( 'Start of the process' ); ?></h6>
-				<div class="fs-14 t-muted"><?php echo t( 'Ask a question to continue this process' ); ?></div>
+				<?php
+				echo view(
+                    'global/state',
+					[
+						'icon'        => 'ufo',
+						'title'       => t('Start of the process'),
+						'description' => t('Ask a question to continue this process'),
+					]
+				)->render();
+				?>
 			</div>
 
 			<div class="chat-message" u-each="(message, i) in activeMessages" u-bind="messageItem(message)">
 				<div class="chat-message-avatar">
 					<i u-bind="messageAvatar(message)"></i>
 				</div>
-				<div class="chat-message-text" u-bind="messageText(message)"></div>
+				<div class="chat-message-body">
+					<div class="chat-message-text" u-bind="messageText(message)"></div>
+					<div class="chat-message-time" u-bind="messageTime(message)"></div>
+				</div>
 			</div>
 		</div>
 
@@ -58,13 +68,45 @@ if ( ! defined( 'EX_PATH' ) ) {
 		<div class="chat-sidebar-title"><?php echo t( 'Processes' ); ?></div>
 
 		<div class="chat-sidebar-list">
-			<button type="button" class="chat-sidebar-item" u-each="(process, i) in processes" u-bind="processItem(process)">
-				<i class="ph ph-chat-circle-text"></i>
-				<span class="chat-sidebar-item-body">
-					<span class="chat-sidebar-item-title" u-bind="processTitle(process)"></span>
-					<span class="chat-sidebar-item-time" u-bind="processTime(process)"></span>
+			<div class="chat-sidebar-item" u-each="(process, i) in visibleProcesses" u-bind="processRow(process)">
+				<span class="chat-sidebar-item-status">
+					<span class="chat-sidebar-item-status-label" u-bind="processStatusLabel(process)"></span>
+					<span class="chat-sidebar-item-status-badge" u-bind="processStatusBadge(process)">
+						<i u-bind="processStatusGlyph(process)"></i>
+					</span>
 				</span>
-			</button>
+
+				<button type="button" class="chat-sidebar-item-main" u-bind="processSelectButton(process)">
+					<span class="chat-sidebar-item-title" u-bind="processTitle(process)"></span>
+				</button>
+
+				<input type="text" class="chat-sidebar-item-rename" u-bind="processRenameInput(process)">
+
+				<details class="details chat-sidebar-item-menu" @click.outside="$el.removeAttribute('open')">
+					<summary class="btn btn--icon btn--xs chat-sidebar-item-menu-btn" title="<?php echo t_attr( 'Actions' ); ?>">
+						<i class="ph ph-dots-three-vertical"></i>
+					</summary>
+					<div class="details-content">
+						<ul class="user-menu">
+							<li class="user-menu-item">
+								<button type="button" class="user-menu-link" u-bind="renameProcessButton(process)">
+									<i class="ph ph-pencil-simple"></i> <?php echo t( 'Rename' ); ?>
+								</button>
+							</li>
+							<li class="user-menu-item">
+								<button type="button" class="user-menu-link" u-bind="archiveProcessButton(process)">
+									<i class="ph ph-archive"></i> <?php echo t( 'Archive' ); ?>
+								</button>
+							</li>
+							<li class="user-menu-item">
+								<button type="button" class="user-menu-link" u-bind="deleteProcessButton(process)">
+									<i class="ph ph-trash"></i> <?php echo t( 'Delete' ); ?>
+								</button>
+							</li>
+						</ul>
+					</div>
+				</details>
+			</div>
 		</div>
 	</aside>
 </div>
