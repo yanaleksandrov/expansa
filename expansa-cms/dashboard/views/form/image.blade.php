@@ -47,7 +47,7 @@ Hook::add('renderDashboardFooter', function () {
 						<span u-bind="initials"></span>
 					</span>
 				</label>
-				<span class="image__action" @click="$dialog.open('take-selfie', {})" title="{{ t('You can take a selfie. Allow the browser to access the camera') }}"><i class="ph ph-webcam"></i></span>
+				<span class="image__action" @click="$dialog.open('take-selfie', {})" title="{{ t('You can also take a selfie. Allow your browser to access the camera') }}"><i class="ph ph-webcam"></i></span>
 			</div>
 		</div>
 		<div class="dg g-1 mw50x9">

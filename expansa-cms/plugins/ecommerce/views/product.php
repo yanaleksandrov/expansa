@@ -133,7 +133,7 @@
                                                             @focus="searchProduct($event, $el, product)"
                                                             @input.debounce.250ms="searchProduct($event, $el, product)"
                                                             data-include="<?php echo esc_attr(implode(',', $section_products_ids)); ?>"
-                                                            placeholder="<?php t('Type for join product to the mix&hellip;'); ?>"
+                                                            placeholder="<?php t('Type to add a product to the mix&hellip;'); ?>"
                                                         >
                                                         <template u-if="product.search.length > 0">
                                                             <div class="product-repeater-search-box">
@@ -159,7 +159,7 @@
                                             @focus="searchProduct($event, $el, item)"
                                             @input.debounce.250ms="searchProduct($event, $el, item)"
                                             data-include="<?php echo esc_attr(implode(',', $section_products_ids)); ?>"
-                                            placeholder="<?php t('Type for add new product&hellip;'); ?>"
+                                            placeholder="<?php t('Type to add a new product&hellip;'); ?>"
                                         >
                                         <template u-if="item.search.length > 0">
                                             <div class="product-repeater-search-box">

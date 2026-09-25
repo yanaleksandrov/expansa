@@ -42,7 +42,7 @@
 					[
 						'icon'        => 'ufo',
 						'title'       => t( 'Nothing found' ),
-						'description' => t( 'Try to write something, there will be search results here' ),
+						'description' => t( 'Start typing to see search results' ),
 					]
 				);
 				?>

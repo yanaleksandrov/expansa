@@ -16,6 +16,6 @@ if ( ! defined( 'EX_PATH' ) ) {
 	</a>
 	<?php echo form('user-reset-password', EX_DASHBOARD . 'forms/user-reset-password.php'); ?>
 	<div class="t-center t-muted mt-3">
-		{!! t('I remembered the password, [send](:signInLink) me to the sign in page', url('dashboard/sign-in')) !!}
+		{!! t('Remembered your password? [Back to sign in](:signInLink)', url('dashboard/sign-in')) !!}
 	</div>
 </main>

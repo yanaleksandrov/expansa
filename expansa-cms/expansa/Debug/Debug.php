@@ -42,7 +42,7 @@ class Debug
     {
         $title = t('Fatal Error');
 
-        $description = t('Find on line :lineNumber in file :filepath', $e->getLine(), $e->getFile());
+        $description = t('On line :lineNumber in :filepath', $e->getLine(), $e->getFile());
         $description = preg_replace('/[a-z0-9_\-]*\.php/i', '$1<u>$0</u>', $description);
         $description = preg_replace('/(\d+)/', '<em>$1</em>', $description);
         $description = preg_replace('/[\(\)#\[\]\':]/i', '$1<ss>$0</ss>', $description);

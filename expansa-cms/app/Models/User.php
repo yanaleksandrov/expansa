@@ -187,7 +187,7 @@ class User extends Model implements Fieldable
     {
         $this->validator->extend(
             'email:unique',
-            t('Sorry, that user email address or login is already used!'),
+            t('Sorry, that email address or login is already in use.'),
             fn() => ! $this->exists(
                 [
                     'login' => $this->login,

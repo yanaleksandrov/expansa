@@ -49,7 +49,7 @@ return \Expansa\Facades\Form::enqueue(
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t('Unique slug/reference for the attribute; must be no more than 28 characters'),
+                    'instruction' => t('Unique slug/reference for the attribute; must be 28 characters or fewer'),
                     'tooltip'     => '',
                     'copy'        => 0,
 
@@ -110,7 +110,7 @@ return \Expansa\Facades\Form::enqueue(
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t('E.g.: kg, inch or lbs'),
+                    'instruction' => t('e.g. kg, in, or lbs'),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',
@@ -136,7 +136,7 @@ return \Expansa\Facades\Form::enqueue(
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t('Some types of attributes are applicable only to certain product groups. For example, the size of the monitor is only for electronics.'),
+                    'instruction' => t('Some attributes apply only to certain product groups. For example, screen size applies only to electronics.'),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',
@@ -146,7 +146,7 @@ return \Expansa\Facades\Form::enqueue(
                         'value' => $user->locale ?? '',
                     ],
                     'options'     => [
-                        ''       => t('Any products categories'),
+                        ''       => t('Any product category'),
                         'button' => t('Some category'),
                     ],
                 ],
@@ -171,7 +171,7 @@ return \Expansa\Facades\Form::enqueue(
                 'unique' => [
                     'content'     => t('Uniqueness'),
                     'icon'        => 'ph ph-number-one',
-                    'description' => t('Activate it if the attribute value can only be single, such as serial number, license or certificate number.'),
+                    'description' => t('Enable this if the attribute value must be unique, such as a serial, license, or certificate number.'),
                     'checked'     => false,
                 ],
             ],
@@ -195,7 +195,7 @@ return \Expansa\Facades\Form::enqueue(
                 'filterable' => [
                     'content'     => t('Filterable'),
                     'icon'        => 'ph ph-funnel',
-                    'description' => t('Activate it if you need to show it in the product filter'),
+                    'description' => t('Enable this to show the attribute in the product filter'),
                     'checked'     => false,
                 ],
             ],

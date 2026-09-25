@@ -43,7 +43,7 @@ Hook::add('renderDashboardFooter', function () {
                 </div>
             </template>
             <template u-if="!item.url && !item.icon">
-                <img class="storage__image" src="{{ url('/dashboard/assets/images/files/broken.svg') }}" title="{{ t('Image is broken') }}" width="40" height="40" alt>
+                <img class="storage__image" src="{{ url('/dashboard/assets/images/files/broken.svg') }}" title="{{ t('Broken image') }}" width="40" height="40" alt>
             </template>
         </div>
 

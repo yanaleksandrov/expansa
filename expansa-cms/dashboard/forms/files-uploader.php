@@ -42,7 +42,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'textarea',
 			'name'        => 'urls',
-			'label'       => t( 'Or upload from external URL' ),
+			'label'       => t( 'Or upload from an external URL' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
@@ -55,7 +55,7 @@ return Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'u-prop'      => 'urls',
-				'placeholder' => t( 'Each URL must be from a new line' ),
+				'placeholder' => t( 'Enter one URL per line' ),
 				'@change'     => '$ajax.post("media/grab", {urls}).then(({uploaded}) => uploaded && window.location.reload())',
 				'u-textarea'  => 19,
 			],

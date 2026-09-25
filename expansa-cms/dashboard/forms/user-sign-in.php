@@ -16,7 +16,7 @@ return \Expansa\Facades\Form::enqueue(
 			'label'       => t( 'Welcome to Expansa' ),
 			'name'        => 'title',
 			'class'       => '',
-			'instruction' => t( 'Sign in to access to your dashboard and site settings.' ),
+			'instruction' => t( 'Sign in to access your dashboard and site settings.' ),
 			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[

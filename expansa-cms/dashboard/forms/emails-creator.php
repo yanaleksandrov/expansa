@@ -86,9 +86,9 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop'      => 'title',
-						'value'       => t( 'Your are registered' ),
+						'value'       => t( 'You\'re registered' ),
 						'required'    => true,
-						'placeholder' => t( 'Mail title...' ),
+						'placeholder' => t( 'Email title...' ),
 					],
 				],
 				[
@@ -143,7 +143,7 @@ return \Expansa\Facades\Form::enqueue(
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => t( 'Enter recipients for this email. Each recipient email from a new line.' ),
+					'instruction' => t( 'Enter the recipients for this email, one per line.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -172,7 +172,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'bottom',
-					'label'       => t( 'Mail bottom content' ),
+					'label'       => t( 'Email bottom content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -205,7 +205,7 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop'      => 'footer',
-						'value'       => t( 'This message is generated automatically. Don\'t reply it. All rights reserved © 2024' ),
+						'value'       => t( 'This is an automated message. Please don\'t reply. All rights reserved © 2024' ),
 						'placeholder' => t( 'N/A' ),
 					],
 				],
@@ -225,13 +225,13 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'email',
 					'name'        => 'email',
-					'label'       => t( 'Send To' ),
+					'label'       => t( 'Send to' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => t( 'Enter recipients for this email. Each recipient email from a new line.' ),
+					'instruction' => t( 'Enter the recipients for this email, one per line.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -278,12 +278,12 @@ return \Expansa\Facades\Form::enqueue(
 					'callback' => function() {
 						?>
 						<div class="dg g-2">
-							<div><code>:name</code> <?php echo t( 'User display name if email found in users' ); ?></div>
+							<div><code>:name</code> <?php echo t( 'User display name (if the email belongs to a registered user)' ); ?></div>
 							<div><code>:link</code> <?php echo t( 'Link to page' ); ?></div>
 							<div><code>:admin_email</code> <?php echo t( 'The site admin email' ); ?></div>
 							<div><code>:site_title</code> <?php echo t( 'The site title' ); ?></div>
-							<div><code>:unsubscribe_url</code> <?php echo t( 'Url to unsubscribe from emails' ); ?></div>
-							<div><code>:unsubscribe_link</code> <?php echo t( 'Clickable link to unsubscribe from emails' ); ?></div>
+							<div><code>:unsubscribe_url</code> <?php echo t( 'Unsubscribe URL' ); ?></div>
+							<div><code>:unsubscribe_link</code> <?php echo t( 'Clickable unsubscribe link' ); ?></div>
 							<div><code>:year</code> <?php echo t( 'Current year' ); ?></div>
 							<div><code>:date</code> <?php echo t( 'Current date in "24 August, 2024" format' ); ?></div>
 						</div>

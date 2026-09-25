@@ -70,12 +70,12 @@ class Type
 
         if (!preg_match('/^[a-z_-]+$/', $postType)) {
             throw new InvalidArgumentException(
-                t('Post type key "%s" must use only lowercase letters, dashes and underscores.', $postType)
+                t('Post type key "%s" must contain only lowercase letters, dashes, and underscores.', $postType)
             );
         }
 
         if (empty($postType) || strlen($postType) > 20) {
-            throw new InvalidArgumentException(t('Post type key is empty or exceeds 20 characters.'));
+            throw new InvalidArgumentException(t('Post type key must be between 1 and 20 characters long.'));
         }
 
         $this->labelName       ??= t('Page');

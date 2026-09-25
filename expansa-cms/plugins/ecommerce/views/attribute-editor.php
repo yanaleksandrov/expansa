@@ -48,7 +48,7 @@ use Expansa\Builders\Form;
                             'conditions'  => [],
                             'attributes'  => [
                                 'name'                 => 'value',
-                                'placeholder'          => t('Add attribute value and press Enter'),
+                                'placeholder'          => t('Type a value and press Enter'),
                                 '@keyup.enter.prevent' => '$el.value.trim() && values.push({title: $el.value.trim(), slug: $safe.slug($el.value)}), $el.value = "", values.sort((a, b) => a.title.localeCompare(b.title))',
                             ],
                         ],
@@ -75,8 +75,8 @@ use Expansa\Builders\Form;
                                 [
                                     'icon'        => 'empty-pack',
                                     'class'       => 'dg jic m-auto t-center p-8 mw-320',
-                                    'title'       => t('Values not found'),
-                                    'description' => t('Try to add new attribute value, there will be results here'),
+                                    'title'       => t('No values found'),
+                                    'description' => t('Add a value and it will appear here'),
                                 ]
                             );
                             ?>

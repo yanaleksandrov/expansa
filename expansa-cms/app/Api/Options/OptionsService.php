@@ -18,7 +18,7 @@ final class OptionsService
         }
 
         return [
-            ['target' => 'body', 'notify' => t('Options is updated successfully')],
+            ['target' => 'body', 'notify' => t('Options updated successfully.')],
         ];
     }
 }

@@ -45,8 +45,8 @@ use Expansa\Builders\Form;
 								[
 									'icon'        => 'empty-pack',
 									'class'       => 'dg jic m-auto t-center p-8 mw-320',
-									'title'       => t( 'Attributes not found' ),
-									'description' => t( 'Try to add new attribute, there will be results here' ),
+									'title'       => t( 'No attributes found' ),
+									'description' => t( 'Add an attribute and it will appear here' ),
 								]
 							);
 							?>

@@ -18,7 +18,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'header',
 			'class'       => 'px-8 t-center',
 			'label'       => t( 'Tools Page' ),
-			'instruction' => t( 'Here are additional tools for working with Expansa. To start, select a tool from the list below:' ),
+			'instruction' => t( 'Here are some additional tools for working with Expansa. Select a tool below to get started:' ),
 			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[

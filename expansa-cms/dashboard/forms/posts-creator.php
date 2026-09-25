@@ -61,7 +61,7 @@ return \Expansa\Facades\Form::enqueue(
             'reset'       => 0,
             'before'      => '',
             'after'       => '',
-            'instruction' => t('This section only applicable to post types that have excerpts enabled. Here you can write a one to two sentence description of the post.'),
+            'instruction' => t('This section only applies to post types with excerpts enabled. Write a one- or two-sentence description of the post.'),
             'tooltip'     => '',
             'copy'        => 0,
             'validator'   => '',
@@ -92,7 +92,7 @@ return \Expansa\Facades\Form::enqueue(
                 'value'  => 'publish',
             ],
             'options'     => [
-                'publish' => t('Publish'),
+                'publish' => t('Published'),
                 'pending' => t('Pending'),
                 'draft'   => t('Draft'),
             ],
@@ -181,7 +181,7 @@ return \Expansa\Facades\Form::enqueue(
             'options'     => [
                 'us' => [
                     'image'   => 'assets/images/flags/us.svg',
-                    'content' => t('English - english'),
+                    'content' => t('English - English'),
                 ],
                 'ru' => [
                     'image'   => 'assets/images/flags/ru.svg',

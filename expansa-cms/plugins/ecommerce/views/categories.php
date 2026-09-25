@@ -15,7 +15,7 @@ use Expansa\Builders\Form;
         <form class="attributes-wrapper" u-data="{values: []}">
             <div class="attributes-editor">
                 <h5 class="attributes-title">
-                    <span class="fw-600 mr-auto"><?php echo t('Products Categories'); ?></span>
+                    <span class="fw-600 mr-auto"><?php echo t('Product Categories'); ?></span>
                     <button class="btn btn--sm" type="button"><?php echo t('Export'); ?></button>
                     <button class="btn btn--sm" type="button"><?php echo t('Import'); ?></button>
                     <button class="btn btn--sm btn--primary" type="submit"><?php echo t('Save'); ?></button>
@@ -45,8 +45,8 @@ use Expansa\Builders\Form;
                                 [
                                     'icon'        => 'empty-pack',
                                     'class'       => 'dg jic m-auto t-center p-8 mw-320',
-                                    'title'       => t('Categories not found'),
-                                    'description' => t('Try to add new category, there will be results here'),
+                                    'title'       => t('No categories found'),
+                                    'description' => t('Add a category and it will appear here'),
                                 ]
                             );
                             ?>

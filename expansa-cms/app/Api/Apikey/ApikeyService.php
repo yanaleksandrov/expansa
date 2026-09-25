@@ -83,7 +83,7 @@ final class ApikeyService
         return (new Response())->json([
             'post' => $postData,
             'data' => [
-                ['target' => 'body', 'notify' => t('New API key is created')],
+                ['target' => 'body', 'notify' => t('API key created.')],
             ],
         ]);
     }

@@ -14,7 +14,7 @@ return new class extends Plugin
             ->setName('Docify')
             ->setVersion('2024.9')
             ->setAuthor('Expansa Team')
-            ->setDescription(t('Simple way to create docs for your plugins'));
+            ->setDescription(t('A simple way to create docs for your plugins'));
     }
 
     public function boot(): void

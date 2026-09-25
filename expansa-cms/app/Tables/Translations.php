@@ -40,7 +40,7 @@ final class Translations extends Table
     {
         return [
             'title'       => t('Translations'),
-            'badge'       => t('completed :stringsCount from :allStringsCount', 56, 408) . '<i class="t-green">(25%)</i>',
+            'badge'       => t(':stringsCount of :allStringsCount completed', 56, 408) . '<i class="t-green">(25%)</i>',
             'translation' => true,
         ];
     }
@@ -48,8 +48,8 @@ final class Translations extends Table
     public function notFoundData(): array
     {
         return [
-            'title'       => t('Translates not found'),
-            'description' => t("Click the 'Scan' button to get started and load the strings to be translated from the source code."),
+            'title'       => t('No translations found'),
+            'description' => t("Click the 'Scan' button to load translatable strings from the source code."),
         ];
     }
 }

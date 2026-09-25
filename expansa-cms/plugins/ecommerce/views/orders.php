@@ -149,7 +149,7 @@
             </div>
             <div class="kanban__col">
                 <div class="kanban__title">
-                    <i class="ph ph-info" u-tooltip.click.prevent="'<?php echo t_attr('The products of order have been transferred to the courier, transport company or postal service'); ?>'"></i>
+                    <i class="ph ph-info" u-tooltip.click.prevent="'<?php echo t_attr('The order has been handed over to the courier, shipping company, or postal service'); ?>'"></i>
                     <span class="fs-15 fw-500 mr-auto">Shipping</span>
                     <span class="badge">3</span>
                 </div>

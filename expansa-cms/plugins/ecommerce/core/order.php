@@ -289,7 +289,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'address',
-                            'label'       => t('Apartment, suite, etc'),
+                            'label'       => t('Apartment, suite, etc.'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
                             'reset'       => 0,

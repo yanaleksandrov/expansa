@@ -26,7 +26,7 @@ return \Expansa\Facades\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => t( '25% used of 2GB' ),
+			'instruction' => t( '25% of 2GB used' ),
 			'attributes'  => [
 				'u-prop'      => 'progress',
 				'placeholder' => t( 'e.g. image name' ),

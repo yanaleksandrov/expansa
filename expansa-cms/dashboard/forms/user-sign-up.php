@@ -17,7 +17,7 @@ return Expansa\Facades\Form::enqueue(
 			'label'       => t( 'Create new account' ),
 			'name'        => 'title',
 			'class'       => '',
-			'instruction' => t( 'After creating an account, more platform features will be available to you' ),
+			'instruction' => t( 'Create an account to unlock more platform features' ),
 			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[

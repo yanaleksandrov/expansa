@@ -208,7 +208,7 @@ new class
                         'showMenu'            => false,
                         'flagsUrl'            => url('/dashboard/assets/sprites/flags.svg'),
                         'notifications'       => [
-                            'ctrlS' => t_attr('Expansa saves the changes automatically, so there is no need to press ⌘ + S'),
+                            'ctrlS' => t_attr('Expansa saves your changes automatically, so there\'s no need to press ⌘ + S'),
                         ],
                         'uploaderDialog'      => [
                             'title' => t('Upload Files'),
@@ -223,7 +223,7 @@ new class
                             'class' => 'dialog--lg dialog--right',
                         ],
                         'takeSelfieDialog'    => [
-                            'title' => t('Take A Selfie'),
+                            'title' => t('Take a Selfie'),
                             'class' => 'dialog--sm',
                         ],
                         'apiKeyManagerDialog' => [

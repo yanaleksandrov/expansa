@@ -166,7 +166,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                     'options' => [
                                         'core' => [
                                             'content' => t('Expansa Core'),
-                                            'description' => t('completion :percent\%', 0),
+                                            'description' => t(':percent\% complete', 0),
                                         ],
                                     ],
                                 ],
@@ -175,7 +175,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                     'options' => array_reduce($plugins, function ($carry, Expansa\Extensions\Plugin $plugin) {
                                         $carry[$plugin->id] = [
                                             'content'     => $plugin->name,
-                                            'description' => t('completion :percent%', 0),
+                                            'description' => t(':percent% complete', 0),
                                         ];
                                         return $carry;
                                     }, []),
@@ -185,7 +185,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                     'options' => array_reduce($themes, function ($carry, Expansa\Extensions\Theme $theme) {
                                         $carry[$theme->id] = [
                                             'content'     => $theme->name,
-                                            'description' => t('completion :percent%', 0),
+                                            'description' => t(':percent% complete', 0),
                                         ];
                                         return $carry;
                                     }, []),

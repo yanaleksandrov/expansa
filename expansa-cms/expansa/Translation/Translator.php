@@ -13,7 +13,7 @@ use Expansa\Facades\Safe;
  * The class also offers methods for returning translations sanitized for use in HTML attributes.
  *
  * As text your can use base markdown syntax. For example links looks like this:
- * t( 'Go to [documentation page](:pageLink) for resolve issue', 'https://google.com' )
+ * t( 'See the [documentation](:pageLink) to resolve this issue', 'https://google.com' )
  *
  * Main functionalities:
  * - `t|_t(_attr)`: translates a string with placeholders and returns/outputs it (sanitizes for HTML attributes).

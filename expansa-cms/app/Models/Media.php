@@ -113,7 +113,7 @@ class Media
     public static function upload(array $file): int|Error
     {
         if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || empty($file['tmp_name'])) {
-            return new Error('media_upload', t('An error occurred while uploading the file, please try again.'));
+            return new Error('media_upload', t('An error occurred while uploading the file. Please try again.'));
         }
 
         $mime = self::mimeFromFilename($file['name'] ?? '');
@@ -128,12 +128,12 @@ class Media
 
         $basename = self::uniqueBasename($directory, self::sanitizeFilename($file['name'] ?? ''));
         if (! $basename) {
-            return new Error('media_upload', t('File name must not contain illegal characters and must not be empty.'));
+            return new Error('media_upload', t('The file name can\'t be empty or contain invalid characters.'));
         }
 
         $filepath = $directory . $basename;
         if (! move_uploaded_file($file['tmp_name'], $filepath)) {
-            return new Error('media_upload', t('Something went wrong, upload is failed.'));
+            return new Error('media_upload', t('Something went wrong. The upload failed.'));
         }
 
         return self::finalize($filepath, $basename, $mime);
@@ -148,13 +148,13 @@ class Media
     public static function grab(string $url): int|Error
     {
         if (! filter_var($url, FILTER_VALIDATE_URL)) {
-            return new Error('media_grab', t('The file cannot be grabbed because the URL is not valid.'));
+            return new Error('media_grab', t('Can\'t fetch the file because the URL is invalid.'));
         }
 
         $basename = self::sanitizeFilename(basename((string) parse_url($url, PHP_URL_PATH)));
         $mime     = self::mimeFromFilename($basename);
         if (! $basename || ! $mime) {
-            return new Error('media_grab', t('The file cannot be grabbed because it does not contain a valid extension.'));
+            return new Error('media_grab', t('Can\'t fetch the file because it doesn\'t have a valid extension.'));
         }
 
         $directory = EX_STORAGE . 'i/original/';
@@ -180,7 +180,7 @@ class Media
 
         if (! $downloaded) {
             @unlink($filepath);
-            return new Error('media_grab', $curlError ?: t('Something went wrong when uploading the file.'));
+            return new Error('media_grab', $curlError ?: t('Something went wrong while uploading the file.'));
         }
 
         return self::finalize($filepath, $basename, $mime);

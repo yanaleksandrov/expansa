@@ -323,8 +323,8 @@ final class PluginsInstall extends Table
     {
         return [
             'icon'        => 'no-plugins',
-            'title'       => t('Plugins not found'),
-            'description' => t('You don&apos;t have any themes installed yet, <a @click="$dialog.open(`tmpl-post-editor`)">download them</a>'),
+            'title'       => t('No plugins found'),
+            'description' => t('You don&apos;t have any plugins installed yet. <a @click="$dialog.open(`tmpl-post-editor`)">Download some</a>'),
         ];
     }
 }

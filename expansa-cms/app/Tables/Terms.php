@@ -49,7 +49,7 @@ final class Terms extends Table
     public function notFoundData(): array
     {
         return [
-            'title'       => t('Pages not found'),
+            'title'       => t('No pages found'),
             'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
         ];
     }
