@@ -11,30 +11,20 @@ use Throwable;
 
 /**
  * Runs the application in a fixed order: phases one by one, then the first matching
- * context, then the fallback. Every step fires hooks and is recorded in the timeline;
- * the "terminate" hook runs after the response is sent.
+ * context, then routing (not in the console). Every step fires hooks and is recorded
+ * in the timeline; the "terminate" hook runs after the response is sent.
  */
 final class Manager
 {
     /**
-     * @var array<string, array{callback: callable, when: callable|null}>
+     * @var array<string, array{callback: callable, when: bool|callable}>
      */
     private array $phases = [];
 
     /**
-     * @var array<string, array{when: callable, callback: callable}>
+     * @var array<string, array{when: bool|callable, callback: callable}>
      */
     private array $contexts = [];
-
-    /**
-     * @var callable|null
-     */
-    private $fallback = null;
-
-    /**
-     * @var callable|null
-     */
-    private $catch = null;
 
     private ?string $current = null;
 
@@ -51,11 +41,11 @@ final class Manager
 
     /**
      * Declare a phase. Phases run in declaration order, wrapped by "before{Name}" and "after{Name}" hooks.
-     * A phase with $when runs only if it returns true; a skipped phase fires no hooks.
+     * $when is a ready bool or a callable checked at run time; a skipped phase fires no hooks.
      *
      * @throws LifecycleException
      */
-    public function phase(string $name, callable $callback, ?callable $when = null): static
+    public function phase(string $name, bool|callable $when, callable $callback): static
     {
         $this->guard($name, $this->phases, 'phase');
 
@@ -65,12 +55,12 @@ final class Manager
     }
 
     /**
-     * Declare a context. Only the first one whose $when(string $uri) returns true runs, after the phases,
-     * followed by the "enter{Name}" hook. It is matched on the first current()/is() call, even from a phase.
+     * Declare a context. After the phases only the first match runs, followed by the "enter{Name}" hook.
+     * $when is a ready bool or $when(string $uri); matched on the first current()/is() call, even from a phase.
      *
      * @throws LifecycleException
      */
-    public function context(string $name, callable $when, callable $callback): static
+    public function context(string $name, bool|callable $when, callable $callback): static
     {
         $this->guard($name, $this->contexts, 'context');
 
@@ -80,40 +70,13 @@ final class Manager
     }
 
     /**
-     * Declare the step that runs after the context, e.g. routing.
-     *
-     * @throws LifecycleException
-     */
-    public function fallback(callable $callback): static
-    {
-        $this->guard(null, [], 'fallback');
-
-        $this->fallback = $callback;
-
-        return $this;
-    }
-
-    /**
-     * Declare the handler for anything a step throws; without it the exception propagates.
-     *
-     * @param callable(Throwable): void $handler
-     * @throws LifecycleException
-     */
-    public function catch(callable $handler): static
-    {
-        $this->guard(null, [], 'catch');
-
-        $this->catch = $handler;
-
-        return $this;
-    }
-
-    /**
      * Run the lifecycle once. $uri defaults to the router's current URI, in the console to an empty string.
+     * $catch gets anything a step throws and stops the remaining steps; without it the exception propagates.
      *
+     * @param callable(Throwable): void|null $catch
      * @throws LifecycleException
      */
-    public function run(?string $uri = null): void
+    public function run(?string $uri = null, ?callable $catch = null): void
     {
         if ($this->started) {
             throw new LifecycleException('Lifecycle has already been run');
@@ -127,11 +90,11 @@ final class Manager
         try {
             $this->steps();
         } catch (Throwable $e) {
-            if ($this->catch === null) {
+            if ($catch === null) {
                 throw $e;
             }
 
-            ($this->catch)($e);
+            $catch($e);
         }
     }
 
@@ -163,7 +126,7 @@ final class Manager
     private function steps(): void
     {
         foreach ($this->phases as $name => $phase) {
-            if ($phase['when'] !== null && !($phase['when'])()) {
+            if (!$this->passes($phase['when'])) {
                 continue;
             }
 
@@ -188,8 +151,9 @@ final class Manager
             });
         }
 
-        if ($this->fallback !== null) {
-            $this->measure('fallback', 'fallback', $this->fallback);
+        // dispatches the routes registered by the context; the console has none
+        if (PHP_SAPI !== 'cli') {
+            $this->measure('route', 'route', fn () => Route::run());
         }
     }
 
@@ -219,14 +183,19 @@ final class Manager
             return;
         }
 
-        $uri = $this->uri ?? Route::getCurrentUri();
+        $uri = $this->uri ?? Route::uri();
 
         foreach ($this->contexts as $name => $context) {
-            if (($context['when'])($uri)) {
+            if ($this->passes($context['when'], $uri)) {
                 $this->current = $name;
                 break;
             }
         }
+    }
+
+    private function passes(bool|callable $when, mixed ...$args): bool
+    {
+        return is_bool($when) ? $when : (bool) $when(...$args);
     }
 
     private function measure(string $name, string $type, callable $callback): void

@@ -372,7 +372,7 @@ return Form::enqueue(
                                 'u-select' => '',
                                 'value'    => $user->locale ?? '',
                             ],
-                            'options'     => I18n::getLanguagesOptions(),
+                            'options'     => I18n::languageOptions(),
                         ],
                     ],
                 ],

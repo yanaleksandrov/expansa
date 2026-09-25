@@ -6,7 +6,7 @@ namespace App\Support;
 
 /**
  * Minimum server requirements shared by the bootstrap and the installer.
- * Runs before expansa/functions.php, so keep it (and dashboard/error.php) free of PHP 8.4 syntax and helpers.
+ * Runs before any PHP 8.4 code is loaded, so keep it (and dashboard/error.php) free of PHP 8.4 syntax.
  */
 final class Requirements
 {

@@ -48,30 +48,35 @@ class Terminal
     protected array $arguments = [];
 
     /**
-     * Console constructor.
+     * @param string $version Application version shown by the "list" command.
      */
-    public function __construct()
+    public function __construct(protected readonly string $version = '')
     {
         global $argv;
         $this->prepare($argv ?? []);
         $this->setDefaultCommands();
     }
 
+    public function version(): string
+    {
+        return $this->version;
+    }
+
     protected function setDefaultCommands() : static
     {
-        if ($this->getCommand('list') === null) {
+        if ($this->command('list') === null) {
             $this->addCommand(new Index($this));
         }
-        if ($this->getCommand('help') === null) {
+        if ($this->command('help') === null) {
             $this->addCommand(new Help($this));
         }
-	    if ($this->getCommand('env') === null) {
+	    if ($this->command('env') === null) {
 		    $this->addCommand(new Env($this));
 	    }
-        if ($this->getCommand('asset:clean') === null) {
+        if ($this->command('asset:clean') === null) {
             $this->addCommand(new AssetClean($this));
         }
-        if ($this->getCommand('hooks:list') === null) {
+        if ($this->command('hooks:list') === null) {
             $this->addCommand(new HooksList($this));
         }
         return $this;
@@ -82,7 +87,7 @@ class Terminal
      *
      * @return array<string,bool|string>
      */
-    public function getOptions() : array
+    public function options() : array
     {
         return $this->options;
     }
@@ -94,7 +99,7 @@ class Terminal
      *
      * @return bool|string|null
      */
-    public function getOption(string $option) : bool | string | null
+    public function option(string $option) : bool | string | null
     {
         return $this->options[$option] ?? null;
     }
@@ -104,7 +109,7 @@ class Terminal
      *
      * @return array<int,string>
      */
-    public function getArguments() : array
+    public function arguments() : array
     {
         return $this->arguments;
     }
@@ -116,7 +121,7 @@ class Terminal
      *
      * @return string|null The argument value or null if it was not set
      */
-    public function getArgument(int $position) : ?string
+    public function argument(int $position) : ?string
     {
         return $this->arguments[$position] ?? null;
     }
@@ -161,7 +166,7 @@ class Terminal
      *
      * @return Command|null The Command on success or null if not found
      */
-    public function getCommand(string $name) : ?Command
+    public function command(string $name) : ?Command
     {
         if (isset($this->commands[$name])) {
             return $this->commands[$name];
@@ -174,7 +179,7 @@ class Terminal
      *
      * @return array<string,Command>
      */
-    public function getCommands() : array
+    public function commands() : array
     {
         $commands = $this->commands;
         foreach ($commands as $name => $command) {
@@ -223,33 +228,31 @@ class Terminal
      */
     public function hasCommand(string $name) : bool
     {
-        return $this->getCommand($name) !== null;
+        return $this->command($name) !== null;
     }
 
     /**
-     * Run the Console.
+     * Run a console command: the one from $argv, or the given command line, e.g. "help list".
      */
-    public function handle() : void
+    public function run(?string $command = null) : void
     {
+        if ($command !== null) {
+            $argumentValues = static::commandToArgs($command);
+            array_unshift($argumentValues, 'removed');
+            $this->prepare($argumentValues);
+        }
+
         if ($this->command === '') {
             $this->command = 'list';
         }
 
-        $command = $this->getCommand($this->command);
-        if ($command === null) {
-	        $this->info(t('[red]#Command ":commandName" not found#', $this->command));
+        $handler = $this->command($this->command);
+        if ($handler === null) {
+            $this->info(t('[red]#Command ":commandName" not found#', $this->command));
             return;
         }
 
-        $command->handle();
-    }
-
-    public function exec(string $command) : void
-    {
-        $argumentValues = static::commandToArgs($command);
-        array_unshift($argumentValues, 'removed');
-        $this->prepare($argumentValues);
-        $this->handle();
+        $handler->handle();
     }
 
     protected function reset() : void

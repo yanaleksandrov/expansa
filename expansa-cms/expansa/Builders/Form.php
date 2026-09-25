@@ -54,7 +54,7 @@ class Form
      * @param string $uid Unique Form ID.
      * @return string
      */
-    public function make(string $uid): string
+    public function render(string $uid): string
     {
         $uid = Safe::id($uid);
         if (! $uid) {

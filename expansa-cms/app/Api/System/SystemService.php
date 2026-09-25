@@ -6,6 +6,7 @@ namespace App\Api\System;
 
 use App\Models\Options;
 use App\Models\User;
+use App\Support\Installation;
 use App\Support\Requirements;
 use Expansa\Database\Query\Builder;
 use Expansa\Facades\Db;
@@ -16,7 +17,6 @@ use Expansa\Facades\Validator;
 use Expansa\Http\Exceptions\HttpException;
 use Expansa\Http\Exceptions\ValidationException;
 use Expansa\Support\Arr;
-use Expansa\Support\Is;
 
 /**
  * Business logic for the installer, moved out of the controller. Talks to
@@ -82,7 +82,7 @@ final class SystemService
      */
     public function install(array $input): array
     {
-        if (Is::installed()) {
+        if (Installation::isComplete()) {
             throw new HttpException(409, t('Expansa is already installed.'));
         }
 
@@ -108,39 +108,68 @@ final class SystemService
             'db.prefix'        => 'snakecase',
         ])->values();
 
-        // The connection check should have already passed by this point (see checkRequirements());
-        // here we just persist it and connect to it.
-        $config = EX_PATH . 'env.php';
-        if (!is_file($config)) {
-            $env = Disk::file(EX_PATH . 'env.example.php')->copy('env');
-            if ($env->errors) {
-                throw new ValidationException(t('Unable to write the environment configuration file.'), $env->errors);
+        // env.php marks the installation as complete, so it appears only after every step succeeded
+        $draft = EX_PATH . 'env.install.php';
+        if (is_file($draft)) {
+            unlink($draft);
+        }
+
+        $env = Disk::file(EX_PATH . 'env.example.php')->copy('env.install');
+        if ($env->errors) {
+            throw new ValidationException(t('Unable to write the environment configuration file.'), $env->errors);
+        }
+
+        Disk::file($draft)->rewrite(
+            array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database) + [
+                'auth.key'  => bin2hex(random_bytes(32)),
+                'nonce.key' => bin2hex(random_bytes(32)),
+                'hash.key'  => bin2hex(random_bytes(32)),
+            ]
+        );
+
+        try {
+            // the rest of the installation reads the new constants, e.g. EX_DB_PREFIX
+            require_once $draft;
+
+            Db::configure(
+                driver: EX_DB_DRIVER,
+                database: EX_DB_NAME,
+                username: EX_DB_USERNAME,
+                password: EX_DB_PASSWORD,
+                host: EX_DB_HOST,
+                prefix: EX_DB_PREFIX,
+                charset: EX_DB_CHARSET,
+                collation: EX_DB_COLLATION,
+                port: EX_DB_PORT,
+                testMode: EX_DB_LOGGING,
+                error: EX_DB_ERROR_MODE,
+            );
+
+            Hook::call('createMainDatabaseTables');
+
+            Db::updateSchema();
+
+            // The constructor calls fill() internally, which routes through setAttribute() -
+            // required so the password attribute's set-mutator actually hashes it before it's
+            // saved (unlike make(), which bypasses that entirely for already-trusted data).
+            $user = new User($userdata);
+
+            if (!$user->isValid()) {
+                throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());
             }
 
-            Disk::file(EX_PATH . 'env.php')->rewrite(
-                array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database)
-            );
+            $user->save();
+
+            Options::update('site', $site + ['owner' => ['email' => $user->email]]);
+
+            if (!rename($draft, EX_PATH . 'env.php')) {
+                throw new ValidationException(t('Unable to write the environment configuration file.'));
+            }
+        } catch (\Throwable $e) {
+            is_file($draft) && unlink($draft);
+
+            throw $e;
         }
-
-        require_once $config;
-
-        Hook::configure(EX_PATH . 'app/Listeners');
-        Hook::call('createMainDatabaseTables');
-
-        Db::updateSchema();
-
-        // The constructor calls fill() internally, which routes through setAttribute() -
-        // required so the password attribute's set-mutator actually hashes it before it's
-        // saved (unlike make(), which bypasses that entirely for already-trusted data).
-        $user = new User($userdata);
-
-        if (!$user->isValid()) {
-            throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());
-        }
-
-        $user->save();
-
-        Options::update('site', $site + ['owner' => ['email' => $user->email]]);
 
         User::login($userdata);
 

@@ -30,7 +30,7 @@ new class
          *
          * @since 2025.1
          */
-        Manager::configure(function (string $file, array $context = []) use ($suffix): array {
+        Manager::configure(resolver: function (string $file, array $context = []) use ($suffix): array {
             if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/form/')) {
                 return Manager::defaultStructure($file);
             }
@@ -56,7 +56,7 @@ new class
         $userId = $user->id ?? 0;
 
         // only the profile page lists and manages API keys
-        $isProfile = trim(Route::getCurrentUri(), '/') === Hook::call('dashboardRootSlug', 'dashboard') . '/profile';
+        $isProfile = trim(Route::uri(), '/') === Hook::call('dashboardRootSlug', 'dashboard') . '/profile';
 
         $data = Hook::call(
             'expansa_dashboard_data',

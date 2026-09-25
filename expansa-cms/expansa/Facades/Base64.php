@@ -16,6 +16,6 @@ class Base64 extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Codecs\Base64';
+        return \Expansa\Codecs\Base64::class;
     }
 }

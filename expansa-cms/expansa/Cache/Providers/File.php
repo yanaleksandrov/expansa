@@ -25,7 +25,7 @@ class File implements Provider
     use Memoizes;
     use Serializes;
 
-    public function __construct(private readonly string $directory = EX_PATH . 'storage/cache/')
+    public function __construct(private readonly string $directory)
     {
     }
 

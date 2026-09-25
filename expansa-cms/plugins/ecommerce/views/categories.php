@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Builders\Form;
 
 /**
  * Attributes list
@@ -23,7 +22,7 @@ use Expansa\Builders\Form;
                 <div class="attributes-description">
                     <p><?php echo t('Product categories for your store can be managed here. To change the order of categories on the front-end you can drag and drop to sort them. Deleting a category does not delete the products in that category.'); ?></p>
                 </div>
-                <?php Form::make(EX_PLUGINS . 'ecommerce/core/categories.php', true); ?>
+                <?php echo form('attributes', EX_PLUGINS . 'ecommerce/core/categories.php'); ?>
             </div>
             <div class="attributes-side">
                 <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>

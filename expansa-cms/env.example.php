@@ -21,18 +21,6 @@ const EX_DB_LOGGING          = false;
 const EX_DB_ERROR_MODE       = PDO::ERRMODE_SILENT;
 
 /**
- * Constants for paths to Expansa directories.
- *
- * @since 2025.1
- */
-const EX_CORE      = __DIR__ . '/expansa/';
-const EX_DASHBOARD = __DIR__ . '/dashboard/';
-const EX_PLUGINS   = __DIR__ . '/plugins/';
-const EX_THEMES    = __DIR__ . '/themes/';
-const EX_STORAGE   = __DIR__ . '/storage/';
-const EX_I18N      = __DIR__ . '/i18n/';
-
-/**
  * Authentication unique keys and salts.
  *
  * You can change these at any point in time to invalidate all existing cookies.
@@ -40,9 +28,9 @@ const EX_I18N      = __DIR__ . '/i18n/';
  *
  * @since 2025.1
  */
-const EX_AUTH_KEY  = 'authkey';
-const EX_NONCE_KEY = 'noncekey';
-const EX_HASH_KEY  = 'hashkey';
+const EX_AUTH_KEY  = 'auth.key';
+const EX_NONCE_KEY = 'nonce.key';
+const EX_HASH_KEY  = 'hash.key';
 
 /**
  * Debug mode.
@@ -63,6 +51,8 @@ const EX_DEBUG_VIEW = EX_DASHBOARD . 'debug.php';
  * @const string EX_DKIM_IDENTITY           The identity for signing the email. Typically set to the 'From' address.
  * @const bool   EX_DKIM_COPY_HEADER_FIELDS Whether to include signed header fields in the DKIM signature.
  * @const array  EX_DKIM_EXTRA_HEADERS      Optional list of extra headers to sign with the DKIM signature.
+ *
+ * @since 2025.1
  */
 const EX_DKIM_DOMAIN             = 'example.com';
 const EX_DKIM_PRIVATE            = 'dkim_private.pem';

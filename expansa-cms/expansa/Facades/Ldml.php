@@ -16,6 +16,6 @@ class Ldml extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Codecs\Ldml';
+        return \Expansa\Codecs\Ldml::class;
     }
 }

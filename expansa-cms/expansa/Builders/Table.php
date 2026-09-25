@@ -18,6 +18,16 @@ use Expansa\Facades\Safe;
 abstract class Table extends TableBase
 {
     /**
+     * File that enqueues the items filter form, included by every table.
+     */
+    private static string $filter = '';
+
+    public static function configure(string $filter): void
+    {
+        self::$filter = $filter;
+    }
+
+    /**
      * Table constructor.
      *
      * @param array $data Data for rendering the table.
@@ -28,8 +38,9 @@ abstract class Table extends TableBase
         public array $cells = []
     )
     {
-        // include filter
-        require_once EX_DASHBOARD . 'forms/items-filter.php';
+        if (self::$filter !== '') {
+            require_once self::$filter;
+        }
 
         $this->data  = $this->data();
         $this->cells = $this->cells();

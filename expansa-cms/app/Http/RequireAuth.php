@@ -29,7 +29,7 @@ final class RequireAuth
 
     public function handle(): void
     {
-        if (in_array(Route::getCurrentUri(), self::PUBLIC_ROUTES, true)) {
+        if (in_array(Route::uri(), self::PUBLIC_ROUTES, true)) {
             return;
         }
 

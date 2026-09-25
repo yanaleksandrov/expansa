@@ -93,7 +93,7 @@ return Expansa\Facades\Form::enqueue(
 								'value'    => Options::get( 'site.language' ),
 								'u-select' => '{"showSearch": 1}',
 							],
-							'options' => I18n::getLanguagesOptions(),
+							'options' => I18n::languageOptions(),
 						],
 						[
 							'type'        => 'text',

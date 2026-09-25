@@ -17,6 +17,6 @@ class Validator extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Security\Validator';
+        return \Expansa\Security\Validator::class;
     }
 }

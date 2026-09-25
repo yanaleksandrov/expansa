@@ -23,6 +23,6 @@ class Log extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Log\Logger';
+        return \Expansa\Log\Logger::class;
     }
 }

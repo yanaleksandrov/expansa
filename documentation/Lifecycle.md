@@ -19,10 +19,10 @@
 ```
 index.php / artisan
 └─ bootstrap.php
-   ├─ константы, autoload.php
+   ├─ константы, env.php, autoload.php
+   ├─ functions.php                metrics() считает время от начала запроса
    ├─ Requirements::check()        старая версия PHP → страница ошибки (500) или текст в консоли
-   ├─ functions.php, env.php, metrics()->start()
-   ├─ $installed = Is::installed() вычисляется один раз
+   ├─ $isInstalled = Installation::isComplete() вычисляется один раз
    ├─ фазы
    │  ├─ boot          вывод ошибок в debug, maintenance.php, ленивые справочники
    │  ├─ configure     configs.php: слушатели хуков, поля форм, переводы
@@ -36,8 +36,8 @@ index.php / artisan
    │  ├─ auth          sign-in, sign-up, reset-password
    │  ├─ dashboard     /dashboard/...: проверка входа, ассеты, меню
    │  └─ web           всё остальное: главная и /installed, иначе 404
-   ├─ fallback         Route::run() (кроме cli)
-   ├─ catch            исключение из любого шага → Debug::render(), страница отладки
+   ├─ маршрутизация    Route::run() внутри Lifecycle::run() (кроме cli)
+   ├─ run(catch:)      исключение из любого шага → Debug::render(), страница отладки
    └─ terminate        хук после отправки ответа
 ```
 
@@ -48,25 +48,29 @@ index.php / artisan
 ```php
 use Expansa\Facades\Lifecycle;
 
-Lifecycle::phase('register', function () {
+Lifecycle::phase('register', $isInstalled, function () {
     require_once EX_PATH . 'register.php';
-}, fn () => $installed);
+});
 ```
 
-Третий аргумент необязателен: фаза выполняется, только если он вернул `true`. Так фазы, которым
-нужны `env.php` и база данных, пропускаются до установки. Пропущенная фаза не вызывает хуки и не
+Второй аргумент — условие, как у контекста: фаза выполняется, только если оно равно `true`. Так
+фазы, которым нужны `env.php` и база данных, пропускаются до установки. Пропущенная фаза не вызывает хуки и не
 попадает в таймлайн.
+
+Условие фазы или контекста — это готовый `bool` или callable. Callable нужен, только если значение
+неизвестно при объявлении: контекст проверяет URI или хук, который регистрируют расширения.
 
 | Фаза         | Что делает                                                     | Условие             |
 |--------------|----------------------------------------------------------------|---------------------|
 | `boot`       | Режим обслуживания, `Registry::lazy()` для справочников        | всегда              |
-| `configure`  | `Hook::configure()`, `Form::configure()`, `I18n::configure()`  | всегда              |
+| `configure`  | `configure()` пакетов: `Url`, `View`, `Hook`, `Form`, `I18n`…  | всегда              |
 | `register`   | Роли, типы постов (создают таблицы)                            | система установлена |
 | `extensions` | Загрузка расширений из опции `extensions.active`, `register()` | система установлена |
 | `booted`     | `boot()` всех расширений                                       | система установлена |
 
 Фазы `boot` и `configure` не должны обращаться к базе данных и константам из `env.php`: на
-свежей копии их ещё нет. Поэтому `I18n::configure()` выполняется, только если объявлен `EX_CORE`.
+свежей копии их ещё нет. Пути к папкам (`EX_CORE`, `EX_DASHBOARD`, `EX_PLUGINS`, `EX_THEMES`,
+`EX_STORAGE`, `EX_I18N`) объявлены в `bootstrap.php`, поэтому они доступны всегда.
 
 ## Контексты
 
@@ -182,16 +186,16 @@ return new class extends Plugin
 
 ## Ошибки
 
-`Lifecycle::catch()` получает исключение, выброшенное любым шагом. После него оставшиеся шаги не
-выполняются. Без обработчика исключение уходит дальше.
+Аргумент `catch` у `Lifecycle::run()` получает исключение, выброшенное любым шагом. После него
+оставшиеся шаги не выполняются. Без обработчика исключение уходит дальше.
 
 ```php
-Lifecycle::catch(fn (Throwable $e) => Debug::render($e, EX_PATH . 'dashboard/debug.php'));
+Lifecycle::run(catch: fn (Throwable $e) => Debug::render($e, EX_PATH . 'dashboard/debug.php'));
 ```
 
 ## Таймлайн
 
-Каждый выполненный шаг записывается в таймлайн: имя, тип (`phase`, `context`, `fallback`), время
+Каждый выполненный шаг записывается в таймлайн: имя, тип (`phase`, `context`, `route`), время
 в миллисекундах и прирост памяти в байтах. Шаг записывается, даже если он завершился
 редиректом, `exit` или исключением.
 
@@ -212,8 +216,15 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
 
 - **В `bootstrap.php` нет синтаксиса PHP 8.4.** Проверка версии PHP стоит в этом же файле, и на
   старом PHP он должен хотя бы разобраться, чтобы показать страницу требований. То же относится к
-  `autoload.php`, `App\Support\Requirements` и `dashboard/error.php`.
-- **`Is::installed()` вычисляется один раз**, в `$installed`: запрос установки меняет результат.
+  `env.php`, `autoload.php`, `expansa/functions.php`, `App\Support\Requirements` и `dashboard/error.php`.
+- **Фреймворк не знает про `app` и константы `EX_`.** Всё, что ему нужно от приложения (пути,
+  адрес сайта, соединение с базой, версия), приложение передаёт через `configure()` пакета с
+  именованными аргументами: `Db`, `Url`, `View`, `Extensions`, `Terminal`, `Table`, `I18n`, `Hook`,
+  `Form` — в фазе `configure`; `Is` — до фаз, потому что фаза `boot` читает `Is::debug()`.
+- **Установлено, если есть `env.php`.** Установщик пишет черновик `env.install.php` и переименовывает
+  его в `env.php` только после всех шагов, поэтому прерванная установка не оставляет `env.php`.
+  Проверка `Installation::isComplete()` не обращается к базе и вычисляется один раз, в `$isInstalled`:
+  запрос установки меняет результат.
 - **Объявления после старта запрещены.** Фазу или контекст нельзя объявить после
   `Lifecycle::run()`, повторный запуск и дубли имён выбрасывают `LifecycleException`.
 - **Ассеты дашборда подключаются через `DashboardAssets::enqueue()`**: он сам выбирает `.min` и

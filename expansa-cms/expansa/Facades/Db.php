@@ -8,6 +8,7 @@ use Expansa\Database\Exception\InvalidArgumentException;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Query\Raw;
 use Expansa\Patterns\Facade;
+use PDO;
 use PDOStatement;
 
 /**
@@ -48,33 +49,53 @@ class Db extends Facade
      */
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Database\Query\Builder';
+        return \Expansa\Database\Query\Builder::class;
     }
 
     /**
-     * Connection options read from the application's own env config - the one legitimate place
-     * this happens; everything downstream (Query\Builder and below) receives them as plain
-     * constructor arguments instead of reading the constants itself.
+     * @var array<string, mixed>
+     */
+    private static array $options = [];
+
+    /**
+     * Set the connection before the first query.
      *
+     * @param int $error PDO error mode, e.g. PDO::ERRMODE_SILENT.
+     */
+    public static function configure(
+        string $driver,
+        string $database,
+        string $username,
+        string $password,
+        string $host,
+        string $prefix = '',
+        string $charset = 'utf8mb4',
+        string $collation = 'utf8mb4_general_ci',
+        int|string $port = 3306,
+        bool $testMode = false,
+        int $error = PDO::ERRMODE_SILENT,
+    ): void {
+        self::$options = compact(
+            'driver',
+            'database',
+            'username',
+            'password',
+            'host',
+            'prefix',
+            'charset',
+            'collation',
+            'port',
+            'testMode',
+            'error',
+        );
+    }
+
+    /**
      * @return array{0: array<string, mixed>}
      */
     protected static function getConstructorArgs(): array
     {
-        return [
-            [
-                'driver'    => EX_DB_DRIVER,
-                'database'  => EX_DB_NAME,
-                'username'  => EX_DB_USERNAME,
-                'password'  => EX_DB_PASSWORD,
-                'host'      => EX_DB_HOST,
-                'prefix'    => EX_DB_PREFIX,
-                'charset'   => EX_DB_CHARSET,
-                'collation' => EX_DB_COLLATION,
-                'testMode'  => EX_DB_LOGGING,
-                'port'      => EX_DB_PORT,
-                'error'     => EX_DB_ERROR_MODE,
-            ],
-        ];
+        return [self::$options];
     }
 
     /**

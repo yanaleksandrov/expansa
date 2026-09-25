@@ -23,6 +23,6 @@ class Cache extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Cache\Providers\Memory';
+        return \Expansa\Cache\Providers\Memory::class;
     }
 }

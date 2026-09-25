@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Builders\Form;
 
 /**
  * Attributes list
@@ -24,7 +23,7 @@ use Expansa\Builders\Form;
                 <div class="attributes-description">
                     <p><?php echo t('Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.'); ?></p>
                 </div>
-                <?php Form::make(EX_PLUGINS . 'ecommerce/core/attributes.php', true); ?>
+                <?php echo form('attribute-editor', EX_PLUGINS . 'ecommerce/core/attributes.php'); ?>
             </div>
             <div class="attributes-side">
                 <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>

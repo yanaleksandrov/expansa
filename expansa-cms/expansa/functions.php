@@ -42,7 +42,7 @@ if (! function_exists('root')) {
      */
     function root(string $string): string
     {
-        return EX_PATH . $string;
+        return Expansa\Support\Url::toPath($string);
     }
 }
 
@@ -111,7 +111,7 @@ if (! function_exists('form')) {
         if (is_file($path)) {
             require_once $path;
         }
-        return new Expansa\Builders\Form()->make($uid);
+        return Expansa\Facades\Form::render($uid);
     }
 }
 

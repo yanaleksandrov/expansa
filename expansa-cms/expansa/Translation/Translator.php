@@ -38,6 +38,11 @@ class Translator extends Locale
     protected static string $pattern = '';
 
     /**
+     * Directory with translation overrides, e.g. edited in the dashboard.
+     */
+    protected static string $overrides = '';
+
+    /**
      * Translates a given string based on the current locale. The method checks for
      * a corresponding translation in a locale-specific JSON file. If a translation
      * exists, it returns the translated string; otherwise, it returns the original string.
@@ -88,7 +93,7 @@ class Translator extends Locale
                         $targetDir = $element . DIRECTORY_SEPARATOR . str_replace(':dirname', $directory, $targetDir);
                     }
 
-                    $override[ $source ] ??= sprintf('%s%s/%s.json', EX_I18N, $targetDir, $this->getLocale());
+                    $override[ $source ] ??= sprintf('%s%s/%s.json', self::$overrides, $targetDir, $this->getLocale());
                     $routes[ $source ]   ??= sprintf('%s/%s.json', $targetRoute, $filename);
                 }
 
@@ -300,11 +305,12 @@ class Translator extends Locale
      *
      * @param array $routes
      * @param string $pattern
+     * @param string $overrides Directory with translation overrides.
      * @return void
      */
-    public function configure(array $routes, string $pattern): void
+    public function configure(array $routes, string $pattern, string $overrides = ''): void
     {
-        [ self::$routes, self::$pattern ] = [ $routes, $pattern ];
+        [ self::$routes, self::$pattern, self::$overrides ] = [ $routes, $pattern, $overrides ];
     }
 
     /**
@@ -325,9 +331,9 @@ class Translator extends Locale
      * @param string $getBy
      * @return array
      */
-    public function getLanguage(string $value, string $getBy = 'locale'): array
+    public function language(string $value, string $getBy = 'locale'): array
     {
-        $languages = self::getLanguages();
+        $languages = self::languages();
 
         foreach ($languages as $language) {
             if (isset($language[ $getBy ]) && $language[ $getBy ] === $value) {
@@ -343,10 +349,10 @@ class Translator extends Locale
      *
      * @return array
      */
-    public function getLanguagesOptions(): array
+    public function languageOptions(): array
     {
         $options   = [];
-        $languages = self::getLanguages();
+        $languages = self::languages();
 
         foreach ($languages as $language) {
             $key  = $language['locale'] ?? $language['iso_639_1'];
@@ -366,7 +372,7 @@ class Translator extends Locale
      *
      * @return array
      */
-    public function getLanguages(): array
+    public function languages(): array
     {
         return Hook::call('i18n_get_languages', [
             [

@@ -175,8 +175,8 @@ abstract class BuilderAbstract
     /**
      * Longest string a CHAR/VARCHAR/TEXT column can be indexed over in utf8mb4 without the
      * index itself exceeding InnoDB's key-prefix limit: 3072 bytes ÷ 4 bytes/char (utf8mb4's
-     * max) = 768. Safe for every database version this framework requires (see
-     * EX_REQUIRED_MYSQL_VERSION) - MySQL 8.0+/MariaDB 10.2+ both default to the DYNAMIC row
+     * max) = 768. Safe for every database version this framework requires -
+     * MySQL 8.0+/MariaDB 10.2+ both default to the DYNAMIC row
      * format, where that 3072-byte prefix is always available, not the older 767-byte one.
      *
      * A framework-owned constant, not read from the application's own config: it's a fact

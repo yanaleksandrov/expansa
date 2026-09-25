@@ -2,9 +2,14 @@
 
 declare(strict_types=1);
 
-// Load order: environment → phases → first matching context → fallback. See documentation/Lifecycle.md.
-// No PHP 8.4 syntax in this file: on an older PHP it must still parse to show the requirements page.
+/**
+ * Core load order, top to bottom: 1. environment, 2. phases, 3. contexts (first match only), 4. run.
+ * No PHP 8.4 syntax in this file: on an older PHP it must still parse to show the requirements page.
+ *
+ * @see documentation/Lifecycle.md
+ */
 
+use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
 use Expansa\Facades\Extensions;
 use Expansa\Facades\Form;
@@ -14,12 +19,16 @@ use Expansa\Facades\Lifecycle;
 use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Terminal;
+use Expansa\Facades\View;
 use Expansa\Patterns\Registry;
 use Expansa\Support\Is;
+use Expansa\Support\Url;
 
-// =============================================================================
-// 1. Environment
-// =============================================================================
+/**
+ * 1. Environment
+ *
+ * Constants, env.php, autoload and helpers, then the PHP check and the settings the phases need first.
+ */
 
 const EX_PATH                   = __DIR__ . '/';
 const EX_VERSION                = '2025.6';
@@ -27,29 +36,46 @@ const EX_REQUIRED_PHP_VERSION   = '8.4';
 const EX_REQUIRED_MYSQL_VERSION = '8.0';
 const EX_REQUIRED_MEMORY        = 128;
 
-require_once EX_PATH . 'autoload.php';
-
-// stops with an error page before any PHP 8.4 code is parsed
-App\Support\Requirements::check();
-
-require_once EX_PATH . 'expansa/functions.php';
+// the code layout, the same for every installation, so env.php can already use it
+const EX_CORE      = EX_PATH . 'expansa/';
+const EX_DASHBOARD = EX_PATH . 'dashboard/';
+const EX_PLUGINS   = EX_PATH . 'plugins/';
+const EX_THEMES    = EX_PATH . 'themes/';
+const EX_STORAGE   = EX_PATH . 'storage/';
+const EX_I18N      = EX_PATH . 'i18n/';
 
 // missing on a fresh copy until the installer creates it
 if (is_file(EX_PATH . 'env.php')) {
     require_once EX_PATH . 'env.php';
 }
 
-metrics()->start();
+require_once EX_PATH . 'autoload.php';
+require_once EX_PATH . 'expansa/functions.php';
 
-// computed once: the install request itself changes the result
-$installed = Is::installed();
+// stops with an error page before any PHP 8.4 code is parsed: everything above must stay free of it
+App\Support\Requirements::check();
 
-// =============================================================================
-// 2. Phases: run on every request in declaration order
-// =============================================================================
+// needed before the phases: boot reads Is::debug()
+Is::configure(
+    debug: defined('EX_DEBUG') && EX_DEBUG === true
+);
 
-// ---- boot: always -----------------------------------------------------------
-Lifecycle::phase('boot', function () {
+// computed once: the installation request itself changes the result
+$isInstalled = App\Support\Installation::isComplete();
+
+/**
+ * 2. Phases
+ *
+ * Every request, in declaration order; the ones bound to $isInstalled are skipped before install.
+ */
+
+/**
+ * 1. boot · always.
+ *
+ * Turns on error output in debug mode and stops on maintenance.php, if it exists.
+ * Registers the default data (countries, timezones, languages), loaded on first Registry::get().
+ */
+Lifecycle::phase('boot', true, function () {
     if (Is::debug()) {
         ini_set('error_reporting', E_ALL);
         ini_set('display_errors', 1);
@@ -66,12 +92,78 @@ Lifecycle::phase('boot', function () {
     }
 });
 
-// ---- configure: always, no database -----------------------------------------
-Lifecycle::phase('configure', function () {
-    Hook::configure(EX_PATH . 'app/Listeners');
+/**
+ * 2. configure · always, also before install, so no database queries here.
+ *
+ * Passes the database, site URL, views, extensions root, console version and table filter to the framework,
+ * then the translations priority, the hook listener classes and the form field types.
+ */
+Lifecycle::phase('configure', true, function () {
+    // the connection from env.php; nothing to connect to before install
+    if (defined('EX_DB_DRIVER')) {
+        Db::configure(
+            driver: EX_DB_DRIVER,
+            database: EX_DB_NAME,
+            username: EX_DB_USERNAME,
+            password: EX_DB_PASSWORD,
+            host: EX_DB_HOST,
+            prefix: EX_DB_PREFIX,
+            charset: EX_DB_CHARSET,
+            collation: EX_DB_COLLATION,
+            port: EX_DB_PORT,
+            testMode: EX_DB_LOGGING,
+            error: EX_DB_ERROR_MODE,
+        );
+    }
 
+    // the site URL is read from the options only once there is a database to read it from
+    Url::configure(
+        root: EX_PATH,
+        site: defined('EX_DB_DRIVER') ? fn () => App\Models\Options::get('site.url') : null,
+    );
+
+    // views of the dashboard, installer and auth pages
+    View::configure(
+        viewsPath: EX_PATH . 'dashboard/views',
+        cachePath: EX_PATH . 'cache/views',
+    );
+
+    // extension ids like "plugins/seo" are relative to it
+    Extensions::configure(
+        root: EX_PATH
+    );
+
+    // the version shown by the "list" console command
+    Terminal::configure(version: EX_VERSION);
+
+    // every dashboard table renders the items filter form
+    Expansa\Builders\Table::configure(
+        filter: EX_DASHBOARD . 'forms/items-filter.php'
+    );
+
+    // translations lookup priority
+    I18n::configure(
+        routes: [
+            EX_CORE      => EX_DASHBOARD,
+            EX_DASHBOARD => EX_DASHBOARD,
+            EX_PLUGINS   => EX_PLUGINS . ':dirname',
+            EX_THEMES    => EX_THEMES . ':dirname',
+        ],
+        pattern: 'i18n/%s',
+        overrides: EX_I18N,
+    );
+
+    // a new listener class has to be added here
+    Hook::configure(
+        listeners: [
+            App\Listeners\Assets::class,
+            App\Listeners\Migrations::class,
+        ],
+    );
+
+    // form fields: input types, basic fields, composite fields
     Form::configure(
-        [
+        fields: [
             'text'            => Expansa\Builders\Forms\Fields\Input::class,
             'color'           => Expansa\Builders\Forms\Fields\Input::class,
             'date'            => Expansa\Builders\Forms\Fields\Input::class,
@@ -113,86 +205,96 @@ Lifecycle::phase('configure', function () {
             'gallery'         => Expansa\Builders\Forms\Fields\Gallery::class,
             'repeater'        => Expansa\Builders\Forms\Fields\Repeater::class,
             'message'         => Expansa\Builders\Forms\Fields\Message::class,
-        ]
+        ],
     );
-
-    // translation lookup priority; the paths come from env.php, missing before install
-    if (defined('EX_CORE')) {
-        I18n::configure(
-            [
-                EX_CORE      => EX_DASHBOARD,
-                EX_DASHBOARD => EX_DASHBOARD,
-                EX_PLUGINS   => EX_PLUGINS . ':dirname',
-                EX_THEMES    => EX_THEMES . ':dirname',
-            ],
-            'i18n/%s'
-        );
-    }
 });
 
-// ---- register: installed only, creates missing tables -----------------------
-Lifecycle::phase('register', function () {
-    App\User\Roles::register('admin', t('Administrator'), [
-        'read',
-        'files_upload',
-        'files_edit',
-        'files_delete',
-        'types_publish',
-        'types_edit',
-        'types_delete',
-        'other_types_publish',
-        'other_types_edit',
-        'other_types_delete',
-        'private_types_publish',
-        'private_types_edit',
-        'private_types_delete',
-        'manage_comments',
-        'manage_options',
-        'manage_update',
-        'manage_import',
-        'manage_export',
-        'themes_install',
-        'themes_switch',
-        'themes_delete',
-        'plugins_install',
-        'plugins_activate',
-        'plugins_delete',
-        'users_create',
-        'users_edit',
-        'users_delete',
-    ]);
+/**
+ * 3. register · installed only: needs env.php and the database.
+ *
+ * Registers the default roles (admin, editor, author, subscriber) and post types
+ * (pages, files, api-keys); post types create their missing tables.
+ */
+Lifecycle::phase('register', $isInstalled, function () {
+    // roles
+    App\User\Roles::register(
+        role: 'admin',
+        displayName: t('Administrator'),
+        capabilities: [
+            'read',
+            'files_upload',
+            'files_edit',
+            'files_delete',
+            'types_publish',
+            'types_edit',
+            'types_delete',
+            'other_types_publish',
+            'other_types_edit',
+            'other_types_delete',
+            'private_types_publish',
+            'private_types_edit',
+            'private_types_delete',
+            'manage_comments',
+            'manage_options',
+            'manage_update',
+            'manage_import',
+            'manage_export',
+            'themes_install',
+            'themes_switch',
+            'themes_delete',
+            'plugins_install',
+            'plugins_activate',
+            'plugins_delete',
+            'users_create',
+            'users_edit',
+            'users_delete',
+        ],
+    );
 
-    App\User\Roles::register('editor', t('Editor'), [
-        'read',
-        'files_upload',
-        'files_edit',
-        'files_delete',
-        'types_publish',
-        'types_edit',
-        'types_delete',
-        'other_types_publish',
-        'other_types_edit',
-        'other_types_delete',
-        'private_types_publish',
-        'private_types_edit',
-        'private_types_delete',
-        'manage_comments',
-    ]);
+    App\User\Roles::register(
+        role: 'editor',
+        displayName: t('Editor'),
+        capabilities: [
+            'read',
+            'files_upload',
+            'files_edit',
+            'files_delete',
+            'types_publish',
+            'types_edit',
+            'types_delete',
+            'other_types_publish',
+            'other_types_edit',
+            'other_types_delete',
+            'private_types_publish',
+            'private_types_edit',
+            'private_types_delete',
+            'manage_comments',
+        ],
+    );
 
-    App\User\Roles::register('author', t('Author'), [
-        'read',
-        'files_upload',
-        'files_edit',
-        'files_delete',
-        'types_publish',
-        'types_edit',
-        'types_delete',
-    ]);
+    App\User\Roles::register(
+        role: 'author',
+        displayName: t('Author'),
+        capabilities: [
+            'read',
+            'files_upload',
+            'files_edit',
+            'files_delete',
+            'types_publish',
+            'types_edit',
+            'types_delete',
+        ],
+    );
 
-    App\User\Roles::register('subscriber', t('Subscriber'), [
-        'read',
-    ]);
+    App\User\Roles::register(
+        role: 'subscriber',
+        displayName: t('Subscriber'),
+        capabilities: [
+            'read',
+        ],
+    );
 
+    // post types
     App\Post\Type::register(
         key: 'pages',
         labelName: t('Page'),
@@ -261,34 +363,57 @@ Lifecycle::phase('register', function () {
         menuIcon: 'ph ph-key',
         menuPosition: 30,
     );
-}, fn () => $installed);
-
-// ---- extensions: installed only ---------------------------------------------
-Lifecycle::phase('extensions', function () {
-    // ids like "plugins/seo"
-    Extensions::enqueue(fn () => Extensions::paths((array) App\Models\Options::get('extensions.active', [])));
-    Extensions::register('plugin');
-    Extensions::register('theme');
-}, fn () => $installed);
-
-// ---- booted: installed only, every extension is registered ------------------
-Lifecycle::phase('booted', function () {
-    Extensions::boot('plugin');
-    Extensions::boot('theme');
-}, fn () => $installed);
-
-// =============================================================================
-// 3. Contexts: only the first match runs, so the order matters
-// =============================================================================
-
-// ---- cli --------------------------------------------------------------------
-Lifecycle::context('cli', fn () => PHP_SAPI === 'cli', function () {
-    Terminal::handle();
 });
 
-// ---- api --------------------------------------------------------------------
-// before install: the installer calls system/test and system/install
+/**
+ * 4. extensions · installed only.
+ *
+ * Loads the active plugins & themes listed in the "extensions.active" option (ids like "plugins/seo")
+ * and calls register() on each: plugins first, then themes.
+ */
+Lifecycle::phase('extensions', $isInstalled, function () {
+    Extensions::load(
+        ids: (array) App\Models\Options::get('extensions.active', []),
+    );
+    Extensions::register('plugin');
+    Extensions::register('theme');
+});
+
+/**
+ * 5. booted · installed only.
+ *
+ * Every extension is registered, so boot() runs on plugins, then themes.
+ * From here Is::dashboard() and other context checks are available.
+ */
+Lifecycle::phase('booted', $isInstalled, function () {
+    Extensions::boot('plugin');
+    Extensions::boot('theme');
+});
+
+/**
+ * 3. Contexts
+ *
+ * After the phases only the first match runs, so the order matters.
+ */
+
+/**
+ * 1. cli · console, run through artisan.
+ *
+ * The terminal runs the requested command and prints its output.
+ * No routing: run() skips it in the console.
+ */
+Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
+    Terminal::run();
+});
+
+/**
+ * 2. api · URI starts with /api/, declared before install: the installer calls system/test and system/install.
+ *
+ * Adds the JSON header, the CSRF check for mutating methods and the auth check, then the routes:
+ * SystemController through Router::register(), the other controllers as POST /{controller}/{method}.
+ */
 Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), function () {
+    // middlewares, run in this order
     Route::before('*', '/api/.*', function () {
         header('Content-Type: application/json; charset=utf-8');
     });
@@ -299,6 +424,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
     // RequireAuth has its own allow-list: system/test, system/install, user/sign-in, user/sign-up, user/reset-password
     Route::before('*', '/api/.*', [App\Http\RequireAuth::class, 'handle']);
 
+    // routes
     Route::prefix('/api', function () {
         // reference implementation: routes derived by Router::register() (POST /system/test, POST /system/install)
         Route::register(App\Api\System\SystemController::class, [App\Http\Kernel::class, 'dispatch']);
@@ -333,15 +459,24 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
     });
 });
 
-// ---- install ----------------------------------------------------------------
-// until installed, every other page shows the installer
-Lifecycle::context('install', fn () => !$installed, function () {
+/**
+ * 3. install · not installed yet.
+ *
+ * Every page except the API shows the installer: its assets come from dashboard/install.php,
+ * the page from Web::install().
+ */
+Lifecycle::context('install', !$isInstalled, function () {
     require_once EX_PATH . 'dashboard/install.php';
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'install']);
 });
 
-// ---- auth -------------------------------------------------------------------
+/**
+ * 4. auth · sign-in, sign-up and reset-password pages.
+ *
+ * A logged-in user goes straight to the dashboard. Otherwise, dashboard/auth.php enqueues
+ * only the assets the auth forms need, without the admin panel.
+ */
 Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-in', 'sign-up', 'reset-password'], true), function () {
     if (App\Models\User::isLogged()) {
         redirect('dashboard');
@@ -352,8 +487,12 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
 
-// ---- dashboard --------------------------------------------------------------
-// the slug can be changed with the "dashboardRootSlug" hook
+/**
+ * 5. dashboard · URI starts with the dashboard slug.
+ *
+ * The slug is "dashboard" by default, changed with the "dashboardRootSlug" hook. A guest is redirected
+ * to sign-in, otherwise dashboard/index.php enqueues the assets and menus, the page comes from Web::index().
+ */
 Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '/'), Hook::call('dashboardRootSlug', 'dashboard')), function () {
     if (! App\Models\User::isLogged()) {
         redirect('sign-in');
@@ -364,22 +503,24 @@ Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
 
-// ---- web: everything else ---------------------------------------------------
-Lifecycle::context('web', fn () => true, function () {
+/**
+ * 6. web · everything else.
+ *
+ * The public site: the home page and /installed through Web::index(), otherwise 404.
+ */
+Lifecycle::context('web', true, function () {
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
 
-// =============================================================================
-// 4. Run: fallback after the context, errors from any step go to the debug page
-// =============================================================================
+/**
+ * 4. Run
+ *
+ * Phases, the matched context, then its routes (not in the console).
+ * Errors from any step go to the debug page.
+ */
+Lifecycle::run(catch: function (Throwable $e) {
+    // EX_DEBUG_VIEW comes from env.php, which may be missing
+    $view = defined('EX_DEBUG_VIEW') ? EX_DEBUG_VIEW : EX_PATH . 'dashboard/debug.php';
 
-Lifecycle::fallback(function () {
-    if (! Lifecycle::is('cli')) {
-        Route::run();
-    }
+    Debug::render($e, $view);
 });
-
-// EX_DEBUG_VIEW comes from env.php, which may not exist yet
-Lifecycle::catch(fn (Throwable $e) => Debug::render($e, defined('EX_DEBUG_VIEW') ? EX_DEBUG_VIEW : EX_PATH . 'dashboard/debug.php'));
-
-Lifecycle::run();

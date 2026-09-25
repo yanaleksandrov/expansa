@@ -328,7 +328,7 @@ return \Expansa\Facades\Form::enqueue(
                         'u-select' => '{"showSearch": 1}',
                         'required' => true,
                     ],
-                    'options'     => Expansa\Facades\I18n::getLanguagesOptions(),
+                    'options'     => Expansa\Facades\I18n::languageOptions(),
                 ],
                 [
                     'type'        => 'text',

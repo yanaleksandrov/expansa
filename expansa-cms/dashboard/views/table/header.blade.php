@@ -135,7 +135,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                 'u-select' => '',
                                 'name' => 'language',
                             ],
-                            'options' => I18n::getLanguagesOptions(),
+                            'options' => I18n::languageOptions(),
                         ]
                     );
 
@@ -210,5 +210,5 @@ $themes  = Expansa\Facades\Extensions::get('theme');
         <?php endif; ?>
     </div>
 </div>
-<?php //Dashboard\Form::make( 'items-filter' ); ?>
+<?php //Dashboard\Form::render( 'items-filter' ); ?>
 <?php $content && print($content . PHP_EOL); ?>

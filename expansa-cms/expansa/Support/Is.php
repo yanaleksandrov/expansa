@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use App\Models\Options;
 use DateTime;
-use Expansa\Facades\Db;
 use Expansa\Facades\Lifecycle;
 
 /**
@@ -15,6 +13,18 @@ use Expansa\Facades\Lifecycle;
  */
 final class Is
 {
+    private static bool $debug = false;
+
+    private static bool $ajax = false;
+
+    /**
+     * Set the application state the checks below report.
+     */
+    public static function configure(bool $debug = false, bool $ajax = false): void
+    {
+        [self::$debug, self::$ajax] = [$debug, $ajax];
+    }
+
     /**
      * Checks whether the given string is a valid email address.
      *
@@ -150,26 +160,7 @@ final class Is
      */
     public static function debug(): bool
     {
-        return defined('EX_DEBUG') && EX_DEBUG === true;
-    }
-
-    /**
-     * Checks whether the database is installed.
-     *
-     * @return bool True if Expansa is installed.
-     */
-    public static function installed(): bool
-    {
-        if (! defined('EX_PATH') || ! file_exists(EX_PATH . 'env.php')) {
-            return false;
-        }
-
-        $schema = Db::schema();
-        if (empty($schema)) {
-            return false;
-        }
-
-        return isset($schema[ EX_DB_PREFIX . 'options' ]) && ! empty(Options::get('site.url'));
+        return self::$debug;
     }
 
     /**
@@ -179,7 +170,7 @@ final class Is
      */
     public static function ajax(): bool
     {
-        return defined('EX_DOING_AJAX') && EX_DOING_AJAX === true;
+        return self::$ajax;
     }
 
     /**

@@ -46,18 +46,18 @@ class Index extends Command
 
 		EOT;
 
-        $version = EX_VERSION;
+        $version = $this->console?->version();
         $year    = date('Y');
 
         $this->info("[green]#$text#Program version: [green]#$version# | © 2024-$year «expansa.com»" . PHP_EOL);
 
-        if ($this->console->getOption('g')) {
+        if ($this->console->option('g')) {
             $this->info(t('Hello, friend!'));
         }
 
         $groupDefault = [];
         $groups = [];
-        foreach ($this->console->getCommands() as $name => $command) {
+        foreach ($this->console->commands() as $name => $command) {
             $group = $command->getGroup();
             if ($group === null) {
                 $groupDefault[$name] = $command;

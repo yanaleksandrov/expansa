@@ -16,6 +16,6 @@ class Mail extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Mail\Mailer';
+        return \Expansa\Mail\Mailer::class;
     }
 }

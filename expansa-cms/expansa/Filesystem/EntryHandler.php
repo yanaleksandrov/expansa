@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Filesystem;
 
 use Expansa\Filesystem\Traits\Entry;
+use Expansa\Support\Url;
 
 class EntryHandler
 {
@@ -110,7 +111,7 @@ class EntryHandler
      */
     protected function getUrl(): string
     {
-        return url(str_replace(EX_PATH, '', $this->path));
+        return Url::toUrl($this->path);
     }
 
     /**

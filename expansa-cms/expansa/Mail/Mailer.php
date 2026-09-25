@@ -8,9 +8,9 @@ use Expansa\Facades\Hook;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
-require_once EX_CORE . 'Mail/PHPMailer/Exception.php';
-require_once EX_CORE . 'Mail/PHPMailer/PHPMailer.php';
-require_once EX_CORE . 'Mail/PHPMailer/SMTP.php';
+require_once __DIR__ . '/PHPMailer/Exception.php';
+require_once __DIR__ . '/PHPMailer/PHPMailer.php';
+require_once __DIR__ . '/PHPMailer/SMTP.php';
 
 /**
  * Class Mailer

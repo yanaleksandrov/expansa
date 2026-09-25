@@ -16,6 +16,6 @@ class Marshal extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Codecs\Marshal';
+        return \Expansa\Codecs\Marshal::class;
     }
 }

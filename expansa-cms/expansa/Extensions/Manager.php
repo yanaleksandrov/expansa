@@ -15,11 +15,24 @@ class Manager
     public static array $extensions = [];
 
     /**
+     * Directory the extension ids are relative to, with a trailing slash.
+     */
+    private static string $root = '';
+
+    /**
      * Get extensions list.
      *
      * @param string $type
      * @return array
      */
+    /**
+     * Set the directory that holds the "plugins" and "themes" folders.
+     */
+    public function configure(string $root): void
+    {
+        self::$root = rtrim($root, '/\\') . '/';
+    }
+
     public function get(string $type): array
     {
          return self::$extensions[$type] ?? [];
@@ -110,18 +123,18 @@ class Manager
     }
 
     /**
-     * Entry files of extensions by id, e.g. "plugins/seo" => EX_PATH . "plugins/seo/index.php".
+     * Entry files of extensions by id, e.g. "plugins/seo" => "{root}plugins/seo/index.php".
      * Ids other than "plugins/{dir}" or "themes/{dir}" are ignored, so a stored list can't point elsewhere.
      *
      * @param array $ids
      * @return string[]
      */
-    public function paths(array $ids): array
+    private function paths(array $ids): array
     {
         $paths = [];
         foreach ($ids as $id) {
             if (is_string($id) && preg_match('#^(plugins|themes)/[a-z0-9_-]+$#i', $id)) {
-                $paths[] = EX_PATH . "$id/index.php";
+                $paths[] = self::$root . "$id/index.php";
             }
         }
 
@@ -129,19 +142,14 @@ class Manager
     }
 
     /**
-     * Enqueue extensions from paths.
+     * Load the extensions by id, e.g. "plugins/seo"; ids other than "plugins/{dir}" or "themes/{dir}" are ignored.
      *
-     * @param callable $callback Callback function used for get plugins paths.
+     * @param string[] $ids
      * @return void
      */
-    public function enqueue(callable $callback): void
+    public function load(array $ids): void
     {
-        $paths = call_user_func($callback);
-        if (!is_array($paths)) {
-            return;
-        }
-
-        foreach ($paths as $path) {
+        foreach ($this->paths($ids) as $path) {
             if (! is_file($path)) {
                 continue;
             }
@@ -165,7 +173,7 @@ class Manager
 
             }
 
-            $extension->id   = dirname(str_replace(EX_PATH, '', $path));
+            $extension->id   = dirname(str_replace(self::$root, '', $path));
             $extension->path = $path;
 
             self::$extensions[$extension->type][] = $extension;

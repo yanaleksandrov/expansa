@@ -6,9 +6,10 @@ namespace Expansa\Assets;
 
 use Closure;
 use Expansa\Assets\Abstracts\Provider;
-use Expansa\Assets\Support\AssetHandler;
 use Expansa\Assets\Providers\Link;
 use Expansa\Assets\Providers\Script;
+use Expansa\Assets\Support\AssetHandler;
+use Expansa\Support\Url;
 use InvalidArgumentException;
 
 /**
@@ -491,7 +492,7 @@ class Manager
      */
     public static function clean(int $maxAge = 604800, ?int $maxBytes = null): int
     {
-        $dir = rtrim(EX_PATH, '/\\') . '/cache/assets';
+        $dir = Url::toPath('cache/assets');
 
         if (! is_dir($dir)) {
             return 0;
