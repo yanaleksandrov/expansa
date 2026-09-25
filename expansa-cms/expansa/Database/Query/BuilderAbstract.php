@@ -1102,7 +1102,8 @@ abstract class BuilderAbstract
                         'Number' => (float) $item,
                         'Int'    => (int) $item,
                         'Bool'   => (bool) $item,
-                        'Object' => unserialize($item),
+                        // the builder writes only arrays here; restoring classes would allow object injection
+                        'Object' => unserialize($item, ['allowed_classes' => false]),
                         'JSON'   => json_decode($item, true),
                         'String' => (string) $item,
                         default  => $item,

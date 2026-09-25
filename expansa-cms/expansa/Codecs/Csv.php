@@ -278,12 +278,15 @@ class Csv
      */
     private function resolveEncoding(string $encoding): string
     {
+        // iconv reports an unknown encoding only by a warning; a handler, as custom handlers get @-silenced ones
+        set_error_handler(static fn (): bool => true);
         try {
             mb_convert_encoding('', 'UTF-8', $encoding);
-            // iconv has no list of encodings: an unsupported one is reported only by a warning
-            $supported = @iconv($encoding, 'UTF-8', '') !== false; // phpcs:ignore Generic.PHP.NoSilencedErrors
+            $supported = iconv($encoding, 'UTF-8', '') !== false;
         } catch (ValueError) {
             $supported = false;
+        } finally {
+            restore_error_handler();
         }
 
         if (! $supported) {
