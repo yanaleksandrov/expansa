@@ -96,14 +96,15 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                     ?>
                 </div>
             <?php endif; ?>
+
             <?php if ($uploader) : ?>
-            <div class="df aic g-1">
-                <button class="btn btn--sm btn--outline"
-                        @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
-                    <i class="ph ph-upload-simple"></i> <?php echo t('Add new file'); ?>
-                </button>
-            </div>
+                <div class="df aic g-1">
+                    <button class="btn btn--sm btn--outline" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
+                        <i class="ph ph-upload-simple"></i> <?php echo t('Add new file'); ?>
+                    </button>
+                </div>
             <?php endif; ?>
+
             <?php if ($translation) : ?>
             <div class="df aic g-2">
                 <div class="df aic g-1">

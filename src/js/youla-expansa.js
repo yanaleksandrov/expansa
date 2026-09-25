@@ -366,8 +366,13 @@ document.addEventListener('youla:init', ()=> {
 
                     const isBase = this.stack.length === 0;
 
+                    // "id"/"content" go last so they always win: a caller's own data can freely
+                    // include a same-named field (e.g. opening with a Post - which always has its
+                    // own "id" and "content" - would otherwise silently clobber this entry's real
+                    // id and, worse, wipe out the dialog's actual markup with the post's own,
+                    // usually-empty "content" field).
                     // u-each (parts/footer.html) initializes each entry itself, wiring up the template's own "@click".
-                    this.stack.push({ id: ++uid, content: template.innerHTML, ...data });
+                    this.stack.push({ ...data, id: ++uid, content: template.innerHTML });
 
                     // Only the base dialog locks scroll — a nested call would read scrollY as 0 (already frozen).
                     if (isBase) {

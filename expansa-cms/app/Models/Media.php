@@ -6,11 +6,11 @@ namespace App\Models;
 
 use App\Query\Query;
 use App\Url;
-use Exception;
-use Expansa\Error;
+use Expansa\Debug\Error;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Image;
 use Expansa\Facades\Safe;
+use Expansa\Filesystem\MimeType;
 use Expansa\Patterns;
 
 /**
@@ -109,24 +109,129 @@ class Media
      *
      * @param array $file Array that represents a `$_FILES` upload array.
      * @return Error|int
-     * @throws Exception
      */
     public static function upload(array $file): int|Error
     {
-        $filepath = EX_STORAGE . 'i/original/' . ($file['name'] ?? '');
+        if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || empty($file['tmp_name'])) {
+            return new Error('media_upload', t('An error occurred while uploading the file, please try again.'));
+        }
 
-        // upload original image
-        print_r($file);
-        print_r($file['tmp_name']);
-        print_r($filepath);
-        $originalFile = Disk::file($filepath)->upload($file);
-        exit;
+        $mime = self::mimeFromFilename($file['name'] ?? '');
+        if (! $mime) {
+            return new Error('media_upload', t('Sorry, you are not allowed to upload this file type.'));
+        }
+
+        $directory = EX_STORAGE . 'i/original/';
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true)) {
+            return new Error('media_upload', t('Failed to create the uploads directory.'));
+        }
+
+        $basename = self::uniqueBasename($directory, self::sanitizeFilename($file['name'] ?? ''));
+        if (! $basename) {
+            return new Error('media_upload', t('File name must not contain illegal characters and must not be empty.'));
+        }
+
+        $filepath = $directory . $basename;
+        if (! move_uploaded_file($file['tmp_name'], $filepath)) {
+            return new Error('media_upload', t('Something went wrong, upload is failed.'));
+        }
+
+        return self::finalize($filepath, $basename, $mime);
+    }
+
+    /**
+     * Downloads a file from an external URL into the Expansa downloads folder and adds it to the library.
+     *
+     * @param string $url External file URL.
+     * @return Error|int
+     */
+    public static function grab(string $url): int|Error
+    {
+        if (! filter_var($url, FILTER_VALIDATE_URL)) {
+            return new Error('media_grab', t('The file cannot be grabbed because the URL is not valid.'));
+        }
+
+        $basename = self::sanitizeFilename(basename((string) parse_url($url, PHP_URL_PATH)));
+        $mime     = self::mimeFromFilename($basename);
+        if (! $basename || ! $mime) {
+            return new Error('media_grab', t('The file cannot be grabbed because it does not contain a valid extension.'));
+        }
+
+        $directory = EX_STORAGE . 'i/original/';
+        if (! is_dir($directory) && ! mkdir($directory, 0755, true)) {
+            return new Error('media_grab', t('Failed to create the uploads directory.'));
+        }
+
+        $basename = self::uniqueBasename($directory, $basename);
+        $filepath = $directory . $basename;
+
+        $handle = fopen($filepath, 'wb');
+        $ch     = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_FILE           => $handle,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $downloaded = curl_exec($ch);
+        $curlError  = curl_error($ch);
+        curl_close($ch);
+        fclose($handle);
+
+        if (! $downloaded) {
+            @unlink($filepath);
+            return new Error('media_grab', $curlError ?: t('Something went wrong when uploading the file.'));
+        }
+
+        return self::finalize($filepath, $basename, $mime);
+    }
+
+    /**
+     * Removes a media file (and its resized variants) and its library entry.
+     *
+     * @param int $id
+     * @return bool
+     */
+    public static function delete(int $id): bool
+    {
+        $post = Post::get('files', $id);
+        if (! $post instanceof Post) {
+            return false;
+        }
+
+        if (! Post::delete('files', $id)) {
+            return false;
+        }
 
         $sizes = Patterns\Registry::get('images');
-        $types = [ 'image/jpeg', 'image/gif', 'image/png', 'image/bmp', 'image/webp', 'image/avif', 'image/tiff', 'image/x-icon' ];
+        @unlink(sprintf('%si/original/%s', EX_STORAGE, $post->slug));
 
-        // now make smaller copies for images
-        if (in_array($file->mime, $types, true) && is_array($sizes)) {
+        if (is_array($sizes)) {
+            foreach ($sizes as $size) {
+                $width  = Safe::absint($size['width'] ?? 0);
+                $height = Safe::absint($size['height'] ?? 0);
+                if ($width && $height) {
+                    @unlink(sprintf('%si/%sx%s/%s', EX_STORAGE, $width, $height, $post->slug));
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Creates the resized variants for image uploads and registers the file in the library.
+     *
+     * @param string $filepath Absolute path to the already-stored original file.
+     * @param string $basename File name on disk, used as the post slug.
+     * @param string $mime     Detected mime type of the file.
+     * @return Error|int
+     */
+    private static function finalize(string $filepath, string $basename, string $mime): int|Error
+    {
+        $sizes = Patterns\Registry::get('images');
+
+        if (str_starts_with($mime, 'image/') && is_array($sizes)) {
             foreach ($sizes as $size) {
                 $width  = Safe::absint($size['width'] ?? 0);
                 $height = Safe::absint($size['height'] ?? 0);
@@ -134,36 +239,86 @@ class Media
                     continue;
                 }
 
-                // TODO: add file storage variations
-                $filepathResize = str_replace(
-                    '/i/original/',
-                    sprintf('/i/%s/', implode('x', [ $width, $height ])),
-                    $file->path
-                );
+                $resizedPath = sprintf('%si/%sx%s/%s', EX_STORAGE, $width, $height, $basename);
+                $resizedDir  = dirname($resizedPath);
 
-                Image::load($file->path)->crop($width, $height)->save($filepathResize);
-                new Image()->fromFile($file->path)->thumbnail($width, $height)->toFile($filepathResize, $file->mime);
+                if (! is_dir($resizedDir) && ! mkdir($resizedDir, 0755, true)) {
+                    continue;
+                }
+
+                try {
+                    Image::load($filepath)->crop($width, $height)->save($resizedPath);
+                } catch (\Throwable) {
+                    // A failed resize shouldn't block the upload itself - the original file is already saved.
+                }
             }
         }
 
-        if ($originalFile instanceof Error) {
-            return $originalFile;
+        $post = Post::add('files', [
+            'status' => 'publish',
+            'title'  => pathinfo($basename, PATHINFO_FILENAME),
+            'slug'   => $basename,
+            'fields' => [
+                'mime' => $mime,
+            ],
+        ]);
+
+        if (! $post instanceof Post) {
+            @unlink($filepath);
+            return new Error('media_upload', t('Failed to save the file to the library.'));
         }
 
-        return Post::add(
-            'files',
-            [
-                'status' => 'publish',
-                'title'  => $originalFile->filename,
-                'slug'   => $originalFile->basename,
-                'fields' => [
-                    'mime' => $originalFile->mime,
-                ],
-            ]
-        );
+        return $post->id;
     }
 
-    public static function grab(string $url)
+    /**
+     * Resolves a file's mime type from its extension against the allow-list, or null when
+     * the extension isn't recognized/allowed.
+     */
+    private static function mimeFromFilename(string $filename): ?string
     {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if (! $extension) {
+            return null;
+        }
+
+        foreach (new MimeType()->typesList as $extensions => $mime) {
+            if (in_array($extension, explode('|', $extensions), true)) {
+                return $mime;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Strips anything but letters/numbers/dots/dashes/underscores from a file name.
+     */
+    private static function sanitizeFilename(string $filename): string
+    {
+        $filename = preg_replace('/[^A-Za-z0-9._-]+/', '-', trim($filename));
+
+        return trim($filename ?? '', '-');
+    }
+
+    /**
+     * Appends a numeric suffix until the file name is unique within the given directory.
+     */
+    private static function uniqueBasename(string $directory, string $basename): string
+    {
+        if ($basename === '' || ! is_file($directory . $basename)) {
+            return $basename;
+        }
+
+        $filename  = pathinfo($basename, PATHINFO_FILENAME);
+        $extension = pathinfo($basename, PATHINFO_EXTENSION);
+        $suffix    = 1;
+
+        do {
+            $suffix++;
+            $candidate = $extension ? sprintf('%s-%d.%s', $filename, $suffix, $extension) : sprintf('%s-%d', $filename, $suffix);
+        } while (is_file($directory . $candidate));
+
+        return $candidate;
     }
 }

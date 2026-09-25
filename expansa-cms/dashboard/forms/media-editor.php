@@ -34,7 +34,7 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'alt',
-						':value' => '$store.dialog.filename',
+						':value' => 'entry.filename',
 					],
 				],
 			],
@@ -63,7 +63,7 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'title',
-						':value' => '$store.dialog.filename',
+						':value' => 'entry.filename',
 					],
 				],
 			],
@@ -118,7 +118,7 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'description',
-						':value' => '$store.dialog.content',
+						':value' => 'entry.content',
 					],
 				],
 			],
@@ -147,7 +147,7 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'url',
-						':value'   => '$store.dialog.url',
+						':value'   => 'entry.url',
 						'readonly' => true,
 					],
 				],

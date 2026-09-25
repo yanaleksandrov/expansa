@@ -27,7 +27,7 @@ return Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'u-prop'   => 'files',
-				'@change'  => '$ajax.post("media/upload", $el.files, e => percent = e.percent)',
+				'@change'  => '$ajax.post("media/upload", $el.files, e => percent = e.percent).then(({uploaded}) => uploaded && window.location.reload())',
 				'multiple' => true,
 			],
 		],
@@ -56,7 +56,7 @@ return Expansa\Facades\Form::enqueue(
 			'attributes'  => [
 				'u-prop'      => 'urls',
 				'placeholder' => t( 'Each URL must be from a new line' ),
-				'@change'     => '$ajax.post("media/grab", {urls}).then(response => files = response)',
+				'@change'     => '$ajax.post("media/grab", {urls}).then(({uploaded}) => uploaded && window.location.reload())',
 				'u-textarea'  => 19,
 			],
 		],

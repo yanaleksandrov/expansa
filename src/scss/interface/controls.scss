@@ -644,15 +644,36 @@
   opacity: 0.25;
 }
 
+// The rubber-band rectangle drawn by DragSelect/u-dragselect (src/js/youla-storage.js) while
+// dragging over a .storage grid's empty space.
+.u-dragselect-area {
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid var(--expansa-primary);
+}
+
 .storage {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-  gap: 0.65rem;
-  padding: 1.75rem;
+  padding: 1.5rem;
   position: relative;
 
   @media (max-width: 1024px) {
     padding: 1.25rem;
+  }
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  &__items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: 0.65rem;
   }
 
   &__item {
@@ -713,6 +734,40 @@
     inset: 0;
     margin: auto;
     max-height: 100%;
+  }
+
+  &--field {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 0.5rem;
+    padding: 0;
+
+    .storage__item {
+      cursor: default;
+      border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+    }
+  }
+
+  &__remove {
+    position: absolute;
+    z-index: 10;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgb(0 0 0 / 0.55);
+    color: var(--expansa-white);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.15s;
+
+    .storage__item:hover & {
+      opacity: 1;
+    }
   }
 }
 

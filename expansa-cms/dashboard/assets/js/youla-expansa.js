@@ -301,9 +301,9 @@ document.addEventListener('youla:init', () => {
                     }
                     const isBase = this.stack.length === 0;
                     this.stack.push({
+                        ...data,
                         id: ++uid,
-                        content: template.innerHTML,
-                        ...data
+                        content: template.innerHTML
                     });
                     if (isBase) {
                         lockScroll();

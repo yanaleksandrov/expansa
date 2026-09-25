@@ -190,8 +190,7 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   scrollbar-gutter: stable;
-  font-size: 0.84375rem;
-  font-size: 0.8125rem;
+  font-size: 13px;
 }
 body::-webkit-scrollbar-thumb {
   background-color: hsla(216, 3%, 64%, 0.6);
@@ -203,12 +202,12 @@ body:has(dialog[open]) {
   overflow: hidden;
 }
 
-[hidden],
 template {
   display: none !important;
 }
 
-[u-each] {
+[u-each],
+[u-each\.lazy] {
   display: none !important;
 }
 
@@ -1150,17 +1149,34 @@ img:after {
   opacity: 0.25;
 }
 
+.u-dragselect-area {
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid var(--expansa-primary);
+}
+
 .storage {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-  gap: 0.65rem;
-  padding: 1.75rem;
+  padding: 1.5rem;
   position: relative;
 }
 @media (max-width: 1024px) {
   .storage {
     padding: 1.25rem;
   }
+}
+.storage__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+.storage__items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  gap: 0.65rem;
 }
 .storage__item {
   background-color: var(--expansa-bg-universal);
@@ -1215,6 +1231,36 @@ img:after {
   inset: 0;
   margin: auto;
   max-height: 100%;
+}
+.storage--field {
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 0.5rem;
+  padding: 0;
+}
+.storage--field .storage__item {
+  cursor: default;
+  border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+}
+.storage__remove {
+  position: absolute;
+  z-index: 10;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.55);
+  color: var(--expansa-white);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.storage__item:hover .storage__remove {
+  opacity: 1;
 }
 
 .sample {

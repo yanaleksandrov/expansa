@@ -150,7 +150,7 @@
     <!-- Настроенные правила -->
     <rule ref="phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php" />
 
-    <file>src</file>
+    <file>expansa-cms</file>
     <file>phpcs</file>
 
     <!-- Исключает файлы с расширениями .js, .css, .xml, .blade.php и файлы из папки vendor -->

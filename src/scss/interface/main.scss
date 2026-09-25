@@ -66,8 +66,7 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   scrollbar-gutter: stable;
-  font-size: 0.84375rem;
-  font-size: 0.8125rem;
+  font-size: 13px;
 
   &::-webkit-scrollbar-thumb {
     background-color: hsla(216, 3%, 64%, 0.6);
@@ -82,13 +81,12 @@ body {
   }
 }
 
-
-[hidden],
 template {
   display: none !important;
 }
 
-[u-each] {
+[u-each],
+[u-each\.lazy]{
   display: none !important;
 }
 

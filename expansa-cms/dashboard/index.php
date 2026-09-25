@@ -34,7 +34,7 @@ new class
          */
         $suffix = ! Is::debug() ? '.min' : '';
         $styles = [
-            'phosphor', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor', 'chat',
+            'phosphor', 'expansa', 'dialog', 'controls', 'utility', 'notifications', 'nav-editor', 'chat',
         ];
         foreach ($styles as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
@@ -73,7 +73,10 @@ new class
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-chat'];
+        // "youla-storage" (the media library data provider/dialog) is global, not co-located
+        // per-page, because it must be reachable from any field on any page - see
+        // src/js/youla-storage.js and views/dialogs/media-library.blade.php.
+        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-chat', 'youla-storage'];
         foreach ($scripts as $script) {
             $data = [];
             if ($script === 'youla') {
@@ -226,6 +229,10 @@ new class
                         'apiKeyManagerDialog' => [
                             'title' => t('Create/update API key'),
                             'class' => 'dialog--sm',
+                        ],
+                        'mediaLibraryDialog'  => [
+                            'title' => t('Media Library'),
+                            'class' => 'dialog--xl',
                         ],
                     ]
                 );

@@ -93,7 +93,7 @@ final class Web
                 $table = new ($instances[$tableName] ?? App\Tables\Pages::class)();
 
                 if ($tableName === 'files') {
-                    $slug  = 'files';
+                    $slug  = 'media';
                     $table = new App\Tables\Media();
                 }
 
