@@ -125,7 +125,7 @@ class User extends Model implements Fieldable
      *
      * @var string
      */
-    private static string $cookieName = EX_DB_PREFIX . 'auth';
+    private static string $cookieName = EX_DB['prefix'] . 'auth';
 
     /**
      * Lifetime of the authentication cookie when "remember me" is not checked.

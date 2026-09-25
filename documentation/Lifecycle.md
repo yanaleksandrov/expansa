@@ -217,6 +217,7 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
 - **В `bootstrap.php` нет синтаксиса PHP 8.4.** Проверка версии PHP стоит в этом же файле, и на
   старом PHP он должен хотя бы разобраться, чтобы показать страницу требований. То же относится к
   `env.php`, `autoload.php`, `expansa/functions.php`, `App\Support\Requirements` и `dashboard/error.php`.
+  Правило проверяет `tests/Syntax.php`: он падает на синтаксисе новее PHP 8.0 в этих файлах.
 - **Фреймворк не знает про `app` и константы `EX_`.** Всё, что ему нужно от приложения (пути,
   адрес сайта, соединение с базой, версия), приложение передаёт через `configure()` пакета с
   именованными аргументами: `Db`, `Url`, `View`, `Extensions`, `Terminal`, `Table`, `I18n`, `Hook`,
@@ -229,3 +230,9 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
   `Lifecycle::run()`, повторный запуск и дубли имён выбрасывают `LifecycleException`.
 - **Ассеты дашборда подключаются через `DashboardAssets::enqueue()`**: он сам выбирает `.min` и
   выставляет CSRF-cookie, который читает `youla-ajax.js`.
+
+## Разработка
+
+- `php tests/run.php` запускает все тесты, каждый в отдельном процессе, и возвращает 1, если хоть один упал.
+- `php artisan serve [--host=127.0.0.1] [--port=8000]` запускает сайт на встроенном сервере PHP через
+  `server.php`. Роутер выставляет `SCRIPT_NAME` как Apache, иначе `/dashboard` путается с папкой `dashboard/`.

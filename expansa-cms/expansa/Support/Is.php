@@ -15,14 +15,12 @@ final class Is
 {
     private static bool $debug = false;
 
-    private static bool $ajax = false;
-
     /**
      * Set the application state the checks below report.
      */
-    public static function configure(bool $debug = false, bool $ajax = false): void
+    public static function configure(bool $debug = false): void
     {
-        [self::$debug, self::$ajax] = [$debug, $ajax];
+        self::$debug = $debug;
     }
 
     /**
@@ -161,16 +159,6 @@ final class Is
     public static function debug(): bool
     {
         return self::$debug;
-    }
-
-    /**
-     * Checks if the current request is an AJAX query.
-     *
-     * @return bool True if the request is an AJAX query, false otherwise.
-     */
-    public static function ajax(): bool
-    {
-        return self::$ajax;
     }
 
     /**

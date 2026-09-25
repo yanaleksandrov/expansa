@@ -19,8 +19,15 @@ if (PHP_VERSION_ID < 50600) {
 }
 
 // autoload class
-spl_autoload_register(fn ($class) => require_once str_replace(
-    ['\\', '/Expansa/', '/App/'],
-    ['/', '/expansa/', '/app/'],
-    sprintf('%s%s.php', EX_PATH, $class)
-));
+spl_autoload_register(static function (string $class): void {
+    $file = str_replace(
+        ['\\', '/Expansa/', '/App/'],
+        ['/', '/expansa/', '/app/'],
+        sprintf('%s%s.php', EX_PATH, $class)
+    );
+
+    // a missing file leaves the class undefined, so class_exists() and "Class not found" work as usual
+    if (is_file($file)) {
+        require_once $file;
+    }
+});

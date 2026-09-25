@@ -35,6 +35,9 @@ trait Writer
      */
     protected function decorate(string $text): string
     {
+        // t() prepares text for HTML; decoded first, since entities like &#039; contain the "#" of the markup below
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
         // replacing all occurrences of [color,style]#text# with the equivalent color and style in the CLI
         return preg_replace_callback('/\[(\w+(?:,\s*\w+)*)\]#([^#]+)#/', function ($matches) {
             $attributes = explode(',', $matches[1]);

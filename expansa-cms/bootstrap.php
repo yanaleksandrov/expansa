@@ -100,26 +100,14 @@ Lifecycle::phase('boot', true, function () {
  */
 Lifecycle::phase('configure', true, function () {
     // the connection from env.php; nothing to connect to before install
-    if (defined('EX_DB_DRIVER')) {
-        Db::configure(
-            driver: EX_DB_DRIVER,
-            database: EX_DB_NAME,
-            username: EX_DB_USERNAME,
-            password: EX_DB_PASSWORD,
-            host: EX_DB_HOST,
-            prefix: EX_DB_PREFIX,
-            charset: EX_DB_CHARSET,
-            collation: EX_DB_COLLATION,
-            port: EX_DB_PORT,
-            testMode: EX_DB_LOGGING,
-            error: EX_DB_ERROR_MODE,
-        );
+    if (defined('EX_DB')) {
+        Db::configure(...EX_DB);
     }
 
     // the site URL is read from the options only once there is a database to read it from
     Url::configure(
         root: EX_PATH,
-        site: defined('EX_DB_DRIVER') ? fn () => App\Models\Options::get('site.url') : null,
+        site: defined('EX_DB') ? fn () => App\Models\Options::get('site.url') : null,
     );
 
     // views of the dashboard, installer and auth pages
@@ -403,6 +391,7 @@ Lifecycle::phase('booted', $isInstalled, function () {
  * No routing: run() skips it in the console.
  */
 Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
+    Terminal::addCommand(App\Console\Serve::class);
     Terminal::run();
 });
 

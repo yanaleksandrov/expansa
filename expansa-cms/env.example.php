@@ -1,24 +1,26 @@
 <?php
 /**
- * Constants for database name, user, password, host, prefix & charset.
+ * Database connection, passed to Db::configure() as named arguments.
  *
  * @since 2025.1
  */
-const EX_DB_DRIVER           = 'mysql';
-const EX_DB_NAME             = 'db.name';
-const EX_DB_USERNAME         = 'db.username';
-const EX_DB_PASSWORD         = 'db.password';
-const EX_DB_HOST             = 'db.host';
-const EX_DB_PREFIX           = 'db.prefix';
-const EX_DB_CHARSET          = 'utf8mb4';
-const EX_DB_COLLATION        = 'utf8mb4_general_ci';
-const EX_DB_PORT             = 21;
-// It is disabled by default for better performance.
-const EX_DB_LOGGING          = false;
-// Error handling strategies when the error has occurred.
-// PDO::ERRMODE_SILENT (default) | PDO::ERRMODE_WARNING | PDO::ERRMODE_EXCEPTION
-// Read more from https://www.php.net/manual/en/pdo.error-handling.php.
-const EX_DB_ERROR_MODE       = PDO::ERRMODE_SILENT;
+const EX_DB = [
+    'driver'     => 'mysql',
+    'database'   => 'db.name',
+    'username'   => 'db.username',
+    'password'   => 'db.password',
+    'host'       => 'db.host',
+    'prefix'     => 'db.prefix',
+    'charset'    => 'utf8mb4',
+    'collation'  => 'utf8mb4_general_ci',
+    'port'       => 3306,
+    // keeps the connection open between requests served by the same PHP worker
+    'persistent' => false,
+    // query log; disabled by default for better performance
+    'testMode'   => false,
+    // PDO::ERRMODE_SILENT (default) | PDO::ERRMODE_WARNING | PDO::ERRMODE_EXCEPTION, see https://www.php.net/manual/en/pdo.error-handling.php
+    'error'      => PDO::ERRMODE_SILENT,
+];
 
 /**
  * Authentication unique keys and salts.

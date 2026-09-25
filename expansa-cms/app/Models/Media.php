@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Query\Query;
-use App\Url;
 use Expansa\Debug\Error;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Image;
 use Expansa\Facades\Safe;
 use Expansa\Filesystem\MimeType;
 use Expansa\Patterns;
+use Expansa\Support\Url;
 
 /**
  * Expansa administration Media API.
@@ -46,8 +46,8 @@ class Media
                     $posts[$i] = [
                         ...$post,
                         ...[
-                            'url'          => Url::fromPath($filepath),
-                            'icon'         => Url::fromPath($iconPath),
+                            'url'          => Url::toUrl($filepath),
+                            'icon'         => Url::toUrl($iconPath),
                             'height'       => $file->height,
                             'width'        => $file->width,
                             'path'         => $file->path,
@@ -77,8 +77,8 @@ class Media
                         $iconPath = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?? 'default');
 
                         $posts[$i]['sizes'][$key] = [
-                            'url'          => Url::fromPath($filepath),
-                            'icon'         => Url::fromPath($iconPath),
+                            'url'          => Url::toUrl($filepath),
+                            'icon'         => Url::toUrl($iconPath),
                             'width'        => $width,
                             'height'       => $height,
                             'path'         => $file->path,

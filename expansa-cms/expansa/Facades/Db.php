@@ -72,6 +72,7 @@ class Db extends Facade
         string $charset = 'utf8mb4',
         string $collation = 'utf8mb4_general_ci',
         int|string $port = 3306,
+        bool $persistent = false,
         bool $testMode = false,
         int $error = PDO::ERRMODE_SILENT,
     ): void {
@@ -87,7 +88,7 @@ class Db extends Facade
             'port',
             'testMode',
             'error',
-        );
+        ) + ['option' => $persistent ? [PDO::ATTR_PERSISTENT => true] : []];
     }
 
     /**

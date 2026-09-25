@@ -10,7 +10,6 @@ use App\Support\Installation;
 use App\Support\Requirements;
 use Expansa\Database\Query\Builder;
 use Expansa\Facades\Db;
-use Expansa\Facades\Disk;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
@@ -41,10 +40,10 @@ final class SystemService
             'password' => 'trim',
             'host'     => 'trim',
             'prefix'   => 'trim',
-            'driver'   => 'trim:' . EX_DB_DRIVER,
-            'charset'  => 'trim:' . EX_DB_CHARSET,
-            'port'     => 'trim:' . EX_DB_PORT,
-            'error'    => 'trim:' . EX_DB_ERROR_MODE,
+            'driver'   => 'trim:' . EX_DB['driver'],
+            'charset'  => 'trim:' . EX_DB['charset'],
+            'port'     => 'trim:' . EX_DB['port'],
+            'error'    => 'trim:' . EX_DB['error'],
         ])->apply();
 
         try {
@@ -109,17 +108,7 @@ final class SystemService
         ])->values();
 
         // env.php marks the installation as complete, so it appears only after every step succeeded
-        $draft = EX_PATH . 'env.install.php';
-        if (is_file($draft)) {
-            unlink($draft);
-        }
-
-        $env = Disk::file(EX_PATH . 'env.example.php')->copy('env.install');
-        if ($env->errors) {
-            throw new ValidationException(t('Unable to write the environment configuration file.'), $env->errors);
-        }
-
-        Disk::file($draft)->rewrite(
+        $draft = Installation::draft(
             array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database) + [
                 'auth.key'  => bin2hex(random_bytes(32)),
                 'nonce.key' => bin2hex(random_bytes(32)),
@@ -128,22 +117,10 @@ final class SystemService
         );
 
         try {
-            // the rest of the installation reads the new constants, e.g. EX_DB_PREFIX
+            // the rest of the installation reads the new constants, e.g. EX_DB
             require_once $draft;
 
-            Db::configure(
-                driver: EX_DB_DRIVER,
-                database: EX_DB_NAME,
-                username: EX_DB_USERNAME,
-                password: EX_DB_PASSWORD,
-                host: EX_DB_HOST,
-                prefix: EX_DB_PREFIX,
-                charset: EX_DB_CHARSET,
-                collation: EX_DB_COLLATION,
-                port: EX_DB_PORT,
-                testMode: EX_DB_LOGGING,
-                error: EX_DB_ERROR_MODE,
-            );
+            Db::configure(...EX_DB);
 
             Hook::call('createMainDatabaseTables');
 
@@ -162,11 +139,17 @@ final class SystemService
 
             Options::update('site', $site + ['owner' => ['email' => $user->email]]);
 
-            if (!rename($draft, EX_PATH . 'env.php')) {
-                throw new ValidationException(t('Unable to write the environment configuration file.'));
-            }
+            Installation::complete($draft);
         } catch (\Throwable $e) {
-            is_file($draft) && unlink($draft);
+            Installation::discard($draft);
+
+            // a retry would otherwise fail on the owner's login and email being taken
+            if (isset($user->id)) {
+                try {
+                    Db::delete($user->getTable(), ['id' => $user->id]);
+                } catch (\Throwable) {
+                }
+            }
 
             throw $e;
         }

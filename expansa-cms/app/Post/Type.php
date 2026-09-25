@@ -118,7 +118,7 @@ class Type
          * Add DB table for post type if not exists.
          */
         $type = Safe::snakecase($key);
-        if (!Db::hasTable(EX_DB_PREFIX . $type)) {
+        if (!Db::hasTable(EX_DB['prefix'] . $type)) {
             Hook::call('createPostsTable', $type);
         }
     }
@@ -132,7 +132,7 @@ class Type
     public static function register(...$args): self
     {
         $type = new self(...$args);
-        if (empty($items[ $type->key ])) {
+        if (empty(self::$items[ $type->key ])) {
             self::$items[ $type->key ] = $type;
         }
         return $type;
