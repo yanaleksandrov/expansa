@@ -7,11 +7,9 @@ namespace Expansa\Facades;
 use Expansa\Patterns\Facade;
 
 /**
- * Provides a facade for the Debug functionality in the Expansa framework.
- * It allows starting the debug process with a specified view path, callback,
- * and an optional flag to show errors.
+ * Debug page facade.
  *
- * @method static void start(bool $isShowErrors, string $viewPath, callable $callback)
+ * @method static void render(\Throwable $e, string $viewPath)
  */
 class Debug extends Facade
 {

@@ -27,14 +27,14 @@ namespace Expansa\Patterns;
  */
 class Registry
 {
-    /**
-     * Put item into the registry.
-     *
-     * @param string $key
-     * @param mixed $item
-     * @return void
-     */
     private static array $registry = [];
+
+    /**
+     * Resolvers of lazy items, keyed by top-level key.
+     *
+     * @var array<string, callable>
+     */
+    private static array $lazy = [];
 
     /**
      * Put item into the registry.
@@ -47,6 +47,22 @@ class Registry
     {
         if (! isset(self::$registry[ $key ])) {
             self::$registry[ $key ] = $value;
+
+            unset(self::$lazy[ $key ]);
+        }
+    }
+
+    /**
+     * Put item into the registry on first get(): $resolver returns its value, e.g. by requiring a data file.
+     *
+     * @param  string   $key
+     * @param  callable $resolver
+     * @return void
+     */
+    public static function lazy(string $key, callable $resolver): void
+    {
+        if (! isset(self::$registry[ $key ])) {
+            self::$lazy[ $key ] = $resolver;
         }
     }
 
@@ -59,6 +75,11 @@ class Registry
      */
     public static function get(string $key, mixed $default = null): mixed
     {
+        $root = strstr($key, '.', true) ?: $key;
+        if (isset(self::$lazy[ $root ])) {
+            self::set($root, (self::$lazy[ $root ])());
+        }
+
         $array = self::$registry;
 
         foreach (explode('.', $key) as $segment) {

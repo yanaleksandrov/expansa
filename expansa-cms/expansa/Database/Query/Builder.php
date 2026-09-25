@@ -1033,7 +1033,7 @@ class Builder extends BuilderAbstract
         return preg_replace(
             '/^\D*(\d+\.\d+(\.\d+)?)/',
             '$1',
-            $this->pdo->getAttribute(constant('PDO::ATTR_CLIENT_VERSION'))
+            $this->pdo->getAttribute(constant('PDO::ATTR_SERVER_VERSION'))
         ) ?: '';
     }
 

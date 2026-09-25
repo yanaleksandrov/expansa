@@ -6,6 +6,7 @@ namespace App\Api\System;
 
 use App\Models\Options;
 use App\Models\User;
+use App\Support\Requirements;
 use Expansa\Database\Query\Builder;
 use Expansa\Facades\Db;
 use Expansa\Facades\Disk;
@@ -53,11 +54,11 @@ final class SystemService
         }
 
         $connected = $connection instanceof Builder;
-        $mysql     = $connected && version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>=');
+        $mysql     = $connected && Requirements::database($connection->version());
 
         $compat = array_map(
             fn($requirement) => match ($requirement) {
-                'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
+                'php'        => Requirements::php(),
                 'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
                 'mysql'      => $mysql,
                 'connection' => $connected,

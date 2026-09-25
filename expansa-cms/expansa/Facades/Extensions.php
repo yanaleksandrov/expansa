@@ -11,6 +11,8 @@ use Expansa\Patterns\Facade;
  *
  * @method static array get(string $type)
  * @method static void enqueue(callable $callback)
+ * @method static array paths(array $ids)
+ * @method static void register(string $type)
  * @method static void boot(string $type)
  * @method static void activate(string $type)
  * @method static void deactivate(string $type)

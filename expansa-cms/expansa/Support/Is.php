@@ -7,6 +7,7 @@ namespace Expansa\Support;
 use App\Models\Options;
 use DateTime;
 use Expansa\Facades\Db;
+use Expansa\Facades\Lifecycle;
 
 /**
  * This class provides a set of static methods to check various conditions, such as validating
@@ -139,7 +140,7 @@ final class Is
      */
     public static function dashboard(): bool
     {
-        return defined('EX_IS_DASHBOARD') && EX_IS_DASHBOARD === true;
+        return Lifecycle::is('dashboard');
     }
 
     /**

@@ -9,8 +9,9 @@ use Expansa\Http\Response;
 
 final readonly class FieldGroupsController
 {
-    public function __construct(private FieldGroupsService $service = new FieldGroupsService())
-    {} // phpcs:ignore
+    public function __construct(
+        private FieldGroupsService $service = new FieldGroupsService()
+    ) {} // phpcs:ignore
 
     public function index(): Response
     {

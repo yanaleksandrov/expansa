@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use Expansa\Patterns\Registry;
-
-Registry::set('countries', [
+return [
     [
         'name'     => 'Afghanistan — افغانستان',
         'iso2'     => 'AF',
@@ -2755,4 +2753,4 @@ Registry::set('countries', [
             'symbol' => '$',
         ],
     ],
-]);
+];

@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use Expansa\Patterns\Registry;
-
-Registry::set('timezones', [
+return [
     'Pacific/Midway'                 => '-11:00, Midway, Midway Time',
     'Pacific/Niue'                   => '-11:00, Niue, Niue Time',
     'Pacific/Pago_Pago'              => '-11:00, Pago_Pago, American Samoa Time',
@@ -267,4 +265,4 @@ Registry::set('timezones', [
     'Pacific/Tarawa'                 => '+12:00, Tarawa, Tarawa',
     'Pacific/Wake'                   => '+12:00, Wake, Wake Time',
     'Pacific/Wallis'                 => '+12:00, Wallis, Wallis & Futuna Time',
-]);
+];

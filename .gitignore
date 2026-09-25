@@ -17,3 +17,7 @@ vendor/
 .DS_Store    # macOS
 Thumbs.db    # Windows
 /expansa-cms/env.php
+
+# Generated cache
+/expansa-cms/cache/*
+!/expansa-cms/cache/index.php

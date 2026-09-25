@@ -2,10 +2,8 @@
 
 namespace Dashboard;
 
-use App\Http\VerifyCsrfToken;
+use App\Support\DashboardAssets;
 use App\Support\DashboardFavicons;
-use Expansa\Facades\Asset;
-use Expansa\Support\Is;
 
 /**
  * Lightweight asset bootstrap for the unauthenticated auth pages (sign-in,
@@ -20,30 +18,14 @@ use Expansa\Support\Is;
  *
  * @see index.php for the equivalent bootstrap once a user is actually logged in.
  */
-new class
-{
-    public function __construct()
-    {
-        VerifyCsrfToken::seed();
+DashboardFavicons::enqueue();
 
-        DashboardFavicons::enqueue();
-
-        $suffix = ! Is::debug() ? '.min' : '';
-
-        $styles = ['phosphor', 'expansa', 'controls', 'utility', 'notifications'];
-        foreach ($styles as $style) {
-            Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
-        }
-
-        $scripts = ['youla', 'youla-ajax', 'youla-expansa'];
-        foreach ($scripts as $script) {
-            // Only `apiurl` - youla-ajax.js reads it to build the $ajax.post() base URL.
-            // Everything else in the dashboard's own `youla` data dump (API-key table,
-            // dialog titles, datepicker locale, ...) belongs to admin-only widgets that
-            // never render here.
-            $data = $script === 'youla' ? ['data' => ['apiurl' => url('/api/')]] : [];
-
-            Asset::script($script, url("/dashboard/assets/js/$script$suffix.js"), $data);
-        }
-    }
-};
+DashboardAssets::enqueue(
+    ['phosphor', 'expansa', 'controls', 'utility', 'notifications'],
+    [
+        // only `apiurl`: youla-ajax.js builds the $ajax.post() base URL from it
+        'youla' => ['data' => ['apiurl' => url('/api/')]],
+        'youla-ajax',
+        'youla-expansa',
+    ]
+);

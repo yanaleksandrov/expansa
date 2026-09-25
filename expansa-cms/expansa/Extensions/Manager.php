@@ -26,7 +26,20 @@ class Manager
     }
 
     /**
-     * Register new extension.
+     * Call register() of every enqueued extension of the type.
+     *
+     * @param string $type
+     * @return void
+     */
+    public function register(string $type): void
+    {
+        foreach (self::$extensions[$type] ?? [] as $extension) {
+            $extension instanceof ExtensionSkeleton && $extension->register();
+        }
+    }
+
+    /**
+     * Call boot() of every enqueued extension of the type.
      *
      * @param string $type
      * @return void
@@ -94,6 +107,25 @@ class Manager
         foreach (self::$extensions[$type] ?? [] as $extension) {
             $extension instanceof ExtensionSkeleton && $extension->uninstall();
         }
+    }
+
+    /**
+     * Entry files of extensions by id, e.g. "plugins/seo" => EX_PATH . "plugins/seo/index.php".
+     * Ids other than "plugins/{dir}" or "themes/{dir}" are ignored, so a stored list can't point elsewhere.
+     *
+     * @param array $ids
+     * @return string[]
+     */
+    public function paths(array $ids): array
+    {
+        $paths = [];
+        foreach ($ids as $id) {
+            if (is_string($id) && preg_match('#^(plugins|themes)/[a-z0-9_-]+$#i', $id)) {
+                $paths[] = EX_PATH . "$id/index.php";
+            }
+        }
+
+        return $paths;
     }
 
     /**
