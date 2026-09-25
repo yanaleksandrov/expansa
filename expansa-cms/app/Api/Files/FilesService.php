@@ -22,7 +22,42 @@ use Expansa\Filesystem\File;
  */
 final class FilesService
 {
-    public function upload(array $files): array
+    /**
+     * CSV encodings offered by the importer; 'auto' lets the codec choose between UTF-8 and Windows-1251.
+     * Keys are passed to Csv as is, values are labels.
+     */
+    public const array CSV_ENCODINGS = [
+        'auto'         => 'Auto-detect (UTF-8, Windows-1251)',
+        'UTF-8'        => 'UTF-8',
+        'Windows-1251' => 'Windows-1251 (Cyrillic)',
+        'KOI8-R'       => 'KOI8-R (Cyrillic)',
+        'Windows-1252' => 'Windows-1252 (Western European)',
+        'GBK'          => 'GBK (Simplified Chinese)',
+        'GB18030'      => 'GB18030 (Simplified Chinese)',
+        'BIG5'         => 'Big5 (Traditional Chinese)',
+        'CP932'        => 'Shift_JIS (Japanese)',
+        'EUC-KR'       => 'EUC-KR (Korean)',
+    ];
+
+    /**
+     * Returns the encoding if it is offered by the importer, otherwise 'auto'.
+     *
+     * @param mixed $encoding Raw request value.
+     * @return string
+     */
+    public static function csvEncoding(mixed $encoding): string
+    {
+        return is_string($encoding) && isset(self::CSV_ENCODINGS[$encoding]) ? $encoding : 'auto';
+    }
+
+    /**
+     * Stores the uploaded CSV file and renders the column mapping form with its first row as samples.
+     *
+     * @param array $files    Uploaded files from $_FILES.
+     * @param mixed $encoding Encoding chosen in the form, see CSV_ENCODINGS.
+     * @return array
+     */
+    public function upload(array $files, mixed $encoding = 'auto'): array
     {
         foreach ($files as $file) {
             $uploadedFile = Disk::file('')->upload($file)->move(EX_STORAGE . 'i/');
@@ -32,10 +67,10 @@ final class FilesService
             }
 
             $filepath = Safe::path($uploadedFile->path ?? '');
-            $rows     = Csv::decode($filepath);
+            $samples  = Csv::iterate($filepath, encoding: self::csvEncoding($encoding))->current() ?? [];
 
             $fields = view(EX_DASHBOARD . 'forms/posts-import-fields', [
-                'samples'  => $rows[0] ?? [],
+                'samples'  => $samples,
                 'filepath' => $filepath,
             ])->render();
 

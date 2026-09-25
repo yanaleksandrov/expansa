@@ -9,7 +9,7 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'card card-border',
 		'@submit.prevent' => '$ajax.post("posts/import").then(response => output = response.output,goNext())',
-		'u-data'          => '{fields: "", output: ""}',
+		'u-data'          => '{fields: "", output: "", encoding: "auto"}',
 	],
 	[
 		[
@@ -46,6 +46,23 @@ return \Expansa\Facades\Form::enqueue(
 					'attributes'  => [ 'u-prop' => 'title' ],
 				],
 				[
+					'type'        => 'select',
+					'name'        => 'encoding',
+					'label'       => t( 'File encoding' ),
+					'class'       => '',
+					'label_class' => '',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => t( 'If the column samples on the next step look garbled, go back, choose the encoding and upload the file again' ),
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [ 'u-prop' => 'encoding' ],
+					'options'     => array_map( 't', \App\Api\Files\FilesService::CSV_ENCODINGS ),
+				],
+				[
 					'type'        => 'uploader',
 					'name'        => 'uploader',
 					'label'       => '',
@@ -62,7 +79,7 @@ return \Expansa\Facades\Form::enqueue(
 					'attributes'  => [
 						'u-prop'  => 'uploader',
 						'accept'  => '.csv,.txt',
-						'@change' => '$ajax.post("files/upload").then(response => fields = response.fields,goNext())',
+						'@change' => '$ajax.post("files/upload", {encoding}).then(response => fields = response.fields,goNext())',
 					],
 				],
 			],
