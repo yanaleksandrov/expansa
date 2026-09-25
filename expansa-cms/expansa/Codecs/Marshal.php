@@ -7,12 +7,12 @@ namespace Expansa\Codecs;
 use Throwable;
 
 /**
- * Serializes PHP values into strings and back. Objects are not restored unless explicitly allowed.
- * Errors never throw: encode() returns '' and decode() returns null.
+ * Native PHP serialize() format with safe decoding: objects are not restored unless explicitly allowed.
+ * Named after Ruby's Marshal, the same kind of format. Errors never throw: encode() returns '', decode() null.
  *
  * @package Expansa\Codecs
  */
-class Serializer
+class Marshal
 {
     /**
      * Optional 1-byte format markers; a plain serialize() string never starts with either of them.

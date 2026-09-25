@@ -19,6 +19,9 @@ class Str
     }
 
     /**
+     * Generates a random UUID version 4, e.g. "3f2b8c1e-9d4a-4f6b-8e2c-7a1d5b9c0e3f".
+     *
+     * @return string
      * @throws RandomException
      */
     public static function uuid(): string
@@ -31,24 +34,31 @@ class Str
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
     }
 
+    /**
+     * Generates a cryptographically secure token of 32 hex characters (128 bits).
+     *
+     * @return string
+     * @throws RandomException
+     */
     public static function genToken(): string
     {
-        $token = match (true) {
-            function_exists('random_bytes')                => bin2hex(random_bytes(32)),
-            function_exists('openssl_random_pseudo_bytes') => bin2hex(openssl_random_pseudo_bytes(32)),
-            default                                                => uniqid(Str::random(32), true),
-        };
-
-        return md5($token);
+        return bin2hex(random_bytes(16));
     }
 
+    /**
+     * Generates a cryptographically secure random alphanumeric string, suitable for tokens and API keys.
+     *
+     * @param int $length Number of characters; 32 characters give about 190 bits of entropy.
+     * @return string
+     */
     public static function random(int $length): string
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $max        = strlen($characters) - 1;
 
         $string = '';
         for ($i = 0; $i < $length; $i++) {
-            $string .= $characters[mt_rand(0, strlen($characters) - 1)];
+            $string .= $characters[random_int(0, $max)];
         }
 
         return $string;

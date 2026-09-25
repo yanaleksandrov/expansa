@@ -1,20 +1,24 @@
 # Введение
 
-`Serializer` превращает любые PHP-значения (массивы, объекты, числа, `null`) в строку и обратно.
-Это нужно везде, где можно сохранить только строку: колонка в БД, файл, Redis.
+`Marshal` превращает любые PHP-значения (массивы, объекты, числа, `null`) в строку нативного
+формата PHP `serialize()` и обратно. Это нужно везде, где можно сохранить только строку: колонка
+в БД, файл, Redis.
+
+Имя взято по аналогии с Ruby, где такой же нативный формат значений называется `Marshal`.
+«Маршалинг» — общий термин для превращения значений в форму, пригодную для хранения или передачи.
 
 Главное отличие от голых `serialize()` и `unserialize()` — безопасность по умолчанию: при
 декодировании объекты **не восстанавливаются**, пока это явно не разрешено. Ошибки не бросают
 исключений.
 
-Работать можно через фасад `Expansa\Facades\Serializer` или напрямую с классом
-`Expansa\Codecs\Serializer`.
+Работать можно через фасад `Expansa\Facades\Marshal` или напрямую с классом
+`Expansa\Codecs\Marshal`.
 
 ```php
-use Expansa\Facades\Serializer;
+use Expansa\Facades\Marshal;
 
-$payload = Serializer::encode(['id' => 1, 'tags' => ['a', 'b']]);
-$value   = Serializer::decode($payload); // ['id' => 1, 'tags' => ['a', 'b']]
+$payload = Marshal::encode(['id' => 1, 'tags' => ['a', 'b']]);
+$value   = Marshal::decode($payload); // ['id' => 1, 'tags' => ['a', 'b']]
 ```
 
 ## Почему объекты не восстанавливаются
@@ -29,14 +33,14 @@ $value   = Serializer::decode($payload); // ['id' => 1, 'tags' => ['a', 'b']]
 читаются, но ни один метод класса не выполняется. Массивы и скаляры восстанавливаются как есть.
 
 ```php
-Serializer::decode(serialize(new Point(1, 2))); // __PHP_Incomplete_Class
+Marshal::decode(serialize(new Point(1, 2))); // __PHP_Incomplete_Class
 ```
 
 Если объекты действительно нужны, перечислите разрешённые классы во втором параметре:
 
 ```php
-Serializer::decode($payload, [Point::class, Money::class]); // только эти классы
-Serializer::decode($payload, true);                          // любые классы
+Marshal::decode($payload, [Point::class, Money::class]); // только эти классы
+Marshal::decode($payload, true);                          // любые классы
 ```
 
 `true` передавайте только для данных, которые пишет само приложение и куда пользователь не может
@@ -45,7 +49,7 @@ Serializer::decode($payload, true);                          // любые кл�
 ## Кодирование
 
 ```php
-Serializer::encode(mixed $value, bool $igbinary = false): string
+Marshal::encode(mixed $value, bool $igbinary = false): string
 ```
 
 По умолчанию результат — обычная строка `serialize()`, поэтому её прочитает и любой другой код.
@@ -53,8 +57,8 @@ Serializer::encode(mixed $value, bool $igbinary = false): string
 возвращается пустая строка `''`.
 
 ```php
-Serializer::encode([1, 2]);    // 'a:2:{i:0;i:1;i:1;i:2;}'
-Serializer::encode(fn () => 1); // ''
+Marshal::encode([1, 2]);    // 'a:2:{i:0;i:1;i:1;i:2;}'
+Marshal::encode(fn () => 1); // ''
 ```
 
 ### igbinary
@@ -69,16 +73,16 @@ igbinary-данные декодируются только при `$allowedClas
 `decode()` возвращает `null`. Используйте igbinary только для доверенного хранилища.
 
 ```php
-$payload = Serializer::encode($value, igbinary: true);
+$payload = Marshal::encode($value, igbinary: true);
 
-Serializer::decode($payload, true); // значение
-Serializer::decode($payload);       // null: igbinary нельзя декодировать безопасно
+Marshal::decode($payload, true); // значение
+Marshal::decode($payload);       // null: igbinary нельзя декодировать безопасно
 ```
 
 ## Декодирование
 
 ```php
-Serializer::decode(string $payload, bool|array $allowedClasses = false): mixed
+Marshal::decode(string $payload, bool|array $allowedClasses = false): mixed
 ```
 
 Принимает результат `encode()` и любую строку `serialize()`. Если данные невалидны (пустая
@@ -89,8 +93,8 @@ Serializer::decode(string $payload, bool|array $allowedClasses = false): mixed
 неотличим от ошибки: оба дают `null`.
 
 ```php
-Serializer::decode(Serializer::encode(false)); // false
-Serializer::decode('garbage');                  // null
+Marshal::decode(Marshal::encode(false)); // false
+Marshal::decode('garbage');                  // null
 ```
 
 ## Формат
@@ -110,9 +114,9 @@ Serializer::decode('garbage');                  // null
 | Операция | Время |
 |---|---|
 | `serialize()` | 0,41 мкс |
-| `Serializer::encode()` | 0,44 мкс |
+| `Marshal::encode()` | 0,44 мкс |
 | `unserialize()` с `allowed_classes => false` | 0,50 мкс |
-| `Serializer::decode()` | 0,71 мкс |
+| `Marshal::decode()` | 0,71 мкс |
 
 Разница у `decode()` уходит на временный обработчик ошибок, который глушит предупреждения
 `unserialize()` о невалидных данных.
