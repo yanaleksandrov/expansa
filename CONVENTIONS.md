@@ -1,374 +1,256 @@
 # Соглашения Expansa
 
-Правила именования и структуры для нового кода и для рефакторинга существующего. Цель — чтобы
-любой пакет читался одинаково: открыв один, понятно, где что лежит в остальных.
-
-Эталон — пакет `Log` (`expansa-cms/expansa/Log`, [documentation/Log.md](documentation/Log.md)).
-Если правило ниже непонятно, делай как в нём.
+Именование и структура для нового кода и рефакторинга: все пакеты устроены одинаково.
+Эталон — `expansa-cms/expansa/Log` и [documentation/Log.md](documentation/Log.md); неясно — делай как там.
 
 ## Принципы
 
-1. **Имя короткое, по возможности одно слово.** Роль задаёт namespace, в имени она не повторяется:
-   `use Expansa\Assets\Providers\Link`, а не `LinkProvider`. Если два класса с одинаковым именем
-   нужны в одном файле, конфликт решается алиасом: `use Expansa\Cache\Providers\File as FileCache`.
-2. **Одно понятие — одно слово.** Если в проекте уже есть термин (`configure`, `forget`, `Manager`),
-   используй его, а не синоним.
-3. **Без сокращений**, кроме общепринятых: `Db`, `Url`, `Csv`, `Json`, `Html`, `I18n`, `Id`.
-   Аббревиатуры пишутся как слово: `Json`, `HtmlDom`, не `JSON`.
-4. **Пакеты самостоятельны.** По возможности пакет в `expansa-cms/expansa/` не зависит от других
-   пакетов: связь между ними устраивается в `bootstrap.php` и `App\` (см. «Независимость пакетов»).
-5. **Структура плоская.** Подпапка появляется, когда в ней будет 2+ однородных класса.
-6. **Проект в бете:** несоответствие правилам исправляется переименованием, без алиасов и
-   обратной совместимости. Все использования обновляются в том же коммите.
+1. **Имя короткое, по возможности одно слово**, роль задаёт namespace: `Assets\Providers\Link`, не
+   `LinkProvider`. Конфликт имён в файле решается алиасом: `use Expansa\Cache\Providers\File as FileCache`.
+2. **Одно понятие — одно слово.** Есть термин (`configure`, `forget`, `Manager`) — используй его.
+3. **Без сокращений**, кроме `Db`, `Url`, `Csv`, `Json`, `Html`, `I18n`, `Id`. Аббревиатура — как слово: `HtmlDom`.
+4. **Пакеты самостоятельны** (см. «Независимость пакетов»).
+5. **Структура плоская:** подпапка — от 2 однородных классов.
+6. **Бета:** нарушения исправляются переименованием без алиасов и совместимости, все использования — в том же коммите.
 
 ## Структура пакета
 
-Пакет фреймворка — папка `expansa-cms/expansa/<Package>/`, namespace `Expansa\<Package>`.
-Имя пакета — предметная область одним словом: `Log`, `Cache`, `Session`, `Routing`, `Codecs`.
+`expansa-cms/expansa/<Package>/`, namespace `Expansa\<Package>`, имя — предметная область одним словом.
 
 ```
 Log/
-├── Manager.php            точка входа и цель фасада
-├── Logger.php             основные классы пакета — в корне
-├── Level.php
+├── Manager.php        точка входа, цель фасада
+├── Logger.php         основные классы — в корне
 ├── LogRecord.php
-├── Contracts/             интерфейсы
-│   ├── Handler.php
-│   └── Formatter.php
-├── Handlers/              реализации одного контракта
-│   ├── AbstractHandler.php
-│   ├── File.php
-│   └── Telegram.php
-├── Formatters/
-│   ├── AbstractFormatter.php
-│   └── Line.php
-├── Traits/                трейты пакета
-└── Exception/
-    └── LogException.php
+├── Contracts/Handler.php
+├── Handlers/AbstractHandler.php, File.php, Telegram.php
+├── Formatters/AbstractFormatter.php, Line.php
+├── Traits/
+└── Exception/LogException.php
 ```
 
-Допустимые подпапки и их имена:
+| Папка        | Что лежит                                          | Имя                                     |
+|--------------|----------------------------------------------------|-----------------------------------------|
+| `Contracts/` | интерфейсы                                         | роль: `Handler`                         |
+| `<Role>s/`   | реализации контракта: `Handlers/`, `Providers/`, `Fields/`, `Commands/` | вариант: `Handlers\File`, `Providers\Redis` |
+| `Traits/`    | трейты                                             | способность: `HasTimestamps`, `Macroable`, `Locks` |
+| `Exception/` | исключения                                         | `<Package>Exception`                    |
+| `<Class>/`   | части большого класса (`Database/Schema/` для `Schema.php`) | по роли                        |
 
-| Папка          | Что лежит                                      | Имя класса                         |
-|----------------|------------------------------------------------|------------------------------------|
-| `Contracts/`   | интерфейсы                                     | роль без суффикса: `Handler`       |
-| `<Role>s/`     | реализации одного контракта: `Handlers/`, `Providers/`, `Fields/`, `Commands/` | вариант одним словом: `Handlers\File`, `Providers\Redis` |
-| `Traits/`      | трейты                                         | способность: `HasTimestamps`, `Macroable`, `Locks` |
-| `Exception/`   | исключения пакета                              | `<Package>Exception`               |
-| `<Class>/`     | части большого класса: `Database/Schema/` для `Schema.php` | по роли внутри            |
-
-Чего не делать:
-
-- Папок `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exceptions/` (множественное).
-- Абстрактного класса в отдельной папке: он лежит рядом с реализациями.
-- Префикса или суффикса `Base`: только `Abstract<Role>` (`AbstractHandler`, не `BaseHandler`,
-  `HandlerAbstract`, `TableBase`).
+Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exceptions/`; абстрактный
+класс вне папки реализаций; `Base` в имени (`BaseHandler`, `HandlerAbstract`, `TableBase`).
 
 ### Классы
 
-| Что                    | Правило                                                        | Пример                              |
-|------------------------|----------------------------------------------------------------|-------------------------------------|
-| Файл                   | один класс, имя файла = имя класса                             | `LogRecord.php`                     |
-| Класс                  | существительное в единственном числе, PascalCase               | `Logger`, `CookieJar`               |
-| Точка входа пакета     | `Manager`, если пакет хранит конфигурацию, реестр каналов или драйверов | `Log\Manager`, `Hooks\Manager` |
-|                        | иначе — существительное по роли                                | `Router`, `Translator`, `Validator` |
-| Реализация в `<Role>s/`| вариант без суффикса роли, по возможности одно слово           | `Handlers\RotatingFile`, `Fields\Checkbox` |
-| Абстрактный класс      | `Abstract<Role>`, рядом с реализациями                         | `Handlers/AbstractHandler.php`      |
-| Интерфейс              | роль без суффикса `Interface`                                  | `Contracts\Handler`                 |
-|                        | суффикс `Interface` — только для имён из PSR и когда имя роли совпадает с классом-реализацией | `LoggerInterface`, `FileInterface` |
-| Трейт                  | способность, которую он даёт; `Has<Noun>` для данных и методов вокруг них | `HasSoftDeletes`, `Macroable` |
-| Enum                   | единственное число, кейсы в PascalCase                         | `Level::Debug`                      |
-| Исключение             | одно на пакет — `<Package>Exception`; отдельный класс, только если вызывающему нужно ловить его отдельно | `LogException`, `NotFoundHttpException` |
-| Модификаторы           | `final` для классов, от которых не наследуются; `abstract` для базовых | `final class Manager`       |
+| Что              | Правило                                                              | Пример                          |
+|------------------|----------------------------------------------------------------------|---------------------------------|
+| Файл             | один класс, имя файла = имя класса                                   | `LogRecord.php`                 |
+| Класс            | существительное, единственное число, PascalCase                      | `Logger`, `CookieJar`           |
+| Точка входа      | `Manager`, если есть конфигурация или реестр каналов/драйверов; иначе по роли | `Log\Manager`; `Router`, `Validator` |
+| Реализация       | вариант без суффикса роли                                            | `Handlers\RotatingFile`, `Fields\Checkbox` |
+| Абстрактный      | `Abstract<Role>`, рядом с реализациями                               | `Handlers/AbstractHandler.php`  |
+| Интерфейс        | без суффикса; `Interface` — только для имён PSR; конфликт с реализацией — алиасом | `Handler`, `File`; `LoggerInterface` |
+| Трейт            | способность; `Has<Noun>` — данные и методы вокруг них                | `HasSoftDeletes`                |
+| Enum             | единственное число, кейсы PascalCase                                 | `Level::Debug`                  |
+| Исключение       | одно `<Package>Exception`; отдельное — только если его ловят отдельно | `NotFoundHttpException`        |
+| Модификаторы     | `final`, если не наследуются; `abstract` для базовых                 | `final class Manager`           |
 
 ### Независимость пакетов
 
-Пакет должен работать и тестироваться сам по себе: его можно скопировать в другой проект вместе с
-базовым слоем, и он будет работать.
+Пакет работает и тестируется только с базовым слоем.
 
-- **Базовый слой** — `Support`, `Patterns`, `Codecs`. От них можно зависеть любому пакету, сами
-  они не зависят ни от чего, кроме друг друга.
-- **Остальные пакеты друг от друга не зависят.** Если пакету нужно чужое поведение, он получает его
-  снаружи: в `configure()`, в конструктор или через свой контракт. Реализацию передаёт
-  `bootstrap.php` или `App\`.
-
-  ```php
-  // Scheduler не знает о Mail: как отправить письмо, решает bootstrap.php
-  Scheduler::configure(mailer: fn (string $to, string $subject, string $body) => Mail::send(...));
-  ```
-
-- **Внутри пакета не вызываются фасады других пакетов** (`Hook::`, `Db::`, `Safe::`, `Lifecycle::`).
-  Фасады — для `bootstrap.php`, `App\`, шаблонов и плагинов.
-- **Хуки.** Точку расширения пакет даёт колбэком в `configure()` или методом `extend()`. Хук с
-  этим колбэком связывает `bootstrap.php`, а не сам пакет.
-- **Драйвер для чужого пакета допустим.** Если драйвер работает через другой пакет (например,
-  `Cache\Providers\Database` через `Database`), зависимость есть только у этого драйвера. Он
-  загружается, только когда его выбрали в конфигурации, а остальной пакет о нём не знает.
-- **Консольная команда пакета** лежит в самом пакете (`Scheduler/Commands/Run.php`) и
-  регистрируется в `bootstrap.php`. Пакет `Console` о чужих пакетах не знает.
-- **Исключение — `Builders`:** это UI-слой, который собирает формы и таблицы из других пакетов. Ему
-  можно зависеть от них, но зависимости он получает через конструктор, а не через фасады.
-- **Циклических зависимостей нет**, даже через драйвер.
-- **Проверка:** `tests/<Package>.php` проходит, когда подключены только этот пакет и базовый слой,
-  а в `use` пакета нет других `Expansa\*`, кроме базового слоя и своих драйверов.
+- **Базовый слой** — `Support`, `Patterns`, `Codecs`: доступен всем, сам зависит только от себя.
+- Прочие пакеты друг от друга не зависят. Чужое поведение приходит снаружи — через `configure()`,
+  конструктор или свой контракт; реализацию передают `bootstrap.php` или `App\`:
+  `Scheduler::configure(mailer: fn (string $to, string $subject, string $body) => Mail::send(...))`.
+- Внутри пакета нет фасадов других пакетов (`Hook::`, `Db::`, `Safe::`, `Lifecycle::`) — фасады для
+  `bootstrap.php`, `App\`, шаблонов, плагинов.
+- Точка расширения — колбэк в `configure()` или `extend()`; с хуком её связывает `bootstrap.php`.
+- Драйвер через чужой пакет допустим (`Cache\Providers\Database`): зависимость только у него, грузится
+  только при выборе в конфигурации.
+- Консольная команда — в своём пакете (`Scheduler/Commands/Run.php`), регистрируется в `bootstrap.php`.
+- Исключение — `Builders` (UI-слой): зависит от других пакетов, но через конструктор, не фасады.
+- Циклов нет, даже через драйвер.
+- Проверка: `tests/<Package>.php` проходит с одним пакетом и базовым слоем; в `use` нет других `Expansa\*`,
+  кроме базового слоя и своих драйверов.
 
 ### Фасады
 
-- `expansa-cms/expansa/Facades/<Name>.php`, один фасад на точку входа пакета.
-- Имя — то, как вызов читается в коде: короткое существительное в единственном числе
-  (`Log::info()`, `Hook::call()`, `Route::get()`, `Cache::get()`).
-- В описании класса — `@method static` для **каждого** публичного метода цели, с теми же типами
-  и значениями по умолчанию. При изменении сигнатуры метода обновляй и фасад.
-- Цель задаётся в `getStaticClassAccessor()`; логики в фасаде нет.
+- `Facades/<Name>.php`, один на точку входа; имя — как читается вызов, единственное число:
+  `Log::info()`, `Hook::call()`, `Route::get()`.
+- `@method static` на **каждый** публичный метод цели с теми же типами и default; сигнатура изменилась — обнови.
+- Только `getStaticClassAccessor()`, без логики.
 
 ### Конфигурация
 
-- Пакет настраивается методом `configure(...)` с именованными аргументами. Он вызывается в фазе
-  `configure` в `expansa-cms/bootstrap.php`, запросов к базе там нет.
-- Повторный `configure()` заменяет конфигурацию целиком и сбрасывает созданные по ней объекты.
-- Без `configure()` пакет работает с безопасными значениями по умолчанию (как `Log` пишет в
-  `error_log()`).
-- Драйверы: встроенные создаются методами `create<Driver>Driver(array $config)`, свои
-  добавляются через `extend(string $driver, Closure $factory)`.
-- Ключи массивов конфигурации — `snake_case`: `chat_id`, `driver`, `days`.
+- `configure(...)` с именованными аргументами, в фазе `configure` в `bootstrap.php`, без запросов к БД.
+- Повторный вызов заменяет конфигурацию целиком и сбрасывает созданные объекты.
+- Без `configure()` — безопасные умолчания (`Log` пишет в `error_log()`).
+- Встроенные драйверы — `create<Driver>Driver(array $config)`, свои — `extend(string $driver, Closure $factory)`.
+- Ключи конфигурации — `snake_case`: `chat_id`.
 
 ## Методы и свойства
 
-### Словарь глаголов
+| Глагол                 | Смысл                                          | Возвращает          |
+|------------------------|------------------------------------------------|---------------------|
+| `get<X>()`             | чтение без побочных эффектов                   | значение            |
+| `set<X>()`             | запись с перезаписью                           | `static` в fluent-API (`Plugin::setVersion()`), иначе `void`; одинаково в пакете |
+| `add()`                | добавить, если нет                             | `bool`/`static`     |
+| `has<X>()` / `is<X>()` | наличие / состояние                            | `bool`              |
+| `can<X>()`             | наличие возможности или права на действие      | `bool`              |
+| `forget()` / `flush()` | убрать один / все из памяти или кэша           | `bool`/`static`/`void` |
+| `pull()`               | `get()` + `forget()`                           | значение            |
+| `delete()`             | удалить сохранённое: строку БД, файл           | `bool`              |
+| `with<X>()`            | изменённая копия, исходный не меняется         | `static`            |
+| `create<X>()`          | фабрика                                        | объект              |
+| `resolve()`            | создать при первом обращении и закэшировать, обычно `protected` | объект |
+| `configure()` / `extend()` | настройка / свой драйвер                   | `void` / `static`   |
+| `render()`             | HTML или текст                                 | `string`            |
+| `handle()`             | обработать входящее: запись, запрос, команду   | результат           |
+| `encode()` / `decode()`| в формат и обратно                             | значение            |
+| `validate()` / `sanitize()` | проверить / очистить                      | `bool` / значение   |
 
-Используй глагол из таблицы, а не синоним. Если подходящего нет — выбери одно слово и применяй
-его во всём пакете.
+Нет подходящего — выбери одно слово на весь пакет. Не используй: `fetch`, `retrieve`, `remove`, `drop`,
+`clear`, `destroy`, `make`, `build` (кроме `Builders/`), `do`, `process`, `execute`.
 
-| Глагол             | Смысл                                                       | Возвращает            |
-|--------------------|-------------------------------------------------------------|-----------------------|
-| `get<X>()`         | прочитать без побочных эффектов                             | значение              |
-| `set<X>()`         | записать, перезаписав                                       | `static` или `void`   |
-| `add()`            | добавить, если ещё нет                                      | `bool` или `static`   |
-| `has<X>()`         | есть ли значение или элемент                                | `bool`                |
-| `is<X>()`          | состояние или проверка                                      | `bool`                |
-| `forget()`         | убрать один элемент из памяти или кэша                      | `bool` или `static`   |
-| `flush()`          | убрать все элементы                                         | `void` или `static`   |
-| `pull()`           | `get()` + `forget()`                                        | значение              |
-| `delete()`         | удалить сохранённое: строку в БД, файл                      | `bool`                |
-| `with<X>()`        | копия объекта с изменением, исходный не меняется            | `static`              |
-| `create<X>()`      | новый объект (фабрика)                                      | объект                |
-| `resolve()`        | создать при первом обращении и закэшировать, обычно `protected` | объект            |
-| `configure()`      | настройка пакета, см. выше                                  | `void`                |
-| `extend()`         | зарегистрировать свой драйвер или обработчик                | `static`              |
-| `render()`         | получить HTML или текст                                     | `string`              |
-| `handle()`         | обработать входящее: запись лога, запрос, команду           | результат             |
-| `encode()` / `decode()` | перевести в формат и обратно (кодеки)                  | значение              |
-| `validate()` / `sanitize()` | проверить / очистить данные                        | `bool` / значение     |
+- camelCase для методов и свойств; булевы — прилагательное или `is`/`has`: `$secure`, `$isInstalled`.
+- Флаг публичного метода передаётся именованным аргументом: `encode($value, pretty: true)`.
+- Константы класса — `UPPER_SNAKE_CASE` с типом: `private const int ENCODE_FLAGS`; глобальные — `EX_*`.
+- Глобальные функции (`functions.php`) — короткие `snake_case` для шаблонов и частых вызовов (`t()`,
+  `t_attr()`, `view()`); новые — только если фасада мало.
+- Геттер/сеттер без логики → свойство (короче и быстрее): `public private(set)`, `readonly` или hook.
+  Контракт объявляет свойство, а не геттер: `public Level $level { get; }`. Геттер остаётся для
+  ленивого значения (`getFormatter()`) или фасада.
+- `mixed` — только если значение действительно любое (`Cache::get()`); иначе точный тип (`add(): bool`).
 
-Не используй в новом коде: `fetch`, `retrieve`, `remove`, `drop`, `clear`, `destroy`, `make`,
-`build` (кроме строителей в `Builders/`), `do`, `process`, `execute`.
+### PHP 8.4
 
-### Именование
-
-- Методы и свойства — camelCase: `getDefaultChannel()`, `$sharedContext`.
-- Булевы свойства и параметры — прилагательное или `is`/`has`: `$secure`, `$httpOnly`, `$isInstalled`.
-- Параметр-флаг в публичном методе вызывается именованным аргументом: `encode($value, pretty: true)`.
-- Константы класса — `UPPER_SNAKE_CASE`, с типом: `private const int ENCODE_FLAGS`.
-- Глобальные константы — префикс `EX_`: `EX_PATH`, `EX_STORAGE`, `EX_VERSION`.
-- Глобальные функции (`expansa-cms/expansa/functions.php`) — `snake_case`, короткие, только для
-  шаблонов и частых вызовов: `t()`, `t_attr()`, `view()`, `url()`. Новые добавляй, только если
-  фасада недостаточно.
-
-### Свойства вместо геттеров
-
-PHP 8.4: вместо пары `getX()`/`setX()` без логики используй свойство — это и короче, и быстрее вызова метода.
-
-```php
-public private(set) string $name;         // читать снаружи, менять только внутри
-public readonly Level $level;             // задаётся один раз
-public string $path = '' {                // нормализация при записи
-    set => $value === '' ? '/' : $value;
-}
-```
-
-Геттер остаётся, если он часть контракта, вычисляет значение лениво (`getFormatter()`) или нужен
-фасаду. Правила конструкторов и property hooks — в [AGENTS.md](AGENTS.md).
-
-### Возможности PHP 8.4
-
-- **Ленивые объекты** (`ReflectionClass::newLazyGhost()` / `newLazyProxy()`) для тяжёлых сервисов:
-  БД, Mailer, Image. Объект создаётся при первом обращении, без ручного `resolve()`. Замени через
-  бенчмарк: запрос, где сервис не нужен, и запрос, где нужен.
-- **`array_find()`, `array_any()`, `array_all()`** вместо `foreach` с `break`, если бенчмарк не
-  показывает замедления на горячем пути.
-- **`new Foo()->bar()`** без скобок вокруг `new`.
-- **First-class callable** `strlen(...)` вместо `fn ($s) => strlen($s)`.
+- Ленивые объекты (`ReflectionClass::newLazyGhost()`/`newLazyProxy()`) для БД, Mailer, Image вместо
+  ручного `resolve()`; внедрять после бенчмарка запроса без сервиса и с ним.
+- `array_find()`, `array_any()`, `array_all()` вместо `foreach` с `break`, если бенчмарк не хуже.
+- `new Foo()->bar()` без скобок; `strlen(...)` вместо `fn ($s) => strlen($s)`.
 
 ## Хуки
 
-- Имя хука — camelCase, без префикса `expansa`.
-- Событие — `<объект><Событие в прошедшем времени>`: `dashboardLoaded`, `postSaved`.
-- Фильтр — имя фильтруемого значения: `dashboardRootSlug`, `redirectStatus`.
-- Хуки для вывода разметки — `render<Место>`: `renderDashboardFooter`.
-- Хуки плагина начинаются с его slug в camelCase: `seoMetaTags`.
+Хуки — единственная система событий: без EventDispatcher, Observer и аналогов. camelCase без префикса `expansa`. Событие — `<объект><прошедшее время>` (`dashboardLoaded`), фильтр — имя
+значения (`redirectStatus`), вывод разметки — `render<Место>`, хуки плагина — с его slug (`seoMetaTags`).
 
-## Слой приложения `App\`
+## App и плагины
 
-| Папка          | Что лежит                                  | Имя                                     |
-|----------------|--------------------------------------------|-----------------------------------------|
-| `Api/<Resource>/` | обработчики API ресурса                 | `<Resource>Controller`, `<Resource>Service` |
-| `Models/`      | модели БД                                  | единственное число: `Post`, `User`      |
-| `Tables/`      | таблицы дашборда                           | множественное число: `Posts`, `Users`   |
-| `Listeners/`   | классы с методами-хуками                   | область: `Assets`, `Migrations`         |
-| `Http/`        | middleware                                 | действие: `RequireAuth`, `VerifyCsrfToken` |
-| `Console/`     | команды приложения                         | как команды фреймворка                  |
+| `App\`            | Что                    | Имя                                         |
+|-------------------|------------------------|---------------------------------------------|
+| `Api/<Resource>/` | API ресурса            | `<Resource>Controller`, `<Resource>Service` |
+| `Models/`         | модели БД              | единственное: `Post`                        |
+| `Tables/`         | таблицы дашборда       | множественное: `Posts`                      |
+| `Listeners/`      | классы методов-хуков   | область: `Assets`                           |
+| `Http/`           | middleware             | действие: `RequireAuth`                     |
+| `Console/`        | команды                | как в фреймворке                            |
 
-Бизнес-логика — в `Service`, контроллер только разбирает запрос и возвращает ответ.
+Логика — в `Service`, контроллер разбирает запрос и отдаёт ответ.
 
-## Плагины и темы
-
-- `expansa-cms/plugins/<slug>/index.php` возвращает анонимный класс, наследник `Expansa\Extensions\Plugin`,
-  темы — аналогично в `expansa-cms/themes/<slug>/`.
-- slug — kebab-case: `file-manager`, `query-monitor`.
-- Классы плагина — в namespace из имени плагина в PascalCase (`FileManager\`, `Docify\`), по тем же
-  правилам, что и пакеты.
+Плагин — `plugins/<slug>/index.php` (тема — `themes/<slug>/`) возвращает анонимный наследник
+`Expansa\Extensions\Plugin`. slug — kebab-case, namespace — PascalCase slug (`FileManager\`), правила — как у пакетов.
 
 ## Добавление пакета
 
-1. **Проверь, что пакет нужен.** Если задача — новый драйвер или обработчик существующего пакета,
-   добавь класс в его `<Role>s/`, а не новый пакет.
-2. **Структура.** Создай `expansa-cms/expansa/<Package>/` по схеме выше: `declare(strict_types=1)`,
-   namespace `Expansa\<Package>`, описание класса в `/** */`.
-3. **Точка входа и фасад.** `Manager` или класс по роли, фасад в `Facades/` с `@method` для всех
-   публичных методов.
-4. **Конфигурация.** `configure()` вызывается в фазе `configure` в `bootstrap.php`; без него пакет
-   работает с безопасными умолчаниями.
-5. **Исключение.** `Exception/<Package>Exception.php`, наследник подходящего SPL-исключения
-   (`InvalidArgumentException`, `RuntimeException`).
-6. **Тесты.** `tests/<Package>.php`: объявляет `EX_PATH`, подключает `autoload.php`, проверки через
-   `check()`. Запуск всех тестов и PHPStan — `php tests/run.php`; новых ошибок PHPStan сверх
-   `phpstan-baseline.neon` быть не должно.
-7. **Бенчмарк**, если код на горячем пути (вызывается на каждом запросе или в цикле):
-   `tests/benchmarks/<Package>.php` по разделу «Бенчмарки». Сравни с исходной версией и оставь
-   быстрейший вариант, если читаемость не страдает.
-8. **Документация.** `documentation/<Package>.md` на русском: вступление с примером и таблицей
-   классов (`Класс` — `Назначение`), затем конфигурация, использование, расширение. Код в примерах
-   должен работать.
-9. **Classmap.** `php artisan autoload:dump`, если меняешь набор классов в продакшн-сборке; без него
-   новые классы подгружаются по PSR-4.
+1. Новый драйвер существующего пакета — класс в его `<Role>s/`, а не пакет.
+2. Структура по схеме, `declare(strict_types=1)`, описание класса в `/** */`.
+3. Точка входа и фасад с `@method`.
+4. `configure()` в `bootstrap.php`, безопасные умолчания без него.
+5. `Exception/<Package>Exception.php` от подходящего SPL-исключения.
+6. `tests/<Package>.php` подключает `tests/bootstrap.php` (`EX_PATH`, `autoload.php`, `check()`, `throws()`)
+   и содержит только проверки; `php tests/run.php` — тесты и PHPStan без новых ошибок сверх baseline.
+7. Горячий путь (каждый запрос или цикл) — бенчмарк по разделу «Бенчмарки».
+8. `documentation/<Package>.md` на русском: вступление с примером и таблицей `Класс — Назначение`,
+   конфигурация, использование, расширение; примеры рабочие.
+9. `php artisan autoload:dump` при изменении классов в продакшн-сборке (иначе PSR-4).
 
 ### Сторонний код
 
-- **Не подключай библиотеку ради одной функции.** Сторонний код поставляется вместе с ядром, и
-  каждая библиотека увеличивает объём, который нужно поддерживать. Сначала проверь встроенные
-  функции PHP и пакеты `expansa/`. Небольшую задачу реши сам. Библиотека оправдана, когда её
-  объём и сложность несопоставимы с задачей: обработка изображений, отправка почты.
-- Библиотека ставится через `require-dev` в `composer.json` и копируется в `expansa/` скриптом
-  `scripts/sync-vendored.php` (добавь пару в `$map`).
-- Она сохраняет свой namespace; префикс добавляется в `$prefixes` в `expansa-cms/autoload.php`,
-  а папка — в `excludePaths` в `phpstan.neon`.
-- Сторонний код не правится и не переименовывается под эти соглашения; если он переписан под
-  Expansa (как `Scheduler/Cron`), он становится частью пакета и следует им полностью.
+- Не подключай библиотеку ради одной функции: она поставляется с ядром и её надо поддерживать. Сначала
+  PHP и `expansa/`, небольшое — пиши сам. Оправдано, когда объём несопоставим с задачей (изображения, почта).
+- `require-dev` в `composer.json` → копия в `expansa/` через `$map` в `scripts/sync-vendored.php`; свой
+  namespace — в `$prefixes` в `autoload.php`; папка — в `excludePaths` в `phpstan.neon`.
+- Не правится и не переименовывается; переписанный под Expansa (`Scheduler/Cron`) — часть пакета по всем правилам.
 
 ## Обновление кода
 
-- **Касаешься пакета — приводишь его к соглашениям.** Не весь проект за раз: пакет, с которым
-  работаешь, и его использования.
-- **Переименование** — сразу во всём проекте: `grep` по имени класса, метода, хука, строки
-  в `bootstrap.php`, фасады, тесты, документация.
-- **Удаляй мёртвый код** — неиспользуемые методы, параметры, классы.
-- **Без защитного кода для невозможных случаев.** Тип параметра и `strict_types` уже гарантируют
-  тип: не нужны `is_string()` после `string $x`, проверки на `null` у не-nullable значения, `try`
-  вокруг кода, который не бросает. Проверяй только внешние данные: запрос, файлы, конфигурацию,
-  ответы сервисов.
-- **Проверка перед коммитом:** `php tests/run.php` без ошибок; для горячего пути — бенчмарк против
-  предыдущего коммита.
-- **Документация и комментарии** обновляются вместе с кодом (правила комментариев — в
-  [AGENTS.md](AGENTS.md)).
-- **PHPStan:** у пакета, с которым работаешь, в `phpstan-baseline.neon` не остаётся записей: ошибки
-  исправляются, а не переносятся в baseline.
-- **Коммит** — на английском, повелительное наклонение, пакет в тексте: `Update Log package`,
-  `Add Codecs package`, `Fix Cache: expired keys on add()`.
+- Тронул пакет — приведи к соглашениям его и его использования, не весь проект.
+- Переименование — сразу везде: классы, методы, хуки, `bootstrap.php`, фасады, тесты, документация.
+- Удаляй мёртвый код.
+- Без защиты от невозможного: не нужны `is_string()` после `string $x`, `null`-проверки не-nullable,
+  `try` вокруг небросающего. Проверяй только внешние данные: запрос, файлы, конфигурацию, ответы сервисов.
+- Перед коммитом: `php tests/run.php`; горячий путь — бенчмарк против предыдущего коммита.
+- Документация и комментарии — вместе с кодом.
+- У тронутого пакета нет записей в `phpstan-baseline.neon`: ошибки исправляются, а не переносятся.
+- Коммит на английском, повелительно, с пакетом: `Update Log package`, `Fix Cache: expired keys on add()`.
 
-## Статический анализ
+## Инструменты
 
-Уровень PHPStan поднимается поэтапно, до 6 (типы параметров, возвратов и элементов массивов):
+**CI** — GitHub Actions на каждый push и PR: `php tests/run.php` (тесты и PHPStan) и phpcs. Красная сборка
+не мержится.
 
-1. Пока baseline непустой, пакеты чистятся по мере работы с ними (см. «Обновление кода»).
-2. Когда на текущем уровне baseline опустел или остались единичные записи, подними `level` в
-   `phpstan.neon` на один и пересобери baseline:
-   `vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=1G --generate-baseline phpstan-baseline.neon`.
-3. Уровень не понижается, а baseline не пополняется вручную.
+**PHPStan** — поэтапно до level 6. Когда baseline текущего уровня почти пуст, подними `level` на один и
+пересобери: `vendor/bin/phpstan analyse -c phpstan.neon --memory-limit=1G --generate-baseline phpstan-baseline.neon`.
+Уровень не понижается, baseline вручную не пополняется. Пиши типы сразу: `Handler[]`,
+`array<string, Logger>`, `array{driver: string, level?: string}`, `class-string<T>`.
 
-Чтобы следующий уровень проходил без правок, пиши типы сразу: `@var Handler[]`,
-`array<string, Logger>`, `array{driver: string, level?: string}` для конфигураций, `class-string<T>`.
+**phpcs** по `phpcs.xml` (PSR-12 + правила). Переход на `squizlabs/php_codesniffer` `4.*` (3.x ложно ругается
+на hooks): проверь sniff `phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php` и исключения, убери
+устаревшее. До перехода ложные ошибки не исправляй кодом и не глуши `phpcs:ignore`. Если 4.x не тянет
+PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форматтера не держим.
 
-## Стиль кода
-
-- Стиль проверяется phpcs по `phpcs.xml` (PSR-12 и дополнительные правила).
-- Переход на phpcs 4.x: `squizlabs/php_codesniffer` в `composer.json` — `4.*`. Версия 3.x не понимает
-  property hooks и выдаёт по ним ложные ошибки.
-- Перед переходом проверь, что собственный sniff `phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php`
-  и исключения в `phpcs.xml` работают с 4.x; устаревшие правила убери.
-- До перехода ложные ошибки по hooks не исправляются правками кода и не подавляются
-  `phpcs:ignore`.
-- Если phpcs 4.x всё ещё не поддерживает какую-то конструкцию PHP 8.4, замени phpcs на
-  PHP-CS-Fixer с теми же правилами. Одновременно два форматтера не держим.
-
-## Бенчмарки
-
-Бенчмарки лежат в `tests/benchmarks/<Package>.php` и сравнивают текущий код с версией из коммита
-или файла (`--baseline`) на одинаковых данных.
-
-Общий код выносится в `tests/benchmarks/bootstrap.php` (пока повторяется в каждом бенчмарке):
-
-- разбор опций `--baseline=<git ref или файл>` (можно несколько), `--iterations=N`;
-- загрузка базовой версии из git под другим именем. Для одного класса — переименование класса
-  (`Kses` → `KsesBaseline`, как в `Kses.php` и `Arr.php`). Для пакета — замена namespace
-  (`Expansa\Log` → `LogBaseline`, как в `Log.php`). Файлы кладутся во временную папку с `mtime`
-  в прошлом, чтобы opcache их кэшировал;
-- `measure(callable $callback, int $iterations, int $rounds = 5): float` — лучший из раундов после
-  прогрева;
-- вывод таблицы: вариант, время на операцию, разница с базовой версией в процентах.
-
-Бенчмарк пакета после этого содержит только входные данные и сравниваемые вызовы, примерно на
-20 строк. Особые сценарии, например отдельный процесс на каждый прогон в `Autoload.php`,
-остаются в самом бенчмарке.
+**Бенчмарки** — `tests/benchmarks/<Package>.php`, текущий код против `--baseline` на одних данных. Общий код —
+в `tests/benchmarks/bootstrap.php` (пока дублируется): опции `--baseline=<ref или файл>` (несколько) и
+`--iterations=N`; загрузка базы из git — переименованием класса (`Kses` → `KsesBaseline`) или namespace
+(`Expansa\Log` → `LogBaseline`) во временную папку с `mtime` в прошлом для opcache;
+`measure(callable $callback, int $iterations, int $rounds = 5): float` — лучший раунд после прогрева;
+таблица: вариант, время на операцию, разница в %. Бенчмарк пакета — ~20 строк данных и вызовов; особые
+сценарии (процесс на прогон в `Autoload.php`) остаются в нём.
 
 ## Известные отклонения
 
 Исправляются при следующей работе с пакетом.
 
-| Где                                           | Сейчас                                   | Должно быть                                  |
-|-----------------------------------------------|------------------------------------------|----------------------------------------------|
-| `Http/Exceptions/`                            | множественное число                      | `Http/Exception/`                            |
-| `Http/Request/ParameterBug.php`               | опечатка                                 | `ParameterBag.php`                           |
-| `Assets/Abstracts/Provider.php`               | папка `Abstracts/`                       | `Assets/Providers/AbstractProvider.php`      |
-| `Log/Handlers/*Handler.php`                   | суффикс роли                             | `File`, `RotatingFile`, `ErrorLog`, `Telegram` |
-| `Log/Formatters/*Formatter.php`               | суффикс роли                             | `Line`, `Telegram`                           |
-| `Security/Csrf/Providers/Native*Provider.php` | суффикс роли                             | `Cookie`, `HttpOnlyCookie`, `Session`        |
-| `View/Engines/*Engine.php`                    | суффикс роли                             | `Blade`, `File`, `Js`, `Php`                 |
-| `View/Engines/Engine.php`                     | базовый класс назван как роль            | `AbstractEngine` или `Contracts\Engine`      |
-| `View/Compilers/BladeCompiler.php`            | суффикс роли                             | `Blade`                                      |
-| `Session/Middleware/SessionStartMiddleware.php` | суффикс роли, повтор пакета           | `StartSession`                               |
-| `Cache/Concerns/`                             | `Concerns/`                              | `Cache/Traits/`                              |
-| `Builders/Table/Abstracts/TableBase.php`      | `Abstracts/`, суффикс `Base`             | `AbstractTable`                              |
-| `Database/Query/BuilderAbstract.php`          | суффикс `Abstract`                       | `AbstractBuilder`                            |
-| `Database/Model/Has*.php`                     | трейты вне `Traits/`                     | `Database/Traits/Has*.php`                   |
-| `Filesystem/Contracts/CommonInterface.php`    | имя не описывает роль                    | имя по роли, например `EntryInterface`       |
-| `Extensions/Traits/ExtensionTraits.php`, `ExtensionHelpers.php` | имя не описывает способность | по способности                    |
-| `Models/Options.php`                          | множественное число                      | `Option`                                     |
-| хук `expansa_view_part`                       | snake_case, префикс                      | `viewPart`                                   |
-| хуки `expansaRedirectBy`, `expansaRedirectStatus`, `expansaRedirectLocation`, `expansaConfigureMailer` | префикс `expansa` | `redirectBy`, `redirectStatus`, ...  |
-| `Facades/Json.php`                           | отступ табами                                 | 4 пробела                                    |
+| Где                                              | Проблема                   | Должно быть                              |
+|--------------------------------------------------|----------------------------|------------------------------------------|
+| `Http/Exceptions/`                               | множественное              | `Http/Exception/`                        |
+| `Http/Request/ParameterBug.php`                  | опечатка                   | `ParameterBag`                           |
+| `Assets/Abstracts/Provider.php`                  | `Abstracts/`               | `Assets/Providers/AbstractProvider`      |
+| `Log/Handlers/*Handler`                          | суффикс роли               | `File`, `RotatingFile`, `ErrorLog`, `Telegram` |
+| `Log/Formatters/*Formatter`                      | суффикс роли               | `Line`, `Telegram`                       |
+| `Security/Csrf/Providers/Native*Provider`        | суффикс роли               | `Cookie`, `HttpOnlyCookie`, `Session`    |
+| `View/Engines/*Engine`                           | суффикс роли               | `Blade`, `File`, `Js`, `Php`             |
+| `View/Engines/Engine.php`                        | база названа как роль      | `AbstractEngine` или `Contracts\Engine`  |
+| `View/Compilers/BladeCompiler`                   | суффикс роли               | `Blade`                                  |
+| `Session/Middleware/SessionStartMiddleware`      | суффикс, повтор пакета     | `StartSession`                           |
+| `Cache/Concerns/`                                | `Concerns/`                | `Cache/Traits/`                          |
+| `Builders/Table/Abstracts/TableBase`             | `Abstracts/`, `Base`       | `AbstractTable`                          |
+| `Database/Query/BuilderAbstract`                 | суффикс `Abstract`         | `AbstractBuilder`                        |
+| `Database/Model/Has*`                            | трейты вне `Traits/`       | `Database/Traits/Has*`                   |
+| `Filesystem/Contracts/*Interface`                | суффикс не из PSR          | `File`, `Directory`; `CommonInterface` → по роли, например `Entry` |
+| `Session/Contracts/{Flash,Session,SessionManager}Interface` | суффикс не из PSR | `Flash`, `Session`, `Manager` (PSR-7/15 имена остаются) |
+| `Cache/Contracts/Provider`                       | `add()`, `set()` и др. возвращают `mixed` | точные типы: `bool`         |
+| `tests/*.php`                                    | `check()`, `throws()`, `EX_PATH` в каждом из 16 тестов | `tests/bootstrap.php` |
+| CI                                               | нет `.github/`             | workflow с `tests/run.php` и phpcs       |
+| `Extensions/Traits/ExtensionTraits`, `ExtensionHelpers` | имя без способности | по способности                           |
+| `Models/Options`                                 | множественное              | `Option`                                 |
+| хук `expansa_view_part`                          | snake_case, префикс        | `viewPart`                               |
+| хуки `expansaRedirectBy/Status/Location`, `expansaConfigureMailer` | префикс `expansa` | `redirectBy`, ...          |
+| `Facades/Json.php`                               | табы                       | 4 пробела                                |
 
 ### Зависимости между пакетами
 
-| Пакет         | Зависит от                        | Как развязать                                              |
-|---------------|-----------------------------------|------------------------------------------------------------|
-| `Support`     | `Lifecycle` (`Is::dashboard()`)   | базовый слой не зависит ни от чего: значение передаётся через `Is::configure()` |
-| `Scheduler`   | `Mail` (`Job` создаёт `Mailer`)   | колбэк отправки в `configure()`                            |
-| `Console`     | `Assets`, `Scheduler`, `Hooks`    | команды `AssetClean`, `ScheduleRun`, `HooksList` — в свои пакеты |
-| `Database`    | `Cache`, `Security` (`Safe`)      | кэш и очистка передаются снаружи                           |
-| `Filesystem`  | `Debug`, `Security` (`Validator`) | ошибки через исключения, проверка — снаружи                |
-| `Http`        | `Cookie`, `Hooks`                 | хуки `Redirect` — колбэками в `configure()`                |
-| `Mail`        | `Hooks`                           | настройка мейлера — колбэком в `configure()`               |
-| `Translation` | `Hooks`, `Security` (`Safe`)      | колбэки в `configure()`                                    |
-| `Lifecycle`   | `Hooks`, `Routing`                | колбэки фаз и маршрутизации передаёт `bootstrap.php`       |
-| `Builders`    | `Assets`, `View`, `Security`      | UI-слой поверх пакетов: допустимо, но через конструктор, не фасады |
-| `Cache`       | `Database` (`Providers\Database`) | допустимо: зависимость только у драйвера                   |
+| Пакет         | Зависит от                      | Как развязать                                        |
+|---------------|---------------------------------|------------------------------------------------------|
+| `Support`     | `Lifecycle` (`Is::dashboard()`) | значение через `Is::configure()`                     |
+| `Scheduler`   | `Mail` (`Job` создаёт `Mailer`) | колбэк отправки в `configure()`                      |
+| `Console`     | `Assets`, `Scheduler`, `Hooks`  | `AssetClean`, `ScheduleRun`, `HooksList` — в свои пакеты |
+| `Database`    | `Cache`, `Security` (`Safe`)    | кэш и очистка снаружи                                |
+| `Filesystem`  | `Debug`, `Security` (`Validator`) | ошибки — исключениями, проверка снаружи            |
+| `Http`        | `Cookie`, `Hooks`               | хуки `Redirect` — колбэками в `configure()`          |
+| `Mail`        | `Hooks`                         | настройка мейлера — колбэком в `configure()`         |
+| `Translation` | `Hooks`, `Security` (`Safe`)    | колбэки в `configure()`                              |
+| `Lifecycle`   | `Hooks`, `Routing`              | колбэки фаз и маршрутизации из `bootstrap.php`       |
+| `Builders`    | `Assets`, `View`, `Security`    | допустимо (UI-слой), но через конструктор            |
+| `Cache`       | `Database` (`Providers\Database`) | допустимо: только драйвер                          |
