@@ -10,10 +10,9 @@ use DateTimeInterface;
 use ReflectionFunction;
 use Stringable;
 use Throwable;
-use Expansa\Mail\Mailer;
-use Expansa\Scheduler\Cron\CronExpression;
-use Expansa\Scheduler\Exceptions\SchedulerException;
-use Expansa\Scheduler\Traits\JobIntervals;
+use Expansa\Scheduler\Exceptions\EmailNotSent;
+use Expansa\Scheduler\Exceptions\InvalidConfiguration;
+use Expansa\Scheduler\Traits\HasIntervals;
 
 /**
  * A scheduled PHP closure or shell command.
@@ -21,9 +20,9 @@ use Expansa\Scheduler\Traits\JobIntervals;
  *
  * @package Expansa\Scheduler
  */
-class Job
+final class Job
 {
-    use JobIntervals;
+    use HasIntervals;
 
     private const bool POSIX = PHP_OS_FAMILY !== 'Windows';
 
@@ -60,9 +59,15 @@ class Job
 
     private ?Closure $after = null;
 
-    private ?string $output = null;
+    /**
+     * Output of the last run, `null` before the first run or for a background job.
+     */
+    public private(set) ?string $output = null;
 
-    private int $returnCode = 0;
+    /**
+     * Exit code of the last foreground shell run.
+     */
+    public private(set) int $returnCode = 0;
 
     /**
      * Files the output is written to.
@@ -81,9 +86,14 @@ class Job
     private array $emailTo = [];
 
     /**
-     * Email settings: `subject`, `from`, `body` and `ignore_empty_output`.
+     * Email settings: `subject`, `body` and `ignore_empty_output`.
      */
-    private array $emailConfig = [];
+    private array $email = [];
+
+    /**
+     * Sends an email: gets the address, subject, body and attached files, returns true when sent.
+     */
+    private ?Closure $mailer = null;
 
     public function __construct(
 
@@ -126,27 +136,18 @@ class Job
     }
 
     /**
-     * Apply the scheduler config: `tempDir` for lock files and `email` settings.
+     * Apply the scheduler configuration, see Scheduler::configure().
      *
-     * @param array $config
+     * @param string       $tempDir Lock files directory, the system temp one when empty.
+     * @param array        $email   `subject`, `body` and `ignore_empty_output`.
+     * @param Closure|null $mailer  Gets the address, subject, body and attached files, returns true when sent.
      * @return static
-     * @throws SchedulerException
      */
-    public function configure(array $config = []): static
+    public function configure(string $tempDir = '', array $email = [], ?Closure $mailer = null): static
     {
-        if (isset($config['email'])) {
-            if (! is_array($config['email'])) {
-                throw new SchedulerException('Email configuration should be an array.');
-            }
-            $this->emailConfig = $config['email'];
-        }
-
-        if (isset($config['tempDir'])) {
-            if (! is_string($config['tempDir'])) {
-                throw new SchedulerException('The tempDir should be a path to a directory.');
-            }
-            $this->tempDir = $config['tempDir'];
-        }
+        $this->tempDir = $tempDir;
+        $this->email   = $email;
+        $this->mailer  = $mailer;
 
         return $this;
     }
@@ -264,26 +265,6 @@ class Job
     }
 
     /**
-     * Get the output of the last run, `null` before the first run or for a background job.
-     *
-     * @return string|null
-     */
-    public function getOutput(): ?string
-    {
-        return $this->output;
-    }
-
-    /**
-     * Get the exit code of the last foreground shell run.
-     *
-     * @return int
-     */
-    public function getReturnCode(): int
-    {
-        return $this->returnCode;
-    }
-
-    /**
      * Send the output by email after each run, the output files are attached. Forces the job to foreground.
      *
      * @param array|string $email
@@ -391,16 +372,16 @@ class Job
                 ($this->before)($this);
             }
 
-            $this->output = $this->execute();
+            $this->output = $this->runCompiled();
         } catch (Throwable $e) {
-            $this->removeLockFile();
+            $this->deleteLockFile();
 
             throw $e;
         }
 
         // a background job removes the lock itself when it finishes
         if (! $this->canRunInBackground()) {
-            $this->removeLockFile();
+            $this->deleteLockFile();
         }
 
         $this->emailOutput();
@@ -417,7 +398,7 @@ class Job
      *
      * @return string|null `null` for a background job.
      */
-    private function execute(): ?string
+    private function runCompiled(): ?string
     {
         $compiled = $this->compile();
 
@@ -484,7 +465,7 @@ class Job
         }
     }
 
-    private function removeLockFile(): void
+    private function deleteLockFile(): void
     {
         if ($this->lockFile !== '' && is_file($this->lockFile)) {
             unlink($this->lockFile);
@@ -492,10 +473,10 @@ class Job
     }
 
     /**
-     * Email the output to the recipients set by email().
+     * Email the output to each recipient set by email(), with the existing output files attached.
      *
      * @return void
-     * @throws SchedulerException If the email is not sent.
+     * @throws InvalidConfiguration|EmailNotSent
      */
     private function emailOutput(): void
     {
@@ -503,27 +484,22 @@ class Job
             return;
         }
 
-        if (($this->emailConfig['ignore_empty_output'] ?? false) === true && ($this->output ?? '') === '') {
+        if (($this->email['ignore_empty_output'] ?? false) === true && ($this->output ?? '') === '') {
             return;
         }
 
-        $mailer = new Mailer();
-        foreach ($this->emailTo as $email) {
-            $mailer->to($email);
+        if ($this->mailer === null) {
+            throw new InvalidConfiguration('The job output is not sent: no mailer is configured.');
         }
 
-        if (isset($this->emailConfig['from'])) {
-            $mailer->from($this->emailConfig['from']);
-        }
+        $subject     = $this->email['subject'] ?? 'Cronjob execution';
+        $body        = $this->email['body'] ?? (string) $this->output;
+        $attachments = array_values(array_filter($this->outputTo, is_file(...)));
 
-        $result = $mailer
-            ->subject($this->emailConfig['subject'] ?? 'Cronjob execution')
-            ->message($this->emailConfig['body'] ?? (string) $this->output)
-            ->attach($this->outputTo)
-            ->send();
-
-        if ($result !== true) {
-            throw new SchedulerException('The job output is not sent: ' . $result->ErrorInfo);
+        foreach ($this->emailTo as $to) {
+            if (($this->mailer)($to, $subject, $body, $attachments) !== true) {
+                throw new EmailNotSent("The job output is not sent to $to.");
+            }
         }
     }
 }

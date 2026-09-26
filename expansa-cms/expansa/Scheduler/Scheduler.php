@@ -8,7 +8,9 @@ use Closure;
 use DateTime;
 use DateTimeInterface;
 use Throwable;
-use Expansa\Scheduler\Exceptions\SchedulerException;
+use InvalidArgumentException;
+use Expansa\Scheduler\Exceptions\ScriptNotFound;
+use Expansa\Scheduler\Internal\FailedJob;
 
 /**
  * Queues closures, PHP scripts and shell commands and runs the due ones.
@@ -17,8 +19,37 @@ use Expansa\Scheduler\Exceptions\SchedulerException;
  *
  * @package Expansa\Scheduler
  */
-class Scheduler
+final class Scheduler
 {
+    /**
+     * Lock files directory of onlyOne(), the system temp one when empty.
+     */
+    private static string $tempDir = '';
+
+    /**
+     * Email settings: `subject`, `body` and `ignore_empty_output`.
+     */
+    private static array $email = [];
+
+    /**
+     * Sends the output of email(): gets the address, subject, body and attached files, returns true when sent.
+     */
+    private static ?Closure $mailer = null;
+
+    /**
+     * Jobs executed by the last run.
+     *
+     * @var Job[]
+     */
+    public private(set) array $executedJobs = [];
+
+    /**
+     * Jobs failed during the last run or while being queued.
+     *
+     * @var FailedJob[]
+     */
+    public private(set) array $failedJobs = [];
+
     /**
      * Queued jobs.
      *
@@ -27,33 +58,27 @@ class Scheduler
     private array $jobs = [];
 
     /**
-     * Jobs executed by the last run.
-     *
-     * @var Job[]
-     */
-    private array $executedJobs = [];
-
-    /**
-     * Jobs failed during the last run or while being queued.
-     *
-     * @var FailedJob[]
-     */
-    private array $failedJobs = [];
-
-    /**
      * Log lines of the last run.
      *
      * @var string[]
      */
     private array $outputSchedule = [];
 
-    public function __construct(
-
-        /**
-         * `tempDir` for lock files and `email` settings, applied to every queued job.
-         */
-        private readonly array $config = [],
-    ) {} // phpcs:ignore
+    /**
+     * Set the configuration of the jobs queued from now on, the previous one is replaced.
+     *
+     * @param string       $tempDir Lock files directory of onlyOne(), the system temp one when empty.
+     * @param array        $email   `subject`, `body` (the output by default) and `ignore_empty_output`.
+     * @param Closure|null $mailer  `fn (string $to, string $subject, string $body, array $attachments): bool`,
+     *                              without it email() jobs fail.
+     * @return void
+     */
+    public static function configure(string $tempDir = '', array $email = [], ?Closure $mailer = null): void
+    {
+        self::$tempDir = $tempDir;
+        self::$email   = $email;
+        self::$mailer  = $mailer;
+    }
 
     /**
      * Queue a PHP callable.
@@ -84,7 +109,7 @@ class Scheduler
         $job = new Job(escapeshellarg($bin) . ' ' . escapeshellarg($script), $args, $id);
 
         if (! is_file($script)) {
-            $this->pushFailedJob($job->configure($this->config), new SchedulerException("The script $script does not exist."));
+            $this->pushFailedJob($job->configure(self::$tempDir, self::$email, self::$mailer), new ScriptNotFound("The script $script does not exist."));
 
             return $job;
         }
@@ -160,31 +185,11 @@ class Scheduler
     }
 
     /**
-     * Get the jobs executed by the last run.
-     *
-     * @return Job[]
-     */
-    public function getExecutedJobs(): array
-    {
-        return $this->executedJobs;
-    }
-
-    /**
-     * Get the jobs failed during the last run or while being queued.
-     *
-     * @return FailedJob[]
-     */
-    public function getFailedJobs(): array
-    {
-        return $this->failedJobs;
-    }
-
-    /**
      * Get the log of the last run.
      *
      * @param string $type `text`, `html` or `array`.
      * @return string|string[]
-     * @throws SchedulerException
+     * @throws InvalidArgumentException
      */
     public function getVerboseOutput(string $type = 'text'): string|array
     {
@@ -192,16 +197,16 @@ class Scheduler
             'text'  => implode("\n", $this->outputSchedule),
             'html'  => implode('<br>', array_map('htmlspecialchars', $this->outputSchedule)),
             'array' => $this->outputSchedule,
-            default => throw new SchedulerException('Invalid output type'),
+            default => throw new InvalidArgumentException('Invalid output type'),
         };
     }
 
     /**
-     * Remove all queued jobs.
+     * Forget all queued jobs.
      *
      * @return static
      */
-    public function clearJobs(): static
+    public function flushJobs(): static
     {
         $this->jobs = [];
 
@@ -214,7 +219,7 @@ class Scheduler
      *
      * @param int[] $seconds From 0 to 59.
      * @return never
-     * @throws SchedulerException
+     * @throws InvalidArgumentException
      */
     public function work(array $seconds = [0]): never
     {
@@ -222,7 +227,7 @@ class Scheduler
         sort($seconds);
 
         if ($seconds === [] || $seconds[0] < 0 || $seconds[count($seconds) - 1] > 59) {
-            throw new SchedulerException('The seconds should be between 0 and 59.');
+            throw new InvalidArgumentException('The seconds should be between 0 and 59.');
         }
 
         while (true) {
@@ -251,7 +256,7 @@ class Scheduler
      */
     private function queue(Job $job): Job
     {
-        $this->jobs[] = $job->configure($this->config);
+        $this->jobs[] = $job->configure(self::$tempDir, self::$email, self::$mailer);
 
         return $job;
     }

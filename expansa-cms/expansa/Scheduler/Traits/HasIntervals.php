@@ -6,23 +6,24 @@ namespace Expansa\Scheduler\Traits;
 
 use DateTimeInterface;
 use DateTimeImmutable;
-use Expansa\Scheduler\Cron\CronExpression;
-use Expansa\Scheduler\Exceptions\SchedulerException;
+use Expansa\Scheduler\CronExpression;
+use Expansa\Scheduler\Exceptions\InvalidExpression;
+use Expansa\Scheduler\Exceptions\InvalidInterval;
 
 /**
  * Fluent schedule methods of a job, each one replaces the previous schedule.
  * Hours accept the `H:i` form, e.g. `daily('10:30')`, which overrides the minute argument.
  *
- * @package Expansa\Scheduler\Traits
+ * @package Expansa\Scheduler
  */
-trait JobIntervals
+trait HasIntervals
 {
     /**
      * Run the job by a CRON expression or an alias, e.g. `0 9 * * 1-5` or `@daily`.
      *
      * @param string $expression
      * @return static
-     * @throws SchedulerException
+     * @throws InvalidExpression
      */
     public function at(string $expression): static
     {
@@ -236,7 +237,7 @@ trait JobIntervals
      * @param int        $min
      * @param int        $max
      * @return string
-     * @throws SchedulerException
+     * @throws InvalidInterval
      */
     private function cronValue(int|string $value, int $min, int $max): string
     {
@@ -246,7 +247,7 @@ trait JobIntervals
 
         $number = is_int($value) || ctype_digit($value) ? (int) $value : -1;
         if ($number < $min || $number > $max) {
-            throw new SchedulerException("Invalid value: it should be '*' or between {$min} and {$max}.");
+            throw new InvalidInterval("Invalid value: it should be '*' or between {$min} and {$max}.");
         }
 
         return (string) $number;

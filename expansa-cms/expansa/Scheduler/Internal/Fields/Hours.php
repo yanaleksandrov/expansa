@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Scheduler\Cron;
+namespace Expansa\Scheduler\Internal\Fields;
 
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -10,9 +10,10 @@ use DateTimeInterface;
 /**
  * Hours field, allows: * , / -. Hours skipped or repeated by a DST change are still matched.
  *
- * @package Expansa\Scheduler\Cron
+ * @internal
+ * @package Expansa\Scheduler
  */
-class HoursField extends AbstractField
+final class Hours extends AbstractField
 {
     /**
      * Seconds around a date for which the timezone transitions are loaded.

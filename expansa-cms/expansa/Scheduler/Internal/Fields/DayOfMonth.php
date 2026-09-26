@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Scheduler\Cron;
+namespace Expansa\Scheduler\Internal\Fields;
 
 use DateTimeInterface;
 
@@ -12,9 +12,10 @@ use DateTimeInterface;
  * `L` is the last day of the month. `15W` is the weekday nearest to the 15th that does not leave the month:
  * a Saturday moves to Friday, a Sunday to Monday, `1W` on a Saturday moves to Monday the 3rd.
  *
- * @package Expansa\Scheduler\Cron
+ * @internal
+ * @package Expansa\Scheduler
  */
-class DayOfMonthField extends AbstractField
+final class DayOfMonth extends AbstractField
 {
     protected int $rangeStart = 1;
 

@@ -9,7 +9,6 @@ use Expansa\Console\Commands\AutoloadDump;
 use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
 use Expansa\Console\Commands\Index;
-use Expansa\Console\Commands\ScheduleRun;
 use Expansa\Console\Traits\WritesOutput;
 
 /**
@@ -59,7 +58,7 @@ final class Terminal
 
         $this->parse($argv ?? []);
 
-        foreach ([Index::class, Help::class, Env::class, AssetClean::class, AutoloadDump::class, ScheduleRun::class] as $command) {
+        foreach ([Index::class, Help::class, Env::class, AssetClean::class, AutoloadDump::class] as $command) {
             $this->addCommand($command);
         }
     }

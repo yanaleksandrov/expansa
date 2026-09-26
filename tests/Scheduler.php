@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-use Expansa\Facades\Hook;
-use Expansa\Mail\Mailer;
-use Expansa\Scheduler\Cron\CronExpression;
-use Expansa\Scheduler\Exceptions\SchedulerException;
+use Expansa\Scheduler\CronExpression;
+use Expansa\Scheduler\Exceptions\EmailNotSent;
+use Expansa\Scheduler\Exceptions\InvalidConfiguration;
+use Expansa\Scheduler\Exceptions\InvalidExpression;
+use Expansa\Scheduler\Exceptions\InvalidInterval;
+use Expansa\Scheduler\Exceptions\ScriptNotFound;
 use Expansa\Scheduler\Job;
 use Expansa\Scheduler\Scheduler;
-use PHPMailer\PHPMailer\PHPMailer;
 
 // run: php tests/Scheduler.php
 require_once __DIR__ . '/bootstrap.php';
@@ -70,17 +71,17 @@ check('DST: skipped hour runs right after the change', new CronExpression('30 2 
 check('DST: repeated hour matches both times', new CronExpression('30 1 * * *')->getNextRunDate(new DateTime('2025-11-02 01:40', $ny))->format('Y-m-d H:i T') === '2025-11-02 01:30 EST');
 
 check('aliases resolve', (string) new CronExpression('@daily') === '0 0 * * *' && (string) new CronExpression('@HOURLY') === '0 * * * *');
-CronExpression::registerAlias('@workdays', '0 9 * * 1-5');
-check('user aliases register', CronExpression::supportsAlias('@workdays') && (string) new CronExpression('@workdays') === '0 9 * * 1-5');
-check('user aliases unregister', CronExpression::unregisterAlias('@workdays') && ! CronExpression::supportsAlias('@workdays'));
-check('built-in aliases can not be unregistered', throws(fn () => CronExpression::unregisterAlias('@daily'), LogicException::class));
-check('invalid aliases are rejected', throws(fn () => CronExpression::registerAlias('daily', '* * * * *'), LogicException::class) && throws(fn () => CronExpression::registerAlias('@x', 'foo'), LogicException::class));
+CronExpression::addAlias('@workdays', '0 9 * * 1-5');
+check('user aliases register', CronExpression::hasAlias('@workdays') && (string) new CronExpression('@workdays') === '0 9 * * 1-5');
+check('user aliases unregister', CronExpression::forgetAlias('@workdays') && ! CronExpression::hasAlias('@workdays'));
+check('built-in aliases can not be unregistered', throws(fn () => CronExpression::forgetAlias('@daily'), LogicException::class));
+check('invalid aliases are rejected', throws(fn () => CronExpression::addAlias('daily', '* * * * *'), LogicException::class) && throws(fn () => CronExpression::addAlias('@x', 'foo'), LogicException::class));
 
 $valid   = ['* * * * *', '*/5 1-5 1,15 JAN-MAR MON-FRI', '0 0 L * ?', '0 0 15W * *', '0 0 ? * 5L', '0 0 * * 5#2', '0 0 * * 7', '05 09 * * *'];
 $invalid = ['* * * *', '* * * * * *', '? * * * *', '0 0 ? * ?', '60 * * * *', '0 24 * * *', '0 0 32 * *', '0 0 * 13 *', '0 0 * * 8', '*/0 * * * *', '*/-1 * * * *', '+5 * * * *', '1e1 * * * *', '*/5/2 * * * *', '5/5 * * * *', '1-2-3 * * * *', '*-5 * * * *', '0 0 LW * *', '0 0 1,L * *', '0 0 * * 5#6', 'foo'];
 check('valid expressions are accepted', array_filter($valid, fn ($e) => ! CronExpression::isValidExpression($e)) === []);
 check('invalid expressions are rejected', array_filter($invalid, fn ($e) => CronExpression::isValidExpression($e)) === []);
-check('invalid expression throws a SchedulerException', throws(fn () => new CronExpression('60 * * * *'), SchedulerException::class) && throws(fn () => new CronExpression('60 * * * *'), InvalidArgumentException::class));
+check('invalid expression throws InvalidExpression', throws(fn () => new CronExpression('60 * * * *'), InvalidExpression::class) && throws(fn () => new CronExpression('60 * * * *'), InvalidArgumentException::class));
 check('setPart changes the expression', (string) new CronExpression('* * * * *')->setPart(CronExpression::HOUR, '5') === '* 5 * * *' && new CronExpression('* * * * *')->setPart(CronExpression::HOUR, '5')->isDue(new DateTime('2025-01-01 05:10')));
 
 // the fork must agree with the original library wherever it did not fix a bug
@@ -136,7 +137,7 @@ check('daily accepts H:i with leading zeros', expression($job->daily('09:05')) =
 check('daily keeps the minute of a * hour', expression($job->daily('*', 30)) === '30 * * * *');
 check('weekly and weekdays', expression($job->weekly(3, '10:30')) === '30 10 * * 3' && expression($job->friday(18)) === '0 18 * * 5' && expression($job->sunday()) === '0 0 * * 0');
 check('monthly and months', expression($job->monthly(day: 15, hour: '12:45')) === '45 12 15 * *' && expression($job->december(25, 8)) === '0 8 25 12 *');
-check('invalid interval values throw', throws(fn () => $job->hourly(60), SchedulerException::class) && throws(fn () => $job->daily('25:00'), SchedulerException::class) && throws(fn () => $job->everyMinute(0), SchedulerException::class) && throws(fn () => $job->weekly(7), SchedulerException::class) && throws(fn () => $job->monthly(13), SchedulerException::class));
+check('invalid interval values throw', throws(fn () => $job->hourly(60), InvalidInterval::class) && throws(fn () => $job->daily('25:00'), InvalidInterval::class) && throws(fn () => $job->everyMinute(0), InvalidInterval::class) && throws(fn () => $job->weekly(7), InvalidInterval::class) && throws(fn () => $job->monthly(13), InvalidInterval::class));
 check('at accepts an alias', expression($job->at('@hourly')) === '0 * * * *');
 
 $job = new Job(fn () => null)->date('2030-05-06 07:08');
@@ -150,7 +151,7 @@ $job = new Job(function (int $a, int $b) {
 
     return (string) ($a + $b);
 }, ['b' => 2, 'a' => 1]);
-check('a closure gets named arguments, the output is its echo plus the returned string', $job->run() && $job->getOutput() === 'sum:3');
+check('a closure gets named arguments, the output is its echo plus the returned string', $job->run() && $job->output === 'sum:3');
 
 $calls = 0;
 $job   = new Job(fn () => 'x')->when(function () use (&$calls) {
@@ -158,7 +159,7 @@ $job   = new Job(fn () => 'x')->when(function () use (&$calls) {
 
     return false;
 });
-check('when() is checked at the run, not when declared', $calls === 0 && ! $job->run() && $calls === 1 && $job->getOutput() === null);
+check('when() is checked at the run, not when declared', $calls === 0 && ! $job->run() && $calls === 1 && $job->output === null);
 check('when(true) runs the job', new Job(fn () => 'x')->when(true)->run());
 
 $log = [];
@@ -201,9 +202,8 @@ check('a failing job throws and releases its lock', throws(fn () => $job->run(),
 $locked = false;
 new Job(function () use (&$locked, $tmp) {
     $locked = is_file($tmp . DIRECTORY_SEPARATOR . 'configured.lock');
-}, id: 'configured')->configure(['tempDir' => $tmp])->onlyOne('/no/such/dir')->run();
+}, id: 'configured')->configure(tempDir: $tmp)->onlyOne('/no/such/dir')->run();
 check('onlyOne falls back to the configured tempDir', $locked);
-check('invalid config throws', throws(fn () => new Job('ls')->configure(['email' => 'me@example.com']), SchedulerException::class) && throws(fn () => new Job('ls')->configure(['tempDir' => 1]), SchedulerException::class));
 
 // shell commands
 $posix = PHP_OS_FAMILY !== 'Windows';
@@ -220,15 +220,18 @@ if ($posix) {
 $script = $tmp . DIRECTORY_SEPARATOR . 'script.php';
 file_put_contents($script, '<?php echo implode(",", array_slice($argv, 1)); exit(3);');
 
-$scheduler = new Scheduler(['tempDir' => $tmp]);
-$job       = $scheduler->php($script, null, ['--name' => 'a b', 'c'])->inForeground()->output($file);
+Scheduler::configure(tempDir: $tmp);
+$scheduler = new Scheduler();
+$job       = $scheduler->php($script, null, ['--name' => 'a b', 'c'])->inForeground()->output($file)->onlyOne();
 $scheduler->run();
-check('php() runs a script with escaped arguments', $job->getOutput() === '--name,a b,c' && $job->getReturnCode() === 3);
+check('php() runs a script with escaped arguments', $job->output === '--name,a b,c' && $job->returnCode === 3);
 check('a foreground shell output is written to the files', file_get_contents($file) === "--name,a b,c\n");
+check('configure() sets the lock directory of the queued jobs', str_starts_with(new ReflectionProperty(Job::class, 'lockFile')->getValue($job), $tmp));
+Scheduler::configure();
 
 $scheduler = new Scheduler();
 $job       = $scheduler->php($tmp . DIRECTORY_SEPARATOR . 'missing.php');
-check('php() with a missing script fails without being queued', $scheduler->getQueuedJobs() === [] && $scheduler->getFailedJobs()[0]->getJob() === $job);
+check('php() with a missing script fails without being queued', $scheduler->getQueuedJobs() === [] && $scheduler->failedJobs[0]->job === $job && $scheduler->failedJobs[0]->exception instanceof ScriptNotFound);
 
 // scheduler
 $scheduler = new Scheduler();
@@ -239,12 +242,12 @@ $scheduler->call(fn () => 'not due')->at('0 0 1 1 *');
 $last = $scheduler->call('strtoupper', ['last']);
 
 $executed = $scheduler->run(new DateTime('2025-06-15 10:30'));
-check('run executes the due jobs, skipped ones are not executed', $executed === [$first, $last] && $last->getOutput() === 'LAST');
-check('an Error of a job does not stop the others', count($scheduler->getFailedJobs()) === 1 && $scheduler->getFailedJobs()[0]->getException() instanceof TypeError);
+check('run executes the due jobs, skipped ones are not executed', $executed === [$first, $last] && $last->output === 'LAST');
+check('an Error of a job does not stop the others', count($scheduler->failedJobs) === 1 && $scheduler->failedJobs[0]->exception instanceof TypeError);
 check('verbose output logs every executed and failed job', count($scheduler->getVerboseOutput('array')) === 3 && str_contains($scheduler->getVerboseOutput(), 'type: Closure ' . __FILE__));
-check('unknown verbose output type throws', throws(fn () => $scheduler->getVerboseOutput('json'), SchedulerException::class));
-check('resetRun clears the results', $scheduler->resetRun()->getExecutedJobs() === [] && $scheduler->getFailedJobs() === [] && $scheduler->getVerboseOutput() === '');
-check('clearJobs empties the queue', $scheduler->clearJobs()->getQueuedJobs() === []);
+check('unknown verbose output type throws', throws(fn () => $scheduler->getVerboseOutput('json'), InvalidArgumentException::class));
+check('resetRun clears the results', $scheduler->resetRun()->executedJobs === [] && $scheduler->failedJobs === [] && $scheduler->getVerboseOutput() === '');
+check('flushJobs empties the queue', $scheduler->flushJobs()->getQueuedJobs() === []);
 
 $scheduler = new Scheduler();
 $scheduler->call(fn () => throw new Exception('<b>'));
@@ -255,28 +258,20 @@ $scheduler  = new Scheduler();
 $foreground = $scheduler->call(fn () => null);
 $background = $scheduler->raw('ls');
 check('background jobs are queued first', $scheduler->getQueuedJobs() === ($posix ? [$background, $foreground] : [$foreground, $background]));
-check('work() rejects invalid seconds', throws(fn () => $scheduler->work([60]), SchedulerException::class));
+check('work() rejects invalid seconds', throws(fn () => $scheduler->work([60]), InvalidArgumentException::class));
 
 // email
-class_exists(Mailer::class);
+$sent   = [];
+$mailer = function (string $to, string $subject, string $body, array $attachments) use (&$sent): bool {
+    $sent[] = [$to, $subject, $body, count($attachments)];
 
-class FakeMailer extends PHPMailer
-{
-    public function send(): bool
-    {
-        return true;
-    }
-}
-
-$sent = [];
-Hook::add('expansaConfigureMailer', function (PHPMailer $mailer) use (&$sent) {
-    $sent[] = [$mailer->Subject, $mailer->Body, count($mailer->getAttachments())];
-
-    return new FakeMailer();
-});
-new Job(fn () => 'report')->email('me@example.com')->configure(['email' => ['subject' => 'Daily']])->output($file)->run();
-new Job(fn () => '')->email(['me@example.com'])->configure(['email' => ['ignore_empty_output' => true]])->run();
-check('email sends the output with the output files, empty output is ignored if configured', $sent === [['Daily', 'report', 1]]);
+    return true;
+};
+new Job(fn () => 'report')->email(['a@example.com', 'b@example.com'])->configure(email: ['subject' => 'Daily'], mailer: $mailer)->output($file)->run();
+new Job(fn () => '')->email('me@example.com')->configure(email: ['ignore_empty_output' => true], mailer: $mailer)->run();
+check('email sends the output with the output files to each recipient, empty output is ignored if configured', $sent === [['a@example.com', 'Daily', 'report', 1], ['b@example.com', 'Daily', 'report', 1]]);
+check('email without a mailer fails', throws(fn () => new Job(fn () => 'x')->email('me@example.com')->run(), InvalidConfiguration::class));
+check('an email the mailer does not send fails', throws(fn () => new Job(fn () => 'x')->email('me@example.com')->configure(mailer: fn () => false)->run(), EmailNotSent::class));
 
 // artisan schedule:run, in a separate process: the command writes to STDOUT and exits with the failure code
 $command = $tmp . DIRECTORY_SEPARATOR . 'command.php';
@@ -286,19 +281,20 @@ const EX_PATH    = ' . var_export(EX_PATH, true) . ';
 const EX_STORAGE = ' . var_export($tmp . DIRECTORY_SEPARATOR, true) . ';
 require EX_PATH . "autoload.php";
 require EX_PATH . "expansa/functions.php";
-Expansa\Facades\Hook::add("schedule", function (Expansa\Scheduler\Scheduler $scheduler) use ($argv) {
+Expansa\Scheduler\Scheduler::configure(tempDir: EX_STORAGE);
+$run = new Expansa\Scheduler\Commands\Run(function (Expansa\Scheduler\Scheduler $scheduler) use ($argv) {
     $scheduler->call(fn () => file_put_contents(EX_STORAGE . "ran.txt", "yes"))->onlyOne();
     $scheduler->call(fn () => null)->at("0 0 1 1 *");
     if (isset($argv[1])) {
         $scheduler->call(fn () => throw new RuntimeException("broken job"));
     }
 });
-new Expansa\Console\Terminal()->run("schedule:run");
+new Expansa\Console\Terminal()->addCommand($run)->run("schedule:run");
 ');
 
 exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($command) . ' 2>&1', $output, $code);
-check('schedule:run runs the jobs of the schedule hook', $code === 0 && count($output) === 1 && str_contains($output[0], 'Done') && str_contains($output[0], 'command.php:8') && is_file($tmp . DIRECTORY_SEPARATOR . 'ran.txt'));
-check('schedule:run keeps lock files in the storage', glob($tmp . DIRECTORY_SEPARATOR . '*.lock') === []);
+check('schedule:run runs the jobs of its schedule callback', $code === 0 && count($output) === 1 && str_contains($output[0], 'Done') && str_contains($output[0], 'command.php:9') && is_file($tmp . DIRECTORY_SEPARATOR . 'ran.txt'));
+check('schedule:run keeps lock files in the configured directory', glob($tmp . DIRECTORY_SEPARATOR . '*.lock') === []);
 
 $output = [];
 exec(escapeshellarg(PHP_BINARY) . ' ' . escapeshellarg($command) . ' fail 2>&1', $output, $code);

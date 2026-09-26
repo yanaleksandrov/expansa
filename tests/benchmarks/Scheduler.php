@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Expansa\Scheduler\Cron\CronExpression;
+use Expansa\Scheduler\CronExpression;
 use Expansa\Scheduler\Scheduler;
 
 // run: php tests/benchmarks/Scheduler.php [--iterations=N]

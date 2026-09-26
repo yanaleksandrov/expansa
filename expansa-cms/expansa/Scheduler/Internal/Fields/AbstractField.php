@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Scheduler\Cron;
+namespace Expansa\Scheduler\Internal\Fields;
 
 use DateTime;
 use DateTimeImmutable;
@@ -14,7 +14,8 @@ use RuntimeException;
  * Base CRON expression field: validates a part and checks it against a date value.
  * Instances are shared between all expressions, so the caches are keyed by the part itself.
  *
- * @package Expansa\Scheduler\Cron
+ * @internal
+ * @package Expansa\Scheduler
  */
 abstract class AbstractField
 {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Scheduler\Cron;
+namespace Expansa\Scheduler;
 
 use DateTime;
 use DateTimeImmutable;
@@ -11,16 +11,23 @@ use DateTimeZone;
 use Exception;
 use LogicException;
 use RuntimeException;
-use Expansa\Scheduler\Exceptions\SchedulerException;
+use InvalidArgumentException;
+use Expansa\Scheduler\Exceptions\InvalidExpression;
+use Expansa\Scheduler\Internal\Fields\AbstractField;
+use Expansa\Scheduler\Internal\Fields\DayOfMonth;
+use Expansa\Scheduler\Internal\Fields\DayOfWeek;
+use Expansa\Scheduler\Internal\Fields\Hours;
+use Expansa\Scheduler\Internal\Fields\Minutes;
+use Expansa\Scheduler\Internal\Fields\Month;
 
 /**
  * CRON expression: checks whether it is due and finds its next and previous run dates.
  * Seconds are dropped from every comparison, so the result is exact when checked once a minute.
  * Fork of https://github.com/dragonmantank/cron-expression.
  *
- * @package Expansa\Scheduler\Cron
+ * @package Expansa\Scheduler
  */
-class CronExpression
+final class CronExpression
 {
     public const int MINUTE  = 0;
     public const int HOUR    = 1;
@@ -63,7 +70,7 @@ class CronExpression
      *
      * @var string[]
      */
-    private array $parts = [];
+    public private(set) array $parts = [];
 
     /**
      * Parts other than `*` in ORDER, each split into its comma separated items.
@@ -85,14 +92,14 @@ class CronExpression
     private ?self $weekDays = null;
 
     /**
-     * Max iterations when searching for a run date.
+     * Max iterations when searching for a run date, the search throws after them.
      */
-    private int $maxIterationCount = 1000;
+    public int $maxIterationCount = 1000;
 
     /**
      * Parse a CRON expression or an alias.
      *
-     * @throws SchedulerException
+     * @throws InvalidExpression
      */
     public function __construct(
 
@@ -100,8 +107,7 @@ class CronExpression
          * E.g. `8 * * * *` or `@daily`.
          */
         string $expression,
-    )
-    {
+    ) {
         $this->setExpression(self::$aliases[strtolower($expression)] ?? $expression);
     }
 
@@ -113,7 +119,7 @@ class CronExpression
      * @return void
      * @throws LogicException If the expression or the alias are invalid, or the alias is already registered.
      */
-    public static function registerAlias(string $alias, string $expression): void
+    public static function addAlias(string $alias, string $expression): void
     {
         if (! self::isValidExpression($expression)) {
             throw new LogicException("The expression `$expression` is invalid");
@@ -138,7 +144,7 @@ class CronExpression
      * @return bool False if the alias is not registered.
      * @throws LogicException For a built-in alias.
      */
-    public static function unregisterAlias(string $alias): bool
+    public static function forgetAlias(string $alias): bool
     {
         $shortcut = strtolower($alias);
         if (isset(self::MAPPINGS[$shortcut])) {
@@ -160,7 +166,7 @@ class CronExpression
      * @param string $alias
      * @return bool
      */
-    public static function supportsAlias(string $alias): bool
+    public static function hasAlias(string $alias): bool
     {
         return isset(self::$aliases[strtolower($alias)]);
     }
@@ -185,7 +191,7 @@ class CronExpression
     {
         try {
             new self($expression);
-        } catch (SchedulerException) {
+        } catch (InvalidExpression) {
             return false;
         }
 
@@ -197,17 +203,17 @@ class CronExpression
      *
      * @param int $position One of the MINUTE ... WEEKDAY constants.
      * @return AbstractField
-     * @throws SchedulerException
+     * @throws InvalidArgumentException For an unknown position.
      */
-    public static function field(int $position): AbstractField
+    private static function field(int $position): AbstractField
     {
         return self::$fields[$position] ??= match ($position) {
-            self::MINUTE  => new MinutesField(),
-            self::HOUR    => new HoursField(),
-            self::DAY     => new DayOfMonthField(),
-            self::MONTH   => new MonthField(),
-            self::WEEKDAY => new DayOfWeekField(),
-            default       => throw new SchedulerException(($position + 1) . ' is not a valid position'),
+            self::MINUTE  => new Minutes(),
+            self::HOUR    => new Hours(),
+            self::DAY     => new DayOfMonth(),
+            self::MONTH   => new Month(),
+            self::WEEKDAY => new DayOfWeek(),
+            default       => throw new InvalidArgumentException("$position is not a valid position"),
         };
     }
 
@@ -216,7 +222,7 @@ class CronExpression
      *
      * @param string $value E.g. `8 * * * *`, aliases are not resolved here.
      * @return static
-     * @throws SchedulerException
+     * @throws InvalidExpression
      */
     public function setExpression(string $value): static
     {
@@ -231,7 +237,7 @@ class CronExpression
             || $parts[self::MONTH] === '?'
             || ($parts[self::DAY] === '?' && $parts[self::WEEKDAY] === '?')
         ) {
-            throw new SchedulerException($value . ' is not a valid CRON expression');
+            throw new InvalidExpression($value . ' is not a valid CRON expression');
         }
 
         foreach ($parts as $position => $part) {
@@ -247,31 +253,18 @@ class CronExpression
      * @param int    $position One of the MINUTE ... WEEKDAY constants.
      * @param string $value
      * @return static
-     * @throws SchedulerException
+     * @throws InvalidExpression|InvalidArgumentException
      */
     public function setPart(int $position, string $value): static
     {
         if (! self::field($position)->validate($value)) {
-            throw new SchedulerException('Invalid CRON field value ' . $value . ' at position ' . $position);
+            throw new InvalidExpression('Invalid CRON field value ' . $value . ' at position ' . $position);
         }
 
         $this->parts[$position] = $value;
         $this->lists            = null;
         $this->monthDays        = null;
         $this->weekDays         = null;
-
-        return $this;
-    }
-
-    /**
-     * Set max iterations when searching for a run date.
-     *
-     * @param int $maxIterationCount
-     * @return static
-     */
-    public function setMaxIterationCount(int $maxIterationCount): static
-    {
-        $this->maxIterationCount = $maxIterationCount;
 
         return $this;
     }
@@ -285,16 +278,6 @@ class CronExpression
     public function getExpression(?int $part = null): ?string
     {
         return $part === null ? implode(' ', $this->parts) : $this->parts[$part] ?? null;
-    }
-
-    /**
-     * Get the parts of the expression, from minute to weekday.
-     *
-     * @return string[]
-     */
-    public function getParts(): array
-    {
-        return $this->parts;
     }
 
     public function __toString(): string

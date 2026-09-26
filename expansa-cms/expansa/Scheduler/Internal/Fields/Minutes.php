@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Scheduler\Cron;
+namespace Expansa\Scheduler\Internal\Fields;
 
 use DateTimeInterface;
 
 /**
  * Minutes field, allows: * , / -.
  *
- * @package Expansa\Scheduler\Cron
+ * @internal
+ * @package Expansa\Scheduler
  */
-class MinutesField extends AbstractField
+final class Minutes extends AbstractField
 {
     protected int $rangeStart = 0;
 

@@ -4,13 +4,20 @@
 описывается CRON-выражением или fluent-методами (`daily()`, `hourly()`, `monday()`…). Весь пакет
 находится в `Expansa\Scheduler`:
 
-| Класс                           | Назначение                                                        |
-|---------------------------------|-------------------------------------------------------------------|
-| `Scheduler`                     | Очередь задач, запуск наступивших, результаты и лог               |
-| `Job`                           | Задача: команда, расписание, условия, вывод, блокировка           |
-| `FailedJob`                     | Задача, которая выбросила исключение, и само исключение           |
-| `Cron\CronExpression`           | Разбор CRON-выражения, `isDue()`, следующая и предыдущая даты     |
-| `Exceptions\SchedulerException` | Неверное выражение, значение интервала или конфигурация           |
+| Класс                             | Назначение                                                        |
+|-----------------------------------|-------------------------------------------------------------------|
+| `Scheduler`                       | Очередь задач, запуск наступивших, результаты, лог и конфигурация |
+| `Job`                             | Задача: команда, расписание, условия, вывод, блокировка           |
+| `CronExpression`                  | Разбор CRON-выражения, `isDue()`, следующая и предыдущая даты     |
+| `Commands\Run`                    | Консольная команда `schedule:run`                                 |
+| `Exceptions\InvalidExpression`    | CRON-выражение или его часть не разбирается                       |
+| `Exceptions\InvalidInterval`      | Значение метода расписания вне диапазона: `hourly(60)`            |
+| `Exceptions\ScriptNotFound`       | Скрипта задачи `php()` нет                                        |
+| `Exceptions\InvalidConfiguration` | `email()` без почтового колбэка в `configure()`                   |
+| `Exceptions\EmailNotSent`         | Колбэк не отправил письмо с выводом                               |
+
+Упавшая задача попадает в `$scheduler->failedJobs` объектом со свойствами `job` и `exception`
+(класс `Internal\FailedJob` внутренний: по имени на него не ссылаются).
 
 Планировщик сам по себе ничего не запускает: его нужно вызывать **раз в минуту** системным cron'ом
 (команда `php artisan schedule:run`) или держать запущенным через `work()`.
@@ -61,10 +68,20 @@ Hook::add('schedule', function (Scheduler $scheduler) {
 * * * * * cd /path/to/expansa-cms && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-Команда создаёт планировщик, вызывает хук `schedule` и выполняет наступившие задачи. Каждая
+Команда создаёт планировщик, передаёт его колбэку `schedule` и выполняет наступившие задачи. Каждая
 выполненная задача выводится строкой `Done <задача>`, упавшая — в STDERR, с сообщением исключения.
 Если упала хотя бы одна задача, команда завершается с кодом 1, и системный cron может сообщить об
-ошибке. Lock-файлы `onlyOne()` хранятся в `EX_STORAGE`.
+ошибке.
+
+Пакет не зависит от хуков: команду `Commands\Run` регистрирует `bootstrap.php` и передаёт колбэк,
+который вызывает хук. Lock-файлы `onlyOne()` хранятся в `EX_STORAGE` — так задано в
+`Scheduler::configure()`, см. [Конфигурация](#конфигурация).
+
+```php
+Terminal::addCommand(new Expansa\Scheduler\Commands\Run(
+    schedule: fn (Scheduler $scheduler) => Hook::call('schedule', $scheduler),
+));
+```
 
 Хук вызывается при каждом запуске команды, поэтому слушатель должен только объявлять задачи: всё
 тяжёлое — внутри замыканий задач и условий `when()`.
@@ -88,7 +105,7 @@ $scheduler->call(fn (int $days, string $type) => pruneLogs($days, $type), ['type
 ```
 
 `php()` по умолчанию использует текущий бинарник PHP (`PHP_BINARY`). Если скрипта нет, задача
-не ставится в очередь и сразу попадает в `getFailedJobs()`.
+не ставится в очередь и сразу попадает в `failedJobs` с `ScriptNotFound`.
 
 Сама команда в `raw()` **не экранируется** — не подставляйте в неё пользовательские данные,
 передавайте их через `$args`.
@@ -115,7 +132,7 @@ $job->at('@daily');              // или алиас
 
 Час можно передать строкой `H:i`, тогда минута берётся из неё. Значение `*` означает «любое».
 Неверное значение (`hourly(60)`, `daily('25:00')`, `everyMinute(0)`) выбрасывает
-`SchedulerException`.
+`InvalidInterval`, неверное выражение в `at()` — `InvalidExpression`.
 
 `date()` запускает задачу один раз: выражение совпадает с минутой даты каждый год, поэтому
 задача дополнительно проверяет год. Последующий `at()` или другой метод расписания сбрасывает год.
@@ -149,10 +166,13 @@ $job->at('@daily');              // или алиас
 Свои алиасы регистрируются глобально:
 
 ```php
-use Expansa\Scheduler\Cron\CronExpression;
+use Expansa\Scheduler\CronExpression;
 
-CronExpression::registerAlias('@workdays', '0 9 * * 1-5');
+CronExpression::addAlias('@workdays', '0 9 * * 1-5');
 $scheduler->call($report)->at('@workdays');
+
+CronExpression::hasAlias('@workdays');     // true
+CronExpression::forgetAlias('@workdays');  // встроенный алиас убрать нельзя: LogicException
 ```
 
 ## Условия и колбэки
@@ -184,30 +204,30 @@ $scheduler->raw('report')->daily()->inForeground()->output(EX_STORAGE . 'report.
 | Метод                                  | Описание                                                        |
 |----------------------------------------|-----------------------------------------------------------------|
 | `output(array\|string $files, $append)`| Записать вывод в файлы, перезаписывая или дописывая              |
-| `getOutput(): ?string`                 | Вывод последнего запуска, `null` до запуска и у фоновой задачи   |
-| `getReturnCode(): int`                 | Код выхода последнего запуска shell-команды на переднем плане    |
+| `$job->output`                         | Вывод последнего запуска, `null` до запуска и у фоновой задачи   |
+| `$job->returnCode`                     | Код выхода последнего запуска shell-команды на переднем плане    |
 | `email(array\|string $emails)`         | Отправить вывод на почту, файлы вывода прикладываются            |
 
 Вывод замыкания — всё, что оно напечатало, плюс возвращённая строка.
 
-Почта отправляется через `Expansa\Mail\Mailer` (хук `expansaConfigureMailer` работает как обычно)
-и настраивается конфигурацией планировщика:
+Письма отправляет колбэк `mailer` из [конфигурации](#конфигурация), каждому адресату отдельно:
 
 ```php
-$scheduler = new Scheduler([
-    'email' => [
+Scheduler::configure(
+    email: [
         'subject'             => 'Отчёт планировщика',
-        'from'                => 'cron@example.com',
         'body'                => null,   // по умолчанию тело письма — вывод задачи
         'ignore_empty_output' => true,   // не отправлять пустой вывод
     ],
-]);
+    mailer: fn (string $to, string $subject, string $body, array $attachments) => Mail::send($to, $subject, $body, $attachments),
+);
 
 $scheduler->call($report)->daily()->email(['admin@example.com']);
 ```
 
-`email()` переводит задачу на передний план. Если письмо не отправлено, задача попадает в
-упавшие с `SchedulerException`.
+`email()` переводит задачу на передний план. Без колбэка задача попадает в упавшие с
+`InvalidConfiguration`, если колбэк вернул не `true` — с `EmailNotSent`. Отправитель — забота
+колбэка: `bootstrap.php` передаёт `Mail::send()`.
 
 ## Защита от наложения
 
@@ -258,13 +278,14 @@ $scheduler->raw('ls')->output('/tmp/ls.log')->onlyOne('/tmp')->compile();
 $executed = $scheduler->run();                   // сейчас
 $executed = $scheduler->run(new DateTime('2025-01-01 10:30'));
 
-$scheduler->getExecutedJobs();                   // Job[]
-$scheduler->getFailedJobs();                     // FailedJob[]: getJob(), getException()
+$scheduler->executedJobs;                        // Job[]
+$scheduler->failedJobs;                          // объекты со свойствами job и exception
 $scheduler->getVerboseOutput();                  // 'text', 'html' или 'array'
+$scheduler->flushJobs();                         // очистить очередь
 ```
 
 Исключение или `Error` одной задачи не останавливает остальные: задача попадает в
-`getFailedJobs()`, а в лог записывается сообщение и описание задачи (команда или
+`failedJobs`, а в лог записывается сообщение и описание задачи (команда или
 `Closure файл:строка`).
 
 Результаты накапливаются между вызовами `run()`. Если вызываете его несколько раз в одном процессе,
@@ -282,20 +303,30 @@ $scheduler->work([0, 30]);   // запуск на 0-й и 30-й секунде �
 
 ## Конфигурация
 
-| Ключ      | Тип      | Описание                                                    |
-|-----------|----------|-------------------------------------------------------------|
-| `tempDir` | `string` | Папка lock-файлов для `onlyOne()` без аргумента             |
-| `email`   | `array`  | Настройки почты, см. [Вывод](#вывод)                        |
+`Scheduler::configure()` — статический, `bootstrap.php` вызывает его в фазе `configure`:
 
-Конфигурация применяется ко всем задачам при постановке в очередь. Неверный тип значения
-выбрасывает `SchedulerException`.
+```php
+Expansa\Scheduler\Scheduler::configure(
+    tempDir: EX_STORAGE,
+    mailer: fn (string $to, string $subject, string $body, array $attachments) => Mail::send($to, $subject, $body, $attachments),
+);
+```
+
+| Аргумент  | Тип        | Описание                                                               |
+|-----------|------------|------------------------------------------------------------------------|
+| `tempDir` | `string`   | Папка lock-файлов для `onlyOne()` без аргумента, иначе системная       |
+| `email`   | `array`    | `subject`, `body`, `ignore_empty_output`, см. [Вывод](#вывод)          |
+| `mailer`  | `?Closure` | Отправка письма, возвращает `true`; без него `email()`-задачи падают   |
+
+Конфигурация применяется к задачам при постановке в очередь; повторный вызов заменяет её целиком.
+Без вызова lock-файлы лежат в системной временной папке, а почта не отправляется.
 
 ## CronExpression
 
 Выражение можно использовать без планировщика:
 
 ```php
-use Expansa\Scheduler\Cron\CronExpression;
+use Expansa\Scheduler\CronExpression;
 
 $cron = new CronExpression('0 9-17 * * 1-5');
 
@@ -306,6 +337,8 @@ $cron->getPreviousRunDate('2025-01-06 08:30');
 $cron->getNextRunDate($date, nth: 2);               // пропустить два совпадения
 $cron->getMultipleRunDates(5);                      // пять следующих дат
 CronExpression::isValidExpression('0 25 * * *');    // false
+$cron->parts;                                       // ['0', '9-17', '*', '*', '1-5']
+$cron->maxIterationCount = 5000;                    // предел поиска даты, по умолчанию 1000
 ```
 
 Даты считаются в часовом поясе переданной даты; для строки — в `$timeZone` или в поясе по

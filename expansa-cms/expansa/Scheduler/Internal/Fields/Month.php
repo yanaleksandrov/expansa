@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Scheduler\Cron;
+namespace Expansa\Scheduler\Internal\Fields;
 
 use DateTimeInterface;
 
 /**
  * Month field, allows: * , / - and the literals JAN-DEC.
  *
- * @package Expansa\Scheduler\Cron
+ * @internal
+ * @package Expansa\Scheduler
  */
-class MonthField extends AbstractField
+final class Month extends AbstractField
 {
     protected const array LITERALS = [
         'JAN' => 1,
