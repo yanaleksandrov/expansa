@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Hook;
-use Expansa\Lifecycle\Exception\LifecycleException;
+use Expansa\Lifecycle\Exceptions\LifecycleException;
 use Expansa\Lifecycle\Manager;
 
 // run: php tests/Lifecycle.php

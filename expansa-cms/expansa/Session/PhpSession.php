@@ -7,7 +7,7 @@ namespace Expansa\Session;
 use Expansa\Session\Contracts\FlashInterface;
 use Expansa\Session\Contracts\SessionInterface;
 use Expansa\Session\Contracts\SessionManagerInterface;
-use Expansa\Session\Exception\SessionException;
+use Expansa\Session\Exceptions\SessionException;
 
 /**
  * A PHP Session handler adapter.

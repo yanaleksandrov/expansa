@@ -4,20 +4,22 @@ declare(strict_types=1);
 
 namespace Expansa\Http\Contracts;
 
+/**
+ * Exception that becomes an HTTP error response.
+ *
+ * @package Expansa\Http\Contracts
+ */
 interface HttpException extends \Throwable
 {
     /**
-     * Returns the status code.
+     * HTTP status code of the error response.
      */
-    public function getStatusCode(): int;
+    public int $statusCode { get; }
 
     /**
-     * Returns response headers.
+     * Extra response headers, header name => value.
+     *
+     * @var array<string, string>
      */
-    public function getHeaders(): array;
-
-    /**
-     * Set response headers.
-     */
-    public function setHeaders(array $headers): void;
+    public array $headers { get; }
 }

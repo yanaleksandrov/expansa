@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use Expansa\Database\Exception\InvalidArgumentException;
+use Expansa\Database\Exceptions\InvalidArgumentException;
 use PDO;
 use PDOStatement;
 

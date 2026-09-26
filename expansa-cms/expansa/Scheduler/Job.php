@@ -12,7 +12,7 @@ use Stringable;
 use Throwable;
 use Expansa\Mail\Mailer;
 use Expansa\Scheduler\Cron\CronExpression;
-use Expansa\Scheduler\Exception\SchedulerException;
+use Expansa\Scheduler\Exceptions\SchedulerException;
 use Expansa\Scheduler\Traits\JobIntervals;
 
 /**

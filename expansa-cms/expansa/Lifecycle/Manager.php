@@ -6,7 +6,7 @@ namespace Expansa\Lifecycle;
 
 use Expansa\Facades\Hook;
 use Expansa\Facades\Route;
-use Expansa\Lifecycle\Exception\LifecycleException;
+use Expansa\Lifecycle\Exceptions\LifecycleException;
 use Throwable;
 
 /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Cookie;
 
 use Expansa\Cookie\Contracts\QueueingFactory;
-use Expansa\Cookie\Exception\CookieException;
+use Expansa\Cookie\Exceptions\CookieException;
 
 /**
  * Builds and queues outgoing cookies. Exposed as the `Cookie` facade, which

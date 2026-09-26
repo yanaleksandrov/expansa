@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Session\Contracts;
 
-use Expansa\Session\Exception\SessionException;
+use Expansa\Session\Exceptions\SessionException;
 
 interface SessionManagerInterface
 {

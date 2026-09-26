@@ -11,7 +11,7 @@ use DateTimeZone;
 use Exception;
 use LogicException;
 use RuntimeException;
-use Expansa\Scheduler\Exception\SchedulerException;
+use Expansa\Scheduler\Exceptions\SchedulerException;
 
 /**
  * CRON expression: checks whether it is due and finds its next and previous run dates.

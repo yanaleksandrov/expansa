@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Log\Handlers;
 
-use Expansa\Log\Exception\LogException;
+use Expansa\Log\Exceptions\LogException;
 use Expansa\Log\Level;
 use Expansa\Log\LogRecord;
 

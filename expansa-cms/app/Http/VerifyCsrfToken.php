@@ -7,7 +7,7 @@ namespace App\Http;
 use Expansa\Http\Response;
 use Expansa\Security\Csrf\Csrf;
 use Expansa\Security\Csrf\Providers\NativeCookieProvider;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
+use Expansa\Security\Exceptions\InvalidCsrfTokenException;
 
 /**
  * Verifies the CSRF token on state-changing API requests — double-submit cookie pattern.

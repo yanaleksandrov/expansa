@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Extensions;
 
 use Expansa\Extensions\Contracts\ExtensionSkeleton;
-use Expansa\Extensions\Exception\RequiredPropertyException;
+use Expansa\Extensions\Exceptions\RequiredPropertyException;
 
 class Manager
 {

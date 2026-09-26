@@ -26,7 +26,7 @@ Log/
 ├── Handlers/AbstractHandler.php, File.php, Telegram.php
 ├── Formatters/AbstractFormatter.php, Line.php
 ├── Traits/
-└── Exception/LogException.php
+└── Exceptions/LogException.php
 ```
 
 | Папка        | Что лежит                                          | Имя                                     |
@@ -34,10 +34,10 @@ Log/
 | `Contracts/` | интерфейсы                                         | роль: `Handler`                         |
 | `<Role>s/`   | реализации контракта: `Handlers/`, `Providers/`, `Fields/`, `Commands/` | вариант: `Handlers\File`, `Providers\Redis` |
 | `Traits/`    | трейты                                             | способность: `HasTimestamps`, `Macroable`, `Locks` |
-| `Exception/` | исключения                                         | `<Package>Exception`                    |
+| `Exceptions/` | исключения                                        | `<Package>Exception`                    |
 | `<Class>/`   | части большого класса (`Database/Schema/` для `Schema.php`) | по роли                        |
 
-Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exceptions/`; абстрактный
+Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exception/`; абстрактный
 класс вне папки реализаций; `Base` в имени (`BaseHandler`, `HandlerAbstract`, `TableBase`).
 
 ### Классы
@@ -118,9 +118,22 @@ Log/
 - Константы класса — `UPPER_SNAKE_CASE` с типом: `private const int ENCODE_FLAGS`; глобальные — `EX_*`.
 - Глобальные функции (`functions.php`) — короткие `snake_case` для шаблонов и частых вызовов (`t()`,
   `t_attr()`, `view()`); новые — только если фасада мало.
-- Геттер/сеттер без логики → свойство (короче и быстрее): `public private(set)`, `readonly` или hook.
+- Геттер/сеттер без логики → свойство (короче и быстрее), вызовы `->getX()` → `->x`. Модификатор:
+  задаётся один раз в конструкторе — `readonly`; меняется внутри класса — `private(set)`, в наследниках —
+  `protected(set)`; при чтении или записи есть логика — hook. Hook ради одного доступа не нужен.
   Контракт объявляет свойство, а не геттер: `public Level $level { get; }`. Геттер остаётся для
-  ленивого значения (`getFormatter()`) или фасада.
+  ленивого значения (`getFormatter()`), фасада и чужого контракта (PSR, `Throwable::getMessage()`).
+
+  ```php
+  // было: protected Response $response + getResponse()
+  public function __construct(
+
+      /**
+       * Ready response to send instead of the regular handler result.
+       */
+      public readonly Response $response,
+  ) {}
+  ```
 - `mixed` — только если значение действительно любое (`Cache::get()`); иначе точный тип (`add(): bool`).
 
 ### PHP 8.4
@@ -157,7 +170,7 @@ Log/
 2. Структура по схеме, `declare(strict_types=1)`, описание класса в `/** */`.
 3. Точка входа и фасад с `@method`.
 4. `configure()` в `bootstrap.php`, безопасные умолчания без него.
-5. `Exception/<Package>Exception.php` от подходящего SPL-исключения.
+5. `Exceptions/<Package>Exception.php` от подходящего SPL-исключения.
 6. `tests/<Package>.php` подключает `tests/bootstrap.php` (`EX_PATH`, `autoload.php`, `check()`, `throws()`)
    и содержит только проверки; `php tests/run.php` — тесты и PHPStan без новых ошибок сверх baseline.
 7. Горячий путь (каждый запрос или цикл) — бенчмарк по разделу «Бенчмарки».
@@ -214,7 +227,6 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 
 | Где                                              | Проблема                   | Должно быть                              |
 |--------------------------------------------------|----------------------------|------------------------------------------|
-| `Http/Exceptions/`                               | множественное              | `Http/Exception/`                        |
 | `Http/Request/ParameterBug.php`                  | опечатка                   | `ParameterBag`                           |
 | `Assets/Abstracts/Provider.php`                  | `Abstracts/`               | `Assets/Providers/AbstractProvider`      |
 | `Log/Handlers/*Handler`                          | суффикс роли               | `File`, `RotatingFile`, `ErrorLog`, `Telegram` |

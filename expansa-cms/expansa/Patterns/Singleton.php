@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Patterns;
 
-use Expansa\Patterns\Exception\SingletonException;
+use Expansa\Patterns\Exceptions\SingletonException;
 
 /**
  * This trait implements the Singleton pattern, ensuring that a class has only one instance

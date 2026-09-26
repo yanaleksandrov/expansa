@@ -6,7 +6,7 @@ namespace Expansa\Security\Csrf;
 
 use Expansa\Security\Csrf\Contracts\SessionProvider;
 use Expansa\Security\Csrf\Providers\NativeHttpOnlyCookieProvider;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
+use Expansa\Security\Exceptions\InvalidCsrfTokenException;
 use Random\RandomException;
 
 /**
@@ -23,7 +23,7 @@ use Random\RandomException;
  *
  * try {
  *  $csrf->check( 'my_token', $token );
- * } catch ( Csrf\Exception\InvalidCsrfTokenException $e ) {
+ * } catch ( Security\Exceptions\InvalidCsrfTokenException $e ) {
  *  return $e->getMessage();
  * }
  */

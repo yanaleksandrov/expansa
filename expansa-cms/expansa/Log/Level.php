@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Log;
 
-use Expansa\Log\Exception\LogException;
+use Expansa\Log\Exceptions\LogException;
 
 /**
  * Log levels of RFC 5424 with the Monolog values, a higher value is more severe.

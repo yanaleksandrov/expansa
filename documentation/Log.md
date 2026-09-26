@@ -20,7 +20,7 @@ Log::channel('telegram')->critical('Database is down');
 | `LogRecord`                        | Одна запись, неизменяемая: её получают все обработчики канала           |
 | `Handlers\*`                       | Куда писать: файл, файл по дням, Telegram, `error_log()`                |
 | `Formatters\*`                     | Как записать: строка или HTML-сообщение Telegram                        |
-| `Exception\LogException`           | Неизвестный уровень, неверная конфигурация, файл нельзя открыть         |
+| `Exceptions\LogException`          | Неизвестный уровень, неверная конфигурация, файл нельзя открыть         |
 
 ## Конфигурация
 

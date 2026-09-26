@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Cookie;
 
-use Expansa\Cookie\Exception\CookieException;
+use Expansa\Cookie\Exceptions\CookieException;
 
 /**
  * A single HTTP cookie: validates its own name/sameSite, normalizes its own

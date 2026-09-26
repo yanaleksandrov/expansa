@@ -14,7 +14,12 @@ class Response implements ResponseContract
 
     protected string $charset = 'utf-8';
 
-    protected array $cookies = [];
+    /**
+     * Set-Cookie header values.
+     *
+     * @var array<string|Stringable>
+     */
+    public protected(set) array $cookies = [];
 
     protected array $headers = [];
 
@@ -80,14 +85,6 @@ class Response implements ResponseContract
     public function flushCookies(): void
     {
         $this->cookies = [];
-    }
-
-    /**
-     * @return array<string|Stringable>
-     */
-    public function getCookies(): array
-    {
-        return $this->cookies;
     }
 
     /**

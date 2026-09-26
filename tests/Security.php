@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Expansa\Facades\Safe;
 use Expansa\Security\Csrf\Contracts\SessionProvider;
 use Expansa\Security\Csrf\Csrf;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
+use Expansa\Security\Exceptions\InvalidCsrfTokenException;
 
 // run: php tests/Security.php
 const EX_PATH = __DIR__ . '/../expansa-cms/';

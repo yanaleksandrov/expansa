@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Hook;
-use Expansa\Hooks\Exception\HooksException;
+use Expansa\Hooks\Exceptions\HooksException;
 
 // run: php tests/Hooks.php
 const EX_PATH = __DIR__ . '/../expansa-cms/';

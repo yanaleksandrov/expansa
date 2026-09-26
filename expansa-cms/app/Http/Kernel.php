@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use Expansa\Http\Exception\HttpException;
-use Expansa\Http\Exception\ValidationException;
+use Expansa\Http\Exceptions\HttpException;
+use Expansa\Http\Exceptions\ValidationException;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Is;
@@ -50,10 +50,10 @@ final class Kernel
         } catch (HttpException $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationException) {
-                $payload['errors'] = $e->getErrors();
+                $payload['errors'] = $e->errors;
             }
 
-            $response = new Response()->json(self::withMetrics($payload), $e->getStatusCode());
+            $response = new Response()->json(self::withMetrics($payload), $e->statusCode);
         } catch (Throwable $e) {
             $response = new Response()->json(self::withMetrics([
                 'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),

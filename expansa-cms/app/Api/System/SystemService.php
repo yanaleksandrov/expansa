@@ -13,8 +13,8 @@ use Expansa\Facades\Db;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
-use Expansa\Http\Exception\HttpException;
-use Expansa\Http\Exception\ValidationException;
+use Expansa\Http\Exceptions\HttpException;
+use Expansa\Http\Exceptions\ValidationException;
 use Expansa\Support\Arr;
 
 /**

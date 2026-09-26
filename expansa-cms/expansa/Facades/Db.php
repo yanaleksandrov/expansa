@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
-use Expansa\Database\Exception\InvalidArgumentException;
+use Expansa\Database\Exceptions\InvalidArgumentException;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Query\Raw;
 use Expansa\Patterns\Facade;

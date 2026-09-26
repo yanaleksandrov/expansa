@@ -7,7 +7,7 @@ namespace Expansa\View;
 use Expansa\Support\Str;
 use Expansa\Support\Traits\Macroable;
 use Expansa\View\Engines\Engine;
-use Expansa\View\Exception\ViewException;
+use Expansa\View\Exceptions\ViewException;
 use Expansa\View\Support\Html;
 
 class View

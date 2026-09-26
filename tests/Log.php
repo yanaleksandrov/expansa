@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Expansa\Facades\Log;
 use Expansa\Log\Contracts\Handler;
-use Expansa\Log\Exception\LogException;
+use Expansa\Log\Exceptions\LogException;
 use Expansa\Log\Formatters\Line;
 use Expansa\Log\Formatters\Telegram;
 use Expansa\Log\Handlers\AbstractHandler;

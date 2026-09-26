@@ -6,7 +6,7 @@ namespace Expansa\View;
 
 use Expansa\View\Engines\Engine;
 use Expansa\View\Engines\EngineManager;
-use Expansa\View\Exception\ViewException;
+use Expansa\View\Exceptions\ViewException;
 
 class Factory
 {

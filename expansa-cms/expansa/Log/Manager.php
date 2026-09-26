@@ -8,7 +8,7 @@ use Closure;
 use Stringable;
 use Expansa\Log\Contracts\Handler;
 use Expansa\Log\Contracts\LoggerInterface;
-use Expansa\Log\Exception\LogException;
+use Expansa\Log\Exceptions\LogException;
 use Expansa\Log\Handlers\ErrorLog;
 use Expansa\Log\Handlers\File;
 use Expansa\Log\Handlers\RotatingFile;
