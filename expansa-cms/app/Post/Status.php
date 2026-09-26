@@ -62,13 +62,13 @@ class Status
     public static function getStatuses(): array
     {
         return [
-            'publish'   => t('Publish'),
+            'publish'   => t('Published'),
             'pending'   => t('Pending'),
             'draft'     => t('Draft'),
             'protected' => t('Protected'),
             'private'   => t('Private'),
             'trash'     => t('Trash'),
-            'future'    => t('Future'),
+            'future'    => t('Scheduled'),
         ];
     }
 }

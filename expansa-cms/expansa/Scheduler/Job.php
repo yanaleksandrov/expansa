@@ -4,138 +4,232 @@ declare(strict_types=1);
 
 namespace Expansa\Scheduler;
 
+use Closure;
 use DateTime;
-use Exception;
-use InvalidArgumentException;
-use Cron\CronExpression;
+use DateTimeInterface;
+use ReflectionFunction;
+use Stringable;
+use Throwable;
+use Expansa\Mail\Mailer;
+use Expansa\Scheduler\Cron\CronExpression;
+use Expansa\Scheduler\Exception\SchedulerException;
+use Expansa\Scheduler\Traits\JobIntervals;
 
+/**
+ * A scheduled PHP closure or shell command.
+ * Shell commands run in background through a POSIX shell unless forced to foreground, on Windows always in foreground.
+ *
+ * @package Expansa\Scheduler
+ */
 class Job
 {
     use JobIntervals;
 
-    /**
-     * A function to execute before the job is executed.
-     *
-     * @var callable
-     */
-    private $before;
+    private const bool POSIX = PHP_OS_FAMILY !== 'Windows';
 
     /**
-     * A function to execute after the job is executed.
-     *
-     * @var callable
+     * Schedule of the job, `null` runs it every minute.
      */
-    private $after;
+    private ?CronExpression $executionTime = null;
 
     /**
-     * A function to ignore an overlapping job. If true, the job will run also if it's overlapping.
-     *
-     * @var callable
+     * The only year the job runs in, set by date().
      */
-    private $whenOverlapping;
+    private ?string $executionYear = null;
+
+    private bool $runInBackground = true;
 
     /**
-     * Create a new Job instance.
-     *
-     * @param callable|string     $command         Command to execute.
-     * @param array               $args            Arguments to be passed to the command.
-     * @param null|string         $id              Job identifier.
-     * @param bool                $runInBackground Defines if the job should run in background.
-     * @param null|DateTime       $creationTime    Creation time.
-     * @param null|CronExpression $executionTime   Job schedule time.
-     * @param null|string         $executionYear   Job schedule year.
-     * @param string              $tempDir         Temporary directory path for lock files to prevent overlapping.
-     * @param string              $lockFile        Path to the lock file.
-     * @param bool                $truthTest       This could prevent the job to run. If true, the job will run.
-     * @param mixed               $output          The output of the executed job.
-     * @param int                 $returnCode      The return code of the executed job.
-     * @param array               $outputTo        Files to write the output of the job.
-     * @param array               $emailTo         Email addresses where the output should be sent to.
-     * @param array               $emailConfig     Configuration for email sending.
-     * @param null|string         $outputMode      Output mode for the executed job.
+     * Lock files directory from the scheduler config, empty for the system temp directory.
      */
+    private string $tempDir = '';
+
+    private string $lockFile = '';
+
+    /**
+     * Decides if an overlapping job still runs, gets the lock file mtime.
+     */
+    private ?Closure $whenOverlapping = null;
+
+    /**
+     * Truth test checked right before the run, the job runs only on `true`.
+     */
+    private Closure|bool $truthTest = true;
+
+    private ?Closure $before = null;
+
+    private ?Closure $after = null;
+
+    private ?string $output = null;
+
+    private int $returnCode = 0;
+
+    /**
+     * Files the output is written to.
+     *
+     * @var string[]
+     */
+    private array $outputTo = [];
+
+    private bool $appendOutput = false;
+
+    /**
+     * Emails the output is sent to.
+     *
+     * @var string[]
+     */
+    private array $emailTo = [];
+
+    /**
+     * Email settings: `subject`, `from`, `body` and `ignore_empty_output`.
+     */
+    private array $emailConfig = [];
+
     public function __construct(
-        private readonly mixed $command,
+
+        /**
+         * A closure, or a shell command.
+         */
+        private readonly Closure|string $command,
+
+        /**
+         * Closure arguments (string keys are named ones), or shell arguments:
+         * `['--force' => null, '--env' => 'dev', 'file.txt']`.
+         */
         private readonly array $args = [],
+
+        /**
+         * Identifier used as the lock file name, derived from the command by default.
+         */
         private ?string $id = null,
-        private readonly ?CronExpression $executionTime = null,
-        private readonly ?string $executionYear = null,
-        private bool $runInBackground = true,
-        private ?DateTime $creationTime = null,
-        private string $tempDir = '',
-        private string $lockFile = '',
-        private bool $truthTest = true,
-        private mixed $output = null,
-        private int $returnCode = 0,
-        private array $outputTo = [],
-        private array $emailTo = [],
-        private array $emailConfig = [],
-        private ?string $outputMode = null
-    )
+    ) {} // phpcs:ignore
+
+    /**
+     * Get the job identifier: md5 of the shell command, or of the closure location.
+     *
+     * @return string
+     */
+    public function getId(): string
     {
-        if (!is_string($id)) {
-            $this->id = match (true) {
-                is_string($command) => md5($command),
-                is_array($command)  => md5(serialize($command)),
-                default             => spl_object_hash($command),
-            };
+        if ($this->id !== null) {
+            return $this->id;
         }
 
-        $this->creationTime = new DateTime('now');
+        if (is_string($this->command)) {
+            return $this->id = md5($this->compileCommand());
+        }
 
-        // initialize the directory path for lock files
-        $this->tempDir = sys_get_temp_dir();
+        $reflection = new ReflectionFunction($this->command);
+        $location   = $reflection->getFileName() . ':' . $reflection->getStartLine();
+
+        return $this->id = md5($reflection->getClosureScopeClass()?->name . '::' . $reflection->name . '@' . $location);
     }
 
     /**
-     * Get the Job id.
+     * Apply the scheduler config: `tempDir` for lock files and `email` settings.
      *
-     * @return null|string
+     * @param array $config
+     * @return static
+     * @throws SchedulerException
      */
-    public function getId(): ?string
+    public function configure(array $config = []): static
     {
-        return $this->id;
+        if (isset($config['email'])) {
+            if (! is_array($config['email'])) {
+                throw new SchedulerException('Email configuration should be an array.');
+            }
+            $this->emailConfig = $config['email'];
+        }
+
+        if (isset($config['tempDir'])) {
+            if (! is_string($config['tempDir'])) {
+                throw new SchedulerException('The tempDir should be a path to a directory.');
+            }
+            $this->tempDir = $config['tempDir'];
+        }
+
+        return $this;
     }
 
     /**
-     * Check if the Job is due to run. It accepts as input a DateTime used to check if the job is due.
-     * Defaults to job creation time. It also defaults the execution time if not previously defined.
+     * Check if the job is due at a date, `now` by default.
      *
-     * @param null|DateTime $date
+     * @param DateTimeInterface|null $date
      * @return bool
      */
-    public function isDue(?DateTime $date = null): bool
+    public function isDue(?DateTimeInterface $date = null): bool
     {
-        // The execution time is being defaulted if not defined
-        if (! $this->executionTime) {
-            $this->at('* * * * *');
-        }
+        $date ??= new DateTime();
 
-        $date = $date !== null ? $date : $this->creationTime;
-
-        if ($this->executionYear && $this->executionYear !== $date->format('Y')) {
+        if ($this->executionYear !== null && $this->executionYear !== $date->format('Y')) {
             return false;
         }
 
-        return $this->executionTime->isDue($date);
+        return $this->executionTime === null || $this->executionTime->isDue($date);
     }
 
     /**
-     * Check if the Job is overlapping.
+     * Get the schedule of the job.
+     *
+     * @return CronExpression
+     */
+    public function getExecutionTime(): CronExpression
+    {
+        return $this->executionTime ??= new CronExpression('* * * * *');
+    }
+
+    /**
+     * Run the job only if a condition is true at the moment of the run.
+     *
+     * @param callable|bool $condition Callable is called only when the job is due.
+     * @return static
+     */
+    public function when(callable|bool $condition): static
+    {
+        $this->truthTest = is_bool($condition) ? $condition : $condition(...);
+
+        return $this;
+    }
+
+    /**
+     * Prevent the job from running while its previous run is still in progress.
+     *
+     * @param string        $tempDir         Lock files directory, the configured or the system temp one by default.
+     * @param callable|null $whenOverlapping Gets the lock file mtime, returns `true` to run the job anyway.
+     * @return static
+     */
+    public function onlyOne(string $tempDir = '', ?callable $whenOverlapping = null): static
+    {
+        $dir = match (true) {
+            $tempDir !== '' && is_dir($tempDir)             => $tempDir,
+            $this->tempDir !== '' && is_dir($this->tempDir) => $this->tempDir,
+            default                                         => sys_get_temp_dir(),
+        };
+
+        $this->lockFile        = rtrim($dir, '/\\') . DIRECTORY_SEPARATOR . $this->getId() . '.lock';
+        $this->whenOverlapping = $whenOverlapping === null ? null : $whenOverlapping(...);
+
+        return $this;
+    }
+
+    /**
+     * Check if the previous run of the job still holds its lock.
      *
      * @return bool
      */
     public function isOverlapping(): bool
     {
-        return $this->lockFile &&
-               file_exists($this->lockFile) &&
-               call_user_func($this->whenOverlapping, filemtime($this->lockFile)) === false;
+        if ($this->lockFile === '' || ! is_file($this->lockFile)) {
+            return false;
+        }
+
+        return $this->whenOverlapping === null || ($this->whenOverlapping)(filemtime($this->lockFile)) !== true;
     }
 
     /**
-     * Force the Job to run in foreground.
+     * Force the job to run in foreground.
      *
-     * @return self
+     * @return static
      */
     public function inForeground(): static
     {
@@ -145,360 +239,291 @@ class Job
     }
 
     /**
-     * Check if the Job can run in background.
+     * Check if the job runs in background: a shell command on a POSIX system, not forced to foreground.
      *
      * @return bool
      */
     public function canRunInBackground(): bool
     {
-        return !(is_callable($this->command) || $this->runInBackground === false);
+        return self::POSIX && $this->runInBackground && is_string($this->command);
     }
 
     /**
-     * This will prevent the Job from overlapping. It prevents another instance of the
-     * same Job of being executed if the previous is still running. The job id is used
-     * as a filename for the lock file.
-     *
-     * @param string        $tempDir         The directory path for the lock files
-     * @param null|callable $whenOverlapping A callback to ignore job overlapping
-     * @return self
-     */
-    public function onlyOne(string $tempDir = '', ?callable $whenOverlapping = null): static
-    {
-        if (!$tempDir || ! is_dir($tempDir)) {
-            $tempDir = $this->tempDir;
-        }
-
-        $this->lockFile = implode('/', [trim($tempDir), trim($this->id) . '.lock']);
-        if ($whenOverlapping) {
-            $this->whenOverlapping = $whenOverlapping;
-        } else {
-            $this->whenOverlapping = fn () => false;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Compile the Job command.
-     *
-     * @return string|callable
-     */
-    public function compile(): string|callable
-    {
-        $compiled = $this->command;
-
-        // If callable, return the function itself
-        if (is_callable($compiled)) {
-            return $compiled;
-        }
-
-        // Augment with any supplied arguments
-        foreach ($this->args as $key => $value) {
-            $compiled .= ' ' . escapeshellarg($key);
-            if ($value !== null) {
-                $compiled .= ' ' . escapeshellarg($value);
-            }
-        }
-
-        // Add the boilerplate to redirect the output to file/s
-        if (count($this->outputTo) > 0) {
-            $compiled .= ' | tee ';
-            $compiled .= $this->outputMode === 'a' ? '-a ' : '';
-            foreach ($this->outputTo as $file) {
-                $compiled .= $file . ' ';
-            }
-
-            $compiled = trim($compiled);
-        }
-
-        // Add boilerplate to remove lockfile after execution
-        if ($this->lockFile) {
-            $compiled .= '; rm ' . $this->lockFile;
-        }
-
-        // Add boilerplate to run in background
-        if ($this->canRunInBackground()) {
-            // Parentheses are need execute the chain of commands in a subshell
-            // that can then run in background
-            $compiled = '(' . $compiled . ') > /dev/null 2>&1 &';
-        }
-
-        return trim($compiled);
-    }
-
-    /**
-     * Configure the job.
-     *
-     * @param  array  $config
-     * @return self
-     */
-    public function configure(array $config = []): static
-    {
-        if (isset($config['email'])) {
-            if (! is_array($config['email'])) {
-                throw new InvalidArgumentException('Email configuration should be an array.');
-            }
-            $this->emailConfig = $config['email'];
-        }
-
-        // Check if config has defined a tempDir
-        if (is_dir($config['tempDir'] ?? null)) {
-            $this->tempDir = $config['tempDir'];
-        }
-
-        return $this;
-    }
-
-    /**
-     * Truth test to define if the job should run if due.
-     *
-     * @param  callable  $fn
-     * @return self
-     */
-    public function when(callable $fn): static
-    {
-        $this->truthTest = $fn();
-
-        return $this;
-    }
-
-    /**
-     * Run the job.
-     *
-     * @return bool
-     * @throws Exception
-     */
-    public function run(): bool
-    {
-        // If the truthTest failed, don't run
-        if ($this->truthTest !== true) {
-            return false;
-        }
-
-        // If overlapping, don't run
-        if ($this->isOverlapping()) {
-            return false;
-        }
-
-        $compiled = $this->compile();
-
-        // Write lock file if necessary
-        $this->createLockFile();
-
-        if (is_callable($this->before)) {
-            call_user_func($this->before);
-        }
-
-        if (is_callable($compiled)) {
-            $this->output = $this->exec($compiled);
-        } else {
-            exec($compiled, $this->output, $this->returnCode);
-        }
-
-        $this->finalise();
-
-        return true;
-    }
-
-    /**
-     * Create the job lock file.
-     *
-     * @param null|mixed $content
-     * @return void
-     */
-    private function createLockFile(mixed $content = null): void
-    {
-        if ($this->lockFile) {
-            if (! is_string($content)) {
-                $content = $this->getId();
-            }
-
-            file_put_contents($this->lockFile, $content);
-        }
-    }
-
-    /**
-     * Remove the job lock file.
-     *
-     * @return void
-     */
-    private function removeLockFile(): void
-    {
-        if ($this->lockFile && file_exists($this->lockFile)) {
-            unlink($this->lockFile);
-        }
-    }
-
-    /**
-     * Execute a callable job.
-     *
-     * @param  callable  $fn
-     * @throws Exception
-     * @return string
-     */
-    private function exec(callable $fn): string
-    {
-        ob_start();
-
-        try {
-            $returnData = call_user_func_array($fn, $this->args);
-        } catch (Exception $e) {
-            ob_end_clean();
-            throw $e;
-        }
-
-        $outputBuffer = ob_get_clean();
-
-        foreach ($this->outputTo as $filename) {
-            if ($outputBuffer) {
-                file_put_contents($filename, $outputBuffer, $this->outputMode === 'a' ? FILE_APPEND : 0);
-            }
-
-            if ($returnData) {
-                file_put_contents($filename, $returnData, FILE_APPEND);
-            }
-        }
-
-        $this->removeLockFile();
-
-        return $outputBuffer . (is_string($returnData) ? $returnData : '');
-    }
-
-    /**
-     * Set the file/s where to write the output of the job.
+     * Write the output to files, a callable job output is its echo plus the returned string.
      *
      * @param array|string $filename
      * @param bool         $append
-     * @return self
+     * @return static
      */
     public function output(array|string $filename, bool $append = false): static
     {
-        $this->outputTo   = is_array($filename) ? $filename : [$filename];
-        $this->outputMode = $append === false ? 'w' : 'a';
+        $this->outputTo     = (array) $filename;
+        $this->appendOutput = $append;
 
         return $this;
     }
 
     /**
-     * Get the job output.
+     * Get the output of the last run, `null` before the first run or for a background job.
      *
-     * @return mixed
+     * @return string|null
      */
-    public function getOutput(): mixed
+    public function getOutput(): ?string
     {
         return $this->output;
     }
 
     /**
-     * Set the emails where the output should be sent to.
-     * The Job should be set to write output to a file for this to work.
+     * Get the exit code of the last foreground shell run.
+     *
+     * @return int
+     */
+    public function getReturnCode(): int
+    {
+        return $this->returnCode;
+    }
+
+    /**
+     * Send the output by email after each run, the output files are attached. Forces the job to foreground.
      *
      * @param array|string $email
-     * @return self
+     * @return static
      */
     public function email(array|string $email): static
     {
-        if (! is_string($email) && ! is_array($email)) {
-            throw new InvalidArgumentException('The email can be only string or array');
-        }
+        $this->emailTo = (array) $email;
 
-        $this->emailTo = is_array($email) ? $email : [$email];
+        return $this->inForeground();
+    }
 
-        // Force the job to run in foreground
-        $this->inForeground();
+    /**
+     * Call a function before the run, it gets the job.
+     *
+     * @param callable $fn
+     * @return static
+     */
+    public function before(callable $fn): static
+    {
+        $this->before = $fn(...);
 
         return $this;
     }
 
     /**
-     * Finalise the job after execution.
+     * Call a function after the run, it gets the output and the exit code.
+     * Forces the job to foreground: a background job has no output.
      *
-     * @return void
+     * @param callable $fn
+     * @param bool     $runInBackground Keep the job in background anyway.
+     * @return static
      */
-    private function finalise(): void
+    public function then(callable $fn, bool $runInBackground = false): static
     {
-        // Send output to email
-        $this->emailOutput();
+        $this->after = $fn(...);
 
-        // Call any callback defined
-        if (is_callable($this->after)) {
-            call_user_func($this->after, $this->output, $this->returnCode);
-        }
+        return $runInBackground ? $this : $this->inForeground();
     }
 
     /**
-     * Email the output of the job, if any.
+     * Compile the job: the closure itself, or the shell command with arguments and, in background, its output and lock handling.
      *
-     * @return bool
+     * @return Closure|string
      */
-    private function emailOutput(): bool
+    public function compile(): Closure|string
     {
-        if (! count($this->outputTo) || ! count($this->emailTo)) {
+        if ($this->command instanceof Closure) {
+            return $this->command;
+        }
+
+        $compiled = $this->compileCommand();
+        if (! $this->canRunInBackground()) {
+            return $compiled;
+        }
+
+        if ($this->outputTo !== []) {
+            $files     = implode(' ', array_map('escapeshellarg', $this->outputTo));
+            $compiled .= ' | tee ' . ($this->appendOutput ? '-a ' : '') . $files;
+        }
+
+        if ($this->lockFile !== '') {
+            $compiled .= '; rm -f ' . escapeshellarg($this->lockFile);
+        }
+
+        // a subshell runs the whole chain in background
+        return '(' . $compiled . ') > /dev/null 2>&1 &';
+    }
+
+    /**
+     * Describe the job for logs: the shell command or the closure location.
+     *
+     * @return string
+     */
+    public function describe(): string
+    {
+        if (is_string($this->command)) {
+            return $this->compileCommand();
+        }
+
+        $reflection = new ReflectionFunction($this->command);
+        $file       = $reflection->getFileName();
+
+        return 'Closure ' . ($file === false ? $reflection->name : $file . ':' . $reflection->getStartLine());
+    }
+
+    /**
+     * Run the job if the truth test passes and it does not overlap.
+     *
+     * @return bool False if the job was skipped.
+     * @throws Throwable Whatever the job, its callbacks or the mailer throw.
+     */
+    public function run(): bool
+    {
+        if (! $this->passesTruthTest() || $this->isOverlapping()) {
             return false;
         }
 
-        if (
-            isset($this->emailConfig['ignore_empty_output']) &&
-            $this->emailConfig['ignore_empty_output'] === true &&
-            empty($this->output)
-        ) {
-            return false;
+        if ($this->lockFile !== '') {
+            file_put_contents($this->lockFile, $this->getId());
+        }
+
+        try {
+            if ($this->before !== null) {
+                ($this->before)($this);
+            }
+
+            $this->output = $this->execute();
+        } catch (Throwable $e) {
+            $this->removeLockFile();
+
+            throw $e;
+        }
+
+        // a background job removes the lock itself when it finishes
+        if (! $this->canRunInBackground()) {
+            $this->removeLockFile();
+        }
+
+        $this->emailOutput();
+
+        if ($this->after !== null) {
+            ($this->after)($this->output, $this->returnCode);
         }
 
         return true;
     }
 
     /**
-     * Set function to be called before job execution
-     * Job object is injected as a parameter to callable function.
+     * Execute the compiled job and collect its output.
      *
-     * @param callable $fn
-     * @return self
+     * @return string|null `null` for a background job.
      */
-    public function before(callable $fn): static
+    private function execute(): ?string
     {
-        $this->before = $fn;
+        $compiled = $this->compile();
 
-        return $this;
+        if (is_string($compiled)) {
+            $lines = [];
+            exec($compiled, $lines, $this->returnCode);
+
+            if ($this->canRunInBackground()) {
+                return null;
+            }
+
+            $output = implode("\n", $lines);
+            $this->writeOutput($lines === [] ? '' : $output . "\n");
+
+            return $output;
+        }
+
+        ob_start();
+        try {
+            $result = $compiled(...$this->args);
+        } finally {
+            $output = (string) ob_get_clean();
+        }
+
+        if (is_string($result) || $result instanceof Stringable) {
+            $output .= $result;
+        }
+
+        $this->writeOutput($output);
+
+        return $output;
     }
 
     /**
-     * Set a function to be called after job execution. By default, this will force
-     * the job to run in foreground because the output is injected as a parameter of this
-     * function, but it could be avoided by passing true as a second parameter. The job
-     * will run in background if it meets all the other criteria.
+     * Get the shell command with its escaped arguments.
      *
-     * @param  callable $fn
-     * @param bool      $runInBackground
-     * @return self
+     * @return string
      */
-    public function then(callable $fn, bool $runInBackground = false): static
+    private function compileCommand(): string
     {
-        $this->after = $fn;
+        $compiled = $this->command;
 
-        // Force the job to run in foreground
-        if ($runInBackground === false) {
-            $this->inForeground();
+        foreach ($this->args as $key => $value) {
+            if (is_string($key)) {
+                $compiled .= ' ' . escapeshellarg($key);
+            }
+            if ($value !== null) {
+                $compiled .= ' ' . escapeshellarg((string) $value);
+            }
         }
 
-        return $this;
+        return $compiled;
+    }
+
+    private function passesTruthTest(): bool
+    {
+        return $this->truthTest instanceof Closure ? ($this->truthTest)() === true : $this->truthTest;
+    }
+
+    private function writeOutput(string $output): void
+    {
+        foreach ($this->outputTo as $file) {
+            file_put_contents($file, $output, $this->appendOutput ? FILE_APPEND : 0);
+        }
+    }
+
+    private function removeLockFile(): void
+    {
+        if ($this->lockFile !== '' && is_file($this->lockFile)) {
+            unlink($this->lockFile);
+        }
     }
 
     /**
-     * Get the execution time for the job.
+     * Email the output to the recipients set by email().
      *
-     * If no execution time is set, a default CronExpression
-     * for every minute (* * * * *) is returned.
-     *
-     * @return CronExpression The cron expression representing the execution time.
+     * @return void
+     * @throws SchedulerException If the email is not sent.
      */
-    public function getExecutionTime(): CronExpression
+    private function emailOutput(): void
     {
-        if (! $this->executionTime) {
-            return new CronExpression('* * * * *');
+        if ($this->emailTo === []) {
+            return;
         }
 
-        return $this->executionTime;
+        if (($this->emailConfig['ignore_empty_output'] ?? false) === true && ($this->output ?? '') === '') {
+            return;
+        }
+
+        $mailer = new Mailer();
+        foreach ($this->emailTo as $email) {
+            $mailer->to($email);
+        }
+
+        if (isset($this->emailConfig['from'])) {
+            $mailer->from($this->emailConfig['from']);
+        }
+
+        $result = $mailer
+            ->subject($this->emailConfig['subject'] ?? 'Cronjob execution')
+            ->message($this->emailConfig['body'] ?? (string) $this->output)
+            ->attach($this->outputTo)
+            ->send();
+
+        if ($result !== true) {
+            throw new SchedulerException('The job output is not sent: ' . $result->ErrorInfo);
+        }
     }
 }

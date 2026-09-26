@@ -4,45 +4,32 @@ declare(strict_types=1);
 
 namespace Expansa\Debug;
 
-use Error;
-use Exception;
+use Throwable;
 
 /**
- * A utility class for debugging PHP applications. Provides methods to manage error reporting,
- * measure execution time, memory usage, and generate detailed error outputs. This class is
- * designed to be used in a development environment to facilitate troubleshooting and performance
- * analysis.
+ * Renders the debug page for uncaught errors: message, trace and the code around the failing line.
  *
  * @package Expansa
  */
 class Debug
 {
-    public function start(bool $isShowErrors, string $viewPath, callable $callback): void
+    /**
+     * Output the debug page for an uncaught error.
+     *
+     * @param string $viewPath Template that receives title, description, context, details, traces and code.
+     */
+    public function render(Throwable $e, string $viewPath): void
     {
-        if ($isShowErrors) {
-            ini_set('error_reporting', E_ALL);
-            ini_set('display_errors', 1);
-            ini_set('display_startup_errors', 1);
-        }
+        extract($this->getData($e), EXTR_SKIP);
 
-        if (is_callable($callback)) {
-            try {
-                $callback();
-            } catch (Error | Exception $e) {
-                extract($this->getData($e), EXTR_SKIP);
-
-                ob_start();
-                include $viewPath;
-                echo ob_get_clean();
-            }
-        }
+        include $viewPath;
     }
 
-    private function getData(mixed $e): array
+    private function getData(Throwable $e): array
     {
         $title = t('Fatal Error');
 
-        $description = t('Find on line :lineNumber in file :filepath', $e->getLine(), $e->getFile());
+        $description = t('On line :lineNumber in :filepath', $e->getLine(), $e->getFile());
         $description = preg_replace('/[a-z0-9_\-]*\.php/i', '$1<u>$0</u>', $description);
         $description = preg_replace('/(\d+)/', '<em>$1</em>', $description);
         $description = preg_replace('/[\(\)#\[\]\':]/i', '$1<ss>$0</ss>', $description);
@@ -91,7 +78,7 @@ class Debug
         return $data;
     }
 
-    private function parseErrorCode(mixed $e): string
+    private function parseErrorCode(Throwable $e): string
     {
         $trace = $e->getTrace();
 

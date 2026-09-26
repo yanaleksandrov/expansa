@@ -13,7 +13,7 @@ use Expansa\Facades\Safe;
  * The class also offers methods for returning translations sanitized for use in HTML attributes.
  *
  * As text your can use base markdown syntax. For example links looks like this:
- * t( 'Go to [documentation page](:pageLink) for resolve issue', 'https://google.com' )
+ * t( 'See the [documentation](:pageLink) to resolve this issue', 'https://google.com' )
  *
  * Main functionalities:
  * - `t|_t(_attr)`: translates a string with placeholders and returns/outputs it (sanitizes for HTML attributes).
@@ -36,6 +36,11 @@ class Translator extends Locale
      * @var string
      */
     protected static string $pattern = '';
+
+    /**
+     * Directory with translation overrides, e.g. edited in the dashboard.
+     */
+    protected static string $overrides = '';
 
     /**
      * Translates a given string based on the current locale. The method checks for
@@ -88,7 +93,7 @@ class Translator extends Locale
                         $targetDir = $element . DIRECTORY_SEPARATOR . str_replace(':dirname', $directory, $targetDir);
                     }
 
-                    $override[ $source ] ??= sprintf('%s%s/%s.json', EX_I18N, $targetDir, $this->getLocale());
+                    $override[ $source ] ??= sprintf('%s%s/%s.json', self::$overrides, $targetDir, $this->getLocale());
                     $routes[ $source ]   ??= sprintf('%s/%s.json', $targetRoute, $filename);
                 }
 
@@ -146,6 +151,8 @@ class Translator extends Locale
      *   - If the placeholder starts with uppercase → result is capitalized (title case).
      * - `:placeholder\suffix` — attaches a suffix (e.g. `:count\st` → `1st`).
      * - `%s`, `%d` — traditional PHP-style placeholders are fully supported.
+     * - Values of `:name` placeholders are HTML-escaped, so user data is safe there;
+     *   `%s` values are inserted as is, for markup around the text like `<a href="...">` and `</a>`.
      *
      * ### Missing Values:
      * - If not enough arguments are provided, unused placeholders (`:name`, `::NAME`, `%s`, `%d`, etc.)
@@ -202,15 +209,14 @@ class Translator extends Locale
                     $value = array_shift($args);
 
                     if ($matches[1] === '::') {
-                        $replacement = match (true) {
+                        $value = match (true) {
                             mb_strtolower($placeholder) === $placeholder => mb_strtolower($value),
                             mb_strtoupper($placeholder) === $placeholder => mb_strtoupper($value),
                             default => mb_convert_case($value, MB_CASE_TITLE, 'UTF-8'),
                         };
-                        return $replacement . $suffix;
                     }
 
-                    return $value . $suffix;
+                    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . $suffix;
                 },
                 $string
             );
@@ -228,7 +234,7 @@ class Translator extends Locale
      */
     public function t_attr(string $string, mixed ...$args): void
     {
-        echo Safe::attribute(self::_t($string, ...$args));
+        echo Safe::attribute(html_entity_decode(self::_t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     /**
@@ -240,7 +246,7 @@ class Translator extends Locale
      */
     public function _t_attr(string $string, mixed ...$args): string
     {
-        return Safe::attribute(self::_t($string, ...$args));
+        return Safe::attribute(html_entity_decode(self::_t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     /**
@@ -292,7 +298,7 @@ class Translator extends Locale
      */
     public function _c_attr(bool $condition, string $ifString, string $elseString = ''): string
     {
-        return Safe::attribute(self::_c($condition, $ifString, $elseString));
+        return Safe::attribute(html_entity_decode(self::_c($condition, $ifString, $elseString), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     /**
@@ -300,11 +306,12 @@ class Translator extends Locale
      *
      * @param array $routes
      * @param string $pattern
+     * @param string $overrides Directory with translation overrides.
      * @return void
      */
-    public function configure(array $routes, string $pattern): void
+    public function configure(array $routes, string $pattern, string $overrides = ''): void
     {
-        [ self::$routes, self::$pattern ] = [ $routes, $pattern ];
+        [ self::$routes, self::$pattern, self::$overrides ] = [ $routes, $pattern, $overrides ];
     }
 
     /**
@@ -325,9 +332,9 @@ class Translator extends Locale
      * @param string $getBy
      * @return array
      */
-    public function getLanguage(string $value, string $getBy = 'locale'): array
+    public function language(string $value, string $getBy = 'locale'): array
     {
-        $languages = self::getLanguages();
+        $languages = self::languages();
 
         foreach ($languages as $language) {
             if (isset($language[ $getBy ]) && $language[ $getBy ] === $value) {
@@ -343,10 +350,10 @@ class Translator extends Locale
      *
      * @return array
      */
-    public function getLanguagesOptions(): array
+    public function languageOptions(): array
     {
         $options   = [];
-        $languages = self::getLanguages();
+        $languages = self::languages();
 
         foreach ($languages as $language) {
             $key  = $language['locale'] ?? $language['iso_639_1'];
@@ -366,7 +373,7 @@ class Translator extends Locale
      *
      * @return array
      */
-    public function getLanguages(): array
+    public function languages(): array
     {
         return Hook::call('i18n_get_languages', [
             [

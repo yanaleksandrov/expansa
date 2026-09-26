@@ -68,6 +68,6 @@ class Table
         /**
          * The connection its DDL will run on once the enclosing Schema::create() compiles it.
          */
-        public Builder $connection
+        public Builder $connection,
     ) {} // phpcs:ignore
 }

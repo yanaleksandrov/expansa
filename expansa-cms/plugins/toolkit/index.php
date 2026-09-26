@@ -335,7 +335,7 @@ return new class extends Plugin
                                     'before'      => '',
                                     'after'       => '',
                                     'tooltip'     => '',
-                                    'instruction' => t('The form will not be saved if it is not filled in'),
+                                    'instruction' => t('The form can\'t be saved until this field is filled in'),
                                     'attributes'  => [ 'u-prop' => 'required' ],
                                     'conditions'  => [],
                                     'options'     => [],

@@ -36,11 +36,11 @@ class Form
     {
         $uid = Safe::id($uid);
         if (! $uid) {
-            throw new InvalidArgumentException(t('The form with ":formUid" ID is empty.', $uid));
+            throw new InvalidArgumentException(t('The form with ID ":formUid" is empty.', $uid));
         }
 
         if (isset(self::$forms[$uid])) {
-            throw new InvalidArgumentException(t('The form with ":formUid" ID is already exists.', $uid));
+            throw new InvalidArgumentException(t('A form with ID ":formUid" already exists.', $uid));
         }
 
         self::$forms[$uid] = new \Expansa\Builders\Forms\Form($uid, $fields, $attributes);
@@ -54,11 +54,11 @@ class Form
      * @param string $uid Unique Form ID.
      * @return string
      */
-    public function make(string $uid): string
+    public function render(string $uid): string
     {
         $uid = Safe::id($uid);
         if (! $uid) {
-            throw new InvalidArgumentException(t('The form with ":formUid" ID is empty.', $uid));
+            throw new InvalidArgumentException(t('The form with ID ":formUid" is empty.', $uid));
         }
 
         $form = self::$forms[$uid] ?? null;
@@ -94,10 +94,13 @@ class Form
      */
     public function override(string $uid, callable $function): \Expansa\Builders\Forms\Form
     {
-        $form = self::$forms[$uid];
-        if (is_callable($function)) {
-            $function($form);
+        $form = self::$forms[$uid] ?? null;
+        if (! $form instanceof \Expansa\Builders\Forms\Form) {
+            throw new InvalidArgumentException(t('The form with ID ":formUid" does not exist.', $uid));
         }
+
+        $function($form);
+
         return $form;
     }
 }

@@ -13,11 +13,12 @@ use Attribute;
 final readonly class HookListenerPriority
 {
     public function __construct(
+
         /**
          * The priority the listener should run with, in ascending order. See {@see \Expansa\Hooks\Priority}.
          *
          * @var int
          */
-        public int $priority
+        public int $priority,
     ) {} // phpcs:ignore
 }

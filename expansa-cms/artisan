@@ -1,14 +1,7 @@
 #!/usr/bin/env php
 <?php
-const EX_PATH                   = __DIR__ . '/';
-const EX_VERSION                = '2025.6';
-const EX_REQUIRED_PHP_VERSION   = '8.4';
-const EX_REQUIRED_MYSQL_VERSION = '8.0';
 
-require_once __DIR__ . '/env.php';
-require_once __DIR__ . '/autoload.php';
+declare(strict_types=1);
 
-use Expansa\Console\Terminal;
-
-$console = new Terminal();
-$console->handle();
+// the console runs through the same lifecycle as the web, in the "cli" context
+require_once __DIR__ . '/bootstrap.php';

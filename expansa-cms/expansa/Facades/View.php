@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Facades;
 
 use Expansa\Patterns\Facade;
+use Expansa\View\Engines\EngineManager;
+use Expansa\View\Finder;
 use Expansa\View\View as BaseView;
 
 /**
@@ -14,25 +16,33 @@ use Expansa\View\View as BaseView;
  */
 class View extends Facade
 {
+    private static string $views = '';
+
+    /**
+     * @var array<string, mixed>
+     */
+    private static array $options = [];
+
+    /**
+     * Set the views directory before the first view is made; with $cachePath compiled templates are cached there.
+     */
+    public static function configure(string $viewsPath, string $cachePath = ''): void
+    {
+        self::$views   = $viewsPath;
+        self::$options = $cachePath !== '' ? ['cache' => true, 'cache_path' => $cachePath] : [];
+    }
+
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\View\Factory';
+        return \Expansa\View\Factory::class;
     }
 
     protected static function getConstructorArgs(): array
     {
         return [
-            new \Expansa\View\Finder(EX_PATH . 'dashboard/views'),
-            new \Expansa\View\Engines\EngineManager(),
-            [
-                'paths'      => [
-                    root('dashboard'),
-                ],
-                'cache_path' => root('cache/views'),
-                'css_path'   => root('public/css'),
-                'js_path'    => root('public/js'),
-                'cache'      => true,
-            ],
+            new Finder(self::$views),
+            new EngineManager(),
+            self::$options,
         ];
     }
 }

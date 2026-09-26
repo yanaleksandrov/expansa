@@ -16,9 +16,11 @@ return Expansa\Facades\Form::enqueue(
 			'name'        => 'title',
 			'type'        => 'header',
 			'class'       => 'pt-7 px-7 t-center',
-			'label'       => t( 'Map fields for export' ),
-			'instruction' => t( 'Select fields from your CSV file that you want to map to fields in the posts, or that you want to ignore during import' ),
-			'attributes'  => [ 'u-prop' => 'title' ],
+			'label'       => t( 'Export posts' ),
+			'instruction' => t( 'Choose which content to export and the file format' ),
+			'attributes'  => [
+				'u-prop' => 'title'
+			],
 		],
 		[
 			'type'        => 'select',
@@ -35,7 +37,7 @@ return Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop' => 'types',
+				'u-prop'   => 'types',
 				'value'    => 'pages',
 				'multiple' => true,
 			],
@@ -53,27 +55,27 @@ return Expansa\Facades\Form::enqueue(
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Select the appropriate format for subsequent work' ),
+			'instruction' => t( 'Choose the format that best fits how you\'ll use the data' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
 				'u-prop' => 'format',
-				'value' => 'csv',
+				'value'  => 'csv',
 			],
 			'options'     => [
 				'csv' => [
 					'icon'        => 'ph ph-file-csv',
 					'image'       => url( 'dashboard/assets/images/dashboard-light.svg' ),
 					'content'     => t( 'CSV file' ),
-					'description' => t( 'A clear format for apps that work with tables' ),
+					'description' => t( 'A simple format for spreadsheet apps' ),
 				],
 				'json' => [
 					'icon'        => 'ph ph-file-txt',
 					'image'       => url( 'dashboard/assets/images/dashboard-dark.svg' ),
 					'content'     => t( 'JSON file' ),
-					'description' => t( 'Universal format for cross-platform data exchange' ),
+					'description' => t( 'A universal format for exchanging data across platforms' ),
 				],
 			],
 		],

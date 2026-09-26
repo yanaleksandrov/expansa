@@ -17,8 +17,8 @@ class AssetClean extends Command
 
     public function handle(): void
     {
-        $maxAge  = (int) ($this->getConsole()->getOption('max-age') ?: 604800);
-        $maxSize = $this->getConsole()->getOption('max-size');
+        $maxAge  = (int) ($this->getConsole()->option('max-age') ?: 604800);
+        $maxSize = $this->getConsole()->option('max-size');
         $maxSize = $maxSize !== null ? (int) $maxSize : null;
 
         $removed = Manager::clean($maxAge, $maxSize);

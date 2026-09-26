@@ -40,7 +40,7 @@ return Form::enqueue(
                             'before'      => '',
                             'after'       => '',
                             'instruction' => t('Click to upload your avatar'),
-                            'tooltip'     => t('This is tooltip'),
+                            'tooltip'     => t('This is a tooltip'),
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
@@ -84,7 +84,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-at"></i>',
                             'after'       => '',
-                            'instruction' => t('Is not displayed anywhere. It is used to work with the account and system notifications'),
+                            'instruction' => t('Not displayed publicly. Used for account access and system notifications'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -105,7 +105,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-at"></i>',
                             'after'       => '',
-                            'instruction' => t('We sent a 4-digit verification code to your %s email', 'user@gmail.com'),
+                            'instruction' => t('We sent a 4-digit verification code to %s', 'user@gmail.com'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -131,7 +131,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-user"></i>',
                             'after'       => '',
-                            'instruction' => t('Cannot be changed because used to log in to your account'),
+                            'instruction' => t('Can\'t be changed because it\'s used to sign in to your account'),
                             'tooltip'     => '',
                             'copy'        => 1,
                             'validator'   => '',
@@ -216,7 +216,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-identification-badge"></i>',
                             'after'       => '',
-                            'instruction' => t('Your name may appear around website where you contribute or are mentioned'),
+                            'instruction' => t('Your name may appear on the website wherever you contribute or are mentioned'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -287,7 +287,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('Choose how dashboard looks to you. Select a single theme, or sync with your system and automatically switch between day and night themes.'),
+                            'instruction' => t('Choose how the dashboard looks to you. Select a single theme, or sync with your system to switch between light and dark themes automatically.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -362,7 +362,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('Language for your dashboard panel'),
+                            'instruction' => t('Your dashboard language'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -372,7 +372,7 @@ return Form::enqueue(
                                 'u-select' => '',
                                 'value'    => $user->locale ?? '',
                             ],
-                            'options'     => I18n::getLanguagesOptions(),
+                            'options'     => I18n::languageOptions(),
                         ],
                     ],
                 ],
@@ -587,7 +587,7 @@ return Form::enqueue(
 				                                    </div>
 			                                    </template>
 			                                    <p class="df aic g-1 t-red fs-13">
-				                                    <i class="ph ph-info"></i> <?php echo t('Expansa support team will never ask you to share your secret keys.'); ?>
+				                                    <i class="ph ph-info"></i> <?php echo t('The Expansa support team will never ask you to share your secret keys.'); ?>
 			                                    </p>
 		                                    </div>
 	                                    </template>
@@ -598,7 +598,7 @@ return Form::enqueue(
                                                 [
                                                     'icon'        => 'ufo',
                                                     'class'       => 'dg jic m-auto t-center p-7',
-                                                    'title'       => t('API keys not found'),
+                                                    'title'       => t('No API keys found'),
                                                     'description' => t('To begin, click "Add new key" to create your first API key.'),
                                                 ]
                                             );

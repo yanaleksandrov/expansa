@@ -4,39 +4,41 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Uploader extends Field
+/**
+ * Renders `form/uploader.blade.php` - a drag-and-drop file uploader with a
+ * configurable maximum size.
+ */
+class Uploader extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'uploader',
+            label: t('File Uploader'),
+            category: 'media',
+            icon: 'ph ph-upload-simple',
+            description: t('A drag-and-drop file uploader with a configurable maximum size.'),
+            defaults: [
+                'name'       => '',
+                'label'      => '',
+                'attributes' => [],
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ...$this->baseSettings(false),
+            ['type' => 'text', 'name' => 'max_size', 'label' => t('Maximum file size')],
+            ['type' => 'text', 'name' => 'attributes.accept', 'label' => t('Accepted file types')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
+        $rule = isset($field['max_size']) ? 'maxSize:' . $field['max_size'] : '';
 
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [($field['name'] ?? '') => $this->withRequired($field, $rule)];
     }
 }

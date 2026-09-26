@@ -23,10 +23,8 @@ final class Manager extends HooksCollector
     /**
      * Files already scanned by configure(), keyed by their real path.
      *
-     * Guards against configure() being called more than once for the same file within the same
-     * request (e.g. once at bootstrap and again mid-request, as the installer does) - without it,
-     * every rescan would register the same class's methods a second time, so every matching hook
-     * would fire twice.
+     * Files of the listener classes configured in this request: without it, configuring the same
+     * class twice would register its methods again, so every matching hook would fire twice.
      *
      * @var array<string, true>
      */
@@ -64,64 +62,76 @@ final class Manager extends HooksCollector
     private const int MAX_RECURSION_DEPTH = 20;
 
     /**
-     * Scans a file or directory for listener classes and registers every public method of each
-     * discovered class as a listener for the hook matching its method name.
+     * Registers every public method of each listener class as a listener for the hook matching its name.
+     * Pass the classes explicitly, or a file or directory to scan; a class configured before is skipped.
+     * A listener class is only instantiated the first time one of its hooks actually fires.
      *
-     * Each listener class is only instantiated the first time one of its hooks actually fires,
-     * not while scanning - so listing a large Listeners directory stays cheap even if most of
-     * the hooks in it never run during a given request.
-     *
-     * A file already scanned by a previous configure() call, in this request, is skipped.
-     *
-     * @param string $path Path to a single listener file, or a directory to scan recursively.
+     * @param class-string[]|string $listeners Listener classes, or a listener file or directory to scan.
      *
      * @return void
      * @throws FinderException|HooksException|ReflectionException
      */
-    public function configure(string $path): void
+    public function configure(string|array $listeners): void
     {
-        $paths = is_file($path) ? [$path] : $this->discover($path);
+        if (is_array($listeners)) {
+            foreach ($listeners as $class) {
+                $this->configureClass($class);
+            }
+
+            return;
+        }
+
+        $paths = is_file($listeners) ? [$listeners] : $this->discover($listeners);
 
         foreach ($paths as $file) {
-            $realFile = realpath($file) ?: $file;
-
-            if (isset(self::$configuredFiles[$realFile])) {
-                continue;
-            }
-            self::$configuredFiles[$realFile] = true;
-
-            // A namespace regex is far cheaper than diffing get_declared_classes() before/after
-            // require_once - and, since it never depends on require_once actually declaring
-            // something new, it works just as well when the file was already loaded some other
-            // way (Composer's autoloader, or a previous configure() call outside $configuredFiles).
+            // cheaper than diffing get_declared_classes() and works for a file loaded some other way
             if (!preg_match('/namespace\s+([^;]+);/', file_get_contents($file), $namespaceMatch)) {
                 throw new HooksException("Listener file '$file' does not declare a namespace");
             }
 
-            $class = $namespaceMatch[1] . '\\' . basename($file, '.php');
-
             require_once $file;
 
-            $reflection = new ReflectionClass($class);
+            $this->configureClass($namespaceMatch[1] . '\\' . basename($file, '.php'));
+        }
+    }
 
-            if (!$reflection->isInstantiable()) {
-                throw new HooksException("Listener class '$class' is not instantiable");
+    /**
+     * @param class-string $class
+     *
+     * @throws HooksException|ReflectionException
+     */
+    private function configureClass(string $class): void
+    {
+        if (!class_exists($class)) {
+            throw new HooksException("Listener class '$class' does not exist");
+        }
+
+        $reflection = new ReflectionClass($class);
+        $file       = $reflection->getFileName() ?: $class;
+        $realFile   = realpath($file) ?: $file;
+
+        if (isset(self::$configuredFiles[$realFile])) {
+            return;
+        }
+        self::$configuredFiles[$realFile] = true;
+
+        if (!$reflection->isInstantiable()) {
+            throw new HooksException("Listener class '$class' is not instantiable");
+        }
+
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            $methodName = $method->getName();
+
+            if (str_starts_with($methodName, '__')) {
+                continue;
             }
 
-            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-                $methodName = $method->getName();
+            $priority = $this->getProperty([$class, $methodName]) ?? Priority::BASE;
 
-                if (str_starts_with($methodName, '__')) {
-                    continue;
-                }
-
-                $priority = $this->getProperty([$class, $methodName]) ?? Priority::BASE;
-
-                $this->add($methodName, $this->lazyListener($class, $methodName), $priority, [
-                    'file' => $reflection->getFileName() ?: '',
-                    'line' => $method->getStartLine() ?: '',
-                ], [$class, $methodName]);
-            }
+            $this->add($methodName, $this->lazyListener($class, $methodName), $priority, [
+                'file' => $reflection->getFileName() ?: '',
+                'line' => $method->getStartLine() ?: '',
+            ], [$class, $methodName]);
         }
     }
 

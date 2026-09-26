@@ -9,7 +9,7 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		'class'           => 'card card-border',
 		'@submit.prevent' => '$ajax.post("posts/import").then(response => output = response.output,goNext())',
-		'u-data'          => '{fields: "", output: ""}',
+		'u-data'          => '{fields: "", output: "", encoding: "auto"}',
 	],
 	[
 		[
@@ -33,7 +33,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'pl-7 pr-7',
-				'u-step'  => 'fields.trim()',
+				'u-step'         => 'fields.trim()',
 				'u-wizard:title' => t( 'Upload CSV file' ),
 			],
 			'fields' => [
@@ -42,8 +42,25 @@ return \Expansa\Facades\Form::enqueue(
 					'type'        => 'header',
 					'class'       => 'p-7 t-center',
 					'label'       => t( 'Import posts from a CSV file' ),
-					'instruction' => t( 'This tool allows you to import (or merge) posts data to your website from a CSV or TXT file. %sDownload%s the file for an example or choose a file from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
+					'instruction' => t( 'This tool lets you import (or merge) post data into your website from a CSV or TXT file. %sDownload%s a sample file or choose one from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
 					'attributes'  => [ 'u-prop' => 'title' ],
+				],
+				[
+					'type'        => 'select',
+					'name'        => 'encoding',
+					'label'       => t( 'File encoding' ),
+					'class'       => '',
+					'label_class' => '',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => t( 'If the column samples in the next step look garbled, go back, choose a different encoding, and upload the file again' ),
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [ 'u-prop' => 'encoding' ],
+					'options'     => array_map( 't', \App\Api\Files\FilesService::CSV_ENCODINGS ),
 				],
 				[
 					'type'        => 'uploader',
@@ -60,9 +77,9 @@ return \Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'u-prop' => 'uploader',
+						'u-prop'  => 'uploader',
 						'accept'  => '.csv,.txt',
-						'@change' => '$ajax.post("files/upload").then(response => fields = response.fields,goNext())',
+						'@change' => '$ajax.post("files/upload", {encoding}).then(response => fields = response.fields,goNext())',
 					],
 				],
 			],
@@ -71,8 +88,8 @@ return \Expansa\Facades\Form::enqueue(
 			'type'       => 'step',
 			'attributes' => [
 				'class'          => 'pl-7 pr-7',
-				'hidden'        => true,
-				'u-step'  => 'output.trim()',
+				'hidden'         => true,
+				'u-step'         => 'output.trim()',
 				'u-wizard:title' => t( 'Column mapping' ),
 			],
 			'fields' => [
@@ -81,7 +98,7 @@ return \Expansa\Facades\Form::enqueue(
 					'type'        => 'header',
 					'class'       => 'p-7 t-center',
 					'label'       => t( 'Map CSV fields to posts' ),
-					'instruction' => t( 'Select fields from your CSV file that you want to map to fields in the posts, or that you want to ignore during import' ),
+					'instruction' => t( 'Choose which fields from your CSV file to map to post fields and which to skip during import' ),
 					'attributes'  => [ 'u-prop' => 'title' ],
 				],
 				[
@@ -96,7 +113,7 @@ return \Expansa\Facades\Form::enqueue(
 				'class'          => 'dg p-7',
 				'u-html'         => 'output',
 				'hidden'        => true,
-				'u-wizard:title' => t( 'Import is completed' ),
+				'u-wizard:title' => t( 'Import complete' ),
 			],
 		],
 		[

@@ -9,9 +9,13 @@ use Expansa\Http\Response;
 
 final readonly class ApikeyController
 {
-    public function __construct(private ApikeyService $service = new ApikeyService())
-    {
-    }
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private ApikeyService $service = new ApikeyService(),
+    ) {} // phpcs:ignore
 
     /** @todo not implemented — placeholder carried over from the legacy class */
     public function index(): array

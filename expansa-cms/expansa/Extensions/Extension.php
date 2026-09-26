@@ -13,6 +13,13 @@ abstract class Extension
     use ExtensionHelpers;
 
     /**
+     * Nothing to declare by default: most extensions only need boot().
+     */
+    public function register(): void
+    {
+    }
+
+    /**
      * Sets the name of the extension.
      *
      * @param string $name The name of the extension.

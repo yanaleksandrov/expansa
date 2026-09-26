@@ -8,7 +8,13 @@ use Expansa\Http\Request;
 
 final readonly class OptionsController
 {
-    public function __construct(private OptionsService $service = new OptionsService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private OptionsService $service = new OptionsService(),
+    )
     {
     }
 

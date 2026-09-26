@@ -125,7 +125,7 @@ class User extends Model implements Fieldable
      *
      * @var string
      */
-    private static string $cookieName = EX_DB_PREFIX . 'auth';
+    private static string $cookieName = EX_DB['prefix'] . 'auth';
 
     /**
      * Lifetime of the authentication cookie when "remember me" is not checked.
@@ -187,7 +187,7 @@ class User extends Model implements Fieldable
     {
         $this->validator->extend(
             'email:unique',
-            t('Sorry, that user email address or login is already used!'),
+            t('Sorry, that email address or login is already in use.'),
             fn() => ! $this->exists(
                 [
                     'login' => $this->login,
@@ -505,7 +505,7 @@ class User extends Model implements Fieldable
      * Sign an authentication payload for the given user.
      *
      * The user's password hash is folded into the signature, so changing the
-     * password (or rotating EX_AUTH_KEY) invalidates every cookie issued before.
+     * password (or rotating EX_KEYS['auth']) invalidates every cookie issued before.
      *
      * @param User $user       The user to issue the cookie for.
      * @param int  $expiration Unix timestamp after which the cookie is no longer valid.
@@ -515,7 +515,7 @@ class User extends Model implements Fieldable
     {
         $payload = "$user->login|$expiration";
 
-        return $payload . '|' . hash_hmac('sha256', $payload . '|' . $user->password, EX_AUTH_KEY);
+        return $payload . '|' . hash_hmac('sha256', $payload . '|' . $user->password, EX_KEYS['auth']);
     }
 
     /**
@@ -541,7 +541,7 @@ class User extends Model implements Fieldable
             return null;
         }
 
-        $expected = hash_hmac('sha256', "$login|$expiration|$user->password", EX_AUTH_KEY);
+        $expected = hash_hmac('sha256', "$login|$expiration|$user->password", EX_KEYS['auth']);
 
         return hash_equals($expected, $hmac) ? $user : null;
     }

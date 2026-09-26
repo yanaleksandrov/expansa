@@ -12,12 +12,13 @@ use Expansa\Session\Contracts\SessionManagerInterface;
 
 final class SessionStartMiddleware implements MiddlewareInterface
 {
-    private SessionManagerInterface $session;
+    public function __construct(
 
-    public function __construct(SessionManagerInterface $session)
-    {
-        $this->session = $session;
-    }
+        /**
+         * Session started before the handler (unless already started) and saved after it.
+         */
+        private SessionManagerInterface $session,
+    ) {} // phpcs:ignore
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {

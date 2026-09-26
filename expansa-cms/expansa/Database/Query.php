@@ -48,7 +48,7 @@ class Query
         /**
          * The model instance this query is scoped to.
          */
-        protected readonly Model $model
+        protected readonly Model $model,
     ) {} // phpcs:ignore
 
     /**

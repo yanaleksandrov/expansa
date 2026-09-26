@@ -31,7 +31,7 @@ final class UserService
         return [
             [
                 'target' => 'body',
-                'notify' => t('User is updated')
+                'notify' => t('User updated.')
             ],
         ];
     }
@@ -94,7 +94,7 @@ final class UserService
         if ($user instanceof User) {
             $mailIsSent = Mail::send(
                 $email,
-                t('Instructions for reset password'),
+                t('Password reset instructions'),
                 View::make(EX_DASHBOARD . 'mails/wrapper', [
                     'body_template' => EX_DASHBOARD . 'mails/reset-password',
                 ])

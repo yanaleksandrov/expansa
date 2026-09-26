@@ -1179,7 +1179,14 @@
                 options.once = true;
             }
             if (event === "load") {
-                handler(createEvent(event, {}));
+                // Deferred a microtask, not fired inline: "load" can fire mid-walk, while
+                // componentDiscover() is still synchronously initializing the *other* top-level
+                // "u-data" roots ("dialog", "notice", ...) - e.g. a footer <template>'s own
+                // "@load" runs as part of <body>'s walk, before the sibling "dialog" root (a
+                // later call in that same forEach) exists yet, so "$dialog" would still resolve
+                // to undefined at that instant. Queuing a microtask guarantees every top-level
+                // root - the whole synchronous componentDiscover() pass - is done first.
+                queueMicrotask(() => handler(createEvent(event, {})));
             }
             if (event === "intersect") {
                 const observer = new IntersectionObserver(entries => entries.forEach(entry => {

@@ -15,54 +15,113 @@ class Type
 {
     private static array $items = [];
 
-    /**
-     * @param string $key             Unique key. Must not exceed 20 characters and may contain only
-     *                                lowercase alphanumeric characters, dashes, and underscores.
-     * @param string $labelName       The name of the item displayed in the menu. Usually singular.
-     * @param string $labelNamePlural The plural name of the item displayed in the menu.
-     * @param string $labelAllItems   Text to display for "All Items".
-     * @param string $labelAdd        Text to display for "Add Item".
-     * @param string $labelEdit       Text to display for "Edit Item".
-     * @param string $labelUpdate     Text to display for "Update Item".
-     * @param string $labelView       Text to display for "View Item".
-     * @param string $labelSearch     Text to display for "Search".
-     * @param string $labelSave       Text to display for "Save".
-     * @param string $table           The name of the database table where items are stored.
-     * @param bool   $public          Indicates if the item is for public use via admin interface or front-end users.
-     * @param bool   $hierarchical    Whether the structure is hierarchical (e.g., like pages). Default false.
-     * @param bool   $searchable      Whether items of this type are available in front-end search.
-     * @param bool   $showInMenu      Whether to display this item in the admin menu. If true, it is displayed
-     *                                as a top-level menu item. If false, it is hidden from the menu.
-     * @param bool   $showInBar       Whether to make this item available in the admin bar.
-     * @param bool   $canExport       Whether items of this type can be exported. Default true.
-     * @param bool   $canImport       Whether items of this type can be imported.
-     * @param array  $capabilities    Array of user capabilities for this item type. Controls permissions for
-     *                                actions such as editing and deleting items.
-     * @param string $menuIcon        URL or class name for the icon used in the admin menu. Can be a base64-encoded
-     *                                SVG or a Phosphor class name.
-     * @param int    $menuPosition    The position in the menu order where this item should appear.
-     */
     private function __construct(
+
+        /**
+         * Unique key, 1-20 lowercase letters, dashes or underscores; also used as the menu id and table name.
+         */
         public string $key,
+
+        /**
+         * Singular item name, also shown in type select options.
+         */
         public string $labelName,
+
+        /**
+         * Plural item name, used as the top-level admin menu title.
+         */
         public string $labelNamePlural,
+
+        /**
+         * Text for "All Items", used as the admin submenu title.
+         */
         public string $labelAllItems,
+
+        /**
+         * Text for "Add Item".
+         */
         public string $labelAdd,
+
+        /**
+         * Text for "Edit Item".
+         */
         public string $labelEdit,
+
+        /**
+         * Text for "Update Item".
+         */
         public string $labelUpdate,
+
+        /**
+         * Text for "View Item".
+         */
         public string $labelView,
+
+        /**
+         * Text for "Search".
+         */
         public string $labelSearch,
+
+        /**
+         * Text for "Save".
+         */
         public string $labelSave,
+
+        /**
+         * Database table of the items; always overwritten with the name derived from $key.
+         */
         public string $table = '',
+
+        /**
+         * Whether items are available to front-end users; only public items get URL slugs.
+         */
         public bool $public = true,
+
+        /**
+         * Whether items can have parents, like pages.
+         */
         public bool $hierarchical = false,
+
+        /**
+         * Whether items are available in front-end search.
+         */
         public bool $searchable = true,
+
+        /**
+         * Whether to add a top-level admin menu item with an "All Items" submenu.
+         */
         public bool $showInMenu = true,
+
+        /**
+         * Whether the type is available in the admin bar.
+         */
         public bool $showInBar = true,
+
+        /**
+         * Whether items can be exported.
+         */
         public bool $canExport = true,
+
+        /**
+         * Whether items can be imported.
+         */
         public bool $canImport = true,
+
+        /**
+         * User capabilities required to see the type's admin menu items.
+         *
+         * @var string[]
+         */
         public array $capabilities = ['typesEdit'],
+
+        /**
+         * Admin menu icon: a Phosphor class name or a base64-encoded SVG.
+         */
         public string $menuIcon = 'ph ph-folders',
+
+        /**
+         * Position of the item in the admin menu.
+         */
         public int $menuPosition = 10,
     )
     {
@@ -70,12 +129,12 @@ class Type
 
         if (!preg_match('/^[a-z_-]+$/', $postType)) {
             throw new InvalidArgumentException(
-                t('Post type key "%s" must use only lowercase letters, dashes and underscores.', $postType)
+                t('Post type key "%s" must contain only lowercase letters, dashes, and underscores.', $postType)
             );
         }
 
         if (empty($postType) || strlen($postType) > 20) {
-            throw new InvalidArgumentException(t('Post type key is empty or exceeds 20 characters.'));
+            throw new InvalidArgumentException(t('Post type key must be between 1 and 20 characters long.'));
         }
 
         $this->labelName       ??= t('Page');
@@ -118,7 +177,7 @@ class Type
          * Add DB table for post type if not exists.
          */
         $type = Safe::snakecase($key);
-        if (!Db::hasTable(EX_DB_PREFIX . $type)) {
+        if (!Db::hasTable(EX_DB['prefix'] . $type)) {
             Hook::call('createPostsTable', $type);
         }
     }
@@ -132,7 +191,7 @@ class Type
     public static function register(...$args): self
     {
         $type = new self(...$args);
-        if (empty($items[ $type->key ])) {
+        if (empty(self::$items[ $type->key ])) {
             self::$items[ $type->key ] = $type;
         }
         return $type;

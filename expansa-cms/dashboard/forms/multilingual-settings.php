@@ -56,7 +56,7 @@ return Expansa\Facades\Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t( 'Decide how your URLs will look like' ),
+                            'instruction' => t( 'Choose how your URLs will look' ),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',

@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Builders;
 
 use Expansa\Builders\Table\Abstracts\TableBase;
-use Expansa\Facades\Safe;
-use Expansa\Facades\View;
-use Expansa\Support\Arr;
 use Expansa\Builders\Table\Cell;
-use Expansa\Builders\Table\Row;
+use Expansa\Facades\Safe;
 
 /**
  * Class Table.
@@ -21,18 +18,31 @@ use Expansa\Builders\Table\Row;
 abstract class Table extends TableBase
 {
     /**
-     * Table constructor.
-     *
-     * @param array $data Data for rendering the table.
-     * @param array $cells Table cells list.
+     * File that enqueues the items filter form, included by every table.
      */
+    private static string $filter = '';
+
+    public static function configure(string $filter): void
+    {
+        self::$filter = $filter;
+    }
+
     public function __construct(
+
+        /**
+         * Data for rendering the table.
+         */
         public array $data = [],
-        public array $cells = []
+
+        /**
+         * Table cells list.
+         */
+        public array $cells = [],
     )
     {
-        // include filter
-        require_once EX_DASHBOARD . 'forms/items-filter.php';
+        if (self::$filter !== '') {
+            require_once self::$filter;
+        }
 
         $this->data  = $this->data();
         $this->cells = $this->cells();
@@ -44,7 +54,7 @@ abstract class Table extends TableBase
     }
 
     /**
-     * Calculate grid css styles.
+     * Calculate grid CSS styles.
      *
      * @param array $columns
      * @return string

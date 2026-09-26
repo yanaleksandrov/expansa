@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace Expansa\Debug;
 
-use LogicException;
-
 class Metric
 {
+    /**
+     * Request start by default, so the time includes PHP startup and autoload.
+     */
     protected float $startTime;
 
     protected float $endTime;
 
     protected int $memoryUsage;
 
+    public function __construct()
+    {
+        $this->startTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
+    }
+
     /**
-     * Sets start microtime
-     *
-     * @return void
+     * Restart the timer from now, e.g. to measure a single operation.
      */
     public function start(): void
     {
@@ -32,9 +36,6 @@ class Metric
      */
     public function time(bool $raw = false): float|string
     {
-        if (!isset($this->startTime)) {
-            throw new LogicException("You must call start()");
-        }
         $this->end();
 
         $elapsed = $this->endTime - $this->startTime;
@@ -88,14 +89,9 @@ class Metric
      * Sets end microtime
      *
      * @return void
-     * @throws LogicException
      */
     private function end(): void
     {
-        if (!isset($this->startTime)) {
-            throw new LogicException("You must call start()");
-        }
-
         $this->endTime     = microtime(true);
         $this->memoryUsage = memory_get_usage(true);
     }

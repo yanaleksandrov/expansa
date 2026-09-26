@@ -77,6 +77,9 @@ module.exports = {
             options: {
               implementation: require('sass'),
               sourceMap: false,
+              sassOptions: {
+                style: 'expanded',
+              },
             },
           },
         ],

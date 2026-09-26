@@ -26,9 +26,9 @@ class Help extends Command
 
     public function handle(): void
     {
-        $commandName = $this->console->getArgument(0) ?? 'help';
+        $commandName = $this->console->argument(0) ?? 'help';
 
-        $command = $this->console->getCommand($commandName);
+        $command = $this->console->command($commandName);
         if ($command === null) {
             $this->error(
                 t('Command ":commandName" not found', $commandName),

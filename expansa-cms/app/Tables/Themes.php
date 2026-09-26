@@ -76,8 +76,8 @@ final class Themes extends Table
     public function notFoundData(): array
     {
         return [
-            'title'       => t('Themes not found'),
-            'description' => t('You don\'t have any themes installed yet, <a @click="$dialog.open(`tmpl-post-editor`)">download them</a>'),
+            'title'       => t('No themes found'),
+            'description' => t('You don\'t have any themes installed yet. <a @click="$dialog.open(`tmpl-post-editor`)">Download some</a>'),
         ];
     }
 }

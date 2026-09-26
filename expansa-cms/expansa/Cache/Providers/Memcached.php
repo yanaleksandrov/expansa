@@ -40,9 +40,13 @@ class Memcached implements Provider
      */
     private static WeakMap $groupVersions;
 
-    public function __construct(private readonly MemcachedClient $client)
-    {
-    }
+    public function __construct(
+
+        /**
+         * Client with servers already added; this class does not configure the connection.
+         */
+        private readonly MemcachedClient $client,
+    ) {} // phpcs:ignore
 
     /**
      * $expiry accepts an absolute DateTime or a relative time string (e.g. "+1 day").

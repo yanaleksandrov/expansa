@@ -8,13 +8,22 @@ use Expansa\Http\Request;
 
 final readonly class MediaController
 {
-    public function __construct(private MediaService $service = new MediaService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private MediaService $service = new MediaService(),
+    )
     {
     }
 
-    public function get(): array
+    public function get(Request $request): array
     {
-        return $this->service->list();
+        return $this->service->list([
+            'page' => (int) ($request->post('page') ?: 1),
+            's'    => (string) $request->post('s', ''),
+        ]);
     }
 
     public function upload(): array
@@ -25,5 +34,10 @@ final readonly class MediaController
     public function grab(Request $request): array
     {
         return $this->service->grab($request->post('urls', ''));
+    }
+
+    public function delete(Request $request): array
+    {
+        return $this->service->delete((array) $request->post('ids', []));
     }
 }

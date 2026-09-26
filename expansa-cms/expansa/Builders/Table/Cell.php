@@ -6,27 +6,47 @@ namespace Expansa\Builders\Table;
 
 class Cell
 {
-    /**
-     * Column constructor.
-     *
-     * @param string $key Unique column key.
-     * @param string $title Title of column.
-     * @param string $view Path to get view for render column cell.
-     * @param bool $sortable Column is sortable.
-     * @param string $width Min column width.
-     * @param bool $flexible Column width is flexible.
-     * @param bool $searchable Column is searchable.
-     * @param array $attributes Cell wrapper HTML attributes list.
-     */
     public function __construct(
+
+        /**
+         * Unique column key.
+         */
         public string $key = '',
+
+        /**
+         * Title of column.
+         */
         public string $title = '',
+
+        /**
+         * Path to get view for render column cell.
+         */
         public string $view = 'table/cell',
+
+        /**
+         * Column is sortable.
+         */
         public bool $sortable = false,
+
+        /**
+         * Min column width.
+         */
         public string $width = '',
+
+        /**
+         * Column width is flexible.
+         */
         public bool $flexible = false,
+
+        /**
+         * Column is searchable.
+         */
         public bool $searchable = false,
-        public array $attributes = []
+
+        /**
+         * Cell wrapper HTML attributes list.
+         */
+        public array $attributes = [],
     ) {} // phpcs:ignore
 
     /**

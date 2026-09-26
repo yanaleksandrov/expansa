@@ -18,8 +18,12 @@ use Expansa\Http\Request;
 final readonly class SystemController
 {
     public function __construct(
-        private SystemService $service = new SystemService())
-    {} // phpcs:ignore
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private SystemService $service = new SystemService(),
+    ) {} // phpcs:ignore
 
     /**
      * @url POST /api/system/test

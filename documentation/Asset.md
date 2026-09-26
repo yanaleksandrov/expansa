@@ -153,7 +153,7 @@ Asset::discover($path, 'page');
 ```php
 // Стили и скрипты лежат в общих папках assets/css и assets/js,
 // а не рядом с шаблоном, и называются по папке компонента, а не по имени PHP-файла.
-Asset::configure(function (string $file): array {
+Asset::configure(resolver: function (string $file): array {
     $name = basename(dirname($file)); // views/card/card.blade.php -> "card"
 
     return [
@@ -166,7 +166,7 @@ Asset::configure(function (string $file): array {
 ```php
 // Фиксированные имена style.css/script.js рядом с шаблоном, независимо от того,
 // как называется сам файл шаблона (card.blade.php, index.php, ...).
-Asset::configure(fn (string $file): array => [
+Asset::configure(resolver: fn (string $file): array => [
     'css' => dirname($file) . '/style.css',
     'js'  => dirname($file) . '/script.js',
 ]);
@@ -235,7 +235,7 @@ use Expansa\Assets\Manager;
 
 $suffix = ! Is::debug() ? '.min' : '';
 
-Manager::configure(function (string $file, array $context = []) use ($suffix): array {
+Manager::configure(resolver: function (string $file, array $context = []) use ($suffix): array {
     if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/form/')) {
         return Manager::defaultStructure($file); // всё остальное — по конвенции по умолчанию
     }

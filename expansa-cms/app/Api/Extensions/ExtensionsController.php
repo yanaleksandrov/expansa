@@ -12,7 +12,13 @@ namespace App\Api\Extensions;
  */
 final readonly class ExtensionsController
 {
-    public function __construct(private ExtensionsService $service = new ExtensionsService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private ExtensionsService $service = new ExtensionsService(),
+    )
     {
     }
 

@@ -1,73 +1,101 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\Log;
 
+use DateTimeImmutable;
+use DateTimeInterface;
+use LogicException;
+use Stringable;
+use Throwable;
 use Expansa\Log\Contracts\Handler;
 use Expansa\Log\Contracts\LoggerInterface;
 
+/**
+ * PSR-3 logger of one channel: builds a record and passes it to every handler of its level.
+ * A record below the level of all handlers costs a single comparison.
+ *
+ * @package Expansa\Log
+ */
 class Logger implements LoggerInterface
 {
-    public const DEBUG = 100;
-
-    public const INFO = 200;
-
-    public const NOTICE = 250;
-
-    public const WARNING = 300;
-
-    public const ERROR = 400;
-
-    public const CRITICAL = 500;
-
-    public const ALERT = 550;
-
-    public const EMERGENCY = 600;
-
-    public const LEVELS = [
-        self::DEBUG     => 'DEBUG',
-        self::INFO      => 'INFO',
-        self::NOTICE    => 'NOTICE',
-        self::WARNING   => 'WARNING',
-        self::ERROR     => 'ERROR',
-        self::CRITICAL  => 'CRITICAL',
-        self::ALERT     => 'ALERT',
-        self::EMERGENCY => 'EMERGENCY',
-    ];
-
-    protected const RFC_5424_LEVELS = [
-        7 => self::DEBUG,
-        6 => self::INFO,
-        5 => self::NOTICE,
-        4 => self::WARNING,
-        3 => self::ERROR,
-        2 => self::CRITICAL,
-        1 => self::ALERT,
-        0 => self::EMERGENCY,
-    ];
-
+    /**
+     * Context added to every record, the record context overrides its keys.
+     */
     protected array $context = [];
 
-    public function __construct(protected string $name = '', protected array $handlers = [])
+    /**
+     * Lowest level of the handlers, PHP_INT_MAX without handlers.
+     */
+    private int $minLevel = PHP_INT_MAX;
+
+    public function __construct(
+
+        /**
+         * Channel name, printed in every record.
+         */
+        protected readonly string $name = 'app',
+
+        /**
+         * Handlers, the top of the stack first.
+         *
+         * @var Handler[]
+         */
+        protected array $handlers = [] {
+            set {
+                $this->handlers = array_values($value);
+                $this->minLevel = PHP_INT_MAX;
+
+                foreach ($this->handlers as $handler) {
+                    $this->minLevel = min($this->minLevel, $handler->getLevel()->value);
+                }
+            }
+        },
+    ) {} // phpcs:ignore
+
+    public function getName(): string
     {
-        $this->setHandlers($handlers);
+        return $this->name;
     }
 
+    /**
+     * Add a handler on top of the stack.
+     *
+     * @param Handler $handler
+     * @return static
+     */
     public function pushHandler(Handler $handler): static
     {
-        array_unshift($this->handlers, $handler);
+        $this->handlers = [$handler, ...$this->handlers];
 
         return $this;
     }
 
+    /**
+     * Remove the handler on top of the stack.
+     *
+     * @return Handler
+     * @throws LogicException If there are no handlers.
+     */
     public function popHandler(): Handler
     {
-        if (empty($this->handlers)) {
-            throw new \LogicException('You tried to pop from an empty handler stack.');
+        if ($this->handlers === []) {
+            throw new LogicException('You tried to pop from an empty handler stack.');
         }
 
-        return array_shift($this->handlers);
+        $handler        = $this->handlers[0];
+        $this->handlers = array_slice($this->handlers, 1);
+
+        return $handler;
     }
 
+    /**
+     * Replace all handlers.
+     *
+     * @param Handler[] $handlers
+     * @return static
+     */
     public function setHandlers(array $handlers): static
     {
         $this->handlers = $handlers;
@@ -75,37 +103,36 @@ class Logger implements LoggerInterface
         return $this;
     }
 
+    /**
+     * Get the handlers, the top of the stack first.
+     *
+     * @return Handler[]
+     */
     public function getHandlers(): array
     {
         return $this->handlers;
     }
 
-    public static function toLevel($level): int
+    /**
+     * Check if any handler writes records of a level.
+     *
+     * @param Level|int|string $level
+     * @return bool
+     */
+    public function isHandling(Level|int|string $level): bool
     {
-        if (is_int($level)) {
-            if (isset(static::RFC_5424_LEVELS[$level])) {
-                $level = static::RFC_5424_LEVELS[$level];
-            }
-
-            if (isset(static::LEVELS[$level])) {
-                return $level;
-            }
-        }
-
-        if (is_string($level)) {
-            $upper = strtr($level, 'abcdefgilmnortuwy', 'ABCDEFGILMNORTUWY');
-
-            if (defined(__CLASS__ . '::' . $upper)) {
-                return constant(__CLASS__ . '::' . $upper);
-            }
-        }
-
-        throw new \InvalidArgumentException('Level "' . $level . '" is not defined, use one of: ' . implode(', ', array_keys(static::LEVELS) + static::LEVELS));
+        return Level::of($level)->value >= $this->minLevel;
     }
 
+    /**
+     * Add context to every following record.
+     *
+     * @param array $context
+     * @return static
+     */
     public function withContext(array $context): static
     {
-        $this->context = array_merge($this->context, $context);
+        $this->context = [...$this->context, ...$context];
 
         return $this;
     }
@@ -117,66 +144,105 @@ class Logger implements LoggerInterface
         return $this;
     }
 
-    public function log($level, $message, array $context = []): void
+    public function getContext(): array
     {
-        $level = static::toLevel($level);
+        return $this->context;
+    }
 
-        $record = null;
+    public function log(Level|int|string $level, string|Stringable $message, array $context = []): void
+    {
+        $level = Level::of($level);
+        if ($level->value < $this->minLevel) {
+            return;
+        }
+
+        if ($this->context !== []) {
+            $context = [...$this->context, ...$context];
+        }
+
+        $message = self::interpolate((string) $message, $context);
+        $record  = new LogRecord(new DateTimeImmutable(), $this->name, $level, $message, $context);
 
         foreach ($this->handlers as $handler) {
-            if (is_null($record)) {
-                if (! $handler->isHandling($level)) {
-                    continue;
-                }
-
-                $record = new LogRecord($message, $context, date("Y-m-d H:i:s"), $level, $this->name);
+            if (! $handler->isHandling($level)) {
+                continue;
             }
 
+            // a broken handler must neither break the application nor stop the other handlers
             try {
                 $handler->handle($record);
-            } catch (\Throwable $e) {
-                // ...
+            } catch (Throwable $e) {
+                error_log('Log handler ' . $handler::class . ' failed: ' . $e->getMessage() . '; record: ' . $record->message); // phpcs:ignore
             }
         }
     }
 
-    public function emergency($message, array $context = []): void
+    public function emergency(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Emergency, $message, $context);
     }
 
-    public function alert($message, array $context = []): void
+    public function alert(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Alert, $message, $context);
     }
 
-    public function critical($message, array $context = []): void
+    public function critical(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Critical, $message, $context);
     }
 
-    public function error($message, array $context = []): void
+    public function error(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Error, $message, $context);
     }
 
-    public function warning($message, array $context = []): void
+    public function warning(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Warning, $message, $context);
     }
 
-    public function notice($message, array $context = []): void
+    public function notice(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Notice, $message, $context);
     }
 
-    public function info($message, array $context = []): void
+    public function info(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Info, $message, $context);
     }
 
-    public function debug($message, array $context = []): void
+    public function debug(string|Stringable $message, array $context = []): void
     {
-        $this->log(__FUNCTION__, $message, $context);
+        $this->log(Level::Debug, $message, $context);
+    }
+
+    /**
+     * Replace `{key}` placeholders with the context values that can be printed.
+     *
+     * @param string $message
+     * @param array  $context
+     * @return string
+     */
+    private static function interpolate(string $message, array $context): string
+    {
+        if ($context === [] || ! str_contains($message, '{')) {
+            return $message;
+        }
+
+        $replace = [];
+        foreach ($context as $key => $value) {
+            $replace['{' . $key . '}'] = match (true) {
+                $value === null                      => 'null',
+                is_bool($value)                      => $value ? 'true' : 'false',
+                is_scalar($value)                    => (string) $value,
+                $value instanceof Throwable          => $value::class . ': ' . $value->getMessage(),
+                $value instanceof Stringable         => (string) $value,
+                $value instanceof DateTimeInterface  => $value->format(DateTimeInterface::RFC3339),
+                default                              => '[' . get_debug_type($value) . ']',
+            };
+        }
+
+        return strtr($message, $replace);
     }
 }

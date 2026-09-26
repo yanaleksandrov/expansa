@@ -4,166 +4,154 @@ declare(strict_types=1);
 
 namespace Expansa\Scheduler;
 
+use Closure;
 use DateTime;
-use Exception;
-use ReflectionFunction;
-use ReflectionException;
-use InvalidArgumentException;
+use DateTimeInterface;
+use Throwable;
+use Expansa\Scheduler\Exception\SchedulerException;
 
 /**
- * Scheduler class.
+ * Queues closures, PHP scripts and shell commands and runs the due ones.
+ * Meant to be called once a minute by the system cron, or kept alive by work().
+ * Fork of https://github.com/peppeocchi/php-cron-scheduler.
  *
- * Fork of https://github.com/peppeocchi/php-cron-scheduler/tree/master.
+ * @package Expansa\Scheduler
  */
 class Scheduler
 {
     /**
-     * Create new instance.
+     * Queued jobs.
      *
-     * @param  array  $config
-     * @param  array  $jobs The queued jobs.
-     * @param  array  $executedJobs Successfully executed jobs.
-     * @param  array  $failedJobs Failed jobs.
-     * @param  array  $outputSchedule The verbose output of the scheduled jobs.
+     * @var Job[]
      */
+    private array $jobs = [];
+
+    /**
+     * Jobs executed by the last run.
+     *
+     * @var Job[]
+     */
+    private array $executedJobs = [];
+
+    /**
+     * Jobs failed during the last run or while being queued.
+     *
+     * @var FailedJob[]
+     */
+    private array $failedJobs = [];
+
+    /**
+     * Log lines of the last run.
+     *
+     * @var string[]
+     */
+    private array $outputSchedule = [];
+
     public function __construct(
+
+        /**
+         * `tempDir` for lock files and `email` settings, applied to every queued job.
+         */
         private readonly array $config = [],
-        private array $jobs = [],
-        private array $executedJobs = [],
-        private array $failedJobs = [],
-        private array $outputSchedule = []
     ) {} // phpcs:ignore
 
     /**
-     * Queue a job for execution in the correct queue.
+     * Queue a PHP callable.
      *
-     * @param  Job  $job
-     * @return void
-     */
-    private function queueJob(Job $job): void
-    {
-        $this->jobs[] = $job;
-    }
-
-    /**
-     * Prioritise jobs in background.
-     *
-     * @return array
-     */
-    private function prioritiseJobs(): array
-    {
-        return array_merge(
-            array_filter($this->jobs, fn($job) => $job->canRunInBackground()),
-            array_filter($this->jobs, fn($job) => !$job->canRunInBackground())
-        );
-    }
-
-    /**
-     * Get the queued jobs.
-     *
-     * @return array
-     */
-    public function getQueuedJobs(): array
-    {
-        return $this->prioritiseJobs();
-    }
-
-    /**
-     * Queues a function execution.
-     *
-     * @param callable    $fn   The function to execute
-     * @param array       $args Optional arguments to pass to the php script
-     * @param null|string $id   Optional custom identifier
+     * @param callable    $fn
+     * @param array       $args Arguments passed to the callable, string keys are named arguments.
+     * @param string|null $id   Custom identifier.
      * @return Job
      */
     public function call(callable $fn, array $args = [], ?string $id = null): Job
     {
-        $job = new Job($fn, $args, $id);
-
-        $this->queueJob($job->configure($this->config));
-
-        return $job;
+        return $this->queue(new Job($fn instanceof Closure ? $fn : $fn(...), $args, $id));
     }
 
     /**
-     * Queues a php script execution.
+     * Queue a PHP script, run by a separate PHP process.
+     * A missing script is reported as a failed job and is not queued.
      *
-     * @param string      $script The path to the php script to execute
-     * @param null|string $bin    Optional path to the php binary
-     * @param array       $args   Optional arguments to pass to the php script
-     * @param null|string $id     Optional custom identifier
+     * @param string      $script Path to the script.
+     * @param string|null $bin    Path to the PHP binary, the current one by default.
+     * @param array       $args   Script arguments.
+     * @param string|null $id     Custom identifier.
      * @return Job
-     * @throws ReflectionException
      */
     public function php(string $script, ?string $bin = null, array $args = [], ?string $id = null): Job
     {
-        $bin = is_string($bin) && file_exists($bin) ? $bin : (PHP_BINARY === '' ? '/usr/bin/php' : PHP_BINARY);
+        $bin = $bin !== null && is_file($bin) ? $bin : (PHP_BINARY ?: '/usr/bin/php');
+        $job = new Job(escapeshellarg($bin) . ' ' . escapeshellarg($script), $args, $id);
 
-        $job = new Job($bin . ' ' . $script, $args, $id);
+        if (! is_file($script)) {
+            $this->pushFailedJob($job->configure($this->config), new SchedulerException("The script $script does not exist."));
 
-        if (! file_exists($script)) {
-            $this->pushFailedJob($job, new InvalidArgumentException('The script should be a valid path to a file.'));
+            return $job;
         }
 
-        $this->queueJob($job->configure($this->config));
-
-        return $job;
+        return $this->queue($job);
     }
 
     /**
      * Queue a raw shell command.
      *
-     * @param string      $command The command to execute
-     * @param array       $args    Optional arguments to pass to the command
-     * @param null|string $id      Optional custom identifier
+     * @param string      $command
+     * @param array       $args Arguments, escaped: `['--force' => null, '--env' => 'dev', 'file.txt']`.
+     * @param string|null $id   Custom identifier.
      * @return Job
      */
     public function raw(string $command, array $args = [], ?string $id = null): Job
     {
-        $job = new Job($command, $args, $id);
-
-        $this->queueJob($job->configure($this->config));
-
-        return $job;
+        return $this->queue(new Job($command, $args, $id));
     }
 
     /**
-     * Run the scheduler.
+     * Get the queued jobs, background ones first.
      *
-     * @param null|DateTime $runTime Optional, run at specific moment
-     * @return array  Executed jobs
-     * @throws ReflectionException
+     * @return Job[]
      */
-    public function run(?Datetime $runTime = null): array
+    public function getQueuedJobs(): array
     {
-        $jobs = $this->getQueuedJobs();
+        return $this->prioritise($this->jobs);
+    }
 
-        if (is_null($runTime)) {
-            $runTime = new DateTime('now');
-        }
+    /**
+     * Run the due jobs, background ones first so that foreground jobs do not delay them.
+     *
+     * @param DateTimeInterface|null $runTime The moment to check the jobs against, `now` by default.
+     * @return Job[] Jobs executed by this run.
+     */
+    public function run(?DateTimeInterface $runTime = null): array
+    {
+        $runTime ??= new DateTime();
 
-        foreach ($jobs as $job) {
+        $due = [];
+        foreach ($this->jobs as $job) {
             if ($job->isDue($runTime)) {
-                try {
-                    $job->run();
-                    $this->pushExecutedJob($job);
-                } catch (Exception $e) {
-                    $this->pushFailedJob($job, $e);
-                }
+                $due[] = $job;
             }
         }
 
-        return $this->getExecutedJobs();
+        foreach ($this->prioritise($due) as $job) {
+            try {
+                if ($job->run()) {
+                    $this->pushExecutedJob($job);
+                }
+            } catch (Throwable $e) {
+                $this->pushFailedJob($job, $e);
+            }
+        }
+
+        return $this->executedJobs;
     }
 
     /**
-     * Reset all collected data of last run.
+     * Reset the results of the last run, call it before run() when it is called several times.
      *
-     * Call before run() if you call run() multiple times.
+     * @return static
      */
     public function resetRun(): static
     {
-        // Reset collected data of last run
         $this->executedJobs   = [];
         $this->failedJobs     = [];
         $this->outputSchedule = [];
@@ -172,44 +160,9 @@ class Scheduler
     }
 
     /**
-     * Add an entry to the scheduler verbose output array.
+     * Get the jobs executed by the last run.
      *
-     * @param string $string
-     * @return void
-     */
-    private function addSchedulerVerboseOutput(string $string): void
-    {
-        $now = '[' . new DateTime('now')->format('c') . '] ';
-        $this->outputSchedule[] = $now . $string;
-
-        // Print to stdoutput in light gray
-        // echo "\033[37m{$string}\033[0m\n";
-    }
-
-    /**
-     * Push a successfully executed job.
-     *
-     * @param  Job  $job
-     * @return void
-     */
-    private function pushExecutedJob(Job $job): void
-    {
-        $this->executedJobs[] = $job;
-
-        $compiled = $job->compile();
-
-        // If callable, log the string Closure
-        if (is_callable($compiled)) {
-            $compiled = 'Closure';
-        }
-
-        $this->addSchedulerVerboseOutput("Executing {$compiled}");
-    }
-
-    /**
-     * Get the executed jobs.
-     *
-     * @return array
+     * @return Job[]
      */
     public function getExecutedJobs(): array
     {
@@ -217,31 +170,7 @@ class Scheduler
     }
 
     /**
-     * Push a failed job.
-     *
-     * @param Job       $job
-     * @param Exception $e
-     * @return void
-     * @throws ReflectionException
-     */
-    private function pushFailedJob(Job $job, Exception $e): void
-    {
-        $this->failedJobs[] = new FailedJob($job, $e);
-
-        $compiled = $job->compile();
-
-        // If callable, log the string Closure
-        if (is_callable($compiled)) {
-            $reflectionClosure = new ReflectionFunction($compiled);
-
-            $compiled = 'Closure ' . $reflectionClosure->getClosureScopeClass()->getName();
-        }
-
-        $this->addSchedulerVerboseOutput("{$e->getMessage()}: {$compiled}");
-    }
-
-    /**
-     * Get the failed jobs.
+     * Get the jobs failed during the last run or while being queued.
      *
      * @return FailedJob[]
      */
@@ -251,23 +180,26 @@ class Scheduler
     }
 
     /**
-     * Get the scheduler verbose output.
+     * Get the log of the last run.
      *
-     * @param string $type Allowed: text, html, array
-     * @return string|array  The return depends on the requested $type
+     * @param string $type `text`, `html` or `array`.
+     * @return string|string[]
+     * @throws SchedulerException
      */
     public function getVerboseOutput(string $type = 'text'): string|array
     {
         return match ($type) {
             'text'  => implode("\n", $this->outputSchedule),
-            'html'  => implode('<br>', $this->outputSchedule),
+            'html'  => implode('<br>', array_map('htmlspecialchars', $this->outputSchedule)),
             'array' => $this->outputSchedule,
-            default => throw new InvalidArgumentException('Invalid output type'),
+            default => throw new SchedulerException('Invalid output type'),
         };
     }
 
     /**
-     * Remove all queued Jobs.
+     * Remove all queued jobs.
+     *
+     * @return static
      */
     public function clearJobs(): static
     {
@@ -277,17 +209,91 @@ class Scheduler
     }
 
     /**
-     * Start a worker.
+     * Run the scheduler forever, at the given seconds of every minute.
+     * Sleeps until the next of these seconds, each run starts with fresh results.
      *
-     * @param  array  $seconds - When the scheduler should run
+     * @param int[] $seconds From 0 to 59.
+     * @return never
+     * @throws SchedulerException
      */
-    public function work(array $seconds = [0])
+    public function work(array $seconds = [0]): never
     {
+        $seconds = array_values(array_unique(array_map('intval', $seconds)));
+        sort($seconds);
+
+        if ($seconds === [] || $seconds[0] < 0 || $seconds[count($seconds) - 1] > 59) {
+            throw new SchedulerException('The seconds should be between 0 and 59.');
+        }
+
         while (true) {
-            if (in_array((int) date('s'), $seconds, true)) {
-                $this->run();
-                sleep(1);
+            $now    = microtime(true);
+            $second = (int) date('s', (int) $now);
+            $next   = $seconds[0] + 60;
+
+            foreach ($seconds as $candidate) {
+                if ($candidate > $second) {
+                    $next = $candidate;
+                    break;
+                }
+            }
+
+            usleep((int) (($next - $second - fmod($now, 1)) * 1_000_000));
+
+            $this->resetRun()->run();
+        }
+    }
+
+    /**
+     * Configure and queue a job.
+     *
+     * @param Job $job
+     * @return Job
+     */
+    private function queue(Job $job): Job
+    {
+        $this->jobs[] = $job->configure($this->config);
+
+        return $job;
+    }
+
+    /**
+     * Order jobs so that background ones come first, keeping the queue order otherwise.
+     *
+     * @param Job[] $jobs
+     * @return Job[]
+     */
+    private function prioritise(array $jobs): array
+    {
+        $background = [];
+        $foreground = [];
+
+        foreach ($jobs as $job) {
+            if ($job->canRunInBackground()) {
+                $background[] = $job;
+            } else {
+                $foreground[] = $job;
             }
         }
+
+        return [...$background, ...$foreground];
+    }
+
+    private function log(string $message): void
+    {
+        $this->outputSchedule[] = '[' . date('c') . '] ' . $message;
+    }
+
+    private function pushExecutedJob(Job $job): void
+    {
+        $this->executedJobs[] = $job;
+
+        $this->log('Executed ' . $job->describe());
+    }
+
+    private function pushFailedJob(Job $job, Throwable $e): void
+    {
+        $this->failedJobs[] = new FailedJob($job, $e);
+
+        $this->log($e->getMessage() . ': ' . $job->describe());
     }
 }

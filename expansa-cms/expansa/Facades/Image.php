@@ -20,6 +20,6 @@ class Image extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Images\Manager';
+        return \Expansa\Images\Manager::class;
     }
 }

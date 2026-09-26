@@ -25,8 +25,16 @@ class BladeCompiler
     protected array $layouts = [];
 
     public function __construct(
+
+        /**
+         * Reuse a compiled template while it is newer than the source; false recompiles on every render.
+         */
         protected bool $shouldCache = true,
-        protected ?string $cacheDir = null
+
+        /**
+         * Directory for compiled templates (sha1 of source path + .php); must be set before rendering.
+         */
+        protected ?string $cacheDir = null,
     ) {} // phpcs:ignore
 
     /**

@@ -8,7 +8,13 @@ use Expansa\Http\Request;
 
 final readonly class TranslationsController
 {
-    public function __construct(private TranslationsService $service = new TranslationsService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private TranslationsService $service = new TranslationsService(),
+    )
     {
     }
 

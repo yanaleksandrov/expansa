@@ -13,6 +13,7 @@ use Attribute;
 final readonly class HookListenerAlias
 {
     public function __construct(
+
         /**
          * The name used to identify the anonymous function when removing it as a listener.
          *

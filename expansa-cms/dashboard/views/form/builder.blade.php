@@ -1,165 +1,66 @@
 <?php
 
 /**
- * Query builder
+ * Location rule builder markup: groups of rules ORed together, each rule (location/operator/
+ * value) ANDed within its group - e.g. "Post Type is Page" AND "User Role is Editor", OR
+ * "Post Status is Draft".
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/builder.php
+ * This is a plain partial, not its own `u-data` component: it renders into whichever
+ * `builder`-scoped host embeds it (currently dashboard/views/field-groups.blade.php's Custom
+ * Fields group editor), which is expected to already provide `groups` (array of
+ * `{rules: [{location, operator, value}]}`) and `valueOptions` (a `location key => {value:
+ * label}` lookup) on its own reactive state, plus the addGroup()/removeGroup()/addRule()/
+ * removeRule() methods used below.
+ *
+ * @param array $locations Location key => {label, options} - only used here to render the
+ *                          "location" select; `valueOptions` (same options, keyed the same
+ *                          way) is what actually drives the reactive "value" select.
+ *
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/form/builder.php
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
+if (! defined('EX_PATH')) {
+    exit;
 }
+
+$locations = $__data['locations'] ?? [];
 ?>
 <div class="builder">
 	<div class="builder-wrapper">
-		<div class="builder-header">
-			<?php
-			echo view(
-				'form/select',
-				[
-					'type'        => 'select',
-					'name'        => 'type',
-					'label'       => t( 'Type' ),
-					'class'       => '',
-					'label_class' => '',
-					'reset'       => 0,
-					'before'      => '',
-					'after'       => '',
-					'instruction' => '',
-					'tooltip'     => '',
-					'copy'        => 0,
-					'validator'   => '',
-					'conditions'  => [],
-					'attributes'  => [
-						'name'     => 'type',
-						'required' => 1,
-					],
-					'options'     => [
-						'type'     => t( 'Post Type' ),
-						'template' => t( 'Post Template' ),
-						'status'   => t( 'Post Status' ),
-						'format'   => t( 'Post Format' ),
-						'category' => t( 'Post Category' ),
-						'taxonomy' => t( 'Post Taxonomy' ),
-						'post'     => t( 'Post' ),
-					],
-				],
-			);
-			echo view(
-				'form/input',
-				[
-					'type'        => 'text',
-					'name'        => 'label',
-					'label'       => t( 'Label' ),
-					'class'       => '',
-					'label_class' => '',
-					'reset'       => 0,
-					'before'      => '',
-					'after'       => '',
-					'instruction' => '',
-					'tooltip'     => '',
-					'copy'        => 0,
-					'validator'   => '',
-					'conditions'  => [],
-					'attributes'  => [
-						'name'     => 'label',
-						'required' => 1,
-					],
-				],
-			);
-			echo view(
-				'form/input',
-				[
-					'type'        => 'text',
-					'name'        => 'name',
-					'label'       => t( 'Name' ),
-					'class'       => '',
-					'label_class' => '',
-					'reset'       => 0,
-					'before'      => '',
-					'after'       => '',
-					'instruction' => '',
-					'tooltip'     => t( 'Single word, no spaces. Underscores and dashes allowed' ),
-					'copy'        => 0,
-					'validator'   => '',
-					'conditions'  => [],
-					'attributes'  => [
-						'name'     => 'name',
-						'required' => 1,
-					],
-				],
-			);
-			echo view(
-				'form/input',
-				[
-					'type'        => 'text',
-					'name'        => 'default',
-					'label'       => t( 'Default value' ),
-					'class'       => '',
-					'label_class' => '',
-					'reset'       => 0,
-					'before'      => '',
-					'after'       => '',
-					'instruction' => '',
-					'tooltip'     => '',
-					'copy'        => 0,
-					'validator'   => '',
-					'conditions'  => [],
-					'attributes'  => [
-						'name'     => 'default',
-						'required' => 1,
-					],
-				],
-			);
-			?>
-		</div>
-		<template u-for="(group, key) in groups">
-			<div class="builder-group" data-or="{{ t(' or ') }}">
-				<template u-for="(rule, i) in group.rules">
-					<div class="builder__rules">
+		<div class="dg g-4">
+			<div class="builder-group" u-each="(group, key) in groups" data-or="<?php echo t(' or '); ?>">
+				<div class="dg g-1">
+					<div class="builder__rules" u-each="(rule, i) in group.rules">
 						<div class="dg g-1">
-							<select class="select" :name="`group.rules[${i}][location]`">
-								<optgroup label="Post">
-									<option value="post_type">Post Type</option>
-									<option value="post_template">Post Template</option>
-									<option value="post_status">Post Status</option>
-									<option value="post_format">Post Format</option>
-									<option value="post_category">Post Category</option>
-									<option value="post_taxonomy">Post Taxonomy</option>
-									<option value="post">Post</option>
-								</optgroup>
+							<select class="field" u-prop="rule.location" u-select>
+								<?php foreach ($locations as $key => $location) : ?>
+									<option value="<?php echo $key; ?>"><?php echo $location['label']; ?></option>
+								<?php endforeach; ?>
 							</select>
 						</div>
 						<div class="dg g-1">
-							<select class="select" :name="`group.rules[${i}][operator]`">
-								<option value="===">is equal to</option>
-								<option value="!=">is not equal to</option>
+							<select class="field" u-prop="rule.operator" u-select>
+								<option value="=="><?php echo t('is equal to'); ?></option>
+								<option value="!="><?php echo t('is not equal to'); ?></option>
 							</select>
 						</div>
 						<div class="dg g-1">
-							<select class="select" :name="`group.rules[${i}][value]`">
-								<option value="subscriber">Subscriber</option>
-								<option value="contributor">Contributor</option>
-								<option value="author">Author</option>
-								<option value="editor">Editor</option>
-								<option value="administrator">Administrator</option>
-							</select>
+							<select class="field" u-html="locationValueOptions(rule)" u-prop="rule.value" u-select></select>
 						</div>
 						<div class="dg g-1" u-show="group.rules.length > 1">
-							<button type="button" class="btn btn--icon t-red" @click="removeRule(key,i)"><i class="ph ph-trash-simple"></i></button>
+							<button type="button" class="btn btn--icon t-red" @click="removeRule(key, i)"><i class="ph ph-trash-simple"></i></button>
 						</div>
 					</div>
-				</template>
+				</div>
 				<div class="builder__buttons">
-					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" u-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php echo t( 'Remove Group' ); ?></button>
-					<button type="button" class="btn btn--sm t-purple ml-auto" @click="addRule(key)"><i class="ph ph-plus"></i> <?php echo t( 'add rule' ); ?></button>
+					<button type="button" class="btn btn--sm t-red" @click="removeGroup(key)" u-show="groups.length > 1"><i class="ph ph-trash-simple"></i> <?php echo t('Remove Group'); ?></button>
+					<button type="button" class="btn btn--sm t-purple ml-auto" @click="addRule(key)"><i class="ph ph-plus"></i> <?php echo t('Add rule'); ?></button>
 				</div>
 			</div>
-		</template>
+		</div>
 		<div class="builder__buttons mt-2">
-			<button class="btn btn--sm btn--outline" type="button" @click="addGroup"><?php echo t( 'Add Group' ); ?></button>
-			<button class="btn btn--sm btn--primary" type="submit"><i class="ph ph-floppy-disk"></i> <?php echo t( 'Save' ); ?></button>
+			<button class="btn btn--sm btn--outline" type="button" @click="addGroup()"><i class="ph ph-plus"></i> <?php echo t('Add Group'); ?></button>
 		</div>
 	</div>
 </div>

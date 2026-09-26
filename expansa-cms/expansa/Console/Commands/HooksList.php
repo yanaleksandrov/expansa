@@ -21,7 +21,7 @@ class HooksList extends Command
 
     public function handle(): void
     {
-        $name  = $this->getConsole()->getArgument(0);
+        $name  = $this->getConsole()->argument(0);
         $hooks = $name !== null ? [$name => Hook::get($name)] : Hook::get();
 
         $rows = [];

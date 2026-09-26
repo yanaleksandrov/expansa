@@ -4,39 +4,41 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Editor extends Field
+/**
+ * A rich text editor for formatted content. No WYSIWYG asset is wired into the
+ * dashboard yet, so this renders `form/textarea.blade.php` as a plain-text fallback
+ * until a real editor (and its own template) is registered.
+ */
+class Editor extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'editor',
+            label: t('Rich Text Editor'),
+            category: 'advanced',
+            icon: 'ph ph-text-aa',
+            description: t('A rich text editor for formatted content.'),
+            defaults: [
+                'name'       => '',
+                'label'      => '',
+                'attributes' => ['rows' => 8],
+            ],
+        );
     }
 
-    public function assets()
+    public function view(): string
     {
-
+        return 'form/textarea';
     }
 
-    public function render()
+    public function settings(): array
     {
-
+        return $this->baseSettings();
     }
 
-    public function settings()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function validate()
-    {
-
+        return [($field['name'] ?? '') => $this->withRequired($field)];
     }
 }

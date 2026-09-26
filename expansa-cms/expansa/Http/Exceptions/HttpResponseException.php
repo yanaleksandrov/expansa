@@ -9,7 +9,11 @@ use Expansa\Http\Contracts\Response;
 class HttpResponseException extends \RuntimeException
 {
     public function __construct(
-        protected Response $response
+
+        /**
+         * Ready response to send instead of the regular handler result.
+         */
+        protected Response $response,
     ) {} // phpcs:ignore
 
     public function getResponse(): Response

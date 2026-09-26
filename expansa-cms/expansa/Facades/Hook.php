@@ -10,7 +10,7 @@ use Expansa\Patterns\Facade;
 /**
  * Class Hook provides a facade for managing hooks in the Expansa framework.
  *
- * @method static array configure(string $path)
+ * @method static void  configure(string|array $listeners)
  * @method static void  add(string $name, string|array|callable $function, int $priority = Priority::BASE, ?array $source = null, string|array|null $identity = null)
  * @method static void  once(string $name, callable $function, int $priority = Priority::BASE)
  * @method static bool  has(string $name)
@@ -26,6 +26,6 @@ class Hook extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Hooks\Manager';
+        return \Expansa\Hooks\Manager::class;
     }
 }

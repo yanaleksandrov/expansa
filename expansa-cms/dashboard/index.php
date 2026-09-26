@@ -2,43 +2,25 @@
 
 namespace Dashboard;
 
-use App\Http\VerifyCsrfToken;
 use App\Models\User;
 use App\Query\Query;
+use App\Support\DashboardAssets;
 use App\Support\DashboardFavicons;
 use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
 use Expansa\Database\FieldEav;
-use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
+use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
-use Expansa\Support\Is;
 
 new class
 {
     public function __construct()
     {
-        if (!defined('EX_IS_DASHBOARD')) {
-            define('EX_IS_DASHBOARD', true);
-        }
-
-        VerifyCsrfToken::seed();
-
         DashboardFavicons::enqueue();
 
-        /**
-         * Include CSS styles & JS scripts.
-         *
-         * @since 2025.1
-         */
-        $suffix = ! Is::debug() ? '.min' : '';
-        $styles = [
-            'phosphor', 'expansa', 'controls', 'utility', 'notifications', 'nav-editor', 'chat',
-        ];
-        foreach ($styles as $style) {
-            Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));
-        }
+        $suffix = DashboardAssets::suffix();
 
         /**
          * Auto-connect vendor JS per form field, so it loads only on pages that render that
@@ -48,7 +30,7 @@ new class
          *
          * @since 2025.1
          */
-        Manager::configure(function (string $file, array $context = []) use ($suffix): array {
+        Manager::configure(resolver: function (string $file, array $context = []) use ($suffix): array {
             if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/form/')) {
                 return Manager::defaultStructure($file);
             }
@@ -73,165 +55,182 @@ new class
         $user   = User::current();
         $userId = $user->id ?? 0;
 
-        $scripts = ['youla', 'youla-ajax', 'youla-expansa', 'youla-chat'];
-        foreach ($scripts as $script) {
-            $data = [];
-            if ($script === 'youla') {
-                $data['data'] = Hook::call(
-                    'expansa_dashboard_data',
+        // only the profile page lists and manages API keys
+        $isProfile = trim(Route::uri(), '/') === Hook::call('dashboardRootSlug', 'dashboard') . '/profile';
+
+        $data = Hook::call(
+            'expansa_dashboard_data',
+            [
+                'apiurl'              => url('/api/'),
+                'apiKeys'             => ! $isProfile ? [] : Query::apply(
                     [
-                        'apiurl'              => url('/api/'),
-                        'apiKeys'             => Query::apply(
-                            [
-                                'type'      => 'api-keys',
-                                'per_page'  => 25,
-                                'author_id' => $userId,
-                            ],
-                            function ($query, $items) {
-                                $posts = [];
+                        'type'      => 'api-keys',
+                        'per_page'  => 25,
+                        'author_id' => $userId,
+                    ],
+                    function ($query, $items) {
+                        $posts = [];
 
-                                foreach ($items as $i => $item) {
-                                    foreach ((array) $item as $key => $value) {
-                                        if (!in_array($key, ['uuid', 'title', 'status', 'createdAt', 'updatedAt'], true)) {
-                                            continue;
-                                        }
+                        foreach ($items as $i => $item) {
+                            foreach ((array) $item as $key => $value) {
+                                if (!in_array($key, ['uuid', 'title', 'status', 'createdAt', 'updatedAt'], true)) {
+                                    continue;
+                                }
 
-                                        if (in_array($key, ['createdAt', 'updatedAt'], true)) {
-                                            $date = new \DateTime($value);
-                                            if ($date instanceof \DateTime) {
-                                                $value = $date->format('j F, Y');
-                                            }
-                                        }
-
-                                        $posts[$i][$key] = $value;
-                                    }
-
-                                    $fields = new FieldEav($item)->find();
-                                    if ($fields) {
-                                        foreach ($fields as $field => $values) {
-                                            $key = Safe::camelcase($field);
-                                            if (!isset($key, $values[0])) {
-                                                continue;
-                                            }
-
-                                            if (in_array($key, ['endDate', 'startDate'], true)) {
-                                                $date = \DateTime::createFromFormat('Y-m-d', $values[0]);
-                                                if ($date instanceof \DateTime) {
-                                                    $values[0] = $date->format('j F, Y');
-                                                }
-                                            }
-
-                                            $posts[$i][$key] = $values[0];
-                                        }
+                                if (in_array($key, ['createdAt', 'updatedAt'], true)) {
+                                    $date = new \DateTime($value);
+                                    if ($date instanceof \DateTime) {
+                                        $value = $date->format('j F, Y');
                                     }
                                 }
 
-                                return $posts;
+                                $posts[$i][$key] = $value;
                             }
-                        ),
-                        'items'               => [],
-                        'locale'              => I18n::locale(),
-                        'dateFormat'          => 'd MMMM, yyyy',
-                        'datepicker'          => [
-                            'days'        => [
-                                t('Sunday'),
-                                t('Monday'),
-                                t('Tuesday'),
-                                t('Wednesday'),
-                                t('Thursday'),
-                                t('Friday'),
-                                t('Saturday')
-                            ],
-                            'daysShort'   => [
-                                t('Sun'),
-                                t('Mon'),
-                                t('Tue'),
-                                t('Wed'),
-                                t('Thu'),
-                                t('Fri'),
-                                t('Sat')
-                            ],
-                            'daysMin'     => [
-                                t('Su'),
-                                t('Mo'),
-                                t('Tu'),
-                                t('We'),
-                                t('Th'),
-                                t('Fr'),
-                                t('Sa')
-                            ],
-                            'months'      => [
-                                t('January'),
-                                t('February'),
-                                t('March'),
-                                t('April'),
-                                t('May'),
-                                t('June'),
-                                t('July'),
-                                t('August'),
-                                t('September'),
-                                t('October'),
-                                t('November'),
-                                t('December')
-                            ],
-                            'monthsShort' => [
-                                t('Jan'),
-                                t('Feb'),
-                                t('Mar'),
-                                t('Apr'),
-                                t('May'),
-                                t('Jun'),
-                                t('Jul'),
-                                t('Aug'),
-                                t('Sep'),
-                                t('Oct'),
-                                t('Nov'),
-                                t('Dec')
-                            ],
-                            'today'       => t('Today'),
-                            'clear'       => t('Clear'),
-                            'dateFormat'  => 'MM/dd/yyyy',
-                            'timeFormat'  => 'hh:mm aa',
-                            'firstDay'    => 0,
-                        ],
-                        'weekStart'           => 1,
-                        'loadingText'         => t('Loading...'),
-                        'noResultsText'       => t('No results found'),
-                        'noChoicesText'       => t('No choices to choose from'),
-                        'uniqueItemText'      => t('Only unique values can be added'),
-                        'customAddItemText'   => t('Only values matching specific conditions can be added'),
-                        'showFilter'          => false,
-                        'bulk'                => false,
-                        'showMenu'            => false,
-                        'flagsUrl'            => url('/dashboard/assets/sprites/flags.svg'),
-                        'notifications'       => [
-                            'ctrlS' => t_attr('Expansa saves the changes automatically, so there is no need to press ⌘ + S'),
-                        ],
-                        'uploaderDialog'      => [
-                            'title' => t('Upload Files'),
-                            'class' => 'dialog--md',
-                        ],
-                        'emailDialog'         => [
-                            'title' => t('Email Settings'),
-                            'class' => 'dialog--xl dialog--right',
-                        ],
-                        'postEditorDialog'    => [
-                            'title' => t('Post Editor'),
-                            'class' => 'dialog--lg dialog--right',
-                        ],
-                        'takeSelfieDialog'    => [
-                            'title' => t('Take A Selfie'),
-                            'class' => 'dialog--sm',
-                        ],
-                        'apiKeyManagerDialog' => [
-                            'title' => t('Create/update API key'),
-                            'class' => 'dialog--sm',
-                        ],
-                    ]
-                );
-            }
-            Asset::script($script, url("/dashboard/assets/js/$script$suffix.js"), $data);
-        }
+
+                            $fields = new FieldEav($item)->find();
+                            if ($fields) {
+                                foreach ($fields as $field => $values) {
+                                    $key = Safe::camelcase($field);
+                                    if (!isset($key, $values[0])) {
+                                        continue;
+                                    }
+
+                                    if (in_array($key, ['endDate', 'startDate'], true)) {
+                                        $date = \DateTime::createFromFormat('Y-m-d', $values[0]);
+                                        if ($date instanceof \DateTime) {
+                                            $values[0] = $date->format('j F, Y');
+                                        }
+                                    }
+
+                                    $posts[$i][$key] = $values[0];
+                                }
+                            }
+                        }
+
+                        return $posts;
+                    }
+                ),
+                'items'               => [],
+                'locale'              => I18n::locale(),
+                'dateFormat'          => 'd MMMM, yyyy',
+                'datepicker'          => [
+                    'days'        => [
+                        t('Sunday'),
+                        t('Monday'),
+                        t('Tuesday'),
+                        t('Wednesday'),
+                        t('Thursday'),
+                        t('Friday'),
+                        t('Saturday')
+                    ],
+                    'daysShort'   => [
+                        t('Sun'),
+                        t('Mon'),
+                        t('Tue'),
+                        t('Wed'),
+                        t('Thu'),
+                        t('Fri'),
+                        t('Sat')
+                    ],
+                    'daysMin'     => [
+                        t('Su'),
+                        t('Mo'),
+                        t('Tu'),
+                        t('We'),
+                        t('Th'),
+                        t('Fr'),
+                        t('Sa')
+                    ],
+                    'months'      => [
+                        t('January'),
+                        t('February'),
+                        t('March'),
+                        t('April'),
+                        t('May'),
+                        t('June'),
+                        t('July'),
+                        t('August'),
+                        t('September'),
+                        t('October'),
+                        t('November'),
+                        t('December')
+                    ],
+                    'monthsShort' => [
+                        t('Jan'),
+                        t('Feb'),
+                        t('Mar'),
+                        t('Apr'),
+                        t('May'),
+                        t('Jun'),
+                        t('Jul'),
+                        t('Aug'),
+                        t('Sep'),
+                        t('Oct'),
+                        t('Nov'),
+                        t('Dec')
+                    ],
+                    'today'       => t('Today'),
+                    'clear'       => t('Clear'),
+                    'dateFormat'  => 'MM/dd/yyyy',
+                    'timeFormat'  => 'hh:mm aa',
+                    'firstDay'    => 0,
+                ],
+                'weekStart'           => 1,
+                'loadingText'         => t('Loading...'),
+                'noResultsText'       => t('No results found'),
+                'noChoicesText'       => t('No choices to choose from'),
+                'uniqueItemText'      => t('Only unique values can be added'),
+                'customAddItemText'   => t('Only values matching specific conditions can be added'),
+                'showFilter'          => false,
+                'bulk'                => false,
+                'showMenu'            => false,
+                'flagsUrl'            => url('/dashboard/assets/sprites/flags.svg'),
+                'notifications'       => [
+                    'ctrlS' => t_attr('Expansa saves your changes automatically, so there\'s no need to press ⌘ + S'),
+                ],
+                'uploaderDialog'      => [
+                    'title' => t('Upload Files'),
+                    'class' => 'dialog--md',
+                ],
+                'emailDialog'         => [
+                    'title' => t('Email Settings'),
+                    'class' => 'dialog--xl dialog--right',
+                ],
+                'postEditorDialog'    => [
+                    'title' => t('Post Editor'),
+                    'class' => 'dialog--lg dialog--right',
+                ],
+                'takeSelfieDialog'    => [
+                    'title' => t('Take a Selfie'),
+                    'class' => 'dialog--sm',
+                ],
+                'apiKeyManagerDialog' => [
+                    'title' => t('Create/update API key'),
+                    'class' => 'dialog--sm',
+                ],
+                'mediaLibraryDialog'  => [
+                    'title' => t('Media Library'),
+                    'class' => 'dialog--xl',
+                ],
+            ]
+        );
+
+        /**
+         * Include CSS styles & JS scripts.
+         *
+         * @since 2025.1
+         */
+        DashboardAssets::enqueue(
+            ['phosphor', 'expansa', 'dialog', 'controls', 'utility', 'notifications', 'nav-editor', 'chat'],
+            [
+                'youla'         => ['data' => $data],
+                'youla-ajax',
+                'youla-expansa',
+                'youla-chat',
+                // global, not co-located: the media library must be reachable from any field on any page
+                'youla-storage',
+            ]
+        );
 
         /**
          * Register menu
@@ -288,12 +287,12 @@ new class
                     'title'        => t('Sign out'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-sign-out',
-                    'position'     => 0,
+                    'position'     => 100,
                 ],
                 [
                     'id'       => 'divider-content',
                     'title'    => '',
-                    'position' => 10,
+                    'position' => 200,
                 ],
                 [
                     'id'           => 'profile',
@@ -301,28 +300,12 @@ new class
                     'title'        => t('Profile'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-gear',
-                    'position'     => 20,
-                ],
-                [
-                    'id'           => 'profile',
-                    'url'          => 'profile',
-                    'title'        => t('Set yourself as %saway%s', '<strong>', '</strong>'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-moon-stars',
-                    'position'     => 30,
-                ],
-                [
-                    'id'           => 'dialogs',
-                    'url'          => 'comments',
-                    'title'        => t('Pause notifications'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-bell-slash',
-                    'position'     => 40,
+                    'position'     => 300,
                 ],
                 [
                     'id'       => 'divider-content',
                     'title'    => '',
-                    'position' => 50,
+                    'position' => 400,
                 ],
                 [
                     'id'           => 'comments',
@@ -330,7 +313,7 @@ new class
                     'title'        => t('Add account'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-user-plus',
-                    'position'     => 60,
+                    'position'     => 500,
                 ],
                 [
                     'id'           => 'comments',
@@ -338,7 +321,7 @@ new class
                     'title'        => t('Igor Ivanov'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-user-plus',
-                    'position'     => 70,
+                    'position'     => 600,
                 ],
             ]
         ));
@@ -434,6 +417,14 @@ new class
                     'icon'         => '',
                     'position'     => 0,
                     'parent_id'    => 'dialogs',
+                ],
+                [
+                    'id'           => 'field-groups',
+                    'url'          => 'field-groups',
+                    'title'        => t('Custom Fields'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-stack',
+                    'position'     => 250,
                 ],
                 [
                     'id'       => 'divider-customization',

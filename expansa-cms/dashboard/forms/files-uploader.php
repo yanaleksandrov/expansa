@@ -27,22 +27,22 @@ return Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'u-prop'   => 'files',
-				'@change'  => '$ajax.post("media/upload", $el.files, e => percent = e.percent)',
+				'@change'  => '$ajax.post("media/upload", $el.files, e => percent = e.percent).then(({uploaded}) => uploaded && window.location.reload())',
 				'multiple' => true,
 			],
 		],
 		[
-			'name'     => 'progress',
-			'type'     => 'custom',
-			'callback' => fn () => '<div class="progress" :style="{\'--expansa-progress\':`${percent}%`}"></div>',
-			'attributes'  => [
+			'name'       => 'progress',
+			'type'       => 'custom',
+			'callback'   => fn () => '<div class="progress" :style="{\'--expansa-progress\':`${percent}%`}"></div>',
+			'attributes' => [
                 'u-prop' => 'progress'
             ],
 		],
 		[
 			'type'        => 'textarea',
 			'name'        => 'urls',
-			'label'       => t( 'Or upload from external URL' ),
+			'label'       => t( 'Or upload from an external URL' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
@@ -55,8 +55,8 @@ return Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'u-prop'      => 'urls',
-				'placeholder' => t( 'Each URL must be from a new line' ),
-				'@change'     => '$ajax.post("media/grab", {urls}).then(response => files = response)',
+				'placeholder' => t( 'Enter one URL per line' ),
+				'@change'     => '$ajax.post("media/grab", {urls}).then(({uploaded}) => uploaded && window.location.reload())',
 				'u-textarea'  => 19,
 			],
 		],

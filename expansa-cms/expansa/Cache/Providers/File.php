@@ -25,9 +25,13 @@ class File implements Provider
     use Memoizes;
     use Serializes;
 
-    public function __construct(private readonly string $directory = EX_PATH . 'storage/cache/')
-    {
-    }
+    public function __construct(
+
+        /**
+         * Root cache directory, one subdirectory per group; subdirectories are created on first write.
+         */
+        private readonly string $directory,
+    ) {} // phpcs:ignore
 
     /**
      * $expiry accepts an absolute DateTime or a relative time string (e.g. "+1 day").

@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Builders\Form;
 
 /**
  * Single order data.
@@ -23,7 +22,7 @@ use Expansa\Builders\Form;
                 <div class="attributes-description">
                     <p>Updated by Ian Iskenderov December 23, 10:14 pm</p>
                 </div>
-                <?php Form::make(EX_PLUGINS . 'ecommerce/core/order.php', true); ?>
+                <?php echo form('order-editor', EX_PLUGINS . 'ecommerce/core/order.php'); ?>
             </div>
             <div class="attributes-side">
                 <div><?php echo t('Timeline'); ?></div>

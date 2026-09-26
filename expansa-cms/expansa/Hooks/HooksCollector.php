@@ -46,11 +46,11 @@ abstract class HooksCollector
     protected function makeId(string $hookName, string|array|callable $function): string
     {
         $identity = match (true) {
-            is_string($function)            => $function,
-            $function instanceof Closure    => $this->getAlias($function) ?? (string) spl_object_id($function),
-            is_object($function)            => (string) spl_object_id($function),
+            is_string($function)                  => $function,
+            $function instanceof Closure          => $this->getAlias($function) ?? (string) spl_object_id($function),
+            is_object($function)                  => (string) spl_object_id($function),
             is_object($function[0] ?? null) => spl_object_id($function[0]) . '::' . $function[1],
-            default                         => implode('::', $function),
+            default                               => implode('::', $function),
         };
 
         return hash('xxh3', $hookName . '::' . $identity);

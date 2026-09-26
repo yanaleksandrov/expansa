@@ -27,6 +27,6 @@ class Cookie extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Cookie\CookieJar';
+        return \Expansa\Cookie\CookieJar::class;
     }
 }

@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Api\Posts;
 
+use App\Api\Files\FilesService;
 use App\Models\Post;
 use App\Query\Query;
-use Expansa\Codecs\Csv;
+use Expansa\Facades\Csv;
 use Expansa\Facades\Json;
 use Expansa\Facades\View;
 use Expansa\Http\Response;
@@ -42,7 +43,8 @@ final class PostsService
 
                 return match ($format) {
                     'json'  => Json::encode($posts),
-                    'csv'   => Csv::export([array_keys($posts[0]), ...$posts]),
+                    // the BOM makes Excel read the file as UTF-8 instead of the system codepage
+                    'csv'   => "\xEF\xBB\xBF" . Csv::encode([array_keys($posts[0]), ...$posts]),
                     default => $posts,
                 };
             }
@@ -62,10 +64,10 @@ final class PostsService
         $status   = $input['status'] ?? '';
         $author   = $input['author'] ?? '';
         $type     = $input['type'] ?? '';
+        $encoding = FilesService::csvEncoding($input['encoding'] ?? null);
 
         if (file_exists($filename)) {
-            $rows = Csv::import($filename);
-            foreach ($rows as $row) {
+            foreach (Csv::iterate($filename, encoding: $encoding) as $row) {
                 $args = array_filter(array_combine($map, $row), fn($key) => !empty($key), ARRAY_FILTER_USE_KEY);
 
                 $rowStatus = trim(strval($row['status'] ?? $status));
@@ -90,7 +92,7 @@ final class PostsService
             'output'    => View::make(EX_DASHBOARD . 'views/global/state', [
                 'icon'        => 'success',
                 'title'       => t('Import is complete!'),
-                'description' => t(':counts posts was successfully imported. Do you want [to launch a new import?](:link)', count($imported), url('/dashboard/import')),
+                'description' => t(':counts posts were imported successfully. Do you want to [start another import](:link)?', count($imported), url('/dashboard/import')),
             ]),
         ];
     }

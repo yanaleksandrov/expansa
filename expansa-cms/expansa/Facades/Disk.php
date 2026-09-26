@@ -18,6 +18,6 @@ class Disk extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return 'Expansa\Filesystem\Disk';
+        return \Expansa\Filesystem\Disk::class;
     }
 }

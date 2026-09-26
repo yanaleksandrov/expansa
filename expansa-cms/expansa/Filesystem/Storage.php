@@ -25,14 +25,14 @@ class Storage extends EntryHandler
 
         $basename  = basename($url);
         $extension = pathinfo($url, PATHINFO_EXTENSION);
-        $filepath  = sprintf('%s%s', $targetDir, $basename);
+        $filepath  = sprintf('%s/%s', $this->path, $basename);
 
         if (!$extension) {
-            return new Error(t('The file cannot be grabbed because it does not contain an extension.'));
+            return new Error(t('Can\'t fetch the file because it doesn\'t have an extension.'));
         }
 
-        if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0755, true);
+        if (!is_dir($this->path)) {
+            mkdir($this->path, 0755, true);
         }
 
         $ch   = curl_init($url);
@@ -52,7 +52,7 @@ class Storage extends EntryHandler
                 3  => t('The URL you provided is not properly formatted.'),
                 6  => t('Couldn\'t resolve the host specified in the URL.'),
                 7  => t('Failed to connect to the remote host.'),
-                8  => t('The server sent a strange reply to a FTP-related command.'),
+                8  => t('The server sent an unexpected reply to an FTP command.'),
                 9  => t('Access denied to the resource on the server.'),
                 18 => t('The file transfer was only partially completed.'),
                 22 => t('The HTTP server returned an error code.'),
@@ -63,15 +63,15 @@ class Storage extends EntryHandler
                 35 => t('A problem occurred while establishing an SSL/TLS connection.'),
                 37 => t('The FTP server couldn\'t retrieve the specified file.'),
                 47 => t('Too many redirects were followed during the request.'),
-                51 => t('The remote server\'s SSL certificate or SSH md5 fingerprint was deemed not OK.'),
+                51 => t('The remote server\'s SSL certificate or SSH MD5 fingerprint could not be verified.'),
                 52 => t('The server returned nothing during the request.'),
-                56 => t('Failure with receiving network data.'),
+                56 => t('Failed to receive network data.'),
                 58 => t('Problem with the local client certificate.'),
                 63 => t('The requested file size exceeds the allowed limits.'),
-                67 => t('Failure with sending network data.'),
+                67 => t('Failed to send network data.'),
                 94 => t('The last received HTTP, FTP, or SMTP response code.'),
                 95 => t('An SSL cipher problem occurred.'),
-                99 => t('Something went wrong when uploading the file.'),
+                99 => t('Something went wrong while uploading the file.'),
             ];
 
             return new Error($errors[$error] ?? $errors[99]);
@@ -107,7 +107,7 @@ class Storage extends EntryHandler
             t('Sorry, you are not allowed to upload this file type.')
         )->extend(
             'error:equal',
-            t('An error occurred while uploading the file, please try again.'),
+            t('An error occurred while uploading the file. Please try again.'),
             function ($validator, $value, $comparison_value) {
                 $value = intval($value);
 
@@ -141,11 +141,10 @@ class Storage extends EntryHandler
             $this->errors[] = $validator;
         }
 
-        var_dump($this->path);
         $basename = $this->sanitizeName($file['name'] ?? '');
-        $filepath = sprintf('%s%s', $this->path, $basename);
+        $filepath = sprintf('%s/%s', $this->path, $basename);
         if (!$basename) {
-            $this->errors[] = t('File name must not contain illegal characters and must not be empty.');
+            $this->errors[] = t('The file name can\'t be empty or contain invalid characters.');
         }
 
         // check that the uploaded file is unique.
@@ -161,7 +160,7 @@ class Storage extends EntryHandler
                 $suffix = 1;
                 while (is_file($filepath)) {
                     $suffix++;
-                    $filepath = sprintf('%s%s-%d.%s', $this->path, $filename, $suffix, $extension);
+                    $filepath = sprintf('%s/%s-%d.%s', $this->path, $filename, $suffix, $extension);
                 }
             }
         }
@@ -173,7 +172,7 @@ class Storage extends EntryHandler
 
         $uploaded = move_uploaded_file($file['tmp_name'], $filepath);
         if (!$uploaded) {
-            $this->errors[] = t('Something went wrong, upload is failed.');
+            $this->errors[] = t('Something went wrong. The upload failed.');
         }
 
         return $filepath;

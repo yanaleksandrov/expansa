@@ -21,9 +21,18 @@ class Factory
     protected static array $sectionStack = [];
 
     public function __construct(
+
+        /**
+         * Resolves view names, including "namespace::view", to template files.
+         */
         protected readonly Finder $finder,
+
+        /**
+         * Picks the render engine by the template file extension.
+         */
         protected readonly EngineManager $engine,
-        array $config
+
+        array $config,
     )
     {
         $this->cache = (bool) ($config['cache'] ?? false);

@@ -11,11 +11,24 @@ use Throwable;
 class HttpException extends RuntimeException implements HttpExceptionContract
 {
     public function __construct(
+
+        /**
+         * HTTP status code of the error response, e.g. 404 or 409.
+         */
         protected int $statusCode,
+
         string $message = '',
+
+        /**
+         * Extra response headers, header name => value.
+         *
+         * @var array<string, string>
+         */
         protected array $headers = [],
+
         ?Throwable $previous = null,
-        int $code = 0
+
+        int $code = 0,
     )
     {
         parent::__construct($message, $code, $previous);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Assets\Support;
 
 use Expansa\Assets\Abstracts\Provider;
+use Expansa\Support\Url;
 
 trait AssetHandler
 {
@@ -63,7 +64,7 @@ trait AssetHandler
      */
     public static function toPath(string $url): string
     {
-        $file = rtrim(EX_PATH, '/\\') . DIRECTORY_SEPARATOR . ltrim((string) parse_url($url, PHP_URL_PATH), '/');
+        $file = Url::toPath((string) parse_url($url, PHP_URL_PATH));
 
         return is_file($file) ? $file : '';
     }
@@ -74,12 +75,7 @@ trait AssetHandler
      */
     public static function toUrl(string $path): string
     {
-        $path = str_replace('\\', '/', $path);
-        $root = str_replace('\\', '/', rtrim(EX_PATH, '/\\')) . '/';
-
-        $relative = str_starts_with($path, $root) ? substr($path, strlen($root)) : ltrim($path, '/');
-
-        return url($relative);
+        return Url::toUrl($path);
     }
 
     /**
@@ -156,7 +152,7 @@ trait AssetHandler
         // Dirs already confirmed to exist this request - scoped to this method only.
         static $ensuredCacheDirs = [];
 
-        $dir = rtrim(EX_PATH, '/\\') . "/cache/assets/$extension";
+        $dir = Url::toPath("cache/assets/$extension");
 
         if (! isset($ensuredCacheDirs[$dir])) {
             if (! is_dir($dir) && ! @mkdir($dir, 0755, true) && ! is_dir($dir)) {

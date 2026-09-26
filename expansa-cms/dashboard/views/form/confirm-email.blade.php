@@ -49,7 +49,7 @@ defined('EX_PATH') || exit;
 			</div>
 		</div>
 		<div class="confirm-email-bottom">
-			<a href=""><?php echo t("Didn't get thу email?"); ?></a>
+			<a href=""><?php echo t("Didn't get the email?"); ?></a>
 			<button type="button" class="btn btn--outline"><?php echo t('Verify email'); ?></button>
 		</div>
 	</div>

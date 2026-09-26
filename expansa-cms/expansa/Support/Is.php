@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use App\Models\Options;
 use DateTime;
-use Expansa\Facades\Db;
+use Expansa\Facades\Lifecycle;
 
 /**
  * This class provides a set of static methods to check various conditions, such as validating
@@ -14,6 +13,16 @@ use Expansa\Facades\Db;
  */
 final class Is
 {
+    private static bool $debug = false;
+
+    /**
+     * Set the application state the checks below report.
+     */
+    public static function configure(bool $debug = false): void
+    {
+        self::$debug = $debug;
+    }
+
     /**
      * Checks whether the given string is a valid email address.
      *
@@ -139,7 +148,7 @@ final class Is
      */
     public static function dashboard(): bool
     {
-        return defined('EX_IS_DASHBOARD') && EX_IS_DASHBOARD === true;
+        return Lifecycle::is('dashboard');
     }
 
     /**
@@ -149,36 +158,7 @@ final class Is
      */
     public static function debug(): bool
     {
-        return defined('EX_DEBUG') && EX_DEBUG === true;
-    }
-
-    /**
-     * Checks whether the database is installed.
-     *
-     * @return bool True if Expansa is installed.
-     */
-    public static function installed(): bool
-    {
-        if (! defined('EX_PATH') || ! file_exists(EX_PATH . 'env.php')) {
-            return false;
-        }
-
-        $schema = Db::schema();
-        if (empty($schema)) {
-            return false;
-        }
-
-        return isset($schema[ EX_DB_PREFIX . 'options' ]) && ! empty(Options::get('site.url'));
-    }
-
-    /**
-     * Checks if the current request is an AJAX query.
-     *
-     * @return bool True if the request is an AJAX query, false otherwise.
-     */
-    public static function ajax(): bool
-    {
-        return defined('EX_DOING_AJAX') && EX_DOING_AJAX === true;
+        return self::$debug;
     }
 
     /**

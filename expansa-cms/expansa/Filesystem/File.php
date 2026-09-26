@@ -20,7 +20,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
     public function chmod(int $mode = 0755): File
     {
         if ($this->exists && ! chmod($this->path, $mode)) {
-            $this->errors[] = t('Failed to update file access rights');
+            $this->errors[] = t('Failed to update file permissions');
         }
         return $this;
     }
@@ -116,7 +116,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
     public function rename(string $name): File
     {
         if (!$this->exists) {
-            $this->errors[] = t('File not exists at the destination.');
+            $this->errors[] = t('The file does not exist at the destination.');
         } else {
             $newPath = $this->dirpath . DIRECTORY_SEPARATOR . $this->sanitizeName($name);
             if (!rename($this->path, $newPath)) {
@@ -172,7 +172,7 @@ class File extends EntryHandler implements CommonInterface, FileInterface
             $this->errors[] = t("The file cannot be opened: ':path'", $this->path);
         } else {
             if (fwrite($fp, $content) === false) {
-                $this->errors[] = t("It is not possible to write to the file: ':path'", $this->path);
+                $this->errors[] = t("Unable to write to the file: ':path'", $this->path);
             }
             fclose($fp);
 

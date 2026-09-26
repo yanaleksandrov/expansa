@@ -16,7 +16,7 @@ return \Expansa\Facades\Form::enqueue(
 			'label'       => t( 'Welcome to Expansa' ),
 			'name'        => 'title',
 			'class'       => '',
-			'instruction' => t( 'Sign in to access to your dashboard and site settings.' ),
+			'instruction' => t( 'Sign in to access your dashboard and site settings.' ),
 			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
@@ -34,8 +34,8 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop' => 'login',
 				'placeholder' => t( 'Enter login or email' ),
+                'u-prop'      => 'login',
                 'required'    => 1,
 			],
 		],
@@ -54,8 +54,8 @@ return \Expansa\Facades\Form::enqueue(
 			'validator'   => '',
 			'conditions'  => [],
 			'attributes'  => [
-				'u-prop.up'   => 'password',
 				'placeholder' => t( 'Password' ),
+                'u-prop.up'   => 'password',
 				'required'    => 1,
 			],
 			'switcher'    => 1,

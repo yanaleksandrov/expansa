@@ -22,7 +22,7 @@ class Schema extends Facade
      */
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Database\Schema\Builder';
+        return \Expansa\Database\Schema\Builder::class;
     }
 
     /**

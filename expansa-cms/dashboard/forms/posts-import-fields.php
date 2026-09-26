@@ -47,7 +47,7 @@ return \Expansa\Facades\Form::enqueue(
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => t( 'Set default post status, if not specified' ),
+					'instruction' => t( 'Default post status, if none is specified' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -64,7 +64,7 @@ return \Expansa\Facades\Form::enqueue(
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => t( 'Set post author, if not specified' ),
+					'instruction' => t( 'Default post author, if none is specified' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -96,17 +96,17 @@ return \Expansa\Facades\Form::enqueue(
 				'before'      => '',
 				'after'       => '',
 				'tooltip'     => '',
-				'instruction' => t( 'Sample: %s', '<samp>' . $sample . '</samp>' ),
+				'instruction' => t( 'Sample: %s', '<samp>' . escape( $sample ) . '</samp>' ),
 				'attributes'  => [ 'u-prop' => 'map.' . $index ],
 				'conditions'  => [],
 				'options'     => [
-					''         => t( 'No import' ),
+					''         => t( 'Don\'t import' ),
 					'optgroup' => [
 						'label'   => t( 'Main fields' ),
 						'options' => [
 							'name'     => t( 'Post ID' ),
 							'author'   => t( 'Author ID' ),
-							'views'    => t( 'Views count' ),
+							'views'    => t( 'View count' ),
 							'type'     => t( 'Type' ),
 							'title'    => t( 'Title' ),
 							'content'  => t( 'Content' ),
@@ -119,10 +119,12 @@ return \Expansa\Facades\Form::enqueue(
 			], array_keys($samples), $samples),
 		],
 		[
-			'name'     => 'custom',
-			'type'     => 'custom',
-			'callback' => fn () => '<input type="hidden" value="' . $filepath . '" name="filename">',
-			'attributes'  => [ 'u-prop' => 'custom' ],
+			'name'       => 'custom',
+			'type'       => 'custom',
+			'callback'   => fn () => '<input type="hidden" value="' . $filepath . '" name="filename">',
+			'attributes' => [
+                'u-prop' => 'custom'
+            ],
 		],
 	]
 );

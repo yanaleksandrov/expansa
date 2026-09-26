@@ -48,14 +48,13 @@ return \Expansa\Facades\Form::enqueue(
             'type'       => 'step',
             'attributes' => [
                 'class'          => 'pl-8 pr-8',
-                'u-wizard:title' => t('Choose project'),
             ],
             'fields'     => [
                 [
                     'name'        => 'title',
                     'type'        => 'header',
                     'class'       => 'p-8 t-center',
-                    'label'       => t('Select the project you want to export to docs'),
+                    'label'       => t('Select the project you want to generate docs for'),
                     'instruction' => t('This tool allows you to convert docblock comments into docs pages. You can also use markdown.'),
                     'attributes'  => [ 'u-prop' => 'title' ],
                 ],
@@ -78,7 +77,7 @@ return \Expansa\Facades\Form::enqueue(
                         'optgroup' => [
                             'label'   => t('Plugins'),
                             'options' => [
-                                'none' => t('Nothing is selected'),
+                                'none' => t('Nothing selected'),
                                 ...$list,
                             ],
                         ],
@@ -91,7 +90,6 @@ return \Expansa\Facades\Form::enqueue(
             'attributes' => [
                 'class'          => 'pl-8 pr-8',
                 'hidden'        => true,
-                'u-wizard:title' => t('Project import is completed'),
             ],
             'fields'     => [
                 [

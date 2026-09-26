@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Builders\Form;
 
 /**
  * Attributes list
@@ -23,7 +22,7 @@ use Expansa\Builders\Form;
 				<div class="attributes-description">
 					<p><?php echo t( 'Attributes define product details such as size or color and allow them to be included in product filtering.' ); ?></p>
 				</div>
-				<?php Form::make( EX_PLUGINS . 'ecommerce/core/attributes.php', true ); ?>
+				<?php echo form('attribute-editor', EX_PLUGINS . 'ecommerce/core/attributes.php'); ?>
 			</div>
 			<div class="attributes-side">
 				<div u-text="`<?php echo t_attr( ':attributesCount items', '${attributes.length}' ); ?>`">0 items</div>
@@ -45,8 +44,8 @@ use Expansa\Builders\Form;
 								[
 									'icon'        => 'empty-pack',
 									'class'       => 'dg jic m-auto t-center p-8 mw-320',
-									'title'       => t( 'Attributes not found' ),
-									'description' => t( 'Try to add new attribute, there will be results here' ),
+									'title'       => t( 'No attributes found' ),
+									'description' => t( 'Add an attribute and it will appear here' ),
 								]
 							);
 							?>

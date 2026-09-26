@@ -25,7 +25,7 @@ use Throwable;
  *   HttpException -> { "message": ..., "errors"?: ... }  with the exception's status code
  *   anything else -> { "message": ... }  with status 500
  *
- * In debug mode (EX_DEBUG), every JSON response also carries `benchmark`/`memory`
+ * In debug mode (EX_DEBUG['enabled']), every JSON response also carries `benchmark`/`memory`
  * metrics — never in production, so nothing about the server leaks by default.
  *
  * A controller that needs to send something other than JSON (a file download, an

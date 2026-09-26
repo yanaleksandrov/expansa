@@ -8,8 +8,8 @@ namespace Expansa\Database\Contracts;
  * Anything that can own a dynamic set of meta fields (see {@see \Expansa\Database\FieldEav}) —
  * currently every {@see \Expansa\Database\Model} subclass that `use`s {@see \Expansa\Database\Model\HasFieldEav}
  * or {@see \Expansa\Database\Model\HasFieldEavTyped} (both implement getId()/getFieldColumn() below)
- * and declares `implements Fieldable` itself (User, Term, Apikey, ...). App\Models\Post does NOT
- * implement this yet - it isn't even a Model - so passing one to FieldEav is a TypeError today.
+ * and declares `implements Fieldable` itself. A class that isn't a Model can't implement it yet,
+ * so passing one to FieldEav is a TypeError.
  */
 interface Fieldable
 {

@@ -29,7 +29,8 @@ if (! function_exists('t_attr')) {
      */
     function t_attr(string $string, mixed ...$args): string
     {
-        return Expansa\Facades\Safe::attribute(t($string, ...$args));
+        // t() already escapes, so decode once to avoid "&amp;amp;"
+        return Expansa\Facades\Safe::attribute(html_entity_decode(t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 }
 
@@ -42,7 +43,7 @@ if (! function_exists('root')) {
      */
     function root(string $string): string
     {
-        return EX_PATH . $string;
+        return Expansa\Support\Url::toPath($string);
     }
 }
 
@@ -111,7 +112,7 @@ if (! function_exists('form')) {
         if (is_file($path)) {
             require_once $path;
         }
-        return new Expansa\Builders\Form()->make($uid);
+        return Expansa\Facades\Form::render($uid);
     }
 }
 

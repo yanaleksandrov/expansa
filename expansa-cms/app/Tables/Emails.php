@@ -56,8 +56,8 @@ final class Emails extends Table
     public function notFoundData(): array
     {
         return [
-            'title'       => t('No emails templates found'),
-            'description' => t('Add [new email template](:emailDialog) manually', url('/dashboard/import')),
+            'title'       => t('No email templates found'),
+            'description' => t('Add a [new email template](:emailDialog) manually', url('/dashboard/import')),
         ];
     }
 }

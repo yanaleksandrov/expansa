@@ -15,18 +15,44 @@ class Manager
     public static array $extensions = [];
 
     /**
+     * Directory the extension ids are relative to, with a trailing slash.
+     */
+    private static string $root = '';
+
+    /**
      * Get extensions list.
      *
      * @param string $type
      * @return array
      */
+    /**
+     * Set the directory that holds the "plugins" and "themes" folders.
+     */
+    public function configure(string $root): void
+    {
+        self::$root = rtrim($root, '/\\') . '/';
+    }
+
     public function get(string $type): array
     {
          return self::$extensions[$type] ?? [];
     }
 
     /**
-     * Register new extension.
+     * Call register() of every enqueued extension of the type.
+     *
+     * @param string $type
+     * @return void
+     */
+    public function register(string $type): void
+    {
+        foreach (self::$extensions[$type] ?? [] as $extension) {
+            $extension instanceof ExtensionSkeleton && $extension->register();
+        }
+    }
+
+    /**
+     * Call boot() of every enqueued extension of the type.
      *
      * @param string $type
      * @return void
@@ -97,19 +123,33 @@ class Manager
     }
 
     /**
-     * Enqueue extensions from paths.
+     * Entry files of extensions by id, e.g. "plugins/seo" => "{root}plugins/seo/index.php".
+     * Ids other than "plugins/{dir}" or "themes/{dir}" are ignored, so a stored list can't point elsewhere.
      *
-     * @param callable $callback Callback function used for get plugins paths.
-     * @return void
+     * @param array $ids
+     * @return string[]
      */
-    public function enqueue(callable $callback): void
+    private function paths(array $ids): array
     {
-        $paths = call_user_func($callback);
-        if (!is_array($paths)) {
-            return;
+        $paths = [];
+        foreach ($ids as $id) {
+            if (is_string($id) && preg_match('#^(plugins|themes)/[a-z0-9_-]+$#i', $id)) {
+                $paths[] = self::$root . "$id/index.php";
+            }
         }
 
-        foreach ($paths as $path) {
+        return $paths;
+    }
+
+    /**
+     * Load the extensions by id, e.g. "plugins/seo"; ids other than "plugins/{dir}" or "themes/{dir}" are ignored.
+     *
+     * @param string[] $ids
+     * @return void
+     */
+    public function load(array $ids): void
+    {
+        foreach ($this->paths($ids) as $path) {
             if (! is_file($path)) {
                 continue;
             }
@@ -133,7 +173,7 @@ class Manager
 
             }
 
-            $extension->id   = dirname(str_replace(EX_PATH, '', $path));
+            $extension->id   = dirname(str_replace(self::$root, '', $path));
             $extension->path = $path;
 
             self::$extensions[$extension->type][] = $extension;

@@ -391,7 +391,7 @@ class Router
         // Handle all routes: an O(1) lookup for a literal match; only a genuinely dynamic
         // pattern falls back to handleDynamic(), which itself only scans the bucket that
         // could plausibly match instead of every dynamic route in the app.
-        $uri      = $this->getCurrentUri();
+        $uri      = $this->uri();
         $staticFn = $this->staticRoutes[$requestedMethod][$uri] ?? null;
 
         if ($staticFn !== null) {
@@ -450,7 +450,7 @@ class Router
                 $matches = [];
 
                 // check if there is a match and get matches as $matches (pointer)
-                $isMatch = $this->patternMatches($route_pattern, $this->getCurrentUri(), $matches);
+                $isMatch = $this->patternMatches($route_pattern, $this->uri(), $matches);
 
                 // is fallback route match?
                 if ($isMatch) {
@@ -472,7 +472,7 @@ class Router
      *
      * @return string
      */
-    public function getCurrentUri(): string
+    public function uri(): string
     {
         // Get the current Request URI and remove the rewrite base path to run the router in a subfolder.
         $uri = substr(rawurldecode($_SERVER['REQUEST_URI']), strlen($this->getBasePath()));
@@ -538,7 +538,7 @@ class Router
         $numHandled = 0;
 
         // The current page URL
-        $uri = $this->getCurrentUri();
+        $uri = $this->uri();
 
         // Loop all routes
         foreach ($routes as $route) {

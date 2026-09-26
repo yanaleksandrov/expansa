@@ -10,7 +10,13 @@ use Expansa\Http\Request;
 
 final readonly class UserController
 {
-    public function __construct(private UserService $service = new UserService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private UserService $service = new UserService(),
+    )
     {
     }
 

@@ -1,0 +1,16 @@
+includes:
+    # known issues to fix, new ones are not allowed
+    - phpstan-baseline.neon
+
+parameters:
+    level: 0
+    paths:
+        - expansa-cms/expansa
+        - expansa-cms/app
+    excludePaths:
+        # third-party code shipped with the framework: its classes are known, the code itself is not analysed
+        analyse:
+            - expansa-cms/expansa/Mail/PHPMailer
+            - expansa-cms/expansa/Images/Spatie
+    bootstrapFiles:
+        - tests/phpstan/bootstrap.php

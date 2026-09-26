@@ -45,6 +45,7 @@ class Cookie
                 if (! preg_match("/^([A-z0-9._-]+)$/i", $value)) {
                     throw new CookieException('The "name" parameter value contains illegal characters.');
                 }
+
                 $this->name = $value;
             }
         },
@@ -91,9 +92,10 @@ class Cookie
                 if (! in_array($value, [self::SAME_SITE_NONE, self::SAME_SITE_LAX, self::SAME_SITE_STRICT, null], true)) {
                     throw new CookieException('The "sameSite" parameter value is not valid.');
                 }
+
                 $this->sameSite = $value;
             }
-        }
+        },
     ) {} // phpcs:ignore
 
     /**

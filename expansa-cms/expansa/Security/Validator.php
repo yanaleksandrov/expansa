@@ -96,16 +96,24 @@ final class Validator
     protected array $errors = [];
 
     /**
-     * Setup validation
-     *
-     * @param array $fields Incoming fields and their values.
-     * @param array $rules  Validation rules list.
-     * @param bool  $break  Flag to stop validation if the first error is found.
+     * Fills the default error messages, translated at construction time.
      */
     public function __construct(
+
+        /**
+         * Incoming fields and their values.
+         */
         protected array $fields = [],
+
+        /**
+         * Validation rules list.
+         */
         protected array $rules = [],
-        protected bool $break = false
+
+        /**
+         * Flag to stop validation if the first error is found.
+         */
+        protected bool $break = false,
     )
     {
         $this->messages = [
@@ -118,9 +126,9 @@ final class Validator
             'rgb'          => t('The color format should be :format.', 'RGB'),
             'rgba'         => t('The color format should be :format.', 'RGBA'),
             'date'         => t('Is not a valid date.'),
-            'later'        => t("Must be date after '%s'."),
-            'earlier'      => t("Must be date before '%s'."),
-            'different'    => t("Must be different than '%s'."),
+            'later'        => t("Must be a date after '%s'."),
+            'earlier'      => t("Must be a date before '%s'."),
+            'different'    => t("Must be different from '%s'."),
             'email'        => t('Is not a valid email address.'),
             'equals'       => t("Must be the same as '%s'."),
             'ip'           => t('Is not a valid IP address.'),
@@ -134,15 +142,15 @@ final class Validator
             'min'          => t('Must be at least %s.'),
             'numeric'      => t('Must be numeric.'),
             'required'     => t('Is required.'),
-            'regex'        => t('The field is not valid format.'),
-            'similar'      => t("Value of this field must be same with '%s'."),
+            'regex'        => t('Has an invalid format.'),
+            'similar'      => t("Must match '%s'."),
             'slug'         => t('Must contain only letters, numbers, dashes and underscores.'),
             'tld'          => t('Is not a valid top-level domain (TLD).'),
             'url'          => t('Is not a valid URL.'),
             'uuid'         => t('Is not a valid UUID.'),
             'type'         => t('This type of file is not allowed.'),
             'minSize'      => t('File size is too small. Must be greater than or equal to %s.'),
-            'maxSize'      => t('File size is too big. Must be less than %s.'),
+            'maxSize'      => t('File size is too large. Must be less than %s.'),
             'extension'    => t('Invalid file extension. Accepted extensions are: %s.'),
             ...$this->messages,
         ];
@@ -176,7 +184,7 @@ final class Validator
 
                 // checking the value for compliance with the condition
                 $value      = $this->fields[ $field ] ?? '';
-                $comparison = $this->fields[ $comparisonValue ] ?? $comparisonValue;
+                $comparison = $comparisonValue !== null ? ($this->fields[ $comparisonValue ] ?? $comparisonValue) : null;
 
                 // check if $comparisonValue is a list of data
                 $comparisonValue_array = explode(',', $comparisonValue ?? '');
@@ -270,7 +278,7 @@ final class Validator
      */
     protected function alpha(string $value): bool
     {
-        return preg_match('/^([a-z])+$/i', $value);
+        return preg_match('/^([a-z])+$/i', $value) === 1;
     }
 
     /**
@@ -281,7 +289,7 @@ final class Validator
      */
     protected function alphanumeric(string|int $value): bool
     {
-        return preg_match('/^([a-z0-9])+$/i', $value);
+        return preg_match('/^([a-z0-9])+$/i', (string) $value) === 1;
     }
 
     /**
@@ -556,7 +564,7 @@ final class Validator
      */
     protected function regex(mixed $value, mixed $regexp): bool
     {
-        return preg_match($regexp, $value);
+        return preg_match((string) $regexp, (string) $value) === 1;
     }
 
     /**
@@ -579,7 +587,13 @@ final class Validator
      */
     protected function slug($value): bool
     {
-        return ! is_array($value) && str_contains($value, '/') ? false : preg_match('/^([-a-z0-9_-])+$/i', $value);
+        if (is_array($value)) {
+            return false;
+        }
+
+        $value = (string) $value;
+
+        return ! str_contains($value, '/') && preg_match('/^([-a-z0-9_-])+$/i', $value) === 1;
     }
 
     /**

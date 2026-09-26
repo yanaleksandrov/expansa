@@ -5,43 +5,44 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App;
+use App\Models\Options;
 use App\Models\Slug;
 use App\Models\User;
+use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
-use Expansa\Support\Is;
+use Expansa\Facades\Lifecycle;
 
 final class Web
 {
-    public function index($slug): void
+    /**
+     * Installer page, routed by the "install" lifecycle context: every slug but "install" redirects to it.
+     */
+    public function install($slug): void
     {
-        /**
-         * Expansa dashboard panel.
-         *
-         * @param string $slug Dashboard page root slug.
-         */
-        $dashboard = Hook::call('dashboardRootSlug', 'dashboard');
-
-        // run the installer if Expansa is not installed.
-        if (!Is::installed()) {
-            if ($slug !== 'install') {
-                redirect('install');
-            }
-            $welcome = view('welcome', ['slug' => 'install']);
-
-            Asset::discover($welcome->getPath());
-
-            echo $welcome->beautify()->render();
-            exit;
+        if ($slug !== 'install') {
+            redirect('install');
         }
 
-        // redirect unauthenticated users from the dashboard, but allow access to registration and password recovery.
-        if (str_starts_with($slug, $dashboard)) {
-            if (! User::isLogged()) {
-                redirect('sign-in');
-            }
+        $welcome = view('welcome', ['slug' => 'install', 'title' => t('Install Expansa')]);
 
-            require_once EX_PATH . 'dashboard/index.php';
+        Asset::discover($welcome->getPath());
+
+        echo $welcome->beautify()->render();
+    }
+
+    /**
+     * Pages of the "auth", "dashboard" and "web" lifecycle contexts; access checks and assets are done by the context.
+     */
+    public function index($slug): void
+    {
+        if (Lifecycle::is('dashboard')) {
+            /**
+             * Expansa dashboard panel.
+             *
+             * @param string $slug Dashboard page root slug.
+             */
+            $dashboard = Hook::call('dashboardRootSlug', 'dashboard');
 
             $slug = str_replace('dashboard/', '', $slug);
 
@@ -51,19 +52,25 @@ final class Web
             }
         }
 
-        // not allow some slugs for logged user, they are reserved.
+        // not allow some slugs for logged user, they are reserved (e.g. "dashboard/sign-in" or "install").
         $blackListSlugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
         if (in_array($slug, $blackListSlugs, true) && User::isLogged()) {
             redirect('dashboard');
         }
 
-        // include & launch the lightweight auth bootstrap - not the full dashboard, since
-        // none of its admin-only assets (menus, tables, vendor JS for dashboard form
-        // fields, ...) are reachable from a page a logged-out visitor can see.
-        if (in_array($slug, ['sign-in', 'sign-up', 'reset-password'], true) && !User::isLogged()) {
-            require_once EX_PATH . 'dashboard/auth.php';
+        $title = $this->title($slug);
 
+        if (Lifecycle::is('auth')) {
             $page = 'welcome';
+        }
+
+        // dashboard views are not public pages: outside the dashboard only the front page and the post-install page exist
+        if (Lifecycle::is('web') && $slug !== '' && !($slug === 'installed' && User::isLogged())) {
+            http_response_code(404);
+
+            $page  = 'welcome';
+            $slug  = '404';
+            $title = $this->title('', t('Page not found'));
         }
 
         if (empty($slug)) {
@@ -93,7 +100,7 @@ final class Web
                 $table = new ($instances[$tableName] ?? App\Tables\Pages::class)();
 
                 if ($tableName === 'files') {
-                    $slug  = 'files';
+                    $slug  = 'media';
                     $table = new App\Tables\Media();
                 }
 
@@ -106,6 +113,7 @@ final class Web
             // output view to frontend
             $content = view($page ?? 'index', [
                 'slug'   => $slug,
+                'title'  => $title,
                 'table'  => $table ?? null,
                 'entity' => $entity,
             ]);
@@ -123,5 +131,46 @@ final class Web
          * @param string $slug    Current page slug.
          */
         echo Hook::call('dashboardLoaded', $content ?? '', $slug);
+    }
+
+    /**
+     * Document title: "{page} — {site name}". The page name is the label of the dashboard menu item
+     * linking to the current URL, e.g. "Custom Fields" for "field-groups".
+     */
+    private function title(string $slug, ?string $page = null): string
+    {
+        $site = (string) Options::get('site.name', '');
+        $site = $site !== '' ? $site : 'Expansa';
+
+        if ($page === null && $slug !== '') {
+            $query = isset($_GET['table']) ? $slug . '?table=' . $_GET['table'] : $slug;
+
+            $page = match ($slug) {
+                'sign-in'        => t('Sign In'),
+                'sign-up'        => t('Sign Up'),
+                'reset-password' => t('Reset password'),
+                'installed'      => t('Installed'),
+                default          => $this->menuTitle($query)
+                    ?? $this->menuTitle($_GET['table'] ?? $slug)
+                    ?? ucfirst(str_replace('-', ' ', $slug)),
+            };
+        }
+
+        return $page === null || $page === '' ? $site : "$page — $site";
+    }
+
+    private function menuTitle(string $url): ?string
+    {
+        $tree = Tree::init();
+
+        foreach (['dashboard-main-menu', 'dashboard-panel-menu', 'dashboard-user-menu'] as $menu) {
+            foreach ($tree->list[$menu] ?? [] as $item) {
+                if (($item['url'] ?? null) === $url && is_string($item['title'] ?? null) && $item['title'] !== '') {
+                    return $item['title'];
+                }
+            }
+        }
+
+        return null;
     }
 }

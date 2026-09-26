@@ -25,24 +25,21 @@ class Error implements \JsonSerializable
     private static array $errors = [];
 
     /**
-     * The code this particular instance was constructed with — kept so
-     * jsonSerialize() (and any other per-instance read) reflects only this
-     * error, not the whole cross-request registry in self::$errors.
-     *
-     * @var string
-     */
-    private string $code;
-
-    /**
      * Add an error or append additional message to an existing error.
-     *
-     * @param string $code          Error code.
-     * @param string|array $message Error single message or array of messages.
      */
-    public function __construct(string $code, string|array $message = '')
-    {
-        $this->code = $code;
+    public function __construct(
 
+        /**
+         * Error code. Kept so jsonSerialize() reflects only this error, not the whole registry in self::$errors.
+         */
+        private string $code,
+
+        /**
+         * Error single message or array of messages.
+         */
+        string|array $message = '',
+    )
+    {
         if (is_array($message)) {
             self::$errors[$code] = array_merge(self::$errors[$code] ?? [], $message);
         } else {

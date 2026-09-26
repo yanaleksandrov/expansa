@@ -25,7 +25,7 @@ $table = $__data['table'] ?? null;
 <head>
     <meta charset="{{ Options::attr( 'charset', 'UTF-8' ) }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Menu</title>
+    <title>{{ $title ?? 'Expansa' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
@@ -87,15 +87,15 @@ $table = $__data['table'] ?? null;
     </div>
 
     <!-- dialog windows start -->
-    <div class="dialog" :class="$store.dialog?.class" id="expansa-dialog">
-        <div class="dialog-wrapper" @click.outside="$dialog.close()">
+    <div class="dialog" u-data="dialog" :class="stack.length ? ['active', stack.at(-1)?.class].filter(Boolean).join(' ') : ''" @keydown.esc.window="close()" id="expansa-dialog">
+        <div u-each="entry in stack" class="dialog-wrapper" @click.outside="close(entry.id)">
             <div class="dialog-header">
-                <template u-if="$store.dialog?.title">
-                    <h6 class="dialog-title" u-text="$store.dialog.title"></h6>
+                <template u-if="entry.title">
+                    <h6 class="dialog-title" u-text="entry.title"></h6>
                 </template>
-                <button class="dialog-close" type="button" @click="$dialog.close()"></button>
+                <button class="dialog-close" type="button" @click="close(entry.id)"></button>
             </div>
-            <div class="dialog-content" data-content></div>
+            <div class="dialog-content" u-html="entry.content"></div>
         </div>
     </div>
 
@@ -113,6 +113,10 @@ $table = $__data['table'] ?? null;
             </div>
         </div>
     </div>
+
+    <!-- media library dialog start: registered globally (not per-field/page) since it must be
+         reachable from anywhere - see src/js/youla-storage.js and dialogs/media-library.blade.php -->
+    <?php echo view('dialogs/media-library'); ?>
 
     <?php
     /**

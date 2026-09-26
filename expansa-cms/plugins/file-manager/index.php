@@ -16,7 +16,7 @@ return new class extends Plugin
             ->setName('File Manager')
             ->setVersion('2025.2')
             ->setAuthor('Expansa Team')
-            ->setDescription(t('Tool for ability to edit, delete, upload, download, copy and paste files and folders.'));
+            ->setDescription(t('Edit, delete, upload, download, copy, and paste files and folders.'));
     }
 
     public function boot(): void

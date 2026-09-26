@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-use Expansa\Patterns\Registry;
-
-Registry::set('languages', [
+return [
     [
         'name'      => 'Afrikaans',
         'native'    => 'Afrikaans',
@@ -1314,4 +1312,4 @@ Registry::set('languages', [
         'nplurals'  => 2,
         'plural'    => 'n != 1',
     ],
-]);
+];

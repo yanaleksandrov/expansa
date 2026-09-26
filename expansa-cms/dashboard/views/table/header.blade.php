@@ -96,14 +96,15 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                     ?>
                 </div>
             <?php endif; ?>
+
             <?php if ($uploader) : ?>
-            <div class="df aic g-1">
-                <button class="btn btn--sm btn--outline"
-                        @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
-                    <i class="ph ph-upload-simple"></i> <?php echo t('Add new file'); ?>
-                </button>
-            </div>
+                <div class="df aic g-1">
+                    <button class="btn btn--sm btn--outline" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
+                        <i class="ph ph-upload-simple"></i> <?php echo t('Add new file'); ?>
+                    </button>
+                </div>
             <?php endif; ?>
+
             <?php if ($translation) : ?>
             <div class="df aic g-2">
                 <div class="df aic g-1">
@@ -134,7 +135,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                 'u-select' => '',
                                 'name' => 'language',
                             ],
-                            'options' => I18n::getLanguagesOptions(),
+                            'options' => I18n::languageOptions(),
                         ]
                     );
 
@@ -165,7 +166,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                     'options' => [
                                         'core' => [
                                             'content' => t('Expansa Core'),
-                                            'description' => t('completion :percent\%', 0),
+                                            'description' => t(':percent\% complete', 0),
                                         ],
                                     ],
                                 ],
@@ -174,7 +175,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                     'options' => array_reduce($plugins, function ($carry, Expansa\Extensions\Plugin $plugin) {
                                         $carry[$plugin->id] = [
                                             'content'     => $plugin->name,
-                                            'description' => t('completion :percent%', 0),
+                                            'description' => t(':percent% complete', 0),
                                         ];
                                         return $carry;
                                     }, []),
@@ -184,7 +185,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                                     'options' => array_reduce($themes, function ($carry, Expansa\Extensions\Theme $theme) {
                                         $carry[$theme->id] = [
                                             'content'     => $theme->name,
-                                            'description' => t('completion :percent%', 0),
+                                            'description' => t(':percent% complete', 0),
                                         ];
                                         return $carry;
                                     }, []),
@@ -209,5 +210,5 @@ $themes  = Expansa\Facades\Extensions::get('theme');
         <?php endif; ?>
     </div>
 </div>
-<?php //Dashboard\Form::make( 'items-filter' ); ?>
+<?php //Dashboard\Form::render( 'items-filter' ); ?>
 <?php $content && print($content . PHP_EOL); ?>

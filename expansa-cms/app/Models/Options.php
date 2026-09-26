@@ -284,7 +284,7 @@ class Options extends Model
         $not_allowed_options = array_keys(self::default());
         if (in_array($option, $not_allowed_options, true)) {
             throw new LogicException(
-                t('You are not allowed to delete the ":optionName" option. You can just update it.', $option)
+                t('You can\'t delete the ":optionName" option, but you can update it.', $option)
             );
         }
 

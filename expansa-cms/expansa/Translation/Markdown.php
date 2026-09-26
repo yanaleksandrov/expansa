@@ -11,15 +11,13 @@ namespace Expansa\Translation;
  */
 class Markdown
 {
-    /**
-     * Constructor for the Markdown class.
-     *
-     * Initializes the Markdown parser with default rules for converting Markdown elements to HTML.
-     * The constructor is private to prevent external instantiation of the class.
-     *
-     * @param array $rules An optional array of rules to extend the default Markdown parsing capabilities.
-     */
     private function __construct(
+
+        /**
+         * Names of the parsing methods, applied in order by render().
+         *
+         * @var string[]
+         */
         private readonly array $rules = [
             'headers',
             'blockquote',
@@ -28,7 +26,7 @@ class Markdown
             'image',
             'link',
             //'code',
-        ]
+        ],
     ) {} // phpcs:ignore
 
     /**

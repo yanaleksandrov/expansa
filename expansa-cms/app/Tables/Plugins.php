@@ -81,8 +81,8 @@ final class Plugins extends Table
     {
         return [
             'icon'        => 'no-plugins',
-            'title'       => t('Plugins are not installed yet'),
-            'description' => t('You can download them manually or install from the repository'),
+            'title'       => t('No plugins installed yet'),
+            'description' => t('You can upload them manually or install them from the repository'),
         ];
     }
 }

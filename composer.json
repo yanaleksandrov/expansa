@@ -24,7 +24,7 @@
         "dragonmantank/cron-expression": "^3.0",
         "squizlabs/php_codesniffer": "3.*",
         "spatie/image": "^3.7",
-        "vimeo/psalm": "^5.26"
+        "phpstan/phpstan": "^2.1"
     },
     "autoload": {
         "psr-4": {
@@ -34,18 +34,10 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "if not exist expansa-cms\\expansa\\Images mkdir expansa-cms\\expansa\\Images",
-            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa-cms\\expansa\\Images\\Spatie\\Image",
-            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa-cms\\expansa\\Images\\Spatie\\ImageOptimizer",
-            "if not exist expansa-cms\\expansa\\Scheduler mkdir expansa-cms\\expansa\\Scheduler",
-            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa-cms\\expansa\\Scheduler"
+            "@php scripts/sync-vendored.php"
         ],
         "post-update-cmd": [
-            "if not exist expansa-cms\\expansa\\Images mkdir expansa-cms\\expansa\\Images",
-            "xcopy /e /i /h /y vendor\\spatie\\image\\src\\* expansa-cms\\expansa\\Images\\Spatie\\Image",
-            "xcopy /e /i /h /y vendor\\spatie\\image-optimizer\\src\\* expansa-cms\\expansa\\Images\\Spatie\\ImageOptimizer",
-            "if not exist expansa-cms\\expansa\\Scheduler mkdir expansa-cms\\expansa\\Scheduler",
-            "xcopy /e /i /h /y vendor\\dragonmantank\\cron-expression\\src\\* expansa-cms\\expansa\\Scheduler"
+            "@php scripts/sync-vendored.php"
         ]
     }
 }

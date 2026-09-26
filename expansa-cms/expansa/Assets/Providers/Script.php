@@ -18,41 +18,88 @@ use Expansa\Assets\Abstracts\Provider;
 class Script extends Provider
 {
     /**
-     * Constructor for the script asset, allowing to define various attributes of the script tag.
-     *
-     * @param string $uid          Unique ID attribute of the asset.
-     * @param string $src          URL or path to the external JavaScript file.
-     * @param array  $data         Additional data passed to the asset.
-     * @param string $class        CSS class name for the script tag.
-     * @param string $type         MIME type of the script (default is 'text/javascript').
-     * @param bool   $async        Whether the script should be executed asynchronously.
-     * @param bool   $defer        Whether the script should be executed after the document is parsed.
-     * @param string $integrity    Integrity hash for the script file to verify its content.
-     * @param string $crossorigin  Specifies how to handle cross-origin requests for the script.
-     * @param bool   $nomodule     Executes the script only in browsers that do not support modules.
-     * @param string $language     Specifies the language of the script (deprecated, not recommended for use).
-     * @param string $event        Specifies an event that will trigger the script (deprecated, not recommended for use)
-     * @param string $path         Local path to the script for internal reference.
-     * @param string $version
-     * @param array  $dependencies uid's (or full ids) of assets that are required before this script.
-     * @param bool   $toFooter     Output before close body tag.
+     * Computes `path` from `src`; `data` entries override matching properties except `id`.
      */
     public function __construct(
+
+        /**
+         * Unique ID attribute of the asset.
+         */
         public string $uid,
+
+        /**
+         * URL or path to the external JavaScript file.
+         */
         public string $src,
+
+        /**
+         * Additional data passed to the asset.
+         */
         public array $data = [],
+
+        /**
+         * CSS class name for the script tag.
+         */
         public string $class = '',
+
+        /**
+         * MIME type of the script.
+         */
         public string $type = 'text/javascript',
+
+        /**
+         * Whether the script should be executed asynchronously.
+         */
         public bool $async = false,
+
+        /**
+         * Whether the script should be executed after the document is parsed.
+         */
         public bool $defer = false,
+
+        /**
+         * Integrity hash for the script file to verify its content.
+         */
         public string $integrity = '',
+
+        /**
+         * Specifies how to handle cross-origin requests for the script.
+         */
         public string $crossorigin = '',
+
+        /**
+         * Executes the script only in browsers that do not support modules.
+         */
         public bool $nomodule = false,
+
+        /**
+         * Specifies the language of the script (deprecated, not recommended for use).
+         */
         public string $language = '',
+
+        /**
+         * Specifies an event that will trigger the script (deprecated, not recommended for use).
+         */
         public string $event = '',
+
+        /**
+         * Local path to the script for internal reference.
+         */
         public string $path = '',
+
+        /**
+         * Asset version; not added to the URL (cached copies use content-hashed names) and ignored when checking if the asset can be bundled.
+         */
         public string $version = '',
+
+        /**
+         * uid's (or full ids) of assets that are required before this script.
+         */
         public array $dependencies = [],
+
+        /**
+         * Output before close body tag.
+         */
         public bool $toFooter = true,
     )
     {

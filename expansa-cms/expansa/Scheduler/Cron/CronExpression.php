@@ -2,112 +2,141 @@
 
 declare(strict_types=1);
 
-namespace Cron;
+namespace Expansa\Scheduler\Cron;
 
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
 use Exception;
-use InvalidArgumentException;
 use LogicException;
 use RuntimeException;
+use Expansa\Scheduler\Exception\SchedulerException;
 
 /**
- * CRON expression parser that can determine whether or not a CRON expression is
- * due to run, the next run date and previous run date of a CRON expression.
- * The determinations made by this class are accurate if checked run once per
- * minute (seconds are dropped from date time comparisons).
+ * CRON expression: checks whether it is due and finds its next and previous run dates.
+ * Seconds are dropped from every comparison, so the result is exact when checked once a minute.
+ * Fork of https://github.com/dragonmantank/cron-expression.
  *
- * Schedule parts must map to:
- * minute [0-59], hour [0-23], day of month, month [1-12|JAN-DEC], day of week
- * [1-7|MON-SUN], and an optional year.
- *
- * @see http://en.wikipedia.org/wiki/Cron
+ * @package Expansa\Scheduler\Cron
  */
 class CronExpression
 {
-    public const MINUTE = 0;
-    public const HOUR = 1;
-    public const DAY = 2;
-    public const MONTH = 3;
-    public const WEEKDAY = 4;
+    public const int MINUTE  = 0;
+    public const int HOUR    = 1;
+    public const int DAY     = 2;
+    public const int MONTH   = 3;
+    public const int WEEKDAY = 4;
 
-    /** @deprecated */
-    public const YEAR = 5;
-
-    public const MAPPINGS = [
-        '@yearly' => '0 0 1 1 *',
+    /**
+     * Built-in aliases, they can not be unregistered.
+     */
+    public const array MAPPINGS = [
+        '@yearly'   => '0 0 1 1 *',
         '@annually' => '0 0 1 1 *',
-        '@monthly' => '0 0 1 * *',
-        '@weekly' => '0 0 * * 0',
-        '@daily' => '0 0 * * *',
+        '@monthly'  => '0 0 1 * *',
+        '@weekly'   => '0 0 * * 0',
+        '@daily'    => '0 0 * * *',
         '@midnight' => '0 0 * * *',
-        '@hourly' => '0 * * * *',
+        '@hourly'   => '0 * * * *',
     ];
 
     /**
-     * @var array CRON expression parts
+     * Order in which the parts are satisfied when a run date is searched: the largest unit first.
      */
-    protected $cronParts;
+    private const array ORDER = [self::MONTH, self::DAY, self::WEEKDAY, self::HOUR, self::MINUTE];
 
     /**
-     * @var FieldFactoryInterface CRON field factory
+     * Built-in and registered aliases.
      */
-    protected $fieldFactory;
+    private static array $aliases = self::MAPPINGS;
 
     /**
-     * @var int Max iteration count when searching for next run date
-     */
-    protected $maxIterationCount = 1000;
-
-    /**
-     * @var array Order in which to test of cron parts
-     */
-    protected static $order = [
-        self::YEAR,
-        self::MONTH,
-        self::DAY,
-        self::WEEKDAY,
-        self::HOUR,
-        self::MINUTE,
-    ];
-
-    /**
-     * @var array<string, string>
-     */
-    private static $registeredAliases = self::MAPPINGS;
-
-    /**
-     * Registered a user defined CRON Expression Alias.
+     * Field instances shared by all expressions.
      *
-     * @throws LogicException If the expression or the alias name are invalid
-     *                         or if the alias is already registered.
+     * @var AbstractField[]
      */
-    public static function registerAlias(string $alias, string $expression): void
+    private static array $fields = [];
+
+    /**
+     * The five parts of the expression, from minute to weekday.
+     *
+     * @var string[]
+     */
+    private array $parts = [];
+
+    /**
+     * Parts other than `*` in ORDER, each split into its comma separated items.
+     *
+     * @var array<int, string[]>|null
+     */
+    private ?array $lists = null;
+
+    /**
+     * Both the day of month and the day of week are set, so either of them satisfies the day.
+     */
+    private bool $eitherDay = false;
+
+    /**
+     * Copies without the day of week and without the day of month, used when $eitherDay is set.
+     */
+    private ?self $monthDays = null;
+
+    private ?self $weekDays = null;
+
+    /**
+     * Max iterations when searching for a run date.
+     */
+    private int $maxIterationCount = 1000;
+
+    /**
+     * Parse a CRON expression or an alias.
+     *
+     * @throws SchedulerException
+     */
+    public function __construct(
+
+        /**
+         * E.g. `8 * * * *` or `@daily`.
+         */
+        string $expression,
+    )
     {
-        try {
-            new self($expression);
-        } catch (InvalidArgumentException $exception) {
-            throw new LogicException("The expression `$expression` is invalid", 0, $exception);
-        }
-
-        $shortcut = strtolower($alias);
-        if (1 !== preg_match('/^@\w+$/', $shortcut)) {
-            throw new LogicException("The alias `$alias` is invalid. It must start with an `@` character and contain alphanumeric (letters, numbers, regardless of case) plus underscore (_).");
-        }
-
-        if (isset(self::$registeredAliases[$shortcut])) {
-            throw new LogicException("The alias `$alias` is already registered.");
-        }
-
-        self::$registeredAliases[$shortcut] = $expression;
+        $this->setExpression(self::$aliases[strtolower($expression)] ?? $expression);
     }
 
     /**
-     * Unregistered a user defined CRON Expression Alias.
+     * Register a user defined alias, e.g. `@workdays` for `0 9 * * 1-5`.
      *
-     * @throws LogicException If the user tries to unregister a built-in alias
+     * @param string $alias
+     * @param string $expression
+     * @return void
+     * @throws LogicException If the expression or the alias are invalid, or the alias is already registered.
+     */
+    public static function registerAlias(string $alias, string $expression): void
+    {
+        if (! self::isValidExpression($expression)) {
+            throw new LogicException("The expression `$expression` is invalid");
+        }
+
+        $shortcut = strtolower($alias);
+        if (preg_match('/^@\w+$/', $shortcut) !== 1) {
+            throw new LogicException("The alias `$alias` is invalid: it must be `@` followed by letters, numbers or `_`.");
+        }
+
+        if (isset(self::$aliases[$shortcut])) {
+            throw new LogicException("The alias `$alias` is already registered.");
+        }
+
+        self::$aliases[$shortcut] = $expression;
+    }
+
+    /**
+     * Unregister a user defined alias.
+     *
+     * @param string $alias
+     * @return bool False if the alias is not registered.
+     * @throws LogicException For a built-in alias.
      */
     public static function unregisterAlias(string $alias): bool
     {
@@ -116,55 +145,47 @@ class CronExpression
             throw new LogicException("The alias `$alias` is a built-in alias; it can not be unregistered.");
         }
 
-        if (!isset(self::$registeredAliases[$shortcut])) {
+        if (! isset(self::$aliases[$shortcut])) {
             return false;
         }
 
-        unset(self::$registeredAliases[$shortcut]);
+        unset(self::$aliases[$shortcut]);
 
         return true;
     }
 
     /**
-     * Tells whether a CRON Expression alias is registered.
+     * Check if an alias is registered.
+     *
+     * @param string $alias
+     * @return bool
      */
     public static function supportsAlias(string $alias): bool
     {
-        return isset(self::$registeredAliases[strtolower($alias)]);
+        return isset(self::$aliases[strtolower($alias)]);
     }
 
     /**
-     * Returns all registered aliases as an associated array where the aliases are the key
-     * and their associated expressions are the values.
+     * Get all aliases with their expressions.
      *
      * @return array<string, string>
      */
     public static function getAliases(): array
     {
-        return self::$registeredAliases;
+        return self::$aliases;
     }
 
     /**
-     * @deprecated since version 3.0.2, use __construct instead.
-     */
-    public static function factory(string $expression, ?FieldFactoryInterface $fieldFactory = null): CronExpression
-    {
-        /** @phpstan-ignore-next-line */
-        return new static($expression, $fieldFactory);
-    }
-
-    /**
-     * Validate a CronExpression.
+     * Check if an expression is valid.
      *
-     * @param string $expression the CRON expression to validate
-     *
-     * @return bool True if a valid CRON expression was passed. False if not.
+     * @param string $expression
+     * @return bool
      */
     public static function isValidExpression(string $expression): bool
     {
         try {
-            new CronExpression($expression);
-        } catch (InvalidArgumentException $e) {
+            new self($expression);
+        } catch (SchedulerException) {
             return false;
         }
 
@@ -172,57 +193,48 @@ class CronExpression
     }
 
     /**
-     * Parse a CRON expression.
+     * Get the shared field of a position.
      *
-     * @param string $expression CRON expression (e.g. '8 * * * *')
-     * @param null|FieldFactoryInterface $fieldFactory Factory to create cron fields
-     * @throws InvalidArgumentException
+     * @param int $position One of the MINUTE ... WEEKDAY constants.
+     * @return AbstractField
+     * @throws SchedulerException
      */
-    public function __construct(string $expression, ?FieldFactoryInterface $fieldFactory = null)
+    public static function field(int $position): AbstractField
     {
-        $shortcut = strtolower($expression);
-        $expression = self::$registeredAliases[$shortcut] ?? $expression;
-
-        $this->fieldFactory = $fieldFactory ?: new FieldFactory();
-        $this->setExpression($expression);
+        return self::$fields[$position] ??= match ($position) {
+            self::MINUTE  => new MinutesField(),
+            self::HOUR    => new HoursField(),
+            self::DAY     => new DayOfMonthField(),
+            self::MONTH   => new MonthField(),
+            self::WEEKDAY => new DayOfWeekField(),
+            default       => throw new SchedulerException(($position + 1) . ' is not a valid position'),
+        };
     }
 
     /**
-     * Set or change the CRON expression.
+     * Set or change the whole expression.
      *
-     * @param string $value CRON expression (e.g. 8 * * * *)
-     *
-     * @throws \InvalidArgumentException if not a valid CRON expression
-     *
-     * @return CronExpression
+     * @param string $value E.g. `8 * * * *`, aliases are not resolved here.
+     * @return static
+     * @throws SchedulerException
      */
-    public function setExpression(string $value): CronExpression
+    public function setExpression(string $value): static
     {
-        $split = preg_split('/\s/', $value, -1, PREG_SPLIT_NO_EMPTY);
+        $parts = preg_split('/\s/', $value, -1, PREG_SPLIT_NO_EMPTY);
 
-        if (!\is_array($split)) {
-            throw new InvalidArgumentException(
-                $value . ' is not a valid CRON expression'
-            );
+        // `?` is allowed only in one of the day fields
+        if (
+            ! is_array($parts)
+            || count($parts) !== 5
+            || $parts[self::MINUTE] === '?'
+            || $parts[self::HOUR] === '?'
+            || $parts[self::MONTH] === '?'
+            || ($parts[self::DAY] === '?' && $parts[self::WEEKDAY] === '?')
+        ) {
+            throw new SchedulerException($value . ' is not a valid CRON expression');
         }
 
-        $notEnoughParts = \count($split) < 5;
-
-        $questionMarkInInvalidPart = array_key_exists(0, $split) && $split[0] === '?'
-            || array_key_exists(1, $split) && $split[1] === '?'
-            || array_key_exists(3, $split) && $split[3] === '?';
-
-        $tooManyQuestionMarks = array_key_exists(2, $split) && $split[2] === '?'
-            && array_key_exists(4, $split) && $split[4] === '?';
-
-        if ($notEnoughParts || $questionMarkInInvalidPart || $tooManyQuestionMarks) {
-            throw new InvalidArgumentException(
-                $value . ' is not a valid CRON expression'
-            );
-        }
-
-        $this->cronParts = $split;
-        foreach ($this->cronParts as $position => $part) {
+        foreach ($parts as $position => $part) {
             $this->setPart($position, $part);
         }
 
@@ -230,36 +242,34 @@ class CronExpression
     }
 
     /**
-     * Set part of the CRON expression.
+     * Set one part of the expression.
      *
-     * @param int $position The position of the CRON expression to set
-     * @param string $value The value to set
-     *
-     * @throws \InvalidArgumentException if the value is not valid for the part
-     *
-     * @return CronExpression
+     * @param int    $position One of the MINUTE ... WEEKDAY constants.
+     * @param string $value
+     * @return static
+     * @throws SchedulerException
      */
-    public function setPart(int $position, string $value): CronExpression
+    public function setPart(int $position, string $value): static
     {
-        if (!$this->fieldFactory->getField($position)->validate($value)) {
-            throw new InvalidArgumentException(
-                'Invalid CRON field value ' . $value . ' at position ' . $position
-            );
+        if (! self::field($position)->validate($value)) {
+            throw new SchedulerException('Invalid CRON field value ' . $value . ' at position ' . $position);
         }
 
-        $this->cronParts[$position] = $value;
+        $this->parts[$position] = $value;
+        $this->lists            = null;
+        $this->monthDays        = null;
+        $this->weekDays         = null;
 
         return $this;
     }
 
     /**
-     * Set max iteration count for searching next run dates.
+     * Set max iterations when searching for a run date.
      *
-     * @param int $maxIterationCount Max iteration count when searching for next run date
-     *
-     * @return CronExpression
+     * @param int $maxIterationCount
+     * @return static
      */
-    public function setMaxIterationCount(int $maxIterationCount): CronExpression
+    public function setMaxIterationCount(int $maxIterationCount): static
     {
         $this->maxIterationCount = $maxIterationCount;
 
@@ -267,325 +277,307 @@ class CronExpression
     }
 
     /**
-     * Get a next run date relative to the current date or a specific date
+     * Get the whole expression or one of its parts.
      *
-     * @param string|\DateTimeInterface $currentTime      Relative calculation date
-     * @param int                       $nth              Number of matches to skip before returning a
-     *                                                    matching next run date.  0, the default, will return the
-     *                                                    current date and time if the next run date falls on the
-     *                                                    current date and time.  Setting this value to 1 will
-     *                                                    skip the first match and go to the second match.
-     *                                                    Setting this value to 2 will skip the first 2
-     *                                                    matches and so on.
-     * @param bool                      $allowCurrentDate Set to TRUE to return the current date if
-     *                                                    it matches the cron expression.
-     * @param null|string               $timeZone         TimeZone to use instead of the system default
-     *
-     * @throws \RuntimeException on too many iterations
-     * @throws \Exception
-     *
-     * @return \DateTime
+     * @param int|null $part One of the MINUTE ... WEEKDAY constants, `null` for the whole expression.
+     * @return string|null `null` for an unknown part.
      */
-    public function getNextRunDate($currentTime = 'now', int $nth = 0, bool $allowCurrentDate = false, $timeZone = null): DateTime
+    public function getExpression(?int $part = null): ?string
+    {
+        return $part === null ? implode(' ', $this->parts) : $this->parts[$part] ?? null;
+    }
+
+    /**
+     * Get the parts of the expression, from minute to weekday.
+     *
+     * @return string[]
+     */
+    public function getParts(): array
+    {
+        return $this->parts;
+    }
+
+    public function __toString(): string
+    {
+        return $this->getExpression();
+    }
+
+    /**
+     * Check if the expression is due at a date, seconds are ignored.
+     *
+     * @param DateTimeInterface|string $currentTime
+     * @param string|null              $timeZone    Defaults to the date timezone, or to the default one for a string.
+     * @return bool
+     */
+    public function isDue(DateTimeInterface|string $currentTime = 'now', ?string $timeZone = null): bool
+    {
+        try {
+            if ($currentTime instanceof DateTimeInterface) {
+                if ($timeZone !== null && $timeZone !== $currentTime->getTimezone()->getName()) {
+                    $currentTime = DateTimeImmutable::createFromInterface($currentTime)->setTimezone(new DateTimeZone($timeZone));
+                }
+            } else {
+                $currentTime = new DateTime($currentTime);
+                $currentTime->setTimezone(new DateTimeZone($timeZone ?? date_default_timezone_get()));
+            }
+
+            return $this->matches($currentTime);
+        } catch (Exception) {
+            return false;
+        }
+    }
+
+    /**
+     * Get the next run date after a date.
+     *
+     * @param DateTimeInterface|string $currentTime
+     * @param int                      $nth              Number of matches to skip.
+     * @param bool                     $allowCurrentDate Whether the current date itself can be returned.
+     * @param string|null              $timeZone
+     * @return DateTime
+     * @throws RuntimeException When no run date is found within the max iterations.
+     */
+    public function getNextRunDate(
+        DateTimeInterface|string $currentTime = 'now',
+        int $nth = 0,
+        bool $allowCurrentDate = false,
+        ?string $timeZone = null
+    ): DateTime
     {
         return $this->getRunDate($currentTime, $nth, false, $allowCurrentDate, $timeZone);
     }
 
     /**
-     * Get a previous run date relative to the current date or a specific date.
+     * Get the previous run date before a date.
      *
-     * @param string|\DateTimeInterface $currentTime      Relative calculation date
-     * @param int                       $nth              Number of matches to skip before returning
-     * @param bool                      $allowCurrentDate Set to TRUE to return the
-     *                                                    current date if it matches the cron expression
-     * @param null|string               $timeZone         TimeZone to use instead of the system default
-     *
-     * @throws \RuntimeException on too many iterations
-     * @throws \Exception
-     *
-     * @return \DateTime
-     *
-     * @see \Cron\CronExpression::getNextRunDate
+     * @param DateTimeInterface|string $currentTime
+     * @param int                      $nth              Number of matches to skip.
+     * @param bool                     $allowCurrentDate Whether the current date itself can be returned.
+     * @param string|null              $timeZone
+     * @return DateTime
+     * @throws RuntimeException When no run date is found within the max iterations.
      */
-    public function getPreviousRunDate($currentTime = 'now', int $nth = 0, bool $allowCurrentDate = false, $timeZone = null): DateTime
+    public function getPreviousRunDate(
+        DateTimeInterface|string $currentTime = 'now',
+        int $nth = 0,
+        bool $allowCurrentDate = false,
+        ?string $timeZone = null
+    ): DateTime
     {
         return $this->getRunDate($currentTime, $nth, true, $allowCurrentDate, $timeZone);
     }
 
     /**
-     * Get multiple run dates starting at the current date or a specific date.
+     * Get several consecutive run dates, fewer if the search runs out of iterations.
      *
-     * @param int $total Set the total number of dates to calculate
-     * @param string|\DateTimeInterface|null $currentTime Relative calculation date
-     * @param bool $invert Set to TRUE to retrieve previous dates
-     * @param bool $allowCurrentDate Set to TRUE to return the
-     *                               current date if it matches the cron expression
-     * @param null|string $timeZone TimeZone to use instead of the system default
-     *
-     * @return \DateTime[] Returns an array of run dates
+     * @param int                      $total
+     * @param DateTimeInterface|string $currentTime
+     * @param bool                     $invert           Whether previous dates are returned.
+     * @param bool                     $allowCurrentDate Whether the current date itself can be returned.
+     * @param string|null              $timeZone
+     * @return DateTime[]
      */
-    public function getMultipleRunDates(int $total, $currentTime = 'now', bool $invert = false, bool $allowCurrentDate = false, $timeZone = null): array
+    public function getMultipleRunDates(
+        int $total,
+        DateTimeInterface|string $currentTime = 'now',
+        bool $invert = false,
+        bool $allowCurrentDate = false,
+        ?string $timeZone = null
+    ): array
     {
-        $timeZone = $this->determineTimeZone($currentTime, $timeZone);
+        $timeZone    = $this->determineTimeZone($currentTime, $timeZone);
+        $currentTime = $this->toDateTime($currentTime, $timeZone);
+        $matches     = [];
 
-        if ('now' === $currentTime) {
-            $currentTime = new DateTime();
-        } elseif ($currentTime instanceof DateTime) {
-            $currentTime = clone $currentTime;
-        } elseif ($currentTime instanceof DateTimeImmutable) {
-            $currentTime = DateTime::createFromFormat('U', $currentTime->format('U'));
-        } elseif (\is_string($currentTime)) {
-            $currentTime = new DateTime($currentTime);
-        }
-
-        if (!$currentTime instanceof DateTime) {
-            throw new InvalidArgumentException('invalid current time');
-        }
-
-        $currentTime->setTimezone(new DateTimeZone($timeZone));
-
-        $matches = [];
         for ($i = 0; $i < $total; ++$i) {
             try {
                 $result = $this->getRunDate($currentTime, 0, $invert, $allowCurrentDate, $timeZone);
-            } catch (RuntimeException $e) {
+            } catch (RuntimeException) {
                 break;
             }
 
             $allowCurrentDate = false;
-            $currentTime = clone $result;
-            $matches[] = $result;
+            $currentTime      = clone $result;
+            $matches[]        = $result;
         }
 
         return $matches;
     }
 
     /**
-     * Get all or part of the CRON expression.
+     * Check if every part of the expression satisfies the date.
      *
-     * @param int|string|null $part specify the part to retrieve or NULL to get the full
-     *                     cron schedule string
-     *
-     * @return null|string Returns the CRON expression, a part of the
-     *                     CRON expression, or NULL if the part was specified but not found
+     * @param DateTimeInterface $date
+     * @return bool
      */
-    public function getExpression($part = null): ?string
+    private function matches(DateTimeInterface $date): bool
     {
-        if (null === $part) {
-            return implode(' ', $this->cronParts);
+        if ($this->lists === null) {
+            $this->compile();
         }
 
-        if (array_key_exists($part, $this->cronParts)) {
-            return $this->cronParts[$part];
-        }
-
-        return null;
-    }
-
-    /**
-     * Gets the parts of the cron expression as an array.
-     *
-     * @return string[]
-     *   The array of parts that make up this expression.
-     */
-    public function getParts()
-    {
-        return $this->cronParts;
-    }
-
-    /**
-     * Helper method to output the full expression.
-     *
-     * @return string Full CRON expression
-     */
-    public function __toString(): string
-    {
-        return (string) $this->getExpression();
-    }
-
-    /**
-     * Determine if the cron is due to run based on the current date or a
-     * specific date.  This method assumes that the current number of
-     * seconds are irrelevant, and should be called once per minute.
-     *
-     * @param string|\DateTimeInterface $currentTime Relative calculation date
-     * @param null|string               $timeZone    TimeZone to use instead of the system default
-     *
-     * @return bool Returns TRUE if the cron is due to run or FALSE if not
-     */
-    public function isDue($currentTime = 'now', $timeZone = null): bool
-    {
-        $timeZone = $this->determineTimeZone($currentTime, $timeZone);
-
-        if ('now' === $currentTime) {
-            $currentTime = new DateTime();
-        } elseif ($currentTime instanceof DateTime) {
-            $currentTime = clone $currentTime;
-        } elseif ($currentTime instanceof DateTimeImmutable) {
-            $currentTime = DateTime::createFromFormat('U', $currentTime->format('U'));
-        } elseif (\is_string($currentTime)) {
-            $currentTime = new DateTime($currentTime);
-        }
-
-        if (!$currentTime instanceof DateTime) {
-            throw new InvalidArgumentException('invalid current time');
-        }
-
-        $currentTime->setTimezone(new DateTimeZone($timeZone));
-
-        // drop the seconds to 0
-        $currentTime->setTime((int) $currentTime->format('H'), (int) $currentTime->format('i'), 0);
-
-        try {
-            return $this->getNextRunDate($currentTime, 0, true)->getTimestamp() === $currentTime->getTimestamp();
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Get the next or previous run date of the expression relative to a date.
-     *
-     * @param string|\DateTimeInterface|null $currentTime Relative calculation date
-     * @param int $nth Number of matches to skip before returning
-     * @param bool $invert Set to TRUE to go backwards in time
-     * @param bool $allowCurrentDate Set to TRUE to return the
-     *                               current date if it matches the cron expression
-     * @param string|null $timeZone  TimeZone to use instead of the system default
-     *
-     * @throws \RuntimeException on too many iterations
-     * @throws Exception
-     *
-     * @return \DateTime
-     */
-    protected function getRunDate($currentTime = null, int $nth = 0, bool $invert = false, bool $allowCurrentDate = false, $timeZone = null): DateTime
-    {
-        $timeZone = $this->determineTimeZone($currentTime, $timeZone);
-
-        if ($currentTime instanceof DateTime) {
-            $currentDate = clone $currentTime;
-        } elseif ($currentTime instanceof DateTimeImmutable) {
-            $currentDate = DateTime::createFromFormat('U', $currentTime->format('U'));
-        } elseif (\is_string($currentTime)) {
-            $currentDate = new DateTime($currentTime);
-        } else {
-            $currentDate = new DateTime('now');
-        }
-
-        if (!$currentDate instanceof DateTime) {
-            throw new InvalidArgumentException('invalid current date');
-        }
-
-        $currentDate->setTimezone(new DateTimeZone($timeZone));
-        // Workaround for setTime causing an offset change: https://bugs.php.net/bug.php?id=81074
-        $currentDate = DateTime::createFromFormat("!Y-m-d H:iO", $currentDate->format("Y-m-d H:iP"), $currentDate->getTimezone());
-        if ($currentDate === false) {
-            throw new \RuntimeException('Unable to create date from format');
-        }
-        $currentDate->setTimezone(new DateTimeZone($timeZone));
-
-        $nextRun = clone $currentDate;
-
-        // We don't have to satisfy * or null fields
-        $parts = [];
-        $fields = [];
-        foreach (self::$order as $position) {
-            $part = $this->getExpression($position);
-            if (null === $part || '*' === $part) {
+        foreach ($this->lists as $position => $items) {
+            if ($this->eitherDay && ($position === self::DAY || $position === self::WEEKDAY)) {
                 continue;
             }
-            $parts[$position] = $part;
-            $fields[$position] = $this->fieldFactory->getField($position);
+
+            if (! self::satisfies(self::$fields[$position], $date, $items, false)) {
+                return false;
+            }
         }
 
-        if (isset($parts[self::DAY]) && isset($parts[self::WEEKDAY])) {
-            $domExpression = sprintf('%s %s %s %s *', $this->getExpression(0), $this->getExpression(1), $this->getExpression(2), $this->getExpression(3));
-            $dowExpression = sprintf('%s %s * %s %s', $this->getExpression(0), $this->getExpression(1), $this->getExpression(3), $this->getExpression(4));
+        return ! $this->eitherDay
+            || self::satisfies(self::$fields[self::DAY], $date, $this->lists[self::DAY], false)
+            || self::satisfies(self::$fields[self::WEEKDAY], $date, $this->lists[self::WEEKDAY], false);
+    }
 
-            $domExpression = new self($domExpression);
-            $dowExpression = new self($dowExpression);
-
-            $domRunDates = $domExpression->getMultipleRunDates($nth + 1, $currentTime, $invert, $allowCurrentDate, $timeZone);
-            $dowRunDates = $dowExpression->getMultipleRunDates($nth + 1, $currentTime, $invert, $allowCurrentDate, $timeZone);
-
-            if ($parts[self::DAY] === '?' || $parts[self::DAY] === '*') {
-                $domRunDates = [];
+    /**
+     * Split the parts other than `*` into their items, in the order they are satisfied.
+     *
+     * @return void
+     */
+    private function compile(): void
+    {
+        $this->lists = [];
+        foreach (self::ORDER as $position) {
+            $part = $this->parts[$position];
+            if ($part !== '*') {
+                $this->lists[$position] = str_contains($part, ',') ? array_map('trim', explode(',', $part)) : [$part];
             }
-
-            if ($parts[self::WEEKDAY] === '?' || $parts[self::WEEKDAY] === '*') {
-                $dowRunDates = [];
-            }
-
-            $combined = array_merge($domRunDates, $dowRunDates);
-            usort($combined, function ($a, $b) {
-                return $a->format('Y-m-d H:i:s') <=> $b->format('Y-m-d H:i:s');
-            });
-            if ($invert) {
-                $combined = array_reverse($combined);
-            }
-
-            return $combined[$nth];
         }
 
-        // Set a hard limit to bail on an impossible date
+        $day     = $this->parts[self::DAY];
+        $weekday = $this->parts[self::WEEKDAY];
+
+        $this->eitherDay = $day !== '*' && $day !== '?' && $weekday !== '*' && $weekday !== '?';
+    }
+
+    /**
+     * Check if any item of a part satisfies the date.
+     *
+     * @param AbstractField     $field
+     * @param DateTimeInterface $date
+     * @param string[]          $items
+     * @param bool              $invert
+     * @return bool
+     */
+    private static function satisfies(AbstractField $field, DateTimeInterface $date, array $items, bool $invert): bool
+    {
+        foreach ($items as $item) {
+            if ($field->isSatisfiedBy($date, $item, $invert)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the next or previous run date relative to a date.
+     *
+     * @param DateTimeInterface|string|null $currentTime
+     * @param int                           $nth
+     * @param bool                          $invert
+     * @param bool                          $allowCurrentDate
+     * @param string|null                   $timeZone
+     * @return DateTime
+     * @throws RuntimeException On too many iterations.
+     */
+    private function getRunDate(
+        DateTimeInterface|string|null $currentTime,
+        int $nth,
+        bool $invert,
+        bool $allowCurrentDate,
+        ?string $timeZone
+    ): DateTime
+    {
+        $timeZone = $this->determineTimeZone($currentTime, $timeZone);
+        $zone     = new DateTimeZone($timeZone);
+        $current  = $this->toDateTime($currentTime ?? 'now', $timeZone);
+
+        // drops the seconds without setTime(), which may change the offset: https://bugs.php.net/bug.php?id=81074
+        $current = DateTime::createFromFormat('!Y-m-d H:iO', $current->format('Y-m-d H:iP'), $zone);
+        if ($current === false) {
+            throw new RuntimeException('Unable to create date from format');
+        }
+        $current->setTimezone($zone);
+
+        if ($this->lists === null) {
+            $this->compile();
+        }
+
+        // either day satisfies the expression, so the nearest date of the two searches wins
+        if ($this->eitherDay) {
+            [$minute, $hour, $day, $month, $weekday] = $this->parts;
+
+            $this->monthDays ??= new self("$minute $hour $day $month *");
+            $this->weekDays  ??= new self("$minute $hour * $month $weekday");
+
+            $combined = [
+                ...$this->monthDays->getMultipleRunDates($nth + 1, $currentTime ?? 'now', $invert, $allowCurrentDate, $timeZone),
+                ...$this->weekDays->getMultipleRunDates($nth + 1, $currentTime ?? 'now', $invert, $allowCurrentDate, $timeZone),
+            ];
+
+            usort($combined, $invert ? fn ($a, $b) => $b <=> $a : fn ($a, $b) => $a <=> $b);
+
+            return $combined[$nth] ?? throw new RuntimeException('Impossible CRON expression');
+        }
+
+        $next   = clone $current;
+        $minute = $this->parts[self::MINUTE] === '*' ? null : $this->parts[self::MINUTE];
+
         for ($i = 0; $i < $this->maxIterationCount; ++$i) {
-            foreach ($parts as $position => $part) {
-                $satisfied = false;
-                // Get the field object used to validate this part
-                $field = $fields[$position];
-                // Check if this is singular or a list
-                if (false === strpos($part, ',')) {
-                    $satisfied = $field->isSatisfiedBy($nextRun, $part, $invert);
-                } else {
-                    foreach (array_map('trim', explode(',', $part)) as $listPart) {
-                        if ($field->isSatisfiedBy($nextRun, $listPart, $invert)) {
-                            $satisfied = true;
-
-                            break;
-                        }
-                    }
-                }
-
-                // If the field is not satisfied, then start over
-                if (!$satisfied) {
-                    $field->increment($nextRun, $invert, $part);
+            foreach ($this->lists as $position => $items) {
+                if (! self::satisfies(self::$fields[$position], $next, $items, $invert)) {
+                    self::$fields[$position]->increment($next, $invert, $this->parts[$position]);
 
                     continue 2;
                 }
             }
 
-            // Skip this match if needed
-            if ((!$allowCurrentDate && $nextRun == $currentDate) || --$nth > -1) {
-                $this->fieldFactory->getField(self::MINUTE)->increment($nextRun, $invert, $parts[self::MINUTE] ?? null);
+            if ((! $allowCurrentDate && $next == $current) || --$nth > -1) {
+                self::$fields[self::MINUTE]->increment($next, $invert, $minute);
+
                 continue;
             }
 
-            return $nextRun;
+            return $next;
         }
 
-        // @codeCoverageIgnoreStart
         throw new RuntimeException('Impossible CRON expression');
-        // @codeCoverageIgnoreEnd
     }
 
     /**
-     * Workout what timeZone should be used.
+     * Convert a date to a DateTime in a timezone, never modifying the given object.
      *
-     * @param string|\DateTimeInterface|null $currentTime Relative calculation date
-     * @param string|null $timeZone TimeZone to use instead of the system default
+     * @param DateTimeInterface|string $time
+     * @param string                   $timeZone
+     * @return DateTime
+     */
+    private function toDateTime(DateTimeInterface|string $time, string $timeZone): DateTime
+    {
+        $date = match (true) {
+            $time instanceof DateTime          => clone $time,
+            $time instanceof DateTimeInterface => DateTime::createFromInterface($time),
+            default                            => new DateTime($time),
+        };
+
+        return $date->setTimezone(new DateTimeZone($timeZone));
+    }
+
+    /**
+     * Get the timezone to calculate in: the given one, the date one, or the default one.
      *
+     * @param DateTimeInterface|string|null $currentTime
+     * @param string|null                   $timeZone
      * @return string
      */
-    protected function determineTimeZone($currentTime, ?string $timeZone): string
+    private function determineTimeZone(DateTimeInterface|string|null $currentTime, ?string $timeZone): string
     {
-        if (null !== $timeZone) {
+        if ($timeZone !== null) {
             return $timeZone;
         }
 
-        if ($currentTime instanceof DateTimeInterface) {
-            return $currentTime->getTimezone()->getName();
-        }
-
-        return date_default_timezone_get();
+        return $currentTime instanceof DateTimeInterface ? $currentTime->getTimezone()->getName() : date_default_timezone_get();
     }
 }

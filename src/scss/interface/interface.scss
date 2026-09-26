@@ -957,3 +957,124 @@
   }
 }
 
+.field-groups {
+  display: grid;
+  grid-template-columns: 18rem 1fr;
+  gap: 1.5rem;
+  padding: 1.75rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+
+  &__side {
+    background-color: var(--expansa-bg);
+    border: 1px solid var(--expansa-border);
+    border-radius: var(--expansa-border-radius--lg);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+    overflow: hidden;
+    align-self: start;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--expansa-border);
+
+    h4 {
+      margin: 0;
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: inherit;
+    border-bottom: 1px solid var(--expansa-border);
+
+    &:hover,
+    &.active {
+      background-color: var(--expansa-bg-active);
+    }
+  }
+
+  &__field {
+    border: 1px solid var(--expansa-border);
+    border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  }
+
+  &__add {
+    position: relative;
+  }
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  background-color: var(--expansa-bg-universal);
+  color: var(--expansa-text-muted);
+
+  &--green {
+    background-color: rgba(52, 168, 83, 0.15);
+    color: #1f8b3b;
+  }
+
+  &--muted {
+    background-color: var(--expansa-bg-universal);
+    color: var(--expansa-text-muted);
+  }
+}
+
+.dropdown {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  min-width: 14rem;
+  max-height: 20rem;
+  overflow-y: auto;
+  background-color: var(--expansa-white);
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius--lg);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 0.5rem;
+
+  &-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--expansa-text-muted);
+    padding: 0.5rem 0.5rem 0;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+    color: inherit;
+
+    &:hover {
+      background-color: var(--expansa-bg-active);
+    }
+  }
+}
+

@@ -181,7 +181,7 @@ class Query
                 continue;
             }
 
-            $table = EX_DB_PREFIX . $postTypeTable;
+            $table = EX_DB['prefix'] . $postTypeTable;
             $join = $customFields ? " INNER JOIN `{$table}_fields` ON ($table.id = {$table}_fields.post_id)" : '';
 
             $queries[] = trim("SELECT *, '$postTypeTable' AS type FROM `$table` $join $search");
@@ -406,7 +406,7 @@ class Query
         }
 
         $date        = new \DateTime();
-        $table       = EX_DB_PREFIX . $table;
+        $table       = EX_DB['prefix'] . $table;
         $schema      = Db::schema();
         $relation    = 'OR' === strtoupper($dateQuery['relation'] ?? 'AND') ? 'OR' : 'AND';
         $comparisons = [ '=', '!=', '>', '>=', '<', '<=', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' ];

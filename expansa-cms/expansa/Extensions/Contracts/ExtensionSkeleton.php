@@ -13,7 +13,13 @@ namespace Expansa\Extensions\Contracts;
 interface ExtensionSkeleton
 {
     /**
-     * Launch the plugin.
+     * Declare what the plugin provides (post types, roles, hooks), in the "extensions" lifecycle phase.
+     * Runs for every active extension before any boot().
+     */
+    public function register(): void;
+
+    /**
+     * Launch the plugin, in the "booted" lifecycle phase: every extension is registered and the context is known.
      */
     public function boot(): void;
 

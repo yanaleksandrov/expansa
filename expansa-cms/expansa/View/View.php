@@ -23,11 +23,33 @@ class View
     protected bool $shouldMinify = false;
 
     public function __construct(
+
+        /**
+         * Factory that created the view; rendering goes through $engine.
+         */
         protected readonly Factory $factory,
+
+        /**
+         * Engine chosen by the file extension, cache already configured by the factory.
+         */
         protected readonly Engine $engine,
+
+        /**
+         * View name as requested, e.g. "namespace::view".
+         */
         protected readonly string $name,
+
+        /**
+         * Path to the resolved template file.
+         */
         protected readonly string $path,
-        protected array $data
+
+        /**
+         * Template variables, merged over the factory's shared data.
+         *
+         * @var array<string, mixed>
+         */
+        protected array $data,
     ) {} // phpcs:ignore
 
     public function render(): string

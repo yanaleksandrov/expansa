@@ -34,8 +34,8 @@ return Expansa\Facades\Form::enqueue(
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
-						'u-prop' => 'title',
 						'placeholder' => '',
+						'u-prop'      => 'title',
 						'required'    => true,
 					],
 				],
@@ -72,27 +72,27 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'number',
 					'name'        => 'limits',
-					'label'       => t( 'Requests limits' ),
+					'label'       => t( 'Request limit' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => t( 'Max request limits for this API key' ),
+					'instruction' => t( 'Maximum number of requests for this API key' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'limits',
-						'value' => 10,
-						'min'   => 1,
+						'value'  => 10,
+						'min'    => 1,
 					],
 				],
 				[
 					'type'        => 'select',
 					'name'        => 'period',
-					'label'       => t( 'Limits period' ),
+					'label'       => t( 'Limit period' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -105,7 +105,7 @@ return Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop' => 'period',
-						'value' => '',
+						'value'  => '',
 					],
 					'options'     => [
 						'second' => t( 'per second' ),
@@ -140,7 +140,9 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [ 'u-prop' => 'startDate' ],
+					'attributes'  => [
+						'u-prop' => 'startDate',
+					],
 				],
 				[
 					'type'        => 'date',
@@ -156,7 +158,9 @@ return Expansa\Facades\Form::enqueue(
 					'copy'        => 0,
 					'validator'   => '',
 					'conditions'  => [],
-					'attributes'  => [ 'u-prop' => 'endDate' ],
+					'attributes'  => [
+						'u-prop' => 'endDate',
+					],
 				],
 			],
 		],
@@ -169,7 +173,7 @@ return Expansa\Facades\Form::enqueue(
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Site domain from which it is allowed to accept requests. Empty, so everyone is allowed.' ),
+			'instruction' => t( 'Domains allowed to send requests. Leave empty to allow requests from anywhere.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -188,7 +192,7 @@ return Expansa\Facades\Form::enqueue(
 				<div class="df jcsb g-2">
 					<button type="button" class="btn btn--outline" @click="$dialog.close()"><?php echo t( 'Cancel' ); ?></button>
 					<button type="submit" class="btn btn--primary" disabled :disabled="title === ''">
-						<i class="ph ph-plug"></i> <?php echo t( 'Save project' ); ?>
+						<i class="ph ph-plug"></i> <?php echo t( 'Save key' ); ?>
 					</button>
 				</div>
 				<?php

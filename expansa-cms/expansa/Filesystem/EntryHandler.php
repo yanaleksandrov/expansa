@@ -5,16 +5,12 @@ declare(strict_types=1);
 namespace Expansa\Filesystem;
 
 use Expansa\Filesystem\Traits\Entry;
+use Expansa\Support\Url;
 
 class EntryHandler
 {
     use Entry;
 
-    /**
-     * Trait that provides file-related properties.
-     *
-     * @param string $path
-     */
     public function __construct(string $path)
     {
         $this->path   = rtrim($path, '/');
@@ -110,7 +106,7 @@ class EntryHandler
      */
     protected function getUrl(): string
     {
-        return url(str_replace(EX_PATH, '', $this->path));
+        return Url::toUrl($this->path);
     }
 
     /**
@@ -134,17 +130,7 @@ class EntryHandler
      */
     protected function getSize(): int
     {
-        if (is_dir($this->path)) {
-            $size  = 0;
-            $files = $this->files('*', 9999);
-
-            foreach ($files as $file) {
-                $size += filesize($file);
-            }
-
-            return $size;
-        }
-        return filesize($this->path) ?? 0;
+        return is_file($this->path) ? (int) filesize($this->path) : 0;
     }
 
     /**

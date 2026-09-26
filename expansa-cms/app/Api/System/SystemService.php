@@ -6,16 +6,16 @@ namespace App\Api\System;
 
 use App\Models\Options;
 use App\Models\User;
+use App\Support\Installation;
+use App\Support\Requirements;
 use Expansa\Database\Query\Builder;
 use Expansa\Facades\Db;
-use Expansa\Facades\Disk;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
 use Expansa\Http\Exceptions\HttpException;
 use Expansa\Http\Exceptions\ValidationException;
 use Expansa\Support\Arr;
-use Expansa\Support\Is;
 
 /**
  * Business logic for the installer, moved out of the controller. Talks to
@@ -40,10 +40,10 @@ final class SystemService
             'password' => 'trim',
             'host'     => 'trim',
             'prefix'   => 'trim',
-            'driver'   => 'trim:' . EX_DB_DRIVER,
-            'charset'  => 'trim:' . EX_DB_CHARSET,
-            'port'     => 'trim:' . EX_DB_PORT,
-            'error'    => 'trim:' . EX_DB_ERROR_MODE,
+            'driver'   => 'trim:' . EX_DB['driver'],
+            'charset'  => 'trim:' . EX_DB['charset'],
+            'port'     => 'trim:' . EX_DB['port'],
+            'error'    => 'trim:' . EX_DB['error'],
         ])->apply();
 
         try {
@@ -53,11 +53,11 @@ final class SystemService
         }
 
         $connected = $connection instanceof Builder;
-        $mysql     = $connected && version_compare($connection->version(), EX_REQUIRED_MYSQL_VERSION, '>=');
+        $mysql     = $connected && Requirements::database($connection->version());
 
         $compat = array_map(
             fn($requirement) => match ($requirement) {
-                'php'        => version_compare(phpversion(), EX_REQUIRED_PHP_VERSION, '>='),
+                'php'        => Requirements::php(),
                 'memory'     => intval(ini_get('memory_limit')) >= EX_REQUIRED_MEMORY,
                 'mysql'      => $mysql,
                 'connection' => $connected,
@@ -81,7 +81,7 @@ final class SystemService
      */
     public function install(array $input): array
     {
-        if (Is::installed()) {
+        if (Installation::isComplete()) {
             throw new HttpException(409, t('Expansa is already installed.'));
         }
 
@@ -107,39 +107,52 @@ final class SystemService
             'db.prefix'        => 'snakecase',
         ])->values();
 
-        // The connection check should have already passed by this point (see checkRequirements());
-        // here we just persist it and connect to it.
-        $config = EX_PATH . 'env.php';
-        if (!is_file($config)) {
-            $env = Disk::file(EX_PATH . 'env.example.php')->copy('env');
-            if ($env->errors) {
-                throw new ValidationException(t('Unable to write the environment configuration file.'), $env->errors);
+        // env.php marks the installation as complete, so it appears only after every step succeeded
+        $draft = Installation::draft(
+            array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database) + [
+                'auth.key'  => bin2hex(random_bytes(32)),
+                'nonce.key' => bin2hex(random_bytes(32)),
+                'hash.key'  => bin2hex(random_bytes(32)),
+            ]
+        );
+
+        try {
+            // the rest of the installation reads the new constants, e.g. EX_DB
+            require_once $draft;
+
+            Db::configure(...EX_DB);
+
+            Hook::call('createMainDatabaseTables');
+
+            Db::updateSchema();
+
+            // The constructor calls fill() internally, which routes through setAttribute() -
+            // required so the password attribute's set-mutator actually hashes it before it's
+            // saved (unlike make(), which bypasses that entirely for already-trusted data).
+            $user = new User($userdata);
+
+            if (!$user->isValid()) {
+                throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());
             }
 
-            Disk::file(EX_PATH . 'env.php')->rewrite(
-                array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database)
-            );
+            $user->save();
+
+            Options::update('site', $site + ['owner' => ['email' => $user->email]]);
+
+            Installation::complete($draft);
+        } catch (\Throwable $e) {
+            Installation::discard($draft);
+
+            // a retry would otherwise fail on the owner's login and email being taken
+            if (isset($user->id)) {
+                try {
+                    Db::delete($user->getTable(), ['id' => $user->id]);
+                } catch (\Throwable) {
+                }
+            }
+
+            throw $e;
         }
-
-        require_once $config;
-
-        Hook::configure(EX_PATH . 'app/Listeners');
-        Hook::call('createMainDatabaseTables');
-
-        Db::updateSchema();
-
-        // The constructor calls fill() internally, which routes through setAttribute() -
-        // required so the password attribute's set-mutator actually hashes it before it's
-        // saved (unlike make(), which bypasses that entirely for already-trusted data).
-        $user = new User($userdata);
-
-        if (!$user->isValid()) {
-            throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());
-        }
-
-        $user->save();
-
-        Options::update('site', $site + ['owner' => ['email' => $user->email]]);
 
         User::login($userdata);
 

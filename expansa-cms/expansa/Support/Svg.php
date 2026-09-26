@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
+use DOMDocument;
+
 /**
  * Usage:
  * $svg = new Svg();
- * $svg->addSprite( EX_DASHBOARD . 'assets/images/', EX_DASHBOARD . 'assets/' ); // create sprite.
+ * $svg->addSprite( $imagesDir, $spriteDir ); // create sprite.
  *
  * Svg::sprite( 'logo' ); // output symbol
  */
@@ -628,7 +630,7 @@ class Svg
             return '';
         }
 
-        $url = str_replace(EX_PATH, url(), self::$source) . "#{$id}";
+        $url = Url::toUrl(self::$source) . "#{$id}";
 
         ob_start();
         ?>

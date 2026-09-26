@@ -4,39 +4,36 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Builders\Forms\Field;
-
-class Header extends Field
+/**
+ * Renders `form/header.blade.php` - a section heading with an optional description.
+ */
+class Header extends AbstractField
 {
     public function __construct()
     {
-        $this->type        = 'input';
-        $this->label       = t('Text');
-        $this->category    = 'basic';
-        $this->icon        = 'ph ph-text-t';
-        $this->description = t('A basic text input, useful for storing single string values.');
-        $this->preview     = '';
-        $this->view        = view('install')->render();
-        $this->defaults    = [];
+        parent::__construct(
+            type: 'header',
+            label: t('Heading'),
+            category: 'layout',
+            icon: 'ph ph-text-h',
+            description: t('A section heading with an optional description, used to visually group fields.'),
+            defaults: [
+                'label'       => '',
+                'instruction' => '',
+            ],
+        );
     }
 
-    public function assets()
+    public function settings(): array
     {
-
+        return [
+            ['type' => 'text', 'name' => 'label', 'label' => t('Heading'), 'attributes' => ['required' => true]],
+            ['type' => 'text', 'name' => 'instruction', 'label' => t('Description')],
+        ];
     }
 
-    public function render()
+    public function validate(array $field = []): array
     {
-
-    }
-
-    public function settings()
-    {
-
-    }
-
-    public function validate()
-    {
-
+        return [];
     }
 }

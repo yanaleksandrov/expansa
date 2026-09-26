@@ -17,3 +17,11 @@ vendor/
 .DS_Store    # macOS
 Thumbs.db    # Windows
 /expansa-cms/env.php
+/expansa-cms/env.install.php
+
+# Generated cache
+/expansa-cms/cache/*
+!/expansa-cms/cache/index.php
+
+# Logs
+/expansa-cms/storage/logs/*.log

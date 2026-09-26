@@ -45,7 +45,7 @@ class Roles
 
         if (is_string($capabilities)) {
             if (! isset(self::$roles[$capabilities])) {
-                throw new InvalidArgumentException(t('You are trying to copy capabilities from a non exists role.'));
+                throw new InvalidArgumentException(t('Cannot copy capabilities from a role that does not exist.'));
             }
             $capabilities = self::$roles[$capabilities]['capabilities'];
         }
@@ -97,7 +97,7 @@ class Roles
     public static function set(string $role, string|array $capability): bool
     {
         if (! isset(self::$roles[$role])) {
-            throw new InvalidArgumentException(t('You are trying set capability for non exists role.'));
+            throw new InvalidArgumentException(t('Cannot set a capability for a role that does not exist.'));
         }
 
         self::$roles[$role]['capabilities'] = array_values(array_unique([
@@ -118,7 +118,7 @@ class Roles
     public static function unset(string $role, string $capability): bool
     {
         if (! isset(self::$roles[$role])) {
-            throw new InvalidArgumentException(t('You are trying unset capability for non exists role.'));
+            throw new InvalidArgumentException(t('Cannot unset a capability for a role that does not exist.'));
         }
 
         self::$roles[$role]['capabilities'] = array_values(

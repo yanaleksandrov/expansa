@@ -5,70 +5,64 @@ declare(strict_types=1);
 namespace Expansa\Codecs;
 
 /**
- * Class JSON.
+ * Encodes and decodes JSON. Errors never throw: encode() returns '' and decode() returns null.
  *
- * Provides methods for encoding and decoding JSON data.
- * This class is intended for handling JSON serialization and deserialization
- * with options for customization, such as pretty printing and handling
- * character encoding. It ensures that JSON data is processed correctly
- * while providing meaningful error handling.
- *
- * @package Expansa\Codec
+ * @package Expansa\Codecs
  */
 class Json
 {
-	/**
-	 * Converts value to JSON format.
-	 *
-	 * @param mixed $value
-	 * @param bool $ascii        For ASCII output and $html_safe for HTML escaping.
-	 * @param bool $pretty       For easier reading and clarity.
-	 * @param bool $forceObjects Enforces the encoding of non-associative arrays as objects.
-	 * @return string
-	 */
-	public function encode( mixed $value, bool $ascii = false, bool $pretty = false, bool $forceObjects = false ): string {
-		$flags = JSON_UNESCAPED_SLASHES                  // do not escape slashes by default
-			| ( $ascii ? 0 : JSON_UNESCAPED_UNICODE )    // keep unicode unescaped if $ascii = false
-			| ( $pretty ? JSON_PRETTY_PRINT : 0 )        // pretty print
-			| ( $forceObjects ? JSON_FORCE_OBJECT : 0 ); // convert arrays to objects if specified
+    /**
+     * Invalid UTF-8 is replaced with U+FFFD instead of failing the whole value.
+     */
+    private const int ENCODE_FLAGS = JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
 
-		$json = json_encode($value, $flags);
+    private const int DECODE_FLAGS = JSON_BIGINT_AS_STRING;
 
-		// check for encoding errors
-		if (json_last_error() !== JSON_ERROR_NONE) {
-			return '';
-		}
+    /**
+     * Converts a value to JSON; returns '' if the value cannot be encoded (e.g. NAN or a resource).
+     *
+     * @param mixed $value
+     * @param bool  $ascii        Escape non-ASCII characters as \uXXXX.
+     * @param bool  $pretty       Indent the output.
+     * @param bool  $forceObjects Encode lists as objects.
+     * @return string
+     */
+    public function encode(mixed $value, bool $ascii = false, bool $pretty = false, bool $forceObjects = false): string
+    {
+        $flags = self::ENCODE_FLAGS
+            | ($ascii ? 0 : JSON_UNESCAPED_UNICODE)
+            | ($pretty ? JSON_PRETTY_PRINT : 0)
+            | ($forceObjects ? JSON_FORCE_OBJECT : 0);
 
-		return $json;
-	}
+        $json = json_encode($value, $flags);
 
-	/**
-	 * Parses JSON to PHP value.
-	 *
-	 * @param string $json
-	 * @param bool $forceArrays Enforces the decoding of objects as arrays.
-	 * @return mixed
-	 */
-	public function decode( string $json, bool $forceArrays = false ): mixed {
-		$flags  = $forceArrays ? JSON_OBJECT_AS_ARRAY : 0;
-		$flags |= JSON_BIGINT_AS_STRING;
+        return $json === false ? '' : $json;
+    }
 
-		$value = json_decode($json, flags: $flags);
+    /**
+     * Parses JSON into a PHP value; returns null on invalid JSON.
+     * Integers beyond PHP_INT_MAX are returned as strings.
+     *
+     * @param string $json
+     * @param bool   $forceArrays Decode objects as associative arrays.
+     * @return mixed
+     */
+    public function decode(string $json, bool $forceArrays = false): mixed
+    {
+        // json_last_error() instead of JSON_THROW_ON_ERROR: exceptions double the cost of invalid input
+        $value = json_decode($json, $forceArrays, 512, self::DECODE_FLAGS);
 
-		// check for decoding errors
-		if (json_last_error() !== JSON_ERROR_NONE) {
-			return null;
-		}
-		return $value;
-	}
+        return json_last_error() === JSON_ERROR_NONE ? $value : null;
+    }
 
-	/**
-	 * Check that incoming data is valid json.
-	 *
-	 * @param mixed $data
-	 * @return bool
-	 */
-	public function isValid(mixed $data): bool {
-		return json_validate($data);
-	}
+    /**
+     * Checks that the value is a string with valid JSON.
+     *
+     * @param mixed $data
+     * @return bool
+     */
+    public function isValid(mixed $data): bool
+    {
+        return is_string($data) && json_validate($data);
+    }
 }

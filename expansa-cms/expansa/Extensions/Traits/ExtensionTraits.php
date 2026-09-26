@@ -106,5 +106,5 @@ trait ExtensionTraits
      *
      * @var string
      */
-    public string $minVersionExpansa = EX_VERSION;
+    public string $minVersionExpansa = '';
 }

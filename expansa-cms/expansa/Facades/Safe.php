@@ -19,7 +19,7 @@ use Expansa\Security\Sanitizer;
  * @method static string exist(mixed $value, ?string $comparisonValue)
  * @method static string json(mixed $value)
  * @method static string datetime(mixed $value)
- * @method static string markup(mixed $value)
+ * @method static string markup(mixed $value, array $allowedHtml = [])
  * @method static string html(mixed $value)
  * @method static string attribute(mixed $value)
  * @method static string attributes(mixed $value)
@@ -62,6 +62,6 @@ class Safe extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Security\Sanitizer';
+        return \Expansa\Security\Sanitizer::class;
     }
 }

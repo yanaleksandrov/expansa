@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Builders\Form;
 
 /**
  * Attributes list
@@ -24,7 +23,7 @@ use Expansa\Builders\Form;
                 <div class="attributes-description">
                     <p><?php echo t('Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.'); ?></p>
                 </div>
-                <?php Form::make(EX_PLUGINS . 'ecommerce/core/attributes.php', true); ?>
+                <?php echo form('attribute-editor', EX_PLUGINS . 'ecommerce/core/attributes.php'); ?>
             </div>
             <div class="attributes-side">
                 <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
@@ -48,7 +47,7 @@ use Expansa\Builders\Form;
                             'conditions'  => [],
                             'attributes'  => [
                                 'name'                 => 'value',
-                                'placeholder'          => t('Add attribute value and press Enter'),
+                                'placeholder'          => t('Type a value and press Enter'),
                                 '@keyup.enter.prevent' => '$el.value.trim() && values.push({title: $el.value.trim(), slug: $safe.slug($el.value)}), $el.value = "", values.sort((a, b) => a.title.localeCompare(b.title))',
                             ],
                         ],
@@ -75,8 +74,8 @@ use Expansa\Builders\Form;
                                 [
                                     'icon'        => 'empty-pack',
                                     'class'       => 'dg jic m-auto t-center p-8 mw-320',
-                                    'title'       => t('Values not found'),
-                                    'description' => t('Try to add new attribute value, there will be results here'),
+                                    'title'       => t('No values found'),
+                                    'description' => t('Add a value and it will appear here'),
                                 ]
                             );
                             ?>

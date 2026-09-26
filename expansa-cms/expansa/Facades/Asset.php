@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
+use Closure;
 use Expansa\Patterns\Facade;
 
 /**
@@ -18,7 +19,7 @@ use Expansa\Patterns\Facade;
  * @method static void  dequeue(string $uid, ?string $provider = null)
  * @method static void  discover(string $file, ?string $uid = null, array $context = [])
  * @method static void  provider(string $extension, string $providerClass)
- * @method static void  configure(\Closure $resolver)
+ * @method static void  configure(Closure $resolver)
  * @method static void  render(array $filter = [], bool $combine = false, bool $minify = false, bool $inline = false)
  * @method static array get(string $uid = '')
  * @method static int   clean(int $maxAge = 604800, ?int $maxBytes = null)
@@ -27,6 +28,6 @@ class Asset extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return '\Expansa\Assets\Manager';
+        return \Expansa\Assets\Manager::class;
     }
 }

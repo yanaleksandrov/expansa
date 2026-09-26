@@ -9,46 +9,103 @@ use Expansa\Assets\Abstracts\Provider;
 class Link extends Provider
 {
     /**
-     * Constructor for the link asset, defining various attributes of the link tag.
-     *
-     * @param string $uid            Unique ID attribute of the asset.
-     * @param string $href           URL or path to the linked resource.
-     * @param array  $data           Additional data for the asset.
-     * @param string $class          CSS class name for the link tag.
-     * @param string $media          Media attribute specifying the media type for the asset.
-     * @param string $rel            Relationship between the current document and the linked resource.
-     * @param string $sizes          Sizes of the icons for visual media, used with rel="icon".
-     * @param string $type           MIME type of the linked resource (default is 'css').
-     * @param string $hreflang       Language of the linked resource.
-     * @param string $as             Type of resource being linked (e.g., script, style, font).
-     * @param string $crossorigin    Indicates how the resource should be fetched across origins.
-     * @param string $integrity      Security feature providing a hash-based integrity check.
-     * @param string $title          Alternative title for the resource.
-     * @param string $disabled       Disables the link if present (primarily for stylesheets).
-     * @param string $referrerpolicy Specifies the referrer information to be included with the request.
-     * @param string $path           Computed path to the linked resource.
-     * @param array  $dependencies   uid's (or full ids) of assets that must be output before this one.
-     * @param bool   $toFooter       Output before close body tag.
+     * Computes `path` from `href`; `data` entries override matching properties except `id`.
      */
     public function __construct(
+
+        /**
+         * Unique ID attribute of the asset.
+         */
         public string $uid,
+
+        /**
+         * URL or path to the linked resource.
+         */
         public string $href,
+
+        /**
+         * Additional data for the asset.
+         */
         public array $data = [],
+
+        /**
+         * CSS class name for the link tag.
+         */
         public string $class = '',
+
+        /**
+         * Media attribute specifying the media type for the asset.
+         */
         public string $media = '',
+
+        /**
+         * Relationship between the current document and the linked resource.
+         */
         public string $rel = 'stylesheet',
+
+        /**
+         * MIME type of the linked resource.
+         */
         public string $type = 'text/css',
+
+        /**
+         * Sizes of the icons for visual media, used with rel="icon".
+         */
         public string $sizes = '',
+
+        /**
+         * Language of the linked resource.
+         */
         public string $hreflang = '',
+
+        /**
+         * Type of resource being linked (e.g., script, style, font).
+         */
         public string $as = '',
+
+        /**
+         * Indicates how the resource should be fetched across origins.
+         */
         public string $crossorigin = '',
+
+        /**
+         * Security feature providing a hash-based integrity check.
+         */
         public string $integrity = '',
+
+        /**
+         * Alternative title for the resource.
+         */
         public string $title = '',
+
+        /**
+         * Disables the link if present (primarily for stylesheets).
+         */
         public string $disabled = '',
+
+        /**
+         * Specifies the referrer information to be included with the request.
+         */
         public string $referrerpolicy = '',
+
+        /**
+         * Computed path to the linked resource.
+         */
         public string $path = '',
+
+        /**
+         * Asset version; not added to the URL (cached copies use content-hashed names) and ignored when checking if the asset can be bundled.
+         */
         public string $version = '',
+
+        /**
+         * uid's (or full ids) of assets that must be output before this one.
+         */
         public array $dependencies = [],
+
+        /**
+         * Output before close body tag.
+         */
         public bool $toFooter = false,
     )
     {
