@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Expansa\Security\Xss\Kses;
 
-// run: php tests/benchmarks/Kses.php [--baseline=<git ref or file>] [--iterations=N]
+// run: php tests/benchmarks/Kses.php [--baseline=<git ref or file>] [--iterations=N], the original kses is 4492a8a
 // the baseline, Kses of a commit or a file, is loaded as KsesBaseline and measured on the same input
 const EX_PATH = __DIR__ . '/../../expansa-cms/';
 
@@ -63,11 +63,16 @@ function measure(callable $callback, int $iterations): float
     return (hrtime(true) - $start) / $iterations / 1000;
 }
 
-// the baseline gets the current rules, so only the speed of the algorithm is compared
+// the original kses gets the current rules, so only the speed of the algorithm is compared;
+// a rewritten baseline has its own read-only rules
 $rules    = new Kses()->allowedHtml;
-$baseline = function () use ($rules) {
+$property = new ReflectionProperty(Expansa\Security\Xss\KsesBaseline::class, 'allowedHtml');
+$settable = $property->isPublic() && ! $property->isReadOnly() && ! $property->isPrivateSet() && ! $property->hasHooks();
+$baseline = function () use ($rules, $settable) {
     $kses = new Expansa\Security\Xss\KsesBaseline();
-    $kses->allowedHtml = $rules;
+    if ($settable) {
+        $kses->allowedHtml = $rules;
+    }
 
     return $kses;
 };
@@ -78,13 +83,8 @@ $new = fn (string $html) => new Kses()->apply($html);
 $title      = $inputs['short title'];
 $markupWarm = measure(fn () => Expansa\Security\Sanitizer::markup($title), $iterations * 10);
 
-// cold: the cache of the default rules can not be emptied, so it is filled up with other tags and nothing new gets cached
-for ($i = 0; $i < 1100; $i++) {
-    new Kses()->apply("<b title=\"filler $i\">");
-}
-
-// warm: the protocols in another order make other rules for the cache, so this filter has its own empty part of it
-$warm = new Kses(Kses::ALLOWED_HTML, array_reverse(Kses::ALLOWED_PROTOCOLS));
+// cold: a new filter per call has an empty cache; warm: one filter filters the same text again
+$warm = new Kses();
 
 printf("%-16s %12s %12s %12s %8s %8s %s\n", 'input', "$ref, µs", 'cold, µs', 'warm, µs', 'cold', 'warm', 'same output');
 foreach ($inputs as $name => $html) {

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Security\Xss;
 
 use InvalidArgumentException;
+use LogicException;
 
 /**
  * HTML filter: keeps only allowed elements, attributes and URL protocols, disarms everything else.
@@ -185,7 +186,18 @@ final class Kses
      * Well-formed attributes in a row: `name="value"`, `name='value'`, `name=value` or a valueless `name`,
      * the same pieces combineAttributes() parses step by step.
      */
-    private const string ATTRIBUTES = '/\G([-a-zA-Z]++)(?:\s*+=\s*+(?:"([^"]*+)"|\'([^\']*+)\'|([^\s"\']++))(?:\s++|$)|\s++(?!=)|$)/';
+    private const string ATTRIBUTES = '/\G(' . self::NAME . '++)'
+        . '(?:\s*+=\s*+(?:"([^"]*+)"|\'([^\']*+)\'|([^\s"\']++))(?:\s++|$)|\s++(?!=)|$)/';
+
+    /**
+     * Characters of an attribute name: letters and `-`, also `:`, `@` and `.` of framework directives like `v-on:click`.
+     */
+    private const string NAME = '[-a-zA-Z:@.]';
+
+    /**
+     * An attribute name at the current offset.
+     */
+    private const string ATTRIBUTE_NAME = '/\G' . self::NAME . '+/';
 
     /**
      * An attribute value: double-quoted, single quoted or unquoted, followed by whitespace or the end.
@@ -208,7 +220,7 @@ final class Kses
     private const int CACHE_KEY_LENGTH = 256;
 
     /**
-     * Max number of cached markup pieces per set of rules.
+     * Max number of cached markup pieces per filter.
      */
     private const int CACHE_SIZE = 1024;
 
@@ -218,54 +230,50 @@ final class Kses
     private const string PROTOCOL = '/^((&[^;]*;|[\sA-Za-z0-9])*)(:|&#0*58;|&#[Xx]0*3[Aa];|&colon;)\s*/';
 
     /**
-     * Allowed elements with their attributes, keyed by the lower case element name,
-     * the attributes of `*` already added to every element. Never changes, the tag cache relies on it.
-     */
-    public readonly array $allowedHtml;
-
-    /**
      * Rules of attribute prefixes by element, e.g. `data-` for `data-*`.
      */
-    private readonly array $prefixes;
+    private array $prefixes = [];
 
     /**
-     * Key of the rules in the cache of filterMarkup(): empty for the default rules, a hash of the custom ones.
+     * Filtered markup pieces by their source, valid because the rules of a filter never change.
      */
-    private readonly string $rules;
+    private array $cache = [];
 
     /**
      * Create a filter.
      *
-     * @param array    $allowedHtml      Elements and attributes, see ALLOWED_HTML.
+     * @param array    $allowedHtml      Elements and attributes, see ALLOWED_HTML; stored compiled: keyed by the lower case
+     *                                    element name, with the attributes of `*` added to every element. Set only once.
      * @param string[] $allowedProtocols Lower case protocols, see ALLOWED_PROTOCOLS; stored as keys for isset() lookups.
      */
     public function __construct(
-        array $allowedHtml = self::ALLOWED_HTML,
+        public private(set) array $allowedHtml = self::ALLOWED_HTML {
+            set {
+                // the tag cache relies on rules that never change
+                if (isset($this->allowedHtml)) {
+                    throw new LogicException('The rules of a filter can not be changed, create another filter.');
+                }
+
+                // the default rules are compiled once per process, they are the same for every filter
+                static $defaults = self::compile(self::ALLOWED_HTML);
+
+                [$this->allowedHtml, $this->prefixes] = $value === self::ALLOWED_HTML ? $defaults : self::compile($value);
+            }
+        },
         private array $allowedProtocols = self::ALLOWED_PROTOCOLS {
             set => array_fill_keys($value, true);
         },
-    )
-    {
-        // the default rules are compiled once per process, they are the same for every filter
-        static $defaults = self::compile(self::ALLOWED_HTML);
-
-        [$this->allowedHtml, $this->prefixes] = $allowedHtml === self::ALLOWED_HTML ? $defaults : self::compile($allowedHtml);
-
-        // filters with the same rules share the results, others never see them
-        $this->rules = $allowedHtml === self::ALLOWED_HTML && $allowedProtocols === self::ALLOWED_PROTOCOLS
-            ? ''
-            : md5(serialize([$allowedHtml, $allowedProtocols]));
-    }
+    ) {} // phpcs:ignore
 
     /**
-     * Get the default rules with more elements and attributes, e.g. directives of a trusted page.
+     * Get rules with more elements and attributes, e.g. directives of a trusted page.
      *
-     * @param array $allowedHtml Elements and attributes added to ALLOWED_HTML, see ALLOWED_HTML.
+     * @param array $allowedHtml Elements and attributes to add, see ALLOWED_HTML.
+     * @param array $rules       Rules to extend, the default ones by default.
      * @return array
      */
-    public static function extend(array $allowedHtml): array
+    public static function extend(array $allowedHtml, array $rules = self::ALLOWED_HTML): array
     {
-        $rules = self::ALLOWED_HTML;
         foreach ($allowedHtml as $element => $attributes) {
             $rules[$element] = [...$rules[$element] ?? [], ...$attributes];
         }
@@ -367,26 +375,23 @@ final class Kses
     }
 
     /**
-     * Filter one piece of markup, reusing the result for a piece seen before by a filter with the same rules.
+     * Filter one piece of markup, reusing the result for a piece this filter has seen before.
      *
      * @param array $match
      * @return string
      */
     private function filterMarkup(array $match): string
     {
-        // shared by all filters of the process, so it is split by the rules
-        static $cache = [];
-
         $markup = $match[0];
 
-        if (isset($cache[$this->rules][$markup])) {
-            return $cache[$this->rules][$markup];
+        if (isset($this->cache[$markup])) {
+            return $this->cache[$markup];
         }
 
         $result = $this->stripTags($markup);
 
-        if (strlen($markup) <= self::CACHE_KEY_LENGTH && count($cache[$this->rules] ?? []) < self::CACHE_SIZE) {
-            $cache[$this->rules][$markup] = $result;
+        if (strlen($markup) <= self::CACHE_KEY_LENGTH && count($this->cache) < self::CACHE_SIZE) {
+            $this->cache[$markup] = $result;
         }
 
         return $result;
@@ -509,7 +514,7 @@ final class Kses
                     continue;
                 }
 
-                if (preg_match('/\G[-a-zA-Z]+/', $attr, $match, 0, $offset)) {
+                if (preg_match(self::ATTRIBUTE_NAME, $attr, $match, 0, $offset)) {
                     $matched = true;
                     $mode    = 1;
                     $name    = strtolower($match[0]);

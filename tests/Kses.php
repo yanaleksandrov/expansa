@@ -223,6 +223,13 @@ check('a bare prefix is not an attribute', $kses->apply('<b data- aria-=1 data-x
 check('prefixes do not allow event handlers or directives', $kses->apply('<b onclick="x" data-onclick="y" u-text="z" style="w">x</b>') === '<b data-onclick="y">x</b>');
 check('the protocol check applies to data-* values', $kses->apply('<b data-url="javascript:alert(1)">x</b>') === '<b data-url="alert(1)">x</b>');
 
+// framework directives: names with ":", "@" and "."
+check('directives with ":", "@" and "." are removed by default', $kses->apply('<b v-on:click="x()" :href="y" @click="z" .prop="w" v-if="ok">b</b>') === '<b>b</b>');
+$vue = new Kses(Kses::extend(['*' => ['v-*', ':*', '@*']]));
+check('Vue directives pass once their prefixes are allowed', $vue->apply('<b v-on:click.prevent="x()" :href="y" @click="z" v-if="ok" onclick="w">b</b>')
+    === '<b v-on:click.prevent="x()" :href="y" @click="z" v-if="ok">b</b>');
+check('a bare ":" or "@" is not an attribute', $vue->apply('<b : @ :x="1">b</b>') === '<b :x="1">b</b>');
+
 // new elements and attributes
 check('HTML5 sections, details and time', $kses->apply('<article><header><h2>T</h2></header><details open><summary>S</summary>D</details><time datetime="2025-01-31">today</time></article>')
     === '<article><header><h2>T</h2></header><details open><summary>S</summary>D</details><time datetime="2025-01-31">today</time></article>');
@@ -251,6 +258,16 @@ $extended = Kses::extend(['select' => ['u-select' => 1], 'x-box' => ['id' => 1]]
 check('extend() adds attributes and elements to the default rules', $extended['select'] === ['u-select' => 1] && $extended['x-box'] === ['id' => 1] && $extended['p'] === [] && isset($extended['*']));
 check('extra rules of markup() are added to the default ones', Sanitizer::markup('<select u-select="{}" class="a" onchange="x"><option>1</option></select>', ['select' => ['u-select' => 1]])
     === '<select u-select="{}" class="a"><option>1</option></select>');
+$filter  = new Kses();
+$rewrite = Closure::bind(fn () => $this->allowedHtml = ['script' => []], $filter, Kses::class);
+try {
+    $rewrite();
+    $locked = false;
+} catch (LogicException) {
+    $locked = true;
+}
+check('rules can not be changed after the filter is created, even from inside', $locked && count($filter->allowedHtml) === count(Kses::ALLOWED_HTML) - 1);
+
 $directive = '<select u-select="fetch(2)">';
 check('the shared cache never gives the result of other rules', new Kses(Kses::extend(['select' => ['u-select']]))->apply($directive) === $directive
     && new Kses()->apply($directive) === '<select>'
