@@ -26,8 +26,8 @@ public function export(Request $request): Response
 | `Request`                        | Значения суперглобальных массивов и то, что из них следует         |
 | `Response`                       | Статус, заголовки, cookie и тело; `send()` отправляет              |
 | `Redirect`                       | Заголовок `Location` с фильтрами из `configure()`                  |
-| `Exceptions\HttpException`       | Ошибка со статусом и заголовками, `Kernel` превращает её в ответ    |
-| `Exceptions\ValidationException` | Ошибка 422 со списком ошибок полей                                 |
+| `Exceptions\HttpError`           | Ошибка со статусом и заголовками, `Kernel` превращает её в ответ    |
+| `Exceptions\ValidationFailed`    | Ошибка 422 со списком ошибок полей                                 |
 
 ## Конфигурация
 
@@ -112,10 +112,10 @@ Expansa\Http\Redirect::send('https://example.com', 301);
 
 ## Ошибки
 
-`HttpException` и наследники превращаются `Kernel` в JSON-ответ `{ "message": ... }` со своим статусом;
-`ValidationException` добавляет `errors`.
+`HttpError` и наследники превращаются `Kernel` в JSON-ответ `{ "message": ... }` со своим статусом;
+`ValidationFailed` добавляет `errors`.
 
 ```php
-throw new HttpException(409, t('Expansa is already installed.'));
-throw new ValidationException(t('Check the form'), ['email' => [t('Required')]]);
+throw new HttpError(409, t('Expansa is already installed.'));
+throw new ValidationFailed(t('Check the form'), ['email' => [t('Required')]]);
 ```

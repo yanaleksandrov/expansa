@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Cookie;
 
-use Expansa\Cookie\Exceptions\CookieException;
+use Expansa\Cookie\Exceptions\InvalidName;
 
 /**
  * HTTP cookie: validates its attributes and renders the Set-Cookie header value with __toString().
@@ -29,7 +29,7 @@ final class Cookie
         public string $name {
             set {
                 if (! preg_match('/^[A-Za-z0-9._-]+$/', $value)) {
-                    throw new CookieException('The "name" parameter value contains illegal characters.');
+                    throw new InvalidName('The "name" parameter value contains illegal characters.');
                 }
 
                 $this->name = $value;

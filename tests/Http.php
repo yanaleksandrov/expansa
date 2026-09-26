@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Expansa\Http\Exceptions\HttpException;
-use Expansa\Http\Exceptions\ValidationException;
+use Expansa\Http\Exceptions\HttpError;
+use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 
@@ -46,8 +46,8 @@ check('json response headers', $response->headers === ['Content-Type' => 'applic
 check('HEAD response has no body', new Response('body')->prepare(Request::create('/', 'HEAD'))->content === '');
 check('cookies are collected', new Response()->setCookie('id=1')->setCookie('a=2')->cookies === ['id=1', 'a=2']);
 
-$error = new ValidationException('Invalid', ['email' => ['Required']]);
-check('validation exception is a 422 http exception', $error instanceof HttpException && $error->statusCode === 422);
+$error = new ValidationFailed('Invalid', ['email' => ['Required']]);
+check('validation exception is a 422 http exception', $error instanceof HttpError && $error->statusCode === 422);
 check('validation errors', $error->errors === ['email' => ['Required']]);
 
 exit($failures ? 1 : 0);

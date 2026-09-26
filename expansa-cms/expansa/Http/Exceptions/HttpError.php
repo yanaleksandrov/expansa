@@ -8,11 +8,11 @@ use RuntimeException;
 use Throwable;
 
 /**
- * Error that becomes an HTTP response with its status code and headers.
+ * Thrown to end the request with an HTTP error: Kernel sends its status code, headers and message.
  *
  * @package Expansa\Http
  */
-class HttpException extends RuntimeException
+class HttpError extends RuntimeException
 {
     public function __construct(
 

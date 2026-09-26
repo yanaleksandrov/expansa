@@ -9,8 +9,10 @@ use Throwable;
 /**
  * Thrown when incoming request data fails validation. Kernel turns it into
  * a 422 JSON response carrying both the message and the per-field errors.
+ *
+ * @package Expansa\Http
  */
-final class ValidationException extends HttpException
+final class ValidationFailed extends HttpError
 {
     public function __construct(
 

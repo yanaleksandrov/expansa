@@ -23,14 +23,14 @@ $token = Cookie::get('expansa_auth', '');
 |------------------------------|---------------------------------------------------------|
 | `Cookie`                     | Одна cookie; `__toString()` — значение `Set-Cookie`     |
 | `SameSite`                   | Атрибут `SameSite`: `None`, `Lax`, `Strict`             |
-| `Exceptions\CookieException` | Недопустимое имя                                        |
+| `Exceptions\InvalidName`     | Недопустимое имя                                        |
 
 ## Использование
 
 Атрибуты — публичные свойства, заданные в конструкторе: `name`, `value`, `expires`, `path`, `domain`,
 `secure`, `httpOnly`, `sameSite`; `maxAge` — секунды до истечения.
 
-- Имя — буквы, цифры и `._-`, иначе `CookieException`.
+- Имя — буквы, цифры и `._-`, иначе `InvalidName`.
 - Пустое значение удаляет cookie: заголовок с датой в прошлом и `Max-Age=0`.
 - `expires` — Unix-время, `0` — cookie до закрытия браузера, отрицательное становится `0`.
 - Пустой `path` становится `/`.

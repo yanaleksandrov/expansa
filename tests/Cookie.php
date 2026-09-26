@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Expansa\Cookie\Cookie;
-use Expansa\Cookie\Exceptions\CookieException;
+use Expansa\Cookie\Exceptions\InvalidName;
 use Expansa\Cookie\SameSite;
 
 require __DIR__ . '/bootstrap.php';
@@ -19,7 +19,7 @@ check('path and domain', str_ends_with((string) $cookie, '; path=/app; domain=ex
 
 check('empty value deletes the cookie', str_starts_with((string) new Cookie('id'), 'id=deleted; expires=') && str_contains((string) new Cookie('id'), 'Max-Age=0'));
 check('negative expiry becomes a session cookie', new Cookie('id', 'x', -5)->expires === 0);
-check('illegal name', throws(fn () => new Cookie('a b'), CookieException::class) && throws(fn () => new Cookie('a[b]'), CookieException::class));
+check('illegal name', throws(fn () => new Cookie('a b'), InvalidName::class) && throws(fn () => new Cookie('a[b]'), InvalidName::class));
 
 $_COOKIE['theme'] = 'dark';
 check('get reads the request cookie', Cookie::get('theme') === 'dark' && Cookie::get('missing', 'light') === 'light');
