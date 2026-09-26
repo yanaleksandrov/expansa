@@ -12,7 +12,7 @@ use InvalidArgumentException;
  *
  * @package Expansa\Codecs
  */
-class Ldml
+final class Ldml
 {
     /**
      * PHP date() tokens with an exact LDML equivalent.

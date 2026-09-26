@@ -9,7 +9,7 @@ namespace Expansa\Codecs;
  *
  * @package Expansa\Codecs
  */
-class Json
+final class Json
 {
     /**
      * Invalid UTF-8 is replaced with U+FFFD instead of failing the whole value.

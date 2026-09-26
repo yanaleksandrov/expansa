@@ -9,7 +9,7 @@ namespace Expansa\Codecs;
  *
  * @package Expansa\Codecs
  */
-class Base64
+final class Base64
 {
     /**
      * Encodes data as Base64.

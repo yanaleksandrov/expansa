@@ -14,7 +14,7 @@ use ValueError;
  *
  * @package Expansa\Codecs
  */
-class Csv
+final class Csv
 {
     private const array DELIMITERS = [',', ';', "\t", '|'];
 
