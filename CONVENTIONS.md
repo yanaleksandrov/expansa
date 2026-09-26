@@ -252,7 +252,6 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 | `Filesystem/Contracts/*Interface`                | суффикс не из PSR          | `File`, `Directory`; `CommonInterface` → по роли, например `Entry` |
 | `Session/Contracts/{Flash,Session,SessionManager}Interface` | суффикс не из PSR | `Flash`, `Session`, `Manager` (PSR-7/15 имена остаются) |
 | `Cache/Contracts/Provider`                       | `add()`, `set()` и др. возвращают `mixed` | точные типы: `bool`         |
-| CI                                               | нет `.github/`             | workflow с `tests/run.php` и phpcs       |
 | `Extensions/Traits/ExtensionTraits`, `ExtensionHelpers` | имя без способности | по способности                           |
 | `Models/Options`                                 | множественное              | `Option`                                 |
 | хук `expansa_view_part`                          | snake_case, префикс        | `viewPart`                               |
