@@ -30,7 +30,7 @@ final readonly class SystemController
      */
     public function test(Request $request): array
     {
-        return $this->service->checkRequirements($request->post());
+        return $this->service->checkRequirements($request->post);
     }
 
     /**
@@ -38,6 +38,6 @@ final readonly class SystemController
      */
     public function install(Request $request): array
     {
-        return $this->service->install($request->post());
+        return $this->service->install($request->post);
     }
 }

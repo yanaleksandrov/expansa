@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Hooks;
 
 use Closure;
-use Expansa\Hooks\Exception\HooksException;
-use Expansa\Support\Exception\FinderException;
+use Expansa\Hooks\Exceptions\HooksException;
+use Expansa\Support\Exceptions\FinderException;
 use Expansa\Support\Finder;
 use ReflectionClass;
 use ReflectionException;

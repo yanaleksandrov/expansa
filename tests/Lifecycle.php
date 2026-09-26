@@ -3,35 +3,11 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Hook;
-use Expansa\Lifecycle\Exception\LifecycleException;
+use Expansa\Lifecycle\Exceptions\LifecycleException;
 use Expansa\Lifecycle\Manager;
 
 // run: php tests/Lifecycle.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
-
-function throws(callable $callback): bool
-{
-    try {
-        $callback();
-    } catch (LifecycleException) {
-        return true;
-    }
-
-    return false;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 $log = [];
 Hook::add('beforeBoot', function () use (&$log) { $log[] = 'hook:beforeBoot'; });
@@ -51,9 +27,9 @@ check('phases and the first matching context run in order with hooks', $log === 
 ]);
 check('current context is reported', $app->current() === 'dashboard' && $app->is('dashboard') && !$app->is('web'));
 check('timeline records every executed step, no routing in the console', array_column($app->timeline(), 'name') === ['boot', 'register', 'dashboard']);
-check('second run is rejected', throws(fn () => $app->run('/')));
-check('declaring after start is rejected', throws(fn () => $app->phase('late', true, fn () => null)));
-check('duplicate phase is rejected', throws(fn () => new Manager()->phase('boot', true, fn () => null)->phase('boot', true, fn () => null)));
+check('second run is rejected', throws(fn () => $app->run('/'), LifecycleException::class));
+check('declaring after start is rejected', throws(fn () => $app->phase('late', true, fn () => null), LifecycleException::class));
+check('duplicate phase is rejected', throws(fn () => new Manager()->phase('boot', true, fn () => null)->phase('boot', true, fn () => null), LifecycleException::class));
 
 $log = [];
 Hook::add('beforeSkipped', function () use (&$log) { $log[] = 'hook:beforeSkipped'; });

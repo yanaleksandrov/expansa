@@ -24,16 +24,16 @@ final readonly class FieldGroupsController
 
     public function create(Request $request): Response
     {
-        return $this->service->create($request->post());
+        return $this->service->create($request->post);
     }
 
     public function update(Request $request): Response
     {
-        return $this->service->update($request->post());
+        return $this->service->update($request->post);
     }
 
     public function delete(Request $request): Response
     {
-        return $this->service->delete($request->post());
+        return $this->service->delete($request->post);
     }
 }

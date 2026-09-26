@@ -5,24 +5,11 @@ declare(strict_types=1);
 use Expansa\Facades\Safe;
 use Expansa\Security\Csrf\Contracts\SessionProvider;
 use Expansa\Security\Csrf\Csrf;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
+use Expansa\Security\Exceptions\InvalidCsrfTokenException;
 
 // run: php tests/Security.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 require_once EX_PATH . 'expansa/functions.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
 
 function rejects(callable $callback): bool
 {

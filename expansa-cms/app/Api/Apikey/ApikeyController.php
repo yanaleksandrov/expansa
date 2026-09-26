@@ -25,7 +25,7 @@ final readonly class ApikeyController
 
     public function create(Request $request): Response|array
     {
-        return $this->service->create($request->post());
+        return $this->service->create($request->post);
     }
 
     /** @todo not implemented — placeholder carried over from the legacy class */

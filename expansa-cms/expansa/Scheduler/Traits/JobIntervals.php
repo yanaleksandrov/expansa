@@ -7,7 +7,7 @@ namespace Expansa\Scheduler\Traits;
 use DateTimeInterface;
 use DateTimeImmutable;
 use Expansa\Scheduler\Cron\CronExpression;
-use Expansa\Scheduler\Exception\SchedulerException;
+use Expansa\Scheduler\Exceptions\SchedulerException;
 
 /**
  * Fluent schedule methods of a job, each one replaces the previous schedule.

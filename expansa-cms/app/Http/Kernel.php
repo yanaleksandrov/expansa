@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use Expansa\Http\Exceptions\HttpException;
-use Expansa\Http\Exceptions\ValidationException;
+use Expansa\Http\Exceptions\HttpError;
+use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Is;
@@ -22,7 +22,7 @@ use Throwable;
  * JSON envelope, then sends it:
  *
  *   success       -> { "data": <return value> }
- *   HttpException -> { "message": ..., "errors"?: ... }  with the exception's status code
+ *   HttpError -> { "message": ..., "errors"?: ... }  with the exception's status code
  *   anything else -> { "message": ... }  with status 500
  *
  * In debug mode (EX_DEBUG['enabled']), every JSON response also carries `benchmark`/`memory`
@@ -47,13 +47,13 @@ final class Kernel
             $response = $result instanceof Response
                 ? $result
                 : new Response()->json(self::withMetrics(['data' => $result]));
-        } catch (HttpException $e) {
+        } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
-            if ($e instanceof ValidationException) {
-                $payload['errors'] = $e->getErrors();
+            if ($e instanceof ValidationFailed) {
+                $payload['errors'] = $e->errors;
             }
 
-            $response = new Response()->json(self::withMetrics($payload), $e->getStatusCode());
+            $response = new Response()->json(self::withMetrics($payload), $e->statusCode);
         } catch (Throwable $e) {
             $response = new Response()->json(self::withMetrics([
                 'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),

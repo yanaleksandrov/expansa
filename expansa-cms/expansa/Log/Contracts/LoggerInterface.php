@@ -6,7 +6,7 @@ namespace Expansa\Log\Contracts;
 
 use Stringable;
 use Expansa\Log\Level;
-use Expansa\Log\Exception\LogException;
+use Expansa\Log\Exceptions\LogException;
 
 /**
  * PSR-3 logger: `{key}` placeholders of the message are replaced by the context values,

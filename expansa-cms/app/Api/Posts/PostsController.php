@@ -49,11 +49,11 @@ final readonly class PostsController
 
     public function export(Request $request): Response
     {
-        return $this->service->export($request->all());
+        return $this->service->export($request->input);
     }
 
     public function import(Request $request): array
     {
-        return $this->service->import($request->post());
+        return $this->service->import($request->post);
     }
 }

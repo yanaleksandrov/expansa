@@ -10,8 +10,9 @@
 2. **Одно понятие — одно слово.** Есть термин (`configure`, `forget`, `Manager`) — используй его.
 3. **Без сокращений**, кроме `Db`, `Url`, `Csv`, `Json`, `Html`, `I18n`, `Id`. Аббревиатура — как слово: `HtmlDom`.
 4. **Пакеты самостоятельны** (см. «Независимость пакетов»).
-5. **Структура плоская:** подпапка — от 2 однородных классов.
-6. **Бета:** нарушения исправляются переименованием без алиасов и совместимости, все использования — в том же коммите.
+5. **Структура плоская:** подпапка — от 2 однородных классов; `Internal/`, `Exceptions/`, `Contracts/` — с одного.
+6. **Корень пакета — публичный API**, внутренняя кухня — в `Internal/`.
+7. **Бета:** нарушения исправляются переименованием без алиасов и совместимости, все использования — в том же коммите.
 
 ## Структура пакета
 
@@ -26,7 +27,7 @@ Log/
 ├── Handlers/AbstractHandler.php, File.php, Telegram.php
 ├── Formatters/AbstractFormatter.php, Line.php
 ├── Traits/
-└── Exception/LogException.php
+└── Exceptions/InvalidLevel.php, UnwritableFile.php
 ```
 
 | Папка        | Что лежит                                          | Имя                                     |
@@ -34,10 +35,18 @@ Log/
 | `Contracts/` | интерфейсы                                         | роль: `Handler`                         |
 | `<Role>s/`   | реализации контракта: `Handlers/`, `Providers/`, `Fields/`, `Commands/` | вариант: `Handlers\File`, `Providers\Redis` |
 | `Traits/`    | трейты                                             | способность: `HasTimestamps`, `Macroable`, `Locks` |
-| `Exception/` | исключения                                         | `<Package>Exception`                    |
+| `Exceptions/` | исключения                                        | что произошло: `InvalidLevel`           |
 | `<Class>/`   | части большого класса (`Database/Schema/` для `Schema.php`) | по роли                        |
+| `Internal/`  | внутренние классы пакета, даже один                | по роли: `Scheduler\Internal\FailedJob` |
 
-Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exceptions/`; абстрактный
+**Корень пакета — публичный API:** в нём только классы, которые остальное приложение (`App\`,
+`bootstrap.php`, шаблоны, плагины, драйверы) упоминает по имени — в `use`, `new`, типе, `extends`,
+статическом вызове. Класс, который пакет создаёт и использует сам, — в `Internal/` с тегом `@internal`
+в описании, даже если его объект возвращается наружу. `Contracts/`, `Exceptions/`, `Traits/`, `<Role>s/`
+публичны: их реализуют, ловят и подключают снаружи. `Expansa\<Package>\Internal\*` вне пакета не
+импортируется.
+
+Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exception/`; абстрактный
 класс вне папки реализаций; `Base` в имени (`BaseHandler`, `HandlerAbstract`, `TableBase`).
 
 ### Классы
@@ -45,15 +54,35 @@ Log/
 | Что              | Правило                                                              | Пример                          |
 |------------------|----------------------------------------------------------------------|---------------------------------|
 | Файл             | один класс, имя файла = имя класса                                   | `LogRecord.php`                 |
-| Класс            | существительное, единственное число, PascalCase                      | `Logger`, `CookieJar`           |
+| Класс            | существительное, единственное число, PascalCase                      | `Logger`, `LogRecord`           |
 | Точка входа      | `Manager`, если есть конфигурация или реестр каналов/драйверов; иначе по роли | `Log\Manager`; `Router`, `Validator` |
 | Реализация       | вариант без суффикса роли                                            | `Handlers\RotatingFile`, `Fields\Checkbox` |
 | Абстрактный      | `Abstract<Role>`, рядом с реализациями                               | `Handlers/AbstractHandler.php`  |
 | Интерфейс        | без суффикса; `Interface` — только для имён PSR; конфликт с реализацией — алиасом | `Handler`, `File`; `LoggerInterface` |
 | Трейт            | способность; `Has<Noun>` — данные и методы вокруг них                | `HasSoftDeletes`                |
 | Enum             | единственное число, кейсы PascalCase                                 | `Level::Debug`                  |
-| Исключение       | одно `<Package>Exception`; отдельное — только если его ловят отдельно | `NotFoundHttpException`        |
+| Исключение       | что произошло, без суффикса `Exception`; см. «Исключения»            | `InvalidLevel`, `ValidationFailed` |
 | Модификаторы     | `final`, если не наследуются; `abstract` для базовых                 | `final class Manager`           |
+
+### Исключения
+
+- Имя — что произошло, без суффикса `Exception` (роль задаёт `Exceptions\`): `Log\Exceptions\InvalidLevel`,
+  `ChannelNotConfigured`, `UnwritableFile`, `Session\Exceptions\AlreadyStarted`.
+- Класс — на причину, которую вызывающий может обработать по-своему, а не на каждое сообщение: детали —
+  в тексте.
+- Наследует подходящее SPL-исключение: неверный аргумент или конфигурация — `InvalidArgumentException`,
+  сбой окружения (файл, сеть, БД) — `RuntimeException`, неверный порядок вызовов — `LogicException`.
+- Ошибка программиста, которую никто не ловит отдельно, — SPL-исключение напрямую, без своего класса.
+- Нельзя: `<Package>Exception`, имена SPL (`Console\Exceptions\RuntimeException`), общий базовый класс пакета,
+  пока никто не ловит «все ошибки пакета».
+- `final`, если не наследуется; описание класса в `/** */` — когда бросается:
+
+  ```php
+  /**
+   * Thrown when a level name or number is not one of the PSR-3 levels.
+   */
+  final class InvalidLevel extends InvalidArgumentException {}
+  ```
 
 ### Независимость пакетов
 
@@ -118,9 +147,22 @@ Log/
 - Константы класса — `UPPER_SNAKE_CASE` с типом: `private const int ENCODE_FLAGS`; глобальные — `EX_*`.
 - Глобальные функции (`functions.php`) — короткие `snake_case` для шаблонов и частых вызовов (`t()`,
   `t_attr()`, `view()`); новые — только если фасада мало.
-- Геттер/сеттер без логики → свойство (короче и быстрее): `public private(set)`, `readonly` или hook.
+- Геттер/сеттер без логики → свойство (короче и быстрее), вызовы `->getX()` → `->x`. Модификатор:
+  задаётся один раз в конструкторе — `readonly`; меняется внутри класса — `private(set)`, в наследниках —
+  `protected(set)`; при чтении или записи есть логика — hook. Hook ради одного доступа не нужен.
   Контракт объявляет свойство, а не геттер: `public Level $level { get; }`. Геттер остаётся для
-  ленивого значения (`getFormatter()`) или фасада.
+  ленивого значения (`getFormatter()`), фасада и чужого контракта (PSR, `Throwable::getMessage()`).
+
+  ```php
+  // было: protected Response $response + getResponse()
+  public function __construct(
+
+      /**
+       * Ready response to send instead of the regular handler result.
+       */
+      public readonly Response $response,
+  ) {}
+  ```
 - `mixed` — только если значение действительно любое (`Cache::get()`); иначе точный тип (`add(): bool`).
 
 ### PHP 8.4
@@ -157,7 +199,7 @@ Log/
 2. Структура по схеме, `declare(strict_types=1)`, описание класса в `/** */`.
 3. Точка входа и фасад с `@method`.
 4. `configure()` в `bootstrap.php`, безопасные умолчания без него.
-5. `Exception/<Package>Exception.php` от подходящего SPL-исключения.
+5. Исключения в `Exceptions/` по разделу «Исключения».
 6. `tests/<Package>.php` подключает `tests/bootstrap.php` (`EX_PATH`, `autoload.php`, `check()`, `throws()`)
    и содержит только проверки; `php tests/run.php` — тесты и PHPStan без новых ошибок сверх baseline.
 7. Горячий путь (каждый запрос или цикл) — бенчмарк по разделу «Бенчмарки».
@@ -214,8 +256,6 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 
 | Где                                              | Проблема                   | Должно быть                              |
 |--------------------------------------------------|----------------------------|------------------------------------------|
-| `Http/Exceptions/`                               | множественное              | `Http/Exception/`                        |
-| `Http/Request/ParameterBug.php`                  | опечатка                   | `ParameterBag`                           |
 | `Assets/Abstracts/Provider.php`                  | `Abstracts/`               | `Assets/Providers/AbstractProvider`      |
 | `Log/Handlers/*Handler`                          | суффикс роли               | `File`, `RotatingFile`, `ErrorLog`, `Telegram` |
 | `Log/Formatters/*Formatter`                      | суффикс роли               | `Line`, `Telegram`                       |
@@ -231,8 +271,6 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 | `Filesystem/Contracts/*Interface`                | суффикс не из PSR          | `File`, `Directory`; `CommonInterface` → по роли, например `Entry` |
 | `Session/Contracts/{Flash,Session,SessionManager}Interface` | суффикс не из PSR | `Flash`, `Session`, `Manager` (PSR-7/15 имена остаются) |
 | `Cache/Contracts/Provider`                       | `add()`, `set()` и др. возвращают `mixed` | точные типы: `bool`         |
-| `tests/*.php`                                    | `check()`, `throws()`, `EX_PATH` в каждом из 16 тестов | `tests/bootstrap.php` |
-| CI                                               | нет `.github/`             | workflow с `tests/run.php` и phpcs       |
 | `Extensions/Traits/ExtensionTraits`, `ExtensionHelpers` | имя без способности | по способности                           |
 | `Models/Options`                                 | множественное              | `Option`                                 |
 | хук `expansa_view_part`                          | snake_case, префикс        | `viewPart`                               |
@@ -248,7 +286,6 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 | `Console`     | `Assets`, `Scheduler`, `Hooks`  | `AssetClean`, `ScheduleRun`, `HooksList` — в свои пакеты |
 | `Database`    | `Cache`, `Security` (`Safe`)    | кэш и очистка снаружи                                |
 | `Filesystem`  | `Debug`, `Security` (`Validator`) | ошибки — исключениями, проверка снаружи            |
-| `Http`        | `Cookie`, `Hooks`               | хуки `Redirect` — колбэками в `configure()`          |
 | `Mail`        | `Hooks`                         | настройка мейлера — колбэком в `configure()`         |
 | `Translation` | `Hooks`, `Security` (`Safe`)    | колбэки в `configure()`                              |
 | `Lifecycle`   | `Hooks`, `Routing`              | колбэки фаз и маршрутизации из `bootstrap.php`       |

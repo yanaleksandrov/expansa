@@ -5,21 +5,8 @@ declare(strict_types=1);
 use Expansa\Support\Url;
 
 // run: php tests/Url.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 require_once EX_PATH . 'expansa/functions.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
 
 $_SERVER['HTTP_HOST'] = 'request.test';
 

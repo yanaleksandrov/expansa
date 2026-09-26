@@ -5,19 +5,7 @@ declare(strict_types=1);
 // run: php tests/Syntax.php
 // Files loaded before App\Support\Requirements::check() must parse on an older PHP to show the
 // requirements page; bootstrap.php already needs PHP 8.0 (named arguments), so 8.1+ syntax is refused.
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
-
+require_once __DIR__ . '/bootstrap.php';
 /**
  * Syntax newer than PHP 8.0 found in the code, as "line: description".
  *

@@ -6,12 +6,12 @@ namespace Expansa\Log\Handlers;
 
 use Expansa\Log\Contracts\Formatter;
 use Expansa\Log\Contracts\Handler;
-use Expansa\Log\Formatters\LineFormatter;
+use Expansa\Log\Formatters\Line;
 use Expansa\Log\Level;
 use Expansa\Log\LogRecord;
 
 /**
- * Base handler: the minimum level and a formatter, LineFormatter by default.
+ * Base handler: the minimum level and a formatter, Line by default.
  *
  * @package Expansa\Log\Handlers
  */
@@ -61,6 +61,6 @@ abstract class AbstractHandler implements Handler
 
     protected function getDefaultFormatter(): Formatter
     {
-        return new LineFormatter();
+        return new Line();
     }
 }

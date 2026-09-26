@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use Expansa\Support\Exception\FinderException;
+use Expansa\Support\Exceptions\FinderException;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;

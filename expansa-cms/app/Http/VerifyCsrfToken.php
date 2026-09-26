@@ -7,7 +7,7 @@ namespace App\Http;
 use Expansa\Http\Response;
 use Expansa\Security\Csrf\Csrf;
 use Expansa\Security\Csrf\Providers\NativeCookieProvider;
-use Expansa\Security\Exception\InvalidCsrfTokenException;
+use Expansa\Security\Exceptions\InvalidCsrfTokenException;
 
 /**
  * Verifies the CSRF token on state-changing API requests — double-submit cookie pattern.
@@ -62,7 +62,7 @@ final class VerifyCsrfToken
             // HEAD must never carry a body — Response::prepare(Request) would normally
             // enforce this, kept here as a plain check instead of pulling in a Request.
             if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
-                $response->setContent(null);
+                $response->content = '';
             }
 
             $response->send();

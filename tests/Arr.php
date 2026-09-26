@@ -5,20 +5,7 @@ declare(strict_types=1);
 use Expansa\Support\Arr;
 
 // run: php tests/Arr.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 check('clean() drops empty values recursively', Arr::clean(['a' => 1, 'b' => '', 'c' => ['d' => null, 'e' => 2], 'f' => [[]]]) === ['a' => 1, 'c' => ['e' => 2]]);
 check('exclude() drops listed keys', Arr::exclude(['a' => 1, 'b' => 2, 'c' => 3], ['b', 'x']) === ['a' => 1, 'c' => 3]);

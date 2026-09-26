@@ -4,104 +4,76 @@ declare(strict_types=1);
 
 namespace Expansa\Http;
 
-use Expansa\Facades\Hook;
+use Closure;
 use InvalidArgumentException;
 
+/**
+ * HTTP redirect: sends the Location and X-Redirect-By headers and stops the script.
+ * Location, status and X-Redirect-By pass through the filters set in configure().
+ *
+ * @package Expansa\Http
+ */
 final class Redirect
 {
-    private array $values = [];
+    /**
+     * Filter of the location, gets the location and status.
+     */
+    private static ?Closure $locationFilter = null;
 
-    private ?string $to;
+    /**
+     * Filter of the status code, gets the status and location.
+     */
+    private static ?Closure $statusFilter = null;
 
-    private string $redirectBy = 'Expansa';
+    /**
+     * Filter of the X-Redirect-By header, gets the value, status and location.
+     */
+    private static ?Closure $redirectByFilter = null;
 
-    private int $status = 302;
-
-    public function await(int $seconds = 7): void
+    /**
+     * Set the filters, a repeated call replaces all of them.
+     *
+     * @param Closure|null $location   fn (string $to, int $status): string
+     * @param Closure|null $status     fn (int $status, string $to): int
+     * @param Closure|null $redirectBy fn (string $redirectBy, int $status, string $to): string
+     * @return void
+     */
+    public static function configure(?Closure $location = null, ?Closure $status = null, ?Closure $redirectBy = null): void
     {
-        $title = t('Redirecting to :link', $this->to);
-        $text  = t('Redirecting to [:url](:url) after **:seconds** seconds.', $this->to, $this->to, $seconds);
-        $meta  = sprintf('%d;url=%s', $seconds, htmlspecialchars($this->to, ENT_QUOTES, 'UTF-8'));
-
-        echo "<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='UTF-8' />
-    <meta http-equiv='refresh' content='$meta' />
-    <title>$title</title>
-</head>
-<body
-    style='display: flex; place-items: center; place-content: center; height: 100dvh; margin: 0'
-    onload='var t=$seconds; setInterval(() => document.querySelector(`p strong`).innerText = t--, 1000)'
->
-    <p>$text</p>
-</body>
-</html>";
+        self::$locationFilter   = $location;
+        self::$statusFilter     = $status;
+        self::$redirectByFilter = $redirectBy;
     }
 
-    // Метод для перенаправления назад
-    public function back(): self
+    /**
+     * Redirect to the URL and exit; returns only if the location filter cancels it with an empty string.
+     *
+     * @param string $to         Absolute URL.
+     * @param int    $status     3xx status code.
+     * @param string $redirectBy X-Redirect-By header value, empty to omit it.
+     * @return void
+     * @throws InvalidArgumentException If the filtered status is not 3xx.
+     */
+    public static function send(string $to, int $status = 302, string $redirectBy = 'Expansa'): void
     {
-        $this->to = $_SERVER['HTTP_REFERER'] ?? '/';
-        $this->status = 302;
+        // filters come from hooks, so their results are cast
+        $location   = self::$locationFilter ? (string) (self::$locationFilter)($to, $status) : $to;
+        $code       = self::$statusFilter ? (int) (self::$statusFilter)($status, $to) : $status;
+        $redirectBy = self::$redirectByFilter ? (string) (self::$redirectByFilter)($redirectBy, $status, $to) : $redirectBy;
 
-        // Немедленное перенаправление
-        if (empty($this->values)) {
-            $this->redirect($this->to, $this->status);
+        if ($location === '') {
+            return;
         }
 
-        return $this;
-    }
-
-    public function with(string $key, array $values): void
-    {
-        $_SESSION[$this->redirectBy][$key] = $values;
-
-        $this->redirect($this->to, $this->status);
-    }
-
-    public function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): self
-    {
-        $to = url($to);
-
-        /**
-         * Filters the redirect location.
-         *
-         * @param string $to     The path or URL to redirect to.
-         * @param int    $status The HTTP response status code to use.
-         */
-        $this->to = Hook::call('expansaRedirectLocation', $to, $status);
-
-        /**
-         * Filters the redirect HTTP response status code to use.
-         *
-         * @param int    $status The HTTP response status code to use.
-         * @param string $to     The path or URL to redirect to.
-         */
-        $this->status = Hook::call('expansaRedirectStatus', $status, $to);
-
-        /**
-         * Filters the X-Redirect-By header, allows applications to identify themselves when they're doing a redirect.
-         *
-         * @param string $redirectBy The application doing the redirect.
-         * @param int    $status     Status code to use.
-         * @param string $to         The path to redirect to.
-         */
-        $this->redirectBy = Hook::call('expansaRedirectBy', $redirectBy, $status, $to);
-
-        if ($this->to) {
-            if ($this->status < 300 || 399 < $this->status) {
-                throw new InvalidArgumentException(t('HTTP redirect status code must be a redirection code, 3xx.'));
-            }
-
-            if (!empty($this->redirectBy)) {
-                header("X-Redirect-By: $this->redirectBy");
-            }
-
-            header("Location: $this->to", true, $this->status);
-            exit;
+        if ($code < 300 || $code > 399) {
+            throw new InvalidArgumentException('HTTP redirect status code must be a redirection code, 3xx.');
         }
 
-        return $this;
+        if ($redirectBy !== '') {
+            header("X-Redirect-By: $redirectBy");
+        }
+
+        header("Location: $location", true, $code);
+        exit;
     }
 }

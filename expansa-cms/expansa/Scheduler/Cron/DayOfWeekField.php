@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Scheduler\Cron;
 
 use DateTimeInterface;
-use Expansa\Scheduler\Exception\SchedulerException;
+use Expansa\Scheduler\Exceptions\SchedulerException;
 
 /**
  * Day of week field, allows: * , / - ? L # and the literals MON-SUN, both 0 and 7 are Sunday.

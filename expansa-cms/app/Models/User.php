@@ -8,6 +8,7 @@ use DateTime;
 use App\Post\Type;
 use App\User\Roles;
 use Expansa\Cookie\Cookie;
+use Expansa\Cookie\SameSite;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
@@ -563,7 +564,7 @@ class User extends Model implements Fieldable
             path: '/',
             secure: Cookie::isSecureRequest(),
             httpOnly: true,
-            sameSite: Cookie::SAME_SITE_LAX,
+            sameSite: SameSite::Lax,
         ));
     }
 
@@ -579,7 +580,7 @@ class User extends Model implements Fieldable
             path: '/',
             secure: Cookie::isSecureRequest(),
             httpOnly: true,
-            sameSite: Cookie::SAME_SITE_LAX,
+            sameSite: SameSite::Lax,
         ));
     }
 

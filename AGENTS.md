@@ -29,7 +29,7 @@ public function __construct(
     public string $name {
         set {
             if (! preg_match('/^[A-Za-z0-9._-]+$/', $value)) {
-                throw new CookieException('The "name" parameter value contains illegal characters.');
+                throw new InvalidName('The "name" parameter value contains illegal characters.');
             }
 
             $this->name = $value;

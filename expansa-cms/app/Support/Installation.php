@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use Expansa\Facades\Disk;
-use Expansa\Http\Exceptions\ValidationException;
+use Expansa\Http\Exceptions\ValidationFailed;
 
 /**
  * Installation state: the installer writes env.php only after every other step succeeded.
@@ -22,7 +22,7 @@ final class Installation
      * A draft left by a failed attempt is replaced, so none of its old values survive.
      *
      * @param array<string, string> $values
-     * @throws ValidationException
+     * @throws ValidationFailed
      */
     public static function draft(array $values, string $root = EX_PATH): string
     {
@@ -31,7 +31,7 @@ final class Installation
 
         $env = Disk::file($root . 'env.example.php')->copy('env.install');
         if ($env->errors) {
-            throw new ValidationException(t('Unable to write the environment configuration file.'), $env->errors);
+            throw new ValidationFailed(t('Unable to write the environment configuration file.'), $env->errors);
         }
 
         Disk::file($draft)->rewrite($values);
@@ -42,12 +42,12 @@ final class Installation
     /**
      * Turn the draft into env.php, which marks the installation as complete.
      *
-     * @throws ValidationException
+     * @throws ValidationFailed
      */
     public static function complete(string $draft, string $root = EX_PATH): void
     {
         if (! rename($draft, $root . 'env.php')) {
-            throw new ValidationException(t('Unable to write the environment configuration file.'));
+            throw new ValidationFailed(t('Unable to write the environment configuration file.'));
         }
     }
 

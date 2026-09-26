@@ -13,8 +13,8 @@ use Expansa\Facades\Db;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
-use Expansa\Http\Exceptions\HttpException;
-use Expansa\Http\Exceptions\ValidationException;
+use Expansa\Http\Exceptions\HttpError;
+use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Support\Arr;
 
 /**
@@ -75,14 +75,14 @@ final class SystemService
     /**
      * Writes the environment config, creates the schema, and creates the owner account.
      *
-     * @throws HttpException       When Expansa is already installed.
-     * @throws ValidationException When required fields are missing, the env file can't be
+     * @throws HttpError       When Expansa is already installed.
+     * @throws ValidationFailed When required fields are missing, the env file can't be
      *                              written, or the owner account is invalid.
      */
     public function install(array $input): array
     {
         if (Installation::isComplete()) {
-            throw new HttpException(409, t('Expansa is already installed.'));
+            throw new HttpError(409, t('Expansa is already installed.'));
         }
 
         $this->validateInstallInput($input);
@@ -132,7 +132,7 @@ final class SystemService
             $user = new User($userdata);
 
             if (!$user->isValid()) {
-                throw new ValidationException(t('Unable to create the owner account.'), $user->getValidatorErrors());
+                throw new ValidationFailed(t('Unable to create the owner account.'), $user->getValidatorErrors());
             }
 
             $user->save();
@@ -166,7 +166,7 @@ final class SystemService
      * Rejects the request before any side effect (writing env.php, creating tables, ...)
      * runs, instead of letting missing fields surface deep inside model validation.
      *
-     * @throws ValidationException
+     * @throws ValidationFailed
      */
     private function validateInstallInput(array $input): void
     {
@@ -184,7 +184,7 @@ final class SystemService
         ])->apply();
 
         if (!$validator->isValid()) {
-            throw new ValidationException(t('Please fill in all required fields.'), $validator->getErrors());
+            throw new ValidationFailed(t('Please fill in all required fields.'), $validator->getErrors());
         }
     }
 }

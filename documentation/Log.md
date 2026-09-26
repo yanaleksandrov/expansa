@@ -20,7 +20,7 @@ Log::channel('telegram')->critical('Database is down');
 | `LogRecord`                        | Одна запись, неизменяемая: её получают все обработчики канала           |
 | `Handlers\*`                       | Куда писать: файл, файл по дням, Telegram, `error_log()`                |
 | `Formatters\*`                     | Как записать: строка или HTML-сообщение Telegram                        |
-| `Exception\LogException`           | Неизвестный уровень, неверная конфигурация, файл нельзя открыть         |
+| `Exceptions\LogException`          | Неизвестный уровень, неверная конфигурация, файл нельзя открыть         |
 
 ## Конфигурация
 
@@ -43,13 +43,13 @@ Log::configure([
 конфигурацию и сбрасывает уже созданные каналы. Пока `configure()` не вызван, записи уходят в
 `error_log()`.
 
-| Драйвер    | Параметры                                 | Обработчик              |
-|------------|-------------------------------------------|-------------------------|
-| `single`   | `path`, `level`                           | `FileHandler`           |
-| `daily`    | `path`, `days` (7, 0 — хранить все), `level` | `RotatingFileHandler` |
-| `telegram` | `token`, `chat_id`, `level` (`error`)     | `TelegramHandler`       |
-| `errorlog` | `level`                                   | `ErrorLogHandler`       |
-| `stack`    | `channels`                                | обработчики каналов     |
+| Драйвер    | Параметры                                    | Обработчик          |
+|------------|----------------------------------------------|---------------------|
+| `single`   | `path`, `level`                              | `File`              |
+| `daily`    | `path`, `days` (7, 0 — хранить все), `level` | `RotatingFile`      |
+| `telegram` | `token`, `chat_id`, `level` (`error`)        | `Telegram`          |
+| `errorlog` | `level`                                      | `ErrorLog`          |
+| `stack`    | `channels`                                   | обработчики каналов |
 
 `level` — минимальный уровень канала, по умолчанию `debug`. Записи ниже него отбрасываются сразу,
 без форматирования.
@@ -130,11 +130,11 @@ Log::stack(['daily', 'telegram']);    // временный канал из об
 возвращает `Logger` или обработчик:
 
 ```php
-use Expansa\Log\Formatters\LineFormatter;
-use Expansa\Log\Handlers\FileHandler;
+use Expansa\Log\Formatters\Line;
+use Expansa\Log\Handlers\File;
 
-Log::extend('short', fn (array $config, string $name) => new FileHandler($config['path'], $config['level'] ?? 'debug')
-    ->setFormatter(new LineFormatter('H:i:s')));
+Log::extend('short', fn (array $config, string $name) => new File($config['path'], $config['level'] ?? 'debug')
+    ->setFormatter(new Line('H:i:s')));
 
 Log::configure(['import' => ['driver' => 'short', 'path' => EX_STORAGE . 'logs/import.log']]);
 ```
@@ -145,20 +145,20 @@ Log::configure(['import' => ['driver' => 'short', 'path' => EX_STORAGE . 'logs/i
 
 ```php
 use Expansa\Log\Logger;
-use Expansa\Log\Handlers\FileHandler;
-use Expansa\Log\Formatters\LineFormatter;
+use Expansa\Log\Handlers\File;
+use Expansa\Log\Formatters\Line;
 
 $logger = new Logger('import', [
-    new FileHandler(EX_STORAGE . 'logs/import.log', 'info')->setFormatter(new LineFormatter('H:i:s')),
+    new File(EX_STORAGE . 'logs/import.log', 'info')->setFormatter(new Line('H:i:s')),
 ]);
 ```
 
-| Обработчик            | Поведение                                                                         |
-|-----------------------|-----------------------------------------------------------------------------------|
-| `FileHandler`         | Дописывает в файл, создаёт папку. Файл открывается один раз на запрос             |
-| `RotatingFileHandler` | Файл на день (`app-2025-01-31.log`), при открытии нового дня удаляет старые файлы  |
-| `TelegramHandler`     | Сообщение через Bot API; таймаут 5 секунд, проверка SSL                           |
-| `ErrorLogHandler`     | `error_log()`: лог веб-сервера или файл из `error_log` в php.ini                  |
+| Обработчик     | Поведение                                                                        |
+|----------------|----------------------------------------------------------------------------------|
+| `File`         | Дописывает в файл, создаёт папку. Файл открывается один раз на запрос            |
+| `RotatingFile` | Файл на день (`app-2025-01-31.log`), при открытии нового дня удаляет старые файлы |
+| `Telegram`     | Сообщение через Bot API; таймаут 5 секунд, проверка SSL                          |
+| `ErrorLog`     | `error_log()`: лог веб-сервера или файл из `error_log` в php.ini                 |
 
 Каждая запись в Telegram — отдельный HTTP-запрос во время ответа, поэтому держите уровень высоким.
 `chat_id` — число или `@username` канала. Сообщение экранируется и обрезается до 4096 символов.
@@ -176,8 +176,8 @@ $logger = new Logger('import', [
 - фасад `Log` создавал `Logger` без обработчиков, записи никуда не попадали;
 - `LogManager` требовал несуществующий `Container` и не мог быть создан;
 - контекст `withContext()` не добавлялся к записям, плейсхолдеры `{key}` не заменялись;
-- `RotatingFileHandler` игнорировал `maxFiles`: старые файлы не удалялись;
-- `TelegramHandler` отключал проверку SSL, не имел таймаута, всегда возвращал `true`, не
+- `Handlers\RotatingFile` игнорировал `maxFiles`: старые файлы не удалялись;
+- `Handlers\Telegram` отключал проверку SSL, не имел таймаута, всегда возвращал `true`, не
   принимал `@username` канала, а неэкранированный `<` в сообщении ломал HTML-разметку;
 - форматтер изменял общую запись, и следующий обработчик получал уже изменённый контекст;
 - из исключения записывались только файл, строка и код, без класса и сообщения;

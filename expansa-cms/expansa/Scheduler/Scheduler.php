@@ -8,7 +8,7 @@ use Closure;
 use DateTime;
 use DateTimeInterface;
 use Throwable;
-use Expansa\Scheduler\Exception\SchedulerException;
+use Expansa\Scheduler\Exceptions\SchedulerException;
 
 /**
  * Queues closures, PHP scripts and shell commands and runs the due ones.
