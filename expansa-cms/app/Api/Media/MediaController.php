@@ -21,23 +21,23 @@ final readonly class MediaController
     public function get(Request $request): array
     {
         return $this->service->list([
-            'page' => (int) ($request->post('page') ?: 1),
-            's'    => (string) $request->post('s', ''),
+            'page' => max(1, $request->getInt('page', 1)),
+            's'    => $request->getString('s'),
         ]);
     }
 
-    public function upload(): array
+    public function upload(Request $request): array
     {
-        return $this->service->upload($_FILES ?? []);
+        return $this->service->upload($request->files);
     }
 
     public function grab(Request $request): array
     {
-        return $this->service->grab($request->post('urls', ''));
+        return $this->service->grab($request->post['urls'] ?? '');
     }
 
     public function delete(Request $request): array
     {
-        return $this->service->delete((array) $request->post('ids', []));
+        return $this->service->delete((array) ($request->post['ids'] ?? []));
     }
 }

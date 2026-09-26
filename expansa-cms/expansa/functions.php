@@ -73,13 +73,9 @@ if (!function_exists('metrics')) {
 }
 
 if (!function_exists('redirect')) {
-    function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): Expansa\Http\Redirect
+    function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): void
     {
-        static $redirect;
-        if (!$redirect) {
-            $redirect = new Expansa\Http\Redirect();
-        }
-        return $redirect->redirect($to, $status, $redirectBy);
+        Expansa\Http\Redirect::send(url($to), $status, $redirectBy);
     }
 }
 

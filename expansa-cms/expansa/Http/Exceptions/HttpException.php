@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace Expansa\Http\Exceptions;
 
-use Expansa\Http\Contracts\HttpException as HttpExceptionContract;
 use RuntimeException;
 use Throwable;
 
-class HttpException extends RuntimeException implements HttpExceptionContract
+/**
+ * Error that becomes an HTTP response with its status code and headers.
+ *
+ * @package Expansa\Http
+ */
+class HttpException extends RuntimeException
 {
     public function __construct(
 

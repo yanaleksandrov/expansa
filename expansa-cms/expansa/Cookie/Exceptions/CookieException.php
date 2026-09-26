@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Expansa\Cookie\Exceptions;
 
-use Exception;
+use InvalidArgumentException;
 
 /**
- * Class CookieException
- *
- * Exception thrown when an error occurs related to cookies.
+ * Invalid cookie attribute.
  *
  * @package Expansa\Cookie
  */
-class CookieException extends Exception {}
+final class CookieException extends InvalidArgumentException {}
