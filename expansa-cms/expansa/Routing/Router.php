@@ -9,9 +9,12 @@ use ReflectionException;
 use ReflectionMethod;
 
 /**
- * Class Route.
+ * Routes of the request: static ones by exact URI, dynamic ones by regex, before middlewares
+ * and 404 handlers. The Route facade instance.
+ *
+ * @package Expansa\Routing
  */
-class Router
+final class Router
 {
     /**
      * The function to be executed when no route has been matched
@@ -72,11 +75,9 @@ class Router
     private string $serverBasePath = '';
 
     /**
-     * Default Controllers Namespace
-     *
-     * @var string
+     * Namespace prepended to the controller class of an `[Controller::class, 'method']` handler.
      */
-    private string $namespace = '';
+    public string $namespace = '';
 
     /**
      * Store a before middleware route and a handling function to be
@@ -290,7 +291,7 @@ class Router
      *
      * @return array The request headers
      */
-    public function getRequestHeaders(): array
+    private function requestHeaders(): array
     {
         $headers = [];
 
@@ -329,7 +330,7 @@ class Router
      *
      * @return string The Request method to handle
      */
-    public function getRequestMethod(): string
+    private function requestMethod(): string
     {
         // Take the method as found in $_SERVER
         $method = $_SERVER['REQUEST_METHOD'];
@@ -340,7 +341,7 @@ class Router
             ob_start();
             $method = 'GET';
         } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $headers = $this->getRequestHeaders();
+            $headers = $this->requestHeaders();
 
             $methodName = $headers['X-HTTP-Method-Override'] ?? '';
             if (in_array($methodName, ['PUT', 'DELETE', 'PATCH'])) {
@@ -349,26 +350,6 @@ class Router
         }
 
         return $method;
-    }
-
-    /**
-     * Set a Default Lookup Namespace for Callable methods.
-     *
-     * @param string $namespace A given namespace
-     */
-    public function setNamespace(string $namespace): void
-    {
-        $this->namespace = $namespace;
-    }
-
-    /**
-     * Get the given Namespace before.
-     *
-     * @return string The given Namespace if exists
-     */
-    public function getNamespace(): string
-    {
-        return $this->namespace;
     }
 
     /**
@@ -381,7 +362,7 @@ class Router
     public function run(callable|object|null $callback = null): bool
     {
         // Define which method we need to handle
-        $requestedMethod = $this->getRequestMethod();
+        $requestedMethod = $this->requestMethod();
 
         // Handle all before middlewares
         if (isset($this->beforeRoutes[$requestedMethod])) {
@@ -618,8 +599,8 @@ class Router
             [$controller, $method] = $fn;
 
             // Adjust controller class if namespace has been set
-            if ($this->getNamespace() !== '') {
-                $controller = $this->getNamespace() . '\\' . $controller;
+            if ($this->namespace !== '') {
+                $controller = $this->namespace . '\\' . $controller;
             }
 
             try {
