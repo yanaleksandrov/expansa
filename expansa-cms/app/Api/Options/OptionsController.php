@@ -32,7 +32,7 @@ final readonly class OptionsController
 
     public function update(Request $request): array
     {
-        return $this->service->update($request->post());
+        return $this->service->update($request->post);
     }
 
     /** @todo not implemented — placeholder carried over from the legacy class */

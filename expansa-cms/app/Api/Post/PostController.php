@@ -26,7 +26,7 @@ final readonly class PostController
 
     public function create(Request $request): array
     {
-        return $this->service->create($request->post());
+        return $this->service->create($request->post);
     }
 
     /** @todo not implemented — placeholder carried over from the legacy class */

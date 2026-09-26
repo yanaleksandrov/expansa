@@ -30,14 +30,6 @@ final class Redirect
      */
     private static ?Closure $redirectByFilter = null;
 
-    private array $values = [];
-
-    private ?string $to = null;
-
-    private string $redirectBy = 'Expansa';
-
-    private int $status = 302;
-
     /**
      * Set the filters, a repeated call replaces all of them.
      *
@@ -53,73 +45,35 @@ final class Redirect
         self::$redirectByFilter = $redirectBy;
     }
 
-    public function await(int $seconds = 7): void
-    {
-        $title = t('Redirecting to :link', $this->to);
-        $text  = t('Redirecting to [:url](:url) after **:seconds** seconds.', $this->to, $this->to, $seconds);
-        $meta  = sprintf('%d;url=%s', $seconds, htmlspecialchars($this->to, ENT_QUOTES, 'UTF-8'));
-
-        echo "<!DOCTYPE html>
-<html>
-<head>
-    <meta charset='UTF-8' />
-    <meta http-equiv='refresh' content='$meta' />
-    <title>$title</title>
-</head>
-<body
-    style='display: flex; place-items: center; place-content: center; height: 100dvh; margin: 0'
-    onload='var t=$seconds; setInterval(() => document.querySelector(`p strong`).innerText = t--, 1000)'
->
-    <p>$text</p>
-</body>
-</html>";
-    }
-
     /**
-     * Redirect to the referer, at once if no values are waiting for with().
+     * Redirect to the URL and exit; returns only if the location filter cancels it with an empty string.
      *
-     * @return self
+     * @param string $to         Absolute URL.
+     * @param int    $status     3xx status code.
+     * @param string $redirectBy X-Redirect-By header value, empty to omit it.
+     * @return void
+     * @throws InvalidArgumentException If the filtered status is not 3xx.
      */
-    public function back(): self
+    public static function send(string $to, int $status = 302, string $redirectBy = 'Expansa'): void
     {
-        $this->to     = $_SERVER['HTTP_REFERER'] ?? '/';
-        $this->status = 302;
+        // filters come from hooks, so their results are cast
+        $location   = self::$locationFilter ? (string) (self::$locationFilter)($to, $status) : $to;
+        $code       = self::$statusFilter ? (int) (self::$statusFilter)($status, $to) : $status;
+        $redirectBy = self::$redirectByFilter ? (string) (self::$redirectByFilter)($redirectBy, $status, $to) : $redirectBy;
 
-        if (empty($this->values)) {
-            $this->redirect($this->to, $this->status);
+        if ($location === '') {
+            return;
         }
 
-        return $this;
-    }
-
-    public function with(string $key, array $values): void
-    {
-        $_SESSION[$this->redirectBy][$key] = $values;
-
-        $this->redirect($this->to, $this->status);
-    }
-
-    public function redirect(string $to, int $status = 302, string $redirectBy = 'Expansa'): self
-    {
-        $to = url($to);
-
-        $this->to         = self::$locationFilter ? (self::$locationFilter)($to, $status) : $to;
-        $this->status     = self::$statusFilter ? (self::$statusFilter)($status, $to) : $status;
-        $this->redirectBy = self::$redirectByFilter ? (self::$redirectByFilter)($redirectBy, $status, $to) : $redirectBy;
-
-        if ($this->to) {
-            if ($this->status < 300 || 399 < $this->status) {
-                throw new InvalidArgumentException(t('HTTP redirect status code must be a redirection code, 3xx.'));
-            }
-
-            if (!empty($this->redirectBy)) {
-                header("X-Redirect-By: $this->redirectBy");
-            }
-
-            header("Location: $this->to", true, $this->status);
-            exit;
+        if ($code < 300 || $code > 399) {
+            throw new InvalidArgumentException('HTTP redirect status code must be a redirection code, 3xx.');
         }
 
-        return $this;
+        if ($redirectBy !== '') {
+            header("X-Redirect-By: $redirectBy");
+        }
+
+        header("Location: $location", true, $code);
+        exit;
     }
 }

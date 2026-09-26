@@ -62,7 +62,7 @@ final class VerifyCsrfToken
             // HEAD must never carry a body — Response::prepare(Request) would normally
             // enforce this, kept here as a plain check instead of pulling in a Request.
             if ($_SERVER['REQUEST_METHOD'] === 'HEAD') {
-                $response->setContent(null);
+                $response->content = '';
             }
 
             $response->send();

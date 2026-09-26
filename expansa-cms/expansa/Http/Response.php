@@ -4,88 +4,46 @@ declare(strict_types=1);
 
 namespace Expansa\Http;
 
-use Expansa\Http\Contracts\Request as RequestContract;
-use Expansa\Http\Contracts\Response as ResponseContract;
 use Stringable;
 
-class Response implements ResponseContract
+/**
+ * Outgoing HTTP response: status, headers, cookies and body, sent with send().
+ *
+ * @package Expansa\Http
+ */
+final class Response
 {
-    protected string $version = '1.1';
-
-    protected string $charset = 'utf-8';
+    /**
+     * Charset appended to the Content-Type header.
+     */
+    private const string CHARSET = 'utf-8';
 
     /**
      * Set-Cookie header values.
      *
      * @var array<string|Stringable>
      */
-    public protected(set) array $cookies = [];
+    public private(set) array $cookies = [];
 
-    protected array $headers = [];
+    public function __construct(
 
-    protected int $statusCode = 200;
+        /**
+         * Response body.
+         */
+        public string $content = '',
 
-    protected string $statusText = '';
+        /**
+         * HTTP status code.
+         */
+        public int $statusCode = 200,
 
-    protected ?string $content = null;
-
-    public function __construct(string $content = '', int $statusCode = 200, array $headers = [])
-    {
-        $this->setContent($content)
-             ->setStatusCode($statusCode)
-             ->setHeaders($headers);
-    }
-
-    public function setStatusCode(int $statusCode): static
-    {
-        $this->statusCode = $statusCode;
-
-        return $this;
-    }
-
-    public function code(int $statusCode): static
-    {
-        return $this->setStatusCode($statusCode);
-    }
-
-    public function setHeader(string $name, string $value): static
-    {
-        $this->headers[$name] = $value;
-
-        return $this;
-    }
-
-    public function header(string $name, string $value): static
-    {
-        return $this->setHeader($name, $value);
-    }
-
-    public function setHeaders(array $headers = []): static
-    {
-        $this->headers = array_merge($this->headers, $headers);
-
-        return $this;
-    }
-
-    public function withHeaders(array $headers = []): static
-    {
-        return $this->setHeaders($headers);
-    }
-
-    public function headers(array $headers = []): static
-    {
-        return $this->setHeaders($headers);
-    }
-
-    /**
-     * Forget the cookies added so far.
-     *
-     * @return void
-     */
-    public function flushCookies(): void
-    {
-        $this->cookies = [];
-    }
+        /**
+         * Headers, name => value.
+         *
+         * @var array<string, string>
+         */
+        public array $headers = [],
+    ) {}
 
     /**
      * Add a cookie, sent as a Set-Cookie header.
@@ -100,113 +58,89 @@ class Response implements ResponseContract
         return $this;
     }
 
-    public function setContent(?string $content): static
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
-    public function getContent(): string
-    {
-        return $this->content ?? '';
-    }
-
-    public function content(mixed $content = null): static|string|null
-    {
-        if (is_null($content)) {
-            return $this->getContent();
-        }
-
-        return $this->setContent($content);
-    }
-
+    /**
+     * Set the body to the JSON of the data along with the Content-Type header.
+     *
+     * @param array<array-key, mixed> $data
+     * @param int                     $statusCode
+     * @param array<string, string>   $headers    Added to the current headers.
+     * @return static
+     */
     public function json(array $data, int $statusCode = 200, array $headers = []): static
     {
-        $this->content = json_encode($data, JSON_UNESCAPED_UNICODE);
+        $this->content    = (string) json_encode($data, JSON_UNESCAPED_UNICODE);
+        $this->statusCode = $statusCode;
+        $this->headers    = [...$this->headers, 'Content-Type' => 'application/json', ...$headers];
 
-        $this->header('Content-Type', 'application/json');
-
-        return $this->setStatusCode($statusCode)->setHeaders($headers);
+        return $this;
     }
 
-    public function prepare(RequestContract $request): static
+    /**
+     * Adjust the response to the request: a HEAD response has no body.
+     *
+     * @param Request $request
+     * @return static
+     */
+    public function prepare(Request $request): static
     {
-        if ($request->isMethod('HEAD')) {
-            $this->setContent(null);
+        if ($request->method === 'HEAD') {
+            $this->content = '';
         }
 
         return $this;
     }
 
+    /**
+     * Send the headers and the body, then finish the request so the script can go on without the client waiting.
+     *
+     * @return static
+     */
     public function send(): static
     {
-        $this->sendHeaders()->sendContent();
+        if (! headers_sent()) {
+            http_response_code($this->statusCode);
+
+            foreach ($this->headers as $name => $value) {
+                if (strcasecmp($name, 'Content-Type') === 0) {
+                    $value .= '; charset=' . self::CHARSET;
+                }
+                header($name . ': ' . $value, false);
+            }
+
+            foreach ($this->cookies as $cookie) {
+                header('Set-Cookie: ' . $cookie, false);
+            }
+        }
+
+        echo $this->content;
 
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         } elseif (function_exists('litespeed_finish_request')) {
             litespeed_finish_request();
-        } elseif (!in_array(PHP_SAPI, ['cli', 'phpdbg'], true)) {
-            static::closeOutputBuffers(0, true);
+        } elseif (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
+            self::flushOutputBuffers();
         }
 
         return $this;
     }
 
-    protected function sendHeaders(): static
+    /**
+     * Flush and close the output buffers that allow it.
+     *
+     * @return void
+     */
+    private static function flushOutputBuffers(): void
     {
-        // headers have already been sent by the developer
-        if (headers_sent()) {
-            return $this;
-        }
+        $flags = PHP_OUTPUT_HANDLER_REMOVABLE | PHP_OUTPUT_HANDLER_FLUSHABLE;
 
-        // headers
-        foreach ($this->headers as $name => $value) {
-            if (strtolower($name) == 'content-type') {
-                header($name . ': ' . $value . '; charset=' . $this->charset, false, $this->statusCode);
-            } else {
-                header($name . ': ' . $value, false, $this->statusCode);
+        foreach (array_reverse(ob_get_status(true)) as $status) {
+            if (($status['flags'] & $flags) !== $flags) {
+                break;
             }
+            ob_end_flush();
         }
 
-        foreach ($this->cookies as $cookie) {
-            header("Set-Cookie: " . (string) $cookie, false, $this->statusCode);
-        }
-
-        header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode);
-
-        return $this;
-    }
-
-    protected function sendContent(): static
-    {
-        echo $this->getContent();
-
-        return $this;
-    }
-
-    public static function closeOutputBuffers(int $targetLevel, bool $flush): void
-    {
-        $status = ob_get_status(true);
-        $level  = count($status);
-        $flags  = PHP_OUTPUT_HANDLER_REMOVABLE | ($flush ? PHP_OUTPUT_HANDLER_FLUSHABLE : PHP_OUTPUT_HANDLER_CLEANABLE);
-
-        while ($level-- > $targetLevel && ($s = $status[$level]) && (!isset($s['del']) ? !isset($s['flags']) || ($s['flags'] & $flags) === $flags : $s['del'])) {
-            if ($flush) {
-                ob_end_flush();
-                flush();
-            } else {
-                ob_end_clean();
-            }
-        }
-    }
-
-    public function isRedirect(?string $location = null): bool
-    {
-        return in_array(
-            $this->statusCode,
-            [201, 301, 302, 303, 307, 308]
-        ) && (null === $location || $location == ($this->headers['Location'] ?? null));
+        flush();
     }
 }
