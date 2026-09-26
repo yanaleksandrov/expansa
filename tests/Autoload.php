@@ -5,19 +5,7 @@ declare(strict_types=1);
 use Expansa\Support\ClassMap;
 
 // run: php tests/Autoload.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
-
+require_once __DIR__ . '/bootstrap.php';
 /**
  * Run PHP code in a fresh process with the autoloader, so every check starts with no class loaded.
  */
@@ -30,8 +18,6 @@ function isolated(string $code): string
 
     return trim($output);
 }
-
-require EX_PATH . 'autoload.php';
 
 $classmap = EX_PATH . 'cache/classmap.php';
 $saved    = is_file($classmap) ? file_get_contents($classmap) : null;

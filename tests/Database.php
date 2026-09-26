@@ -5,21 +5,8 @@ declare(strict_types=1);
 use Expansa\Database\Query\Builder;
 
 // run: php tests/Database.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 require_once EX_PATH . 'expansa/functions.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
 
 // test mode builds the SQL without connecting or running it
 $db  = new Builder(['driver' => 'mysql', 'type' => 'mysql', 'prefix' => 'x_', 'testMode' => true]);

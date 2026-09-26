@@ -11,31 +11,7 @@ use Expansa\Scheduler\Scheduler;
 use PHPMailer\PHPMailer\PHPMailer;
 
 // run: php tests/Scheduler.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
-
-function throws(callable $callback, string $class = SchedulerException::class): bool
-{
-    try {
-        $callback();
-    } catch (Throwable $e) {
-        return $e instanceof $class;
-    }
-
-    return false;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 function runDate(string $expression, string $from, bool $invert = false): string
 {
@@ -104,7 +80,7 @@ $valid   = ['* * * * *', '*/5 1-5 1,15 JAN-MAR MON-FRI', '0 0 L * ?', '0 0 15W *
 $invalid = ['* * * *', '* * * * * *', '? * * * *', '0 0 ? * ?', '60 * * * *', '0 24 * * *', '0 0 32 * *', '0 0 * 13 *', '0 0 * * 8', '*/0 * * * *', '*/-1 * * * *', '+5 * * * *', '1e1 * * * *', '*/5/2 * * * *', '5/5 * * * *', '1-2-3 * * * *', '*-5 * * * *', '0 0 LW * *', '0 0 1,L * *', '0 0 * * 5#6', 'foo'];
 check('valid expressions are accepted', array_filter($valid, fn ($e) => ! CronExpression::isValidExpression($e)) === []);
 check('invalid expressions are rejected', array_filter($invalid, fn ($e) => CronExpression::isValidExpression($e)) === []);
-check('invalid expression throws a SchedulerException', throws(fn () => new CronExpression('60 * * * *')) && throws(fn () => new CronExpression('60 * * * *'), InvalidArgumentException::class));
+check('invalid expression throws a SchedulerException', throws(fn () => new CronExpression('60 * * * *'), SchedulerException::class) && throws(fn () => new CronExpression('60 * * * *'), InvalidArgumentException::class));
 check('setPart changes the expression', (string) new CronExpression('* * * * *')->setPart(CronExpression::HOUR, '5') === '* 5 * * *' && new CronExpression('* * * * *')->setPart(CronExpression::HOUR, '5')->isDue(new DateTime('2025-01-01 05:10')));
 
 // the fork must agree with the original library wherever it did not fix a bug
@@ -160,7 +136,7 @@ check('daily accepts H:i with leading zeros', expression($job->daily('09:05')) =
 check('daily keeps the minute of a * hour', expression($job->daily('*', 30)) === '30 * * * *');
 check('weekly and weekdays', expression($job->weekly(3, '10:30')) === '30 10 * * 3' && expression($job->friday(18)) === '0 18 * * 5' && expression($job->sunday()) === '0 0 * * 0');
 check('monthly and months', expression($job->monthly(day: 15, hour: '12:45')) === '45 12 15 * *' && expression($job->december(25, 8)) === '0 8 25 12 *');
-check('invalid interval values throw', throws(fn () => $job->hourly(60)) && throws(fn () => $job->daily('25:00')) && throws(fn () => $job->everyMinute(0)) && throws(fn () => $job->weekly(7)) && throws(fn () => $job->monthly(13)));
+check('invalid interval values throw', throws(fn () => $job->hourly(60), SchedulerException::class) && throws(fn () => $job->daily('25:00'), SchedulerException::class) && throws(fn () => $job->everyMinute(0), SchedulerException::class) && throws(fn () => $job->weekly(7), SchedulerException::class) && throws(fn () => $job->monthly(13), SchedulerException::class));
 check('at accepts an alias', expression($job->at('@hourly')) === '0 * * * *');
 
 $job = new Job(fn () => null)->date('2030-05-06 07:08');
@@ -227,7 +203,7 @@ new Job(function () use (&$locked, $tmp) {
     $locked = is_file($tmp . DIRECTORY_SEPARATOR . 'configured.lock');
 }, id: 'configured')->configure(['tempDir' => $tmp])->onlyOne('/no/such/dir')->run();
 check('onlyOne falls back to the configured tempDir', $locked);
-check('invalid config throws', throws(fn () => new Job('ls')->configure(['email' => 'me@example.com'])) && throws(fn () => new Job('ls')->configure(['tempDir' => 1])));
+check('invalid config throws', throws(fn () => new Job('ls')->configure(['email' => 'me@example.com']), SchedulerException::class) && throws(fn () => new Job('ls')->configure(['tempDir' => 1]), SchedulerException::class));
 
 // shell commands
 $posix = PHP_OS_FAMILY !== 'Windows';
@@ -266,7 +242,7 @@ $executed = $scheduler->run(new DateTime('2025-06-15 10:30'));
 check('run executes the due jobs, skipped ones are not executed', $executed === [$first, $last] && $last->getOutput() === 'LAST');
 check('an Error of a job does not stop the others', count($scheduler->getFailedJobs()) === 1 && $scheduler->getFailedJobs()[0]->getException() instanceof TypeError);
 check('verbose output logs every executed and failed job', count($scheduler->getVerboseOutput('array')) === 3 && str_contains($scheduler->getVerboseOutput(), 'type: Closure ' . __FILE__));
-check('unknown verbose output type throws', throws(fn () => $scheduler->getVerboseOutput('json')));
+check('unknown verbose output type throws', throws(fn () => $scheduler->getVerboseOutput('json'), SchedulerException::class));
 check('resetRun clears the results', $scheduler->resetRun()->getExecutedJobs() === [] && $scheduler->getFailedJobs() === [] && $scheduler->getVerboseOutput() === '');
 check('clearJobs empties the queue', $scheduler->clearJobs()->getQueuedJobs() === []);
 
@@ -279,7 +255,7 @@ $scheduler  = new Scheduler();
 $foreground = $scheduler->call(fn () => null);
 $background = $scheduler->raw('ls');
 check('background jobs are queued first', $scheduler->getQueuedJobs() === ($posix ? [$background, $foreground] : [$foreground, $background]));
-check('work() rejects invalid seconds', throws(fn () => $scheduler->work([60])));
+check('work() rejects invalid seconds', throws(fn () => $scheduler->work([60]), SchedulerException::class));
 
 // email
 class_exists(Mailer::class);

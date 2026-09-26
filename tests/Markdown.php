@@ -5,20 +5,7 @@ declare(strict_types=1);
 use Expansa\Translation\Markdown;
 
 // run: php tests/Markdown.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 check('headings of every level', Markdown::render('# Заголовок') === '<h1>Заголовок</h1>' && Markdown::render('###### Заголовок') === '<h6>Заголовок</h6>');
 check('bold and italic inside a heading', Markdown::render('## Текст с **жирным** и *курсивом*') === '<h2>Текст с <strong>жирным</strong> и <em>курсивом</em></h2>');

@@ -6,21 +6,8 @@ use App\Support\Installation;
 use Expansa\Facades\Extensions;
 
 // run: php tests/Installation.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 require_once EX_PATH . 'expansa/functions.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
 
 // installation steps in a scratch copy, so the real env.php is never touched
 $root = sys_get_temp_dir() . '/expansa-install-' . getmypid() . '/';

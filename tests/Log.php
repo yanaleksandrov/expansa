@@ -17,31 +17,7 @@ use Expansa\Log\LogRecord;
 use Expansa\Log\Manager;
 
 // run: php tests/Log.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
-
-function throws(callable $callback, string $class = LogException::class): bool
-{
-    try {
-        $callback();
-    } catch (Throwable $e) {
-        return $e instanceof $class;
-    }
-
-    return false;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 // keeps the records in memory
 class MemoryHandler extends AbstractHandler
@@ -76,7 +52,7 @@ $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'expansa-log-' . getmypid();
 
 // levels
 check('levels resolve from cases, values, RFC 5424 codes and names', Level::of(Level::Error) === Level::Error && Level::of(400) === Level::Error && Level::of(3) === Level::Error && Level::of('ERROR') === Level::Error);
-check('unknown levels throw', throws(fn () => Level::of('fatal')) && throws(fn () => Level::of(8)) && throws(fn () => new Logger()->log('verbose', 'x')));
+check('unknown levels throw', throws(fn () => Level::of('fatal'), LogException::class) && throws(fn () => Level::of(8), LogException::class) && throws(fn () => new Logger()->log('verbose', 'x'), LogException::class));
 check('level labels and order', Level::Warning->label() === 'WARNING' && Level::Warning->includes(Level::Error) && ! Level::Warning->includes(Level::Info));
 
 // logger
@@ -155,7 +131,7 @@ $handler->close();
 $handler->handle(record('third'));
 check('the file is opened again after close', substr_count(file_get_contents($file), "\n") === 3);
 $handler->close();
-check('an unwritable path throws', throws(fn () => new File($file . DIRECTORY_SEPARATOR . 'x' . DIRECTORY_SEPARATOR . 'a.log')->handle(record('x'))));
+check('an unwritable path throws', throws(fn () => new File($file . DIRECTORY_SEPARATOR . 'x' . DIRECTORY_SEPARATOR . 'a.log')->handle(record('x')), LogException::class));
 
 $daily = $tmp . DIRECTORY_SEPARATOR . 'daily';
 mkdir($daily);
@@ -191,9 +167,9 @@ check('the first channel is the default one', $manager->getDefaultChannel() === 
 check('channels are created once', $manager->channel('file') === $manager->channel('file') && $manager->channel('file')->getName() === 'file');
 check('channel drivers and levels come from the config', $manager->channel()->getHandlers()[0] instanceof File && $manager->channel()->getHandlers()[0]->getLevel() === Level::Notice);
 check('stack channel gets the handlers of its channels', count($manager->channel('both')->getHandlers()) === 2);
-check('a stack including itself throws', throws(fn () => $manager->channel('self')));
-check('unknown channel, driver and missing options throw', throws(fn () => $manager->channel('none')) && throws(fn () => $manager->channel('bad')) && throws(fn () => $manager->channel('tg')));
-check('unknown default channel throws', throws(fn () => new Manager()->configure(['a' => ['driver' => 'single']], 'b')));
+check('a stack including itself throws', throws(fn () => $manager->channel('self'), LogException::class));
+check('unknown channel, driver and missing options throw', throws(fn () => $manager->channel('none'), LogException::class) && throws(fn () => $manager->channel('bad'), LogException::class) && throws(fn () => $manager->channel('tg'), LogException::class));
+check('unknown default channel throws', throws(fn () => new Manager()->configure(['a' => ['driver' => 'single']], 'b'), LogException::class));
 
 $memory = new MemoryHandler();
 $manager->extend('memory', fn (array $config, string $name) => $memory);
