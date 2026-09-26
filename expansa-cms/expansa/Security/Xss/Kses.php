@@ -6,361 +6,161 @@ namespace Expansa\Security\Xss;
 
 use InvalidArgumentException;
 
-class Kses
+/**
+ * HTML filter: keeps only allowed elements, attributes and URL protocols, disarms everything else.
+ * Port of kses (https://sourceforge.net/projects/kses), the filter behind wp_kses().
+ *
+ * @package Expansa\Security\Xss
+ */
+final class Kses
 {
     /**
-     * @var array
+     * Allowed elements and their attributes, in alphabetical order. A listed attribute takes any value,
+     * `name => [check => value]` takes a value that passes one of the checks, see checkAttrVal().
+     * The `*` element holds attributes of every element, a name ending with `*` is a prefix.
      */
-    public $allowedHtml = [
-        'a'          => [
-            'class'    => 1,
-            'download' => [
-                'valueless' => 'y',
-            ],
-            'href'     => 1,
-            'id'       => 1,
-            'rel'      => 1,
-            'rev'      => 1,
-            'name'     => 1,
-            'target'   => 1,
-        ],
+    public const array ALLOWED_HTML = [
+        '*'          => ['aria-*', 'class', 'data-*', 'dir', 'lang', 'role', 'title'],
+        'a'          => ['download' => ['valueless' => 'y'], 'href', 'id', 'name', 'rel', 'rev', 'target'],
         'abbr'       => [],
         'address'    => [],
-        'audio'      => [
-            'autoplay' => 1,
-            'class'    => 1,
-            'controls' => 1,
-            'id'       => 1,
-            'loop'     => 1,
-            'muted'    => 1,
-            'preload'  => 1,
-            'src'      => 1,
-        ],
+        'article'    => [],
+        'aside'      => [],
+        'audio'      => self::MEDIA,
         'b'          => [],
+        'bdi'        => [],
         'bdo'        => [],
-        'blockquote' => [
-            'cite'  => 1,
-            'class' => 1,
-            'id'    => 1,
-            'lang'  => 1,
-        ],
+        'blockquote' => ['cite', 'id'],
         'br'         => [],
-        'button'     => [
-            'class'    => 1,
-            'disabled' => 1,
-            'id'       => 1,
-            'name'     => 1,
-            'type'     => 1,
-            'value'    => 1,
-        ],
-        'caption'    => [
-            'align' => 1,
-        ],
+        'button'     => ['disabled', 'id', 'name', 'type', 'value'],
+        'caption'    => ['align'],
         'cite'       => [],
         'code'       => [],
+        'col'        => ['span'],
+        'colgroup'   => ['span'],
+        'data'       => ['value'],
         'dd'         => [],
-        'del'        => [
-            'datetime' => 1,
-        ],
-        'div'        => [
-            'class' => 1,
-            'dir'   => 1,
-            'id'    => 1,
-            'lang'  => 1,
-        ],
+        'del'        => ['datetime'],
+        'details'    => ['open'],
+        'dfn'        => [],
+        'div'        => ['id'],
         'dl'         => [],
         'dt'         => [],
         'em'         => [],
-        'fieldset'   => [
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'figcaption' => [
-            'align' => 1,
-            'class' => 1,
-            'dir'   => 1,
-            'id'    => 1,
-            'lang'  => 1,
-        ],
-        'figure'     => [
-            'align' => 1,
-            'class' => 1,
-            'dir'   => 1,
-            'id'    => 1,
-            'lang'  => 1,
-        ],
-        'h1'         => [
-            'align' => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'h2'         => [
-            'align' => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'h3'         => [
-            'align' => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'h4'         => [
-            'align' => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'h5'         => [
-            'align' => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'h6'         => [
-            'align' => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'hr'         => [
-            'align'   => 1,
-            'class'   => 1,
-            'id'      => 1,
-            'noshade' => 1,
-            'size'    => 1,
-            'width'   => 1,
-        ],
-        'i'          => [
-            'aria-hidden' => 1,
-            'class'       => 1,
-            'id'          => 1,
-        ],
+        'fieldset'   => ['id'],
+        'figcaption' => self::ALIGNED,
+        'figure'     => self::ALIGNED,
+        'footer'     => [],
+        'h1'         => self::ALIGNED,
+        'h2'         => self::ALIGNED,
+        'h3'         => self::ALIGNED,
+        'h4'         => self::ALIGNED,
+        'h5'         => self::ALIGNED,
+        'h6'         => self::ALIGNED,
+        'header'     => [],
+        'hgroup'     => [],
+        'hr'         => [...self::ALIGNED, 'noshade', 'size', 'width'],
+        'i'          => ['id'],
         'iframe'     => [
-            'allowfullscreen' => 1,
-            'frameborder'     => 1,
-            'height'          => 1,
-            'id'              => 1,
-            'sandbox'         => 1,
-            'scrolling'       => 1,
-            'src'             => 1,
-            'marginheight'    => 1,
-            'marginwidth'     => 1,
-            'title'           => 1,
-            'width'           => 1,
+            'allow',
+            'allowfullscreen',
+            'frameborder',
+            'height',
+            'id',
+            'loading',
+            'marginheight',
+            'marginwidth',
+            'referrerpolicy',
+            'sandbox',
+            'scrolling',
+            'src',
+            'width',
         ],
-        'img'        => [
-            'alt'    => 1,
-            'align'  => 1,
-            'class'  => 1,
-            'border' => 1,
-            'height' => 1,
-            'id'     => 1,
-            'src'    => 1,
-            'width'  => 1,
-        ],
-        'ins'        => [
-            'datetime' => 1,
-            'cite'     => 1,
-            'class'    => 1,
-            'id'       => 1,
-        ],
-        'kbd'        => [
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'label'      => [
-            'class' => 1,
-            'for'   => 1,
-            'id'    => 1,
-        ],
-        'legend'     => [
-            'align' => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'li'         => [
-            'class' => 1,
-            'id'    => 1,
-        ],
+        'img'        => ['align', 'alt', 'border', 'decoding', 'height', 'id', 'loading', 'sizes', 'src', 'srcset', 'width'],
+        'ins'        => ['cite', 'datetime', 'id'],
+        'kbd'        => ['id'],
+        'label'      => ['for', 'id'],
+        'legend'     => self::ALIGNED,
+        'li'         => ['id', 'value'],
+        'main'       => [],
         'mark'       => [],
-        'meter'      => [
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'nav'        => [
-            'align' => 1,
-            'class' => 1,
-            'dir'   => 1,
-            'id'    => 1,
-            'lang'  => 1,
-        ],
-        'ol'         => [
-            'class' => 1,
-            'id'    => 1,
-        ],
+        'meter'      => ['id'],
+        'nav'        => self::ALIGNED,
+        'ol'         => ['id', 'reversed', 'start', 'type'],
+        'optgroup'   => ['label', 'selected', 'value'],
+        'option'     => ['selected', 'value'],
         'p'          => [],
+        'picture'    => [],
         'pre'        => [],
-        'progress'   => [
-            'class' => 1,
-            'id'    => 1,
-        ],
-        'q'          => [
-            'cite'  => 1,
-            'class' => 1,
-            'id'    => 1,
-        ],
+        'progress'   => ['id'],
+        'q'          => ['cite', 'id'],
         'rp'         => [],
         'rt'         => [],
         'ruby'       => [],
         's'          => [],
         'samp'       => [],
-        'section'    => [
-            'align' => 1,
-            'class' => 1,
-            'dir'   => 1,
-            'id'    => 1,
-            'lang'  => 1,
-        ],
-        'select'     => [
-            'class'    => 1,
-            'u-select' => 1,
-        ],
-        'option'     => [
-            'value'    => 1,
-            'selected' => 1,
-        ],
-        'optgroup'   => [
-            'value'    => 1,
-            'label'    => 1,
-            'selected' => 1,
-        ],
+        'section'    => self::ALIGNED,
+        'select'     => [],
         'small'      => [],
-        'span'       => [
-            'align' => 1,
-            'class' => 1,
-        ],
+        'source'     => ['media', 'sizes', 'src', 'srcset', 'type'],
+        'span'       => ['align'],
         'strong'     => [],
         'sub'        => [],
+        'summary'    => [],
         'sup'        => [],
-        'table'      => [
-            'align'       => 1,
-            'bgcolor'     => 1,
-            'border'      => 1,
-            'cellpadding' => 1,
-            'cellspacing' => 1,
-            'class'       => 1,
-            'dir'         => 1,
-            'id'          => 1,
-            'rules'       => 1,
-            'summary'     => 1,
-            'width'       => 1,
-        ],
-        'tbody'      => [
-            'align'   => 1,
-            'char'    => 1,
-            'charoff' => 1,
-            'class'   => 1,
-            'id'      => 1,
-            'valign'  => 1,
-        ],
-        'td'         => [
-            'abbr'    => 1,
-            'align'   => 1,
-            'axis'    => 1,
-            'bgcolor' => 1,
-            'char'    => 1,
-            'charoff' => 1,
-            'class'   => 1,
-            'colspan' => 1,
-            'dir'     => 1,
-            'headers' => 1,
-            'height'  => 1,
-            'id'      => 1,
-            'nowrap'  => 1,
-            'rowspan' => 1,
-            'scope'   => 1,
-            'valign'  => 1,
-            'width'   => 1,
-        ],
-        'tfoot'      => [
-            'align'   => 1,
-            'char'    => 1,
-            'charoff' => 1,
-            'class'   => 1,
-            'id'      => 1,
-            'valign'  => 1,
-        ],
-        'th'         => [
-            'abbr'    => 1,
-            'align'   => 1,
-            'axis'    => 1,
-            'bgcolor' => 1,
-            'char'    => 1,
-            'charoff' => 1,
-            'class'   => 1,
-            'colspan' => 1,
-            'headers' => 1,
-            'height'  => 1,
-            'id'      => 1,
-            'nowrap'  => 1,
-            'rowspan' => 1,
-            'scope'   => 1,
-            'valign'  => 1,
-            'width'   => 1,
-        ],
-        'thead'      => [
-            'align'   => 1,
-            'char'    => 1,
-            'charoff' => 1,
-            'class'   => 1,
-            'id'      => 1,
-            'valign'  => 1,
-        ],
+        'table'      => ['align', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'id', 'rules', 'summary', 'width'],
+        'tbody'      => self::TABLE_SECTION,
+        'td'         => self::TABLE_CELL,
+        'tfoot'      => self::TABLE_SECTION,
+        'th'         => self::TABLE_CELL,
+        'thead'      => self::TABLE_SECTION,
+        'time'       => ['datetime'],
         'title'      => [],
-        'tr'         => [
-            'align'   => 1,
-            'bgcolor' => 1,
-            'char'    => 1,
-            'charoff' => 1,
-            'class'   => 1,
-            'id'      => 1,
-            'valign'  => 1,
-        ],
-        'track'      => [
-            'class'   => 1,
-            'default' => 1,
-            'id'      => 1,
-            'kind'    => 1,
-            'label'   => 1,
-            'src'     => 1,
-            'srclang' => 1,
-        ],
+        'tr'         => [...self::TABLE_SECTION, 'bgcolor'],
+        'track'      => ['default', 'id', 'kind', 'label', 'src', 'srclang'],
         'u'          => [],
-        'ul'         => [
-            'class' => 1,
-            'id'    => 1,
-        ],
+        'ul'         => ['id'],
         'var'        => [],
-        'video'      => [
-            'autoplay' => 1,
-            'class'    => 1,
-            'controls' => 1,
-            'height'   => 1,
-            'id'       => 1,
-            'loop'     => 1,
-            'muted'    => 1,
-            'poster'   => 1,
-            'preload'  => 1,
-            'src'      => 1,
-            'width'    => 1,
-        ],
-        'wbr'        => [
-            'class' => 1,
-            'id'    => 1,
-        ],
+        'video'      => [...self::MEDIA, 'height', 'playsinline', 'poster', 'width'],
+        'wbr'        => ['id'],
     ];
 
     /**
-     * @var array
+     * Attributes of headings and sections in ALLOWED_HTML.
      */
-    public $allowedProtocols = [
+    private const array ALIGNED = ['align', 'id'];
+
+    /**
+     * Attributes of audio and video in ALLOWED_HTML.
+     */
+    private const array MEDIA = ['autoplay', 'controls', 'id', 'loop', 'muted', 'preload', 'src'];
+
+    /**
+     * Attributes of table rows and row groups in ALLOWED_HTML.
+     */
+    private const array TABLE_SECTION = ['align', 'char', 'charoff', 'id', 'valign'];
+
+    /**
+     * Attributes of table cells in ALLOWED_HTML.
+     */
+    private const array TABLE_CELL = [
+        ...self::TABLE_SECTION,
+        'abbr',
+        'axis',
+        'bgcolor',
+        'colspan',
+        'headers',
+        'height',
+        'nowrap',
+        'rowspan',
+        'scope',
+        'width',
+    ];
+
+    /**
+     * URL protocols allowed at the start of attribute values.
+     */
+    public const array ALLOWED_PROTOCOLS = [
         'ftp',
         'http',
         'https',
@@ -377,515 +177,571 @@ class Kses
     ];
 
     /**
-     * This function makes sure that only the allowed HTML element names, attribute
-     * names and attribute values plus only same HTML entities will occur in
-     * $str. You have to remove any slashes from PHP's magic quotes before you
-     * call this function.
-     *
-     * @return string an XSS safe version of $string, or an empty string if $string is not valid UTF-8
+     * Pieces of markup: a lone `<`, a comment, a tag up to `>` or the end, or a lone `>`.
      */
-    public function apply(string $str): string
+    private const string MARKUP = '%(<(?=[^a-zA-Z!/])|<!--.*?-->|<[^>]*(>|$)|>)%';
+
+    /**
+     * Well-formed attributes in a row: `name="value"`, `name='value'`, `name=value` or a valueless `name`,
+     * the same pieces combineAttributes() parses step by step.
+     */
+    private const string ATTRIBUTES = '/\G([-a-zA-Z]++)(?:\s*+=\s*+(?:"([^"]*+)"|\'([^\']*+)\'|([^\s"\']++))(?:\s++|$)|\s++(?!=)|$)/';
+
+    /**
+     * An attribute value: double-quoted, single quoted or unquoted, followed by whitespace or the end.
+     */
+    private const string VALUE = '/\G(?:"([^"]*)"|\'([^\']*)\'|([^\s"\']+))(?:\s+|$)/';
+
+    /**
+     * Characters of an element name.
+     */
+    private const string NAME_CHARS = '-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    /**
+     * Characters of a plainly written lower case protocol.
+     */
+    private const string PROTOCOL_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    /**
+     * Longest markup piece, in bytes, whose result is cached, so the cache stays small.
+     */
+    private const int CACHE_KEY_LENGTH = 256;
+
+    /**
+     * Max number of cached markup pieces per set of rules.
+     */
+    private const int CACHE_SIZE = 1024;
+
+    /**
+     * A protocol at the start of a value: letters, whitespace and entities followed by a colon in any encoding.
+     */
+    private const string PROTOCOL = '/^((&[^;]*;|[\sA-Za-z0-9])*)(:|&#0*58;|&#[Xx]0*3[Aa];|&colon;)\s*/';
+
+    /**
+     * Allowed elements with their attributes, keyed by the lower case element name,
+     * the attributes of `*` already added to every element. Never changes, the tag cache relies on it.
+     */
+    public readonly array $allowedHtml;
+
+    /**
+     * Rules of attribute prefixes by element, e.g. `data-` for `data-*`.
+     */
+    private readonly array $prefixes;
+
+    /**
+     * Key of the rules in the cache of filterMarkup(): empty for the default rules, a hash of the custom ones.
+     */
+    private readonly string $rules;
+
+    /**
+     * Create a filter.
+     *
+     * @param array    $allowedHtml      Elements and attributes, see ALLOWED_HTML.
+     * @param string[] $allowedProtocols Lower case protocols, see ALLOWED_PROTOCOLS; stored as keys for isset() lookups.
+     */
+    public function __construct(
+        array $allowedHtml = self::ALLOWED_HTML,
+        private array $allowedProtocols = self::ALLOWED_PROTOCOLS {
+            set => array_fill_keys($value, true);
+        },
+    )
     {
-        if (! $this->isUtf8($str)) {
-            return '';
-        }
+        // the default rules are compiled once per process, they are the same for every filter
+        static $defaults = self::compile(self::ALLOWED_HTML);
 
-        /* Removes any NULL characters in $str. */
-        $str = str_replace(chr(0), '', $str);
+        [$this->allowedHtml, $this->prefixes] = $allowedHtml === self::ALLOWED_HTML ? $defaults : self::compile($allowedHtml);
 
-        /* Remove Netscape 4 JS entities. */
-        $str = preg_replace('%&\s*\{[^}]*(\}\s*;?|$)%', '', $str) ?? '';
-
-        $str = self::normalizeEntities($str);
-
-        return (string) preg_replace_callback(
-            '%
-            (
-            <(?=[^a-zA-Z!/])  # a lone <
-            |                 # or
-            <!--.*?-->        # a comment
-            |                 # or
-            <[^>]*(>|$)       # a string that starts with a <, up until the > or the end of the string
-            |                 # or
-            >                 # just a >
-            )%x',
-            function (array $match): string {
-                return $this->stripTags($match);
-            },
-            $str
-        );
-    }
-
-    protected function isUtf8(string $str): bool
-    {
-        if ($str === '') {
-            return true;
-        }
-
-        /*
-         * With the PCRE_UTF8 modifier 'u', preg_match() fails silently on strings
-         * containing invalid UTF-8 byte sequences. It does not reject character
-         * codes above U+10FFFF (represented by 4 or more octets), though.
-         */
-        return preg_match('/^./us', $str) === 1;
+        // filters with the same rules share the results, others never see them
+        $this->rules = $allowedHtml === self::ALLOWED_HTML && $allowedProtocols === self::ALLOWED_PROTOCOLS
+            ? ''
+            : md5(serialize([$allowedHtml, $allowedProtocols]));
     }
 
     /**
-     * This function does a lot of work. It rejects some very malformed things
-     * like <:::>. It returns an empty string, if the element isn't allowed (look
-     * ma, no strip_tags()!). Otherwise, it splits the tag into an element and an
-     * attribute list.
+     * Get the default rules with more elements and attributes, e.g. directives of a trusted page.
+     *
+     * @param array $allowedHtml Elements and attributes added to ALLOWED_HTML, see ALLOWED_HTML.
+     * @return array
      */
-    protected function stripTags(array $match): string
+    public static function extend(array $allowedHtml): array
     {
-        $str = $match[0];
+        $rules = self::ALLOWED_HTML;
+        foreach ($allowedHtml as $element => $attributes) {
+            $rules[$element] = [...$rules[$element] ?? [], ...$attributes];
+        }
 
-        if (substr($str, 0, 1) !== '<') {
-            /* We matched a lone ">" character. */
+        return $rules;
+    }
+
+    /**
+     * Split rules into exact attributes and prefixes, adding the attributes of `*` to every element.
+     *
+     * @param array $allowedHtml
+     * @return array{array, array} Attributes by element and prefixes by element.
+     */
+    private static function compile(array $allowedHtml): array
+    {
+        $global = self::attributes($allowedHtml['*'] ?? []);
+        unset($allowedHtml['*']);
+
+        $prefixes = [];
+        foreach ($allowedHtml as $element => $attributes) {
+            $attributes = [...$global, ...self::attributes($attributes)];
+
+            foreach ($attributes as $name => $rules) {
+                if (str_ends_with($name, '*')) {
+                    $prefixes[$element][substr($name, 0, -1)] = $rules;
+                    unset($attributes[$name]);
+                }
+            }
+
+            $allowedHtml[$element] = $attributes;
+        }
+
+        return [$allowedHtml, $prefixes];
+    }
+
+    /**
+     * Turn listed attributes into `name => 1`, keeping the ones with checks; a later entry of a name wins.
+     *
+     * @param array $attributes E.g. `['href', 'download' => ['valueless' => 'y']]`.
+     * @return array<string, mixed>
+     */
+    private static function attributes(array $attributes): array
+    {
+        $rules = [];
+        foreach ($attributes as $name => $checks) {
+            if (is_int($name)) {
+                $rules[$checks] = 1;
+            } else {
+                $rules[$name] = $checks;
+            }
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Get the allowed protocols.
+     *
+     * @return string[]
+     */
+    public function getAllowedProtocols(): array
+    {
+        return array_keys($this->allowedProtocols);
+    }
+
+    /**
+     * Filter HTML: only allowed elements, attributes, protocols and valid entities remain.
+     *
+     * @param string $html
+     * @return string Safe HTML, an empty string for invalid UTF-8.
+     */
+    public function apply(string $html): string
+    {
+        if ($html === '' || ! mb_check_encoding($html, 'UTF-8')) {
+            return '';
+        }
+
+        // plain text without markup, entities and NUL characters is already safe
+        if (strpbrk($html, "<>&\0") === false) {
+            return $html;
+        }
+
+        $html = str_replace("\0", '', $html);
+
+        if (str_contains($html, '&')) {
+            // Netscape 4 JavaScript entities, e.g. &{alert(1)};
+            if (str_contains($html, '{')) {
+                $html = preg_replace('%&\s*\{[^}]*(\}\s*;?|$)%', '', $html) ?? '';
+            }
+
+            $html = self::normalizeEntities($html);
+        }
+
+        if (strpbrk($html, '<>') === false) {
+            return $html;
+        }
+
+        return (string) preg_replace_callback(self::MARKUP, $this->filterMarkup(...), $html);
+    }
+
+    /**
+     * Filter one piece of markup, reusing the result for a piece seen before by a filter with the same rules.
+     *
+     * @param array $match
+     * @return string
+     */
+    private function filterMarkup(array $match): string
+    {
+        // shared by all filters of the process, so it is split by the rules
+        static $cache = [];
+
+        $markup = $match[0];
+
+        if (isset($cache[$this->rules][$markup])) {
+            return $cache[$this->rules][$markup];
+        }
+
+        $result = $this->stripTags($markup);
+
+        if (strlen($markup) <= self::CACHE_KEY_LENGTH && count($cache[$this->rules] ?? []) < self::CACHE_SIZE) {
+            $cache[$this->rules][$markup] = $result;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Filter one piece of markup: disarm a lone `<` or `>`, drop a malformed or not allowed element.
+     *
+     * @param string $markup
+     * @return string
+     */
+    private function stripTags(string $markup): string
+    {
+
+        if ($markup[0] !== '<') {
             return '&gt;';
         }
-        if (strlen($str) === 1) {
-            /* We matched a lone "<" character. */
+
+        if ($markup === '<') {
             return '&lt;';
         }
 
-        /* It's seriously malformed. */
-        if (! preg_match('%^<\s*(/\s*)?([-a-zA-Z0-9]+)\s*([^>]*)>?|(<!--.*?-->)$%', $str, $matches)) {
+        // a tag without attributes and spaces, e.g. <p> or </p>, needs no parsing
+        if ($markup[-1] === '>') {
+            $closing = $markup[1] === '/';
+            $tag     = substr($markup, $closing ? 2 : 1, -1);
+
+            if ($tag !== '' && strspn($tag, self::NAME_CHARS) === strlen($tag)) {
+                if (! isset($this->allowedHtml[strtolower($tag)])) {
+                    return '';
+                }
+
+                return $closing ? "</{$tag}>" : "<{$tag}>";
+            }
+        }
+
+        if (! preg_match('%^<\s*(/\s*)?([-a-zA-Z0-9]+)\s*([^>]*)>?|(<!--.*?-->)$%', $markup, $matches)) {
             return '';
         }
 
-        $slash    = trim($matches[1]);
-        $tag      = &$matches[2];
-        $attrList = &$matches[3];
-        $comment  = &$matches[4];
+        $comment = $matches[4] ?? '';
+        $tag     = $comment !== '' ? '!--' : $matches[2];
+        $element = strtolower($tag);
 
-        if ($comment) {
-            $tag = '!--';
-        }
-
-        if (! isset($this->allowedHtml[strtolower($tag)])) {
+        if (! isset($this->allowedHtml[$element])) {
             return '';
         }
 
-        if ($comment) {
+        if ($comment !== '') {
             return $comment;
         }
 
-        /* They are using a not allowed HTML element. */
-        if ($slash !== '') {
+        // closing tags lose all attributes
+        if (trim($matches[1]) !== '') {
             return "</{$tag}>";
         }
 
-        /* No attributes are allowed for closing elements. */
-        return $this->stripAttributes("{$slash}{$tag}", $attrList);
+        return $this->stripAttributes($tag, $element, $matches[3]);
     }
 
     /**
-     * This function removes all attributes, if none are allowed for this element.
-     * If some are allowed it calls combineAttributes() to split them further, and then it
-     * builds up new HTML code from the data that combineAttributes() returns. It also
-     * removes "<" and ">" characters, if there are any left. One more thing it
-     * does is to check if the tag has a closing XHTML slash, and if it does,
-     * it puts one in the returned code as well.
-     */
-    protected function stripAttributes(string $tag, string $attr): string
-    {
-        /* Is there a closing XHTML slash at the end of the attributes? */
-        $xhtmlSlash = preg_match('%\s/\s*$%', $attr)
-            ? ' /'
-            : '';
-
-        /* Are any attributes allowed at all for this element? */
-        if (count($this->allowedHtml[strtolower($tag)]) === 0) {
-            return "<{$tag}{$xhtmlSlash}>";
-        }
-
-        /* Split it. */
-        $attrArr = $this->combineAttributes($attr);
-
-        /* Go through $attrArr, and save the allowed attributes for this element in $attrList. */
-        $attrList = '';
-
-        $tagAllowed = strtolower($tag);
-
-        foreach ($attrArr as $arrEach) {
-            $current = $this->allowedHtml[$tagAllowed][strtolower($arrEach['name'])] ?? null;
-
-            if ($current === null) {
-                /* The attribute is not allowed. */
-                continue;
-            }
-
-            if (! is_array($current)) {
-                $attrList .= ' ' . $arrEach['whole'];
-
-                continue;
-            }
-
-            foreach ($current as $key => $value) {
-                if (
-                    self::checkAttrVal(
-                        $arrEach['value'],
-                        $arrEach['vless'],
-                        $key,
-                        $value
-                    )
-                ) {
-                    /* It passed them. */
-                    $attrList .= ' ' . $arrEach['whole'];
-
-                    break;
-                }
-            }
-        }
-
-        /* Remove any "<" or ">" characters. */
-        $attrList = preg_replace('/[<>]/', '', $attrList) ?? '';
-
-        return "<{$tag}{$attrList}{$xhtmlSlash}>";
-    }
-
-    /**
-     * This function does a lot of work. It parses an attribute list into an array
-     * with attribute data, and tries to do the right thing even if it gets weird
-     * input. It will add quotes around attribute values that don't have any quotes
-     * or apostrophes around them, to make it easier to produce HTML code that will
-     * conform to W3C's HTML specification. It will also remove bad URL protocols
-     * from attribute values.
-     */
-    protected function combineAttributes(string $attr): array
-    {
-        $attrArr  = [];
-        $mode     = 0;
-        $attrName = '';
-
-        /* Loop through the whole attribute list. */
-        while (strlen($attr) !== 0) {
-            /* Was the last operation successful? */
-            $working = 0;
-
-            switch ($mode) {
-                /* Attribute name, href for instance. */
-                case 0:
-                    if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
-                        $working  = 1;
-                        $mode     = 1;
-                        $attr     = preg_replace('/^[-a-zA-Z]+/', '', $attr) ?? '';
-                        $attrName = strtolower($match[1]);
-                    }
-
-                    break;
-                    /* Equals sign or valueless ("selected"). */
-                case 1:
-                    if (preg_match('/^\s*=\s*/', $attr)) {
-                        /* Equals sign. */
-                        $working = 1;
-                        $mode    = 2;
-                        $attr    = preg_replace('/^\s*=\s*/', '', $attr) ?? '';
-
-                        break;
-                    }
-
-                    if (preg_match('/^\s+/', $attr)) {
-                        /* Valueless. */
-                        $working = 1;
-                        $mode    = 0;
-                        $attr    = preg_replace('/^\s+/', '', $attr) ?? '';
-
-                        $attrArr[] = [
-                            'name'  => $attrName,
-                            'value' => '',
-                            'whole' => $attrName,
-                            'vless' => 'y',
-                        ];
-                    }
-
-                    break;
-                    /* Attribute value, a URL after href= for instance. */
-                case 2:
-                    if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
-                        /* "value" */
-                        $working = 1;
-                        $mode    = 0;
-                        $attr    = preg_replace('/^"[^"]*"(\s+|$)/', '', $attr) ?? '';
-                        $thisVal = $this->badProtocol($match[1]);
-
-                        $attrArr[] = [
-                            'name'  => $attrName,
-                            'value' => $thisVal,
-                            'whole' => "{$attrName}=\"{$thisVal}\"",
-                            'vless' => 'n',
-                        ];
-
-                        break;
-                    }
-
-                    if (preg_match("/^'([^']*)'(\\s+|$)/", $attr, $match)) {
-                        /* 'value' */
-                        $working = 1;
-                        $mode    = 0;
-                        $attr    = preg_replace("/^'[^']*'(\\s+|$)/", '', $attr) ?? '';
-                        $thisVal = $this->badProtocol($match[1]);
-
-                        $attrArr[] = [
-                            'name'  => $attrName,
-                            'value' => $thisVal,
-                            'whole' => "{$attrName}='{$thisVal}'",
-                            'vless' => 'n',
-                        ];
-
-                        break;
-                    }
-
-                    if (preg_match("%^([^\\s\"']+)(\\s+|$)%", $attr, $match)) {
-                        /* value */
-                        $working = 1;
-                        $mode    = 0;
-                        /* We add quotes to conform to W3C's HTML spec. */
-                        $attr    = preg_replace("%^[^\\s\"']+(\\s+|$)%", '', $attr) ?? '';
-                        $thisVal = $this->badProtocol($match[1]);
-
-                        $attrArr[] = [
-                            'name'  => $attrName,
-                            'value' => $thisVal,
-                            'whole' => "{$attrName}=\"{$thisVal}\"",
-                            'vless' => 'n',
-                        ];
-                    }
-
-                    break;
-            }
-
-            if ($working === 0) {
-                /* Not well-formed, remove and try again. */
-                $attr = self::htmlError($attr);
-                $mode = 0;
-            }
-        }
-
-        if ($mode === 1) {
-            /* Special case, for when the attribute list ends with a valueless. */
-            /* Attribute like "selected". */
-            $attrArr[] = [
-                'name'  => $attrName,
-                'value' => '',
-                'whole' => $attrName,
-                'vless' => 'y',
-            ];
-        }
-
-        return $attrArr;
-    }
-
-    /**
-     * This function performs different checks for attribute values. The currently
-     * implemented checks are "maxlen", "minlen", "maxval", "minval" and "valueless"
-     * with even more checks to come soon.
+     * Rebuild an opening tag with its allowed attributes only, keeping the XHTML closing slash.
      *
-     * @param array|numeric|string $checkValue
-     * @throws InvalidArgumentException
-     */
-    protected static function checkAttrVal(string $value, string $vless, string $checkName, mixed $checkValue): bool
-    {
-        switch ($checkName) {
-            case 'maxlen':
-                if (! is_numeric($checkValue)) {
-                    throw new InvalidArgumentException('maxlen must be of type numeric, ' . gettype($checkValue) . ' given');
-                }
-
-                /*
-                 * The maxlen check makes sure that the attribute value has a length not
-                 * greater than the given value. This can be used to avoid Buffer Overflows
-                 * in WWW clients and various Internet servers.
-                 */
-                return strlen($value) <= $checkValue;
-            case 'minlen':
-                if (! is_numeric($checkValue)) {
-                    throw new InvalidArgumentException('maxlen must be of type numeric, ' . gettype($checkValue) . ' given');
-                }
-
-                /*
-                 * The minlen check makes sure that the attribute value has a length not
-                 * smaller than the given value.
-                 */
-                return strlen($value) >= $checkValue;
-            case 'maxval':
-                if (! is_numeric($checkValue)) {
-                    throw new InvalidArgumentException('maxlen must be of type numeric, ' . gettype($checkValue) . ' given');
-                }
-                /*
-                 * The maxval check does two things: it checks that the attribute value is
-                 * an integer from 0 and up, without an excessive amount of zeroes or
-                 * whitespace (to avoid Buffer Overflows). It also checks that the attribute
-                 * value is not greater than the given value.
-                 * This check can be used to avoid Denial of Service attacks.
-                 */
-                if (! preg_match('/^\s{0,6}\d{1,6}\s{0,6}$/', $value)) {
-                    return false;
-                }
-
-                return $value <= $checkValue;
-            case 'minval':
-                if (! is_numeric($checkValue)) {
-                    throw new InvalidArgumentException('maxlen must be of type numeric, ' . gettype($checkValue) . ' given');
-                }
-                /*
-                 * The minval check checks that the attribute value is a positive integer,
-                 * and that it is not smaller than the given value.
-                 */
-                if (! preg_match('/^\s{0,6}\d{1,6}\s{0,6}$/', $value)) {
-                    return false;
-                }
-
-                return $value >= $checkValue;
-            case 'valueless':
-                if (! is_string($checkValue)) {
-                    throw new InvalidArgumentException('valueless must be of type string, ' . gettype($checkValue) . ' given');
-                }
-
-                /*
-                 * The valueless check checks if the attribute has a value
-                 * (like <a href="blah">) or not (<option selected>). If the given value
-                 * is a "y" or a "Y", the attribute must not have a value.
-                 * If the given value is an "n" or an "N", the attribute must have one.
-                 */
-                return strtolower($checkValue) === $vless;
-            case 'content':
-                if (! is_array($checkValue)) {
-                    throw new InvalidArgumentException('content must be of type array, ' . gettype($checkValue) . ' given');
-                }
-
-                foreach ($checkValue as $check) {
-                    $str     = preg_quote($check, '/');
-                    $pattern = strtr($str, ['%' => '.*']);
-
-                    if (preg_match("/$pattern/", $value)) {
-                        return true;
-                    }
-                }
-
-                return false;
-            default:
-                return true;
-        }
-    }
-
-    /**
-     * This function removes all non-allowed protocols from the beginning of
-     * $str. It ignores whitespace and the case of the letters, and it does
-     * understand HTML entities. It does its work in a while loop, so it won't be
-     * fooled by a string like "javascript:javascript:alert(57)".
-     */
-    protected function badProtocol(string $str): string
-    {
-        /* Removes any NULL characters in $str. */
-        $str = str_replace(chr(0), '', $str);
-
-        /* Deals with Opera "feature". */
-        $string = preg_replace('/\xad+/', '', $str) ?? '';
-        $string .= 'a';
-
-        while ($str !== $string) {
-            $string = $str;
-
-            /**
-             * This function searches for URL protocols at the beginning of $string, while
-             * handling whitespace and HTML entities.
-             */
-            $str = preg_replace_callback(
-                '/^((&[^;]*;|[\sA-Za-z0-9])*)(:|&#58;|&#[Xx]3[Aa];)\s*/',
-                function (array $str): string {
-                    return $this->badProtocolOnce($str);
-                },
-                $str
-            ) ?? '';
-        }
-
-        return $str;
-    }
-
-    /**
-     * This function deals with parsing errors in combineAttributes(). The general plan is
-     * to remove everything to and including some whitespace, but it deals with
-     * quotes and apostrophes as well.
-     *
-     * @param string $str
+     * @param string $tag     Element name as written.
+     * @param string $element Lower case element name.
+     * @param string $attr    Attributes as written.
      * @return string
      */
-    protected static function htmlError(string $str): string
+    private function stripAttributes(string $tag, string $element, string $attr): string
     {
-        return preg_replace(
-            '/
-        ^
-        (
-        "[^"]*("|$)     # - a string that starts with a double quote, up until the next double quote or the end of the string
-        |               # or
-        \'[^\']*(\'|$)| # - a string that starts with a quote, up until the next quote or the end of the string
-        |               # or
-        \S              # - a non-whitespace character
-        )*              # any number of the above three
-        \s*             # any number of whitespaces
-        /x',
-            '',
-            $str
-        ) ?? '';
+        $slash    = str_contains($attr, '/') && preg_match('%\s/\s*$%', $attr) ? ' /' : '';
+        $allowed  = $this->allowedHtml[$element];
+        $prefixes = $this->prefixes[$element] ?? [];
+
+        if (($allowed === [] && $prefixes === []) || $attr === '') {
+            return "<{$tag}{$slash}>";
+        }
+
+        $list = $this->combineAttributes($attr, $allowed, $prefixes);
+
+        return '<' . $tag . (strpbrk($list, '<>') === false ? $list : str_replace(['<', '>'], '', $list)) . $slash . '>';
     }
 
     /**
-     * This function processes URL protocols, checks to see if they're in the white-list
-     * or not, and returns different data depending on the answer.
+     * Parse attributes even from broken markup and keep the allowed ones: unquoted values get quotes,
+     * values lose disallowed protocols, unparsable pieces are skipped.
+     *
+     * @param string $attr
+     * @param array  $allowed  Attribute rules of the element.
+     * @param array  $prefixes Attribute prefix rules of the element.
+     * @return string Allowed attributes, each one preceded by a space.
      */
-    protected function badProtocolOnce(array $str): string
+    private function combineAttributes(string $attr, array $allowed, array $prefixes): string
     {
-        $string = self::deleteEntities($str[1]);
-        $string = preg_replace('/\s/', '', $string) ?? '';
-        /* Deals with Opera "feature". */
-        $string = preg_replace('/\xad+/', '', $string) ?? '';
-        $string = strtolower($string);
+        $list   = '';
+        $mode   = 0;
+        $name   = '';
+        $offset = 0;
+        $length = strlen($attr);
 
-        return in_array($string, $this->allowedProtocols, true) ? "{$string}:" : '';
+        // 0: attribute name, 1: equals sign or a valueless attribute, 2: value
+        while ($offset < $length) {
+            $matched = false;
+
+            if ($mode === 0) {
+                // well-formed attributes are taken in one call, the steps below handle only the broken part
+                if (preg_match_all(self::ATTRIBUTES, $attr, $sets, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL, $offset)) {
+                    foreach ($sets as $set) {
+                        $offset += strlen($set[0]);
+                        $name    = strtolower($set[1]);
+                        $rules   = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+
+                        if ($rules !== null) {
+                            $list .= isset($set[3])
+                                ? $this->attribute($rules, $name, $set[3], "'")
+                                : $this->attribute($rules, $name, $set[2] ?? $set[4], '"');
+                        }
+                    }
+
+                    continue;
+                }
+
+                if (preg_match('/\G[-a-zA-Z]+/', $attr, $match, 0, $offset)) {
+                    $matched = true;
+                    $mode    = 1;
+                    $name    = strtolower($match[0]);
+                    $offset += strlen($match[0]);
+                }
+            } elseif ($mode === 1) {
+                if (preg_match('/\G\s*=\s*/', $attr, $match, 0, $offset)) {
+                    $matched = true;
+                    $mode    = 2;
+                    $offset += strlen($match[0]);
+                } elseif (preg_match('/\G\s+/', $attr, $match, 0, $offset)) {
+                    $matched = true;
+                    $mode    = 0;
+                    $offset += strlen($match[0]);
+                    $rules   = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+
+                    if ($rules !== null) {
+                        $list .= $this->attribute($rules, $name, null, '');
+                    }
+                }
+            } elseif (preg_match(self::VALUE, $attr, $match, PREG_UNMATCHED_AS_NULL, $offset)) {
+                $matched = true;
+                $mode    = 0;
+                $offset += strlen($match[0]);
+                $rules   = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+
+                if ($rules !== null) {
+                    $list .= $match[2] !== null
+                        ? $this->attribute($rules, $name, $match[2], "'")
+                        : $this->attribute($rules, $name, $match[1] ?? $match[3], '"');
+                }
+            }
+
+            if (! $matched) {
+                $offset = self::skipMalformed($attr, $offset);
+                $mode   = 0;
+            }
+        }
+
+        // a valueless attribute at the very end, e.g. "selected"
+        if ($mode === 1) {
+            $rules = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+
+            if ($rules !== null) {
+                $list .= $this->attribute($rules, $name, null, '');
+            }
+        }
+
+        return $list;
     }
 
     /**
-     * This function normalizes HTML entities. It will convert "AT&T" to the correct
-     * "AT&amp;T", "&#00058;" to "&#58;", "&#XYZZY;" to "&amp;#XYZZY;" and so on.
+     * Get the rules of the first prefix an attribute name starts with, e.g. `data-` for `data-id`.
+     *
+     * @param array  $prefixes
+     * @param string $name
+     * @return mixed `null` if no prefix matches.
      */
-    protected static function normalizeEntities(string $str): string
+    private static function prefixRules(array $prefixes, string $name): mixed
     {
-        /* Disarm all entities by converting & to &amp; */
-        $str = str_replace('&', '&amp;', $str);
+        foreach ($prefixes as $prefix => $rules) {
+            if (str_starts_with($name, (string) $prefix) && $name !== $prefix) {
+                return $rules;
+            }
+        }
 
-        /* Entités numériques décimales. */
-        $str = preg_replace(
-            '/&amp;#(\d+;)/',
-            '&#\1',
-            $str
-        ) ?? '';
-
-        /* Hexadecimal numeric entities. */
-        $str = preg_replace(
-            '/&amp;#[Xx]0*((?:[0-9A-Fa-f]{2})+;)/',
-            '&#x\1',
-            $str
-        ) ?? '';
-
-        /* Named entities. */
-        return preg_replace(
-            '/&amp;([A-Za-z][A-Za-z0-9]*;)/',
-            '&\1',
-            $str
-        ) ?? '';
+        return null;
     }
 
     /**
-     * This function delete numeric HTML entities (&#65; and &#x41;). It doesn't
-     * do anything with other entities like &auml;, but we don't need them in the
-     * URL protocol whitelisting system anyway.
+     * Build an allowed attribute if its value passes the rules.
+     *
+     * @param mixed       $rules `1` for any value, or checks, see checkAttrVal().
+     * @param string      $name
+     * @param string|null $value `null` for a valueless attribute.
+     * @param string      $quote Quote of the rebuilt value, unquoted values get double quotes.
+     * @return string The attribute preceded by a space, or an empty string.
      */
-    protected static function deleteEntities(string $str): string
+    private function attribute(mixed $rules, string $name, ?string $value, string $quote): string
     {
-        $str = preg_replace('/&#(\d+);/', '', $str) ?? '';
+        if ($value === null) {
+            [$value, $valueless, $whole] = ['', 'y', $name];
+        } else {
+            $value     = $this->badProtocol($value);
+            $valueless = 'n';
+            $whole     = $name . '=' . $quote . $value . $quote;
+        }
 
-        return preg_replace('/&#[Xx]([0-9A-Fa-f]+);/', '', $str) ?? '';
+        if (! is_array($rules)) {
+            return ' ' . $whole;
+        }
+
+        foreach ($rules as $check => $expected) {
+            if (self::checkAttrVal($value, $valueless, $check, $expected)) {
+                return ' ' . $whole;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Check an attribute value against a rule of ALLOWED_HTML.
+     *
+     * @param string $value
+     * @param string $valueless `y` if the attribute has no value, `n` otherwise.
+     * @param string $check     `maxlen`, `minlen`, `maxval`, `minval`, `valueless` or `content`; others always pass.
+     * @param mixed  $expected
+     * @return bool
+     * @throws InvalidArgumentException For an expected value of a wrong type.
+     */
+    private static function checkAttrVal(string $value, string $valueless, string $check, mixed $expected): bool
+    {
+        $type = match ($check) {
+            'maxlen', 'minlen', 'maxval', 'minval' => is_numeric($expected) ? null : 'numeric',
+            'valueless'                            => is_string($expected) ? null : 'string',
+            'content'                              => is_array($expected) ? null : 'array',
+            default                                => null,
+        };
+
+        if ($type !== null) {
+            throw new InvalidArgumentException("$check must be of type $type, " . get_debug_type($expected) . ' given');
+        }
+
+        // maxval and minval accept only a short non-negative integer, so a huge number can not be passed
+        return match ($check) {
+            'maxlen'    => strlen($value) <= $expected,
+            'minlen'    => strlen($value) >= $expected,
+            'maxval'    => preg_match('/^\s{0,6}\d{1,6}\s{0,6}$/', $value) === 1 && (int) trim($value) <= $expected,
+            'minval'    => preg_match('/^\s{0,6}\d{1,6}\s{0,6}$/', $value) === 1 && (int) trim($value) >= $expected,
+            'valueless' => strtolower($expected) === $valueless,
+            'content'   => self::matchesContent($value, $expected),
+            default     => true,
+        };
+    }
+
+    /**
+     * Check if a value contains one of the patterns, `%` matches any text.
+     *
+     * @param string   $value
+     * @param string[] $patterns
+     * @return bool
+     */
+    private static function matchesContent(string $value, array $patterns): bool
+    {
+        foreach ($patterns as $pattern) {
+            if (preg_match('/' . strtr(preg_quote($pattern, '/'), ['%' => '.*']) . '/', $value)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Remove disallowed protocols from the start of a value, repeatedly, so that `javascript:javascript:` is caught.
+     * Whitespace, case and entities in the protocol are understood.
+     *
+     * @param string $value
+     * @return string
+     */
+    private function badProtocol(string $value): string
+    {
+        $colon = strpos($value, ':');
+
+        // every other encoding of the colon is an entity: &#58; &#x3A; &colon;
+        if ($colon === false && ! str_contains($value, '&#') && ! str_contains($value, '&colon;')) {
+            return $value;
+        }
+
+        // an allowed protocol written plainly, e.g. "https://x", is kept by the search as is,
+        // unless whitespace follows the colon: the search removes it
+        if (
+            $colon > 0
+            && strspn($value, self::PROTOCOL_CHARS) === $colon
+            && isset($this->allowedProtocols[substr($value, 0, $colon)])
+            && strspn($value, " \t\n\v\f\r", $colon + 1, 1) === 0
+        ) {
+            return $value;
+        }
+
+        do {
+            $previous = $value;
+            $value    = preg_replace_callback(self::PROTOCOL, $this->badProtocolOnce(...), $value) ?? '';
+        } while ($value !== $previous);
+
+        return $value;
+    }
+
+    /**
+     * Keep a found protocol if it is allowed, drop it otherwise.
+     *
+     * @param array $match
+     * @return string
+     */
+    private function badProtocolOnce(array $match): string
+    {
+        // numeric entities and the invisible soft hyphen could hide a protocol
+        $protocol = preg_replace(['/&#\d+;/', '/&#[Xx][0-9A-Fa-f]+;/', '/\s/', '/\xad+/'], '', $match[1]) ?? '';
+        $protocol = strtolower($protocol);
+
+        return isset($this->allowedProtocols[$protocol]) ? "{$protocol}:" : '';
+    }
+
+    /**
+     * Skip a piece that combineAttributes() can not parse: up to whitespace, with quoted parts.
+     *
+     * @param string $attr
+     * @param int    $offset
+     * @return int Offset after the piece.
+     */
+    private static function skipMalformed(string $attr, int $offset): int
+    {
+        preg_match('/\G("[^"]*("|$)|\'[^\']*(\'|$)||\S)*\s*/', $attr, $match, 0, $offset);
+
+        return $offset + max(1, strlen($match[0] ?? ''));
+    }
+
+    /**
+     * Disarm `&` that does not start a valid entity: `AT&T` becomes `AT&amp;T`, `&#x0041;` becomes `&#x41;`.
+     *
+     * @param string $html
+     * @return string
+     */
+    private static function normalizeEntities(string $html): string
+    {
+        $html = preg_replace('/&(?!#\d+;|#[Xx]0*(?:[0-9A-Fa-f]{2})+;|[A-Za-z][A-Za-z0-9]*;)/', '&amp;', $html) ?? '';
+
+        if (! str_contains($html, '&#x') && ! str_contains($html, '&#X')) {
+            return $html;
+        }
+
+        return preg_replace('/&#[Xx]0*((?:[0-9A-Fa-f]{2})+;)/', '&#x\1', $html) ?? '';
     }
 }

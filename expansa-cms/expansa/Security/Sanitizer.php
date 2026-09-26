@@ -295,14 +295,22 @@ final class Sanitizer
     }
 
     /**
-     * Sanitizer html markup.
+     * Keep only the allowed HTML elements, attributes and URL protocols, see Kses::ALLOWED_HTML.
      *
-     * @param mixed $value Value to change
+     * @param mixed $value       Value to change
+     * @param array $allowedHtml Elements and attributes added to the default ones, e.g. Youla directives of a trusted page.
      * @return string
      */
-    public static function markup(mixed $value): string
+    public static function markup(mixed $value, array $allowedHtml = []): string
     {
-        return ( new Kses() )->apply($value ?? '');
+        // a filter per set of rules, so that its cache of filtered tags is reused
+        static $filters = [];
+
+        $key = $allowedHtml === [] ? '' : serialize($allowedHtml);
+
+        $filters[$key] ??= new Kses($allowedHtml === [] ? Kses::ALLOWED_HTML : Kses::extend($allowedHtml));
+
+        return $filters[$key]->apply((string) $value);
     }
 
     /**
