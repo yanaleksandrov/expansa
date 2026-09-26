@@ -17,7 +17,10 @@ use Expansa\Log\LogRecord;
  */
 abstract class AbstractHandler implements Handler
 {
-    protected Level $level;
+    /**
+     * Minimum level of the records to handle.
+     */
+    public readonly Level $level;
 
     protected ?Formatter $formatter = null;
 
@@ -36,11 +39,6 @@ abstract class AbstractHandler implements Handler
     }
 
     abstract public function handle(LogRecord $record): bool;
-
-    public function getLevel(): Level
-    {
-        return $this->level;
-    }
 
     public function isHandling(Level $level): bool
     {

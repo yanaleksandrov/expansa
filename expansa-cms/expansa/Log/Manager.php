@@ -29,14 +29,17 @@ class Manager implements LoggerInterface
         'errorlog' => ['driver' => 'errorlog'],
     ];
 
-    protected string $default = 'errorlog';
+    /**
+     * Channel of the PSR-3 methods.
+     */
+    public protected(set) string $defaultChannel = 'errorlog';
 
     /**
      * Created channels by name.
      *
      * @var Logger[]
      */
-    protected array $channels = [];
+    public protected(set) array $channels = [];
 
     /**
      * Custom drivers: get the channel config and name, return a Logger or a Handler.
@@ -48,7 +51,7 @@ class Manager implements LoggerInterface
     /**
      * Context added to every channel.
      */
-    protected array $sharedContext = [];
+    public protected(set) array $sharedContext = [];
 
     /**
      * Channels being created, to detect a stack that includes itself.
@@ -71,9 +74,9 @@ class Manager implements LoggerInterface
             throw new LogException("Default logging channel [$default] is not configured.");
         }
 
-        $this->config   = $channels;
-        $this->default  = $default;
-        $this->channels = [];
+        $this->config         = $channels;
+        $this->defaultChannel = $default;
+        $this->channels       = [];
     }
 
     /**
@@ -99,7 +102,7 @@ class Manager implements LoggerInterface
      */
     public function channel(?string $name = null): Logger
     {
-        $name ??= $this->default;
+        $name ??= $this->defaultChannel;
 
         return $this->channels[$name] ?? $this->channels[$name] = $this->resolve($name);
     }
@@ -117,16 +120,6 @@ class Manager implements LoggerInterface
     }
 
     /**
-     * Get the channels created so far.
-     *
-     * @return Logger[]
-     */
-    public function getChannels(): array
-    {
-        return $this->channels;
-    }
-
-    /**
      * Drop a created channel, the next call creates it again.
      *
      * @param string|null $name The default channel by default.
@@ -134,14 +127,9 @@ class Manager implements LoggerInterface
      */
     public function forgetChannel(?string $name = null): static
     {
-        unset($this->channels[$name ?? $this->default]);
+        unset($this->channels[$name ?? $this->defaultChannel]);
 
         return $this;
-    }
-
-    public function getDefaultChannel(): string
-    {
-        return $this->default;
     }
 
     /**
@@ -159,11 +147,6 @@ class Manager implements LoggerInterface
         }
 
         return $this;
-    }
-
-    public function sharedContext(): array
-    {
-        return $this->sharedContext;
     }
 
     /**
@@ -270,7 +253,7 @@ class Manager implements LoggerInterface
     {
         $handlers = [];
         foreach ((array) ($config['channels'] ?? []) as $channel) {
-            array_push($handlers, ...$this->channel($channel)->getHandlers());
+            array_push($handlers, ...$this->channel($channel)->handlers);
         }
 
         return new Logger($name, $handlers);

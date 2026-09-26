@@ -31,7 +31,7 @@ class File extends AbstractHandler
         /**
          * Path of the log file.
          */
-        protected string $path,
+        public protected(set) string $path,
 
         /**
          * Minimum level of the records to handle.
@@ -45,11 +45,6 @@ class File extends AbstractHandler
     public function __destruct()
     {
         $this->close();
-    }
-
-    public function getPath(): string
-    {
-        return $this->path;
     }
 
     public function handle(LogRecord $record): bool

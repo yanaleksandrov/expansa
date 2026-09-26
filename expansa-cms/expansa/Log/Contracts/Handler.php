@@ -10,11 +10,9 @@ use Expansa\Log\LogRecord;
 interface Handler
 {
     /**
-     * Get the minimum level the handler writes.
-     *
-     * @return Level
+     * Minimum level the handler writes.
      */
-    public function getLevel(): Level;
+    public Level $level { get; }
 
     /**
      * Check if the handler writes records of a level.

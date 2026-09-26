@@ -23,7 +23,7 @@ class Logger implements LoggerInterface
     /**
      * Context added to every record, the record context overrides its keys.
      */
-    protected array $context = [];
+    public protected(set) array $context = [];
 
     /**
      * Lowest level of the handlers, PHP_INT_MAX without handlers.
@@ -35,29 +35,24 @@ class Logger implements LoggerInterface
         /**
          * Channel name, printed in every record.
          */
-        protected readonly string $name = 'app',
+        public readonly string $name = 'app',
 
         /**
          * Handlers, the top of the stack first.
          *
          * @var Handler[]
          */
-        protected array $handlers = [] {
+        public protected(set) array $handlers = [] {
             set {
                 $this->handlers = array_values($value);
                 $this->minLevel = PHP_INT_MAX;
 
                 foreach ($this->handlers as $handler) {
-                    $this->minLevel = min($this->minLevel, $handler->getLevel()->value);
+                    $this->minLevel = min($this->minLevel, $handler->level->value);
                 }
             }
         },
     ) {} // phpcs:ignore
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
 
     /**
      * Add a handler on top of the stack.
@@ -104,16 +99,6 @@ class Logger implements LoggerInterface
     }
 
     /**
-     * Get the handlers, the top of the stack first.
-     *
-     * @return Handler[]
-     */
-    public function getHandlers(): array
-    {
-        return $this->handlers;
-    }
-
-    /**
      * Check if any handler writes records of a level.
      *
      * @param Level|int|string $level
@@ -142,11 +127,6 @@ class Logger implements LoggerInterface
         $this->context = [];
 
         return $this;
-    }
-
-    public function getContext(): array
-    {
-        return $this->context;
     }
 
     public function log(Level|int|string $level, string|Stringable $message, array $context = []): void
