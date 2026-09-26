@@ -7,7 +7,7 @@ namespace Expansa\Support;
 /**
  * Helpers for arrays and lists of arrays or objects, nested keys use "dot" notation.
  */
-class Arr
+final class Arr
 {
     /**
      * Chars that htmlspecialchars() escapes with ENT_QUOTES.
@@ -56,24 +56,24 @@ class Arr
      * Removes the elements with the listed keys.
      *
      * @param array $array
-     * @param array $black_list Keys to remove.
+     * @param array $keys Keys to remove.
      * @return array
      */
-    public static function exclude(array $array, array $black_list): array
+    public static function exclude(array $array, array $keys): array
     {
-        return array_diff_key($array, array_flip($black_list));
+        return array_diff_key($array, array_flip($keys));
     }
 
     /**
      * Keeps only the elements with the listed keys.
      *
      * @param array $array
-     * @param array $white_list Keys to keep.
+     * @param array $keys Keys to keep.
      * @return array
      */
-    public static function extract(array $array, array $white_list): array
+    public static function extract(array $array, array $keys): array
     {
-        return array_intersect_key($array, array_flip($white_list));
+        return array_intersect_key($array, array_flip($keys));
     }
 
     /**
@@ -110,13 +110,13 @@ class Arr
     /**
      * Moves the keys from the pattern to the start in its order, the rest keep their order.
      *
-     * @param array $arr
+     * @param array $array
      * @param array $pattern Keys in the wanted order, missing ones are skipped.
      * @return array
      */
-    public static function sortByPattern(array $arr, array $pattern): array
+    public static function sortByPattern(array $array, array $pattern): array
     {
-        return array_replace(array_intersect_key(array_flip($pattern), $arr), $arr);
+        return array_replace(array_intersect_key(array_flip($pattern), $array), $array);
     }
 
     /**
@@ -217,7 +217,7 @@ class Arr
      * @param array $attributes
      * @return string
      */
-    public static function toHtmlAtts(array $attributes): string
+    public static function toHtmlAttributes(array $attributes): string
     {
         $atts = '';
         foreach ($attributes as $attribute => $value) {

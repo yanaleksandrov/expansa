@@ -41,6 +41,6 @@ defined('EX_PATH') || exit;
 			<?php endif; ?>
 			<span class="fs-13 t-muted"><?php echo t( 'Maximum upload file size is :maxsize', $max_size ); ?></span>
 		</span>
-        <input type="file"<?php echo Arr::toHtmlAtts($attributes); ?>>
+        <input type="file"<?php echo Arr::toHtmlAttributes($attributes); ?>>
     </label>
 </div>

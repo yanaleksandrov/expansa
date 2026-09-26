@@ -53,7 +53,7 @@ class Form extends Field
      */
     public function wrap(array $attributes, string $content = ''): string
     {
-        return sprintf("<form%s>\n%s</form>\n", Arr::toHtmlAtts($attributes), $content);
+        return sprintf("<form%s>\n%s</form>\n", Arr::toHtmlAttributes($attributes), $content);
     }
 
     /**

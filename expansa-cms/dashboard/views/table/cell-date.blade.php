@@ -20,7 +20,7 @@ defined('EX_PATH') || exit;
 	]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts($attributes); ?>>
+<div<?php echo Arr::toHtmlAttributes($attributes); ?>>
     Published
     <div u-text="item.<?php echo $prop; ?>"></div>
 </div>

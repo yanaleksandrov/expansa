@@ -56,9 +56,10 @@ require_once EX_PATH . 'expansa/functions.php';
 // stops with an error page before any PHP 8.4 code is parsed: everything above must stay free of it
 App\Support\Requirements::check();
 
-// needed before the phases: boot reads Is::debug()
+// needed before the phases: boot reads Is::debug(); the dashboard context is known only after the phases
 Is::configure(
-    debug: defined('EX_DEBUG') && EX_DEBUG['enabled'] === true
+    debug: defined('EX_DEBUG') && EX_DEBUG['enabled'] === true,
+    dashboard: fn () => Lifecycle::is('dashboard'),
 );
 
 // computed once: the installation request itself changes the result

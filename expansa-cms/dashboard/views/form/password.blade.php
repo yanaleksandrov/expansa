@@ -49,7 +49,7 @@ $attributes = [
 		@endif
 	</div>
 	<div class="field-item">
-		<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
+		<input<?php echo Arr::toHtmlAttributes( $attributes ); ?>>
 		@if($switcher)
 			<i class="ph" :class="visible ? 'ph-eye-closed' : 'ph-eye'" @click="visible = !visible"></i>
 		@endif

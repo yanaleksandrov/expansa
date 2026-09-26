@@ -42,10 +42,10 @@ defined('EX_PATH') || exit;
 				<?php endif; ?>
 			</div>
 			<div class="confirm-email-code">
-				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAtts($attributes); ?>>
-				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAtts($attributes); ?>>
-				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAtts($attributes); ?>>
-				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAtts($attributes); ?>>
+				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAttributes($attributes); ?>>
+				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAttributes($attributes); ?>>
+				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAttributes($attributes); ?>>
+				<input type="text" placeholder="0" maxlength="1" <?php echo Arr::toHtmlAttributes($attributes); ?>>
 			</div>
 		</div>
 		<div class="confirm-email-bottom">

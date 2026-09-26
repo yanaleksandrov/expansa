@@ -125,11 +125,7 @@ if (! function_exists('url')) {
      */
     function url(string $slug = ''): string
     {
-        static $url;
-        if (!$url) {
-            $url = new Expansa\Support\Url();
-        }
-        return $url->site($slug);
+        return Expansa\Support\Url::site($slug);
     }
 }
 

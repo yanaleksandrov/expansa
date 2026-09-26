@@ -20,7 +20,7 @@ defined('EX_PATH') || exit;
 	]
 )->values();
 ?>
-<div<?php echo Arr::toHtmlAtts($attributes); ?>>
+<div<?php echo Arr::toHtmlAttributes($attributes); ?>>
     <div class="fs-14 lh-sm">
         <a href="#" class="fw-500 t-dark" @click="$dialog.open('jb-add-item')">{{ $__data[$prop] ?? '' }}</a>
         <span class="t-muted">— Draft</span>

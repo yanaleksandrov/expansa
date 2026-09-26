@@ -48,7 +48,7 @@ class Repeater extends AbstractField
 
         return sprintf(
             "<div%s>\n%s</div>\n",
-            Arr::toHtmlAtts(['class' => 'repeater', 'data-name' => $field['name']]),
+            Arr::toHtmlAttributes(['class' => 'repeater', 'data-name' => $field['name']]),
             $content
         );
     }
