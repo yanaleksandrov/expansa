@@ -183,16 +183,15 @@ final class Kses
     private const string MARKUP = '%(<(?=[^a-zA-Z!/])|<!--.*?-->|<[^>]*(>|$)|>)%';
 
     /**
-     * Well-formed attributes in a row: `name="value"`, `name='value'`, `name=value` or a valueless `name`,
-     * the same pieces combineAttributes() parses step by step.
-     */
-    private const string ATTRIBUTES = '/\G(' . self::NAME . '++)'
-        . '(?:\s*+=\s*+(?:"([^"]*+)"|\'([^\']*+)\'|([^\s"\']++))(?:\s++|$)|\s++(?!=)|$)/';
-
-    /**
      * Characters of an attribute name: letters and `-`, also `:`, `@` and `.` of framework directives like `v-on:click`.
      */
     private const string NAME = '[-a-zA-Z:@.]';
+
+    /**
+     * Well-formed attributes in a row: `name="value"`, `name='value'`, `name=value` or a valueless `name`,
+     * the same pieces combineAttributes() parses step by step.
+     */
+    private const string ATTRIBUTES = '/\G(' . self::NAME . '++)(?:\s*+=\s*+(?:"([^"]*+)"|\'([^\']*+)\'|([^\s"\']++))(?:\s++|$)|\s++(?!=)|$)/';
 
     /**
      * An attribute name at the current offset.
@@ -235,14 +234,16 @@ final class Kses
     private array $cache = [];
 
     /**
-     * Create a filter.
-     *
-     * @param array    $allowedHtml      Elements and attributes, see ALLOWED_HTML; stored compiled: keyed by the lower case
-     *                                    element name, with the attributes of `*` added to every element and the prefixes
-     *                                    of an element under its `*` key, e.g. `['data-' => 1]`. Set only once.
-     * @param string[] $allowedProtocols Lower case protocols, see ALLOWED_PROTOCOLS; stored as keys for isset() lookups.
+     * @throws InvalidArgumentException For a rule with a bare `*` attribute or a check of a wrong type.
+     * @throws LogicException           When the rules are set again.
      */
     public function __construct(
+
+        /**
+         * Elements and attributes, see ALLOWED_HTML; stored compiled: keyed by the lower case element name,
+         * with the attributes of `*` added to every element and the prefixes of an element under its `*` key,
+         * e.g. `['data-' => 1]`. Set only once.
+         */
         public private(set) array $allowedHtml = self::ALLOWED_HTML {
             set {
                 // the tag cache relies on rules that never change
@@ -256,6 +257,12 @@ final class Kses
                 $this->allowedHtml = $value === self::ALLOWED_HTML ? $defaults : self::compile($value);
             }
         },
+
+        /**
+         * Lower case protocols, see ALLOWED_PROTOCOLS; stored as keys for isset() lookups.
+         *
+         * @var string[]
+         */
         private array $allowedProtocols = self::ALLOWED_PROTOCOLS {
             set => array_fill_keys($value, true);
         },
@@ -294,6 +301,8 @@ final class Kses
 
             $prefixes = [];
             foreach ($attributes as $name => $rules) {
+                $name = (string) $name;
+
                 if (str_ends_with($name, '*')) {
                     if ($name === '*') {
                         throw new InvalidArgumentException(
@@ -302,6 +311,7 @@ final class Kses
                     }
 
                     $prefixes[substr($name, 0, -1)] = $rules;
+
                     unset($attributes[$name]);
                 }
             }

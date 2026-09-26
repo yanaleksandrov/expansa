@@ -92,10 +92,15 @@ class CronExpression
     /**
      * Parse a CRON expression or an alias.
      *
-     * @param string $expression E.g. `8 * * * *` or `@daily`.
      * @throws SchedulerException
      */
-    public function __construct(string $expression)
+    public function __construct(
+
+        /**
+         * E.g. `8 * * * *` or `@daily`.
+         */
+        string $expression,
+    )
     {
         $this->setExpression(self::$aliases[strtolower($expression)] ?? $expression);
     }

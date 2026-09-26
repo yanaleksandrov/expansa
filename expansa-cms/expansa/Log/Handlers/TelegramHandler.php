@@ -17,19 +17,27 @@ use Expansa\Log\LogRecord;
  */
 class TelegramHandler extends AbstractHandler
 {
-    /**
-     * Create the handler.
-     *
-     * @param string           $token   Bot token.
-     * @param int|string       $chatId  Chat id, or `@username` of a channel.
-     * @param Level|int|string $level
-     * @param int              $timeout Seconds to wait for Telegram, so a slow API does not hang the request.
-     */
     public function __construct(
+
+        /**
+         * Bot token.
+         */
         protected readonly string $token,
+
+        /**
+         * Chat id, or `@username` of a channel.
+         */
         protected readonly int|string $chatId,
+
+        /**
+         * Minimum level of the records to handle.
+         */
         Level|int|string $level = Level::Error,
-        protected readonly int $timeout = 5
+
+        /**
+         * Seconds to wait for Telegram, so a slow API does not hang the request.
+         */
+        protected readonly int $timeout = 5,
     )
     {
         parent::__construct($level);

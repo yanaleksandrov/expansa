@@ -22,11 +22,15 @@ abstract class AbstractHandler implements Handler
     protected ?Formatter $formatter = null;
 
     /**
-     * Create the handler.
-     *
-     * @param Level|int|string $level Minimum level of the records to handle.
+     * The level is not promoted: a promoted property would take only a Level, not its value, code or name.
      */
-    public function __construct(Level|int|string $level = Level::Debug)
+    public function __construct(
+
+        /**
+         * Minimum level of the records to handle: a level, its value, RFC 5424 code or name.
+         */
+        Level|int|string $level = Level::Debug,
+    )
     {
         $this->level = Level::of($level);
     }

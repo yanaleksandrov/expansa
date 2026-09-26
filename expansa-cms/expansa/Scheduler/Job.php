@@ -85,18 +85,23 @@ class Job
      */
     private array $emailConfig = [];
 
-    /**
-     * Create a job.
-     *
-     * @param Closure|string $command A closure, or a shell command.
-     * @param array          $args    Closure arguments (string keys are named ones), or shell arguments:
-     *                                `['--force' => null, '--env' => 'dev', 'file.txt']`.
-     * @param string|null    $id      Identifier used as the lock file name, derived from the command by default.
-     */
     public function __construct(
+
+        /**
+         * A closure, or a shell command.
+         */
         private readonly Closure|string $command,
+
+        /**
+         * Closure arguments (string keys are named ones), or shell arguments:
+         * `['--force' => null, '--env' => 'dev', 'file.txt']`.
+         */
         private readonly array $args = [],
-        private ?string $id = null
+
+        /**
+         * Identifier used as the lock file name, derived from the command by default.
+         */
+        private ?string $id = null,
     ) {} // phpcs:ignore
 
     /**

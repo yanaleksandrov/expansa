@@ -21,13 +21,6 @@ use Expansa\Log\Contracts\LoggerInterface;
 class Logger implements LoggerInterface
 {
     /**
-     * Handlers, the top of the stack first.
-     *
-     * @var Handler[]
-     */
-    protected array $handlers = [];
-
-    /**
      * Context added to every record, the record context overrides its keys.
      */
     protected array $context = [];
@@ -37,19 +30,29 @@ class Logger implements LoggerInterface
      */
     private int $minLevel = PHP_INT_MAX;
 
-    /**
-     * Create a logger.
-     *
-     * @param string    $name     Channel name, printed in every record.
-     * @param Handler[] $handlers
-     */
     public function __construct(
+
+        /**
+         * Channel name, printed in every record.
+         */
         protected readonly string $name = 'app',
-        array $handlers = []
-    )
-    {
-        $this->setHandlers($handlers);
-    }
+
+        /**
+         * Handlers, the top of the stack first.
+         *
+         * @var Handler[]
+         */
+        protected array $handlers = [] {
+            set {
+                $this->handlers = array_values($value);
+                $this->minLevel = PHP_INT_MAX;
+
+                foreach ($this->handlers as $handler) {
+                    $this->minLevel = min($this->minLevel, $handler->getLevel()->value);
+                }
+            }
+        },
+    ) {} // phpcs:ignore
 
     public function getName(): string
     {
@@ -64,9 +67,9 @@ class Logger implements LoggerInterface
      */
     public function pushHandler(Handler $handler): static
     {
-        array_unshift($this->handlers, $handler);
+        $this->handlers = [$handler, ...$this->handlers];
 
-        return $this->setHandlers($this->handlers);
+        return $this;
     }
 
     /**
@@ -81,8 +84,8 @@ class Logger implements LoggerInterface
             throw new LogicException('You tried to pop from an empty handler stack.');
         }
 
-        $handler = array_shift($this->handlers);
-        $this->setHandlers($this->handlers);
+        $handler        = $this->handlers[0];
+        $this->handlers = array_slice($this->handlers, 1);
 
         return $handler;
     }
@@ -95,12 +98,7 @@ class Logger implements LoggerInterface
      */
     public function setHandlers(array $handlers): static
     {
-        $this->handlers = array_values($handlers);
-        $this->minLevel = PHP_INT_MAX;
-
-        foreach ($this->handlers as $handler) {
-            $this->minLevel = min($this->minLevel, $handler->getLevel()->value);
-        }
+        $this->handlers = $handlers;
 
         return $this;
     }

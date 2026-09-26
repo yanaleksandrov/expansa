@@ -13,22 +13,36 @@ use DateTimeImmutable;
  */
 final readonly class LogRecord
 {
-    /**
-     * Create the record.
-     *
-     * @param DateTimeImmutable $datetime
-     * @param string            $channel  Name of the logger.
-     * @param Level             $level
-     * @param string            $message  With the `{placeholders}` already replaced from the context.
-     * @param array             $context
-     * @param array             $extra    Additional data a handler or formatter may print.
-     */
     public function __construct(
+
+        /**
+         * Moment the record was created.
+         */
         public DateTimeImmutable $datetime,
+
+        /**
+         * Name of the logger.
+         */
         public string $channel,
+
+        /**
+         * Severity of the record.
+         */
         public Level $level,
+
+        /**
+         * With the `{placeholders}` already replaced from the context.
+         */
         public string $message,
+
+        /**
+         * Context of the record, with the logger context merged in.
+         */
         public array $context = [],
-        public array $extra = []
+
+        /**
+         * Additional data a handler or formatter may print.
+         */
+        public array $extra = [],
     ) {} // phpcs:ignore
 }

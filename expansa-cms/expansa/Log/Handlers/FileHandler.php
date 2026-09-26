@@ -24,14 +24,19 @@ class FileHandler extends AbstractHandler
     protected $stream = null;
 
     /**
-     * Create the handler, the file is opened on the first write.
-     *
-     * @param string           $path
-     * @param Level|int|string $level
+     * The file is opened on the first write.
      */
     public function __construct(
+
+        /**
+         * Path of the log file.
+         */
         protected string $path,
-        Level|int|string $level = Level::Debug
+
+        /**
+         * Minimum level of the records to handle.
+         */
+        Level|int|string $level = Level::Debug,
     )
     {
         parent::__construct($level);

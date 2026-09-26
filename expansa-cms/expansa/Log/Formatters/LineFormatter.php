@@ -14,13 +14,12 @@ use Expansa\Log\LogRecord;
  */
 class LineFormatter extends AbstractFormatter
 {
-    /**
-     * Create the formatter.
-     *
-     * @param string $dateFormat Format of the record date, see date().
-     */
     public function __construct(
-        protected readonly string $dateFormat = 'Y-m-d H:i:s'
+
+        /**
+         * Format of the record date, see date().
+         */
+        protected readonly string $dateFormat = 'Y-m-d H:i:s',
     ) {} // phpcs:ignore
 
     public function format(LogRecord $record): string

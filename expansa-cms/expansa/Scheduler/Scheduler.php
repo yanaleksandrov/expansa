@@ -47,13 +47,12 @@ class Scheduler
      */
     private array $outputSchedule = [];
 
-    /**
-     * Create a scheduler.
-     *
-     * @param array $config `tempDir` for lock files and `email` settings, applied to every queued job.
-     */
     public function __construct(
-        private readonly array $config = []
+
+        /**
+         * `tempDir` for lock files and `email` settings, applied to every queued job.
+         */
+        private readonly array $config = [],
     ) {} // phpcs:ignore
 
     /**

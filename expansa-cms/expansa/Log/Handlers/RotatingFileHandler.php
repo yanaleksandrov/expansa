@@ -25,17 +25,22 @@ class RotatingFileHandler extends FileHandler
      */
     private string $date = '';
 
-    /**
-     * Create the handler.
-     *
-     * @param string           $basePath Path without the date, it is inserted before the extension.
-     * @param int              $maxFiles Number of files to keep, 0 keeps all of them.
-     * @param Level|int|string $level
-     */
     public function __construct(
+
+        /**
+         * Path without the date, it is inserted before the extension.
+         */
         protected readonly string $basePath,
+
+        /**
+         * Number of files to keep, 0 keeps all of them.
+         */
         protected readonly int $maxFiles = 7,
-        Level|int|string $level = Level::Debug
+
+        /**
+         * Minimum level of the records to handle.
+         */
+        Level|int|string $level = Level::Debug,
     )
     {
         parent::__construct($this->datedPath(date('Y-m-d')), $level);
