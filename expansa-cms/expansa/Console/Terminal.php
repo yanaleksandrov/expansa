@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Console;
 
-use Expansa\Console\Commands\AssetClean;
 use Expansa\Console\Commands\AutoloadDump;
 use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
@@ -78,9 +77,6 @@ class Terminal
 	    if ($this->command('env') === null) {
 		    $this->addCommand(new Env($this));
 	    }
-        if ($this->command('asset:clean') === null) {
-            $this->addCommand(new AssetClean($this));
-        }
         if ($this->command('hooks:list') === null) {
             $this->addCommand(new HooksList($this));
         }

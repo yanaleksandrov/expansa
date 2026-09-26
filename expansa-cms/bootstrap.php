@@ -410,6 +410,7 @@ Lifecycle::phase('booted', $isInstalled, function () {
  */
 Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(App\Console\Serve::class);
+    Terminal::addCommand(Expansa\Assets\Commands\Clean::class);
     Terminal::run();
 });
 
