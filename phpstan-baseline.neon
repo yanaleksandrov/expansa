@@ -192,14 +192,3 @@ parameters:
 			count: 2
 			path: expansa-cms/expansa/Http/Request/FileBag.php
 
-		-
-			message: '#^Parameter \$app of method Expansa\\Log\\LogManager\:\:__construct\(\) has invalid type Expansa\\Log\\Container\.$#'
-			identifier: class.notFound
-			count: 1
-			path: expansa-cms/expansa/Log/LogManager.php
-
-		-
-			message: '#^Property Expansa\\Log\\LogManager\:\:\$app has unknown class Expansa\\Log\\Container as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: expansa-cms/expansa/Log/LogManager.php

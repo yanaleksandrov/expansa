@@ -20,3 +20,308 @@
 * CSS-комментарии должны быть краткими — не более одной строки.
 * Библиотека развивается, поэтому описания могут содержать функции, поведение или элементы, которых больше не существует. Комментарии необходимо поддерживать в актуальном состоянии.
 * **Не добавляйте комментарии в HTML.**
+
+### Правила оформления PHP-конструкторов
+
+При рефакторинге PHP-кода, где конструктор принимает параметры и присваивает их свойствам, используй **constructor property promotion** вместе с **property hooks**, если для свойства нужна валидация, нормализация или другая логика при установке значения.
+
+Цель — получить компактное объявление свойств непосредственно в сигнатуре конструктора.
+
+#### 1. Переноси свойства в constructor property promotion
+
+Вместо:
+
+```php
+protected readonly string $name = 'app';
+
+public function __construct(
+    string $name = 'app',
+) {
+    $this->name = $name;
+}
+```
+
+используй:
+
+```php
+public function __construct(
+    protected readonly string $name = 'app',
+) {}
+```
+
+Если свойство уже существует отдельно в классе, не дублируй его — перенеси visibility, type, readonly и default value в параметр конструктора.
+
+---
+
+#### 2. Если свойство требует валидации или преобразования — используй property hook
+
+Например:
+
+```php
+public function __construct(
+    public string $name {
+        set {
+            if (! preg_match('/^[A-Za-z0-9._-]+$/', $value)) {
+                throw new CookieException('The "name" parameter value contains illegal characters.');
+            }
+
+            $this->name = $value;
+        }
+    },
+) {}
+```
+
+Не выноси такую логику обратно в тело конструктора.
+
+Не используй:
+
+```php
+public function __construct(
+    public string $name,
+) {
+    if (...) {
+        throw ...;
+    }
+}
+```
+
+если эту проверку можно корректно выразить через `set` hook.
+
+---
+
+#### 3. Для простой нормализации используй короткую форму `set =>`
+
+Если setter состоит из одного выражения:
+
+```php
+public int $expires = 0 {
+    set => max($value, 0);
+},
+```
+
+или:
+
+```php
+public string $path = '' {
+    set => $value === '' ? '/' : $value;
+},
+```
+
+Если нужна последовательность действий, условие, исключение или несколько выражений — используй обычный блок:
+
+```php
+public string $name {
+    set {
+        if (...) {
+            throw new CookieException(...);
+        }
+
+        $this->name = $value;
+    }
+},
+```
+
+---
+
+#### 4. Документацию параметра размещай непосредственно перед соответствующим promoted property
+
+Вместо общего PHPDoc над конструктором:
+
+```php
+/**
+ * @param string $name Channel name, printed in every record.
+ * @param Handler[] $handlers
+ */
+public function __construct(
+    protected readonly string $name = 'app',
+    array $handlers = [],
+) {}
+```
+
+используй:
+
+```php
+public function __construct(
+
+    /**
+     * Channel name, printed in every record.
+     */
+    protected readonly string $name = 'app',
+
+    /**
+     * Handlers used by the channel.
+     *
+     * @var Handler[]
+     */
+    array $handlers = [],
+) {}
+```
+
+То есть **каждый параметр должен иметь свою документацию**, если исходный код содержал документацию для этого параметра.
+
+---
+
+#### 5. Не добавляй hook, если логики нет
+
+Если свойство просто хранит значение, используй обычный promoted property:
+
+```php
+public bool $secure = false,
+public bool $httpOnly = false,
+public string $domain = '',
+```
+
+Не нужно превращать его в:
+
+```php
+public bool $secure = false {
+    set => $value;
+},
+```
+
+---
+
+#### 6. Сохраняй исходную семантику
+
+При рефакторинге нельзя менять:
+
+* visibility (`public`, `protected`, `private`);
+* `readonly`;
+* типы;
+* значения по умолчанию;
+* порядок параметров;
+* поведение валидации;
+* поведение нормализации;
+* исключения и их сообщения;
+* PHPDoc;
+* типы элементов массивов;
+* nullable-типы.
+
+Рефакторинг должен менять **форму записи**, а не поведение класса.
+
+---
+
+#### 7. Для массива с generic PHPDoc сохраняй тип элементов
+
+Например, исходный код:
+
+```php
+/**
+ * @param Handler[] $handlers
+ */
+public function __construct(
+    array $handlers = [],
+) {}
+```
+
+после переноса документации должен сохранять информацию `Handler[]`:
+
+```php
+public function __construct(
+
+    /**
+     * Handlers used by the channel.
+     *
+     * @var Handler[]
+     */
+    array $handlers = [],
+) {}
+```
+
+Не заменяй `Handler[]` просто на `array`, если эта информация была частью исходного API-документации.
+
+---
+
+#### 8. Если setter hook использует `$this->property`, это допустимо
+
+Для property hook с нормализацией или валидацией используй:
+
+```php
+public string $path = '' {
+    set => $value === '' ? '/' : $value;
+},
+```
+
+А если нужен блок:
+
+```php
+public string $name {
+    set {
+        if (...) {
+            throw new CookieException(...);
+        }
+
+        $this->name = $value;
+    }
+},
+```
+
+Не создавай дополнительное приватное свойство только ради хранения значения, если property hook может работать непосредственно с promoted property.
+
+---
+
+#### 9. Пустой конструктор оставляй пустым
+
+Если вся логика перенесена в promoted properties и property hooks:
+
+```php
+public function __construct(
+    // ...
+) {}
+```
+
+Не оставляй бессмысленный код:
+
+```php
+public function __construct(
+    // ...
+) {
+    $this->setHandlers($handlers);
+}
+```
+
+Если `setHandlers()` нельзя выразить через property hook, тогда этот параметр нельзя механически превращать в обычное promoted property с hook. В таком случае сохрани необходимую логику конструктора.
+
+---
+
+#### 10. Форматирование
+
+Для многострочного конструктора:
+
+* после `(` делай пустую строку, если внутри параметров есть PHPDoc;
+* каждый параметр размещай на отдельном блоке;
+* PHPDoc располагай непосредственно перед параметром;
+* после каждого параметра ставь запятую;
+* hook оформляй непосредственно после типа/значения свойства;
+* закрывающий `)` и тело конструктора располагай как в примере:
+
+```php
+public function __construct(
+
+    /**
+     * Description.
+     */
+    public string $name = '' {
+        set => $value === '' ? 'default' : $value;
+    },
+
+    /**
+     * Description.
+     */
+    public bool $enabled = true,
+) {}
+```
+
+---
+
+### Главный принцип
+
+При преобразовании существующего класса сначала определи, **какое поведение выполняется при установке каждого свойства**.
+
+* Нет дополнительной логики → обычное promoted property.
+* Валидация → `set { ... }`.
+* Простая нормализация одним выражением → `set => ...`.
+* Несколько операций → `set { ... }`.
+* Логика не относится непосредственно к одному свойству или требует взаимодействия нескольких параметров → не пытайся насильно переносить её в property hook; сохрани её в конструкторе или другом подходящем методе.
+
+Всегда отдавай предпочтение **property hooks + constructor property promotion**, но не ценой изменения поведения существующего кода.

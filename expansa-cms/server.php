@@ -5,7 +5,8 @@
 $path = urldecode((string) parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $file = __DIR__ . $path;
 
-if ($path !== '/' && is_file($file) && pathinfo($file, PATHINFO_EXTENSION) !== 'php') {
+// logs are never served, the same as storage/logs/.htaccess does for Apache
+if ($path !== '/' && is_file($file) && pathinfo($file, PATHINFO_EXTENSION) !== 'php' && ! str_starts_with($path, '/storage/logs/')) {
     return false;
 }
 

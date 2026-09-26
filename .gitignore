@@ -22,3 +22,6 @@ Thumbs.db    # Windows
 # Generated cache
 /expansa-cms/cache/*
 !/expansa-cms/cache/index.php
+
+# Logs
+/expansa-cms/storage/logs/*.log

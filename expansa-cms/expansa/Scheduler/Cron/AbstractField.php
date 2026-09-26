@@ -2,276 +2,149 @@
 
 declare(strict_types=1);
 
-namespace Cron;
+namespace Expansa\Scheduler\Cron;
 
+use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
+use OutOfRangeException;
+use RuntimeException;
 
 /**
- * Abstract CRON expression field.
+ * Base CRON expression field: validates a part and checks it against a date value.
+ * Instances are shared between all expressions, so the caches are keyed by the part itself.
+ *
+ * @package Expansa\Scheduler\Cron
  */
-abstract class AbstractField implements FieldInterface
+abstract class AbstractField
 {
     /**
-     * Full range of values that are allowed for this field type.
-     *
-     * @var array
+     * Literal names and their numeric values, e.g. `JAN` => 1.
      */
-    protected $fullRange = [];
+    protected const array LITERALS = [];
 
     /**
-     * Literal values we need to convert to integers.
-     *
-     * @var array
+     * First allowed value of the field.
      */
-    protected $literals = [];
+    protected int $rangeStart = 0;
 
     /**
-     * Start value of the full range.
-     *
-     * @var int
+     * Last allowed value of the field.
      */
-    protected $rangeStart;
+    protected int $rangeEnd = 0;
 
     /**
-     * End value of the full range.
-     *
-     * @var int
+     * Parts with literals replaced by numbers, keyed by the original part.
      */
-    protected $rangeEnd;
+    private array $converted = [];
 
     /**
-     * Constructor
+     * Sorted values matching a part, keyed by the part.
      */
-    public function __construct()
-    {
-        $this->fullRange = range($this->rangeStart, $this->rangeEnd);
-    }
+    private array $values = [];
 
     /**
-     * Check to see if a field is satisfied by a value.
+     * Check if a date satisfies a single, not comma separated, part of the expression.
      *
-     * @internal
-     * @param int $dateValue Date value to check
-     * @param string $value Value to test
+     * @param DateTimeInterface $date
+     * @param string            $value
+     * @param bool              $invert Whether the run date is searched backwards.
+     * @return bool
+     */
+    abstract public function isSatisfiedBy(DateTimeInterface $date, string $value, bool $invert): bool;
+
+    /**
+     * Move the date to the next (or previous) moment that can satisfy the part.
      *
+     * @param DateTime|DateTimeImmutable $date
+     * @param bool                       $invert
+     * @param string|null                $parts  The whole part of the expression, `null` for `*`.
+     * @return void
+     */
+    abstract public function increment(DateTimeInterface &$date, bool $invert = false, ?string $parts = null): void;
+
+    /**
+     * Check if a numeric date value satisfies a value, a range or a step of the part.
+     *
+     * @param int    $dateValue
+     * @param string $value
      * @return bool
      */
     public function isSatisfied(int $dateValue, string $value): bool
     {
-        if ($this->isIncrementsOfRanges($value)) {
+        if ($value === '*') {
+            return true;
+        }
+
+        if (str_contains($value, '/')) {
             return $this->isInIncrementsOfRanges($dateValue, $value);
         }
 
-        if ($this->isRange($value)) {
-            return $this->isInRange($dateValue, $value);
+        if (str_contains($value, '-')) {
+            [$from, $to] = explode('-', $value, 2);
+
+            return $dateValue >= (int) $this->convertLiterals(trim($from))
+                && $dateValue <= (int) $this->convertLiterals(trim($to));
         }
 
-        return '*' === $value || $dateValue === (int) $value;
+        return $dateValue === (int) $value;
     }
 
     /**
-     * Check if a value is a range.
+     * Check if a value is within a stepped range: `*`/`offset[-to]` followed by `/step`.
      *
-     * @internal
-     * @param string $value Value to test
-     *
+     * @param int    $dateValue
+     * @param string $value
      * @return bool
-     */
-    public function isRange(string $value): bool
-    {
-        return false !== strpos($value, '-');
-    }
-
-    /**
-     * Check if a value is an increments of ranges.
-     *
-     * @internal
-     * @param string $value Value to test
-     *
-     * @return bool
-     */
-    public function isIncrementsOfRanges(string $value): bool
-    {
-        return false !== strpos($value, '/');
-    }
-
-    /**
-     * Test if a value is within a range.
-     *
-     * @internal
-     * @param int $dateValue Set date value
-     * @param string $value Value to test
-     *
-     * @return bool
-     */
-    public function isInRange(int $dateValue, $value): bool
-    {
-        $parts = array_map(
-            function ($value) {
-                $value = trim($value);
-
-                return $this->convertLiterals($value);
-            },
-            explode('-', $value, 2)
-        );
-
-        return $dateValue >= $parts[0] && $dateValue <= $parts[1];
-    }
-
-    /**
-     * Test if a value is within an increments of ranges (offset[-to]/step size).
-     *
-     * @internal
-     * @param int $dateValue Set date value
-     * @param string $value Value to test
-     *
-     * @return bool
+     * @throws OutOfRangeException
      */
     public function isInIncrementsOfRanges(int $dateValue, string $value): bool
     {
-        $chunks = array_map('trim', explode('/', $value, 2));
-        $range = $chunks[0];
-        $step = $chunks[1] ?? 0;
+        [$range, $step] = array_map('trim', explode('/', $value, 2)) + [1 => '0'];
 
-        // No step or 0 steps aren't cool
-        /** @phpstan-ignore-next-line */
-        if (null === $step || '0' === $step || 0 === $step) {
+        $step = (int) $step;
+        if ($step <= 0) {
             return false;
         }
 
-        // Expand the * to a full range
-        if ('*' === $range) {
-            $range = $this->rangeStart . '-' . $this->rangeEnd;
+        [$start, $end] = $range === '*' ? [$this->rangeStart, $this->rangeEnd] : explode('-', $range, 2) + [1 => $range];
+
+        $start = (int) $start;
+        $end   = (int) $end;
+
+        if ($start < $this->rangeStart || $start > $this->rangeEnd || $start > $end) {
+            throw new OutOfRangeException('Invalid range start requested');
         }
 
-        // Generate the requested small range
-        $rangeChunks = explode('-', $range, 2);
-        $rangeStart = (int) $rangeChunks[0];
-        $rangeEnd = $rangeChunks[1] ?? $rangeStart;
-        $rangeEnd = (int) $rangeEnd;
-
-        if ($rangeStart < $this->rangeStart || $rangeStart > $this->rangeEnd || $rangeStart > $rangeEnd) {
-            throw new \OutOfRangeException('Invalid range start requested');
+        if ($end > $this->rangeEnd) {
+            throw new OutOfRangeException('Invalid range end requested');
         }
 
-        if ($rangeEnd < $this->rangeStart || $rangeEnd > $this->rangeEnd || $rangeEnd < $rangeStart) {
-            throw new \OutOfRangeException('Invalid range end requested');
-        }
-
-        // Steps larger than the range need to wrap around and be handled
-        // slightly differently than smaller steps
-
-        // UPDATE - This is actually false. The C implementation will allow a
-        // larger step as valid syntax, it never wraps around. It will stop
-        // once it hits the end. Unfortunately this means in future versions
-        // we will not wrap around. However, because the logic exists today
-        // per the above documentation, fixing the bug from #89
+        // a step larger than the field wraps around once, as the original library does
         if ($step > $this->rangeEnd) {
-            $thisRange = [$this->fullRange[$step % \count($this->fullRange)]];
-        } else {
-            if ($step > ($rangeEnd - $rangeStart)) {
-                $thisRange[$rangeStart] = (int) $rangeStart;
-            } else {
-                $thisRange = range($rangeStart, $rangeEnd, (int) $step);
-            }
+            return $dateValue === $this->rangeStart + $step % ($this->rangeEnd - $this->rangeStart + 1);
         }
 
-        return \in_array($dateValue, $thisRange, true);
+        return $dateValue >= $start && $dateValue <= $end && ($dateValue - $start) % $step === 0;
     }
 
     /**
-     * Returns a range of values for the given cron expression.
-     *
-     * @param string $expression The expression to evaluate
-     * @param int $max Maximum offset for range
-     *
-     * @return array
-     */
-    public function getRangeForExpression(string $expression, int $max): array
-    {
-        $values = [];
-        $expression = $this->convertLiterals($expression);
-
-        if (false !== strpos($expression, ',')) {
-            $ranges = explode(',', $expression);
-            $values = [];
-            foreach ($ranges as $range) {
-                $expanded = $this->getRangeForExpression($range, $this->rangeEnd);
-                $values = array_merge($values, $expanded);
-            }
-
-            return $values;
-        }
-
-        if ($this->isRange($expression) || $this->isIncrementsOfRanges($expression)) {
-            if (!$this->isIncrementsOfRanges($expression)) {
-                [$offset, $to] = explode('-', $expression);
-                $offset = $this->convertLiterals($offset);
-                $to = $this->convertLiterals($to);
-                $stepSize = 1;
-            } else {
-                $range = array_map('trim', explode('/', $expression, 2));
-                $stepSize = $range[1] ?? 0;
-                $range = $range[0];
-                $range = explode('-', $range, 2);
-                $offset = $range[0];
-                $to = $range[1] ?? $max;
-            }
-            $offset = '*' === $offset ? $this->rangeStart : $offset;
-            if ($stepSize >= $this->rangeEnd) {
-                $values = [$this->fullRange[$stepSize % \count($this->fullRange)]];
-            } else {
-                for ($i = $offset; $i <= $to; $i += $stepSize) {
-                    $values[] = (int) $i;
-                }
-            }
-            sort($values);
-        } else {
-            $values = [$expression];
-        }
-
-        return $values;
-    }
-
-    /**
-     * Convert literal.
+     * Check if a part is valid for the field.
      *
      * @param string $value
-     *
-     * @return string
-     */
-    protected function convertLiterals(string $value): string
-    {
-        if (\count($this->literals)) {
-            $key = array_search(strtoupper($value), $this->literals, true);
-            if (false !== $key) {
-                return (string) $key;
-            }
-        }
-
-        return $value;
-    }
-
-    /**
-     * Checks to see if a value is valid for the field.
-     *
-     * @param string $value
-     *
      * @return bool
      */
     public function validate(string $value): bool
     {
         $value = $this->convertLiterals($value);
 
-        // All fields allow * as a valid value
-        if ('*' === $value) {
+        if ($value === '*') {
             return true;
         }
 
-        // Validate each chunk of a list individually
-        if (false !== strpos($value, ',')) {
-            foreach (explode(',', $value) as $listItem) {
-                if (!$this->validate($listItem)) {
+        if (str_contains($value, ',')) {
+            foreach (explode(',', $value) as $item) {
+                if (! $this->validate($item)) {
                     return false;
                 }
             }
@@ -279,66 +152,152 @@ abstract class AbstractField implements FieldInterface
             return true;
         }
 
-        if (false !== strpos($value, '/')) {
-            [$range, $step] = explode('/', $value);
+        if (str_contains($value, '/')) {
+            $chunks = explode('/', $value);
 
-            // Don't allow numeric ranges
-            if (is_numeric($range)) {
-                return false;
-            }
-
-            return $this->validate($range) && filter_var($step, FILTER_VALIDATE_INT);
+            // a numeric offset without a range is not a step
+            return count($chunks) === 2
+                && ! ctype_digit($chunks[0])
+                && $this->validate($chunks[0])
+                && filter_var($chunks[1], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false;
         }
 
-        if (false !== strpos($value, '-')) {
-            if (substr_count($value, '-') > 1) {
-                return false;
-            }
-
+        if (str_contains($value, '-')) {
             $chunks = explode('-', $value);
-            $chunks[0] = $this->convertLiterals($chunks[0]);
-            $chunks[1] = $this->convertLiterals($chunks[1]);
 
-            if ('*' === $chunks[0] || '*' === $chunks[1]) {
-                return false;
+            return count($chunks) === 2
+                && $chunks[0] !== '*'
+                && $chunks[1] !== '*'
+                && $this->validate($chunks[0])
+                && $this->validate($chunks[1]);
+        }
+
+        return ctype_digit($value) && (int) $value >= $this->rangeStart && (int) $value <= $this->rangeEnd;
+    }
+
+    /**
+     * Replace literal names in a part with their numbers, e.g. `MON-FRI` becomes `1-5`.
+     *
+     * @param string $value
+     * @return string
+     */
+    protected function convertLiterals(string $value): string
+    {
+        if (static::LITERALS === [] || $value === '*' || ctype_digit($value)) {
+            return $value;
+        }
+
+        return $this->converted[$value] ??= preg_replace_callback(
+            '/[a-z]{3}/i',
+            fn (array $match): string => (string) (static::LITERALS[strtoupper($match[0])] ?? $match[0]),
+            $value
+        );
+    }
+
+    /**
+     * Get the sorted values of the field that satisfy a comma separated part.
+     *
+     * @param string $parts
+     * @return int[]
+     * @throws RuntimeException When no value can satisfy the part.
+     */
+    protected function values(string $parts): array
+    {
+        if (isset($this->values[$parts])) {
+            return $this->values[$parts];
+        }
+
+        $items  = array_map('trim', explode(',', $parts));
+        $values = [];
+
+        for ($value = $this->rangeStart; $value <= $this->rangeEnd; $value++) {
+            foreach ($items as $item) {
+                if ($this->isSatisfied($value, $item)) {
+                    $values[] = $value;
+                    break;
+                }
+            }
+        }
+
+        if ($values === []) {
+            throw new RuntimeException('Impossible CRON expression');
+        }
+
+        return $this->values[$parts] = $values;
+    }
+
+    /**
+     * Pick the value the date should move to: the next one after the current, or the previous one when inverted.
+     *
+     * @param int[] $values Sorted values.
+     * @param int   $current
+     * @param bool  $invert
+     * @return int
+     */
+    protected function target(array $values, int $current, bool $invert): int
+    {
+        if ($invert) {
+            for ($i = count($values) - 1; $i >= 0; $i--) {
+                if ($values[$i] < $current) {
+                    return $values[$i];
+                }
             }
 
-            return $this->validate($chunks[0]) && $this->validate($chunks[1]);
+            return $values[count($values) - 1];
         }
 
-        if (!is_numeric($value)) {
-            return false;
+        foreach ($values as $value) {
+            if ($value > $current) {
+                return $value;
+            }
         }
 
-        if (false !== strpos($value, '.')) {
-            return false;
-        }
-
-        // We should have a numeric by now, so coerce this into an integer
-        $value = (int) $value;
-
-        return \in_array($value, $this->fullRange, true);
+        return $values[0];
     }
 
-    protected function timezoneSafeModify(DateTimeInterface $dt, string $modification): DateTimeInterface
+    /**
+     * Move the date by a number of seconds regardless of DST changes.
+     *
+     * @param DateTime|DateTimeImmutable $date
+     * @param int                        $seconds
+     * @return DateTime|DateTimeImmutable
+     */
+    protected function shift(DateTimeInterface $date, int $seconds): DateTimeInterface
     {
-        $timezone = $dt->getTimezone();
-        $dt = $dt->setTimezone(new \DateTimeZone("UTC"));
-        $dt = $dt->modify($modification);
-        $dt = $dt->setTimezone($timezone);
-        return $dt;
+        return $date->setTimestamp($date->getTimestamp() + $seconds);
     }
 
+    /**
+     * Move the date to the start of the next day, or to the end of the previous one.
+     *
+     * @param DateTime|DateTimeImmutable $date
+     * @param bool                       $invert
+     * @return DateTime|DateTimeImmutable
+     */
+    protected function shiftDay(DateTimeInterface $date, bool $invert): DateTimeInterface
+    {
+        return $invert ? $date->modify('-1 day')->setTime(23, 59) : $date->modify('+1 day')->setTime(0, 0);
+    }
+
+    /**
+     * Round the date to the start (or end) of its hour, compensating an offset change that moved it the wrong way.
+     *
+     * @param DateTime|DateTimeImmutable $date
+     * @param bool                       $invert
+     * @param int                        $originalTimestamp
+     * @return DateTime|DateTimeImmutable
+     */
     protected function setTimeHour(DateTimeInterface $date, bool $invert, int $originalTimestamp): DateTimeInterface
     {
-        $date = $date->setTime((int)$date->format('H'), ($invert ? 59 : 0));
+        $date      = $date->setTime((int) $date->format('H'), $invert ? 59 : 0);
+        $timestamp = $date->getTimestamp();
 
-        // setTime caused the offset to change, moving time in the wrong direction
-        $actualTimestamp = $date->format('U');
-        if ((! $invert) && ($actualTimestamp <= $originalTimestamp)) {
-            $date = $this->timezoneSafeModify($date, "+1 hour");
-        } elseif ($invert && ($actualTimestamp >= $originalTimestamp)) {
-            $date = $this->timezoneSafeModify($date, "-1 hour");
+        if (! $invert && $timestamp <= $originalTimestamp) {
+            return $this->shift($date, 3600);
+        }
+
+        if ($invert && $timestamp >= $originalTimestamp) {
+            return $this->shift($date, -3600);
         }
 
         return $date;

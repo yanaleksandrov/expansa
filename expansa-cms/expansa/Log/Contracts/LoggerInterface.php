@@ -1,24 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Expansa\Log\Contracts;
 
 use Stringable;
-use InvalidArgumentException;
+use Expansa\Log\Level;
+use Expansa\Log\Exception\LogException;
 
 /**
- * Describes a logger instance.
+ * PSR-3 logger: `{key}` placeholders of the message are replaced by the context values,
+ * an exception is passed in the `exception` key of the context.
  *
- * The message MUST be a string or object implementing __toString().
- *
- * The message MAY contain placeholders in the form: {foo} where foo
- * will be replaced by the context data in key "foo".
- *
- * The context array can contain arbitrary data. The only assumption that
- * can be made by implementors is that if an Exception instance is given
- * to produce a stack trace, it MUST be in a key named "exception".
- *
- * See https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md
- * for the full interface specification.
+ * @see https://www.php-fig.org/psr/psr-3/
  */
 interface LoggerInterface
 {
@@ -96,10 +90,10 @@ interface LoggerInterface
     /**
      * Logs with an arbitrary level.
      *
-     * @param mixed             $level
+     * @param Level|int|string  $level   A level, its value, RFC 5424 code or name.
      * @param string|Stringable $message
      * @param array             $context
-     * @throws InvalidArgumentException
+     * @throws LogException For an unknown level.
      */
-    public function log(mixed $level, string|Stringable $message, array $context = []): void;
+    public function log(Level|int|string $level, string|Stringable $message, array $context = []): void;
 }

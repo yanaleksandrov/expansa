@@ -16,6 +16,7 @@ use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Lifecycle;
+use Expansa\Facades\Log;
 use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Terminal;
@@ -120,6 +121,16 @@ Lifecycle::phase('configure', true, function () {
     Extensions::configure(
         root: EX_PATH
     );
+
+    // Log::info() and the others: a file per day in storage/logs, closed to the web, kept for two weeks
+    Log::configure([
+        'daily' => [
+            'driver' => 'daily',
+            'path'   => EX_STORAGE . 'logs/expansa.log',
+            'days'   => 14,
+            'level'  => Is::debug() ? 'debug' : 'info',
+        ],
+    ]);
 
     // the version shown by the "list" console command
     Terminal::configure(version: EX_VERSION);

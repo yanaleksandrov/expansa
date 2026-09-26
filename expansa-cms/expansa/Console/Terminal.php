@@ -9,6 +9,7 @@ use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
 use Expansa\Console\Commands\HooksList;
 use Expansa\Console\Commands\Index;
+use Expansa\Console\Commands\ScheduleRun;
 use Expansa\Console\Output\Writer;
 
 /**
@@ -78,6 +79,9 @@ class Terminal
         }
         if ($this->command('hooks:list') === null) {
             $this->addCommand(new HooksList($this));
+        }
+        if ($this->command('schedule:run') === null) {
+            $this->addCommand(new ScheduleRun($this));
         }
         return $this;
     }

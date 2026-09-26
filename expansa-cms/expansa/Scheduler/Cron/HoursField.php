@@ -2,211 +2,148 @@
 
 declare(strict_types=1);
 
-namespace Cron;
+namespace Expansa\Scheduler\Cron;
 
+use DateTimeImmutable;
 use DateTimeInterface;
-use DateTimeZone;
 
 /**
- * Hours field.  Allows: * , / -.
+ * Hours field, allows: * , / -. Hours skipped or repeated by a DST change are still matched.
+ *
+ * @package Expansa\Scheduler\Cron
  */
 class HoursField extends AbstractField
 {
     /**
-     * {@inheritdoc}
+     * Seconds around a date for which the timezone transitions are loaded.
      */
-    protected $rangeStart = 0;
+    private const int TRANSITIONS_WINDOW = 31_622_400;
+
+    protected int $rangeStart = 0;
+
+    protected int $rangeEnd = 23;
 
     /**
-     * {@inheritdoc}
+     * Transitions of $transitionsZone, from DateTimeZone::getTransitions().
      */
-    protected $rangeEnd = 23;
+    private array $transitions = [];
 
-    /**
-     * @var array|null Transitions returned by DateTimeZone::getTransitions()
-     */
-    protected $transitions = [];
+    private string $transitionsZone = '';
 
-    /**
-     * @var int|null Timestamp of the start of the transitions range
-     */
-    protected $transitionsStart = null;
+    private int $transitionsStart = 0;
 
-    /**
-     * @var int|null Timestamp of the end of the transitions range
-     */
-    protected $transitionsEnd = null;
+    private int $transitionsEnd = 0;
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isSatisfiedBy(DateTimeInterface $date, $value, bool $invert): bool
+    public function isSatisfiedBy(DateTimeInterface $date, string $value, bool $invert): bool
     {
-        $checkValue = (int) $date->format('H');
-        $retval = $this->isSatisfied($checkValue, $value);
-        if ($retval) {
-            return $retval;
+        $hour = (int) $date->format('H');
+        if ($this->isSatisfied($hour, $value)) {
+            return true;
         }
 
-        // Are we on the edge of a transition
-        $lastTransition = $this->getPastTransition($date);
-        if (($lastTransition !== null) && ($lastTransition["ts"] > ((int) $date->format('U') - 3600))) {
-            $dtLastOffset = clone $date;
-            $this->timezoneSafeModify($dtLastOffset, "-1 hour");
-            $lastOffset = $dtLastOffset->getOffset();
-
-            $dtNextOffset = clone $date;
-            $this->timezoneSafeModify($dtNextOffset, "+1 hour");
-            $nextOffset = $dtNextOffset->getOffset();
-
-            $offsetChange = $nextOffset - $lastOffset;
-            if ($offsetChange >= 3600) {
-                $checkValue -= 1;
-                return $this->isSatisfied($checkValue, $value);
-            }
-            if ((! $invert) && ($offsetChange <= -3600)) {
-                $checkValue += 1;
-                return $this->isSatisfied($checkValue, $value);
-            }
+        $timestamp  = $date->getTimestamp();
+        $transition = $this->getPastTransition($date);
+        if ($transition === null || $transition['ts'] <= $timestamp - 3600) {
+            return false;
         }
 
-        return $retval;
+        // the hour right after a DST change also satisfies the hour it replaced
+        $zone   = $date->getTimezone();
+        $change = $zone->getOffset(new DateTimeImmutable('@' . ($timestamp + 3600)))
+            - $zone->getOffset(new DateTimeImmutable('@' . ($timestamp - 3600)));
+
+        if ($change >= 3600) {
+            return $this->isSatisfied($hour - 1, $value);
+        }
+
+        if (! $invert && $change <= -3600) {
+            return $this->isSatisfied($hour + 1, $value);
+        }
+
+        return false;
     }
 
-    public function getPastTransition(DateTimeInterface $date): ?array
+    public function increment(DateTimeInterface &$date, bool $invert = false, ?string $parts = null): void
     {
-        $currentTimestamp = (int) $date->format('U');
-        if (
-            ($this->transitions === null)
-            || ($this->transitionsStart < ($currentTimestamp + 86400))
-            || ($this->transitionsEnd > ($currentTimestamp - 86400))
-        ) {
-            // We start a day before current time so we can differentiate between the first transition entry
-            // and a change that happens now
-            $dtLimitStart = clone $date;
-            $dtLimitStart = $dtLimitStart->modify("-12 months");
-            $dtLimitEnd = clone $date;
-            $dtLimitEnd = $dtLimitEnd->modify('+12 months');
+        $originalTimestamp = $date->getTimestamp();
 
-            $this->transitions = $date->getTimezone()->getTransitions(
-                $dtLimitStart->getTimestamp(),
-                $dtLimitEnd->getTimestamp()
-            );
-            if (empty($this->transitions)) {
-                return null;
-            }
-            $this->transitionsStart = $dtLimitStart->getTimestamp();
-            $this->transitionsEnd = $dtLimitEnd->getTimestamp();
+        if ($parts === null || $parts === '*') {
+            $date = $this->setTimeHour($this->shift($date, $invert ? -3600 : 3600), $invert, $originalTimestamp);
+
+            return;
         }
 
-        $nextTransition = null;
-        foreach ($this->transitions as $transition) {
-            if ($transition["ts"] > $currentTimestamp) {
-                continue;
-            }
-
-            if (($nextTransition !== null) && ($transition["ts"] < $nextTransition["ts"])) {
-                continue;
-            }
-
-            $nextTransition = $transition;
-        }
-
-        return ($nextTransition ?? null);
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @param string|null                  $parts
-     */
-    public function increment(DateTimeInterface &$date, $invert = false, $parts = null): FieldInterface
-    {
-        $originalTimestamp = (int) $date->format('U');
-
-        // Change timezone to UTC temporarily. This will
-        // allow us to go back or forwards and hour even
-        // if DST will be changed between the hours.
-        if (null === $parts || '*' === $parts) {
-            if ($invert) {
-                $date = $date->sub(new \DateInterval('PT1H'));
-            } else {
-                $date = $date->add(new \DateInterval('PT1H'));
-            }
-
-            $date = $this->setTimeHour($date, $invert, $originalTimestamp);
-            return $this;
-        }
-
-        $parts = false !== strpos($parts, ',') ? explode(',', $parts) : [$parts];
-        $hours = [];
-        foreach ($parts as $part) {
-            $hours = array_merge($hours, $this->getRangeForExpression($part, 23));
-        }
-
-        $current_hour = (int) $date->format('H');
-        $position = $invert ? \count($hours) - 1 : 0;
-        $countHours = \count($hours);
-        if ($countHours > 1) {
-            for ($i = 0; $i < $countHours - 1; ++$i) {
-                if ((!$invert && $current_hour >= $hours[$i] && $current_hour < $hours[$i + 1]) ||
-                    ($invert && $current_hour > $hours[$i] && $current_hour <= $hours[$i + 1])) {
-                    $position = $invert ? $i : $i + 1;
-
-                    break;
-                }
-            }
-        }
-
-        $target = (int) $hours[$position];
-        $originalHour = (int)$date->format('H');
-
-        $originalDay = (int)$date->format('d');
-        $previousOffset = $date->getOffset();
+        $hour   = (int) $date->format('H');
+        $target = $this->target($this->values($parts), $hour, $invert);
+        $day    = (int) $date->format('d');
+        $offset = $date->getOffset();
 
         if (! $invert) {
-            if ($originalHour >= $target) {
-                $distance = 24 - $originalHour;
-                $date = $this->timezoneSafeModify($date, "+{$distance} hours");
+            if ($hour >= $target) {
+                $date = $this->shift($date, (24 - $hour) * 3600);
 
-                $actualDay = (int)$date->format('d');
-                $actualHour = (int)$date->format('H');
-                if (($actualDay !== ($originalDay + 1)) && ($actualHour !== 0)) {
-                    $offsetChange = ($previousOffset - $date->getOffset());
-                    $date = $this->timezoneSafeModify($date, "+{$offsetChange} seconds");
+                // a DST change on the way leaves the date off midnight of the next day
+                if ((int) $date->format('d') !== $day + 1 && (int) $date->format('H') !== 0) {
+                    $date = $this->shift($date, $offset - $date->getOffset());
                 }
 
-                $originalHour = (int)$date->format('H');
+                $hour = (int) $date->format('H');
             }
 
-            $distance = $target - $originalHour;
-            $date = $this->timezoneSafeModify($date, "+{$distance} hours");
+            $date = $this->shift($date, ($target - $hour) * 3600);
         } else {
-            if ($originalHour <= $target) {
-                $distance = ($originalHour + 1);
-                $date = $this->timezoneSafeModify($date, "-" . $distance . " hours");
+            if ($hour <= $target) {
+                $date = $this->shift($date, -($hour + 1) * 3600);
 
-                $actualDay = (int)$date->format('d');
-                $actualHour = (int)$date->format('H');
-                if (($actualDay !== ($originalDay - 1)) && ($actualHour !== 23)) {
-                    $offsetChange = ($previousOffset - $date->getOffset());
-                    $date = $this->timezoneSafeModify($date, "+{$offsetChange} seconds");
+                if ((int) $date->format('d') !== $day - 1 && (int) $date->format('H') !== 23) {
+                    $date = $this->shift($date, $offset - $date->getOffset());
                 }
 
-                $originalHour = (int)$date->format('H');
+                $hour = (int) $date->format('H');
             }
 
-            $distance = $originalHour - $target;
-            $date = $this->timezoneSafeModify($date, "-{$distance} hours");
+            $date = $this->shift($date, -($hour - $target) * 3600);
         }
 
         $date = $this->setTimeHour($date, $invert, $originalTimestamp);
 
-        $actualHour = (int)$date->format('H');
-        if ($invert && ($actualHour === ($target - 1) || (($actualHour === 23) && ($target === 0)))) {
-            $date = $this->timezoneSafeModify($date, "+1 hour");
+        $hour = (int) $date->format('H');
+        if ($invert && ($hour === $target - 1 || ($hour === 23 && $target === 0))) {
+            $date = $this->shift($date, 3600);
+        }
+    }
+
+    /**
+     * Get the latest timezone transition before the date, cached for a year around it.
+     *
+     * @param DateTimeInterface $date
+     * @return array|null
+     */
+    private function getPastTransition(DateTimeInterface $date): ?array
+    {
+        $timestamp = $date->getTimestamp();
+        $zone      = $date->getTimezone();
+
+        if (
+            $this->transitionsZone !== $zone->getName()
+            || $timestamp - 86400 < $this->transitionsStart
+            || $timestamp + 86400 > $this->transitionsEnd
+        ) {
+            // the first entry is the state at the window start, so the window starts well before the date
+            $this->transitionsZone  = $zone->getName();
+            $this->transitionsStart = $timestamp - self::TRANSITIONS_WINDOW;
+            $this->transitionsEnd   = $timestamp + self::TRANSITIONS_WINDOW;
+            $this->transitions      = $zone->getTransitions($this->transitionsStart, $this->transitionsEnd) ?: [];
         }
 
-        return $this;
+        $past = null;
+        foreach ($this->transitions as $transition) {
+            if ($transition['ts'] > $timestamp) {
+                break;
+            }
+            $past = $transition;
+        }
+
+        return $past;
     }
 }

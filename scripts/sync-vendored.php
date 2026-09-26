@@ -8,9 +8,8 @@ $root   = dirname(__DIR__);
 $target = rtrim($argv[1] ?? $root, '/\\');
 
 $map = [
-    'vendor/spatie/image/src'                => 'expansa-cms/expansa/Images/Spatie/Image',
-    'vendor/spatie/image-optimizer/src'      => 'expansa-cms/expansa/Images/Spatie/ImageOptimizer',
-    'vendor/dragonmantank/cron-expression/src' => 'expansa-cms/expansa/Scheduler',
+    'vendor/spatie/image/src'           => 'expansa-cms/expansa/Images/Spatie/Image',
+    'vendor/spatie/image-optimizer/src' => 'expansa-cms/expansa/Images/Spatie/ImageOptimizer',
 ];
 
 $copy = static function (string $from, string $to) use (&$copy): int {

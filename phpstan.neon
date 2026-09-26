@@ -12,6 +12,5 @@ parameters:
         analyse:
             - expansa-cms/expansa/Mail/PHPMailer
             - expansa-cms/expansa/Images/Spatie
-            - expansa-cms/expansa/Scheduler/Cron
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
