@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace Expansa\Cache\Providers;
 
 use DateTime;
-use Expansa\Cache\Concerns\Locks;
-use Expansa\Cache\Concerns\Memoizes;
-use Expansa\Cache\Concerns\Serializes;
 use Expansa\Cache\Contracts\Provider;
-use Expansa\Facades\Db;
+use Expansa\Cache\Traits\Locks;
+use Expansa\Cache\Traits\Memoizes;
+use Expansa\Cache\Traits\Serializes;
+use Expansa\Database\Query\Builder;
 
 /**
- * A cache provider backed by the `cache` DB table, for entries that must survive past a single
- * request/process — unlike Memory, which is wiped once the PHP process holding it ends.
+ * The `cache` table: outlives the process. The only provider that depends on the Database package,
+ * loaded only when chosen.
  *
- * The table has no `group` column, so $group and $key are folded into one physical key
- * ("$group:$key") for storage and lookup. A request-local L1 memo (see Memoizes) sits in front
- * of the table: a key read twice in the same request costs one query, not two — the slowest of
- * the persistent backends benefits from this the most.
+ * The table has no group column, so the physical key is "group:key". Values are memoized for the request.
+ *
+ * @package Expansa\Cache\Providers
  */
-class Database implements Provider
+final class Database implements Provider
 {
     use Locks;
     use Memoizes;
@@ -28,56 +27,48 @@ class Database implements Provider
 
     private const string TABLE = 'cache';
 
-    /**
-     * $expiry accepts an absolute DateTime or a relative time string (e.g. "+1 day").
-     */
+    public function __construct(
+
+        /**
+         * Connection with the `cache` table.
+         */
+        private readonly Builder $db,
+    ) {}
+
     #[\Override]
-    public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): mixed
+    public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): bool
     {
-        if ($this->isLocked($group, $key)) {
+        if ($this->isLocked($group, $key) || $this->hasMemoized($group, $key)) {
             return false;
         }
 
-        if ($this->hasMemoized($group, $key)) {
-            return $this->memoized($group, $key);
-        }
-
-        if (is_string($expiry)) {
-            $expiry = new DateTime($expiry);
-        }
-
-        $row = $this->fetchRow($key, $group);
-
+        $row = $this->read($key, $group);
         if ($row !== null) {
-            return $this->memoize($group, $key, $row['value']);
+            $this->memoize($group, $key, $row['value']);
+
+            return false;
         }
 
-        // An expiry already in the past is never actually stored (or memoized), matching every
-        // other provider's behavior of an add()'d-then-immediately-expired entry never being
-        // visible to a later get().
-        if ($expiry === null || $expiry->getTimestamp() > time()) {
-            $this->persist($key, $group, $value, $expiry);
-            $this->memoize($group, $key, $value);
+        $expiry = is_string($expiry) ? new DateTime($expiry) : $expiry;
+        if ($expiry !== null && $expiry->getTimestamp() <= time()) {
+            return false;
         }
 
-        return $value;
+        $this->write($key, $group, $value, $expiry);
+        $this->memoize($group, $key, $value);
+
+        return true;
     }
 
-    /**
-     * Sets a value in the cache for a given key and group. The value never expires — use add()
-     * with an $expiry for a TTL-bound entry.
-     */
     #[\Override]
-    public function set(string $key, mixed $value, string $group = 'default'): mixed
+    public function set(string $key, mixed $value, string $group = 'default'): bool
     {
-        $this->persist($key, $group, $value, null);
+        $this->write($key, $group, $value, null);
+        $this->memoize($group, $key, $value);
 
-        return $this->memoize($group, $key, $value);
+        return true;
     }
 
-    /**
-     * Retrieves data from the cache, optionally populating it via $callback on a miss.
-     */
     #[\Override]
     public function get(string $key, string $group = 'default', ?callable $callback = null): mixed
     {
@@ -85,22 +76,21 @@ class Database implements Provider
             return $this->memoized($group, $key);
         }
 
-        $row = $this->fetchRow($key, $group);
-
+        $row = $this->read($key, $group);
         if ($row !== null) {
             return $this->memoize($group, $key, $row['value']);
         }
 
-        if ($callback !== null) {
-            return $this->add($key, $callback(), $group);
+        if ($callback === null) {
+            return null;
         }
 
-        return null;
+        $value = $callback();
+        $this->add($key, $value, $group);
+
+        return $value;
     }
 
-    /**
-     * Retrieves and removes data from the cache.
-     */
     #[\Override]
     public function pull(string $key, string $group = 'default'): mixed
     {
@@ -111,17 +101,14 @@ class Database implements Provider
         return $value;
     }
 
-    /**
-     * Clears data from the cache. An empty $key clears the whole group.
-     */
     #[\Override]
     public function forget(string $key = '', string $group = 'default'): bool
     {
         if ($key !== '') {
-            Db::delete(self::TABLE, ['key' => $this->physicalKey($key, $group)]);
+            $this->db->delete(self::TABLE, ['key' => $this->physicalKey($key, $group)]);
             $this->forgetMemoized($group, $key);
         } else {
-            Db::delete(self::TABLE, ['key[~]' => $group . ':%']);
+            $this->db->delete(self::TABLE, ['key[~]' => $group . ':%']);
             $this->forgetMemoizedGroup($group);
         }
 
@@ -129,32 +116,24 @@ class Database implements Provider
     }
 
     /**
-     * Increases the value of a key by a given amount. Expiry, if any, is preserved.
+     * Keeps the expiry of the value.
      */
     #[\Override]
     public function increase(string $key, int|float $amount = 1, string $group = 'default'): bool
     {
-        if ($key === '') {
-            return false;
-        }
-
-        $row = $this->fetchRow($key, $group);
-
+        $row = $this->read($key, $group);
         if ($row === null || ! is_numeric($row['value'])) {
             return false;
         }
 
         $value = $row['value'] + $amount;
 
-        $this->persist($key, $group, $value, $row['expiry']);
+        $this->write($key, $group, $value, $row['expiry']);
         $this->memoize($group, $key, $value);
 
         return true;
     }
 
-    /**
-     * Decreases the value of a key by a given amount. Expiry, if any, is preserved.
-     */
     #[\Override]
     public function decrease(string $key, int|float $amount = 1, string $group = 'default'): bool
     {
@@ -162,36 +141,36 @@ class Database implements Provider
     }
 
     /**
-     * Deletes every already-expired row regardless of group. Not called automatically — wire it
-     * into a Scheduler job (see Memory::MAX_ENTRIES_PER_GROUP's doc comment for the equivalent
-     * concern on the in-memory side) if the table is expected to accumulate expired entries
-     * between reads.
+     * Delete expired rows of every group. Not called automatically: expired keys that are never
+     * read stay in the table, run it from a scheduled job.
+     *
+     * @return void
      */
     public function purgeExpired(): void
     {
-        Db::delete(self::TABLE, [
+        $this->db->delete(self::TABLE, [
             'expiry_at[!]'  => null,
-            'expiry_at[<=]' => Db::raw('NOW()'),
+            'expiry_at[<=]' => Builder::raw('NOW()'),
         ]);
     }
 
     /**
-     * Reads a row and decodes its value, transparently deleting and returning null if it has
-     * already expired.
+     * Read a row and decode its value, an expired row is deleted.
      *
+     * @param string $key
+     * @param string $group
      * @return array{value: mixed, expiry: DateTime|null}|null
      */
-    private function fetchRow(string $key, string $group): ?array
+    private function read(string $key, string $group): ?array
     {
         $physicalKey = $this->physicalKey($key, $group);
-        $row         = Db::get(self::TABLE, ['value', 'expiry_at'], ['key' => $physicalKey]);
-
+        $row         = $this->db->get(self::TABLE, ['value', 'expiry_at'], ['key' => $physicalKey]);
         if ($row === null) {
             return null;
         }
 
         if ($row['expiry_at'] !== null && strtotime($row['expiry_at']) <= time()) {
-            Db::delete(self::TABLE, ['key' => $physicalKey]);
+            $this->db->delete(self::TABLE, ['key' => $physicalKey]);
 
             return null;
         }
@@ -203,32 +182,30 @@ class Database implements Provider
     }
 
     /**
-     * Inserts or updates the row for $key/$group. There is no upsert support in the query
-     * builder, so existence is checked explicitly first.
+     * Insert or update the row, the query builder has no upsert.
+     *
+     * @param string        $key
+     * @param string        $group
+     * @param mixed         $value
+     * @param DateTime|null $expiry
+     * @return void
      */
-    private function persist(string $key, string $group, mixed $value, ?DateTime $expiry): void
+    private function write(string $key, string $group, mixed $value, ?DateTime $expiry): void
     {
         $physicalKey = $this->physicalKey($key, $group);
         $data        = [
-            // base64'd on top of serializeValue()'s own encoding: igbinary's output (unlike
-            // plain serialize()'s) is raw binary — embedded NUL bytes, non-UTF8 sequences — and
-            // the `value` column is a charset-validated MEDIUMTEXT, not a binary/BLOB column.
-            // Storing that raw binary directly gets silently mangled by MySQL's charset
-            // conversion; base64 keeps the payload pure ASCII so no column type change is needed.
+            // igbinary output is binary and the column is text: base64 keeps it from charset conversion
             'value'     => base64_encode($this->serializeValue($value)),
             'expiry_at' => $expiry?->format('Y-m-d H:i:s'),
         ];
 
-        if (Db::get(self::TABLE, ['key'], ['key' => $physicalKey]) !== null) {
-            Db::update(self::TABLE, $data, ['key' => $physicalKey]);
+        if ($this->db->get(self::TABLE, ['key'], ['key' => $physicalKey]) !== null) {
+            $this->db->update(self::TABLE, $data, ['key' => $physicalKey]);
         } else {
-            Db::insert(self::TABLE, $data + ['key' => $physicalKey]);
+            $this->db->insert(self::TABLE, $data + ['key' => $physicalKey]);
         }
     }
 
-    /**
-     * The physical row key for $key/$group — the table has no separate group column.
-     */
     private function physicalKey(string $key, string $group): string
     {
         return $group . ':' . $key;
