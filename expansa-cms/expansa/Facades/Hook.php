@@ -21,6 +21,7 @@ use Expansa\Patterns\Facade;
  * @method static int   calls(string $name)
  * @method static void  defer(string $name, mixed $value = null, mixed ...$values)
  * @method static void  reset()
+ * @method static array multisort(array $array, string $key, bool $descending = false)
  */
 class Hook extends Facade
 {

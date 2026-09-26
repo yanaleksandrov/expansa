@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Expansa\Hooks;
 
 use Closure;
+use LogicException;
 use Expansa\Hooks\Attributes\Alias;
 use Expansa\Hooks\Attributes\Priority as PriorityAttribute;
-use Expansa\Hooks\Exceptions\HooksException;
+use Expansa\Hooks\Exceptions\InvalidListener;
 use Expansa\Support\Exceptions\FinderException;
 use Expansa\Support\Finder;
 use ReflectionClass;
@@ -79,7 +80,7 @@ final class Manager
      *
      * @param class-string[]|string $listeners Classes, or a listener file or directory to scan.
      * @return void
-     * @throws FinderException|HooksException|ReflectionException
+     * @throws FinderException|InvalidListener|ReflectionException
      */
     public function configure(string|array $listeners): void
     {
@@ -96,7 +97,7 @@ final class Manager
         foreach ($paths as $file) {
             // cheaper than diffing get_declared_classes() and works for a file loaded some other way
             if (! preg_match('/namespace\s+([^;]+);/', file_get_contents($file), $namespaceMatch)) {
-                throw new HooksException("Listener file '$file' does not declare a namespace");
+                throw new InvalidListener("Listener file '$file' does not declare a namespace");
             }
 
             require_once $file;
@@ -259,7 +260,7 @@ final class Manager
      * @param mixed  $value     Value to filter.
      * @param mixed  ...$values Extra arguments of the listeners.
      * @return mixed The filtered value.
-     * @throws HooksException If the hook recurses deeper than MAX_RECURSION_DEPTH.
+     * @throws LogicException If the hook recurses deeper than MAX_RECURSION_DEPTH.
      */
     public function call(string $name, mixed $value = null, mixed ...$values): mixed
     {
@@ -275,7 +276,7 @@ final class Manager
         $depth = $depthByName[$name] ?? 0;
 
         if ($depth >= self::MAX_RECURSION_DEPTH) {
-            throw new HooksException(
+            throw new LogicException(
                 "Hook '$name' recursed more than " . self::MAX_RECURSION_DEPTH . ' levels deep - '
                 . 'a listener is likely re-triggering the same hook it is running on'
             );
@@ -359,12 +360,12 @@ final class Manager
      *
      * @param class-string $class
      * @return void
-     * @throws HooksException|ReflectionException
+     * @throws InvalidListener|ReflectionException
      */
     private function configureClass(string $class): void
     {
         if (! class_exists($class)) {
-            throw new HooksException("Listener class '$class' does not exist");
+            throw new InvalidListener("Listener class '$class' does not exist");
         }
 
         $reflection = new ReflectionClass($class);
@@ -377,7 +378,7 @@ final class Manager
         self::$configuredFiles[$realFile] = true;
 
         if (! $reflection->isInstantiable()) {
-            throw new HooksException("Listener class '$class' is not instantiable");
+            throw new InvalidListener("Listener class '$class' is not instantiable");
         }
 
         foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
@@ -439,20 +440,24 @@ final class Manager
      */
     private function getSorted(string $name): array
     {
-        return self::$sorted[$name] ??= self::sort(self::$hooks[$name] ?? []);
+        return self::$sorted[$name] ??= self::multisort(self::$hooks[$name] ?? [], 'priority');
     }
 
     /**
-     * Sort listeners by priority, keeping the order of equal ones.
+     * Sort a list of arrays by a key, keeping the order of equal ones; the keys are not kept.
      *
-     * @param array $hooks
-     * @return list<array{key: string, function: callable, source: array{file: string, line: int|string}, priority: int}>
+     * @param array  $array
+     * @param string $key
+     * @param bool   $descending
+     * @return array
      */
-    private static function sort(array $hooks): array
+    public static function multisort(array $array, string $key, bool $descending = false): array
     {
-        usort($hooks, static fn (array $a, array $b): int => $a['priority'] <=> $b['priority']);
+        usort($array, $descending
+            ? static fn (array $a, array $b): int => $b[$key] <=> $a[$key]
+            : static fn (array $a, array $b): int => $a[$key] <=> $b[$key]);
 
-        return $hooks;
+        return $array;
     }
 
     /**
