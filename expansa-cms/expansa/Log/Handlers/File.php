@@ -14,7 +14,7 @@ use Expansa\Log\LogRecord;
  *
  * @package Expansa\Log\Handlers
  */
-class FileHandler extends AbstractHandler
+class File extends AbstractHandler
 {
     /**
      * The open file, `null` until the first write.

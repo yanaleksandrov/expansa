@@ -12,7 +12,7 @@ use Expansa\Log\LogRecord;
  *
  * @package Expansa\Log\Formatters
  */
-class LineFormatter extends AbstractFormatter
+class Line extends AbstractFormatter
 {
     public function __construct(
 

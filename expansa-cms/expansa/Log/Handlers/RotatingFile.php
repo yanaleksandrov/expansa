@@ -13,7 +13,7 @@ use Expansa\Log\LogRecord;
  *
  * @package Expansa\Log\Handlers
  */
-class RotatingFileHandler extends FileHandler
+class RotatingFile extends File
 {
     /**
      * Glob of the Y-m-d date part in file names.

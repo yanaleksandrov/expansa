@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Log\Handlers;
 
 use Expansa\Log\Contracts\Formatter;
-use Expansa\Log\Formatters\TelegramFormatter;
+use Expansa\Log\Formatters\Telegram as TelegramFormatter;
 use Expansa\Log\Level;
 use Expansa\Log\LogRecord;
 
@@ -15,7 +15,7 @@ use Expansa\Log\LogRecord;
  *
  * @package Expansa\Log\Handlers
  */
-class TelegramHandler extends AbstractHandler
+class Telegram extends AbstractHandler
 {
     public function __construct(
 

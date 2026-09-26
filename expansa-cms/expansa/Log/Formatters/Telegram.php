@@ -12,7 +12,7 @@ use Expansa\Log\LogRecord;
  *
  * @package Expansa\Log\Formatters
  */
-class TelegramFormatter extends AbstractFormatter
+class Telegram extends AbstractFormatter
 {
     /**
      * Telegram limit of a message, in characters after the entities are parsed.

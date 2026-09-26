@@ -9,10 +9,10 @@ use Stringable;
 use Expansa\Log\Contracts\Handler;
 use Expansa\Log\Contracts\LoggerInterface;
 use Expansa\Log\Exception\LogException;
-use Expansa\Log\Handlers\ErrorLogHandler;
-use Expansa\Log\Handlers\FileHandler;
-use Expansa\Log\Handlers\RotatingFileHandler;
-use Expansa\Log\Handlers\TelegramHandler;
+use Expansa\Log\Handlers\ErrorLog;
+use Expansa\Log\Handlers\File;
+use Expansa\Log\Handlers\RotatingFile;
+use Expansa\Log\Handlers\Telegram;
 
 /**
  * Channels described by configuration and created on first use, the Log facade instance.
@@ -278,7 +278,7 @@ class Manager implements LoggerInterface
 
     protected function createSingleDriver(array $config, string $name): Logger
     {
-        return new Logger($name, [new FileHandler($this->required($config, 'path', $name), $config['level'] ?? Level::Debug)]);
+        return new Logger($name, [new File($this->required($config, 'path', $name), $config['level'] ?? Level::Debug)]);
     }
 
     protected function createDailyDriver(array $config, string $name): Logger
@@ -286,7 +286,7 @@ class Manager implements LoggerInterface
         $path = $this->required($config, 'path', $name);
         $days = (int) ($config['days'] ?? 7);
 
-        return new Logger($name, [new RotatingFileHandler($path, $days, $config['level'] ?? Level::Debug)]);
+        return new Logger($name, [new RotatingFile($path, $days, $config['level'] ?? Level::Debug)]);
     }
 
     protected function createTelegramDriver(array $config, string $name): Logger
@@ -294,12 +294,12 @@ class Manager implements LoggerInterface
         $token  = $this->required($config, 'token', $name);
         $chatId = $this->required($config, 'chat_id', $name);
 
-        return new Logger($name, [new TelegramHandler($token, $chatId, $config['level'] ?? Level::Error)]);
+        return new Logger($name, [new Telegram($token, $chatId, $config['level'] ?? Level::Error)]);
     }
 
     protected function createErrorlogDriver(array $config, string $name): Logger
     {
-        return new Logger($name, [new ErrorLogHandler($config['level'] ?? Level::Debug)]);
+        return new Logger($name, [new ErrorLog($config['level'] ?? Level::Debug)]);
     }
 
     private function required(array $config, string $key, string $name): mixed

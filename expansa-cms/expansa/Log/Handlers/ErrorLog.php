@@ -11,7 +11,7 @@ use Expansa\Log\LogRecord;
  *
  * @package Expansa\Log\Handlers
  */
-class ErrorLogHandler extends AbstractHandler
+class ErrorLog extends AbstractHandler
 {
     public function handle(LogRecord $record): bool
     {
