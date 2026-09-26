@@ -7,7 +7,13 @@ namespace Expansa\Http\Request;
 class ParameterBug implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     public function __construct(
-        protected array $parameters = []
+
+        /**
+         * Values stored as given; lookups pass the key through modifyKey(), so keys must already be in that form.
+         *
+         * @var array<string, mixed>
+         */
+        protected array $parameters = [],
     ) {} // phpcs:ignore
 
     public function all(): array

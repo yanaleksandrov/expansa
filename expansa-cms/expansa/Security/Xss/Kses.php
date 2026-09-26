@@ -9,7 +9,7 @@ use LogicException;
 
 /**
  * HTML filter: keeps only allowed elements, attributes and URL protocols, disarms everything else.
- * Port of kses (https://sourceforge.net/projects/kses), the filter behind wp_kses().
+ * Port of kses (https://sourceforge.net/projects/kses).
  *
  * @package Expansa\Security\Xss
  */
@@ -62,21 +62,7 @@ final class Kses
         'hgroup'     => [],
         'hr'         => [...self::ALIGNED, 'noshade', 'size', 'width'],
         'i'          => ['id'],
-        'iframe'     => [
-            'allow',
-            'allowfullscreen',
-            'frameborder',
-            'height',
-            'id',
-            'loading',
-            'marginheight',
-            'marginwidth',
-            'referrerpolicy',
-            'sandbox',
-            'scrolling',
-            'src',
-            'width',
-        ],
+        'iframe'     => ['allow', 'allowfullscreen', 'frameborder', 'height', 'id', 'loading', 'marginheight', 'marginwidth', 'referrerpolicy', 'sandbox', 'scrolling', 'src', 'width'],
         'img'        => ['align', 'alt', 'border', 'decoding', 'height', 'id', 'loading', 'sizes', 'src', 'srcset', 'width'],
         'ins'        => ['cite', 'datetime', 'id'],
         'kbd'        => ['id'],
@@ -294,6 +280,7 @@ final class Kses
     private static function compile(array $allowedHtml): array
     {
         $global = self::attributes($allowedHtml['*'] ?? []);
+
         unset($allowedHtml['*']);
 
         foreach ($allowedHtml as $element => $attributes) {
@@ -336,6 +323,7 @@ final class Kses
     private static function attributes(array $attributes): array
     {
         $rules = [];
+
         foreach ($attributes as $name => $checks) {
             if (is_int($name)) {
                 $rules[$checks] = 1;
@@ -423,7 +411,6 @@ final class Kses
      */
     private function stripTags(string $markup): string
     {
-
         if ($markup[0] !== '<') {
             return '&gt;';
         }
@@ -480,7 +467,7 @@ final class Kses
      */
     private function stripAttributes(string $tag, string $element, string $attr): string
     {
-        $slash    = str_contains($attr, '/') && preg_match('%\s/\s*$%', $attr) ? ' /' : '';
+        $slash   = str_contains($attr, '/') && preg_match('%\s/\s*$%', $attr) ? ' /' : '';
         $allowed = $this->allowedHtml[$element];
 
         if ($allowed === [] || $attr === '') {
@@ -705,9 +692,12 @@ final class Kses
         // unless whitespace follows the colon: the search removes it
         if (
             $colon > 0
-            && strspn($value, self::PROTOCOL_CHARS) === $colon
-            && isset($this->allowedProtocols[substr($value, 0, $colon)])
-            && strspn($value, " \t\n\v\f\r", $colon + 1, 1) === 0
+            &&
+            strspn($value, self::PROTOCOL_CHARS) === $colon
+            &&
+            isset($this->allowedProtocols[substr($value, 0, $colon)])
+            &&
+            strspn($value, " \t\n\v\f\r", $colon + 1, 1) === 0
         ) {
             return $value;
         }
@@ -732,7 +722,7 @@ final class Kses
         $protocol = preg_replace(['/&#\d+;/', '/&#[Xx][0-9A-Fa-f]+;/', '/\s/', '/\xad+/'], '', $match[1]) ?? '';
         $protocol = strtolower($protocol);
 
-        return isset($this->allowedProtocols[$protocol]) ? "{$protocol}:" : '';
+        return isset($this->allowedProtocols[$protocol]) ? "$protocol:" : '';
     }
 
     /**

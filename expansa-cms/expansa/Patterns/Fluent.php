@@ -16,13 +16,12 @@ use JsonSerializable;
  */
 class Fluent implements ArrayAccess, JsonSerializable
 {
-    /**
-     * Construct a new Fluent instance.
-     *
-     * @param array $attributes Initial attributes for the instance.
-     */
     public function __construct(
-        protected array $attributes = []
+
+        /**
+         * Initial attributes for the instance.
+         */
+        protected array $attributes = [],
     ) {} // phpcs:ignore
 
     /**

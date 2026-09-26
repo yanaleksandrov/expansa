@@ -14,7 +14,13 @@ use Expansa\Http\Response;
  */
 final readonly class PostsController
 {
-    public function __construct(private PostsService $service = new PostsService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private PostsService $service = new PostsService(),
+    )
     {
     }
 

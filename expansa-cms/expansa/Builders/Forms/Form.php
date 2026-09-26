@@ -8,23 +8,37 @@ use Expansa\Support\Arr;
 
 class Form extends Field
 {
-    /**
-     * Constructor for the Form class.
-     *
-     * @param string $uid Unique ID of the form class instance.
-     * @param array $fields List of all form fields.
-     * @param array $attributes Default attributes for the form.
-     * @param string $before ID of the field before which the new field will be added.
-     * @param string $after ID of the field after which the new field will be added.
-     * @param string $instead ID of the field to be replaced with the new field.
-     */
     public function __construct(
+
+        /**
+         * Unique ID of the form class instance.
+         */
         public string $uid,
+
+        /**
+         * List of all form fields.
+         */
         public array $fields = [],
+
+        /**
+         * Default attributes for the form.
+         */
         public array $attributes = [],
+
+        /**
+         * ID of the field before which the new field will be added.
+         */
         public string $before = '',
+
+        /**
+         * ID of the field after which the new field will be added.
+         */
         public string $after = '',
-        public string $instead = ''
+
+        /**
+         * ID of the field to be replaced with the new field.
+         */
+        public string $instead = '',
     )
     {
         $this->attributes = ['id' => $uid, 'method' => 'POST', ...$attributes];

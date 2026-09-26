@@ -31,16 +31,21 @@ final class Sanitizer
      */
     public array $data = [];
 
-    /**
-     * Setup sanitizer rules.
-     *
-     * @param array $fields     Incoming fields and their values.
-     * @param array $rules      Sanitizer rules list. Example: 'kebabcase'.
-     * @param array $extensions List for custom rules for extend sanitizer.
-     */
     public function __construct(
+
+        /**
+         * Incoming fields and their values.
+         */
         protected array $fields = [],
+
+        /**
+         * Sanitizer rules list. Example: 'kebabcase'.
+         */
         protected array $rules = [],
+
+        /**
+         * List for custom rules for extend sanitizer.
+         */
         protected array $extensions = [],
     ) {} // phpcs:ignore
 

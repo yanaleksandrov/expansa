@@ -10,7 +10,11 @@ use Expansa\Http\Response;
 final readonly class FieldGroupsController
 {
     public function __construct(
-        private FieldGroupsService $service = new FieldGroupsService()
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private FieldGroupsService $service = new FieldGroupsService(),
     ) {} // phpcs:ignore
 
     public function index(): Response

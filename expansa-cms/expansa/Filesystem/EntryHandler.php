@@ -11,11 +11,6 @@ class EntryHandler
 {
     use Entry;
 
-    /**
-     * Trait that provides file-related properties.
-     *
-     * @param string $path
-     */
     public function __construct(string $path)
     {
         $this->path   = rtrim($path, '/');

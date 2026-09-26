@@ -18,24 +18,41 @@ use Expansa\Facades\View;
  */
 abstract class AbstractField implements Field
 {
-    /**
-     * Describe this field type.
-     *
-     * @param string $type        Template name under `views/form/` (without extension).
-     * @param string $label       Human-readable name shown in the field type picker.
-     * @param string $category    Group the field type is listed under (basic, choice, layout, media, ...).
-     * @param string $icon        Phosphor icon class, e.g. `ph ph-text-t`.
-     * @param string $description Short explanation shown in the field type picker.
-     * @param string $preview     Optional path/markup used to preview the field type.
-     * @param array  $defaults    Default field configuration merged under caller-provided values.
-     */
     public function __construct(
+
+        /**
+         * Template name under `views/form/` (without extension).
+         */
         public readonly string $type,
+
+        /**
+         * Human-readable name shown in the field type picker.
+         */
         public readonly string $label,
+
+        /**
+         * Group the field type is listed under (basic, choice, layout, media, ...).
+         */
         public readonly string $category,
+
+        /**
+         * Phosphor icon class, e.g. `ph ph-text-t`.
+         */
         public readonly string $icon,
+
+        /**
+         * Short explanation shown in the field type picker.
+         */
         public readonly string $description,
+
+        /**
+         * Optional path/markup used to preview the field type.
+         */
         public readonly string $preview = '',
+
+        /**
+         * Default field configuration merged under caller-provided values.
+         */
         public readonly array $defaults = [],
     ) {} // phpcs:ignore
 

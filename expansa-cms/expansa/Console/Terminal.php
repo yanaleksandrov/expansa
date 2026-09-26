@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Console;
 
 use Expansa\Console\Commands\AssetClean;
+use Expansa\Console\Commands\AutoloadDump;
 use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
 use Expansa\Console\Commands\HooksList;
@@ -48,10 +49,13 @@ class Terminal
      */
     protected array $arguments = [];
 
-    /**
-     * @param string $version Application version shown by the "list" command.
-     */
-    public function __construct(protected readonly string $version = '')
+    public function __construct(
+
+        /**
+         * Application version shown by the "list" command.
+         */
+        protected readonly string $version = '',
+    )
     {
         global $argv;
         $this->prepare($argv ?? []);
@@ -79,6 +83,9 @@ class Terminal
         }
         if ($this->command('hooks:list') === null) {
             $this->addCommand(new HooksList($this));
+        }
+        if ($this->command('autoload:dump') === null) {
+            $this->addCommand(new AutoloadDump($this));
         }
         if ($this->command('schedule:run') === null) {
             $this->addCommand(new ScheduleRun($this));

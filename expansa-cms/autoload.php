@@ -2,32 +2,46 @@
 
 declare(strict_types=1);
 
-// platform check
-if (PHP_VERSION_ID < 50600) {
-    if (! headers_sent()) {
-        header('HTTP/1.1 500 Internal Server Error');
-    }
-    $err = 'Composer 2.3.0 dropped support for autoloading on PHP <5.6 and you are running ' . PHP_VERSION . ', please upgrade PHP or use Composer 2.2 LTS via "composer self-update --2.2". Aborting.' . PHP_EOL;
-    if (! ini_get('display_errors')) {
-        if (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg') {
-            fwrite(STDERR, $err);
-        } elseif (! headers_sent()) {
-            echo $err;
-        }
-    }
-    trigger_error($err, E_USER_ERROR);
-}
-
-// autoload class
+// runs before the PHP version check, so it stays free of PHP 8 syntax and functions
 spl_autoload_register(static function (string $class): void {
-    $file = str_replace(
-        ['\\', '/Expansa/', '/App/'],
-        ['/', '/expansa/', '/app/'],
-        sprintf('%s%s.php', EX_PATH, $class)
-    );
+    // PSR-4 prefixes of the framework, the app and the libraries shipped with them: prefix => [length, directory]
+    static $prefixes = [
+        'Expansa\\'              => [8, EX_PATH . 'expansa/'],
+        'App\\'                  => [4, EX_PATH . 'app/'],
+        'Spatie\\'               => [7, EX_PATH . 'expansa/Images/Spatie/'],
+        'PHPMailer\\PHPMailer\\' => [20, EX_PATH . 'expansa/Mail/PHPMailer/'],
+    ];
 
-    // a missing file leaves the class undefined, so class_exists() and "Class not found" work as usual
-    if (is_file($file)) {
-        require_once $file;
+    // class => file relative to EX_PATH, written by `php artisan autoload:dump`; no file checks for these classes
+    static $classes = null;
+    if ($classes === null) {
+        $classes = is_file(EX_PATH . 'cache/classmap.php') ? require EX_PATH . 'cache/classmap.php' : [];
+    }
+
+    // the autoloader runs only for a class not declared yet, so its file was not included yet
+    if (isset($classes[$class])) {
+        require EX_PATH . $classes[$class];
+
+        return;
+    }
+
+    // classes found missing in this request, so a repeated class_exists() checks no file again
+    static $missing = [];
+    if (isset($missing[$class])) {
+        return;
+    }
+
+    // a class added after the dump; a missing file leaves the class undefined, so class_exists() works as usual
+    foreach ($prefixes as $prefix => [$length, $directory]) {
+        if (strncmp($class, $prefix, $length) === 0) {
+            $file = $directory . strtr(substr($class, $length), '\\', '/') . '.php';
+            if (is_file($file)) {
+                require $file;
+            } else {
+                $missing[$class] = true;
+            }
+
+            return;
+        }
     }
 });

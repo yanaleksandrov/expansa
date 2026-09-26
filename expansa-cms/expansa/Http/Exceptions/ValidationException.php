@@ -12,7 +12,19 @@ use Throwable;
  */
 final class ValidationException extends HttpException
 {
-    public function __construct(string $message, private readonly array $errors = [], ?Throwable $previous = null)
+    public function __construct(
+
+        string $message,
+
+        /**
+         * Validator errors (field => messages) or a plain list of messages; sent as "errors" in the 422 response.
+         *
+         * @var array<array-key, string|string[]>
+         */
+        private readonly array $errors = [],
+
+        ?Throwable $previous = null,
+    )
     {
         parent::__construct(422, $message, [], $previous);
     }

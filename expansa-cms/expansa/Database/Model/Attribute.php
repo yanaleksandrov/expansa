@@ -15,6 +15,7 @@ use Closure;
 class Attribute
 {
     public function __construct(
+
         /**
          * Runs on read: (rawValue, allAttributes) -> exposed value. Null skips mutation.
          */

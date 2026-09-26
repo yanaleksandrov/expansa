@@ -21,13 +21,12 @@ require_once __DIR__ . '/PHPMailer/SMTP.php';
  */
 class Mailer
 {
-    /**
-     * Mailer constructor.
-     *
-     * @param PHPMailer $mailer An instance of PHPMailer
-     */
     public function __construct(
-        private PHPMailer $mailer = new PHPMailer()
+
+        /**
+         * Underlying PHPMailer instance.
+         */
+        private PHPMailer $mailer = new PHPMailer(),
     ) {} // phpcs:ignore
 
     /**

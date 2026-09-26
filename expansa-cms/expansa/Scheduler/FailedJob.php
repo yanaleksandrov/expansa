@@ -14,8 +14,16 @@ use Throwable;
 readonly class FailedJob
 {
     public function __construct(
+
+        /**
+         * Job that failed; may never have run if it could not be scheduled.
+         */
         private Job $job,
-        private Throwable $exception
+
+        /**
+         * Error thrown by the run, or a SchedulerException when the job could not be scheduled.
+         */
+        private Throwable $exception,
     ) {} // phpcs:ignore
 
     public function getJob(): Job

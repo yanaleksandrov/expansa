@@ -21,7 +21,13 @@ use Spatie\ImageOptimizer\Optimizers\Jpegoptim;
 
 class Manager
 {
-    protected function __construct(public ?Image $driver = null)
+    protected function __construct(
+
+        /**
+         * Spatie image; replaced by an Imagick instance (GD fallback), the passed value stays only if no driver is available.
+         */
+        public ?Image $driver = null,
+    )
     {
         try {
             if (extension_loaded('imagick')) {

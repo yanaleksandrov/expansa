@@ -12,21 +12,20 @@ use Expansa\Session\Contracts\FlashInterface;
  */
 final class Flash implements FlashInterface
 {
-    /**
-     * @var array<string, mixed>|ArrayAccess<string, mixed>
-     */
-    private array|ArrayAccess $storage;
+    public function __construct(
 
-    private string $storageKey;
+        /**
+         * Session data, bound by reference.
+         *
+         * @var array<string, mixed>|ArrayAccess<string, mixed>
+         */
+        private array|ArrayAccess &$storage,
 
-    /**
-     * @param array<string, mixed>|ArrayAccess<string, mixed> $storage
-     */
-    public function __construct(array|ArrayAccess &$storage, string $storageKey = '_flash')
-    {
-        $this->storage = &$storage;
-        $this->storageKey = $storageKey;
-    }
+        /**
+         * Storage key holding all flash messages, grouped by message key.
+         */
+        private string $storageKey = '_flash',
+    ) {} // phpcs:ignore
 
     public function add(string $key, string $message): void
     {

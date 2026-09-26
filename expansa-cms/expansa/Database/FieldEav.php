@@ -22,7 +22,7 @@ class FieldEav
         /**
          * The Fieldable this store belongs to.
          */
-        protected Fieldable $owner
+        protected Fieldable $owner,
     ) {} // phpcs:ignore
 
     /**

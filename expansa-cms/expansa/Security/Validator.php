@@ -96,16 +96,24 @@ final class Validator
     protected array $errors = [];
 
     /**
-     * Setup validation
-     *
-     * @param array $fields Incoming fields and their values.
-     * @param array $rules  Validation rules list.
-     * @param bool  $break  Flag to stop validation if the first error is found.
+     * Fills the default error messages, translated at construction time.
      */
     public function __construct(
+
+        /**
+         * Incoming fields and their values.
+         */
         protected array $fields = [],
+
+        /**
+         * Validation rules list.
+         */
         protected array $rules = [],
-        protected bool $break = false
+
+        /**
+         * Flag to stop validation if the first error is found.
+         */
+        protected bool $break = false,
     )
     {
         $this->messages = [

@@ -7,6 +7,12 @@ namespace Expansa\Filesystem;
 class MimeType
 {
     public function __construct(
+
+        /**
+         * Allowed upload types: pipe-separated extensions mapped to their MIME type.
+         *
+         * @var array<string, string>
+         */
         public array $typesList = [
             // image formats
             'jpg|jpeg|jpe'    => 'image/jpeg',
@@ -102,6 +108,6 @@ class MimeType
             'odc'             => 'application/vnd.oasis.opendocument.chart',
             'odb'             => 'application/vnd.oasis.opendocument.database',
             'odf'             => 'application/vnd.oasis.opendocument.formula',
-        ]
+        ],
     ) {} // phpcs:ignore
 }

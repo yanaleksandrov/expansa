@@ -8,7 +8,13 @@ use Expansa\Http\Request;
 
 final readonly class FilesController
 {
-    public function __construct(private FilesService $service = new FilesService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private FilesService $service = new FilesService(),
+    )
     {
     }
 

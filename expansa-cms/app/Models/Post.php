@@ -11,50 +11,106 @@ use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use LogicException;
 
+/**
+ * Class representing an entry entity.
+ */
 class Post
 {
-    /**
-     * Class representing an entry entity.
-     *
-     * @property int    $id           Unique identifier of the entry.
-     * @property string $title        The title of the entry.
-     * @property string $content      The content of the entry.
-     * @property int    $authorId     The ID of the author of the entry.
-     * @property int    $parentId     The ID of the parent entry.
-     * @property int    $comments     The number of comments.
-     * @property int    $views        The number of views.
-     * @property int    $position     The position of the entry (for sorting).
-     * @property string $status       The status of the entry.
-     * @property string $discussion   Post discussion status.
-     * @property string $password     The password for protecting the entry.
-     * @property string $createdAt    The creation date and time of the entry.
-     * @property string $updatedAt    The last update date and time of the entry.
-     * @property string $type         The type of the entry (e.g., "article", "page", etc.).
-     * @property string $table        The name of the database table.
-     * @property string $uuid         The unique string ID slug for the post.
-     * @property string $link         The full URL of the entry.
-     * @property string $slug         The unique URL slug for the entry.
-     * @property Field $field
-     */
     public function __construct(
+
+        /**
+         * Entry id, 0 for an entry not saved yet.
+         */
         public int $id = 0,
+
+        /**
+         * Entry title.
+         */
         public string $title = '',
+
+        /**
+         * Entry content.
+         */
         public string $content = '',
+
+        /**
+         * Author user id, 0 when there is no author.
+         */
         public int $authorId = 0,
+
+        /**
+         * Parent entry id, 0 for a top-level entry.
+         */
         public int $parentId = 0,
+
+        /**
+         * Number of comments.
+         */
         public int $comments = 0,
+
+        /**
+         * Number of views.
+         */
         public int $views = 0,
+
+        /**
+         * Sort position.
+         */
         public int $position = 0,
+
+        /**
+         * Visibility status: publish, pending, draft, protected, private, trash or future.
+         */
         public string $status = 'pending',
+
+        /**
+         * Discussion status: open or closed.
+         */
         public string $discussion = 'open',
+
+        /**
+         * Password protecting the entry, empty for none.
+         */
         public string $password = '',
+
+        /**
+         * Creation date and time.
+         */
         public string $createdAt = '',
+
+        /**
+         * Last update date and time.
+         */
         public string $updatedAt = '',
+
+        /**
+         * Post type key, see App\Post\Type.
+         */
         public string $type = '',
+
+        /**
+         * Database table name; always overwritten with the name derived from $type.
+         */
         public string $table = '',
+
+        /**
+         * Unique string identifier of the entry.
+         */
         public string $uuid = '',
+
+        /**
+         * Full URL of the entry.
+         */
         public string $link = '',
+
+        /**
+         * Unique URL slug, empty for entries of non-public types.
+         */
         public string $slug = '',
+
+        /**
+         * Custom fields of the entry.
+         */
         public ?Field $field = null,
     )
     {

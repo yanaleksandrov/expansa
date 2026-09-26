@@ -8,7 +8,13 @@ use Expansa\Http\Request;
 
 final readonly class PostController
 {
-    public function __construct(private PostService $service = new PostService())
+    public function __construct(
+
+        /**
+         * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
+         */
+        private PostService $service = new PostService(),
+    )
     {
     }
 

@@ -29,15 +29,17 @@ use Random\RandomException;
  */
 class Csrf
 {
-    /**
-     * Csrf constructor.
-     *
-     * @param SessionProvider $session
-     * @param string          $sessionPrefix Session prefix.
-     */
     public function __construct(
+
+        /**
+         * Token storage; by default an HttpOnly cookie that lives one hour.
+         */
         protected SessionProvider $session = new NativeHttpOnlyCookieProvider(),
-        protected string $sessionPrefix = 'expansa_'
+
+        /**
+         * Prefix of the session keys that store tokens.
+         */
+        protected string $sessionPrefix = 'expansa_',
     ) {} // phpcs:ignore
 
     /**

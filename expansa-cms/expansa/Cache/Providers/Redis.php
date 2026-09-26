@@ -27,9 +27,13 @@ class Redis implements Provider
     use Memoizes;
     use Serializes;
 
-    public function __construct(private readonly RedisClient $client)
-    {
-    }
+    public function __construct(
+
+        /**
+         * Already connected Redis client; the connection is not opened here.
+         */
+        private readonly RedisClient $client,
+    ) {} // phpcs:ignore
 
     /**
      * $expiry accepts an absolute DateTime or a relative time string (e.g. "+1 day").

@@ -10,7 +10,11 @@ use Expansa\View\Factory;
 class BladeEngine extends PhpEngine
 {
     public function __construct(
-        protected readonly BladeCompiler $compiler = new BladeCompiler()
+
+        /**
+         * Compiles templates to PHP; its cache settings are overwritten by setCache().
+         */
+        protected readonly BladeCompiler $compiler = new BladeCompiler(),
     ) {} // phpcs:ignore
 
     #[\Override]

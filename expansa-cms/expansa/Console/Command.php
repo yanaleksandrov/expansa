@@ -48,15 +48,13 @@ abstract class Command implements Commands
      */
     protected bool $active = true;
 
-    /**
-     * Command constructor.
-     *
-     * @param Terminal|null $console
-     */
     public function __construct(
-        protected ?Terminal $console = null
-    )
-    {} // phpcs:ignore
+
+        /**
+         * Terminal running the command; Terminal::addCommand() sets it on registration.
+         */
+        protected ?Terminal $console = null,
+    ) {} // phpcs:ignore
 
     /**
      * Get console instance.

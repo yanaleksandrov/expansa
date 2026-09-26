@@ -27,15 +27,17 @@ abstract class Table extends TableBase
         self::$filter = $filter;
     }
 
-    /**
-     * Table constructor.
-     *
-     * @param array $data Data for rendering the table.
-     * @param array $cells Table cells list.
-     */
     public function __construct(
+
+        /**
+         * Data for rendering the table.
+         */
         public array $data = [],
-        public array $cells = []
+
+        /**
+         * Table cells list.
+         */
+        public array $cells = [],
     )
     {
         if (self::$filter !== '') {
