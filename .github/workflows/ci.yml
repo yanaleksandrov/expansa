@@ -13,7 +13,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: pdo, fileinfo, curl, intl, iconv, openssl, zlib, zip, bcmath
+          extensions: pdo, fileinfo, curl, intl, iconv, openssl, zlib, zip, bcmath, exif
           coverage: none
 
       - uses: actions/cache@v4
@@ -34,6 +34,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          extensions: intl, exif
           coverage: none
 
       - run: composer install --no-interaction --no-progress --no-scripts
