@@ -147,6 +147,11 @@ Lifecycle::phase('configure', true, function () {
         filter: EX_DASHBOARD . 'forms/items-filter.php'
     );
 
+    // validation error messages in the site language
+    Expansa\Security\Validator::configure(
+        translate: fn (string $message, string ...$args) => t($message, ...$args)
+    );
+
     // translations lookup priority
     I18n::configure(
         routes: [

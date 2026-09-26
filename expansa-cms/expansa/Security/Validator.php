@@ -4,164 +4,148 @@ declare(strict_types=1);
 
 namespace Expansa\Security;
 
+use Closure;
 use DateTime;
 
 /**
- * Validates input against certain criteria.
+ * Validates fields against rules: `'field' => 'required|lengthMin:2'`, a rule argument after the colon
+ * is a value or the name of another field. Error messages are translated by the callback of configure().
  *
-    print_r(
-        Validator::data(
-            $_POST,
-            [
-                'field1'  => 'accepted',
-                'field2'  => 'alpha',
-                'field3'  => 'alphanumeric',
-                'field4'  => 'hex',
-                'field5'  => 'hsl',
-                'field6'  => 'hsla',
-                'field7'  => 'rgb',
-                'field8'  => 'rgba',
-                'field9'  => 'date',
-                'field10' => 'later:field12',
-                'field11' => 'earlier:field12',
-                'field12' => 'different:field1',
-                'field13' => 'email',
-                'field14' => 'equals:45',
-                'field15' => 'ip',
-                'field16' => 'ipv4',
-                'field17' => 'ipv6',
-                'field18' => 'length:4',
-                'field19' => 'lengthMin:2',
-                'field20' => 'lengthMax:6',
-                'field21' => 'mac',
-                'field22' => 'max:14',
-                'field23' => 'min:10',
-                'field24' => 'numeric',
-                'field25' => 'required',
-                'field26' => 'similar:field1',
-                'field27' => 'slug',
-                'field28' => 'tld',
-                'field29' => 'url',
-                'field30' => 'uuid',
-
-                'field31' => 'time:H:i:s',
-                'field32' => 'required|numeric',
-            ]
-        )->extend(
-            'time',
-            t( 'Time must be in \'%s\' format' ),
-            function( $validator, $value, $comparisonValue ) {
-                $time = DateTime::createFromFormat( $comparisonValue, $value );
-
-                return $time && $time->format( $comparisonValue ) === $value;
-            }
-        )->extend(
-            'array',
-            t( 'This is not array' ),
-            function( $validator, $value ) {
-                return is_array( $value );
-            }
-        )->extend(
-            'numeric',
-            t( 'Oh no, must be numeric' )
-        )->extend(
-            'field32:numeric',
-            t( 'Message for specified field: must be numeric' )
-        )->apply()
-    );
+ * ```php
+ * $validator = Validator::data($_POST, [
+ *     'email' => 'required|email',
+ *     'age'   => 'numeric|min:18',
+ *     'from'  => 'date|earlier:to',
+ *     'time'  => 'time:H:i:s',
+ * ])->extend('time', t('Time must be in \'%s\' format'), function (Validator $validator, $value, $format) {
+ *     $time = DateTime::createFromFormat($format, $value);
  *
- * @package Expansa
+ *     return $time && $time->format($format) === $value;
+ * })->extend('age:numeric', t('Age must be a number'))->apply();
+ *
+ * $validator->isValid();
+ * $validator->errors; // ['age' => ['Age must be a number', 'Must be at least 18.']]
+ * ```
+ *
+ * @package Expansa\Security
  */
 final class Validator
 {
     /**
-     * Errors messages list
-     *
-     * @var array
+     * Default error messages by rule, with the arguments of their placeholders.
      */
-    protected array $messages = [];
+    private const array MESSAGES = [
+        'accepted'     => ['Must be accepted.'],
+        'alpha'        => ['Must contain only letters.'],
+        'alphanumeric' => ['Must contain only letters and/or numbers.'],
+        'hex'          => ['The color format should be :format.', 'HEX'],
+        'hsl'          => ['The color format should be :format.', 'HSL'],
+        'hsla'         => ['The color format should be :format.', 'HSLA'],
+        'rgb'          => ['The color format should be :format.', 'RGB'],
+        'rgba'         => ['The color format should be :format.', 'RGBA'],
+        'date'         => ['Is not a valid date.'],
+        'later'        => ["Must be a date after '%s'."],
+        'earlier'      => ["Must be a date before '%s'."],
+        'different'    => ["Must be different from '%s'."],
+        'email'        => ['Is not a valid email address.'],
+        'equals'       => ["Must be the same as '%s'."],
+        'ip'           => ['Is not a valid IP address.'],
+        'ipv4'         => ['Is not a valid IPv4 address.'],
+        'ipv6'         => ['Is not a valid IPv6 address.'],
+        'length'       => ['Must be %d characters long.'],
+        'lengthMin'    => ['Must be at least %d characters long.'],
+        'lengthMax'    => ['Must not exceed %d characters.'],
+        'mac'          => ['Is not a valid MAC address.'],
+        'max'          => ['Must be no more than %s.'],
+        'min'          => ['Must be at least %s.'],
+        'numeric'      => ['Must be numeric.'],
+        'required'     => ['Is required.'],
+        'regex'        => ['Has an invalid format.'],
+        'similar'      => ["Must match '%s'."],
+        'slug'         => ['Must contain only letters, numbers, dashes and underscores.'],
+        'tld'          => ['Is not a valid top-level domain (TLD).'],
+        'url'          => ['Is not a valid URL.'],
+        'uuid'         => ['Is not a valid UUID.'],
+        'type'         => ['This type of file is not allowed.'],
+        'minSize'      => ['File size is too small. Must be greater than or equal to %s.'],
+        'maxSize'      => ['File size is too large. Must be less than %s.'],
+        'extension'    => ['Invalid file extension. Accepted extensions are: %s.'],
+    ];
 
     /**
-     * List for custom rules for extend validation
-     *
-     * @var array
+     * Translates a message with the arguments of its `:name` placeholders.
      */
-    protected array $extensions = [];
+    private static ?Closure $translate = null;
 
     /**
-     * Errors list for return
+     * Translated MESSAGES, filled once per process.
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected array $errors = [];
+    private static array $translated = [];
 
     /**
-     * Fills the default error messages, translated at construction time.
+     * Errors by field.
+     *
+     * @var array<string, string[]>
      */
+    public private(set) array $errors = [];
+
+    /**
+     * Messages by rule or `field:rule`.
+     *
+     * @var array<string, string>
+     */
+    private array $messages;
+
+    /**
+     * Custom rules by name or `field:rule`.
+     *
+     * @var array<string, callable>
+     */
+    private array $extensions = [];
+
     public function __construct(
 
         /**
          * Incoming fields and their values.
          */
-        protected array $fields = [],
+        private array $fields = [],
 
         /**
-         * Validation rules list.
+         * Rules by field: `'required|lengthMin:2'`.
+         *
+         * @var array<string, string>
          */
-        protected array $rules = [],
+        private array $rules = [],
 
         /**
-         * Flag to stop validation if the first error is found.
+         * Stop at the first rule of a field.
          */
-        protected bool $break = false,
+        private bool $break = false,
     )
     {
-        $this->messages = [
-            'accepted'     => t('Must be accepted.'),
-            'alpha'        => t('Must contain only letters.'),
-            'alphanumeric' => t('Must contain only letters and/or numbers.'),
-            'hex'          => t('The color format should be :format.', 'HEX'),
-            'hsl'          => t('The color format should be :format.', 'HSL'),
-            'hsla'         => t('The color format should be :format.', 'HSLA'),
-            'rgb'          => t('The color format should be :format.', 'RGB'),
-            'rgba'         => t('The color format should be :format.', 'RGBA'),
-            'date'         => t('Is not a valid date.'),
-            'later'        => t("Must be a date after '%s'."),
-            'earlier'      => t("Must be a date before '%s'."),
-            'different'    => t("Must be different from '%s'."),
-            'email'        => t('Is not a valid email address.'),
-            'equals'       => t("Must be the same as '%s'."),
-            'ip'           => t('Is not a valid IP address.'),
-            'ipv4'         => t('Is not a valid IPv4 address.'),
-            'ipv6'         => t('Is not a valid IPv6 address.'),
-            'length'       => t('Must be %d characters long.'),
-            'lengthMin'    => t('Must be at least %d characters long.'),
-            'lengthMax'    => t('Must not exceed %d characters.'),
-            'mac'          => t('Is not a valid MAC address.'),
-            'max'          => t('Must be no more than %s.'),
-            'min'          => t('Must be at least %s.'),
-            'numeric'      => t('Must be numeric.'),
-            'required'     => t('Is required.'),
-            'regex'        => t('Has an invalid format.'),
-            'similar'      => t("Must match '%s'."),
-            'slug'         => t('Must contain only letters, numbers, dashes and underscores.'),
-            'tld'          => t('Is not a valid top-level domain (TLD).'),
-            'url'          => t('Is not a valid URL.'),
-            'uuid'         => t('Is not a valid UUID.'),
-            'type'         => t('This type of file is not allowed.'),
-            'minSize'      => t('File size is too small. Must be greater than or equal to %s.'),
-            'maxSize'      => t('File size is too large. Must be less than %s.'),
-            'extension'    => t('Invalid file extension. Accepted extensions are: %s.'),
-            ...$this->messages,
-        ];
+        $this->messages = self::$translated ?: self::translateMessages();
     }
 
     /**
-     * Setup validator rules via `data` method.
+     * Set the translation of the error messages; without it messages stay in English.
      *
-     * @param array $fields
-     * @param array $rules
-     * @param bool  $break
+     * @param Closure|null $translate Gets a message and the arguments of its `:name` placeholders, returns a string.
+     * @return void
+     */
+    public static function configure(?Closure $translate = null): void
+    {
+        self::$translate  = $translate;
+        self::$translated = [];
+    }
+
+    /**
+     * Create a validator for the data, the facade entry point.
+     *
+     * @param array                 $fields
+     * @param array<string, string> $rules
+     * @param bool                  $break Stop at the first rule of a field.
      * @return Validator
      */
     public function data(array $fields, array $rules, bool $break = false): self
@@ -170,7 +154,7 @@ final class Validator
     }
 
     /**
-     * Apply validation
+     * Check every field against its rules, errors go to $errors.
      *
      * @return Validator
      */
@@ -182,18 +166,16 @@ final class Validator
             foreach ($rules as $rule) {
                 [ $method, $comparisonValue ] = explode(':', $rule, 2) + [ null, null ];
 
-                // checking the value for compliance with the condition
                 $value      = $this->fields[ $field ] ?? '';
                 $comparison = $comparisonValue !== null ? ($this->fields[ $comparisonValue ] ?? $comparisonValue) : null;
 
-                // check if $comparisonValue is a list of data
+                // a comma-separated argument is a list
                 $comparisonValue_array = explode(',', $comparisonValue ?? '');
                 if (count($comparisonValue_array) > 1) {
                     $comparison       = $comparisonValue_array;
                     $comparisonValue = implode(', ', $comparison);
                 }
 
-                // run class methods
                 $key = sprintf('%s:%s', $field, $method);
                 if (method_exists($this, $method)) {
                     $error = call_user_func([ $this, $method ], $value, $comparison);
@@ -204,13 +186,11 @@ final class Validator
                     }
                 }
 
-                // fetch error message
                 $message = $this->messages[ $key ] ?? ( $this->messages[ $method ] ?? '' );
                 if (isset($error) && ! $error && $message) {
                     $this->errors[ $field ][] = sprintf($message, $comparisonValue);
                 }
 
-                // if option is active, skip other errors
                 if ($this->break) {
                     continue( 2 );
                 }
@@ -220,41 +200,46 @@ final class Validator
         return $this;
     }
 
-    /**
-     * Check data is valid.
-     *
-     * @return bool
-     */
     public function isValid(): bool
     {
-        return empty($this->errors);
+        return $this->errors === [];
     }
 
     /**
-     * Check data is invalid.
+     * Add a custom rule or replace the message of a rule.
      *
-     * @return array
-     */
-    public function getErrors(): array
-    {
-        return $this->errors;
-    }
-
-    /**
-     * Add custom validation rule or override messages
-     *
-     * @param string $type
-     * @param string $message
-     * @param callable|null $callback
+     * @param string        $type     Rule name or `field:rule` for one field.
+     * @param string        $message  Message with `%s` for the rule argument.
+     * @param callable|null $callback Gets the validator, the value, the argument and the field name, returns bool.
      * @return Validator
      */
     public function extend(string $type, string $message, ?callable $callback = null): self
     {
         $this->messages[ $type ] = $message;
-        if (is_callable($callback)) {
+        if ($callback !== null) {
             $this->extensions[ $type ] = $callback;
         }
         return $this;
+    }
+
+    /**
+     * Translate MESSAGES with the configured callback, without it only fill the placeholders.
+     *
+     * @return array<string, string>
+     */
+    private static function translateMessages(): array
+    {
+        $translate = self::$translate ?? static fn (string $message, string ...$args): string => $args
+            ? preg_replace_callback('/:\w+/', static function () use (&$args) {
+                return array_shift($args);
+            }, $message)
+            : $message;
+
+        foreach (self::MESSAGES as $rule => $message) {
+            self::$translated[$rule] = $translate(...$message);
+        }
+
+        return self::$translated;
     }
 
     /**
@@ -265,7 +250,7 @@ final class Validator
      * @param mixed $value
      * @return bool
      */
-    protected function accepted(mixed $value): bool
+    private function accepted(mixed $value): bool
     {
         return in_array($value, [ 'yes', 'on', 1, '1', true ], true);
     }
@@ -276,7 +261,7 @@ final class Validator
      * @param  string $value
      * @return bool
      */
-    protected function alpha(string $value): bool
+    private function alpha(string $value): bool
     {
         return preg_match('/^([a-z])+$/i', $value) === 1;
     }
@@ -287,7 +272,7 @@ final class Validator
      * @param string|int $value
      * @return bool
      */
-    protected function alphanumeric(string|int $value): bool
+    private function alphanumeric(string|int $value): bool
     {
         return preg_match('/^([a-z0-9])+$/i', (string) $value) === 1;
     }
@@ -298,7 +283,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function hex(string $value): bool
+    private function hex(string $value): bool
     {
         return preg_match('/^#([a-fA-F0-9]{3}){1,2}$/', $value) === 1;
     }
@@ -309,7 +294,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function hsl(string $value): bool
+    private function hsl(string $value): bool
     {
         return preg_match('/^hsl\(\s*\d+\s*,\s*\d+%?\s*,\s*\d+%?\s*\)$/', $value) === 1;
     }
@@ -320,7 +305,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function hsla(string $value): bool
+    private function hsla(string $value): bool
     {
         return preg_match('/^hsla\(\s*\d+\s*,\s*\d+%?\s*,\s*\d+%?\s*,\s*(0(\.\d+)?|1(\.0)?)\s*\)$/', $value) === 1;
     }
@@ -331,7 +316,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function rgb(string $value): bool
+    private function rgb(string $value): bool
     {
         return preg_match('/^(rgb)\(([01]?\d\d?|2[0-4]\d|25[0-5])(\W+)([01]?\d\d?|2[0-4]\d|25[0-5])\W+(([01]?\d\d?|2[0-4]\d|25[0-5])\))$/i', $value) === 1;
     }
@@ -342,7 +327,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function rgba(string $value): bool
+    private function rgba(string $value): bool
     {
         return preg_match('/^(rgba)\(([01]?\d\d?|2[0-4]\d|25[0-5])\W+([01]?\d\d?|2[0-4]\d|25[0-5])\W+([01]?\d\d?|2[0-4]\d|25[0-5])\)?\W+([01](\.\d+)?)\)$/i', $value) === 1;
     }
@@ -353,7 +338,7 @@ final class Validator
      * @param  mixed $value
      * @return bool
      */
-    protected function date(mixed $value): bool
+    private function date(mixed $value): bool
     {
         return $value instanceof DateTime || strtotime($value) !== false;
     }
@@ -365,7 +350,7 @@ final class Validator
      * @param string|DateTime $compare
      * @return bool
      */
-    protected function later(string|DateTime $value, string|DateTime $compare): bool
+    private function later(string|DateTime $value, string|DateTime $compare): bool
     {
         $vtime = ( $value instanceof DateTime ) ? $value->getTimestamp() : strtotime($value);
         $ptime = ( $compare instanceof DateTime ) ? $compare->getTimestamp() : strtotime($compare);
@@ -379,14 +364,14 @@ final class Validator
      * @param string|DateTime $compare
      * @return bool
      */
-    protected function earlier(string|DateTime $value, string|DateTime $compare): bool
+    private function earlier(string|DateTime $value, string|DateTime $compare): bool
     {
         $vtime = ( $value instanceof DateTime ) ? $value->getTimestamp() : strtotime($value);
         $ptime = ( $compare instanceof DateTime ) ? $compare->getTimestamp() : strtotime($compare);
         return ( $vtime && $ptime ) && ( $vtime < $ptime );
     }
 
-    protected function different(mixed $value): bool
+    private function different(mixed $value): bool
     {
         return $value instanceof DateTime || strtotime($value) !== false;
     }
@@ -397,7 +382,7 @@ final class Validator
      * @param  string $value
      * @return bool
      */
-    protected function email(string $value): bool
+    private function email(string $value): bool
     {
         return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
@@ -409,7 +394,7 @@ final class Validator
      * @param int|string $comparisonValue
      * @return bool
      */
-    protected function equals(int|string $value, int|string $comparisonValue): bool
+    private function equals(int|string $value, int|string $comparisonValue): bool
     {
         if (is_string($value)) {
             return $value === strval($comparisonValue);
@@ -423,7 +408,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function ip(string $value): bool
+    private function ip(string $value): bool
     {
         return filter_var($value, FILTER_VALIDATE_IP) !== false;
     }
@@ -434,7 +419,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function ipv4(string $value): bool
+    private function ipv4(string $value): bool
     {
         return filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) !== false;
     }
@@ -445,7 +430,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function ipv6(string $value): bool
+    private function ipv6(string $value): bool
     {
         return filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
     }
@@ -457,7 +442,7 @@ final class Validator
      * @param mixed $comparisonValue
      * @return bool
      */
-    protected function length(mixed $value, mixed $comparisonValue): bool
+    private function length(mixed $value, mixed $comparisonValue): bool
     {
         return mb_strlen($value) === intval($comparisonValue);
     }
@@ -469,7 +454,7 @@ final class Validator
      * @param mixed $comparisonValue
      * @return bool
      */
-    protected function lengthMin(mixed $value, mixed $comparisonValue): bool
+    private function lengthMin(mixed $value, mixed $comparisonValue): bool
     {
         return mb_strlen($value) >= intval($comparisonValue);
     }
@@ -481,7 +466,7 @@ final class Validator
      * @param mixed $comparisonValue
      * @return bool
      */
-    protected function lengthMax(mixed $value, mixed $comparisonValue): bool
+    private function lengthMax(mixed $value, mixed $comparisonValue): bool
     {
         return mb_strlen($value) <= intval($comparisonValue);
     }
@@ -492,7 +477,7 @@ final class Validator
      * @param string $value
      * @return bool
      */
-    protected function mac(string $value): bool
+    private function mac(string $value): bool
     {
         return preg_match('/^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/', $value) === 1;
     }
@@ -504,7 +489,7 @@ final class Validator
      * @param mixed $maximumValue
      * @return bool
      */
-    protected function max(mixed $value, mixed $maximumValue): bool
+    private function max(mixed $value, mixed $maximumValue): bool
     {
         if (function_exists('bccomp')) {
             $value        = strval($value);
@@ -522,7 +507,7 @@ final class Validator
      * @param mixed $minimumValue
      * @return bool
      */
-    protected function min(mixed $value, mixed $minimumValue): bool
+    private function min(mixed $value, mixed $minimumValue): bool
     {
         if (function_exists('bccomp')) {
             $value        = strval($value);
@@ -539,7 +524,7 @@ final class Validator
      * @param mixed $value
      * @return bool
      */
-    protected function numeric(mixed $value): bool
+    private function numeric(mixed $value): bool
     {
         return is_numeric($value);
     }
@@ -550,7 +535,7 @@ final class Validator
      * @param mixed $value
      * @return bool
      */
-    protected function required(mixed $value): bool
+    private function required(mixed $value): bool
     {
         return is_scalar($value) && ! empty($value);
     }
@@ -562,7 +547,7 @@ final class Validator
      * @param mixed $regexp
      * @return bool
      */
-    protected function regex(mixed $value, mixed $regexp): bool
+    private function regex(mixed $value, mixed $regexp): bool
     {
         return preg_match((string) $regexp, (string) $value) === 1;
     }
@@ -574,7 +559,7 @@ final class Validator
      * @param mixed $comparisonValue
      * @return bool
      */
-    protected function similar(mixed $value, mixed $comparisonValue): bool
+    private function similar(mixed $value, mixed $comparisonValue): bool
     {
         return $value === $comparisonValue;
     }
@@ -585,7 +570,7 @@ final class Validator
      * @param  $value
      * @return bool
      */
-    protected function slug($value): bool
+    private function slug($value): bool
     {
         if (is_array($value)) {
             return false;
@@ -602,7 +587,7 @@ final class Validator
      * @param  string $value
      * @return bool
      */
-    protected function tld(string $value): bool
+    private function tld(string $value): bool
     {
         return preg_match('/^[a-zA-Z]{2,}$/i', $value) && str_ends_with($value, '.') === false;
     }
@@ -613,7 +598,7 @@ final class Validator
      * @param  string $value
      * @return bool
      */
-    protected function url(string $value): bool
+    private function url(string $value): bool
     {
         return filter_var($value, FILTER_VALIDATE_URL);
     }
@@ -624,7 +609,7 @@ final class Validator
      * @param  string $value
      * @return bool
      */
-    protected function uuid(string $value): bool
+    private function uuid(string $value): bool
     {
         return preg_match('/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i', $value) === 1;
     }
@@ -636,7 +621,7 @@ final class Validator
      * @param array $data
      * @return bool
      */
-    protected function in(string $value, array $data): bool
+    private function in(string $value, array $data): bool
     {
         return in_array($value, $data, true);
     }
@@ -648,7 +633,7 @@ final class Validator
      * @param array $data
      * @return bool
      */
-    protected function notIn(string $value, array $data): bool
+    private function notIn(string $value, array $data): bool
     {
         return ! $this->in($value, $data);
     }
@@ -660,7 +645,7 @@ final class Validator
      * @param array|string $types
      * @return bool
      */
-    protected function type(string $value, array|string $types): bool
+    private function type(string $value, array|string $types): bool
     {
         return $this->in($value, (array) $types);
     }
@@ -672,7 +657,7 @@ final class Validator
      * @param array|string $comparisonValue
      * @return bool
      */
-    protected function extension(string $value, array|string $comparisonValue): bool
+    private function extension(string $value, array|string $comparisonValue): bool
     {
         return $this->in(pathinfo($value, PATHINFO_EXTENSION), (array) $comparisonValue);
     }
@@ -684,7 +669,7 @@ final class Validator
      * @param int|string $comparisonValue
      * @return bool
      */
-    protected function minSize(mixed $value, int|string $comparisonValue): bool
+    private function minSize(mixed $value, int|string $comparisonValue): bool
     {
         $units = [ 'b', 'kb', 'mb', 'gb' ];
         if (is_string($comparisonValue)) {
@@ -700,7 +685,7 @@ final class Validator
      * @param int|string $comparisonValue
      * @return bool
      */
-    protected function maxSize(mixed $value, int|string $comparisonValue): bool
+    private function maxSize(mixed $value, int|string $comparisonValue): bool
     {
         $units = [ 'b', 'kb', 'mb', 'gb' ];
         if (is_string($comparisonValue)) {

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http;
 
 use Expansa\Http\Response;
-use Expansa\Security\Csrf\Csrf;
-use Expansa\Security\Csrf\Providers\NativeCookieProvider;
+use Expansa\Security\Csrf;
+use Expansa\Security\Csrf\Providers\Cookie;
 use Expansa\Security\Exceptions\InvalidCsrfTokenException;
 
 /**
@@ -36,7 +36,7 @@ final class VerifyCsrfToken
     private const string KEY = 'token';
 
     /**
-     * Csrf::generate()/check() build the cookie name as $sessionPrefix . KEY — this
+     * Csrf::generate()/check() build the cookie name as $prefix . KEY — this
      * override makes it `x_csrf_token`, the exact name youla-ajax.js reads.
      */
     private const string COOKIE_PREFIX = 'x_csrf_';
@@ -82,6 +82,6 @@ final class VerifyCsrfToken
 
     private function csrf(): Csrf
     {
-        return new Csrf(new NativeCookieProvider(), self::COOKIE_PREFIX);
+        return new Csrf(new Cookie(), self::COOKIE_PREFIX);
     }
 }

@@ -1,6 +1,6 @@
 # Введение
 
-`Expansa\Security\Xss\Kses` — фильтр HTML от XSS: оставляет только разрешённые элементы, атрибуты
+`Expansa\Security\Kses` — фильтр HTML от XSS: оставляет только разрешённые элементы, атрибуты
 и протоколы ссылок, всё остальное удаляет или обезвреживает. Это порт
 [kses](https://sourceforge.net/projects/kses), на котором построен `wp_kses()` в WordPress.
 
@@ -125,7 +125,7 @@ Safe::markup($html, ['select' => ['u-select']]);
 вторым аргументом с добавленными элементами и атрибутами:
 
 ```php
-use Expansa\Security\Xss\Kses;
+use Expansa\Security\Kses;
 
 $kses = new Kses(Kses::extend(['x-card' => ['id']]));
 ```

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Security\Xss;
+namespace Expansa\Security;
 
 use InvalidArgumentException;
 use LogicException;
@@ -11,7 +11,7 @@ use LogicException;
  * HTML filter: keeps only allowed elements, attributes and URL protocols, disarms everything else.
  * Port of kses (https://sourceforge.net/projects/kses).
  *
- * @package Expansa\Security\Xss
+ * @package Expansa\Security
  */
 final class Kses
 {

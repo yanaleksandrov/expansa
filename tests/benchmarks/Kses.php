@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Expansa\Security\Xss\Kses;
+use Expansa\Security\Kses;
 
 // run: php tests/benchmarks/Kses.php [--baseline=<git ref or file>] [--iterations=N], the original kses is 4492a8a
 // the baseline, Kses of a commit or a file, is loaded as KsesBaseline and measured on the same input
@@ -17,8 +17,14 @@ $ref        = $options['baseline'] ?? 'HEAD';
 if (is_file($ref)) {
     $source = file_get_contents($ref);
 } else {
-    $object = escapeshellarg($ref . ':expansa-cms/expansa/Security/Xss/Kses.php');
-    $source = shell_exec('git -C ' . escapeshellarg(dirname(__DIR__, 2)) . ' show ' . $object . ' 2>&1');
+    // Kses was in Security/Xss/ before it moved to the package root
+    foreach (['Security/Kses.php', 'Security/Xss/Kses.php'] as $path) {
+        $object = escapeshellarg($ref . ':expansa-cms/expansa/' . $path);
+        $source = shell_exec('git -C ' . escapeshellarg(dirname(__DIR__, 2)) . ' show ' . $object . ' 2>&1');
+        if (is_string($source) && str_starts_with($source, '<?php')) {
+            break;
+        }
+    }
 }
 if (! is_string($source) || ! str_starts_with($source, '<?php')) {
     fwrite(STDERR, "Cannot load the baseline $ref: $source" . PHP_EOL);
@@ -27,6 +33,7 @@ if (! is_string($source) || ! str_starts_with($source, '<?php')) {
 
 // eval() and fresh files (opcache.file_update_protection) skip opcache, the baseline would look slower
 $file = tempnam(sys_get_temp_dir(), 'kses');
+$source = preg_replace('/^namespace [^;]+;/m', 'namespace Expansa\Security;', $source, 1);
 file_put_contents($file, preg_replace('/^(final )?class Kses\b/m', 'class KsesBaseline', $source, 1));
 touch($file, time() - 60);
 require $file;
@@ -66,10 +73,10 @@ function measure(callable $callback, int $iterations): float
 // the original kses gets the current rules, so only the speed of the algorithm is compared;
 // a rewritten baseline has its own read-only rules
 $rules    = new Kses()->allowedHtml;
-$property = new ReflectionProperty(Expansa\Security\Xss\KsesBaseline::class, 'allowedHtml');
+$property = new ReflectionProperty(Expansa\Security\KsesBaseline::class, 'allowedHtml');
 $settable = $property->isPublic() && ! $property->isReadOnly() && ! $property->isPrivateSet() && ! $property->hasHooks();
 $baseline = function () use ($rules, $settable) {
-    $kses = new Expansa\Security\Xss\KsesBaseline();
+    $kses = new Expansa\Security\KsesBaseline();
     if ($settable) {
         $kses->allowedHtml = $rules;
     }
