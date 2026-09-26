@@ -62,6 +62,14 @@ Is::configure(
     dashboard: fn () => Lifecycle::is('dashboard'),
 );
 
+// step hooks, the terminate hook after the response, routing after the context
+Lifecycle::configure(
+    hook: fn (string $name) => Hook::call($name),
+    terminate: fn () => Hook::defer('terminate'),
+    route: fn () => Route::run(),
+    uri: fn () => Route::uri(),
+);
+
 // computed once: the installation request itself changes the result
 $isInstalled = App\Support\Installation::isComplete();
 
