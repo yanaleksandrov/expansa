@@ -230,11 +230,6 @@ final class Kses
     private const string PROTOCOL = '/^((&[^;]*;|[\sA-Za-z0-9])*)(:|&#0*58;|&#[Xx]0*3[Aa];|&colon;)\s*/';
 
     /**
-     * Rules of attribute prefixes by element, e.g. `data-` for `data-*`.
-     */
-    private array $prefixes = [];
-
-    /**
      * Filtered markup pieces by their source, valid because the rules of a filter never change.
      */
     private array $cache = [];
@@ -243,7 +238,8 @@ final class Kses
      * Create a filter.
      *
      * @param array    $allowedHtml      Elements and attributes, see ALLOWED_HTML; stored compiled: keyed by the lower case
-     *                                    element name, with the attributes of `*` added to every element. Set only once.
+     *                                    element name, with the attributes of `*` added to every element and the prefixes
+     *                                    of an element under its `*` key, e.g. `['data-' => 1]`. Set only once.
      * @param string[] $allowedProtocols Lower case protocols, see ALLOWED_PROTOCOLS; stored as keys for isset() lookups.
      */
     public function __construct(
@@ -257,7 +253,7 @@ final class Kses
                 // the default rules are compiled once per process, they are the same for every filter
                 static $defaults = self::compile(self::ALLOWED_HTML);
 
-                [$this->allowedHtml, $this->prefixes] = $value === self::ALLOWED_HTML ? $defaults : self::compile($value);
+                $this->allowedHtml = $value === self::ALLOWED_HTML ? $defaults : self::compile($value);
             }
         },
         private array $allowedProtocols = self::ALLOWED_PROTOCOLS {
@@ -282,31 +278,43 @@ final class Kses
     }
 
     /**
-     * Split rules into exact attributes and prefixes, adding the attributes of `*` to every element.
+     * Compile rules: add the attributes of `*` to every element and move its prefixes under its own `*` key.
      *
      * @param array $allowedHtml
-     * @return array{array, array} Attributes by element and prefixes by element.
+     * @return array Attributes by element, `*` of an element holds its prefixes, e.g. `['data-' => 1]`.
+     * @throws InvalidArgumentException For a bare `*`: an empty prefix would allow every attribute, event handlers too.
      */
     private static function compile(array $allowedHtml): array
     {
         $global = self::attributes($allowedHtml['*'] ?? []);
         unset($allowedHtml['*']);
 
-        $prefixes = [];
         foreach ($allowedHtml as $element => $attributes) {
             $attributes = [...$global, ...self::attributes($attributes)];
 
+            $prefixes = [];
             foreach ($attributes as $name => $rules) {
                 if (str_ends_with($name, '*')) {
-                    $prefixes[$element][substr($name, 0, -1)] = $rules;
+                    if ($name === '*') {
+                        throw new InvalidArgumentException(
+                            "The attribute `*` of <$element> would allow every attribute, use a prefix like `data-*`"
+                        );
+                    }
+
+                    $prefixes[substr($name, 0, -1)] = $rules;
                     unset($attributes[$name]);
                 }
+            }
+
+            // parsed attribute names never contain "*", so the key can not clash with an attribute
+            if ($prefixes !== []) {
+                $attributes['*'] = $prefixes;
             }
 
             $allowedHtml[$element] = $attributes;
         }
 
-        return [$allowedHtml, $prefixes];
+        return $allowedHtml;
     }
 
     /**
@@ -463,14 +471,13 @@ final class Kses
     private function stripAttributes(string $tag, string $element, string $attr): string
     {
         $slash    = str_contains($attr, '/') && preg_match('%\s/\s*$%', $attr) ? ' /' : '';
-        $allowed  = $this->allowedHtml[$element];
-        $prefixes = $this->prefixes[$element] ?? [];
+        $allowed = $this->allowedHtml[$element];
 
-        if (($allowed === [] && $prefixes === []) || $attr === '') {
+        if ($allowed === [] || $attr === '') {
             return "<{$tag}{$slash}>";
         }
 
-        $list = $this->combineAttributes($attr, $allowed, $prefixes);
+        $list = $this->combineAttributes($attr, $allowed);
 
         return '<' . $tag . (strpbrk($list, '<>') === false ? $list : str_replace(['<', '>'], '', $list)) . $slash . '>';
     }
@@ -480,11 +487,10 @@ final class Kses
      * values lose disallowed protocols, unparsable pieces are skipped.
      *
      * @param string $attr
-     * @param array  $allowed  Attribute rules of the element.
-     * @param array  $prefixes Attribute prefix rules of the element.
+     * @param array  $allowed Attribute rules of the element, prefixes under `*`.
      * @return string Allowed attributes, each one preceded by a space.
      */
-    private function combineAttributes(string $attr, array $allowed, array $prefixes): string
+    private function combineAttributes(string $attr, array $allowed): string
     {
         $list   = '';
         $mode   = 0;
@@ -502,7 +508,7 @@ final class Kses
                     foreach ($sets as $set) {
                         $offset += strlen($set[0]);
                         $name    = strtolower($set[1]);
-                        $rules   = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+                        $rules   = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
 
                         if ($rules !== null) {
                             $list .= isset($set[3])
@@ -529,7 +535,7 @@ final class Kses
                     $matched = true;
                     $mode    = 0;
                     $offset += strlen($match[0]);
-                    $rules   = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+                    $rules   = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
 
                     if ($rules !== null) {
                         $list .= $this->attribute($rules, $name, null, '');
@@ -539,7 +545,7 @@ final class Kses
                 $matched = true;
                 $mode    = 0;
                 $offset += strlen($match[0]);
-                $rules   = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+                $rules   = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
 
                 if ($rules !== null) {
                     $list .= $match[2] !== null
@@ -556,7 +562,7 @@ final class Kses
 
         // a valueless attribute at the very end, e.g. "selected"
         if ($mode === 1) {
-            $rules = $allowed[$name] ?? ($prefixes === [] ? null : self::prefixRules($prefixes, $name));
+            $rules = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
 
             if ($rules !== null) {
                 $list .= $this->attribute($rules, $name, null, '');

@@ -219,6 +219,17 @@ check('a rule with a wrong type throws', $thrown);
 // attributes of every element and prefixes
 check('class, title, lang, dir and role are allowed on every element', $kses->apply('<p class="lead" title="t" lang="en" dir="ltr" role="note">x</p>') === '<p class="lead" title="t" lang="en" dir="ltr" role="note">x</p>');
 check('data-* and aria-* are allowed on every element', $kses->apply('<code data-lang="php" aria-label="Code" class="language-php">x</code>') === '<code data-lang="php" aria-label="Code" class="language-php">x</code>');
+$emptyPrefix = function (array $rules): bool {
+    try {
+        new Kses($rules);
+    } catch (InvalidArgumentException $e) {
+        return str_contains($e->getMessage(), 'would allow every attribute');
+    }
+
+    return false;
+};
+check('a bare `*` attribute is rejected, it would allow every attribute', $emptyPrefix(['b' => ['*']]) && $emptyPrefix(['*' => ['*'], 'b' => []])
+    && $emptyPrefix(Kses::extend(['b' => ['*']])) && $emptyPrefix(Kses::extend(['*' => ['*']])));
 check('a bare prefix is not an attribute', $kses->apply('<b data- aria-=1 data-x=1>x</b>') === '<b data-x="1">x</b>');
 check('prefixes do not allow event handlers or directives', $kses->apply('<b onclick="x" data-onclick="y" u-text="z" style="w">x</b>') === '<b data-onclick="y">x</b>');
 check('the protocol check applies to data-* values', $kses->apply('<b data-url="javascript:alert(1)">x</b>') === '<b data-url="alert(1)">x</b>');
