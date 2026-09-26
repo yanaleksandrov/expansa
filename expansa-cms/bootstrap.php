@@ -405,11 +405,12 @@ Lifecycle::phase('booted', $isInstalled, function () {
 /**
  * 1. cli · console, run through artisan.
  *
- * The terminal runs the requested command and prints its output.
+ * Adds the commands of the app and the packages, then the terminal runs the requested one.
  * No routing: run() skips it in the console.
  */
 Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(App\Console\Serve::class);
+    Terminal::addCommand(Expansa\Hooks\Commands\Index::class);
     Terminal::run();
 });
 

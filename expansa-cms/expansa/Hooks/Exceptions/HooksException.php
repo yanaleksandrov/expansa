@@ -7,11 +7,8 @@ namespace Expansa\Hooks\Exceptions;
 use Exception;
 
 /**
- * Class HooksException
+ * Thrown on an invalid listener class or file, or on a hook that recurses into itself.
  *
- * Represents an exception related to hooks within the Expansa namespace.
- * Extends the base Exception class to provide custom error handling for event-related operations.
- *
- * @package Expansa\Hooks\Exception
+ * @package Expansa\Hooks
  */
 class HooksException extends Exception {}

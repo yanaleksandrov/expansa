@@ -44,15 +44,15 @@ Hook::add('testHook', 'applyTestHook');
 
 ```php
 use Expansa\Facades\Hook;
-use Expansa\Hooks\Attributes\HookListenerAlias;
+use Expansa\Hooks\Attributes\Alias;
 
 Hook::add('testHook', fn(&$var) => $var = 'foo');
 // или
-Hook::add('testHook', #[HookListenerAlias('applyTestHook')] fn(&$var) => $var = 'foo');
+Hook::add('testHook', #[Alias('applyTestHook')] fn(&$var) => $var = 'foo');
 ```
 
 Анонимная функция без псевдонима не имеет постоянного идентификатора, поэтому убрать её через 
-`flush()` нельзя. Псевдоним, установленный через аттрибут `HookListenerAlias`, даёт анонимной 
+`flush()` нельзя. Псевдоним, установленный через атрибут `Alias`, даёт анонимной 
 функции такое же стабильное имя, каким для обычной функции служит её имя — по нему слушателя 
 можно снять точно так же, как если бы это была обычная функция:
 
@@ -114,7 +114,7 @@ TODO: вероятно этот механизм следует исправит
 
 Один хук может иметь несколько слушателей, которые не зависят друг от друга. Если мы хотим 
 контролировать последовательность выполнения для таких случаев, используется параметр приоритет. 
-Приоритет - это просто числовое значение: чем оно выше, тем раньше оно выполняется.
+Приоритет — число: чем оно меньше, тем раньше выполняется слушатель.
 
 Если слушатель подключается через метод `add`, приоритет указывается в 3 параметре метода. В 
 данном примере, функция `commerceProductCreate` сработает раньше `commerceProductUpdate`, несмотря
@@ -122,21 +122,23 @@ TODO: вероятно этот механизм следует исправит
 
 ```php
 <?php
-use Expansa\Facades\Hook;use Expansa\Hooks\Priority;
+use Expansa\Facades\Hook;
+use Expansa\Hooks\Priority;
 
 Hook::add('testHook', 'commerceProductUpdate', Priority::BASE);
 Hook::add('testHook', 'commerceProductCreate', Priority::HIGH + 1);
 ```
 
 Если слушатель подключается через каталог `Listeners`, номер приоритета указывается через PHP 
-аттрибут `HookListenerPriority`, где 400 - число приоритета:
+атрибут `Priority`, где 400 - число приоритета. Он совпадает по имени с классом констант
+`Expansa\Hooks\Priority`: если нужны оба, один подключается под псевдонимом.
 
 ```php
-use Expansa\Hooks\Attributes\HookListenerPriority;
+use Expansa\Hooks\Attributes\Priority;
 
 class Test
 {
-	#[HookListenerPriority(400)]
+	#[Priority(400)]
 	public function testHook($var) {
 		$var = 'foo';
 		return $var;
@@ -144,9 +146,9 @@ class Test
 }
 ```
 
-Если у метода одновременно есть аттрибут `HookListenerPriority` **и** приоритет передан явным 
+Если у метода одновременно есть атрибут `Priority` **и** приоритет передан явным 
 3-м параметром в `add()` (например, при ручном добавлении `[$object, 'method']`), побеждает 
-аттрибут — явный параметр в этом случае будет проигнорирован.
+атрибут — явный параметр в этом случае будет проигнорирован.
 
 ## Одноразовые слушатели
 
@@ -189,6 +191,9 @@ php artisan hooks:list testHook
 
 Для слушателей, найденных через `configure()`, в качестве "откуда добавлен" показывается файл и 
 строка самого метода в классе-слушателе — а не место, откуда был вызван `configure()`.
+
+Команда — класс `Expansa\Hooks\Commands\Index` (`list` — зарезервированное слово), её регистрирует
+`bootstrap.php` в контексте `cli`.
 
 ## Выгрузка хуков плагина или темы
 

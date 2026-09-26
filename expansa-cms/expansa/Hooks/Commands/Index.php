@@ -2,25 +2,40 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Console\Commands;
+namespace Expansa\Hooks\Commands;
 
 use Expansa\Console\Command;
-use Expansa\Facades\Hook;
+use Expansa\Hooks\Manager;
 
 /**
- * Lists every registered hook so plugin/theme authors can see who listens to what without
- * grepping the codebase for Hook::add() calls.
+ * The `hooks:list` command: every hook with its listeners, their priority, origin and calls so far.
+ * Named Index since `list` is a reserved word.
+ *
+ * @package Expansa\Hooks
  */
-class HooksList extends Command
+final class Index extends Command
 {
     public string $name = 'hooks:list';
 
     public string $signature = 'hooks:list [<name>]';
 
+    public function __construct(
+
+        /**
+         * Hooks to list, the storage is shared by all instances.
+         */
+        private readonly Manager $hooks = new Manager(),
+    ) {} // phpcs:ignore
+
+    public function getDescription(): string
+    {
+        return t('List every registered hook, its listeners, their priority and where they were added.');
+    }
+
     public function handle(): void
     {
         $name  = $this->console->argument(0);
-        $hooks = $name !== null ? [$name => Hook::get($name)] : Hook::get();
+        $hooks = $name !== null ? [$name => $this->hooks->get($name)] : $this->hooks->get();
 
         $rows = [];
         foreach ($hooks as $hookName => $listeners) {
@@ -29,10 +44,8 @@ class HooksList extends Command
                     $hookName,
                     $listener['priority'],
                     $this->describe($listener['function']),
-                    $listener['source']['file'] !== ''
-                        ? $listener['source']['file'] . ':' . $listener['source']['line']
-                        : '-',
-                    Hook::calls($hookName),
+                    $listener['source']['file'] !== '' ? $listener['source']['file'] . ':' . $listener['source']['line'] : '-',
+                    $this->hooks->calls($hookName),
                 ];
             }
         }
@@ -47,10 +60,9 @@ class HooksList extends Command
     }
 
     /**
-     * Renders a listener's callable as a short, human-readable label.
+     * Describe a listener: the function name, `Class::method` or `Closure`.
      *
-     * @param string|array|callable $function The listener stored for a hook.
-     *
+     * @param string|array|callable $function
      * @return string
      */
     private function describe(string|array|callable $function): string
@@ -58,12 +70,7 @@ class HooksList extends Command
         return match (true) {
             is_string($function) => $function,
             is_array($function)  => (is_object($function[0]) ? $function[0]::class : $function[0]) . '::' . $function[1],
-            default               => 'Closure',
+            default              => 'Closure',
         };
-    }
-
-    public function getDescription(): string
-    {
-        return t('List every registered hook, its listeners, their priority and where they were added.');
     }
 }
