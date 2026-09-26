@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Expansa\Builders\Tree;
-use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
 /**
@@ -28,7 +27,7 @@ ob_start();
 ?>
 <div class="expansa-user-name"><?php echo t('Hi, :Username', $user->showname ?? ''); ?></div>
 <div class="avatar avatar--xs" style="background-image: url(https://i.pravatar.cc/150?img=3)">
-    <i class="badge bg-green" title="<?php I18n::c_attr( true, 'Online', 'Offline' ); ?>"></i>
+    <i class="badge bg-green" title="<?php echo t_attr('Online'); ?>"></i>
 </div>
 <?php
 $label = ob_get_clean();

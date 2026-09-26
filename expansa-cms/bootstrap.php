@@ -158,6 +158,7 @@ Lifecycle::phase('configure', true, function () {
         ],
         pattern: 'i18n/%s',
         overrides: EX_I18N,
+        languages: fn (array $languages) => Hook::call('languages', $languages),
     );
 
     // a new listener class has to be added here

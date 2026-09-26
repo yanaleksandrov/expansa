@@ -4,219 +4,117 @@ declare(strict_types=1);
 
 namespace Expansa\Translation;
 
-use Expansa\Facades\Hook;
-use Expansa\Facades\Safe;
+use Closure;
+use Expansa\Translation\Internal\Markdown;
 
 /**
- * The I18n class provides methods for handling translations in the system, including
- * regular translations, translations with formatting, and conditional translations.
- * The class also offers methods for returning translations sanitized for use in HTML attributes.
+ * Translations with placeholders and basic Markdown, the locale of the request and the language list.
+ * The I18n facade instance; t() and t_attr() are its shortcuts for templates.
  *
- * As text your can use base markdown syntax. For example links looks like this:
- * t( 'See the [documentation](:pageLink) to resolve this issue', 'https://google.com' )
- *
- * Main functionalities:
- * - `t|_t(_attr)`: translates a string with placeholders and returns/outputs it (sanitizes for HTML attributes).
- * - `c|_c(_attr)`: translates a string based on a condition and returns/outputs it (sanitizes for HTML attributes).
+ * ```php
+ * t('See the [documentation](:pageLink) to resolve this issue', 'https://example.com');
+ * ```
  *
  * TODO: Implement text pluralization.
+ *
+ * @package Expansa\Translation
  */
-class Translator extends Locale
+final class Translator
 {
     /**
-     * Incoming translations routes list.
+     * Source directories and the translation directories they map to.
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected static array $routes = [];
+    private array $routes = [];
 
     /**
-     *
-     *
-     * @var string
+     * sprintf() pattern of a translation file name, gets the locale.
      */
-    protected static string $pattern = '';
+    private string $pattern = '';
 
     /**
      * Directory with translation overrides, e.g. edited in the dashboard.
      */
-    protected static string $overrides = '';
+    private string $overrides = '';
 
     /**
-     * Translates a given string based on the current locale. The method checks for
-     * a corresponding translation in a locale-specific JSON file. If a translation
-     * exists, it returns the translated string; otherwise, it returns the original string.
-     *
-     * The translation files are expected to be named according to the locale and
-     * follow a JSON format, where keys are original strings and values are their
-     * translations.
-     *
-     * @param string $string The string to be translated.
-     * @return string        The translated string, or the original if no translation is found.
+     * Filter of the language list: gets the built-in languages, returns the full list.
      */
-    protected function get(string $string): string
-    {
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $source    = $backtrace[1]['file'] ?? null;
-
-        // add routes storages
-        static $override = [];
-        static $routes   = [];
-
-        if ($source !== null) {
-            if (isset($routes[ $source ]) || isset($override[ $source ])) {
-                return self::gettext($string, $routes[ $source ] ?? '', $override[ $source ] ?? '');
-            }
-
-            // check that incoming path is part of exist routes
-            $segments = array_map(fn($key) => basename(rtrim($key, '/')), array_keys(self::$routes));
-            $result   = implode('|', $segments);
-            $pattern  = sprintf('/(%s)\/([^\/]+)\/[^\/]+$/', $result);
-            if (preg_match($pattern, $source, $matches)) {
-                $element   = $matches[1] ?? '';
-                $directory = $matches[2] ?? '';
-                $filename  = sprintf(self::$pattern, $this->getLocale());
-
-                // try to find main & custom translations
-                foreach (self::$routes as $route => $targetRoute) {
-                    if (! str_starts_with($source, $route)) {
-                        continue;
-                    }
-
-                    $targetRoute = rtrim($targetRoute, DIRECTORY_SEPARATOR);
-                    $targetDir   = basename($targetRoute);
-                    if ($directory) {
-                        $targetRoute = str_replace(':dirname', $directory, $targetRoute);
-                    }
-
-                    if (in_array($element, [ 'plugins', 'themes' ], true)) {
-                        $targetDir = $element . DIRECTORY_SEPARATOR . str_replace(':dirname', $directory, $targetDir);
-                    }
-
-                    $override[ $source ] ??= sprintf('%s%s/%s.json', self::$overrides, $targetDir, $this->getLocale());
-                    $routes[ $source ]   ??= sprintf('%s/%s.json', $targetRoute, $filename);
-                }
-
-                return self::gettext($string, $routes[ $source ] ?? '', $override[ $source ] ?? '');
-            }
-        }
-        return $string;
-    }
+    private ?Closure $languages = null;
 
     /**
-     * Find text from file.
-     *
-     * @param string $string
-     * @param string $filepath
-     * @param string $overrideFilepath
-     * @return string
+     * Locale from the Accept-Language header, false if it can not be detected.
      */
-    private static function gettext(string $string, string $filepath, string $overrideFilepath = ''): string
-    {
-        foreach ([ $overrideFilepath, $filepath ] as $path) {
-            if (file_exists($path)) {
-                $translations = json_decode(file_get_contents($path) ?: '', true);
-                if (isset($translations[ $string ])) {
-                    return $translations[ $string ];
-                }
-            }
-        }
-        return $string;
-    }
+    private string|false|null $httpLocale = null;
 
     /**
-     * Translate with formatting.
+     * Set the translation lookup and the language list filter, replacing the previous configuration.
      *
-     * @param string $string
-     * @param mixed ...$args
+     * @param array<string, string> $routes    Source directories and their translation directories.
+     * @param string                $pattern   sprintf() pattern of a translation file name, gets the locale.
+     * @param string                $overrides Directory with translation overrides.
+     * @param Closure|null          $languages `fn (array $languages): array`, filters the language list.
      * @return void
      */
-    public function t(string $string, mixed ...$args): void
+    public function configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null): void
     {
-        echo self::_t($string, ...$args);
+        $this->routes    = $routes;
+        $this->pattern   = $pattern;
+        $this->overrides = $overrides;
+        $this->languages = $languages;
     }
 
     /**
-     * Translates and formats a string using human-readable placeholders.
+     * Translate a string and fill its placeholders, then render its Markdown.
      *
-     * This function provides an alternative to native PHP formatting by introducing
-     * descriptive placeholders while still supporting the traditional `%s` and `%d`.
-     * Placeholders can also apply automatic case transformation and attach suffixes.
+     * - `:name` — the next value, HTML-escaped;
+     * - `::name` — the same in the case of the placeholder: `::name` lower, `::NAME` upper, `::Name` title;
+     * - `:name\suffix` — the value followed by a suffix: `:count\st` → `1st`;
+     * - `%s`, `%d` — the next value as is, for markup around the text like `<a href="...">` and `</a>`.
      *
-     * ### Placeholder Features:
-     * - `:placeholder` — human-readable basic replacement.
-     * - `::placeholder` — replacement with automatic case transformation:
-     *   - If the placeholder is lowercase → result is converted to lowercase.
-     *   - If the placeholder is uppercase → result is converted to uppercase.
-     *   - If the placeholder starts with uppercase → result is capitalized (title case).
-     * - `:placeholder\suffix` — attaches a suffix (e.g. `:count\st` → `1st`).
-     * - `%s`, `%d` — traditional PHP-style placeholders are fully supported.
-     * - Values of `:name` placeholders are HTML-escaped, so user data is safe there;
-     *   `%s` values are inserted as is, for markup around the text like `<a href="...">` and `</a>`.
-     *
-     * ### Missing Values:
-     * - If not enough arguments are provided, unused placeholders (`:name`, `::NAME`, `%s`, `%d`, etc.)
-     *   will remain unchanged in the output string.
-     *
-     * ### Markdown Support:
-     * - Direct HTML is disallowed for security reasons.
-     * - Instead, a limited subset of Markdown is supported:
-     *   - **Bold**, *italic*, `#` headers, `![image]`, and `[link](url)`.
-     * - Markdown is automatically converted into safe HTML output.
-     *
-     * ### Examples:
+     * Placeholders without a value stay unchanged. HTML of the string itself is escaped;
+     * Markdown gives bold, italic, headers, quotes, images and links.
      *
      * ```php
      * t('Hi, ::Firstname, you have :count\st none closed "::TASKNAME" task.', 'john', 1, 'test');
-     * // Returns: 'Hi, John, you have 1st none closed "TEST" task'
-     *
-     * t('##Hi, *my name* is John, [view my profile](:profileLink).', 'http://example.com');
-     * // Returns: "<h2>Hi, <em>my name</em> is John, <a href="http://example.com">view my profile</a></h2>"
-     *
-     * t('User %s has %d new messages.', 'Alice', 5);
-     * // Returns: "User Alice has 5 new messages."
-     *
-     * t('Hello, :name, you have %d tasks.');
-     * // Returns: "Hello, :name, you have %d tasks." (placeholders remain unchanged)
+     * // 'Hi, John, you have 1st none closed "TEST" task.'
      * ```
      *
-     * @param string $string The translation string containing placeholders and optional Markdown.
-     * @param mixed  ...$args Values to be inserted into placeholders, in order of appearance.
-     *
-     * @return string The formatted and safely rendered string with replacements applied.
+     * @param string $string
+     * @param mixed  ...$args Values of the placeholders, in order of appearance.
+     * @return string
      */
-    public function _t(string $string, mixed ...$args): string
+    public function translate(string $string, mixed ...$args): string
     {
         $string = htmlentities($string);
 
         if ($args) {
             $string = preg_replace_callback(
                 '{
-                    (:{1,2})           # (1) One or two colons (:: or :) — marks a placeholder
-                    (\w+)              # (2) Placeholder name: one or more letters, digits, or underscores
-                    (?:\\\\([^:]+))?   # (3) Optional suffix: a backslash followed by any characters except a colon
-                    |                  # OR
-                    %[sd]              # Special format placeholders: %s (string) or %d (digit/integer)
+                    (:{1,2})           # (1) one or two colons
+                    (\w+)              # (2) placeholder name
+                    (?:\\\\([^:]+))?   # (3) optional suffix after a backslash
+                    |
+                    %[sd]
                 }ux',
-                function ($matches) use (&$args) {
+                function (array $matches) use (&$args): string {
                     if ($matches[0] === '%s' || $matches[0] === '%d') {
-                        return array_shift($args);
+                        return (string) array_shift($args);
                     }
 
                     $placeholder = $matches[2] ?? '';
-                    $suffix      = $matches[3] ?? '';
-
-                    $value = array_shift($args);
+                    $value       = (string) array_shift($args);
 
                     if ($matches[1] === '::') {
                         $value = match (true) {
                             mb_strtolower($placeholder) === $placeholder => mb_strtolower($value),
                             mb_strtoupper($placeholder) === $placeholder => mb_strtoupper($value),
-                            default => mb_convert_case($value, MB_CASE_TITLE, 'UTF-8'),
+                            default                                      => mb_convert_case($value, MB_CASE_TITLE, 'UTF-8'),
                         };
                     }
 
-                    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . $suffix;
+                    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . ($matches[3] ?? '');
                 },
                 $string
             );
@@ -226,118 +124,44 @@ class Translator extends Locale
     }
 
     /**
-     * Output translation with placeholder & sanitize like html attribute.
+     * Translate a string for an HTML attribute value: plain text, escaped once.
      *
      * @param string $string
-     * @param mixed ...$args
-     * @return void
-     */
-    public function t_attr(string $string, mixed ...$args): void
-    {
-        echo Safe::attribute(html_entity_decode(self::_t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-    }
-
-    /**
-     * Return translation with placeholder & sanitize like html attribute.
-     *
-     * @param string $string
-     * @param mixed ...$args
+     * @param mixed  ...$args
      * @return string
      */
-    public function _t_attr(string $string, mixed ...$args): string
+    public function translateAttribute(string $string, mixed ...$args): string
     {
-        return Safe::attribute(html_entity_decode(self::_t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        // translate() already escapes, so decode once to avoid "&amp;amp;"
+        return trim(htmlspecialchars(html_entity_decode($this->translate($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'), ENT_QUOTES));
     }
 
     /**
-     * Output translated text by condition.
+     * Get the locale of the request from the Accept-Language header: `en-US`.
      *
-     * @param bool $condition
-     * @param string $ifString
-     * @param string $elseString
-     * @return void
-     */
-    public function c(bool $condition, string $ifString, string $elseString = ''): void
-    {
-        echo self::_c($condition, $ifString, $elseString);
-    }
-
-    /**
-     * Return translated text by condition.
-     *
-     * @param bool $condition
-     * @param string $ifString
-     * @param string $elseString
-     * @return string
-     */
-    public function _c(bool $condition, string $ifString, string $elseString = ''): string
-    {
-        return $condition ? self::_t($ifString) : self::_t($elseString);
-    }
-
-    /**
-     * Output translated text by condition & sanitize like html attribute.
-     *
-     * @param bool $condition
-     * @param string $ifString
-     * @param string $elseString
-     * @return void
-     */
-    public function c_attr(bool $condition, string $ifString, string $elseString = ''): void
-    {
-        echo self::_c_attr($condition, $ifString, $elseString);
-    }
-
-    /**
-     * Return translated text by condition & sanitize like html attribute.
-     *
-     * @param bool $condition
-     * @param string $ifString
-     * @param string $elseString
-     * @return string
-     */
-    public function _c_attr(bool $condition, string $ifString, string $elseString = ''): string
-    {
-        return Safe::attribute(html_entity_decode(self::_c($condition, $ifString, $elseString), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-    }
-
-    /**
-     * Initial setting up of translation rules.
-     *
-     * @param array $routes
-     * @param string $pattern
-     * @param string $overrides Directory with translation overrides.
-     * @return void
-     */
-    public function configure(array $routes, string $pattern, string $overrides = ''): void
-    {
-        [ self::$routes, self::$pattern, self::$overrides ] = [ $routes, $pattern, $overrides ];
-    }
-
-    /**
-     * Output local from HTTP.
-     *
-     * @param string $default
+     * @param string $default Locale when the header is missing or can not be parsed.
      * @return string
      */
     public function locale(string $default = 'en-US'): string
     {
-        return $this->getLocale($default);
+        $this->httpLocale ??= function_exists('locale_accept_from_http')
+            ? locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $default)
+            : false;
+
+        return str_replace('_', '-', $this->httpLocale ?: $default);
     }
 
     /**
-     * Get language by field.
+     * Find a language by a field value.
      *
      * @param string $value
-     * @param string $getBy
-     * @return array
+     * @param string $getBy Field of the language: `locale`, `iso_639_1`, `country`...
+     * @return array Empty array if nothing is found.
      */
     public function language(string $value, string $getBy = 'locale'): array
     {
-        $languages = self::languages();
-
-        foreach ($languages as $language) {
-            if (isset($language[ $getBy ]) && $language[ $getBy ] === $value) {
+        foreach ($this->languages() as $language) {
+            if (($language[$getBy] ?? null) === $value) {
                 return $language;
             }
         }
@@ -346,22 +170,20 @@ class Translator extends Locale
     }
 
     /**
-     * Get language by field.
+     * Get the options of a language select: flag and name by locale.
      *
-     * @return array
+     * @return array<string, array{flag: string, content: string}>
      */
     public function languageOptions(): array
     {
-        $options   = [];
-        $languages = self::languages();
-
-        foreach ($languages as $language) {
+        $options = [];
+        foreach ($this->languages() as $language) {
             $key  = $language['locale'] ?? $language['iso_639_1'];
-            $name = "{$language['name']} - {$language['native']}";
+            $name = $language['name'] === $language['native'] ? $language['name'] : "{$language['name']} - {$language['native']}";
 
-            $options[ $key ] = [
+            $options[$key] = [
                 'flag'    => $language['country'],
-                'content' => $language['name'] === $language['native'] ? $language['name'] : $name,
+                'content' => $name,
             ];
         }
 
@@ -369,13 +191,13 @@ class Translator extends Locale
     }
 
     /**
-     * Get languages list.
+     * Get the language list: the built-in languages passed through the configured filter.
      *
-     * @return array
+     * @return array[]
      */
     public function languages(): array
     {
-        return Hook::call('i18n_get_languages', [
+        $languages = [
             [
                 'name'      => 'English (US)',
                 'native'    => 'English (US)',
@@ -398,6 +220,86 @@ class Translator extends Locale
                 'nplurals'  => 3,
                 'plural'    => '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)',
             ],
-        ]);
+        ];
+
+        return $this->languages === null ? $languages : ($this->languages)($languages);
+    }
+
+    /**
+     * Translate a string from the translation file of the calling file's extension.
+     * Not wired into translate() yet: the caller frame points to the facade, not to the template.
+     *
+     * @param string $string
+     * @return string The translation, or the string itself if there is none.
+     */
+    protected function get(string $string): string
+    {
+        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
+        $source    = $backtrace[1]['file'] ?? null;
+
+        static $override = [];
+        static $routes   = [];
+
+        if ($source === null) {
+            return $string;
+        }
+
+        if (isset($routes[$source]) || isset($override[$source])) {
+            return self::lookup($string, $routes[$source] ?? '', $override[$source] ?? '');
+        }
+
+        // the file must be inside one of the routes
+        $segments = array_map(fn ($key) => basename(rtrim($key, '/')), array_keys($this->routes));
+        $pattern  = sprintf('/(%s)\/([^\/]+)\/[^\/]+$/', implode('|', $segments));
+        if (! preg_match($pattern, $source, $matches)) {
+            return $string;
+        }
+
+        $element   = $matches[1] ?? '';
+        $directory = $matches[2] ?? '';
+        $filename  = sprintf($this->pattern, $this->locale());
+
+        foreach ($this->routes as $route => $targetRoute) {
+            if (! str_starts_with($source, $route)) {
+                continue;
+            }
+
+            $targetRoute = rtrim($targetRoute, DIRECTORY_SEPARATOR);
+            $targetDir   = basename($targetRoute);
+            if ($directory) {
+                $targetRoute = str_replace(':dirname', $directory, $targetRoute);
+            }
+
+            if (in_array($element, ['plugins', 'themes'], true)) {
+                $targetDir = $element . DIRECTORY_SEPARATOR . str_replace(':dirname', $directory, $targetDir);
+            }
+
+            $override[$source] ??= sprintf('%s%s/%s.json', $this->overrides, $targetDir, $this->locale());
+            $routes[$source]   ??= sprintf('%s/%s.json', $targetRoute, $filename);
+        }
+
+        return self::lookup($string, $routes[$source] ?? '', $override[$source] ?? '');
+    }
+
+    /**
+     * Find a translation in the override file, then in the translation file.
+     *
+     * @param string $string
+     * @param string $path
+     * @param string $overridePath
+     * @return string
+     */
+    private static function lookup(string $string, string $path, string $overridePath = ''): string
+    {
+        foreach ([$overridePath, $path] as $file) {
+            if (is_file($file)) {
+                $translations = json_decode(file_get_contents($file) ?: '', true);
+                if (isset($translations[$string])) {
+                    return $translations[$string];
+                }
+            }
+        }
+
+        return $string;
     }
 }
