@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use Expansa\Http\Exceptions\HttpException;
-use Expansa\Http\Exceptions\ValidationException;
+use Expansa\Http\Exception\HttpException;
+use Expansa\Http\Exception\ValidationException;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Is;

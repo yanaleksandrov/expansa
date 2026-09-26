@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use Expansa\Facades\Disk;
-use Expansa\Http\Exceptions\ValidationException;
+use Expansa\Http\Exception\ValidationException;
 
 /**
  * Installation state: the installer writes env.php only after every other step succeeded.

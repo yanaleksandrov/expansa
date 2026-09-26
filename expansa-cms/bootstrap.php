@@ -96,8 +96,8 @@ Lifecycle::phase('boot', true, function () {
 /**
  * 2. configure · always, also before install, so no database queries here.
  *
- * Passes the database, site URL, views, extensions root, console version and table filter to the framework,
- * then the translations priority, the hook listener classes and the form field types.
+ * Passes the database, site URL, views, extensions root, console version, redirect filters and table filter
+ * to the framework, then the translations priority, the hook listener classes and the form field types.
  */
 Lifecycle::phase('configure', true, function () {
     // the connection from env.php; nothing to connect to before install
@@ -134,6 +134,13 @@ Lifecycle::phase('configure', true, function () {
 
     // the version shown by the "list" console command
     Terminal::configure(version: EX_VERSION);
+
+    // redirect location, status and X-Redirect-By header are filtered by hooks
+    Expansa\Http\Redirect::configure(
+        location: fn (string $to, int $status) => Hook::call('redirectLocation', $to, $status),
+        status: fn (int $status, string $to) => Hook::call('redirectStatus', $status, $to),
+        redirectBy: fn (string $redirectBy, int $status, string $to) => Hook::call('redirectBy', $redirectBy, $status, $to),
+    );
 
     // every dashboard table renders the items filter form
     Expansa\Builders\Table::configure(

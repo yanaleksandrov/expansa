@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Http;
 
-use Expansa\Http\Exceptions\InvalidArgument;
+use Expansa\Http\Exception\InvalidArgument;
 
 /**
  * Helper class for dealing with HTTP status codes.

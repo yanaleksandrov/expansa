@@ -11,7 +11,7 @@ use Expansa\Contracts\Session\SessionInterface;
 use Expansa\Contracts\Validation\Validator;
 use Expansa\Http\Request\FileBag;
 use Expansa\Http\Request\HeaderBag;
-use Expansa\Http\Request\ParameterBug;
+use Expansa\Http\Request\ParameterBag;
 use Expansa\Http\Request\ServerBag;
 use Expansa\Support\Arr;
 use Expansa\Support\Str;
@@ -25,13 +25,13 @@ class Request implements \ArrayAccess, RequestContract
     use Macroable;
 
     //protected array $attributes;
-    public ParameterBug $query;
+    public ParameterBag $query;
 
-    public ParameterBug $post;
+    public ParameterBag $post;
 
-    public ParameterBug $json;
+    public ParameterBag $json;
 
-    public ParameterBug $cookies;
+    public ParameterBag $cookies;
 
     public FileBag $files;
 
@@ -150,9 +150,9 @@ class Request implements \ArrayAccess, RequestContract
 
     public function __construct(array $query = [], array $post = [], array $cookies = [], array $files = [], array $server = [])
     {
-        $this->query = new ParameterBug($query);
-        $this->post = new ParameterBug($post);
-        $this->cookies = new ParameterBug($cookies);
+        $this->query = new ParameterBag($query);
+        $this->post = new ParameterBag($post);
+        $this->cookies = new ParameterBag($cookies);
         $this->server = new ServerBag($server);
         $this->headers = new HeaderBag($this->server->getHeaders());
         $this->files = new FileBag($files);
@@ -232,7 +232,7 @@ class Request implements \ArrayAccess, RequestContract
             $json = [];
         }
 
-        $this->json = new ParameterBug($json);
+        $this->json = new ParameterBag($json);
     }
 
     public function getMethod(): string

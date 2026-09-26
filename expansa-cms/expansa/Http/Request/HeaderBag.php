@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Http\Request;
 
-class HeaderBag extends ParameterBug
+class HeaderBag extends ParameterBag
 {
     protected function modifyKey(string $key): string
     {

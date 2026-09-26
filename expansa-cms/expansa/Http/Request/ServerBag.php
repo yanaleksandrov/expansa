@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Http\Request;
 
-class ServerBag extends ParameterBug
+class ServerBag extends ParameterBag
 {
     public function getHeaders(): array
     {

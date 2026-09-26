@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Http\Request;
 
-class ParameterBug implements \ArrayAccess, \IteratorAggregate, \Countable
+class ParameterBag implements \ArrayAccess, \IteratorAggregate, \Countable
 {
     public function __construct(
 

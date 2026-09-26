@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Http\Exceptions;
+namespace Expansa\Http\Exception;
 
 use Expansa\Http\Contracts\HttpException as HttpExceptionContract;
 use RuntimeException;

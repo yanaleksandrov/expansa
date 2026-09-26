@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Http\Exceptions;
+namespace Expansa\Http\Exception;
 
 use InvalidArgumentException;
 

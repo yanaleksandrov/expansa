@@ -4,18 +4,54 @@ declare(strict_types=1);
 
 namespace Expansa\Http;
 
-use Expansa\Facades\Hook;
+use Closure;
 use InvalidArgumentException;
 
+/**
+ * HTTP redirect: sends the Location and X-Redirect-By headers and stops the script.
+ * Location, status and X-Redirect-By pass through the filters set in configure().
+ *
+ * @package Expansa\Http
+ */
 final class Redirect
 {
+    /**
+     * Filter of the location, gets the location and status.
+     */
+    private static ?Closure $locationFilter = null;
+
+    /**
+     * Filter of the status code, gets the status and location.
+     */
+    private static ?Closure $statusFilter = null;
+
+    /**
+     * Filter of the X-Redirect-By header, gets the value, status and location.
+     */
+    private static ?Closure $redirectByFilter = null;
+
     private array $values = [];
 
-    private ?string $to;
+    private ?string $to = null;
 
     private string $redirectBy = 'Expansa';
 
     private int $status = 302;
+
+    /**
+     * Set the filters, a repeated call replaces all of them.
+     *
+     * @param Closure|null $location   fn (string $to, int $status): string
+     * @param Closure|null $status     fn (int $status, string $to): int
+     * @param Closure|null $redirectBy fn (string $redirectBy, int $status, string $to): string
+     * @return void
+     */
+    public static function configure(?Closure $location = null, ?Closure $status = null, ?Closure $redirectBy = null): void
+    {
+        self::$locationFilter   = $location;
+        self::$statusFilter     = $status;
+        self::$redirectByFilter = $redirectBy;
+    }
 
     public function await(int $seconds = 7): void
     {
@@ -39,13 +75,16 @@ final class Redirect
 </html>";
     }
 
-    // Метод для перенаправления назад
+    /**
+     * Redirect to the referer, at once if no values are waiting for with().
+     *
+     * @return self
+     */
     public function back(): self
     {
-        $this->to = $_SERVER['HTTP_REFERER'] ?? '/';
+        $this->to     = $_SERVER['HTTP_REFERER'] ?? '/';
         $this->status = 302;
 
-        // Немедленное перенаправление
         if (empty($this->values)) {
             $this->redirect($this->to, $this->status);
         }
@@ -64,30 +103,9 @@ final class Redirect
     {
         $to = url($to);
 
-        /**
-         * Filters the redirect location.
-         *
-         * @param string $to     The path or URL to redirect to.
-         * @param int    $status The HTTP response status code to use.
-         */
-        $this->to = Hook::call('expansaRedirectLocation', $to, $status);
-
-        /**
-         * Filters the redirect HTTP response status code to use.
-         *
-         * @param int    $status The HTTP response status code to use.
-         * @param string $to     The path or URL to redirect to.
-         */
-        $this->status = Hook::call('expansaRedirectStatus', $status, $to);
-
-        /**
-         * Filters the X-Redirect-By header, allows applications to identify themselves when they're doing a redirect.
-         *
-         * @param string $redirectBy The application doing the redirect.
-         * @param int    $status     Status code to use.
-         * @param string $to         The path to redirect to.
-         */
-        $this->redirectBy = Hook::call('expansaRedirectBy', $redirectBy, $status, $to);
+        $this->to         = self::$locationFilter ? (self::$locationFilter)($to, $status) : $to;
+        $this->status     = self::$statusFilter ? (self::$statusFilter)($status, $to) : $status;
+        $this->redirectBy = self::$redirectByFilter ? (self::$redirectByFilter)($redirectBy, $status, $to) : $redirectBy;
 
         if ($this->to) {
             if ($this->status < 300 || 399 < $this->status) {

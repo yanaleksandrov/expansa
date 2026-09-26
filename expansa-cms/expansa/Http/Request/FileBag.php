@@ -6,7 +6,7 @@ namespace Expansa\Http\Request;
 
 use InvalidArgumentException;
 
-class FileBag extends ParameterBug
+class FileBag extends ParameterBag
 {
     protected const FILE_KEYS = ['error', 'full_path', 'name', 'size', 'tmp_name', 'type'];
 

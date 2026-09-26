@@ -6,7 +6,7 @@ namespace Expansa\Http;
 
 use Expansa\Http\Contracts\Request as RequestContract;
 use Expansa\Http\Contracts\Response as ResponseContract;
-use Expansa\Cookie\Cookie;
+use Stringable;
 
 class Response implements ResponseContract
 {
@@ -72,41 +72,35 @@ class Response implements ResponseContract
         return $this->setHeaders($headers);
     }
 
-    public function clearCookies(): void
+    /**
+     * Forget the cookies added so far.
+     *
+     * @return void
+     */
+    public function flushCookies(): void
     {
         $this->cookies = [];
     }
 
+    /**
+     * @return array<string|Stringable>
+     */
     public function getCookies(): array
     {
         return $this->cookies;
     }
 
-    public function setCookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, ?string $sameSite = null): static
+    /**
+     * Add a cookie, sent as a Set-Cookie header.
+     *
+     * @param string|Stringable $cookie The header value: `id=1; Path=/; HttpOnly` or an object that renders it.
+     * @return static
+     */
+    public function setCookie(string|Stringable $cookie): static
     {
-        if (is_string($cookie)) {
-            $expires = ($minutes === 0) ? 0 : time() + ($minutes * 60);
-
-            $cookie = new Cookie($cookie, $value, $expires, $path, $domain, $secure, $httpOnly, $sameSite);
-        }
-
         $this->cookies[] = $cookie;
 
         return $this;
-    }
-
-    public function cookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, ?string $sameSite = null): static
-    {
-        return $this->setCookie($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
-    }
-
-    public function withoutCookie(Cookie|string $cookie, $path = null, $domain = null): static
-    {
-        if (is_string($cookie)) {
-            $cookie = new Cookie($cookie, '', -2628000, $path, $domain);
-        }
-
-        return $this->setCookie($cookie);
     }
 
     public function setContent(?string $content): static
