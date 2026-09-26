@@ -21,7 +21,7 @@ $session->flash->pull('notice');    // ['Сохранено'] — на след�
 | `Contracts\Session`           | Данные: значения по ключу и `$flash`                             |
 | `Contracts\Manager`           | Жизненный цикл: `start()`, `regenerateId()`, `save()`, `delete()` |
 | `Contracts\Flash`             | Flash-сообщения: хранятся в сессии, пока их не прочитают         |
-| `Exceptions\SessionException` | Сессию нельзя запустить, сменить id или удалить                  |
+| `Exceptions\*`                | `AlreadyStarted`, `NotStarted`, `HeadersSent`; сбой функций сессии PHP — `RuntimeException` |
 
 ## Конфигурация
 
@@ -53,9 +53,9 @@ $session = new Native([
 
 | Метод или свойство              | Что делает                                                  |
 |---------------------------------|-------------------------------------------------------------|
-| `start()`                       | Запускает сессию, повторный запуск — `SessionException`     |
+| `start()`                       | Запускает сессию; повторный запуск — `AlreadyStarted`, вывод уже начат — `HeadersSent` |
 | `$started`, `$id`, `$name`      | Состояние, id и имя сессии, только чтение                   |
-| `regenerateId()`                | Переносит данные на новый id, старая сессия удаляется       |
+| `regenerateId()`                | Переносит данные на новый id, старая сессия удаляется; до `start()` — `NotStarted` |
 | `save()`                        | Сохраняет и закрывает сессию; PHP делает это и сам в конце запроса |
 | `delete()`                      | Забывает данные, удаляет сессию и её cookie                 |
 | `get($key, $default)`, `all()`  | Значение по ключу, все значения                             |

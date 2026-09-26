@@ -7,8 +7,11 @@ namespace Expansa\Session\Providers;
 use Expansa\Session\Contracts\Flash;
 use Expansa\Session\Contracts\Manager;
 use Expansa\Session\Contracts\Session;
-use Expansa\Session\Exceptions\SessionException;
+use Expansa\Session\Exceptions\AlreadyStarted;
+use Expansa\Session\Exceptions\HeadersSent;
+use Expansa\Session\Exceptions\NotStarted;
 use Expansa\Session\Internal\Flash as SessionFlash;
+use RuntimeException;
 
 /**
  * PHP native session: data lives in $_SESSION after start(), before it in memory.
@@ -76,11 +79,11 @@ final class Native implements Session, Manager
     public function start(): void
     {
         if ($this->started) {
-            throw new SessionException('Failed to start the session: Already started.');
+            throw new AlreadyStarted('Failed to start the session: Already started.');
         }
 
         if (headers_sent($file, $line) && filter_var(ini_get('session.use_cookies'), FILTER_VALIDATE_BOOLEAN)) {
-            throw new SessionException(
+            throw new HeadersSent(
                 sprintf('Failed to start the session because headers have already been sent by "%s" at line %d.', $file, $line)
             );
         }
@@ -102,7 +105,7 @@ final class Native implements Session, Manager
         }
 
         if (! session_start()) {
-            throw new SessionException('Failed to start the session.');
+            throw new RuntimeException('Failed to start the session.');
         }
 
         $this->storage = &$_SESSION;
@@ -112,15 +115,15 @@ final class Native implements Session, Manager
     public function regenerateId(): void
     {
         if (! $this->started) {
-            throw new SessionException('Cannot regenerate the session ID for non-active sessions.');
+            throw new NotStarted('Cannot regenerate the session ID for non-active sessions.');
         }
 
         if (headers_sent()) {
-            throw new SessionException('Headers have already been sent.');
+            throw new HeadersSent('Headers have already been sent.');
         }
 
         if (! session_regenerate_id(true)) {
-            throw new SessionException('The session ID could not be regenerated.');
+            throw new RuntimeException('The session ID could not be regenerated.');
         }
     }
 
@@ -138,11 +141,11 @@ final class Native implements Session, Manager
         }
 
         if (session_unset() === false) {
-            throw new SessionException('The session could not be unset.');
+            throw new RuntimeException('The session could not be unset.');
         }
 
         if (session_destroy() === false) {
-            throw new SessionException('The session could not be destroyed.');
+            throw new RuntimeException('The session could not be destroyed.');
         }
     }
 

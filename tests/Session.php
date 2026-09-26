@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Expansa\Session\Exceptions\NotStarted;
 use Expansa\Session\Providers\Memory;
 use Expansa\Session\Providers\Native;
 
@@ -40,5 +41,6 @@ check('delete() regenerates the id', $session->id !== $id);
 $native = new Native(['name' => 'expansa']);
 $native->set('key', 'value');
 check('native session keeps values in memory before start()', ! $native->started && $native->get('key') === 'value');
+check('regenerateId() before start() throws NotStarted', throws(fn () => $native->regenerateId(), NotStarted::class));
 
 exit($failures > 0 ? 1 : 0);

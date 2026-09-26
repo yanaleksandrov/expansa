@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Expansa\Session\Contracts;
 
-use Expansa\Session\Exceptions\SessionException;
+use Expansa\Session\Exceptions\AlreadyStarted;
+use Expansa\Session\Exceptions\HeadersSent;
+use Expansa\Session\Exceptions\NotStarted;
+use RuntimeException;
 
 /**
  * Session lifecycle: start, new id, save and delete.
@@ -30,7 +33,9 @@ interface Manager
      * Start the session.
      *
      * @return void
-     * @throws SessionException If the session can't be started.
+     * @throws AlreadyStarted   If the session is already started.
+     * @throws HeadersSent      If the output has already started.
+     * @throws RuntimeException If PHP can't start the session.
      */
     public function start(): void;
 
@@ -38,7 +43,9 @@ interface Manager
      * Move the data to a new session id, the old session is deleted.
      *
      * @return void
-     * @throws SessionException If the id can't be regenerated.
+     * @throws NotStarted       If the session is not started.
+     * @throws HeadersSent      If the output has already started.
+     * @throws RuntimeException If PHP can't regenerate the id.
      */
     public function regenerateId(): void;
 
@@ -46,7 +53,7 @@ interface Manager
      * Forget the data and delete the stored session with its cookie.
      *
      * @return void
-     * @throws SessionException If the session can't be deleted.
+     * @throws RuntimeException If PHP can't delete the session.
      */
     public function delete(): void;
 
