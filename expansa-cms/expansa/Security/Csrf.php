@@ -6,7 +6,7 @@ namespace Expansa\Security;
 
 use Expansa\Security\Csrf\Contracts\Provider;
 use Expansa\Security\Csrf\Providers\Cookie;
-use Expansa\Security\Exceptions\InvalidCsrfTokenException;
+use Expansa\Security\Exceptions\InvalidCsrfToken;
 use Random\RandomException;
 
 /**
@@ -20,7 +20,7 @@ use Random\RandomException;
  *
  * try {
  *     $csrf->check('profile', $_POST['token'] ?? '', timespan: 3600);
- * } catch (InvalidCsrfTokenException $e) {
+ * } catch (InvalidCsrfToken $e) {
  *     return $e->getMessage();
  * }
  * ```
@@ -66,28 +66,28 @@ final class Csrf
      * @param int|null $timespan Lifetime of the token in seconds, `null` — no expiration.
      * @param bool     $multiple Keep the token for more requests, useful for AJAX-heavy pages.
      * @return void
-     * @throws InvalidCsrfTokenException If the token is missing, forged, of another client or expired.
+     * @throws InvalidCsrfToken If the token is missing, forged, of another client or expired.
      */
     public function check(string $key, string $token, ?int $timespan = null, bool $multiple = false): void
     {
         $key = $this->prefix . $this->sanitizeKey($key);
 
         if ($token === '') {
-            throw new InvalidCsrfTokenException('Invalid CSRF token');
+            throw new InvalidCsrfToken('Invalid CSRF token');
         }
 
         $stored = $this->provider->get($key);
         if (! $stored) {
-            throw new InvalidCsrfTokenException('Invalid CSRF session token');
+            throw new InvalidCsrfToken('Invalid CSRF session token');
         }
 
         $decoded = base64_decode($stored);
         if (! hash_equals($this->referralHash(), substr($decoded, 10, 40)) || ! hash_equals($stored, $token)) {
-            throw new InvalidCsrfTokenException('Invalid CSRF token');
+            throw new InvalidCsrfToken('Invalid CSRF token');
         }
 
         if ($timespan !== null && (int) substr($decoded, 0, 10) + $timespan < time()) {
-            throw new InvalidCsrfTokenException('CSRF token has expired');
+            throw new InvalidCsrfToken('CSRF token has expired');
         }
 
         // a new token, not the same one: expiration slides with the embedded time

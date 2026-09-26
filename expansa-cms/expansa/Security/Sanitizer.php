@@ -6,7 +6,7 @@ namespace Expansa\Security;
 
 use DateTime;
 use Expansa\Codecs\Json;
-use Expansa\Security\Exceptions\SecurityException;
+use InvalidArgumentException;
 
 /**
  * Cleans values: static methods for single values, `data()` and `apply()` for fields by rules like `'slug:$login|trim'`.
@@ -115,7 +115,7 @@ final class Sanitizer
      *
      * @param string $return Field for return.
      * @return mixed
-     * @throws SecurityException If a rule names neither a Sanitizer method nor an extension.
+     * @throws InvalidArgumentException If a rule names neither a Sanitizer method nor an extension.
      */
     public function apply(string $return = ''): mixed
     {
@@ -159,7 +159,7 @@ final class Sanitizer
                 $data = match (true) {
                     is_callable($extension) => $extension($value, $this),
                     $isOwnMethod             => self::{$method}($value),
-                    default                  => throw new SecurityException(
+                    default                  => throw new InvalidArgumentException(
                         "Sanitizer rule '$method' (field '$field') does not exist. " .
                         "Register it first via ->extend('$method', ...) if it's meant to be custom."
                     ),

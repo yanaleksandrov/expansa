@@ -5,7 +5,7 @@ declare(strict_types=1);
 use Expansa\Facades\Safe;
 use Expansa\Security\Csrf;
 use Expansa\Security\Csrf\Contracts\Provider;
-use Expansa\Security\Exceptions\InvalidCsrfTokenException;
+use Expansa\Security\Exceptions\InvalidCsrfToken;
 use Expansa\Security\Validator;
 
 // run: php tests/Security.php
@@ -16,7 +16,7 @@ function rejects(callable $callback): bool
 {
     try {
         $callback();
-    } catch (InvalidCsrfTokenException) {
+    } catch (InvalidCsrfToken) {
         return true;
     }
 
