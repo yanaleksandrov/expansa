@@ -46,10 +46,10 @@ trait Indexes
             return '';
         }
 
-        $existsColumns  = array_map(fn($column) => $column->getAttributes(), $table->columns);
+        $existsColumns  = array_map(fn($column) => $column->attributes, $table->columns);
         $existsLength   = array_column($existsColumns, 'length', 'name');
         $existsColumns  = array_column($existsColumns, 'type', 'name');
-        $indexedColumns = (array) ($command->getAttributes()['columns'] ?? []);
+        $indexedColumns = (array) ($command->attributes['columns'] ?? []);
 
         $columns = array_intersect_key($existsColumns, array_flip($indexedColumns));
 

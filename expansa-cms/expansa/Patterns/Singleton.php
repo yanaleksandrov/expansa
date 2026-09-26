@@ -14,19 +14,16 @@ use Expansa\Patterns\Exceptions\SingletonException;
 trait Singleton
 {
     /**
-     * This is a static method that controls access to a Singleton.
-     * On the first run, it creates a Singleton instance and places it in a static field.
-     * On subsequent runs, it returns to the client the object stored in the static field.
+     * Get the instance of the class, creating it with the arguments on the first call.
+     *
+     * @param mixed ...$args Constructor arguments, ignored after the first call.
+     * @return self
      */
-    public static function init(...$args)
+    public static function init(mixed ...$args): self
     {
-        static $instances;
+        static $instances = [];
 
-        $id = static::class;
-        if (!isset($instances[$id])) {
-            $instances[$id] = new self(...$args);
-        }
-        return $instances[$id];
+        return $instances[static::class] ??= new self(...$args);
     }
 
     /**
@@ -36,7 +33,7 @@ trait Singleton
      *
      * @param mixed ...$args Optional arguments for the class constructor.
      */
-    protected function __construct(...$args) {} // phpcs:ignore
+    protected function __construct(mixed ...$args) {} // phpcs:ignore
 
     /**
      * Prevents cloning of the instance.

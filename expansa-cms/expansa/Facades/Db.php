@@ -128,6 +128,6 @@ class Db extends Facade
      */
     public static function instance(): Builder
     {
-        return static::getResolvedClassInstance();
+        return static::resolve();
     }
 }
