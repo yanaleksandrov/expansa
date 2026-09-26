@@ -1,0 +1,205 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Parameter \$field of method App\\Models\\Post\:\:__construct\(\) has invalid type App\\Models\\Field\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/app/Models/Post.php
+
+		-
+			message: '#^Property App\\Models\\Post\:\:\$field has unknown class App\\Models\\Field as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/app/Models/Post.php
+
+		-
+			message: '#^Method App\\Post\\Status\:\:register\(\) should return object but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: expansa-cms/app/Post/Status.php
+
+		-
+			message: '#^Undefined variable\: \$dayofmonth$#'
+			identifier: variable.undefined
+			count: 3
+			path: expansa-cms/app/Query/Query.php
+
+		-
+			message: '#^Undefined variable\: \$dayofweek$#'
+			identifier: variable.undefined
+			count: 3
+			path: expansa-cms/app/Query/Query.php
+
+		-
+			message: '#^Undefined variable\: \$dayofyear$#'
+			identifier: variable.undefined
+			count: 3
+			path: expansa-cms/app/Query/Query.php
+
+		-
+			message: '#^Undefined variable\: \$human_date_time$#'
+			identifier: variable.undefined
+			count: 3
+			path: expansa-cms/app/Query/Query.php
+
+		-
+			message: '#^Undefined variable\: \$week$#'
+			identifier: variable.undefined
+			count: 3
+			path: expansa-cms/app/Query/Query.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 2
+			path: expansa-cms/expansa/Database/Model.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 3
+			path: expansa-cms/expansa/Database/Model/Attribute.php
+
+		-
+			message: '#^Method Expansa\\Http\\Contracts\\Request\:\:getSession\(\) has invalid return type Expansa\\Contracts\\Session\\SessionInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Contracts/Request.php
+
+		-
+			message: '#^Method Expansa\\Http\\Contracts\\Request\:\:session\(\) has invalid return type Expansa\\Contracts\\Session\\SessionInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Contracts/Request.php
+
+		-
+			message: '#^Parameter \$session of method Expansa\\Http\\Contracts\\Request\:\:setSession\(\) has invalid type Expansa\\Contracts\\Session\\SessionInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Contracts/Request.php
+
+		-
+			message: '#^Call to an undefined static method Expansa\\Support\\Arr\:\:data\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Call to an undefined static method Expansa\\Support\\Arr\:\:forget\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Call to an undefined static method Expansa\\Support\\Arr\:\:has\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Call to an undefined static method Expansa\\Support\\Arr\:\:hasAny\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Call to an undefined static method Expansa\\Support\\Arr\:\:missing\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Method Expansa\\Http\\Request\:\:getRoute\(\) has invalid return type Expansa\\Contracts\\Routing\\Route\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Method Expansa\\Http\\Request\:\:getSession\(\) has invalid return type Expansa\\Contracts\\Session\\SessionInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Method Expansa\\Http\\Request\:\:route\(\) has invalid return type Expansa\\Contracts\\Routing\\Route\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Method Expansa\\Http\\Request\:\:session\(\) has invalid return type Expansa\\Contracts\\Session\\SessionInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Parameter \$route of method Expansa\\Http\\Request\:\:route\(\) has invalid type Expansa\\Contracts\\Routing\\Route\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Parameter \$route of method Expansa\\Http\\Request\:\:setRoute\(\) has invalid type Expansa\\Contracts\\Routing\\Route\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Parameter \$session of method Expansa\\Http\\Request\:\:setSession\(\) has invalid type Expansa\\Contracts\\Session\\SessionInterface\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Property Expansa\\Http\\Request\:\:\$route has unknown class Expansa\\Contracts\\Routing\\Route as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Property Expansa\\Http\\Request\:\:\$session has unknown class Expansa\\Contracts\\Session\\SessionInterface as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 2
+			path: expansa-cms/expansa/Http/Request.php
+
+		-
+			message: '#^Call to static method createFrom\(\) on an unknown class Expansa\\Http\\Request\\UploadedFile\.$#'
+			identifier: class.notFound
+			count: 2
+			path: expansa-cms/expansa/Http/Request/FileBag.php
+
+		-
+			message: '#^Class Expansa\\Http\\Request\\UploadedFile not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request/FileBag.php
+
+		-
+			message: '#^Method Expansa\\Http\\Request\\FileBag\:\:convert\(\) has invalid return type Expansa\\Http\\Request\\UploadedFile\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Http/Request/FileBag.php
+
+		-
+			message: '#^Undefined variable\: \$data$#'
+			identifier: variable.undefined
+			count: 2
+			path: expansa-cms/expansa/Http/Request/FileBag.php
+
+		-
+			message: '#^Parameter \$app of method Expansa\\Log\\LogManager\:\:__construct\(\) has invalid type Expansa\\Log\\Container\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Log/LogManager.php
+
+		-
+			message: '#^Property Expansa\\Log\\LogManager\:\:\$app has unknown class Expansa\\Log\\Container as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: expansa-cms/expansa/Log/LogManager.php

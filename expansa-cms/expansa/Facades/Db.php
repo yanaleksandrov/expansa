@@ -60,7 +60,9 @@ class Db extends Facade
     /**
      * Set the connection before the first query.
      *
-     * @param int $error PDO error mode, e.g. PDO::ERRMODE_SILENT.
+     * @param bool $logging  Keep every query for Db::log(), not only the last one.
+     * @param bool $testMode Build queries without connecting or running them, e.g. in tests.
+     * @param int  $error    PDO error mode, e.g. PDO::ERRMODE_SILENT.
      */
     public static function configure(
         string $driver,
@@ -73,6 +75,7 @@ class Db extends Facade
         string $collation = 'utf8mb4_general_ci',
         int|string $port = 3306,
         bool $persistent = false,
+        bool $logging = false,
         bool $testMode = false,
         int $error = PDO::ERRMODE_SILENT,
     ): void {
@@ -86,6 +89,7 @@ class Db extends Facade
             'charset',
             'collation',
             'port',
+            'logging',
             'testMode',
             'error',
         ) + ['option' => $persistent ? [PDO::ATTR_PERSISTENT => true] : []];

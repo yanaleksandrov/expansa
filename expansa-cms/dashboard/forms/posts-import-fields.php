@@ -96,7 +96,7 @@ return \Expansa\Facades\Form::enqueue(
 				'before'      => '',
 				'after'       => '',
 				'tooltip'     => '',
-				'instruction' => t( 'Sample: %s', '<samp>' . $sample . '</samp>' ),
+				'instruction' => t( 'Sample: %s', '<samp>' . escape( $sample ) . '</samp>' ),
 				'attributes'  => [ 'u-prop' => 'map.' . $index ],
 				'conditions'  => [],
 				'options'     => [

@@ -86,9 +86,9 @@ class Csrf
         }
 
         if (
-            $this->referralHash() !== substr(base64_decode($sessionToken), 10, 40)
+            ! hash_equals($this->referralHash(), substr(base64_decode($sessionToken), 10, 40))
             ||
-            $token !== $sessionToken
+            ! hash_equals($sessionToken, $token)
         ) {
             throw new InvalidCsrfTokenException('Invalid CSRF token');
         }

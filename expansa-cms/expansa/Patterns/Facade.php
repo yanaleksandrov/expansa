@@ -132,4 +132,26 @@ class Facade
     {
         return [];
     }
+
+    /**
+     * Drop the resolved instance of this facade, or of every facade when called on Facade itself,
+     * so the next call creates a new one, e.g. between tests.
+     */
+    public static function clearResolved(): void
+    {
+        if (static::class === self::class) {
+            self::$class = [];
+            return;
+        }
+
+        unset(self::$class[self::classNamespaceDecorator(static::getStaticClassAccessor())]);
+    }
+
+    /**
+     * Use the given instance behind this facade, e.g. a test double.
+     */
+    public static function swap(object $instance): void
+    {
+        self::setClass(self::classNamespaceDecorator(static::getStaticClassAccessor()), $instance);
+    }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
+use DOMDocument;
+
 /**
  * Usage:
  * $svg = new Svg();

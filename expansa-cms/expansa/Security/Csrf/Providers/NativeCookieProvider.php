@@ -8,7 +8,7 @@ use Expansa\Security\Csrf\Contracts\SessionProvider;
 
 class NativeCookieProvider implements SessionProvider
 {
-    const HOUR_IN_SECONDS = 3600;
+    const int HOUR_IN_SECONDS = 3600;
 
     /**
      * Get a cookie value.

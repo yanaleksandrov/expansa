@@ -135,17 +135,7 @@ class EntryHandler
      */
     protected function getSize(): int
     {
-        if (is_dir($this->path)) {
-            $size  = 0;
-            $files = $this->files('*', 9999);
-
-            foreach ($files as $file) {
-                $size += filesize($file);
-            }
-
-            return $size;
-        }
-        return filesize($this->path) ?? 0;
+        return is_file($this->path) ? (int) filesize($this->path) : 0;
     }
 
     /**

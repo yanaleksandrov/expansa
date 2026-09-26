@@ -423,8 +423,8 @@ final class Sanitizer
 
         // if the string contains the `<` character
         if (str_contains($value, '<')) {
-            // escape `<` unless followed by a word character
-            $value = preg_replace_callback('/<(?!\w)/', fn($matches) => htmlspecialchars($matches[0] ?? ''), $value);
+            // escape `<` unless it starts a tag: a letter, a closing tag, a comment or a processing instruction
+            $value = preg_replace_callback('/<(?![a-zA-Z\/!?])/', fn($matches) => htmlspecialchars($matches[0] ?? ''), $value);
             // remove all HTML tags
             $value = strip_tags($value);
             // replace `<\n` with a safe HTML entity
@@ -716,7 +716,14 @@ final class Sanitizer
      */
     public static function url(mixed $value): string
     {
-        return strval(filter_var(self::trim($value), FILTER_SANITIZE_URL));
+        $url = strval(filter_var(self::trim($value), FILTER_SANITIZE_URL));
+
+        // a scheme like javascript: or data: runs code once the value ends up in a link
+        if (preg_match('~^([a-z][a-z0-9+.\-]*):~i', $url, $scheme) && ! in_array(strtolower($scheme[1]), ['http', 'https', 'ftp', 'mailto', 'tel'], true)) {
+            return '';
+        }
+
+        return $url;
     }
 
     /**
@@ -874,24 +881,25 @@ final class Sanitizer
     public static function slug(string $value): string
     {
         $value = strip_tags($value);
-        // Preserve escaped octets.
-        $value = preg_replace('|%([a-fA-F0-9][a-fA-F0-9])|', '---$1---', $value);
-        // Remove percent signs that are not part of an octet.
-        $value = str_replace('%', '', $value);
-        // Restore octets.
-        $value = preg_replace('|---([a-fA-F0-9][a-fA-F0-9])---|', '%$1', $value);
 
-        $value = strtolower($value);
+        // entities like &amp; are not part of the text
+        $value = preg_replace('/&[a-z0-9#]+;/i', '', $value);
 
-        // Remove HTML entities.
-        $value = preg_replace('/&.+?;/', '', $value);
-        $value = str_replace('.', '-', $value);
+        // a percent-encoded URL segment gives the same slug as its text: /%D0%BF%D1%80... and /пр...
+        $value = rawurldecode($value);
+        $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
 
-        $value = preg_replace('/[^%a-z0-9 _-]/', '', $value);
-        $value = preg_replace('/\s+/', '-', $value);
-        $value = preg_replace('|-+|', '-', $value);
+        // one form for letters that can be typed composed or decomposed, e.g. "й"
+        if (class_exists('Normalizer')) {
+            $value = \Normalizer::normalize($value, \Normalizer::FORM_C) ?: $value;
+        }
 
-        return self::trim($value);
+        $value = mb_strtolower($value, 'UTF-8');
+
+        // letters, marks and digits of any script stay, everything else separates the words
+        $value = preg_replace('/[^\p{L}\p{M}\p{N}_]+/u', '-', $value);
+
+        return trim($value, '-');
     }
 
     /**

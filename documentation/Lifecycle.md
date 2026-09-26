@@ -233,6 +233,10 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
 
 ## Разработка
 
-- `php tests/run.php` запускает все тесты, каждый в отдельном процессе, и возвращает 1, если хоть один упал.
+- `php tests/run.php` запускает все тесты, каждый в отдельном процессе, затем PHPStan, и возвращает 1, если
+  что-то упало. Известные ошибки PHPStan собраны в `phpstan-baseline.neon`: новые не допускаются, старые
+  убираются из файла по мере исправления.
+- Настройки окружения в `env.php` сгруппированы в массивы: `EX_DB` (передаётся в `Db::configure()`),
+  `EX_KEYS`, `EX_DEBUG`, `EX_DKIM`. `EX_DEBUG['enabled']` никогда не включайте на рабочем сайте.
 - `php artisan serve [--host=127.0.0.1] [--port=8000]` запускает сайт на встроенном сервере PHP через
   `server.php`. Роутер выставляет `SCRIPT_NAME` как Apache, иначе `/dashboard` путается с папкой `dashboard/`.

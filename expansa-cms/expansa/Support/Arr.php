@@ -149,7 +149,7 @@ class Arr
      *                         match. Default 'AND'.
      * @return array           Array of found values.
      */
-    public static function filter($array, $args, $operator = 'AND'): array
+    public static function filter($array, array $args, string $operator = 'AND'): array
     {
         $operator = strtoupper($operator);
         if (! is_array($array) || empty($args) || ! in_array($operator, [ 'AND', 'OR', 'NOT' ], true)) {
@@ -253,7 +253,7 @@ class Arr
      * @param  string  $prepend
      * @return array
      */
-    public static function dot($array, $prepend = ''): array
+    public static function dot(iterable $array, string $prepend = ''): array
     {
         $results = [];
 
@@ -282,7 +282,7 @@ class Arr
      * @param  iterable  $array
      * @return array
      */
-    public static function undot($array)
+    public static function undot(iterable $array)
     {
         $results = [];
         if (is_array($array)) {

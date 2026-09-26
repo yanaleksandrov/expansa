@@ -11,6 +11,11 @@ use PDOStatement;
 abstract class BuilderAbstract
 {
     /**
+     * Quote a string for use in a query.
+     */
+    abstract public function quote(string $string): string;
+
+    /**
      * The PDO object.
      *
      * @var PDO

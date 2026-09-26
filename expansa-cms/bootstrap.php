@@ -57,7 +57,7 @@ App\Support\Requirements::check();
 
 // needed before the phases: boot reads Is::debug()
 Is::configure(
-    debug: defined('EX_DEBUG') && EX_DEBUG === true
+    debug: defined('EX_DEBUG') && EX_DEBUG['enabled'] === true
 );
 
 // computed once: the installation request itself changes the result
@@ -508,8 +508,8 @@ Lifecycle::context('web', true, function () {
  * Errors from any step go to the debug page.
  */
 Lifecycle::run(catch: function (Throwable $e) {
-    // EX_DEBUG_VIEW comes from env.php, which may be missing
-    $view = defined('EX_DEBUG_VIEW') ? EX_DEBUG_VIEW : EX_PATH . 'dashboard/debug.php';
+    // EX_DEBUG comes from env.php, which may be missing
+    $view = defined('EX_DEBUG') ? EX_DEBUG['view'] : EX_DASHBOARD . 'debug.php';
 
     Debug::render($e, $view);
 });

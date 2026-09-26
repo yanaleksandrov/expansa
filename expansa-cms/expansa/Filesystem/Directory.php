@@ -62,6 +62,19 @@ class Directory extends EntryHandler implements CommonInterface, DirectoryInterf
         return $folders;
     }
 
+    /**
+     * Total size of the files inside, in bytes.
+     */
+    protected function getSize(): int
+    {
+        $size = 0;
+        foreach ($this->files('*', 9999) as $file) {
+            $size += (int) filesize($file);
+        }
+
+        return $size;
+    }
+
     public function files(string $pattern = '*', int $depth = 0): array
     {
         $search = function ($path, int $current_depth) use (&$search, $pattern, $depth) {

@@ -33,9 +33,12 @@ class Disk
         return new Directory($dirpath);
     }
 
-    public function upload(string|array $filedata): File
+    /**
+     * Save an uploaded file, or grab one by URL, into the given directory.
+     */
+    public function upload(string|array $filedata, string $targetDir): File
     {
-        $storage = new Storage();
+        $storage = new Storage($targetDir);
         if (is_string($filedata)) {
             $filepath = $storage->grab($filedata);
         } else {

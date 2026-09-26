@@ -25,14 +25,14 @@ class Storage extends EntryHandler
 
         $basename  = basename($url);
         $extension = pathinfo($url, PATHINFO_EXTENSION);
-        $filepath  = sprintf('%s%s', $targetDir, $basename);
+        $filepath  = sprintf('%s/%s', $this->path, $basename);
 
         if (!$extension) {
             return new Error(t('Can\'t fetch the file because it doesn\'t have an extension.'));
         }
 
-        if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0755, true);
+        if (!is_dir($this->path)) {
+            mkdir($this->path, 0755, true);
         }
 
         $ch   = curl_init($url);
@@ -141,9 +141,8 @@ class Storage extends EntryHandler
             $this->errors[] = $validator;
         }
 
-        var_dump($this->path);
         $basename = $this->sanitizeName($file['name'] ?? '');
-        $filepath = sprintf('%s%s', $this->path, $basename);
+        $filepath = sprintf('%s/%s', $this->path, $basename);
         if (!$basename) {
             $this->errors[] = t('The file name can\'t be empty or contain invalid characters.');
         }
@@ -161,7 +160,7 @@ class Storage extends EntryHandler
                 $suffix = 1;
                 while (is_file($filepath)) {
                     $suffix++;
-                    $filepath = sprintf('%s%s-%d.%s', $this->path, $filename, $suffix, $extension);
+                    $filepath = sprintf('%s/%s-%d.%s', $this->path, $filename, $suffix, $extension);
                 }
             }
         }

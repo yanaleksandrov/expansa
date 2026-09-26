@@ -151,6 +151,8 @@ class Translator extends Locale
      *   - If the placeholder starts with uppercase → result is capitalized (title case).
      * - `:placeholder\suffix` — attaches a suffix (e.g. `:count\st` → `1st`).
      * - `%s`, `%d` — traditional PHP-style placeholders are fully supported.
+     * - Values of `:name` placeholders are HTML-escaped, so user data is safe there;
+     *   `%s` values are inserted as is, for markup around the text like `<a href="...">` and `</a>`.
      *
      * ### Missing Values:
      * - If not enough arguments are provided, unused placeholders (`:name`, `::NAME`, `%s`, `%d`, etc.)
@@ -207,15 +209,14 @@ class Translator extends Locale
                     $value = array_shift($args);
 
                     if ($matches[1] === '::') {
-                        $replacement = match (true) {
+                        $value = match (true) {
                             mb_strtolower($placeholder) === $placeholder => mb_strtolower($value),
                             mb_strtoupper($placeholder) === $placeholder => mb_strtoupper($value),
                             default => mb_convert_case($value, MB_CASE_TITLE, 'UTF-8'),
                         };
-                        return $replacement . $suffix;
                     }
 
-                    return $value . $suffix;
+                    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8') . $suffix;
                 },
                 $string
             );
@@ -233,7 +234,7 @@ class Translator extends Locale
      */
     public function t_attr(string $string, mixed ...$args): void
     {
-        echo Safe::attribute(self::_t($string, ...$args));
+        echo Safe::attribute(html_entity_decode(self::_t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     /**
@@ -245,7 +246,7 @@ class Translator extends Locale
      */
     public function _t_attr(string $string, mixed ...$args): string
     {
-        return Safe::attribute(self::_t($string, ...$args));
+        return Safe::attribute(html_entity_decode(self::_t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     /**
@@ -297,7 +298,7 @@ class Translator extends Locale
      */
     public function _c_attr(bool $condition, string $ifString, string $elseString = ''): string
     {
-        return Safe::attribute(self::_c($condition, $ifString, $elseString));
+        return Safe::attribute(html_entity_decode(self::_c($condition, $ifString, $elseString), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
     }
 
     /**
