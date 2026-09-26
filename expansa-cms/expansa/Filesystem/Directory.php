@@ -4,242 +4,228 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem;
 
+use FilesystemIterator;
+use SplFileInfo;
 use ZipArchive;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
-use Expansa\Filesystem\Contracts\CommonInterface;
-use Expansa\Filesystem\Contracts\DirectoryInterface;
+use Expansa\Filesystem\Contracts\Directory as DirectoryContract;
+use Expansa\Filesystem\Exceptions\FilesystemException;
 
 /**
- * Class Directory.
+ * A directory: listing, copying, moving and deleting it with its contents.
+ * Failed operations throw FilesystemException.
  *
- * A class that represents a directory on a file system.
+ * @package Expansa\Filesystem
  */
-class Directory extends EntryHandler implements CommonInterface, DirectoryInterface
+final class Directory extends AbstractEntry implements DirectoryContract
 {
-    public function read(int $depth = 0, bool $treeFormat = false): array
-    {
-        if ($treeFormat) {
-            $search = function (string $path) use (&$search): array {
-                $path  = rtrim($path, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-                $items = glob($path . '*', GLOB_NOSORT);
+    public bool $exists {
+        get => is_dir($this->path);
+    }
 
-                $tree = [];
-                foreach ($items as $item) {
-                    if (is_dir($item)) {
-                        $tree[basename($item)] = $search($item);
-                    }
-                }
-                return $tree;
-            };
-
-            $findFolders = $search($this->path);
-
-            ksort($findFolders);
-
-            return [ basename($this->path) => $findFolders ];
-        }
-
-        $search = function (string $path, int $current_depth) use (&$search, $depth) {
-            $flags   = GLOB_ONLYDIR | GLOB_NOSORT | GLOB_ERR;
-            $folders = glob($this->normalizePath($path . '/*'), $flags);
-
-            if ($current_depth < $depth) {
-                $subfolders = glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT);
-
-                foreach ($subfolders as $folder) {
-                    $folders = array_merge($folders, $search($folder, $current_depth + 1));
-                }
+    public int $bytes {
+        get {
+            $bytes = 0;
+            foreach ($this->iterate() as $item) {
+                $bytes += $item->isFile() ? $item->getSize() : 0;
             }
 
-            return $folders;
-        };
+            return $bytes;
+        }
+    }
 
-        $folders = $search($this->path, 0);
+    public function directories(int $depth = 0): array
+    {
+        $folders = $this->glob($this->path, '*', GLOB_ONLYDIR, $depth);
 
         sort($folders);
 
         return $folders;
     }
 
-    /**
-     * Total size of the files inside, in bytes.
-     */
-    protected function getSize(): int
+    public function tree(): array
     {
-        $size = 0;
-        foreach ($this->files('*', 9999) as $file) {
-            $size += (int) filesize($file);
-        }
+        $search = function (string $path) use (&$search): array {
+            $tree = [];
+            foreach (glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT) ?: [] as $item) {
+                $tree[basename($item)] = $search($item);
+            }
+            ksort($tree);
 
-        return $size;
+            return $tree;
+        };
+
+        return [$this->basename => $search($this->path)];
     }
 
     public function files(string $pattern = '*', int $depth = 0): array
     {
-        $search = function ($path, int $current_depth) use (&$search, $pattern, $depth) {
-            $flags = GLOB_BRACE | GLOB_NOSORT | GLOB_MARK | GLOB_ERR;
-            $files = glob($this->normalizePath($path . '/' . $pattern), $flags);
-
-            if ($current_depth < $depth) {
-                $folders = glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT);
-
-                foreach ($folders as $folder) {
-                    $files = array_merge($files, $search($folder, $current_depth + 1));
-                }
-            }
-
-            return $files ?: [];
-        };
-
-        $files = $search($this->path, 0);
+        $files = $this->glob($this->path, $pattern, GLOB_BRACE | GLOB_MARK, $depth);
 
         sort($files);
 
         return $files;
     }
 
-    public function make(int $mode = 0755): Directory
+    public function create(int $mode = 0755): static
     {
-        if (! is_dir($this->path)) {
-            mkdir($this->path, $mode, true);
+        if (! is_dir($this->path) && ! @mkdir($this->path, $mode, true) && ! is_dir($this->path)) {
+            throw new FilesystemException("Failed to create the directory $this->path");
         }
+
         return $this;
     }
 
-    public function chmod(int $mode = 0755, bool $recursive = false): Directory
+    public function chmod(int $mode = 0755, bool $recursive = false): static
     {
-        chmod($this->path, $mode);
-
+        $paths = [$this->path => $mode];
         if ($recursive) {
-            $files = new RecursiveIteratorIterator(
-                new RecursiveDirectoryIterator($this->path),
-                RecursiveIteratorIterator::SELF_FIRST
-            );
+            foreach ($this->iterate(RecursiveIteratorIterator::SELF_FIRST) as $item) {
+                $paths[$item->getPathname()] = $item->isDir() ? $mode : 0644;
+            }
+        }
 
-            foreach ($files as $file) {
-                if ($file->isDir()) {
-                    chmod($file->getRealPath(), $mode);
-                } else {
-                    chmod($file->getRealPath(), 0644);
-                }
+        foreach ($paths as $path => $pathMode) {
+            if (! @chmod($path, $pathMode)) {
+                throw new FilesystemException("Failed to change the permissions of $path");
             }
         }
 
         return $this;
     }
 
-    public function clean(string $path = ''): Directory
+    public function clean(): static
     {
-        $path = $path ?: $this->path;
-        if (is_dir($path)) {
-            $paths = glob($path . '/*');
-
-            foreach ($paths as $path) {
-                if (is_file($path)) {
-                    unlink($path);
-                }
-                if (is_dir($path)) {
-                    $this->clean($path);
-                    rmdir($path);
-                }
-            }
-        }
-        return $this;
-    }
-
-    public function copy(string $name): Directory
-    {
-        if (!is_dir($this->path)) {
-            return $this;
-        }
-
-        $to = $this->dirpath . DIRECTORY_SEPARATOR . $name;
-        if (!is_dir($to)) {
-            mkdir($to, 0755, true);
-        }
-
-        foreach (scandir($this->path) as $item) {
-            if ($item === '.' || $item === '..') {
-                continue;
-            }
-
-            $fromPath = $this->path . DIRECTORY_SEPARATOR . $item;
-            $toPath   = $to . DIRECTORY_SEPARATOR . $item;
-
-            if (is_dir($fromPath)) {
-                new self($fromPath)->copy($toPath);
-            } else {
-                copy($fromPath, $toPath);
+        foreach ($this->iterate(RecursiveIteratorIterator::CHILD_FIRST) as $item) {
+            $path    = $item->getPathname();
+            $deleted = $item->isDir() && ! $item->isLink() ? @rmdir($path) : @unlink($path);
+            if (! $deleted) {
+                throw new FilesystemException("Failed to delete $path");
             }
         }
 
         return $this;
+    }
+
+    public function copy(string $name): static
+    {
+        $to = $this->dirpath . '/' . $name;
+        if (file_exists($to)) {
+            throw new FilesystemException("Directory $to already exists");
+        }
+
+        new self($to)->create();
+
+        $offset = strlen($this->path);
+        foreach ($this->iterate(RecursiveIteratorIterator::SELF_FIRST) as $item) {
+            $target = $to . substr($item->getPathname(), $offset);
+            $copied = $item->isDir() ? @mkdir($target, 0755) : @copy($item->getPathname(), $target);
+            if (! $copied) {
+                throw new FilesystemException("Failed to copy {$item->getPathname()} to $target");
+            }
+        }
+
+        return new self($to);
     }
 
     public function delete(): bool
     {
-        $this->clean();
-        if (rmdir($this->path)) {
-            return true;
+        if (! $this->exists) {
+            return false;
         }
-        return false;
+
+        try {
+            $this->clean();
+        } catch (FilesystemException) {
+            return false;
+        }
+
+        return @rmdir($this->path);
     }
 
     public function download(): void
     {
-        if (class_exists('ZipArchive')) {
-            $zipFilepath = sprintf('%s.zip', $this->path);
+        if (! $this->exists || ! class_exists(ZipArchive::class)) {
+            return;
+        }
 
-            $zip = new ZipArchive();
-            if ($zip->open($zipFilepath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-                $files = new RecursiveIteratorIterator(
-                    new RecursiveDirectoryIterator($this->path),
-                    RecursiveIteratorIterator::LEAVES_ONLY
-                );
+        $archive = $this->path . '.zip';
+        $zip     = new ZipArchive();
+        if ($zip->open($archive, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
+            return;
+        }
 
-                foreach ($files as $file) {
-                    if ($file->isDir()) {
-                        continue;
-                    }
-
-                    $filepath     = $file->getRealPath();
-                    $relativePath = substr($filepath, strlen($this->path) + 1);
-
-                    $zip->addFile($filepath, $relativePath);
-                }
-
-                $zip->close();
-            }
-
-            if (file_exists($zipFilepath)) {
-                header('Content-Type: application/zip');
-                header('Content-Disposition: attachment; filename="' . basename($zipFilepath) . '"');
-                header('Content-Length: ' . filesize($zipFilepath));
-
-                readfile($zipFilepath);
-
-                // remove archive after download
-                unlink($zipFilepath);
-                exit;
+        $offset = strlen($this->path) + 1;
+        foreach ($this->iterate() as $item) {
+            if ($item->isFile()) {
+                $zip->addFile($item->getPathname(), substr($item->getPathname(), $offset));
             }
         }
+        $zip->close();
+
+        header('Content-Type: application/zip');
+        header('Content-Disposition: attachment; filename="' . basename($archive) . '"');
+        header('Content-Length: ' . filesize($archive));
+
+        readfile($archive);
+        unlink($archive);
+        exit;
     }
 
-    public function move(string $to): Directory
+    public function move(string $directory): static
     {
-        // TODO: Implement move() method.
-        return $this;
+        $directory = rtrim($directory, '/\\');
+        if (! is_dir($directory) && ! @mkdir($directory, 0755, true)) {
+            throw new FilesystemException("Failed to create the directory $directory");
+        }
+
+        return $this->relocate($directory . '/' . $this->basename);
     }
 
-    public function rename(string $name): Directory
+    public function rename(string $name): static
     {
-        if (is_dir($this->path)) {
-            $dirpath = sprintf('%s%s%s', dirname($this->path), DIRECTORY_SEPARATOR, $name);
-            if (! is_dir($dirpath) && rename($this->path, $dirpath)) {
-                $this->path = $dirpath;
+        return $this->relocate($this->dirpath . '/' . $name);
+    }
+
+
+    /**
+     * Iterate over the contents recursively, an empty list for a missing directory.
+     *
+     * @param int $mode RecursiveIteratorIterator mode.
+     * @return iterable<SplFileInfo>
+     */
+    private function iterate(int $mode = RecursiveIteratorIterator::LEAVES_ONLY): iterable
+    {
+        if (! $this->exists) {
+            return [];
+        }
+
+        return new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($this->path, FilesystemIterator::SKIP_DOTS),
+            $mode
+        );
+    }
+
+    /**
+     * Glob a directory and its subdirectories down to a depth.
+     *
+     * @param string $path
+     * @param string $pattern
+     * @param int    $flags
+     * @param int    $depth
+     * @return string[]
+     */
+    private function glob(string $path, string $pattern, int $flags, int $depth): array
+    {
+        $found = glob($path . '/' . $pattern, $flags | GLOB_NOSORT) ?: [];
+
+        if ($depth > 0) {
+            foreach (glob($path . '/*', GLOB_ONLYDIR | GLOB_NOSORT) ?: [] as $folder) {
+                array_push($found, ...$this->glob($folder, $pattern, $flags, $depth - 1));
             }
         }
-        return $this;
+
+        return $found;
     }
 }
