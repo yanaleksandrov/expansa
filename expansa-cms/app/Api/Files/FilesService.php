@@ -7,7 +7,8 @@ namespace App\Api\Files;
 use Expansa\Facades\Csv;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Safe;
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
+use Expansa\Filesystem\Exceptions\UploadRejected;
 
 /**
  * Handles the CSV file upload step of the posts importer (dashboard/forms/posts-import.php,
@@ -62,7 +63,7 @@ final class FilesService
         foreach ($files as $file) {
             try {
                 $filepath = Disk::upload($file, EX_STORAGE . 'i/')->path;
-            } catch (FilesystemException) {
+            } catch (UploadRejected | OperationFailed) {
                 continue;
             }
 

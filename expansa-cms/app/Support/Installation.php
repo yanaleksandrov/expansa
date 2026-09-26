@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use Expansa\Facades\Disk;
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
 use Expansa\Http\Exceptions\ValidationException;
 
 /**
@@ -32,7 +32,7 @@ final class Installation
 
         try {
             Disk::file($root . 'env.example.php')->copy('env.install')->replace($values);
-        } catch (FilesystemException) {
+        } catch (OperationFailed) {
             throw new ValidationException(t('Unable to write the environment configuration file.'));
         }
 

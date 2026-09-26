@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem\Contracts;
 
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
 
 interface File extends Entry
 {
@@ -13,7 +13,7 @@ interface File extends Entry
      *
      * @param int $mode
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function chmod(int $mode = 0644): static;
 
@@ -22,7 +22,7 @@ interface File extends Entry
      *
      * @param array<string, string> $pairs
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function replace(array $pairs): static;
 
@@ -32,7 +32,7 @@ interface File extends Entry
      * @param string $content
      * @param bool   $append False to overwrite the file.
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function write(string $content, bool $append = true): static;
 
@@ -49,7 +49,7 @@ interface File extends Entry
      * @param int|null $time  Modification time, now by default.
      * @param int|null $atime Access time, the modification time by default.
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function touch(?int $time = null, ?int $atime = null): static;
 }

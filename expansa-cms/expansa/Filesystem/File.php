@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem;
 
+use InvalidArgumentException;
 use Expansa\Filesystem\Contracts\File as FileContract;
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
 use Expansa\Filesystem\Internal\Name;
 
 /**
  * A file: reading, writing, copying, moving and sending it to the browser.
- * Failed operations throw FilesystemException.
+ * Failed operations throw OperationFailed.
  *
  * @package Expansa\Filesystem
  */
@@ -41,7 +42,7 @@ final class File extends AbstractEntry implements FileContract
     public function chmod(int $mode = 0644): static
     {
         if (! @chmod($this->path, $mode)) {
-            throw new FilesystemException("Failed to change the permissions of $this->path");
+            throw new OperationFailed("Failed to change the permissions of $this->path");
         }
 
         return $this;
@@ -56,11 +57,11 @@ final class File extends AbstractEntry implements FileContract
     {
         $path = $this->dirpath . '/' . $this->basenameOf($name);
         if (file_exists($path)) {
-            throw new FilesystemException("File $path already exists");
+            throw new OperationFailed("File $path already exists");
         }
 
         if (! @copy($this->path, $path)) {
-            throw new FilesystemException("Failed to copy $this->path to $path");
+            throw new OperationFailed("Failed to copy $this->path to $path");
         }
 
         return new self($path);
@@ -97,7 +98,7 @@ final class File extends AbstractEntry implements FileContract
     {
         $directory = rtrim($directory, '/\\');
         if (! is_dir($directory) && ! @mkdir($directory, 0755, true)) {
-            throw new FilesystemException("Failed to create the directory $directory");
+            throw new OperationFailed("Failed to create the directory $directory");
         }
 
         return $this->relocate(Name::unique($directory, $this->basename));
@@ -112,7 +113,7 @@ final class File extends AbstractEntry implements FileContract
     {
         $name = Name::sanitize($name);
         if ($name === '') {
-            throw new FilesystemException('The file name is empty or contains only invalid characters');
+            throw new InvalidArgumentException('The file name is empty or contains only invalid characters');
         }
 
         return $this->relocate(Name::unique($this->dirpath, $this->basenameOf($name)));
@@ -128,7 +129,7 @@ final class File extends AbstractEntry implements FileContract
         $time ??= time();
 
         if (! @touch($this->path, $time, $atime ?? $time)) {
-            throw new FilesystemException("Failed to update the timestamps of $this->path");
+            throw new OperationFailed("Failed to update the timestamps of $this->path");
         }
         clearstatcache(true, $this->path);
 
@@ -139,11 +140,11 @@ final class File extends AbstractEntry implements FileContract
     {
         $directory = $this->dirpath;
         if (! is_dir($directory) && ! @mkdir($directory, 0755, true)) {
-            throw new FilesystemException("Failed to create the directory $directory");
+            throw new OperationFailed("Failed to create the directory $directory");
         }
 
         if (@file_put_contents($this->path, $content, $append ? FILE_APPEND : 0) === false) {
-            throw new FilesystemException("Unable to write to the file $this->path");
+            throw new OperationFailed("Unable to write to the file $this->path");
         }
         clearstatcache(true, $this->path);
 

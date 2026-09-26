@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Filesystem;
 
 use Expansa\Filesystem\Contracts\Entry;
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
 use Expansa\Support\Url;
 
 /**
@@ -122,12 +122,12 @@ abstract class AbstractEntry implements Entry
      *
      * @param string $path Must be free.
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     protected function relocate(string $path): static
     {
         if (file_exists($path) || ! @rename($this->path, $path)) {
-            throw new FilesystemException("Failed to move $this->path to $path");
+            throw new OperationFailed("Failed to move $this->path to $path");
         }
         $this->path = $path;
 

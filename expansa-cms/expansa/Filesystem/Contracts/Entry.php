@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem\Contracts;
 
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
 
 /**
  * A file or a directory addressed by its path.
@@ -32,7 +32,7 @@ interface Entry
      * Delete the contents, the entry itself stays.
      *
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function clean(): static;
 
@@ -41,7 +41,7 @@ interface Entry
      *
      * @param string $name New name, a file keeps its extension.
      * @return static The copy.
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function copy(string $name): static;
 
@@ -50,7 +50,7 @@ interface Entry
      *
      * @param string $directory
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function move(string $directory): static;
 
@@ -59,7 +59,7 @@ interface Entry
      *
      * @param string $name New name, a file keeps its extension.
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function rename(string $name): static;
 

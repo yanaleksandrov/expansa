@@ -1,7 +1,7 @@
 # Введение
 
 Работа с локальной файловой системой: файлы, каталоги и загрузки. Пакет находится в `Expansa\Filesystem`,
-доступ к нему — через фасад `Disk`. Неудачные операции бросают `FilesystemException`.
+доступ к нему — через фасад `Disk`. Неудачные операции бросают `OperationFailed`, отклонённые загрузки — `UploadRejected`.
 
 ```php
 use Expansa\Facades\Disk;
@@ -19,7 +19,8 @@ $image = Disk::upload($_FILES['image'], EX_STORAGE . 'i/original');
 | `AbstractEntry`                        | Общее для файла и каталога: части пути и метаданные             |
 | `MimeType`                             | Разрешённые для загрузки расширения и их MIME-типы               |
 | `Contracts\Entry`, `File`, `Directory` | Контракты файла и каталога                                      |
-| `Exceptions\FilesystemException`       | Операция или загрузка не удалась                                |
+| `Exceptions\OperationFailed`           | Операция с диском не удалась: запись, копирование, скачивание   |
+| `Exceptions\UploadRejected`            | Загрузка отклонена: ошибка PHP, пустой, большой, тип, URL       |
 
 ## Использование
 
@@ -88,12 +89,13 @@ $dir->download();                      // zip-архив, нужен ZipArchive
 для имени. Остальные правила (MIME-тип, размеры изображения, квоты) проверяет вызывающий код до вызова.
 
 ```php
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
+use Expansa\Filesystem\Exceptions\UploadRejected;
 
 try {
     $file = Disk::upload($_FILES['file'], EX_STORAGE . 'i/');
     $logo = Disk::grab('https://example.com/logo.png', EX_STORAGE . 'i/');
-} catch (FilesystemException $e) {
+} catch (UploadRejected | OperationFailed $e) {
     return ['error' => t($e->getMessage())];
 }
 

@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem;
 
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
+use Expansa\Filesystem\Exceptions\UploadRejected;
 use Expansa\Filesystem\Internal\Name;
 
 /**
@@ -45,32 +46,33 @@ final class Disk
      * @param array  $file      Item of $_FILES: `name`, `tmp_name`, `error`, `size`.
      * @param string $directory Created if it does not exist.
      * @return File
-     * @throws FilesystemException If the upload failed or the file is empty, too big or of a not allowed type.
+     * @throws UploadRejected If PHP rejected the upload or the file is empty, too big or of a not allowed type.
+     * @throws OperationFailed If the file can not be moved.
      */
     public function upload(array $file, string $directory): File
     {
         $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
         if ($error !== UPLOAD_ERR_OK) {
-            throw new FilesystemException(self::UPLOAD_ERRORS[$error] ?? 'The upload failed.');
+            throw new UploadRejected(self::UPLOAD_ERRORS[$error] ?? 'The upload failed.');
         }
 
         $tmp  = (string) ($file['tmp_name'] ?? '');
         $size = (int) ($file['size'] ?? 0);
         if (! is_uploaded_file($tmp)) {
-            throw new FilesystemException('No file was uploaded.');
+            throw new UploadRejected('No file was uploaded.');
         }
 
         if ($size <= 0) {
-            throw new FilesystemException('File is empty. Please upload something more substantial.');
+            throw new UploadRejected('File is empty. Please upload something more substantial.');
         }
 
         if ($size > $this->getMaxUploadSize()) {
-            throw new FilesystemException('The uploaded file exceeds the upload_max_filesize directive.');
+            throw new UploadRejected('The uploaded file exceeds the upload_max_filesize directive.');
         }
 
         $path = Name::unique($this->prepare($directory), $this->basename((string) ($file['name'] ?? '')));
         if (! move_uploaded_file($tmp, $path)) {
-            throw new FilesystemException('Something went wrong. The upload failed.');
+            throw new OperationFailed('Something went wrong. The upload failed.');
         }
 
         return new File($path);
@@ -82,19 +84,20 @@ final class Disk
      * @param string $url       HTTP or HTTPS URL.
      * @param string $directory Created if it does not exist.
      * @return File
-     * @throws FilesystemException If the URL is invalid, the type is not allowed or the download failed.
+     * @throws UploadRejected If the URL is invalid or the type is not allowed.
+     * @throws OperationFailed If the download failed.
      */
     public function grab(string $url, string $directory): File
     {
         $url = trim($url);
         if (! filter_var($url, FILTER_VALIDATE_URL) || ! preg_match('#^https?://#i', $url)) {
-            throw new FilesystemException('File URL is not valid.');
+            throw new UploadRejected('File URL is not valid.');
         }
 
         $path   = Name::unique($this->prepare($directory), $this->basename(basename((string) parse_url($url, PHP_URL_PATH))));
         $stream = @fopen($path, 'wb');
         if ($stream === false) {
-            throw new FilesystemException("Unable to write to the file $path");
+            throw new OperationFailed("Unable to write to the file $path");
         }
 
         $curl = curl_init($url);
@@ -112,7 +115,7 @@ final class Disk
 
         if ($done === false) {
             unlink($path);
-            throw new FilesystemException("Failed to download $url: $error");
+            throw new OperationFailed("Failed to download $url: $error");
         }
 
         return new File($path);
@@ -133,14 +136,14 @@ final class Disk
      *
      * @param string $name
      * @return string
-     * @throws FilesystemException
+     * @throws UploadRejected
      */
     private function basename(string $name): string
     {
         $extension = strtolower(pathinfo($name, PATHINFO_EXTENSION));
         $allowed   = str_replace('|', ',', implode(',', array_keys(new MimeType()->typesList)));
         if ($extension === '' || ! in_array($extension, explode(',', $allowed), true)) {
-            throw new FilesystemException('Sorry, you are not allowed to upload this file type.');
+            throw new UploadRejected('Sorry, you are not allowed to upload this file type.');
         }
 
         return (Name::sanitize(pathinfo($name, PATHINFO_FILENAME)) ?: 'file') . '.' . $extension;
@@ -151,7 +154,7 @@ final class Disk
      *
      * @param string $directory
      * @return string The directory without the trailing slash.
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     private function prepare(string $directory): string
     {

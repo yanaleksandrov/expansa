@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 use Expansa\Filesystem\Directory;
 use Expansa\Filesystem\Disk;
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
+use Expansa\Filesystem\Exceptions\UploadRejected;
 use Expansa\Filesystem\File;
 
 // run: php tests/Filesystem.php
@@ -28,7 +29,7 @@ check('write(append: false) overwrites and replace() swaps substrings', $file->r
 
 $copy = $file->copy('copy');
 check('copy() returns the copy next to the file', $copy instanceof File && $copy->path === "$root/a/copy.txt" && $copy->read() === 'shop');
-check('copy() over an existing file throws', throws(fn () => $file->copy('copy'), FilesystemException::class));
+check('copy() over an existing file throws', throws(fn () => $file->copy('copy'), OperationFailed::class));
 
 $copy->rename('Ünïcode Name');
 check('rename() sanitizes the name and keeps the extension', $copy->basename === 'unicode-name.txt' && is_file("$root/a/unicode-name.txt"));
@@ -60,9 +61,9 @@ check('clean() empties a directory and keeps it', $dir->exists && $dir->files() 
 check('delete() removes a directory with its contents', $dirCopy->delete() && ! is_dir("$root/e"));
 check('delete() of a missing entry is false', ! $disk->file("$root/none.txt")->delete() && ! $disk->dir("$root/none")->delete());
 
-check('upload() rejects a failed upload', throws(fn () => $disk->upload(['error' => UPLOAD_ERR_PARTIAL], $root), FilesystemException::class));
-check('upload() rejects a file that was not uploaded', throws(fn () => $disk->upload(['name' => 'a.txt', 'tmp_name' => "$root/a/note.txt", 'error' => 0, 'size' => 1], $root), FilesystemException::class));
-check('grab() rejects a not HTTP URL', throws(fn () => $disk->grab('file:///etc/passwd', $root), FilesystemException::class));
+check('upload() rejects a failed upload', throws(fn () => $disk->upload(['error' => UPLOAD_ERR_PARTIAL], $root), UploadRejected::class));
+check('upload() rejects a file that was not uploaded', throws(fn () => $disk->upload(['name' => 'a.txt', 'tmp_name' => "$root/a/note.txt", 'error' => 0, 'size' => 1], $root), UploadRejected::class));
+check('grab() rejects a not HTTP URL', throws(fn () => $disk->grab('file:///etc/passwd', $root), UploadRejected::class));
 
 $disk->dir($root)->delete();
 check('the scratch directory is removed', ! is_dir($root));

@@ -10,11 +10,11 @@ use ZipArchive;
 use RecursiveIteratorIterator;
 use RecursiveDirectoryIterator;
 use Expansa\Filesystem\Contracts\Directory as DirectoryContract;
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
 
 /**
  * A directory: listing, copying, moving and deleting it with its contents.
- * Failed operations throw FilesystemException.
+ * Failed operations throw OperationFailed.
  *
  * @package Expansa\Filesystem
  */
@@ -71,7 +71,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
     public function create(int $mode = 0755): static
     {
         if (! is_dir($this->path) && ! @mkdir($this->path, $mode, true) && ! is_dir($this->path)) {
-            throw new FilesystemException("Failed to create the directory $this->path");
+            throw new OperationFailed("Failed to create the directory $this->path");
         }
 
         return $this;
@@ -88,7 +88,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
 
         foreach ($paths as $path => $pathMode) {
             if (! @chmod($path, $pathMode)) {
-                throw new FilesystemException("Failed to change the permissions of $path");
+                throw new OperationFailed("Failed to change the permissions of $path");
             }
         }
 
@@ -101,7 +101,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
             $path    = $item->getPathname();
             $deleted = $item->isDir() && ! $item->isLink() ? @rmdir($path) : @unlink($path);
             if (! $deleted) {
-                throw new FilesystemException("Failed to delete $path");
+                throw new OperationFailed("Failed to delete $path");
             }
         }
 
@@ -112,7 +112,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
     {
         $to = $this->dirpath . '/' . $name;
         if (file_exists($to)) {
-            throw new FilesystemException("Directory $to already exists");
+            throw new OperationFailed("Directory $to already exists");
         }
 
         new self($to)->create();
@@ -122,7 +122,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
             $target = $to . substr($item->getPathname(), $offset);
             $copied = $item->isDir() ? @mkdir($target, 0755) : @copy($item->getPathname(), $target);
             if (! $copied) {
-                throw new FilesystemException("Failed to copy {$item->getPathname()} to $target");
+                throw new OperationFailed("Failed to copy {$item->getPathname()} to $target");
             }
         }
 
@@ -137,7 +137,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
 
         try {
             $this->clean();
-        } catch (FilesystemException) {
+        } catch (OperationFailed) {
             return false;
         }
 
@@ -177,7 +177,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
     {
         $directory = rtrim($directory, '/\\');
         if (! is_dir($directory) && ! @mkdir($directory, 0755, true)) {
-            throw new FilesystemException("Failed to create the directory $directory");
+            throw new OperationFailed("Failed to create the directory $directory");
         }
 
         return $this->relocate($directory . '/' . $this->basename);

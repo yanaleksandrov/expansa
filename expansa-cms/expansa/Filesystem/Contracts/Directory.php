@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem\Contracts;
 
-use Expansa\Filesystem\Exceptions\FilesystemException;
+use Expansa\Filesystem\Exceptions\OperationFailed;
 
 interface Directory extends Entry
 {
@@ -14,7 +14,7 @@ interface Directory extends Entry
      * @param int  $mode      Mode of the directories, files inside get 0644.
      * @param bool $recursive
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function chmod(int $mode = 0755, bool $recursive = false): static;
 
@@ -47,7 +47,7 @@ interface Directory extends Entry
      *
      * @param int $mode
      * @return static
-     * @throws FilesystemException
+     * @throws OperationFailed
      */
     public function create(int $mode = 0755): static;
 }
