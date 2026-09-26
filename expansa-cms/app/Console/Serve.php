@@ -11,16 +11,14 @@ use Expansa\Console\Command;
  */
 final class Serve extends Command
 {
-    protected string $name = 'serve';
+    public string $name = 'serve';
 
-    protected string $description = 'Run the site on the PHP built-in web server.';
-
-    protected string $signature = 'serve [--host=<host>] [--port=<port>]';
+    public string $signature = 'serve [--host=<host>] [--port=<port>]';
 
     public function handle(): void
     {
-        $host = (string) ($this->getConsole()->option('host') ?: '127.0.0.1');
-        $port = (int) ($this->getConsole()->option('port') ?: 8000);
+        $host = (string) ($this->console->option('host') ?: '127.0.0.1');
+        $port = (int) ($this->console->option('port') ?: 8000);
 
         $this->info(t('Expansa is running on [green]#http://%s:%d#, press Ctrl+C to stop.', $host, $port));
 

@@ -14,11 +14,9 @@ use Expansa\Scheduler\Scheduler;
  */
 class ScheduleRun extends Command
 {
-    protected string $name = 'schedule:run';
+    public string $name = 'schedule:run';
 
-    protected string $description = 'Run the scheduled jobs that are due now.';
-
-    protected string $signature = 'schedule:run';
+    public string $signature = 'schedule:run';
 
     public function handle(): void
     {

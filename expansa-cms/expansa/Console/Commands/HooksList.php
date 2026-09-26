@@ -13,15 +13,13 @@ use Expansa\Facades\Hook;
  */
 class HooksList extends Command
 {
-    protected string $name = 'hooks:list';
+    public string $name = 'hooks:list';
 
-    protected string $description = 'List every registered hook, its listeners, their priority and where they were added.';
-
-    protected string $signature = 'hooks:list [<name>]';
+    public string $signature = 'hooks:list [<name>]';
 
     public function handle(): void
     {
-        $name  = $this->getConsole()->argument(0);
+        $name  = $this->console->argument(0);
         $hooks = $name !== null ? [$name => Hook::get($name)] : Hook::get();
 
         $rows = [];

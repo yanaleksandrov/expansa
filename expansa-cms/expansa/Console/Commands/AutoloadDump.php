@@ -10,20 +10,25 @@ use Expansa\Support\ClassMap;
 /**
  * Writes the class map of autoload.php, so classes load without file checks. Run it after deploying or updating
  * the code: a class moved or deleted since the dump fails to load until the next dump, a new one loads without it.
+ *
+ * @package Expansa\Console
  */
-class AutoloadDump extends Command
+final class AutoloadDump extends Command
 {
-    protected string $name = 'autoload:dump';
+    public string $name = 'autoload:dump';
 
-    protected string $description = 'Write the class map of the autoloader, or remove it with --clear.';
+    public string $signature = 'autoload:dump [--clear]';
 
-    protected string $signature = 'autoload:dump [--clear]';
+    public function getDescription(): string
+    {
+        return t('Write the class map of the autoloader, or remove it with --clear.');
+    }
 
     public function handle(): void
     {
         $file = EX_PATH . 'cache/classmap.php';
 
-        if ($this->getConsole()->option('clear')) {
+        if ($this->console->option('clear')) {
             if (is_file($file)) {
                 unlink($file);
             }
@@ -37,10 +42,5 @@ class AutoloadDump extends Command
         ClassMap::dump($file, $classes);
 
         $this->info(t('The class map of %d classes is written to cache/classmap.php.', count($classes)));
-    }
-
-    public function getDescription(): string
-    {
-        return t('Write the class map of the autoloader, or remove it with --clear.');
     }
 }
