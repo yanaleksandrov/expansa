@@ -163,7 +163,9 @@ Lifecycle::phase('configure', true, function () {
     ]);
 
     // the version shown by the "list" console command
-    Terminal::configure(version: EX_VERSION);
+    Terminal::configure(
+        version: EX_VERSION
+    );
 
     // every email passes its PHPMailer through the "mailer" filter: SMTP settings, a test double
     Mail::configure(

@@ -60,8 +60,10 @@ final class Finder
      * @param string|string[] $paths      Directories of views without a namespace.
      * @param string[]        $extensions Template extensions, a view with several of them gets the first one.
      */
-    public function __construct(string|array $paths = [], private array $extensions = [])
-    {
+    public function __construct(
+        string|array $paths = [],
+        private array $extensions = []
+    ) {
         $this->paths = array_map($this->resolvePath(...), (array) $paths);
     }
 
@@ -105,8 +107,9 @@ final class Finder
      */
     public function addPath(string $path, string $prefix = '', string $namespace = ''): static
     {
-        $path        = $this->resolvePath($path);
-        $this->paths   = [...$this->paths, $path];
+        $path = $this->resolvePath($path);
+
+        $this->paths = [...$this->paths, $path];
 
         $this->scanPath($path, $prefix, $namespace);
 

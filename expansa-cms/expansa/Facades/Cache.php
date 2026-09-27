@@ -6,6 +6,7 @@ namespace Expansa\Facades;
 
 use Closure;
 use DateTime;
+use Expansa\Cache\Manager;
 use Expansa\Cache\Contracts\Provider;
 use Expansa\Patterns\Facade;
 
@@ -13,9 +14,9 @@ use Expansa\Patterns\Facade;
  * Cache stores; provider methods work with the default store, see Expansa\Cache\Manager.
  *
  * @method static void     configure(array $stores, string $default = '')
- * @method static \Expansa\Cache\Manager extend(string $driver, Closure $factory)
+ * @method static Manager  extend(string $driver, Closure $factory)
  * @method static Provider store(?string $name = null)
- * @method static \Expansa\Cache\Manager forgetStore(?string $name = null)
+ * @method static Manager  forgetStore(?string $name = null)
  * @method static bool     add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null)
  * @method static bool     set(string $key, mixed $value, string $group = 'default')
  * @method static mixed    get(string $key, string $group = 'default', ?callable $callback = null)
