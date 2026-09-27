@@ -106,7 +106,7 @@ Asset::discover('/absolute/path/to/index.blade.php');
 $content = view($page ?? 'index', [...]);
 
 // index.css / index.js рядом с index.blade.php подключатся сами, если существуют
-Asset::discover($content->getPath());
+Asset::discover($content->path);
 
 $content = $content->beautify()->render();
 ```
@@ -221,23 +221,19 @@ if (in_array($type, ['color', 'date', /* ... */], true)) {
 // $inputType используется и как uid, и как контекст: без этого color-поле и date-поле
 // на одной странице столкнулись бы на одном uid "input" от общего шаблона, и второе
 // поле по рендеру молча осталось бы без своего скрипта (enqueue дедуплицирует по id).
-$content .= Form::view("form/{$prefix}{$type}", $field, $inputType);
+Form::assets("form/{$prefix}{$type}", $inputType);
+
+$content .= Form::view("form/{$prefix}{$type}", $field);
 ```
 
-Сам `Builders` не вызывает фасады `View` и `Asset`: шаблон рендерит колбэк `view` из
-`Form::configure()` в `bootstrap.php`, он же вызывает `discover()`:
+Сам `Builders` не вызывает фасады `View` и `Asset`: шаблон рендерит колбэк `view`, а `discover()`
+вызывает колбэк `assets` из `Form::configure()` в `bootstrap.php`:
 
 ```php
 Form::configure(
     fields: [/* ... */],
-    view: function (string $template, array $data, ?string $assets): string {
-        $view = View::make($template, $data);
-        if ($assets !== null) {
-            Asset::discover($view->getPath(), $assets, ['type' => $assets]);
-        }
-
-        return (string) $view;
-    },
+    view: fn (string $template, array $data) => (string) View::create($template, $data),
+    assets: fn (string $template, string $uid) => Asset::discover(View::create($template)->path, $uid, ['type' => $uid]),
 );
 ```
 

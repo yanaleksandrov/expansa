@@ -3,9 +3,10 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Safe;
-use Expansa\Security\Csrf\Contracts\SessionProvider;
-use Expansa\Security\Csrf\Csrf;
-use Expansa\Security\Exceptions\InvalidCsrfTokenException;
+use Expansa\Security\Csrf;
+use Expansa\Security\Csrf\Contracts\Provider;
+use Expansa\Security\Exceptions\InvalidCsrfToken;
+use Expansa\Security\Validator;
 
 // run: php tests/Security.php
 require_once __DIR__ . '/bootstrap.php';
@@ -15,7 +16,7 @@ function rejects(callable $callback): bool
 {
     try {
         $callback();
-    } catch (InvalidCsrfTokenException) {
+    } catch (InvalidCsrfToken) {
         return true;
     }
 
@@ -53,17 +54,17 @@ check('t() leaves %s for markup', t('%sLearn more%s', '<a href="/x">', '</a>') =
 check('t_attr() escapes once', t_attr('Tom & Jerry') === 'Tom &amp; Jerry' && t_attr('v :n', '"x"') === 'v &quot;x&quot;');
 
 // CSRF: a token is valid only as issued, and only for the client it was issued to
-$store = new class implements SessionProvider {
+$store = new class implements Provider {
     private array $values = [];
 
-    public function get(string $key): mixed
+    public function get(string $key): ?string
     {
         return $this->values[$key] ?? null;
     }
 
-    public function set(string $key, mixed $value): void
+    public function set(string $key, string $token): void
     {
-        $this->values[$key] = $value;
+        $this->values[$key] = $token;
     }
 };
 
@@ -80,5 +81,24 @@ check('a token of another form is rejected', rejects(fn () => $csrf->check('othe
 
 $_SERVER['REMOTE_ADDR'] = '10.0.0.2';
 check('a token used from another client is rejected', rejects(fn () => $csrf->check('form', $token)));
+
+$_SERVER['REMOTE_ADDR'] = '10.0.0.1';
+$csrf->check('form', $token);
+check('a one-time token is replaced after the check', rejects(fn () => $csrf->check('form', $token)));
+
+// validator: errors by field, messages of the rule or of the field
+$validator = new Validator(['email' => 'nope', 'age' => '7', 'name' => ''], ['email' => 'email', 'age' => 'numeric|min:18', 'name' => 'required'])->apply();
+check('invalid fields get errors', ! $validator->isValid() && array_keys($validator->errors) === ['email', 'age', 'name']);
+check('messages get the comparison value', $validator->errors['age'] === ['Must be at least 18.']);
+check('valid data has no errors', new Validator(['age' => '20'], ['age' => 'numeric|min:18'])->apply()->errors === []);
+
+$custom = new Validator(['code' => 'abc'], ['code' => 'even'])
+    ->extend('even', 'Must be even.', fn (Validator $validator, mixed $value) => is_numeric($value) && $value % 2 === 0)
+    ->apply();
+check('extend() adds a rule with its message', $custom->errors === ['code' => ['Must be even.']]);
+
+Validator::configure(translate: fn (string $message, string ...$args) => 'T:' . $message);
+check('configure() translates the messages', new Validator(['a' => ''], ['a' => 'required'])->apply()->errors === ['a' => ['T:Is required.']]);
+Validator::configure();
 
 exit($failures > 0 ? 1 : 0);

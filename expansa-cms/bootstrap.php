@@ -133,7 +133,7 @@ Lifecycle::phase('configure', true, function () {
 
     // views of the dashboard, installer and auth pages
     View::configure(
-        viewsPath: EX_PATH . 'dashboard/views',
+        paths: EX_PATH . 'dashboard/views',
         cachePath: EX_PATH . 'cache/views',
     );
 
@@ -176,6 +176,11 @@ Lifecycle::phase('configure', true, function () {
     // every dashboard table renders the items filter form
     Expansa\Builders\Table\AbstractTable::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php'
+    );
+
+    // validation error messages in the site language
+    Expansa\Security\Validator::configure(
+        translate: fn (string $message, string ...$args) => t($message, ...$args)
     );
 
     // translations lookup priority
@@ -244,8 +249,8 @@ Lifecycle::phase('configure', true, function () {
             'repeater'        => Expansa\Builders\Forms\Fields\Repeater::class,
             'message'         => Expansa\Builders\Forms\Fields\Message::class,
         ],
-        view: fn (string $template, array $data) => (string) View::make($template, $data),
-        assets: fn (string $template, string $uid) => Asset::discover(View::make($template)->getPath(), $uid, ['type' => $uid]),
+        view: fn (string $template, array $data) => (string) View::create($template, $data),
+        assets: fn (string $template, string $uid) => Asset::discover(View::create($template)->path, $uid, ['type' => $uid]),
     );
 });
 

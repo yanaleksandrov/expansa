@@ -59,7 +59,7 @@ if (!function_exists('escape')) {
 if (!function_exists('view')) {
     function view(string $view, array $data = []): Expansa\View\View
     {
-        return Expansa\Facades\View::make($view, $data);
+        return Expansa\Facades\View::create($view, $data);
     }
 }
 
@@ -129,15 +129,13 @@ if (! function_exists('session')) {
      * Get session.
      *
      * @param array $config
-     * @return Expansa\Session\PhpSession
+     * @return Expansa\Session\Providers\Native
      */
-    function session(array $config = ['name' => 'expansa']): Expansa\Session\PhpSession
+    function session(array $config = ['name' => 'expansa']): Expansa\Session\Providers\Native
     {
         static $session;
-        if (!$session) {
-            $session = new Expansa\Session\PhpSession($config);
-        }
-        return $session;
+
+        return $session ??= new Expansa\Session\Providers\Native($config);
     }
 }
 

@@ -44,7 +44,7 @@ trait HasValidation
      */
     final public function getValidatorErrors(): array
     {
-        return $this->validate()->getErrors();
+        return $this->validate()->errors;
     }
 
     /**

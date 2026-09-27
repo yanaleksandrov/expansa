@@ -95,7 +95,7 @@ final class UserService
             $mailIsSent = Mail::send(
                 $email,
                 t('Password reset instructions'),
-                View::make(EX_DASHBOARD . 'mails/wrapper', [
+                View::create(EX_DASHBOARD . 'mails/wrapper', [
                     'body_template' => EX_DASHBOARD . 'mails/reset-password',
                 ])->render()
             );

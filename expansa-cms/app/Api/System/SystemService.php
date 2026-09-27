@@ -184,7 +184,7 @@ final class SystemService
         ])->apply();
 
         if (!$validator->isValid()) {
-            throw new ValidationFailed(t('Please fill in all required fields.'), $validator->getErrors());
+            throw new ValidationFailed(t('Please fill in all required fields.'), $validator->errors);
         }
     }
 }

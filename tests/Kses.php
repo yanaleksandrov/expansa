@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Expansa\Security\Sanitizer;
-use Expansa\Security\Xss\Kses;
+use Expansa\Security\Kses;
 
 // run: php tests/Kses.php
 require_once __DIR__ . '/bootstrap.php';
