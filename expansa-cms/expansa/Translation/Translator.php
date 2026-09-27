@@ -137,6 +137,32 @@ final class Translator
     }
 
     /**
+     * Translate one of two strings by a condition.
+     *
+     * @param bool   $condition
+     * @param string $ifString   Translated when the condition is true.
+     * @param string $elseString Translated otherwise.
+     * @return string
+     */
+    public function translateIf(bool $condition, string $ifString, string $elseString = ''): string
+    {
+        return $this->translate($condition ? $ifString : $elseString);
+    }
+
+    /**
+     * Translate one of two strings by a condition, for an HTML attribute value.
+     *
+     * @param bool   $condition
+     * @param string $ifString
+     * @param string $elseString
+     * @return string
+     */
+    public function translateAttributeIf(bool $condition, string $ifString, string $elseString = ''): string
+    {
+        return $this->translateAttribute($condition ? $ifString : $elseString);
+    }
+
+    /**
      * Get the locale of the request from the Accept-Language header: `en-US`.
      *
      * @param string $default Locale when the header is missing or can not be parsed.
