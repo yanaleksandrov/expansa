@@ -6,6 +6,10 @@ namespace App\Models;
 
 use DateTime;
 use Expansa\Database\Model;
+use Expansa\Database\Traits\HasSanitizing;
+use Expansa\Database\Traits\HasSoftDeletes;
+use Expansa\Database\Traits\HasTimestamps;
+use Expansa\Database\Traits\HasValidation;
 use Expansa\Debug\Error;
 
 /**
@@ -35,10 +39,10 @@ use Expansa\Debug\Error;
  */
 class Comment extends Model
 {
-    use Model\HasSanitizing;
-    use Model\HasValidation;
-    use Model\HasTimestamps;
-    use Model\HasSoftDeletes;
+    use HasSanitizing;
+    use HasValidation;
+    use HasTimestamps;
+    use HasSoftDeletes;
 
     /**
      * The "pending" value of the `status` column.
@@ -65,14 +69,14 @@ class Comment extends Model
      *
      * @var string
      */
-    protected string $table = 'comments';
+    public protected(set) string $table = 'comments';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<int, string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'post_id',
         'post_type',
         'parent_id',

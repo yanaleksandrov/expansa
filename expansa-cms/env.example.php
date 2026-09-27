@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Settings of the installation, written by the installer. Real environment variables (Docker, CI, a hosting panel)
  * override the values: EX_DB_*, EX_KEY_* and EX_DEBUG; an empty variable counts as not set.
@@ -25,6 +26,34 @@ define('EX_DB', [
     'logging'    => false,
     // PDO::ERRMODE_SILENT (default) | PDO::ERRMODE_WARNING | PDO::ERRMODE_EXCEPTION, see https://www.php.net/manual/en/pdo.error-handling.php
     'error'      => PDO::ERRMODE_SILENT,
+]);
+
+/**
+ * Cache stores, passed to Cache::configure(). `default` serves Cache::get() and the other facade methods,
+ * Cache::store('name') picks another one. EX_CACHE_STORE overrides the default.
+ *
+ * @since 2025.6
+ */
+define('EX_CACHE', [
+    'default' => getenv('EX_CACHE_STORE') ?: 'memory',
+    'stores'  => [
+        // the current request only, needs nothing
+        'memory'    => ['driver' => 'memory'],
+        // files on disk, survive between requests
+        'file'      => ['driver' => 'file', 'path' => EX_STORAGE . 'cache'],
+        // shared memory of the PHP process, needs ext-apcu
+        'apcu'      => ['driver' => 'apcu'],
+        // needs ext-redis
+        'redis'     => [
+            'driver' => 'redis',
+            'host'   => getenv('EX_REDIS_HOST') ?: '127.0.0.1',
+            'port'   => (int) (getenv('EX_REDIS_PORT') ?: 6379),
+        ],
+        // needs ext-memcached; servers: [host, port, weight]
+        'memcached' => ['driver' => 'memcached', 'servers' => [['127.0.0.1', 11211]]],
+        // the "cache" table of the site database
+        'database'  => ['driver' => 'database'],
+    ],
 ]);
 
 /**

@@ -4,861 +4,493 @@ declare(strict_types=1);
 
 namespace Expansa\Http;
 
+use ArrayAccess;
 use Closure;
 use Expansa\Http\Contracts\Request as RequestContract;
-use Expansa\Contracts\Routing\Route;
-use Expansa\Contracts\Session\SessionInterface;
-use Expansa\Contracts\Validation\Validator;
-use Expansa\Http\Request\FileBag;
-use Expansa\Http\Request\HeaderBag;
-use Expansa\Http\Request\ParameterBug;
-use Expansa\Http\Request\ServerBag;
-use Expansa\Support\Arr;
-use Expansa\Support\Str;
+use Expansa\Http\Contracts\Route;
+use Expansa\Http\Contracts\Session;
 use Expansa\Support\Traits\Macroable;
+use LogicException;
 
 /**
- * @method Validator validate(array $rules, array $messages = [])
+ * Incoming HTTP request: superglobal values as arrays plus what is derived from them.
+ * Headers, body, decoded JSON and Accept values are read on first access, so a request
+ * that only reads form values never touches php://input. Input is read-only: array
+ * access and magic properties read $input, writing them throws LogicException.
+ *
+ * @implements ArrayAccess<string, mixed>
+ * @package Expansa\Http
  */
-class Request implements \ArrayAccess, RequestContract
+final class Request implements ArrayAccess, RequestContract
 {
     use Macroable;
 
-    //protected array $attributes;
-    public ParameterBug $query;
+    /**
+     * Formats of getFormat() and their content types.
+     */
+    private const array FORMATS = [
+        'html'   => ['text/html', 'application/xhtml+xml'],
+        'txt'    => ['text/plain'],
+        'js'     => ['application/javascript', 'application/x-javascript', 'text/javascript'],
+        'css'    => ['text/css'],
+        'json'   => ['application/json', 'application/x-json'],
+        'jsonld' => ['application/ld+json'],
+        'xml'    => ['text/xml', 'application/xml', 'application/x-xml'],
+        'rdf'    => ['application/rdf+xml'],
+        'atom'   => ['application/atom+xml'],
+        'rss'    => ['application/rss+xml'],
+        'form'   => ['application/x-www-form-urlencoded', 'multipart/form-data'],
+    ];
 
-    public ParameterBug $post;
+    /**
+     * Headers by name in the $_SERVER form: upper case, "-" replaced with "_" (CONTENT_TYPE, USER_AGENT).
+     *
+     * @var array<string, string>
+     */
+    public private(set) array $headers {
+        get => $this->headers ??= self::extractHeaders($this->server);
+    }
 
-    public ParameterBug $json;
+    /**
+     * Raw request body, php://input is read on first access.
+     */
+    public private(set) string $content {
+        get => $this->content ??= (string) file_get_contents('php://input');
+    }
 
-    public ParameterBug $cookies;
+    /**
+     * Body decoded as a JSON object, empty if it is not one.
+     *
+     * @var array<array-key, mixed>
+     */
+    public private(set) array $json {
+        get => $this->json ??= is_array($json = json_decode($this->content, true)) ? $json : [];
+    }
 
-    public FileBag $files;
+    /**
+     * Query, form, JSON and file values merged, later sources override earlier ones.
+     *
+     * @var array<array-key, mixed>
+     */
+    public private(set) array $input {
+        get => $this->input ??= array_merge($this->query, $this->post, $this->json, $this->files);
+    }
 
-    public ServerBag $server;
+    /**
+     * Accept header types in lower case, without parameters, in the order sent.
+     *
+     * @var string[]
+     */
+    public private(set) array $acceptableTypes {
+        get => $this->acceptableTypes ??= self::parseAccept($this->headers['ACCEPT'] ?? '');
+    }
 
-    public HeaderBag $headers;
+    /**
+     * Accept-Language languages from the most preferred, lower case with "_": en_us.
+     *
+     * @var string[]
+     */
+    public private(set) array $languages {
+        get => $this->languages ??= self::parseLanguages($this->headers['ACCEPT_LANGUAGE'] ?? '');
+    }
 
-    protected ?Route $route = null;
+    /**
+     * Request method, GET if the server did not set it.
+     */
+    public string $method {
+        get => $this->server['REQUEST_METHOD'] ?? 'GET';
+    }
 
-    protected ?Closure $userResolver = null;
+    /**
+     * Whether the request came over HTTPS, directly or through a proxy.
+     */
+    public bool $secure {
+        get => in_array(strtolower((string) ($this->server['HTTPS'] ?? '')), ['on', '1'], true)
+            || (int) ($this->server['SERVER_PORT'] ?? 0) === 443
+            || ($this->server['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'
+            || ($this->server['HTTP_X_FORWARDED_SSL'] ?? '') === 'on';
+    }
 
-    public mixed $content;
+    /**
+     * "https" or "http".
+     */
+    public string $scheme {
+        get => $this->secure ? 'https' : 'http';
+    }
+
+    /**
+     * Host in lower case as the client sent it, with the port if it is not the default one.
+     */
+    public string $host {
+        get => strtolower($this->server['HTTP_HOST'] ?? $this->server['SERVER_NAME'] ?? $this->server['SERVER_ADDR'] ?? '');
+    }
+
+    /**
+     * Port from the Host header, the server port or the scheme default.
+     */
+    public int $port {
+        get {
+            if (preg_match('/:(\d+)$/', $this->host, $match)) {
+                return (int) $match[1];
+            }
+
+            return isset($this->server['HTTP_HOST']) || ! isset($this->server['SERVER_PORT'])
+                ? ($this->secure ? 443 : 80)
+                : (int) $this->server['SERVER_PORT'];
+        }
+    }
+
+    /**
+     * Request URI as sent: path and query string.
+     */
+    public string $uri {
+        get => $this->server['REQUEST_URI'] ?? '/';
+    }
+
+    /**
+     * URI path without the query string and the trailing slash.
+     */
+    public string $path {
+        get {
+            $path = strtok($this->uri, '?');
+
+            return $path === false || $path === '/' ? '/' : rtrim($path, '/');
+        }
+    }
+
+    /**
+     * Query string without "?".
+     */
+    public string $queryString {
+        get => (string) ($this->server['QUERY_STRING'] ?? '');
+    }
+
+    /**
+     * Scheme and host: https://example.com.
+     */
+    public string $root {
+        get => $this->scheme . '://' . $this->host;
+    }
+
+    /**
+     * Request URL without the query string.
+     */
+    public string $url {
+        get => $this->root . ($this->path === '/' ? '' : $this->path);
+    }
+
+    /**
+     * Client IP: the first X-Forwarded-For address, the Cloudflare header or the remote address.
+     */
+    public string $ip {
+        get {
+            if (isset($this->server['HTTP_X_FORWARDED_FOR'])) {
+                return trim(explode(',', $this->server['HTTP_X_FORWARDED_FOR'])[0]);
+            }
+
+            return $this->server['HTTP_CF_CONNECTING_IP'] ?? $this->server['REMOTE_ADDR'] ?? '';
+        }
+    }
+
+    /**
+     * User-Agent header.
+     */
+    public string $userAgent {
+        get => $this->headers['USER_AGENT'] ?? '';
+    }
+
+    /**
+     * Token of the "Authorization: Bearer" header.
+     */
+    public ?string $bearerToken {
+        get {
+            $header = $this->headers['AUTHORIZATION'] ?? '';
+            $pos    = stripos($header, 'Bearer ');
+
+            return $pos === false ? null : trim(explode(',', substr($header, $pos + 7), 2)[0]);
+        }
+    }
+
+    /**
+     * User of HTTP basic authentication.
+     */
+    public ?string $authUser {
+        get => $this->server['PHP_AUTH_USER'] ?? $this->basicCredentials()[0] ?? null;
+    }
+
+    /**
+     * Password of HTTP basic authentication.
+     */
+    public ?string $authPassword {
+        get => $this->server['PHP_AUTH_PW'] ?? $this->basicCredentials()[1] ?? null;
+    }
+
+    /**
+     * Whether the request was sent with XMLHttpRequest.
+     */
+    public bool $isAjax {
+        get => ($this->headers['X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
+    }
+
+    /**
+     * Whether the request was sent by PJAX.
+     */
+    public bool $isPjax {
+        get => ($this->headers['X_PJAX'] ?? '') === 'true';
+    }
+
+    /**
+     * Whether the browser prefetches the page.
+     */
+    public bool $isPrefetch {
+        get => strcasecmp($this->headers['X_MOZ'] ?? '', 'prefetch') === 0
+            || strcasecmp($this->headers['X_PURPOSE'] ?? '', 'preview') === 0
+            || strcasecmp($this->headers['SEC_PURPOSE'] ?? '', 'prefetch') === 0;
+    }
+
+    /**
+     * Route matched for the request, set by the router.
+     */
+    public ?Route $route = null;
+
+    /**
+     * Session for old input, set by the application.
+     */
+    public ?Session $session = null;
+
+    /**
+     * Resolver of the current user for getUser(): fn (?string $guard): mixed.
+     */
+    public ?Closure $userResolver = null;
+
+    public function __construct(
+
+        /**
+         * Query string values.
+         *
+         * @var array<array-key, mixed>
+         */
+        public readonly array $query = [],
+
+        /**
+         * Form body values.
+         *
+         * @var array<array-key, mixed>
+         */
+        public readonly array $post = [],
+
+        /**
+         * Cookies sent by the client.
+         *
+         * @var array<string, string>
+         */
+        public readonly array $cookies = [],
+
+        /**
+         * Uploaded files in the $_FILES form.
+         *
+         * @var array<string, array<string, mixed>>
+         */
+        public readonly array $files = [],
+
+        /**
+         * Server and environment values in the $_SERVER form.
+         *
+         * @var array<string, mixed>
+         */
+        public readonly array $server = [],
+
+        /**
+         * Raw body; null reads php://input on first access.
+         */
+        ?string $content = null,
+    ) {
+        if ($content !== null) {
+            $this->content = $content;
+        }
+    }
 
     public static function createFromGlobals(): static
     {
-        return new static($_GET, $_POST, $_COOKIE, $_FILES, $_SERVER);
+        return new self($_GET, $_POST, $_COOKIE, $_FILES, $_SERVER);
     }
 
-    public static function create(string $uri, string $method = 'GET', array $parameters = [], array $cookies = [], array $files = [], array $server = []): static
-    {
+    public static function create(
+        string $uri,
+        string $method = 'GET',
+        array $parameters = [],
+        array $cookies = [],
+        array $files = [],
+        array $server = [],
+        ?string $content = null,
+    ): static {
+        $url     = parse_url($uri) ?: [];
+        $method  = strtoupper($method);
+        $host    = ($url['host'] ?? 'localhost') . (isset($url['port']) ? ':' . $url['port'] : '');
+        $inQuery = $method === 'GET' || $method === 'HEAD';
+
+        parse_str($url['query'] ?? '', $query);
+        if ($inQuery) {
+            $query = array_replace($query, $parameters);
+        }
+        $queryString = http_build_query($query, '', '&');
+
         $server = array_replace([
-            'SERVER_NAME'          => 'localhost',
-            'SERVER_PORT'          => 80,
-            'HTTP_HOST'            => 'localhost',
-            'HTTP_USER_AGENT'      => 'Expansa',
-            'HTTP_ACCEPT'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            'HTTP_ACCEPT_LANGUAGE' => 'en-us,en;q=0.5',
-            'HTTP_ACCEPT_CHARSET'  => 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
-            'REMOTE_ADDR'          => '127.0.0.1',
-            'SCRIPT_NAME'          => '',
-            'SCRIPT_FILENAME'      => '',
-            'SERVER_PROTOCOL'      => 'HTTP/1.1',
-            'REQUEST_TIME'         => time(),
-            'REQUEST_TIME_FLOAT'   => microtime(true),
-        ], $server);
+            'SERVER_NAME'     => $url['host'] ?? 'localhost',
+            'SERVER_PORT'     => $url['port'] ?? (($url['scheme'] ?? '') === 'https' ? 443 : 80),
+            'HTTP_HOST'       => $host,
+            'REMOTE_ADDR'     => '127.0.0.1',
+            'SERVER_PROTOCOL' => 'HTTP/1.1',
+            'REQUEST_METHOD'  => $method,
+            'REQUEST_URI'     => '/' . ltrim($url['path'] ?? '', '/') . ($queryString === '' ? '' : '?' . $queryString),
+            'QUERY_STRING'    => $queryString,
+            'REQUEST_TIME'    => time(),
+        ], ($url['scheme'] ?? '') === 'https' ? ['HTTPS' => 'on'] : [], $server);
 
-        $server['PATH_INFO'] = '';
-        $server['REQUEST_METHOD'] = strtoupper($method);
-
-        $components = parse_url($uri);
-
-        if (isset($components['host'])) {
-            $server['SERVER_NAME'] = $components['host'];
-            $server['HTTP_HOST'] = $components['host'];
-        }
-
-        if (isset($components['scheme'])) {
-            if ('https' === $components['scheme']) {
-                $server['HTTPS'] = 'on';
-                $server['SERVER_PORT'] = 443;
-            } else {
-                unset($server['HTTPS']);
-                $server['SERVER_PORT'] = 80;
-            }
-        }
-
-        if (isset($components['port'])) {
-            $server['SERVER_PORT'] = $components['port'];
-            $server['HTTP_HOST'] .= ':' . $components['port'];
-        }
-
-        if (isset($components['user'])) {
-            $server['PHP_AUTH_USER'] = $components['user'];
-        }
-
-        if (isset($components['pass'])) {
-            $server['PHP_AUTH_PW'] = $components['pass'];
-        }
-
-        if (!isset($components['path'])) {
-            $components['path'] = '/';
-        } elseif (!str_starts_with($components['path'], '/')) {
-            $components['path'] = '/' . $components['path'];
-        }
-
-        switch (strtoupper($method)) {
-            case 'POST':
-            case 'PUT':
-            case 'DELETE':
-                if (!isset($server['CONTENT_TYPE'])) {
-                    $server['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
-                }
-                // no break
-            case 'PATCH':
-                $post = $parameters;
-                $query = [];
-                break;
-            default:
-                $post = [];
-                $query = $parameters;
-                break;
-        }
-
-        $queryString = '';
-        if (isset($components['query'])) {
-            parse_str(html_entity_decode($components['query']), $qs);
-
-            if ($query) {
-                $query = array_replace($qs, $query);
-                $queryString = http_build_query($query, '', '&');
-            } else {
-                $query = $qs;
-                $queryString = $components['query'];
-            }
-        } elseif ($query) {
-            $queryString = http_build_query($query, '', '&');
-        }
-
-        $server['REQUEST_URI'] = $components['path'] . ('' !== $queryString ? '?' . $queryString : '');
-        $server['QUERY_STRING'] = $queryString;
-
-        $request = new static($query, $post, $cookies, $files, $server);
-
-        return $request;
+        return new self($query, $inQuery ? [] : $parameters, $cookies, $files, $server, $content);
     }
 
-    public function __construct(array $query = [], array $post = [], array $cookies = [], array $files = [], array $server = [])
+    public function isMethod(string ...$methods): bool
     {
-        $this->query = new ParameterBug($query);
-        $this->post = new ParameterBug($post);
-        $this->cookies = new ParameterBug($cookies);
-        $this->server = new ServerBag($server);
-        $this->headers = new HeaderBag($this->server->getHeaders());
-        $this->files = new FileBag($files);
-
-        $this->makeJson();
+        return in_array($this->method, array_map(strtoupper(...), $methods), true);
     }
 
-    /*
-    protected function makeHeaders(): void
+    public function getFullUrl(array $query = []): string
     {
-        $this->headers = new HeaderBag();
+        parse_str($this->queryString, $current);
 
-        foreach ($this->server->all() as $key => $val) {
-            if (str_starts_with($key, 'HTTP_')) {
-                $this->headers->set(substr($key, 5), $val);
-            }
-            elseif (in_array($key, ['CONTENT_TYPE', 'CONTENT_LENGTH', 'CONTENT_MD5'], true)) {
-                $this->headers->set($key, $val);
-            }
-        }
+        $queryString = http_build_query([...$current, ...$query], '', '&', PHP_QUERY_RFC3986);
 
-        if ($this->server->has('PHP_AUTH_USER')) {
-            $this->headers->set('PHP_AUTH_USER', $this->server->get('PHP_AUTH_USER'));
-            $this->headers->set('PHP_AUTH_PW', $this->server->get('PHP_AUTH_PW', ''));
-        }
-
-        if ($this->headers->has('PHP_AUTH_USER')) {
-            $this->headers->set(
-                'AUTHORIZATION',
-                'Basic '.base64_encode($this->headers->get('PHP_AUTH_USER').':'.$this->headers->get('PHP_AUTH_PW', ''))
-            );
-        }
-        elseif ($this->headers->has('PHP_AUTH_DIGEST')) {
-            $this->headers->set('AUTHORIZATION', $this->headers->get('PHP_AUTH_DIGEST'));
-        }
-    }
-    */
-
-    /*
-    protected function makeFiles(array $files): void
-    {
-        $this->files = new FileBag();
-
-        foreach ($files as $key => $file) {
-            if (! is_array($file['tmp_name'])) {
-                if ($uploadedFile = UploadedFile::createFrom($file)) {
-                    $this->files->set($key, $uploadedFile);
-                }
-                continue;
-            }
-
-            $uploadedFiles = [];
-            for ($i = 0; $i < count($file['tmp_name']); $i++) {
-                $uploadedFile = UploadedFile::createFrom([
-                    'tmp_name' => $file['tmp_name'][$i] ?? '',
-                    'name' => $file['name'][$i] ?? '',
-                    'type' => $file['type'][$i] ?? '',
-                    'size' => $file['size'][$i] ?? 0,
-                    'error' => $file['error'][$i] ?? -1
-                ]);
-
-                if ($uploadedFile) $uploadedFiles[] = $uploadedFile;
-            }
-
-            if (count($uploadedFiles) > 0) {
-                $this->files->set($key, $uploadedFiles);
-            }
-        }
-    }
-    */
-
-    protected function makeJson(): void
-    {
-        $json = json_decode($this->getContent(), true);
-
-        if (is_null($json) || json_last_error() !== JSON_ERROR_NONE) {
-            $json = [];
-        }
-
-        $this->json = new ParameterBug($json);
+        return $queryString === '' ? $this->url : $this->url . ($this->path === '/' ? '/?' : '?') . $queryString;
     }
 
-    public function getMethod(): string
+    public function getHeader(string $name, ?string $default = null): ?string
     {
-        return $this->server->get('REQUEST_METHOD', 'GET');
+        return $this->headers[self::headerKey($name)] ?? $default;
     }
 
-    public function method(): string
+    public function hasHeader(string ...$names): bool
     {
-        return $this->getMethod();
+        return array_all($names, fn (string $name) => isset($this->headers[self::headerKey($name)]));
     }
 
-    public function isMethod(string|array $methods): bool
+    public function get(string $key, mixed $default = null): mixed
     {
-        if (! is_array($methods)) {
-            $methods = func_get_args();
-        }
-
-        foreach ($methods as $method) {
-            if ($this->getMethod() === strtoupper($method)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->input[$key] ?? $default;
     }
 
-    public function isSecure(): bool
+    public function getString(string $key, string $default = ''): string
     {
-        $https = $this->server->get('HTTPS');
-        $port  = $this->server->get('SERVER_PORT');
+        $value = $this->get($key);
 
-        if ($https == 'on' || $https == 1 || $port == 443) {
-            return true;
-        }
-
-        if ($this->server->get('HTTP_X_FORWARDED_PROTO') === 'https') {
-            return true;
-        }
-
-        if ($this->server->get('HTTP_X_FORWARDED_SSL') === 'on') {
-            return true;
-        }
-
-        return false;
+        return is_scalar($value) && ! is_bool($value) ? trim((string) $value) : $default;
     }
 
-    public function secure(): bool
+    public function getInt(string $key, int $default = 0): int
     {
-        return $this->isSecure();
+        return filter_var($this->get($key), FILTER_VALIDATE_INT, ['options' => ['default' => $default]]);
     }
 
-    public function getScheme(): string
+    public function getFloat(string $key, float $default = 0.0): float
     {
-        return $this->secure() ? 'https' : 'http';
+        return filter_var($this->get($key), FILTER_VALIDATE_FLOAT, ['options' => ['default' => $default]]);
     }
 
-    public function scheme(): string
+    public function getBool(string $key, bool $default = false): bool
     {
-        return $this->getScheme();
+        return filter_var($this->get($key), FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? $default;
     }
 
-    public function getHost(bool $withPort = false): string
+    public function has(string ...$keys): bool
     {
-        if (! $host = $this->headers->get('HOST')) {
-            $host = $this->server->get('SERVER_NAME') ?? $this->server->get('SERVER_ADDR');
-        }
-
-        // Remove port from host
-        $host = strtolower(preg_replace('/:\d+$/', '', trim($host)));
-
-        if (! $withPort) {
-            return $host;
-        }
-
-        $scheme = $this->getScheme();
-        $port = $this->getPort();
-
-        if (($scheme === 'http' && $port === 80) || ($scheme === 'https' && $port === 443)) {
-            return $host;
-        }
-
-        return $host . ':' . $port;
+        return array_all($keys, fn (string $key) => array_key_exists($key, $this->input));
     }
 
-    public function host(bool $withPort = false): string
+    public function hasAny(string ...$keys): bool
     {
-        return $this->getHost($withPort);
+        return array_any($keys, fn (string $key) => array_key_exists($key, $this->input));
     }
 
-    public function getPort(): int
+    public function only(string ...$keys): array
     {
-        if (! $host = $this->headers->get('HOST')) {
-            return intval($this->server->get('SERVER_PORT'));
-        }
-
-        if (preg_match('/:(\d+)/', $host, $match)) {
-            return intval($match[1]);
-        }
-
-        return $this->getScheme() === 'https' ? 443 : 80;
+        return array_intersect_key($this->input, array_flip($keys));
     }
 
-    public function port(): int
+    public function except(string ...$keys): array
     {
-        return $this->getPort();
+        return array_diff_key($this->input, array_flip($keys));
     }
 
-    public function getPath(): string
+    public function isFilled(string ...$keys): bool
     {
-        $path = $this->server->get('REQUEST_URI', '');
-
-        if (false !== $pos = strpos($path, '?')) {
-            $path = substr($path, 0, $pos);
-        }
-
-        if ($path !== '/' && str_ends_with($path, '/')) {
-            $path = substr($path, 0, -1);
-        }
-
-        return $path;
+        return array_all($keys, fn (string $key) => ! self::isBlank($this->get($key)));
     }
 
-    public function path(): string
+    public function isAnyFilled(string ...$keys): bool
     {
-        return $this->getPath();
+        return array_any($keys, fn (string $key) => ! self::isBlank($this->get($key)));
     }
 
-    public function getQueryString(): string
+    public function isEmpty(string ...$keys): bool
     {
-        return $this->fixQueryString($this->server->get('QUERY_STRING'));
-    }
-
-    public function queryString(): string
-    {
-        return $this->getQueryString();
-    }
-
-    protected function fixQueryString(?string $qs): string
-    {
-        if (($qs ?? '') === '') {
-            return '';
-        }
-
-        return $qs;
-    }
-
-    public function getContent(): mixed
-    {
-        if (! isset($this->content)) {
-            $this->content = file_get_contents('php://input');
-        }
-
-        return $this->content;
-    }
-
-    public function root(): string
-    {
-        return $this->scheme() . '://' . $this->host(true);
-    }
-
-    public function url(bool|array $withQuery = false): string
-    {
-        $query = '';
-        if (is_array($withQuery) && count($withQuery) > 0) {
-            $query = array_merge($this->query(), $withQuery);
-            $query = http_build_query($query, '', '&', PHP_QUERY_RFC3986);
-        } elseif ($withQuery === true) {
-            $query = $this->queryString();
-        }
-
-        $path = $this->path();
-        $url  = rtrim($this->scheme() . '://' . $this->host(true) . $path, '/');
-
-        $question = ($path === '/') ? '/?' : '?';
-
-        return empty($query) ? $url : $url . $question . $query;
-    }
-
-    public function fullUrl(): string
-    {
-        return $this->url(true);
-    }
-
-    public function fullUrlWithQuery(array $query): string
-    {
-        return $this->url($query);
-    }
-
-    public function getUri()
-    {
-        return $this->server->get('REQUEST_URI', '');
-    }
-
-    public function uri()
-    {
-        return $this->getUri();
-    }
-
-    public function server(?string $key = null, mixed $default = null): mixed
-    {
-        if (is_null($key)) {
-            return $this->server->all();
-        }
-
-        return $this->server->get($key, $default);
-    }
-
-    public function headers(?string $key = null, mixed $default = null): mixed
-    {
-        if (is_null($key)) {
-            return $this->headers->all();
-        }
-
-        return $this->headers->get($key, $default);
-    }
-
-    public function header(string $key, mixed $default = null): mixed
-    {
-        return $this->headers->get($key, $default);
-    }
-
-    public function hasHeader(string|array $keys): bool
-    {
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        foreach ($keys as $key) {
-            if (! $this->headers->has($key)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public function cookies(?string $key = null, mixed $default = null): mixed
-    {
-        if (is_null($key)) {
-            return $this->cookies->all();
-        }
-
-        return $this->cookies->get($key, $default);
-    }
-
-    public function cookie(string $key, mixed $default = null): mixed
-    {
-        return $this->cookies->get($key, $default);
-    }
-
-    public function query(?string $key = null, mixed $default = null): mixed
-    {
-        if (is_null($key)) {
-            return $this->query->all();
-        }
-
-        return $this->query->get($key, $default);
-    }
-
-    public function post(?string $key = null, mixed $default = null): mixed
-    {
-        if (is_null($key)) {
-            return $this->post->all();
-        }
-
-        return $this->post->get($key, $default);
-    }
-
-    public function json(?string $key = null, mixed $default = null): mixed
-    {
-        if (is_null($key)) {
-            return $this->json->all();
-        }
-
-        return $this->json->get($key, $default);
-    }
-
-    public function files(?string $key = null, mixed $default = null): mixed
-    {
-        if (is_null($key)) {
-            return $this->files->all();
-        }
-
-        return $this->files->get($key, $default);
-    }
-
-    public function file(string $key, mixed $default = null): mixed
-    {
-        return $this->files->get($key, $default);
-    }
-
-    public function hasFile(string $key): bool
-    {
-        return $this->files->has($key);
-    }
-
-    public function all(): array
-    {
-        return array_merge($this->query(), $this->post(), $this->json(), $this->files());
-    }
-
-    public function input(?string $key = null, mixed $default = null): mixed
-    {
-        $input = $this->all();
-
-        if (is_null($key)) {
-            return $input;
-        }
-
-        return Arr::get($input, $key, $default);
-    }
-
-    public function only(string|array $keys): array
-    {
-        $result = [];
-
-        $input = $this->all();
-
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        $default = new \stdClass();
-
-        foreach ($keys as $key) {
-            $value = Arr::data($input, $key, $default);
-
-            if ($value !== $default) {
-                Arr::set($result, $key, $value);
-            }
-        }
-
-        return $result;
-    }
-
-    public function except(string|array $keys): array
-    {
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        $result = $this->all();
-
-        Arr::forget($result, $keys);
-
-        return $result;
-    }
-
-    public function has(string|array $keys): bool
-    {
-        $input = $this->all();
-
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        foreach ($keys as $key) {
-            if (! Arr::has($input, $key)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public function hasAny(string|array $keys): bool
-    {
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        return Arr::hasAny($this->all(), $keys);
+        return array_all($keys, fn (string $key) => self::isBlank($this->get($key)));
     }
 
     public function whenHas(string $key, callable $callback, ?callable $default = null): static
     {
         if ($this->has($key)) {
-            $callback(Arr::get($this->all(), $key));
-        }
-
-        if ($default) {
+            $callback($this->input[$key]);
+        } elseif ($default !== null) {
             $default();
         }
 
         return $this;
-    }
-
-    public function filled(string|array $keys): bool
-    {
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        foreach ($keys as $key) {
-            if (Str::isEmpty(Arr::get($this->all(), $key))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public function notFilled(string|array $keys): bool
-    {
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        foreach ($keys as $key) {
-            if (! Str::isEmpty(Arr::get($this->all(), $key))) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public function anyFilled(string|array $keys): bool
-    {
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        foreach ($keys as $key) {
-            if (! Str::isEmpty(Arr::get($this->all(), $key))) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public function whenFilled(string $key, callable $callback, ?callable $default = null): static
     {
-        $value = Arr::get($this->all(), $key);
-
-        if (! Str::isEmpty($value)) {
-            $callback($value);
-        }
-
-        if ($default) {
+        if ($this->isFilled($key)) {
+            $callback($this->input[$key]);
+        } elseif ($default !== null) {
             $default();
         }
 
         return $this;
-    }
-
-    public function missing(string|array $keys): bool
-    {
-        $keys = is_array($keys) ? $keys : func_get_args();
-
-        return ! $this->has($keys);
     }
 
     public function whenMissing(string $key, callable $callback, ?callable $default = null): static
     {
-        if (Arr::missing($this->all(), $key)) {
+        if (! $this->has($key)) {
             $callback();
-        }
-
-        if ($default) {
+        } elseif ($default !== null) {
             $default();
         }
 
         return $this;
     }
 
-    // Input types
-    public function string(string $key, ?string $default = ''): ?string
+    public function accepts(string ...$types): bool
     {
-        $value = $this->input($key, $default);
-
-        if (is_array($value) || is_bool($value)) {
-            return $default;
-        }
-
-        return trim(strval($value));
-    }
-
-    public function str(string $key, ?string $default = ''): ?string
-    {
-        return $this->string($key, $default);
-    }
-
-    public function integer(string $key, ?int $default = 0): ?int
-    {
-        $value = filter_var($this->input($key, $default), FILTER_VALIDATE_INT);
-
-        return is_int($value) ? $value : $default;
-    }
-
-    public function int(string $key, ?int $default = 0): ?int
-    {
-        return $this->integer($key, $default);
-    }
-
-    public function float(string $key, ?float $default = 0.0): ?float
-    {
-        $value = filter_var($this->input($key, $default), FILTER_VALIDATE_FLOAT);
-
-        return is_float($value) ? $value : $default;
-    }
-
-    public function boolean(string $key, ?bool $default = false): ?bool
-    {
-        return filter_var($this->input($key, $default), FILTER_VALIDATE_BOOLEAN);
-    }
-
-    public function bool(string $key, ?bool $default = false): ?bool
-    {
-        return $this->boolean($key, $default);
-    }
-
-    // Work with headers
-    public function ip(): string
-    {
-        if ($this->server->has('HTTP_X_FORWARDED_FOR')) {
-            return $this->server->get('HTTP_X_FORWARDED_FOR');
-        }
-
-        // For Cloudflare
-        if ($this->server->has('HTTP_CF_CONNECTING_IP')) {
-            return $this->server->get('HTTP_CF_CONNECTING_IP');
-        }
-
-        return $this->server->get('REMOTE_ADDR');
-    }
-
-    public function userAgent(): string
-    {
-        return $this->headers->get('User-Agent', '');
-    }
-
-    public function bearerToken(): ?string
-    {
-        $token = $this->headers->get('Authorization', '');
-
-        $pos = stripos($token, 'Bearer');
-
-        if ($pos !== false) {
-            $token = substr($token, $pos + 7);
-
-            if (str_contains($token, ',')) {
-                return trim(strstr($token, ',', true));
-            }
-
-            return trim($token);
-        }
-
-        return null;
-    }
-
-    public function getUser(): ?string
-    {
-        return $this->headers->get('PHP_AUTH_USER');
-    }
-
-    public function getPassword(): ?string
-    {
-        return $this->headers->get('PHP_AUTH_PW');
-    }
-
-    public function ajax(): bool
-    {
-        return $this->headers->get('X_REQUESTED_WITH') === 'XMLHttpRequest';
-    }
-
-    public function pajax(): bool
-    {
-        return $this->headers->get('X_PJAX') === 'true';
-    }
-
-    public function prefetch(): bool
-    {
-        $moz = $this->headers->get('X_MOZ', '');
-        $purpose = $this->headers->get('X_PURPOSE', '');
-
-        return strcasecmp($moz, 'prefetch') === 0 || strcasecmp($purpose, 'preview') === 0;
-    }
-
-    // Work with Accept
-    protected ?array $acceptsCache = null;
-
-    protected ?array $acceptLanguages = null;
-
-    public function getAcceptableTypes(): array
-    {
-        if (is_null($this->acceptsCache)) {
-            $accepts = trim($this->headers->get('Accept', ''));
-
-            if ($accepts === '') {
-                $accepts = [];
-            } else {
-                if (str_contains($accepts, ';')) {
-                    $accepts = strtok($accepts, ';');
-                }
-
-                $accepts = array_map(fn($val) => strtolower(trim($val)), explode(",", $accepts));
-            }
-
-            $this->acceptsCache = $accepts;
-        }
-
-        return $this->acceptsCache;
-    }
-
-    public function accepts(string|array $contentTypes): bool
-    {
-        $accepts = $this->getAcceptableTypes();
-
-        if (count($accepts) === 0) {
+        if ($this->acceptableTypes === []) {
             return true;
         }
 
-        $contentTypes = is_array($contentTypes) ? $contentTypes : func_get_args();
-
-        foreach ($accepts as $accept) {
+        foreach ($this->acceptableTypes as $accept) {
             if ($accept === '*/*' || $accept === '*') {
                 return true;
             }
 
-            foreach ($contentTypes as $type) {
+            foreach ($types as $type) {
                 $type = strtolower($type);
 
-                if ($accept === $type) {
+                if ($accept === $type || $accept === strtok($type, '/') . '/*') {
                     return true;
                 }
 
-                if ($accept === strtok($type, '/') . '/*') {
+                // application/json also accepts application/ld+json
+                [$group, $subtype] = explode('/', $accept, 2) + [1 => ''];
+                if ($subtype !== '' && preg_match('#^' . preg_quote($group, '#') . '/.+\+' . preg_quote($subtype, '#') . '$#', $type)) {
                     return true;
-                }
-
-                $split = explode("/", $accept);
-
-                if (isset($split[1])) {
-                    $split[0] = preg_quote($split[0], '#');
-                    $split[1] = preg_quote($split[1], '#');
-
-                    if (preg_match("#{$split[0]}/.+\+{$split[1]}#", $type)) {
-                        return true;
-                    }
                 }
             }
         }
@@ -868,9 +500,7 @@ class Request implements \ArrayAccess, RequestContract
 
     public function acceptsAny(): bool
     {
-        $accepts = $this->getAcceptableTypes();
-
-        return count($accepts) === 0 || in_array($accepts[0] ?? '', ['*/*', '*']);
+        return $this->acceptableTypes === [] || in_array($this->acceptableTypes[0], ['*/*', '*'], true);
     }
 
     public function acceptsJson(): bool
@@ -883,24 +513,10 @@ class Request implements \ArrayAccess, RequestContract
         return $this->accepts('text/html');
     }
 
-    public function format(string $default = 'html'): string
+    public function getFormat(string $default = 'html'): string
     {
-        $defaultFormats = [
-            'html'   => ['text/html', 'application/xhtml+xml'],
-            'txt'    => ['text/plain'],
-            'js'     => ['application/javascript', 'application/x-javascript', 'text/javascript'],
-            'css'    => ['text/css'],
-            'json'   => ['application/json', 'application/x-json'],
-            'jsonld' => ['application/ld+json'],
-            'xml'    => ['text/xml', 'application/xml', 'application/x-xml'],
-            'rdf'    => ['application/rdf+xml'],
-            'atom'   => ['application/atom+xml'],
-            'rss'    => ['application/rss+xml'],
-            'form'   => ['application/x-www-form-urlencoded', 'multipart/form-data'],
-        ];
-
-        foreach ($defaultFormats as $format => $contentTypes) {
-            if ($this->accepts($contentTypes)) {
+        foreach (self::FORMATS as $format => $types) {
+            if ($this->accepts(...$types)) {
                 return $format;
             }
         }
@@ -910,196 +526,233 @@ class Request implements \ArrayAccess, RequestContract
 
     public function expectsJson(): bool
     {
-        return ($this->ajax() && ! $this->pajax() && $this->acceptsAny()) || $this->wantsJson();
+        return ($this->isAjax && ! $this->isPjax && $this->acceptsAny()) || $this->wantsJson();
     }
 
     public function wantsJson(): bool
     {
-        $accepts = $this->getAcceptableTypes();
+        $type = $this->acceptableTypes[0] ?? '';
 
-        return isset($accepts[0]) && (str_contains($accepts[0], '/json') || str_contains($accepts[0], '+json'));
+        return str_contains($type, '/json') || str_contains($type, '+json');
     }
 
-    public function getAcceptedLanguages(string|array|null $languages = null): array
+    public function getLanguages(string ...$supported): array
     {
-        if (is_null($this->acceptLanguages)) {
-            $this->acceptLanguages = [];
-
-            $pattern = '/([\w\-_]+)\s*(;\s*q\s*=\s*(\d*\.\d*))?/';
-            $accept = $this->headers->get('accept-language');
-
-            if (!is_null($accept) && ($n = preg_match_all($pattern, $accept, $matches)) > 0) {
-                for ($i = 0; $i < $n; ++$i) {
-                    $lang = strtolower(str_replace('-', '_', $matches[1][$i]));
-
-                    $this->acceptLanguages[$lang] = empty($matches[3][$i])
-                        ? 1.0
-                        : floatval($matches[3][$i]);
-                }
-
-                arsort($this->acceptLanguages);
-
-                $this->acceptLanguages = array_keys($this->acceptLanguages);
-            }
+        if ($supported === []) {
+            return $this->languages;
         }
 
-        if (! is_null($languages)) {
-            if (is_string($languages)) {
-                $languages = [$languages];
-            }
-
-            foreach ($languages as $key => $val) {
-                $languages[$key] = strtolower(str_replace('-', '_', $val));
-            }
-
-            return array_values(array_intersect($this->getAcceptedLanguages(), $languages));
-        }
-
-        return $this->acceptLanguages;
+        return array_values(array_intersect($this->languages, array_map(self::languageKey(...), $supported)));
     }
 
-    public function acceptLanguage(string $language): bool
+    public function acceptsLanguage(string $language): bool
     {
-        $language = strtolower(str_replace('-', '_', $language));
-
-        return in_array($language, $this->getAcceptedLanguages());
+        return in_array(self::languageKey($language), $this->languages, true);
     }
 
-    // Work with routes
-    public function getRoute(): ?Route
+    public function getUser(?string $guard = null): mixed
     {
-        return $this->route ?? null;
+        return $this->userResolver !== null ? ($this->userResolver)($guard) : null;
     }
 
-    public function setRoute(Route $route): static
+    public function getOld(string $key, mixed $default = null): mixed
     {
-        $this->route = $route;
-
-        return $this;
-    }
-
-    public function route(?Route $route = null): static|Route|null
-    {
-        if (is_null($route)) {
-            return $this->getRoute();
-        }
-
-        return $this->setRoute($route);
-    }
-
-    public function setUserResolver(Closure $resolver): static
-    {
-        $this->userResolver = $resolver;
-
-        return $this;
-    }
-
-    public function getUserResolver(): Closure
-    {
-        return $this->userResolver ?: function () {
-        };
-    }
-
-    public function user(?string $guard = null): mixed
-    {
-        return call_user_func($this->getUserResolver(), $guard);
-    }
-
-    // Session
-    protected SessionInterface $session;
-
-    public function setSession(SessionInterface $session): void
-    {
-        $this->session = $session;
-    }
-
-    public function hasSession(): bool
-    {
-        return ! is_null($this->session);
-    }
-
-    public function getSession(): SessionInterface
-    {
-        if (! $this->hasSession()) {
-            throw new \RuntimeException('Session store not set on request.');
-        }
-
-        return $this->session;
-    }
-
-    public function session(): SessionInterface
-    {
-        return $this->getSession();
-    }
-
-    public function old(string $key, mixed $default = null): mixed
-    {
-        return $this->hasSession() ? $this->session->getOldInput($key, $default) : value($default);
+        return $this->session !== null ? $this->session->getOldInput($key, $default) : $default;
     }
 
     public function flash(): void
     {
-        $this->session->setOldInput($this->all());
+        $this->requireSession()->setOldInput($this->input);
     }
 
-    public function flashOnly(string|array $keys): void
+    public function flashOnly(string ...$keys): void
     {
-        $this->session->setOldInput(
-            $this->only(is_array($keys) ? $keys : func_get_args())
-        );
+        $this->requireSession()->setOldInput($this->only(...$keys));
     }
 
-    public function flashExcept(string|array $keys): void
+    public function flashExcept(string ...$keys): void
     {
-        $this->session->setOldInput(
-            $this->except(is_array($keys) ? $keys : func_get_args())
-        );
+        $this->requireSession()->setOldInput($this->except(...$keys));
     }
 
-    public function flush(): void
+    public function flushOld(): void
     {
-        $this->session->setOldInput([]);
+        $this->requireSession()->setOldInput([]);
     }
 
     public function offsetExists(mixed $offset): bool
     {
-        return $this->all()[$offset] ?? false;
+        return isset($this->input[$offset]);
     }
 
     public function offsetGet(mixed $offset): mixed
     {
-        return $this->input($offset);
+        return $this->input[$offset] ?? null;
     }
 
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        if (in_array($this->getMethod(), ['GET', 'HEAD'])) {
-            $this->query->set($offset, $value);
-        } else {
-            $this->post->set($offset, $value);
-        }
+        throw new LogicException('Request input is read-only.');
     }
 
     public function offsetUnset(mixed $offset): void
     {
-        if (in_array($this->getMethod(), ['GET', 'HEAD'])) {
-            $this->query->remove($offset);
-        } else {
-            $this->post->remove($offset);
-        }
+        throw new LogicException('Request input is read-only.');
     }
 
-    public function __get(string $key)
+    /**
+     * Input value by an undeclared property name: $request->title.
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function __get(string $key): mixed
     {
-        return $this->input($key);
+        return $this->input[$key] ?? null;
     }
 
-    public function __set(string $key, mixed $value)
+    /**
+     * Whether the input has a non-null value for an undeclared property name.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function __isset(string $key): bool
     {
-        if (in_array($this->getMethod(), ['GET', 'HEAD'])) {
-            $this->query->set($key, $value);
-        } else {
-            $this->post->set($key, $value);
+        return isset($this->input[$key]);
+    }
+
+    /**
+     * Session for the flash methods.
+     *
+     * @return Session
+     * @throws LogicException If no session is set.
+     */
+    private function requireSession(): Session
+    {
+        return $this->session ?? throw new LogicException('Session is not set on the request.');
+    }
+
+    /**
+     * User and password of the "Authorization: Basic" header.
+     *
+     * @return array{0?: string, 1?: string}
+     */
+    private function basicCredentials(): array
+    {
+        $header = $this->headers['AUTHORIZATION'] ?? '';
+
+        if (strncasecmp($header, 'Basic ', 6) !== 0) {
+            return [];
         }
+
+        $credentials = explode(':', (string) base64_decode(substr($header, 6)), 2);
+
+        return count($credentials) === 2 ? $credentials : [];
+    }
+
+    /**
+     * Headers from the $_SERVER values; restores Authorization that Apache passes only after a rewrite.
+     *
+     * @param array<string, mixed> $server
+     * @return array<string, string>
+     */
+    private static function extractHeaders(array $server): array
+    {
+        $headers = [];
+
+        foreach ($server as $key => $value) {
+            if (str_starts_with($key, 'HTTP_')) {
+                $headers[substr($key, 5)] = $value;
+            } elseif ($key === 'CONTENT_TYPE' || $key === 'CONTENT_LENGTH' || $key === 'CONTENT_MD5') {
+                $headers[$key] = $value;
+            }
+        }
+
+        if (! isset($headers['AUTHORIZATION'])) {
+            if (isset($server['REDIRECT_HTTP_AUTHORIZATION'])) {
+                $headers['AUTHORIZATION'] = $server['REDIRECT_HTTP_AUTHORIZATION'];
+            } elseif (isset($server['PHP_AUTH_USER'])) {
+                $headers['AUTHORIZATION'] = 'Basic ' . base64_encode($server['PHP_AUTH_USER'] . ':' . ($server['PHP_AUTH_PW'] ?? ''));
+            } elseif (isset($server['PHP_AUTH_DIGEST'])) {
+                $headers['AUTHORIZATION'] = $server['PHP_AUTH_DIGEST'];
+            }
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Accept header types.
+     *
+     * @param string $accept
+     * @return string[]
+     */
+    private static function parseAccept(string $accept): array
+    {
+        $types = [];
+
+        foreach (explode(',', $accept) as $type) {
+            $type = strtolower(trim(explode(';', $type, 2)[0]));
+            if ($type !== '') {
+                $types[] = $type;
+            }
+        }
+
+        return $types;
+    }
+
+    /**
+     * Accept-Language languages sorted by quality.
+     *
+     * @param string $accept
+     * @return string[]
+     */
+    private static function parseLanguages(string $accept): array
+    {
+        if (! preg_match_all('/([\w-]+)\s*(?:;\s*q\s*=\s*(\d*\.?\d*))?/', $accept, $matches)) {
+            return [];
+        }
+
+        $languages = [];
+        foreach ($matches[1] as $i => $language) {
+            $languages[self::languageKey($language)] = $matches[2][$i] === '' ? 1.0 : (float) $matches[2][$i];
+        }
+        arsort($languages);
+
+        return array_map(strval(...), array_keys($languages));
+    }
+
+    /**
+     * Key of the $headers array for a header name.
+     *
+     * @param string $name
+     * @return string
+     */
+    private static function headerKey(string $name): string
+    {
+        return strtoupper(strtr($name, '-', '_'));
+    }
+
+    /**
+     * Language in the $languages form: en-US → en_us.
+     *
+     * @param string $language
+     * @return string
+     */
+    private static function languageKey(string $language): string
+    {
+        return strtolower(strtr($language, '-', '_'));
+    }
+
+    /**
+     * Whether an input value counts as not filled: null, blank string or empty array.
+     *
+     * @param mixed $value
+     * @return bool
+     */
+    private static function isBlank(mixed $value): bool
+    {
+        return $value === null || $value === [] || (is_string($value) && trim($value) === '');
     }
 }

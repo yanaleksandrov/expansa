@@ -6,43 +6,77 @@ namespace Expansa\Http;
 
 use Expansa\Http\Contracts\Request as RequestContract;
 use Expansa\Http\Contracts\Response as ResponseContract;
-use Expansa\Cookie\Cookie;
+use Stringable;
 
-class Response implements ResponseContract
+/**
+ * Outgoing HTTP response: status, headers, cookies and body, sent with send().
+ *
+ * @package Expansa\Http
+ */
+final class Response implements ResponseContract
 {
-    protected string $version = '1.1';
+    /**
+     * Charset appended to the Content-Type header.
+     */
+    private const string CHARSET = 'utf-8';
 
-    protected string $charset = 'utf-8';
+    /**
+     * Set-Cookie header values.
+     *
+     * @var array<string|Stringable>
+     */
+    public private(set) array $cookies = [];
 
-    protected array $cookies = [];
+    public function __construct(
 
-    protected array $headers = [];
+        /**
+         * Response body.
+         */
+        public string $content = '',
 
-    protected int $statusCode = 200;
+        /**
+         * HTTP status code.
+         */
+        public int $statusCode = 200,
 
-    protected string $statusText = '';
+        /**
+         * Headers, name => value.
+         *
+         * @var array<string, string>
+         */
+        public array $headers = [],
+    ) {}
 
-    protected ?string $content = null;
-
-    public function __construct(string $content = '', int $statusCode = 200, array $headers = [])
+    /**
+     * Add a cookie, sent as a Set-Cookie header.
+     *
+     * @param string|Stringable $cookie The header value: `id=1; Path=/; HttpOnly` or an object that renders it.
+     * @return static
+     */
+    public function setCookie(string|Stringable $cookie): static
     {
-        $this->setContent($content)
-             ->setStatusCode($statusCode)
-             ->setHeaders($headers);
-    }
-
-    public function setStatusCode(int $statusCode): static
-    {
-        $this->statusCode = $statusCode;
+        $this->cookies[] = $cookie;
 
         return $this;
     }
 
-    public function code(int $statusCode): static
+    /**
+     * Forget the cookies added so far.
+     *
+     * @return void
+     */
+    public function flushCookies(): void
     {
-        return $this->setStatusCode($statusCode);
+        $this->cookies = [];
     }
 
+    /**
+     * Set a header, replacing the one with the same name; fluent alternative to $headers.
+     *
+     * @param string $name
+     * @param string $value
+     * @return static
+     */
     public function setHeader(string $name, string $value): static
     {
         $this->headers[$name] = $value;
@@ -50,172 +84,106 @@ class Response implements ResponseContract
         return $this;
     }
 
-    public function header(string $name, string $value): static
-    {
-        return $this->setHeader($name, $value);
-    }
-
-    public function setHeaders(array $headers = []): static
-    {
-        $this->headers = array_merge($this->headers, $headers);
-
-        return $this;
-    }
-
-    public function withHeaders(array $headers = []): static
-    {
-        return $this->setHeaders($headers);
-    }
-
-    public function headers(array $headers = []): static
-    {
-        return $this->setHeaders($headers);
-    }
-
-    public function clearCookies(): void
-    {
-        $this->cookies = [];
-    }
-
-    public function getCookies(): array
-    {
-        return $this->cookies;
-    }
-
-    public function setCookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, ?string $sameSite = null): static
-    {
-        if (is_string($cookie)) {
-            $expires = ($minutes === 0) ? 0 : time() + ($minutes * 60);
-
-            $cookie = new Cookie($cookie, $value, $expires, $path, $domain, $secure, $httpOnly, $sameSite);
-        }
-
-        $this->cookies[] = $cookie;
-
-        return $this;
-    }
-
-    public function cookie(Cookie|string $cookie, string $value = '', int $minutes = 0, string $path = '', string $domain = '', bool $secure = false, bool $httpOnly = false, ?string $sameSite = null): static
-    {
-        return $this->setCookie($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
-    }
-
-    public function withoutCookie(Cookie|string $cookie, $path = null, $domain = null): static
-    {
-        if (is_string($cookie)) {
-            $cookie = new Cookie($cookie, '', -2628000, $path, $domain);
-        }
-
-        return $this->setCookie($cookie);
-    }
-
-    public function setContent(?string $content): static
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
-    public function getContent(): string
-    {
-        return $this->content ?? '';
-    }
-
-    public function content(mixed $content = null): static|string|null
-    {
-        if (is_null($content)) {
-            return $this->getContent();
-        }
-
-        return $this->setContent($content);
-    }
-
+    /**
+     * Set the body to the JSON of the data along with the Content-Type header.
+     *
+     * @param array<array-key, mixed> $data
+     * @param int                     $statusCode
+     * @param array<string, string>   $headers    Added to the current headers.
+     * @return static
+     */
     public function json(array $data, int $statusCode = 200, array $headers = []): static
     {
-        $this->content = json_encode($data, JSON_UNESCAPED_UNICODE);
+        $this->content    = (string) json_encode($data, JSON_UNESCAPED_UNICODE);
+        $this->statusCode = $statusCode;
+        $this->headers    = [...$this->headers, 'Content-Type' => 'application/json', ...$headers];
 
-        $this->header('Content-Type', 'application/json');
-
-        return $this->setStatusCode($statusCode)->setHeaders($headers);
+        return $this;
     }
 
+    /**
+     * Adjust the response to the request: a HEAD response has no body.
+     *
+     * @param RequestContract $request
+     * @return static
+     */
     public function prepare(RequestContract $request): static
     {
-        if ($request->isMethod('HEAD')) {
-            $this->setContent(null);
+        if ($request->method === 'HEAD') {
+            $this->content = '';
         }
 
         return $this;
     }
 
+    /**
+     * Send the headers and the body, then finish the request so the script can go on without the client waiting.
+     *
+     * @return static
+     */
     public function send(): static
     {
-        $this->sendHeaders()->sendContent();
+        if (! headers_sent()) {
+            http_response_code($this->statusCode);
+
+            foreach ($this->headers as $name => $value) {
+                if (strcasecmp($name, 'Content-Type') === 0) {
+                    $value .= '; charset=' . self::CHARSET;
+                }
+                header($name . ': ' . $value, false);
+            }
+
+            foreach ($this->cookies as $cookie) {
+                header('Set-Cookie: ' . $cookie, false);
+            }
+        }
+
+        echo $this->content;
 
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         } elseif (function_exists('litespeed_finish_request')) {
             litespeed_finish_request();
-        } elseif (!in_array(PHP_SAPI, ['cli', 'phpdbg'], true)) {
-            static::closeOutputBuffers(0, true);
+        } elseif (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
+            self::closeOutputBuffers(0, flush: true);
         }
 
         return $this;
     }
 
-    protected function sendHeaders(): static
-    {
-        // headers have already been sent by the developer
-        if (headers_sent()) {
-            return $this;
-        }
-
-        // headers
-        foreach ($this->headers as $name => $value) {
-            if (strtolower($name) == 'content-type') {
-                header($name . ': ' . $value . '; charset=' . $this->charset, false, $this->statusCode);
-            } else {
-                header($name . ': ' . $value, false, $this->statusCode);
-            }
-        }
-
-        foreach ($this->cookies as $cookie) {
-            header("Set-Cookie: " . (string) $cookie, false, $this->statusCode);
-        }
-
-        header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode);
-
-        return $this;
-    }
-
-    protected function sendContent(): static
-    {
-        echo $this->getContent();
-
-        return $this;
-    }
-
-    public static function closeOutputBuffers(int $targetLevel, bool $flush): void
-    {
-        $status = ob_get_status(true);
-        $level  = count($status);
-        $flags  = PHP_OUTPUT_HANDLER_REMOVABLE | ($flush ? PHP_OUTPUT_HANDLER_FLUSHABLE : PHP_OUTPUT_HANDLER_CLEANABLE);
-
-        while ($level-- > $targetLevel && ($s = $status[$level]) && (!isset($s['del']) ? !isset($s['flags']) || ($s['flags'] & $flags) === $flags : $s['del'])) {
-            if ($flush) {
-                ob_end_flush();
-                flush();
-            } else {
-                ob_end_clean();
-            }
-        }
-    }
-
+    /**
+     * Whether the status is a redirect (201 or 3xx with a location), to the location if given.
+     *
+     * @param string|null $location
+     * @return bool
+     */
     public function isRedirect(?string $location = null): bool
     {
-        return in_array(
-            $this->statusCode,
-            [201, 301, 302, 303, 307, 308]
-        ) && (null === $location || $location == ($this->headers['Location'] ?? null));
+        return in_array($this->statusCode, [201, 301, 302, 303, 307, 308], true)
+            && ($location === null || $location === ($this->headers['Location'] ?? null));
+    }
+
+    /**
+     * Close the output buffers above the level that allow it, flushing or discarding their content.
+     *
+     * @param int  $targetLevel Buffer level to stop at, 0 closes all.
+     * @param bool $flush       Send the content instead of discarding it.
+     * @return void
+     */
+    public static function closeOutputBuffers(int $targetLevel, bool $flush): void
+    {
+        $flags  = PHP_OUTPUT_HANDLER_REMOVABLE | ($flush ? PHP_OUTPUT_HANDLER_FLUSHABLE : PHP_OUTPUT_HANDLER_CLEANABLE);
+        $status = ob_get_status(true);
+
+        for ($level = count($status) - 1; $level >= $targetLevel; $level--) {
+            if (($status[$level]['flags'] & $flags) !== $flags) {
+                break;
+            }
+            $flush ? ob_end_flush() : ob_end_clean();
+        }
+
+        if ($flush) {
+            flush();
+        }
     }
 }

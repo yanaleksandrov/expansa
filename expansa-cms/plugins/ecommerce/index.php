@@ -23,7 +23,7 @@ return new class extends Plugin
     public function boot(): void
     {
         // TODO: переделать подключение файлов плагинов
-        Hook::add('expansa_view_part', function ($filepath) {
+        Hook::add('viewPart', function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/order.php') {
                 $filepath = __DIR__ . '/views/order.php';
             }
@@ -180,21 +180,17 @@ return new class extends Plugin
 
     public function activate(): void
     {
-
     }
 
     public function deactivate(): void
     {
-
     }
 
     public function install(): void
     {
-
     }
 
     public function uninstall(): void
     {
-
     }
 };

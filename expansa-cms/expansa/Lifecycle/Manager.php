@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace Expansa\Lifecycle;
 
-use Expansa\Facades\Hook;
-use Expansa\Facades\Route;
-use Expansa\Lifecycle\Exception\LifecycleException;
+use Closure;
+use Expansa\Lifecycle\Exceptions\AlreadyDeclared;
+use Expansa\Lifecycle\Exceptions\AlreadyStarted;
 use Throwable;
 
 /**
  * Runs the application in a fixed order: phases one by one, then the first matching
  * context, then routing (not in the console). Every step fires hooks and is recorded
- * in the timeline; the "terminate" hook runs after the response is sent.
+ * in the timeline; the terminate callback runs when the lifecycle starts.
+ * Hooks and routing come from configure(), without it the steps run without them.
+ *
+ * @package Expansa\Lifecycle
  */
 final class Manager
 {
@@ -40,10 +43,51 @@ final class Manager
     private array $timeline = [];
 
     /**
+     * Fires a hook by name: `before{Phase}`, `after{Phase}`, `enter{Context}`.
+     */
+    private ?Closure $hook = null;
+
+    /**
+     * Called once by run(), to schedule the work after the response.
+     */
+    private ?Closure $terminate = null;
+
+    /**
+     * Dispatches the routes registered by the context.
+     */
+    private ?Closure $route = null;
+
+    /**
+     * Returns the request URI the contexts are matched against.
+     */
+    private ?Closure $uriResolver = null;
+
+    /**
+     * Set the hooks and routing of the steps, replacing the previous ones.
+     *
+     * @param Closure|null $hook      `fn (string $name)`, fires a lifecycle hook.
+     * @param Closure|null $terminate `fn ()`, called when run() starts, e.g. to defer the "terminate" hook.
+     * @param Closure|null $route     `fn ()`, dispatches the routes after the context, not in the console.
+     * @param Closure|null $uri       `fn (): string`, the request URI when run() gets none.
+     * @return void
+     */
+    public function configure(?Closure $hook = null, ?Closure $terminate = null, ?Closure $route = null, ?Closure $uri = null): void
+    {
+        $this->hook        = $hook;
+        $this->terminate   = $terminate;
+        $this->route       = $route;
+        $this->uriResolver = $uri;
+    }
+
+    /**
      * Declare a phase. Phases run in declaration order, wrapped by "before{Name}" and "after{Name}" hooks.
      * $when is a ready bool or a callable checked at run time; a skipped phase fires no hooks.
      *
-     * @throws LifecycleException
+     * @param string        $name
+     * @param bool|callable $when
+     * @param callable      $callback
+     * @return static
+     * @throws AlreadyStarted|AlreadyDeclared
      */
     public function phase(string $name, bool|callable $when, callable $callback): static
     {
@@ -58,7 +102,11 @@ final class Manager
      * Declare a context. After the phases only the first match runs, followed by the "enter{Name}" hook.
      * $when is a ready bool or $when(string $uri); matched on the first current()/is() call, even from a phase.
      *
-     * @throws LifecycleException
+     * @param string        $name
+     * @param bool|callable $when
+     * @param callable      $callback
+     * @return static
+     * @throws AlreadyStarted|AlreadyDeclared
      */
     public function context(string $name, bool|callable $when, callable $callback): static
     {
@@ -70,22 +118,26 @@ final class Manager
     }
 
     /**
-     * Run the lifecycle once. $uri defaults to the router's current URI, in the console to an empty string.
+     * Run the lifecycle once. $uri defaults to the configured URI source, in the console to an empty string.
      * $catch gets anything a step throws and stops the remaining steps; without it the exception propagates.
      *
+     * @param string|null                    $uri
      * @param callable(Throwable): void|null $catch
-     * @throws LifecycleException
+     * @return void
+     * @throws AlreadyStarted
      */
     public function run(?string $uri = null, ?callable $catch = null): void
     {
         if ($this->started) {
-            throw new LifecycleException('Lifecycle has already been run');
+            throw new AlreadyStarted('Lifecycle has already been run');
         }
         $this->started = true;
         $this->uri     = $uri ?? (PHP_SAPI === 'cli' ? '' : null);
 
-        // after the response is sent, also when a step exits early (redirect, exit)
-        Hook::defer('terminate');
+        // before the steps: a step may exit early (redirect, exit)
+        if ($this->terminate !== null) {
+            ($this->terminate)();
+        }
 
         try {
             $this->steps();
@@ -99,7 +151,9 @@ final class Manager
     }
 
     /**
-     * Name of the matched context; null before run() or when none matched.
+     * Get the name of the matched context; null before run() or when none matched.
+     *
+     * @return string|null
      */
     public function current(): ?string
     {
@@ -108,13 +162,19 @@ final class Manager
         return $this->current;
     }
 
+    /**
+     * Check if a context is the matched one.
+     *
+     * @param string $context
+     * @return bool
+     */
     public function is(string $context): bool
     {
         return $this->current() === $context;
     }
 
     /**
-     * Executed steps with duration in milliseconds and memory growth in bytes.
+     * Get the executed steps with duration in milliseconds and memory growth in bytes.
      *
      * @return array<int, array{name: string, type: string, time: float, memory: int}>
      */
@@ -125,17 +185,17 @@ final class Manager
 
     private function steps(): void
     {
+        $hook = $this->hook ?? static fn (string $name) => null;
+
         foreach ($this->phases as $name => $phase) {
-            if (!$this->passes($phase['when'])) {
+            if (! $this->passes($phase['when'])) {
                 continue;
             }
 
-            $hook = ucfirst($name);
-
-            $this->measure($name, 'phase', function () use ($hook, $phase) {
-                Hook::call("before$hook");
+            $this->measure($name, 'phase', function () use ($hook, $name, $phase) {
+                $hook('before' . ucfirst($name));
                 ($phase['callback'])();
-                Hook::call("after$hook");
+                $hook('after' . ucfirst($name));
             });
         }
 
@@ -145,45 +205,45 @@ final class Manager
             $name    = $this->current;
             $context = $this->contexts[$name];
 
-            $this->measure($name, 'context', function () use ($name, $context) {
+            $this->measure($name, 'context', function () use ($hook, $name, $context) {
                 ($context['callback'])();
-                Hook::call('enter' . ucfirst($name));
+                $hook('enter' . ucfirst($name));
             });
         }
 
         // dispatches the routes registered by the context; the console has none
-        if (PHP_SAPI !== 'cli') {
-            $this->measure('route', 'route', fn () => Route::run());
+        if ($this->route !== null && PHP_SAPI !== 'cli') {
+            $this->measure('route', 'route', $this->route);
         }
     }
 
     /**
-     * @throws LifecycleException
+     * @throws AlreadyStarted|AlreadyDeclared
      */
-    private function guard(?string $name, array $declared, string $type): void
+    private function guard(string $name, array $declared, string $type): void
     {
         if ($this->started) {
-            throw new LifecycleException("Cannot declare $type after the lifecycle has started");
+            throw new AlreadyStarted("Cannot declare $type after the lifecycle has started");
         }
 
-        if ($name !== null && isset($declared[$name])) {
-            throw new LifecycleException("The $type '$name' is already declared");
+        if (isset($declared[$name])) {
+            throw new AlreadyDeclared("The $type '$name' is already declared");
         }
     }
 
     private function resolve(): void
     {
         // before run() not all contexts may be declared yet, so nothing is memoized
-        if (!$this->started || $this->resolved) {
+        if (! $this->started || $this->resolved) {
             return;
         }
         $this->resolved = true;
 
-        if (!$this->contexts) {
+        if (! $this->contexts) {
             return;
         }
 
-        $uri = $this->uri ?? Route::uri();
+        $uri = $this->uri ?? ($this->uriResolver !== null ? ($this->uriResolver)() : '');
 
         foreach ($this->contexts as $name => $context) {
             if ($this->passes($context['when'], $uri)) {

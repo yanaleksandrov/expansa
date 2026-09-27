@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
+use Closure;
 use Expansa\Lifecycle\Manager;
 use Expansa\Patterns\Facade;
 
 /**
  * Application lifecycle facade: phases, contexts, routing and the load timeline.
  *
+ * @method static void        configure(?Closure $hook = null, ?Closure $terminate = null, ?Closure $route = null, ?Closure $uri = null)
  * @method static Manager     phase(string $name, bool|callable $when, callable $callback)
  * @method static Manager     context(string $name, bool|callable $when, callable $callback)
  * @method static void        run(?string $uri = null, ?callable $catch = null)

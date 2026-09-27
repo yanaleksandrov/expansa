@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
+use Expansa\Builders\Form;
 use Expansa\Builders\Forms\Contracts\Field;
-use Expansa\Facades\Asset;
-use Expansa\Facades\Safe;
-use Expansa\Facades\View;
+use Expansa\Security\Sanitizer;
 
 /**
- * Base class for all field type descriptors registered via {@see \Expansa\Facades\Form::configure()}.
+ * Base class for all field type descriptors registered via {@see \Expansa\Builders\Form::configure()}.
  *
  * A subclass describes one entry in the field type palette (label/icon/description),
  * knows which `dashboard/views/form/*.blade.php` template renders it, and provides the
@@ -54,7 +53,7 @@ abstract class AbstractField implements Field
          * Default field configuration merged under caller-provided values.
          */
         public readonly array $defaults = [],
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * View template name that renders this field type.
@@ -66,12 +65,12 @@ abstract class AbstractField implements Field
 
     public function assets(): void
     {
-        Asset::discover(View::make($this->view())->getPath(), $this->type, ['type' => $this->type]);
+        Form::assets($this->view(), $this->type);
     }
 
     public function render(array $field = []): string
     {
-        return (string) View::make($this->view(), [...$this->defaults, ...$field]);
+        return Form::view($this->view(), [...$this->defaults, ...$field]);
     }
 
     /**
@@ -107,8 +106,8 @@ abstract class AbstractField implements Field
                     'label'   => '',
                     'options' => [
                         'required' => [
-                            'content' => t('Required')
-                        ]
+                            'content' => t('Required'),
+                        ],
                     ],
                 ],
             ] : []),
@@ -126,7 +125,7 @@ abstract class AbstractField implements Field
      */
     protected function withRequired(array $field, string $rule = ''): string
     {
-        if (! Safe::bool($field['attributes']['required'] ?? false)) {
+        if (! Sanitizer::bool($field['attributes']['required'] ?? false)) {
             return '';
         }
 

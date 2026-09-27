@@ -5,19 +5,7 @@ declare(strict_types=1);
 // run: php tests/Syntax.php
 // Files loaded before App\Support\Requirements::check() must parse on an older PHP to show the
 // requirements page; bootstrap.php already needs PHP 8.0 (named arguments), so 8.1+ syntax is refused.
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
-
+require_once __DIR__ . '/bootstrap.php';
 /**
  * Syntax newer than PHP 8.0 found in the code, as "line: description".
  *
@@ -53,6 +41,8 @@ function newerSyntax(string $code): array
             $found[] = $line($i) . ': readonly (8.1)';
         } elseif ($type === T_ENUM) {
             $found[] = $line($i) . ': enum (8.1)';
+        } elseif ($type === T_AMPERSAND_NOT_FOLLOWED_BY_VAR_OR_VARARG && in_array($id($i - 1), $names, true) && in_array($id($i + 1), $names, true)) {
+            $found[] = $line($i) . ': intersection type (8.1)';
         } elseif ($type === T_ELLIPSIS && $text($i - 1) === '(' && $text($i + 1) === ')') {
             $found[] = $line($i) . ': first-class callable (8.1)';
         } elseif ($type === T_CONST && in_array($id($i + 1), $names, true) && in_array($id($i + 2), $names, true)) {
@@ -84,11 +74,12 @@ $samples = [
     'readonly'                  => '<?php class A { public function __construct(public readonly int $a) {} }',
     'enum'                      => '<?php enum Status { case On; }',
     'first-class callable'      => '<?php $f = strlen(...);',
+    'intersection type'         => '<?php function f(): A&B {}',
 ];
 foreach ($samples as $title => $code) {
     check("detects $title", newerSyntax($code) !== []);
 }
-check('allows PHP 8.0 syntax', newerSyntax('<?php (new Foo())->bar(); $a = new Foo(); f(name: 1); $b = fn () => match (1) { 1 => 2 }; $c = $d?->e; const X = [1];') === []);
+check('allows PHP 8.0 syntax', newerSyntax('<?php (new Foo())->bar(); $a = new Foo(); f(name: 1); $b = fn () => match (1) { 1 => 2 }; $c = $d?->e; const X = [1]; $f = $a & $b & 1;') === []);
 
 $files = [
     'bootstrap.php',

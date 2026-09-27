@@ -7,24 +7,33 @@ namespace Expansa\Support;
 use DOMDocument;
 
 /**
- * Usage:
- * $svg = new Svg();
- * $svg->addSprite( $imagesDir, $spriteDir ); // create sprite.
+ * SVG sprites and sanitizing of SVG markup by a whitelist of elements and attributes.
  *
- * Svg::sprite( 'logo' ); // output symbol
+ * ```php
+ * new Svg()->addSprite($imagesDir, $spriteDir);   // builds sprite.svg from the directory
+ * Svg::sprite('logo');                            // prints a symbol of the sprite
+ * ```
+ *
+ * @package Expansa\Support
  */
-class Svg
+final class Svg
 {
+    /**
+     * Symbols of the last built sprite by id: width, height and viewBox.
+     *
+     * @var array<string, array<string, string>>
+     */
     public static array $items = [];
 
+    /**
+     * Path of the last built sprite file.
+     */
     public static string $source = '';
 
-    private DOMDocument $xml;
-
     /**
-     * Defines the whitelist of elements and attributes allowed.
+     * Allowed elements and their allowed attributes.
      */
-    private static array $whitelist = [
+    private const array WHITELIST = [
         'a'              => [
             'class',
             'clip-path',
@@ -601,14 +610,22 @@ class Svg
         ],
     ];
 
+    private DOMDocument $xml;
+
     public function __construct()
     {
-        $this->xml = new DOMDocument();
+        $this->xml                     = new DOMDocument();
         $this->xml->preserveWhiteSpace = false;
-        $this->xml->formatOutput = true;
+        $this->xml->formatOutput       = true;
     }
 
-    public function globTreeFiles($path): array
+    /**
+     * Find the .svg files of a directory and its subdirectories.
+     *
+     * @param string $path Directory with a trailing slash.
+     * @return string[]
+     */
+    public function globTreeFiles(string $path): array
     {
         $out = [];
         foreach (glob($path . '*.svg') as $file) {
@@ -621,12 +638,19 @@ class Svg
         return $out;
     }
 
-    public static function sprite($id, bool $print = true): bool|string
+    /**
+     * Render a symbol of the sprite as an `<svg><use></svg>` element.
+     *
+     * @param string $id    Symbol id: the file name of the source SVG.
+     * @param bool   $print Print the markup as well as return it.
+     * @return string Empty for an unknown symbol.
+     */
+    public static function sprite(string $id, bool $print = true): string
     {
-        $id = trim($id ?? '');
-        $symbol = (array) (self::$items[$id] ?? []);
+        $id     = trim($id);
+        $symbol = self::$items[$id] ?? [];
 
-        if (empty($symbol) || empty($id)) {
+        if ($symbol === [] || $id === '') {
             return '';
         }
 
@@ -634,7 +658,7 @@ class Svg
 
         ob_start();
         ?>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none"<?php echo Arr::toHtmlAtts($symbol); ?>>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none"<?php echo Arr::toHtmlAttributes($symbol); ?>>
             <use xlink:href="/<?php echo $url; ?>"></use>
         </svg>
         <?php
@@ -645,33 +669,39 @@ class Svg
         return ob_get_clean();
     }
 
-    public function addSprite($from_dir, $to_dir): string
+    /**
+     * Build `sprite.svg` from the .svg files of a directory and remember their symbols.
+     *
+     * @param string $fromDir Directory of the source files, with a trailing slash.
+     * @param string $toDir   Directory of the sprite, with a trailing slash.
+     * @return void
+     */
+    public function addSprite(string $fromDir, string $toDir): void
     {
-        $sprite = $to_dir . 'sprite.svg';
-        $files = array_filter(glob($from_dir . '*.svg'), 'file_exists');
-        if (! empty($files)) {
-            $_files = [];
+        $sprite = $toDir . 'sprite.svg';
+        $files  = array_filter(glob($fromDir . '*.svg') ?: [], 'file_exists');
+        if ($files) {
+            $symbols = [];
             foreach ($files as $file) {
-                $is_loaded = $this->load($file);
-                if ($is_loaded) {
-                    $elements = $this->xml->getElementsByTagName('*');
-                    $symbol_whitelist = self::$whitelist['symbol'];
-                    $node = $elements->item(0);
+                if ($this->load($file)) {
+                    $elements        = $this->xml->getElementsByTagName('*');
+                    $symbolWhitelist = self::WHITELIST['symbol'];
+                    $node            = $elements->item(0);
 
                     if ($node->tagName === 'svg') {
                         // add required attributes
                         $filename = trim(pathinfo($file, PATHINFO_FILENAME));
                         if ($filename) {
-                            $dom = $this->xml->createAttribute('id');
+                            $dom        = $this->xml->createAttribute('id');
                             $dom->value = $filename;
                             $this->xml->documentElement->appendChild($dom);
                         }
 
                         if (! $node->hasAttribute('viewBox')) {
-                            $width = $this->xml->documentElement->getAttribute('width');
+                            $width  = $this->xml->documentElement->getAttribute('width');
                             $height = $this->xml->documentElement->getAttribute('height');
                             if ($width && $height) {
-                                $dom = $this->xml->createAttribute('viewBox');
+                                $dom        = $this->xml->createAttribute('viewBox');
                                 $dom->value = sprintf('0 0 %d %d', $width, $height);
                                 $this->xml->documentElement->appendChild($dom);
 
@@ -686,13 +716,13 @@ class Svg
                         // remove all not allowed attributes
                         for ($x = 0; $x < $node->attributes->length; ++$x) {
                             $attr = $node->attributes->item($x)->name;
-                            if (! in_array($attr, $symbol_whitelist, true)) {
+                            if (! in_array($attr, $symbolWhitelist, true)) {
                                 $node->removeAttribute($attr);
                                 --$x;
                             }
                         }
 
-                        $_files[] = str_replace(['<svg', 'svg>'], ['<symbol', 'symbol>'], $this->xml->saveHTML());
+                        $symbols[] = str_replace(['<svg', 'svg>'], ['<symbol', 'symbol>'], $this->xml->saveHTML());
                     }
                 }
             }
@@ -703,61 +733,75 @@ class Svg
                 $sprite,
                 sprintf(
                     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">%s</svg>',
-                    implode(
-                        '',
-                        $_files
-                    )
+                    implode('', $symbols)
                 )
             );
         }
-        return '';
     }
 
-    // load XML SVG
-    public function load($file)
+    /**
+     * Load an SVG file.
+     *
+     * @param string $file
+     * @return bool
+     */
+    public function load(string $file): bool
     {
         return $this->xml->load($file);
     }
 
-    // load XML SVG
-    public function loadXML($source): void
+    /**
+     * Load SVG markup.
+     *
+     * @param string $source
+     * @return void
+     */
+    public function loadXML(string $source): void
     {
         $this->xml->loadXML($source);
     }
 
-    public function save($file)
+    /**
+     * Save the loaded SVG to a file.
+     *
+     * @param string $file
+     * @return int|false Bytes written.
+     */
+    public function save(string $file): int|false
     {
         return $this->xml->save($file);
     }
 
-    public function saveXML()
+    /**
+     * Get the markup of the loaded SVG.
+     *
+     * @return string|false
+     */
+    public function saveXML(): string|false
     {
         return $this->xml->saveXML($this->xml->documentElement);
     }
 
     /**
+     * Remove the elements and attributes that are not whitelisted from the loaded SVG.
+     *
      * @see https://github.com/alnorris/SVG-Sanitizer
+     * @return void
      */
     public function sanitize(): void
     {
-        // all elements in xml doc
         $elements = $this->xml->getElementsByTagName('*');
 
-        // loop through all elements
         for ($i = 0; $i < $elements->length; ++$i) {
             $node = $elements->item($i);
 
-            // array of allowed attributes in specific element
-            $whitelist_attr_arr = self::$whitelist[$node->tagName];
+            $allowed = self::WHITELIST[$node->tagName] ?? null;
 
-            // does element exist in whitelist?
-            if (isset($whitelist_attr_arr)) {
+            if ($allowed !== null) {
                 for ($x = 0; $x < $node->attributes->length; ++$x) {
-                    // get attributes name
                     $attr = $node->attributes->item($x)->name;
 
-                    // check if attribute isn't in whitelist
-                    if (! in_array($attr, $whitelist_attr_arr, true)) {
+                    if (! in_array($attr, $allowed, true)) {
                         $node->removeAttribute($attr);
                         --$x;
                     }

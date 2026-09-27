@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/checkbox.blade.php` - one checkbox, or a set of checkboxes when `options` is given.
  */
-class Checkbox extends AbstractField
+final class Checkbox extends AbstractField
 {
     public function __construct()
     {

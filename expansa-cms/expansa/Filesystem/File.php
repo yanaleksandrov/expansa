@@ -4,182 +4,165 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem;
 
-use DateTime;
-use Expansa\Filesystem\Contracts\CommonInterface;
-use Expansa\Filesystem\Contracts\FileInterface;
+use Expansa\Filesystem\Internal\AbstractEntry;
+use InvalidArgumentException;
+use Expansa\Filesystem\Contracts\File as FileContract;
+use Expansa\Filesystem\Exceptions\OperationFailed;
+use Expansa\Filesystem\Internal\Name;
 
 /**
- * The File class provides a convenient and easy-to-use API for working with files.
- * It supports working with various types: CSV, SVG and images of different formats.
+ * A file: reading, writing, copying, moving and sending it to the browser.
+ * Failed operations throw OperationFailed.
  *
- * You can perform a wide range of operations: reading and writing to a file,
- * downloading and capturing, moving and copying files, and much more.
+ * @package Expansa\Filesystem
  */
-class File extends EntryHandler implements CommonInterface, FileInterface
+final class File extends AbstractEntry implements FileContract
 {
-    public function chmod(int $mode = 0755): File
+    public bool $exists {
+        get => is_file($this->path);
+    }
+
+    public int $bytes {
+        get => $this->exists ? (int) filesize($this->path) : 0;
+    }
+
+    /**
+     * MD5 of the contents, empty for a missing file.
+     */
+    public string $hash {
+        get => $this->exists ? (string) hash_file('md5', $this->path) : '';
+    }
+
+    /**
+     * MIME type detected from the contents, empty for a missing file.
+     */
+    public string $mime {
+        get => $this->exists ? (string) mime_content_type($this->path) : '';
+    }
+
+    public function chmod(int $mode = 0644): static
     {
-        if ($this->exists && ! chmod($this->path, $mode)) {
-            $this->errors[] = t('Failed to update file permissions');
+        if (! @chmod($this->path, $mode)) {
+            throw new OperationFailed("Failed to change the permissions of $this->path");
         }
+
         return $this;
     }
 
-    public function clean(): File
+    public function clean(): static
     {
-        if ($this->exists) {
-            $handle = fopen($this->path, 'w');
-            if ($handle) {
-                fclose($handle);
-            } else {
-                $this->errors[] = t('Failed to open the file for writing.');
-            }
-        } else {
-            $this->errors[] = t('The file does not exist or you don\'t have permission to edit the file.');
-        }
-
-        return $this;
+        return $this->write('', append: false);
     }
 
-    public function copy(string $name): File
+    public function copy(string $name): static
     {
-        if ($this->exists) {
-            $newPath = sprintf('%s/%s.%s', $this->dirpath, $name, $this->extension);
-            $dirPath = dirname($newPath);
+        $this->ensureExists();
 
-            if (!is_dir($dirPath) && !mkdir($dirPath, 0755, true)) {
-                $this->errors[] = t('Failed to create the directory.');
-            } elseif (!is_file($newPath) && !copy($this->path, $newPath)) {
-                $this->errors[] = is_file($newPath)
-                    ? t('File already exists at the destination.')
-                    : t('Failed to copy the file.');
-            }
+        $path = $this->dirpath . '/' . $this->basenameOf($name);
+        if (file_exists($path)) {
+            throw new OperationFailed("File $path already exists");
         }
 
-        return $this;
+        if (! @copy($this->path, $path)) {
+            throw new OperationFailed("Failed to copy $this->path to $path");
+        }
+
+        return new self($path);
     }
 
     public function delete(): bool
     {
-        if ($this->exists) {
-            if (unlink($this->path)) {
-                return true;
-            }
-        }
-        return false;
+        return $this->exists && @unlink($this->path);
     }
 
     public function download(): void
     {
-        if ($this->exists) {
-            header('Content-Description: File Transfer');
-            header('Content-Type: application/octet-stream');
-            header('Content-Disposition: attachment; filename="' . $this->basename . '"');
-            header('Expires: 0');
-            header('Cache-Control: must-revalidate');
-            header('Pragma: public');
-            header('Content-Length: ' . $this->sizeB);
-
-            // read the file and output it to the browser
-            ob_clean();
-            flush();
-            readfile($this->path);
-            exit;
+        if (! $this->exists) {
+            return;
         }
+
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $this->basename . '"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . $this->bytes);
+
+        if (ob_get_level() > 0) {
+            ob_clean();
+        }
+        flush();
+        readfile($this->path);
+        exit;
     }
 
-    public function move(string $to): File
+    public function move(string $directory): static
     {
-        if ($this->exists) {
-            $directory = dirname($to);
-            $filepath  = $directory . DIRECTORY_SEPARATOR . $this->filename;
-
-            if (!is_dir($directory) && !mkdir($directory, 0755, true)) {
-                $this->errors[] = t('Failed to create directory "%s".', $directory);
-                return $this;
-            }
-
-            if (rename($this->path, $filepath)) {
-                return new self($filepath);
-            }
-
-            $this->errors[] = t('Failed to move the file.');
+        $directory = rtrim($directory, '/\\');
+        if (! is_dir($directory) && ! @mkdir($directory, 0755, true)) {
+            throw new OperationFailed("Failed to create the directory $directory");
         }
-        return $this;
+
+        return $this->relocate(Name::unique($directory, $this->basename));
     }
 
     public function read(): string
     {
-        return $this->exists ? (file_get_contents($this->path) ?: '') : '';
+        return $this->exists ? (string) file_get_contents($this->path) : '';
     }
 
-    public function rename(string $name): File
+    public function rename(string $name): static
     {
-        if (!$this->exists) {
-            $this->errors[] = t('The file does not exist at the destination.');
-        } else {
-            $newPath = $this->dirpath . DIRECTORY_SEPARATOR . $this->sanitizeName($name);
-            if (!rename($this->path, $newPath)) {
-                $this->errors[] = t('Failed to rename file to "%s".', $newPath);
-            } else {
-                return new self($newPath);
-            }
+        $name = Name::sanitize($name);
+        if ($name === '') {
+            throw new InvalidArgumentException('The file name is empty or contains only invalid characters');
         }
+
+        return $this->relocate(Name::unique($this->dirpath, $this->basenameOf($name)));
+    }
+
+    public function replace(array $pairs): static
+    {
+        return $this->write(strtr($this->read(), $pairs), append: false);
+    }
+
+    public function touch(?int $time = null, ?int $atime = null): static
+    {
+        $time ??= time();
+
+        if (! @touch($this->path, $time, $atime ?? $time)) {
+            throw new OperationFailed("Failed to update the timestamps of $this->path");
+        }
+        clearstatcache(true, $this->path);
 
         return $this;
     }
 
-    public function rewrite(array $content): File
+    public function write(string $content, bool $append = true): static
     {
-        if ($this->exists && is_readable($this->path) && filesize($this->path) > 0) {
-            $file_content = file_get_contents($this->path);
-
-            foreach ($content as $field => $value) {
-                $file_content = str_replace($field, $value, $file_content);
-            }
-
-            file_put_contents($this->path, $file_content);
+        $directory = $this->dirpath;
+        if (! is_dir($directory) && ! @mkdir($directory, 0755, true)) {
+            throw new OperationFailed("Failed to create the directory $directory");
         }
+
+        if (@file_put_contents($this->path, $content, $append ? FILE_APPEND : 0) === false) {
+            throw new OperationFailed("Unable to write to the file $this->path");
+        }
+        clearstatcache(true, $this->path);
+
         return $this;
     }
 
-    public function touch(?int $time = null, ?int $atime = null): File
+
+    /**
+     * Append the extension of this file to a name.
+     *
+     * @param string $name
+     * @return string
+     */
+    private function basenameOf(string $name): string
     {
-        if ($this->exists) {
-            $time  = $time ?? time();
-            $atime = $atime ?? $time;
-
-            if (!touch($this->path, $time, $atime)) {
-                $this->errors[] = t('Failed to update the timestamps for ":filePath".', $this->path);
-            }
-
-            $this->modified = new DateTime()->setTimestamp($time)->format('Y-m-d H:i:s');
-        }
-        return $this;
-    }
-
-    public function write(mixed $content, bool $after = true): File
-    {
-        $this->createFile();
-
-        if (!is_writable($this->path)) {
-            $this->errors[] = t("The file is not writable: ':path'", $this->path);
-            return $this;
-        }
-
-        $fp = fopen($this->path, $after ? 'a' : 'w');
-        if (!$fp) {
-            $this->errors[] = t("The file cannot be opened: ':path'", $this->path);
-        } else {
-            if (fwrite($fp, $content) === false) {
-                $this->errors[] = t("Unable to write to the file: ':path'", $this->path);
-            }
-            fclose($fp);
-
-            // file is changed, update data about file, e.g.: "size" etc.
-            return new self($this->path);
-        }
-
-        return $this;
+        return $this->extension === '' ? $name : $name . '.' . $this->extension;
     }
 }

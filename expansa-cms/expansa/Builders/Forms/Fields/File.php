@@ -9,7 +9,7 @@ namespace Expansa\Builders\Forms\Fields;
  * (unlike the richer {@see Uploader}), so this reuses `form/input.blade.php` with
  * its `type` attribute forced to `file`.
  */
-class File extends AbstractField
+final class File extends AbstractField
 {
     public function __construct()
     {

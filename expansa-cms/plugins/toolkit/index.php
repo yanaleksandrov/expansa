@@ -27,7 +27,7 @@ return new class extends Plugin
 
         Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
 
-        Hook::add('expansa_view_part', function ($filepath) {
+        Hook::add('viewPart', function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/fields-builder.php') {
                 $filepath = __DIR__ . '/views/fields-builder.php';
             }
@@ -259,7 +259,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => t('This is the name which will appear on the EDIT page'),
                                     'attributes'  => [
-                                        'u-prop' => 'label',
+                                        'u-prop'      => 'label',
                                         'value'       => 'Title',
                                         'placeholder' => t('Field label'),
                                     ],
@@ -273,7 +273,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => t('Single word, no spaces. Underscores and dashes allowed'),
                                     'attributes'  => [
-                                        'u-prop' => 'name',
+                                        'u-prop'      => 'name',
                                         'value'       => '',
                                         'placeholder' => t('Field label'),
                                     ],
@@ -288,7 +288,7 @@ return new class extends Plugin
                                     'instruction' => t('Appears when creating a new post'),
                                     'attributes'  => [
                                         'u-prop' => 'value',
-                                        'value' => '',
+                                        'value'  => '',
                                     ],
                                 ],
                                 [
@@ -359,7 +359,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => '',
                                     'attributes'  => [
-                                        'u-prop' => 'labelClass',
+                                        'u-prop'      => 'labelClass',
                                         'placeholder' => t('e.g. df aic fs-12 t-muted'),
                                     ],
                                 ],
@@ -372,7 +372,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => '',
                                     'attributes'  => [
-                                        'u-prop' => 'before',
+                                        'u-prop'      => 'before',
                                         'placeholder' => t('e.g. <i class="ph ph-bug"></i>'),
                                     ],
                                 ],
@@ -385,7 +385,7 @@ return new class extends Plugin
                                     'tooltip'     => '',
                                     'instruction' => '',
                                     'attributes'  => [
-                                        'u-prop' => 'after',
+                                        'u-prop'      => 'after',
                                         'placeholder' => t('e.g. Mb'),
                                     ],
                                 ],
@@ -441,21 +441,17 @@ return new class extends Plugin
 
     public function activate(): void
     {
-
     }
 
     public function deactivate(): void
     {
-
     }
 
     public function install(): void
     {
-
     }
 
     public function uninstall(): void
     {
-
     }
 };

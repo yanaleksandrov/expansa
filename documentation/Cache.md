@@ -5,16 +5,57 @@ Cache — простое хранилище пар ключ/значение с 
 уже было получено раньше: результат тяжёлого запроса к БД, ответ внешнего API, вычисленное
 значение и т.д.
 
-Всё взаимодействие идёт через фасад `Cache`, который сам решает, какой провайдер (реализация
-хранилища) использовать. По умолчанию это `Expansa\Cache\Providers\Memory` — хранилище в памяти
-текущего процесса.
+Всё взаимодействие идёт через фасад `Cache`. Его экземпляр — `Cache\Manager`: хранилища описаны в
+конфигурации, методы фасада работают с хранилищем по умолчанию, `Cache::store('имя')` — с любым
+другим. Без конфигурации это память текущего запроса (`Providers\Memory`).
 
 ```php
 use Expansa\Facades\Cache;
 
-Cache::set('key', 'value');
-Cache::get('key'); // 'value'
+Cache::set('key', 'value');                         // хранилище по умолчанию
+Cache::get('key');                                  // 'value'
+Cache::store('redis')->get('report', 'stats');      // другое хранилище
 ```
+
+| Класс                  | Назначение                                                            |
+|------------------------|-----------------------------------------------------------------------|
+| `Manager`              | Хранилища из конфигурации, создаются при первом обращении; экземпляр фасада |
+| `Contracts\Provider`   | Контракт хранилища: `add`, `set`, `get`, `pull`, `forget`, …          |
+| `Providers\*`          | Хранилища: `Memory`, `File`, `Apcu`, `Redis`, `Memcached`, `Database` |
+| `Traits\*`             | Общая инфраструктура провайдеров: блокировки, memo, сериализация      |
+
+## Конфигурация
+
+Хранилища описываются в `env.php` константой `EX_CACHE`, `bootstrap.php` передаёт её в
+`Cache::configure()` в фазе `configure`. `default` — хранилище методов фасада, переменная окружения
+`EX_CACHE_STORE` его переопределяет. Без `EX_CACHE` кэш живёт в памяти запроса.
+
+```php
+define('EX_CACHE', [
+    'default' => getenv('EX_CACHE_STORE') ?: 'memory',
+    'stores'  => [
+        'memory'    => ['driver' => 'memory'],
+        'file'      => ['driver' => 'file', 'path' => EX_STORAGE . 'cache'],
+        'apcu'      => ['driver' => 'apcu'],
+        'redis'     => ['driver' => 'redis', 'host' => '127.0.0.1', 'port' => 6379],
+        'memcached' => ['driver' => 'memcached', 'servers' => [['127.0.0.1', 11211]]],
+        'database'  => ['driver' => 'database'],
+    ],
+]);
+```
+
+| Драйвер     | Параметры                                              | Провайдер   |
+|-------------|--------------------------------------------------------|-------------|
+| `memory`    | —                                                      | `Memory`    |
+| `file`      | `path`                                                 | `File`      |
+| `apcu`      | —                                                      | `Apcu`      |
+| `redis`     | `host` (`127.0.0.1`), `port` (6379), `password`, `database` | `Redis`     |
+| `memcached` | `servers`: `[[хост, порт, вес], …]`                    | `Memcached` |
+| `database`  | `connection`: колбэк, возвращающий `Query\Builder`; добавляет `bootstrap.php` | `Database`  |
+
+Хранилище создаётся при первом обращении: неиспользуемый Redis не открывает соединение.
+Повторный `configure()` заменяет конфигурацию и сбрасывает созданные хранилища, `forgetStore()` —
+одно. Свой драйвер — `Cache::extend('name', fn (array $config) => new MyProvider(...))`.
 
 ## Группы
 
@@ -31,19 +72,20 @@ Cache::forget('', 'posts'); // очищает только группу 'posts'
 
 ## Добавление и чтение
 
-`add()` записывает значение, только если ключа ещё нет (или он уже истёк) — повторный вызов с тем
-же ключом молча вернёт то, что уже лежит в кэше, не перезаписывая его. `set()`, наоборот, всегда
-перезаписывает значение и сбрасывает любой прежний TTL.
+`add()` записывает значение, только если ключа ещё нет (или он уже истёк), и возвращает `true`;
+если ключ есть, заблокирован `suspend()` или срок уже истёк — `false`, кэш не меняется. `set()`,
+наоборот, всегда перезаписывает значение, сбрасывает любой прежний TTL и возвращает `true`.
 
 ```php
-Cache::add('key', 'first');
-Cache::add('key', 'second'); // 'first' — add() не перезаписывает существующий ключ
+Cache::add('key', 'first');  // true
+Cache::add('key', 'second'); // false — add() не перезаписывает существующий ключ
+Cache::get('key');           // 'first'
 
 Cache::set('key', 'second'); // перезаписывает безусловно
 ```
 
 `get()` умеет лениво вычислять значение через callback, если ключа нет — результат callback тут
-же сохраняется через `add()`, так что повторные вызовы `get()` больше не выполняют callback:
+же сохраняется через `add()` и возвращается, так что повторные вызовы `get()` больше не выполняют callback:
 
 ```php
 $posts = Cache::get('recent', 'posts', function () {
@@ -93,11 +135,14 @@ Cache::suspend(function () {
 }, 'key', 'group');
 ```
 
+Блокировка касается только записи: `get()` с callback для заблокированного ключа вернёт результат
+callback, но в кэш его не положит.
+
 ## Провайдеры
 
 Провайдер — конкретная реализация хранилища, спрятанная за одним и тем же контрактом
-`Expansa\Cache\Contracts\Provider`. Фасад `Cache` всегда резолвится в `Memory` — чтобы явно
-использовать другой провайдер, создайте его экземпляр самостоятельно вместо обращения через фасад.
+`Expansa\Cache\Contracts\Provider`. Какой из них использовать, задаёт конфигурация (см. выше);
+экземпляр можно создать и напрямую: `new File(EX_STORAGE . 'cache')`.
 
 | Провайдер | Хранилище | Переживает конец процесса | TTL | Очистка всей группы |
 |---|---|---|---|---|
@@ -153,7 +198,7 @@ Memcached уже есть в инфраструктуре (например, у 
 
 ## Производительность
 
-### L1-память в оперативной памяти процесса (`Concerns\Memoizes`)
+### L1-память в оперативной памяти процесса (`Traits\Memoizes`)
 
 Перед каждым персистентным провайдером (`Database`, `File`, `APCu`, `Redis`, `Memcached`) стоит
 memo-слой уровня одного запроса/процесса: если один и тот же ключ читается несколько раз за один
@@ -172,10 +217,10 @@ Memo привязан не к классу, а к конкретному экз�
 PHP-FPM запроса (один процесс — один запрос) это не проблема; в долгоживущем воркере (RoadRunner,
 Swoole) окно шире и совпадает с временем жизни экземпляра провайдера.
 
-### Опциональный `ext-igbinary` (`Concerns\Serializes`)
+### Опциональный `ext-igbinary` (`Traits\Serializes`)
 
 `Database`, `File`, `Redis` и `Memcached` хранят значения не через `serialize()`/`unserialize()`
-напрямую, а через `Concerns\Serializes`: если расширение `igbinary` подключено, используется оно
+напрямую, а через `Traits\Serializes`: если расширение `igbinary` подключено, используется оно
 (компактнее и быстрее нативного `serialize()` на массивах/объектах — а именно они чаще всего лежат
 в кэше), иначе — прозрачный откат на `serialize()`. Формат самоописывающийся (один служебный байт
 перед данными), поэтому уже записанные записи остаются читаемыми после того, как `igbinary`
@@ -184,7 +229,7 @@ Swoole) окно шире и совпадает с временем жизни �
 `igbinary` — бинарный формат (произвольные байты, включая `\0`), поэтому безопасен для File
 (файл), Redis и Memcached (бинарно-безопасные хранилища), но не для сырого текстового столбца.
 `Database` хранит `value` в `MEDIUMTEXT` с проверкой кодировки (`utf8mb4`), поэтому там
-`Concerns\Serializes` дополнительно оборачивается в `base64` перед записью в таблицу — см.
+`Traits\Serializes` дополнительно оборачивается в `base64` перед записью в таблицу — см.
 находку об этом в «Docker-стенд» ниже.
 
 ### Измерения на хосте (Memory/File, без Docker)
@@ -227,14 +272,14 @@ callback, `pull`, `increase`/`decrease`, отказ `increase()` на нечис
    даёт печатаемый ASCII, поэтому раньше проблема не проявлялась, но бинарный формат `igbinary`
    содержит произвольные байты (включая `\0`) — MySQL их портил при перекодировке, и
    `igbinary_unserialize()` падал с `end-of-data`. Починено оборачиванием в `base64` только на
-   границе `Database`-провайдера (`Concerns\Serializes` для `File`/`Redis`/`Memcached` не
+   границе `Database`-провайдера (`Traits\Serializes` для `File`/`Redis`/`Memcached` не
    тронут — там значение и так лежит в бинарно-безопасном хранилище).
-3. **L1-memo был квадратичным по размеру группы.** Первая версия `Concerns\Memoizes` хранила
+3. **L1-memo был квадратичным по размеру группы.** Первая версия `Traits\Memoizes` хранила
    memo как обычный массив внутри `WeakMap`: каждая запись делала «прочитать весь массив →
    изменить копию → записать весь массив обратно», а массивы в PHP копируются по значению — так
    запись N уникальных ключей в одну группу стала O(N²). На `APCu` (сам по себе очень быстрый)
    это превращало `set()` из ~800 тыс. оп/с в ~5 тыс. Починено: `WeakMap` теперь хранит один
-   объект-держатель (`Concerns\MemoStore`) на инстанс, а не массив, и мутация идёт через свойство
+   объект-держатель (`Internal\MemoStore`) на инстанс, а не массив, и мутация идёт через свойство
    объекта — O(1) в среднем, без пересборки всего массива на каждую запись.
 
 Ниже — цифры уже после всех трёх исправлений.
@@ -260,7 +305,7 @@ callback, `pull`, `increase`/`decrease`, отказ `increase()` на нечис
   провайдер, где инфраструктура L1-memo и `Locks` заметна на фоне самого бэкенда. Для
   `Redis`/`Memcached`/`Database`/`File` тот же самый оверхед тонет в стоимости похода в сеть/на
   диск, поэтому там `set()`/cold `get()` не просели (`Redis`/`Memcached` даже чуть быстрее — за
-  счёт `igbinary` в `Concerns\Serializes` на пути записи).
+  счёт `igbinary` в `Traits\Serializes` на пути записи).
 - Абсолютные цифры — для этого конкретного докер-окружения (контейнеры без выделенных ресурсов,
   на Windows-хосте через Docker Desktop), не для продакшен-железа; важнее порядок величины и
   относительное до/после на одной и той же машине.
@@ -276,13 +321,16 @@ callback, `pull`, `increase`/`decrease`, отказ `increase()` на нечис
 
 Хранит записи в таблице `cache` (`key`, `value`, `expiry_at`) — переживает перезапуск процесса.
 Поскольку в таблице нет колонки группы, группа и ключ склеиваются в один физический ключ
-(`"группа:ключ"`). Значение кодируется через `Concerns\Serializes` — `igbinary`, если он подключён,
+(`"группа:ключ"`). Значение кодируется через `Traits\Serializes` — `igbinary`, если он подключён,
 иначе `serialize()`/`unserialize()` (см. «Производительность» выше).
+
+Единственный провайдер, зависящий от пакета `Database`: соединение передаётся в конструктор.
 
 ```php
 use Expansa\Cache\Providers\Database;
+use Expansa\Facades\Db;
 
-$cache = new Database();
+$cache = new Database(Db::instance());
 $cache->add('key', $value, 'group', '+1 hour');
 ```
 
@@ -293,14 +341,13 @@ $cache->add('key', $value, 'group', '+1 hour');
 ### File
 
 Хранит каждую запись отдельным файлом на диске: один каталог на группу, один файл на ключ (имя —
-`sha1($key) . '.cache'`, чтобы произвольный ключ всегда был безопасным именем файла). По умолчанию
-использует каталог `EX_PATH . 'storage/cache/'`, но его можно переопределить:
+`sha1($key) . '.cache'`, чтобы произвольный ключ всегда был безопасным именем файла). Корневой
+каталог передаётся в конструктор, каталоги групп создаются при первой записи:
 
 ```php
 use Expansa\Cache\Providers\File;
 
-$cache = new File(); // EX_PATH . 'storage/cache/'
-$cache = new File('/var/cache/myapp'); // свой каталог
+$cache = new File(EX_STORAGE . 'cache');
 
 $cache->add('key', $value, 'group', '+1 hour');
 ```
@@ -370,7 +417,7 @@ TTL тоже нативный. Но у Memcached нет команды пере�
 ## Свой провайдер
 
 Любое хранилище можно подключить, реализовав `Expansa\Cache\Contracts\Provider`. Три трейта в
-`Expansa\Cache\Concerns` — те же, что использует каждый встроенный провайдер — избавляют от
+`Expansa\Cache\Traits` — те же, что использует каждый встроенный провайдер — избавляют от
 переписывания типовой инфраструктуры:
 
 - `Locks` — блокировка ключа на время `suspend()` (реализует сам метод `suspend()` целиком).
@@ -382,10 +429,10 @@ TTL тоже нативный. Но у Memcached нет команды пере�
 use Expansa\Cache\Contracts\Provider;
 use DateTime;
 
-class MyProvider implements Provider
+final class MyProvider implements Provider
 {
-    public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): mixed { /* ... */ }
-    public function set(string $key, mixed $value, string $group = 'default'): mixed { /* ... */ }
+    public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): bool { /* ... */ }
+    public function set(string $key, mixed $value, string $group = 'default'): bool { /* ... */ }
     public function get(string $key, string $group = 'default', ?callable $callback = null): mixed { /* ... */ }
     public function pull(string $key, string $group = 'default'): mixed { /* ... */ }
     public function suspend(callable $callback, string $key, string $group = 'default'): void { /* ... */ }

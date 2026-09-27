@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace Expansa\Security;
 
-use Expansa\Facades\Json;
-use Expansa\Security\Xss\Kses;
+use DateTime;
+use Expansa\Codecs\Json;
+use InvalidArgumentException;
 
+/**
+ * Cleans values: static methods for single values, `data()` and `apply()` for fields by rules like `'slug:$login|trim'`.
+ *
+ * @package Expansa\Security
+ */
 final class Sanitizer
 {
     /**
@@ -47,7 +53,7 @@ final class Sanitizer
          * List for custom rules for extend sanitizer.
          */
         protected array $extensions = [],
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Setup sanitizer rules via `data` method.
@@ -71,9 +77,8 @@ final class Sanitizer
      */
     public function extend(string $rule, callable $callback): Sanitizer
     {
-        if (is_callable($callback)) {
-            $this->extensions[ $rule ] = $callback;
-        }
+        $this->extensions[ $rule ] = $callback;
+
         return $this;
     }
 
@@ -110,7 +115,7 @@ final class Sanitizer
      *
      * @param string $return Field for return.
      * @return mixed
-     * @throws \Exception If a rule names neither a real Sanitizer method nor a registered extension.
+     * @throws InvalidArgumentException If a rule names neither a Sanitizer method nor an extension.
      */
     public function apply(string $return = ''): mixed
     {
@@ -154,7 +159,7 @@ final class Sanitizer
                 $data = match (true) {
                     is_callable($extension) => $extension($value, $this),
                     $isOwnMethod             => self::{$method}($value),
-                    default                  => throw new \Exception(
+                    default                  => throw new InvalidArgumentException(
                         "Sanitizer rule '$method' (field '$field') does not exist. " .
                         "Register it first via ->extend('$method', ...) if it's meant to be custom."
                     ),
@@ -275,7 +280,7 @@ final class Sanitizer
      */
     public static function json(mixed $value): string
     {
-        return Json::encode($value);
+        return new Json()->encode($value);
     }
 
     /**
@@ -294,9 +299,9 @@ final class Sanitizer
         }
 
         $format   = 'Y-m-d H:i:s';
-        $datetime = \DateTime::createFromFormat($format, (string) $value);
+        $datetime = DateTime::createFromFormat($format, (string) $value);
 
-        return $datetime instanceof \DateTime ? $datetime->format($format) : '';
+        return $datetime instanceof DateTime ? $datetime->format($format) : '';
     }
 
     /**
@@ -868,9 +873,9 @@ final class Sanitizer
      * Sanitizes a hex color with or without a hash.
      *
      * @param string $value Color in HEX format
-     * @return string|null  3 or 6 digit hex color with or without #
+     * @return string       3 or 6 digit hex color with #, '' if the value is not a color
      */
-    public static function hex(mixed $value): ?string
+    public static function hex(mixed $value): string
     {
         $value = self::trim($value);
         if (! str_contains($value, '#')) {

@@ -4,13 +4,22 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use DateTime;
 use App\Post\Type;
 use App\User\Roles;
+use DateTime;
 use Expansa\Cookie\Cookie;
+use Expansa\Cookie\Enums\SameSite;
+use Expansa\Database\Attribute;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
+use Expansa\Database\Traits\HasFieldEav;
+use Expansa\Database\Traits\HasHiddenAttributes;
+use Expansa\Database\Traits\HasReadonlyAttributes;
+use Expansa\Database\Traits\HasSanitizing;
+use Expansa\Database\Traits\HasSoftDeletes;
+use Expansa\Database\Traits\HasTimestamps;
+use Expansa\Database\Traits\HasValidation;
 use Expansa\Debug\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
@@ -45,13 +54,13 @@ use Expansa\Support\Is;
  */
 class User extends Model implements Fieldable
 {
-    use Model\HasSanitizing;
-    use Model\HasValidation;
-    use Model\HasTimestamps;
-    use Model\HasReadonlyAttributes;
-    use Model\HasHiddenAttributes;
-    use Model\HasSoftDeletes;
-    use Model\HasFieldEav;
+    use HasSanitizing;
+    use HasValidation;
+    use HasTimestamps;
+    use HasReadonlyAttributes;
+    use HasHiddenAttributes;
+    use HasSoftDeletes;
+    use HasFieldEav;
 
     /**
      * The "active" value of the `status` column.
@@ -74,14 +83,14 @@ class User extends Model implements Fieldable
      *
      * @var string
      */
-    protected string $table = 'users';
+    public protected(set) string $table = 'users';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'login',
         'password',
         'nicename',
@@ -207,9 +216,9 @@ class User extends Model implements Fieldable
      * (see Hash::generate()) if an empty value is given, rather than storing
      * the hash of an empty string.
      */
-    protected function password(): Model\Attribute
+    protected function password(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             set: fn($value) => password_hash($value ?: Hash::generate(), PASSWORD_DEFAULT)
         );
     }
@@ -218,9 +227,9 @@ class User extends Model implements Fieldable
      * Derives a unique, URL-safe nicename from whatever value is set,
      * appending a numeric suffix if it would otherwise collide.
      */
-    protected function nicename(): Model\Attribute
+    protected function nicename(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             set: fn($value) => $this->generateUniqueNicename($value)
         );
     }
@@ -231,9 +240,9 @@ class User extends Model implements Fieldable
      * not on hydration from the database, so a freshly-fetched user's raw value is
      * whatever the driver returns for TINYINT(1) (an int), not a PHP bool.
      */
-    protected function isVerified(): Model\Attribute
+    protected function isVerified(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: fn($value) => (bool) $value
         );
     }
@@ -244,9 +253,9 @@ class User extends Model implements Fieldable
      * assignRole()/removeRole(): granting a role has security implications
      * that a public fillable attribute shouldn't be exposed to).
      */
-    protected function roles(): Model\Attribute
+    protected function roles(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: fn($value) => $value ? json_decode($value, true) : [],
             set: fn($value) => json_encode(array_values(array_unique((array) $value)))
         );
@@ -255,9 +264,9 @@ class User extends Model implements Fieldable
     /**
      * Exposes the raw stored timestamp as a DateTime instead of a string.
      */
-    protected function verificationTokenExpiresAt(): Model\Attribute
+    protected function verificationTokenExpiresAt(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: fn($value) => $value ? new DateTime($value) : null
         );
     }
@@ -265,9 +274,9 @@ class User extends Model implements Fieldable
     /**
      * Exposes the raw stored timestamp as a DateTime instead of a string.
      */
-    protected function passwordResetExpiresAt(): Model\Attribute
+    protected function passwordResetExpiresAt(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: fn($value) => $value ? new DateTime($value) : null
         );
     }
@@ -313,7 +322,7 @@ class User extends Model implements Fieldable
         }
 
         // Not mass-assignable (see roles()) — read the raw input so a caller can still request a role, falling back to the default.
-        $role = $userdata['role'] ?? Options::get('users.role', self::DEFAULT_ROLE);
+        $role = $userdata['role'] ?? Option::get('users.role', self::DEFAULT_ROLE);
         if (Roles::exists($role)) {
             $user->roles = [$role];
         }
@@ -563,7 +572,7 @@ class User extends Model implements Fieldable
             path: '/',
             secure: Cookie::isSecureRequest(),
             httpOnly: true,
-            sameSite: Cookie::SAME_SITE_LAX,
+            sameSite: SameSite::Lax,
         ));
     }
 
@@ -579,7 +588,7 @@ class User extends Model implements Fieldable
             path: '/',
             secure: Cookie::isSecureRequest(),
             httpOnly: true,
-            sameSite: Cookie::SAME_SITE_LAX,
+            sameSite: SameSite::Lax,
         ));
     }
 

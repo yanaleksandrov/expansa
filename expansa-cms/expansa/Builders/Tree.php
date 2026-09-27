@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Builders;
 
-use Expansa\Facades\Safe;
+use Expansa\Security\Sanitizer;
 use Expansa\Patterns\Singleton;
 use Expansa\Support\Arr;
 use InvalidArgumentException;
@@ -13,7 +13,7 @@ use InvalidArgumentException;
  * A class for displaying various tree-like structures.
  * Use it for output a tree of menu items, comments, taxonomies & many more.
  */
-class Tree
+final class Tree
 {
     use Singleton;
 
@@ -45,7 +45,7 @@ class Tree
     public static function attach(string $name, ?callable $function = null): void
     {
         $tree = self::init($name);
-        $name = Safe::html($name);
+        $name = Sanitizer::html($name);
 
         if (empty($tree->list[$name])) {
             $tree->list[$name] = [];

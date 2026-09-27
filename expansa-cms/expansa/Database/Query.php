@@ -4,75 +4,67 @@ declare(strict_types=1);
 
 namespace Expansa\Database;
 
-use Exception;
-use Expansa\Database\Model\HasSoftDeletes;
-use Expansa\Facades\Cache;
+use Expansa\Database\Internal\Cache;
+use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Facades\Db;
 
 /**
- * A fluent query builder scoped to one Model instance - finding by primary key or where
- * conditions, aggregations, chunking, soft deletes, and save()/delete()/restore(). Rows come
- * back hydrated via {@see Model::make()}, with full attribute mutators/accessors applied.
+ * Queries of one model: find by key or where conditions, chunks, soft deletes, save(), delete(), restore().
+ * Rows come back as models through Model::hydrate().
  *
- * Application code normally never constructs this directly: {@see Model::__callStatic()} and
- * {@see Model::__call()} build one on demand for any Query method called on the model itself,
- * e.g. `User::get(1)` or `$user->save()`.
+ * Usually created by the model itself for a Query method called on it: `User::get(1)`, `$user->save()`.
+ * Only get() by id is cached, the other methods always query the database.
  *
- * get() results are cached; the rest of the Query methods query the database directly on every call.
+ * @package Expansa\Database
  */
-class Query
+final class Query
 {
     /**
      * Accumulated where conditions, in Medoo's keyed where-clause format.
      *
      * @var array<string, mixed>
      */
-    protected array $wheres = [];
+    private array $wheres = [];
 
     /**
      * Whether soft-deleted records should be included in the results.
      *
      * @var bool
      */
-    protected bool $withTrashed = false;
+    private bool $withTrashed = false;
 
     /**
      * Whether the results should be restricted to soft-deleted records only.
      *
      * @var bool
      */
-    protected bool $onlyTrashed = false;
+    private bool $onlyTrashed = false;
 
     public function __construct(
 
         /**
          * The model instance this query is scoped to.
          */
-        protected readonly Model $model,
-    ) {} // phpcs:ignore
+        private readonly Model $model,
+    ) {}
 
     /**
-     * Find a record by primary key or another field value. Only an 'id' lookup is cached -
-     * caching by any other field would need the field name folded into the cache key (two
-     * different fields can share the same value, e.g. a nicename that happens to equal another
-     * row's id) and, more importantly, {@see self::save()}/{@see self::delete()}/{@see self::restore()}
-     * below only ever invalidate the "id" entry - a row cached under a different field would
-     * keep serving stale data after being changed.
+     * Find a row by primary key or another field. Only the id lookup is cached:
+     * save(), delete() and restore() forget only the id entry.
      *
-     * @param int|string $value The value to search for (e.g., primary key).
-     * @param string     $by    The field name to search by. Defaults to 'id'.
-     *
-     * @return Model|null Returns the model instance if found; otherwise, null.
+     * @param int|string $value
+     * @param string     $by
+     * @return Model|null
      */
     public function get(int|string $value, string $by = 'id'): ?Model
     {
-        $fetch = function () use ($value, $by) {
-            $data = Db::get($this->model->getTable(), '*', $this->scopedWheres([$by => $value]));
+        $query = function () use ($value, $by): ?Model {
+            $row = Db::get($this->model->table, '*', $this->scopedWheres([$by => $value]));
 
-            return is_array($data) ? $this->model::make($data) : null;
+            return is_array($row) ? $this->model::hydrate($row) : null;
         };
 
-        return $by === 'id' ? Cache::get("$value", $this->model->getTable(), $fetch) : $fetch();
+        return $by === 'id' ? Cache::get((string) $value, $this->model->table, $query) : $query();
     }
 
     /**
@@ -82,9 +74,9 @@ class Query
      */
     public function find(): array
     {
-        $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres($this->wheres)) ?? [];
+        $rows = Db::select($this->model->table, '*', $this->scopedWheres($this->wheres)) ?? [];
 
-        return array_map($this->model::make(...), $rows);
+        return array_map($this->model::hydrate(...), $rows);
     }
 
     /**
@@ -94,9 +86,9 @@ class Query
      */
     public function first(): ?Model
     {
-        $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres(array_merge($this->wheres, ['LIMIT' => 1]))) ?? [];
+        $rows = Db::select($this->model->table, '*', $this->scopedWheres(array_merge($this->wheres, ['LIMIT' => 1]))) ?? [];
 
-        return isset($rows[0]) ? $this->model::make($rows[0]) : null;
+        return isset($rows[0]) ? $this->model::hydrate($rows[0]) : null;
     }
 
     /**
@@ -106,9 +98,9 @@ class Query
      */
     public function all(): array
     {
-        $rows = Db::select($this->model->getTable(), '*', $this->scopedWheres([])) ?? [];
+        $rows = Db::select($this->model->table, '*', $this->scopedWheres([])) ?? [];
 
-        return array_map($this->model::make(...), $rows);
+        return array_map($this->model::hydrate(...), $rows);
     }
 
     /**
@@ -155,13 +147,13 @@ class Query
      * @param array $where
      * @return array
      */
-    protected function scopedWheres(array $where): array
+    private function scopedWheres(array $where): array
     {
         if (! $this->model->usesTrait(HasSoftDeletes::class)) {
             return $where;
         }
 
-        $column = $this->model->getDeletedAtColumn();
+        $column = $this->model->deletedAtColumn;
 
         if ($this->onlyTrashed) {
             return array_merge($where, ["{$column}[!]" => null]);
@@ -186,7 +178,7 @@ class Query
         $page = 0;
 
         do {
-            $results = Db::select($this->model->getTable(), '*', $this->scopedWheres(array_merge($this->wheres, ['LIMIT' => [$page * $size, $size]]))) ?? [];
+            $results = Db::select($this->model->table, '*', $this->scopedWheres(array_merge($this->wheres, ['LIMIT' => [$page * $size, $size]]))) ?? [];
 
             if ($results) {
                 $callback($results);
@@ -212,11 +204,11 @@ class Query
         if ($id) {
             $changes = $this->model->getChanges();
             if ($changes) {
-                if (! Db::update($this->model->getTable(), $changes, ['id' => $id])) {
+                if (! Db::update($this->model->table, $changes, ['id' => $id])) {
                     return null;
                 }
 
-                Cache::forget("$id", $this->model->getTable());
+                Cache::forget("$id", $this->model->table);
             }
 
             $this->model->syncOriginals();
@@ -224,7 +216,7 @@ class Query
             return $this->model;
         }
 
-        if (! Db::insert($this->model->getTable(), $this->model->getAttributes())) {
+        if (! Db::insert($this->model->table, $this->model->attributes)) {
             return null;
         }
 
@@ -233,10 +225,7 @@ class Query
             return null;
         }
 
-        // Db::id() always returns a string (PDO::lastInsertId()'s own contract),
-        // while a freshly-fetched row types its numeric id column as an int —
-        // cast here so a just-inserted model's id has the same type as one
-        // loaded via get(), and the two compare equal with ===.
+        // Db::id() is a string, a fetched row has an int id
         $this->model->setAttribute('id', (int) $id);
         $this->model->syncOriginals();
 
@@ -253,15 +242,15 @@ class Query
     {
         if ($this->model->usesTrait(HasSoftDeletes::class)) {
             $results = Db::update(
-                $this->model->getTable(),
-                [$this->model->getDeletedAtColumn() => date('Y-m-d H:i:s')],
+                $this->model->table,
+                [$this->model->deletedAtColumn => date('Y-m-d H:i:s')],
                 ['id' => $this->model->id ?? 0]
             );
         } else {
-            $results = Db::delete($this->model->getTable(), ['id' => $this->model->id ?? 0]);
+            $results = Db::delete($this->model->table, ['id' => $this->model->id ?? 0]);
         }
 
-        Cache::forget("{$this->model->id}", $this->model->getTable());
+        Cache::forget("{$this->model->id}", $this->model->table);
 
         return $results ? $results->rowCount() : 0;
     }
@@ -279,12 +268,12 @@ class Query
         }
 
         $results = Db::update(
-            $this->model->getTable(),
-            [$this->model->getDeletedAtColumn() => null],
+            $this->model->table,
+            [$this->model->deletedAtColumn => null],
             ['id' => $this->model->id ?? 0]
         );
 
-        Cache::forget("{$this->model->id}", $this->model->getTable());
+        Cache::forget("{$this->model->id}", $this->model->table);
 
         return $results ? $results->rowCount() : 0;
     }
@@ -297,6 +286,6 @@ class Query
      */
     public function exists(array $data): bool
     {
-        return (bool) Db::select($this->model->getTable(), 'id', ['OR' => $data, 'LIMIT' => 1]);
+        return (bool) Db::select($this->model->table, 'id', ['OR' => $data, 'LIMIT' => 1]);
     }
 }

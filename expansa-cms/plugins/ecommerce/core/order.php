@@ -35,7 +35,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'u-prop' => 'customer',
+                        'u-prop'   => 'customer',
                         'value'    => $user->locale ?? '',
                         'u-select' => '{"showSearch": 1}',
                     ],
@@ -58,7 +58,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'u-prop' => 'datetime',
+                        'u-prop'   => 'datetime',
                         'required' => 1,
                     ],
                 ],
@@ -207,7 +207,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'country',
+                                'u-prop'   => 'country',
                                 'value'    => $user->locale ?? '',
                                 'u-select' => '{"showSearch": 1}',
                             ],
@@ -230,7 +230,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'country',
+                                'u-prop'   => 'country',
                                 'value'    => $user->locale ?? '',
                                 'u-select' => '{"showSearch": 1}',
                             ],
@@ -317,7 +317,7 @@ return \Expansa\Facades\Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'note',
+                                'u-prop'      => 'note',
                                 'placeholder' => t('Customer notes about the order'),
                             ],
                         ],

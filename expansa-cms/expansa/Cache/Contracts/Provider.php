@@ -6,42 +6,46 @@ namespace Expansa\Cache\Contracts;
 
 use DateTime;
 
+/**
+ * Cache storage: values by key within a group, a group can be forgotten at once.
+ *
+ * @package Expansa\Cache\Contracts
+ */
 interface Provider
 {
     /**
-     * Adds data to the cache. Does nothing if the key is already present (and not expired).
-     * $expiry accepts an absolute DateTime or a relative time string (e.g. "+1 day").
+     * Store a value unless the key is already present and not expired.
      *
-     * @param string $key
-     * @param mixed $value
-     * @param string $group
-     * @param DateTime|string|null $expiry
-     * @return mixed
+     * @param string               $key
+     * @param mixed                $value
+     * @param string               $group
+     * @param DateTime|string|null $expiry Absolute time or a relative string like "+1 day", null never expires.
+     * @return bool False if the key exists, is suspended or the expiry has passed.
      */
-    public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): mixed;
+    public function add(string $key, mixed $value, string $group = 'default', DateTime|string|null $expiry = null): bool;
 
     /**
-     * Sets a value in the cache for a given key and group, overwriting any existing entry.
+     * Store a value without expiry, overwriting an existing one.
      *
      * @param string $key
-     * @param mixed $value
+     * @param mixed  $value
      * @param string $group
-     * @return mixed
+     * @return bool
      */
-    public function set(string $key, mixed $value, string $group = 'default'): mixed;
+    public function set(string $key, mixed $value, string $group = 'default'): bool;
 
     /**
-     * Retrieves data from the cache, optionally populating it via $callback on a miss.
+     * Get a value; on a miss the callback result is added and returned.
      *
-     * @param string $key
-     * @param string $group
+     * @param string        $key
+     * @param string        $group
      * @param callable|null $callback
-     * @return mixed
+     * @return mixed Null on a miss without a callback.
      */
     public function get(string $key, string $group = 'default', ?callable $callback = null): mixed;
 
     /**
-     * Retrieves and removes data from the cache.
+     * Get a value and forget it.
      *
      * @param string $key
      * @param string $group
@@ -50,16 +54,17 @@ interface Provider
     public function pull(string $key, string $group = 'default'): mixed;
 
     /**
-     * Suspends the addition of data to the cache for the duration of $callback.
+     * Reject add() of the key while the callback runs.
      *
      * @param callable $callback
-     * @param string $key
-     * @param string $group
+     * @param string   $key
+     * @param string   $group
+     * @return void
      */
     public function suspend(callable $callback, string $key, string $group = 'default'): void;
 
     /**
-     * Clears data from the cache. An empty $key clears the whole group.
+     * Forget a key, or the whole group with an empty key.
      *
      * @param string $key
      * @param string $group
@@ -68,22 +73,22 @@ interface Provider
     public function forget(string $key = '', string $group = 'default'): bool;
 
     /**
-     * Increases the value of a numeric key by a given amount.
+     * Increase a numeric value.
      *
-     * @param string $key
+     * @param string    $key
      * @param int|float $amount
-     * @param string $group
-     * @return bool
+     * @param string    $group
+     * @return bool False if the key is missing or not numeric.
      */
     public function increase(string $key, int|float $amount = 1, string $group = 'default'): bool;
 
     /**
-     * Decreases the value of a numeric key by a given amount.
+     * Decrease a numeric value.
      *
-     * @param string $key
+     * @param string    $key
      * @param int|float $amount
-     * @param string $group
-     * @return bool
+     * @param string    $group
+     * @return bool False if the key is missing or not numeric.
      */
     public function decrease(string $key, int|float $amount = 1, string $group = 'default'): bool;
 }

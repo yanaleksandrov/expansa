@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Attribute;
 use Expansa\Database\Model;
+use Expansa\Database\Traits\HasSanitizing;
+use Expansa\Database\Traits\HasValidation;
 use Expansa\Debug\Error;
 
 /**
@@ -21,22 +24,22 @@ use Expansa\Debug\Error;
  */
 class Slug extends Model
 {
-    use Model\HasSanitizing;
-    use Model\HasValidation;
+    use HasSanitizing;
+    use HasValidation;
 
     /**
      * The database table associated with the model.
      *
      * @var string
      */
-    protected string $table = 'slugs';
+    public protected(set) string $table = 'slugs';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'entity_id',
         'entity_table',
         'slug',
@@ -82,9 +85,9 @@ class Slug extends Model
      * Derives a unique, URL-safe slug from whatever value is set, appending a
      * numeric suffix if it would otherwise collide.
      */
-    protected function slug(): Model\Attribute
+    protected function slug(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             set: fn($value) => $this->generateUniqueSlug($value)
         );
     }

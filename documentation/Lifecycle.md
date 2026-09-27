@@ -22,6 +22,7 @@ index.php / artisan
    ├─ константы, env.php, autoload.php
    ├─ functions.php                metrics() считает время от начала запроса
    ├─ Requirements::check()        старая версия PHP → страница ошибки (500) или текст в консоли
+   ├─ Is::configure(), Lifecycle::configure() хуки и маршрутизация шагов
    ├─ $isInstalled = Installation::isComplete() вычисляется один раз
    ├─ фазы
    │  ├─ boot          вывод ошибок в debug, maintenance.php, ленивые справочники
@@ -36,10 +37,27 @@ index.php / artisan
    │  ├─ auth          sign-in, sign-up, reset-password
    │  ├─ dashboard     /dashboard/...: проверка входа, ассеты, меню
    │  └─ web           всё остальное: главная и /installed, иначе 404
-   ├─ маршрутизация    Route::run() внутри Lifecycle::run() (кроме cli)
+   ├─ маршрутизация    колбэк route: Route::run() (кроме cli)
    ├─ run(catch:)      исключение из любого шага → Debug::render(), страница отладки
    └─ terminate        хук после отправки ответа
 ```
+
+## Конфигурация
+
+Пакет не знает про хуки и роутер: их передаёт `bootstrap.php` до объявления фаз. Без
+`configure()` шаги выполняются без хуков и маршрутизации, а URI для контекстов пустой.
+
+```php
+Lifecycle::configure(
+    hook: fn (string $name) => Hook::call($name),        // before{Phase}, after{Phase}, enter{Context}
+    terminate: fn () => Hook::defer('terminate'),       // один раз в начале run()
+    route: fn () => Route::run(),                       // после контекста, кроме консоли
+    uri: fn () => Route::uri(),                         // URI, если run() его не получил
+);
+```
+
+`Is::dashboard()` из базового слоя тоже получает контекст через колбэк:
+`Is::configure(dashboard: fn () => Lifecycle::is('dashboard'))`.
 
 ## Фазы
 
@@ -117,7 +135,7 @@ Is::dashboard();               // то же самое
 
 ## Хуки жизненного цикла
 
-Хуки вызываются автоматически, отдельно объявлять их не нужно. Имена в camelCase, чтобы их можно
+Хуки вызывает колбэк `hook` из `configure()`, отдельно объявлять их не нужно. Имена в camelCase, чтобы их можно
 было слушать методами классов из `app/Listeners`.
 
 | Хук                          | Когда                                                  |
@@ -146,7 +164,7 @@ final class Audit
 }
 ```
 
-`terminate` работает через `Hook::defer()`: под PHP-FPM ответ сначала отправляется клиенту
+`terminate` работает через `Hook::defer()` из колбэка `terminate`: под PHP-FPM ответ сначала отправляется клиенту
 (`fastcgi_finish_request()`), и только потом выполняются слушатели. Их возвращаемое значение не
 используется.
 
@@ -156,7 +174,7 @@ final class Audit
 `themes/{папка}`. Остальные id игнорируются.
 
 ```php
-Options::update('extensions', ['active' => ['plugins/seo', 'plugins/file-manager']]);
+Option::update('extensions', ['active' => ['plugins/seo', 'plugins/file-manager']]);
 ```
 
 У расширения два метода жизненного цикла:
@@ -221,13 +239,14 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
 - **Фреймворк не знает про `app` и константы `EX_`.** Всё, что ему нужно от приложения (пути,
   адрес сайта, соединение с базой, версия), приложение передаёт через `configure()` пакета с
   именованными аргументами: `Db`, `Url`, `View`, `Extensions`, `Terminal`, `Table`, `I18n`, `Hook`,
-  `Form` — в фазе `configure`; `Is` — до фаз, потому что фаза `boot` читает `Is::debug()`.
+  `Form` — в фазе `configure`; `Is` и `Lifecycle` — до фаз, потому что фаза `boot` читает `Is::debug()`.
 - **Установлено, если есть `env.php`.** Установщик пишет черновик `env.install.php` и переименовывает
   его в `env.php` только после всех шагов, поэтому прерванная установка не оставляет `env.php`.
   Проверка `Installation::isComplete()` не обращается к базе и вычисляется один раз, в `$isInstalled`:
   запрос установки меняет результат.
 - **Объявления после старта запрещены.** Фазу или контекст нельзя объявить после
-  `Lifecycle::run()`, повторный запуск и дубли имён выбрасывают `LifecycleException`.
+  `Lifecycle::run()` и повторный запуск выбрасывают `Exceptions\AlreadyStarted`, дубль имени —
+  `Exceptions\AlreadyDeclared` (оба — `LogicException`).
 - **Ассеты дашборда подключаются через `DashboardAssets::enqueue()`**: он сам выбирает `.min` и
   выставляет CSRF-cookie, который читает `youla-ajax.js`.
 

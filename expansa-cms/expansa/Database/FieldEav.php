@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Database;
 
 use Expansa\Database\Contracts\Fieldable;
-use Expansa\Facades\Cache;
+use Expansa\Database\Internal\Cache;
 use Expansa\Facades\Db;
 
 /**
@@ -23,7 +23,7 @@ class FieldEav
          * The Fieldable this store belongs to.
          */
         protected Fieldable $owner,
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Name of the metadata table for the owner, e.g. "users_fields".
@@ -31,7 +31,7 @@ class FieldEav
      * @var string
      */
     public string $fieldsForeignTable {
-        get => $this->fieldsForeignTable ??= $this->owner->getTable() . '_fields';
+        get => $this->fieldsForeignTable ??= $this->owner->table . '_fields';
     }
 
     /**
@@ -75,10 +75,10 @@ class FieldEav
                 $this->fieldsForeignTable,
                 [
                     'key',
-                    'value'
+                    'value',
                 ],
                 [
-                    $this->fieldsForeignKey => $this->ownerId
+                    $this->fieldsForeignKey => $this->ownerId,
                 ]
             );
 
@@ -104,7 +104,7 @@ class FieldEav
     /**
      * The owner's field set exactly as find() would cache it, without querying — null means
      * find() hasn't warmed the cache yet, not that the owner has no fields. protected, not
-     * private: {@see FieldEavTyped} extends this class and reuses it unchanged.
+     * private: {@see Internal\FieldEavTyped} extends this class and reuses it unchanged.
      *
      * @return array<string, array<int, mixed>>|null
      */
@@ -156,7 +156,7 @@ class FieldEav
             $rows[] = [
                 $this->fieldsForeignKey => $this->ownerId,
                 'key'                   => $key,
-                'value'                 => $value
+                'value'                 => $value,
             ];
 
             $existing[$key] = true; // also skip a key repeated within this same batch
@@ -304,11 +304,11 @@ class FieldEav
                     $this->fieldsForeignTable,
                     [
                         'key',
-                        'value'
+                        'value',
                     ],
                     [
                         $this->fieldsForeignKey => $this->ownerId,
-                        'key'                   => $chunkKeys
+                        'key'                   => $chunkKeys,
                     ]
                 );
 
@@ -323,7 +323,7 @@ class FieldEav
                     $toInsert[] = [
                         $this->fieldsForeignKey => $this->ownerId,
                         'key'                   => $key,
-                        'value'                 => $value
+                        'value'                 => $value,
                     ];
                 } elseif ($value !== $existing[$key]) {
                     $toUpdate[$key] = $value;

@@ -1,12 +1,18 @@
 <?xml version="1.0"?>
-<ruleset name="Laravel Standards">
-    <description>PSR-12 Конвенции Laravel</description>
+<ruleset name="Expansa">
+    <description>PSR-12 и правила Expansa</description>
 
-    <!-- Наследует стандарты кодирования PSR-12 -->
-    <rule ref="PSR12"/>
+    <!-- Наследует стандарты кодирования PSR-12; пустое тело `{}` проверяют свои sniff'ы ниже -->
+    <rule ref="PSR12">
+        <exclude name="PSR2.Classes.ClassDeclaration"/>
+        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace"/>
+    </rule>
 
-    <!-- Требует открывающую скобку функции на новой строке (стиль BSD Allman) -->
-    <rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/>
+    <!-- Пустая строка перед PHPDoc параметра и тела property hooks в сигнатуре конструктора (AGENTS.md) -->
+    <rule ref="Squiz.Functions.MultiLineFunctionDeclaration">
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.EmptyLine"/>
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent"/>
+    </rule>
 
     <!-- Обнаруживает и предотвращает классы с дублирующимися именами -->
     <rule ref="Generic.Classes.DuplicateClassName">
@@ -58,9 +64,6 @@
     <!-- Предотвращает пробелы после приведения типа -->
     <rule ref="Generic.Formatting.SpaceAfterCast"/>
 
-    <!-- Проверяет вызовы функций на использование передачи по ссылке по времени вызова -->
-    <rule ref="Generic.Functions.CallTimePassByReference"/>
-
     <!-- Проверяет пробелы между аргументами в вызовах функций -->
     <rule ref="Generic.Functions.FunctionCallArgumentSpacing"/>
 
@@ -93,21 +96,14 @@
         </properties>
     </rule>
 
-    <!-- Разрешаем использование табуляции для отступов -->
-    <rule ref="Generic.WhiteSpace.DisallowTabIndent">
-        <exclude/>
-    </rule>
-
     <!-- Проверяет правильность объявления массивов -->
     <rule ref="Squiz.Arrays.ArrayDeclaration">
         <exclude name="Squiz.Arrays.ArrayDeclaration.ValueNotAligned" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.KeyNotAligned" />
-        <exclude name="Squiz.Arrays.ArrayDeclaration.ValueNotAligned" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.CloseBraceNotAligned" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.ValueNoNewline" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.MultiLineNotAllowed" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.SingleLineNotAllowed" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.NewlineBeforeOpenBrace" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.NoKeySpecified" />
         <exclude name="Squiz.Arrays.ArrayDeclaration.KeySpecified" />
     </rule>
@@ -120,6 +116,8 @@
         <properties>
             <property name="error" value="true"/>
         </properties>
+        <!-- error_log() — запасной канал логгера, когда обработчик не смог записать -->
+        <exclude-pattern>*/expansa-cms/expansa/Log/*</exclude-pattern>
     </rule>
 
     <!-- Проверяет правильное использование пробела вокруг операторов -->
@@ -149,16 +147,21 @@
 
     <!-- Настроенные правила -->
     <rule ref="phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php" />
+    <rule ref="phpcs/Expansa/Sniffs/Classes/ClassDeclarationSniff.php" />
+    <rule ref="phpcs/Expansa/Sniffs/WhiteSpace/ScopeClosingBraceSniff.php" />
 
     <file>expansa-cms</file>
     <file>phpcs</file>
 
-    <!-- Исключает файлы с расширениями .js, .css, .xml, .blade.php и файлы из папки vendor -->
+    <!-- Исключает не-PHP файлы, шаблоны дашборда и сторонний код -->
     <exclude-pattern>*/*.js</exclude-pattern>
     <exclude-pattern>*/*.css</exclude-pattern>
     <exclude-pattern>*/*.xml</exclude-pattern>
     <exclude-pattern>*/*.blade.php</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/expansa-cms/cache/*</exclude-pattern>
+    <exclude-pattern>*/expansa-cms/expansa/Mail/PHPMailer/*</exclude-pattern>
+    <exclude-pattern>*/expansa-cms/expansa/Images/Spatie/*</exclude-pattern>
     <exclude-pattern>*/expansa-cms/dashboard/views/*</exclude-pattern>
     <exclude-pattern>*/expansa-cms/dashboard/*.php</exclude-pattern>
 

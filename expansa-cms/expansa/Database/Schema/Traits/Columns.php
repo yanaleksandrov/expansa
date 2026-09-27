@@ -52,7 +52,7 @@ trait Columns
     {
         $column = $this->addColumn('char(31)', $column)->unique();
 
-        $this->commands[] = $this->addCommand('createUlid', ['column' => $column->getAttributes()]);
+        $this->commands[] = $this->addCommand('createUlid', ['column' => $column->attributes]);
 
         return $column;
     }
@@ -68,7 +68,7 @@ trait Columns
     {
         $column = $this->addColumn('char(36)', $column);
 
-        $this->commands[] = $this->addCommand('createUuid', ['column' => $column->getAttributes()]);
+        $this->commands[] = $this->addCommand('createUuid', ['column' => $column->attributes]);
 
         return $column;
     }

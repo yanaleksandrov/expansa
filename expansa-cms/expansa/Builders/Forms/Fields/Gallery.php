@@ -9,7 +9,7 @@ namespace Expansa\Builders\Forms\Fields;
  * `form/gallery.blade.php` template, so this reuses `form/media.blade.php`
  * (which already supports multiple items) with `multiple` and an image `accept` filter forced on.
  */
-class Gallery extends AbstractField
+final class Gallery extends AbstractField
 {
     public function __construct()
     {

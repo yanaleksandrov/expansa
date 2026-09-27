@@ -1,305 +1,141 @@
----
-layout: default
-title: Version 6
-nav_order: 4
-description: "Version 6"
----
+# Введение
 
-# Session v6 Documentation
-
-## Table of contents
-
-* [Requirements](#requirements)
-* [Installation](#installation)
-* [Features](#features)
-* [Usage](#usage)
-* [Methods](#methods)
-* [Flash messages](#flash-messages)
-    * [Twig flash messages](#twig-flash-messages)
-* [SameSite Cookies](#samesite-cookies)
-* [Adapter](#adapter)
-    * [PHP Session](#php-session)
-    * [Memory Session](#memory-session)
-* [Slim 4 integration](#slim-4-integration)
-
-## Requirements
-
-* PHP 8.2+
-
-## Installation
-
-```
-composer require odan/session
-```
-
-## Features
-
-* PSR-7 and PSR-15 (middleware) support
-* DI container (PSR-11) support
-* Lazy session start
-
-## Usage
+Сессия и flash-сообщения. Пакет находится в `Expansa\Session`, доступ — через фасад `Session`
+или функцию `session()`, которая возвращает драйвер из конфигурации.
 
 ```php
-$config = [
-    'name' => 'app',
-];
+use Expansa\Facades\Session;
 
-// Create a standard session handler
-$session = new \Odan\Session\PhpSession($config);
+Session::start();
+Session::set('user_id', 7);
 
-// Start the session
-$session->start();
+$session = session();
 
-// Set session value
-$session->set('bar', 'foo');
+$session->set('cart', [12, 15]);
+$session->get('cart');              // [12, 15]
 
-// Get session value
-echo $session->get('bar'); // foo
-
-// Add flash message
-$session->getFlash()->add('error', 'My flash message')
+$session->flash->add('notice', 'Сохранено');
+$session->flash->pull('notice');    // ['Сохранено'] — на следующем запросе
 ```
 
-## Methods
+| Класс                         | Назначение                                                       |
+|-------------------------------|------------------------------------------------------------------|
+| `Manager`                     | Драйвер из конфигурации, создаётся при первом обращении; экземпляр фасада |
+| `Providers\Native`            | Сессия PHP: данные в `$_SESSION` после `start()`                 |
+| `Providers\Memory`            | Сессия в массиве до конца запроса: тесты, консоль                |
+| `StartSession`                | PSR-15 middleware: запускает сессию до обработчика, сохраняет после |
+| `Contracts\Session`           | Данные: значения по ключу и `$flash`                             |
+| `Contracts\Lifecycle`         | Жизненный цикл: `start()`, `regenerateId()`, `save()`, `delete()` |
+| `Contracts\Flash`             | Flash-сообщения: хранятся в сессии, пока их не прочитают         |
+| `Exceptions\*`                | `AlreadyStarted`, `NotStarted`, `HeadersSent`; сбой функций сессии PHP — `RuntimeException` |
+
+## Конфигурация
+
+`bootstrap.php` выбирает драйвер в фазе `configure`: сессию PHP в браузере, массив в консоли.
+Сессия не запускается сама — её запускает код, которому она нужна (`Session::start()`, `StartSession`,
+flash-значения `Redirect`). Повторный `configure()` сбрасывает созданный драйвер.
 
 ```php
-// Get session variable
-$foo = $session->get('foo');
+Session::configure(
+    driver: PHP_SAPI === 'cli' ? 'memory' : 'native',
+    options: ['name' => 'expansa', 'secure' => Cookie::isSecureRequest()],
+);
 
-// Get session variable or the default value
-$bar = $session->get('bar', 'my default value');
+Session::extend('redis', fn (array $options) => new RedisSession($options)); // свой драйвер
+```
 
-// Set session variable
-$session->set('bar', 'new value');
+Настройки `native` — ключи сессии и cookie, остальные уходят в `ini_set('session.<ключ>')`:
 
-// Sets multiple values at once
-$session->setValues(['foo' => 'value1', 'bar' => 'value2']);
+```php
+Session::configure(driver: 'native', options: [
+    'name'          => 'expansa',  // имя cookie, по умолчанию app
+    'lifetime'      => 7200,       // время жизни cookie, секунды
+    'path'          => null,       // null — из настроек PHP
+    'domain'        => null,
+    'secure'        => false,
+    'httponly'      => true,
+    'cache_limiter' => 'nocache',  // public, private_no_expire, private, nocache или '' — без заголовков
+    'id'            => null,       // свой id сессии
+    'gc_maxlifetime' => 7200,      // session.gc_maxlifetime
+]);
+```
 
-// Get all session variables
-$values = $session->all();
+У `memory` есть только `name`. Драйверы можно создать и напрямую: `new Native([...])`, `new Memory('test')`.
 
-// Returns true if the attribute exists
-$hasKey = $session->has('foo');
+## Использование
 
-// Delete a session variable
-$session->delete('key');
+Используйте методы сессии вместо `session_start()`, `session_regenerate_id()` и `session_destroy()`.
+Фасад не видит свойств: вместо `$started` и `$flash` у него `Session::isStarted()` и `Session::getFlash()`.
 
-// Clear all session variables
-$session->clear();
+| Метод или свойство              | Что делает                                                  |
+|---------------------------------|-------------------------------------------------------------|
+| `start()`                       | Запускает сессию; повторный запуск — `AlreadyStarted`, вывод уже начат — `HeadersSent` |
+| `$started`, `$id`, `$name`      | Состояние, id и имя сессии, только чтение                   |
+| `regenerateId()`                | Переносит данные на новый id, старая сессия удаляется; до `start()` — `NotStarted` |
+| `save()`                        | Сохраняет и закрывает сессию; PHP делает это и сам в конце запроса |
+| `delete()`                      | Забывает данные, удаляет сессию и её cookie                 |
+| `get($key, $default)`, `all()`  | Значение по ключу, все значения                             |
+| `set($key, $value)`, `setValues($values)` | Записывает одно или несколько значений            |
+| `has($key)`                     | Есть ли ключ, в том числе со значением `null`               |
+| `forget($key)`, `flush()`       | Забывает одно значение или все, flash-сообщения тоже        |
 
-// Generate a new session ID
+После входа пользователя меняйте id, чтобы старый id нельзя было использовать:
+
+```php
 $session->regenerateId();
-
-// Get the current session ID
-$sessionId = $session->getId();
-
-// Get the session name
-$sessionName = $session->getName();
-
-// Force the session to be saved and closed
-$session->save();
+$session->set('user_id', $user->id);
 ```
 
-## Flash messages
+До `start()` данные `Native` хранятся в памяти и в `$_SESSION` не попадают.
 
-The library provides its own implementation of Flash messages.
+### Flash-сообщения
+
+Сообщение живёт в сессии, пока его не прочитают, — обычно на следующем запросе после редиректа.
+Сообщения хранятся по ключу, под одним ключом их может быть несколько.
 
 ```php
-// Get flash object
-$flash = $session->getFlash();
+$flash = session()->flash;
 
-// Clear all flash messages
-$flash->clear();
-
-// Add flash message
-$flash->add('error', 'Login failed');
-
-// Get flash messages
-$messages = $flash->get('error');
-
-// Has flash message
-$has = $flash->has('error');
-
-// Set all messages
-$flash->set('error', ['Message 1', 'Message 2']);
-
-// Gets all flash messages
-$messages = $flash->all();
+$flash->add('error', 'Неверный пароль');
+$flash->has('error');     // true
+$flash->pull('error');    // ['Неверный пароль'], сообщения забыты
+$flash->pullAll();        // все сообщения по ключам, сообщения забыты
+$flash->set('error', ['Первое', 'Второе']);
+$flash->flush();
 ```
 
-### Twig flash messages
+### Middleware
 
-To display the Flash messages, you can pass the Flash
-object in the array of options as the second argument:
+`StartSession` работает с PSR-15 контрактами из `Expansa\Session\Contracts`: запускает сессию, если
+она не запущена, передаёт запрос дальше и сохраняет сессию.
 
 ```php
-$flash = $session->getFlash();
-$html = $twig->render('filename.html.twig', ['flash' => $flash]);
+use Expansa\Session\StartSession;
+
+$middleware = new StartSession(session());
 ```
 
-Another approach would be to add the Flash instance
-as global Twig variable within the DI container definition of `Twig::class`:
+### Flash-значения редиректа
+
+`bootstrap.php` передаёт в `Redirect::configure(flash: ...)` запись в flash-сообщения сессии и запускает
+её при необходимости: `Redirect::flash('errors', $errors)` перед `Redirect::send()` доживает до
+следующего запроса, где его читает `Session::getFlash()->pull('errors')`.
+
+## Расширение
+
+Своё хранилище реализует `Contracts\Session` и `Contracts\Lifecycle` и подключается через
+`Session::extend()`. Свойства контрактов объявлены
+только для чтения — `public string $id { get; }`, реализация задаёт их обычным свойством или hook:
 
 ```php
-use Odan\Session\SessionInterface;
+final class Redis implements Session, Lifecycle
+{
+    public private(set) string $id = '';
 
-// ...
+    public bool $started {
+        get => $this->id !== '';
+    }
 
-$flash = $container->get(SessionInterface::class)->getFlash();
-$twig->getEnvironment()->addGlobal('flash', $flash);
-```
-
-Twig template example:
-
-{% raw %}
-```twig
-{% for message in flash.get('error') %}
-    <div class="alert alert-danger" role="alert">
-        {{ message }}
-    </div>
-{% endfor %}
-```
-{% endraw %}
-
-## SameSite Cookies
-
-A SameSite cookie that tells browser to send the cookie to the server only
-when the request is made from the same domain of the website.
-
-```php
-use Odan\Session\PhpSession;
-
-$options = [
-    'name' => 'app',
-    // Lax will send the cookie for cross-domain GET requests
-    'cookie_samesite' => 'Lax',   
-    // Optional: Send cookie only over https
-    'cookie_secure' => true,
-    // Optional: Additional XSS protection
-    // Note: This cookie is not accessible in JavaScript!
-    'cookie_httponly' => false,
-];
-
-$session = new PhpSession($options);
-$session->start();
-```
-
-Read more:
-
-* [SameSite cookie middleware](https://github.com/selective-php/samesite-cookie)
-* <https://www.php.net/manual/en/session.configuration.php#ini.session.cookie-samesite>
-* <https://www.php.net/manual/en/session.configuration.php#ini.session.cookie-httponly>
-* <https://www.php.net/manual/en/session.configuration.php#ini.session.cookie-secure>
-
-## Adapter
-
-### PHP Session
-
-* The default PHP session handler
-* Uses the native PHP session functions
-
-Example:
-
-```php
-use Odan\Session\PhpSession;
-
-$session = new PhpSession();
-```
-
-### Memory Session
-
-* Optimized for integration tests (with phpunit)
-* Prevent output buffer issues
-* Run sessions only in memory
-
-```php
-use Odan\Session\MemorySession;
-
-$session = new MemorySession();
-```
-
-## Slim 4 Integration
-
-### Configuration
-
-Add your application-specific settings:
-
-```php
-$settings['session'] = [
-    'name' => 'app',
-    'lifetime' => 7200,
-    'save_path' => null,
-    'domain' => null,
-    'secure' => false,
-    'httponly' => true,
-    'cache_limiter' => 'nocache',
-];
-```
-
-For this example we use the [PHP-DI](http://php-di.org/) package.
-
-Add the container definitions as follows:
-
-```php
-<?php
-
-use Odan\Session\PhpSession;
-use Odan\Session\SessionInterface;
-use Odan\Session\SessionManagerInterface;
-use Psr\Container\ContainerInterface;
-
-return [
     // ...
-
-    SessionManagerInterface::class => function (ContainerInterface $container) {
-        return $container->get(SessionInterface::class);
-    },
-
-    SessionInterface::class => function (ContainerInterface $container) {
-        $options = $container->get('settings')['session'];
-
-        return new PhpSession($options);
-    },
-];
-```
-
-### Session middleware
-
-**Lazy session start**
-
-The DI container should (must) never start a session automatically because:
-
-* The DI container is not responsible for the HTTP context.
-* In some use cases an API call from a REST client generates a session.
-* Only an HTTP middleware or an action handler should start the session.
-
-Register the session middleware for all routes:
-
-```php
-use Odan\Session\Middleware\SessionStartMiddleware;
-//...
-
-$app->add(SessionStartMiddleware::class);
-```
-
-Register middleware for a routing group:
-
-```php
-use Odan\Session\Middleware\SessionStartMiddleware;
-use Slim\Routing\RouteCollectorProxy;
-
-// Protect the whole group
-$app->group('/admin', function (RouteCollectorProxy $group) {
-    // ...
-})->add(SessionStartMiddleware::class);
-```
-
-Register middleware for a single route:
-
-```php
-use Odan\Session\Middleware\SessionStartMiddleware;
-
-$app->post('/example', \App\Action\ExampleAction::class)
-    ->add(SessionStartMiddleware::class);
+}
 ```

@@ -4,34 +4,27 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\Console\Command;
-use Expansa\Console\Terminal;
-
 /**
- * Class List.
+ * Shows the version and the active commands by group, the default command.
  *
- * @package cli
+ * @package Expansa\Console
  */
-class Index extends Command
+final class Index extends AbstractCommand
 {
-    protected string $name = 'list';
+    public string $name = 'list';
 
-    protected string $description = 'Shows full list of Expansa CLI commands.';
+    public string $signature = 'list [-g]';
 
-    protected string $signature = 'list';
-
-    protected array $options = [
-        '-g' => 'Shows greeting.',
-    ];
-
-    public function __construct(?Terminal $console = null)
+    public function __construct()
     {
-        parent::__construct($console);
+        $this->options = [
+            '-g' => t('Shows greeting'),
+        ];
+    }
 
-        $this->setOptions([
-            '-g'  => t('Shows greeting'),
-            '-he' => t('New howing'),
-        ]);
+    public function getDescription(): string
+    {
+        return t('Shows full list of Expansa CLI commands.');
     }
 
     public function handle(): void
@@ -46,7 +39,7 @@ class Index extends Command
 
 		EOT;
 
-        $version = $this->console?->version();
+        $version = $this->console->version;
         $year    = date('Y');
 
         $this->info("[green]#$text#Program version: [green]#$version# | © 2024-$year «expansa.com»" . PHP_EOL);
@@ -56,14 +49,13 @@ class Index extends Command
         }
 
         $groupDefault = [];
-        $groups = [];
+        $groups       = [];
         foreach ($this->console->commands() as $name => $command) {
-            $group = $command->getGroup();
-            if ($group === null) {
+            if ($command->group === null) {
                 $groupDefault[$name] = $command;
-                continue;
+            } else {
+                $groups[$command->group][$name] = $command;
             }
-            $groups[$group][$name] = $command;
         }
 
         $this->info(t('[yellow]#Available Commands:#'));
@@ -76,7 +68,7 @@ class Index extends Command
 
         foreach ($groups as $groupName => $commands) {
             $this->newLine();
-            $this->info("'  [yellow]#$groupName#'");
+            $this->info("  [yellow]#$groupName#");
 
             foreach ($commands as $name => $command) {
                 $this->info(str_pad("  [green]#$name#", 32) . $command->getDescription());

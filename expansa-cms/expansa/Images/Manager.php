@@ -9,6 +9,7 @@ use Spatie\Image\Enums\ColorFormat;
 use Spatie\Image\Enums\ImageDriver;
 use Spatie\Image\Enums\CropPosition;
 use Spatie\Image\Enums\FlipDirection;
+use Spatie\Image\Enums\Orientation;
 use Spatie\Image\Image;
 use Spatie\Image\Exceptions\InvalidImageDriver;
 use Spatie\ImageOptimizer\OptimizerChain;
@@ -19,23 +20,25 @@ use Spatie\ImageOptimizer\Optimizers\Pngquant;
 use Spatie\ImageOptimizer\Optimizers\Gifsicle;
 use Spatie\ImageOptimizer\Optimizers\Jpegoptim;
 
-class Manager
+/**
+ * Image editing over Spatie Image, the Image facade instance: `Image::load($path)->crop(300, 200)->save($to)`.
+ * One image at a time: load() or new() replaces the current one.
+ *
+ * @package Expansa\Images
+ */
+final class Manager
 {
-    protected function __construct(
+    /**
+     * Spatie image with the Imagick driver, GD without the imagick extension.
+     */
+    public readonly Image $driver;
 
-        /**
-         * Spatie image; replaced by an Imagick instance (GD fallback), the passed value stays only if no driver is available.
-         */
-        public ?Image $driver = null,
-    )
+    /**
+     * @throws InvalidImageDriver If neither Imagick nor GD is available.
+     */
+    public function __construct()
     {
-        try {
-            if (extension_loaded('imagick')) {
-                $this->driver = Image::useImageDriver(ImageDriver::Imagick);
-            } else {
-                $this->driver = Image::useImageDriver(ImageDriver::Gd);
-            }
-        } catch (InvalidImageDriver $e) {} // phpcs:ignore
+        $this->driver = Image::useImageDriver(extension_loaded('imagick') ? ImageDriver::Imagick : ImageDriver::Gd);
     }
 
     public function load(string $pathToImage): static
@@ -138,8 +141,7 @@ class Manager
         ?int $desiredHeight = null,
         bool $relative = false,
         string $backgroundColor = '#ffffff'
-    ): static
-    {
+    ): static {
         $this->driver->fit($fit, $desiredWidth, $desiredHeight, $relative, $backgroundColor);
 
         return $this;
@@ -203,9 +205,9 @@ class Manager
         return $this;
     }
 
-    public function rotate(?int $degrees = 180): static
+    public function rotate(Orientation $orientation = Orientation::Rotate180): static
     {
-        $this->driver->orientation($degrees);
+        $this->driver->orientation($orientation);
 
         return $this;
     }
@@ -215,21 +217,21 @@ class Manager
         return $this->driver->exif();
     }
 
-    public function flipH(): static
+    public function flipHorizontal(): static
     {
         $this->driver->flip(FlipDirection::Horizontal);
 
         return $this;
     }
 
-    public function flipV(): static
+    public function flipVertical(): static
     {
         $this->driver->flip(FlipDirection::Vertical);
 
         return $this;
     }
 
-    public function flipB(): static
+    public function flipBoth(): static
     {
         $this->driver->flip(FlipDirection::Both);
 
@@ -285,56 +287,36 @@ class Manager
         return $this;
     }
 
+    /**
+     * Optimize the saved file with the tool matching its type: jpegoptim, pngquant, svgo, gifsicle, cwebp or avifenc.
+     * The tool is picked by save() from the file mime type, missing tools are skipped.
+     *
+     * @param int $quality From 0 to 100.
+     * @return static
+     */
     public function optimize(int $quality = 90): static
     {
-        $mimeType  = $this->driver->image()->getMimeType();
-        $quality   = max(0, min(100, $quality));
-        $optimizer = match ($mimeType) {
-            'image/jpeg',
-            'image/jpg'      => new Jpegoptim([
-                "-m$quality",
-                '--force',
-                '--strip-all',
-                '--all-progressive',
-            ]),
-            'image/png'      => new Pngquant([
-                "--quality=$quality",
-                '--force',
-            ]),
-            'text/html',
-            'image/svg',
-            'image/svg+xml',
-            'text/plain',    => new Svgo(),
-            'image/gif'      => new Gifsicle([
-                '-b',
-                '-O3',
-            ]),
-            'image/webp'     => new Cwebp([
-                '-m 6',
-                '-pass 10',
-                '-mt',
-                "-q $quality",
-            ]),
-            'image/avif'     => new Avifenc([
-                '-a cq-level=' . round(63 - $quality * 0.63),
-                '-j all',
-                '--min 0',
-                '--max 63',
-                '--minalpha 0',
-                '--maxalpha 63',
-                '-a end-usage=q',
-                '-a tune=ssim',
-            ]),
-            default => null,
-        };
+        $quality = max(0, min(100, $quality));
 
-        if ($optimizer) {
-            $this->driver->optimize(
-                new OptimizerChain()
-                    ->addOptimizer($optimizer)
-                    ->setTimeout(60)
-            );
-        }
+        $this->driver->optimize(
+            new OptimizerChain()
+                ->addOptimizer(new Jpegoptim(["-m$quality", '--force', '--strip-all', '--all-progressive']))
+                ->addOptimizer(new Pngquant(["--quality=$quality", '--force']))
+                ->addOptimizer(new Svgo())
+                ->addOptimizer(new Gifsicle(['-b', '-O3']))
+                ->addOptimizer(new Cwebp(['-m 6', '-pass 10', '-mt', "-q $quality"]))
+                ->addOptimizer(new Avifenc([
+                    '-a cq-level=' . round(63 - $quality * 0.63),
+                    '-j all',
+                    '--min 0',
+                    '--max 63',
+                    '--minalpha 0',
+                    '--maxalpha 63',
+                    '-a end-usage=q',
+                    '-a tune=ssim',
+                ]))
+                ->setTimeout(60)
+        );
 
         return $this;
     }

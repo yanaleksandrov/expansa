@@ -4,19 +4,27 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use Expansa\Database\Exception\InvalidArgumentException;
+use Expansa\Database\Internal\AbstractBuilder;
+use Expansa\Database\Exceptions\InvalidConnection;
+use InvalidArgumentException;
 use PDO;
 use PDOException;
 use PDOStatement;
 
-class Builder extends BuilderAbstract
+/**
+ * Database connection and queries in keyed arrays: `select('posts', ['id'], ['status' => 'publish'])`.
+ * The Db facade target.
+ *
+ * @package Expansa\Database\Query
+ */
+class Builder extends AbstractBuilder
 {
     /**
      * Connect the database.
      *
      * @param array $options Connection options
      * @return void
-     * @throws PDOException|InvalidArgumentException
+     * @throws PDOException|InvalidConnection
      */
     public function __construct(array $options)
     {
@@ -68,7 +76,7 @@ class Builder extends BuilderAbstract
 
         if (isset($options['pdo'])) {
             if (!$options['pdo'] instanceof PDO) {
-                throw new InvalidArgumentException('Invalid PDO object supplied.');
+                throw new InvalidConnection('Invalid PDO object supplied.');
             }
 
             $this->pdo = $options['pdo'];
@@ -84,7 +92,7 @@ class Builder extends BuilderAbstract
             if (is_array($options['dsn']) && isset($options['dsn']['driver'])) {
                 $attr = $options['dsn'];
             } else {
-                throw new InvalidArgumentException('Invalid DSN option supplied.');
+                throw new InvalidConnection('Invalid DSN option supplied.');
             }
         } else {
             if (
@@ -228,13 +236,13 @@ class Builder extends BuilderAbstract
         }
 
         if (!isset($attr)) {
-            throw new InvalidArgumentException('Incorrect connection options.');
+            throw new InvalidConnection('Incorrect connection options.');
         }
 
         $driver = $attr['driver'];
 
         if (!in_array($driver, PDO::getAvailableDrivers())) {
-            throw new InvalidArgumentException("Unsupported PDO driver: {$driver}.");
+            throw new InvalidConnection("Unsupported PDO driver: {$driver}.");
         }
 
         unset($attr['driver']);

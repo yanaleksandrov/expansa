@@ -5,37 +5,37 @@ declare(strict_types=1);
 namespace Expansa\Assets;
 
 use Closure;
-use Expansa\Assets\Abstracts\Provider;
+use InvalidArgumentException;
+use ReflectionMethod;
+use Expansa\Assets\Providers\AbstractProvider;
 use Expansa\Assets\Providers\Link;
 use Expansa\Assets\Providers\Script;
-use Expansa\Assets\Support\AssetHandler;
 use Expansa\Support\Url;
-use InvalidArgumentException;
 
 /**
  * Allows assets (CSS, JS, etc.) to be included throughout the application, and then outputted
  * later based on dependencies. This makes sure all assets will be included in the correct
- * order, no matter what order they are defined in.
+ * order, no matter what order they are defined in. The Asset facade instance.
+ *
+ * @package Expansa\Assets
  */
-class Manager
+final class Manager
 {
-    use AssetHandler;
-
     /**
      * Assets list, keyed by composite id ("{uid}-{extension}").
      *
-     * @var array<string, Provider>
+     * @var array<string, AbstractProvider>
      */
-    public static array $assets = [];
+    private static array $assets = [];
 
     /**
      * Provider registry: file extension (or arbitrary provider key) => provider class.
      * Register your own with {@see self::provider()} to support new asset kinds
      * (fonts, preloads, importmaps, ...) without touching this class.
      *
-     * @var array<string, class-string<Provider>>
+     * @var array<string, class-string<AbstractProvider>>
      */
-    protected static array $providers = [
+    private static array $providers = [
         'css' => Link::class,
         'js'  => Script::class,
     ];
@@ -44,7 +44,7 @@ class Manager
      * Template file extensions stripped when resolving the default co-located structure
      * in {@see self::defaultStructure()}.
      */
-    protected const array TEMPLATE_EXTENSIONS = ['blade.php', 'php', 'html'];
+    private const array TEMPLATE_EXTENSIONS = ['blade.php', 'php', 'html'];
 
     /**
      * Resolver used by {@see self::discover()} to find a file's CSS/JS. Receives the absolute
@@ -54,7 +54,7 @@ class Manager
      *
      * @var null|Closure(string, array): array<string, string>
      */
-    protected static ?Closure $configure = null;
+    private static ?Closure $configure = null;
 
     /**
      * Bumped by {@see self::enqueue()}/{@see self::dequeue()} on an actual change (not a dedup no-op).
@@ -67,12 +67,12 @@ class Manager
      * can teach the manager new kinds of assets without modifying it.
      *
      * @param string                 $extension     e.g. 'css', 'js', or a custom key such as 'font'.
-     * @param class-string<Provider> $providerClass Must extend {@see Provider}.
+     * @param class-string<AbstractProvider> $providerClass Must extend {@see AbstractProvider}.
      */
     public static function provider(string $extension, string $providerClass): void
     {
-        if (! is_a($providerClass, Provider::class, true)) {
-            throw new InvalidArgumentException(sprintf('%s must extend %s', $providerClass, Provider::class));
+        if (! is_a($providerClass, AbstractProvider::class, true)) {
+            throw new InvalidArgumentException(sprintf('%s must extend %s', $providerClass, AbstractProvider::class));
         }
 
         self::$providers[$extension] = $providerClass;
@@ -200,7 +200,7 @@ class Manager
 
         self::$assets = array_filter(
             self::$assets,
-            fn (Provider $asset) => $asset->uid !== $uid || ($class !== null && $asset::class !== $class)
+            fn (AbstractProvider $asset) => $asset->uid !== $uid || ($class !== null && $asset::class !== $class)
         );
 
         if (self::$assets !== $before) {
@@ -213,7 +213,7 @@ class Manager
      *
      * @param string $uid When given, only assets registered under this uid (there may be
      *                    more than one, e.g. a css and a js asset sharing the same uid).
-     * @return array<string, Provider>
+     * @return array<string, AbstractProvider>
      */
     public function get(string $uid = ''): array
     {
@@ -221,7 +221,7 @@ class Manager
             return self::$assets;
         }
 
-        return array_filter(self::$assets, fn (Provider $asset) => $asset->uid === $uid);
+        return array_filter(self::$assets, fn (AbstractProvider $asset) => $asset->uid === $uid);
     }
 
     /**
@@ -256,7 +256,7 @@ class Manager
         }
 
         foreach ($discovered[$key] as $extension => $path) {
-            $this->enqueue($uid, $this->toUrl($path), $extension);
+            $this->enqueue($uid, Url::toUrl($path), $extension);
         }
     }
 
@@ -343,12 +343,14 @@ class Manager
 
         if (! $combine) {
             foreach ($assets as $asset) {
-                echo $asset->render($asset, $minify, $inline);
+                echo $asset->render($minify, $inline);
             }
             return;
         }
 
-        /** @var array{class: class-string<Provider>, toFooter: bool, assets: Provider[]}|null $run */
+        /**
+ * @var array{class: class-string<AbstractProvider>, toFooter: bool, assets: AbstractProvider[]}|null $run
+*/
         $run = null;
 
         $flush = function () use (&$run, $minify, $inline): void {
@@ -358,7 +360,7 @@ class Manager
 
             echo count($run['assets']) > 1
                 ? $this->renderCombined($run, $minify, $inline)
-                : $run['assets'][0]->render($run['assets'][0], $minify, $inline);
+                : $run['assets'][0]->render($minify, $inline);
 
             $run = null;
         };
@@ -376,7 +378,7 @@ class Manager
             if ($combinable) {
                 $run = ['class' => $asset::class, 'toFooter' => $asset->toFooter, 'assets' => [$asset]];
             } else {
-                echo $asset->render($asset, $minify, $inline);
+                echo $asset->render($minify, $inline);
             }
         }
 
@@ -392,7 +394,7 @@ class Manager
      * from this: {@see self::renderCombined()} carries every piece's preamble() (Script's data
      * dump) forward regardless of whether it joins a bundle.
      */
-    private function isCombinable(Provider $asset): bool
+    private function isCombinable(AbstractProvider $asset): bool
     {
         if ($asset->path === '' || pathinfo($asset->path, PATHINFO_EXTENSION) === '') {
             return false;
@@ -403,7 +405,7 @@ class Manager
         $class = $asset::class;
         if (! isset($defaults[$class])) {
             $defaults[$class] = [];
-            foreach (new \ReflectionMethod($class, '__construct')->getParameters() as $param) {
+            foreach (new ReflectionMethod($class, '__construct')->getParameters() as $param) {
                 if ($param->isDefaultValueAvailable()) {
                     $defaults[$class][$param->getName()] = $param->getDefaultValue();
                 }
@@ -426,11 +428,11 @@ class Manager
     /**
      * Concatenate a run of same-provider, same-placement assets into one unit and render it:
      * embedded directly ($inline, nothing touches disk) or written to a cached file and linked
-     * to. Uses readContent() per piece so a bundle shares the APCu minify cache with individual
+     * to. Uses readContent() of each piece so a bundle shares the APCu minify cache with individual
      * renders instead of bypassing it.
      *
      * The bundle is always named just "bundle" - uniqueness/dedup comes entirely from the
-     * content hash in the cache filename (see cacheMinifiedFile()), so two pages producing the
+     * content hash in the cache filename (see AbstractProvider::writeCache()), so two pages producing the
      * same concatenated content share one file regardless of which uids went into it. That still
      * depends on the pieces landing in the same order; a different dependency order still
      * produces different (correct, just not deduped) content and thus a different file.
@@ -439,16 +441,16 @@ class Manager
      * tag - the *bundle* itself is a fresh instance with no data of its own, but the pieces it
      * was built from might. Kept out of the bundle file itself; see preamble()'s own docs for why.
      *
-     * @param array{class: class-string<Provider>, toFooter: bool, assets: Provider[]} $run
+     * @param array{class: class-string<AbstractProvider>, toFooter: bool, assets: AbstractProvider[]} $run
      */
     private function renderCombined(array $run, bool $minify, bool $inline): string
     {
         $content = implode("\n", array_map(
-            fn (Provider $asset) => $this->readContent($asset, $minify) ?? '',
+            fn (AbstractProvider $asset) => $asset->readContent($minify) ?? '',
             $run['assets']
         ));
 
-        $preamble = implode('', array_map(fn (Provider $asset) => $asset->preamble($asset), $run['assets']));
+        $preamble = implode('', array_map(fn (AbstractProvider $asset) => $asset->preamble(), $run['assets']));
 
         $uid       = 'bundle';
         $extension = pathinfo($run['assets'][0]->path, PATHINFO_EXTENSION);
@@ -456,10 +458,10 @@ class Manager
         if ($inline) {
             $bundle = new ($run['class'])($uid, "$uid.$extension", toFooter: $run['toFooter']);
 
-            return $preamble . $bundle->renderInline($bundle, $content);
+            return $preamble . $bundle->renderInline($content);
         }
 
-        $url = $this->cacheMinifiedFile($uid, $content, $extension);
+        $url = AbstractProvider::writeCache($uid, $content, $extension);
 
         if ($url === null) {
             // Couldn't write the bundle (disk full, permissions, ...) - fall back to each piece
@@ -467,18 +469,18 @@ class Manager
             // through its own render(), which has the same fallback for a plain (non-combined)
             // minify: true write failure, and renders its own preamble() already.
             return implode('', array_map(
-                fn (Provider $asset) => $asset->render($asset, $minify, false),
+                fn (AbstractProvider $asset) => $asset->render($minify),
                 $run['assets']
             ));
         }
 
         $bundle = new ($run['class'])($uid, $url, toFooter: $run['toFooter']);
 
-        return $preamble . $bundle->render($bundle);
+        return $preamble . $bundle->render();
     }
 
     /**
-     * Delete cached/minified/combined files (everything {@see AssetHandler::cacheMinifiedFile()}
+     * Delete cached/minified/combined files (everything {@see AbstractProvider::writeCache()}
      * writes) older than $maxAge seconds, then - if $maxBytes is given - keep deleting the
      * oldest survivors (oldest mtime first) until the total is back under budget. Content
      * changes already get a fresh hash/filename on their own; this is purely about reclaiming
@@ -549,7 +551,7 @@ class Manager
      * Shared filtering logic behind {@see self::render()}. Sorts (and caches the sort of)
      * self::$assets, then applies $filter, re-sorting only when self::$assetsRevision changed.
      *
-     * @return array<string, Provider>
+     * @return array<string, AbstractProvider>
      */
     private function filter(array $filter): array
     {
@@ -562,7 +564,7 @@ class Manager
             $sortedRevision = self::$assetsRevision;
         }
 
-        return array_filter($sorted, function (Provider $asset) use ($filter) {
+        return array_filter($sorted, function (AbstractProvider $asset) use ($filter) {
             foreach ($filter as $key => $value) {
                 if (! property_exists($asset, $key)) {
                     continue;
@@ -595,5 +597,69 @@ class Manager
         }
 
         return null;
+    }
+
+    /**
+     * Sort assets so each one comes after its dependencies; a dependency is a uid or a full id,
+     * unknown ones are ignored.
+     *
+     * @param array<string, AbstractProvider> $assets
+     * @return array<string, AbstractProvider>
+     */
+    public function sortDependencies(array $assets): array
+    {
+        $idsByUid = [];
+        foreach ($assets as $id => $asset) {
+            $idsByUid[$asset->uid][] = $id;
+        }
+
+        $sorted  = [];
+        $visited = [];
+
+        $visit = function (string $id) use (&$visit, &$sorted, &$visited, $assets, $idsByUid): void {
+            if (isset($visited[$id]) || ! isset($assets[$id])) {
+                return;
+            }
+            $visited[$id] = true;
+
+            foreach ($assets[$id]->dependencies as $dependency) {
+                foreach ($idsByUid[$dependency] ?? [$dependency] as $dependencyId) {
+                    $visit($dependencyId);
+                }
+            }
+
+            $sorted[$id] = $assets[$id];
+        };
+
+        foreach (array_keys($assets) as $id) {
+            $visit($id);
+        }
+
+        return $sorted;
+    }
+
+    /**
+     * Turn a uid into a file-safe id: `_`, `.`, `,` and spaces become dashes.
+     *
+     * @param string $uid
+     * @return string
+     */
+    public function sanitizeId(string $uid): string
+    {
+        return trim((string) preg_replace('/\W-/', '', str_replace(['_', '.', ',', ' '], '-', $uid)));
+    }
+
+    /**
+     * Keep only URL-safe characters and collapse repeated slashes, except after the scheme.
+     *
+     * @param string $url
+     * @return string
+     */
+    public function sanitizeUrl(string $url): string
+    {
+        $url = str_replace(';//', '://', trim($url));
+        $url = (string) preg_replace('/[^a-zA-Z0-9-_.:\/?]/', '', $url);
+
+        return (string) preg_replace('#([^:])//+#', '/', $url);
     }
 }

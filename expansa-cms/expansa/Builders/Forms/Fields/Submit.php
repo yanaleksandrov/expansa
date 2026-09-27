@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/submit.blade.php` - a submit button.
  */
-class Submit extends AbstractField
+final class Submit extends AbstractField
 {
     public function __construct()
     {

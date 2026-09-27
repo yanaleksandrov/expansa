@@ -31,7 +31,7 @@ final class UserService
         return [
             [
                 'target' => 'body',
-                'notify' => t('User updated.')
+                'notify' => t('User updated.'),
             ],
         ];
     }
@@ -52,20 +52,22 @@ final class UserService
             return [
                 [
                     'target' => 'body',
-                    'notify' => $user->get('user-login')[0]
+                    'notify' => $user->get('user-login')[0],
                 ],
             ];
         }
 
         return [
             [
-                'target' => 'body',
-                'redirect' => url('dashboard')
+                'target'   => 'body',
+                'redirect' => url('dashboard'),
             ],
         ];
     }
 
-    /** Same redirect-fragment key fix as signIn() — was `method`/`fragment`, now `redirect`. */
+    /**
+ * Same redirect-fragment key fix as signIn() — was `method`/`fragment`, now `redirect`.
+*/
     public function signUp(array $input): array|User
     {
         $user = User::create($input);
@@ -95,9 +97,9 @@ final class UserService
             $mailIsSent = Mail::send(
                 $email,
                 t('Password reset instructions'),
-                View::make(EX_DASHBOARD . 'mails/wrapper', [
+                View::create(EX_DASHBOARD . 'mails/wrapper', [
                     'body_template' => EX_DASHBOARD . 'mails/reset-password',
-                ])
+                ])->render()
             );
 
             return ['mail-is-sent' => $mailIsSent];

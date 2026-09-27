@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Attributes list
  *
@@ -8,6 +7,7 @@
  *
  * @package Expansa\Templates
  */
+
 ?>
 <div class="expansa-main">
     <div class="attributes">

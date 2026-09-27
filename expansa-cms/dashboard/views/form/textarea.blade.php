@@ -42,7 +42,7 @@ unset( $attributes['value'] );
 	<?php endif; ?>
 	<label class="field-item">
 		<?php echo $before; ?>
-		<textarea<?php echo Arr::toHtmlAtts( $attributes ); ?>><?php echo $value; ?></textarea>
+		<textarea<?php echo Arr::toHtmlAttributes( $attributes ); ?>><?php echo $value; ?></textarea>
 		<?php
 		echo $after;
 		if ( $copy ) {

@@ -112,8 +112,7 @@ class Post
          * Custom fields of the entry.
          */
         public ?Field $field = null,
-    )
-    {
+    ) {
         $this->table = Safe::tablename($this->type);
     }
 

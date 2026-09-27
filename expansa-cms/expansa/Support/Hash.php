@@ -4,74 +4,72 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use Exception;
-use Throwable;
-use Random\RandomException;
+use RuntimeException;
 
 /**
- * The Hash Class.
+ * Random passwords, password hashes and short fingerprints of strings.
+ *
+ * @package Expansa\Support
  */
-class Hash
+final class Hash
 {
+    private const string CHARS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    private const string SPECIAL_CHARS = '!@#$%^&*()';
+
+    private const string EXTRA_SPECIAL_CHARS = '-_[]{}<>~`+=,.;:/?|';
+
     /**
-     * Generates a random password drawn from the defined set of characters.
+     * Generate a cryptographically secure random password.
      *
-     * @param int  $length            Optional. The length of password to generate. Default 12.
-     * @param bool $specialChars      Optional. Whether to include standard special characters.
-     *                                Default true.
-     * @param bool $extraSpecialChars Optional. Whether to include other special characters.
-     *                                Used when generating secret keys and salts. Default false.
-     *
-     * @return string The random password.
+     * @param int  $length
+     * @param bool $specialChars      Include `!@#$%^&*()`.
+     * @param bool $extraSpecialChars Include other punctuation, for secret keys and salts.
+     * @return string
      */
     public static function generate(int $length = 12, bool $specialChars = true, bool $extraSpecialChars = false): string
     {
-        $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-
-        if ($specialChars) {
-            $chars .= '!@#$%^&*()';
-        }
-
-        if ($extraSpecialChars) {
-            $chars .= '-_[]{}<>~`+=,.;:/?|';
-        }
+        $chars = self::CHARS . ($specialChars ? self::SPECIAL_CHARS : '') . ($extraSpecialChars ? self::EXTRA_SPECIAL_CHARS : '');
+        $max   = strlen($chars) - 1;
 
         $password = '';
-        for ($i = 0; $i < $length; ++$i) {
-            $password .= $chars[mt_rand(0, strlen($chars) - 1)];
+        for ($i = 0; $i < $length; $i++) {
+            $password .= $chars[random_int(0, $max)];
         }
 
         return $password;
     }
 
     /**
-     * Создает хеш пароля.
+     * Hash a password with password_hash().
      *
-     * @throws Exception
+     * @param string $password
+     * @param array  $options `hash_algorithm` (PASSWORD_DEFAULT by default) and the password_hash() options.
+     * @return string
      */
-    public static function make(string $password, array $options = []): string
+    public static function password(string $password, array $options = []): string
     {
-        $algorithm = $options['hash_algorithm'] ?? PASSWORD_DEFAULT;
-
-        $hashedPassword = password_hash($password, $algorithm);
-
-        if ($hashedPassword === false) {
-            throw new Exception('Не удалось создать хеш пароля.');
-        }
-
-        return $hashedPassword;
+        return password_hash($password, $options['hash_algorithm'] ?? PASSWORD_DEFAULT, $options);
     }
 
     /**
-     * Generate unique string from existing data.
+     * Get a short fingerprint of a string: the letters of its SHA-256 hash.
+     *
+     * @param string $string
+     * @param int    $length
+     * @return string
      */
-    public static function form(string $string, int $length = 6): string
+    public static function fingerprint(string $string, int $length = 6): string
     {
         return substr(preg_replace('/[^a-z]/', '', hash('sha256', $string)), 0, $length);
     }
 
     /**
-     * Проверяет, совпадает ли введенный пароль с хешем.
+     * Check a password against its hash.
+     *
+     * @param string $password
+     * @param string $hashedPassword
+     * @return bool
      */
     public static function check(string $password, string $hashedPassword): bool
     {
@@ -79,7 +77,11 @@ class Hash
     }
 
     /**
-     * Проверяет, нужно ли повторно хешировать пароль с использованием других опций.
+     * Check if a hash was made with other options and should be made again.
+     *
+     * @param string $hashedPassword
+     * @param array  $options Same as for password().
+     * @return bool
      */
     public static function needsRehash(string $hashedPassword, array $options = []): bool
     {
@@ -87,10 +89,10 @@ class Hash
     }
 
     /**
-     * Возвращает информацию о хеше пароля.
+     * Get the algorithm and options of a hash.
      *
      * @param string $hashedPassword
-     * @return array
+     * @return array{algo: string|null, algoName: string, options: array}
      */
     public static function info(string $hashedPassword): array
     {
@@ -98,24 +100,22 @@ class Hash
     }
 
     /**
-     * Устанавливает количество раундов для хеширования.
+     * Hash an empty password with Argon2id and the given time cost, e.g. to check that it is supported.
      *
-     * @throws Exception
+     * @param int $rounds Argon2id time cost.
+     * @return void
+     * @throws RuntimeException If PHP is built without Argon2id.
      */
     public static function setRounds(int $rounds): void
     {
         if (! defined('PASSWORD_ARGON2ID')) {
-            throw new Exception('Алгоритм Argon2ID не поддерживается.');
+            throw new RuntimeException('The Argon2id algorithm is not supported.');
         }
 
-        $options = [
+        password_hash('', PASSWORD_ARGON2ID, [
             'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST,
-            'time_cost'   => PASSWORD_ARGON2_DEFAULT_TIME_COST,
+            'time_cost'   => $rounds,
             'threads'     => PASSWORD_ARGON2_DEFAULT_THREADS,
-        ];
-
-        $options['time_cost'] = $rounds;
-
-        password_hash('', PASSWORD_ARGON2ID, $options);
+        ]);
     }
 }

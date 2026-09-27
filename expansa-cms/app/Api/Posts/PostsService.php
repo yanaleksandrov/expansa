@@ -50,10 +50,10 @@ final class PostsService
             }
         );
 
-        return (new Response())
-            ->setContent(is_string($content) ? $content : Json::encode($content))
-            ->setHeader('Content-Type', 'application/force-download')
-            ->setHeader('Content-Disposition', sprintf('inline; filename="core-posts-%s.%s"', $date, $format));
+        return new Response(is_string($content) ? $content : Json::encode($content), headers: [
+            'Content-Type'        => 'application/force-download',
+            'Content-Disposition' => sprintf('inline; filename="core-posts-%s.%s"', $date, $format),
+        ]);
     }
 
     public function import(array $input): array
@@ -89,7 +89,7 @@ final class PostsService
 
         return [
             'completed' => true,
-            'output'    => View::make(EX_DASHBOARD . 'views/global/state', [
+            'output'    => View::create(EX_DASHBOARD . 'views/global/state', [
                 'icon'        => 'success',
                 'title'       => t('Import is complete!'),
                 'description' => t(':counts posts were imported successfully. Do you want to [start another import](:link)?', count($imported), url('/dashboard/import')),

@@ -3,24 +3,11 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Hook;
-use Expansa\Hooks\Exception\HooksException;
+use Expansa\Hooks\Exceptions\InvalidListener;
 
 // run: php tests/Hooks.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
+require_once __DIR__ . '/bootstrap.php';
 require_once EX_PATH . 'expansa/functions.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
 
 /**
  * Number of listeners registered for a hook.
@@ -48,7 +35,7 @@ check('a directory scan picks up the other listener files', listeners('testFarew
 try {
     Hook::configure(listeners: ['TestListeners\Missing']);
     check('a missing listener class is reported', false);
-} catch (HooksException $e) {
+} catch (InvalidListener $e) {
     check('a missing listener class is reported', str_contains($e->getMessage(), 'does not exist'));
 }
 

@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 // run: php tests/run.php
-// every test declares its own EX_PATH and check(), so each one runs in a separate process
+// tests declare functions and constants, so each one runs in a separate process
 $failed = [];
 
 foreach (glob(__DIR__ . '/*.php') as $test) {
     // glob() and __FILE__ use different slashes on Windows, so the paths themselves never match
-    if (basename($test) === basename(__FILE__)) {
+    if (in_array(basename($test), [basename(__FILE__), 'bootstrap.php'], true)) {
         continue;
     }
 

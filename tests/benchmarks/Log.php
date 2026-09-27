@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Expansa\Log\Handlers\FileHandler;
+use Expansa\Log\Handlers\File;
 use Expansa\Log\Logger;
 
 // run: php tests/benchmarks/Log.php [--baseline=<git ref>] [--iterations=N]
@@ -48,11 +48,14 @@ function measure(callable $callback, int $iterations): float
     return (hrtime(true) - $start) / $iterations / 1000;
 }
 
-$old = new LogBaseline\Logger('app', [new LogBaseline\Handlers\FileHandler("$tmp/old.log", 'debug')]);
-$new = new Logger('app', [new FileHandler("$tmp/new.log", 'debug')]);
+// the handler was FileHandler before the rename
+$baselineFile = is_file("$tmp/baseline/Handlers/File.php") ? 'LogBaseline\Handlers\File' : 'LogBaseline\Handlers\FileHandler';
 
-$oldQuiet = new LogBaseline\Logger('app', [new LogBaseline\Handlers\FileHandler("$tmp/old-quiet.log", 'error')]);
-$newQuiet = new Logger('app', [new FileHandler("$tmp/new-quiet.log", 'error')]);
+$old = new LogBaseline\Logger('app', [new $baselineFile("$tmp/old.log", 'debug')]);
+$new = new Logger('app', [new File("$tmp/new.log", 'debug')]);
+
+$oldQuiet = new LogBaseline\Logger('app', [new $baselineFile("$tmp/old-quiet.log", 'error')]);
+$newQuiet = new Logger('app', [new File("$tmp/new-quiet.log", 'error')]);
 
 $context = ['user' => 42, 'ip' => '127.0.0.1', 'tags' => ['auth', 'login']];
 

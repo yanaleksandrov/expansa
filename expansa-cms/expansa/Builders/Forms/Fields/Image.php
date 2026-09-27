@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/image.blade.php` - a single image/avatar uploader with camera capture support.
  */
-class Image extends AbstractField
+final class Image extends AbstractField
 {
     public function __construct()
     {

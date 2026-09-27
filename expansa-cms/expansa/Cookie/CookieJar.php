@@ -4,64 +4,70 @@ declare(strict_types=1);
 
 namespace Expansa\Cookie;
 
-use Expansa\Cookie\Contracts\QueueingFactory;
-use Expansa\Cookie\Exception\CookieException;
+use Expansa\Cookie\Contracts\Queue;
+use Expansa\Cookie\Enums\SameSite;
 
 /**
- * Builds and queues outgoing cookies. Exposed as the `Cookie` facade, which
- * resolves a single shared instance per request (see Expansa\Patterns\Facade),
- * so the queue and the configured defaults below persist across Cookie::* calls.
+ * Creates cookies with the configured defaults and queues them for the response.
+ * Target of the Cookie facade, so the defaults and the queue live for the whole request;
+ * the application passes getQueue() to Response::setCookie() before sending.
+ *
+ * @package Expansa\Cookie
  */
-class CookieJar implements QueueingFactory
+final class CookieJar implements Queue
 {
     /**
-     * Default path applied to a cookie that doesn't specify its own.
+     * Minutes in about a year, the lifetime of createForever().
      */
-    protected string $path = '/';
+    private const int FOREVER = 576000;
 
     /**
-     * Default domain applied to a cookie that doesn't specify its own.
+     * Default path.
      */
-    protected string $domain = '';
+    public private(set) string $path = '/';
 
     /**
-     * Default "secure" flag applied to a cookie that doesn't specify its own.
+     * Default domain.
      */
-    protected bool $secure = false;
+    public private(set) string $domain = '';
 
     /**
-     * Default "httpOnly" flag applied to a cookie that doesn't specify its own.
+     * Default secure attribute.
      */
-    protected bool $httpOnly = true;
+    public private(set) bool $secure = false;
 
     /**
-     * Cookies queued for later delivery, keyed by name then path.
+     * Default httpOnly attribute.
+     */
+    public private(set) bool $httpOnly = true;
+
+    /**
+     * Default SameSite attribute.
+     */
+    public private(set) SameSite $sameSite = SameSite::Lax;
+
+    /**
+     * Queued cookies by name, then by path.
      *
      * @var array<string, array<string, Cookie>>
      */
-    protected array $queued = [];
+    private array $queue = [];
 
-    /**
-     * Default "sameSite" attribute applied to a cookie that doesn't specify its own.
-     *
-     * @throws CookieException
-     */
-    protected string $sameSite = Cookie::SAME_SITE_LAX {
-        set {
-            if (! in_array($value, [Cookie::SAME_SITE_NONE, Cookie::SAME_SITE_LAX, Cookie::SAME_SITE_STRICT], true)) {
-                throw new CookieException('The "sameSite" parameter value is not valid.');
-            }
-            $this->sameSite = $value;
-        }
+    public function configure(
+        string $path = '/',
+        string $domain = '',
+        bool $secure = false,
+        bool $httpOnly = true,
+        SameSite $sameSite = SameSite::Lax,
+    ): void {
+        $this->path     = $path;
+        $this->domain   = $domain;
+        $this->secure   = $secure;
+        $this->httpOnly = $httpOnly;
+        $this->sameSite = $sameSite;
     }
 
-    /**
-     * Build a cookie, falling back to the configured defaults for any
-     * attribute left null.
-     *
-     * @throws CookieException
-     */
-    public function make(
+    public function create(
         string $name,
         string $value,
         int $minutes = 0,
@@ -69,14 +75,12 @@ class CookieJar implements QueueingFactory
         ?string $domain = null,
         ?bool $secure = null,
         ?bool $httpOnly = null,
-        ?string $sameSite = null
+        ?SameSite $sameSite = null,
     ): Cookie {
-        $expires = $minutes === 0 ? 0 : time() + ($minutes * 60);
-
         return new Cookie(
             $name,
             $value,
-            $expires,
+            $minutes === 0 ? 0 : time() + $minutes * 60,
             $path ?? $this->path,
             $domain ?? $this->domain,
             $secure ?? $this->secure,
@@ -85,46 +89,23 @@ class CookieJar implements QueueingFactory
         );
     }
 
-    /**
-     * Build a cookie that lasts roughly a year (576000 minutes).
-     *
-     * @throws CookieException
-     */
-    public function forever(
+    public function createForever(
         string $name,
         string $value,
         ?string $path = null,
         ?string $domain = null,
         ?bool $secure = null,
-        bool $httpOnly = true,
-        ?string $sameSite = null
+        ?bool $httpOnly = null,
+        ?SameSite $sameSite = null,
     ): Cookie {
-        return $this->make($name, $value, 576000, $path, $domain, $secure, $httpOnly, $sameSite);
+        return $this->create($name, $value, self::FOREVER, $path, $domain, $secure, $httpOnly, $sameSite);
     }
 
-    /**
-     * Build a cookie that clears an existing one (empty value, expired in the past).
-     *
-     * @throws CookieException
-     */
-    public function forget(string $name, ?string $path = null, ?string $domain = null): Cookie
+    public function createExpired(string $name, ?string $path = null, ?string $domain = null): Cookie
     {
-        return $this->make($name, '', -2628000, $path, $domain);
+        return $this->create($name, '', 0, $path, $domain);
     }
 
-    /**
-     * Check whether a cookie with the given name (and, optionally, path) is queued.
-     */
-    public function hasQueued(string $name, ?string $path = null): bool
-    {
-        return $this->queued($name, null, $path) !== null;
-    }
-
-    /**
-     * Queue a cookie (built from raw arguments, or already built) for later delivery.
-     *
-     * @throws CookieException
-     */
     public function queue(
         Cookie|string $cookie,
         string $value = '',
@@ -132,143 +113,57 @@ class CookieJar implements QueueingFactory
         ?string $path = null,
         ?string $domain = null,
         ?bool $secure = null,
-        bool $httpOnly = true,
-        ?string $sameSite = null
+        ?bool $httpOnly = null,
+        ?SameSite $sameSite = null,
     ): void {
         if (is_string($cookie)) {
-            $cookie = $this->make($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
+            $cookie = $this->create($cookie, $value, $minutes, $path, $domain, $secure, $httpOnly, $sameSite);
         }
 
-        $this->queued[$cookie->name][$cookie->path] = $cookie;
+        $this->queue[$cookie->name][$cookie->path] = $cookie;
     }
 
-    /**
-     * Read a queued cookie by name — the one at the given path, or the most
-     * recently queued one for that name if no path is given.
-     *
-     * @param mixed|null $default
-     * @return mixed|Cookie
-     */
-    public function queued(string $name, mixed $default = null, ?string $path = null): mixed
+    public function hasQueued(string $name, ?string $path = null): bool
     {
-        if (! isset($this->queued[$name])) {
-            return $default;
-        }
-
-        $queued = $this->queued[$name];
-
-        if ($path === null) {
-            return end($queued);
-        }
-
-        return $queued[$path] ?? $default;
+        return $this->getQueued($name, $path) !== null;
     }
 
-    /**
-     * Remove a queued cookie (a specific path, or every path for that name).
-     */
-    public function unqueue(string $name, ?string $path = null): void
+    public function getQueued(string $name, ?string $path = null): ?Cookie
+    {
+        if (! isset($this->queue[$name])) {
+            return null;
+        }
+
+        return $path === null ? end($this->queue[$name]) : $this->queue[$name][$path] ?? null;
+    }
+
+    public function getQueue(): array
+    {
+        return array_merge(...array_values(array_map(array_values(...), $this->queue)));
+    }
+
+    public function forget(string $name, ?string $path = null): void
     {
         if ($path === null) {
-            unset($this->queued[$name]);
+            unset($this->queue[$name]);
 
             return;
         }
 
-        unset($this->queued[$name][$path]);
+        unset($this->queue[$name][$path]);
 
-        if (empty($this->queued[$name])) {
-            unset($this->queued[$name]);
+        if (empty($this->queue[$name])) {
+            unset($this->queue[$name]);
         }
     }
 
-    /**
-     * Queue a cookie that clears an existing one. Shorthand for queue(forget(...)).
-     *
-     * @throws CookieException
-     */
     public function expire(string $name, ?string $path = null, ?string $domain = null): void
     {
-        $this->queue($this->forget($name, $path, $domain));
+        $this->queue($this->createExpired($name, $path, $domain));
     }
 
-    /**
-     * All queued cookies, flattened into a single list.
-     *
-     * @return Cookie[]
-     */
-    public function getQueuedCookies(): array
+    public function flush(): void
     {
-        $cookies = [];
-
-        foreach ($this->queued as $paths) {
-            foreach ($paths as $cookie) {
-                $cookies[] = $cookie;
-            }
-        }
-
-        return $cookies;
-    }
-
-    /**
-     * Empty the queue without sending anything.
-     */
-    public function flushQueuedCookies(): static
-    {
-        $this->queued = [];
-
-        return $this;
-    }
-
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    public function getDomain(): string
-    {
-        return $this->domain;
-    }
-
-    public function getSecure(): bool
-    {
-        return $this->secure;
-    }
-
-    public function getSameSite(): string
-    {
-        return $this->sameSite;
-    }
-
-    /**
-     * Change the defaults applied to cookies that don't specify their own
-     * attributes. Only non-null arguments are updated.
-     *
-     * @throws CookieException
-     */
-    public function setDefault(
-        ?string $path = null,
-        ?string $domain = null,
-        ?bool $secure = null,
-        ?bool $httpOnly = null,
-        ?string $sameSite = null
-    ): static {
-        if ($path !== null) {
-            $this->path = $path;
-        }
-        if ($domain !== null) {
-            $this->domain = $domain;
-        }
-        if ($secure !== null) {
-            $this->secure = $secure;
-        }
-        if ($httpOnly !== null) {
-            $this->httpOnly = $httpOnly;
-        }
-        if ($sameSite !== null) {
-            $this->sameSite = $sameSite;
-        }
-
-        return $this;
+        $this->queue = [];
     }
 }

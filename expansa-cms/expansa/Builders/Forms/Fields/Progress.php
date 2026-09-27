@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/progress.blade.php` - an animated progress bar indicator.
  */
-class Progress extends AbstractField
+final class Progress extends AbstractField
 {
     public function __construct()
     {

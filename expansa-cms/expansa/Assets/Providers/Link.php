@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Assets\Providers;
 
-use Expansa\Assets\Abstracts\Provider;
-
-class Link extends Provider
+/**
+ * A `<link>` asset: a stylesheet by default, also icons, manifests and preloads.
+ *
+ * @package Expansa\Assets\Providers
+ */
+final class Link extends AbstractProvider
 {
     /**
      * Computes `path` from `href`; `data` entries override matching properties except `id`.
@@ -133,40 +136,39 @@ class Link extends Provider
      * webmanifest as if it were CSS text would corrupt it, so those always render as-is
      * regardless of the flags. No effect either on an asset with no local file to read.
      *
-     * @param Provider $asset
-     * @param bool     $minify
-     * @param bool     $inline
+     * @param bool $minify
+     * @param bool $inline
      * @return string
      */
-    public function render(Provider $asset, bool $minify = false, bool $inline = false): string
+    public function render(bool $minify = false, bool $inline = false): string
     {
-        $isStylesheet = $asset->rel === 'stylesheet';
-        $content      = ($isStylesheet && ($minify || $inline)) ? $this->readContent($asset, $minify) : null;
+        $isStylesheet = $this->rel === 'stylesheet';
+        $content      = ($isStylesheet && ($minify || $inline)) ? $this->readContent($minify) : null;
 
         if ($inline && $content !== null) {
-            return $this->renderInline($asset, $content);
+            return $this->renderInline($content);
         }
 
-        $attributes = array_diff_key(get_object_vars($asset), array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
+        $attributes = array_diff_key(get_object_vars($this), array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
 
         if ($minify && $content !== null) {
             // Null means the write failed (disk full, permissions, ...) - keep the original
             // href rather than link to a cached file that was never actually written.
-            $attributes['href'] = $this->cacheMinifiedFile($asset->uid, $content, 'css') ?? $attributes['href'];
+            $attributes['href'] = self::writeCache($this->uid, $content, 'css') ?? $attributes['href'];
         }
 
-        return sprintf("	<link%s/>\n", $this->sanitizeAttributes($attributes));
+        return sprintf("	<link%s/>\n", $this->renderAttributes($attributes));
     }
 
     /**
      * Embed already-computed CSS $content directly as a `<style>` tag, keeping only the
      * attributes that still make sense without a href (id, class, media).
      */
-    public function renderInline(Provider $asset, string $content): string
+    public function renderInline(string $content): string
     {
-        $attributes = array_intersect_key(get_object_vars($asset), array_flip(['id', 'class', 'media']));
+        $attributes = array_intersect_key(get_object_vars($this), array_flip(['id', 'class', 'media']));
 
-        return sprintf("	<style%s>%s</style>\n", $this->sanitizeAttributes($attributes), $content);
+        return sprintf("	<style%s>%s</style>\n", $this->renderAttributes($attributes), $content);
     }
 
     /**

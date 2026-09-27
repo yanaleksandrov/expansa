@@ -4,15 +4,22 @@ declare(strict_types=1);
 
 namespace Expansa\Extensions;
 
-use Expansa\Extensions\Contracts\ExtensionSkeleton;
-use Expansa\Extensions\Exception\RequiredPropertyException;
+use Expansa\Extensions\Contracts\Extension;
+use Expansa\Extensions\Exceptions\MissingProperty;
 
-class Manager
+/**
+ * Loads plugins and themes by id and calls their lifecycle methods, the Extensions facade instance.
+ *
+ * @package Expansa\Extensions
+ */
+final class Manager
 {
     /**
-     * Contains registered instances of plugin classes.
+     * Loaded extensions by type: `plugin`, `theme`.
+     *
+     * @var array<string, Extension[]>
      */
-    public static array $extensions = [];
+    private static array $extensions = [];
 
     /**
      * Directory the extension ids are relative to, with a trailing slash.
@@ -20,22 +27,25 @@ class Manager
     private static string $root = '';
 
     /**
-     * Get extensions list.
-     *
-     * @param string $type
-     * @return array
-     */
-    /**
      * Set the directory that holds the "plugins" and "themes" folders.
+     *
+     * @param string $root
+     * @return void
      */
     public function configure(string $root): void
     {
         self::$root = rtrim($root, '/\\') . '/';
     }
 
+    /**
+     * Get the loaded extensions of a type.
+     *
+     * @param string $type `plugin` or `theme`.
+     * @return Extension[]
+     */
     public function get(string $type): array
     {
-         return self::$extensions[$type] ?? [];
+        return self::$extensions[$type] ?? [];
     }
 
     /**
@@ -47,7 +57,7 @@ class Manager
     public function register(string $type): void
     {
         foreach (self::$extensions[$type] ?? [] as $extension) {
-            $extension instanceof ExtensionSkeleton && $extension->register();
+            $extension->register();
         }
     }
 
@@ -60,7 +70,7 @@ class Manager
     public function boot(string $type): void
     {
         foreach (self::$extensions[$type] ?? [] as $extension) {
-            $extension instanceof ExtensionSkeleton && $extension->boot();
+            $extension->boot();
         }
     }
 
@@ -74,7 +84,7 @@ class Manager
     public function activate(string $type): void
     {
         foreach (self::$extensions[$type] ?? [] as $extension) {
-            $extension instanceof ExtensionSkeleton && $extension->activate();
+            $extension->activate();
         }
     }
 
@@ -89,7 +99,7 @@ class Manager
     public function deactivate(string $type): void
     {
         foreach (self::$extensions[$type] ?? [] as $extension) {
-            $extension instanceof ExtensionSkeleton && $extension->deactivate();
+            $extension->deactivate();
         }
     }
 
@@ -103,7 +113,7 @@ class Manager
     public function install(string $type): void
     {
         foreach (self::$extensions[$type] ?? [] as $extension) {
-            $extension instanceof ExtensionSkeleton && $extension->install();
+            $extension->install();
         }
     }
 
@@ -118,7 +128,23 @@ class Manager
     public function uninstall(string $type): void
     {
         foreach (self::$extensions[$type] ?? [] as $extension) {
-            $extension instanceof ExtensionSkeleton && $extension->uninstall();
+            $extension->uninstall();
+        }
+    }
+
+    /**
+     * Check that an extension sets the required metadata.
+     *
+     * @param Extension $extension
+     * @return void
+     * @throws MissingProperty
+     */
+    private function validate(Extension $extension): void
+    {
+        foreach (['name', 'description', 'version'] as $property) {
+            if (empty($extension->$property)) {
+                throw new MissingProperty(sprintf('Extension property "%s" is required', $property));
+            }
         }
     }
 
@@ -155,22 +181,14 @@ class Manager
             }
 
             $extension = require_once $path;
-            if (! $extension instanceof ExtensionSkeleton) {
+            if (! $extension instanceof Extension) {
                 continue;
             }
 
             try {
-                foreach (['name', 'description', 'version'] as $property) {
-                    if (property_exists($extension, $property) && !empty($extension->$property)) {
-                        continue;
-                    }
-
-                    throw new RequiredPropertyException(
-                        t('Extension parameter ":propertyName" is required', $property)
-                    );
-                }
-            } catch (RequiredPropertyException $e) {
-
+                $this->validate($extension);
+            } catch (MissingProperty) {
+                continue;
             }
 
             $extension->id   = dirname(str_replace(self::$root, '', $path));

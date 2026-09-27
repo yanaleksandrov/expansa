@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem;
 
-class MimeType
+/**
+ * Allowed upload types, used by Disk to check the extension of uploads.
+ *
+ * @package Expansa\Filesystem
+ */
+final class MimeType
 {
     public function __construct(
 
@@ -109,5 +114,5 @@ class MimeType
             'odb'             => 'application/vnd.oasis.opendocument.database',
             'odf'             => 'application/vnd.oasis.opendocument.formula',
         ],
-    ) {} // phpcs:ignore
+    ) {}
 }

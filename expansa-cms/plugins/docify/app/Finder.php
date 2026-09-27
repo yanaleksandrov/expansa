@@ -57,7 +57,6 @@ class Finder
                     ];
                 }
             } catch (\Exception $e) {
-
             }
         }
         return $classes;

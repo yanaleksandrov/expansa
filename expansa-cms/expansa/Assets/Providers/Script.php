@@ -4,18 +4,13 @@ declare(strict_types=1);
 
 namespace Expansa\Assets\Providers;
 
-use Expansa\Assets\Abstracts\Provider;
-
 /**
- * Class Script
- *
- * This class represents a script asset and provides functionality for rendering
- * and minifying script tags with various attributes. It allows specifying attributes
- * such as async, defer, type, and more.
+ * A `<script>` asset: external file, inline code or a combined bundle, with `data` passed
+ * to the page as a JS variable named after the uid.
  *
  * @package Expansa\Assets\Providers
  */
-class Script extends Provider
+final class Script extends AbstractProvider
 {
     /**
      * Computes `path` from `src`; `data` entries override matching properties except `id`.
@@ -124,40 +119,39 @@ class Script extends Provider
      * the content directly instead of a `src`; $minify runs it through minify() first either
      * way. No effect on an asset with no local file to read.
      *
-     * @param Provider $asset The asset to be rendered.
-     * @param bool     $minify
-     * @param bool     $inline
+     * @param bool $minify
+     * @param bool $inline
      * @return string The HTML script tag with the corresponding attributes.
      */
-    public function render(Provider $asset, bool $minify = false, bool $inline = false): string
+    public function render(bool $minify = false, bool $inline = false): string
     {
-        $return  = $this->preamble($asset);
-        $content = ($minify || $inline) ? $this->readContent($asset, $minify) : null;
+        $return  = $this->preamble();
+        $content = ($minify || $inline) ? $this->readContent($minify) : null;
 
         if ($inline && $content !== null) {
-            return $return . $this->renderInline($asset, $content);
+            return $return . $this->renderInline($content);
         }
 
-        $attributes = array_diff_key(get_object_vars($asset), array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
+        $attributes = array_diff_key(get_object_vars($this), array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
 
         if ($minify && $content !== null) {
             // Null means the write failed (disk full, permissions, ...) - keep the original
             // src rather than link to a cached file that was never actually written.
-            $attributes['src'] = $this->cacheMinifiedFile($asset->uid, $content, 'js') ?? $attributes['src'];
+            $attributes['src'] = self::writeCache($this->uid, $content, 'js') ?? $attributes['src'];
         }
 
-        return $return . sprintf("	<script%s></script>\n", $this->sanitizeAttributes($attributes));
+        return $return . sprintf("	<script%s></script>\n", $this->renderAttributes($attributes));
     }
 
     /**
      * Embed already-computed JS $content directly as a `<script>` tag, keeping only the
      * attributes that still make sense without a src (id, class, type).
      */
-    public function renderInline(Provider $asset, string $content): string
+    public function renderInline(string $content): string
     {
-        $attributes = array_intersect_key(get_object_vars($asset), array_flip(['id', 'class', 'type']));
+        $attributes = array_intersect_key(get_object_vars($this), array_flip(['id', 'class', 'type']));
 
-        return sprintf("	<script%s>%s</script>\n", $this->sanitizeAttributes($attributes), $content);
+        return sprintf("	<script%s>%s</script>\n", $this->renderAttributes($attributes), $content);
     }
 
     /**
@@ -166,20 +160,19 @@ class Script extends Provider
      * `data` is per-render state - baking it into a cached bundle would change that bundle's
      * hash, and thus its filename, on every request where the data differs.
      */
-    public function preamble(Provider $asset): string
+    public function preamble(): string
     {
-        $data = json_encode($asset->data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
+        $data = json_encode($this->data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 
-        return ($asset->data && $data)
-            ? sprintf("<script>var %s = %s</script>\n", $this->sanitizeConst($asset->uid), $data)
+        return ($this->data && $data)
+            ? sprintf("<script>var %s = %s</script>\n", self::variableName($this->uid), $data)
             : '';
     }
 
     /**
      * No-op: safe JS minification needs real tokenization (a `//` or `/*` may be inside a
      * string or regex literal), which a regex-based pass can't tell apart without risking
-     * corrupting the code. Override this (or register a custom provider) with a real
-     * minifier/tokenizer if you need actual JS minification.
+     * corrupting the code. Register a custom provider with a real minifier if you need one.
      *
      * @param string $code The JavaScript code to be minified.
      * @return string The code, unchanged.

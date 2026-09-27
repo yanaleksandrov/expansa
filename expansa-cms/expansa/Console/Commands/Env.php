@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\Console\Command;
-
-class Env extends Command
+/**
+ * Shows the current environment.
+ *
+ * @package Expansa\Console
+ */
+final class Env extends AbstractCommand
 {
-    protected string $name = 'env';
+    public string $name = 'env';
 
-    protected string $description = 'Display the current framework environment.';
+    public string $signature = 'env';
 
-    protected string $signature = 'env';
-
-    protected array $options = [];
+    public function getDescription(): string
+    {
+        return t('Display the current Expansa CMS environment');
+    }
 
     public function handle(): void
     {
@@ -25,10 +29,5 @@ class Env extends Command
         $this->liveLine('50% complete...');
         sleep(2);
         $this->liveLine('100% complete!', true);
-    }
-
-    public function getDescription(): string
-    {
-        return t('Display the current Expansa CMS environment');
     }
 }

@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Table;
 
-class Cell
+/**
+ * Column of a dashboard table, described with fluent setters.
+ *
+ * @package Expansa\Builders\Table
+ */
+final class Cell
 {
     public function __construct(
 
@@ -47,7 +52,7 @@ class Cell
          * Cell wrapper HTML attributes list.
          */
         public array $attributes = [],
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Set column title.
@@ -128,7 +133,7 @@ class Cell
     }
 
     /**
-     * Get view template.
+     * Set the view of the cells: a file path, or a suffix of the default `table/cell` view.
      *
      * @param string $filepath
      * @return Cell

@@ -27,7 +27,7 @@ final class TranslationsService
             $content = Disk::file($path)->read();
 
             $pattern = '/I18n::   # Match the literal "I18n::"
-                (?:_?t|_?t_attr)  # Non-capturing group, matches "_t(f)" or "_t(f)_attr" functions
+                translate(?:Attribute)?  # translate() or translateAttribute()
                 \s*               # Match any whitespace characters (optional)
                 \(                # Match the opening parenthesis
                 \s*               # Match any whitespace characters (optional)
@@ -43,25 +43,6 @@ final class TranslationsService
 
             // extracting the found strings into a separate array
             $i18nStrings = array_map(fn($match) => $match[1] ?? '', $matches);
-            if ($i18nStrings) {
-                $result = [...$result, ...$i18nStrings];
-            }
-
-            // regular expression pattern with comments
-            $pattern = '/
-				I18n::                   # Match the literal "I18n::"
-				_?с(?:_attr)?            # Function names matches: с, _с, с_attr, _с_attr
-				\s*\(                    # Opening parenthesis with optional spaces
-				[^,]+,                   # First parameter (anything up to the first comma)
-				\s*([\'"])(.*?)\1        # Second parameter: string in single or double quotes
-				\s*,\s*                  # Comma with optional spaces
-				([\'"])(.*?)\3           # Third parameter: string in single or double quotes
-			/x';
-
-            preg_match_all($pattern, $content, $matches);
-
-            // extracting the found strings
-            $i18nStrings = array_filter([$matches[2] ?? null, $matches[4] ?? null]);
             if ($i18nStrings) {
                 $result = [...$result, ...$i18nStrings];
             }
@@ -90,7 +71,7 @@ final class TranslationsService
 
         if ($project && $translations) {
             $filepath = sprintf('%s/%s.json', EX_I18N . $project, 'ru');
-            Disk::file($filepath)->write(Json::encode($translations), false);
+            Disk::file($filepath)->write(Json::encode($translations), append: false);
         }
 
         return [];

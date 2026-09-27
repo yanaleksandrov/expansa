@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
-use RuntimeException;
 use Throwable;
 
-class Url
+/**
+ * Paths and URLs of files under the site root.
+ *
+ * @package Expansa\Support
+ */
+final class Url
 {
     /**
      * Directory served at the site URL, with a trailing slash.
@@ -15,7 +19,9 @@ class Url
     private static string $root = '';
 
     /**
-     * @var callable|null
+     * Source of the site URL.
+     *
+     * @var callable(): (string|null)|null
      */
     private static $site = null;
 
@@ -23,7 +29,9 @@ class Url
      * Set the directory served at the site URL and the source of that URL.
      * Without $site, or when it fails, the URL is built from the request.
      *
-     * @param callable(): string|null $site
+     * @param string                        $root
+     * @param callable(): (string|null)|null $site
+     * @return void
      */
     public static function configure(string $root, ?callable $site = null): void
     {
@@ -33,6 +41,9 @@ class Url
 
     /**
      * Absolute path of a file under the root, e.g. "cache/views" or the path part of an URL.
+     *
+     * @param string $relative
+     * @return string
      */
     public static function toPath(string $relative = ''): string
     {
@@ -41,6 +52,9 @@ class Url
 
     /**
      * Site URL of a file under the root; a path outside of it is treated as relative.
+     *
+     * @param string $path
+     * @return string
      */
     public static function toUrl(string $path): string
     {
@@ -48,41 +62,37 @@ class Url
 
         $relative = self::$root !== '' && str_starts_with($path, self::$root) ? substr($path, strlen(self::$root)) : ltrim($path, '/');
 
-        return url($relative);
+        return self::site($relative);
     }
 
     /**
-     * Retrieves the URL for a given site where Expansa application files are accessible.
+     * Site URL with a path. Without a source, or when it fails or returns nothing,
+     * the URL is built from the request.
      *
-     * @param string $path Optional. Path relative to the site URL. Default empty.
-     * @return string Site URL link with optional path appended.
+     * @param string $path Path relative to the site URL.
+     * @return string
      */
-    public function site(string $path = ''): string
+    public static function site(string $path = ''): string
     {
         try {
-            if (self::$site === null) {
-                throw new RuntimeException(t('The site URL source is not configured.'));
-            }
-
-            $url = (self::$site)();
-        } catch (Throwable $e) {
-            $protocol = match (true) {
-                isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
-                isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
-                &&
-                $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https' => 'https://',
-                default                                        => 'http://',
-            };
-
-            $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
-            $url  = $protocol . filter_var($host, FILTER_SANITIZE_URL);
-        } finally {
-            $url = rtrim($url, '/') . '/';
-            if ($path) {
-                $url .= ltrim($path, '/');
-            }
-
-            return $url;
+            $url = self::$site === null ? '' : (string) (self::$site)();
+        } catch (Throwable) {
+            $url = '';
         }
+
+        return rtrim($url !== '' ? $url : self::fromRequest(), '/') . '/' . ltrim($path, '/');
+    }
+
+    /**
+     * Site URL taken from the request: scheme and host.
+     *
+     * @return string
+     */
+    private static function fromRequest(): string
+    {
+        $https = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+        $host  = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+
+        return ($https ? 'https://' : 'http://') . filter_var($host, FILTER_SANITIZE_URL);
     }
 }

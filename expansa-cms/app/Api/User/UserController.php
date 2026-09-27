@@ -16,17 +16,19 @@ final readonly class UserController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private UserService $service = new UserService(),
-    )
-    {
-    }
+    ) {}
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function create(): array
     {
         return ['method' => 'POST create user'];
     }
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function index(): array
     {
         return ['method' => 'GET user list'];
@@ -34,10 +36,12 @@ final readonly class UserController
 
     public function update(Request $request): array
     {
-        return $this->service->update($request->post());
+        return $this->service->update($request->post);
     }
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function delete(): array
     {
         return ['method' => 'DELETE remove user by ID'];
@@ -45,17 +49,17 @@ final readonly class UserController
 
     public function signIn(Request $request): array
     {
-        return $this->service->signIn($request->post());
+        return $this->service->signIn($request->post);
     }
 
     public function signUp(Request $request): array|User
     {
-        return $this->service->signUp($request->all());
+        return $this->service->signUp($request->input);
     }
 
     public function resetPassword(Request $request): array|Error
     {
-        return $this->service->resetPassword($request->all());
+        return $this->service->resetPassword($request->input);
     }
 
     /**

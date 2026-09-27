@@ -11,8 +11,11 @@ use Expansa\Patterns\Facade;
 /**
  * Disk Facade provides static access to manage local filesystem.
  *
- * @method static File file(string $filepath)
- * @method static Directory dir(string $dirpath)
+ * @method static File file(string $path)
+ * @method static Directory dir(string $path)
+ * @method static File upload(array $file, string $directory)
+ * @method static File grab(string $url, string $directory)
+ * @method static int getMaxUploadSize()
  */
 class Disk extends Facade
 {

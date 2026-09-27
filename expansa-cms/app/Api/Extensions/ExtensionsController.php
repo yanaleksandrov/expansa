@@ -18,9 +18,7 @@ final readonly class ExtensionsController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private ExtensionsService $service = new ExtensionsService(),
-    )
-    {
-    }
+    ) {}
 
     public function get(): array
     {

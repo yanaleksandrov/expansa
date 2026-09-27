@@ -29,7 +29,7 @@ public function __construct(
     public string $name {
         set {
             if (! preg_match('/^[A-Za-z0-9._-]+$/', $value)) {
-                throw new CookieException('The "name" parameter value contains illegal characters.');
+                throw new InvalidName('The "name" parameter value contains illegal characters.');
             }
 
             $this->name = $value;
@@ -55,6 +55,9 @@ public function __construct(
   условие, исключение, несколько действий → блок `set { }`. Не выноси проверку в тело конструктора,
   если она выражается hook'ом.
 - Отдельно объявленное свойство не дублируй: visibility, тип, `readonly` и default переносятся в параметр.
+- Вычисляемое свойство (только `get`, значение не передаётся: `$maxAge` из `$expires`) — не параметр, а
+  обычное свойство над конструктором. В сигнатуре оно стало бы обязательным аргументом, и все
+  необязательные параметры перед ним — тоже.
 - PHPDoc каждого параметра — прямо перед ним, а не общим блоком над конструктором; generic-типы
   (`Handler[]`) сохраняются в `@var`.
 - Hook пишет прямо в `$this->prop`; дополнительное приватное свойство для хранения не создавай.
@@ -74,4 +77,4 @@ public function __construct(
 - Массив свойства с hook не меняется по ссылке (`$this->items[] =`, `array_unshift`) — присваивай новый:
   `$this->handlers = [$handler, ...$this->handlers]`.
 - PHPStan не видит инициализацию `readonly`-свойства внутри hook другого свойства.
-- phpcs 3.x даёт ложные ошибки на hooks (см. CONVENTIONS, «Стиль кода»).
+- phpcs 4.x ломает отступы многострочного hook `set { }` в сигнатуре: phpcbf на таком файле не запускай (см. CONVENTIONS, «Инструменты»).

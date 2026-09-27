@@ -6,84 +6,62 @@ namespace Expansa\Builders\Forms;
 
 use Expansa\Support\Arr;
 
-class Form extends Field
+/**
+ * A registered form: its fields and attributes, changed through Form::override(), rendered by Field::parse().
+ *
+ * @package Expansa\Builders\Forms
+ */
+final class Form extends Field
 {
+    /**
+     * Name of the field the next attach() inserts after.
+     */
+    public private(set) string $after = '';
+
+    /**
+     * Name of the field the next attach() inserts before.
+     */
+    public private(set) string $before = '';
+
+    /**
+     * Name of the field the next attach() replaces.
+     */
+    public private(set) string $instead = '';
+
     public function __construct(
 
         /**
-         * Unique ID of the form class instance.
+         * Unique ID of the form.
          */
-        public string $uid,
+        public readonly string $uid,
 
         /**
-         * List of all form fields.
+         * Fields of the form.
          */
         public array $fields = [],
 
         /**
-         * Default attributes for the form.
+         * Attributes of the form tag, `id` and `method="POST"` by default.
          */
-        public array $attributes = [],
-
-        /**
-         * ID of the field before which the new field will be added.
-         */
-        public string $before = '',
-
-        /**
-         * ID of the field after which the new field will be added.
-         */
-        public string $after = '',
-
-        /**
-         * ID of the field to be replaced with the new field.
-         */
-        public string $instead = '',
-    )
-    {
-        $this->attributes = ['id' => $uid, 'method' => 'POST', ...$attributes];
-    }
+        public array $attributes = [] {
+            set => ['id' => $this->uid, 'method' => 'POST', ...$value];
+        },
+    ) {}
 
     /**
-     * Add 'form' tag wrapper for form content.
+     * Wrap the rendered fields in a form tag.
      *
-     * @param array $attributes
+     * @param array  $attributes Attributes of the tag, usually $this->attributes.
      * @param string $content
      * @return string
      */
     public function wrap(array $attributes, string $content = ''): string
     {
-        return sprintf("<form%s>\n%s</form>\n", Arr::toHtmlAtts($attributes), $content);
+        return sprintf("<form%s>\n%s</form>\n", Arr::toHtmlAttributes($attributes), $content);
     }
 
     /**
-     * Insert new fields to any place in existing form.
-     *
-     * @param array $fields
-     * @param array $field
-     * @param Form  $form
-     */
-    public function insert(array &$fields, array $field, Form $form): void
-    {
-        $index    = false;
-        $location = current(array_filter([ $form->after, $form->before, $form->instead ]));
-        if ($location) {
-            $index = array_search($location, array_column($fields, 'name'), true);
-        }
-
-        if ($index !== false) {
-            match (true) {
-                !!$form->after   => array_splice($fields, $index + 1, 0, [ $field ]),
-                !!$form->before  => array_splice($fields, $index, 0, [ $field ]),
-                !!$form->instead => $fields[ $index ] = $field,
-            };
-        } else {
-            $fields[] = $field;
-        }
-    }
-
-    /**
-     * Bulk adding fields.
+     * Add fields at the position set by after(), before() or instead(), at the end by default.
      *
      * @param array $fields
      * @return void
@@ -91,7 +69,7 @@ class Form extends Field
     public function attach(array $fields): void
     {
         foreach ($fields as $field) {
-            $this->insert($this->fields, $field, $this);
+            $this->insert($field);
         }
 
         $this->after   = '';
@@ -100,23 +78,23 @@ class Form extends Field
     }
 
     /**
-     * Override form attributes.
+     * Merge attributes into the form attributes.
      *
      * @param array $attributes
      * @return void
      */
     public function attributes(array $attributes): void
     {
-        $this->attributes = [ ...$this->attributes, ...$attributes ];
+        $this->attributes = [...$this->attributes, ...$attributes];
     }
 
     /**
-     * Insert a new field after the specified one.
+     * Insert the next attached fields after a field.
      *
      * @param string $fieldName
-     * @return Form
+     * @return static
      */
-    public function after(string $fieldName): self
+    public function after(string $fieldName): static
     {
         $this->after = $fieldName;
 
@@ -124,12 +102,12 @@ class Form extends Field
     }
 
     /**
-     * Insert a new field before the specified one.
+     * Insert the next attached fields before a field.
      *
      * @param string $fieldName
-     * @return Form
+     * @return static
      */
-    public function before(string $fieldName): self
+    public function before(string $fieldName): static
     {
         $this->before = $fieldName;
 
@@ -137,15 +115,37 @@ class Form extends Field
     }
 
     /**
-     * Insert a new field instead the specified one.
+     * Replace a field with the next attached field.
      *
      * @param string $fieldName
-     * @return Form
+     * @return static
      */
-    public function instead(string $fieldName): self
+    public function instead(string $fieldName): static
     {
         $this->instead = $fieldName;
 
         return $this;
+    }
+
+    /**
+     * Insert a field at the position set by after(), before() or instead(), at the end by default.
+     *
+     * @param array $field
+     * @return void
+     */
+    public function insert(array $field): void
+    {
+        $location = current(array_filter([$this->after, $this->before, $this->instead]));
+        $index    = $location ? array_search($location, array_column($this->fields, 'name'), true) : false;
+        $fields   = $this->fields;
+
+        match (true) {
+            $index === false       => $fields[] = $field,
+            $this->after !== ''    => array_splice($fields, $index + 1, 0, [$field]),
+            $this->before !== ''   => array_splice($fields, $index, 0, [$field]),
+            default                => $fields[$index] = $field,
+        };
+
+        $this->fields = $fields;
     }
 }

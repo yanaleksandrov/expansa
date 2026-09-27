@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/radio.blade.php` - a group of radio buttons for a single-value choice.
  */
-class Radio extends AbstractField
+final class Radio extends AbstractField
 {
     public function __construct()
     {

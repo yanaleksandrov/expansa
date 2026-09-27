@@ -19,18 +19,18 @@ final class DashboardFavicons
     {
         foreach (
             [
-                'favicon'   => [
+                'favicon'       => [
                     'href'  => url('/dashboard/assets/favicon/favicon-96x96.png'),
                     'rel'   => 'icon',
                     'type'  => 'image/png',
                     'sizes' => '96x96',
                 ],
-                'favicon-svg'  => [
+                'favicon-svg'   => [
                     'href' => url('/dashboard/assets/favicon/favicon.svg'),
                     'rel'  => 'icon',
                     'type' => 'image/svg+xml',
                 ],
-                'favicon-ico'  => [
+                'favicon-ico'   => [
                     'href' => url('/dashboard/assets/favicon/favicon.ico'),
                     'rel'  => 'shortcut icon',
                     'type' => '',
@@ -41,7 +41,7 @@ final class DashboardFavicons
                     'sizes' => '180x180',
                     'type'  => '',
                 ],
-                'manifest'  => [
+                'manifest'      => [
                     'href' => url('/dashboard/assets/favicon/site.webmanifest'),
                     'rel'  => 'manifest',
                     'type' => '',

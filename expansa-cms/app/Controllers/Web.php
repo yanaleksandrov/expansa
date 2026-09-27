@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App;
-use App\Models\Options;
+use App\Models\Option;
 use App\Models\Slug;
 use App\Models\User;
 use Expansa\Builders\Tree;
@@ -26,7 +26,7 @@ final class Web
 
         $welcome = view('welcome', ['slug' => 'install', 'title' => t('Install Expansa')]);
 
-        Asset::discover($welcome->getPath());
+        Asset::discover($welcome->path);
 
         echo $welcome->beautify()->render();
     }
@@ -119,7 +119,7 @@ final class Web
             ]);
 
             // Auto-connect co-located CSS/JS for this page's template - see Manager::discover().
-            Asset::discover($content->getPath());
+            Asset::discover($content->path);
 
             $content = $content->beautify()->render();
         }
@@ -139,7 +139,7 @@ final class Web
      */
     private function title(string $slug, ?string $page = null): string
     {
-        $site = (string) Options::get('site.name', '');
+        $site = (string) Option::get('site.name', '');
         $site = $site !== '' ? $site : 'Expansa';
 
         if ($page === null && $slug !== '') {

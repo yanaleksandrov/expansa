@@ -14,12 +14,10 @@ final readonly class FilesController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private FilesService $service = new FilesService(),
-    )
-    {
-    }
+    ) {}
 
     public function upload(Request $request): array
     {
-        return $this->service->upload($_FILES ?? [], $request->post('encoding', 'auto'));
+        return $this->service->upload($request->files, $request->post['encoding'] ?? 'auto');
     }
 }

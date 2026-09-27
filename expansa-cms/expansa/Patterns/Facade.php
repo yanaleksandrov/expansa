@@ -4,154 +4,89 @@ declare(strict_types=1);
 
 namespace Expansa\Patterns;
 
-use Expansa\Patterns\Exception\FacadeException;
-
 /**
- * The Facade Class.
+ * Static access to one shared instance of a class, created on the first call.
+ * Facades pointing to the same class share its instance.
  *
- * A simple package that convert a service class into a static-like class.
+ * @package Expansa\Patterns
  */
-class Facade
+abstract class Facade
 {
     /**
-     * Store all the resolved service class instance.
+     * Created instances by class name.
      *
-     * @var array
+     * @var array<string, object>
      */
-    protected static array $class = [];
+    private static array $instances = [];
 
     /**
-     * Store the resolved service class instance that will be use later.
-     *
-     * @param string $classNamespace
-     * @param  mixed $classInstance
-     * @return void
-     */
-    protected static function setClass(string $classNamespace, mixed $classInstance): void
-    {
-        self::$class[$classNamespace] = $classInstance;
-    }
-
-    /**
-     * Get the resolved service class instance of the given class namespace.
-     *
-     * @param string $classNamespace
-     * @return mixed
-     */
-    protected static function getClass(string $classNamespace): mixed
-    {
-        return self::$class[$classNamespace] ?? false;
-    }
-
-    /**
-     * Handle all the methods that will lead to service class capability.
+     * Pass a static call to the instance.
      *
      * @param string $method
-     * @param array $args
+     * @param array  $args
      * @return mixed
-     * @throws FacadeException
      */
-    public static function __callStatic(string $method, array $args)
+    public static function __callStatic(string $method, array $args): mixed
     {
-        return self::getResolvedClassInstance()->{$method}(...$args);
+        // inlined resolve(): this runs on every facade call
+        $class = static::getStaticClassAccessor();
+
+        return (self::$instances[$class] ??= new $class(...static::getConstructorArgs()))->{$method}(...$args);
     }
 
     /**
-     * Check if the class namespace already have a cached resolved instance,
-     * if not then the class namespace must be resolved.
+     * Get the instance, creating it on the first call.
      *
-     * @return mixed
-     * @throws FacadeException
+     * @return object
      */
-    protected static function getResolvedClassInstance(): mixed
+    protected static function resolve(): object
     {
-        // Decorated once, here, so the lookup below and the store inside
-        // resolveClassNameSpace() share the exact same cache key — they used to
-        // decorate at different points, so the two never matched and every call
-        // resolved (and instantiated) a brand new instance instead of reusing one.
-        $classNamespace = self::classNamespaceDecorator(static::getStaticClassAccessor());
+        $class = static::getStaticClassAccessor();
 
-        return self::getClass($classNamespace) ?: self::resolveClassNameSpace($classNamespace);
+        return self::$instances[$class] ??= new $class(...static::getConstructorArgs());
     }
 
     /**
-     * Resolver for service class namespace.
-     * Set the resolved service class instance to the class property.
+     * Get the class of the instance.
      *
-     * @param string $classNamespace Already decorated with a leading backslash.
-     * @return mixed
-     * @throws FacadeException
+     * @return class-string
      */
-    protected static function resolveClassNameSpace(mixed $classNamespace): mixed
-    {
-        if (!is_string($classNamespace)) {
-            throw new FacadeException('The given class namespace value is not a string and can not be resolved.');
-        }
-
-        if (!class_exists($classNamespace)) {
-            throw new FacadeException('The class namespace is not exist and can not be resolved.');
-        }
-
-        $classArguments = static::getConstructorArgs();
-
-        $classInstance  = new $classNamespace(...$classArguments);
-
-        self::setClass($classNamespace, $classInstance);
-
-        return $classInstance;
-    }
+    abstract protected static function getStaticClassAccessor(): string;
 
     /**
-     * This method decorate the class namespace, adding a default backslash
-     * in the first character to avoid the namespace scope issue.
+     * Get the constructor arguments of the instance.
      *
-     * @param string $classNamespace
-     * @return string
+     * @return array
      */
-    protected static function classNamespaceDecorator(string $classNamespace): string
-    {
-        if ($classNamespace[0] !== '\\') {
-            return (string) substr_replace($classNamespace, '\\', 0, 0);
-        }
-
-        return $classNamespace;
-    }
-
-    /**
-     * Get the service class namespace that will be converted into static class.
-     *
-     * @return string
-     * @throws FacadeException
-     */
-    protected static function getStaticClassAccessor(): string
-    {
-        throw new FacadeException('The "getStaticClassAccessor()" method is not declared by the successor class.');
-    }
-
     protected static function getConstructorArgs(): array
     {
         return [];
     }
 
     /**
-     * Drop the resolved instance of this facade, or of every facade when called on Facade itself,
+     * Forget the instance of this facade, or of every facade when called on Facade itself,
      * so the next call creates a new one, e.g. between tests.
+     *
+     * @return void
      */
-    public static function clearResolved(): void
+    public static function forgetResolved(): void
     {
         if (static::class === self::class) {
-            self::$class = [];
+            self::$instances = [];
             return;
         }
 
-        unset(self::$class[self::classNamespaceDecorator(static::getStaticClassAccessor())]);
+        unset(self::$instances[static::getStaticClassAccessor()]);
     }
 
     /**
      * Use the given instance behind this facade, e.g. a test double.
+     *
+     * @param object $instance
+     * @return void
      */
     public static function swap(object $instance): void
     {
-        self::setClass(self::classNamespaceDecorator(static::getStaticClassAccessor()), $instance);
+        self::$instances[static::getStaticClassAccessor()] = $instance;
     }
 }

@@ -3,23 +3,10 @@
 declare(strict_types=1);
 
 use Expansa\Security\Sanitizer;
-use Expansa\Security\Xss\Kses;
+use Expansa\Security\Kses;
 
 // run: php tests/Kses.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 $kses = new Kses();
 

@@ -9,6 +9,8 @@ declare(strict_types=1);
  * @see documentation/Lifecycle.md
  */
 
+use Expansa\Facades\Asset;
+use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
 use Expansa\Facades\Extensions;
@@ -17,8 +19,10 @@ use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Lifecycle;
 use Expansa\Facades\Log;
+use Expansa\Facades\Mail;
 use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
+use Expansa\Facades\Session;
 use Expansa\Facades\Terminal;
 use Expansa\Facades\View;
 use Expansa\Patterns\Registry;
@@ -56,9 +60,18 @@ require_once EX_PATH . 'expansa/functions.php';
 // stops with an error page before any PHP 8.4 code is parsed: everything above must stay free of it
 App\Support\Requirements::check();
 
-// needed before the phases: boot reads Is::debug()
+// needed before the phases: boot reads Is::debug(); the dashboard context is known only after the phases
 Is::configure(
-    debug: defined('EX_DEBUG') && EX_DEBUG['enabled'] === true
+    debug: defined('EX_DEBUG') && EX_DEBUG['enabled'] === true,
+    dashboard: fn () => Lifecycle::is('dashboard'),
+);
+
+// step hooks, the terminate hook after the response, routing after the context
+Lifecycle::configure(
+    hook: fn (string $name) => Hook::call($name),
+    terminate: fn () => Hook::defer('terminate'),
+    route: fn () => Route::run(),
+    uri: fn () => Route::uri(),
 );
 
 // computed once: the installation request itself changes the result
@@ -96,8 +109,8 @@ Lifecycle::phase('boot', true, function () {
 /**
  * 2. configure · always, also before install, so no database queries here.
  *
- * Passes the database, site URL, views, extensions root, console version and table filter to the framework,
- * then the translations priority, the hook listener classes and the form field types.
+ * Passes the database, site URL, views, extensions root, console version, mail and scheduler, redirect filters and table filter
+ * to the framework, then the translations priority, the hook listener classes and the form field types.
  */
 Lifecycle::phase('configure', true, function () {
     // the connection from env.php; nothing to connect to before install
@@ -105,15 +118,33 @@ Lifecycle::phase('configure', true, function () {
         Db::configure(...EX_DB);
     }
 
+    // the stores from env.php, the request memory without them; env.php can not hold the connection closure
+    if (defined('EX_CACHE')) {
+        $stores = array_map(
+            fn (array $store) => $store['driver'] === 'database' ? $store + ['connection' => fn () => Db::instance()] : $store,
+            EX_CACHE['stores']
+        );
+
+        Cache::configure($stores, EX_CACHE['default']);
+    }
+
+    // models cache rows in the default cache store, sanitize and validate by the Security rules
+    Expansa\Database\Model::configure(
+        cache: fn (string $key, string $group, ?Closure $callback = null) => Cache::get($key, $group, $callback),
+        forgetCache: fn (string $key, string $group) => Cache::forget($key, $group),
+        sanitizer: fn (array $data, array $rules) => Safe::data($data, $rules)->apply(),
+        validator: fn (array $data, array $rules, bool $break) => new Expansa\Security\Validator($data, $rules, $break),
+    );
+
     // the site URL is read from the options only once there is a database to read it from
     Url::configure(
         root: EX_PATH,
-        site: defined('EX_DB') ? fn () => App\Models\Options::get('site.url') : null,
+        site: defined('EX_DB') ? fn () => App\Models\Option::get('site.url') : null,
     );
 
     // views of the dashboard, installer and auth pages
     View::configure(
-        viewsPath: EX_PATH . 'dashboard/views',
+        paths: EX_PATH . 'dashboard/views',
         cachePath: EX_PATH . 'cache/views',
     );
 
@@ -133,14 +164,55 @@ Lifecycle::phase('configure', true, function () {
     ]);
 
     // the version shown by the "list" console command
-    Terminal::configure(version: EX_VERSION);
+    Terminal::configure(
+        version: EX_VERSION
+    );
+
+    // every email passes its PHPMailer through the "mailer" filter: SMTP settings, a test double
+    Mail::configure(
+        setup: fn (PHPMailer\PHPMailer\PHPMailer $mailer) => Hook::call('mailer', $mailer),
+    );
+
+    // scheduled jobs keep their locks in the storage and email their output through Mail
+    Expansa\Scheduler\Scheduler::configure(
+        tempDir: EX_STORAGE,
+        mailer: fn (string $to, string $subject, string $body, array $attachments) => Mail::send($to, $subject, $body, $attachments),
+    );
+
+    // the native session in the browser, an array in the console; started only by the code that needs it
+    Session::configure(
+        driver: PHP_SAPI === 'cli' ? 'memory' : 'native',
+        options: [
+            'name'   => 'expansa',
+            'secure' => Expansa\Cookie\Cookie::isSecureRequest(),
+        ],
+    );
+
+    // redirect location, status and X-Redirect-By header are filtered by hooks; flashed values go to the session
+    Expansa\Http\Redirect::configure(
+        location: fn (string $to, int $status) => Hook::call('redirectLocation', $to, $status),
+        status: fn (int $status, string $to) => Hook::call('redirectStatus', $status, $to),
+        redirectBy: fn (string $redirectBy, int $status, string $to) => Hook::call('redirectBy', $redirectBy, $status, $to),
+        flash: function (string $key, array $values) {
+            if (! Session::isStarted()) {
+                Session::start();
+            }
+
+            Session::getFlash()->set($key, $values);
+        },
+    );
 
     // every dashboard table renders the items filter form
-    Expansa\Builders\Table::configure(
+    Expansa\Builders\Table\AbstractTable::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php'
     );
 
-    // translations lookup priority
+    // validation error messages in the site language
+    Expansa\Security\Validator::configure(
+        translate: fn (string $message, string ...$args) => t($message, ...$args)
+    );
+
+    // translations lookup priority; the languages with their plural rules, extended by the "languages" hook
     I18n::configure(
         routes: [
             EX_CORE      => EX_DASHBOARD,
@@ -150,6 +222,7 @@ Lifecycle::phase('configure', true, function () {
         ],
         pattern: 'i18n/%s',
         overrides: EX_I18N,
+        languages: fn () => Hook::call('languages', Registry::get('languages')),
     );
 
     // a new listener class has to be added here
@@ -205,6 +278,8 @@ Lifecycle::phase('configure', true, function () {
             'repeater'        => Expansa\Builders\Forms\Fields\Repeater::class,
             'message'         => Expansa\Builders\Forms\Fields\Message::class,
         ],
+        view: fn (string $template, array $data) => (string) View::create($template, $data),
+        assets: fn (string $template, string $uid) => Asset::discover(View::create($template)->path, $uid, ['type' => $uid]),
     );
 });
 
@@ -372,7 +447,7 @@ Lifecycle::phase('register', $isInstalled, function () {
  */
 Lifecycle::phase('extensions', $isInstalled, function () {
     Extensions::load(
-        ids: (array) App\Models\Options::get('extensions.active', []),
+        ids: (array) App\Models\Option::get('extensions.active', []),
     );
     Extensions::register('plugin');
     Extensions::register('theme');
@@ -398,11 +473,16 @@ Lifecycle::phase('booted', $isInstalled, function () {
 /**
  * 1. cli · console, run through artisan.
  *
- * The terminal runs the requested command and prints its output.
+ * Adds the commands of the app and the packages, then the terminal runs the requested one.
  * No routing: run() skips it in the console.
  */
 Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(App\Console\Serve::class);
+    Terminal::addCommand(Expansa\Assets\Commands\Clean::class);
+    Terminal::addCommand(Expansa\Hooks\Commands\Index::class);
+    Terminal::addCommand(new Expansa\Scheduler\Commands\Run(
+        schedule: fn (Expansa\Scheduler\Scheduler $scheduler) => Hook::call('schedule', $scheduler),
+    ));
     Terminal::run();
 });
 

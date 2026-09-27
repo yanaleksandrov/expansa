@@ -27,7 +27,9 @@ foreach ((array) ($options['baseline'] ?? []) as $n => $ref) {
     }
     // eval() and fresh files (opcache.file_update_protection) skip opcache, the baseline would look slower
     $file = tempnam(sys_get_temp_dir(), 'arr');
-    file_put_contents($file, preg_replace('/^class Arr\b/m', "class ArrBaseline$n", $source, 1));
+    // toHtmlAtts() was renamed to toHtmlAttributes()
+    $source = str_replace('function toHtmlAtts(', 'function toHtmlAttributes(', $source);
+    file_put_contents($file, preg_replace('/^((?:final )?class) Arr\b/m', "\$1 ArrBaseline$n", $source, 1));
     touch($file, time() - 60);
     require $file;
     unlink($file);
@@ -78,7 +80,7 @@ $cases = [
     'filter AND'      => fn (string $c) => $c::filter($list, ['type' => 'post', 'public' => true]),
     'filter OR'       => fn (string $c) => $c::filter($list, ['type' => 'page', 'public' => true], 'OR'),
     'filter NOT'      => fn (string $c) => $c::filter($list, ['type' => 'page', 'public' => true], 'NOT'),
-    'toHtmlAtts'      => fn (string $c) => $c::toHtmlAtts($attrs),
+    'toHtmlAttributes' => fn (string $c) => $c::toHtmlAttributes($attrs),
     'dot'             => fn (string $c) => $c::dot($tree),
     'undot'           => fn (string $c) => $c::undot($dots),
     'set'             => function (string $c) use ($tree) {

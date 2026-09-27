@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use Expansa\Http\Exceptions\HttpException;
-use Expansa\Http\Exceptions\ValidationException;
+use Expansa\Facades\Cookie;
+use Expansa\Http\Exceptions\HttpError;
+use Expansa\Http\Exceptions\ResponseReady;
+use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Is;
@@ -22,7 +24,10 @@ use Throwable;
  * JSON envelope, then sends it:
  *
  *   success       -> { "data": <return value> }
- *   HttpException -> { "message": ..., "errors"?: ... }  with the exception's status code
+ *   HttpError -> { "message": ..., "errors"?: ... }  with the exception's status code
+ *   ResponseReady -> the exception's response as-is
+ *
+ * Cookies queued with the Cookie facade are added to every response.
  *   anything else -> { "message": ... }  with status 500
  *
  * In debug mode (EX_DEBUG['enabled']), every JSON response also carries `benchmark`/`memory`
@@ -47,17 +52,23 @@ final class Kernel
             $response = $result instanceof Response
                 ? $result
                 : new Response()->json(self::withMetrics(['data' => $result]));
-        } catch (HttpException $e) {
+        } catch (ResponseReady $e) {
+            $response = $e->response;
+        } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
-            if ($e instanceof ValidationException) {
-                $payload['errors'] = $e->getErrors();
+            if ($e instanceof ValidationFailed) {
+                $payload['errors'] = $e->errors;
             }
 
-            $response = new Response()->json(self::withMetrics($payload), $e->getStatusCode());
+            $response = new Response()->json(self::withMetrics($payload), $e->statusCode);
         } catch (Throwable $e) {
             $response = new Response()->json(self::withMetrics([
                 'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
             ]), 500);
+        }
+
+        foreach (Cookie::getQueue() as $cookie) {
+            $response->setCookie($cookie);
         }
 
         $response->prepare($request)->send();

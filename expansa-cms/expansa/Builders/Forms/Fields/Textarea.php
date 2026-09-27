@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms\Fields;
 
-use Expansa\Facades\Safe;
+use Expansa\Security\Sanitizer;
 
 /**
  * Renders `form/textarea.blade.php` - a multi-line free text input.
  */
-class Textarea extends AbstractField
+final class Textarea extends AbstractField
 {
     public function __construct()
     {
@@ -42,8 +42,8 @@ class Textarea extends AbstractField
     public function validate(array $field = []): array
     {
         $rule = match (true) {
-            isset($field['attributes']['maxlength']) => 'lengthMax:' . Safe::absint($field['attributes']['maxlength']),
-            isset($field['attributes']['minlength']) => 'lengthMin:' . Safe::absint($field['attributes']['minlength']),
+            isset($field['attributes']['maxlength']) => 'lengthMax:' . Sanitizer::absint($field['attributes']['maxlength']),
+            isset($field['attributes']['minlength']) => 'lengthMin:' . Sanitizer::absint($field['attributes']['minlength']),
             default                                  => '',
         };
 

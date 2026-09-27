@@ -5,20 +5,7 @@ declare(strict_types=1);
 use Expansa\Support\Arr;
 
 // run: php tests/Arr.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 check('clean() drops empty values recursively', Arr::clean(['a' => 1, 'b' => '', 'c' => ['d' => null, 'e' => 2], 'f' => [[]]]) === ['a' => 1, 'c' => ['e' => 2]]);
 check('exclude() drops listed keys', Arr::exclude(['a' => 1, 'b' => 2, 'c' => 3], ['b', 'x']) === ['a' => 1, 'c' => 3]);
@@ -47,14 +34,14 @@ check('filter() NOT matches none', array_keys(Arr::filter($list, ['t' => 'a'], '
 check('filter() matches a null array value', array_keys(Arr::filter($list, ['t' => null])) === ['w']);
 check('filter() returns the list for an unknown operator', Arr::filter($list, ['t' => 'a'], 'XOR') === $list);
 
-check('toHtmlAtts() renders attributes', Arr::toHtmlAtts(['type' => 'text', 'name' => 'a"b']) === ' type="text" name="a&quot;b"');
-check('toHtmlAtts() trims and escapes values', Arr::toHtmlAtts(['class' => ' a b ', 'title' => "<i>&'"]) === ' class="a b" title="&lt;i&gt;&amp;&#039;"');
-check('toHtmlAtts() renders scalars', Arr::toHtmlAtts(['tabindex' => 3, 'u-if' => true]) === ' tabindex="3" u-if="1"');
-check('toHtmlAtts() renders boolean attributes by value', Arr::toHtmlAtts(['checked' => true, 'disabled' => false]) === ' checked');
-check('toHtmlAtts() skips empty values without extra spaces', Arr::toHtmlAtts(['class' => '', 'id' => 'x', 'title' => null]) === ' id="x"');
-check('toHtmlAtts() keeps an empty value attribute', Arr::toHtmlAtts(['value' => '']) === ' value=""');
-check('toHtmlAtts() keeps empty u- attributes', Arr::toHtmlAtts(['u-text' => '']) === ' u-text');
-check('toHtmlAtts() returns an empty string for nothing', Arr::toHtmlAtts(['' => 'x', 'class' => '']) === '');
+check('toHtmlAttributes() renders attributes', Arr::toHtmlAttributes(['type' => 'text', 'name' => 'a"b']) === ' type="text" name="a&quot;b"');
+check('toHtmlAttributes() trims and escapes values', Arr::toHtmlAttributes(['class' => ' a b ', 'title' => "<i>&'"]) === ' class="a b" title="&lt;i&gt;&amp;&#039;"');
+check('toHtmlAttributes() renders scalars', Arr::toHtmlAttributes(['tabindex' => 3, 'u-if' => true]) === ' tabindex="3" u-if="1"');
+check('toHtmlAttributes() renders boolean attributes by value', Arr::toHtmlAttributes(['checked' => true, 'disabled' => false]) === ' checked');
+check('toHtmlAttributes() skips empty values without extra spaces', Arr::toHtmlAttributes(['class' => '', 'id' => 'x', 'title' => null]) === ' id="x"');
+check('toHtmlAttributes() keeps an empty value attribute', Arr::toHtmlAttributes(['value' => '']) === ' value=""');
+check('toHtmlAttributes() keeps empty u- attributes', Arr::toHtmlAttributes(['u-text' => '']) === ' u-text');
+check('toHtmlAttributes() returns an empty string for nothing', Arr::toHtmlAttributes(['' => 'x', 'class' => '']) === '');
 
 check('dot() flattens nested arrays', Arr::dot(['a' => ['b' => ['c' => 1], 'd' => []], 'e' => 2]) === ['a.b.c' => 1, 'a.d' => [], 'e' => 2]);
 check('dot() applies the prefix', Arr::dot(['a' => 1], 'p.') === ['p.a' => 1]);

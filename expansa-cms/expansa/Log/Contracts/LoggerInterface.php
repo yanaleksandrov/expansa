@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Log\Contracts;
 
 use Stringable;
-use Expansa\Log\Level;
-use Expansa\Log\Exception\LogException;
+use Expansa\Log\Enums\Level;
+use Expansa\Log\Exceptions\InvalidLevel;
 
 /**
  * PSR-3 logger: `{key}` placeholders of the message are replaced by the context values,
@@ -93,7 +93,7 @@ interface LoggerInterface
      * @param Level|int|string  $level   A level, its value, RFC 5424 code or name.
      * @param string|Stringable $message
      * @param array             $context
-     * @throws LogException For an unknown level.
+     * @throws InvalidLevel For an unknown level.
      */
     public function log(Level|int|string $level, string|Stringable $message, array $context = []): void;
 }

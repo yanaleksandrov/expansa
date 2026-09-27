@@ -10,8 +10,9 @@
 2. **Одно понятие — одно слово.** Есть термин (`configure`, `forget`, `Manager`) — используй его.
 3. **Без сокращений**, кроме `Db`, `Url`, `Csv`, `Json`, `Html`, `I18n`, `Id`. Аббревиатура — как слово: `HtmlDom`.
 4. **Пакеты самостоятельны** (см. «Независимость пакетов»).
-5. **Структура плоская:** подпапка — от 2 однородных классов.
-6. **Бета:** нарушения исправляются переименованием без алиасов и совместимости, все использования — в том же коммите.
+5. **Структура плоская:** подпапка — от 2 однородных классов; `Internal/`, `Exceptions/`, `Contracts/`, `Enums/` — с одного.
+6. **Корень пакета — публичный API**, внутренняя кухня — в `Internal/`.
+7. **Бета:** нарушения исправляются переименованием без алиасов и совместимости, все использования — в том же коммите.
 
 ## Структура пакета
 
@@ -23,10 +24,11 @@ Log/
 ├── Logger.php         основные классы — в корне
 ├── LogRecord.php
 ├── Contracts/Handler.php
+├── Enums/Level.php
 ├── Handlers/AbstractHandler.php, File.php, Telegram.php
 ├── Formatters/AbstractFormatter.php, Line.php
 ├── Traits/
-└── Exception/LogException.php
+└── Exceptions/InvalidLevel.php, UnwritableFile.php
 ```
 
 | Папка        | Что лежит                                          | Имя                                     |
@@ -34,26 +36,60 @@ Log/
 | `Contracts/` | интерфейсы                                         | роль: `Handler`                         |
 | `<Role>s/`   | реализации контракта: `Handlers/`, `Providers/`, `Fields/`, `Commands/` | вариант: `Handlers\File`, `Providers\Redis` |
 | `Traits/`    | трейты                                             | способность: `HasTimestamps`, `Macroable`, `Locks` |
-| `Exception/` | исключения                                         | `<Package>Exception`                    |
+| `Enums/`     | перечисления                                       | набор значений: `Level`, `SameSite`     |
+| `Exceptions/` | исключения                                        | что произошло: `InvalidLevel`           |
 | `<Class>/`   | части большого класса (`Database/Schema/` для `Schema.php`) | по роли                        |
+| `Internal/`  | внутренние классы пакета, даже один                | по роли: `Scheduler\Internal\FailedJob` |
 
-Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exceptions/`; абстрактный
-класс вне папки реализаций; `Base` в имени (`BaseHandler`, `HandlerAbstract`, `TableBase`).
+**Корень пакета — публичный API:** в нём только классы, которые остальное приложение (`App\`,
+`bootstrap.php`, шаблоны, плагины, драйверы) упоминает по имени — в `use`, `new`, типе, `extends`,
+статическом вызове. Класс, который пакет создаёт и использует сам, — в `Internal/` с тегом `@internal`
+в описании, даже если его объект возвращается наружу. `Contracts/`, `Exceptions/`, `Traits/`, `Enums/`,
+`<Role>s/` публичны: их реализуют, ловят, подключают и передают в параметрах снаружи.
+`Expansa\<Package>\Internal\*` вне пакета не импортируется.
+
+Абстрактный класс по тому же правилу: точку расширения, которую наследуют снаружи (`Handlers\AbstractHandler`,
+`Commands\AbstractCommand`), кладут рядом с реализациями; общую базу публичных классов, которую снаружи
+не наследуют и не указывают типом (`AbstractExtension` для `Plugin` и `Theme`), — в `Internal/`.
+
+Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exception/`; `Abstract<Role>`
+в корне пакета; `Base` в имени (`BaseHandler`, `HandlerAbstract`, `TableBase`).
 
 ### Классы
 
 | Что              | Правило                                                              | Пример                          |
 |------------------|----------------------------------------------------------------------|---------------------------------|
 | Файл             | один класс, имя файла = имя класса                                   | `LogRecord.php`                 |
-| Класс            | существительное, единственное число, PascalCase                      | `Logger`, `CookieJar`           |
+| Класс            | существительное, единственное число, PascalCase                      | `Logger`, `LogRecord`           |
 | Точка входа      | `Manager`, если есть конфигурация или реестр каналов/драйверов; иначе по роли | `Log\Manager`; `Router`, `Validator` |
 | Реализация       | вариант без суффикса роли                                            | `Handlers\RotatingFile`, `Fields\Checkbox` |
-| Абстрактный      | `Abstract<Role>`, рядом с реализациями                               | `Handlers/AbstractHandler.php`  |
+| Абстрактный      | `Abstract<Role>`: точка расширения — рядом с реализациями, общая база — в `Internal/` | `Handlers/AbstractHandler.php`, `Extensions/Internal/AbstractExtension.php` |
+| База для чужого кода | реализаций в пакете нет, наследуют только снаружи — в корне, имя по роли без `Abstract` | `Database\Model`, `Extensions\Plugin`, `Patterns\Facade` |
 | Интерфейс        | без суффикса; `Interface` — только для имён PSR; конфликт с реализацией — алиасом | `Handler`, `File`; `LoggerInterface` |
 | Трейт            | способность; `Has<Noun>` — данные и методы вокруг них                | `HasSoftDeletes`                |
-| Enum             | единственное число, кейсы PascalCase                                 | `Level::Debug`                  |
-| Исключение       | одно `<Package>Exception`; отдельное — только если его ловят отдельно | `NotFoundHttpException`        |
+| Enum             | в `Enums/`, единственное число, кейсы PascalCase                     | `Enums\Level::Debug`            |
+| Исключение       | что произошло, без суффикса `Exception`; см. «Исключения»            | `InvalidLevel`, `ValidationFailed` |
 | Модификаторы     | `final`, если не наследуются; `abstract` для базовых                 | `final class Manager`           |
+
+### Исключения
+
+- Имя — что произошло, без суффикса `Exception` (роль задаёт `Exceptions\`): `Log\Exceptions\InvalidLevel`,
+  `ChannelNotConfigured`, `UnwritableFile`, `Session\Exceptions\AlreadyStarted`.
+- Класс — на причину, которую вызывающий может обработать по-своему, а не на каждое сообщение: детали —
+  в тексте.
+- Наследует подходящее SPL-исключение: неверный аргумент или конфигурация — `InvalidArgumentException`,
+  сбой окружения (файл, сеть, БД) — `RuntimeException`, неверный порядок вызовов — `LogicException`.
+- Ошибка программиста, которую никто не ловит отдельно, — SPL-исключение напрямую, без своего класса.
+- Нельзя: `<Package>Exception`, имена SPL (`Console\Exceptions\RuntimeException`), общий базовый класс пакета,
+  пока никто не ловит «все ошибки пакета».
+- `final`, если не наследуется; описание класса в `/** */` — когда бросается:
+
+  ```php
+  /**
+   * Thrown when a level name or number is not one of the PSR-3 levels.
+   */
+  final class InvalidLevel extends InvalidArgumentException {}
+  ```
 
 ### Независимость пакетов
 
@@ -66,9 +102,13 @@ Log/
 - Внутри пакета нет фасадов других пакетов (`Hook::`, `Db::`, `Safe::`, `Lifecycle::`) — фасады для
   `bootstrap.php`, `App\`, шаблонов, плагинов.
 - Точка расширения — колбэк в `configure()` или `extend()`; с хуком её связывает `bootstrap.php`.
+- Значение, известное позже в запросе, приходит ленивым колбэком: `Is::configure(dashboard: fn () => ...)`.
+- Колбэк, которому нужен чужой пакет, хранится в `Internal/` (`Database\Internal\Cache`), а не в чужом контракте.
 - Драйвер через чужой пакет допустим (`Cache\Providers\Database`): зависимость только у него, грузится
   только при выборе в конфигурации.
-- Консольная команда — в своём пакете (`Scheduler/Commands/Run.php`), регистрируется в `bootstrap.php`.
+- Консольная команда — в своём пакете (`Scheduler/Commands/Run.php`), регистрируется в `bootstrap.php`;
+  чужое поведение получает колбэком в конструкторе и регистрируется экземпляром. Имя команды — зарезервированное
+  слово (`list`) → класс `Index`.
 - Исключение — `Builders` (UI-слой): зависит от других пакетов, но через конструктор, не фасады.
 - Циклов нет, даже через драйвер.
 - Проверка: `tests/<Package>.php` проходит с одним пакетом и базовым слоем; в `use` нет других `Expansa\*`,
@@ -118,14 +158,29 @@ Log/
 - Константы класса — `UPPER_SNAKE_CASE` с типом: `private const int ENCODE_FLAGS`; глобальные — `EX_*`.
 - Глобальные функции (`functions.php`) — короткие `snake_case` для шаблонов и частых вызовов (`t()`,
   `t_attr()`, `view()`); новые — только если фасада мало.
-- Геттер/сеттер без логики → свойство (короче и быстрее): `public private(set)`, `readonly` или hook.
+- Геттер/сеттер без логики → свойство (короче и быстрее), вызовы `->getX()` → `->x`. Модификатор:
+  задаётся один раз в конструкторе — `readonly`; меняется внутри класса — `private(set)`, в наследниках —
+  `protected(set)`; при чтении или записи есть логика — hook. Hook ради одного доступа не нужен.
   Контракт объявляет свойство, а не геттер: `public Level $level { get; }`. Геттер остаётся для
-  ленивого значения (`getFormatter()`) или фасада.
+  ленивого значения (`getFormatter()`), фасада и чужого контракта (PSR, `Throwable::getMessage()`).
+
+  ```php
+  // было: protected Response $response + getResponse()
+  public function __construct(
+
+      /**
+       * Ready response to send instead of the regular handler result.
+       */
+      public readonly Response $response,
+  ) {}
+  ```
+- Свойство, которое затеняет магический атрибут модели, получает суффикс: `$deletedAtColumn`.
+- У статических свойств нет асимметричной видимости (PHP 8.4): публичное чтение — через геттер.
 - `mixed` — только если значение действительно любое (`Cache::get()`); иначе точный тип (`add(): bool`).
 
 ### PHP 8.4
 
-- Ленивые объекты (`ReflectionClass::newLazyGhost()`/`newLazyProxy()`) для БД, Mailer, Image вместо
+- Ленивые объекты (`ReflectionClass::newLazyGhost()`/`newLazyProxy()`) для БД, Mail, Image вместо
   ручного `resolve()`; внедрять после бенчмарка запроса без сервиса и с ним.
 - `array_find()`, `array_any()`, `array_all()` вместо `foreach` с `break`, если бенчмарк не хуже.
 - `new Foo()->bar()` без скобок; `strlen(...)` вместо `fn ($s) => strlen($s)`.
@@ -157,7 +212,7 @@ Log/
 2. Структура по схеме, `declare(strict_types=1)`, описание класса в `/** */`.
 3. Точка входа и фасад с `@method`.
 4. `configure()` в `bootstrap.php`, безопасные умолчания без него.
-5. `Exception/<Package>Exception.php` от подходящего SPL-исключения.
+5. Исключения в `Exceptions/` по разделу «Исключения».
 6. `tests/<Package>.php` подключает `tests/bootstrap.php` (`EX_PATH`, `autoload.php`, `check()`, `throws()`)
    и содержит только проверки; `php tests/run.php` — тесты и PHPStan без новых ошибок сверх baseline.
 7. Горячий путь (каждый запрос или цикл) — бенчмарк по разделу «Бенчмарки».
@@ -177,7 +232,11 @@ Log/
 
 - Тронул пакет — приведи к соглашениям его и его использования, не весь проект.
 - Переименование — сразу везде: классы, методы, хуки, `bootstrap.php`, фасады, тесты, документация.
-- Удаляй мёртвый код.
+- Неиспользуемый публичный API (классы, методы, фасады, контракты, исключения) не удаляй: это задел на
+  будущее (`Cookie\CookieJar`), приводи его к соглашениям. Синонимы одного метода сводятся к одному
+  имени («Одно понятие — одно слово»).
+- Удаляй только мёртвый код реализации: недостижимые ветки, закомментированный код, неиспользуемые
+  приватные методы, свойства и переменные.
 - Без защиты от невозможного: не нужны `is_string()` после `string $x`, `null`-проверки не-nullable,
   `try` вокруг небросающего. Проверяй только внешние данные: запрос, файлы, конфигурацию, ответы сервисов.
 - Перед коммитом: `php tests/run.php`; горячий путь — бенчмарк против предыдущего коммита.
@@ -195,10 +254,12 @@ Log/
 Уровень не понижается, baseline вручную не пополняется. Пиши типы сразу: `Handler[]`,
 `array<string, Logger>`, `array{driver: string, level?: string}`, `class-string<T>`.
 
-**phpcs** по `phpcs.xml` (PSR-12 + правила). Переход на `squizlabs/php_codesniffer` `4.*` (3.x ложно ругается
-на hooks): проверь sniff `phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php` и исключения, убери
-устаревшее. До перехода ложные ошибки не исправляй кодом и не глуши `phpcs:ignore`. Если 4.x не тянет
-PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форматтера не держим.
+**phpcs** 4.x по `phpcs.xml` (PSR-12 + правила), свои sniff'ы — в `phpcs/Expansa/Sniffs/`: пустое тело `{}`
+остаётся на строке объявления (`) {}`, `class X extends Y {}`). `phpcs:ignore` не используется: исключение —
+в `phpcs.xml` с комментарием. Сторонний код и `cache/` не проверяются. phpcs 4.x не понимает многострочный
+hook `set { }` в сигнатуре конструктора (`Generic.WhiteSpace.ScopeIndent`): phpcbf на таком файле ломает
+отступы — не запускай его там. Если это не исправится — PHP-CS-Fixer с теми же правилами; два форматтера
+не держим.
 
 **Бенчмарки** — `tests/benchmarks/<Package>.php`, текущий код против `--baseline` на одних данных. Общий код —
 в `tests/benchmarks/bootstrap.php` (пока дублируется): опции `--baseline=<ref или файл>` (несколько) и
@@ -214,43 +275,13 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 
 | Где                                              | Проблема                   | Должно быть                              |
 |--------------------------------------------------|----------------------------|------------------------------------------|
-| `Http/Exceptions/`                               | множественное              | `Http/Exception/`                        |
-| `Http/Request/ParameterBug.php`                  | опечатка                   | `ParameterBag`                           |
-| `Assets/Abstracts/Provider.php`                  | `Abstracts/`               | `Assets/Providers/AbstractProvider`      |
-| `Log/Handlers/*Handler`                          | суффикс роли               | `File`, `RotatingFile`, `ErrorLog`, `Telegram` |
-| `Log/Formatters/*Formatter`                      | суффикс роли               | `Line`, `Telegram`                       |
-| `Security/Csrf/Providers/Native*Provider`        | суффикс роли               | `Cookie`, `HttpOnlyCookie`, `Session`    |
-| `View/Engines/*Engine`                           | суффикс роли               | `Blade`, `File`, `Js`, `Php`             |
-| `View/Engines/Engine.php`                        | база названа как роль      | `AbstractEngine` или `Contracts\Engine`  |
-| `View/Compilers/BladeCompiler`                   | суффикс роли               | `Blade`                                  |
-| `Session/Middleware/SessionStartMiddleware`      | суффикс, повтор пакета     | `StartSession`                           |
-| `Cache/Concerns/`                                | `Concerns/`                | `Cache/Traits/`                          |
-| `Builders/Table/Abstracts/TableBase`             | `Abstracts/`, `Base`       | `AbstractTable`                          |
-| `Database/Query/BuilderAbstract`                 | суффикс `Abstract`         | `AbstractBuilder`                        |
-| `Database/Model/Has*`                            | трейты вне `Traits/`       | `Database/Traits/Has*`                   |
-| `Filesystem/Contracts/*Interface`                | суффикс не из PSR          | `File`, `Directory`; `CommonInterface` → по роли, например `Entry` |
-| `Session/Contracts/{Flash,Session,SessionManager}Interface` | суффикс не из PSR | `Flash`, `Session`, `Manager` (PSR-7/15 имена остаются) |
-| `Cache/Contracts/Provider`                       | `add()`, `set()` и др. возвращают `mixed` | точные типы: `bool`         |
-| `tests/*.php`                                    | `check()`, `throws()`, `EX_PATH` в каждом из 16 тестов | `tests/bootstrap.php` |
-| CI                                               | нет `.github/`             | workflow с `tests/run.php` и phpcs       |
-| `Extensions/Traits/ExtensionTraits`, `ExtensionHelpers` | имя без способности | по способности                           |
-| `Models/Options`                                 | множественное              | `Option`                                 |
-| хук `expansa_view_part`                          | snake_case, префикс        | `viewPart`                               |
-| хуки `expansaRedirectBy/Status/Location`, `expansaConfigureMailer` | префикс `expansa` | `redirectBy`, ...          |
-| `Facades/Json.php`                               | табы                       | 4 пробела                                |
+| `Facades/Db.php`, `Facades/Terminal.php`         | логика в фасаде            | цель — `Database\Manager`, `Console\Manager` |
+| `Http/Status`, `Database/FieldEav`, `Database/Schema/*` | длинные PHPDoc      | 2–4 строки                               |
 
 ### Зависимости между пакетами
 
 | Пакет         | Зависит от                      | Как развязать                                        |
 |---------------|---------------------------------|------------------------------------------------------|
-| `Support`     | `Lifecycle` (`Is::dashboard()`) | значение через `Is::configure()`                     |
-| `Scheduler`   | `Mail` (`Job` создаёт `Mailer`) | колбэк отправки в `configure()`                      |
-| `Console`     | `Assets`, `Scheduler`, `Hooks`  | `AssetClean`, `ScheduleRun`, `HooksList` — в свои пакеты |
-| `Database`    | `Cache`, `Security` (`Safe`)    | кэш и очистка снаружи                                |
-| `Filesystem`  | `Debug`, `Security` (`Validator`) | ошибки — исключениями, проверка снаружи            |
-| `Http`        | `Cookie`, `Hooks`               | хуки `Redirect` — колбэками в `configure()`          |
-| `Mail`        | `Hooks`                         | настройка мейлера — колбэком в `configure()`         |
-| `Translation` | `Hooks`, `Security` (`Safe`)    | колбэки в `configure()`                              |
-| `Lifecycle`   | `Hooks`, `Routing`              | колбэки фаз и маршрутизации из `bootstrap.php`       |
-| `Builders`    | `Assets`, `View`, `Security`    | допустимо (UI-слой), но через конструктор            |
-| `Cache`       | `Database` (`Providers\Database`) | допустимо: только драйвер                          |
+| `Builders`    | `Assets`, `View`, `Security`    | допустимо (UI-слой): колбэки `Form::configure()`, статические помощники (`Sanitizer`) напрямую |
+| `Cache`       | `Database` (`Providers\Database`) | допустимо: только драйвер, `Query\Builder` в конструкторе |
+| `*\Commands`  | `Console`                       | допустимо: команда пакета наследует `Console\Commands\AbstractCommand` |

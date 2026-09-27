@@ -4,44 +4,22 @@ declare(strict_types=1);
 
 use Expansa\Facades\Log;
 use Expansa\Log\Contracts\Handler;
-use Expansa\Log\Exception\LogException;
-use Expansa\Log\Formatters\LineFormatter;
-use Expansa\Log\Formatters\TelegramFormatter;
+use Expansa\Log\Exceptions\InvalidConfiguration;
+use Expansa\Log\Exceptions\InvalidLevel;
+use Expansa\Log\Exceptions\UnwritableFile;
+use Expansa\Log\Formatters\Line;
+use Expansa\Log\Formatters\Telegram;
 use Expansa\Log\Handlers\AbstractHandler;
-use Expansa\Log\Handlers\ErrorLogHandler;
-use Expansa\Log\Handlers\FileHandler;
-use Expansa\Log\Handlers\RotatingFileHandler;
-use Expansa\Log\Level;
+use Expansa\Log\Handlers\ErrorLog;
+use Expansa\Log\Handlers\File;
+use Expansa\Log\Handlers\RotatingFile;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\Logger;
 use Expansa\Log\LogRecord;
 use Expansa\Log\Manager;
 
 // run: php tests/Log.php
-const EX_PATH = __DIR__ . '/../expansa-cms/';
-
-require_once EX_PATH . 'autoload.php';
-
-$failures = 0;
-
-function check(string $title, bool $condition): void
-{
-    global $failures;
-
-    echo ($condition ? 'ok   ' : 'FAIL ') . $title . PHP_EOL;
-
-    $failures += $condition ? 0 : 1;
-}
-
-function throws(callable $callback, string $class = LogException::class): bool
-{
-    try {
-        $callback();
-    } catch (Throwable $e) {
-        return $e instanceof $class;
-    }
-
-    return false;
-}
+require_once __DIR__ . '/bootstrap.php';
 
 // keeps the records in memory
 class MemoryHandler extends AbstractHandler
@@ -76,7 +54,7 @@ $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'expansa-log-' . getmypid();
 
 // levels
 check('levels resolve from cases, values, RFC 5424 codes and names', Level::of(Level::Error) === Level::Error && Level::of(400) === Level::Error && Level::of(3) === Level::Error && Level::of('ERROR') === Level::Error);
-check('unknown levels throw', throws(fn () => Level::of('fatal')) && throws(fn () => Level::of(8)) && throws(fn () => new Logger()->log('verbose', 'x')));
+check('unknown levels throw', throws(fn () => Level::of('fatal'), InvalidLevel::class) && throws(fn () => Level::of(8), InvalidLevel::class) && throws(fn () => new Logger()->log('verbose', 'x'), InvalidLevel::class));
 check('level labels and order', Level::Warning->label() === 'WARNING' && Level::Warning->includes(Level::Error) && ! Level::Warning->includes(Level::Info));
 
 // logger
@@ -94,13 +72,13 @@ check('arrays, exceptions and dates in placeholders are readable', $memory->reco
 $logger->withContext(['request' => 'r1', 'user' => 1]);
 $logger->error('Failed', ['user' => 2]);
 check('logger context is merged, the record context wins', end($memory->records)->context === ['request' => 'r1', 'user' => 2]);
-check('withoutContext clears it', $logger->withoutContext()->getContext() === []);
+check('withoutContext clears it', $logger->withoutContext()->context === []);
 
 $logger = new Logger('app', [new MemoryHandler('error'), new MemoryHandler('warning')]);
 check('isHandling uses the lowest handler level', $logger->isHandling('warning') && ! $logger->isHandling('notice'));
 $top = new MemoryHandler('debug');
 $logger->pushHandler($top);
-check('pushHandler puts the handler on top and lowers the level', $logger->getHandlers()[0] === $top && $logger->isHandling('debug'));
+check('pushHandler puts the handler on top and lowers the level', $logger->handlers[0] === $top && $logger->isHandling('debug'));
 check('popHandler removes it and raises the level back', $logger->popHandler() === $top && ! $logger->isHandling('debug'));
 check('popping an empty stack throws', throws(fn () => new Logger()->popHandler(), LogicException::class));
 check('a logger without handlers handles nothing', ! new Logger()->isHandling('emergency'));
@@ -114,11 +92,11 @@ $logger->critical('Database is down');
 check('a failing handler neither throws nor stops the others', count($after->records) === 1);
 check('the failure goes to error_log with the record', str_contains((string) @file_get_contents($errorLog), 'BrokenHandler failed: disk is full; record: Database is down'));
 
-new Logger('php', [new ErrorLogHandler('info')])->info('to the error log');
+new Logger('php', [new ErrorLog('info')])->info('to the error log');
 check('ErrorLogHandler writes to error_log', str_contains((string) file_get_contents($errorLog), 'php.INFO: to the error log'));
 
 // line formatter
-$formatter = new LineFormatter();
+$formatter = new Line();
 check('line format without context', $formatter->format(record('Hello')) === "[2025-01-31 10:20:30] app.INFO: Hello\n");
 check('context is JSON with unicode and slashes as is', $formatter->format(record('Hi', ['name' => 'Ян', 'url' => 'https://a.b/c', 'price' => 1.0])) === "[2025-01-31 10:20:30] app.INFO: Hi {\"name\":\"Ян\",\"url\":\"https://a.b/c\",\"price\":1.0}\n");
 
@@ -132,22 +110,22 @@ $line = $formatter->format(record('Data', [
     'deep'    => [[[[[['x']]]]]],
     'date'    => new DateTimeImmutable('2025-01-01 00:00', new DateTimeZone('UTC')),
 ]));
-check('objects, enums, invalid UTF-8, deep arrays and dates never break the line', str_contains($line, '"object":"[object stdClass]"') && str_contains($line, '"enum":"Expansa\\\\Log\\\\Level::Error"') && str_contains($line, '"invalid":"�1"') && str_contains($line, '"...') && str_contains($line, '"date":"2025-01-01T00:00:00+00:00"'));
-check('custom date format', new LineFormatter('H:i')->format(record('x')) === "[10:20] app.INFO: x\n");
+check('objects, enums, invalid UTF-8, deep arrays and dates never break the line', str_contains($line, '"object":"[object stdClass]"') && str_contains($line, '"enum":"Expansa\\\\Log\\\\Enums\\\\Level::Error"') && str_contains($line, '"invalid":"�1"') && str_contains($line, '"...') && str_contains($line, '"date":"2025-01-01T00:00:00+00:00"'));
+check('custom date format', new Line('H:i')->format(record('x')) === "[10:20] app.INFO: x\n");
 
 $source = record('shared', ['exception' => new RuntimeException('e')]);
 $formatter->format($source);
 check('formatting does not change the shared record', $source->context['exception'] instanceof RuntimeException);
 
 // telegram formatter
-$telegram = new TelegramFormatter()->format(record('<script> & "quotes"', ['id' => '<1>'], Level::Error));
+$telegram = new Telegram()->format(record('<script> & "quotes"', ['id' => '<1>'], Level::Error));
 check('telegram message escapes HTML', $telegram === "<b>ERROR</b> app\n&lt;script&gt; &amp; \"quotes\"\n<pre>{\"id\":\"&lt;1&gt;\"}</pre>");
-$telegram = new TelegramFormatter()->format(record(str_repeat('я', 5000), ['a' => str_repeat('b', 5000)]));
-check('telegram message fits the limit', mb_strlen(strip_tags(html_entity_decode($telegram))) <= TelegramFormatter::MAX_LENGTH);
+$telegram = new Telegram()->format(record(str_repeat('я', 5000), ['a' => str_repeat('b', 5000)]));
+check('telegram message fits the limit', mb_strlen(strip_tags(html_entity_decode($telegram))) <= Telegram::MAX_LENGTH);
 
 // file handlers
 $file    = $tmp . DIRECTORY_SEPARATOR . 'nested' . DIRECTORY_SEPARATOR . 'app.log';
-$handler = new FileHandler($file, 'info');
+$handler = new File($file, 'info');
 $handler->handle(record('first'));
 $handler->handle(record('second'));
 check('FileHandler creates the directory and appends lines', file_get_contents($file) === "[2025-01-31 10:20:30] app.INFO: first\n[2025-01-31 10:20:30] app.INFO: second\n");
@@ -155,7 +133,7 @@ $handler->close();
 $handler->handle(record('third'));
 check('the file is opened again after close', substr_count(file_get_contents($file), "\n") === 3);
 $handler->close();
-check('an unwritable path throws', throws(fn () => new FileHandler($file . DIRECTORY_SEPARATOR . 'x' . DIRECTORY_SEPARATOR . 'a.log')->handle(record('x'))));
+check('an unwritable path throws', throws(fn () => new File($file . DIRECTORY_SEPARATOR . 'x' . DIRECTORY_SEPARATOR . 'a.log')->handle(record('x')), UnwritableFile::class));
 
 $daily = $tmp . DIRECTORY_SEPARATOR . 'daily';
 mkdir($daily);
@@ -163,7 +141,7 @@ foreach (['2025-01-26', '2025-01-27', '2025-01-28', '2025-01-29', '2025-01-30'] 
     touch($daily . DIRECTORY_SEPARATOR . "app-$date.log");
 }
 touch($daily . DIRECTORY_SEPARATOR . 'app-backup.log');
-$handler = new RotatingFileHandler($daily . DIRECTORY_SEPARATOR . 'app.log', 3);
+$handler = new RotatingFile($daily . DIRECTORY_SEPARATOR . 'app.log', 3);
 $handler->handle(record('today'));
 $handler->close();
 $left = array_map('basename', glob($daily . DIRECTORY_SEPARATOR . '*'));
@@ -176,7 +154,7 @@ check('the day change switches the file', is_file($daily . DIRECTORY_SEPARATOR .
 
 // manager
 $manager = new Manager();
-check('an unconfigured manager writes to error_log', $manager->getDefaultChannel() === 'errorlog' && $manager->channel()->getHandlers()[0] instanceof ErrorLogHandler);
+check('an unconfigured manager writes to error_log', $manager->defaultChannel === 'errorlog' && $manager->channel()->handlers[0] instanceof ErrorLog);
 
 $manager->configure([
     'file'  => ['driver' => 'single', 'path' => $tmp . DIRECTORY_SEPARATOR . 'single.log', 'level' => 'notice'],
@@ -187,22 +165,22 @@ $manager->configure([
     'bad'   => ['driver' => 'unknown'],
     'tg'    => ['driver' => 'telegram', 'token' => 't'],
 ]);
-check('the first channel is the default one', $manager->getDefaultChannel() === 'file');
-check('channels are created once', $manager->channel('file') === $manager->channel('file') && $manager->channel('file')->getName() === 'file');
-check('channel drivers and levels come from the config', $manager->channel()->getHandlers()[0] instanceof FileHandler && $manager->channel()->getHandlers()[0]->getLevel() === Level::Notice);
-check('stack channel gets the handlers of its channels', count($manager->channel('both')->getHandlers()) === 2);
-check('a stack including itself throws', throws(fn () => $manager->channel('self')));
-check('unknown channel, driver and missing options throw', throws(fn () => $manager->channel('none')) && throws(fn () => $manager->channel('bad')) && throws(fn () => $manager->channel('tg')));
-check('unknown default channel throws', throws(fn () => new Manager()->configure(['a' => ['driver' => 'single']], 'b')));
+check('the first channel is the default one', $manager->defaultChannel === 'file');
+check('channels are created once', $manager->channel('file') === $manager->channel('file') && $manager->channel('file')->name === 'file');
+check('channel drivers and levels come from the config', $manager->channel()->handlers[0] instanceof File && $manager->channel()->handlers[0]->level === Level::Notice);
+check('stack channel gets the handlers of its channels', count($manager->channel('both')->handlers) === 2);
+check('a stack including itself throws', throws(fn () => $manager->channel('self'), InvalidConfiguration::class));
+check('unknown channel, driver and missing options throw', throws(fn () => $manager->channel('none'), InvalidConfiguration::class) && throws(fn () => $manager->channel('bad'), InvalidConfiguration::class) && throws(fn () => $manager->channel('tg'), InvalidConfiguration::class));
+check('unknown default channel throws', throws(fn () => new Manager()->configure(['a' => ['driver' => 'single']], 'b'), InvalidConfiguration::class));
 
 $memory = new MemoryHandler();
 $manager->extend('memory', fn (array $config, string $name) => $memory);
 $manager->shareContext(['request' => 'abc']);
 $manager->channel('mem')->info('custom');
 check('custom drivers may return a handler, shared context reaches new channels', $memory->records[0]->channel === 'mem' && $memory->records[0]->context === ['request' => 'abc']);
-check('shared context reaches existing channels', $manager->channel('file')->getContext() === ['request' => 'abc']);
-check('on-demand stack', count($manager->stack(['file', 'mem'])->getHandlers()) === 2 && $manager->stack(['mem'])->getContext() === ['request' => 'abc']);
-check('flushSharedContext forgets it', $manager->flushSharedContext()->sharedContext() === []);
+check('shared context reaches existing channels', $manager->channel('file')->context === ['request' => 'abc']);
+check('on-demand stack', count($manager->stack(['file', 'mem'])->handlers) === 2 && $manager->stack(['mem'])->context === ['request' => 'abc']);
+check('flushSharedContext forgets it', $manager->flushSharedContext()->sharedContext === []);
 check('forgetChannel drops a channel', $manager->channel('mem') !== $manager->forgetChannel('mem')->channel('mem'));
 
 $manager->warning('to the default channel');
@@ -210,9 +188,9 @@ $manager->info('below its level');
 $manager->log('error', 'by level name');
 $single = (string) file_get_contents($tmp . DIRECTORY_SEPARATOR . 'single.log');
 check('PSR-3 methods write to the default channel', str_contains($single, 'file.WARNING: to the default channel') && str_contains($single, 'file.ERROR: by level name') && ! str_contains($single, 'below its level'));
-foreach ($manager->getChannels() as $channel) {
-    foreach ($channel->getHandlers() as $handler) {
-        if ($handler instanceof FileHandler) {
+foreach ($manager->channels as $channel) {
+    foreach ($channel->handlers as $handler) {
+        if ($handler instanceof File) {
             $handler->close();
         }
     }

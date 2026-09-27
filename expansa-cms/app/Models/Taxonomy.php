@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Expansa\Database\Model;
+use Expansa\Database\Traits\HasValidation;
 use Expansa\Debug\Error;
 
 /**
@@ -26,21 +27,21 @@ use Expansa\Debug\Error;
  */
 class Taxonomy extends Model
 {
-    use Model\HasValidation;
+    use HasValidation;
 
     /**
      * The database table associated with the model.
      *
      * @var string
      */
-    protected string $table = 'taxonomies';
+    public protected(set) string $table = 'taxonomies';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'term_id',
         'count',
         'parent',
@@ -63,7 +64,8 @@ class Taxonomy extends Model
      *
      * @return void
      */
-    protected function validatorExtend(): void {}
+    protected function validatorExtend(): void
+    {}
 
     /**
      * Retrieves a taxonomy record by a given field.

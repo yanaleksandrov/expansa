@@ -5,22 +5,111 @@ declare(strict_types=1);
 namespace Expansa\Cookie\Contracts;
 
 use Expansa\Cookie\Cookie;
+use Expansa\Cookie\Enums\SameSite;
 
+/**
+ * Creates cookies, filling the attributes left null with the configured defaults.
+ *
+ * @package Expansa\Cookie
+ */
 interface Factory
 {
-    public function make(string $name, string $value, int $minutes = 0, ?string $path = null, ?string $domain = null, ?bool $secure = null, ?bool $httpOnly = null, ?string $sameSite = null): Cookie;
+    /**
+     * Default path.
+     */
+    public string $path { get; }
 
-    public function forever(string $name, string $value, ?string $path = null, ?string $domain = null, ?bool $secure = null, bool $httpOnly = true, ?string $sameSite = null): Cookie;
+    /**
+     * Default domain.
+     */
+    public string $domain { get; }
 
-    public function forget(string $name, ?string $path = null, ?string $domain = null): Cookie;
+    /**
+     * Default secure attribute.
+     */
+    public bool $secure { get; }
 
-    public function getPath(): string;
+    /**
+     * Default httpOnly attribute.
+     */
+    public bool $httpOnly { get; }
 
-    public function getDomain(): string;
+    /**
+     * Default SameSite attribute.
+     */
+    public SameSite $sameSite { get; }
 
-    public function getSecure(): bool;
+    /**
+     * Set the defaults, a repeated call replaces all of them.
+     *
+     * @param string   $path
+     * @param string   $domain
+     * @param bool     $secure
+     * @param bool     $httpOnly
+     * @param SameSite $sameSite
+     * @return void
+     */
+    public function configure(
+        string $path = '/',
+        string $domain = '',
+        bool $secure = false,
+        bool $httpOnly = true,
+        SameSite $sameSite = SameSite::Lax,
+    ): void;
 
-    public function getSameSite(): string;
+    /**
+     * Create a cookie that lives for the given minutes, 0 for a session cookie.
+     *
+     * @param string        $name
+     * @param string        $value
+     * @param int           $minutes
+     * @param string|null   $path
+     * @param string|null   $domain
+     * @param bool|null     $secure
+     * @param bool|null     $httpOnly
+     * @param SameSite|null $sameSite
+     * @return Cookie
+     */
+    public function create(
+        string $name,
+        string $value,
+        int $minutes = 0,
+        ?string $path = null,
+        ?string $domain = null,
+        ?bool $secure = null,
+        ?bool $httpOnly = null,
+        ?SameSite $sameSite = null,
+    ): Cookie;
 
-    public function setDefault(?string $path = null, ?string $domain = null, ?bool $secure = null, ?bool $httpOnly = null, ?string $sameSite = null): static;
+    /**
+     * Create a cookie that lives about a year (576000 minutes).
+     *
+     * @param string        $name
+     * @param string        $value
+     * @param string|null   $path
+     * @param string|null   $domain
+     * @param bool|null     $secure
+     * @param bool|null     $httpOnly
+     * @param SameSite|null $sameSite
+     * @return Cookie
+     */
+    public function createForever(
+        string $name,
+        string $value,
+        ?string $path = null,
+        ?string $domain = null,
+        ?bool $secure = null,
+        ?bool $httpOnly = null,
+        ?SameSite $sameSite = null,
+    ): Cookie;
+
+    /**
+     * Create a cookie that deletes the existing one in the browser.
+     *
+     * @param string      $name
+     * @param string|null $path
+     * @param string|null $domain
+     * @return Cookie
+     */
+    public function createExpired(string $name, ?string $path = null, ?string $domain = null): Cookie;
 }

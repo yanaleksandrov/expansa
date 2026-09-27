@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\Console\Command;
-
 /**
- * Class Help.
+ * Shows the group, description, usage and options of a command.
  *
- * @package cli
+ * @package Expansa\Console
  */
-class Help extends Command
+final class Help extends AbstractCommand
 {
-    protected string $name = 'help';
+    public string $name = 'help';
 
-    protected string $signature = 'help [command_name]';
-
-    protected string $description = 'Display help for the given command.';
+    public string $signature = 'help [<command>]';
 
     public function getDescription(): string
     {
@@ -26,21 +22,18 @@ class Help extends Command
 
     public function handle(): void
     {
-        $commandName = $this->console->argument(0) ?? 'help';
+        $name    = $this->console->argument(0) ?? 'help';
+        $command = $this->console->command($name);
 
-        $command = $this->console->command($commandName);
         if ($command === null) {
-            $this->error(
-                t('Command ":commandName" not found', $commandName),
-                defined('TESTING') ? null : 1
-            );
+            $this->error(t('Command ":commandName" not found', $name), defined('TESTING') ? null : 1);
+
             return;
         }
 
-        $group = $command->getGroup();
-        if ($group !== null) {
+        if ($command->group !== null) {
             $this->info(t('[green]#Group:#'));
-            $this->info('   ' . $group . PHP_EOL);
+            $this->info('   ' . $command->group . PHP_EOL);
         }
 
         $description = $command->getDescription();
@@ -49,21 +42,19 @@ class Help extends Command
             $this->info('   ' . $description . PHP_EOL);
         }
 
-        $value = $command->getName();
-        if ($value !== '') {
-            $this->info(t('[green]#Usage:#'));
-            $this->info('   ' . $value . PHP_EOL);
-        }
+        $this->info(t('[green]#Usage:#'));
+        $this->info('   ' . $command->signature . PHP_EOL);
 
-        $options = $command->getOptions();
-        if ($options) {
-            $this->info(t('[green]#Options:#') . ':');
+        if ($command->options !== []) {
+            $this->info(t('[green]#Options:#'));
 
+            $options = $command->options;
             krsort($options);
             foreach ($options as $option => $description) {
                 $this->info(str_pad('   ' . $this->decorateOptions($option), 32) . $description);
             }
         }
+
         $this->newLine();
     }
 }

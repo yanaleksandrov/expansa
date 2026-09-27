@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
-use Expansa\Database\Exception\InvalidArgumentException;
+use Expansa\Database\Exceptions\InvalidConnection;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Query\Raw;
 use Expansa\Patterns\Facade;
@@ -12,35 +12,39 @@ use PDO;
 use PDOStatement;
 
 /**
- * This class provides a facade for database interactions, offering a variety of methods to execute
- * common SQL operations such as querying, creating, dropping tables, and performing CRUD operations.
- * It also includes methods for more advanced operations like schema management and raw SQL execution.
+ * The database connection, see Expansa\Database\Query\Builder.
  *
- * @method static PDOStatement query(string $statement, array $map = [])
- * @method static PDOStatement create(string $table, array $columns, ?array $options = null)
- * @method static PDOStatement drop(string $table)
- * @method static PDOStatement rename(string $table, string $to)
- * @method static PDOStatement insert(string $table, array $values, ?string $primaryKey = null)
- * @method static PDOStatement update(string $table, array $data, ?array $where = null)
- * @method static PDOStatement delete(string $table, Raw|array $where)
- * @method static PDOStatement replace(string $table, array $columns, ?array $where = null)
- * @method static mixed        get(string $table, $join = null, array|string|null $columns = null, ?array $where = null)
- * @method static bool         has(string $table, array $join, ?array $where = null)
- * @method static array        rand(string $table, ?array $join = null, array|string|null $columns = null, ?array $where = null)
- * @method static null|int     count(string $table, ?array $join = null, ?string $column = null, ?array $where = null)
- * @method static null|array   select(string $table, $join, array|string|null $columns = null, ?array $where = null)
- * @method static null|string  avg(string $table, array $join, ?string $column = null, ?array $where = null)
- * @method static null|string  max(string $table, array $join, ?string $column = null, ?array $where = null)
- * @method static null|string  min(string $table, array $join, ?string $column = null, ?array $where = null)
- * @method static null|string  sum(string $table, array $join, ?string $column = null, ?array $where = null)
- * @method static null|string  id(?string $name = null)
- * @method static Raw          raw(string $string, array $map = [])
- * @method static string       quote(string $string)
- * @method static string       version()
- * @method static array        schema(?string $col = null)
- * @method static array        updateSchema()
- * @method static array        log()
- * @method static bool         hasTable(string $tableName)
+ * @method static null|PDOStatement query(string $statement, array $map = [])
+ * @method static Raw               raw(string $string, array $map = [])
+ * @method static string            quote(string $string)
+ * @method static null|PDOStatement create(string $table, array $columns, ?array $options = null)
+ * @method static null|PDOStatement drop(string $table)
+ * @method static null|PDOStatement rename(string $table, string $to)
+ * @method static null|array        select(string $table, $join, array|string|null $columns = null, ?array $where = null)
+ * @method static null|PDOStatement insert(string $table, array $values, ?string $primaryKey = null)
+ * @method static null|PDOStatement update(string $table, array $data, ?array $where = null)
+ * @method static null|PDOStatement delete(string $table, Raw|array $where)
+ * @method static null|PDOStatement replace(string $table, array $columns, ?array $where = null)
+ * @method static mixed             get(string $table, $join = null, array|string|null $columns = null, ?array $where = null)
+ * @method static bool              has(string $table, array $join, ?array $where = null)
+ * @method static array             rand(string $table, ?array $join = null, array|string|null $columns = null, ?array $where = null)
+ * @method static null|int          count(string $table, ?array $join = null, ?string $column = null, ?array $where = null)
+ * @method static null|string       avg(string $table, array $join, ?string $column = null, ?array $where = null)
+ * @method static null|string       max(string $table, array $join, ?string $column = null, ?array $where = null)
+ * @method static null|string       min(string $table, array $join, ?string $column = null, ?array $where = null)
+ * @method static null|string       sum(string $table, array $join, ?string $column = null, ?array $where = null)
+ * @method static void              action(callable $actions)
+ * @method static null|string       id(?string $name = null)
+ * @method static Builder           debug()
+ * @method static void              beginDebug()
+ * @method static array             debugLog()
+ * @method static null|string       last()
+ * @method static array             log()
+ * @method static array             info()
+ * @method static string            version()
+ * @method static bool              hasTable(string $tableName)
+ * @method static array             schema(?string $col = null)
+ * @method static array             updateSchema()
  */
 class Db extends Facade
 {
@@ -113,7 +117,7 @@ class Db extends Facade
     {
         try {
             return new Builder($options);
-        } catch (InvalidArgumentException $e) {
+        } catch (InvalidConnection $e) {
             return null;
         }
     }
@@ -128,6 +132,6 @@ class Db extends Facade
      */
     public static function instance(): Builder
     {
-        return static::getResolvedClassInstance();
+        return static::resolve();
     }
 }

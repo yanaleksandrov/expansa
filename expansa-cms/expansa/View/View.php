@@ -4,57 +4,61 @@ declare(strict_types=1);
 
 namespace Expansa\View;
 
+use BadMethodCallException;
 use Expansa\Support\Str;
 use Expansa\Support\Traits\Macroable;
-use Expansa\View\Engines\Engine;
-use Expansa\View\Exception\ViewException;
-use Expansa\View\Support\Html;
+use Expansa\View\Contracts\Engine;
+use Expansa\View\Internal\Html;
 
-class View
+/**
+ * A template with its variables, rendered on render() or string conversion.
+ * `withTitle('x')` is `with('title', 'x')`.
+ *
+ * @package Expansa\View
+ */
+final class View
 {
     use Macroable {
         __call as macroCall;
     }
 
-    protected bool $shouldBeautify = false;
+    private bool $shouldBeautify = false;
 
-    protected array $beautifyOptions = [];
+    /**
+     * Options of the HTML beautifier: indent_size, indent_char, unformatted and others.
+     */
+    private array $beautifyOptions = [];
 
-    protected bool $shouldMinify = false;
+    private bool $shouldMinify = false;
 
     public function __construct(
 
         /**
-         * Factory that created the view; rendering goes through $engine.
+         * Engine chosen by the file extension.
          */
-        protected readonly Factory $factory,
-
-        /**
-         * Engine chosen by the file extension, cache already configured by the factory.
-         */
-        protected readonly Engine $engine,
+        private readonly Engine $engine,
 
         /**
          * View name as requested, e.g. "namespace::view".
          */
-        protected readonly string $name,
+        public readonly string $name,
 
         /**
          * Path to the resolved template file.
          */
-        protected readonly string $path,
+        public readonly string $path,
 
         /**
-         * Template variables, merged over the factory's shared data.
+         * Template variables, merged over the manager's shared data.
          *
          * @var array<string, mixed>
          */
-        protected array $data,
-    ) {} // phpcs:ignore
+        public private(set) array $data,
+    ) {}
 
     public function render(): string
     {
-        $content = $this->engine->get($this->path, $this->data);
+        $content = $this->engine->render($this->path, $this->data);
 
         if ($this->shouldBeautify) {
             $content = new Html($this->beautifyOptions)->beautify($content);
@@ -66,17 +70,11 @@ class View
     }
 
     /**
-     * Pretty-print this view's rendered HTML output before returning it from
-     * render(). Opt-in and off by default - call e.g. once on the outermost
-     * view of a fully assembled page (see app/Controllers/Web.php), not on
-     * every individual sub-view/field partial: beautifying a fragment on its
-     * own can't know the indentation depth it will end up nested at once
-     * concatenated into its parent, so doing it per-fragment produces flatter,
-     * wrong-looking indentation once everything is assembled - beautify the
-     * final page as a whole instead.
+     * Indent the rendered HTML; call it on the whole page, not on each partial, which can't know
+     * its nesting depth. Cancels minify().
      *
-     * @param array $options Passed straight through to Html's constructor
-     *                        (indent_size, indent_char, unformatted, ...).
+     * @param array $options Options of the beautifier: indent_size, indent_char, unformatted and others.
+     * @return static
      */
     public function beautify(array $options = []): static
     {
@@ -88,15 +86,10 @@ class View
     }
 
     /**
-     * Strip this view's rendered HTML output down to a single compact line
-     * (collapsed whitespace, comments removed) before returning it from
-     * render(). Opt-in and off by default; mutually exclusive with beautify()
-     * on the same view - whichever of the two is called last wins, since
-     * doing both would just mean throwing away the formatting pass right
-     * after paying for it. Same "call it on the final assembled page, not on
-     * every sub-view" reasoning as beautify(): minifying a fragment on its
-     * own is harmless (it doesn't depend on nesting depth the way indentation
-     * does), but there's rarely a reason to pay for it more than once per page.
+     * Collapse the rendered HTML to one line without comments; call it once on the whole page.
+     * Cancels beautify().
+     *
+     * @return static
      */
     public function minify(): static
     {
@@ -106,29 +99,22 @@ class View
         return $this;
     }
 
+    /**
+     * Add variables: a name and a value or an array of them.
+     *
+     * @param string|array<string, mixed> $key
+     * @param mixed                       $value
+     * @return static
+     */
     public function with(string|array $key, mixed $value = null): static
     {
         if (is_array($key)) {
-            $this->data = array_merge($this->data, $key);
+            $this->data = [...$this->data, ...$key];
         } else {
             $this->data[$key] = $value;
         }
+
         return $this;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getPath(): string
-    {
-        return $this->path;
-    }
-
-    public function getData(): array
-    {
-        return $this->data;
     }
 
     public function __toString(): string
@@ -146,6 +132,6 @@ class View
             return $this->with(Str::camel(substr($method, 4)), $parameters[0]);
         }
 
-        throw new ViewException(sprintf('Method %s::%s does not exist', static::class, $method));
+        throw new BadMethodCallException(sprintf('Method %s::%s does not exist', static::class, $method));
     }
 }
