@@ -117,7 +117,17 @@ Lifecycle::phase('configure', true, function () {
         Db::configure(...EX_DB);
     }
 
-    // models cache rows in memory for the request, sanitize and validate by the Security rules
+    // the stores from env.php, the request memory without them; env.php can not hold the connection closure
+    if (defined('EX_CACHE')) {
+        $stores = array_map(
+            fn (array $store) => $store['driver'] === 'database' ? $store + ['connection' => fn () => Db::instance()] : $store,
+            EX_CACHE['stores']
+        );
+
+        Cache::configure($stores, EX_CACHE['default']);
+    }
+
+    // models cache rows in the default cache store, sanitize and validate by the Security rules
     Expansa\Database\Model::configure(
         cache: fn (string $key, string $group, ?Closure $callback = null) => Cache::get($key, $group, $callback),
         forgetCache: fn (string $key, string $group) => Cache::forget($key, $group),

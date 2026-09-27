@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Expansa\Cache\Manager;
 use Expansa\Cache\Providers\File;
 use Expansa\Cache\Providers\Memory;
 
@@ -43,6 +44,33 @@ new File($directory)->set('shared', 'disk', 'test');
 check('File: values outlive the instance', new File($directory)->get('shared', 'test') === 'disk');
 new File($directory)->forget('', 'test');
 new File($directory)->forget('', 'other');
+@rmdir($directory);
+
+// the manager: stores from the configuration, created on first use
+$manager = new Manager();
+check('an unconfigured manager keeps values in memory', $manager->defaultStore === 'memory' && $manager->store() instanceof Memory);
+
+$manager->configure([
+    'files'  => ['driver' => 'file', 'path' => $directory],
+    'memory' => ['driver' => 'memory'],
+]);
+check('the first store is the default one', $manager->defaultStore === 'files' && $manager->store() instanceof File);
+check('provider methods use the default store', $manager->set('k', 'v', 'test') && $manager->store('files')->get('k', 'test') === 'v'
+    && $manager->store('memory')->get('k', 'test') === null);
+check('a store is created once', $manager->store('memory') === $manager->store('memory'));
+
+$manager->configure(['memory' => ['driver' => 'memory'], 'files' => ['driver' => 'file', 'path' => $directory]], 'memory');
+check('configure() picks the default store and drops created ones', $manager->defaultStore === 'memory' && $manager->stores === []);
+
+$manager->extend('custom', fn (array $config) => new Memory());
+$manager->configure(['own' => ['driver' => 'custom'], 'bad' => ['driver' => 'none'], 'nopath' => ['driver' => 'file']]);
+check('a custom driver creates the store', $manager->store('own') instanceof Memory);
+check('unknown store, driver and a missing option throw', throws(fn () => $manager->store('missing'), InvalidArgumentException::class)
+    && throws(fn () => $manager->store('bad'), InvalidArgumentException::class)
+    && throws(fn () => $manager->store('nopath'), InvalidArgumentException::class));
+check('an unconfigured default store throws', throws(fn () => $manager->configure(['a' => ['driver' => 'memory']], 'b'), InvalidArgumentException::class));
+
+new File($directory)->forget('', 'test');
 @rmdir($directory);
 
 exit($failures > 0 ? 1 : 0);
