@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Database;
 
 use Closure;
+use Expansa\Database\Query\Builder;
 use Expansa\Facades\Db;
 use Expansa\Patterns\Facade;
 
@@ -30,7 +31,7 @@ class Schema extends Facade
      * application's config and opening a second one - the framework has no config of its own
      * to read, only what's already been given to Db.
      *
-     * @return array{0: \Expansa\Database\Query\Builder}
+     * @return array{0: Builder}
      */
     protected static function getConstructorArgs(): array
     {
