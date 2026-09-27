@@ -126,8 +126,10 @@ final class Cookie
     public static function isSecureRequest(): bool
     {
         return (! empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            || (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443
-            || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+            ||
+            (int) ($_SERVER['SERVER_PORT'] ?? 0) === 443
+            ||
+            ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
     }
 
     /**
