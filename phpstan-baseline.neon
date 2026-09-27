@@ -47,16 +47,3 @@ parameters:
 			identifier: variable.undefined
 			count: 3
 			path: expansa-cms/app/Query/Query.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 2
-			path: expansa-cms/expansa/Database/Model.php
-
-		-
-			message: '#^Unsafe usage of new static\(\)\.$#'
-			identifier: new.static
-			count: 3
-			path: expansa-cms/expansa/Database/Model/Attribute.php
-

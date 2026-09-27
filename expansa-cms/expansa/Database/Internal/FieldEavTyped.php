@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database;
+namespace Expansa\Database\Internal;
 
 use DateTime;
+use Expansa\Database\FieldEav;
 use Expansa\Database\Query\Builder;
-use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 
 /**
@@ -20,10 +20,15 @@ use Expansa\Facades\Db;
  * has no BIGINT equivalent - one shared numeric column would have to lose one or the other. Two
  * single-value tables also keep every table here the same shape ([fk, key, value]), so nothing
  * downstream needs to special-case which columns a given row actually populated.
+ *
+ * Created by Traits\HasFieldEavTyped; the app works with it as FieldEav.
+ *
+ * @internal
+ * @package Expansa\Database\Internal
  */
-class FieldEavTyped extends FieldEav
+final class FieldEavTyped extends FieldEav
 {
-    private const TABLES = ['int', 'decimal', 'datetime', 'varchar', 'text'];
+    private const array TABLES = ['int', 'decimal', 'datetime', 'varchar', 'text'];
 
     /**
      * Physical name of one of the five typed tables, e.g. "users_fields_int" — built off the

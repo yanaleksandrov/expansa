@@ -92,7 +92,7 @@ trait Indexes
      * up one hardcoded table, ignored whichever onDelete/onUpdate action was actually configured,
      * and - since every trigger was named after the *parent* table regardless of which child table
      * it belonged to - would fail with "trigger already exists" the moment a second foreign()
-     * targeting the same parent was compiled (exactly what {@see \Expansa\Database\FieldEavTyped}'s
+     * targeting the same parent was compiled (exactly what {@see \Expansa\Database\Internal\FieldEavTyped}'s
      * five sibling tables each do). A real constraint has none of these problems: MySQL enforces
      * it natively, the constraint name is scoped to $table->name (always unique per child table),
      * and ON DELETE/ON UPDATE do what they say.

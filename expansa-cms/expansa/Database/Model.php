@@ -4,86 +4,97 @@ declare(strict_types=1);
 
 namespace Expansa\Database;
 
-use Exception;
-use Expansa\Facades\Safe;
-use Expansa\Database\Model\HasReadonlyAttributes;
-use Expansa\Database\Model\HasSanitizing;
+use BadMethodCallException;
+use Closure;
+use Expansa\Database\Internal\Cache;
+use Expansa\Database\Traits\HasAttributes;
+use Expansa\Database\Traits\HasGuardAttributes;
+use Expansa\Database\Traits\HasReadonlyAttributes;
+use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Support\Str;
+use JsonSerializable;
+use LogicException;
 use stdClass;
 
 /**
- * Base data model class with support for attributes, mass assignment protection, timestamps, and soft deletes.
+ * Base model: attributes with mutators, mass assignment protection, and Query methods called on the model.
+ * Caching, sanitizing and validation come from configure(), bootstrap.php wires them to the Cache and Security packages.
  *
- * @method static static|null get(mixed $value, string $by = 'id') Find a model by primary key or specified field.
- * @method static bool        exists(array $data)                  Check record is existing.
- * @method null|static        save()                               Insert or update the record and return the fresh model.
- * @method int                delete()                             Delete the record by primary key.
- * @method int                restore()                            Restore a soft-deleted record.
+ * @method static static|null get(int|string $value, string $by = 'id') Find a model by primary key or another field.
+ * @method static static[]    find()                                    Get the models matching the where conditions.
+ * @method static static|null first()                                   Get the first model matching the where conditions.
+ * @method static static[]    all()                                     Get every model.
+ * @method static Query       where(array $args)                        Start a query with where conditions.
+ * @method static bool        exists(array $data)                       Whether a row matches any of the fields.
+ * @method null|static        save()                                    Insert or update the row.
+ * @method int                delete()                                  Delete the row, or soft-delete it.
+ * @method int                restore()                                 Restore a soft-deleted row.
+ *
+ * @package Expansa\Database
  */
-abstract class Model implements \JsonSerializable
+abstract class Model implements JsonSerializable
 {
-    use Model\HasAttributes {
+    use HasAttributes {
         setAttribute as protected traitSetAttribute;
     }
-    use Model\HasGuardAttributes;
+    use HasGuardAttributes;
 
     /**
-     * The database table associated with the model.
-     *
-     * @var string
+     * Table of the model; also the cache group of its rows.
      */
-    protected string $table;
+    public protected(set) string $table;
 
     /**
-     * Whether this model's class, or any ancestor, `use`s $trait. Unlike a bare class_uses()
-     * call (which only sees traits used directly by the exact class, not inherited ones), this
-     * walks the full parent chain, and caches the result - a class's traits never change at runtime.
+     * Sanitizes by rules: (array $data, array $rules): array of the sanitized values by key.
      */
-    public function usesTrait(string $trait): bool
-    {
-        // Scoped to this method only - no other method reads or resets this cache. Keyed by
-        // static::class since this one method body is shared by every Model subclass.
-        static $cache = [];
-
-        return $cache[static::class][$trait] ??= array_any(
-            [static::class, ...(class_parents(static::class) ?: [])],
-            fn($class) => in_array($trait, class_uses($class), true)
-        );
-    }
+    protected static ?Closure $sanitizer = null;
 
     /**
-     * Build a new, unsaved instance, optionally filled with the given attributes -
-     * sanitized and passed through each attribute's mutator, exactly like calling
-     * {@see self::fill()} on an empty instance (which is exactly what this does).
-     * `new User($data)` is the "new + fill" idiom; call save() on the result to persist it.
+     * Creates a validator: (array $data, array $rules, bool $break): object with apply(), isValid(), getErrors().
+     */
+    protected static ?Closure $validatorFactory = null;
+
+    /**
+     * Create an unsaved model and fill it: sanitizers and mutators apply, unfillable keys are skipped.
      *
      * @param array<string, mixed> $attributes
-     * @throws Exception if attributes are not fillable
+     * @throws LogicException If the model has no fillable attributes.
      */
-    public function __construct(array $attributes = [])
+    final public function __construct(array $attributes = [])
     {
         $this->fill($attributes);
     }
 
     /**
-     * Build a new model instance from trusted attributes, bypassing mass-assignment
-     * protection and sanitizing/mutators entirely - for internal/trusted data only
-     * (a value already in its final form: a hashed password, a deduped nicename, a
-     * row just read from the database, ...), never raw user input. See {@see self::fill()}
-     * for the opposite - the one to reach for whenever the data didn't originate in
-     * your own trusted code.
+     * Set the services of the models, a repeated call replaces all of them.
      *
-     * A truthy 'id' in $attributes is treated as "this row already exists in the
-     * database" and syncs originals accordingly, so a later save() diffs against
-     * these values (an update with nothing actually changed becomes a no-op)
-     * instead of treating every attribute as dirty. This is what Query::get()/
-     * find()/first()/all() rely on to hydrate rows. Without an 'id', the instance
-     * is treated as brand new and unsaved - call save() to insert it.
+     * @param Closure|null $cache       Rows and fields cache: (string $key, string $group, ?Closure $callback): mixed,
+     *                                  on a miss stores and returns the callback result. Nothing is cached without it.
+     * @param Closure|null $forgetCache (string $key, string $group): mixed.
+     * @param Closure|null $sanitizer   (array $data, array $rules): array, required by HasSanitizing.
+     * @param Closure|null $validator   (array $data, array $rules, bool $break): object, required by HasValidation.
+     * @return void
+     */
+    public static function configure(
+        ?Closure $cache = null,
+        ?Closure $forgetCache = null,
+        ?Closure $sanitizer = null,
+        ?Closure $validator = null,
+    ): void {
+        Cache::configure($cache, $forgetCache);
+
+        self::$sanitizer        = $sanitizer;
+        self::$validatorFactory = $validator;
+    }
+
+    /**
+     * Create a model from trusted data, such as a database row: no mass assignment check, sanitizers or mutators.
+     * With an id the model counts as saved, so save() writes only the changed attributes.
      *
-     * @param array<string, mixed>|stdClass $attributes Attributes to fill the model with.
+     * @param array<string, mixed>|stdClass $attributes
      * @return static
      */
-    public static function make(array|stdClass $attributes): static
+    public static function hydrate(array|stdClass $attributes): static
     {
         $model = new static();
 
@@ -97,122 +108,87 @@ abstract class Model implements \JsonSerializable
     }
 
     /**
-     * Mass-assign the given attributes - sanitized and passed through each attribute's
-     * mutator (e.g. User's password gets hashed) - unlike {@see self::make()}, which
-     * treats the data as already-final and skips both. This is the one to use for raw
-     * user/API input.
+     * Whether the class or a parent uses the trait, cached per class.
      *
-     * Always an instance method - there's no separate static entry point. For a brand
-     * new record, construct one and let the constructor call this for you: `new User($data)`
-     * (see {@see self::__construct()}). To mass-assign onto a model that already exists -
-     * `$this` inside an update()-style method, or one already fetched from the database -
-     * call `$model->fill($data)` directly; it mutates that same instance in place.
+     * @param class-string $trait
+     * @return bool
+     */
+    public function usesTrait(string $trait): bool
+    {
+        static $cache = [];
+
+        return $cache[static::class][$trait] ??= array_any(
+            [static::class, ...(class_parents(static::class) ?: [])],
+            fn ($class) => in_array($trait, class_uses($class), true)
+        );
+    }
+
+    /**
+     * Mass-assign raw input: sanitizers and mutators apply, unfillable keys are skipped.
      *
      * @param array<string, mixed> $attributes
      * @return static
-     * @throws Exception if attributes are not fillable
+     * @throws LogicException If the model has no fillable attributes.
      */
     public function fill(array $attributes): static
     {
-        if (!$attributes) {
+        if (! $attributes) {
             return $this;
         }
 
         if ($this->isTotallyGuarded()) {
-            $keys = $this->fillable
-                ? array_diff(array_keys($attributes), array_keys(array_flip($this->fillable)))
-                : array_keys($attributes);
+            $keys = implode(', ', array_diff(array_keys($attributes), $this->fillable));
 
-            throw new Exception(
-                sprintf('Add [%s] to fillable property to allow mass assignment on [%s].', implode(", ", $keys), get_class($this))
-            );
+            throw new LogicException(sprintf('Add [%s] to fillable property to allow mass assignment on [%s].', $keys, static::class));
         }
 
-        foreach ($attributes as $key => $val) {
-            if (! $this->isFillable($key)) {
-                continue;
+        foreach ($attributes as $key => $value) {
+            if ($this->isFillable($key)) {
+                $this->setAttribute($key, $value);
             }
-
-            $this->setAttribute($key, $val);
         }
 
         return $this;
     }
 
     /**
-     * Sets $key, applying its sanitizer rule (see {@see Model\HasSanitizing::getSanitizerRules()})
-     * and mutator (see {@see Model\Attribute}), if either is declared. No-ops if $key is
-     * readonly and already has a value (see {@see Model\HasReadonlyAttributes}).
+     * Set an attribute through its sanitizer rule and mutator; a readonly attribute that has a value is kept.
      *
-     * @param string $key   The attribute name
-     * @param mixed  $value The value to set
-     *
+     * @param string $key
+     * @param mixed  $value
      * @return static
+     * @throws LogicException If the attribute has a sanitizer rule and no sanitizer is configured.
      */
     public function setAttribute(string $key, mixed $value): static
     {
         $snakeKey = Str::snake($key);
 
-        if (
-            $this->usesTrait(HasReadonlyAttributes::class)
-            &&
-            $this->isReadonly($snakeKey)
-            &&
-            isset($this->attributes[$snakeKey])
-        ) {
+        if ($this->usesTrait(HasReadonlyAttributes::class) && $this->isReadonly($snakeKey) && isset($this->attributes[$snakeKey])) {
             return $this;
         }
 
-        if ($this->usesTrait(HasSanitizing::class)) {
-            $rule = $this->sanitizerRules()[$snakeKey] ?? '';
-            if ($rule) {
-                // [$key => $value] goes first: for an attribute that's already
-                // set, array + keeps the LEFT side on key collision, so this is
-                // what makes the new value actually win instead of being
-                // silently re-sanitized back to whatever was already stored.
-                // The rest of $this->attributes is still merged in after, for
-                // rules that reference a sibling field (e.g. 'slug:$login').
-                $value = Safe::data([$key => $value] + $this->attributes, [$key => $rule])->apply($key);
-            }
+        $rule = $this->usesTrait(HasSanitizing::class) ? $this->sanitizerRules()[$snakeKey] ?? '' : '';
+        if ($rule !== '') {
+            $sanitizer = self::$sanitizer ?? throw new LogicException('Sanitizing rules of ' . static::class . ' need Model::configure(sanitizer: ...).');
+
+            // the new value goes first, + keeps the left one; other attributes serve rules like 'slug:$login'
+            $value = $sanitizer([$key => $value] + $this->attributes, [$key => $rule])[$key] ?? null;
         }
 
         return $this->traitSetAttribute($key, $value);
     }
 
     /**
-     * Get the table associated with the model. Cached per class: $table is a fixed class
-     * property (never reassigned per-instance by any Model subclass), but Safe::snakecase()
-     * itself runs 3 preg_replace passes with no memoization of its own, and this is called
-     * repeatedly per Query call (Query::get()/find()/save()/... each read it 1-2x).
-     *
-     * @return string
-     */
-    public function getTable(): string
-    {
-        // Scoped to this method only - no other method reads or resets this cache. Keyed by
-        // static::class since this one method body is shared by every Model subclass.
-        static $cache = [];
-
-        return $cache[static::class] ??= Safe::snakecase($this->table);
-    }
-
-    /**
-     * Get the model's attributes as a plain array.
-     *
-     * Overridden by Model\HasHiddenAttributes for models that need to keep
-     * sensitive attributes (passwords, tokens, ...) out of this — getAttributes()
-     * itself is never filtered, so persistence is unaffected either way.
+     * Get the attributes for arrays and JSON, HasHiddenAttributes removes the hidden ones.
      *
      * @return array<string, mixed>
      */
     public function toArray(): array
     {
-        return $this->getAttributes();
+        return $this->attributes;
     }
 
     /**
-     * Specify the data that should be serialized to JSON.
-     *
      * @return array<string, mixed>
      */
     public function jsonSerialize(): array
@@ -220,69 +196,47 @@ abstract class Model implements \JsonSerializable
         return $this->toArray();
     }
 
-    /**
-     * Magic getter to access attributes.
-     *
-     * @param string $name
-     * @return mixed
-     */
     public function __get(string $name): mixed
     {
         return $this->getAttribute($name);
     }
 
-    /**
-     * Magic setter to set attributes.
-     *
-     * @param string $name
-     * @param mixed $value
-     * @return void
-     */
     public function __set(string $name, mixed $value): void
     {
         $this->setAttribute($name, $value);
     }
 
     /**
-     * Handle dynamic static method calls on the model class.
+     * Call a Query method on a new query of the model: `User::get(1)`.
      *
-     * This magic method intercepts static method calls that are not explicitly defined
-     * in the model class. If the called method exists in the Query class, it delegates
-     * the call to a new Query instance for the current model class, passing all arguments.
-     * Otherwise, it throws an Exception.
-     *
-     * @param string $method    The name of the static method being called.
-     * @param array  $arguments The arguments passed to the static method.
-     *
-     * @return mixed The result of the corresponding Query method call.
-     *
-     * @throws Exception If the method does not exist in the Query class.
+     * @param string $method
+     * @param array  $arguments
+     * @return mixed
+     * @throws BadMethodCallException If Query has no such method.
      */
-    public static function __callStatic(string $method, array $arguments)
+    public static function __callStatic(string $method, array $arguments): mixed
     {
         if (method_exists(Query::class, $method)) {
             return new Query(new static())->$method(...$arguments);
         }
-        throw new Exception("Method $method does not exist in " . static::class);
+
+        throw new BadMethodCallException("Method $method does not exist in " . static::class);
     }
 
     /**
-     * Magic instance method handler.
+     * Call a Query method on a query of this model: `$user->save()`.
      *
-     * Delegates instance method calls to the Query class if method exists,
-     * passing the current model instance.
-     *
-     * @param string $method    Method name called.
-     * @param array  $arguments Arguments passed.
+     * @param string $method
+     * @param array  $arguments
      * @return mixed
-     *
-     * @throws Exception When the called method does not exist in Query
+     * @throws BadMethodCallException If Query has no such method.
      */
-    public function __call(string $method, array $arguments)
+    public function __call(string $method, array $arguments): mixed
     {
         if (method_exists(Query::class, $method)) {
             return new Query($this)->$method(...$arguments);
         }
-        throw new Exception("Method $method does not exist in " . static::class);
+
+        throw new BadMethodCallException("Method $method does not exist in " . static::class);
     }
 }

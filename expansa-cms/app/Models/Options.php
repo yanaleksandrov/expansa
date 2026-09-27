@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Attribute;
 use Expansa\Database\Model;
 use Expansa\Database\Query;
+use Expansa\Database\Traits\HasSanitizing;
+use Expansa\Database\Traits\HasValidation;
 use Expansa\Debug\Error;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
@@ -37,22 +40,22 @@ use LogicException;
  */
 class Options extends Model
 {
-    use Model\HasSanitizing;
-    use Model\HasValidation;
+    use HasSanitizing;
+    use HasValidation;
 
     /**
      * The database table associated with the model.
      *
      * @var string
      */
-    protected string $table = 'options';
+    public protected(set) string $table = 'options';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'key',
         'value',
     ];
@@ -109,9 +112,9 @@ class Options extends Model
      * before every value was JSON-encoded stored bare scalars (e.g. "UTF-8"), which
      * aren't valid JSON syntax and would otherwise silently decode to null.
      */
-    protected function value(): Model\Attribute
+    protected function value(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: function ($value) {
                 if (! is_string($value)) {
                     return $value;
