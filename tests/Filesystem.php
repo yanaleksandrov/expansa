@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Expansa\Filesystem\Directory;
 use Expansa\Filesystem\Disk;
+use Expansa\Filesystem\Exceptions\NotFound;
 use Expansa\Filesystem\Exceptions\OperationFailed;
 use Expansa\Filesystem\Exceptions\UploadRejected;
 use Expansa\Filesystem\File;
@@ -64,6 +65,9 @@ check('delete() of a missing entry is false', ! $disk->file("$root/none.txt")->d
 check('upload() rejects a failed upload', throws(fn () => $disk->upload(['error' => UPLOAD_ERR_PARTIAL], $root), UploadRejected::class));
 check('upload() rejects a file that was not uploaded', throws(fn () => $disk->upload(['name' => 'a.txt', 'tmp_name' => "$root/a/note.txt", 'error' => 0, 'size' => 1], $root), UploadRejected::class));
 check('grab() rejects a not HTTP URL', throws(fn () => $disk->grab('file:///etc/passwd', $root), UploadRejected::class));
+
+check('copy() of a missing entry throws NotFound', throws(fn () => $disk->file("$root/none.txt")->copy('x'), NotFound::class) && throws(fn () => $disk->dir("$root/none")->move($root), NotFound::class));
+check('sanitizeName() gives a free name with the extension', $disk->file("$root/a/empty.txt")->sanitizeName("Empty") === "empty-2.txt");
 
 $disk->dir($root)->delete();
 check('the scratch directory is removed', ! is_dir($root));

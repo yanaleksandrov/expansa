@@ -55,6 +55,8 @@ final class File extends AbstractEntry implements FileContract
 
     public function copy(string $name): static
     {
+        $this->ensureExists();
+
         $path = $this->dirpath . '/' . $this->basenameOf($name);
         if (file_exists($path)) {
             throw new OperationFailed("File $path already exists");

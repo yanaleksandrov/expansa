@@ -110,6 +110,8 @@ final class Directory extends AbstractEntry implements DirectoryContract
 
     public function copy(string $name): static
     {
+        $this->ensureExists();
+
         $to = $this->dirpath . '/' . $name;
         if (file_exists($to)) {
             throw new OperationFailed("Directory $to already exists");

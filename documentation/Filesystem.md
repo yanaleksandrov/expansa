@@ -20,6 +20,7 @@ $image = Disk::upload($_FILES['image'], EX_STORAGE . 'i/original');
 | `MimeType`                             | Разрешённые для загрузки расширения и их MIME-типы               |
 | `Contracts\Entry`, `File`, `Directory` | Контракты файла и каталога                                      |
 | `Exceptions\OperationFailed`           | Операция с диском не удалась: запись, копирование, скачивание   |
+| `Exceptions\NotFound`                  | Копируемый, перемещаемый или переименуемый объект не существует |
 | `Exceptions\UploadRejected`            | Загрузка отклонена: ошибка PHP, пустой, большой, тип, URL       |
 
 ## Использование

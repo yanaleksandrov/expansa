@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Expansa\Filesystem;
 
 use Expansa\Filesystem\Contracts\Entry;
+use Expansa\Filesystem\Exceptions\NotFound;
 use Expansa\Filesystem\Exceptions\OperationFailed;
+use Expansa\Filesystem\Internal\Name;
 use Expansa\Support\Url;
 
 /**
@@ -118,19 +120,60 @@ abstract class AbstractEntry implements Entry
     }
 
     /**
+     * Get a free name in the directory of the entry: sanitized, with the extension of the entry.
+     *
+     * @param string $name Name without the extension.
+     * @return string Name with the extension, `-2`, `-3` added if it is taken.
+     */
+    public function sanitizeName(string $name): string
+    {
+        $name = Name::sanitize($name);
+        $name = $this->extension === '' ? $name : $name . '.' . $this->extension;
+
+        return basename(Name::unique($this->dirpath, $name));
+    }
+
+    /**
+     * Remove the characters not allowed in a URL.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function sanitizeUrl(string $value): string
+    {
+        return (string) filter_var(trim($value), FILTER_SANITIZE_URL);
+    }
+
+    /**
      * Rename the entry on the disk and point the object to the new path.
      *
      * @param string $path Must be free.
      * @return static
+     * @throws NotFound If the entry does not exist.
      * @throws OperationFailed
      */
     protected function relocate(string $path): static
     {
+        $this->ensureExists();
+
         if (file_exists($path) || ! @rename($this->path, $path)) {
             throw new OperationFailed("Failed to move $this->path to $path");
         }
         $this->path = $path;
 
         return $this;
+    }
+
+    /**
+     * Check that the entry exists before copying or moving it.
+     *
+     * @return void
+     * @throws NotFound
+     */
+    protected function ensureExists(): void
+    {
+        if (! $this->exists) {
+            throw new NotFound("$this->path does not exist");
+        }
     }
 }

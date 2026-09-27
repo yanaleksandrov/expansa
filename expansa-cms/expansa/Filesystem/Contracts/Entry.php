@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem\Contracts;
 
+use Expansa\Filesystem\Exceptions\NotFound;
 use Expansa\Filesystem\Exceptions\OperationFailed;
 
 /**
@@ -41,6 +42,7 @@ interface Entry
      *
      * @param string $name New name, a file keeps its extension.
      * @return static The copy.
+     * @throws NotFound If the entry does not exist.
      * @throws OperationFailed
      */
     public function copy(string $name): static;
@@ -50,6 +52,7 @@ interface Entry
      *
      * @param string $directory
      * @return static
+     * @throws NotFound If the entry does not exist.
      * @throws OperationFailed
      */
     public function move(string $directory): static;
@@ -59,6 +62,7 @@ interface Entry
      *
      * @param string $name New name, a file keeps its extension.
      * @return static
+     * @throws NotFound If the entry does not exist.
      * @throws OperationFailed
      */
     public function rename(string $name): static;
