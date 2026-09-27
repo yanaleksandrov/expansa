@@ -74,4 +74,4 @@ public function __construct(
 - Массив свойства с hook не меняется по ссылке (`$this->items[] =`, `array_unshift`) — присваивай новый:
   `$this->handlers = [$handler, ...$this->handlers]`.
 - PHPStan не видит инициализацию `readonly`-свойства внутри hook другого свойства.
-- phpcs 3.x даёт ложные ошибки на hooks (см. CONVENTIONS, «Стиль кода»).
+- phpcs 4.x ломает отступы многострочного hook `set { }` в сигнатуре: phpcbf на таком файле не запускай (см. CONVENTIONS, «Инструменты»).

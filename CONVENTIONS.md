@@ -249,10 +249,12 @@ Log/
 Уровень не понижается, baseline вручную не пополняется. Пиши типы сразу: `Handler[]`,
 `array<string, Logger>`, `array{driver: string, level?: string}`, `class-string<T>`.
 
-**phpcs** по `phpcs.xml` (PSR-12 + правила). Переход на `squizlabs/php_codesniffer` `4.*` (3.x ложно ругается
-на hooks): проверь sniff `phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php` и исключения, убери
-устаревшее. До перехода ложные ошибки не исправляй кодом и не глуши `phpcs:ignore`. Если 4.x не тянет
-PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форматтера не держим.
+**phpcs** 4.x по `phpcs.xml` (PSR-12 + правила), свои sniff'ы — в `phpcs/Expansa/Sniffs/`: пустое тело `{}`
+остаётся на строке объявления (`) {}`, `class X extends Y {}`). `phpcs:ignore` не используется: исключение —
+в `phpcs.xml` с комментарием. Сторонний код и `cache/` не проверяются. phpcs 4.x не понимает многострочный
+hook `set { }` в сигнатуре конструктора (`Generic.WhiteSpace.ScopeIndent`): phpcbf на таком файле ломает
+отступы — не запускай его там. Если это не исправится — PHP-CS-Fixer с теми же правилами; два форматтера
+не держим.
 
 **Бенчмарки** — `tests/benchmarks/<Package>.php`, текущий код против `--baseline` на одних данных. Общий код —
 в `tests/benchmarks/bootstrap.php` (пока дублируется): опции `--baseline=<ref или файл>` (несколько) и
