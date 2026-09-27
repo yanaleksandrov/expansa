@@ -15,6 +15,8 @@ interface Error extends Throwable
 {
     /**
      * HTTP status code of the error response.
+     *
+     * @var int
      */
     public int $statusCode { get; }
 

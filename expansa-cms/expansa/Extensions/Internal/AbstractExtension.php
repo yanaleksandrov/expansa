@@ -34,6 +34,7 @@ abstract class AbstractExtension
     protected function setName(string $name): static
     {
         $this->name = $this->sanitize($name);
+
         return $this;
     }
 
@@ -46,6 +47,7 @@ abstract class AbstractExtension
     protected function setUrl(string $url): static
     {
         $this->url = $this->sanitizeUrl($url);
+
         return $this;
     }
 
@@ -58,6 +60,7 @@ abstract class AbstractExtension
     protected function setDescription(string $description): static
     {
         $this->description = $this->sanitize($description);
+
         return $this;
     }
 
@@ -70,6 +73,7 @@ abstract class AbstractExtension
     protected function setLicense(string $license): static
     {
         $this->license = $this->sanitize($license);
+
         return $this;
     }
 
@@ -82,6 +86,7 @@ abstract class AbstractExtension
     protected function setCopyright(string $copyright): static
     {
         $this->copyright = $this->sanitize($copyright);
+
         return $this;
     }
 
@@ -94,6 +99,7 @@ abstract class AbstractExtension
     protected function setAuthor(string $author): static
     {
         $this->author = $this->sanitize($author);
+
         return $this;
     }
 
@@ -106,6 +112,7 @@ abstract class AbstractExtension
     protected function setAuthorUrl(string $authorUrl): static
     {
         $this->authorUrl = $this->sanitizeUrl($authorUrl);
+
         return $this;
     }
 
@@ -118,6 +125,7 @@ abstract class AbstractExtension
     protected function setAuthorEmail(string $authorEmail): static
     {
         $this->authorEmail = $this->sanitize($authorEmail);
+
         return $this;
     }
 
@@ -130,6 +138,7 @@ abstract class AbstractExtension
     protected function setVersion(string $version): static
     {
         $this->version = $this->sanitize($version);
+
         return $this;
     }
 
@@ -142,6 +151,7 @@ abstract class AbstractExtension
     protected function setVersionPhp(string $versionPhp): static
     {
         $this->minVersionPhp = $this->sanitize($versionPhp);
+
         return $this;
     }
 
@@ -154,6 +164,7 @@ abstract class AbstractExtension
     protected function setVersionMysql(string $versionDb): static
     {
         $this->minVersionDb = $this->sanitize($versionDb);
+
         return $this;
     }
 
@@ -166,6 +177,7 @@ abstract class AbstractExtension
     protected function setVersionExpansa(string $versionExpansa): static
     {
         $this->minVersionExpansa = $this->sanitize($versionExpansa);
+
         return $this;
     }
 }

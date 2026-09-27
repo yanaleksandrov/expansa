@@ -20,6 +20,8 @@ final class Is
 
     /**
      * Dashboard state or the callback that reports it, called on every dashboard() check.
+     *
+     * @var bool|Closure
      */
     private static Closure|bool $dashboard = false;
 

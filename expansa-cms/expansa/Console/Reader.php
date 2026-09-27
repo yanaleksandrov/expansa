@@ -55,7 +55,7 @@ final class Reader
 
         $answer = $this->getInput();
 
-        return $answer === '' && isset($options[0]) ? $options[0] : $answer;
+        return $answer === '' ? ($options[0] ?? $answer) : $answer;
     }
 
     /**

@@ -23,16 +23,22 @@ final class Scheduler
 {
     /**
      * Lock files directory of onlyOne(), the system temp one when empty.
+     *
+     * @var string
      */
     private static string $tempDir = '';
 
     /**
      * Email settings: `subject`, `body` and `ignore_empty_output`.
+     *
+     * @var array
      */
     private static array $email = [];
 
     /**
      * Sends the output of email(): gets the address, subject, body and attached files, returns true when sent.
+     *
+     * @var null|Closure
      */
     private static ?Closure $mailer = null;
 

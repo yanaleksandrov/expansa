@@ -76,6 +76,8 @@ final class Router
 
     /**
      * Namespace prepended to the controller class of an `[Controller::class, 'method']` handler.
+     *
+     * @var string
      */
     public string $namespace = '';
 

@@ -25,6 +25,8 @@ class Manager implements LoggerInterface
 {
     /**
      * Channel configs by name, each with a `driver` key.
+     *
+     * @var array
      */
     protected array $config = [
         'errorlog' => ['driver' => 'errorlog'],
@@ -32,6 +34,8 @@ class Manager implements LoggerInterface
 
     /**
      * Channel of the PSR-3 methods.
+     *
+     * @var string
      */
     public protected(set) string $defaultChannel = 'errorlog';
 
@@ -51,11 +55,15 @@ class Manager implements LoggerInterface
 
     /**
      * Context added to every channel.
+     *
+     * @var array
      */
     public protected(set) array $sharedContext = [];
 
     /**
      * Channels being created, to detect a stack that includes itself.
+     *
+     * @var array
      */
     private array $resolving = [];
 

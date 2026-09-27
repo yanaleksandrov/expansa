@@ -13,6 +13,8 @@ interface Engine
 {
     /**
      * Template file rendered last, '' before the first render.
+     *
+     * @var string
      */
     public string $lastRendered { get; }
 

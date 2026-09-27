@@ -26,6 +26,8 @@ final class Hours extends AbstractField
 
     /**
      * Transitions of $transitionsZone, from DateTimeZone::getTransitions().
+     *
+     * @var array
      */
     private array $transitions = [];
 

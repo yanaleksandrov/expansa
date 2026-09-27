@@ -19,6 +19,8 @@ abstract class AbstractHandler implements Handler
 {
     /**
      * Minimum level of the records to handle.
+     *
+     * @var Level
      */
     public readonly Level $level;
 

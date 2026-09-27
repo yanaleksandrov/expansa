@@ -23,6 +23,8 @@ final class Manager
 
     /**
      * Directory the extension ids are relative to, with a trailing slash.
+     *
+     * @var string
      */
     private static string $root = '';
 

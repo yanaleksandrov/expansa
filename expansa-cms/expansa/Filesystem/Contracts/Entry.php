@@ -16,16 +16,22 @@ interface Entry
 {
     /**
      * Full path without the trailing slash.
+     *
+     * @var string
      */
     public string $path { get; }
 
     /**
      * Whether the entry exists and has the expected type.
+     *
+     * @var bool
      */
     public bool $exists { get; }
 
     /**
      * Size in bytes, the total size of the files inside for a directory.
+     *
+     * @var int
      */
     public int $bytes { get; }
 

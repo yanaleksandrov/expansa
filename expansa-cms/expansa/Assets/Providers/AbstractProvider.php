@@ -23,16 +23,22 @@ abstract class AbstractProvider
 
     /**
      * Unique id of the resource, as passed to Manager::enqueue().
+     *
+     * @var string
      */
     abstract public string $uid { get; }
 
     /**
      * Key in the queue, unique per provider: `{uid}-{extension}`.
+     *
+     * @var string
      */
     abstract public string $id { get; }
 
     /**
      * Absolute path of the local file, empty for an external URL.
+     *
+     * @var string
      */
     abstract public string $path { get; }
 
@@ -45,6 +51,8 @@ abstract class AbstractProvider
 
     /**
      * Whether the asset renders before `</body>` instead of the head.
+     *
+     * @var bool
      */
     abstract public bool $toFooter { get; }
 

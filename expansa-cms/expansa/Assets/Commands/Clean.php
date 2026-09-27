@@ -26,10 +26,11 @@ final class Clean extends AbstractCommand
 
     public function handle(): void
     {
-        $maxAge  = (int) ($this->console->option('max-age') ?: 604800);
-        $maxSize = $this->console->option('max-size');
-        $maxSize = $maxSize !== null ? (int) $maxSize : null;
+        $maxAge   = (int) ($this->console->option('max-age') ?: 604800);
+        $maxBytes = $this->console->option('max-size');
 
-        $this->info(sprintf('Removed %d stale cached asset file(s).', Manager::clean($maxAge, $maxSize)));
+        $removed = Manager::clean($maxAge, $maxBytes !== null ? (int) $maxBytes : null);
+
+        $this->info("Removed $removed stale cached asset file(s).");
     }
 }

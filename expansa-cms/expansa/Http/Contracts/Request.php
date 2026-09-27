@@ -57,6 +57,8 @@ interface Request
 
     /**
      * Raw request body.
+     *
+     * @var string
      */
     public string $content { get; }
 
@@ -95,106 +97,143 @@ interface Request
 
     /**
      * Whether the request came over HTTPS.
+     *
+     * @var bool
      */
     public bool $secure { get; }
 
     /**
      * "https" or "http".
+     *
+     * @var string
      */
     public string $scheme { get; }
 
     /**
      * Host, with the port if it is not the default one.
+     *
+     * @var string
      */
     public string $host { get; }
 
     /**
      * Port.
+     *
+     * @var int
      */
     public int $port { get; }
 
     /**
      * Request URI as sent.
+     *
+     * @var string
      */
     public string $uri { get; }
 
     /**
      * URI path without the query string and the trailing slash.
+     *
+     * @var string
      */
     public string $path { get; }
 
     /**
      * Query string without "?".
+     *
+     * @var string
      */
     public string $queryString { get; }
 
     /**
      * Scheme and host.
+     *
+     * @var string
      */
     public string $root { get; }
 
     /**
      * URL without the query string.
+     *
+     * @var string
      */
     public string $url { get; }
 
     /**
      * Client IP.
+     *
+     * @var string
      */
     public string $ip { get; }
 
     /**
      * User-Agent header.
+     *
+     * @var string
      */
     public string $userAgent { get; }
 
     /**
      * Token of the "Authorization: Bearer" header.
+     *
+     * @var ?string
      */
     public ?string $bearerToken { get; }
 
     /**
      * User of HTTP basic authentication.
+     *
+     * @var ?string
      */
     public ?string $authUser { get; }
 
     /**
      * Password of HTTP basic authentication.
+     *
+     * @var ?string
      */
     public ?string $authPassword { get; }
 
     /**
      * Whether the request was sent with XMLHttpRequest.
+     *
+     * @var bool
      */
     public bool $isAjax { get; }
 
     /**
      * Whether the request was sent by PJAX.
+     *
+     * @var bool
      */
     public bool $isPjax { get; }
 
     /**
      * Whether the browser prefetches the page.
+     *
+     * @var bool
      */
     public bool $isPrefetch { get; }
 
     /**
      * Route matched for the request.
+     *
+     * @var null|Route
      */
-    public ?Route $route { get;
-    set; }
+    public ?Route $route { get; set; }
 
     /**
      * Session for old input.
+     *
+     * @var null|Session
      */
-    public ?Session $session { get;
-    set; }
+    public ?Session $session { get; set; }
 
     /**
      * Resolver of the current user: fn (?string $guard): mixed.
+     *
+     * @var null|Closure
      */
-    public ?Closure $userResolver { get;
-    set; }
+    public ?Closure $userResolver { get; set; }
 
     /**
      * Create the request from the superglobals.

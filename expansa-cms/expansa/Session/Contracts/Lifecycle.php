@@ -21,11 +21,15 @@ interface Lifecycle
 
     /**
      * Session id, empty before the start.
+     *
+     * @var string
      */
     public string $id { get; }
 
     /**
      * Session name, the cookie name for the native session.
+     *
+     * @var string
      */
     public string $name { get; }
 

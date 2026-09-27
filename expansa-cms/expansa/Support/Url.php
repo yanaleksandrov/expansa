@@ -15,6 +15,8 @@ final class Url
 {
     /**
      * Directory served at the site URL, with a trailing slash.
+     *
+     * @var string
      */
     private static string $root = '';
 

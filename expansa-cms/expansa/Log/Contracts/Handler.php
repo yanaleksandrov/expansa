@@ -11,6 +11,8 @@ interface Handler
 {
     /**
      * Minimum level the handler writes.
+     *
+     * @var Level
      */
     public Level $level { get; }
 

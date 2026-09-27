@@ -30,12 +30,12 @@ final class Error implements JsonSerializable
         /**
          * Error code. Kept so jsonSerialize() reflects only this error, not the whole registry in self::$errors.
          */
-        private string $code,
+        private readonly string $code,
 
         /**
          * Error single message or array of messages.
          */
-        string|array $message = '',
+        public string|array $message = '',
     ) {
         if (is_array($message)) {
             self::$errors[$code] = array_merge(self::$errors[$code] ?? [], $message);

@@ -13,6 +13,8 @@ final class Metric
 {
     /**
      * Request start by default, so the time includes PHP startup and autoload.
+     *
+     * @var float
      */
     private float $startTime;
 
