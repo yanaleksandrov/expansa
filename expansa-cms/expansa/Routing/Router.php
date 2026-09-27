@@ -291,7 +291,7 @@ final class Router
      *
      * @return array The request headers
      */
-    private function requestHeaders(): array
+    public function getRequestHeaders(): array
     {
         $headers = [];
 
@@ -330,7 +330,7 @@ final class Router
      *
      * @return string The Request method to handle
      */
-    private function requestMethod(): string
+    public function getRequestMethod(): string
     {
         // Take the method as found in $_SERVER
         $method = $_SERVER['REQUEST_METHOD'];
@@ -341,7 +341,7 @@ final class Router
             ob_start();
             $method = 'GET';
         } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $headers = $this->requestHeaders();
+            $headers = $this->getRequestHeaders();
 
             $methodName = $headers['X-HTTP-Method-Override'] ?? '';
             if (in_array($methodName, ['PUT', 'DELETE', 'PATCH'])) {
@@ -362,7 +362,7 @@ final class Router
     public function run(callable|object|null $callback = null): bool
     {
         // Define which method we need to handle
-        $requestedMethod = $this->requestMethod();
+        $requestedMethod = $this->getRequestMethod();
 
         // Handle all before middlewares
         if (isset($this->beforeRoutes[$requestedMethod])) {

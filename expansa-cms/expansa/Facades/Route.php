@@ -25,6 +25,8 @@ use Expansa\Patterns\Facade;
  * @method static void   trigger404(mixed $match = null)
  * @method static string uri()
  * @method static string getBasePath()
+ * @method static array  getRequestHeaders()
+ * @method static string getRequestMethod()
  * @method static void   setBasePath(string $serverBasePath)
  */
 class Route extends Facade
