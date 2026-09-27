@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Support;
 
 /**
- * String helpers: random strings, case conversion, English singular.
+ * UTF-8 string helpers: random strings, case conversion, search, English singular.
  *
  * @package Expansa\Support
  */
@@ -73,6 +73,53 @@ final class Str
     ];
 
     /**
+     * Get the number of characters of a UTF-8 string.
+     *
+     * @param string $string
+     * @return int
+     */
+    public static function length(string $string): int
+    {
+        return mb_strlen($string, 'UTF-8');
+    }
+
+    /**
+     * Get the display width of a UTF-8 string: wide characters count as two.
+     *
+     * @param string $string
+     * @return int
+     */
+    public static function width(string $string): int
+    {
+        return mb_strwidth($string, 'UTF-8');
+    }
+
+    /**
+     * Generate a random UUID version 4, e.g. "3f2b8c1e-9d4a-4f6b-8e2c-7a1d5b9c0e3f".
+     *
+     * @return string
+     */
+    public static function uuid(): string
+    {
+        $data = random_bytes(16);
+
+        $data[6] = chr(ord($data[6]) & 0x0f | 0x40);
+        $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
+
+        return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+
+    /**
+     * Generate a cryptographically secure token of 32 hex characters (128 bits).
+     *
+     * @return string
+     */
+    public static function token(): string
+    {
+        return bin2hex(random_bytes(16));
+    }
+
+    /**
      * Generate a cryptographically secure random alphanumeric string, for tokens and API keys.
      *
      * @param int $length Number of characters; 32 characters give about 190 bits of entropy.
@@ -115,6 +162,96 @@ final class Str
     }
 
     /**
+     * Convert to lower case.
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function lower(string $value): string
+    {
+        return mb_strtolower($value, 'UTF-8');
+    }
+
+    /**
+     * Check if a string has no upper case characters.
+     *
+     * @param string $value
+     * @return bool
+     */
+    public static function isLower(string $value): bool
+    {
+        return self::lower($value) === $value;
+    }
+
+    /**
+     * Convert to upper case.
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function upper(string $value): string
+    {
+        return mb_strtoupper($value, 'UTF-8');
+    }
+
+    /**
+     * Check if a string has no lower case characters.
+     *
+     * @param string $value
+     * @return bool
+     */
+    public static function isUpper(string $value): bool
+    {
+        return self::upper($value) === $value;
+    }
+
+    /**
+     * Make the first character lower case.
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function lcfirst(string $value): string
+    {
+        return self::lower(self::substr($value, 0, 1)) . self::substr($value, 1);
+    }
+
+    /**
+     * Make the first character upper case.
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function ucfirst(string $value): string
+    {
+        return self::upper(self::substr($value, 0, 1)) . self::substr($value, 1);
+    }
+
+    /**
+     * Convert to studly case: `post_title` or `post-title` → `PostTitle`. Results are cached for the request.
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function studly(string $value): string
+    {
+        static $cache = [];
+
+        return $cache[$value] ??= str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $value)));
+    }
+
+    /**
+     * Convert to title case: every word starts with an upper case character.
+     *
+     * @param string $value
+     * @return string
+     */
+    public static function title(string $value): string
+    {
+        return mb_convert_case($value, MB_CASE_TITLE, 'UTF-8');
+    }
+
+    /**
      * Convert to camel case: `post_title` or `post-title` → `postTitle`. Results are cached for the request.
      *
      * @param string $value
@@ -124,7 +261,7 @@ final class Str
     {
         static $cache = [];
 
-        return $cache[$value] ??= lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', $value))));
+        return $cache[$value] ??= lcfirst(self::studly($value));
     }
 
     /**
@@ -136,6 +273,89 @@ final class Str
     public static function isEmpty(mixed $value): bool
     {
         return $value === null || (! is_bool($value) && ! is_array($value) && trim((string) $value) === '');
+    }
+
+    /**
+     * Check if a string contains any of the needles; empty needles never match.
+     *
+     * @param string          $haystack
+     * @param string|string[] $needles
+     * @param bool            $ignoreCase
+     * @return bool
+     */
+    public static function contains(string $haystack, string|array $needles, bool $ignoreCase = false): bool
+    {
+        if ($ignoreCase) {
+            $haystack = self::lower($haystack);
+        }
+
+        foreach ((array) $needles as $needle) {
+            if ($needle !== '' && str_contains($haystack, $ignoreCase ? self::lower($needle) : $needle)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Replace every occurrence of a search string with the next value of a list, in order.
+     * Occurrences beyond the list keep the search string.
+     *
+     * @param string   $search
+     * @param string[] $replace
+     * @param string   $subject
+     * @return string
+     */
+    public static function replaceArray(string $search, array $replace, string $subject): string
+    {
+        $segments = explode($search, $subject);
+        $result   = array_shift($segments);
+
+        foreach ($segments as $segment) {
+            $result .= (array_shift($replace) ?? $search) . $segment;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get a part of a UTF-8 string.
+     *
+     * @param string   $string
+     * @param int      $start
+     * @param int|null $length
+     * @return string
+     */
+    public static function substr(string $string, int $start, ?int $length = null): string
+    {
+        return mb_substr($string, $start, $length, 'UTF-8');
+    }
+
+    /**
+     * Cut a part out of a UTF-8 string, returning the rest.
+     *
+     * @param string $string
+     * @param int    $start
+     * @param int    $length
+     * @return string
+     */
+    public static function subtract(string $string, int $start, int $length): string
+    {
+        return mb_substr($string, 0, $start, 'UTF-8') . mb_substr($string, $start + $length, null, 'UTF-8');
+    }
+
+    /**
+     * Find the character position of a needle in a UTF-8 string.
+     *
+     * @param string $string
+     * @param string $needle
+     * @param int    $offset
+     * @return int|false
+     */
+    public static function strpos(string $string, string $needle, int $offset = 0): int|false
+    {
+        return mb_strpos($string, $needle, $offset, 'UTF-8');
     }
 
     /**

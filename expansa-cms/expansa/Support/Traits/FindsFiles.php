@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Support\Traits;
 
-use Expansa\Support\Exceptions\SupportException;
 use FilesystemIterator;
+use InvalidArgumentException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
@@ -24,12 +24,12 @@ trait FindsFiles
      * @param int    $depth Maximum recursion depth: 0 scans only $path itself, 1 also scans its
      *                      immediate subdirectories, and so on.
      * @return string[]
-     * @throws SupportException If the path is not a directory.
+     * @throws InvalidArgumentException If the path is not a directory.
      */
     public function discover(string $path, int $depth = 99): array
     {
         if (!is_dir($path)) {
-            throw new SupportException("The path '$path' is not a directory");
+            throw new InvalidArgumentException("The path '$path' is not a directory");
         }
 
         // CURRENT_AS_PATHNAME: a path string instead of an SplFileInfo per entry

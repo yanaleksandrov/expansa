@@ -6,8 +6,8 @@ namespace Expansa\Hooks;
 
 use Closure;
 use Expansa\Hooks\Exceptions\HooksException;
-use Expansa\Support\Exceptions\SupportException;
 use Expansa\Support\Traits\FindsFiles;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -69,7 +69,7 @@ final class Manager extends HooksCollector
      * @param class-string[]|string $listeners Listener classes, or a listener file or directory to scan.
      *
      * @return void
-     * @throws SupportException|HooksException|ReflectionException
+     * @throws InvalidArgumentException|HooksException|ReflectionException
      */
     public function configure(string|array $listeners): void
     {
