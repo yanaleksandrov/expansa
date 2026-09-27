@@ -8,7 +8,7 @@ use DateTime;
 use App\Post\Type;
 use App\User\Roles;
 use Expansa\Cookie\Cookie;
-use Expansa\Cookie\SameSite;
+use Expansa\Cookie\Enums\SameSite;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;

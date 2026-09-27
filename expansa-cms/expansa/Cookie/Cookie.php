@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Cookie;
 
+use Expansa\Cookie\Enums\SameSite;
 use Expansa\Cookie\Exceptions\InvalidName;
 
 /**
