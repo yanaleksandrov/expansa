@@ -73,14 +73,13 @@ final class Migrations
     }
 
     /**
-     * The five typed sibling tables for {@see \Expansa\Database\FieldEavTyped} — see there for
+     * The five typed sibling tables of {@see \Expansa\Database\Traits\HasFieldEavTyped} — see there for
      * what each one is for. Additive to {@see createFieldsTable()}, never a replacement for it: a
-     * model using {@see \Expansa\Database\Model\HasFieldEavTyped} keeps its regular "{name}_fields"
+     * model using HasFieldEavTyped keeps its regular "{name}_fields"
      * table too, for everything that doesn't need indexed filtering/sorting/search.
      *
-     * int and decimal get their own tables rather than sharing one with two nullable columns -
-     * see FieldEavTyped's own docblock for why (BIGINT's range vs DECIMAL's fractional part can't
-     * both fit one column).
+     * int and decimal get their own tables rather than sharing one with two nullable columns:
+     * BIGINT's range and DECIMAL's fractional part can't both fit one column.
      */
     private function createTypedFieldsTable(string $name, ?string $idColumnName = null): void
     {

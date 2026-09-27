@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
-use Expansa\Database\Exceptions\InvalidArgumentException;
+use InvalidArgumentException;
 use PDO;
 use PDOStatement;
 
-abstract class BuilderAbstract
+/**
+ * SQL generation and execution of the query builder: quoting, where clauses, joins, column and data maps.
+ *
+ * @package Expansa\Database\Query
+ */
+abstract class AbstractBuilder
 {
     /**
      * Quote a string for use in a query.

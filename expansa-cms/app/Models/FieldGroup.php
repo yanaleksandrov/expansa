@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Attribute;
 use Expansa\Database\Model;
-use Expansa\Database\Model\HasSanitizing;
-use Expansa\Database\Model\HasTimestamps;
-use Expansa\Database\Model\HasValidation;
+use Expansa\Database\Traits\HasSanitizing;
+use Expansa\Database\Traits\HasTimestamps;
+use Expansa\Database\Traits\HasValidation;
 use Expansa\Debug\Error;
 use Expansa\Facades\Json;
 
@@ -33,14 +34,14 @@ class FieldGroup extends Model
     use HasTimestamps;
     use HasValidation;
 
-    protected string $table = 'field_groups';
+    public protected(set) string $table = 'field_groups';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'title',
         'slug',
         'position',
@@ -78,9 +79,9 @@ class FieldGroup extends Model
      * the suffix again rather than keeping the slug stable - an accepted limitation here,
      * not something specific to this model.
      */
-    protected function slug(): Model\Attribute
+    protected function slug(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             set: function ($value) {
                 $suffix = 1;
                 while ($this->exists(['slug' => $value . ($suffix > 1 ? "-$suffix" : '')])) {
@@ -96,9 +97,9 @@ class FieldGroup extends Model
      * Location rules built by the `builder` field type - an array of rule groups, or an
      * empty array to mean "no location rules yet" (the group won't appear anywhere until set).
      */
-    protected function location(): Model\Attribute
+    protected function location(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: fn ($value) => $value ? Json::decode($value, true) : [],
             set: fn ($value) => Json::encode(is_array($value) ? $value : []),
         );
@@ -107,9 +108,9 @@ class FieldGroup extends Model
     /**
      * Field definitions, in the same shape {@see \Expansa\Builders\Forms\Field::parse()} expects.
      */
-    protected function fields(): Model\Attribute
+    protected function fields(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: fn ($value) => $value ? Json::decode($value, true) : [],
             set: fn ($value) => Json::encode(is_array($value) ? $value : []),
         );

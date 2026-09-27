@@ -27,7 +27,7 @@ class Builder
          * The connection new tables/indexes/triggers are created on.
          */
         public QueryBuilder $connection,
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Creates $name with the columns/indexes/foreign keys/triggers $callback declares on the

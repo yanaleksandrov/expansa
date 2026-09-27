@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @see documentation/Lifecycle.md
  */
 
+use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
 use Expansa\Facades\Extensions;
@@ -104,6 +105,14 @@ Lifecycle::phase('configure', true, function () {
     if (defined('EX_DB')) {
         Db::configure(...EX_DB);
     }
+
+    // models cache rows in memory for the request, sanitize and validate by the Security rules
+    Expansa\Database\Model::configure(
+        cache: fn (string $key, string $group, ?Closure $callback = null) => Cache::get($key, $group, $callback),
+        forgetCache: fn (string $key, string $group) => Cache::forget($key, $group),
+        sanitizer: fn (array $data, array $rules) => Safe::data($data, $rules)->apply(),
+        validator: fn (array $data, array $rules, bool $break) => new Expansa\Security\Validator($data, $rules, $break),
+    );
 
     // the site URL is read from the options only once there is a database to read it from
     Url::configure(

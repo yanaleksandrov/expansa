@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Attribute;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
-use Expansa\Database\Model\HasTimestamps;
+use Expansa\Database\Traits\HasFieldEav;
+use Expansa\Database\Traits\HasTimestamps;
 
 /**
  * Represents an API key entity with metadata and content information.
@@ -32,21 +34,21 @@ use Expansa\Database\Model\HasTimestamps;
 class Apikey extends Model implements Fieldable
 {
     use HasTimestamps;
-    use Model\HasFieldEav;
+    use HasFieldEav;
 
     /**
      * The database table associated with the model.
      *
      * @var string
      */
-    protected string $table = 'api_keys';
+    public protected(set) string $table = 'api_keys';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'title',
         'content',
         'author_id',
@@ -59,9 +61,9 @@ class Apikey extends Model implements Fieldable
         'password',
     ];
 
-    protected function createdAt(): Model\Attribute
+    protected function createdAt(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             get: function ($value) {
                 if (!is_string($value) || ($timestamp = strtotime($value)) === false) {
                     return '';
@@ -71,7 +73,7 @@ class Apikey extends Model implements Fieldable
         );
     }
 
-    protected function updatedAt(): Model\Attribute
+    protected function updatedAt(): Attribute
     {
         return $this->createdAt();
     }

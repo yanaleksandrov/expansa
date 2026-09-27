@@ -146,7 +146,7 @@ final class SystemService
             // a retry would otherwise fail on the owner's login and email being taken
             if (isset($user->id)) {
                 try {
-                    Db::delete($user->getTable(), ['id' => $user->id]);
+                    Db::delete($user->table, ['id' => $user->id]);
                 } catch (\Throwable) {
                 }
             }

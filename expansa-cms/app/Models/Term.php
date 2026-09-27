@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Expansa\Database\Attribute;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
+use Expansa\Database\Traits\HasFieldEav;
+use Expansa\Database\Traits\HasSanitizing;
+use Expansa\Database\Traits\HasValidation;
 use Expansa\Debug\Error;
 
 /**
@@ -23,23 +27,23 @@ use Expansa\Debug\Error;
  */
 class Term extends Model implements Fieldable
 {
-    use Model\HasSanitizing;
-    use Model\HasValidation;
-    use Model\HasFieldEav;
+    use HasSanitizing;
+    use HasValidation;
+    use HasFieldEav;
 
     /**
      * The database table associated with the model.
      *
      * @var string
      */
-    protected string $table = 'terms';
+    public protected(set) string $table = 'terms';
 
     /**
      * Fields allowed for mass assignment.
      *
      * @var array<string>
      */
-    protected array $fillable = [
+    public protected(set) array $fillable = [
         'name',
         'slug',
         'term_group',
@@ -85,9 +89,9 @@ class Term extends Model implements Fieldable
      * Derives a unique, URL-safe slug from whatever value is set,
      * appending a numeric suffix if it would otherwise collide.
      */
-    protected function slug(): Model\Attribute
+    protected function slug(): Attribute
     {
-        return Model\Attribute::make(
+        return new Attribute(
             set: fn($value) => $this->generateUniqueSlug($value)
         );
     }
