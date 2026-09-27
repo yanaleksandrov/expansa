@@ -7,7 +7,6 @@ namespace Expansa\Facades;
 use Closure;
 use Expansa\Patterns\Facade;
 use Expansa\Session\Contracts\Flash;
-use Expansa\Session\Contracts\Lifecycle;
 use Expansa\Session\Contracts\Session as SessionContract;
 use Expansa\Session\Manager;
 
@@ -16,7 +15,7 @@ use Expansa\Session\Manager;
  *
  * @method static void    configure(string $driver = 'native', array $options = [])
  * @method static Manager extend(string $driver, Closure $factory)
- * @method static SessionContract&Lifecycle driver()
+ * @method static SessionContract driver() The driver, it also implements Lifecycle.
  * @method static Flash   getFlash()
  * @method static bool    isStarted()
  * @method static void    start()
