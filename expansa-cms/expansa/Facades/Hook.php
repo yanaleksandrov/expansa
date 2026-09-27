@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
-use Expansa\Hooks\Priority;
+use Expansa\Hooks\Attributes\Priority;
 use Expansa\Patterns\Facade;
 
 /**

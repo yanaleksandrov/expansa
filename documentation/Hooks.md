@@ -123,26 +123,27 @@ TODO: вероятно этот механизм следует исправит
 ```php
 <?php
 use Expansa\Facades\Hook;
-use Expansa\Hooks\Priority;
+use Expansa\Hooks\Attributes\Priority;
 
 Hook::add('testHook', 'commerceProductUpdate', Priority::BASE);
 Hook::add('testHook', 'commerceProductCreate', Priority::HIGH + 1);
 ```
 
 Если слушатель подключается через каталог `Listeners`, номер приоритета указывается через PHP 
-атрибут `Priority`, где 400 - число приоритета. Он совпадает по имени с классом констант
-`Expansa\Hooks\Priority`: если нужны оба, один подключается под псевдонимом.
+атрибут `Priority`, где 400 - число приоритета. Константы `HIGH` (100), `BASE` (200, по умолчанию)
+и `LOW` (300) объявлены в нём же, поэтому для `add()` и атрибута нужен один импорт:
+`#[Priority(Priority::HIGH)]`.
 
 ```php
 use Expansa\Hooks\Attributes\Priority;
 
 class Test
 {
-	#[Priority(400)]
-	public function testHook($var) {
-		$var = 'foo';
-		return $var;
-	}
+    #[Priority(400)]
+    public function testHook($var)
+    {
+        return 'foo';
+    }
 }
 ```
 

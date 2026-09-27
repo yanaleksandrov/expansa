@@ -8,7 +8,7 @@ use Closure;
 use InvalidArgumentException;
 use LogicException;
 use Expansa\Hooks\Attributes\Alias;
-use Expansa\Hooks\Attributes\Priority as PriorityAttribute;
+use Expansa\Hooks\Attributes\Priority;
 use Expansa\Hooks\Exceptions\InvalidListener;
 use Expansa\Support\Traits\FindsFiles;
 use ReflectionClass;
@@ -499,7 +499,7 @@ final class Manager
      */
     private function getPriority(array $method): ?int
     {
-        $attributes = new ReflectionMethod($method[0], $method[1])->getAttributes(PriorityAttribute::class);
+        $attributes = new ReflectionMethod($method[0], $method[1])->getAttributes(Priority::class);
 
         return $attributes === [] ? null : $attributes[0]->newInstance()->priority;
     }
