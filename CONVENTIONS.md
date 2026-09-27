@@ -97,9 +97,13 @@ Log/
 - Внутри пакета нет фасадов других пакетов (`Hook::`, `Db::`, `Safe::`, `Lifecycle::`) — фасады для
   `bootstrap.php`, `App\`, шаблонов, плагинов.
 - Точка расширения — колбэк в `configure()` или `extend()`; с хуком её связывает `bootstrap.php`.
+- Значение, известное позже в запросе, приходит ленивым колбэком: `Is::configure(dashboard: fn () => ...)`.
+- Колбэк, которому нужен чужой пакет, хранится в `Internal/` (`Database\Internal\Cache`), а не в чужом контракте.
 - Драйвер через чужой пакет допустим (`Cache\Providers\Database`): зависимость только у него, грузится
   только при выборе в конфигурации.
-- Консольная команда — в своём пакете (`Scheduler/Commands/Run.php`), регистрируется в `bootstrap.php`.
+- Консольная команда — в своём пакете (`Scheduler/Commands/Run.php`), регистрируется в `bootstrap.php`;
+  чужое поведение получает колбэком в конструкторе и регистрируется экземпляром. Имя команды — зарезервированное
+  слово (`list`) → класс `Index`.
 - Исключение — `Builders` (UI-слой): зависит от других пакетов, но через конструктор, не фасады.
 - Циклов нет, даже через драйвер.
 - Проверка: `tests/<Package>.php` проходит с одним пакетом и базовым слоем; в `use` нет других `Expansa\*`,
@@ -165,6 +169,8 @@ Log/
       public readonly Response $response,
   ) {}
   ```
+- Свойство, которое затеняет магический атрибут модели, получает суффикс: `$deletedAtColumn`.
+- У статических свойств нет асимметричной видимости (PHP 8.4): публичное чтение — через геттер.
 - `mixed` — только если значение действительно любое (`Cache::get()`); иначе точный тип (`add(): bool`).
 
 ### PHP 8.4
@@ -262,38 +268,18 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 
 | Где                                              | Проблема                   | Должно быть                              |
 |--------------------------------------------------|----------------------------|------------------------------------------|
-| `Assets/Abstracts/Provider.php`                  | `Abstracts/`               | `Assets/Providers/AbstractProvider`      |
-| `Log/Handlers/*Handler`                          | суффикс роли               | `File`, `RotatingFile`, `ErrorLog`, `Telegram` |
-| `Log/Formatters/*Formatter`                      | суффикс роли               | `Line`, `Telegram`                       |
 | `Security/Csrf/Providers/Native*Provider`        | суффикс роли               | `Cookie`, `HttpOnlyCookie`, `Session`    |
 | `View/Engines/*Engine`                           | суффикс роли               | `Blade`, `File`, `Js`, `Php`             |
 | `View/Engines/Engine.php`                        | база названа как роль      | `AbstractEngine` или `Contracts\Engine`  |
 | `View/Compilers/BladeCompiler`                   | суффикс роли               | `Blade`                                  |
 | `Session/Middleware/SessionStartMiddleware`      | суффикс, повтор пакета     | `StartSession`                           |
-| `Cache/Concerns/`                                | `Concerns/`                | `Cache/Traits/`                          |
-| `Builders/Table/Abstracts/TableBase`             | `Abstracts/`, `Base`       | `AbstractTable`                          |
-| `Database/Query/BuilderAbstract`                 | суффикс `Abstract`         | `AbstractBuilder`                        |
-| `Database/Model/Has*`                            | трейты вне `Traits/`       | `Database/Traits/Has*`                   |
-| `Filesystem/Contracts/*Interface`                | суффикс не из PSR          | `File`, `Directory`; `CommonInterface` → по роли, например `Entry` |
 | `Session/Contracts/{Flash,Session,SessionManager}Interface` | суффикс не из PSR | `Flash`, `Session`, `Manager` (PSR-7/15 имена остаются) |
-| `Cache/Contracts/Provider`                       | `add()`, `set()` и др. возвращают `mixed` | точные типы: `bool`         |
-| `Extensions/Traits/ExtensionTraits`, `ExtensionHelpers` | имя без способности | по способности                           |
-| `Models/Options`                                 | множественное              | `Option`                                 |
-| хук `expansa_view_part`                          | snake_case, префикс        | `viewPart`                               |
-| хуки `expansaRedirectBy/Status/Location`, `expansaConfigureMailer` | префикс `expansa` | `redirectBy`, ...          |
-| `Facades/Json.php`                               | табы                       | 4 пробела                                |
+| `Facades/Db.php`, `Facades/Terminal.php`         | логика в фасаде            | цель — `Database\Manager`, `Console\Manager` |
 
 ### Зависимости между пакетами
 
 | Пакет         | Зависит от                      | Как развязать                                        |
 |---------------|---------------------------------|------------------------------------------------------|
-| `Support`     | `Lifecycle` (`Is::dashboard()`) | значение через `Is::configure()`                     |
-| `Scheduler`   | `Mail` (`Job` создаёт `Mailer`) | колбэк отправки в `configure()`                      |
-| `Console`     | `Assets`, `Scheduler`, `Hooks`  | `AssetClean`, `ScheduleRun`, `HooksList` — в свои пакеты |
-| `Database`    | `Cache`, `Security` (`Safe`)    | кэш и очистка снаружи                                |
-| `Filesystem`  | `Debug`, `Security` (`Validator`) | ошибки — исключениями, проверка снаружи            |
-| `Mail`        | `Hooks`                         | настройка мейлера — колбэком в `configure()`         |
-| `Translation` | `Hooks`, `Security` (`Safe`)    | колбэки в `configure()`                              |
-| `Lifecycle`   | `Hooks`, `Routing`              | колбэки фаз и маршрутизации из `bootstrap.php`       |
-| `Builders`    | `Assets`, `View`, `Security`    | допустимо (UI-слой), но через конструктор            |
-| `Cache`       | `Database` (`Providers\Database`) | допустимо: только драйвер                          |
+| `Builders`    | `Assets`, `View`, `Security`    | допустимо (UI-слой): колбэки `Form::configure()`, статические помощники (`Sanitizer`) напрямую |
+| `Cache`       | `Database` (`Providers\Database`) | допустимо: только драйвер, `Query\Builder` в конструкторе |
+| `*\Commands`  | `Console`                       | допустимо: команда пакета наследует `Console\Command` |
