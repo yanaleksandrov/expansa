@@ -26,7 +26,7 @@ return new class extends Plugin
         }
 
         // TODO: переделать подключение файлов плагинов
-        Hook::add('expansa_view_part', function ($filepath) {
+        Hook::add('viewPart', function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/file-manager.php') {
                 $filepath = __DIR__ . '/views/file-manager.php';
             }
