@@ -4,240 +4,62 @@ declare(strict_types=1);
 
 namespace Expansa\Console;
 
-use Expansa\Console\Contracts\Commands;
-use Expansa\Console\Output\Writer;
+use Expansa\Console\Contracts\Command as CommandContract;
+use Expansa\Console\Traits\WritesOutput;
 
 /**
- * Class Command.
+ * Base of a console command: the name, usage and options shown by "list" and "help", handle() runs it.
+ * Terminal::addCommand() sets the terminal, the command reads its options and arguments from it.
  *
- * @package cli
+ * @package Expansa\Console
  */
-abstract class Command implements Commands
+abstract class Command implements CommandContract
 {
-    use Writer;
+    use WritesOutput;
 
     /**
-     * Command name.
+     * Name typed after artisan: `schedule:run`.
      */
-    protected string $name;
+    public string $name;
 
     /**
-     * Command group.
+     * Group the "list" command shows the command in, `null` for the default one.
      */
-    protected string $group;
+    public ?string $group = null;
 
     /**
-     * Command description.
+     * Usage shown by the "help" command.
      */
-    protected string $description;
+    public string $signature = 'command [options] -- [arguments]';
 
     /**
-     * Command usage.
-     */
-    protected string $signature = 'command [options] -- [arguments]';
-
-    /**
-     * Command options.
+     * Options shown by the "help" command: `['-g' => 'Shows greeting.']`.
      *
-     * @var array<string,string>
+     * @var array<string, string>
      */
-    protected array $options = [];
+    public array $options = [];
 
     /**
-     * Tells if command is active.
+     * Inactive commands are hidden from the "list" command.
      */
-    protected bool $active = true;
-
-    public function __construct(
-
-        /**
-         * Terminal running the command; Terminal::addCommand() sets it on registration.
-         */
-        protected ?Terminal $console = null,
-    ) {} // phpcs:ignore
+    public bool $active = true;
 
     /**
-     * Get console instance.
-     *
-     * @return Terminal
+     * Terminal running the command, set on registration.
      */
-    public function getConsole(): Terminal
-    {
-        return $this->console;
-    }
+    public Terminal $console;
 
     /**
-     * Set console instance.
-     *
-     * @param Terminal $console
-     *
-     * @return static
-     */
-    public function setConsole(Terminal $console): static
-    {
-        $this->console = $console;
-        return $this;
-    }
-
-    /**
-     * Get command name.
+     * Get the translated description shown by "list" and "help".
      *
      * @return string
      */
-    public function getName(): string
-    {
-        if (isset($this->name)) {
-            return $this->name;
-        }
-        $name = static::class;
-        $pos  = strrpos($name, '\\');
-        if ($pos !== false) {
-            $name = substr($name, $pos + 1);
-        }
-        if (str_ends_with($name, 'Command')) {
-            $name = substr($name, 0, -7);
-        }
-
-        return $this->name = strtolower($name);
-    }
+    abstract public function getDescription(): string;
 
     /**
-     * Set command name.
+     * Run the command.
      *
-     * @param string $name
-     *
-     * @return static
+     * @return void
      */
-    public function setName(string $name): static
-    {
-        $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * Get command group.
-     *
-     * @return string|null
-     */
-    public function getGroup(): ?string
-    {
-        return $this->group ?? null;
-    }
-
-    /**
-     * Set command group.
-     *
-     * @param string $group
-     *
-     * @return static
-     */
-    public function setGroup(string $group): static
-    {
-        $this->group = $group;
-        return $this;
-    }
-
-    /**
-     * Get command description.
-     *
-     * @return string
-     */
-    public function getDescription(): string
-    {
-        if (isset($this->description)) {
-            return $this->description;
-        }
-        return $this->description = t('This command does not provide a description.');
-    }
-
-    /**
-     * Set command description.
-     *
-     * @param string $description
-     *
-     * @return static
-     */
-    public function setDescription(string $description): static
-    {
-        $this->description = $description;
-        return $this;
-    }
-
-    /**
-     * Get command usage.
-     *
-     * @return string
-     */
-    public function getSignature(): string
-    {
-        return $this->signature;
-    }
-
-    /**
-     * Set command usage.
-     *
-     * @param string $signature
-     *
-     * @return static
-     */
-    public function setSignature(string $signature): static
-    {
-        $this->signature = $signature;
-        return $this;
-    }
-
-    /**
-     * Get command options.
-     *
-     * @return array<string,string>
-     */
-    public function getOptions(): array
-    {
-        return $this->options;
-    }
-
-    /**
-     * Set command options.
-     *
-     * @param array<string,string> $options
-     *
-     * @return static
-     */
-    public function setOptions(array $options): static
-    {
-        $this->options = $options;
-        return $this;
-    }
-
-    /**
-     * Tells if the command is active.
-     *
-     * @return bool
-     */
-    public function isActive(): bool
-    {
-        return $this->active;
-    }
-
-    /**
-     * Activate the command.
-     *
-     * @return static
-     */
-    public function activate(): static
-    {
-        $this->active = true;
-        return $this;
-    }
-
-    /**
-     * Deactivate the command.
-     *
-     * @return static
-     */
-    public function deactivate(): static
-    {
-        $this->active = false;
-        return $this;
-    }
+    abstract public function handle(): void;
 }

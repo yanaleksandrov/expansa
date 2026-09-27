@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use Expansa\Facades\Hook;
-use Expansa\Hooks\Exceptions\HooksException;
+use Expansa\Hooks\Exceptions\InvalidListener;
 
 // run: php tests/Hooks.php
 require_once __DIR__ . '/bootstrap.php';
@@ -35,7 +35,7 @@ check('a directory scan picks up the other listener files', listeners('testFarew
 try {
     Hook::configure(listeners: ['TestListeners\Missing']);
     check('a missing listener class is reported', false);
-} catch (HooksException $e) {
+} catch (InvalidListener $e) {
     check('a missing listener class is reported', str_contains($e->getMessage(), 'does not exist'));
 }
 

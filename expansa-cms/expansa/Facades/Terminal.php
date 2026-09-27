@@ -11,17 +11,14 @@ use Expansa\Patterns\Facade;
 /**
  * Console terminal facade: commands registry and CLI input handling.
  *
- * @method static string           version()
- * @method static array            options()
  * @method static bool|string|null option(string $option)
- * @method static array            arguments()
  * @method static string|null      argument(int $position)
  * @method static Console          addCommand(Command|string $command)
  * @method static Console          addCommands(array $commands)
  * @method static Command|null     command(string $name)
  * @method static array            commands()
- * @method static Console          removeCommand(string $name)
- * @method static Console          removeCommands(array $names)
+ * @method static Console          forgetCommand(string $name)
+ * @method static Console          forgetCommands(array $names)
  * @method static bool             hasCommand(string $name)
  * @method static void             run(?string $command = null)
  */

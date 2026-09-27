@@ -19,6 +19,7 @@ use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Lifecycle;
 use Expansa\Facades\Log;
+use Expansa\Facades\Mail;
 use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Terminal;
@@ -107,7 +108,7 @@ Lifecycle::phase('boot', true, function () {
 /**
  * 2. configure · always, also before install, so no database queries here.
  *
- * Passes the database, site URL, views, extensions root, console version, redirect filters and table filter
+ * Passes the database, site URL, views, extensions root, console version, mail and scheduler, redirect filters and table filter
  * to the framework, then the translations priority, the hook listener classes and the form field types.
  */
 Lifecycle::phase('configure', true, function () {
@@ -153,6 +154,17 @@ Lifecycle::phase('configure', true, function () {
 
     // the version shown by the "list" console command
     Terminal::configure(version: EX_VERSION);
+
+    // every email passes its PHPMailer through the "mailer" filter: SMTP settings, a test double
+    Mail::configure(
+        setup: fn (PHPMailer\PHPMailer\PHPMailer $mailer) => Hook::call('mailer', $mailer),
+    );
+
+    // scheduled jobs keep their locks in the storage and email their output through Mail
+    Expansa\Scheduler\Scheduler::configure(
+        tempDir: EX_STORAGE,
+        mailer: fn (string $to, string $subject, string $body, array $attachments) => Mail::send($to, $subject, $body, $attachments),
+    );
 
     // redirect location, status and X-Redirect-By header are filtered by hooks
     Expansa\Http\Redirect::configure(
@@ -427,12 +439,16 @@ Lifecycle::phase('booted', $isInstalled, function () {
 /**
  * 1. cli · console, run through artisan.
  *
- * The terminal runs the requested command and prints its output.
+ * Adds the commands of the app and the packages, then the terminal runs the requested one.
  * No routing: run() skips it in the console.
  */
 Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(App\Console\Serve::class);
     Terminal::addCommand(Expansa\Assets\Commands\Clean::class);
+    Terminal::addCommand(Expansa\Hooks\Commands\Index::class);
+    Terminal::addCommand(new Expansa\Scheduler\Commands\Run(
+        schedule: fn (Expansa\Scheduler\Scheduler $scheduler) => Hook::call('schedule', $scheduler),
+    ));
     Terminal::run();
 });
 

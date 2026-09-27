@@ -15,16 +15,19 @@ use Expansa\Console\Command;
  */
 final class Clean extends Command
 {
-    protected string $name = 'asset:clean';
+    public string $name = 'asset:clean';
 
-    protected string $description = 'Remove cached/minified/combined asset files (cache/assets/*) older than a given age, and/or cap their total size.';
+    public string $signature = 'asset:clean [--max-age=<seconds>] [--max-size=<bytes>]';
 
-    protected string $signature = 'asset:clean [--max-age=<seconds>] [--max-size=<bytes>]';
+    public function getDescription(): string
+    {
+        return t('Delete stale cached asset files.');
+    }
 
     public function handle(): void
     {
-        $maxAge  = (int) ($this->getConsole()->option('max-age') ?: 604800);
-        $maxSize = $this->getConsole()->option('max-size');
+        $maxAge  = (int) ($this->console->option('max-age') ?: 604800);
+        $maxSize = $this->console->option('max-size');
         $maxSize = $maxSize !== null ? (int) $maxSize : null;
 
         $this->info(sprintf('Removed %d stale cached asset file(s).', Manager::clean($maxAge, $maxSize)));
