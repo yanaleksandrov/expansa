@@ -7,11 +7,11 @@ namespace Expansa\Security\Csrf\Providers;
 use Expansa\Security\Csrf\Contracts\Provider;
 
 /**
- * Keeps tokens in cookies of the whole site, readable by JavaScript for the double-submit pattern.
+ * Keeps tokens in HttpOnly cookies of the whole site, hidden from JavaScript.
  *
  * @package Expansa\Security
  */
-final class Cookie implements Provider
+final class HttpOnlyCookie implements Provider
 {
     public function __construct(
 
@@ -30,6 +30,6 @@ final class Cookie implements Provider
 
     public function set(string $key, string $token): void
     {
-        setcookie($key, $token, time() + $this->lifetime, '/', '');
+        setcookie($key, $token, time() + $this->lifetime, '/', '', false, true);
     }
 }

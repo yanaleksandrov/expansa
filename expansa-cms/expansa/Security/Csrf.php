@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Security;
 
 use Expansa\Security\Csrf\Contracts\Provider;
-use Expansa\Security\Csrf\Providers\Cookie;
+use Expansa\Security\Csrf\Providers\HttpOnlyCookie;
 use Expansa\Security\Exceptions\InvalidCsrfToken;
 use Random\RandomException;
 
@@ -34,7 +34,7 @@ final class Csrf
         /**
          * Token storage; by default an HttpOnly cookie that lives one hour.
          */
-        private Provider $provider = new Cookie(httpOnly: true),
+        private Provider $provider = new HttpOnlyCookie(),
 
         /**
          * Prefix of the storage keys, the cookie name is the prefix plus the token key.
