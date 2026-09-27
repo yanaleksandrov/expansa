@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Console;
 
+use Expansa\Console\Contracts\Command as CommandContract;
 use Expansa\Console\Traits\WritesOutput;
 
 /**
@@ -12,7 +13,7 @@ use Expansa\Console\Traits\WritesOutput;
  *
  * @package Expansa\Console
  */
-abstract class Command
+abstract class Command implements CommandContract
 {
     use WritesOutput;
 

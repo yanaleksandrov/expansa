@@ -2,16 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Console\Internal;
+namespace Expansa\Console\Enums;
+
+use Expansa\Console\Traits\FindsByName;
 
 /**
  * Text colors of the `[green]#text#` markup of the console output.
  *
- * @internal
  * @package Expansa\Console
  */
 enum Color: string
 {
+    use FindsByName;
+
     case Black   = "\033[0;30m";
     case Red     = "\033[0;31m";
     case Green   = "\033[0;32m";

@@ -253,7 +253,7 @@ final class Terminal
      * @param string $command
      * @return array<int, string>
      */
-    private static function split(string $command): array
+    public static function split(string $command): array
     {
         $argv     = [];
         $arg      = '';

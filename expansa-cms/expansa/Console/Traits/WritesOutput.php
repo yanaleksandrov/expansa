@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Console\Traits;
 
 use Stringable;
-use Expansa\Console\Internal\Color;
-use Expansa\Console\Internal\Style;
+use Expansa\Console\Enums\Color;
+use Expansa\Console\Enums\Style;
 
 /**
  * Writing to STDOUT and STDERR with the `[color,style]#text#` markup: `[green,bold]#Done#`.
@@ -42,12 +42,10 @@ trait WritesOutput
             $style = '';
 
             foreach (explode(',', $matches[1]) as $attribute) {
-                $case = str_replace('_', '', ucwords(strtolower(trim($attribute)), '_'));
-
-                if (defined(Color::class . '::' . $case)) {
-                    $color = constant(Color::class . '::' . $case)->value;
-                } elseif (defined(Style::class . '::' . $case)) {
-                    $style .= constant(Style::class . '::' . $case)->value;
+                if ($case = Color::fromName($attribute)) {
+                    $color = $case->value;
+                } elseif ($case = Style::fromName($attribute)) {
+                    $style .= $case->value;
                 }
             }
 
@@ -107,6 +105,16 @@ trait WritesOutput
         if ($exitCode !== null) {
             exit($exitCode);
         }
+    }
+
+    /**
+     * Erase the terminal screen.
+     *
+     * @return void
+     */
+    public function eraseScreen(): void
+    {
+        fwrite(STDOUT, "\e[H\e[2J");
     }
 
     /**

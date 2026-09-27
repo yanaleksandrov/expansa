@@ -2,16 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Console\Internal;
+namespace Expansa\Console\Enums;
+
+use Expansa\Console\Traits\FindsByName;
 
 /**
  * Text styles of the `[bold]#text#` markup of the console output, `slow_blink` for SlowBlink.
  *
- * @internal
  * @package Expansa\Console
  */
 enum Style: string
 {
+    use FindsByName;
+
     case Bold            = "\033[1m";
     case Faint           = "\033[2m";
     case Italic          = "\033[3m";
