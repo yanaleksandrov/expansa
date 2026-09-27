@@ -193,7 +193,7 @@ Lifecycle::phase('configure', true, function () {
         translate: fn (string $message, string ...$args) => t($message, ...$args)
     );
 
-    // translations lookup priority
+    // translations lookup priority; the languages with their plural rules, extended by the "languages" hook
     I18n::configure(
         routes: [
             EX_CORE      => EX_DASHBOARD,
@@ -203,7 +203,7 @@ Lifecycle::phase('configure', true, function () {
         ],
         pattern: 'i18n/%s',
         overrides: EX_I18N,
-        languages: fn (array $languages) => Hook::call('languages', $languages),
+        languages: fn () => Hook::call('languages', Registry::get('languages')),
     );
 
     // a new listener class has to be added here

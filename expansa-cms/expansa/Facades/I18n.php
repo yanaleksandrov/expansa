@@ -8,22 +8,23 @@ use Closure;
 use Expansa\Patterns\Facade;
 
 /**
- * Translations of Expansa\Translation\Translator: placeholders, Markdown, locale and languages.
+ * Translations of Expansa\Translation\Manager: placeholders, plural forms, Markdown, locale and languages.
  *
  * @method static void   configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null)
  * @method static string translate(string $string, mixed ...$args)
+ * @method static string translatePlural(string $forms, int $count, mixed ...$args)
  * @method static string translateAttribute(string $string, mixed ...$args)
+ * @method static string translateAttributePlural(string $forms, int $count, mixed ...$args)
  * @method static string translateIf(bool $condition, string $ifString, string $elseString = '')
  * @method static string translateAttributeIf(bool $condition, string $ifString, string $elseString = '')
  * @method static string locale(string $default = 'en-US')
  * @method static array  language(string $value, string $getBy = 'locale')
  * @method static array  languageOptions()
- * @method static array  languages()
  */
 class I18n extends Facade
 {
     protected static function getStaticClassAccessor(): string
     {
-        return \Expansa\Translation\Translator::class;
+        return \Expansa\Translation\Manager::class;
     }
 }

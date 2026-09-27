@@ -27,17 +27,30 @@ final class Markdown
             return trim($text);
         }
 
+        // each expression runs only when its marker is in the text
         $text = "\n" . $text . "\n";
-        $text = self::headers($text);
-        $text = preg_replace('#^(?:>|&gt;) \s*(.*)$#mx', '<blockquote>$1</blockquote>', $text);
-        $text = preg_replace('/\*\*(.*?)\*\*|__(.*?)__/s', '<strong>${1}${2}</strong>', $text);
-        $text = preg_replace('/\*(.*?)\*|_(.*?)_/s', '<em>${1}${2}</em>', $text);
-        $text = self::images($text);
-        $text = preg_replace(
-            '/(?<!\!)\[([^\[]+)\]\((https?|mailto|tel|file|ws|ftp|sftp|git|svn):\/\/([^\)]+)\)/',
-            '<a href="$2://$3">$1</a>',
-            $text
-        );
+
+        if (str_contains($text, '#')) {
+            $text = self::headers($text);
+        }
+
+        if (str_contains($text, '&gt;') || str_contains($text, '>')) {
+            $text = preg_replace('#^(?:>|&gt;) \s*(.*)$#mx', '<blockquote>$1</blockquote>', $text);
+        }
+
+        if (strpbrk($text, '*_') !== false) {
+            $text = preg_replace('/\*\*(.*?)\*\*|__(.*?)__/s', '<strong>${1}${2}</strong>', $text);
+            $text = preg_replace('/\*(.*?)\*|_(.*?)_/s', '<em>${1}${2}</em>', $text);
+        }
+
+        if (str_contains($text, '](')) {
+            $text = self::images($text);
+            $text = preg_replace(
+                '/(?<!\!)\[([^\[]+)\]\((https?|mailto|tel|file|ws|ftp|sftp|git|svn):\/\/([^\)]+)\)/',
+                '<a href="$2://$3">$1</a>',
+                $text
+            );
+        }
 
         return trim($text);
     }
