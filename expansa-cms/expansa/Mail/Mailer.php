@@ -4,39 +4,46 @@ declare(strict_types=1);
 
 namespace Expansa\Mail;
 
-use Expansa\Facades\Hook;
+use Closure;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 
-require_once __DIR__ . '/PHPMailer/Exception.php';
-require_once __DIR__ . '/PHPMailer/PHPMailer.php';
-require_once __DIR__ . '/PHPMailer/SMTP.php';
-
 /**
- * Class Mailer
+ * One email built with a fluent interface over PHPMailer: `Mail::to($email)->subject(...)->message(...)->send()`.
+ * The setup callback from Mail\Manager::configure() prepares or replaces the PHPMailer right before sending.
  *
- * A wrapper around PHPMailer providing a fluent interface
- * for constructing and sending emails with support for
- * attachments, custom headers, and hooks for configuration.
+ * @package Expansa\Mail
  */
-class Mailer
+final class Mailer
 {
+    /**
+     * Error of the last send(), empty after a successful one.
+     */
+    public string $error {
+        get => $this->mailer->ErrorInfo;
+    }
+
     public function __construct(
 
         /**
          * Underlying PHPMailer instance.
          */
         private PHPMailer $mailer = new PHPMailer(),
+
+        /**
+         * Gets the PHPMailer before sending and returns the one to send with: SMTP settings, a test double.
+         */
+        private readonly ?Closure $setup = null,
     ) {} // phpcs:ignore
 
     /**
-     * Add a recipient email address.
+     * Add a recipient.
      *
-     * @param string $email Recipient email address
-     * @return $this Fluent interface
-     * @throws Exception If adding address fails
+     * @param string $email
+     * @return static
+     * @throws Exception
      */
-    public function to(string $email): self
+    public function to(string $email): static
     {
         $this->mailer->addAddress($email);
 
@@ -44,13 +51,13 @@ class Mailer
     }
 
     /**
-     * Set the sender's email address.
+     * Set the sender.
      *
-     * @param string $email Sender email address
-     * @return $this Fluent interface
-     * @throws Exception If setting from address fails
+     * @param string $email
+     * @return static
+     * @throws Exception
      */
-    public function from(string $email): self
+    public function from(string $email): static
     {
         $this->mailer->setFrom($email);
 
@@ -58,84 +65,75 @@ class Mailer
     }
 
     /**
-     * Set the reply-to email address.
+     * Add a reply-to address.
      *
-     * @param string $email Reply-to email address
-     * @return $this Fluent interface
+     * @param string $email
+     * @return static
+     * @throws Exception
      */
-    public function replyTo(string $email): self
+    public function replyTo(string $email): static
     {
+        $this->mailer->addReplyTo($email);
 
         return $this;
     }
 
-    /**
-     * Set the subject of the email.
-     *
-     * @param string $subject Email subject
-     * @return $this Fluent interface
-     */
-    public function subject(string $subject): self
+    public function subject(string $subject): static
     {
         $this->mailer->Subject = $subject;
+
         return $this;
     }
 
-    /**
-     * Set the body message of the email.
-     *
-     * @param string $message Email body content
-     * @return $this Fluent interface
-     */
-    public function message(string $message): self
+    public function message(string $message): static
     {
         $this->mailer->Body = $message;
+
         return $this;
     }
 
     /**
-     * Set custom headers for the email.
+     * Add custom headers, one `Name: value` per line.
      *
-     * @param string $headers Custom headers as a string
-     * @return $this Fluent interface
+     * @param string $headers
+     * @return static
+     * @throws Exception
      */
-    public function headers(string $headers): self
+    public function headers(string $headers): static
     {
+        foreach (preg_split('/\R/', trim($headers), -1, PREG_SPLIT_NO_EMPTY) as $header) {
+            $this->mailer->addCustomHeader($header);
+        }
 
         return $this;
     }
 
     /**
-     * Attach files to the email.
+     * Attach files, missing ones are skipped.
      *
-     * @param array $attachments List of file paths to attach
-     * @return $this Fluent interface
-     * @throws Exception If adding attachments fails
+     * @param string[] $attachments Paths.
+     * @return static
+     * @throws Exception
      */
-    public function attach(array $attachments): self
+    public function attach(array $attachments): static
     {
         foreach ($attachments as $attachment) {
-            if (!is_file($attachment)) {
-                continue;
+            if (is_file($attachment)) {
+                $this->mailer->addAttachment($attachment);
             }
-            $this->mailer->addAttachment($attachment);
         }
+
         return $this;
     }
 
     /**
-     * Send the email.
+     * Send the email; peer verification is off for self-signed certificates unless the setup callback changes it.
      *
-     * Applies any mailer configuration hooks, disables SSL peer verification
-     * for self-signed certificates, and attempts to send the email.
-     *
-     * @return PHPMailer|true Returns true on success, or PHPMailer instance on failure
-     * @throws Exception If sending the email fails internally
+     * @return bool False with the reason in $error.
+     * @throws Exception
      */
-    public function send(): PHPMailer|true
+    public function send(): bool
     {
-        $this->mailer = Hook::call('expansaConfigureMailer', $this->mailer);
-
         $this->mailer->SMTPOptions = [
             'ssl' => [
                 'verify_peer'       => false,
@@ -144,9 +142,10 @@ class Mailer
             ],
         ];
 
-        if (!$this->mailer->send()) {
-            return $this->mailer;
+        if ($this->setup !== null) {
+            $this->mailer = ($this->setup)($this->mailer);
         }
-        return true;
+
+        return $this->mailer->send();
     }
 }

@@ -97,7 +97,7 @@ Lifecycle::phase('boot', true, function () {
 /**
  * 2. configure · always, also before install, so no database queries here.
  *
- * Passes the database, site URL, views, extensions root, console version, scheduler, redirect filters and table filter
+ * Passes the database, site URL, views, extensions root, console version, mail and scheduler, redirect filters and table filter
  * to the framework, then the translations priority, the hook listener classes and the form field types.
  */
 Lifecycle::phase('configure', true, function () {
@@ -135,6 +135,11 @@ Lifecycle::phase('configure', true, function () {
 
     // the version shown by the "list" console command
     Terminal::configure(version: EX_VERSION);
+
+    // every email passes its PHPMailer through the "mailer" filter: SMTP settings, a test double
+    Mail::configure(
+        setup: fn (PHPMailer\PHPMailer\PHPMailer $mailer) => Hook::call('mailer', $mailer),
+    );
 
     // scheduled jobs keep their locks in the storage and email their output through Mail
     Expansa\Scheduler\Scheduler::configure(
