@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Filesystem;
 
+use Expansa\Filesystem\Internal\AbstractEntry;
 use FilesystemIterator;
 use SplFileInfo;
 use ZipArchive;

@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Filesystem;
+namespace Expansa\Filesystem\Internal;
 
 use Expansa\Filesystem\Contracts\Entry;
 use Expansa\Filesystem\Exceptions\NotFound;
 use Expansa\Filesystem\Exceptions\OperationFailed;
-use Expansa\Filesystem\Internal\Name;
 use Expansa\Support\Url;
 
 /**
  * Base of a file and a directory: path parts and metadata read from the disk on access,
  * so they stay current after writes and a new object costs nothing until it is read.
  *
- * @package Expansa\Filesystem
+ * @internal
+ * @package Expansa\Filesystem\Internal
  */
 abstract class AbstractEntry implements Entry
 {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Extensions;
 
+use Expansa\Extensions\Internal\AbstractExtension;
 use Expansa\Extensions\Contracts\Extension;
 
 /**

@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Database\Query;
+namespace Expansa\Database\Internal;
 
+use Expansa\Database\Query\Raw;
 use InvalidArgumentException;
 use PDO;
 use PDOStatement;
@@ -11,7 +12,8 @@ use PDOStatement;
 /**
  * SQL generation and execution of the query builder: quoting, where clauses, joins, column and data maps.
  *
- * @package Expansa\Database\Query
+ * @internal
+ * @package Expansa\Database\Internal
  */
 abstract class AbstractBuilder
 {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Database\Query;
 
+use Expansa\Database\Internal\AbstractBuilder;
 use Expansa\Database\Exceptions\InvalidConnection;
 use InvalidArgumentException;
 use PDO;

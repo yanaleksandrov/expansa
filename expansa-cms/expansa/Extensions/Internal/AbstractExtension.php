@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Extensions;
+namespace Expansa\Extensions\Internal;
 
 use Expansa\Extensions\Traits\HasMetadata;
 use Expansa\Extensions\Traits\Sanitizes;
@@ -10,7 +10,8 @@ use Expansa\Extensions\Traits\Sanitizes;
 /**
  * Base of Plugin and Theme: metadata set by fluent setters, which sanitize the values.
  *
- * @package Expansa\Extensions
+ * @internal
+ * @package Expansa\Extensions\Internal
  */
 abstract class AbstractExtension
 {
