@@ -33,7 +33,8 @@ trait Singleton
      *
      * @param mixed ...$args Optional arguments for the class constructor.
      */
-    protected function __construct(mixed ...$args) {} // phpcs:ignore
+    protected function __construct(mixed ...$args)
+    {}
 
     /**
      * Prevents cloning of the instance.

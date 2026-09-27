@@ -53,7 +53,7 @@ class Logger implements LoggerInterface
                 }
             }
         },
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Add a handler on top of the stack.
@@ -153,7 +153,7 @@ class Logger implements LoggerInterface
             try {
                 $handler->handle($record);
             } catch (Throwable $e) {
-                error_log('Log handler ' . $handler::class . ' failed: ' . $e->getMessage() . '; record: ' . $record->message); // phpcs:ignore
+                error_log('Log handler ' . $handler::class . ' failed: ' . $e->getMessage() . '; record: ' . $record->message);
             }
         }
     }

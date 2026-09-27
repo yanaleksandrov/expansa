@@ -16,17 +16,19 @@ final readonly class UserController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private UserService $service = new UserService(),
-    )
-    {
-    }
+    ) {}
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function create(): array
     {
         return ['method' => 'POST create user'];
     }
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function index(): array
     {
         return ['method' => 'GET user list'];
@@ -37,7 +39,9 @@ final readonly class UserController
         return $this->service->update($request->post);
     }
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function delete(): array
     {
         return ['method' => 'DELETE remove user by ID'];

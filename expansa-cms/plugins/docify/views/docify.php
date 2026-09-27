@@ -28,9 +28,9 @@ return \Expansa\Facades\Form::enqueue(
     ],
     [
         [
-            'name'     => 'title',
-            'type'     => 'custom',
-            'callback' => function () {
+            'name'       => 'title',
+            'type'       => 'custom',
+            'callback'   => function () {
                 ?>
                 <div class="progress" :style="'--expansa-progress:' + progress().progress"></div>
                 <div class="p-8 pt-7 pb-7 df aic jcsb">
@@ -42,7 +42,7 @@ return \Expansa\Facades\Form::enqueue(
                 <div class="card-hr"></div>
                 <?php
             },
-            'attributes'  => [ 'u-prop' => 'title' ],
+            'attributes' => [ 'u-prop' => 'title' ],
         ],
         [
             'type'       => 'step',
@@ -88,8 +88,8 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'       => 'step',
             'attributes' => [
-                'class'          => 'pl-8 pr-8',
-                'hidden'        => true,
+                'class'  => 'pl-8 pr-8',
+                'hidden' => true,
             ],
             'fields'     => [
                 [

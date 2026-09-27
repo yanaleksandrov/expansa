@@ -141,8 +141,7 @@ final class Manager
         ?int $desiredHeight = null,
         bool $relative = false,
         string $backgroundColor = '#ffffff'
-    ): static
-    {
+    ): static {
         $this->driver->fit($fit, $desiredWidth, $desiredHeight, $relative, $backgroundColor);
 
         return $this;

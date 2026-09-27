@@ -844,8 +844,7 @@ abstract class AbstractBuilder
         array|string|null &$columns = null,
         ?array $where = null,
         ?string $columnFn = null
-    ): string
-    {
+    ): string {
         preg_match("/(?<table>" . $this::TABLE_PATTERN . ")\s*\((?<alias>" . $this::ALIAS_PATTERN . ")\)/u", $table, $tableMatch);
 
         if (isset($tableMatch['table'], $tableMatch['alias'])) {
@@ -1053,8 +1052,7 @@ abstract class AbstractBuilder
         array &$stack,
         bool $root,
         ?array &$result = null
-    ): void
-    {
+    ): void {
         if ($root) {
             $columnsKey = array_keys($columns);
 
@@ -1174,8 +1172,7 @@ abstract class AbstractBuilder
         ?array $join = null,
         ?string $column = null,
         ?array $where = null
-    ): ?string
-    {
+    ): ?string {
         $map   = [];
         $query = $this->exec($this->selectContext($table, $map, $join, $column, $where, $type), $map);
 

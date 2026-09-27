@@ -25,7 +25,7 @@ final class Index extends Command
          * Hooks to list, the storage is shared by all instances.
          */
         private readonly Manager $hooks = new Manager(),
-    ) {} // phpcs:ignore
+    ) {}
 
     public function getDescription(): string
     {

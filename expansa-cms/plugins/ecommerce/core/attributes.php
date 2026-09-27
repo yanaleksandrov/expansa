@@ -36,7 +36,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'u-prop' => 'name',
+                        'u-prop'   => 'name',
                         'required' => 1,
                     ],
                 ],
@@ -56,7 +56,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'u-prop' => 'slug',
+                        'u-prop'   => 'slug',
                         'required' => 1,
                     ],
                 ],
@@ -92,7 +92,7 @@ return \Expansa\Facades\Form::enqueue(
                     'conditions'  => [],
                     'attributes'  => [
                         'u-prop' => 'type',
-                        'value' => $user->locale ?? '',
+                        'value'  => $user->locale ?? '',
                     ],
                     'options'     => [
                         'select' => t('Dropdown List'),
@@ -143,7 +143,7 @@ return \Expansa\Facades\Form::enqueue(
                     'conditions'  => [],
                     'attributes'  => [
                         'u-prop' => 'assignments',
-                        'value' => $user->locale ?? '',
+                        'value'  => $user->locale ?? '',
                     ],
                     'options'     => [
                         ''       => t('Any product category'),

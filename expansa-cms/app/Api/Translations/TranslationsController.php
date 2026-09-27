@@ -14,9 +14,7 @@ final readonly class TranslationsController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private TranslationsService $service = new TranslationsService(),
-    )
-    {
-    }
+    ) {}
 
     public function get(Request $request): array
     {

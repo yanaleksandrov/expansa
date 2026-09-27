@@ -20,5 +20,5 @@ final readonly class Priority
          * Ascending: a lower value runs earlier, see the Expansa\Hooks\Priority constants.
          */
         public int $priority,
-    ) {} // phpcs:ignore
+    ) {}
 }

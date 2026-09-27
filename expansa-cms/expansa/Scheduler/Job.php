@@ -112,7 +112,7 @@ final class Job
          * Identifier used as the lock file name, derived from the command by default.
          */
         private ?string $id = null,
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Get the job identifier: md5 of the shell command, or of the closure location.

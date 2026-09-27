@@ -33,8 +33,7 @@ final class Memory implements Session, Manager
          * Session name.
          */
         public readonly string $name = 'app',
-    )
-    {
+    ) {
         $this->flash = new SessionFlash($this->storage);
     }
 
@@ -58,7 +57,8 @@ final class Memory implements Session, Manager
         $this->regenerateId();
     }
 
-    public function save(): void {}
+    public function save(): void
+    {}
 
     public function get(string $key, mixed $default = null): mixed
     {

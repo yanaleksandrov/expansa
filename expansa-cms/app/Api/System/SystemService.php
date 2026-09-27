@@ -158,7 +158,7 @@ final class SystemService
 
         return [
             'target'        => 'body',
-            'redirect:7000' => url('installed')
+            'redirect:7000' => url('installed'),
         ];
     }
 

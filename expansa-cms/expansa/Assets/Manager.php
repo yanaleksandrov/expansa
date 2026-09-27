@@ -348,7 +348,9 @@ final class Manager
             return;
         }
 
-        /** @var array{class: class-string<AbstractProvider>, toFooter: bool, assets: AbstractProvider[]}|null $run */
+        /**
+ * @var array{class: class-string<AbstractProvider>, toFooter: bool, assets: AbstractProvider[]}|null $run
+*/
         $run = null;
 
         $flush = function () use (&$run, $minify, $inline): void {

@@ -55,8 +55,7 @@ final class Csv
         string $enclosure = 'auto',
         string $linebreak = 'auto',
         string $encoding = 'auto'
-    ): array
-    {
+    ): array {
         return iterator_to_array($this->iterate($input, $delimiter, $enclosure, $linebreak, $encoding), false);
     }
 
@@ -78,8 +77,7 @@ final class Csv
         string $enclosure = 'auto',
         string $linebreak = 'auto',
         string $encoding = 'auto'
-    ): Generator
-    {
+    ): Generator {
         $encoding = $encoding === 'auto' ? $encoding : $this->resolveEncoding($encoding);
         $stream   = $this->open($input);
 
@@ -134,8 +132,7 @@ final class Csv
         string $delimiter = ',',
         string $enclosure = '"',
         string $linebreak = "\r\n"
-    ): string
-    {
+    ): string {
         if (! $items) {
             return '';
         }

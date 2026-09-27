@@ -36,7 +36,9 @@ final class HtmlDom
 
     private string $indentString;
 
-    /** @var string[] Elements folded inline with surrounding text instead of onto their own line. */
+    /**
+ * @var string[] Elements folded inline with surrounding text instead of onto their own line.
+*/
     private array $inlineTags;
 
     public function __construct(array $options = [])
@@ -196,7 +198,9 @@ final class HtmlDom
         return [$lines, $hadForcedBreak];
     }
 
-    /** Escapes &, < and > - the DOM hands back already-decoded text, so this needs redoing on the way out. */
+    /**
+ * Escapes &, < and > - the DOM hands back already-decoded text, so this needs redoing on the way out.
+*/
     private function escapeText(string $text): string
     {
         return htmlspecialchars($text, ENT_NOQUOTES | ENT_SUBSTITUTE, 'UTF-8');

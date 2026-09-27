@@ -181,17 +181,20 @@ interface Request
     /**
      * Route matched for the request.
      */
-    public ?Route $route { get; set; }
+    public ?Route $route { get;
+    set; }
 
     /**
      * Session for old input.
      */
-    public ?Session $session { get; set; }
+    public ?Session $session { get;
+    set; }
 
     /**
      * Resolver of the current user: fn (?string $guard): mixed.
      */
-    public ?Closure $userResolver { get; set; }
+    public ?Closure $userResolver { get;
+    set; }
 
     /**
      * Create the request from the superglobals.

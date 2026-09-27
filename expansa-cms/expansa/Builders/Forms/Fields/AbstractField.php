@@ -106,8 +106,8 @@ abstract class AbstractField implements Field
                     'label'   => '',
                     'options' => [
                         'required' => [
-                            'content' => t('Required')
-                        ]
+                            'content' => t('Required'),
+                        ],
                     ],
                 ],
             ] : []),

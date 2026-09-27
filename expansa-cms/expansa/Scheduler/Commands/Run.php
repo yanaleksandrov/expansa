@@ -26,7 +26,7 @@ final class Run extends Command
          * Queues the jobs, gets the Scheduler; bootstrap.php passes the `schedule` hook.
          */
         private readonly Closure $schedule,
-    ) {} // phpcs:ignore
+    ) {}
 
     public function getDescription(): string
     {

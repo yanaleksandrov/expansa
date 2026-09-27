@@ -15,9 +15,11 @@ final readonly class ApikeyController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private ApikeyService $service = new ApikeyService(),
-    ) {} // phpcs:ignore
+    ) {}
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function index(): array
     {
         return ['method' => 'PUT update user by ID'];
@@ -28,7 +30,9 @@ final readonly class ApikeyController
         return $this->service->create($request->post);
     }
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function update(): array
     {
         return ['method' => 'PUT update user by ID'];

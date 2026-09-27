@@ -36,4 +36,4 @@ use Expansa\Patterns\Fluent;
  *
  * @method $this check(string $expression) Create a check rules (SQLite)
  */
-class Column extends Fluent {} // phpcs:ignore
+class Column extends Fluent {}

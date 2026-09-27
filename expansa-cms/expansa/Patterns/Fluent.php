@@ -20,7 +20,7 @@ class Fluent implements ArrayAccess, JsonSerializable
          * Attribute values by key.
          */
         public protected(set) array $attributes = [],
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Get an attribute value by key.

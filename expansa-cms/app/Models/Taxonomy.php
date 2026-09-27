@@ -64,7 +64,8 @@ class Taxonomy extends Model
      *
      * @return void
      */
-    protected function validatorExtend(): void {}
+    protected function validatorExtend(): void
+    {}
 
     /**
      * Retrieves a taxonomy record by a given field.

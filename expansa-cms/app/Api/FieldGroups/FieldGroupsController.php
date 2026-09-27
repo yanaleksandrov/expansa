@@ -15,7 +15,7 @@ final readonly class FieldGroupsController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private FieldGroupsService $service = new FieldGroupsService(),
-    ) {} // phpcs:ignore
+    ) {}
 
     public function index(): Response
     {

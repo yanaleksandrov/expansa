@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Attributes list
  *
@@ -8,51 +7,52 @@
  *
  * @package Expansa\Templates
  */
+
 ?>
 <div class="expansa-main">
-	<div class="attributes">
-		<form class="attributes-wrapper" u-data="{attributes: []}">
-			<div class="attributes-editor">
-				<h5 class="attributes-title">
-					<span class="fw-600 mr-auto"><?php echo t( 'Attributes' ); ?></span>
-					<button class="btn btn--sm" type="button"><?php echo t( 'Export' ); ?></button>
-					<button class="btn btn--sm" type="button"><?php echo t( 'Import' ); ?></button>
-					<button class="btn btn--sm btn--primary" type="submit"><?php echo t( 'Save' ); ?></button>
-				</h5>
-				<div class="attributes-description">
-					<p><?php echo t( 'Attributes define product details such as size or color and allow them to be included in product filtering.' ); ?></p>
-				</div>
-				<?php echo form('attribute-editor', EX_PLUGINS . 'ecommerce/core/attributes.php'); ?>
-			</div>
-			<div class="attributes-side">
-				<div u-text="`<?php echo t_attr( ':attributesCount items', '${attributes.length}' ); ?>`">0 items</div>
-				<div class="attributes-list">
-					<div class="attributes-values">
-						<template u-if="attributes.length">
-							<template u-for="(value, i) in attributes" :key="i">
-								<a class="attributes-value">
-									<span class="attributes-value-title" u-text="`attributes.${i}.title`"></span>
-									<span class="attributes-value-slug" u-text="`attributes.${i}.slug`"></span>
-									<div class="btn btn--icon" @click="attributes.splice(i, 1)"><i class="ph ph-pen"></i></div>
-								</a>
-							</template>
-						</template>
-						<template u-if="!attributes.length">
-							<?php
-							echo view(
-								'global/state',
-								[
-									'icon'        => 'empty-pack',
-									'class'       => 'dg jic m-auto t-center p-8 mw-320',
-									'title'       => t( 'No attributes found' ),
-									'description' => t( 'Add an attribute and it will appear here' ),
-								]
-							);
-							?>
-						</template>
-					</div>
-				</div>
-			</div>
-		</form>
-	</div>
+    <div class="attributes">
+        <form class="attributes-wrapper" u-data="{attributes: []}">
+            <div class="attributes-editor">
+                <h5 class="attributes-title">
+                    <span class="fw-600 mr-auto"><?php echo t('Attributes'); ?></span>
+                    <button class="btn btn--sm" type="button"><?php echo t('Export'); ?></button>
+                    <button class="btn btn--sm" type="button"><?php echo t('Import'); ?></button>
+                    <button class="btn btn--sm btn--primary" type="submit"><?php echo t('Save'); ?></button>
+                </h5>
+                <div class="attributes-description">
+                    <p><?php echo t('Attributes define product details such as size or color and allow them to be included in product filtering.'); ?></p>
+                </div>
+                <?php echo form('attribute-editor', EX_PLUGINS . 'ecommerce/core/attributes.php'); ?>
+            </div>
+            <div class="attributes-side">
+                <div u-text="`<?php echo t_attr(':attributesCount items', '${attributes.length}'); ?>`">0 items</div>
+                <div class="attributes-list">
+                    <div class="attributes-values">
+                        <template u-if="attributes.length">
+                            <template u-for="(value, i) in attributes" :key="i">
+                                <a class="attributes-value">
+                                    <span class="attributes-value-title" u-text="`attributes.${i}.title`"></span>
+                                    <span class="attributes-value-slug" u-text="`attributes.${i}.slug`"></span>
+                                    <div class="btn btn--icon" @click="attributes.splice(i, 1)"><i class="ph ph-pen"></i></div>
+                                </a>
+                            </template>
+                        </template>
+                        <template u-if="!attributes.length">
+                            <?php
+                            echo view(
+                                'global/state',
+                                [
+                                    'icon'        => 'empty-pack',
+                                    'class'       => 'dg jic m-auto t-center p-8 mw-320',
+                                    'title'       => t('No attributes found'),
+                                    'description' => t('Add an attribute and it will appear here'),
+                                ]
+                            );
+                            ?>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>

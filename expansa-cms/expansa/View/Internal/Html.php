@@ -33,12 +33,14 @@ final class Html
 
     private string $tokenType = '';
 
-	private string $prevTagText = '';
+    private string $prevTagText = '';
 
-	private string $prevTagType = '';
+    private string $prevTagType = '';
 
-	/** True while the TK_TAG_SINGLE just parsed is an "unformatted" inline tag (e.g. <i>...</i>) swallowed whole, as opposed to a genuine void element like <input> or a comment. */
-	private bool $lastSingleWasUnformatted = false;
+    /**
+ * True while the TK_TAG_SINGLE just parsed is an "unformatted" inline tag (e.g. <i>...</i>) swallowed whole, as opposed to a genuine void element like <input> or a comment.
+*/
+    private bool $lastSingleWasUnformatted = false;
 
     private int $newlines = 0;
 
@@ -52,36 +54,44 @@ final class Html
 
     private array $whitespace = ["\n", "\r", "\t", ' '];
 
-    /** Character list accepted by strspn()/strcspn() for the whitespace set above. */
+    /**
+ * Character list accepted by strspn()/strcspn() for the whitespace set above.
+*/
     private const WHITESPACE_CHARS = " \t\r\n";
 
-    /** Characters getTag() must inspect one at a time; anything else is bulk-skipped. */
+    /**
+ * Characters getTag() must inspect one at a time; anything else is bulk-skipped.
+*/
     private const TAG_SPECIAL_CHARS = " \t\r\n'\"=><";
 
-    /** Elements never folded onto one line by collapseTextOnlyElements() - their whitespace is significant. */
+    /**
+ * Elements never folded onto one line by collapseTextOnlyElements() - their whitespace is significant.
+*/
     private const NO_COLLAPSE_TAGS = ['pre', 'script', 'style', 'textarea'];
 
     private string $input = '';
 
-	private int $inputLength = 0;
+    private int $inputLength = 0;
 
-	/**
-	 * Accumulated output, as a plain string rather than an array of fragments.
-	 * A document with many tags/lines can push hundreds of thousands of tiny
-	 * fragments (one per indent level, per newline, per token) - as an array
-	 * each one carries PHP's per-element bucket/zval overhead regardless of how
-	 * short the string is, which dwarfs the actual text for a large page. A
-	 * string append has none of that: no separate structure, and PHP grows it
-	 * with amortized reallocation just like it would the array's own storage.
-	 */
-	private string $output = '';
+    /**
+     * Accumulated output, as a plain string rather than an array of fragments.
+     * A document with many tags/lines can push hundreds of thousands of tiny
+     * fragments (one per indent level, per newline, per token) - as an array
+     * each one carries PHP's per-element bucket/zval overhead regardless of how
+     * short the string is, which dwarfs the actual text for a large page. A
+     * string append has none of that: no separate structure, and PHP grows it
+     * with amortized reallocation just like it would the array's own storage.
+     */
+    private string $output = '';
 
-	/** The exact string most recently appended to $output, mirroring what "the last array element" used to mean. */
-	private string $lastAppendedChunk = '';
+    /**
+ * The exact string most recently appended to $output, mirroring what "the last array element" used to mean.
+*/
+    private string $lastAppendedChunk = '';
 
-	private $cssBeautify = false;
+    private $cssBeautify = false;
 
-	private $jsBeautify = false;
+    private $jsBeautify = false;
 
     // all the single tags for HTML
     private array $singleToken = [
@@ -151,12 +161,12 @@ final class Html
         }
     }
 
-	/**
-	 * Minify html markup.
-	 *
-	 * @param string $input
-	 * @return string
-	 */
+    /**
+     * Minify html markup.
+     *
+     * @param string $input
+     * @return string
+     */
     public function minify(string $input): string
     {
         $input = preg_replace('/<!--(.|\s)*?-->/', '', $input); // remove comments first
@@ -174,12 +184,12 @@ final class Html
         return preg_replace('/\s+/', ' ', $input);
     }
 
-	/**
-	 * Beautify html markup.
-	 *
-	 * @param string $input
-	 * @return string
-	 */
+    /**
+     * Beautify html markup.
+     *
+     * @param string $input
+     * @return string
+     */
     public function beautify(string $input): string
     {
         $this->input       = $input; // gets the input for the Parser
@@ -235,18 +245,18 @@ final class Html
                         // between them and collapsing "</div>\n</div>" into "</div></div>".
                         $isTagWithContent = true;
                         if ($this->prevTagType === 'TK_TAG_START') {
-                        	preg_match( '/<([a-zA-Z0-9]+)[^>]*>/', $this->prevTagText, $openingMatches );
-							preg_match( '/<\/([a-zA-Z0-9]+)[^>]*>/', $this->tokenText, $closingMatches );
-							if ( ($openingMatches[1] ?? null) === ($closingMatches[1] ?? null) && $this->lastText === '' ) {
-								$isTagWithContent = false;
-							}
+                            preg_match('/<([a-zA-Z0-9]+)[^>]*>/', $this->prevTagText, $openingMatches);
+                            preg_match('/<\/([a-zA-Z0-9]+)[^>]*>/', $this->tokenText, $closingMatches);
+                            if (($openingMatches[1] ?? null) === ($closingMatches[1] ?? null) && $this->lastText === '') {
+                                $isTagWithContent = false;
+                            }
                         }
 
                         if (
-                        	! $skipTags &&
-							$isTagWithContent &&
-							($tagExtractedFromLastOutput === null || $tagExtractedFromLastOutput[1] !== $tagName)
-						) {
+                            ! $skipTags &&
+                            $isTagWithContent &&
+                            ($tagExtractedFromLastOutput === null || $tagExtractedFromLastOutput[1] !== $tagName)
+                        ) {
                             $this->appendNewline();
                         }
                     }
@@ -259,7 +269,7 @@ final class Html
                     preg_match('/^\s*<([a-z]+)/i', $this->tokenText, $matches);
                     $tagCheck = $matches ? $matches : null;
 
-                    if ( ! $tagCheck || ! in_array($tagCheck[1], $this->options['unformatted'], true)) {
+                    if (! $tagCheck || ! in_array($tagCheck[1], $this->options['unformatted'], true)) {
                         $this->appendNewline();
                     }
                     $this->printToken($this->tokenText);
@@ -508,7 +518,7 @@ final class Html
             $content[] = $inputChar; // letter at-a-time (or string) inserted to an array
         }
 
-		return implode( '', $content );
+        return implode('', $content);
     }
 
     // get the full content of a script or style to pass to js_beautify
@@ -560,7 +570,7 @@ final class Html
                 $this->indentLevel = $this->tags[$tag . $this->tags[$tag . 'count']]; // set the indentLevel accordingly
                 $this->tags['parent'] = $this->tags[$tempParent . 'parent']; // and set the current parent
             }
-            unset($this->tags[$tag . $this->tags[$tag . 'count'] . 'parent'] , $this->tags[$tag . $this->tags[$tag . 'count']]); // delete the closed tags parent reference...
+            unset($this->tags[$tag . $this->tags[$tag . 'count'] . 'parent'], $this->tags[$tag . $this->tags[$tag . 'count']]); // delete the closed tags parent reference...
             // ...and the tag itself
             if ($this->tags[$tag . 'count'] === 1) {
                 unset($this->tags[$tag . 'count']);
@@ -681,19 +691,21 @@ final class Html
         }
         $tagCheck = strtolower(substr($tagComplete, $tagOffset, max($tagIndex - $tagOffset, 0)));
 
-        if ($tagComplete[strlen($tagComplete) - 2] === '/'
-            || in_array($tagCheck, $this->singleToken, true)) { // if this tag name is a single tag type (either in the list or has a closing /)
-            if ( ! $peek) {
+        if (
+            $tagComplete[strlen($tagComplete) - 2] === '/'
+            || in_array($tagCheck, $this->singleToken, true)
+        ) { // if this tag name is a single tag type (either in the list or has a closing /)
+            if (! $peek) {
                 $this->tagType = 'SINGLE';
                 $this->lastSingleWasUnformatted = false;
             }
         } elseif ($tagCheck === 'script') {
-            if ( ! $peek) {
+            if (! $peek) {
                 $this->recordTag($tagCheck);
                 $this->tagType = 'SCRIPT';
             }
         } elseif ($tagCheck === 'style') {
-            if ( ! $peek) {
+            if (! $peek) {
                 $this->recordTag($tagCheck);
                 $this->tagType = 'STYLE';
             }
@@ -725,12 +737,12 @@ final class Html
             $this->lastSingleWasUnformatted = true;
         } elseif ($tagCheck && $tagCheck[0] === '!') { // peek for <! comment
             // for comments content is already correct.
-            if ( ! $peek) {
+            if (! $peek) {
                 $this->tagType = 'SINGLE';
                 $this->lastSingleWasUnformatted = false;
                 $this->traverseWhitespace();
             }
-        } elseif ( ! $peek) {
+        } elseif (! $peek) {
             if ($tagCheck && $tagCheck[0] === '/') { // this tag is a double tag so check for tag-ending
                 $this->retrieveTag(substr($tagCheck, 1)); // remove it and all ancestors
                 $this->tagType = 'END';
@@ -830,14 +842,14 @@ final class Html
         if ($this->lastToken === 'TK_TAG_SCRIPT' || $this->lastToken === 'TK_TAG_STYLE') { // check if we need to format javascript
             $type = substr($this->lastToken, 7);
             $token = $this->getContentsTo($type);
-            if ( ! is_string($token)) {
+            if (! is_string($token)) {
                 return $token;
             }
             return [$token, 'TK_' . $type];
         }
         if ($this->currentMode === 'CONTENT') {
             $token = $this->getContent();
-            if ( ! is_string($token)) {
+            if (! is_string($token)) {
                 return $token;
             }
             return [$token, 'TK_CONTENT'];
@@ -845,7 +857,7 @@ final class Html
 
         if ($this->currentMode === 'TAG') {
             $token = $this->getTag();
-            if ( ! is_string($token)) {
+            if (! is_string($token)) {
                 return $token;
             }
             $tagNameType = 'TK_TAG_' . $this->tagType;
@@ -874,7 +886,7 @@ final class Html
     private function isUnformatted(string $tagCheck): bool
     {
         // is this an HTML5 block-level link?
-        if ( ! in_array($tagCheck, $this->options['unformatted'], true)) {
+        if (! in_array($tagCheck, $this->options['unformatted'], true)) {
             return false;
         }
 
@@ -887,13 +899,13 @@ final class Html
 
         // test nextTag to see if it is just html tag (no external content)
         $matches = [];
-        preg_match('/^\s*<\s*\/?([a-z]*)\s*[^>]*>\s*$/',  $nextTag ? $nextTag : '' , $matches);
+        preg_match('/^\s*<\s*\/?([a-z]*)\s*[^>]*>\s*$/', $nextTag ? $nextTag : '', $matches);
         $tag = $matches ? $matches : null;
 
         // if nextTag comes back but is not an isolated tag, then
         // let's treat the 'a' tag as having content
         // and respect the unformatted option
-        if ( ! $tag || in_array($tag, $this->options['unformatted'], true)) {
+        if (! $tag || in_array($tag, $this->options['unformatted'], true)) {
             return true;
         }
         return false;
@@ -905,7 +917,7 @@ final class Html
     private function printNewline(bool $force, array &$arr): void
     {
         $this->lineCharCount = 0;
-        if ( ! $arr || ! count($arr)) {
+        if (! $arr || ! count($arr)) {
             return;
         }
         if ($force || ($arr[count($arr) - 1] !== "\n")) { // we might want the extra line
@@ -921,7 +933,9 @@ final class Html
         }
     }
 
-    /** String-based equivalent of printNewline(), appending straight to $this->output. */
+    /**
+ * String-based equivalent of printNewline(), appending straight to $this->output.
+*/
     private function appendNewline(bool $force = false): void
     {
         $this->lineCharCount = 0;

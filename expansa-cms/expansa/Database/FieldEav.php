@@ -75,10 +75,10 @@ class FieldEav
                 $this->fieldsForeignTable,
                 [
                     'key',
-                    'value'
+                    'value',
                 ],
                 [
-                    $this->fieldsForeignKey => $this->ownerId
+                    $this->fieldsForeignKey => $this->ownerId,
                 ]
             );
 
@@ -156,7 +156,7 @@ class FieldEav
             $rows[] = [
                 $this->fieldsForeignKey => $this->ownerId,
                 'key'                   => $key,
-                'value'                 => $value
+                'value'                 => $value,
             ];
 
             $existing[$key] = true; // also skip a key repeated within this same batch
@@ -304,11 +304,11 @@ class FieldEav
                     $this->fieldsForeignTable,
                     [
                         'key',
-                        'value'
+                        'value',
                     ],
                     [
                         $this->fieldsForeignKey => $this->ownerId,
-                        'key'                   => $chunkKeys
+                        'key'                   => $chunkKeys,
                     ]
                 );
 
@@ -323,7 +323,7 @@ class FieldEav
                     $toInsert[] = [
                         $this->fieldsForeignKey => $this->ownerId,
                         'key'                   => $key,
-                        'value'                 => $value
+                        'value'                 => $value,
                     ];
                 } elseif ($value !== $existing[$key]) {
                     $toUpdate[$key] = $value;

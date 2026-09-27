@@ -21,5 +21,5 @@ final readonly class Alias
          * Name the closure is flushed by.
          */
         public string $name,
-    ) {} // phpcs:ignore
+    ) {}
 }

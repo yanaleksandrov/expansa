@@ -110,7 +110,7 @@ final class Pages extends AbstractTable
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'u-prop' => 'date',
+                        'u-prop'      => 'date',
                         'readonly'    => true,
                         'placeholder' => t('Select dates'),
                     ],

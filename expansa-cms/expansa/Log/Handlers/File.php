@@ -37,8 +37,7 @@ class File extends AbstractHandler
          * Minimum level of the records to handle.
          */
         Level|int|string $level = Level::Debug,
-    )
-    {
+    ) {
         parent::__construct($level);
     }
 

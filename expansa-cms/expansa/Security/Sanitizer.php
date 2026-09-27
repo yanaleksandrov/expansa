@@ -53,7 +53,7 @@ final class Sanitizer
          * List for custom rules for extend sanitizer.
          */
         protected array $extensions = [],
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Setup sanitizer rules via `data` method.

@@ -325,8 +325,7 @@ final class CronExpression
         int $nth = 0,
         bool $allowCurrentDate = false,
         ?string $timeZone = null
-    ): DateTime
-    {
+    ): DateTime {
         return $this->getRunDate($currentTime, $nth, false, $allowCurrentDate, $timeZone);
     }
 
@@ -345,8 +344,7 @@ final class CronExpression
         int $nth = 0,
         bool $allowCurrentDate = false,
         ?string $timeZone = null
-    ): DateTime
-    {
+    ): DateTime {
         return $this->getRunDate($currentTime, $nth, true, $allowCurrentDate, $timeZone);
     }
 
@@ -366,8 +364,7 @@ final class CronExpression
         bool $invert = false,
         bool $allowCurrentDate = false,
         ?string $timeZone = null
-    ): array
-    {
+    ): array {
         $timeZone    = $this->determineTimeZone($currentTime, $timeZone);
         $currentTime = $this->toDateTime($currentTime, $timeZone);
         $matches     = [];
@@ -472,8 +469,7 @@ final class CronExpression
         bool $invert,
         bool $allowCurrentDate,
         ?string $timeZone
-    ): DateTime
-    {
+    ): DateTime {
         $timeZone = $this->determineTimeZone($currentTime, $timeZone);
         $zone     = new DateTimeZone($timeZone);
         $current  = $this->toDateTime($currentTime ?? 'now', $timeZone);

@@ -1,6 +1,5 @@
 <?php
 
-
 /**
  * Single order data.
  *

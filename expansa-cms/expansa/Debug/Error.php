@@ -36,8 +36,7 @@ final class Error implements JsonSerializable
          * Error single message or array of messages.
          */
         string|array $message = '',
-    )
-    {
+    ) {
         if (is_array($message)) {
             self::$errors[$code] = array_merge(self::$errors[$code] ?? [], $message);
         } else {

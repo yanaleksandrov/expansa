@@ -14,9 +14,7 @@ final readonly class MediaController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private MediaService $service = new MediaService(),
-    )
-    {
-    }
+    ) {}
 
     public function get(Request $request): array
     {

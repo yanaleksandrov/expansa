@@ -26,5 +26,5 @@ final readonly class FailedJob
          * Error thrown by the run, or ScriptNotFound when the job could not be queued.
          */
         public Throwable $exception,
-    ) {} // phpcs:ignore
+    ) {}
 }

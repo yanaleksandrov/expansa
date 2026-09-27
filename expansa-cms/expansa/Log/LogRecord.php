@@ -45,5 +45,5 @@ final readonly class LogRecord
          * Additional data a handler or formatter may print.
          */
         public array $extra = [],
-    ) {} // phpcs:ignore
+    ) {}
 }

@@ -123,8 +123,7 @@ final class Validator
          * Stop at the first rule of a field.
          */
         private bool $break = false,
-    )
-    {
+    ) {
         $this->messages = self::$translated ?: self::translateMessages();
     }
 

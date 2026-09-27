@@ -38,8 +38,7 @@ class Telegram extends AbstractHandler
          * Seconds to wait for Telegram, so a slow API does not hang the request.
          */
         protected readonly int $timeout = 5,
-    )
-    {
+    ) {
         parent::__construct($level);
     }
 

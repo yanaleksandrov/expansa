@@ -1,4 +1,5 @@
 <?php
+
 namespace FileManager;
 
 /**
@@ -6,6 +7,6 @@ namespace FileManager;
  *
  * @since 2025.1
  */
-class Model {
-
+class Model
+{
 }

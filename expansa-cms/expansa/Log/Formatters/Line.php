@@ -20,7 +20,7 @@ class Line extends AbstractFormatter
          * Format of the record date, see date().
          */
         protected readonly string $dateFormat = 'Y-m-d H:i:s',
-    ) {} // phpcs:ignore
+    ) {}
 
     public function format(LogRecord $record): string
     {

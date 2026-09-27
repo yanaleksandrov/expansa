@@ -33,8 +33,7 @@ abstract class AbstractHandler implements Handler
          * Minimum level of the records to handle: a level, its value, RFC 5424 code or name.
          */
         Level|int|string $level = Level::Debug,
-    )
-    {
+    ) {
         $this->level = Level::of($level);
     }
 

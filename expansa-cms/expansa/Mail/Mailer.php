@@ -34,7 +34,7 @@ final class Mailer
          * Gets the PHPMailer before sending and returns the one to send with: SMTP settings, a test double.
          */
         private readonly ?Closure $setup = null,
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Add a recipient.

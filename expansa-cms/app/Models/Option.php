@@ -103,7 +103,8 @@ class Option extends Model
      *
      * @return void
      */
-    protected function validatorExtend(): void {}
+    protected function validatorExtend(): void
+    {}
 
     /**
      * JSON-encodes on write so any value type round-trips, and JSON-decodes on read.

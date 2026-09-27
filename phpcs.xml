@@ -2,17 +2,17 @@
 <ruleset name="Expansa">
     <description>PSR-12 и правила Expansa</description>
 
-    <!-- Наследует стандарты кодирования PSR-12 -->
-    <rule ref="PSR12"/>
+    <!-- Наследует стандарты кодирования PSR-12; пустое тело `{}` проверяют свои sniff'ы ниже -->
+    <rule ref="PSR12">
+        <exclude name="PSR2.Classes.ClassDeclaration"/>
+        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace"/>
+    </rule>
 
     <!-- Пустая строка перед PHPDoc параметра и тела property hooks в сигнатуре конструктора (AGENTS.md) -->
     <rule ref="Squiz.Functions.MultiLineFunctionDeclaration">
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.EmptyLine"/>
         <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent"/>
     </rule>
-
-    <!-- Требует открывающую скобку функции на новой строке (стиль BSD Allman) -->
-    <rule ref="Generic.Functions.OpeningFunctionBraceBsdAllman"/>
 
     <!-- Обнаруживает и предотвращает классы с дублирующимися именами -->
     <rule ref="Generic.Classes.DuplicateClassName">
@@ -116,6 +116,8 @@
         <properties>
             <property name="error" value="true"/>
         </properties>
+        <!-- error_log() — запасной канал логгера, когда обработчик не смог записать -->
+        <exclude-pattern>*/expansa-cms/expansa/Log/*</exclude-pattern>
     </rule>
 
     <!-- Проверяет правильное использование пробела вокруг операторов -->
@@ -145,6 +147,8 @@
 
     <!-- Настроенные правила -->
     <rule ref="phpcs/Expansa/Sniffs/Formatting/EmptyConstructorSniff.php" />
+    <rule ref="phpcs/Expansa/Sniffs/Classes/ClassDeclarationSniff.php" />
+    <rule ref="phpcs/Expansa/Sniffs/WhiteSpace/ScopeClosingBraceSniff.php" />
 
     <file>expansa-cms</file>
     <file>phpcs</file>

@@ -252,7 +252,7 @@ final class Kses
         private array $allowedProtocols = self::ALLOWED_PROTOCOLS {
             set => array_fill_keys($value, true);
         },
-    ) {} // phpcs:ignore
+    ) {}
 
     /**
      * Get rules with more elements and attributes, e.g. directives of a trusted page.

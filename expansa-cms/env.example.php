@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Settings of the installation, written by the installer. Real environment variables (Docker, CI, a hosting panel)
  * override the values: EX_DB_*, EX_KEY_* and EX_DEBUG; an empty variable counts as not set.

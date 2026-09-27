@@ -15,6 +15,6 @@ class ErrorLog extends AbstractHandler
 {
     public function handle(LogRecord $record): bool
     {
-        return error_log(rtrim($this->getFormatter()->format($record), "\n")); // phpcs:ignore
+        return error_log(rtrim($this->getFormatter()->format($record), "\n"));
     }
 }

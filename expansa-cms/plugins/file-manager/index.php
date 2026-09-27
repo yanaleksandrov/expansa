@@ -51,21 +51,17 @@ return new class extends Plugin
 
     public function activate(): void
     {
-
     }
 
     public function deactivate(): void
     {
-
     }
 
     public function install(): void
     {
-
     }
 
     public function uninstall(): void
     {
-
     }
 };

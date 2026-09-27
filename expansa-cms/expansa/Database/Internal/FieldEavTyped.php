@@ -236,7 +236,8 @@ final class FieldEavTyped extends FieldEav
         [$targetSuffix, $cast] = $this->route($value);
 
         $result = Db::update($this->table($targetSuffix), ['value' => $cast], [
-            'key' => $key, $this->fieldsForeignKey => $this->ownerId,
+            'key'                   => $key,
+        $this->fieldsForeignKey => $this->ownerId,
         ]);
 
         if ($result && $result->rowCount() > 0) {

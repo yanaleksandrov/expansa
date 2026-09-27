@@ -123,8 +123,7 @@ class Type
          * Position of the item in the admin menu.
          */
         public int $menuPosition = 10,
-    )
-    {
+    ) {
         $postType = Safe::trim($key);
 
         if (!preg_match('/^[a-z_-]+$/', $postType)) {

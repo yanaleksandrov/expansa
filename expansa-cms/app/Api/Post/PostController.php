@@ -14,11 +14,11 @@ final readonly class PostController
          * Endpoint business logic; the default lets Kernel::dispatch() create the controller without arguments.
          */
         private PostService $service = new PostService(),
-    )
-    {
-    }
+    ) {}
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function index(): array
     {
         return ['method' => 'PUT update user by ID'];
@@ -29,13 +29,17 @@ final readonly class PostController
         return $this->service->create($request->post);
     }
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function update(): array
     {
         return ['method' => 'PUT update user by ID'];
     }
 
-    /** @todo not implemented — placeholder carried over from the legacy class */
+    /**
+ * @todo not implemented — placeholder carried over from the legacy class
+*/
     public function delete(): array
     {
         return ['method' => 'DELETE remove user by ID'];

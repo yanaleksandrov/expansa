@@ -18,28 +18,75 @@ final class Str
      */
     private const array UNCOUNTABLE = [
         // materials and substances
-        'water' => true, 'air' => true, 'sand' => true, 'sugar' => true, 'salt' => true, 'rice' => true,
-        'flour' => true, 'oil' => true, 'butter' => true, 'cheese' => true, 'milk' => true, 'coffee' => true,
-        'tea' => true, 'honey' => true, 'meat' => true, 'fish' => true, 'sheep' => true,
+        'water'       => true,
+    'air'         => true,
+    'sand'        => true,
+    'sugar'       => true,
+    'salt'        => true,
+    'rice'        => true,
+        'flour'       => true,
+    'oil'         => true,
+    'butter'      => true,
+    'cheese'      => true,
+    'milk'        => true,
+    'coffee'      => true,
+        'tea'         => true,
+    'honey'       => true,
+    'meat'        => true,
+    'fish'        => true,
+    'sheep'       => true,
 
         // abstract concepts and states
-        'information' => true, 'advice' => true, 'knowledge' => true, 'news' => true, 'progress' => true,
-        'work' => true, 'homework' => true, 'luck' => true, 'happiness' => true, 'freedom' => true,
-        'education' => true, 'music' => true, 'poetry' => true, 'patience' => true, 'traffic' => true,
-        'press' => true, 'sms' => true,
+        'information' => true,
+    'advice'      => true,
+    'knowledge'   => true,
+    'news'        => true,
+    'progress'    => true,
+        'work'        => true,
+    'homework'    => true,
+    'luck'        => true,
+    'happiness'   => true,
+    'freedom'     => true,
+        'education'   => true,
+    'music'       => true,
+    'poetry'      => true,
+    'patience'    => true,
+    'traffic'     => true,
+        'press'       => true,
+    'sms'         => true,
 
         // money and economic concepts
-        'money' => true, 'currency' => true, 'wealth' => true, 'commerce' => true, 'trade' => true,
+        'money'       => true,
+    'currency'    => true,
+    'wealth'      => true,
+    'commerce'    => true,
+    'trade'       => true,
 
         // food and drinks
-        'bread' => true, 'food' => true, 'juice' => true, 'wine' => true, 'beer' => true,
+        'bread'       => true,
+    'food'        => true,
+    'juice'       => true,
+    'wine'        => true,
+    'beer'        => true,
 
         // languages and academic subjects
-        'english' => true, 'french' => true, 'mathematics' => true, 'physics' => true, 'chemistry' => true,
+        'english'     => true,
+    'french'      => true,
+    'mathematics' => true,
+    'physics'     => true,
+    'chemistry'   => true,
 
         // others
-        'furniture' => true, 'equipment' => true, 'species' => true, 'series' => true, 'software' => true,
-        'hardware' => true, 'clothing' => true, 'luggage' => true, 'weather' => true, 'machinery' => true,
+        'furniture'   => true,
+    'equipment'   => true,
+    'species'     => true,
+    'series'      => true,
+    'software'    => true,
+        'hardware'    => true,
+    'clothing'    => true,
+    'luggage'     => true,
+    'weather'     => true,
+    'machinery'   => true,
     ];
 
     /**
