@@ -12,7 +12,7 @@ use Throwable;
  *
  * @package Expansa\Codecs
  */
-class Marshal
+final class Marshal
 {
     /**
      * Optional 1-byte format markers; a plain serialize() string never starts with either of them.

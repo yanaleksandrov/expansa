@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Facades;
 
 use Closure;
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\Logger;
 use Expansa\Patterns\Facade;
 use Stringable;
@@ -17,7 +17,9 @@ use Stringable;
  * @method static \Expansa\Log\Manager extend(string $driver, Closure $factory)
  * @method static Logger channel(?string $name = null)
  * @method static Logger stack(array $channels, string $name = 'stack')
+ * @method static \Expansa\Log\Manager forgetChannel(?string $name = null)
  * @method static \Expansa\Log\Manager shareContext(array $context)
+ * @method static \Expansa\Log\Manager flushSharedContext()
  * @method static void   emergency(string|Stringable $message, array $context = [])
  * @method static void   alert(string|Stringable $message, array $context = [])
  * @method static void   critical(string|Stringable $message, array $context = [])

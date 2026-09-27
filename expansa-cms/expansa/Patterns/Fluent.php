@@ -8,9 +8,7 @@ use ArrayAccess;
 use JsonSerializable;
 
 /**
- * Class Fluent
- *
- * A flexible, dynamic class that provides fluent interface methods and dynamic property handling.
+ * Attribute bag with array access and fluent setters: `$column->nullable()->default(0)`.
  *
  * @package Expansa\Patterns
  */
@@ -19,9 +17,9 @@ class Fluent implements ArrayAccess, JsonSerializable
     public function __construct(
 
         /**
-         * Initial attributes for the instance.
+         * Attribute values by key.
          */
-        protected array $attributes = [],
+        public protected(set) array $attributes = [],
     ) {} // phpcs:ignore
 
     /**
@@ -33,20 +31,7 @@ class Fluent implements ArrayAccess, JsonSerializable
      */
     public function get(int|string $key, mixed $default = null): mixed
     {
-        if (array_key_exists($key, $this->attributes)) {
-            return $this->attributes[$key];
-        }
-        return $default;
-    }
-
-    /**
-     * Get all attributes.
-     *
-     * @return array The attributes array.
-     */
-    public function getAttributes(): array
-    {
-        return $this->attributes;
+        return array_key_exists($key, $this->attributes) ? $this->attributes[$key] : $default;
     }
 
     /**
@@ -131,7 +116,7 @@ class Fluent implements ArrayAccess, JsonSerializable
      * @param string $key The attribute key.
      * @return mixed The attribute value.
      */
-    public function __get(string $key)
+    public function __get(string $key): mixed
     {
         return $this->get($key);
     }
@@ -143,7 +128,7 @@ class Fluent implements ArrayAccess, JsonSerializable
      * @param mixed  $value The attribute value.
      * @return void
      */
-    public function __set(string $key, mixed $value)
+    public function __set(string $key, mixed $value): void
     {
         $this->offsetSet($key, $value);
     }
@@ -154,7 +139,7 @@ class Fluent implements ArrayAccess, JsonSerializable
      * @param string $key The attribute key.
      * @return bool True if the attribute is set, false otherwise.
      */
-    public function __isset(string $key)
+    public function __isset(string $key): bool
     {
         return $this->offsetExists($key);
     }
@@ -165,7 +150,7 @@ class Fluent implements ArrayAccess, JsonSerializable
      * @param string $key The attribute key.
      * @return void
      */
-    public function __unset(string $key)
+    public function __unset(string $key): void
     {
         $this->offsetUnset($key);
     }
@@ -175,9 +160,9 @@ class Fluent implements ArrayAccess, JsonSerializable
      *
      * @param string $method     The method name.
      * @param array  $parameters The method parameters.
-     * @return self The current instance for fluent interface.
+     * @return static
      */
-    public function __call(string $method, array $parameters)
+    public function __call(string $method, array $parameters): static
     {
         $this->attributes[$method] = count($parameters) > 0 ? reset($parameters) : true;
 

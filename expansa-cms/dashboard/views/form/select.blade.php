@@ -34,7 +34,7 @@ $prop  = Safe::prop( $attributes['name'] ?? $name );
 
 unset( $attributes['value'] );
 ?>
-<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAtts( $conditions ); ?>>
+<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes( $conditions ); ?>>
 	<?php if ( $label ) : ?>
 		<div class="<?php echo $label_class; ?>"><?php
 			echo $label;
@@ -51,7 +51,7 @@ unset( $attributes['value'] );
 	<?php endif; ?>
 	<label class="field-item">
 		<?php echo $before; ?>
-		<select<?php echo Arr::toHtmlAtts( $attributes ); ?>>
+		<select<?php echo Arr::toHtmlAttributes( $attributes ); ?>>
 			<?php
 			$get_attributes = function ( $key, $value, $option ) {
 				$attributes = [
@@ -81,7 +81,7 @@ unset( $attributes['value'] );
 							$content = trim( is_scalar( $optgroup_option ) ? $optgroup_option : strval( $optgroup_option['content'] ?? '' ) );
 							$atts    = $get_attributes( $i, $value, $optgroup_option );
 							?>
-							<option<?php echo Arr::toHtmlAtts( $atts ); ?>><?php echo $content; ?></option>
+							<option<?php echo Arr::toHtmlAttributes( $atts ); ?>><?php echo $content; ?></option>
 							<?php
 						}
 						?>
@@ -91,7 +91,7 @@ unset( $attributes['value'] );
 					$content = trim( is_scalar( $option ) ? $option : strval( $option['content'] ?? '' ) );
 					$atts    = $get_attributes( $option_key, $value, $option );
 					?>
-					<option<?php echo Arr::toHtmlAtts( $atts ); ?>><?php echo $content; ?></option>
+					<option<?php echo Arr::toHtmlAttributes( $atts ); ?>><?php echo $content; ?></option>
 					<?php
 				}
 			}

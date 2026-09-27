@@ -6,8 +6,8 @@ namespace Expansa\Hooks;
 
 use Closure;
 use Expansa\Hooks\Exceptions\HooksException;
-use Expansa\Support\Exceptions\FinderException;
-use Expansa\Support\Finder;
+use Expansa\Support\Traits\FindsFiles;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
@@ -18,7 +18,7 @@ use ReflectionMethod;
  */
 final class Manager extends HooksCollector
 {
-    use Finder;
+    use FindsFiles;
 
     /**
      * Files already scanned by configure(), keyed by their real path.
@@ -69,7 +69,7 @@ final class Manager extends HooksCollector
      * @param class-string[]|string $listeners Listener classes, or a listener file or directory to scan.
      *
      * @return void
-     * @throws FinderException|HooksException|ReflectionException
+     * @throws InvalidArgumentException|HooksException|ReflectionException
      */
     public function configure(string|array $listeners): void
     {

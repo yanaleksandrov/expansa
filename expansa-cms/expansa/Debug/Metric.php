@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace Expansa\Debug;
 
-class Metric
+/**
+ * Time and memory of the request, the metrics() helper instance.
+ *
+ * @package Expansa\Debug
+ */
+final class Metric
 {
     /**
      * Request start by default, so the time includes PHP startup and autoload.
      */
-    protected float $startTime;
+    private float $startTime;
 
-    protected float $endTime;
+    private float $endTime;
 
-    protected int $memoryUsage;
+    private int $memoryUsage;
 
     public function __construct()
     {
@@ -22,6 +27,8 @@ class Metric
 
     /**
      * Restart the timer from now, e.g. to measure a single operation.
+     *
+     * @return void
      */
     public function start(): void
     {
@@ -48,9 +55,9 @@ class Metric
      *
      * @param bool $raw
      * @param string|null $format The format to display (printf format)
-     * @return string|float
+     * @return string|int
      */
-    public function memory(bool $raw = false, ?string $format = null): string|float
+    public function memory(bool $raw = false, ?string $format = null): string|int
     {
         $memory = memory_get_peak_usage(false);
 
@@ -78,9 +85,9 @@ class Metric
      *
      * @param bool $raw
      * @param string|null $format The format to display (printf format)
-     * @return string|float
+     * @return string|int
      */
-    public function memoryUsage(bool $raw = false, ?string $format = null): string|float
+    public function memoryUsage(bool $raw = false, ?string $format = null): string|int
     {
         return $raw ? $this->memoryUsage : $this->readableSize($this->memoryUsage, $format);
     }

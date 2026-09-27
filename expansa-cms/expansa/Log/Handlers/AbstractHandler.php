@@ -7,7 +7,7 @@ namespace Expansa\Log\Handlers;
 use Expansa\Log\Contracts\Formatter;
 use Expansa\Log\Contracts\Handler;
 use Expansa\Log\Formatters\Line;
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\LogRecord;
 
 /**
@@ -17,7 +17,10 @@ use Expansa\Log\LogRecord;
  */
 abstract class AbstractHandler implements Handler
 {
-    protected Level $level;
+    /**
+     * Minimum level of the records to handle.
+     */
+    public readonly Level $level;
 
     protected ?Formatter $formatter = null;
 
@@ -36,11 +39,6 @@ abstract class AbstractHandler implements Handler
     }
 
     abstract public function handle(LogRecord $record): bool;
-
-    public function getLevel(): Level
-    {
-        return $this->level;
-    }
 
     public function isHandling(Level $level): bool
     {

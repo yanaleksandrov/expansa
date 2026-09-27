@@ -9,9 +9,12 @@ use ReflectionException;
 use ReflectionMethod;
 
 /**
- * Class Route.
+ * Routes of the request: static ones by exact URI, dynamic ones by regex, before middlewares
+ * and 404 handlers. The Route facade instance.
+ *
+ * @package Expansa\Routing
  */
-class Router
+final class Router
 {
     /**
      * The function to be executed when no route has been matched
@@ -72,11 +75,9 @@ class Router
     private string $serverBasePath = '';
 
     /**
-     * Default Controllers Namespace
-     *
-     * @var string
+     * Namespace prepended to the controller class of an `[Controller::class, 'method']` handler.
      */
-    private string $namespace = '';
+    public string $namespace = '';
 
     /**
      * Store a before middleware route and a handling function to be
@@ -352,26 +353,6 @@ class Router
     }
 
     /**
-     * Set a Default Lookup Namespace for Callable methods.
-     *
-     * @param string $namespace A given namespace
-     */
-    public function setNamespace(string $namespace): void
-    {
-        $this->namespace = $namespace;
-    }
-
-    /**
-     * Get the given Namespace before.
-     *
-     * @return string The given Namespace if exists
-     */
-    public function getNamespace(): string
-    {
-        return $this->namespace;
-    }
-
-    /**
      * Execute the router: Loop all defined before middlewares and routes,
      * and execute the handling function if a match was found.
      *
@@ -618,8 +599,8 @@ class Router
             [$controller, $method] = $fn;
 
             // Adjust controller class if namespace has been set
-            if ($this->getNamespace() !== '') {
-                $controller = $this->getNamespace() . '\\' . $controller;
+            if ($this->namespace !== '') {
+                $controller = $this->namespace . '\\' . $controller;
             }
 
             try {

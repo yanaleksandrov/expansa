@@ -64,7 +64,7 @@ $appendSelected = $multiple
     <div class="df g-2">
         <label class="btn btn--outline dif aic g-1">
             <i class="ph ph-upload-simple"></i> <?php echo t('Upload'); ?>
-            <input<?php echo Arr::toHtmlAtts($attributes); ?> hidden @change="$ajax.post('media/upload', $el.files).then(({posts}) => { <?php echo $appendUploaded; ?>; $el.value = ''; })">
+            <input<?php echo Arr::toHtmlAttributes($attributes); ?> hidden @change="$ajax.post('media/upload', $el.files).then(({posts}) => { <?php echo $appendUploaded; ?>; $el.value = ''; })">
         </label>
         <button type="button" class="btn btn--outline dif aic g-1" @click="$dialog.open('tmpl-media-library', { ...mediaLibraryDialog, multiple: <?php echo $multiple ? 'true' : 'false'; ?>, onSelect(items) { items = Array.isArray(items) ? items : (items ? [items] : []); <?php echo $appendSelected; ?>; } })">
             <i class="ph ph-image"></i> <?php echo t('Choose from library'); ?>

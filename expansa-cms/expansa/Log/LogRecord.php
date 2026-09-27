@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Log;
 
 use DateTimeImmutable;
+use Expansa\Log\Enums\Level;
 
 /**
  * One log entry, shared by every handler of the logger, so it is immutable.

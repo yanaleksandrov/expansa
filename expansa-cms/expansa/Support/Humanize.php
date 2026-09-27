@@ -5,90 +5,55 @@ declare(strict_types=1);
 namespace Expansa\Support;
 
 /**
+ * Human-readable values: file sizes and numbers.
  *
- * @see https://github.com/mhanson01/humanize
- * @see https://github.com/coduo/php-humanizer
- * @see https://github.com/nFnK/php-humanizer
+ * @package Expansa\Support
  */
-class Humanize
+final class Humanize
 {
+    private const array SIZES = ['b', 'Kb', 'Mb', 'Gb', 'Tb', 'Pb'];
+
     /**
-     * Convert bytes to human-readable file size.
+     * Convert bytes to a file size: `1536` → `1.5 Kb`, empty string for zero.
      *
-     * @param string|int $bytes
+     * @param int $bytes
      * @return string
      */
-    public static function fromBytes(string|int $bytes): string
+    public static function fromBytes(int $bytes): string
     {
-        if (empty($bytes)) {
+        if ($bytes <= 0) {
             return '';
         }
 
-        $i     = floor(log($bytes) / log(1024));
-        $sizes = [ 'b', 'Kb', 'Mb', 'Gb', 'Tb', 'Pb' ];
+        $i = min((int) floor(log($bytes, 1024)), count(self::SIZES) - 1);
 
-        return sprintf('%.02F', $bytes / pow(1024, $i)) * 1 . ' ' . $sizes[ $i ];
+        return round($bytes / 1024 ** $i, 2) . ' ' . self::SIZES[$i];
     }
 
     /**
-     * Converts a human-readable file size value to a number of bytes that it represents.
-     * Supports the following modifiers: K, M, G and T.
-     * Invalid input is returned unchanged.
-     * Example:
-     * <code>
-     * $this->to_bytes(10);          // 10
-     * $this->to_bytes('10b');       // 10
-     * $this->to_bytes('10k');       // 10240
-     * $this->to_bytes('10K');       // 10240
-     * $this->to_bytes('10kb');      // 10240
-     * $this->to_bytes('10Kb');      // 10240
-     * // and even
-     * $this->to_bytes('   10 KB '); // 10240
-     * </code>
+     * Convert a file size to bytes: `10`, `10b`, `10k`, `10Kb`, ` 10 KB ` (K, M, G, T).
      *
      * @param string $value
-     * @return null|array|string|string[]
+     * @return string The number of bytes, or the value unchanged if it is not a size.
      */
-    public static function toBytes(string $value): array|null|string
+    public static function toBytes(string $value): string
     {
         return preg_replace_callback(
             '/^\s*(\d+)\s*(?:([kmgt]?)b?)?\s*$/i',
-            function ($m) {
-                switch (strtolower($m[2])) {
-                    case 't':
-                        $m[1] *= 1024;
-                    case 'g':
-                        $m[1] *= 1024;
-                    case 'm':
-                        $m[1] *= 1024;
-                    case 'k':
-                        $m[1] *= 1024;
-                }
-                return $m[1];
-            },
+            fn (array $m): string => (string) ((int) $m[1] * 1024 ** (int) strpos(' kmgt', strtolower($m[2] ?? '') ?: ' ')),
             $value
         );
     }
 
     /**
-     * Converts an integer to a string containing commas every three digits.
+     * Format a number with a comma every three digits: `1234567.891` → `1,234,567.89` with two decimals.
      *
-     * @param $int
+     * @param int|float $number
+     * @param int       $decimals
      * @return string
      */
-    public static function intcomma($int): string
+    public static function number(int|float $number, int $decimals = 0): string
     {
-        return number_format($int, 0, null, ',');
-    }
-
-    /**
-     * Formats a number to a human-readable number.
-     *
-     * @param $number
-     * @return string
-     */
-    public function formatnumber($number): string
-    {
-        return number_format($number, 2, '.', ',');
+        return number_format($number, $decimals, '.', ',');
     }
 }

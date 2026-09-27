@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Log\Handlers;
 
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\LogRecord;
 
 /**

@@ -5,18 +5,23 @@ declare(strict_types=1);
 namespace Expansa\Debug;
 
 use Throwable;
+use TypeError;
 
 /**
  * Renders the debug page for uncaught errors: message, trace and the code around the failing line.
  *
- * @package Expansa
+ * Strings are English: the page is for developers and must work when translations are broken.
+ *
+ * @package Expansa\Debug
  */
-class Debug
+final class Debug
 {
     /**
      * Output the debug page for an uncaught error.
      *
-     * @param string $viewPath Template that receives title, description, context, details, traces and code.
+     * @param Throwable $e
+     * @param string    $viewPath Template that receives title, description, context, details, traces and code.
+     * @return void
      */
     public function render(Throwable $e, string $viewPath): void
     {
@@ -27,76 +32,56 @@ class Debug
 
     private function getData(Throwable $e): array
     {
-        $title = t('Fatal Error');
+        $title = 'Fatal Error';
 
-        $description = t('On line :lineNumber in :filepath', $e->getLine(), $e->getFile());
+        $description = sprintf('On line %d in %s', $e->getLine(), htmlspecialchars($e->getFile(), ENT_QUOTES, 'UTF-8'));
         $description = preg_replace('/[a-z0-9_\-]*\.php/i', '$1<u>$0</u>', $description);
         $description = preg_replace('/(\d+)/', '<em>$1</em>', $description);
         $description = preg_replace('/[\(\)#\[\]\':]/i', '$1<ss>$0</ss>', $description);
 
-        $traces     = [];
-        $tracesList = $e->getTrace();
-        if ($tracesList) {
-            foreach ($tracesList as $trace) {
-                if (empty($trace['file'])) {
-                    continue;
-                }
-
-                $traces[] = (object) [
-                    'file' => $trace['file'] ?? '',
-                    'line' => $trace['line'] ?? '',
-                ];
+        $traces = [];
+        foreach ($e->getTrace() as $trace) {
+            if (empty($trace['file'])) {
+                continue;
             }
+
+            $traces[] = (object) [
+                'file' => $trace['file'],
+                'line' => $trace['line'] ?? '',
+            ];
         }
 
         $context = $e->getMessage();
-        $details = match (true) {
-            $e instanceof \TypeError => $this->parseTypeError($e),
-            default => [],
-        };
+        $details = $e instanceof TypeError ? $this->parseTypeError($e) : [];
 
         $code = $this->parseErrorCode($e);
 
         return compact('title', 'description', 'context', 'details', 'traces', 'code');
     }
 
-    private function parseTypeError(\TypeError $e): array
+    private function parseTypeError(TypeError $e): array
     {
         $data = [];
-
-        $errorTrace     = current($e->getTrace());
-        $errorTraceArgs = $errorTrace['args'] ?? [];
-        if ($errorTraceArgs) {
-            foreach ($errorTraceArgs as $key => $value) {
-                $data[] = (object) [
-                    'key'   => $key,
-                    'type'  => gettype($value),
-                    'value' => $value,
-                ];
-            }
+        foreach ($e->getTrace()[0]['args'] ?? [] as $key => $value) {
+            $data[] = (object) [
+                'key'   => $key,
+                'type'  => gettype($value),
+                'value' => $value,
+            ];
         }
+
         return $data;
     }
 
     private function parseErrorCode(Throwable $e): string
     {
-        $trace = $e->getTrace();
-
-        $code = '';
-        if (empty($trace[0])) {
-            return $code;
+        if (empty($e->getTrace()[0])) {
+            return '';
         }
 
-        try {
-            $file = $e->getFile();
-            $line = $e->getLine();
+        // lines around the error, the file may be gone (eval, deleted cache)
+        $lines = @file($e->getFile()) ?: [];
 
-            // get lines of code around the error so that the context is visible
-            $lines = file($file);
-            $code  = implode('', array_slice($lines, max(0, $line - 10), 30));
-        } catch (\ReflectionException $e) {
-        }
-
-        return trim($code);
+        return trim(implode('', array_slice($lines, max(0, $e->getLine() - 10), 30)));
     }
 }

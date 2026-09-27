@@ -7,23 +7,27 @@ namespace Expansa\Facades;
 use Expansa\Patterns\Facade;
 
 /**
- * Provides static access to the routing.
+ * Routes of Expansa\Routing\Router.
  *
- * @method static void before(string $methods, string $pattern, object|callable $callback)
- * @method static void match(string $methods, string $pattern, callable|object $callback)
- * @method static void any(string $pattern, callable|object $callback)
- * @method static void get(string $pattern, callable|object $callback)
- * @method static void post(string $pattern, callable|object $callback)
- * @method static void patch(string $pattern, callable|object $callback)
- * @method static void delete(string $pattern, callable|object $callback)
- * @method static void put(string $pattern, callable|object $callback)
- * @method static void options(string $pattern, callable|object $callback)
- * @method static void register(string $controller, callable $dispatch, ?string $name = null)
- * @method static void prefix(string $baseRoute, callable $callback)
- * @method static void run(object|callable $callback = null)
- * @method static void set404(object|callable|string $matchFn, object|callable $callback = null)
- * @method static void trigger404(mixed $match = null)
+ * @method static void   before(string $methods, string $pattern, callable|array $fn)
+ * @method static void   match(string $methods, string $pattern, callable|array $fn)
+ * @method static void   any(string $pattern, callable|array $fn)
+ * @method static void   get(string $pattern, callable|array $fn)
+ * @method static void   post(string $pattern, callable|array $fn)
+ * @method static void   patch(string $pattern, callable|array $fn)
+ * @method static void   delete(string $pattern, callable|array $fn)
+ * @method static void   put(string $pattern, callable|array $fn)
+ * @method static void   options(string $pattern, callable|array $fn)
+ * @method static void   register(string $controller, callable $dispatch, ?string $name = null)
+ * @method static void   prefix(string $baseRoute, callable $fn)
+ * @method static bool   run(callable|object|null $callback = null)
+ * @method static void   set404(callable|object|string $matchFn, callable|array|null $fn = null)
+ * @method static void   trigger404(mixed $match = null)
  * @method static string uri()
+ * @method static string getBasePath()
+ * @method static array  getRequestHeaders()
+ * @method static string getRequestMethod()
+ * @method static void   setBasePath(string $serverBasePath)
  */
 class Route extends Facade
 {

@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace Expansa\Debug;
 
+use JsonSerializable;
+
 /**
- * Errors class.
+ * Error messages by code, returned instead of a result: `return new Error('media_upload', t('...'))`.
+ * Messages are kept in a registry shared by all instances for the request; an instance serializes
+ * only its own code.
  *
- * A class whose task is to simplify error handling (messages) when working with Expansa. In order
- * to start working with a class, you need to create an instance of it, and then add or remove
- * errors (messages) to it. The class applies the $message and $data parameters.
- *
- * These are strings and in general they are similar, but they separated by logic:
- *   $message - is a message for the user.
- *   $data    - is an instruction for the developer.
+ * @package Expansa\Debug
  */
-class Error implements \JsonSerializable
+final class Error implements JsonSerializable
 {
     /**
-     * Errors list storage.
+     * Messages of all errors by code.
      *
-     * @var array
+     * @var array<string, string[]>
      */
     private static array $errors = [];
 
@@ -48,38 +46,33 @@ class Error implements \JsonSerializable
     }
 
     /**
-     * Removes the specified error.
+     * Forget all messages of an error code.
      *
-     * This function removes all error messages associated with the specified
-     * error code, along with any error data for that code.
-     *
-     * @param string $code Errors code.
+     * @param string $code
+     * @return void
      */
-    public function remove(string $code): void
+    public function forget(string $code): void
     {
         unset(self::$errors[$code]);
     }
 
     /**
-     * Retrieve all error messages or error messages matching code.
+     * Get the messages of an error code, or of all codes without one.
      *
-     * @param string $code Optional. Retrieve messages matching code, if exists.
-     * @return array Errors strings on success, or empty array on failure (if using code parameter).
+     * @param string $code
+     * @return array
      */
     public function get(string $code = ''): array
     {
-        if (empty($code)) {
-            return self::$errors;
-        }
-        return self::$errors[$code] ?? [];
+        return $code === '' ? self::$errors : self::$errors[$code] ?? [];
     }
 
     /**
-     * Verify if the instance contains errors.
+     * Check if any error was added.
      *
      * @return bool
      */
-    public function exists(): bool
+    public function has(): bool
     {
         return ! empty(self::$errors);
     }

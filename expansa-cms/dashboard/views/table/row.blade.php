@@ -23,7 +23,7 @@ if (!is_array($data) || empty($row) || empty($columns)) {
     ]
 )->values();
 
-$tag && printf( '<%s>', trim( sprintf( '%s %s', $tag, Arr::toHtmlAtts( $attributes ) ) ) );
+$tag && printf( '<%s>', trim( sprintf( '%s %s', $tag, Arr::toHtmlAttributes( $attributes ) ) ) );
 foreach ( $columns as $column ) {
 	echo view( $column->view, [ ...(array) $column, ...$data ] );
 }

@@ -25,7 +25,7 @@ namespace Expansa\Patterns;
  * output: array( 'value', 'row' )
  * ```
  */
-class Registry
+final class Registry
 {
     private static array $registry = [];
 

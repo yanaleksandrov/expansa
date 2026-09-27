@@ -38,7 +38,7 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 	@endif
 	<label class="field-item">
 		{!! $before !!}
-		<input<?php echo Arr::toHtmlAtts( $attributes ); ?>>
+		<input<?php echo Arr::toHtmlAttributes( $attributes ); ?>>
 		{{$after}}
 		@if($copy)
 			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{$prop}})"></i>

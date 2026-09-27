@@ -27,7 +27,7 @@ return new class extends Plugin
 
         Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
 
-        Hook::add('expansa_view_part', function ($filepath) {
+        Hook::add('viewPart', function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/fields-builder.php') {
                 $filepath = __DIR__ . '/views/fields-builder.php';
             }

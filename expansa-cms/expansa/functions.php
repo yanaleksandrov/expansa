@@ -13,7 +13,7 @@ if (! function_exists('t')) {
     function t(string $string, mixed ...$args): string
     {
         if (class_exists('Expansa\Facades\I18n')) {
-            return Expansa\Facades\I18n::_t($string, ...$args);
+            return Expansa\Facades\I18n::translate($string, ...$args);
         }
         return $string;
     }
@@ -29,8 +29,7 @@ if (! function_exists('t_attr')) {
      */
     function t_attr(string $string, mixed ...$args): string
     {
-        // t() already escapes, so decode once to avoid "&amp;amp;"
-        return Expansa\Facades\Safe::attribute(html_entity_decode(t($string, ...$args), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        return Expansa\Facades\I18n::translateAttribute($string, ...$args);
     }
 }
 
@@ -121,11 +120,7 @@ if (! function_exists('url')) {
      */
     function url(string $slug = ''): string
     {
-        static $url;
-        if (!$url) {
-            $url = new Expansa\Support\Url();
-        }
-        return $url->site($slug);
+        return Expansa\Support\Url::site($slug);
     }
 }
 

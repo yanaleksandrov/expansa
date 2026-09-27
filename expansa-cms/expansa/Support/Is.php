@@ -4,23 +4,36 @@ declare(strict_types=1);
 
 namespace Expansa\Support;
 
+use Closure;
 use DateTime;
-use Expansa\Facades\Lifecycle;
+use Exception;
 
 /**
- * This class provides a set of static methods to check various conditions, such as validating
- * email addresses and URLs, determining the type of server, and identifying the request type.
+ * Static checks of values (email, URL, JSON, serialized data), of the server and the request,
+ * and of the application state passed to configure().
+ *
+ * @package Expansa\Support
  */
 final class Is
 {
     private static bool $debug = false;
 
     /**
-     * Set the application state the checks below report.
+     * Dashboard state or the callback that reports it, called on every dashboard() check.
      */
-    public static function configure(bool $debug = false): void
+    private static Closure|bool $dashboard = false;
+
+    /**
+     * Set the application state the checks below report, replacing the previous one.
+     *
+     * @param bool         $debug
+     * @param Closure|bool $dashboard Ready state or `fn (): bool`, for a state known only later in the request.
+     * @return void
+     */
+    public static function configure(bool $debug = false, Closure|bool $dashboard = false): void
     {
-        self::$debug = $debug;
+        self::$debug     = $debug;
+        self::$dashboard = $dashboard;
     }
 
     /**
@@ -59,7 +72,7 @@ final class Is
      */
     public static function mobile(): bool
     {
-        $useragent = $_SERVER['HTTP_USER_AGENT'];
+        $useragent = $_SERVER['HTTP_USER_AGENT'] ?? '';
         if (
             preg_match(
                 '/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i',
@@ -83,8 +96,8 @@ final class Is
      */
     public static function apache(): bool
     {
-        return str_contains($_SERVER['SERVER_SOFTWARE'], 'Apache')
-            || str_contains($_SERVER['SERVER_SOFTWARE'], 'LiteSpeed');
+        return str_contains(($_SERVER['SERVER_SOFTWARE'] ?? ''), 'Apache')
+            || str_contains(($_SERVER['SERVER_SOFTWARE'] ?? ''), 'LiteSpeed');
     }
 
     /**
@@ -95,9 +108,9 @@ final class Is
     public static function iis(): bool
     {
         return ! self::apache() && (
-            str_contains($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS')
+            str_contains(($_SERVER['SERVER_SOFTWARE'] ?? ''), 'Microsoft-IIS')
             ||
-            str_contains($_SERVER['SERVER_SOFTWARE'], 'ExpressionDevServer')
+            str_contains(($_SERVER['SERVER_SOFTWARE'] ?? ''), 'ExpressionDevServer')
         );
     }
 
@@ -108,7 +121,7 @@ final class Is
      */
     public static function nginx(): bool
     {
-        return str_contains($_SERVER['SERVER_SOFTWARE'], 'nginx');
+        return str_contains(($_SERVER['SERVER_SOFTWARE'] ?? ''), 'nginx');
     }
 
     /**
@@ -148,7 +161,7 @@ final class Is
      */
     public static function dashboard(): bool
     {
-        return Lifecycle::is('dashboard');
+        return self::$dashboard instanceof Closure ? (bool) (self::$dashboard)() : self::$dashboard;
     }
 
     /**
@@ -183,7 +196,7 @@ final class Is
         if (strlen((string) $thing) === 10) {
             try {
                 new DateTime('@' . $thing);
-            } catch (\Exception $e) {
+            } catch (Exception) {
                 return false;
             }
             return true;

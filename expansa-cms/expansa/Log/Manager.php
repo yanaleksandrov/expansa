@@ -8,11 +8,12 @@ use Closure;
 use Stringable;
 use Expansa\Log\Contracts\Handler;
 use Expansa\Log\Contracts\LoggerInterface;
-use Expansa\Log\Exceptions\LogException;
+use Expansa\Log\Exceptions\InvalidConfiguration;
 use Expansa\Log\Handlers\ErrorLog;
 use Expansa\Log\Handlers\File;
 use Expansa\Log\Handlers\RotatingFile;
 use Expansa\Log\Handlers\Telegram;
+use Expansa\Log\Enums\Level;
 
 /**
  * Channels described by configuration and created on first use, the Log facade instance.
@@ -29,14 +30,17 @@ class Manager implements LoggerInterface
         'errorlog' => ['driver' => 'errorlog'],
     ];
 
-    protected string $default = 'errorlog';
+    /**
+     * Channel of the PSR-3 methods.
+     */
+    public protected(set) string $defaultChannel = 'errorlog';
 
     /**
      * Created channels by name.
      *
      * @var Logger[]
      */
-    protected array $channels = [];
+    public protected(set) array $channels = [];
 
     /**
      * Custom drivers: get the channel config and name, return a Logger or a Handler.
@@ -48,7 +52,7 @@ class Manager implements LoggerInterface
     /**
      * Context added to every channel.
      */
-    protected array $sharedContext = [];
+    public protected(set) array $sharedContext = [];
 
     /**
      * Channels being created, to detect a stack that includes itself.
@@ -61,19 +65,19 @@ class Manager implements LoggerInterface
      * @param array  $channels Configs by name: `['daily' => ['driver' => 'daily', 'path' => '...', 'days' => 14]]`.
      * @param string $default  Channel of the PSR-3 methods, the first channel by default.
      * @return void
-     * @throws LogException If the default channel is not configured.
+     * @throws InvalidConfiguration If the default channel is not configured.
      */
     public function configure(array $channels, string $default = ''): void
     {
         $default = $default !== '' ? $default : (string) array_key_first($channels);
 
         if (! isset($channels[$default])) {
-            throw new LogException("Default logging channel [$default] is not configured.");
+            throw new InvalidConfiguration("Default logging channel [$default] is not configured.");
         }
 
-        $this->config   = $channels;
-        $this->default  = $default;
-        $this->channels = [];
+        $this->config         = $channels;
+        $this->defaultChannel = $default;
+        $this->channels       = [];
     }
 
     /**
@@ -95,11 +99,11 @@ class Manager implements LoggerInterface
      *
      * @param string|null $name
      * @return Logger
-     * @throws LogException For an unknown channel or driver.
+     * @throws InvalidConfiguration For an unknown channel or driver.
      */
     public function channel(?string $name = null): Logger
     {
-        $name ??= $this->default;
+        $name ??= $this->defaultChannel;
 
         return $this->channels[$name] ?? $this->channels[$name] = $this->resolve($name);
     }
@@ -117,16 +121,6 @@ class Manager implements LoggerInterface
     }
 
     /**
-     * Get the channels created so far.
-     *
-     * @return Logger[]
-     */
-    public function getChannels(): array
-    {
-        return $this->channels;
-    }
-
-    /**
      * Drop a created channel, the next call creates it again.
      *
      * @param string|null $name The default channel by default.
@@ -134,14 +128,9 @@ class Manager implements LoggerInterface
      */
     public function forgetChannel(?string $name = null): static
     {
-        unset($this->channels[$name ?? $this->default]);
+        unset($this->channels[$name ?? $this->defaultChannel]);
 
         return $this;
-    }
-
-    public function getDefaultChannel(): string
-    {
-        return $this->default;
     }
 
     /**
@@ -159,11 +148,6 @@ class Manager implements LoggerInterface
         }
 
         return $this;
-    }
-
-    public function sharedContext(): array
-    {
-        return $this->sharedContext;
     }
 
     /**
@@ -228,17 +212,17 @@ class Manager implements LoggerInterface
      *
      * @param string $name
      * @return Logger
-     * @throws LogException
+     * @throws InvalidConfiguration
      */
     protected function resolve(string $name): Logger
     {
         $config = $this->config[$name] ?? null;
         if (! is_array($config) || ! isset($config['driver'])) {
-            throw new LogException("Logging channel [$name] is not configured.");
+            throw new InvalidConfiguration("Logging channel [$name] is not configured.");
         }
 
         if (isset($this->resolving[$name])) {
-            throw new LogException("Logging channel [$name] includes itself.");
+            throw new InvalidConfiguration("Logging channel [$name] includes itself.");
         }
 
         $this->resolving[$name] = true;
@@ -250,7 +234,7 @@ class Manager implements LoggerInterface
             $logger = match (true) {
                 isset($this->drivers[$driver]) => $this->createCustomDriver($config, $name),
                 method_exists($this, $method)  => $this->{$method}($config, $name),
-                default                        => throw new LogException("Logging driver [$driver] of [$name] is not supported."),
+                default                        => throw new InvalidConfiguration("Logging driver [$driver] of [$name] is not supported."),
             };
         } finally {
             unset($this->resolving[$name]);
@@ -270,7 +254,7 @@ class Manager implements LoggerInterface
     {
         $handlers = [];
         foreach ((array) ($config['channels'] ?? []) as $channel) {
-            array_push($handlers, ...$this->channel($channel)->getHandlers());
+            array_push($handlers, ...$this->channel($channel)->handlers);
         }
 
         return new Logger($name, $handlers);
@@ -304,6 +288,6 @@ class Manager implements LoggerInterface
 
     private function required(array $config, string $key, string $name): mixed
     {
-        return $config[$key] ?? throw new LogException("Logging channel [$name] requires the \"$key\" option.");
+        return $config[$key] ?? throw new InvalidConfiguration("Logging channel [$name] requires the \"$key\" option.");
     }
 }
