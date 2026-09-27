@@ -2,15 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Expansa\View\Support;
+namespace Expansa\View\Internal;
 
 /**
- * This file is part of Expansa CMS.
+ * Beautifies or minifies the rendered HTML of a view, see View::beautify() and View::minify().
+ * Based on the HTML beautifier of Hyperf (https://github.com/hyperf/hyperf, MIT).
  *
- * @link     https://www.hyperf.io
- * @document https://hyperf.wiki
- * @contact  group@hyperf.io
- * @license  https://github.com/hyperf/hyperf/blob/master/LICENSE.md
+ * @internal
+ * @package Expansa\View
  */
 final class Html
 {

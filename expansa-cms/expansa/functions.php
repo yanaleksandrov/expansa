@@ -60,7 +60,7 @@ if (!function_exists('escape')) {
 if (!function_exists('view')) {
     function view(string $view, array $data = []): Expansa\View\View
     {
-        return Expansa\Facades\View::make($view, $data);
+        return Expansa\Facades\View::create($view, $data);
     }
 }
 

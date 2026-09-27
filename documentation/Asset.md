@@ -106,7 +106,7 @@ Asset::discover('/absolute/path/to/index.blade.php');
 $content = view($page ?? 'index', [...]);
 
 // index.css / index.js рядом с index.blade.php подключатся сами, если существуют
-Asset::discover($content->getPath());
+Asset::discover($content->path);
 
 $content = $content->beautify()->render();
 ```
@@ -218,12 +218,12 @@ if (in_array($type, ['color', 'date', /* ... */], true)) {
 
 // ...
 
-$view = View::make("form/{$prefix}{$type}", $field);
+$view = View::create("form/{$prefix}{$type}", $field);
 
 // $inputType используется и как uid, и как контекст: без этого color-поле и date-поле
 // на одной странице столкнулись бы на одном uid "input" от общего шаблона, и второе
 // поле по рендеру молча осталось бы без своего скрипта (enqueue дедуплицирует по id).
-Asset::discover($view->getPath(), $inputType, ['type' => $inputType]);
+Asset::discover($view->path, $inputType, ['type' => $inputType]);
 
 $content .= $view;
 ```

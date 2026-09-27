@@ -28,7 +28,7 @@ class Field
 
             if ($type === 'tab' && ! isset($startTab)) {
                 $startTab = true;
-                $content .= View::make('form/layout-tab-menu', compact('fields'));
+                $content .= View::create('form/layout-tab-menu', compact('fields'));
             }
 
             // add required attributes & other manipulations
@@ -83,12 +83,12 @@ class Field
             }
 
             $prefix = in_array($type, [ 'tab', 'step', 'group' ], true) ? 'layout-' : '';
-            $view   = View::make("form/{$prefix}{$type}", $field);
+            $view   = View::create("form/{$prefix}{$type}", $field);
 
             // Auto-connect vendor JS/CSS for this field template (see Manager::discover()).
             // $inputType also doubles as the uid, so subtypes sharing form/input.blade.php
             // (date, range, color, ...) don't collide on that shared basename.
-            Asset::discover($view->getPath(), $inputType, ['type' => $inputType]);
+            Asset::discover($view->path, $inputType, ['type' => $inputType]);
 
             $content .= $view;
         }

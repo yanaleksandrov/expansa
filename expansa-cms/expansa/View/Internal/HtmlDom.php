@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\View\Support;
+namespace Expansa\View\Internal;
 
 use Dom\Comment;
 use Dom\Element;
@@ -10,46 +10,26 @@ use Dom\HTMLDocument;
 use Dom\Text;
 
 /**
- * EXPERIMENTAL. Not a drop-in replacement for Html::beautify() - a parallel
- * prototype built on PHP 8.4's native Dom\HTMLDocument (a real, spec-compliant
- * HTML5 parser implemented in C) instead of Html.php's hand-rolled
- * character-by-character tokenizer, to see how close it can get on both
- * output and speed.
+ * Experimental HTML beautifier on the native Dom\HTMLDocument parser, a prototype next to Html::beautify().
  *
- * Memory note: profiling showed the ~80MB peak on a 5000-row page comes
- * entirely from Dom\HTMLDocument::createFromString() building the DOM tree
- * itself (peak is identical whether or not serialization runs afterwards) -
- * there is no streaming/incremental HTML parser exposed by the DOM extension,
- * so this cost is inherent to using it at all and isn't something a yield-based
- * rewrite of the *serializer* below could reduce; that part already adds only
- * a few KB over the tree's own footprint.
+ * Differences from Html::beautify():
+ * - void elements are printed without the self-closing slash;
+ * - `<script>` and `<style>` contents are kept byte for byte;
+ * - a container of only text and unformatted elements (code, pre, strong, textarea, i by default,
+ *   `$options['unformatted']`) is folded onto one line, otherwise each child gets its own line;
+ * - a bare fragment gets an implied full document around it;
+ * - broken markup is recovered by the HTML5 parsing algorithm.
  *
- * Known differences from Html::beautify(), by design or current limitation:
- * - Self-closing slashes on void elements (<link ... />) aren't preserved -
- *   the DOM discards that detail (HTML5 doesn't require it), so this class
- *   always prints void elements without one.
- * - <script>/<style> contents are preserved byte-for-byte (like <pre>), not
- *   re-indented the way Html::beautify()'s indent_scripts option can.
- * - Mixed inline content follows the same "unformatted list" concept as
- *   Html::beautify() (default: code, pre, strong, textarea, i - overridable
- *   via $options['unformatted']): a container whose only children are text
- *   and/or unformatted-list elements is folded onto one line; anything else
- *   (e.g. mixing plain text with a <span> or <a>) falls back to one line per
- *   child, same as Html::beautify() forcing a line break before non-listed
- *   start/end tags.
- * - Only tested against documents that already contain <html>/<head>/<body>
- *   (this project's actual usage - see app/Controllers/Web.php); parsing a
- *   bare fragment will have Dom\HTMLDocument imply a full document around it.
- * - Whatever HTML5-parsing-algorithm quirks the DOM extension has (e.g. how
- *   it recovers from malformed nesting) apply here instead of Html.php's own
- *   "climb the open-tag stack" recovery - these can disagree on genuinely
- *   broken markup.
+ * Peak memory is the DOM tree itself (~80 MB on a 5000-row page), the serializer adds a few KB.
+ *
+ * @internal
+ * @package Expansa\View
  */
 final class HtmlDom
 {
-    private const PRESERVE_TAGS = ['script', 'style', 'pre', 'textarea'];
+    private const array PRESERVE_TAGS = ['script', 'style', 'pre', 'textarea'];
 
-    private const VOID_TAGS = [
+    private const array VOID_TAGS = [
         'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
         'link', 'meta', 'param', 'source', 'track', 'wbr',
     ];
@@ -243,7 +223,7 @@ final class HtmlDom
      * while everything else (real boolean attributes, and bare framework
      * directives like u-autocomplete) folds to bare.
      */
-    private const NEVER_BARE_ATTRS = ['class', 'id', 'style', 'value', 'href', 'src', 'alt', 'title', 'name', 'placeholder'];
+    private const array NEVER_BARE_ATTRS = ['class', 'id', 'style', 'value', 'href', 'src', 'alt', 'title', 'name', 'placeholder'];
 
     private function serializeAttributes(Element $element): string
     {

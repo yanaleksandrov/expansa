@@ -4,45 +4,30 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
+use Closure;
 use Expansa\Patterns\Facade;
-use Expansa\View\Engines\EngineManager;
-use Expansa\View\Finder;
+use Expansa\View\Manager;
 use Expansa\View\View as BaseView;
 
 /**
- * The View class provides a static interface to the view factory, allowing the creation and management of views.
+ * Static access to the view manager: `View::create('form/checkbox', $data)->render()`.
  *
- * @method static BaseView make(string $view, array $data = [])
+ * @method static void     configure(string|array $paths, string $cachePath = '')
+ * @method static Manager  extend(string $extension, Closure $factory)
+ * @method static BaseView create(string $view, array $data = [])
+ * @method static bool     exists(string $view)
+ * @method static void     share(string|array $key, mixed $value = null)
+ * @method static Manager  addNamespace(string $namespace, string|array $paths, bool $prepend = false)
+ * @method static void     startSection(string $name, ?string $content = null)
+ * @method static void     extendSection(string $name, string $content)
+ * @method static string   stopSection(bool $overwrite = false)
+ * @method static string   yieldSection()
+ * @method static string   yieldContent(string $name)
  */
 class View extends Facade
 {
-    private static string $views = '';
-
-    /**
-     * @var array<string, mixed>
-     */
-    private static array $options = [];
-
-    /**
-     * Set the views directory before the first view is made; with $cachePath compiled templates are cached there.
-     */
-    public static function configure(string $viewsPath, string $cachePath = ''): void
-    {
-        self::$views   = $viewsPath;
-        self::$options = $cachePath !== '' ? ['cache' => true, 'cache_path' => $cachePath] : [];
-    }
-
     protected static function getStaticClassAccessor(): string
     {
-        return \Expansa\View\Factory::class;
-    }
-
-    protected static function getConstructorArgs(): array
-    {
-        return [
-            new Finder(self::$views),
-            new EngineManager(),
-            self::$options,
-        ];
+        return Manager::class;
     }
 }

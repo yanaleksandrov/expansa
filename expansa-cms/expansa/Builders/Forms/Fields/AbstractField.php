@@ -66,12 +66,12 @@ abstract class AbstractField implements Field
 
     public function assets(): void
     {
-        Asset::discover(View::make($this->view())->getPath(), $this->type, ['type' => $this->type]);
+        Asset::discover(View::create($this->view())->path, $this->type, ['type' => $this->type]);
     }
 
     public function render(array $field = []): string
     {
-        return (string) View::make($this->view(), [...$this->defaults, ...$field]);
+        return (string) View::create($this->view(), [...$this->defaults, ...$field]);
     }
 
     /**

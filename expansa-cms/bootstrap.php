@@ -113,7 +113,7 @@ Lifecycle::phase('configure', true, function () {
 
     // views of the dashboard, installer and auth pages
     View::configure(
-        viewsPath: EX_PATH . 'dashboard/views',
+        paths: EX_PATH . 'dashboard/views',
         cachePath: EX_PATH . 'cache/views',
     );
 
