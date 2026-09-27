@@ -268,13 +268,8 @@ PHP 8.4 — PHP-CS-Fixer с теми же правилами; два форма�
 
 | Где                                              | Проблема                   | Должно быть                              |
 |--------------------------------------------------|----------------------------|------------------------------------------|
-| `Security/Csrf/Providers/Native*Provider`        | суффикс роли               | `Cookie`, `HttpOnlyCookie`, `Session`    |
-| `View/Engines/*Engine`                           | суффикс роли               | `Blade`, `File`, `Js`, `Php`             |
-| `View/Engines/Engine.php`                        | база названа как роль      | `AbstractEngine` или `Contracts\Engine`  |
-| `View/Compilers/BladeCompiler`                   | суффикс роли               | `Blade`                                  |
-| `Session/Middleware/SessionStartMiddleware`      | суффикс, повтор пакета     | `StartSession`                           |
-| `Session/Contracts/{Flash,Session,SessionManager}Interface` | суффикс не из PSR | `Flash`, `Session`, `Manager` (PSR-7/15 имена остаются) |
 | `Facades/Db.php`, `Facades/Terminal.php`         | логика в фасаде            | цель — `Database\Manager`, `Console\Manager` |
+| `Http/Status`, `Database/FieldEav`, `Database/Schema/*` | длинные PHPDoc      | 2–4 строки                               |
 
 ### Зависимости между пакетами
 
