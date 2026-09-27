@@ -49,7 +49,7 @@ Log/
 `Expansa\<Package>\Internal\*` вне пакета не импортируется.
 
 Нельзя: папки `Abstracts/`, `Interfaces/`, `Concerns/`, `Helpers/`, `Utils/`, `Exception/`; абстрактный
-класс вне папки реализаций; `Base` в имени (`BaseHandler`, `HandlerAbstract`, `TableBase`).
+класс не рядом со своими реализациями; `Base` в имени (`BaseHandler`, `HandlerAbstract`, `TableBase`).
 
 ### Классы
 
@@ -59,7 +59,8 @@ Log/
 | Класс            | существительное, единственное число, PascalCase                      | `Logger`, `LogRecord`           |
 | Точка входа      | `Manager`, если есть конфигурация или реестр каналов/драйверов; иначе по роли | `Log\Manager`; `Router`, `Validator` |
 | Реализация       | вариант без суффикса роли                                            | `Handlers\RotatingFile`, `Fields\Checkbox` |
-| Абстрактный      | `Abstract<Role>`, рядом с реализациями                               | `Handlers/AbstractHandler.php`  |
+| Абстрактный      | `Abstract<Role>`, рядом с реализациями пакета                        | `Handlers/AbstractHandler.php`, `Filesystem/AbstractEntry.php` |
+| База для чужого кода | реализаций в пакете нет, наследуют только снаружи — в корне, имя по роли без `Abstract` | `Database\Model`, `Extensions\Plugin`, `Patterns\Facade` |
 | Интерфейс        | без суффикса; `Interface` — только для имён PSR; конфликт с реализацией — алиасом | `Handler`, `File`; `LoggerInterface` |
 | Трейт            | способность; `Has<Noun>` — данные и методы вокруг них                | `HasSoftDeletes`                |
 | Enum             | в `Enums/`, единственное число, кейсы PascalCase                     | `Enums\Level::Debug`            |
