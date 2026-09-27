@@ -176,7 +176,7 @@ Log/
 
 ### PHP 8.4
 
-- Ленивые объекты (`ReflectionClass::newLazyGhost()`/`newLazyProxy()`) для БД, Mailer, Image вместо
+- Ленивые объекты (`ReflectionClass::newLazyGhost()`/`newLazyProxy()`) для БД, Mail, Image вместо
   ручного `resolve()`; внедрять после бенчмарка запроса без сервиса и с ним.
 - `array_find()`, `array_any()`, `array_all()` вместо `foreach` с `break`, если бенчмарк не хуже.
 - `new Foo()->bar()` без скобок; `strlen(...)` вместо `fn ($s) => strlen($s)`.

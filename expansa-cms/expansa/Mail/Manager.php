@@ -36,12 +36,12 @@ final class Manager
      * Start an email to a recipient.
      *
      * @param string $email
-     * @return Mailer
+     * @return Message
      * @throws Exception
      */
-    public function to(string $email): Mailer
+    public function to(string $email): Message
     {
-        return new Mailer(new PHPMailer(), $this->setup)->to($email);
+        return new Message(new PHPMailer(), $this->setup)->to($email);
     }
 
     /**

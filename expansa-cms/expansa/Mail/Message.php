@@ -14,7 +14,7 @@ use PHPMailer\PHPMailer\PHPMailer;
  *
  * @package Expansa\Mail
  */
-final class Mailer
+final class Message
 {
     /**
      * Error of the last send(), empty after a successful one.
