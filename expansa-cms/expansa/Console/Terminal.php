@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Console;
 
+use Expansa\Console\Commands\AbstractCommand;
 use Expansa\Console\Commands\AutoloadDump;
 use Expansa\Console\Commands\Env;
 use Expansa\Console\Commands\Help;
@@ -37,7 +38,7 @@ final class Terminal
     /**
      * Registered commands by name.
      *
-     * @var array<string, Command>
+     * @var array<string, AbstractCommand>
      */
     private array $commands = [];
 
@@ -87,10 +88,10 @@ final class Terminal
     /**
      * Add a command, a command with the same name is replaced.
      *
-     * @param Command|class-string<Command> $command
+     * @param AbstractCommand|class-string<AbstractCommand> $command
      * @return static
      */
-    public function addCommand(Command|string $command): static
+    public function addCommand(AbstractCommand|string $command): static
     {
         $command = is_string($command) ? new $command() : $command;
 
@@ -104,7 +105,7 @@ final class Terminal
     /**
      * Add several commands.
      *
-     * @param array<Command|class-string<Command>> $commands
+     * @param array<AbstractCommand|class-string<AbstractCommand>> $commands
      * @return static
      */
     public function addCommands(array $commands): static
@@ -120,9 +121,9 @@ final class Terminal
      * Get a command, active or not.
      *
      * @param string $name
-     * @return Command|null
+     * @return AbstractCommand|null
      */
-    public function command(string $name): ?Command
+    public function command(string $name): ?AbstractCommand
     {
         return $this->commands[$name] ?? null;
     }
@@ -130,11 +131,11 @@ final class Terminal
     /**
      * Get the active commands sorted by name.
      *
-     * @return array<string, Command>
+     * @return array<string, AbstractCommand>
      */
     public function commands(): array
     {
-        $commands = array_filter($this->commands, fn (Command $command) => $command->active);
+        $commands = array_filter($this->commands, fn (AbstractCommand $command) => $command->active);
         ksort($commands);
 
         return $commands;

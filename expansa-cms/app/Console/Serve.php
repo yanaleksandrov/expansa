@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Console;
 
-use Expansa\Console\Command;
+use Expansa\Console\Commands\AbstractCommand;
 
 /**
  * Runs the site on PHP's built-in server through server.php, which routes requests like the .htaccess rules.
  */
-final class Serve extends Command
+final class Serve extends AbstractCommand
 {
     public string $name = 'serve';
 

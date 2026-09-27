@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Scheduler\Commands;
 
 use Closure;
-use Expansa\Console\Command;
+use Expansa\Console\Commands\AbstractCommand;
 use Expansa\Scheduler\Scheduler;
 
 /**
@@ -14,7 +14,7 @@ use Expansa\Scheduler\Scheduler;
  *
  * @package Expansa\Scheduler
  */
-final class Run extends Command
+final class Run extends AbstractCommand
 {
     public string $name = 'schedule:run';
 

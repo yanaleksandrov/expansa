@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\Console\Command;
-
 /**
  * Shows the group, description, usage and options of a command.
  *
  * @package Expansa\Console
  */
-final class Help extends Command
+final class Help extends AbstractCommand
 {
     public string $name = 'help';
 

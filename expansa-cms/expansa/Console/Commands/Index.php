@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\Console\Command;
-
 /**
  * Shows the version and the active commands by group, the default command.
  *
  * @package Expansa\Console
  */
-final class Index extends Command
+final class Index extends AbstractCommand
 {
     public string $name = 'list';
 

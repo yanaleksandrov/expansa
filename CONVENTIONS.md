@@ -279,4 +279,4 @@ hook `set { }` в сигнатуре конструктора (`Generic.WhiteSpa
 |---------------|---------------------------------|------------------------------------------------------|
 | `Builders`    | `Assets`, `View`, `Security`    | допустимо (UI-слой): колбэки `Form::configure()`, статические помощники (`Sanitizer`) напрямую |
 | `Cache`       | `Database` (`Providers\Database`) | допустимо: только драйвер, `Query\Builder` в конструкторе |
-| `*\Commands`  | `Console`                       | допустимо: команда пакета наследует `Console\Command` |
+| `*\Commands`  | `Console`                       | допустимо: команда пакета наследует `Console\Commands\AbstractCommand` |

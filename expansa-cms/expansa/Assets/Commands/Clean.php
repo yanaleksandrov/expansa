@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Assets\Commands;
 
 use Expansa\Assets\Manager;
-use Expansa\Console\Command;
+use Expansa\Console\Commands\AbstractCommand;
 
 /**
  * Deletes cached, minified and combined asset files older than an age, optionally capping their total size.
@@ -13,7 +13,7 @@ use Expansa\Console\Command;
  *
  * @package Expansa\Assets\Commands
  */
-final class Clean extends Command
+final class Clean extends AbstractCommand
 {
     public string $name = 'asset:clean';
 

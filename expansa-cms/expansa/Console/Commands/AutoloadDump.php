@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\Console\Command;
 use Expansa\Support\ClassMap;
 
 /**
@@ -13,7 +12,7 @@ use Expansa\Support\ClassMap;
  *
  * @package Expansa\Console
  */
-final class AutoloadDump extends Command
+final class AutoloadDump extends AbstractCommand
 {
     public string $name = 'autoload:dump';
 

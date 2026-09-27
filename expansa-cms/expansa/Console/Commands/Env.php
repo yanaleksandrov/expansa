@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Expansa\Console\Commands;
 
-use Expansa\Console\Command;
-
 /**
  * Shows the current environment.
  *
  * @package Expansa\Console
  */
-final class Env extends Command
+final class Env extends AbstractCommand
 {
     public string $name = 'env';
 

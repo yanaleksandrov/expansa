@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Hooks\Commands;
 
-use Expansa\Console\Command;
+use Expansa\Console\Commands\AbstractCommand;
 use Expansa\Hooks\Manager;
 
 /**
@@ -13,7 +13,7 @@ use Expansa\Hooks\Manager;
  *
  * @package Expansa\Hooks
  */
-final class Index extends Command
+final class Index extends AbstractCommand
 {
     public string $name = 'hooks:list';
 

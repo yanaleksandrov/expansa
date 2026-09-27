@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Console;
+namespace Expansa\Console\Commands;
 
 use Expansa\Console\Contracts\Command as CommandContract;
+use Expansa\Console\Terminal;
 use Expansa\Console\Traits\WritesOutput;
 
 /**
  * Base of a console command: the name, usage and options shown by "list" and "help", handle() runs it.
  * Terminal::addCommand() sets the terminal, the command reads its options and arguments from it.
  *
- * @package Expansa\Console
+ * @package Expansa\Console\Commands
  */
-abstract class Command implements CommandContract
+abstract class AbstractCommand implements CommandContract
 {
     use WritesOutput;
 
