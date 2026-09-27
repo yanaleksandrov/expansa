@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/message.blade.php` - a static informational or warning message block.
  */
-class Message extends AbstractField
+final class Message extends AbstractField
 {
     public function __construct()
     {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table;
+use Expansa\Builders\Table\AbstractTable;
 use Expansa\Facades\Form;
 
-final class Pages extends Table
+final class Pages extends AbstractTable
 {
     public function data(): array
     {

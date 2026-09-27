@@ -9,7 +9,7 @@ namespace Expansa\Builders\Forms\Fields;
  * (text, color, date, datetime-local, email, month, range, search, tel, time, url, week).
  * The concrete subtype is carried in `$field['attributes']['type']`, not on this class.
  */
-class Input extends AbstractField
+final class Input extends AbstractField
 {
     public function __construct()
     {

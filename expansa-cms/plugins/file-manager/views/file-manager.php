@@ -15,8 +15,8 @@ if (! defined('EX_PATH')) {
     exit;
 }
 
-$directories = Disk::dir(EX_PATH)->read();
-$folders     = Disk::dir(EX_PATH)->read();
+$directories = Disk::dir(EX_PATH)->directories();
+$folders     = Disk::dir(EX_PATH)->directories();
 $files       = [
     ...Disk::dir(EX_PATH)->files('.[!.]*'),
     ...Disk::dir(EX_PATH)->files('*.*'),

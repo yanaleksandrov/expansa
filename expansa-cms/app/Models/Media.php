@@ -59,7 +59,7 @@ class Media
                             'size'         => $file->size,
                             'sizeKb'       => $file->sizeKb,
                             'sizeMb'       => $file->sizeMb,
-                            'sizeHumanize' => $file->sizeHumanize,
+                            'sizeHumanize' => $file->size,
                         ],
                     ];
                 }
@@ -90,7 +90,7 @@ class Media
                             'size'         => $file->size,
                             'sizeKb'       => $file->sizeKb,
                             'sizeMb'       => $file->sizeMb,
-                            'sizeHumanize' => $file->sizeHumanize,
+                            'sizeHumanize' => $file->size,
                         ];
                     }
                 }

@@ -4,9 +4,14 @@ declare(strict_types=1);
 
 namespace Expansa\Extensions;
 
-use Expansa\Extensions\Contracts\ExtensionSkeleton;
+use Expansa\Extensions\Contracts\Extension;
 
-abstract class Plugin extends Extension implements ExtensionSkeleton
+/**
+ * Base of a plugin: `plugins/<slug>/index.php` returns an anonymous subclass.
+ *
+ * @package Expansa\Extensions
+ */
+abstract class Plugin extends AbstractExtension implements Extension
 {
     public string $type = 'plugin';
 
@@ -18,9 +23,9 @@ abstract class Plugin extends Extension implements ExtensionSkeleton
      * Sets the dependencies.
      *
      * @param string $extensionId The unique ID of the plugin.
-     * @return self
+     * @return static
      */
-    protected function setDependencies(string $extensionId): self
+    protected function setDependencies(string $extensionId): static
     {
         $this->dependencies[] = $this->sanitize($extensionId);
         return $this;
@@ -30,9 +35,9 @@ abstract class Plugin extends Extension implements ExtensionSkeleton
      * Sets an array of roles and access rights associated with the plugin.
      *
      * @param string $capability User capability.
-     * @return self
+     * @return static
      */
-    protected function addCapability(string $capability): self
+    protected function addCapability(string $capability): static
     {
         $this->capabilities[] = $this->sanitize($capability);
         return $this;

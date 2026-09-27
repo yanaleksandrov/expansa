@@ -8,7 +8,7 @@ namespace Expansa\Builders\Forms\Fields;
  * Renders `form/uploader.blade.php` - a drag-and-drop file uploader with a
  * configurable maximum size.
  */
-class Uploader extends AbstractField
+final class Uploader extends AbstractField
 {
     public function __construct()
     {

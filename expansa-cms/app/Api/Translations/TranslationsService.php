@@ -90,7 +90,7 @@ final class TranslationsService
 
         if ($project && $translations) {
             $filepath = sprintf('%s/%s.json', EX_I18N . $project, 'ru');
-            Disk::file($filepath)->write(Json::encode($translations), false);
+            Disk::file($filepath)->write(Json::encode($translations), append: false);
         }
 
         return [];

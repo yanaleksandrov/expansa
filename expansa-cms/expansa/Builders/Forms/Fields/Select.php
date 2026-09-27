@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/select.blade.php` - a dropdown list, with support for `<optgroup>` via nested options.
  */
-class Select extends AbstractField
+final class Select extends AbstractField
 {
     public function __construct()
     {

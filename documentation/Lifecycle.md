@@ -156,7 +156,7 @@ final class Audit
 `themes/{папка}`. Остальные id игнорируются.
 
 ```php
-Options::update('extensions', ['active' => ['plugins/seo', 'plugins/file-manager']]);
+Option::update('extensions', ['active' => ['plugins/seo', 'plugins/file-manager']]);
 ```
 
 У расширения два метода жизненного цикла:

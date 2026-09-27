@@ -9,7 +9,7 @@ namespace Expansa\Builders\Forms\Fields;
  * Nested fields are parsed into `$field['content']` by {@see \Expansa\Builders\Forms\Field::parse()}
  * before this class ever sees them.
  */
-class LayoutGroup extends AbstractField
+final class LayoutGroup extends AbstractField
 {
     public function __construct()
     {

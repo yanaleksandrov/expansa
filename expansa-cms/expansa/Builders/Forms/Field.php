@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Forms;
 
-use Expansa\Facades\Asset;
-use Expansa\Facades\Json;
-use Expansa\Facades\Safe;
-use Expansa\Facades\View;
+use Expansa\Builders\Form;
+use Expansa\Codecs\Json;
+use Expansa\Security\Sanitizer;
 
+/**
+ * Renders a fields array to HTML through the form templates, with conditions turned into `u-show` expressions.
+ *
+ * @package Expansa\Builders\Forms
+ */
 class Field
 {
     /**
-     * Get fields HTML from array.
+     * Render fields, nested tabs, steps and groups included.
      *
      * @param array $fields
-     * @param int $step
+     * @param int   $step   Number of the first step.
      * @return string
      */
     public function parse(array $fields, int $step = 1): string
@@ -23,16 +27,16 @@ class Field
         $content = '';
 
         foreach ($fields as $field) {
-            $name = Safe::name($field['name'] ?? '');
-            $type = Safe::id($field['type'] ?? '');
+            $name = Sanitizer::name($field['name'] ?? '');
+            $type = Sanitizer::id($field['type'] ?? '');
 
             if ($type === 'tab' && ! isset($startTab)) {
                 $startTab = true;
-                $content .= View::make('form/layout-tab-menu', compact('fields'));
+                $content .= Form::view('form/layout-tab-menu', compact('fields'));
             }
 
             // add required attributes & other manipulations
-            $field['attributes'] = Safe::array($field['attributes'] ?? []);
+            $field['attributes'] = Sanitizer::array($field['attributes'] ?? []);
 
             match ($type) {
                 'textarea' => $field['attributes']['u-textarea'] ??= '',
@@ -83,24 +87,20 @@ class Field
             }
 
             $prefix = in_array($type, [ 'tab', 'step', 'group' ], true) ? 'layout-' : '';
-            $view   = View::make("form/{$prefix}{$type}", $field);
 
-            // Auto-connect vendor JS/CSS for this field template (see Manager::discover()).
-            // $inputType also doubles as the uid, so subtypes sharing form/input.blade.php
-            // (date, range, color, ...) don't collide on that shared basename.
-            Asset::discover($view->getPath(), $inputType, ['type' => $inputType]);
+            // $inputType is the asset uid, so subtypes sharing form/input (date, range, color) do not collide
+            Form::assets("form/{$prefix}{$type}", $inputType);
 
-            $content .= $view;
+            $content .= Form::view("form/{$prefix}{$type}", $field);
         }
         return $content;
     }
 
     /**
-     * Generate conditions attributes.
+     * Get the `u-show` and `hidden` attributes of a field from its conditions on other fields.
      *
-     * @param array $conditions
-     * @param array $fields
-     *
+     * @param array $conditions Items with `field`, `operator` and `value`.
+     * @param array $fields     Fields of the same level, their values are checked on the server.
      * @return array
      */
     public function conditions(array $conditions, array $fields): array
@@ -129,15 +129,15 @@ class Field
                 continue;
             }
 
-            $safeValue    = Safe::attribute($value);
+            $safeValue    = Sanitizer::attribute($value);
             $attributeVal = match (gettype($value)) {
                 'boolean'          => $value === true ? 'true' : 'false',
                 'integer', 'double' => $value,
                 default            => "'$safeValue'",
             };
 
-            $values = Json::encode($value);
-            $prop   = Safe::prop($field);
+            $values = new Json()->encode($value);
+            $prop   = Sanitizer::prop($field);
 
             $expressions[] = [
                 'expression' => match ($operator) {
@@ -170,7 +170,7 @@ class Field
         if ($expressions) {
             return [
                 'u-show' => implode(' && ', array_column($expressions, 'expression')),
-                'hidden' => Safe::bool(in_array(false, array_column($expressions, 'match'), true)),
+                'hidden' => Sanitizer::bool(in_array(false, array_column($expressions, 'match'), true)),
             ];
         }
         return [];

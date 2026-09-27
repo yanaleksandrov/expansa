@@ -6,12 +6,14 @@ namespace Expansa\Builders\Forms\Contracts;
 
 /**
  * Describes a single form field type (text, select, uploader, ...) that can be
- * registered with the form builder via {@see \Expansa\Facades\Form::configure()}.
+ * registered with the form builder via {@see \Expansa\Builders\Form::configure()}.
  */
 interface Field
 {
     /**
-     * Register the CSS & JS assets required to render this field type.
+     * Connect the CSS and JS required to render this field type.
+     *
+     * @return void
      */
     public function assets(): void;
 

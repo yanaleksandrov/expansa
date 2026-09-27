@@ -8,7 +8,7 @@ namespace Expansa\Builders\Forms\Fields;
  * Renders `form/password.blade.php` - a password input with an optional visibility
  * switcher, strength indicator and generator.
  */
-class Password extends AbstractField
+final class Password extends AbstractField
 {
     public function __construct()
     {

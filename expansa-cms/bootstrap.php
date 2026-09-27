@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @see documentation/Lifecycle.md
  */
 
+use Expansa\Facades\Asset;
 use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
@@ -117,7 +118,7 @@ Lifecycle::phase('configure', true, function () {
     // the site URL is read from the options only once there is a database to read it from
     Url::configure(
         root: EX_PATH,
-        site: defined('EX_DB') ? fn () => App\Models\Options::get('site.url') : null,
+        site: defined('EX_DB') ? fn () => App\Models\Option::get('site.url') : null,
     );
 
     // views of the dashboard, installer and auth pages
@@ -152,7 +153,7 @@ Lifecycle::phase('configure', true, function () {
     );
 
     // every dashboard table renders the items filter form
-    Expansa\Builders\Table::configure(
+    Expansa\Builders\Table\AbstractTable::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php'
     );
 
@@ -221,6 +222,8 @@ Lifecycle::phase('configure', true, function () {
             'repeater'        => Expansa\Builders\Forms\Fields\Repeater::class,
             'message'         => Expansa\Builders\Forms\Fields\Message::class,
         ],
+        view: fn (string $template, array $data) => (string) View::make($template, $data),
+        assets: fn (string $template, string $uid) => Asset::discover(View::make($template)->getPath(), $uid, ['type' => $uid]),
     );
 });
 
@@ -388,7 +391,7 @@ Lifecycle::phase('register', $isInstalled, function () {
  */
 Lifecycle::phase('extensions', $isInstalled, function () {
     Extensions::load(
-        ids: (array) App\Models\Options::get('extensions.active', []),
+        ids: (array) App\Models\Option::get('extensions.active', []),
     );
     Extensions::register('plugin');
     Extensions::register('theme');
@@ -419,6 +422,7 @@ Lifecycle::phase('booted', $isInstalled, function () {
  */
 Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(App\Console\Serve::class);
+    Terminal::addCommand(Expansa\Assets\Commands\Clean::class);
     Terminal::run();
 });
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\System;
 
-use App\Models\Options;
+use App\Models\Option;
 use App\Models\User;
 use App\Support\Installation;
 use App\Support\Requirements;
@@ -137,7 +137,7 @@ final class SystemService
 
             $user->save();
 
-            Options::update('site', $site + ['owner' => ['email' => $user->email]]);
+            Option::update('site', $site + ['owner' => ['email' => $user->email]]);
 
             Installation::complete($draft);
         } catch (\Throwable $e) {

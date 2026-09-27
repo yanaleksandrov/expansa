@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/number.blade.php` - a numeric input with increment/decrement controls.
  */
-class Number extends AbstractField
+final class Number extends AbstractField
 {
     public function __construct()
     {

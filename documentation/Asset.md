@@ -218,14 +218,27 @@ if (in_array($type, ['color', 'date', /* ... */], true)) {
 
 // ...
 
-$view = View::make("form/{$prefix}{$type}", $field);
-
 // $inputType используется и как uid, и как контекст: без этого color-поле и date-поле
 // на одной странице столкнулись бы на одном uid "input" от общего шаблона, и второе
 // поле по рендеру молча осталось бы без своего скрипта (enqueue дедуплицирует по id).
-Asset::discover($view->getPath(), $inputType, ['type' => $inputType]);
+$content .= Form::view("form/{$prefix}{$type}", $field, $inputType);
+```
 
-$content .= $view;
+Сам `Builders` не вызывает фасады `View` и `Asset`: шаблон рендерит колбэк `view` из
+`Form::configure()` в `bootstrap.php`, он же вызывает `discover()`:
+
+```php
+Form::configure(
+    fields: [/* ... */],
+    view: function (string $template, array $data, ?string $assets): string {
+        $view = View::make($template, $data);
+        if ($assets !== null) {
+            Asset::discover($view->getPath(), $assets, ['type' => $assets]);
+        }
+
+        return (string) $view;
+    },
+);
 ```
 
 А в `dashboard/index.php` резолвер использует и путь к файлу, и этот контекст:
@@ -293,22 +306,22 @@ Asset::script('alpine', '/assets/js/alpine.min.js', ['data' => ['debug' => true]
 
 ### Шаг 1. Что обязан уметь провайдер
 
-Любой провайдер — это класс, унаследованный от `Expansa\Assets\Abstracts\Provider`. Абстрактный
-класс требует реализовать два метода:
+Любой провайдер — это класс, унаследованный от `Expansa\Assets\Providers\AbstractProvider`. Объект
+провайдера — это один ресурс в очереди. Абстрактный класс требует реализовать два метода:
 
-- `render(Provider $asset, bool $minify = false, bool $inline = false): string` — вернуть HTML-тег
-  для одного ресурса; `$minify`/`$inline` приходят из вызова `Asset::render()`, а не хранятся на
+- `render(bool $minify = false, bool $inline = false): string` — вернуть HTML-тег
+  этого ресурса; `$minify`/`$inline` приходят из вызова `Asset::render()`, а не хранятся на
   самом ресурсе (см. [Минификация и встраивание](#минификация-и-встраивание)).
 - `minify(string $code): string` — минифицировать содержимое ресурса (если для вашего типа
   минификация не имеет смысла, как для шрифтов, просто верните `$code` без изменений).
 
-Необязательно, но при желании можно переопределить и `renderInline(Provider $asset, string $content): string`
+Необязательно, но при желании можно переопределить и `renderInline(string $content): string`
 — как обернуть уже готовое содержимое (например, при `combine: true, inline: true`) в тег без
 `href`/`src`. По умолчанию просто откатывается на обычный `render()`; переопределять есть смысл
 только если «встроенное содержимое» вообще имеет смысл для вашего типа ресурса (для шрифта,
 например, нет).
 
-Ещё один необязательный метод — `preamble(Provider $asset): string`. По умолчанию возвращает
+Ещё один необязательный метод — `preamble(): string`. По умолчанию возвращает
 пустую строку; переопределите его, если вашему ресурсу нужна разметка рядом с тегом, которая не
 должна ни минифицироваться вместе с содержимым, ни оказаться внутри закэшированного/объединённого
 файла (пример — `data`-дамп у `Script`, см. [Объединение файлов](#объединение-файлов)).
@@ -316,13 +329,12 @@ Asset::script('alpine', '/assets/js/alpine.min.js', ['data' => ['debug' => true]
 входящий кусок — при `combine: true`.
 
 Кроме этого, `Manager` при рендере и сортировке очереди обращается к нескольким свойствам объекта
-напрямую (через `AssetHandler::sortDependencies()` и фильтр в `render()`), поэтому провайдер
-должен их объявить:
+напрямую, поэтому `AbstractProvider` объявляет их абстрактными, а провайдер должен их реализовать:
 
 | Свойство        | Тип      | Зачем нужно |
 |-----------------|----------|-------------|
 | `uid`           | `string` | идентификатор ресурса, по нему работают `get()`, `dequeue()`, `override()` |
-| `id`            | `string` | ключ хранения в `Manager::$assets`, должен быть уникален (обычно `"{$uid}-{extension}"`) |
+| `id`            | `string` | ключ хранения в очереди `Manager`, должен быть уникален (обычно `"{$uid}-{extension}"`) |
 | `dependencies`  | `array`  | uid’ы (или id’ы) ресурсов, которые должны выводиться раньше |
 | `toFooter`      | `bool`   | попадёт ли ресурс в `render(['toFooter' => true])` (подвал) или в `false` (`<head>`) |
 
@@ -334,9 +346,9 @@ Asset::script('alpine', '/assets/js/alpine.min.js', ['data' => ['debug' => true]
 ```php
 namespace App\Assets;
 
-use Expansa\Assets\Abstracts\Provider;
+use Expansa\Assets\Providers\AbstractProvider;
 
-class Font extends Provider
+final class Font extends AbstractProvider
 {
     public function __construct(
         public string $uid,
@@ -358,15 +370,15 @@ class Font extends Provider
         get => sprintf('%s-font', $this->uid);
     }
 
-    public function render(Provider $asset, bool $minify = false, bool $inline = false): string
+    public function render(bool $minify = false, bool $inline = false): string
     {
         // Шрифт минифицировать/инлайнить нечем, оба параметра для этого провайдера смысла не имеют.
-        $attributes = $this->sanitizeAttributes([
+        $attributes = $this->renderAttributes([
             'rel'         => 'preload',
             'as'          => 'font',
-            'href'        => $asset->src,
-            'type'        => $asset->type,
-            'crossorigin' => $asset->crossorigin,
+            'href'        => $this->src,
+            'type'        => $this->type,
+            'crossorigin' => $this->crossorigin,
         ]);
 
         return sprintf("\t<link%s>\n", $attributes);
@@ -380,9 +392,9 @@ class Font extends Provider
 }
 ```
 
-`sanitizeAttributes()` доступен «из коробки» — он приходит вместе с `Provider` через трейт
-`AssetHandler` и берёт на себя экранирование и сборку строки атрибутов, как это делают `Link` и
-`Script`.
+`renderAttributes()` доступен «из коробки» в `AbstractProvider` и берёт на себя экранирование и
+сборку строки атрибутов, как это делают `Link` и `Script`. Там же `readContent()` (чтение и
+минификация локального файла) и `writeCache()` (запись в `cache/assets`).
 
 ### Шаг 3. Регистрируем провайдера
 
@@ -396,7 +408,7 @@ use App\Assets\Font;
 Asset::provider('font', Font::class);
 ```
 
-Если передать класс, не унаследованный от `Provider`, `Asset::provider()` выбросит
+Если передать класс, не унаследованный от `AbstractProvider`, `Asset::provider()` выбросит
 `InvalidArgumentException` — опечатку в конфигурации сразу будет видно.
 
 ### Шаг 4. Подключаем ресурс и выводим его
@@ -529,7 +541,7 @@ Asset::render(['toFooter' => false], minify: true, inline: true); // миниф�
 APCu — это один сегмент общей памяти фиксированного размера (`apc.shm_size`) на весь сервер, общий
 для всего, что вообще кладёт туда данные (не только `Asset`). Большой файл в нём — плохая идея: он
 непропорционально съедает этот бюджет, фрагментирует сегмент и может вытеснить чужие записи.
-Поэтому результат минификации крупнее `AssetHandler::APCU_MAX_BYTES` (1024 КБ) в APCu не
+Поэтому результат минификации крупнее 1024 КБ (`AbstractProvider::APCU_MAX_BYTES`) в APCu не
 складывается — файл всё равно читается и минифицируется корректно, просто без кэширования
 результата между запросами.
 
@@ -563,8 +575,8 @@ Asset::clean(604800, 100*1024*1024); // + не больше 100 МБ сумма�
 php artisan asset:clean --max-age=604800 --max-size=104857600
 ```
 
-Удобно повесить на cron/деплой-скрипт (эта команда — не более чем тонкая обёртка над
-`Asset::clean()`, никакой отдельной логики).
+Удобно повесить на cron/деплой-скрипт. Команда `Expansa\Assets\Commands\Clean` — тонкая обёртка над
+`Asset::clean()`, её регистрирует `bootstrap.php` в консольном контексте.
 
 > CSS реально минифицируется (`Link::minify()` — рабочий алгоритм). JS-минификация —
 > заглушка (`Script::minify()` возвращает код без изменений): безопасная минификация JS требует

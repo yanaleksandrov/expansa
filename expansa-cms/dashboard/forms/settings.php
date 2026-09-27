@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Options;
+use App\Models\Option;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
@@ -49,7 +49,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'site.name',
-								'value'       => Options::get( 'site.name' ),
+								'value'       => Option::get( 'site.name' ),
 								'required'    => true,
 								'placeholder' => t( 'e.g. Google' ),
 							],
@@ -70,7 +70,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'site.tagline',
-								'value'       => Options::get( 'site.tagline' ),
+								'value'       => Option::get( 'site.tagline' ),
 								'placeholder' => t( 'e.g. Just another Expansa site' ),
 							],
 						],
@@ -90,7 +90,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'site.language',
-								'value'    => Options::get( 'site.language' ),
+								'value'    => Option::get( 'site.language' ),
 								'u-select' => '{"showSearch": 1}',
 							],
 							'options' => I18n::languageOptions(),
@@ -111,7 +111,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'site.url',
-								'value'       => Options::get( 'site.url' ),
+								'value'       => Option::get( 'site.url' ),
 								'placeholder' => t( 'e.g. Google' ),
 								'required'    => true,
 							],
@@ -142,7 +142,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'owner.email',
-								'value'    => Options::get( 'owner.email' ),
+								'value'    => Option::get( 'owner.email' ),
 								'required' => true,
 							],
 						],
@@ -176,13 +176,13 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Anyone can register' ),
 									'icon'        => 'ph ph-user-list',
 									'description' => t( 'Allow visitors to create an account on the site' ),
-									'checked'     => Options::get( 'users.membership', true ),
+									'checked'     => Option::get( 'users.membership', true ),
 								],
 								'users[moderate]' => [
 									'content'     => t( 'Must confirm' ),
 									'icon'        => 'ph ph-police-car',
 									'description' => t( 'Choose how new accounts are verified' ),
-									'checked'     => Options::get( 'users.moderate', false ),
+									'checked'     => Option::get( 'users.moderate', false ),
 								],
 							],
 						],
@@ -208,7 +208,7 @@ return Expansa\Facades\Form::enqueue(
 							],
 							'attributes'  => [
 								'u-prop' => 'users.role',
-								'value' => Options::get( 'users.role' ),
+								'value' => Option::get( 'users.role' ),
 							],
 							'options'     => [
 								'subscriber'    => t( 'Subscriber' ),
@@ -298,7 +298,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'weekStartsOn',
-								'value' => Options::get( 'week-starts-on' ),
+								'value' => Option::get( 'week-starts-on' ),
 							],
 							'options' => [
 								'0' => t( 'Sunday' ),
@@ -326,7 +326,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'timezone',
-								'value' => Options::get( 'timezone' ),
+								'value' => Option::get( 'timezone' ),
 							],
 							'options' => [
 								'subscriber'    => t( 'Subscriber' ),
@@ -375,7 +375,7 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Discourage search engines from indexing this site' ),
 									'icon'        => 'ph ph-globe-hemisphere-west',
 									'description' => t( 'It is up to search engines to honor this request.' ),
-									'checked'     => Options::get( 'discourage', false ),
+									'checked'     => Option::get( 'discourage', false ),
 								],
 							],
 						],
@@ -418,31 +418,31 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Allow people to submit comments on new posts' ),
 									'icon'        => 'ph ph-chat-dots',
 									'description' => t( 'Individual posts may override these settings. Changes here will only be applied to new posts.' ),
-									'checked'     => Options::get( 'comments.default_status', true ),
+									'checked'     => Option::get( 'comments.default_status', true ),
 								],
 								'comments[require_name_email]' => [
 									'content'     => t( 'Comment author must fill out name and email' ),
 									'icon'        => 'ph ph-textbox',
 									'description' => t( 'If disabled, only the name is required' ),
-									'checked'     => Options::get( 'comments.default_status' ),
+									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[registration]' => [
 									'content'     => t( 'Users must be registered and logged in to comment' ),
 									'icon'        => 'ph ph-browser',
 									'description' => '',
-									'checked'     => Options::get( 'comments.default_status' ),
+									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[close_comments_for_old_posts]' => [
 									'content'     => t( 'Automatically close comments on posts older than %s days', '<label class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></label>' ),
 									'icon'        => 'ph ph-hourglass-medium',
 									'description' => '',
-									'checked'     => Options::get( 'comments.default_status' ),
+									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[thread_comments]' => [
 									'content'     => t( 'Enable threaded (nested) comments %s levels deep', '<label class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></label>' ),
 									'icon'        => 'ph ph-stack',
 									'description' => '',
-									'checked'     => Options::get( 'comments.default_status' ),
+									'checked'     => Option::get( 'comments.default_status' ),
 								],
 							],
 						],
@@ -476,13 +476,13 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Anyone posts a comment' ),
 									'icon'        => 'ph ph-chats',
 									'description' => t( 'Individual posts may override these settings. Changes here will only be applied to new posts.' ),
-									'checked'     => Options::get( 'comments.default_status', true ),
+									'checked'     => Option::get( 'comments.default_status', true ),
 								],
 								'comments[notify_moderation]' => [
 									'content'     => t( 'A comment is held for moderation' ),
 									'icon'        => 'ph ph-detective',
 									'description' => '',
-									'checked'     => Options::get( 'comments.default_status' ),
+									'checked'     => Option::get( 'comments.default_status' ),
 								],
 							],
 						],
@@ -516,13 +516,13 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Comment must be manually approved' ),
 									'icon'        => 'ph ph-chats',
 									'description' => t( 'Individual posts may override these settings. Changes here will only be applied to new posts.' ),
-									'checked'     => Options::get( 'comments.moderation', true ),
+									'checked'     => Option::get( 'comments.moderation', true ),
 								],
 								'comments[previously_approved]' => [
 									'content'     => t( 'Comment author must have a previously approved comment' ),
 									'icon'        => 'ph ph-user-check',
 									'description' => '',
-									'checked'     => Options::get( 'comments.previously_approved' ),
+									'checked'     => Option::get( 'comments.previously_approved' ),
 								],
 							],
 						],
@@ -556,7 +556,7 @@ return Expansa\Facades\Form::enqueue(
 									'content'     => t( 'Show Avatars' ),
 									'icon'        => 'ph ph-smiley',
 									'description' => t( 'An avatar is an image that can be associated with a user across multiple websites. In this area, you can choose to display avatars of users who interact with the site.' ),
-									'checked'     => Options::get( 'avatars.show', true ),
+									'checked'     => Option::get( 'avatars.show', true ),
 								],
 							],
 						],
@@ -623,7 +623,7 @@ return Expansa\Facades\Form::enqueue(
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
-							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.format == \'' . Options::get( 'images.format' ) . '\'">Convert existing images</button>',
+							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.format == \'' . Option::get( 'images.format' ) . '\'">Convert existing images</button>',
 							'instruction' => t( 'Changing this setting only affects newly uploaded images. Existing images keep their current format.' ),
 							'tooltip'     => t( 'May reduce image detail and quality, and increase your hosting costs' ),
 							'copy'        => 0,
@@ -631,7 +631,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'images.format',
-								'value' => Options::get( 'images.format' ),
+								'value' => Option::get( 'images.format' ),
 							],
 							'options'     => [
 								''     => t( 'Do not convert' ),
@@ -646,7 +646,7 @@ return Expansa\Facades\Form::enqueue(
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
-							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.organization.trim() == \'' . Options::get( 'images.organization', 'yearmonth' ) . '\'">Convert existing files</button>',
+							'after'       => '<button type="button" class="btn btn--xs btn--primary" @click="" :disabled="images.organization.trim() == \'' . Option::get( 'images.organization', 'yearmonth' ) . '\'">Convert existing files</button>',
 							'instruction' => t( 'Changing this setting only affects new files. Existing files stay where they are.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
@@ -694,7 +694,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'permalinks.pages.single',
-								'value'    => Options::get( 'permalinks.pages.single' ),
+								'value'    => Option::get( 'permalinks.pages.single' ),
 								'required' => true,
 							],
 						],
@@ -714,7 +714,7 @@ return Expansa\Facades\Form::enqueue(
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'permalinks.pages.categories',
-								'value'    => Options::get( 'permalinks.pages.categories' ),
+								'value'    => Option::get( 'permalinks.pages.categories' ),
 								'required' => true,
 							],
 						],
