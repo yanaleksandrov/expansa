@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Expansa\Extensions\Contracts;
 
 /**
- * Interface Skeleton.
+ * Lifecycle of a plugin or a theme: Manager calls these methods for every loaded extension.
  *
- * The Skeleton defines the contract for a plugin in an Expansa CMS. It serves as a
- * blueprint for implementing plugins and ensures consistency across different plugins.
+ * @package Expansa\Extensions\Contracts
  */
-interface ExtensionSkeleton
+interface Extension
 {
     /**
      * Declare what the plugin provides (post types, roles, hooks), in the "extensions" lifecycle phase.

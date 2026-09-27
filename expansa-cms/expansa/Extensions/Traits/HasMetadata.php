@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace Expansa\Extensions\Traits;
 
 /**
- * This trait provides common properties for Expansa extensions, including metadata
- * such as ID, name, version, and author information.
+ * Metadata of an extension: id, name, version, author and requirements.
+ *
+ * @package Expansa\Extensions\Traits
  */
-trait ExtensionTraits
+trait HasMetadata
 {
     /**
      * Unique identifier for the extension.

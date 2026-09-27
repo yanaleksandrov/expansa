@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Expansa\Extensions;
 
-use Expansa\Extensions\Traits\ExtensionHelpers;
-use Expansa\Extensions\Traits\ExtensionTraits;
+use Expansa\Extensions\Traits\HasMetadata;
+use Expansa\Extensions\Traits\Sanitizes;
 
-abstract class Extension
+/**
+ * Base of Plugin and Theme: metadata set by fluent setters, which sanitize the values.
+ *
+ * @package Expansa\Extensions
+ */
+abstract class AbstractExtension
 {
-    use ExtensionTraits;
-    use ExtensionHelpers;
+    use HasMetadata;
+    use Sanitizes;
 
     /**
      * Nothing to declare by default: most extensions only need boot().
@@ -23,9 +28,9 @@ abstract class Extension
      * Sets the name of the extension.
      *
      * @param string $name The name of the extension.
-     * @return self
+     * @return static
      */
-    protected function setName(string $name): self
+    protected function setName(string $name): static
     {
         $this->name = $this->sanitize($name);
         return $this;
@@ -35,9 +40,9 @@ abstract class Extension
      * Sets the URL for the extension's homepage.
      *
      * @param string $url The URL of the extension.
-     * @return self
+     * @return static
      */
-    protected function setUrl(string $url): self
+    protected function setUrl(string $url): static
     {
         $this->url = $this->sanitizeUrl($url);
         return $this;
@@ -47,9 +52,9 @@ abstract class Extension
      * Sets the description of the extension.
      *
      * @param string $description A brief description of the extension's functionality.
-     * @return self
+     * @return static
      */
-    protected function setDescription(string $description): self
+    protected function setDescription(string $description): static
     {
         $this->description = $this->sanitize($description);
         return $this;
@@ -58,14 +63,12 @@ abstract class Extension
     /**
      * Sets the license for the extension.
      *
-     * If the license is not already set, it will be assigned.
-     *
      * @param string $license The license under which the extension is released.
-     * @return self
+     * @return static
      */
-    protected function setLicense(string $license): self
+    protected function setLicense(string $license): static
     {
-        $this->license ??= $this->sanitize($license);
+        $this->license = $this->sanitize($license);
         return $this;
     }
 
@@ -73,9 +76,9 @@ abstract class Extension
      * Sets the copyright information for the extension.
      *
      * @param string $copyright The copyright information.
-     * @return self
+     * @return static
      */
-    protected function setCopyright(string $copyright): self
+    protected function setCopyright(string $copyright): static
     {
         $this->copyright = $this->sanitize($copyright);
         return $this;
@@ -85,9 +88,9 @@ abstract class Extension
      * Sets the author of the extension.
      *
      * @param string $author The name of the author.
-     * @return self
+     * @return static
      */
-    protected function setAuthor(string $author): self
+    protected function setAuthor(string $author): static
     {
         $this->author = $this->sanitize($author);
         return $this;
@@ -97,9 +100,9 @@ abstract class Extension
      * Sets the author's homepage URL.
      *
      * @param string $authorUrl The author's URL.
-     * @return self
+     * @return static
      */
-    protected function setAuthorUrl(string $authorUrl): self
+    protected function setAuthorUrl(string $authorUrl): static
     {
         $this->authorUrl = $this->sanitizeUrl($authorUrl);
         return $this;
@@ -109,9 +112,9 @@ abstract class Extension
      * Sets the author's email address.
      *
      * @param string $authorEmail The author's email.
-     * @return self
+     * @return static
      */
-    protected function setAuthorEmail(string $authorEmail): self
+    protected function setAuthorEmail(string $authorEmail): static
     {
         $this->authorEmail = $this->sanitize($authorEmail);
         return $this;
@@ -121,9 +124,9 @@ abstract class Extension
      * Sets the version of the extension.
      *
      * @param string $version The version number of the extension.
-     * @return self
+     * @return static
      */
-    protected function setVersion(string $version): self
+    protected function setVersion(string $version): static
     {
         $this->version = $this->sanitize($version);
         return $this;
@@ -133,9 +136,9 @@ abstract class Extension
      * Sets the minimum required PHP version for the extension.
      *
      * @param string $versionPhp The minimum PHP version.
-     * @return self
+     * @return static
      */
-    protected function setVersionPhp(string $versionPhp): self
+    protected function setVersionPhp(string $versionPhp): static
     {
         $this->minVersionPhp = $this->sanitize($versionPhp);
         return $this;
@@ -145,9 +148,9 @@ abstract class Extension
      * Sets the minimum required MySQL version for the extension.
      *
      * @param string $versionDb The minimum database version.
-     * @return self
+     * @return static
      */
-    protected function setVersionMysql(string $versionDb): self
+    protected function setVersionMysql(string $versionDb): static
     {
         $this->minVersionDb = $this->sanitize($versionDb);
         return $this;
@@ -157,9 +160,9 @@ abstract class Extension
      * Sets the Expansa version compatibility for the extension.
      *
      * @param string $versionExpansa The Expansa version.
-     * @return self
+     * @return static
      */
-    protected function setVersionExpansa(string $versionExpansa): self
+    protected function setVersionExpansa(string $versionExpansa): static
     {
         $this->minVersionExpansa = $this->sanitize($versionExpansa);
         return $this;
