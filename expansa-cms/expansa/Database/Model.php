@@ -50,7 +50,7 @@ abstract class Model implements JsonSerializable
     protected static ?Closure $sanitizer = null;
 
     /**
-     * Creates a validator: (array $data, array $rules, bool $break): object with apply(), isValid(), getErrors().
+     * Creates a validator: (array $data, array $rules, bool $break): object with apply(), isValid() and $errors.
      */
     protected static ?Closure $validatorFactory = null;
 
