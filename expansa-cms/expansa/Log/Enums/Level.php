@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Log;
+namespace Expansa\Log\Enums;
 
-use Expansa\Log\Exceptions\LogException;
+use Expansa\Log\Exceptions\InvalidLevel;
 
 /**
  * Log levels of RFC 5424 with the Monolog values, a higher value is more severe.
  *
- * @package Expansa\Log
+ * @package Expansa\Log\Enums
  */
 enum Level: int
 {
@@ -41,7 +41,7 @@ enum Level: int
      *
      * @param Level|int|string $level E.g. `Level::Error`, `400`, `3` or `'error'`.
      * @return self
-     * @throws LogException
+     * @throws InvalidLevel
      */
     public static function of(Level|int|string $level): self
     {
@@ -96,10 +96,10 @@ enum Level: int
         return $level->value >= $this->value;
     }
 
-    private static function unknown(int|string $level): LogException
+    private static function unknown(int|string $level): InvalidLevel
     {
         $names = implode(', ', array_map(fn (self $case) => strtolower($case->name), self::cases()));
 
-        return new LogException("Level \"$level\" is not defined, use one of: $names");
+        return new InvalidLevel("Level \"$level\" is not defined, use one of: $names");
     }
 }

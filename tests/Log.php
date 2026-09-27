@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 use Expansa\Facades\Log;
 use Expansa\Log\Contracts\Handler;
-use Expansa\Log\Exceptions\LogException;
+use Expansa\Log\Exceptions\InvalidConfiguration;
+use Expansa\Log\Exceptions\InvalidLevel;
+use Expansa\Log\Exceptions\UnwritableFile;
 use Expansa\Log\Formatters\Line;
 use Expansa\Log\Formatters\Telegram;
 use Expansa\Log\Handlers\AbstractHandler;
 use Expansa\Log\Handlers\ErrorLog;
 use Expansa\Log\Handlers\File;
 use Expansa\Log\Handlers\RotatingFile;
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\Logger;
 use Expansa\Log\LogRecord;
 use Expansa\Log\Manager;
@@ -52,7 +54,7 @@ $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'expansa-log-' . getmypid();
 
 // levels
 check('levels resolve from cases, values, RFC 5424 codes and names', Level::of(Level::Error) === Level::Error && Level::of(400) === Level::Error && Level::of(3) === Level::Error && Level::of('ERROR') === Level::Error);
-check('unknown levels throw', throws(fn () => Level::of('fatal'), LogException::class) && throws(fn () => Level::of(8), LogException::class) && throws(fn () => new Logger()->log('verbose', 'x'), LogException::class));
+check('unknown levels throw', throws(fn () => Level::of('fatal'), InvalidLevel::class) && throws(fn () => Level::of(8), InvalidLevel::class) && throws(fn () => new Logger()->log('verbose', 'x'), InvalidLevel::class));
 check('level labels and order', Level::Warning->label() === 'WARNING' && Level::Warning->includes(Level::Error) && ! Level::Warning->includes(Level::Info));
 
 // logger
@@ -108,7 +110,7 @@ $line = $formatter->format(record('Data', [
     'deep'    => [[[[[['x']]]]]],
     'date'    => new DateTimeImmutable('2025-01-01 00:00', new DateTimeZone('UTC')),
 ]));
-check('objects, enums, invalid UTF-8, deep arrays and dates never break the line', str_contains($line, '"object":"[object stdClass]"') && str_contains($line, '"enum":"Expansa\\\\Log\\\\Level::Error"') && str_contains($line, '"invalid":"�1"') && str_contains($line, '"...') && str_contains($line, '"date":"2025-01-01T00:00:00+00:00"'));
+check('objects, enums, invalid UTF-8, deep arrays and dates never break the line', str_contains($line, '"object":"[object stdClass]"') && str_contains($line, '"enum":"Expansa\\\\Log\\\\Enums\\\\Level::Error"') && str_contains($line, '"invalid":"�1"') && str_contains($line, '"...') && str_contains($line, '"date":"2025-01-01T00:00:00+00:00"'));
 check('custom date format', new Line('H:i')->format(record('x')) === "[10:20] app.INFO: x\n");
 
 $source = record('shared', ['exception' => new RuntimeException('e')]);
@@ -131,7 +133,7 @@ $handler->close();
 $handler->handle(record('third'));
 check('the file is opened again after close', substr_count(file_get_contents($file), "\n") === 3);
 $handler->close();
-check('an unwritable path throws', throws(fn () => new File($file . DIRECTORY_SEPARATOR . 'x' . DIRECTORY_SEPARATOR . 'a.log')->handle(record('x')), LogException::class));
+check('an unwritable path throws', throws(fn () => new File($file . DIRECTORY_SEPARATOR . 'x' . DIRECTORY_SEPARATOR . 'a.log')->handle(record('x')), UnwritableFile::class));
 
 $daily = $tmp . DIRECTORY_SEPARATOR . 'daily';
 mkdir($daily);
@@ -167,9 +169,9 @@ check('the first channel is the default one', $manager->defaultChannel === 'file
 check('channels are created once', $manager->channel('file') === $manager->channel('file') && $manager->channel('file')->name === 'file');
 check('channel drivers and levels come from the config', $manager->channel()->handlers[0] instanceof File && $manager->channel()->handlers[0]->level === Level::Notice);
 check('stack channel gets the handlers of its channels', count($manager->channel('both')->handlers) === 2);
-check('a stack including itself throws', throws(fn () => $manager->channel('self'), LogException::class));
-check('unknown channel, driver and missing options throw', throws(fn () => $manager->channel('none'), LogException::class) && throws(fn () => $manager->channel('bad'), LogException::class) && throws(fn () => $manager->channel('tg'), LogException::class));
-check('unknown default channel throws', throws(fn () => new Manager()->configure(['a' => ['driver' => 'single']], 'b'), LogException::class));
+check('a stack including itself throws', throws(fn () => $manager->channel('self'), InvalidConfiguration::class));
+check('unknown channel, driver and missing options throw', throws(fn () => $manager->channel('none'), InvalidConfiguration::class) && throws(fn () => $manager->channel('bad'), InvalidConfiguration::class) && throws(fn () => $manager->channel('tg'), InvalidConfiguration::class));
+check('unknown default channel throws', throws(fn () => new Manager()->configure(['a' => ['driver' => 'single']], 'b'), InvalidConfiguration::class));
 
 $memory = new MemoryHandler();
 $manager->extend('memory', fn (array $config, string $name) => $memory);

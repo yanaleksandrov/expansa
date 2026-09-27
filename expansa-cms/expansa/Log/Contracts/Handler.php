@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Log\Contracts;
 
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\LogRecord;
 
 interface Handler

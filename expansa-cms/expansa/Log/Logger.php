@@ -11,6 +11,7 @@ use Stringable;
 use Throwable;
 use Expansa\Log\Contracts\Handler;
 use Expansa\Log\Contracts\LoggerInterface;
+use Expansa\Log\Enums\Level;
 
 /**
  * PSR-3 logger of one channel: builds a record and passes it to every handler of its level.

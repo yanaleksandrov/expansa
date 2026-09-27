@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Log\Handlers;
 
-use Expansa\Log\Exceptions\LogException;
-use Expansa\Log\Level;
+use Expansa\Log\Exceptions\UnwritableFile;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\LogRecord;
 
 /**
@@ -70,7 +70,7 @@ class File extends AbstractHandler
      *
      * @param string $text
      * @return bool
-     * @throws LogException If the file can not be opened.
+     * @throws UnwritableFile If the file can not be opened.
      */
     protected function write(string $text): bool
     {
@@ -84,18 +84,18 @@ class File extends AbstractHandler
      *
      * @param string $path
      * @return resource
-     * @throws LogException
+     * @throws UnwritableFile
      */
     protected function open(string $path)
     {
         $dir = dirname($path);
         if (! is_dir($dir) && ! @mkdir($dir, 0775, true) && ! is_dir($dir)) {
-            throw new LogException("Unable to create the log directory $dir");
+            throw new UnwritableFile("Unable to create the log directory $dir");
         }
 
         $stream = @fopen($path, 'a');
         if ($stream === false) {
-            throw new LogException("Unable to open the log file $path");
+            throw new UnwritableFile("Unable to open the log file $path");
         }
 
         return $stream;

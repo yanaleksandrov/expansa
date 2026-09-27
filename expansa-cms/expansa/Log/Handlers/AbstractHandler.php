@@ -7,7 +7,7 @@ namespace Expansa\Log\Handlers;
 use Expansa\Log\Contracts\Formatter;
 use Expansa\Log\Contracts\Handler;
 use Expansa\Log\Formatters\Line;
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\LogRecord;
 
 /**

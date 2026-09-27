@@ -6,7 +6,7 @@ namespace Expansa\Log\Handlers;
 
 use Expansa\Log\Contracts\Formatter;
 use Expansa\Log\Formatters\Telegram as TelegramFormatter;
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\LogRecord;
 
 /**

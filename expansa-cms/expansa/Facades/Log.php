@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Facades;
 
 use Closure;
-use Expansa\Log\Level;
+use Expansa\Log\Enums\Level;
 use Expansa\Log\Logger;
 use Expansa\Patterns\Facade;
 use Stringable;
