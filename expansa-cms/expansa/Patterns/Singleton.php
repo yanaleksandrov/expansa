@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Patterns;
 
-use Expansa\Patterns\Exceptions\SingletonException;
+use LogicException;
 
 /**
  * This trait implements the Singleton pattern, ensuring that a class has only one instance
@@ -39,31 +39,31 @@ trait Singleton
      * Prevents cloning of the instance.
      * Cloning is not allowed to ensure the Singleton pattern is maintained.
      *
-     * @throws SingletonException
+     * @throws LogicException
      */
     protected function __clone()
     {
-        throw new SingletonException('You can not clone a singleton.');
+        throw new LogicException('You can not clone a singleton.');
     }
 
     /**
      * Prevents deserialization of the instance.
      * The Singleton instance should not be recoverable from strings to maintain its integrity.
      *
-     * @throws SingletonException
+     * @throws LogicException
      */
     public function __wakeup()
     {
-        throw new SingletonException('You can not deserialize a singleton.');
+        throw new LogicException('You can not deserialize a singleton.');
     }
 
     /**
      * Prevents serialization of the instance.
      *
-     * @throws SingletonException Thrown when attempting to serialize a Singleton instance.
+     * @throws LogicException Thrown when attempting to serialize a Singleton instance.
      */
     public function __sleep()
     {
-        throw new SingletonException('You can not serialize a singleton.');
+        throw new LogicException('You can not serialize a singleton.');
     }
 }
