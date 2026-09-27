@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Http;
 
+use Expansa\Http\Contracts\Request as RequestContract;
+use Expansa\Http\Contracts\Response as ResponseContract;
 use Stringable;
 
 /**
@@ -11,7 +13,7 @@ use Stringable;
  *
  * @package Expansa\Http
  */
-final class Response
+final class Response implements ResponseContract
 {
     /**
      * Charset appended to the Content-Type header.
@@ -59,6 +61,30 @@ final class Response
     }
 
     /**
+     * Forget the cookies added so far.
+     *
+     * @return void
+     */
+    public function flushCookies(): void
+    {
+        $this->cookies = [];
+    }
+
+    /**
+     * Set a header, replacing the one with the same name; fluent alternative to $headers.
+     *
+     * @param string $name
+     * @param string $value
+     * @return static
+     */
+    public function setHeader(string $name, string $value): static
+    {
+        $this->headers[$name] = $value;
+
+        return $this;
+    }
+
+    /**
      * Set the body to the JSON of the data along with the Content-Type header.
      *
      * @param array<array-key, mixed> $data
@@ -78,10 +104,10 @@ final class Response
     /**
      * Adjust the response to the request: a HEAD response has no body.
      *
-     * @param Request $request
+     * @param RequestContract $request
      * @return static
      */
-    public function prepare(Request $request): static
+    public function prepare(RequestContract $request): static
     {
         if ($request->method === 'HEAD') {
             $this->content = '';
@@ -119,28 +145,45 @@ final class Response
         } elseif (function_exists('litespeed_finish_request')) {
             litespeed_finish_request();
         } elseif (PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg') {
-            self::flushOutputBuffers();
+            self::closeOutputBuffers(0, flush: true);
         }
 
         return $this;
     }
 
     /**
-     * Flush and close the output buffers that allow it.
+     * Whether the status is a redirect (201 or 3xx with a location), to the location if given.
      *
+     * @param string|null $location
+     * @return bool
+     */
+    public function isRedirect(?string $location = null): bool
+    {
+        return in_array($this->statusCode, [201, 301, 302, 303, 307, 308], true)
+            && ($location === null || $location === ($this->headers['Location'] ?? null));
+    }
+
+    /**
+     * Close the output buffers above the level that allow it, flushing or discarding their content.
+     *
+     * @param int  $targetLevel Buffer level to stop at, 0 closes all.
+     * @param bool $flush       Send the content instead of discarding it.
      * @return void
      */
-    private static function flushOutputBuffers(): void
+    public static function closeOutputBuffers(int $targetLevel, bool $flush): void
     {
-        $flags = PHP_OUTPUT_HANDLER_REMOVABLE | PHP_OUTPUT_HANDLER_FLUSHABLE;
+        $flags  = PHP_OUTPUT_HANDLER_REMOVABLE | ($flush ? PHP_OUTPUT_HANDLER_FLUSHABLE : PHP_OUTPUT_HANDLER_CLEANABLE);
+        $status = ob_get_status(true);
 
-        foreach (array_reverse(ob_get_status(true)) as $status) {
-            if (($status['flags'] & $flags) !== $flags) {
+        for ($level = count($status) - 1; $level >= $targetLevel; $level--) {
+            if (($status[$level]['flags'] & $flags) !== $flags) {
                 break;
             }
-            ob_end_flush();
+            $flush ? ob_end_flush() : ob_end_clean();
         }
 
-        flush();
+        if ($flush) {
+            flush();
+        }
     }
 }

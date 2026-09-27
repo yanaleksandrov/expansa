@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Http\Exceptions;
 
+use Expansa\Http\Contracts\Error;
 use RuntimeException;
 use Throwable;
 
@@ -12,7 +13,7 @@ use Throwable;
  *
  * @package Expansa\Http
  */
-class HttpError extends RuntimeException
+class HttpError extends RuntimeException implements Error
 {
     public function __construct(
 
