@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use Expansa\Facades\Cookie;
 use Expansa\Http\Exceptions\HttpError;
+use Expansa\Http\Exceptions\ResponseReady;
 use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
@@ -23,6 +25,9 @@ use Throwable;
  *
  *   success       -> { "data": <return value> }
  *   HttpError -> { "message": ..., "errors"?: ... }  with the exception's status code
+ *   ResponseReady -> the exception's response as-is
+ *
+ * Cookies queued with the Cookie facade are added to every response.
  *   anything else -> { "message": ... }  with status 500
  *
  * In debug mode (EX_DEBUG['enabled']), every JSON response also carries `benchmark`/`memory`
@@ -47,6 +52,8 @@ final class Kernel
             $response = $result instanceof Response
                 ? $result
                 : new Response()->json(self::withMetrics(['data' => $result]));
+        } catch (ResponseReady $e) {
+            $response = $e->response;
         } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationFailed) {
@@ -58,6 +65,10 @@ final class Kernel
             $response = new Response()->json(self::withMetrics([
                 'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
             ]), 500);
+        }
+
+        foreach (Cookie::getQueue() as $cookie) {
+            $response->setCookie($cookie);
         }
 
         $response->prepare($request)->send();

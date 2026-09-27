@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Cookie;
+namespace Expansa\Cookie\Enums;
 
 /**
  * SameSite cookie attribute: when the browser sends the cookie with cross-site requests.
