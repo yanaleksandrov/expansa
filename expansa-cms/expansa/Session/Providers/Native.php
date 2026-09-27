@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Session\Providers;
 
 use Expansa\Session\Contracts\Flash;
-use Expansa\Session\Contracts\Manager;
+use Expansa\Session\Contracts\Lifecycle;
 use Expansa\Session\Contracts\Session;
 use Expansa\Session\Exceptions\AlreadyStarted;
 use Expansa\Session\Exceptions\HeadersSent;
@@ -18,7 +18,7 @@ use RuntimeException;
  *
  * @package Expansa\Session
  */
-final class Native implements Session, Manager
+final class Native implements Session, Lifecycle
 {
     public private(set) Flash $flash;
 
@@ -137,7 +137,15 @@ final class Native implements Session, Manager
 
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
-            setcookie($this->name, '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+            setcookie(
+                $this->name,
+                '',
+                time() - 42000,
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly'],
+            );
         }
 
         if (session_unset() === false) {

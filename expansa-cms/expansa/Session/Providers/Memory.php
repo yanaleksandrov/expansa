@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Session\Providers;
 
 use Expansa\Session\Contracts\Flash;
-use Expansa\Session\Contracts\Manager;
+use Expansa\Session\Contracts\Lifecycle;
 use Expansa\Session\Contracts\Session;
 use Expansa\Session\Internal\Flash as SessionFlash;
 
@@ -14,7 +14,7 @@ use Expansa\Session\Internal\Flash as SessionFlash;
  *
  * @package Expansa\Session
  */
-final class Memory implements Session, Manager
+final class Memory implements Session, Lifecycle
 {
     public readonly Flash $flash;
 
@@ -23,6 +23,8 @@ final class Memory implements Session, Manager
     public private(set) string $id = '';
 
     /**
+     * Session data of the request.
+     *
      * @var array<string, mixed>
      */
     private array $storage = [];

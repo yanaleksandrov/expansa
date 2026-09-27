@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Session;
 
-use Expansa\Session\Contracts\Manager;
+use Expansa\Session\Contracts\Lifecycle;
 use Expansa\Session\Contracts\MiddlewareInterface;
 use Expansa\Session\Contracts\RequestHandlerInterface;
 use Expansa\Session\Contracts\ResponseInterface;
@@ -22,7 +22,7 @@ final class StartSession implements MiddlewareInterface
         /**
          * Session started before the handler (unless already started) and saved after it.
          */
-        private Manager $session,
+        private Lifecycle $session,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -32,6 +32,7 @@ final class StartSession implements MiddlewareInterface
         }
 
         $response = $handler->handle($request);
+
         $this->session->save();
 
         return $response;

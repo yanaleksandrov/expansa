@@ -1,10 +1,15 @@
 # Введение
 
-Сессия и flash-сообщения. Пакет находится в `Expansa\Session`, сессию PHP возвращает функция `session()`.
+Сессия и flash-сообщения. Пакет находится в `Expansa\Session`, доступ — через фасад `Session`
+или функцию `session()`, которая возвращает драйвер из конфигурации.
 
 ```php
+use Expansa\Facades\Session;
+
+Session::start();
+Session::set('user_id', 7);
+
 $session = session();
-$session->start();
 
 $session->set('cart', [12, 15]);
 $session->get('cart');              // [12, 15]
@@ -15,23 +20,34 @@ $session->flash->pull('notice');    // ['Сохранено'] — на след�
 
 | Класс                         | Назначение                                                       |
 |-------------------------------|------------------------------------------------------------------|
+| `Manager`                     | Драйвер из конфигурации, создаётся при первом обращении; экземпляр фасада |
 | `Providers\Native`            | Сессия PHP: данные в `$_SESSION` после `start()`                 |
 | `Providers\Memory`            | Сессия в массиве до конца запроса: тесты, консоль                |
 | `StartSession`                | PSR-15 middleware: запускает сессию до обработчика, сохраняет после |
 | `Contracts\Session`           | Данные: значения по ключу и `$flash`                             |
-| `Contracts\Manager`           | Жизненный цикл: `start()`, `regenerateId()`, `save()`, `delete()` |
+| `Contracts\Lifecycle`         | Жизненный цикл: `start()`, `regenerateId()`, `save()`, `delete()` |
 | `Contracts\Flash`             | Flash-сообщения: хранятся в сессии, пока их не прочитают         |
 | `Exceptions\*`                | `AlreadyStarted`, `NotStarted`, `HeadersSent`; сбой функций сессии PHP — `RuntimeException` |
 
 ## Конфигурация
 
-`Native` принимает массив настроек. Известные ключи — настройки сессии и cookie, остальные уходят в
-`ini_set('session.<ключ>')`:
+`bootstrap.php` выбирает драйвер в фазе `configure`: сессию PHP в браузере, массив в консоли.
+Сессия не запускается сама — её запускает код, которому она нужна (`Session::start()`, `StartSession`,
+flash-значения `Redirect`). Повторный `configure()` сбрасывает созданный драйвер.
 
 ```php
-use Expansa\Session\Providers\Native;
+Session::configure(
+    driver: PHP_SAPI === 'cli' ? 'memory' : 'native',
+    options: ['name' => 'expansa', 'secure' => Cookie::isSecureRequest()],
+);
 
-$session = new Native([
+Session::extend('redis', fn (array $options) => new RedisSession($options)); // свой драйвер
+```
+
+Настройки `native` — ключи сессии и cookie, остальные уходят в `ini_set('session.<ключ>')`:
+
+```php
+Session::configure(driver: 'native', options: [
     'name'          => 'expansa',  // имя cookie, по умолчанию app
     'lifetime'      => 7200,       // время жизни cookie, секунды
     'path'          => null,       // null — из настроек PHP
@@ -44,12 +60,12 @@ $session = new Native([
 ]);
 ```
 
-`session(array $config = ['name' => 'expansa'])` создаёт `Native` при первом вызове и дальше
-возвращает его же. `Memory` принимает только имя: `new Memory('test')`.
+У `memory` есть только `name`. Драйверы можно создать и напрямую: `new Native([...])`, `new Memory('test')`.
 
 ## Использование
 
 Используйте методы сессии вместо `session_start()`, `session_regenerate_id()` и `session_destroy()`.
+Фасад не видит свойств: вместо `$started` и `$flash` у него `Session::isStarted()` и `Session::getFlash()`.
 
 | Метод или свойство              | Что делает                                                  |
 |---------------------------------|-------------------------------------------------------------|
@@ -99,13 +115,20 @@ use Expansa\Session\StartSession;
 $middleware = new StartSession(session());
 ```
 
+### Flash-значения редиректа
+
+`bootstrap.php` передаёт в `Redirect::configure(flash: ...)` запись в flash-сообщения сессии и запускает
+её при необходимости: `Redirect::flash('errors', $errors)` перед `Redirect::send()` доживает до
+следующего запроса, где его читает `Session::getFlash()->pull('errors')`.
+
 ## Расширение
 
-Своё хранилище реализует `Contracts\Session` и `Contracts\Manager`. Свойства контрактов объявлены
+Своё хранилище реализует `Contracts\Session` и `Contracts\Lifecycle` и подключается через
+`Session::extend()`. Свойства контрактов объявлены
 только для чтения — `public string $id { get; }`, реализация задаёт их обычным свойством или hook:
 
 ```php
-final class Redis implements Session, Manager
+final class Redis implements Session, Lifecycle
 {
     public private(set) string $id = '';
 

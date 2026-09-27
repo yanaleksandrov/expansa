@@ -15,7 +15,7 @@ use RuntimeException;
  *
  * @package Expansa\Session
  */
-interface Manager
+interface Lifecycle
 {
     public bool $started { get; }
 

@@ -22,6 +22,7 @@ use Expansa\Facades\Log;
 use Expansa\Facades\Mail;
 use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
+use Expansa\Facades\Session;
 use Expansa\Facades\Terminal;
 use Expansa\Facades\View;
 use Expansa\Patterns\Registry;
@@ -178,11 +179,27 @@ Lifecycle::phase('configure', true, function () {
         mailer: fn (string $to, string $subject, string $body, array $attachments) => Mail::send($to, $subject, $body, $attachments),
     );
 
-    // redirect location, status and X-Redirect-By header are filtered by hooks
+    // the native session in the browser, an array in the console; started only by the code that needs it
+    Session::configure(
+        driver: PHP_SAPI === 'cli' ? 'memory' : 'native',
+        options: [
+            'name'   => 'expansa',
+            'secure' => Expansa\Cookie\Cookie::isSecureRequest(),
+        ],
+    );
+
+    // redirect location, status and X-Redirect-By header are filtered by hooks; flashed values go to the session
     Expansa\Http\Redirect::configure(
         location: fn (string $to, int $status) => Hook::call('redirectLocation', $to, $status),
         status: fn (int $status, string $to) => Hook::call('redirectStatus', $status, $to),
         redirectBy: fn (string $redirectBy, int $status, string $to) => Hook::call('redirectBy', $redirectBy, $status, $to),
+        flash: function (string $key, array $values) {
+            if (! Session::isStarted()) {
+                Session::start();
+            }
+
+            Session::getFlash()->set($key, $values);
+        },
     );
 
     // every dashboard table renders the items filter form

@@ -126,16 +126,13 @@ if (! function_exists('url')) {
 
 if (! function_exists('session')) {
     /**
-     * Get session.
+     * Get the session of the request with the driver of Session::configure().
      *
-     * @param array $config
-     * @return Expansa\Session\Providers\Native
+     * @return Expansa\Session\Contracts\Session&Expansa\Session\Contracts\Lifecycle
      */
-    function session(array $config = ['name' => 'expansa']): Expansa\Session\Providers\Native
+    function session(): Expansa\Session\Contracts\Session&Expansa\Session\Contracts\Lifecycle
     {
-        static $session;
-
-        return $session ??= new Expansa\Session\Providers\Native($config);
+        return Expansa\Facades\Session::driver();
     }
 }
 
