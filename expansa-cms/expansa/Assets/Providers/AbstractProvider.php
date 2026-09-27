@@ -180,12 +180,34 @@ abstract class AbstractProvider
     }
 
     /**
+     * Get the public URL of a local file, the inverse of toPath().
+     *
+     * @param string $path
+     * @return string
+     */
+    public static function toUrl(string $path): string
+    {
+        return Url::toUrl($path);
+    }
+
+    /**
+     * Turn a uid into a camelCase JS variable name: `my-app_data` → `myAppData`.
+     *
+     * @param string $uid
+     * @return string
+     */
+    public static function variableName(string $uid): string
+    {
+        return lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', trim($uid)))));
+    }
+
+    /**
      * Render tag attributes: `id`, `type`, `rel` first, empty values and non-scalars skipped.
      *
      * @param array<string, mixed> $attributes
      * @return string Attributes with a leading space, or an empty string.
      */
-    protected function renderAttributes(array $attributes): string
+    public function renderAttributes(array $attributes): string
     {
         $result = [];
 

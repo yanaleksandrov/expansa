@@ -165,7 +165,7 @@ final class Script extends AbstractProvider
         $data = json_encode($this->data, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG);
 
         return ($this->data && $data)
-            ? sprintf("<script>var %s = %s</script>\n", $this->variableName($this->uid), $data)
+            ? sprintf("<script>var %s = %s</script>\n", self::variableName($this->uid), $data)
             : '';
     }
 
@@ -180,16 +180,5 @@ final class Script extends AbstractProvider
     public function minify(string $code): string
     {
         return $code;
-    }
-
-    /**
-     * Turn a uid into a camelCase JS variable name: `my-app_data` → `myAppData`.
-     *
-     * @param string $uid
-     * @return string
-     */
-    private function variableName(string $uid): string
-    {
-        return lcfirst(str_replace(' ', '', ucwords(str_replace(['_', '-'], ' ', trim($uid)))));
     }
 }

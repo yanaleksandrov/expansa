@@ -604,7 +604,7 @@ final class Manager
      * @param array<string, AbstractProvider> $assets
      * @return array<string, AbstractProvider>
      */
-    private function sortDependencies(array $assets): array
+    public function sortDependencies(array $assets): array
     {
         $idsByUid = [];
         foreach ($assets as $id => $asset) {
@@ -642,7 +642,7 @@ final class Manager
      * @param string $uid
      * @return string
      */
-    private function sanitizeId(string $uid): string
+    public function sanitizeId(string $uid): string
     {
         return trim((string) preg_replace('/\W-/', '', str_replace(['_', '.', ',', ' '], '-', $uid)));
     }
@@ -653,7 +653,7 @@ final class Manager
      * @param string $url
      * @return string
      */
-    private function sanitizeUrl(string $url): string
+    public function sanitizeUrl(string $url): string
     {
         $url = str_replace(';//', '://', trim($url));
         $url = (string) preg_replace('/[^a-zA-Z0-9-_.:\/?]/', '', $url);
