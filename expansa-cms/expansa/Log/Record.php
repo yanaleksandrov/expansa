@@ -12,7 +12,7 @@ use Expansa\Log\Enums\Level;
  *
  * @package Expansa\Log
  */
-final readonly class LogRecord
+final readonly class Record
 {
     public function __construct(
 

@@ -17,7 +17,7 @@ Log::channel('telegram')->critical('Database is down');
 | `Manager`                          | Каналы из конфигурации, создаются при первом обращении; экземпляр фасада |
 | `Logger`                           | Канал: имя, обработчики, общий контекст                                 |
 | `Enums\Level`                      | Уровни от `Debug` до `Emergency`                                        |
-| `LogRecord`                        | Одна запись, неизменяемая: её получают все обработчики канала           |
+| `Record`                           | Одна запись, неизменяемая: её получают все обработчики канала           |
 | `Handlers\*`                       | Куда писать: файл, файл по дням, Telegram, `error_log()`                |
 | `Formatters\*`                     | Как записать: строка или HTML-сообщение Telegram                        |
 | `Exceptions\InvalidLevel`          | Неизвестный уровень                                                     |
@@ -169,8 +169,8 @@ $logger = new Logger('import', [
 Каждая запись в Telegram — отдельный HTTP-запрос во время ответа, поэтому держите уровень высоким.
 `chat_id` — число или `@username` канала. Сообщение экранируется и обрезается до 4096 символов.
 
-Свой обработчик наследует `Handlers\AbstractHandler` и реализует `handle(LogRecord $record): bool`,
-свой форматтер — `Formatters\AbstractFormatter` и `format(LogRecord $record): string`.
+Свой обработчик наследует `Handlers\AbstractHandler` и реализует `handle(Record $record): bool`,
+свой форматтер — `Formatters\AbstractFormatter` и `format(Record $record): string`.
 `normalize()` и `toJson()` базового форматтера безопасно превращают контекст в JSON.
 
 Если обработчик выбросил исключение (диск заполнен, нет прав на папку), приложение продолжает

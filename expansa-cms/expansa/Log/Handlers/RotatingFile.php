@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Log\Handlers;
 
 use Expansa\Log\Enums\Level;
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 
 /**
  * Writes a file per day, `app.log` becomes `app-2025-01-31.log`, and keeps only the latest $maxFiles.
@@ -45,7 +45,7 @@ class RotatingFile extends File
         parent::__construct($this->datedPath(date('Y-m-d')), $level);
     }
 
-    public function handle(LogRecord $record): bool
+    public function handle(Record $record): bool
     {
         $date = $record->datetime->format('Y-m-d');
 

@@ -142,7 +142,7 @@ class Logger implements LoggerInterface
         }
 
         $message = self::interpolate((string) $message, $context);
-        $record  = new LogRecord(new DateTimeImmutable(), $this->name, $level, $message, $context);
+        $record  = new Record(new DateTimeImmutable(), $this->name, $level, $message, $context);
 
         foreach ($this->handlers as $handler) {
             if (! $handler->isHandling($level)) {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Log\Contracts;
 
 use Expansa\Log\Enums\Level;
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 
 interface Handler
 {
@@ -25,8 +25,8 @@ interface Handler
     /**
      * Write or send a record, the logger checks isHandling() first.
      *
-     * @param LogRecord $record
+     * @param Record $record
      * @return bool False if the record was not written.
      */
-    public function handle(LogRecord $record): bool;
+    public function handle(Record $record): bool;
 }

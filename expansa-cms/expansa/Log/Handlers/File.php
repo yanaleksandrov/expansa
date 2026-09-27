@@ -6,7 +6,7 @@ namespace Expansa\Log\Handlers;
 
 use Expansa\Log\Exceptions\UnwritableFile;
 use Expansa\Log\Enums\Level;
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 
 /**
  * Appends records to a file, creating its directory on the first write.
@@ -46,7 +46,7 @@ class File extends AbstractHandler
         $this->close();
     }
 
-    public function handle(LogRecord $record): bool
+    public function handle(Record $record): bool
     {
         return $this->write($this->getFormatter()->format($record));
     }
