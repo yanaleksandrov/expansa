@@ -9,7 +9,7 @@ namespace Expansa\Builders\Forms\Fields;
  * dashboard yet, so this renders `form/textarea.blade.php` as a plain-text fallback
  * until a real editor (and its own template) is registered.
  */
-class Editor extends AbstractField
+final class Editor extends AbstractField
 {
     public function __construct()
     {

@@ -8,7 +8,7 @@ namespace Expansa\Builders\Forms\Fields;
  * Renders `form/builder.blade.php` - a visual rule builder for constructing
  * custom field location/visibility conditions (post type, status, role, ...).
  */
-class Builder extends AbstractField
+final class Builder extends AbstractField
 {
     public function __construct()
     {

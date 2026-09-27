@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @see documentation/Lifecycle.md
  */
 
+use Expansa\Facades\Asset;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
 use Expansa\Facades\Extensions;
@@ -143,7 +144,7 @@ Lifecycle::phase('configure', true, function () {
     );
 
     // every dashboard table renders the items filter form
-    Expansa\Builders\Table::configure(
+    Expansa\Builders\Table\AbstractTable::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php'
     );
 
@@ -212,6 +213,8 @@ Lifecycle::phase('configure', true, function () {
             'repeater'        => Expansa\Builders\Forms\Fields\Repeater::class,
             'message'         => Expansa\Builders\Forms\Fields\Message::class,
         ],
+        view: fn (string $template, array $data) => (string) View::make($template, $data),
+        assets: fn (string $template, string $uid) => Asset::discover(View::make($template)->getPath(), $uid, ['type' => $uid]),
     );
 });
 

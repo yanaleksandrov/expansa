@@ -12,7 +12,7 @@ use Expansa\Support\Arr;
  * `fields` array). There is no dedicated template or add/remove-row JS yet, so
  * this renders every existing row statically by delegating to {@see Field::parse()}.
  */
-class Repeater extends AbstractField
+final class Repeater extends AbstractField
 {
     public function __construct()
     {
@@ -32,8 +32,7 @@ class Repeater extends AbstractField
 
     public function assets(): void
     {
-        // No dedicated template/assets to discover: rows are rendered through the
-        // generic Field parser, whose own field types register their own assets.
+        // rows are rendered by Field::parse(), which connects the assets of each field
     }
 
     public function render(array $field = []): string

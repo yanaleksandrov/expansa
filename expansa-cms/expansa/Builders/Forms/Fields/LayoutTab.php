@@ -8,7 +8,7 @@ namespace Expansa\Builders\Forms\Fields;
  * Renders `form/layout-tab.blade.php` - a single tab panel of a tabbed form,
  * paired with {@see LayoutTabMenu} for its navigation.
  */
-class LayoutTab extends AbstractField
+final class LayoutTab extends AbstractField
 {
     public function __construct()
     {

@@ -218,14 +218,27 @@ if (in_array($type, ['color', 'date', /* ... */], true)) {
 
 // ...
 
-$view = View::make("form/{$prefix}{$type}", $field);
-
 // $inputType используется и как uid, и как контекст: без этого color-поле и date-поле
 // на одной странице столкнулись бы на одном uid "input" от общего шаблона, и второе
 // поле по рендеру молча осталось бы без своего скрипта (enqueue дедуплицирует по id).
-Asset::discover($view->getPath(), $inputType, ['type' => $inputType]);
+$content .= Form::view("form/{$prefix}{$type}", $field, $inputType);
+```
 
-$content .= $view;
+Сам `Builders` не вызывает фасады `View` и `Asset`: шаблон рендерит колбэк `view` из
+`Form::configure()` в `bootstrap.php`, он же вызывает `discover()`:
+
+```php
+Form::configure(
+    fields: [/* ... */],
+    view: function (string $template, array $data, ?string $assets): string {
+        $view = View::make($template, $data);
+        if ($assets !== null) {
+            Asset::discover($view->getPath(), $assets, ['type' => $assets]);
+        }
+
+        return (string) $view;
+    },
+);
 ```
 
 А в `dashboard/index.php` резолвер использует и путь к файлу, и этот контекст:

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table;
+use Expansa\Builders\Table\AbstractTable;
 
-final class PluginsInstall extends Table
+final class PluginsInstall extends AbstractTable
 {
     public function data(): array
     {

@@ -8,7 +8,7 @@ namespace Expansa\Builders\Forms\Fields;
  * Renders `form/custom.blade.php` - developer-supplied markup via a `callback`
  * (callable or raw HTML string), for cases the field builder doesn't natively cover.
  */
-class Custom extends AbstractField
+final class Custom extends AbstractField
 {
     public function __construct()
     {

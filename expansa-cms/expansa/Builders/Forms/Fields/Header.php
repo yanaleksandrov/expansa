@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/header.blade.php` - a section heading with an optional description.
  */
-class Header extends AbstractField
+final class Header extends AbstractField
 {
     public function __construct()
     {

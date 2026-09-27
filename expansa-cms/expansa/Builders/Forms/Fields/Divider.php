@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 /**
  * Renders `form/divider.blade.php` - a plain horizontal divider, optionally labeled.
  */
-class Divider extends AbstractField
+final class Divider extends AbstractField
 {
     public function __construct()
     {
