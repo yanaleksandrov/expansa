@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App;
-use App\Models\Options;
+use App\Models\Option;
 use App\Models\Slug;
 use App\Models\User;
 use Expansa\Builders\Tree;
@@ -139,7 +139,7 @@ final class Web
      */
     private function title(string $slug, ?string $page = null): string
     {
-        $site = (string) Options::get('site.name', '');
+        $site = (string) Option::get('site.name', '');
         $site = $site !== '' ? $site : 'Expansa';
 
         if ($page === null && $slug !== '') {

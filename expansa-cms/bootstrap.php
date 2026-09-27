@@ -109,7 +109,7 @@ Lifecycle::phase('configure', true, function () {
     // the site URL is read from the options only once there is a database to read it from
     Url::configure(
         root: EX_PATH,
-        site: defined('EX_DB') ? fn () => App\Models\Options::get('site.url') : null,
+        site: defined('EX_DB') ? fn () => App\Models\Option::get('site.url') : null,
     );
 
     // views of the dashboard, installer and auth pages
@@ -382,7 +382,7 @@ Lifecycle::phase('register', $isInstalled, function () {
  */
 Lifecycle::phase('extensions', $isInstalled, function () {
     Extensions::load(
-        ids: (array) App\Models\Options::get('extensions.active', []),
+        ids: (array) App\Models\Option::get('extensions.active', []),
     );
     Extensions::register('plugin');
     Extensions::register('theme');

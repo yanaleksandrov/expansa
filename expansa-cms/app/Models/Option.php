@@ -35,7 +35,7 @@ use LogicException;
  * @property mixed  $value The option's value. Stored JSON-encoded so any type round-trips,
  *                         including options written before this model existed (see value()).
  */
-class Options extends Model
+class Option extends Model
 {
     use Model\HasSanitizing;
     use Model\HasValidation;

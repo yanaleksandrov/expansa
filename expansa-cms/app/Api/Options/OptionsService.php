@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Options;
 
-use App\Models\Options;
+use App\Models\Option;
 use Expansa\Support\Arr;
 
 final class OptionsService
@@ -14,7 +14,7 @@ final class OptionsService
         $options = Arr::exclude($input, ['nonce']);
 
         foreach ($options as $option => $value) {
-            Options::update($option, $value);
+            Option::update($option, $value);
         }
 
         return [

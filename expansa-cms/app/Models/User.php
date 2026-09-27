@@ -313,7 +313,7 @@ class User extends Model implements Fieldable
         }
 
         // Not mass-assignable (see roles()) — read the raw input so a caller can still request a role, falling back to the default.
-        $role = $userdata['role'] ?? Options::get('users.role', self::DEFAULT_ROLE);
+        $role = $userdata['role'] ?? Option::get('users.role', self::DEFAULT_ROLE);
         if (Roles::exists($role)) {
             $user->roles = [$role];
         }

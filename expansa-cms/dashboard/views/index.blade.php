@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Options;
+use App\Models\Option;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
@@ -23,7 +23,7 @@ $table = $__data['table'] ?? null;
         <!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
 <head>
-    <meta charset="{{ Options::attr( 'charset', 'UTF-8' ) }}">
+    <meta charset="{{ Option::attr( 'charset', 'UTF-8' ) }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Expansa' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
