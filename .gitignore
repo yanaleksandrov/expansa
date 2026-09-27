@@ -25,3 +25,4 @@ Thumbs.db    # Windows
 
 # Logs
 /expansa-cms/storage/logs/*.log
+/expansa-cms/storage/quarantine.json

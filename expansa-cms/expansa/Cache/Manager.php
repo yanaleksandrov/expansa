@@ -36,6 +36,8 @@ final class Manager implements Provider
 
     /**
      * Store of the provider methods.
+     *
+     * @var string
      */
     public private(set) string $defaultStore = 'memory';
 

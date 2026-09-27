@@ -148,9 +148,16 @@ Lifecycle::phase('configure', true, function () {
         cachePath: EX_PATH . 'cache/views',
     );
 
-    // extension ids like "plugins/seo" are relative to it
+    // extension ids like "plugins/seo" are relative to it; a plugin that breaks goes to quarantine instead of the site
     Extensions::configure(
-        root: EX_PATH
+        root: EX_PATH,
+        quarantine: EX_STORAGE . 'quarantine.json',
+        failed: fn (string $id, Throwable $error) => Log::error('Extension {id} failed: {message}', [
+            'id'      => $id,
+            'message' => $error->getMessage(),
+            'file'    => $error->getFile(),
+            'line'    => $error->getLine(),
+        ]),
     );
 
     // Log::info() and the others: a file per day in storage/logs, closed to the web, kept for two weeks
@@ -599,6 +606,9 @@ Lifecycle::context('web', true, function () {
  * Errors from any step go to the debug page.
  */
 Lifecycle::run(catch: function (Throwable $e) {
+    // a bug in a plugin fails this request only: the plugin is skipped from the next one
+    Extensions::quarantine($e);
+
     // EX_DEBUG comes from env.php, which may be missing
     $view = defined('EX_DEBUG') ? EX_DEBUG['view'] : EX_DASHBOARD . 'debug.php';
 
