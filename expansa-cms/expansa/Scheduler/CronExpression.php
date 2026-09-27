@@ -205,7 +205,7 @@ final class CronExpression
      * @return AbstractField
      * @throws InvalidArgumentException For an unknown position.
      */
-    private static function field(int $position): AbstractField
+    public static function field(int $position): AbstractField
     {
         return self::$fields[$position] ??= match ($position) {
             self::MINUTE  => new Minutes(),
