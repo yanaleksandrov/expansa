@@ -29,8 +29,8 @@ document.addEventListener('youla:init', () => {
         // a built-in authenticator (fingerprint, face, screen lock) or a phone reachable by QR code
         const detect = async () => {
             const capabilities = await PublicKeyCredential.getClientCapabilities?.().catch(() => null);
-            if (capabilities) {
-                return !!(capabilities.passkeyPlatformAuthenticator || capabilities.userVerifyingPlatformAuthenticator || capabilities.hybridTransport);
+            if (capabilities?.passkeyPlatformAuthenticator || capabilities?.userVerifyingPlatformAuthenticator || capabilities?.hybridTransport) {
+                return true;
             }
 
             return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);

@@ -557,6 +557,16 @@ Lifecycle::context('install', !$isInstalled, function () {
  * A logged-in user goes straight to the dashboard. Otherwise, dashboard/auth.php enqueues
  * only the assets the auth forms need, without the admin panel.
  */
+Lifecycle::context('sign-out', function (string $uri): bool {
+    $uri  = trim($uri, '/');
+    $root = trim((string) Hook::call('dashboardRootSlug', 'dashboard'), '/');
+
+    return $uri === 'sign-out' || $uri === "$root/sign-out";
+}, function () {
+    App\Models\User::logout();
+    redirect('sign-in');
+});
+
 Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-in', 'sign-up', 'reset-password'], true), function () {
     if (App\Models\User::isLogged()) {
         redirect('dashboard');

@@ -21,6 +21,22 @@ final class Mailer
      */
     public static function setup(PHPMailer $mailer): PHPMailer
     {
+        $smtp = defined('EX_MAIL') ? (array) EX_MAIL : [];
+
+        if (! empty($smtp['host'])) {
+            $mailer->isSMTP();
+            $mailer->Host       = (string) $smtp['host'];
+            $mailer->Port       = (int) ($smtp['port'] ?? 465);
+            $mailer->SMTPAuth   = true;
+            $mailer->Username   = (string) ($smtp['username'] ?? '');
+            $mailer->Password   = (string) ($smtp['password'] ?? '');
+            $mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+
+            if (! empty($smtp['from'])) {
+                $mailer->setFrom((string) $smtp['from'], (string) Option::get('site.name', '') ?: 'Expansa');
+            }
+        }
+
         // PHPMailer's root@localhost is rejected by mail servers
         if ($mailer->From === 'root@localhost') {
             $mailer->setFrom('no-reply@' . self::host(), (string) Option::get('site.name', '') ?: 'Expansa');

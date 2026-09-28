@@ -22,26 +22,34 @@ if ($hasToken) {
     $fields[] = [
         'type'       => 'hidden',
         'name'       => 'token',
-        'attributes' => ['value' => $resetToken, 'u-prop' => 'token'],
+        'attributes' => [
+            'value'  => $resetToken,
+            'u-prop' => 'token'
+        ],
     ];
     $fields[] = [
         'type'        => 'password',
         'name'        => 'password',
         'label'       => t('New password'),
         'class'       => 'field field--lg',
-        'instruction' => t('At least 8 characters.'),
+        'instruction' => t('At least 12 characters.'),
         'validator'   => '',
         'attributes'  => [
             'placeholder'  => t('Enter a new password'),
             'u-prop'       => 'password',
             'required'     => true,
-            'minlength'    => 8,
             'autocomplete' => 'new-password',
         ],
-        'switcher'   => 1,
-        'generator'  => 0,
-        'indicator'  => 0,
-        'characters' => [],
+        'switcher'    => 1,
+        'generator'   => 1,
+        'indicator'   => 0,
+        'characters'  => [
+            'lowercase' => 2,
+            'uppercase' => 2,
+            'special'   => 2,
+            'length'    => 12,
+            'digit'     => 2,
+        ],
     ];
 } else {
     $fields[] = [
@@ -74,7 +82,7 @@ return Form::enqueue(
     'user-reset-password',
     [
         'class'           => 'dg g-6',
-        'u-data'          => '{email: "", password: "", token: ' . json_encode($hasToken ? $resetToken : '') . '}',
+        'u-data'          => '{token: ' . json_encode($hasToken ? $resetToken : '') . '}',
         '@submit.prevent' => '$ajax.post("user/reset-password")',
     ],
     $fields,

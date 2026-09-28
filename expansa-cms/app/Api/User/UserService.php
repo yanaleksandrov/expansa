@@ -179,6 +179,8 @@ final class UserService
             return [['target' => 'body', 'notify' => $updated->get('user-password')[0] ?? t('Could not update the password. Please try again.')]];
         }
 
+        $this->notifyPasswordChanged($user);
+
         return [
             ['target' => 'body', 'notify' => t('Your password has been changed. Other devices have been signed out.')],
             ['target' => '[name="password-new"], [name="password-old"]', 'value' => ''],
@@ -275,7 +277,7 @@ final class UserService
             return $invalid;
         }
 
-        $id   = Db::get('users', null, 'id', ['password_reset_token' => hash('sha256', $token)]);
+        $id   = Db::get('users', 'id', ['password_reset_token' => hash('sha256', $token)]);
         $user = $id ? User::find((int) $id) : null;
         if (! $user instanceof User || ($user->passwordResetExpiresAt?->getTimestamp() ?? 0) < time()) {
             return $invalid;
@@ -286,9 +288,35 @@ final class UserService
             return [['target' => 'body', 'notify' => $updated->get('user-password')[0] ?? t('Could not update the password. Please try again.')]];
         }
 
+        $this->notifyPasswordChanged($user);
+
         return [
             ['target' => 'body', 'notify' => t('Your password has been changed. Sign in with the new password.')],
             ['target' => 'body', 'redirect:1500' => url('sign-in')],
         ];
+    }
+
+    /**
+     * Notify the account owner after a successful password change without affecting the completed change on mail failure.
+     *
+     * @param User $user Account owner.
+     * @return void
+     */
+    private function notifyPasswordChanged(User $user): void
+    {
+        try {
+            $body = View::create('mails/wrapper', [
+                'body_template' => 'mails/password-changed',
+                'name'          => $user->showname ?: $user->login,
+                'siteUrl'       => url(),
+            ])->render();
+
+            $message = Mail::to($user->email)->subject(t('Your password was changed'))->message($body);
+            if (! $message->send()) {
+                Log::error('Password changed: the notification email was not sent.', ['user' => $user->id, 'error' => $message->error]);
+            }
+        } catch (Throwable $error) {
+            Log::error('Password changed: the notification email failed.', ['user' => $user->id, 'error' => $error->getMessage()]);
+        }
     }
 }

@@ -283,8 +283,8 @@ new class
         Tree::attach('dashboard-user-menu', fn (Tree $tree) => $tree->addItems(
             [
                 [
-                    'id'           => 'comments',
-                    'url'          => 'comments',
+                    'id'           => 'sign-out',
+                    'url'          => 'sign-out',
                     'title'        => t('Sign out'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-sign-out',

@@ -11,8 +11,8 @@ document.addEventListener('youla:init', () => {
         };
         const detect = async () => {
             const capabilities = await (PublicKeyCredential.getClientCapabilities?.().catch(() => null));
-            if (capabilities) {
-                return !!(capabilities.passkeyPlatformAuthenticator || capabilities.userVerifyingPlatformAuthenticator || capabilities.hybridTransport);
+            if (capabilities?.passkeyPlatformAuthenticator || capabilities?.userVerifyingPlatformAuthenticator || capabilities?.hybridTransport) {
+                return true;
             }
             return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);
         };

@@ -157,7 +157,7 @@ final class Passkey
         $challenge  = $this->consume('request', $credential);
         $id         = $this->rp->credentialId($credential);
 
-        $row  = Db::get('passkeys', null, ['id', 'user_id', 'algorithm', 'public_key', 'counter'], ['credential_hash' => hash('sha256', $id)]);
+        $row  = Db::get('passkeys', ['id', 'user_id', 'algorithm', 'public_key', 'counter'], ['credential_hash' => hash('sha256', $id)]);
         $user = is_array($row) ? User::find((int) $row['user_id']) : null;
         if (! $user instanceof User) {
             throw new InvalidCredential('The credential is not registered.');
