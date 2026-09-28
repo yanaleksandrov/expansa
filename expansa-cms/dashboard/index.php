@@ -221,11 +221,12 @@ new class
          * @since 2025.1
          */
         DashboardAssets::enqueue(
-            ['phosphor', 'expansa', 'dialog', 'controls', 'utility', 'notifications', 'nav-editor', 'chat'],
+            ['phosphor', 'expansa', 'dialog', 'controls', 'utility', 'nav-editor', 'chat'],
             [
                 'youla'         => ['data' => $data],
                 'youla-ajax',
                 'youla-expansa',
+                'youla-passkeys',
                 'youla-chat',
                 // global, not co-located: the media library must be reachable from any field on any page
                 'youla-storage',

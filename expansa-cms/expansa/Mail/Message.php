@@ -34,7 +34,10 @@ final class Message
          * Gets the PHPMailer before sending and returns the one to send with: SMTP settings, a test double.
          */
         private readonly ?Closure $setup = null,
-    ) {}
+    ) {
+        // PHPMailer defaults to ISO-8859-1, which garbles any non-Latin text
+        $this->mailer->CharSet = PHPMailer::CHARSET_UTF8;
+    }
 
     /**
      * Add a recipient.
@@ -85,9 +88,19 @@ final class Message
         return $this;
     }
 
+    /**
+     * Set the body; one with HTML tags is sent as HTML with a plain-text alternative.
+     *
+     * @param string $message
+     * @return static
+     */
     public function message(string $message): static
     {
-        $this->mailer->Body = $message;
+        $html = $message !== strip_tags($message);
+
+        $this->mailer->isHTML($html);
+        $this->mailer->Body    = $message;
+        $this->mailer->AltBody = $html ? $this->mailer->html2text($message) : '';
 
         return $this;
     }

@@ -35,6 +35,7 @@ return \Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'placeholder' => t( 'Enter login or email' ),
+                'autocomplete' => 'username webauthn',
                 'u-prop'      => 'login',
                 'required'    => 1,
 			],

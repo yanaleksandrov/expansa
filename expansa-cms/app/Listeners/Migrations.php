@@ -21,6 +21,7 @@ final class Migrations
         $this->createSlugsTable();
         $this->createTermsTable();
         $this->createUsersTable();
+        $this->createPasskeysTable();
         $this->createOptionsTable();
         $this->createCommentsTable();
         $this->createTaxonomiesTable();
@@ -228,6 +229,29 @@ final class Migrations
 
         $this->createFieldsTable('users');
         //$this->createTypedFieldsTable('users');
+    }
+
+    private function createPasskeysTable(): void
+    {
+        Schema::create('passkeys', function (Table $table) {
+            $table->id();
+            $table->bigInt('user_id')->unsigned();
+
+            // base64url ID for excludeCredentials, its hash for the lookup at sign-in: IDs are up to 1023 bytes
+            $table->text('credential_id');
+            $table->char('credential_hash', 64)->unique();
+            $table->smallInt('algorithm');
+            $table->text('public_key');
+            $table->bigInt('counter')->unsigned()->default(0);
+            $table->string('transports', 100)->default('');
+
+            $table->string('name', 100)->default('');
+            $table->timestamps();
+            $table->timestamp('used_at')->nullable();
+
+            $table->index('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
+        });
     }
 
     private function createCommentsTable(): void
