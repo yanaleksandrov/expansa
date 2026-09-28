@@ -58,7 +58,7 @@ meter {
 /* fix the feature of 'hidden' attribute.
    display:revert; revert to element instead of attribute */
 :where([hidden]) {
-  display: none;
+  display: none !important;
 }
 
 /* revert for bug in Chromium browsers
