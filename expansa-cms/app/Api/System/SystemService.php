@@ -90,7 +90,7 @@ final class SystemService
         $protocol = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ? 'https://' : 'http://';
         $siteUrl  = $protocol . $_SERVER['SERVER_NAME'];
 
-        [$site, $userdata, $database] = Safe::data($input, [
+        [$site, $userdata, $database, $smtp] = Safe::data($input, [
             'site.name'        => 'text',
             'site.tagline'     => 'text',
             'site.url'         => "url:$siteUrl",
@@ -105,11 +105,20 @@ final class SystemService
             'db.password'      => 'trim',
             'db.host'          => 'trim',
             'db.prefix'        => 'snakecase',
+            'smtp.host'        => 'trim',
+            'smtp.port'        => 'trim:465',
+            'smtp.username'    => 'trim',
+            'smtp.password'    => 'trim',
+            'smtp.from'        => 'trim',
         ])->values();
 
         // env.php marks the installation as complete, so it appears only after every step succeeded
         $draft = Installation::draft(
-            array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database) + [
+            array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database)
+            + array_combine(
+                ['smtp.host', 'smtp.port', 'smtp.username', 'smtp.password', 'smtp.from'],
+                array_map(static fn (string $value): string => addcslashes($value, "\\'"), $smtp)
+            ) + [
                 'auth.key'  => bin2hex(random_bytes(32)),
                 'nonce.key' => bin2hex(random_bytes(32)),
                 'hash.key'  => bin2hex(random_bytes(32)),

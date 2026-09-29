@@ -2,7 +2,7 @@
 
 /**
  * Settings of the installation, written by the installer. Real environment variables (Docker, CI, a hosting panel)
- * override the values: EX_DB_*, EX_KEY_* and EX_DEBUG; an empty variable counts as not set.
+ * override EX_DB_*, EX_KEY_* and EX_DEBUG; an empty variable counts as not set. EX_MAIL is set in the installer.
  */
 
 /**
@@ -81,17 +81,30 @@ define('EX_DEBUG', [
 ]);
 
 /**
+ * SMTP settings for outgoing mail.
+ *
+ * @since 2025.1
+ */
+define('EX_MAIL', [
+    'host'     => 'smtp.host',
+    'port'     => (int) 'smtp.port',
+    'username' => 'smtp.username',
+    'password' => 'smtp.password',
+    'from'     => 'smtp.from',
+]);
+
+/**
  * DKIM (DomainKeys Identified Mail) settings for signing outgoing emails.
  *
  * @since 2025.1
  */
 define('EX_DKIM', [
     // signing domain, typically the domain of the 'From' address
-    'domain'           => 'example.com',
+    'domain'           => '',
     // path to the private key
-    'private'          => 'dkim_private.pem',
+    'private'          => '',
     // selector of the DNS record with the public key
-    'selector'         => 'phpmailer',
+    'selector'         => '',
     // passphrase of the private key, if any
     'passphrase'       => '',
     // signing identity, typically the 'From' address

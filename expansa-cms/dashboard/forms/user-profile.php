@@ -1,5 +1,6 @@
 <?php
 
+use App\Api\User\Passkey;
 use App\Models\User;
 use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
@@ -443,6 +444,46 @@ return Form::enqueue(
                 ],
                 [
                     'type'          => 'group',
+                    'name'          => 'passkeys',
+                    'label'         => t('Passkeys'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'passkeys',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Sign in with your fingerprint, face, screen lock or security key instead of a password. Passkeys stay on your devices and cannot be phished.'); ?></div>
+                                    <div class="dg g-2" id="passkeys">
+                                        <?php
+                                        foreach (Passkey::all($user) as $passkey) {
+                                            echo view('parts/passkey', ['passkey' => $passkey]);
+                                        }
+                                        ?>
+                                    </div>
+                                    <div hidden u-show="$passkey.available">
+                                        <div class="df aic g-2">
+                                            <div class="field">
+                                                <div class="field-item">
+                                                    <input type="password" id="passkey-password" u-prop="passkeyPassword" autocomplete="current-password" placeholder="<?php echo t_attr('Current password'); ?>" @keydown.enter.prevent="$refs.passkeyAdd.click()">
+                                                </div>
+                                            </div>
+                                            <button class="btn btn--outline" type="button" u-ref="passkeyAdd" :disabled="!passkeyPassword" @click="$ajax.post('user/passkey-create-options', {password: passkeyPassword}).then(({options}) => $passkey.create(options)).then(credential => credential && $ajax.post('user/passkey-create', {credential, name: $passkey.device()}))">
+                                                <i class="ph ph-plus"></i> <?php echo t('Add passkey'); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
+                [
+                    'type'          => 'group',
                     'name'          => 'passwords',
                     'label'         => t('Change password'),
                     'class'         => '',
@@ -458,13 +499,14 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t("Make sure it's at least 15 characters OR at least 12 characters including a number and a lowercase letter."),
+                            'instruction' => t('At least :count characters.', User::PASSWORD_MIN_LENGTH),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop' => 'passwordNew',
+                                'autocomplete' => 'new-password',
                                 'placeholder' => t('New password'),
                             ],
                             'switcher'    => 1,
@@ -494,6 +536,7 @@ return Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop' => 'passwordOld',
+                                'autocomplete' => 'current-password',
                                 'u-autocomplete' => '',
                                 'placeholder'    => t('Old password'),
                             ],
@@ -519,9 +562,9 @@ return Form::enqueue(
                             'attributes'  => [
                                 'type'      => 'button',
                                 'class'     => 'btn btn--primary btn--full',
-                                '@click'    => '$ajax.post("user/password-update", $data)',
+                                '@click'    => '$ajax.post("user/password-update", {current: passwordOld, password: passwordNew})',
                                 'disabled'  => '',
-                                ':disabled' => '!(passwordNew && passwordOld)',
+                                ':disabled' => '!passwordOld || passwordNew.length < ' . User::PASSWORD_MIN_LENGTH,
                             ],
                         ],
                     ],

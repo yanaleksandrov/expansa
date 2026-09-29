@@ -77,6 +77,13 @@ final class Manager
     private array $pluralRules = [];
 
     /**
+     * Translation file and override file of each source file, resolved once per source.
+     *
+     * @var array<string, array{string, string}>
+     */
+    private array $sources = [];
+
+    /**
      * Decoded translation files by path, false for a missing or invalid file.
      *
      * @var array<string, array<string, string>|false>
@@ -109,6 +116,7 @@ final class Manager
         $this->languages      = null;
         $this->languageIndex  = [];
         $this->pluralRules    = [];
+        $this->sources        = [];
         $this->files          = [];
     }
 
@@ -134,7 +142,7 @@ final class Manager
      */
     public function translate(string $string, mixed ...$args): string
     {
-        return Markdown::render($this->fill($string, $args));
+        return Markdown::render($this->fill($this->get($string), $args));
     }
 
     /**
@@ -154,7 +162,7 @@ final class Manager
      */
     public function translatePlural(string $forms, int $count, mixed ...$args): string
     {
-        return Markdown::render($this->fill($this->chooseForm($forms, $count), $args, $count));
+        return Markdown::render($this->fill($this->chooseForm($this->get($forms), $count), $args, $count));
     }
 
     /**
@@ -261,59 +269,93 @@ final class Manager
     }
 
     /**
-     * Translate a string from the translation file of the calling file's extension.
-     * Not wired into translate() yet: the caller frame points to the facade, not to the template.
+     * Translation of a string from the files of the code that asked for it: a plugin or theme
+     * uses its own directory, the rest the directory of its route. The override file wins.
      *
      * @param string $string
      * @return string The translation, or the string itself if there is none.
      */
-    protected function get(string $string): string
+    private function get(string $string): string
     {
-        $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2);
-        $source    = $backtrace[1]['file'] ?? null;
-
-        static $override = [];
-        static $routes   = [];
-
-        if ($source === null) {
+        if ($this->routes === []) {
             return $string;
         }
 
-        if (isset($routes[$source]) || isset($override[$source])) {
-            return $this->lookup($string, $routes[$source] ?? '', $override[$source] ?? '');
-        }
-
-        // the file must be inside one of the routes
-        $segments = array_map(fn ($key) => basename(rtrim($key, '/')), array_keys($this->routes));
-        $pattern  = sprintf('/(%s)\/([^\/]+)\/[^\/]+$/', implode('|', $segments));
-        if (! preg_match($pattern, $source, $matches)) {
+        $source = $this->source();
+        if ($source === '') {
             return $string;
         }
 
-        $element   = $matches[1] ?? '';
-        $directory = $matches[2] ?? '';
-        $filename  = sprintf($this->pattern, $this->locale());
+        [$file, $override] = $this->sources[$source] ??= $this->resolve($source);
 
-        foreach ($this->routes as $route => $targetRoute) {
+        return $this->lookup($string, $file, $override);
+    }
+
+    /**
+     * File of the first caller outside the framework core: t(), the facade and the core helpers
+     * that translate on behalf of their caller live in it.
+     *
+     * @return string Path with forward slashes, empty when the call stack has no file.
+     */
+    private function source(): string
+    {
+        $core   = self::slashes(dirname(__DIR__)) . '/';
+        $source = '';
+
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 12) as $frame) {
+            if (! isset($frame['file'])) {
+                continue;
+            }
+
+            $source = self::slashes($frame['file']);
+            if (! str_starts_with($source, $core)) {
+                break;
+            }
+        }
+
+        return $source;
+    }
+
+    /**
+     * Translation file and override file of a source file, by the first route containing it;
+     * `:dirname` in a route target is the directory right below the route: the plugin or theme.
+     *
+     * @param string $source
+     * @return array{string, string} Empty paths when no route contains the source.
+     */
+    private function resolve(string $source): array
+    {
+        $locale = $this->locale();
+
+        foreach ($this->routes as $route => $target) {
+            $route = rtrim(self::slashes($route), '/') . '/';
             if (! str_starts_with($source, $route)) {
                 continue;
             }
 
-            $targetRoute = rtrim($targetRoute, DIRECTORY_SEPARATOR);
-            $targetDir   = basename($targetRoute);
-            if ($directory) {
-                $targetRoute = str_replace(':dirname', $directory, $targetRoute);
-            }
+            $target   = rtrim(self::slashes($target), '/');
+            $dirname  = strtok(substr($source, strlen($route)), '/') ?: '';
+            $relative = str_contains($target, ':dirname') ? basename(dirname($target)) . '/' . $dirname : basename($target);
+            $target   = str_replace(':dirname', $dirname, $target);
 
-            if (in_array($element, ['plugins', 'themes'], true)) {
-                $targetDir = $element . DIRECTORY_SEPARATOR . str_replace(':dirname', $directory, $targetDir);
-            }
-
-            $override[$source] ??= sprintf('%s%s/%s.json', $this->overrides, $targetDir, $this->locale());
-            $routes[$source]   ??= sprintf('%s/%s.json', $targetRoute, $filename);
+            return [
+                sprintf('%s/%s.json', $target, sprintf($this->pattern, $locale)),
+                $this->overrides === '' ? '' : sprintf('%s/%s/%s.json', rtrim(self::slashes($this->overrides), '/'), $relative, $locale),
+            ];
         }
 
-        return $this->lookup($string, $routes[$source] ?? '', $override[$source] ?? '');
+        return ['', ''];
+    }
+
+    /**
+     * Path with forward slashes, to compare Windows and Unix paths alike.
+     *
+     * @param string $path
+     * @return string
+     */
+    private static function slashes(string $path): string
+    {
+        return str_replace('\\', '/', $path);
     }
 
     /**

@@ -21,11 +21,12 @@ use App\Support\DashboardFavicons;
 DashboardFavicons::enqueue();
 
 DashboardAssets::enqueue(
-    ['phosphor', 'expansa', 'controls', 'utility', 'notifications'],
+    ['phosphor', 'expansa', 'controls', 'utility'],
     [
         // only `apiurl`: youla-ajax.js builds the $ajax.post() base URL from it
         'youla' => ['data' => ['apiurl' => url('/api/')]],
         'youla-ajax',
         'youla-expansa',
+        'youla-passkeys',
     ]
 );

@@ -215,6 +215,61 @@ return \Expansa\Facades\Form::enqueue(
                         ],
                     ],
                 ],
+                [
+                    'name'       => 'smtp-settings',
+                    'type'       => 'divider',
+                    'label'      => t('Outgoing email (optional)'),
+                    'attributes' => [ 'u-prop' => 'smtpSettings' ],
+                ],
+                [
+                    'type'  => 'text',
+                    'name'  => 'smtp[host]',
+                    'label' => t('SMTP server'),
+                    'attributes' => [
+                        'placeholder' => 's32.hostia.name',
+                        'u-prop'      => 'smtp.host',
+                        'u-autocomplete' => '',
+                    ],
+                ],
+                [
+                    'type'  => 'number',
+                    'name'  => 'smtp[port]',
+                    'label' => t('SMTP port'),
+                    'attributes' => [
+                        'value'       => 465,
+                        'placeholder' => '465',
+                        'u-prop'      => 'smtp.port',
+                    ],
+                ],
+                [
+                    'type'  => 'email',
+                    'name'  => 'smtp[username]',
+                    'label' => t('SMTP login'),
+                    'attributes' => [
+                        'placeholder'    => 'no-reply@expansa.org',
+                        'u-prop'         => 'smtp.username',
+                        'u-autocomplete' => '',
+                    ],
+                ],
+                [
+                    'type'  => 'password',
+                    'name'  => 'smtp[password]',
+                    'label' => t('SMTP password'),
+                    'attributes' => [
+                        'u-prop'         => 'smtp.password',
+                        'u-autocomplete' => 'new-password',
+                    ],
+                ],
+                [
+                    'type'  => 'email',
+                    'name'  => 'smtp[from]',
+                    'label' => t('Email sender address'),
+                    'attributes' => [
+                        'placeholder'    => 'no-reply@expansa.org',
+                        'u-prop'         => 'smtp.from',
+                        'u-autocomplete' => '',
+                    ],
+                ],
             ],
         ],
         [
@@ -360,7 +415,7 @@ return \Expansa\Facades\Form::enqueue(
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => '',
+	                'instruction' => t('At least 12 characters.'),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',

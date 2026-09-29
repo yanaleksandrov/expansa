@@ -19,7 +19,7 @@ defined('EX_PATH') || exit;
             echo view(
                 'mails/wrappers',
                 [
-                    'body_template' => 'views/mails/reset-password',
+                    'body_template' => 'mails/reset-password',
                 ]
             );
             ?>
