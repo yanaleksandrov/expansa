@@ -31,4 +31,4 @@ if ( ! defined( 'EX_PATH' ) ) {
     ]
 )->values();
 ?>
-<button <?php echo $attributes; ?>>{{ $label }}</button>
+<button<?php echo Safe::attributes($attributes); ?>><?php echo Safe::markup($label); ?></button>

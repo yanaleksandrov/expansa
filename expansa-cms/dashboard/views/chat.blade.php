@@ -49,6 +49,24 @@ if ( ! defined( 'EX_PATH' ) ) {
 			</div>
 		</div>
 
+		<div class="chat-presets">
+			<ul class="chat-presets-items">
+				<li class="chat-presets-item">
+					<i class="ph ph-hammer"></i> {{ t('Features') }}
+					<span>{{ t('Expanding CMS capabilities') }}</span>
+				</li>
+				<li class="chat-presets-item">
+					<i class="ph ph-files"></i> {{ t('Content') }}
+					<span>{{ t('Upload from computer') }}</span>
+				</li>
+				<li class="chat-presets-item">
+					<i class="ph ph-article-ny-times"></i> {{ t('Texts') }}
+					<span>{{ t('Improve texts') }}</span>
+				</li>
+			</ul>
+			<button type="button" class="btn btn--outline">{{ t('View Presets') }} <i class="ph ph-arrow-right"></i></button>
+		</div>
+
 		<div class="chat-composer">
 			<textarea class="chat-composer-input" rows="1" placeholder="<?php echo t_attr( 'Message the assistant...' ); ?>" u-bind="composerInput"></textarea>
 			<button type="button" class="btn btn--primary chat-composer-send" u-bind="sendButton">
