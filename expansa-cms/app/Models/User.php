@@ -147,6 +147,11 @@ class User extends Model implements Fieldable
     private const int COOKIE_TTL_LONG = 1209600; // 14 days
 
     /**
+     * Shortest password accepted when it is changed or reset.
+     */
+    public const int PASSWORD_MIN_LENGTH = 8;
+
+    /**
      * Current user data, cached for the lifetime of the request.
      */
     private static ?User $current = null;
@@ -493,9 +498,50 @@ class User extends Model implements Fieldable
             return error('user-login', t('These credentials do not match our records.'));
         }
 
+        return self::authenticate($user, $remember);
+    }
+
+    /**
+     * Signs in a user whose identity is already proven (password, passkey): issues the auth cookie.
+     *
+     * @param User $user     Verified user.
+     * @param bool $remember Keep the cookie for 14 days instead of 2.
+     * @return User
+     */
+    public static function authenticate(User $user, bool $remember = false): User
+    {
         self::setAuthCookie($user, time() + ($remember ? self::COOKIE_TTL_LONG : self::COOKIE_TTL_SHORT), $remember);
 
         return self::$current = $user;
+    }
+
+    /**
+     * Set a new password. Auth cookies are signed with the password hash, so every device is signed out;
+     * for the current user the cookie is re-signed with the same lifetime and this session goes on.
+     *
+     * @param string $password New password, at least PASSWORD_MIN_LENGTH characters.
+     * @return User|Error
+     */
+    public function changePassword(string $password): User|Error
+    {
+        if (mb_strlen($password) < self::PASSWORD_MIN_LENGTH) {
+            return error('user-password', t('The password must be at least :count characters long.', self::PASSWORD_MIN_LENGTH));
+        }
+
+        $expiration = preg_match('/\|(\d+)\|[a-f0-9]{64}$/', (string) Cookie::get(self::$cookieName, ''), $matches) ? (int) $matches[1] : 0;
+        $isCurrent  = self::$current?->id === $this->id;
+
+        $updated = $this->update([
+            'password'                  => $password,
+            'password_reset_token'      => null,
+            'password_reset_expires_at' => null,
+        ]);
+
+        if ($updated instanceof self && $isCurrent && $expiration > time()) {
+            self::setAuthCookie($this, $expiration, $expiration - time() > self::COOKIE_TTL_SHORT);
+        }
+
+        return $updated;
     }
 
     /**

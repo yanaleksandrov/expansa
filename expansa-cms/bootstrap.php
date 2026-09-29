@@ -168,9 +168,9 @@ Lifecycle::phase('configure', true, function () {
         version: EX_VERSION
     );
 
-    // every email passes its PHPMailer through the "mailer" filter: SMTP settings, a test double
+    // every email gets the site sender and DKIM signature, then the "mailer" filter: SMTP settings, a test double
     Mail::configure(
-        setup: fn (PHPMailer\PHPMailer\PHPMailer $mailer) => Hook::call('mailer', $mailer),
+        setup: fn (PHPMailer\PHPMailer\PHPMailer $mailer) => Hook::call('mailer', App\Support\Mailer::setup($mailer)),
     );
 
     // scheduled jobs keep their locks in the storage and email their output through Mail
@@ -501,7 +501,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
     // safe methods (GET) are exempt from CSRF by convention
     Route::before('POST|PUT|PATCH|DELETE', '/api/.*', [App\Http\VerifyCsrfToken::class, 'handle']);
 
-    // RequireAuth has its own allow-list: system/test, system/install, user/sign-in, user/sign-up, user/reset-password
+    // RequireAuth has its own allow-list for installation, account setup, password recovery and passkey sign-in.
     Route::before('*', '/api/.*', [App\Http\RequireAuth::class, 'handle']);
 
     // routes
@@ -557,6 +557,16 @@ Lifecycle::context('install', !$isInstalled, function () {
  * A logged-in user goes straight to the dashboard. Otherwise, dashboard/auth.php enqueues
  * only the assets the auth forms need, without the admin panel.
  */
+Lifecycle::context('sign-out', function (string $uri): bool {
+    $uri  = trim($uri, '/');
+    $root = trim((string) Hook::call('dashboardRootSlug', 'dashboard'), '/');
+
+    return $uri === 'sign-out' || $uri === "$root/sign-out";
+}, function () {
+    App\Models\User::logout();
+    redirect('sign-in');
+});
+
 Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-in', 'sign-up', 'reset-password'], true), function () {
     if (App\Models\User::isLogged()) {
         redirect('dashboard');

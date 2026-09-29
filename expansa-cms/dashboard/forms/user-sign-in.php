@@ -35,6 +35,7 @@ return \Expansa\Facades\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'placeholder' => t( 'Enter login or email' ),
+                'autocomplete' => 'username webauthn',
                 'u-prop'      => 'login',
                 'required'    => 1,
 			],
@@ -103,5 +104,33 @@ return \Expansa\Facades\Form::enqueue(
 				':disabled' => '!login.trim() || !password.trim()',
 			],
 		],
+        [
+            'name'       => 'website-data',
+            'type'       => 'divider',
+            'label'      => t('or'),
+            'attributes' => [
+                'u-show' => '$passkey.available',
+                'hidden' => true,
+            ],
+        ],
+        [
+            'name'     => 'instructions',
+            'type'     => 'custom',
+            'callback' => function() {
+                ?>
+                <button
+                    type="button" class="btn btn--lg btn--outline btn--full"
+                    @load="$passkey.autofill(() => $ajax.post('user/passkey-options')).then(credential => credential && $ajax.post('user/passkey-sign-in', {credential, remember: remember ? 1 : 0}))"
+                    @click="$ajax.post('user/passkey-options').then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post('user/passkey-sign-in', {credential, remember: remember ? 1 : 0}))"
+                >
+                    <i class="ph ph-fingerprint"></i> <?php echo t('Sign in with a passkey'); ?>
+                </button>
+                <?php
+            },
+            'attributes'  => [
+                'u-show' => '$passkey.available',
+                'hidden' => true,
+            ],
+        ],
 	]
 );

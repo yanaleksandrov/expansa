@@ -56,6 +56,14 @@ $mail->configure(setup: function (PHPMailer $mailer) {
 $mailer = $mail->to('c@example.com')->subject('x')->message('y');
 check('a failed send returns false with the error', ! $mailer->send() && $mailer->error !== '');
 
+$message = new Expansa\Mail\Message(new FakeMailer());
+$message->message('<p>Привет</p>');
+$html = (fn () => $this->mailer)->call($message);
+check('an HTML body is sent as UTF-8 HTML with a text alternative', $html->CharSet === 'utf-8' && $html->ContentType === 'text/html' && trim($html->AltBody) === 'Привет');
+
+$message->message('Plain');
+check('a plain body stays plain text', $html->ContentType === 'text/plain' && $html->AltBody === '');
+
 unlink($file);
 
 exit($failures > 0 ? 1 : 0);

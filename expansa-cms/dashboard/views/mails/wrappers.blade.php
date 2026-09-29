@@ -20,7 +20,7 @@ if ( empty( $template ) ) {
 	<tbody>
 		<tr>
 			<td style="text-align: center;">
-				<img style="display: inline-block" src="<?php echo url( 'dashboard/assets/images/logo-grid.svg' ); ?>" width="212" height="124" alt="Expansa CMS">
+				<img style="display: inline-block; border: 0;" src="<?php echo url( 'dashboard/assets/images/logo-grid.png' ); ?>" width="212" height="124" alt="Expansa CMS">
 			</td>
 		</tr>
 		<tr>

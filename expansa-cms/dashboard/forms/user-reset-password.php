@@ -1,67 +1,89 @@
 <?php
-/**
- * Reset password form
- *
- * @since 2025.1
- */
-return \Expansa\Facades\Form::enqueue(
-	'user-reset-password',
-	[
-		'class'           => 'dg g-6',
-		'u-data'          => '{email: ""}',
-		'@submit.prevent' => '$ajax.post("user/reset-password")',
-	],
-	[
-		[
-			'name'        => 'title',
-			'type'        => 'header',
-			'label'       => t( 'Reset password' ),
-			'class'       => 't-center',
-			'instruction' => t( 'Enter the email address that you used to register. We will send you an email that will allow you to reset your password.' ),
-			'attributes'  => [
-                'u-prop' => 'title'
-            ],
-		],
-		[
-			'type'        => 'email',
-			'name'        => 'email',
-			'label'       => t( 'Your email' ),
-			'class'       => 'field field--lg',
-			'label_class' => '',
-			'reset'       => 0,
-			'before'      => '',
-			'after'       => '',
-			'instruction' => '',
-			'tooltip'     => '',
-			'copy'        => 0,
-			'validator'   => '',
-			'conditions'  => [],
-			'attributes'  => [
-				'placeholder'    => t( 'Enter your email address' ),
-                'u-prop'         => 'email',
-				'required'       => true,
-				'u-autocomplete' => '',
-			],
-		],
-		[
-			'type'        => 'submit',
-			'name'        => 'sign-in',
-			'label'       => t( 'Send me instructions' ),
-			'class'       => '',
-			'label_class' => '',
-			'reset'       => 0,
-			'before'      => '',
-			'after'       => '',
-			'instruction' => '',
-			'tooltip'     => '',
-			'copy'        => 0,
-			'validator'   => '',
-			'conditions'  => [],
-			'attributes'  => [
-				'class'     => 'btn btn--lg btn--primary btn--full',
-                'disabled'  => true,
-				':disabled' => '!/\S+@\S+\.\S+/.test(email)',
-			],
-		],
-	]
+
+use Expansa\Facades\Form;
+use Expansa\Facades\Safe;
+
+$resetToken = Safe::trim($_GET['token'] ?? '');
+$hasToken   = preg_match('/^[a-f0-9]{64}$/i', $resetToken) === 1;
+$fields     = [
+    [
+        'name'        => 'title',
+        'type'        => 'header',
+        'label'       => t('Reset password'),
+        'class'       => 't-center',
+        'instruction' => $hasToken
+            ? t('Choose a new password for your account.')
+            : t('Enter the email address that you used to register. We will send you an email that will allow you to reset your password.'),
+        'attributes'  => ['u-prop' => 'title'],
+    ],
+];
+
+if ($hasToken) {
+    $fields[] = [
+        'type'       => 'hidden',
+        'name'       => 'token',
+        'attributes' => [
+            'value'  => $resetToken,
+            'u-prop' => 'token'
+        ],
+    ];
+    $fields[] = [
+        'type'        => 'password',
+        'name'        => 'password',
+        'label'       => t('New password'),
+        'class'       => 'field field--lg',
+        'instruction' => t('At least 12 characters.'),
+        'validator'   => '',
+        'attributes'  => [
+            'placeholder'  => t('Enter a new password'),
+            'u-prop'       => 'password',
+            'required'     => true,
+            'autocomplete' => 'new-password',
+        ],
+        'switcher'    => 1,
+        'generator'   => 1,
+        'indicator'   => 0,
+        'characters'  => [
+            'lowercase' => 2,
+            'uppercase' => 2,
+            'special'   => 2,
+            'length'    => 12,
+            'digit'     => 2,
+        ],
+    ];
+} else {
+    $fields[] = [
+        'type'        => 'email',
+        'name'        => 'email',
+        'label'       => t('Your email'),
+        'class'       => 'field field--lg',
+        'instruction' => '',
+        'attributes'  => [
+            'placeholder'    => t('Enter your email address'),
+            'u-prop'         => 'email',
+            'required'       => true,
+            'autocomplete'   => 'email',
+        ],
+    ];
+}
+
+$fields[] = [
+    'type'       => 'submit',
+    'name'       => 'submit',
+    'label'      => $hasToken ? t('Save new password') : t('Send me instructions'),
+    'attributes' => [
+        'class'     => 'btn btn--lg btn--primary btn--full',
+        'disabled'  => true,
+        ':disabled' => $hasToken ? 'password.trim().length < 8' : '!/\S+@\S+\.\S+/.test(email)',
+    ],
+];
+
+return Form::enqueue(
+    'user-reset-password',
+    [
+        'class'           => 'dg g-6',
+        'u-data'          => '{token: ' . json_encode($hasToken ? $resetToken : '') . '}',
+        '@submit.prevent' => '$ajax.post("user/reset-password")',
+    ],
+    $fields,
 );
