@@ -261,12 +261,18 @@
   background-color: var(--expansa-white);
 }
 
+.chat-composer:focus-within {
+  border-color: var(--expansa-link);
+  box-shadow: 0 0 0 1px var(--expansa-link);
+}
+
 .chat-composer-input {
   flex: 1 1 auto;
   max-height: 12rem;
   border: none;
   background-color: transparent;
-  padding: .5rem 0;
+  box-shadow: none;
+  resize: none;
 }
 
 .chat-composer-send {
