@@ -10,6 +10,7 @@ declare(strict_types=1);
  */
 
 use Expansa\Facades\Asset;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
@@ -20,12 +21,14 @@ use Expansa\Facades\I18n;
 use Expansa\Facades\Lifecycle;
 use Expansa\Facades\Log;
 use Expansa\Facades\Mail;
+use Expansa\Facades\Role;
 use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Session;
 use Expansa\Facades\Terminal;
 use Expansa\Facades\View;
 use Expansa\Patterns\Registry;
+use Expansa\Scheduler\Scheduler;
 use Expansa\Support\Is;
 use Expansa\Support\Url;
 
@@ -170,6 +173,13 @@ Lifecycle::phase('configure', true, function () {
         ],
     ]);
 
+    // permissions come from the roles of Role::add(); plugins add policies of their resources with Auth::setPolicy()
+    $roles = new Expansa\Auth\Roles();
+    Role::swap($roles);
+    Auth::configure(
+        permissions: $roles,
+    );
+
     // the version shown by the "list" console command
     Terminal::configure(
         version: EX_VERSION
@@ -181,7 +191,7 @@ Lifecycle::phase('configure', true, function () {
     );
 
     // scheduled jobs keep their locks in the storage and email their output through Mail
-    Expansa\Scheduler\Scheduler::configure(
+    Scheduler::configure(
         tempDir: EX_STORAGE,
         mailer: fn (string $to, string $subject, string $body, array $attachments) => Mail::send($to, $subject, $body, $attachments),
     );
@@ -298,10 +308,10 @@ Lifecycle::phase('configure', true, function () {
  */
 Lifecycle::phase('register', $isInstalled, function () {
     // roles
-    App\User\Roles::register(
+    Role::add(
         role: 'admin',
-        displayName: t('Administrator'),
-        capabilities: [
+        name: t('Administrator'),
+        permissions: [
             'read',
             'files_upload',
             'files_edit',
@@ -332,10 +342,10 @@ Lifecycle::phase('register', $isInstalled, function () {
         ],
     );
 
-    App\User\Roles::register(
+    Role::add(
         role: 'editor',
-        displayName: t('Editor'),
-        capabilities: [
+        name: t('Editor'),
+        permissions: [
             'read',
             'files_upload',
             'files_edit',
@@ -353,10 +363,10 @@ Lifecycle::phase('register', $isInstalled, function () {
         ],
     );
 
-    App\User\Roles::register(
+    Role::add(
         role: 'author',
-        displayName: t('Author'),
-        capabilities: [
+        name: t('Author'),
+        permissions: [
             'read',
             'files_upload',
             'files_edit',
@@ -367,10 +377,10 @@ Lifecycle::phase('register', $isInstalled, function () {
         ],
     );
 
-    App\User\Roles::register(
+    Role::add(
         role: 'subscriber',
-        displayName: t('Subscriber'),
-        capabilities: [
+        name: t('Subscriber'),
+        permissions: [
             'read',
         ],
     );

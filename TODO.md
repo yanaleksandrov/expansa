@@ -1,79 +1,47 @@
 Ты — senior framework architect. Я разрабатываю собственный PHP framework, который является ядром CMS.
 
-Мне нужно спроектировать отдельный core package под названием:
+Нужно с нуля спроектировать отдельный framework-level package:
 
-`Auth`
+Auth
 
-Важно: это именно **framework-level infrastructure**, а не CMS-domain. Не нужно проектировать User, Article, Post, AdminPanel и другие сущности конкретной CMS.
+Текущие packages:
 
-Моя текущая структура framework:
+Assets, Builders, Cache, Codecs, Console, Cookie, Database, Debug,
+Extensions, Facades, Filesystem, Hooks, Http, Images, Lifecycle,
+Log, Mail, Patterns, Routing, Scheduler, Security, Session, Support,
+Translation, View.
 
-* Assets
-* Builders
-* Cache
-* Codecs
-* Console
-* Cookie
-* Database
-* Debug
-* Extensions
-* Facades
-* Filesystem
-* Hooks
-* Http
-* Images
-* Lifecycle
-* Log
-* Mail
-* Patterns
-* Routing
-* Scheduler
-* Security
-* Session
-* Support
-* Translation
-* View
+Добавляется:
 
-Я хочу добавить:
-
-* Auth
+Auth
 
 ## Главная задача
 
-Спроектируй `Auth` с нуля как независимый framework package.
+Определи ответственность и границы Auth как независимого framework package.
 
-В первую очередь определи его ответственность и границы.
+Важно разделить:
 
-Мне важно разделить:
-
-```text
 Authentication → кто субъект?
-Auth           → что этому субъекту разрешено?
-Security       → механизмы безопасности
-Session        → хранение состояния сессии
-```
+Auth → что субъекту разрешено?
+Security → механизмы безопасности
+Session → хранение состояния сессии
 
 Не смешивай эти ответственности.
 
 ## Authorization
 
-`Auth` должен поддерживать как минимум два типа проверок.
-
-Простая проверка permission:
+Auth должен поддерживать:
 
 ```php
 $auth->allows($subject, 'article.update');
-```
-
-И проверка действия над конкретным ресурсом:
-
-```php
 $auth->can($subject, 'update', $article);
-```
+````
 
-При этом framework не должен знать, что такое `$article`.
+Также нужны соответствующие отрицательные проверки.
 
-Например:
+Framework не должен знать, что такое `$article`, `User`, Article или CMS-specific permissions.
+
+Пример:
 
 ```text
 permission:
@@ -83,11 +51,11 @@ policy:
 User can update Article only if they are its owner
 ```
 
-Конкретные `Article`, `User` и CMS permissions должны определяться приложением/CMS, а не самим framework.
+Конкретные модели, permissions и бизнес-правила определяет CMS/application.
 
-## Исследуй архитектуру
+## Архитектурные концепции
 
-Определи, нужны ли в `Auth` следующие понятия:
+Исследуй необходимость:
 
 ```text
 Subject
@@ -102,131 +70,103 @@ Voter
 Guard
 ```
 
-Для каждого:
+Для каждого укажи:
 
-1. Нужен ли он?
-2. Если нужен — зачем?
-3. На каком уровне он должен находиться?
-4. Как он взаимодействует с остальными?
-5. Не дублирует ли он другой компонент?
+1. Нужен ли он;
+2. Зачем;
+3. Framework или application/CMS level;
+4. Как взаимодействует с остальными;
+5. Не дублирует ли другой компонент.
 
-Не добавляй сущности просто потому, что они существуют в Laravel/Symfony.
-
-Если какая-то концепция лишняя — прямо исключи её.
+Не копируй Laravel/Symfony без необходимости. Лишние концепции прямо исключай.
 
 ## Framework vs CMS
 
-Особенно чётко раздели:
-
-### Framework-level
-
-То, что должно находиться внутри `Auth`.
-
-### CMS-level
-
-То, что должно реализовываться самой CMS поверх framework.
-
-Например, ответь отдельно:
+Отдельно определи:
 
 ```text
-Roles        → framework или CMS?
-Permissions  → framework или CMS?
-Policies     → framework или CMS?
-Abilities    → framework или CMS?
-User         → framework или CMS?
+Roles
+Permissions
+Policies
+Abilities
+User
 ```
+
+что относится к framework, а что к CMS/application.
 
 ## API
 
-Спроектируй минимальный и чистый API.
-
-Например:
+Спроектируй минимальный чистый API. Рассмотри:
 
 ```php
 $auth->allows($subject, 'article.update');
-
 $auth->denies($subject, 'article.update');
 
 $auth->can($subject, 'update', $article);
-
 $auth->cannot($subject, 'update', $article);
 ```
 
-Но не ограничивайся этим API — предложи лучший вариант, если считаешь нужным.
+При необходимости предложи лучший вариант.
 
-Покажи реальные PHP-примеры:
+Покажи PHP-примеры:
 
-### 1. Permission
-
-```php
-$auth->allows($subject, 'article.update');
-```
-
-### 2. Resource policy
-
-```php
-$auth->can($subject, 'update', $article);
-```
-
-### 3. Сложное правило
-
-Правило должно зависеть от нескольких условий.
-
-## Exceptions
-
-Определи:
-
-* нужен ли `AuthorizationException`;
-* нужен ли `ForbiddenException`;
-* должен ли `Auth` возвращать `bool` или бросать exceptions;
-* как framework должен отличать `deny` от ошибки;
-* как это должно интегрироваться с HTTP 403.
+1. permission check;
+2. resource policy;
+3. сложное правило с несколькими условиями.
 
 ## Policies
 
-Покажи, как приложение регистрирует policy:
+Покажи регистрацию:
 
 ```php
 $auth->policy(Article::class, ArticlePolicy::class);
 ```
 
-или предложи другой API.
+или предложи лучший API.
 
-Покажи, как framework находит нужную policy.
+Объясни, как framework находит policy.
 
 Policy не должна зависеть от ORM.
 
 ## Permissions
 
-Покажи, как framework предоставляет permission checking, но не заставляй framework хранить permissions в конкретной базе данных.
+Auth должен предоставлять permission checking, но не должен требовать конкретного storage.
 
-Например, реализация может быть:
+Возможные реализации:
 
 ```text
 Static
-Database
 Config
+Database
 External provider
 Custom
 ```
 
-Если для этого нужны interfaces — спроектируй их.
+Если нужны interfaces — спроектируй их.
 
 ## Storage
 
-`Auth` не должен напрямую зависеть от Database.
-
-Не делай внутри него:
+Auth не должен напрямую зависеть от Database:
 
 ```php
 $db->query(...);
 ```
 
-Вместо этого используй abstractions/interfaces, если persistence вообще нужен.
+Если persistence нужен — только через abstractions/interfaces.
 
-## Интеграции
+## Exceptions
 
-Объясни, как `Auth` интегрируется с:
+Определи:
+
+* нужен ли AuthorizationException;
+* нужен ли ForbiddenException;
+* когда возвращать bool, а когда бросать exception;
+* как отличать deny от системной ошибки;
+* как интегрировать deny с HTTP 403.
+
+## Integrations
+
+Объясни интеграцию с:
 
 ```text
 Security
@@ -238,17 +178,19 @@ Extensions
 Facades
 ```
 
-Особенно важно:
+Особенно:
 
-* должен ли `Http` зависеть от `Auth`;
-* должен ли `Auth` зависеть от `Security`;
-* должен ли `Security` зависеть от `Auth`;
+* должен ли Http зависеть от Auth;
+* должен ли Auth зависеть от Security;
+* должен ли Security зависеть от Auth;
 * нужен ли middleware;
 * нужен ли CLI authorization.
 
 Покажи dependency direction.
 
-## Структура пакета
+Все интеграции должны использовать abstractions/adapters.
+
+## Package structure
 
 Предложи конкретную структуру:
 
@@ -257,7 +199,7 @@ Auth/
 ├── ...
 ```
 
-Раздели:
+Используй только необходимые директории, например:
 
 ```text
 Contracts
@@ -266,9 +208,9 @@ Policies
 Exceptions
 ```
 
-или предложи другую структуру, если она архитектурно лучше.
+или предложи лучшую структуру.
 
-Не создавай лишние директории.
+Не создавай директории ради формальности.
 
 ## Dependency graph
 
@@ -280,9 +222,7 @@ Auth
  └── used by → ?
 ```
 
-И общий граф относительно моих существующих пакетов.
-
-Особенно хочу увидеть:
+и общий граф относительно:
 
 ```text
 Security
@@ -291,51 +231,52 @@ Http
 Auth
 ```
 
-## Архитектурные ограничения
+## Ограничения
 
 Не делай Laravel-клон.
 
-Не используй глобальное статическое состояние.
+Не используй:
 
-Не делай God object.
-
-Не привязывай `Auth` напрямую к:
-
+* global static state;
+* God object;
 * ORM;
-* Database;
-* Session;
-* HTTP;
-* конкретной модели User.
-
-Все интеграции должны быть через abstractions/adapters.
-
-Не добавляй функциональность только ради полноты.
+* прямую зависимость от Database;
+* прямую зависимость от Session;
+* прямую зависимость от HTTP;
+* конкретную User model.
 
 Предпочтение:
 
 ```text
 маленькое ядро
 +
-расширяемые interfaces
+минимальные interfaces
 +
 адаптеры
 ```
 
-вместо огромного универсального Auth subsystem.
+Не добавляй функциональность ради полноты.
 
 ## Финальный результат
 
-В конце дай:
+Дай:
 
-1. Итоговую архитектуру `Auth`.
-2. Список обязательных классов.
-3. Список обязательных interfaces.
-4. Что является CMS-level.
-5. Что является framework-level.
+1. Итоговую архитектуру Auth.
+2. Обязательные классы.
+3. Обязательные interfaces.
+4. Framework-level компоненты.
+5. CMS/application-level компоненты.
 6. Dependency graph.
-7. Пример полного flow проверки permission.
-8. Пример полного flow проверки policy.
-9. Что НЕ нужно включать в `Auth`.
+7. Полный flow permission check.
+8. Полный flow policy check.
+9. Что НЕ должно входить в Auth.
 10. Что можно добавить позже без изменения основной архитектуры.
 
-После архитектуры реализуй **минимальную production-ready версию `Auth` на PHP**: только обязательные компоненты, с PHPDoc и unit-тестами. Не реализуй опциональные функции, пока не объяснишь, зачем они нужны.
+После архитектуры реализуй минимальную production-ready версию Auth на PHP:
+
+* только обязательные компоненты;
+* PHPDoc;
+* unit-тесты;
+* без optional features до объяснения их необходимости.
+
+Код должен соответствовать предложенной архитектуре и сохранять независимость от ORM, Database, Session, HTTP и конкретной User model.

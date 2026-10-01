@@ -2,8 +2,8 @@
 
 use App\Models\FieldGroup;
 use App\Post\Type;
-use App\User\Roles;
 use Expansa\Facades\Json;
+use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 
 /**
@@ -89,7 +89,7 @@ $postStatuses = [
     'trash'     => t('Trash'),
 ];
 
-$roles = array_map(static fn ($role) => $role['name'], Roles::get());
+$roles = array_map(static fn ($role) => $role['name'], Role::all());
 
 $locations = [
     'post_type'   => ['label' => t('Post Type'), 'options' => $postTypes],

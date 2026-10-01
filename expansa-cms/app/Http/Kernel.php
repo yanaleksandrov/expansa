@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use Expansa\Auth\Exceptions\AccessDenied;
 use Expansa\Facades\Cookie;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\ResponseReady;
@@ -25,6 +26,7 @@ use Throwable;
  *
  *   success       -> { "data": <return value> }
  *   HttpError -> { "message": ..., "errors"?: ... }  with the exception's status code
+ *   AccessDenied  -> { "message": ... }  with status 403
  *   ResponseReady -> the exception's response as-is
  *
  * Cookies queued with the Cookie facade are added to every response.
@@ -54,6 +56,8 @@ final class Kernel
                 : new Response()->json(self::withMetrics(['data' => $result]));
         } catch (ResponseReady $e) {
             $response = $e->response;
+        } catch (AccessDenied) {
+            $response = new Response()->json(self::withMetrics(['message' => t('You are not allowed to do this.')]), 403);
         } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationFailed) {
