@@ -8,7 +8,7 @@ use Expansa\Webauthn\Exceptions\InvalidCredential;
 
 /**
  * Authenticator data: RP ID hash, flags, signature counter and, after registration,
- * the attested credential with its COSE public key.
+ * the attested credential with its COSE public key; extensions are checked for form and skipped.
  *
  * @internal
  */
@@ -25,11 +25,31 @@ final readonly class AuthenticatorData
     public const int USER_VERIFIED = 0x04;
 
     /**
+     * The credential may be synced to other devices: a multi-device passkey.
+     */
+    public const int BACKUP_ELIGIBLE = 0x08;
+
+    /**
+     * The credential is synced right now.
+     */
+    public const int BACKED_UP = 0x10;
+
+    /**
      * Attested credential data follows the counter.
      */
     public const int ATTESTED = 0x40;
 
+    /**
+     * An extensions map ends the data.
+     */
+    public const int EXTENSIONS = 0x80;
+
     private function __construct(
+
+        /**
+         * Data as the authenticator signed it.
+         */
+        public string $raw,
 
         /**
          * SHA-256 of the RP ID the authenticator scoped the credential to.
@@ -60,39 +80,55 @@ final readonly class AuthenticatorData
     ) {}
 
     /**
-     * Parse raw authenticator data.
+     * Parse raw authenticator data; every byte must belong to a part the flags announce.
      *
      * @param string $raw
      * @return self
-     * @throws InvalidCredential If the data is truncated or the key isn't a CBOR map.
+     * @throws InvalidCredential If the data is truncated, malformed or has trailing bytes.
      */
     public static function parse(string $raw): self
     {
-        if (strlen($raw) < 37) {
+        $length = strlen($raw);
+        if ($length < 37) {
             throw new InvalidCredential('Authenticator data is truncated.');
         }
 
-        $flags   = ord($raw[32]);
-        $counter = unpack('N', $raw, 33)[1];
+        $flags        = ord($raw[32]);
+        $counter      = unpack('N', $raw, 33)[1];
+        $offset       = 37;
+        $credentialId = null;
+        $publicKey    = null;
 
-        if (! ($flags & self::ATTESTED)) {
-            return new self(substr($raw, 0, 32), $flags, $counter);
+        if ($flags & self::ATTESTED) {
+            // 16-byte AAGUID, then a 2-byte credential ID length
+            if ($length < 55) {
+                throw new InvalidCredential('Attested credential data is truncated.');
+            }
+
+            $idLength     = unpack('n', $raw, 53)[1];
+            $credentialId = substr($raw, 55, $idLength);
+            $publicKey    = Cbor::decodeFirst(substr($raw, 55 + $idLength), $keyLength);
+
+            if (strlen($credentialId) !== $idLength || ! is_array($publicKey)) {
+                throw new InvalidCredential('Attested credential data is malformed.');
+            }
+
+            $offset = 55 + $idLength + $keyLength;
         }
 
-        // 16-byte AAGUID, then a 2-byte credential ID length
-        if (strlen($raw) < 55) {
-            throw new InvalidCredential('Attested credential data is truncated.');
+        if ($flags & self::EXTENSIONS) {
+            if (! is_array(Cbor::decodeFirst(substr($raw, $offset), $extensionsLength))) {
+                throw new InvalidCredential('Authenticator extensions are malformed.');
+            }
+
+            $offset += $extensionsLength;
         }
 
-        $length       = unpack('n', $raw, 53)[1];
-        $credentialId = substr($raw, 55, $length);
-        $publicKey    = Cbor::decodeFirst(substr($raw, 55 + $length));
-
-        if (strlen($credentialId) !== $length || ! is_array($publicKey)) {
-            throw new InvalidCredential('Attested credential data is malformed.');
+        if ($offset !== $length) {
+            throw new InvalidCredential('Authenticator data has trailing bytes.');
         }
 
-        return new self(substr($raw, 0, 32), $flags, $counter, $credentialId, $publicKey);
+        return new self($raw, substr($raw, 0, 32), $flags, $counter, $credentialId, $publicKey);
     }
 
     /**

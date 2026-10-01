@@ -242,8 +242,10 @@ final class Migrations
             $table->char('credential_hash', 64)->unique();
             $table->smallInt('algorithm');
             $table->text('public_key');
-            $table->bigInt('counter')->unsigned()->default(0);
+            $table->int('counter')->unsigned()->default(0);
             $table->string('transports', 100)->default('');
+            $table->bool('backup_eligible')->default(false);
+            $table->bool('backed_up')->default(false);
 
             $table->string('name', 100)->default('');
             $table->timestamps();
