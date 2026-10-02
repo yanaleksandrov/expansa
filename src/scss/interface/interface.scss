@@ -1020,26 +1020,6 @@
   }
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.1rem 0.5rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  background-color: var(--expansa-bg-universal);
-  color: var(--expansa-text-muted);
-
-  &--green {
-    background-color: rgba(52, 168, 83, 0.15);
-    color: #1f8b3b;
-  }
-
-  &--muted {
-    background-color: var(--expansa-bg-universal);
-    color: var(--expansa-text-muted);
-  }
-}
-
 .dropdown {
   position: absolute;
   z-index: 10;

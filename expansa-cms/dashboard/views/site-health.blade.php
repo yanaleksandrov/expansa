@@ -54,7 +54,7 @@ $open    = $problem['id'] ?? '';
                         <span class="badge badge--sm {{ $meta[$groupStatus]['badge'] }}">{!! $meta[$groupStatus]['label'] !!}</span>
                         <i class="ph ph-caret-down site-health-caret"></i>
                     </button>
-                    <div class="accordion-panel site-health-panel" u-show="open === '{{ $group['id'] }}'" u-collapse hidden>
+                    <div class="accordion-panel site-health-panel" u-collapse="open === '{{ $group['id'] }}'"<?php echo $group['id'] === $open ? '' : ' hidden'; ?>>
                         <ul class="site-health-checks">
                             @foreach($group['checks'] as $check)
                                 <li class="site-health-check">

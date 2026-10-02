@@ -548,6 +548,9 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
         queue: fn () => App\Support\Ai::queue(),
     ));
 
+    // the site-health page tells from the time of this mark whether cron runs the scheduler
+    Hook::add('schedule', fn () => App\Support\SiteHealth::markScheduler());
+
     // AI tasks whose worker did not start or crashed; a request starts its own worker at once
     Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
         $scheduler->raw(PHP_BINARY, [EX_PATH . 'artisan', 'ai:work'])->everyMinute()->onlyOne();
