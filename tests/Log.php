@@ -15,7 +15,7 @@ use Expansa\Log\Handlers\File;
 use Expansa\Log\Handlers\RotatingFile;
 use Expansa\Log\Enums\Level;
 use Expansa\Log\Logger;
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 use Expansa\Log\Manager;
 
 // run: php tests/Log.php
@@ -25,11 +25,11 @@ require_once __DIR__ . '/bootstrap.php';
 class MemoryHandler extends AbstractHandler
 {
     /**
-     * @var LogRecord[]
+     * @var Record[]
      */
     public array $records = [];
 
-    public function handle(LogRecord $record): bool
+    public function handle(Record $record): bool
     {
         $this->records[] = $record;
 
@@ -39,15 +39,15 @@ class MemoryHandler extends AbstractHandler
 
 class BrokenHandler extends AbstractHandler
 {
-    public function handle(LogRecord $record): bool
+    public function handle(Record $record): bool
     {
         throw new RuntimeException('disk is full');
     }
 }
 
-function record(string $message, array $context = [], Level $level = Level::Info): LogRecord
+function record(string $message, array $context = [], Level $level = Level::Info): Record
 {
-    return new LogRecord(new DateTimeImmutable('2025-01-31 10:20:30'), 'app', $level, $message, $context);
+    return new Record(new DateTimeImmutable('2025-01-31 10:20:30'), 'app', $level, $message, $context);
 }
 
 $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'expansa-log-' . getmypid();
@@ -148,7 +148,7 @@ $left = array_map('basename', glob($daily . DIRECTORY_SEPARATOR . '*'));
 sort($left);
 check('RotatingFileHandler writes a file per day', file_get_contents($daily . DIRECTORY_SEPARATOR . 'app-2025-01-31.log') === "[2025-01-31 10:20:30] app.INFO: today\n");
 check('only the latest maxFiles are kept, other files are not touched', $left === ['app-2025-01-29.log', 'app-2025-01-30.log', 'app-2025-01-31.log', 'app-backup.log']);
-$handler->handle(new LogRecord(new DateTimeImmutable('2025-02-01 00:00:01'), 'app', Level::Info, 'tomorrow'));
+$handler->handle(new Record(new DateTimeImmutable('2025-02-01 00:00:01'), 'app', Level::Info, 'tomorrow'));
 $handler->close();
 check('the day change switches the file', is_file($daily . DIRECTORY_SEPARATOR . 'app-2025-02-01.log') && ! is_file($daily . DIRECTORY_SEPARATOR . 'app-2025-01-29.log'));
 

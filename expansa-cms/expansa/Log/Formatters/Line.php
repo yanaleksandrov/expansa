@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Log\Formatters;
 
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 
 /**
  * One line per record: `[2025-01-01 10:00:00] channel.LEVEL: message {"context"} {"extra"}`.
@@ -22,7 +22,7 @@ class Line extends AbstractFormatter
         protected readonly string $dateFormat = 'Y-m-d H:i:s',
     ) {}
 
-    public function format(LogRecord $record): string
+    public function format(Record $record): string
     {
         $line = '[' . $record->datetime->format($this->dateFormat) . '] '
             . $record->channel . '.' . $record->level->label() . ': ' . $record->message;

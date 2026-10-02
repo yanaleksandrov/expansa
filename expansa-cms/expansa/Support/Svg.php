@@ -27,6 +27,8 @@ final class Svg
 
     /**
      * Path of the last built sprite file.
+     *
+     * @var string
      */
     public static string $source = '';
 

@@ -28,6 +28,8 @@ final class File extends AbstractEntry implements FileContract
 
     /**
      * MD5 of the contents, empty for a missing file.
+     *
+     * @var string
      */
     public string $hash {
         get => $this->exists ? (string) hash_file('md5', $this->path) : '';
@@ -35,6 +37,8 @@ final class File extends AbstractEntry implements FileContract
 
     /**
      * MIME type detected from the contents, empty for a missing file.
+     *
+     * @var string
      */
     public string $mime {
         get => $this->exists ? (string) mime_content_type($this->path) : '';

@@ -38,8 +38,9 @@ final class Html
     private string $prevTagType = '';
 
     /**
- * True while the TK_TAG_SINGLE just parsed is an "unformatted" inline tag (e.g. <i>...</i>) swallowed whole, as opposed to a genuine void element like <input> or a comment.
-*/
+     * True while the TK_TAG_SINGLE just parsed is an "unformatted" inline tag (e.g. <i>...</i>)
+     * swallowed whole,as opposed to a genuine void element like <input> or a comment.
+     */
     private bool $lastSingleWasUnformatted = false;
 
     private int $newlines = 0;
@@ -55,18 +56,18 @@ final class Html
     private array $whitespace = ["\n", "\r", "\t", ' '];
 
     /**
- * Character list accepted by strspn()/strcspn() for the whitespace set above.
-*/
+     * Character list accepted by strspn()/strcspn() for the whitespace set above.
+     */
     private const WHITESPACE_CHARS = " \t\r\n";
 
     /**
- * Characters getTag() must inspect one at a time; anything else is bulk-skipped.
-*/
+     * Characters getTag() must inspect one at a time; anything else is bulk-skipped.
+     */
     private const TAG_SPECIAL_CHARS = " \t\r\n'\"=><";
 
     /**
- * Elements never folded onto one line by collapseTextOnlyElements() - their whitespace is significant.
-*/
+     * Elements never folded onto one line by collapseTextOnlyElements() - their whitespace is significant.
+     */
     private const NO_COLLAPSE_TAGS = ['pre', 'script', 'style', 'textarea'];
 
     private string $input = '';
@@ -85,15 +86,19 @@ final class Html
     private string $output = '';
 
     /**
- * The exact string most recently appended to $output, mirroring what "the last array element" used to mean.
-*/
+     * The exact string most recently appended to $output, mirroring what "the last array element" used to mean.
+     */
     private string $lastAppendedChunk = '';
 
     private $cssBeautify = false;
 
     private $jsBeautify = false;
 
-    // all the single tags for HTML
+    /**
+     * All the single tags for HTML.
+     *
+     * @var array|string[]
+     */
     private array $singleToken = [
         'br',
         'input',

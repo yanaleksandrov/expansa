@@ -98,8 +98,14 @@ enum Level: int
 
     private static function unknown(int|string $level): InvalidLevel
     {
-        $names = implode(', ', array_map(fn (self $case) => strtolower($case->name), self::cases()));
+        $names = implode(
+            ', ',
+            array_map(
+                static fn (self $case): string => strtolower($case->name),
+                self::cases(),
+            )
+        );
 
-        return new InvalidLevel("Level \"$level\" is not defined, use one of: $names");
+        return new InvalidLevel("Level '$level' is not defined, use one of: $names");
     }
 }

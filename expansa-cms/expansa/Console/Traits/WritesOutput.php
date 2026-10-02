@@ -61,7 +61,12 @@ trait WritesOutput
      */
     protected function decorateOptions(string $options): string
     {
-        return implode(', ', array_map(fn (string $item) => $this->decorate(sprintf('[yellow]#%s#', trim($item))), explode(',', $options)));
+        return implode(', ', array_map(
+            fn (string $item) => $this->decorate(
+                sprintf('[yellow]#%s#', trim($item))
+            ),
+            explode(',', $options)
+        ));
     }
 
     /**
@@ -100,6 +105,7 @@ trait WritesOutput
     public function error(string $message, ?int $exitCode = 1): void
     {
         $this->beep();
+
         fwrite(STDERR, $this->decorate("[red]#$message#") . PHP_EOL);
 
         if ($exitCode !== null) {

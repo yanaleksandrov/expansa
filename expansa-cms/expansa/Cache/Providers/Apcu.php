@@ -52,6 +52,7 @@ final class Apcu implements Provider
 
         // 0 never expires
         apcu_store($physicalKey, $value, $expiry === null ? 0 : max(1, $expiry - time()));
+
         $this->memoize($group, $key, $value);
 
         return true;

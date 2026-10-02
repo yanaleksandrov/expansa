@@ -5,8 +5,14 @@
 $path = urldecode((string) parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $file = __DIR__ . $path;
 
-// logs are never served, the same as storage/logs/.htaccess does for Apache
-if ($path !== '/' && is_file($file) && pathinfo($file, PATHINFO_EXTENSION) !== 'php' && ! str_starts_with($path, '/storage/logs/')) {
+// the storage and the compiled views are never served, the same as .htaccess does for Apache
+if (preg_match('~^/(storage|cache/views)/~', $path)) {
+    http_response_code(403);
+
+    return true;
+}
+
+if ($path !== '/' && is_file($file) && pathinfo($file, PATHINFO_EXTENSION) !== 'php') {
     return false;
 }
 

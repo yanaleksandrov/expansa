@@ -13,4 +13,4 @@ defined('EX_PATH') || exit;
 
 $label = Safe::trim($__data['label'] ?? '');
 ?>
-<div class="card-hr">{!! $label !!}</div>
+<div class="card-hr"<?php echo Safe::attributes($attributes); ?>>{!! $label !!}</div>

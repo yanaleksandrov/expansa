@@ -29,20 +29,20 @@ final class Index extends AbstractCommand
 
     public function handle(): void
     {
-        $text = <<<EOT
-		   ____            __                      
-		  / ___|_ __ __ _ / _| ___ _ __ ___   __ _ 
-		 | |  _| '__/ _` | |_ / _ \ '_ ` _ \ / _` |
-		 | |_| | | | (_| |  _|  __/ | | | | | (_| |
-		  \____|_|  \__,_|_|  \___|_| |_| |_|\__,_|
+        $text = <<<'EOT'
+         _____
+        | ____|_  ___ __   __ _ _ __  ___  __ _
+        |  _| \ \/ / '_ \ / _` | '_ \/ __|/ _` |
+        | |___ >  <| |_) | (_| | | | \__ \ (_| |
+        |_____/_/\_\ .__/ \__,_|_| |_|___/\__,_|
+                   |_|
 
-
-		EOT;
+        EOT;
 
         $version = $this->console->version;
         $year    = date('Y');
 
-        $this->info("[green]#$text#Program version: [green]#$version# | © 2024-$year «expansa.com»" . PHP_EOL);
+        $this->info("[green]#$text#Program version: [green]#$version# | © 2025-$year «expansa.com»" . PHP_EOL);
 
         if ($this->console->option('g')) {
             $this->info(t('Hello, friend!'));

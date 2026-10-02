@@ -20,16 +20,22 @@ abstract class AbstractCommand implements CommandContract
 
     /**
      * Name typed after artisan: `schedule:run`.
+     *
+     * @var string
      */
     public string $name;
 
     /**
      * Group the "list" command shows the command in, `null` for the default one.
+     *
+     * @var ?string
      */
     public ?string $group = null;
 
     /**
      * Usage shown by the "help" command.
+     *
+     * @var string
      */
     public string $signature = 'command [options] -- [arguments]';
 
@@ -42,11 +48,15 @@ abstract class AbstractCommand implements CommandContract
 
     /**
      * Inactive commands are hidden from the "list" command.
+     *
+     * @var bool
      */
     public bool $active = true;
 
     /**
      * Terminal running the command, set on registration.
+     *
+     * @var Terminal
      */
     public Terminal $console;
 

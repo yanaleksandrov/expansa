@@ -4,8 +4,7 @@
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "expansa/Yan",
-            "email": "yanalexandrov@gmail.com"
+            "name": "expansa/Yan"
         }
     ],
     "require": {
@@ -22,6 +21,7 @@
     },
     "require-dev": {
         "dragonmantank/cron-expression": "^3.0",
+        "phpunit/phpunit": "^11.0",
         "squizlabs/php_codesniffer": "^4.0",
         "spatie/image": "^3.7",
         "phpstan/phpstan": "^2.1"
@@ -33,6 +33,7 @@
         }
     },
     "scripts": {
+        "test:unit": "phpunit",
         "post-install-cmd": [
             "@php scripts/sync-vendored.php"
         ],

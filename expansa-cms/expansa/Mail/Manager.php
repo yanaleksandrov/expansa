@@ -18,6 +18,8 @@ final class Manager
 {
     /**
      * Gets the PHPMailer of every email before sending and returns the one to send with.
+     *
+     * @var null|Closure
      */
     private ?Closure $setup = null;
 

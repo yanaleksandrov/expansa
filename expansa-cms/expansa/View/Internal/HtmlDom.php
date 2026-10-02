@@ -37,8 +37,8 @@ final class HtmlDom
     private string $indentString;
 
     /**
- * @var string[] Elements folded inline with surrounding text instead of onto their own line.
-*/
+     * @var string[] Elements folded inline with surrounding text instead of onto their own line.
+     */
     private array $inlineTags;
 
     public function __construct(array $options = [])

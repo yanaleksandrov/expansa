@@ -53,6 +53,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Raw request body, php://input is read on first access.
+     *
+     * @var string
      */
     public private(set) string $content {
         get => $this->content ??= (string) file_get_contents('php://input');
@@ -96,6 +98,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Request method, GET if the server did not set it.
+     *
+     * @var string
      */
     public string $method {
         get => $this->server['REQUEST_METHOD'] ?? 'GET';
@@ -103,6 +107,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Whether the request came over HTTPS, directly or through a proxy.
+     *
+     * @var bool
      */
     public bool $secure {
         get => in_array(strtolower((string) ($this->server['HTTPS'] ?? '')), ['on', '1'], true)
@@ -113,6 +119,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * "https" or "http".
+     *
+     * @var string
      */
     public string $scheme {
         get => $this->secure ? 'https' : 'http';
@@ -120,6 +128,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Host in lower case as the client sent it, with the port if it is not the default one.
+     *
+     * @var string
      */
     public string $host {
         get => strtolower($this->server['HTTP_HOST'] ?? $this->server['SERVER_NAME'] ?? $this->server['SERVER_ADDR'] ?? '');
@@ -127,6 +137,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Port from the Host header, the server port or the scheme default.
+     *
+     * @var int
      */
     public int $port {
         get {
@@ -142,6 +154,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Request URI as sent: path and query string.
+     *
+     * @var string
      */
     public string $uri {
         get => $this->server['REQUEST_URI'] ?? '/';
@@ -149,6 +163,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * URI path without the query string and the trailing slash.
+     *
+     * @var string
      */
     public string $path {
         get {
@@ -160,6 +176,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Query string without "?".
+     *
+     * @var string
      */
     public string $queryString {
         get => (string) ($this->server['QUERY_STRING'] ?? '');
@@ -167,6 +185,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Scheme and host: https://example.com.
+     *
+     * @var string
      */
     public string $root {
         get => $this->scheme . '://' . $this->host;
@@ -174,6 +194,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Request URL without the query string.
+     *
+     * @var string
      */
     public string $url {
         get => $this->root . ($this->path === '/' ? '' : $this->path);
@@ -181,6 +203,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Client IP: the first X-Forwarded-For address, the Cloudflare header or the remote address.
+     *
+     * @var string
      */
     public string $ip {
         get {
@@ -194,6 +218,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * User-Agent header.
+     *
+     * @var string
      */
     public string $userAgent {
         get => $this->headers['USER_AGENT'] ?? '';
@@ -201,6 +227,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Token of the "Authorization: Bearer" header.
+     *
+     * @var null|string
      */
     public ?string $bearerToken {
         get {
@@ -213,6 +241,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * User of HTTP basic authentication.
+     *
+     * @var null|string
      */
     public ?string $authUser {
         get => $this->server['PHP_AUTH_USER'] ?? $this->basicCredentials()[0] ?? null;
@@ -220,6 +250,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Password of HTTP basic authentication.
+     *
+     * @var null|string
      */
     public ?string $authPassword {
         get => $this->server['PHP_AUTH_PW'] ?? $this->basicCredentials()[1] ?? null;
@@ -227,6 +259,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Whether the request was sent with XMLHttpRequest.
+     *
+     * @var bool
      */
     public bool $isAjax {
         get => ($this->headers['X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest';
@@ -234,6 +268,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Whether the request was sent by PJAX.
+     *
+     * @var bool
      */
     public bool $isPjax {
         get => ($this->headers['X_PJAX'] ?? '') === 'true';
@@ -241,6 +277,8 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Whether the browser prefetches the page.
+     *
+     * @var bool
      */
     public bool $isPrefetch {
         get => strcasecmp($this->headers['X_MOZ'] ?? '', 'prefetch') === 0
@@ -250,16 +288,22 @@ final class Request implements ArrayAccess, RequestContract
 
     /**
      * Route matched for the request, set by the router.
+     *
+     * @var null|Route
      */
     public ?Route $route = null;
 
     /**
      * Session for old input, set by the application.
+     *
+     * @var null|Session
      */
     public ?Session $session = null;
 
     /**
      * Resolver of the current user for getUser(): fn (?string $guard): mixed.
+     *
+     * @var null|Closure
      */
     public ?Closure $userResolver = null;
 
@@ -302,6 +346,8 @@ final class Request implements ArrayAccess, RequestContract
 
         /**
          * Raw body; null reads php://input on first access.
+         *
+         * @var null|string
          */
         ?string $content = null,
     ) {

@@ -7,7 +7,7 @@ namespace Expansa\Log\Handlers;
 use Expansa\Log\Contracts\Formatter;
 use Expansa\Log\Formatters\Telegram as TelegramFormatter;
 use Expansa\Log\Enums\Level;
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 
 /**
  * Sends records to a Telegram chat through a bot. Each record is an HTTP request,
@@ -42,7 +42,7 @@ class Telegram extends AbstractHandler
         parent::__construct($level);
     }
 
-    public function handle(LogRecord $record): bool
+    public function handle(Record $record): bool
     {
         return $this->send($this->getFormatter()->format($record));
     }

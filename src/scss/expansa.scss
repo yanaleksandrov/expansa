@@ -6,6 +6,8 @@
 @use 'interface/translation';
 @use 'interface/croppr';
 @use 'interface/table';
+@use 'interface/updates';
+@use 'interface/site-health';
 
 @keyframes shake {
   0%    { transform: translateX(0); }

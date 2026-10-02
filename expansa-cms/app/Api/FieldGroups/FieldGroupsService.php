@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Api\FieldGroups;
 
 use App\Models\FieldGroup;
-use Expansa\Debug\Error;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Http\Response;
+use Expansa\Support\Error;
 
 /**
  * Every response here uses the `$ajax` fragment convention only (`data: [{target, notify,

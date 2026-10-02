@@ -59,8 +59,7 @@ final class Memory implements Session, Lifecycle
         $this->regenerateId();
     }
 
-    public function save(): void
-    {}
+    public function save(): void {}
 
     public function get(string $key, mixed $default = null): mixed
     {

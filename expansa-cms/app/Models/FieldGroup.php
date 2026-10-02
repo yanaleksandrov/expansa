@@ -9,8 +9,8 @@ use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
 use Expansa\Facades\Json;
+use Expansa\Support\Error;
 
 /**
  * A group of custom fields (ACF-style "Field Group"): a title, a set of location rules

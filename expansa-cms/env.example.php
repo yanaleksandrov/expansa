@@ -38,11 +38,18 @@ define('EX_CACHE', [
     'default' => getenv('EX_CACHE_STORE') ?: 'memory',
     'stores'  => [
         // the current request only, needs nothing
-        'memory'    => ['driver' => 'memory'],
+        'memory'    => [
+            'driver' => 'memory',
+        ],
         // files on disk, survive between requests
-        'file'      => ['driver' => 'file', 'path' => EX_STORAGE . 'cache'],
+        'file'      => [
+            'driver' => 'file',
+            'path'   => EX_STORAGE . 'cache',
+        ],
         // shared memory of the PHP process, needs ext-apcu
-        'apcu'      => ['driver' => 'apcu'],
+        'apcu'      => [
+            'driver' => 'apcu',
+        ],
         // needs ext-redis
         'redis'     => [
             'driver' => 'redis',
@@ -50,9 +57,16 @@ define('EX_CACHE', [
             'port'   => (int) (getenv('EX_REDIS_PORT') ?: 6379),
         ],
         // needs ext-memcached; servers: [host, port, weight]
-        'memcached' => ['driver' => 'memcached', 'servers' => [['127.0.0.1', 11211]]],
+        'memcached' => [
+            'driver'  => 'memcached',
+            'servers' => [
+                ['127.0.0.1', 11211]
+            ]
+        ],
         // the "cache" table of the site database
-        'database'  => ['driver' => 'database'],
+        'database'  => [
+            'driver' => 'database',
+        ],
     ],
 ]);
 
@@ -69,14 +83,19 @@ define('EX_KEYS', [
 ]);
 
 /**
- * Debug mode: errors on the page and the debug view with the code around them. Never enable it on a public site.
+ * Debug mode, as in WordPress: "enabled" is the main switch, "log" and "display" work only when it is on.
+ * Without it the error page shows only the error id, nothing is logged and PHP warnings do not stop the request.
+ * Never leave "display" on a public site: the errors with the code around them show to every visitor.
  *
  * @since 2025.1
  */
 define('EX_DEBUG', [
     // EX_DEBUG=1, true or on enables it
     'enabled' => filter_var(getenv('EX_DEBUG'), FILTER_VALIDATE_BOOL),
-    'log'     => true,
+    // uncaught errors and warnings go to storage/logs; EX_DEBUG_LOG=0 turns it off
+    'log'     => filter_var(getenv('EX_DEBUG_LOG') ?: 'on', FILTER_VALIDATE_BOOL),
+    // the error message, place and trace on the page and in API responses; EX_DEBUG_DISPLAY=0 turns it off
+    'display' => filter_var(getenv('EX_DEBUG_DISPLAY') ?: 'on', FILTER_VALIDATE_BOOL),
     'view'    => EX_DASHBOARD . 'debug.php',
 ]);
 
@@ -113,4 +132,25 @@ define('EX_DKIM', [
     'copyHeaderFields' => false,
     // extra headers to sign
     'extraHeaders'     => ['List-Unsubscribe', 'List-Help'],
+]);
+
+/**
+ * AI service for generating plugins: any OpenAI-compatible Chat Completions API.
+ * Free for testing: Google Gemini (a key from aistudio.google.com) with the defaults below, or OpenRouter:
+ * EX_AI_URL=https://openrouter.ai/api/v1/, EX_AI_MODEL=<model id ending in :free>, EX_AI_KEY=<openrouter key>.
+ *
+ * @since 2026.10
+ */
+define('EX_AI', [
+    'url'     => getenv('EX_AI_URL') ?: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+    'model'   => getenv('EX_AI_MODEL') ?: 'gemini-flash-latest',
+    'key'     => getenv('EX_AI_KEY') ?: '',
+    // false for models without json_schema structured output: the schema goes into the instructions
+    'schemas' => filter_var(getenv('EX_AI_SCHEMAS') ?: 'on', FILTER_VALIDATE_BOOL),
+    // extra request fields, e.g. ['reasoning_effort' => 'low']
+    'options' => [],
+    // reference material for the model: Markdown files of the CMS documentation
+    'context' => getenv('EX_AI_CONTEXT') ?: dirname(EX_PATH) . '/documentation',
+    // PHP CLI binary for the background worker; under PHP-FPM PHP_BINARY is the FPM binary
+    'php'     => getenv('EX_AI_PHP') ?: PHP_BINARY,
 ]);

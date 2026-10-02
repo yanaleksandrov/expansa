@@ -22,6 +22,8 @@ final class Manager implements Session, Lifecycle
 {
     /**
      * Driver name: `native`, `memory` or a custom one from extend().
+     *
+     * @var string
      */
     public private(set) string $driverName = 'native';
 
@@ -41,6 +43,8 @@ final class Manager implements Session, Lifecycle
 
     /**
      * Driver created on first use.
+     *
+     * @var null|(Session&Lifecycle)
      */
     private (Session&Lifecycle)|null $driver = null;
 

@@ -13,6 +13,8 @@ interface Session
 {
     /**
      * Flash messages stored in this session.
+     *
+     * @var Flash
      */
     public Flash $flash { get; }
 

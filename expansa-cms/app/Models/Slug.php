@@ -8,7 +8,7 @@ use Expansa\Database\Attribute;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
+use Expansa\Support\Error;
 
 /**
  * Represents a URL slug bound to a row in another table (the "entity"). Enforces

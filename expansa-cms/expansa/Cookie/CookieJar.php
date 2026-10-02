@@ -23,26 +23,36 @@ final class CookieJar implements Queue
 
     /**
      * Default path.
+     *
+     * @var string
      */
     public private(set) string $path = '/';
 
     /**
      * Default domain.
+     *
+     * @var string
      */
     public private(set) string $domain = '';
 
     /**
      * Default secure attribute.
+     *
+     * @var bool
      */
     public private(set) bool $secure = false;
 
     /**
      * Default httpOnly attribute.
+     *
+     * @var bool
      */
     public private(set) bool $httpOnly = true;
 
     /**
      * Default SameSite attribute.
+     *
+     * @var SameSite
      */
     public private(set) SameSite $sameSite = SameSite::Lax;
 

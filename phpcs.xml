@@ -118,6 +118,8 @@
         </properties>
         <!-- error_log() — запасной канал логгера, когда обработчик не смог записать -->
         <exclude-pattern>*/expansa-cms/expansa/Log/*</exclude-pattern>
+        <!-- и в Debug, когда отчёт о неперехваченной ошибке сам упал -->
+        <exclude-pattern>*/expansa-cms/expansa/Debug/*</exclude-pattern>
     </rule>
 
     <!-- Проверяет правильное использование пробела вокруг операторов -->

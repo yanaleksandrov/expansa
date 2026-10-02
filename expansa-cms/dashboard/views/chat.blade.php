@@ -8,7 +8,19 @@ if ( ! defined( 'EX_PATH' ) ) {
 	exit;
 }
 ?>
-<div class="chat" u-data="chat">
+<?php
+$labels = [
+	'newProcess'    => t_attr( 'New process' ),
+	'queued'        => t_attr( 'Waiting for the worker to start' ),
+	'seconds'       => t_attr( '%s s' ),
+	'tokens'        => t_attr( '%s tokens' ),
+	'ask'           => t_attr( 'Describe the feature you need...' ),
+	'answer'        => t_attr( 'Answer the questions...' ),
+	'network'       => t_attr( 'The server did not respond. Check the connection and try again.' ),
+	'notConfigured' => t_attr( 'The AI service is not configured: add the service key to EX_AI in env.php.' ),
+];
+?>
+<div class="chat" u-data="chat" data-labels="{{ json_encode( $labels, JSON_UNESCAPED_UNICODE ) }}" @load="init($el)">
 	<section class="chat-main">
 		<div class="chat-progress" u-bind="progressBar">
 			<div class="chat-progress-bar"></div>
@@ -28,12 +40,35 @@ if ( ! defined( 'EX_PATH' ) ) {
 				?>
 			</div>
 
-			<div class="chat-message" u-each="(message, i) in activeMessages" u-bind="messageItem(message)">
+			<div class="chat-message" u-each="(message, i) in messages" u-bind="messageItem(message)">
 				<div class="chat-message-avatar">
 					<i u-bind="messageAvatar(message)"></i>
 				</div>
 				<div class="chat-message-body">
+					<div class="chat-step-head" u-bind="stepHead(message)">
+						<span class="chat-step-label" u-bind="stepLabel(message)"></span>
+						<span class="chat-step-meta" u-bind="stepMeta(message)"></span>
+					</div>
 					<div class="chat-message-text" u-bind="messageText(message)"></div>
+					<ol class="chat-message-list" u-bind="listOf(message, 'questions')">
+						<li u-each="(item, j) in message.questions" u-bind="lineText(item)"></li>
+					</ol>
+					<ul class="chat-message-list chat-message-list--muted" u-bind="listOf(message, 'details')">
+						<li u-each="(item, j) in message.details" u-bind="lineText(item)"></li>
+					</ul>
+					<ul class="chat-message-list chat-message-list--errors" u-bind="listOf(message, 'errors')">
+						<li u-each="(item, j) in message.errors" u-bind="lineText(item)"></li>
+					</ul>
+					<details class="chat-message-spoiler" u-bind="specification(message)">
+						<summary><?php echo t( 'Specification' ); ?></summary>
+						<div class="chat-message-spoiler-body" u-bind="specificationText(message)"></div>
+					</details>
+					<div class="chat-message-files" u-bind="listOf(message, 'files')">
+						<details class="chat-message-spoiler" u-each="(file, j) in message.files">
+							<summary u-bind="fileTitle(file)"></summary>
+							<pre class="chat-message-code"><code u-bind="fileContent(file)"></code></pre>
+						</details>
+					</div>
 					<div class="chat-message-time" u-bind="messageTime(message)"></div>
 				</div>
 			</div>
@@ -49,8 +84,10 @@ if ( ! defined( 'EX_PATH' ) ) {
 			</div>
 		</div>
 
+		<div class="chat-notice" u-bind="notice"></div>
+
 		<div class="chat-composer">
-			<textarea class="chat-composer-input" rows="1" placeholder="<?php echo t_attr( 'Message the assistant...' ); ?>" u-bind="composerInput"></textarea>
+			<textarea class="chat-composer-input" rows="1" u-bind="composerInput"></textarea>
 			<button type="button" class="btn btn--primary chat-composer-send" u-bind="sendButton">
 				<i class="ph ph-paper-plane-tilt"></i>
 			</button>
@@ -68,7 +105,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 		<div class="chat-sidebar-title"><?php echo t( 'Processes' ); ?></div>
 
 		<div class="chat-sidebar-list">
-			<div class="chat-sidebar-item" u-each="(process, i) in visibleProcesses" u-bind="processRow(process)">
+			<div class="chat-sidebar-item" u-each="(process, i) in tasks" u-bind="processRow(process)">
 				<span class="chat-sidebar-item-status">
 					<span class="chat-sidebar-item-status-label" u-bind="processStatusLabel(process)"></span>
 					<span class="chat-sidebar-item-status-badge" u-bind="processStatusBadge(process)">

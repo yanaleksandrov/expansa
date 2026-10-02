@@ -14,21 +14,28 @@ $root = sys_get_temp_dir() . '/expansa-install-' . getmypid() . '/';
 @mkdir($root);
 copy(EX_PATH . 'env.example.php', $root . 'env.example.php');
 
-check('not installed without env.php', ! Installation::isComplete($root));
+check('not installed without env.php', ! Installation::isComplete($root) && ! Installation::hasEnvironment($root));
 
 $draft = Installation::draft(['db.name' => 'first_db'], $root);
 Installation::discard($draft);
-check('a failed attempt leaves neither env.php nor the draft', ! Installation::isComplete($root) && ! is_file($draft));
+check('a failed attempt leaves neither env.php nor the draft', ! Installation::hasEnvironment($root) && ! is_file($draft));
 
 file_put_contents($root . 'env.install.php', '<?php // stale_db');
 $draft = Installation::draft(['db.name' => 'second_db', 'auth.key' => str_repeat('a', 64)], $root);
 check('a stale draft is replaced', ! str_contains(file_get_contents($draft), 'stale_db'));
-check('the draft is not an installation yet', ! Installation::isComplete($root));
+check('the draft is not an installation yet', ! Installation::hasEnvironment($root));
 
 Installation::complete($draft, $root);
 $env = file_get_contents($root . 'env.php');
-check('complete() publishes env.php and removes the draft', Installation::isComplete($root) && ! is_file($draft));
+check('complete() publishes env.php and removes the draft', Installation::hasEnvironment($root) && ! is_file($draft));
 check('env.php holds the new values', str_contains($env, "'second_db'") && str_contains($env, str_repeat('a', 64)));
+
+check('env.php alone is not an installation while its settings are not loaded', ! Installation::isComplete($root));
+
+// env.php with an empty database opens the installer; queries are built, not run, so no table exists
+define('EX_DB', ['prefix' => 'expansa_']);
+Expansa\Facades\Db::configure('mysql', 'expansa', 'user', 'secret', 'localhost', 'expansa_', testMode: true);
+check('env.php with a database without the owner is not an installation', ! Installation::isComplete($root));
 
 array_map('unlink', glob($root . '*.php'));
 rmdir($root);

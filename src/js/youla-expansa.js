@@ -1127,6 +1127,20 @@ document.addEventListener('youla:init', ()=> {
         const duration = 200;
         const props    = ['height', 'paddingTop', 'paddingBottom', 'marginTop', 'marginBottom'];
 
+        // The first call only sets the state, so a panel rendered open does not grow on page load.
+        if (el._x_collapse === undefined) {
+            el._x_collapse = isOpen;
+            el.hidden = !isOpen;
+            return;
+        }
+
+        // Every panel bound to the same value is re-evaluated when it changes, only the changed ones animate.
+        if (el._x_collapse === isOpen) {
+            return;
+        }
+        el._x_collapse = isOpen;
+        el.hidden = false;
+
         el.style.overflow = 'hidden';
         if (isOpen) {
             el.style.display = 'block';

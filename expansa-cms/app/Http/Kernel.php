@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use Expansa\Auth\Exceptions\AccessDenied;
 use Expansa\Facades\Cookie;
+use Expansa\Facades\Debug;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\ResponseReady;
 use Expansa\Http\Exceptions\ValidationFailed;
@@ -25,10 +27,11 @@ use Throwable;
  *
  *   success       -> { "data": <return value> }
  *   HttpError -> { "message": ..., "errors"?: ... }  with the exception's status code
+ *   AccessDenied  -> { "message": ... }  with status 403
  *   ResponseReady -> the exception's response as-is
  *
  * Cookies queued with the Cookie facade are added to every response.
- *   anything else -> { "message": ... }  with status 500
+ *   anything else -> { "message": ... }  with status 500 and the error id, reported by Debug::report()
  *
  * In debug mode (EX_DEBUG['enabled']), every JSON response also carries `benchmark`/`memory`
  * metrics — never in production, so nothing about the server leaks by default.
@@ -54,6 +57,8 @@ final class Kernel
                 : new Response()->json(self::withMetrics(['data' => $result]));
         } catch (ResponseReady $e) {
             $response = $e->response;
+        } catch (AccessDenied) {
+            $response = new Response()->json(self::withMetrics(['message' => t('You are not allowed to do this.')]), 403);
         } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationFailed) {
@@ -62,8 +67,12 @@ final class Kernel
 
             $response = new Response()->json(self::withMetrics($payload), $e->statusCode);
         } catch (Throwable $e) {
+            // the id is in the log and the response, to find one by the other
+            $id = Debug::report($e, ['controller' => $controller, 'method' => $method]);
+
             $response = new Response()->json(self::withMetrics([
-                'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
+                'message' => Debug::hasDetails() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
+                'id'      => $id,
             ]), 500);
         }
 

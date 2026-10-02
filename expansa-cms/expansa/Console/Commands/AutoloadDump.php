@@ -38,6 +38,7 @@ final class AutoloadDump extends AbstractCommand
         }
 
         $classes = ClassMap::scan(EX_PATH);
+
         ClassMap::dump($file, $classes);
 
         $this->info(t('The class map of %d classes is written to cache/classmap.php.', count($classes)));

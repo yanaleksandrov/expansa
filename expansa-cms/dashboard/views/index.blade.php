@@ -20,7 +20,7 @@ if (!defined('EX_PATH')) {
 $slug = Safe::trim($__data['slug'] ?? '');
 $table = $__data['table'] ?? null;
 ?>
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
 <head>
     <meta charset="{{ Option::attr( 'charset', 'UTF-8' ) }}">

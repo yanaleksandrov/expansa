@@ -21,26 +21,36 @@ abstract class AbstractField
 {
     /**
      * Literal names and their numeric values, e.g. `JAN` => 1.
+     *
+     * @var array
      */
     protected const array LITERALS = [];
 
     /**
      * First allowed value of the field.
+     *
+     * @var int
      */
     protected int $rangeStart = 0;
 
     /**
      * Last allowed value of the field.
+     *
+     * @var int
      */
     protected int $rangeEnd = 0;
 
     /**
      * Parts with literals replaced by numbers, keyed by the original part.
+     *
+     * @var array
      */
     private array $converted = [];
 
     /**
      * Sorted values matching a part, keyed by the part.
+     *
+     * @var array
      */
     private array $values = [];
 

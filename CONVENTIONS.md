@@ -22,7 +22,7 @@
 Log/
 ├── Manager.php        точка входа, цель фасада
 ├── Logger.php         основные классы — в корне
-├── LogRecord.php
+├── Record.php
 ├── Contracts/Handler.php
 ├── Enums/Level.php
 ├── Handlers/AbstractHandler.php, File.php, Telegram.php
@@ -59,8 +59,8 @@ Log/
 
 | Что              | Правило                                                              | Пример                          |
 |------------------|----------------------------------------------------------------------|---------------------------------|
-| Файл             | один класс, имя файла = имя класса                                   | `LogRecord.php`                 |
-| Класс            | существительное, единственное число, PascalCase                      | `Logger`, `LogRecord`           |
+| Файл             | один класс, имя файла = имя класса                                   | `Record.php`                    |
+| Класс            | существительное, единственное число, PascalCase                      | `Logger`, `Record`              |
 | Точка входа      | `Manager`, если есть конфигурация или реестр каналов/драйверов; иначе по роли | `Log\Manager`; `Router`, `Validator` |
 | Реализация       | вариант без суффикса роли                                            | `Handlers\RotatingFile`, `Fields\Checkbox` |
 | Абстрактный      | `Abstract<Role>`: точка расширения — рядом с реализациями, общая база — в `Internal/` | `Handlers/AbstractHandler.php`, `Extensions/Internal/AbstractExtension.php` |

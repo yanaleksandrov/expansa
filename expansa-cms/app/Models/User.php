@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Post\Type;
-use App\User\Roles;
 use DateTime;
+use Expansa\Auth\Contracts\Subject;
 use Expansa\Cookie\Cookie;
 use Expansa\Cookie\Enums\SameSite;
 use Expansa\Database\Attribute;
@@ -20,9 +20,11 @@ use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
+use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
+use Expansa\Support\Error;
 use Expansa\Support\Hash;
 use Expansa\Support\Is;
 
@@ -50,9 +52,9 @@ use Expansa\Support\Is;
  * @property DateTime      $updatedAt                  The date and time when the user was last updated.
  * @property DateTime|null $deletedAt                  The date and time when the user was soft-deleted, if at all.
  * @property FieldEav      $field                      A dynamic meta field instance associated with the user.
- * @property array<string> $roles                      Role names assigned to the user (see App\User\Roles).
+ * @property array         $roles                      User roles list.
  */
-class User extends Model implements Fieldable
+class User extends Model implements Fieldable, Subject
 {
     use HasSanitizing;
     use HasValidation;
@@ -77,6 +79,19 @@ class User extends Model implements Fieldable
      * option is configured.
      */
     private const string DEFAULT_ROLE = 'subscriber';
+
+    /**
+     * Role names assigned to the user, the `roles` column through roles(); Auth permissions come from them.
+     *
+     * @var string[]
+     */
+    public array $roles {
+        get => $this->getAttribute('roles');
+        // a block: the short form would store setAttribute()'s return value, the model, in the property
+        set {
+            $this->setAttribute('roles', $value);
+        }
+    }
 
     /**
      * The database table associated with the model.
@@ -328,7 +343,7 @@ class User extends Model implements Fieldable
 
         // Not mass-assignable (see roles()) — read the raw input so a caller can still request a role, falling back to the default.
         $role = $userdata['role'] ?? Option::get('users.role', self::DEFAULT_ROLE);
-        if (Roles::exists($role)) {
+        if (Role::hasRole($role)) {
             $user->roles = [$role];
         }
 
@@ -412,14 +427,14 @@ class User extends Model implements Fieldable
     }
 
     /**
-     * Returns whether this user has the specified capability.
+     * Returns whether this user has the specified capability, through Auth permissions.
      *
-     * @param string $capabilities Capability name.
-     * @return bool                Whether the user has the given capability.
+     * @param string $capability Capability name.
+     * @return bool              Whether the user has the given capability.
      */
-    public function can(string $capabilities): bool
+    public function can(string $capability): bool
     {
-        return array_any($this->roles, fn($role) => Roles::hasCap($role, $capabilities));
+        return Auth::allows($this, $capability);
     }
 
     /**
@@ -437,12 +452,12 @@ class User extends Model implements Fieldable
      * Assign a registered role to this user. Does nothing (returns true) if
      * the user already has that role.
      *
-     * @param string $role Role name, as registered via App\User\Roles::register().
+     * @param string $role Role name, as added with Role::add().
      * @return Error|bool  True once assigned.
      */
     public function assignRole(string $role): Error|bool
     {
-        if (! Roles::exists($role)) {
+        if (! Role::hasRole($role)) {
             return error('user-assign-role', t('That role is not registered.'));
         }
 

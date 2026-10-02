@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Api\User;
 
 use App\Models\User;
-use Expansa\Debug\Error;
 use Expansa\Facades\Db;
 use Expansa\Facades\Log;
 use Expansa\Facades\Mail;
 use Expansa\Facades\Safe;
 use Expansa\Facades\View;
+use Expansa\Support\Error;
 use Throwable;
 
 final class UserService
@@ -60,7 +60,7 @@ final class UserService
             return [
                 [
                     'target' => 'body',
-                    'notify' => $user->get('user-login')[0],
+                    'notify' => $user->messages[0],
                 ],
             ];
         }
@@ -176,7 +176,7 @@ final class UserService
 
         $updated = $user->changePassword(trim((string) ($input['password'] ?? '')));
         if ($updated instanceof Error) {
-            return [['target' => 'body', 'notify' => $updated->get('user-password')[0] ?? t('Could not update the password. Please try again.')]];
+            return [['target' => 'body', 'notify' => $updated->messages[0] ?? t('Could not update the password. Please try again.')]];
         }
 
         $this->notifyPasswordChanged($user);
@@ -285,7 +285,7 @@ final class UserService
 
         $updated = $user->changePassword($password);
         if ($updated instanceof Error) {
-            return [['target' => 'body', 'notify' => $updated->get('user-password')[0] ?? t('Could not update the password. Please try again.')]];
+            return [['target' => 'body', 'notify' => $updated->messages[0] ?? t('Could not update the password. Please try again.')]];
         }
 
         $this->notifyPasswordChanged($user);
