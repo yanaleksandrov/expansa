@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Api\User;
 
 use App\Models\User;
-use Expansa\Debug\Error;
 use Expansa\Http\Request;
+use Expansa\Support\Error;
 
 final readonly class UserController
 {

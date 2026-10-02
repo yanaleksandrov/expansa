@@ -20,11 +20,11 @@ use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
 use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
+use Expansa\Support\Error;
 use Expansa\Support\Hash;
 use Expansa\Support\Is;
 

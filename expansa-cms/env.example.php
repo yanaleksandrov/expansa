@@ -76,8 +76,11 @@ define('EX_KEYS', [
 define('EX_DEBUG', [
     // EX_DEBUG=1, true or on enables it
     'enabled' => filter_var(getenv('EX_DEBUG'), FILTER_VALIDATE_BOOL),
+    // uncaught errors go to the log
     'log'     => true,
     'view'    => EX_DASHBOARD . 'debug.php',
+    // links from the error page to the code: vscode://file/{file}:{line}, phpstorm://open?file={file}&line={line}
+    'editor'  => getenv('EX_DEBUG_EDITOR') ?: '',
 ]);
 
 /**

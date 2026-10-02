@@ -38,7 +38,7 @@ index.php / artisan
    │  ├─ dashboard     /dashboard/...: проверка входа, ассеты, меню
    │  └─ web           всё остальное: главная и /installed, иначе 404
    ├─ маршрутизация    колбэк route: Route::run() (кроме cli)
-   ├─ run(catch:)      исключение из любого шага → Debug::render(), страница отладки
+   ├─ run(catch:)      исключение из любого шага → Debug::handle(): лог и страница ошибки
    └─ terminate        хук после отправки ответа
 ```
 
@@ -208,7 +208,7 @@ return new class extends Plugin
 оставшиеся шаги не выполняются. Без обработчика исключение уходит дальше.
 
 ```php
-Lifecycle::run(catch: fn (Throwable $e) => Debug::render($e, EX_PATH . 'dashboard/debug.php'));
+Lifecycle::run(catch: fn (Throwable $e) => Debug::handle($e));
 ```
 
 ## Таймлайн

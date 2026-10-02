@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Query\Query;
-use Expansa\Debug\Error;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Image;
 use Expansa\Facades\Safe;
 use Expansa\Filesystem\MimeType;
 use Expansa\Patterns;
+use Expansa\Support\Error;
 use Expansa\Support\Url;
 
 /**

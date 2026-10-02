@@ -6,25 +6,22 @@ namespace Expansa\Debug;
 
 /**
  * Time and memory of the request, the metrics() helper instance.
+ * Readable values are compact for the dashboard bar: `12.4ms`, `1.25s`, `4.12MB`.
  *
  * @package Expansa\Debug
  */
 final class Metric
 {
     /**
-     * Request start by default, so the time includes PHP startup and autoload.
+     * Start of the measurement: the request start by default, so the time includes PHP startup and autoload.
      *
      * @var float
      */
-    private float $startTime;
-
-    private float $endTime;
-
-    private int $memoryUsage;
+    private float $start;
 
     public function __construct()
     {
-        $this->startTime = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
+        $this->start = $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
     }
 
     /**
@@ -34,120 +31,104 @@ final class Metric
      */
     public function start(): void
     {
-        $this->startTime = microtime(true);
+        $this->start = microtime(true);
     }
 
     /**
-     * Returns the elapsed time, readable or not
+     * Time since the start: seconds or a readable string.
      *
      * @param bool $raw
      * @return float|string
      */
     public function time(bool $raw = false): float|string
     {
-        $this->end();
+        $seconds = microtime(true) - $this->start;
 
-        $elapsed = $this->endTime - $this->startTime;
+        if ($raw) {
+            return $seconds;
+        }
 
-        return $raw ? $elapsed : $this->readableElapsedTime($elapsed);
+        return $seconds < 1 ? round($seconds * 1000, 1) . 'ms' : round($seconds, 2) . 's';
     }
 
     /**
-     * Returns the memory peak, readable or not
+     * Peak memory used by the script: bytes or a readable string.
      *
      * @param bool $raw
-     * @param string|null $format The format to display (printf format)
-     * @return string|int
+     * @return int|string
      */
-    public function memory(bool $raw = false, ?string $format = null): string|int
+    public function memory(bool $raw = false): int|string
     {
-        $memory = memory_get_peak_usage(false);
+        $bytes = memory_get_peak_usage();
 
-        return $raw ? $memory : $this->readableSize($memory, $format);
+        return $raw ? $bytes : $this->size($bytes);
     }
 
     /**
-     * Returns the percentage of memory used out of the total amount allocated.
+     * Memory allocated from the system now: bytes or a readable string.
      *
-     * @return null|float
+     * @param bool $raw
+     * @return int|string
+     */
+    public function memoryUsage(bool $raw = false): int|string
+    {
+        $bytes = memory_get_usage(true);
+
+        return $raw ? $bytes : $this->size($bytes);
+    }
+
+    /**
+     * Peak allocated memory as a percentage of memory_limit; null without a limit.
+     *
+     * @return float|null
      */
     public function memoryPercent(): ?float
     {
-        $this->end();
+        $limit = $this->limit();
 
-        $memoryLimit = (int) ini_get('memory_limit');
-        if ($memoryLimit > 0) {
-            return round($this->memoryUsage / ($memoryLimit * 1024 * 1024) * 100, 2);
-        }
-        return null;
+        return $limit > 0 ? round(memory_get_peak_usage(true) / $limit * 100, 2) : null;
     }
 
     /**
-     * Returns the memory usage at the end checkpoint
+     * Bytes of memory_limit, `128M` or `1G`; -1 when unlimited.
      *
-     * @param bool $raw
-     * @param string|null $format The format to display (printf format)
-     * @return string|int
+     * @return int
      */
-    public function memoryUsage(bool $raw = false, ?string $format = null): string|int
+    private function limit(): int
     {
-        return $raw ? $this->memoryUsage : $this->readableSize($this->memoryUsage, $format);
+        $limit = trim((string) ini_get('memory_limit'));
+        $value = (int) $limit;
+
+        return match (strtolower(substr($limit, -1))) {
+            'g'     => $value * 1024 ** 3,
+            'm'     => $value * 1024 ** 2,
+            'k'     => $value * 1024,
+            default => $value,
+        };
     }
 
     /**
-     * Sets end microtime
+     * Readable size: `512B`, `4.12MB`.
      *
-     * @return void
-     */
-    private function end(): void
-    {
-        $this->endTime     = microtime(true);
-        $this->memoryUsage = memory_get_usage(true);
-    }
-
-    /**
-     * Returns a human-readable memory size
-     *
-     * @param int $size
-     * @param string|null $format The format to display (printf format)
-     * @param int $round
+     * @param int $bytes
      * @return string
      */
-    private function readableSize(int $size, ?string $format = null, int $round = 3): string
+    private function size(int $bytes): string
     {
-        $mod = 1024;
-
-        if (is_null($format)) {
-            $format = '%.2f%s';
+        if ($bytes < 1024) {
+            return $bytes . 'B';
         }
 
-        $units = explode(' ', 'B Kb Mb Gb Tb');
+        $units = ['KB', 'MB', 'GB', 'TB'];
+        $last  = count($units) - 1;
+        $size  = $bytes / 1024;
+        $unit  = 0;
 
-        for ($i = 0; $size > $mod; $i++) {
-            $size /= $mod;
+        while ($size >= 1024 && $unit < $last) {
+            $size /= 1024;
+            $unit++;
         }
 
-        if ($i === 0) {
-            $format = preg_replace('/(%.[\d]+f)/', '%d', $format);
-        }
-
-        return sprintf($format, round($size, $round), $units[$i]);
-    }
-
-    /**
-     * Returns a human-readable elapsed time
-     *
-     * @param float $microtime
-     * @return string
-     */
-    private function readableElapsedTime(float $microtime): string
-    {
-        $precision = 1;
-        if ($microtime < 1) {
-            $numberStr = str_replace('.', '', (string) $microtime);
-            $precision = strspn($numberStr, '0');
-        }
-
-        return rtrim(number_format($microtime, $precision + 1, '.', ''), '0');
+        return round($size, 2) . $units[$unit];
     }
 }

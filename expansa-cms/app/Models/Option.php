@@ -9,10 +9,10 @@ use Expansa\Database\Model;
 use Expansa\Database\Query;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
+use Expansa\Support\Error;
 use LogicException;
 
 /**

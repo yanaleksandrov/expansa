@@ -69,6 +69,45 @@ Is::configure(
     dashboard: fn () => Lifecycle::is('dashboard'),
 );
 
+// every PHP error is reported in debug mode, and thrown by the handler below
+if (Is::debug()) {
+    error_reporting(E_ALL);
+}
+
+// before the phases, so an error in any of them reaches the log and the error page; details in debug mode only
+Debug::configure(
+    view: defined('EX_DEBUG') ? EX_DEBUG['view'] : EX_DASHBOARD . 'debug.php',
+    details: Is::debug(),
+    report: function (Throwable $e, string $id, array $context) {
+        if (! defined('EX_DEBUG') || (EX_DEBUG['log'] ?? true) !== false) {
+            // out of memory, time limit, compile error: critical, to alert on it separately
+            Log::log(Expansa\Debug\Manager::isFatal($e) ? 'critical' : 'error', 'Uncaught {class}: {message}', [
+                'id'        => $id,
+                'class'     => get_class($e),
+                'message'   => $e->getMessage(),
+                'exception' => $e,
+            ] + $context);
+        }
+    },
+    warning: fn (ErrorException $e) => Log::warning('{message} in {file}:{line}', [
+        'message' => $e->getMessage(),
+        'file'    => $e->getFile(),
+        'line'    => $e->getLine(),
+    ]),
+    // a Closure value is resolved on its own: a failing one does not lose the rest
+    context: fn () => PHP_SAPI === 'cli' ? ['command' => implode(' ', $_SERVER['argv'] ?? [])] : [
+        'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+        'url'    => ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['REQUEST_URI'] ?? ''),
+        'ip'     => $_SERVER['REMOTE_ADDR'] ?? '',
+        'user'   => fn () => defined('EX_DB') ? App\Models\User::current()?->id : null,
+        'input'  => $_POST,
+    ],
+    json: fn () => str_starts_with(Route::uri(), '/api/') || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'json'),
+    editor: defined('EX_DEBUG') ? EX_DEBUG['editor'] ?? '' : '',
+    collapse: [EX_CORE, EX_PATH . 'vendor/'],
+);
+Debug::register();
+
 // step hooks, the terminate hook after the response, routing after the context
 Lifecycle::configure(
     hook: fn (string $name) => Hook::call($name),
@@ -89,16 +128,10 @@ $isInstalled = App\Support\Installation::isComplete();
 /**
  * 1. boot · always.
  *
- * Turns on error output in debug mode and stops on maintenance.php, if it exists.
+ * Stops on maintenance.php, if it exists.
  * Registers the default data (countries, timezones, languages), loaded on first Registry::get().
  */
 Lifecycle::phase('boot', true, function () {
-    if (Is::debug()) {
-        ini_set('error_reporting', E_ALL);
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-    }
-
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
         require $maintenance;
     }
@@ -118,7 +151,9 @@ Lifecycle::phase('boot', true, function () {
 Lifecycle::phase('configure', true, function () {
     // the connection from env.php; nothing to connect to before install
     if (defined('EX_DB')) {
-        Db::configure(...EX_DB);
+        // every query is kept for the debug panel in debug mode; not in the console, where a long process would pile them up
+        $logging = (EX_DB['logging'] ?? false) || (Is::debug() && PHP_SAPI !== 'cli');
+        Db::configure(...array_merge(EX_DB, ['logging' => $logging]));
     }
 
     // the stores from env.php, the request memory without them; env.php can not hold the connection closure
@@ -246,6 +281,7 @@ Lifecycle::phase('configure', true, function () {
     Hook::configure(
         listeners: [
             App\Listeners\Assets::class,
+            App\Listeners\Debug::class,
             App\Listeners\Migrations::class,
         ],
     );
@@ -623,14 +659,11 @@ Lifecycle::context('web', true, function () {
  * 4. Run
  *
  * Phases, the matched context, then its routes (not in the console).
- * Errors from any step go to the debug page.
+ * Errors from any step go to the log and the error page, see Debug::configure() above.
  */
 Lifecycle::run(catch: function (Throwable $e) {
     // a bug in a plugin fails this request only: the plugin is skipped from the next one
     Extensions::quarantine($e);
 
-    // EX_DEBUG comes from env.php, which may be missing
-    $view = defined('EX_DEBUG') ? EX_DEBUG['view'] : EX_DASHBOARD . 'debug.php';
-
-    Debug::render($e, $view);
+    Debug::handle($e);
 });
