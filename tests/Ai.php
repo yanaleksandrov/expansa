@@ -486,8 +486,8 @@ check(
         && $sent['request']['max_tokens'] === 64 && $sent['request']['temperature'] === 0.2,
 );
 check(
-    'AI OpenAI provider reports usage and the finish reason',
-    $completion->inputTokens === 11 && $completion->outputTokens === 4 && $completion->metadata['finish_reason'] === 'stop',
+    'AI OpenAI provider counts reasoning tokens that only the total includes',
+    $completion->inputTokens === 11 && $completion->outputTokens === 14 && $completion->metadata['finish_reason'] === 'stop',
 );
 $sent = json_decode(new OpenAiProvider("http://127.0.0.1:{$port}/v1/", 'test-model', schemas: false)->complete($prompt, 64)->text, true);
 check(

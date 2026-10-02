@@ -1,0 +1,149 @@
+// centered in expansa-main both ways; a long list grows down from the top
+.site-health {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 2.5rem 1.5rem;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem 1rem;
+  }
+}
+
+.site-health-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 44rem;
+}
+
+.site-health-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  text-align: center;
+
+  h4,
+  p {
+    margin: 0;
+  }
+}
+
+.site-health-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  font-size: 2rem;
+
+  &--good {
+    background-color: color-mix(in srgb, var(--expansa-success) 15%, transparent);
+    color: var(--expansa-success);
+  }
+
+  &--recommended {
+    background-color: color-mix(in srgb, var(--expansa-warning) 15%, transparent);
+    color: var(--expansa-warning);
+  }
+
+  &--critical {
+    background-color: color-mix(in srgb, var(--expansa-danger) 15%, transparent);
+    color: var(--expansa-danger);
+  }
+}
+
+.site-health-accordion {
+  .accordion-item:last-child .site-health-title:not(.active) {
+    border-bottom: 0;
+  }
+}
+
+.site-health-title {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  width: 100%;
+  height: auto;
+  padding: .875rem 1.25rem;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--expansa-border);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  transition: background-color .15s;
+
+  &:hover {
+    background-color: var(--expansa-bg-universal);
+  }
+}
+
+.site-health-title-icon {
+  font-size: 1.125rem;
+  color: var(--expansa-text-muted);
+}
+
+.site-health-title-text {
+  flex: 1 1 auto;
+  font-weight: 500;
+}
+
+.site-health-caret {
+  color: var(--expansa-text-muted);
+  transition: transform .2s;
+
+  .active & {
+    transform: rotate(180deg);
+  }
+}
+
+.site-health-panel {
+  padding: 0;
+  border-bottom: 1px solid var(--expansa-border);
+
+  .accordion-item:last-child & {
+    border-bottom: 0;
+  }
+}
+
+.site-health-checks {
+  margin: 0;
+  padding: 0.5rem 0;
+  list-style: none;
+}
+
+.site-health-check {
+  display: flex;
+  gap: .5rem;
+  padding: 0.375rem 1.25rem;
+}
+
+.site-health-check-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: .125rem;
+  min-width: 0;
+}
+
+.site-health-check-icon {
+  margin-top: .125rem;
+
+  &--good {
+    color: var(--expansa-success);
+  }
+
+  &--recommended {
+    color: var(--expansa-warning);
+  }
+
+  &--critical {
+    color: var(--expansa-danger);
+  }
+}

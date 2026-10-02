@@ -12,6 +12,7 @@ use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Lifecycle;
+use Expansa\Facades\View;
 
 final class Web
 {
@@ -108,6 +109,14 @@ final class Web
                     $slug  = 'edit';
                     $table = new App\Tables\Users();
                 }
+            }
+
+            // a dashboard page without a template, e.g. a menu item of an unfinished section or a missing asset
+            if (Lifecycle::is('dashboard') && ! View::exists($slug)) {
+                http_response_code(404);
+
+                $slug  = '404';
+                $title = $this->title('', t('Page not found'));
             }
 
             // output view to frontend

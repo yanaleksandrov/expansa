@@ -63,10 +63,23 @@ require_once EX_PATH . 'expansa/functions.php';
 // stops with an error page before any PHP 8.4 code is parsed: everything above must stay free of it
 App\Support\Requirements::check();
 
+// as in WordPress: "enabled" is the main switch, "log" and "display" work only under it;
+// true, 1, "1", "on" and "yes" count as true: env.php is written by hand as often as by the installer
+$debug = (defined('EX_DEBUG') ? EX_DEBUG : []) + ['enabled' => false, 'log' => true, 'display' => true, 'view' => EX_DASHBOARD . 'debug.php'];
+$isDebug     = filter_var($debug['enabled'], FILTER_VALIDATE_BOOL);
+$isLogged    = $isDebug && filter_var($debug['log'], FILTER_VALIDATE_BOOL);
+$isDisplayed = $isDebug && filter_var($debug['display'], FILTER_VALIDATE_BOOL);
+
 // needed before the phases: boot reads Is::debug(); the dashboard context is known only after the phases
 Is::configure(
-    debug: defined('EX_DEBUG') && EX_DEBUG['enabled'] === true,
+    debug: $isDebug,
     dashboard: fn () => Lifecycle::is('dashboard'),
+    // env.php and the owner in the database, checked once after the configure phase connects it: the installation request changes the result
+    installed: function () {
+        static $installed;
+
+        return $installed ??= App\Support\Installation::isComplete();
+    },
 );
 
 // every PHP error is reported in debug mode, and thrown by the handler below
@@ -74,26 +87,25 @@ if (Is::debug()) {
     error_reporting(E_ALL);
 }
 
-// before the phases, so an error in any of them reaches the log and the error page; details in debug mode only
+// before the phases, so an error in any of them reaches the log and the error page; without debug the page shows only the id
 Debug::configure(
-    view: defined('EX_DEBUG') ? EX_DEBUG['view'] : EX_DASHBOARD . 'debug.php',
-    details: Is::debug(),
-    report: function (Throwable $e, string $id, array $context) {
-        if (! defined('EX_DEBUG') || (EX_DEBUG['log'] ?? true) !== false) {
-            // out of memory, time limit, compile error: critical, to alert on it separately
-            Log::log(Expansa\Debug\Manager::isFatal($e) ? 'critical' : 'error', 'Uncaught {class}: {message}', [
-                'id'        => $id,
-                'class'     => get_class($e),
-                'message'   => $e->getMessage(),
-                'exception' => $e,
-            ] + $context);
-        }
-    },
-    warning: fn (ErrorException $e) => Log::warning('{message} in {file}:{line}', [
+    view: $debug['view'],
+    details: $isDisplayed,
+    strict: $isDebug,
+    report: $isLogged ? function (Throwable $e, string $id, array $context) {
+        // out of memory, time limit, compile error: critical, to alert on it separately
+        Log::log(Expansa\Debug\Manager::isFatal($e) ? 'critical' : 'error', 'Uncaught {class}: {message}', [
+            'id'        => $id,
+            'class'     => get_class($e),
+            'message'   => $e->getMessage(),
+            'exception' => $e,
+        ] + $context);
+    } : null,
+    warning: $isLogged ? fn (ErrorException $e) => Log::warning('{message} in {file}:{line}', [
         'message' => $e->getMessage(),
         'file'    => $e->getFile(),
         'line'    => $e->getLine(),
-    ]),
+    ]) : null,
     // a Closure value is resolved on its own: a failing one does not lose the rest
     context: fn () => PHP_SAPI === 'cli' ? ['command' => implode(' ', $_SERVER['argv'] ?? [])] : [
         'method' => $_SERVER['REQUEST_METHOD'] ?? '',
@@ -103,7 +115,6 @@ Debug::configure(
         'input'  => $_POST,
     ],
     json: fn () => str_starts_with(Route::uri(), '/api/') || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'json'),
-    editor: defined('EX_DEBUG') ? EX_DEBUG['editor'] ?? '' : '',
     collapse: [EX_CORE, EX_PATH . 'vendor/'],
 );
 Debug::register();
@@ -116,13 +127,10 @@ Lifecycle::configure(
     uri: fn () => Route::uri(),
 );
 
-// computed once: the installation request itself changes the result
-$isInstalled = App\Support\Installation::isComplete();
-
 /**
  * 2. Phases
  *
- * Every request, in declaration order; the ones bound to $isInstalled are skipped before install.
+ * Every request, in declaration order; the ones bound to Is::installed() are skipped before install.
  */
 
 /**
@@ -342,7 +350,7 @@ Lifecycle::phase('configure', true, function () {
  * Registers the default roles (admin, editor, author, subscriber) and post types
  * (pages, files, api-keys); post types create their missing tables.
  */
-Lifecycle::phase('register', $isInstalled, function () {
+Lifecycle::phase('register', fn () => Is::installed(), function () {
     // roles
     Role::add(
         role: 'admin',
@@ -498,7 +506,7 @@ Lifecycle::phase('register', $isInstalled, function () {
  * Loads the active plugins & themes listed in the "extensions.active" option (ids like "plugins/seo")
  * and calls register() on each: plugins first, then themes.
  */
-Lifecycle::phase('extensions', $isInstalled, function () {
+Lifecycle::phase('extensions', fn () => Is::installed(), function () {
     Extensions::load(
         ids: (array) App\Models\Option::get('extensions.active', []),
     );
@@ -512,7 +520,7 @@ Lifecycle::phase('extensions', $isInstalled, function () {
  * Every extension is registered, so boot() runs on plugins, then themes.
  * From here Is::dashboard() and other context checks are available.
  */
-Lifecycle::phase('booted', $isInstalled, function () {
+Lifecycle::phase('booted', fn () => Is::installed(), function () {
     Extensions::boot('plugin');
     Extensions::boot('theme');
 });
@@ -608,7 +616,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
  * Every page except the API shows the installer: its assets come from dashboard/install.php,
  * the page from Web::install().
  */
-Lifecycle::context('install', !$isInstalled, function () {
+Lifecycle::context('install', fn () => ! Is::installed(), function () {
     require_once EX_PATH . 'dashboard/install.php';
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'install']);

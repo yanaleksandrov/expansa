@@ -26,16 +26,25 @@ final class Is
     private static Closure|bool $dashboard = false;
 
     /**
+     * Installation state or the callback that reports it, called on every installed() check.
+     *
+     * @var bool|Closure
+     */
+    private static Closure|bool $installed = false;
+
+    /**
      * Set the application state the checks below report, replacing the previous one.
      *
      * @param bool         $debug
      * @param Closure|bool $dashboard Ready state or `fn (): bool`, for a state known only later in the request.
+     * @param Closure|bool $installed Ready state or `fn (): bool`, e.g. a check that needs the configured database.
      * @return void
      */
-    public static function configure(bool $debug = false, Closure|bool $dashboard = false): void
+    public static function configure(bool $debug = false, Closure|bool $dashboard = false, Closure|bool $installed = false): void
     {
         self::$debug     = $debug;
         self::$dashboard = $dashboard;
+        self::$installed = $installed;
     }
 
     /**
@@ -164,6 +173,16 @@ final class Is
     public static function dashboard(): bool
     {
         return self::$dashboard instanceof Closure ? (bool) (self::$dashboard)() : self::$dashboard;
+    }
+
+    /**
+     * Whether the application is installed and can serve the site, by the state passed to configure().
+     *
+     * @return bool
+     */
+    public static function installed(): bool
+    {
+        return self::$installed instanceof Closure ? (bool) (self::$installed)() : self::$installed;
     }
 
     /**

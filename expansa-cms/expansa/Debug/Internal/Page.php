@@ -44,11 +44,6 @@ final class Page
     public function __construct(
 
         /**
-         * Editor URL of a frame with {file} and {line}: `vscode://file/{file}:{line}`; empty without links.
-         */
-        public string $editor = '',
-
-        /**
          * Directories of the frames shown collapsed, e.g. the core and vendor; resolved only for an error.
          *
          * @var string[]
@@ -57,7 +52,7 @@ final class Page
     ) {}
 
     /**
-     * Template variables: title, message, id, file, line, link, trace, arguments, previous and request.
+     * Template variables: title, message, id, file, line, trace, arguments, previous and request.
      * Without details only title, message and id, the rest is empty.
      *
      * @param Throwable            $e
@@ -75,7 +70,6 @@ final class Page
                 'id'        => $id,
                 'file'      => '',
                 'line'      => 0,
-                'link'      => '',
                 'trace'     => [],
                 'arguments' => [],
                 'previous'  => [],
@@ -89,7 +83,6 @@ final class Page
             'id'        => $id,
             'file'      => $e->getFile(),
             'line'      => $e->getLine(),
-            'link'      => $this->link($e->getFile(), $e->getLine()),
             'trace'     => $this->trace($e),
             'arguments' => $e instanceof TypeError ? $this->arguments($e) : [],
             'previous'  => $this->previous($e),
@@ -203,7 +196,6 @@ final class Page
         foreach ($frames as $i => $frame) {
             [$frames[$i]['code'], $frames[$i]['start']] = $this->excerpt($frame['file'], $frame['line']);
 
-            $frames[$i]['link']      = $this->link($frame['file'], $frame['line']);
             $frames[$i]['collapsed'] = $i > 0 && $this->isCollapsed($frame['file'], $collapse);
         }
 
@@ -228,18 +220,6 @@ final class Page
         }
 
         return false;
-    }
-
-    /**
-     * Editor URL of the place, empty without an editor.
-     *
-     * @param string $file
-     * @param int    $line
-     * @return string
-     */
-    private function link(string $file, int $line): string
-    {
-        return $this->editor === '' ? '' : strtr($this->editor, ['{file}' => str_replace('\\', '/', $file), '{line}' => $line]);
     }
 
     /**
@@ -297,7 +277,7 @@ final class Page
      * Previous exceptions, the closest first.
      *
      * @param Throwable $e
-     * @return list<array{title: string, message: string, file: string, line: int, link: string}>
+     * @return list<array{title: string, message: string, file: string, line: int}>
      */
     private function previous(Throwable $e): array
     {
@@ -308,7 +288,6 @@ final class Page
                 'message' => $e->getMessage(),
                 'file'    => $e->getFile(),
                 'line'    => $e->getLine(),
-                'link'    => $this->link($e->getFile(), $e->getLine()),
             ];
         }
 

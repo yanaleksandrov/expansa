@@ -71,7 +71,7 @@ final class Kernel
             $id = Debug::report($e, ['controller' => $controller, 'method' => $method]);
 
             $response = new Response()->json(self::withMetrics([
-                'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
+                'message' => Debug::hasDetails() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
                 'id'      => $id,
             ]), 500);
         }

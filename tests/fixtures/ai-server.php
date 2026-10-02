@@ -24,5 +24,5 @@ echo json_encode([
         ])],
         'finish_reason' => 'stop',
     ]],
-    'usage'   => ['prompt_tokens' => 11, 'completion_tokens' => 4],
+    'usage'   => ['prompt_tokens' => 11, 'completion_tokens' => 4, 'total_tokens' => 25],
 ]);

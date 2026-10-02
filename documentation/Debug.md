@@ -7,7 +7,7 @@
 use Expansa\Facades\Debug;
 use Expansa\Facades\Panel;
 
-Debug::configure(view: EX_DASHBOARD . 'debug.php', details: Is::debug(), report: fn (Throwable $e, string $id, array $context) => ...);
+Debug::configure(view: EX_DASHBOARD . 'debug.php', details: Is::debug(), strict: Is::debug(), report: fn (Throwable $e, string $id, array $context) => ...);
 Debug::register();
 
 $id = Debug::report($e);            // в лог, вернёт id ошибки: 7f3a9c1e
@@ -37,7 +37,8 @@ metrics()->time();                  // 12.4ms
 ```php
 Debug::configure(
     view: EX_DEBUG['view'],
-    details: Is::debug(),
+    details: $isDisplayed,       // enabled и display
+    strict: $isDebug,            // enabled
     report: fn (Throwable $e, string $id, array $context) => Log::error('Uncaught {class}: {message}', [
         'id' => $id, 'class' => get_class($e), 'message' => $e->getMessage(), 'exception' => $e,
     ] + $context),
@@ -48,7 +49,6 @@ Debug::configure(
         'input'  => $_POST,
     ],
     json: fn () => str_starts_with(Route::uri(), '/api/'),
-    editor: EX_DEBUG['editor'] ?? '',
     collapse: [EX_CORE, EX_PATH . 'vendor/'],
 );
 Debug::register();
@@ -57,16 +57,28 @@ Debug::register();
 | Параметр   | Что задаёт                                                                     |
 |------------|--------------------------------------------------------------------------------|
 | `view`     | Шаблон страницы ошибки; без него — простой текст                               |
-| `details`  | Показывать сообщение, код, трассировку и запрос; только в режиме отладки       |
+| `details`  | Показывать сообщение, код, трассировку и запрос вместо одного id ошибки        |
+| `strict`   | Превращать предупреждения и notice в `ErrorException`; режим отладки           |
 | `report`   | Куда записать ошибку: получает исключение, id и контекст                       |
 | `warning`  | Куда записать PHP-предупреждение, после которого запрос продолжается          |
 | `context`  | Данные запроса для лога и страницы; значение-`Closure` вычисляется отдельно    |
 | `json`     | Отвечать ли JSON; без колбэка решает заголовок `Accept`                        |
-| `editor`   | Ссылка на код с `{file}` и `{line}`: `vscode://file/{file}:{line}`, `phpstorm://open?file={file}&line={line}` |
 | `collapse` | Папки, кадры из которых свёрнуты на странице: ядро, vendor                     |
 
-В `env.php` ссылки на код включаются через `EX_DEBUG['editor']`, запись в лог отключается через
-`EX_DEBUG['log'] = false`.
+Настройки в `env.php` устроены как в WordPress (`WP_DEBUG`, `WP_DEBUG_LOG`, `WP_DEBUG_DISPLAY`):
+
+| `EX_DEBUG`  | Переменная окружения | По умолчанию | Что делает                                                        |
+|-------------|----------------------|--------------|-------------------------------------------------------------------|
+| `enabled`   | `EX_DEBUG`           | выключено    | Главный выключатель: без него `log` и `display` не действуют     |
+| `log`       | `EX_DEBUG_LOG`       | включено     | Пишет неперехваченные ошибки и предупреждения в `storage/logs`   |
+| `display`   | `EX_DEBUG_DISPLAY`   | включено     | Показывает сообщение, место и трассировку на странице и в API    |
+
+С `enabled` предупреждения PHP останавливают запрос (`strict`), запросы к базе копятся для панели
+отладки, ассеты подключаются без `.min`. Без него страница ошибки показывает только id, ничего не
+пишется в лог, а предупреждения передаёт обработчику самого PHP. `display` показывает подробности любому
+посетителю, поэтому на публичном сайте держите его включённым только на время поиска ошибки.
+`Debug::hasDetails()` сообщает, включён ли показ: по нему `App\Http\Kernel` решает, отдавать ли текст
+исключения в JSON, а страница «Здоровье сайта» — предупреждать о нём.
 
 ## Обработка ошибок
 
@@ -78,7 +90,7 @@ Debug::register();
   Их видит только shutdown-функция; она регистрируется изнутри другой shutdown-функции и поэтому
   выполняется последней, после отложенных хуков. После нехватки памяти она поднимает `memory_limit`
   на 8 МБ, чтобы вывести страницу: резерв памяти, который держал бы каждый запрос, не нужен.
-- **Предупреждения и notice.** В режиме `details` они становятся `ErrorException` и останавливают
+- **Предупреждения и notice.** В режиме `strict` они становятся `ErrorException` и останавливают
   запрос, иначе уходят в `warning`, и запрос продолжается. Deprecated всегда уходят в `warning`.
   Одно место (`уровень:файл:строка`) уходит в `warning` один раз за запрос: предупреждение в цикле
   или в чужом коде не забивает лог. Ошибки под `@` и уровни вне `error_reporting()` пропускаются.

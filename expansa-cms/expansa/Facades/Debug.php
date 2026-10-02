@@ -11,7 +11,8 @@ use Throwable;
 /**
  * Uncaught errors, see Expansa\Debug\Manager; the debug panel is the Panel facade.
  *
- * @method static void   configure(string $view = '', bool $details = false, ?Closure $report = null, ?Closure $warning = null, ?Closure $context = null, ?Closure $json = null, string $editor = '', array $collapse = [])
+ * @method static void   configure(string $view = '', bool $details = false, bool $strict = false, ?Closure $report = null, ?Closure $warning = null, ?Closure $context = null, ?Closure $json = null, array $collapse = [])
+ * @method static bool   hasDetails()
  * @method static void   register()
  * @method static void   handle(Throwable $e, array $context = [])
  * @method static void   send(Throwable $e, string $id = '')

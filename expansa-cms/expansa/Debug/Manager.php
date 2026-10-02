@@ -14,7 +14,7 @@ use Throwable;
  * handle() reports an error with a new id and outputs the error page, a JSON response or, in the console,
  * text on STDERR. The details are shown only when configured, e.g. in debug mode.
  *
- * PHP warnings and notices become an ErrorException in details mode; otherwise they go to the warning
+ * PHP warnings and notices become an ErrorException in strict mode; otherwise they go to the warning
  * callback, once per place and request, and the request goes on. Deprecations always go to the callback. Errors silenced with `@`
  * and levels outside error_reporting() are ignored.
  *
@@ -37,11 +37,18 @@ final class Manager
     private string $view = '';
 
     /**
-     * Show the message, frames and request: debug mode only.
+     * Show the message, frames and request instead of only the error id.
      *
      * @var bool
      */
     private bool $details = false;
+
+    /**
+     * Throw an ErrorException for PHP warnings and notices: debug mode.
+     *
+     * @var bool
+     */
+    private bool $strict = false;
 
     /**
      * Gets the error, its id and the context: writes it to the log.
@@ -106,32 +113,43 @@ final class Manager
      * Set the page, the details and the callbacks, a repeated call replaces all of them.
      *
      * @param string       $view     Template of the error page; plain text without it.
-     * @param bool         $details  Show the message, frames and request, debug mode only.
+     * @param bool         $details  Show the message, frames and request, e.g. in debug mode or to developers.
+     * @param bool         $strict   Throw an ErrorException for PHP warnings and notices, e.g. in debug mode.
      * @param Closure|null $report   fn (Throwable $e, string $id, array $context): void, e.g. a log write.
      * @param Closure|null $warning  fn (ErrorException $e): void, for PHP errors that do not stop the request.
      * @param Closure|null $context  fn (): array, the request; a Closure value is resolved on its own.
      * @param Closure|null $json     fn (): bool, whether the response is JSON.
-     * @param string       $editor   Editor URL with {file} and {line}: `vscode://file/{file}:{line}`.
      * @param string[]     $collapse Path prefixes of the frames shown collapsed, e.g. the core and vendor.
      * @return void
      */
     public function configure(
         string $view = '',
         bool $details = false,
+        bool $strict = false,
         ?Closure $report = null,
         ?Closure $warning = null,
         ?Closure $context = null,
         ?Closure $json = null,
-        string $editor = '',
         array $collapse = [],
     ): void {
         $this->view    = $view;
         $this->details = $details;
+        $this->strict  = $strict;
         $this->report  = $report;
         $this->warning = $warning;
         $this->context = $context;
         $this->json    = $json;
-        $this->page    = new Page($editor, $collapse);
+        $this->page    = new Page($collapse);
+    }
+
+    /**
+     * Whether error responses show the message and details, e.g. for an API error envelope built elsewhere.
+     *
+     * @return bool
+     */
+    public function hasDetails(): bool
+    {
+        return $this->details;
     }
 
     /**
@@ -279,7 +297,7 @@ final class Manager
     }
 
     /**
-     * Error handler: throws an ErrorException in details mode, otherwise passes the error to the warning callback.
+     * Error handler: throws an ErrorException in strict mode, otherwise passes the error to the warning callback.
      *
      * @param int    $level
      * @param string $message
@@ -294,7 +312,7 @@ final class Manager
             return false;
         }
 
-        if ($this->details && ($level & (E_DEPRECATED | E_USER_DEPRECATED)) === 0) {
+        if ($this->strict && ($level & (E_DEPRECATED | E_USER_DEPRECATED)) === 0) {
             throw new ErrorException($message, 0, $level, $file, $line);
         }
 

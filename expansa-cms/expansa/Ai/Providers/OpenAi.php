@@ -94,10 +94,14 @@ final class OpenAi implements Provider
             throw new InvalidResponse('The AI service returned no message text.');
         }
 
+        // thinking models such as Gemini leave reasoning out of completion_tokens but count it in total_tokens
+        $input = (int) ($data['usage']['prompt_tokens'] ?? 0);
+        $output = max((int) ($data['usage']['completion_tokens'] ?? 0), (int) ($data['usage']['total_tokens'] ?? 0) - $input);
+
         return new Completion(
             $text,
-            (int) ($data['usage']['prompt_tokens'] ?? 0),
-            (int) ($data['usage']['completion_tokens'] ?? 0),
+            $input,
+            $output,
             [
                 'model'         => $data['model'] ?? $this->model,
                 'id'            => $data['id'] ?? '',
@@ -128,6 +132,8 @@ final class OpenAi implements Provider
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => 15,
             CURLOPT_TIMEOUT        => $this->timeout,
+            // the system certificate store, so Windows builds of PHP without curl.cainfo verify HTTPS too
+            CURLOPT_SSL_OPTIONS    => CURLSSLOPT_NATIVE_CA,
         ]);
         $response = curl_exec($curl);
         $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);

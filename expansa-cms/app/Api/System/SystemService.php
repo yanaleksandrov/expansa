@@ -30,11 +30,12 @@ final class SystemService
      */
     public function checkRequirements(array $input): array
     {
-        if (!is_file(EX_PATH . 'env.php')) {
+        if (!Installation::hasEnvironment()) {
             require_once EX_PATH . 'env.example.php';
         }
 
-        $data = Safe::data($input, [
+        // with env.php the installer does not ask for the database: its settings are checked
+        $data = Installation::hasEnvironment() ? EX_DB : Safe::data($input, [
             'database' => 'trim',
             'username' => 'trim',
             'password' => 'trim',
@@ -85,7 +86,9 @@ final class SystemService
             throw new HttpError(409, t('Expansa is already installed.'));
         }
 
-        $this->validateInstallInput($input);
+        // an existing env.php keeps its settings: the configure phase has already connected its database
+        $hasEnvironment = Installation::hasEnvironment();
+        $this->validateInstallInput($input, $hasEnvironment);
 
         $protocol = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ? 'https://' : 'http://';
         $siteUrl  = $protocol . $_SERVER['SERVER_NAME'];
@@ -112,8 +115,8 @@ final class SystemService
             'smtp.from'        => 'trim',
         ])->values();
 
-        // env.php marks the installation as complete, so it appears only after every step succeeded
-        $draft = Installation::draft(
+        // env.php is published only after every step succeeded
+        $draft = $hasEnvironment ? null : Installation::draft(
             array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database)
             + array_combine(
                 ['smtp.host', 'smtp.port', 'smtp.username', 'smtp.password', 'smtp.from'],
@@ -126,10 +129,12 @@ final class SystemService
         );
 
         try {
-            // the rest of the installation reads the new constants, e.g. EX_DB
-            require_once $draft;
+            if ($draft !== null) {
+                // the rest of the installation reads the new constants, e.g. EX_DB
+                require_once $draft;
 
-            Db::configure(...EX_DB);
+                Db::configure(...EX_DB);
+            }
 
             Hook::call('createMainDatabaseTables');
 
@@ -148,11 +153,16 @@ final class SystemService
             $user->roles = ['admin'];
             $user->save();
 
+            // the owner marks the installation as complete, see Installation::isComplete()
             Option::update('site', $site + ['owner' => ['email' => $user->email]]);
 
-            Installation::complete($draft);
+            if ($draft !== null) {
+                Installation::complete($draft);
+            }
         } catch (\Throwable $e) {
-            Installation::discard($draft);
+            if ($draft !== null) {
+                Installation::discard($draft);
+            }
 
             // a retry would otherwise fail on the owner's login and email being taken
             if (isset($user->id)) {
@@ -179,20 +189,28 @@ final class SystemService
      *
      * @throws ValidationFailed
      */
-    private function validateInstallInput(array $input): void
+    private function validateInstallInput(array $input, bool $hasEnvironment): void
     {
-        $validator = Validator::data(Arr::dot($input), [
+        $rules = [
             'site.name'     => 'required',
             'user.email'    => 'required|email',
             'user.login'    => 'required',
             'user.password' => 'required',
             'user.locale'   => 'required',
-            'db.database'   => 'required',
-            'db.username'   => 'required',
-            'db.password'   => 'required',
-            'db.host'       => 'required',
-            'db.prefix'     => 'required',
-        ])->apply();
+        ];
+
+        // the database settings come from env.php when it exists
+        if (! $hasEnvironment) {
+            $rules += [
+                'db.database' => 'required',
+                'db.username' => 'required',
+                'db.password' => 'required',
+                'db.host'     => 'required',
+                'db.prefix'   => 'required',
+            ];
+        }
+
+        $validator = Validator::data(Arr::dot($input), $rules)->apply();
 
         if (!$validator->isValid()) {
             throw new ValidationFailed(t('Please fill in all required fields.'), $validator->errors);

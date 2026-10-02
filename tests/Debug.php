@@ -38,7 +38,7 @@ function debugOutput(callable $callback): string
 
 // the variables of the error page template, read through a template that outputs them as JSON
 $template = tempnam(sys_get_temp_dir(), 'view');
-file_put_contents($template, '<?php echo json_encode(compact("title", "message", "id", "file", "line", "link", "trace", "arguments", "previous", "request"));');
+file_put_contents($template, '<?php echo json_encode(compact("title", "message", "id", "file", "line", "trace", "arguments", "previous", "request"));');
 
 /**
  * Output of the error, rendered by a manager like the one bootstrap.php configures.
@@ -59,7 +59,6 @@ function debugRender(Throwable $e, bool $details = true, array $request = [], ?s
         details: $details,
         context: fn () => $request,
         json: fn () => false,
-        editor: 'vscode://file/{file}:{line}',
         collapse: [EX_PATH . 'expansa'],
     );
 
@@ -79,7 +78,6 @@ $data = json_decode(debugRender($error, true, ['method' => 'POST', 'input' => ['
 check('details have the class and the message', $data['title'] === LogicException::class && $data['message'] === $error->getMessage());
 check('the trace starts at the place of the throw', $data['trace'][0]['file'] === __FILE__ && $data['trace'][0]['line'] === $error->getLine());
 check('every frame has the code around its line', $data['trace'][0]['start'] === max(1, $error->getLine() - 10) && str_contains($data['trace'][0]['code'], "new LogicException('<script>"));
-check('frames link to the editor', $data['link'] === 'vscode://file/' . str_replace('\\', '/', __FILE__) . ':' . $error->getLine());
 check('previous exceptions are listed', count($data['previous']) === 1 && $data['previous'][0]['message'] === 'database is down');
 check('the request hides secrets', $data['request']['input'] === '{"password":"********","name":"Ann"}' && $data['request']['method'] === 'POST');
 
@@ -118,7 +116,7 @@ check('the text has the id, the error, the trace and the cause', str_starts_with
 $html = debugRender($error, true, ['input' => ['password' => 'secret']], EX_PATH . 'dashboard/debug.php');
 check('the page escapes the message', ! str_contains($html, '<script>alert') && str_contains($html, '&lt;script&gt;alert(1)'));
 check('the page escapes the code', str_contains($html, 'new LogicException(&#039;&lt;script&gt;'));
-check('the page shows the error id, the request and the editor link', str_contains($html, 'abc123') && str_contains($html, '&quot;password&quot;:&quot;********&quot;') && str_contains($html, 'href="vscode://file/'));
+check('the page shows the error id and the request', str_contains($html, 'abc123') && str_contains($html, '&quot;password&quot;:&quot;********&quot;'));
 
 $html = debugRender($error, false, [], EX_PATH . 'dashboard/debug.php');
 check('the public page has the id but no trace or code', str_contains($html, 'abc123') && ! str_contains($html, 'errors-source') && ! str_contains($html, __FILE__));
@@ -185,9 +183,15 @@ check('a silenced error is ignored', ! in_array('Undefined array key "silenced"'
 $handler->configure(details: true, warning: function (ErrorException $e) use (&$warnings) {
     $warnings[] = $e->getMessage();
 });
-check('in details mode a warning is thrown', throws(fn () => trigger_error('strict', E_USER_WARNING), ErrorException::class));
+trigger_error('shown', E_USER_WARNING);
+check('details alone do not stop the request on a warning', end($warnings) === 'shown' && $handler->hasDetails());
+
+$handler->configure(strict: true, warning: function (ErrorException $e) use (&$warnings) {
+    $warnings[] = $e->getMessage();
+});
+check('in strict mode a warning is thrown', throws(fn () => trigger_error('strict', E_USER_WARNING), ErrorException::class) && ! $handler->hasDetails());
 trigger_error('old', E_USER_DEPRECATED);
-check('a deprecation goes to the callback even in details mode', end($warnings) === 'old');
+check('a deprecation goes to the callback even in strict mode', end($warnings) === 'old');
 
 $warnings = [];
 for ($i = 0; $i < 3; $i++) {

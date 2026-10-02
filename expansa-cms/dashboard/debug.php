@@ -8,7 +8,6 @@
  * @var string $id
  * @var string $file
  * @var int    $line
- * @var string $link
  * @var array  $trace
  * @var array  $arguments
  * @var array  $previous
@@ -16,19 +15,17 @@
  */
 $h = fn ( mixed $value ): string => htmlspecialchars( (string) $value, ENT_QUOTES, 'UTF-8' );
 
-$place = function ( string $file, int $line, string $link ) use ( $h ): string {
+$place = function ( string $file, int $line ) use ( $h ): string {
 	$path = $h( dirname( $file ) . DIRECTORY_SEPARATOR ) . '<u>' . $h( basename( $file ) ) . '</u>';
-	$path = $link ? '<a href="' . $h( $link ) . '">' . $path . '</a>' : $path;
 
 	return 'on line <em>' . $line . '</em> in ' . $path;
 };
 
 $frame = function ( array $frame, bool $open ) use ( $h ): string {
-	$link = $frame['link'] ? ' <a class="errors-frame-link" href="' . $h( $frame['link'] ) . '">Open</a>' : '';
 	$call = $frame['call'] ? ' <code>' . $h( $frame['call'] ) . '</code>' : '';
 	$code = $frame['code'] === '' ? '' : '<pre class="errors-source" data-start="' . $frame['start'] . '" data-line="' . $frame['line'] . '" u-highlight.php><code class="language-php">' . $h( $frame['code'] ) . '</code></pre>';
 
-	return '<details class="errors-frame"' . ( $open ? ' open' : '' ) . '><summary><code><strong>' . $frame['line'] . ':</strong></code> ' . $h( $frame['file'] ) . $call . $link . '</summary>' . $code . '</details>';
+	return '<details class="errors-frame"' . ( $open ? ' open' : '' ) . '><summary><code><strong>' . $frame['line'] . ':</strong></code> ' . $h( $frame['file'] ) . $call . '</summary>' . $code . '</details>';
 };
 
 $group = fn ( array $frames ): string => '<details class="errors-group"><summary>' . count( $frames ) . ' core and vendor frames</summary>' . implode( '', array_map( fn ( array $item ) => $frame( $item, false ), $frames ) ) . '</details>';
@@ -62,9 +59,9 @@ $group = fn ( array $frames ): string => '<details class="errors-group"><summary
 	</header>
 	<div class="errors-content">
 		<?php if ( $file ) : ?>
-			<p><?php echo ucfirst( $place( $file, $line, $link ) ); ?></p>
+			<p><?php echo ucfirst( $place( $file, $line ) ); ?></p>
 			<?php foreach ( $previous as $cause ) : ?>
-				<p>Caused by <?php echo $h( "{$cause['title']}: {$cause['message']}" ); ?> <?php echo $place( $cause['file'], $cause['line'], $cause['link'] ); ?></p>
+				<p>Caused by <?php echo $h( "{$cause['title']}: {$cause['message']}" ); ?> <?php echo $place( $cause['file'], $cause['line'] ); ?></p>
 			<?php endforeach; ?>
 		<?php endif; ?>
 		<?php if ( $id ) : ?>

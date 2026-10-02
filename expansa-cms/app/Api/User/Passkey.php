@@ -78,7 +78,7 @@ final class Passkey
      */
     public static function all(User $user): array
     {
-        return Db::select('passkeys', null, ['id', 'name', 'backed_up [Bool]', 'created_at', 'used_at'], [
+        return Db::select('passkeys', ['id', 'name', 'backed_up [Bool]', 'created_at', 'used_at'], [
             'user_id' => $user->id,
             'ORDER'   => ['id' => 'DESC'],
         ]) ?? [];
@@ -107,7 +107,7 @@ final class Passkey
     {
         $exclude = array_map(
             fn (array $row) => $this->credential($row, $user),
-            Db::select('passkeys', null, self::COLUMNS, ['user_id' => $user->id]) ?? []
+            Db::select('passkeys', self::COLUMNS, ['user_id' => $user->id]) ?? []
         );
 
         return $this->rp->creationOptions(
