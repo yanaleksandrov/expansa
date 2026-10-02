@@ -536,6 +536,15 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(new Expansa\Scheduler\Commands\Run(
         schedule: fn (Expansa\Scheduler\Scheduler $scheduler) => Hook::call('schedule', $scheduler),
     ));
+    Terminal::addCommand(new Expansa\Ai\Commands\Work(
+        queue: fn () => App\Support\Ai::queue(),
+    ));
+
+    // AI tasks whose worker did not start or crashed; a request starts its own worker at once
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->raw(PHP_BINARY, [EX_PATH . 'artisan', 'ai:work'])->everyMinute()->onlyOne();
+    });
+
     Terminal::run();
 });
 
@@ -565,6 +574,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
         // RPC routes instead of Router::register(): the dashboard calls fixed URLs like `apikey/create` with the id in the body
         foreach (
             [
+                App\Api\Ai\AiController::class,
                 App\Api\Apikey\ApikeyController::class,
                 App\Api\Extensions\ExtensionsController::class,
                 App\Api\FieldGroups\FieldGroupsController::class,

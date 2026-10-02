@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Ai;
 
+use Closure;
 use Exception;
 use Expansa\Ai\Contracts\Context;
 use Expansa\Ai\Contracts\Generator;
@@ -12,6 +13,7 @@ use Expansa\Ai\Contracts\TokenCounter;
 use Expansa\Ai\Contracts\Tool;
 use Expansa\Ai\Contracts\ToolRegistry;
 use Expansa\Ai\Contracts\Validator;
+use Expansa\Ai\Enums\Stage;
 use Expansa\Ai\Exceptions\BudgetExceeded;
 use Expansa\Ai\Exceptions\ClarificationUnavailable;
 use Expansa\Ai\Exceptions\EmptyRequest;
@@ -32,6 +34,8 @@ use Expansa\Ai\Validators\Policy;
  * Runs bounded AI extension generation and user clarification rounds.
  * Keeps no state between calls: each result carries a `Session` for the next round,
  * so one manager serves any number of users and requests.
+ * The optional `progress` callback receives each `Step` when it starts and when it finishes,
+ * so the caller can show intermediate results while the round runs.
  */
 final class Manager
 {
@@ -108,19 +112,20 @@ final class Manager
      * Returns questions in the result when required details are missing.
      *
      * @param string $input User's natural language request for the extension
+     * @param (Closure(Step): void)|null $progress Receives the steps; its exceptions stop the round
      * @return Draft Generated result or questions for the user
      * @throws EmptyRequest When the supplied input is empty
      * @throws InputTooLong When input exceeds the configured size
      * @throws InvalidResponse When a provider returns malformed protocol data
      * @throws BudgetExceeded When the session token budget runs out before a required call
      */
-    public function create(string $input): Draft
+    public function create(string $input, ?Closure $progress = null): Draft
     {
         if (trim($input) === '') {
             throw new EmptyRequest('The plugin request cannot be empty.');
         }
 
-        return $this->run(new Session($input));
+        return $this->run(new Session($input), $progress);
     }
 
     /**
@@ -129,6 +134,7 @@ final class Manager
      *
      * @param Session $session Session of the result that asked the questions
      * @param string $answer User's response to the pending questions
+     * @param (Closure(Step): void)|null $progress Receives the steps; its exceptions stop the round
      * @return Draft Updated result or another clarification request
      * @throws EmptyRequest When the answer is empty
      * @throws ClarificationUnavailable When no question is pending or the limit is reached
@@ -136,7 +142,7 @@ final class Manager
      * @throws InvalidResponse When a provider returns malformed protocol data
      * @throws BudgetExceeded When the session token budget runs out before a required call
      */
-    public function clarify(Session $session, string $answer): Draft
+    public function clarify(Session $session, string $answer, ?Closure $progress = null): Draft
     {
         $answer = trim($answer);
         if ($answer === '') {
@@ -146,18 +152,19 @@ final class Manager
             throw new ClarificationUnavailable('No clarification answer can be accepted for this request.');
         }
 
-        return $this->run($session->withAnswer($answer));
+        return $this->run($session->withAnswer($answer), $progress);
     }
 
     /**
      * Runs one round: context lookup, specification, and generation unless questions remain.
      *
      * @param Session $session Session including the latest answer
+     * @param (Closure(Step): void)|null $progress Receives the steps
      * @return Draft Generated result or questions for the user
      */
-    private function run(Session $session): Draft
+    private function run(Session $session, ?Closure $progress): Draft
     {
-        $trace = new Trace($session->spent);
+        $trace = new Trace($session->spent, $session->clarifications, $progress);
         $input = $this->input($session);
         $context = $this->context($input, $trace);
         $left = $this->limits->clarifications - $session->clarifications;
@@ -223,7 +230,7 @@ final class Manager
      */
     private function context(string $input, Trace $trace): string
     {
-        $started = hrtime(true);
+        $trace->begin(Stage::Context);
         $context = $this->context->get($input, $this->limits->contextTokens);
         $tokens = $this->tokenizer->count($context);
         $truncated = $tokens > $this->limits->contextTokens;
@@ -232,7 +239,10 @@ final class Manager
         }
 
         $trace->contextTokens = min($tokens, $this->limits->contextTokens);
-        $trace->add('context', $started, ['context_tokens' => $trace->contextTokens, 'truncated' => $truncated]);
+        $trace->end(
+            ['context_tokens' => $trace->contextTokens, 'truncated' => $truncated],
+            ['tokens' => $trace->contextTokens, 'truncated' => $truncated],
+        );
 
         return $context;
     }
@@ -245,6 +255,7 @@ final class Manager
      * @param int $left Clarification rounds the user still has
      * @param Trace $trace Records of this round
      * @return array{
+     *     message: string,
      *     specification: string,
      *     questions: string[],
      *     missing_extensions: string[],
@@ -270,7 +281,7 @@ final class Manager
             $data['limits'] = ['tool_calls' => $this->limits->toolCalls];
         }
 
-        $plan = Protocol::plan($this->complete(Protocol::ANALYSIS, $data, 'analysis', $trace)->text);
+        $plan = $this->plan(Stage::Analysis, Protocol::ANALYSIS, $data, $trace);
         $calls = $tools === [] ? [] : $plan['tool_calls'];
         $trace->toolCallsLimited = count($calls) > $this->limits->toolCalls;
 
@@ -279,13 +290,13 @@ final class Manager
             return $plan;
         }
 
-        return Protocol::plan($this->complete(Protocol::REFINEMENT, [
+        return $this->plan(Stage::Refinement, Protocol::REFINEMENT, [
             'input'               => $input,
             'draft'               => $plan['specification'],
             'tool_results'        => $results,
             'platform'            => Protocol::platform($this->platform),
             'clarifications_left' => $left,
-        ], 'refinement', $trace)->text);
+        ], $trace);
     }
 
     /**
@@ -300,7 +311,7 @@ final class Manager
         $limit = $this->limits->toolResultTokens;
         $results = [];
         foreach (array_slice($calls, 0, $this->limits->toolCalls) as $call) {
-            $started = hrtime(true);
+            $trace->begin(Stage::Tool, $call);
             try {
                 $key = 'result';
                 $text = $this->tools->handle($call['name'], $call['arguments']);
@@ -311,11 +322,17 @@ final class Manager
 
             $tokens = $this->tokenizer->count($text);
             $results[] = ['name' => $call['name'], $key => $tokens > $limit ? $this->tokenizer->truncate($text, $limit) : $text];
-            $trace->add('tool', $started, [
+            $failed = $key === 'error';
+            $trace->end([
                 'name'          => $call['name'],
-                'failed'        => $key === 'error',
+                'failed'        => $failed,
                 'result_tokens' => min($tokens, $limit),
                 'truncated'     => $tokens > $limit,
+            ], [
+                'failed'    => $failed,
+                ...$failed ? ['error' => $text] : [],
+                'tokens'    => min($tokens, $limit),
+                'truncated' => $tokens > $limit,
             ]);
         }
 
@@ -348,7 +365,7 @@ final class Manager
             }
 
             $trace->repairs = $attempt;
-            $started = hrtime(true);
+            $trace->begin(Stage::Generation, ['repair' => $attempt]);
             try {
                 $generation = $this->generator->generate(
                     new Brief($input, $context, $specification, $errors, $files, $this->platform),
@@ -356,23 +373,22 @@ final class Manager
                 );
             } catch (InvalidResponse $error) {
                 $errors = [$error->getMessage()];
-                $trace->add('generation', $started, ['error' => $error->getMessage()]);
+                $trace->end(['error' => $error->getMessage()]);
                 continue;
             }
 
             $files = $generation->files;
-            $trace->add(
-                'generation',
-                $started,
+            $trace->end(
                 ['details' => $generation->metadata],
+                ['message' => $generation->message, 'files' => array_map(strlen(...), $files)],
                 $generation->inputTokens,
                 $generation->outputTokens,
                 $generation->providerCalls,
             );
 
-            $started = hrtime(true);
+            $trace->begin(Stage::Validation);
             $errors = $this->validator->validate($files);
-            $trace->add('validation', $started, ['errors' => count($errors)]);
+            $trace->end(['errors' => count($errors)], ['errors' => $errors]);
             if ($errors === []) {
                 break;
             }
@@ -382,35 +398,49 @@ final class Manager
     }
 
     /**
-     * Sends one prompt within the session budget and records the provider's usage.
+     * Sends one specification prompt within the session budget and parses the plan.
+     * Records the provider's usage and reports the plan as the step result.
      *
+     * @param Stage $stage Analysis or refinement
      * @param string $system Stage instructions
      * @param array<string, mixed> $data Request data
-     * @param string $step Step name for the trace
      * @param Trace $trace Records of this round
+     * @return array{
+     *     message: string,
+     *     specification: string,
+     *     questions: string[],
+     *     missing_extensions: string[],
+     *     tool_calls: array<int, array{name: string, arguments: array<string, mixed>}>,
+     * }
      * @throws BudgetExceeded When the session token budget is spent
+     * @throws InvalidResponse When the provider returns malformed protocol data
      */
-    private function complete(string $system, array $data, string $step, Trace $trace): Completion
+    private function plan(Stage $stage, string $system, array $data, Trace $trace): array
     {
         if ($trace->total >= $this->limits->totalTokens) {
-            throw new BudgetExceeded("The session has spent its total token budget before {$step}.");
+            throw new BudgetExceeded("The session has spent its total token budget before {$stage->value}.");
         }
 
-        $started = hrtime(true);
+        $trace->begin($stage);
         $completion = $this->provider->complete(
             new Prompt($system, Protocol::encode($data), Protocol::SPECIFICATION_SCHEMA),
             $this->limits->outputTokens,
         );
-        $trace->add(
-            $step,
-            $started,
+        $plan = Protocol::plan($completion->text);
+        $trace->end(
             ['provider' => $completion->metadata],
+            [
+                'message'            => $plan['message'],
+                'specification'      => $plan['specification'],
+                'questions'          => $plan['questions'],
+                'missing_extensions' => $plan['missing_extensions'],
+            ],
             $completion->inputTokens,
             $completion->outputTokens,
             1,
         );
 
-        return $completion;
+        return $plan;
     }
 
     /**

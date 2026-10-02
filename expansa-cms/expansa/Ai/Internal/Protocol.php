@@ -24,8 +24,9 @@ final class Protocol
      * Instructions for the first specification call.
      */
     public const string ANALYSIS = 'You specify CMS extensions. Read the user input and CMS context, then return JSON '
-        . 'matching the schema. "specification" states the behavior and acceptance criteria. Put a question into '
-        . '"questions" only when a missing detail blocks the specification and "clarifications_left" is above zero; '
+        . 'matching the schema. "message" tells the user in one or two sentences, in the language of the input, '
+        . 'what you understood and will do. "specification" states the behavior and acceptance criteria. '
+        . 'Put a question into "questions" only when a missing detail blocks the specification and "clarifications_left" is above zero; '
         . 'otherwise choose a reasonable default and write it into the specification. Request "tool_calls" only for '
         . 'the listed tools, at most "limits.tool_calls", with arguments matching each tool\'s parameters. Generated '
         . 'code may use only the PHP version and extensions in "platform". When the task cannot be solved without an '
@@ -36,7 +37,8 @@ final class Protocol
      */
     public const string REFINEMENT = 'You finalize a CMS extension specification. Revise the draft using the tool '
         . 'results (an entry with "error" means the tool failed) and return JSON matching the schema with an empty '
-        . '"tool_calls". Ask questions only under the same rule as before: a blocking detail and '
+        . '"tool_calls" and a "message" telling the user in one sentence, in the language of the input, what the '
+        . 'results changed. Ask questions only under the same rule as before: a blocking detail and '
         . '"clarifications_left" above zero. Report extensions missing from "platform" in "missing_extensions".';
 
     /**
@@ -45,7 +47,9 @@ final class Protocol
     public const string GENERATION = 'You write CMS extensions. Implement the specification as complete PHP source '
         . 'files with PHPUnit tests under tests/. Use only the PHP version and extensions in "platform". '
         . 'Use relative paths of letters, digits, ".", "_", "-" and "/". When "validation_errors" is present, '
-        . 'fix them in "previous_files" and return the complete corrected set. Return JSON matching the schema.';
+        . 'fix them in "previous_files" and return the complete corrected set. "message" tells the user in one or '
+        . 'two sentences, in the language of the request, what the files do or what you fixed. Return JSON matching '
+        . 'the schema.';
 
     /**
      * Response schema of the analysis and refinement calls.
@@ -55,6 +59,7 @@ final class Protocol
     public const array SPECIFICATION_SCHEMA = [
         'type'       => 'object',
         'properties' => [
+            'message'            => ['type' => 'string'],
             'specification'      => ['type' => 'string'],
             'questions'          => ['type' => 'array', 'items' => ['type' => 'string']],
             'missing_extensions' => ['type' => 'array', 'items' => ['type' => 'string']],
@@ -67,7 +72,7 @@ final class Protocol
                 ],
             ],
         ],
-        'required'   => ['specification', 'questions', 'missing_extensions', 'tool_calls'],
+        'required'   => ['message', 'specification', 'questions', 'missing_extensions', 'tool_calls'],
     ];
 
     /**
@@ -78,7 +83,8 @@ final class Protocol
     public const array FILES_SCHEMA = [
         'type'       => 'object',
         'properties' => [
-            'files' => [
+            'message' => ['type' => 'string'],
+            'files'   => [
                 'type'  => 'array',
                 'items' => [
                     'type'       => 'object',
@@ -87,7 +93,7 @@ final class Protocol
                 ],
             ],
         ],
-        'required'   => ['files'],
+        'required'   => ['message', 'files'],
     ];
 
     /**
@@ -116,6 +122,7 @@ final class Protocol
      *
      * @param string $text Model response
      * @return array{
+     *     message: string,
      *     specification: string,
      *     questions: string[],
      *     missing_extensions: string[],
@@ -148,6 +155,7 @@ final class Protocol
         }
 
         return [
+            'message'            => self::message($data),
             'specification'      => $data['specification'],
             'questions'          => self::strings($data, 'questions'),
             'missing_extensions' => self::strings($data, 'missing_extensions'),
@@ -174,15 +182,32 @@ final class Protocol
     }
 
     /**
-     * Parses a generation response into a file map.
+     * Reads the optional message for the user.
+     *
+     * @param array<mixed> $data Decoded response
+     * @throws InvalidResponse When the message is not a string
+     */
+    private static function message(array $data): string
+    {
+        $message = $data['message'] ?? '';
+        if (! is_string($message)) {
+            throw new InvalidResponse('The message field must be a string.');
+        }
+
+        return trim($message);
+    }
+
+    /**
+     * Parses a generation response into a file map and the message for the user.
      *
      * @param string $text Model response
-     * @return array<string, string> Relative paths mapped to source
+     * @return array{files: array<string, string>, message: string} Relative paths mapped to source
      * @throws InvalidResponse When the response is not a non-empty file list
      */
-    public static function files(string $text): array
+    public static function generation(string $text): array
     {
-        $entries = self::decode($text)['files'] ?? null;
+        $data = self::decode($text);
+        $entries = $data['files'] ?? null;
         if (! is_array($entries) || $entries === []) {
             throw new InvalidResponse('The AI provider must return a non-empty "files" list.');
         }
@@ -199,7 +224,7 @@ final class Protocol
             $files[$entry['path']] = $entry['content'];
         }
 
-        return $files;
+        return ['files' => $files, 'message' => self::message($data)];
     }
 
     /**

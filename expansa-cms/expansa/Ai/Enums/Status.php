@@ -45,6 +45,11 @@ enum Status: string
     case Failed = 'failed';
 
     /**
+     * The user cancelled the task; it is not run again.
+     */
+    case Cancelled = 'cancelled';
+
+    /**
      * Whether the task waits for a worker or runs now.
      */
     public function isPending(): bool

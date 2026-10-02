@@ -6,8 +6,10 @@ namespace Expansa\Ai\Stores;
 
 use Expansa\Ai\Contracts\Store;
 use Expansa\Ai\Draft;
+use Expansa\Ai\Enums\Stage;
 use Expansa\Ai\Enums\Status;
 use Expansa\Ai\Session;
+use Expansa\Ai\Step;
 use Expansa\Ai\Task;
 use InvalidArgumentException;
 
@@ -20,7 +22,7 @@ final class File implements Store
     /**
      * Classes a task file may contain; anything else is not restored.
      */
-    private const array CLASSES = [Task::class, Draft::class, Session::class, Status::class];
+    private const array CLASSES = [Task::class, Draft::class, Session::class, Status::class, Step::class, Stage::class];
 
     /**
      * Stores the task directory, created on the first write.

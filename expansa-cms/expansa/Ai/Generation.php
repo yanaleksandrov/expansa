@@ -7,7 +7,7 @@ namespace Expansa\Ai;
 use Expansa\Ai\Exceptions\InvalidResponse;
 
 /**
- * A generated file map with usage reported by its generator.
+ * A generated file map with the message for the user and usage reported by its generator.
  */
 final class Generation
 {
@@ -56,5 +56,10 @@ final class Generation
          * @var array<string, mixed>
          */
         public readonly array $metadata = [],
+
+        /**
+         * Short note for the user about the files or the fix, shown while the task runs.
+         */
+        public readonly string $message = '',
     ) {}
 }

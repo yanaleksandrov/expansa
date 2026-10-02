@@ -34,7 +34,7 @@ final class Ai implements Generator
      *
      * @param Brief $brief Request, context, specification, and previous attempt
      * @param int $maxOutputTokens Maximum tokens requested from the provider
-     * @return Generation Files and usage reported by the provider
+     * @return Generation Files, the model's message, and usage reported by the provider
      * @throws InvalidResponse When the provider response is not a file map
      */
     public function generate(Brief $brief, int $maxOutputTokens): Generation
@@ -55,12 +55,15 @@ final class Ai implements Generator
             $maxOutputTokens,
         );
 
+        $output = Protocol::generation($completion->text);
+
         return new Generation(
-            Protocol::files($completion->text),
+            $output['files'],
             $completion->inputTokens,
             $completion->outputTokens,
             1,
             $completion->metadata,
+            $output['message'],
         );
     }
 }

@@ -117,3 +117,24 @@ define('EX_DKIM', [
     // extra headers to sign
     'extraHeaders'     => ['List-Unsubscribe', 'List-Help'],
 ]);
+
+/**
+ * AI service for generating plugins: any OpenAI-compatible Chat Completions API.
+ * Free for testing: Google Gemini (a key from aistudio.google.com) with the defaults below, or OpenRouter:
+ * EX_AI_URL=https://openrouter.ai/api/v1/, EX_AI_MODEL=<model id ending in :free>, EX_AI_KEY=<openrouter key>.
+ *
+ * @since 2026.10
+ */
+define('EX_AI', [
+    'url'     => getenv('EX_AI_URL') ?: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+    'model'   => getenv('EX_AI_MODEL') ?: 'gemini-flash-latest',
+    'key'     => getenv('EX_AI_KEY') ?: '',
+    // false for models without json_schema structured output: the schema goes into the instructions
+    'schemas' => filter_var(getenv('EX_AI_SCHEMAS') ?: 'on', FILTER_VALIDATE_BOOL),
+    // extra request fields, e.g. ['reasoning_effort' => 'low']
+    'options' => [],
+    // reference material for the model: Markdown files of the CMS documentation
+    'context' => getenv('EX_AI_CONTEXT') ?: dirname(EX_PATH) . '/documentation',
+    // PHP CLI binary for the background worker; under PHP-FPM PHP_BINARY is the FPM binary
+    'php'     => getenv('EX_AI_PHP') ?: PHP_BINARY,
+]);

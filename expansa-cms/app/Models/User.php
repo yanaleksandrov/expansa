@@ -87,7 +87,10 @@ class User extends Model implements Fieldable, Subject
      */
     public array $roles {
         get => $this->getAttribute('roles');
-        set => $this->setAttribute('roles', $value);
+        // a block: the short form would store setAttribute()'s return value, the model, in the property
+        set {
+            $this->setAttribute('roles', $value);
+        }
     }
 
     /**

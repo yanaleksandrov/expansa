@@ -144,6 +144,8 @@ final class SystemService
                 throw new ValidationFailed(t('Unable to create the owner account.'), $user->getValidatorErrors());
             }
 
+            // roles are not mass-assignable; the "register" phase that adds them does not run before install
+            $user->roles = ['admin'];
             $user->save();
 
             Option::update('site', $site + ['owner' => ['email' => $user->email]]);

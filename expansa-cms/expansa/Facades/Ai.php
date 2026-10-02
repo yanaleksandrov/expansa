@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
+use Closure;
 use Expansa\Ai\Draft;
 use Expansa\Ai\Session;
 use Expansa\Patterns\Facade;
@@ -12,8 +13,8 @@ use Expansa\Patterns\Facade;
  * Static access to AI plugin generation.
  * Swap in a configured manager before the first call.
  *
- * @method static Draft create(string $input)
- * @method static Draft clarify(Session $session, string $answer)
+ * @method static Draft create(string $input, ?Closure $progress = null)
+ * @method static Draft clarify(Session $session, string $answer, ?Closure $progress = null)
  * @method static void  swap(object $instance)
  * @method static void  forgetResolved()
  */

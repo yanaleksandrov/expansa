@@ -7,7 +7,7 @@ namespace Expansa\Ai;
 use Expansa\Ai\Enums\Status;
 
 /**
- * A background generation process: the user's request, its state, and the latest draft.
+ * A background generation process: the user's request, its state, steps, and the latest draft.
  * One task covers the whole conversation: every clarification answer queues it again.
  */
 final class Task
@@ -33,6 +33,16 @@ final class Task
         public readonly string $owner = '',
 
         /**
+         * Name the user gave the task, empty until renamed; the interface shows the request instead.
+         */
+        public string $title = '',
+
+        /**
+         * Whether the user moved the task out of the list.
+         */
+        public bool $isArchived = false,
+
+        /**
          * Current state.
          */
         public Status $status = Status::Queued,
@@ -46,6 +56,14 @@ final class Task
          * Result of the latest finished round, null before the first one.
          */
         public ?Draft $draft = null,
+
+        /**
+         * Steps of all rounds in execution order; the last one may still run.
+         * A step of an earlier round is followed by the answer of `draft->session->answers[$step->round]`.
+         *
+         * @var Step[]
+         */
+        public array $steps = [],
 
         /**
          * Message of the latest failure, empty when there was none.

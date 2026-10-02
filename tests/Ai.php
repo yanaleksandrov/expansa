@@ -14,6 +14,9 @@ use Expansa\Ai\Exceptions\EmptyRequest;
 use Expansa\Ai\Exceptions\InputTooLong;
 use Expansa\Ai\Exceptions\InvalidConfiguration;
 use Expansa\Ai\Exceptions\InvalidResponse;
+use Expansa\Ai\Exceptions\RequestFailed;
+use Expansa\Ai\Contexts\Files as FilesContext;
+use Expansa\Ai\Providers\OpenAi as OpenAiProvider;
 use Expansa\Ai\Generation;
 use Expansa\Ai\Generators\Ai as AiGenerator;
 use Expansa\Ai\Limits;
@@ -24,6 +27,7 @@ use Expansa\Ai\Enums\Status;
 use Expansa\Ai\Stores\File as FileStore;
 use Expansa\Ai\Prompt;
 use Expansa\Ai\Session;
+use Expansa\Ai\Step;
 use Expansa\Ai\TokenCounters\Characters;
 use Expansa\Ai\Tools\Registry;
 use Expansa\Ai\Validators\Chain;
@@ -203,6 +207,50 @@ check(
     json_decode($provider->prompts[0]->user, true)['tools'][0]['parameters']['properties']['area']['type'] === 'string',
 );
 
+// progress: each step is reported when it starts and when it finishes
+$provider = new QueueProvider([
+    json_encode(['message' => 'I will check the hooks.', 'specification' => 'Draft', 'tool_calls' => [['name' => 'hooks', 'arguments' => ['area' => 'home']]]]),
+    json_encode(['message' => 'The hook index is offline.', 'specification' => 'Final']),
+]);
+$generator = new QueueGenerator([['Plugin.php' => '<?php function {'], ['Plugin.php' => '<?php return true;']]);
+$steps = [];
+new Manager($provider, $context, $generator, $lenient, tools: new Registry([$tool]))
+    ->create('Use the right hook', function (Step $step) use (&$steps): void {
+        $steps[] = $step;
+    });
+$order = array_map(fn (Step $step): string => $step->stage->value . ($step->isDone ? '.' : '…'), $steps);
+check(
+    'AI manager reports every step at its start and its end',
+    $order === [
+        'context…', 'context.', 'analysis…', 'analysis.', 'tool…', 'tool.', 'refinement…', 'refinement.',
+        'generation…', 'generation.', 'validation…', 'validation.', 'generation…', 'generation.', 'validation…', 'validation.',
+    ],
+);
+check(
+    'AI steps carry the model messages and the specification',
+    $steps[3]->data['message'] === 'I will check the hooks.' && $steps[3]->data['specification'] === 'Draft'
+        && $steps[3]->data['tokens'] === 15 && $steps[7]->data['message'] === 'The hook index is offline.',
+);
+check(
+    'AI tool steps report arguments at the start and the failure at the end',
+    $steps[4]->data === ['name' => 'hooks', 'arguments' => ['area' => 'home']] && $steps[4]->duration === null
+        && $steps[5]->data['error'] === 'Hook index is offline' && $steps[5]->duration >= 0,
+);
+check(
+    'AI generation and validation steps report files, repairs, and errors',
+    $steps[9]->data['files'] === ['Plugin.php' => 16] && $steps[11]->data['errors'] !== []
+        && $steps[12]->data['repair'] === 1 && $steps[15]->data['errors'] === [] && $steps[0]->round === 0,
+);
+check(
+    'AI generator passes the model message to the generation',
+    new AiGenerator(new QueueProvider([json_encode(['message' => ' Added a shortcode. ', 'files' => [['path' => 'a.php', 'content' => '']]])]))
+        ->generate(new Brief('', '', ''), 10)->message === 'Added a shortcode.',
+);
+check(
+    'AI rejects a message that is not a string',
+    throws(fn () => new Manager(new QueueProvider([json_encode(['specification' => 'x', 'message' => 1])]), $context)->create('x'), InvalidResponse::class),
+);
+
 // token budget
 $generator = new QueueGenerator([['Plugin.php' => '<?php function {'], ['Plugin.php' => '<?php function {']]);
 $result = new Manager(new QueueProvider([$spec('Spec')], 50, 40), $context, $generator, $lenient, limits: new Limits(totalTokens: 95))
@@ -327,7 +375,38 @@ check(
     'AI worker resumes the task with the answer',
     $done->status === Status::Ready && $done->draft->valid && $done->answer === null && $store->get($task->id)->status === Status::Ready,
 );
+$rounds = array_map(fn (Step $step): string => $step->round . $step->stage->value, $done->steps);
+check(
+    'AI task keeps the finished steps of every round',
+    $rounds === ['0context', '0analysis', '1context', '1analysis', '1generation', '1validation']
+        && array_all($store->get($task->id)->steps, fn (Step $step): bool => $step->isDone),
+);
+check('AI queue does not cancel a finished task', ! $queue->cancel($task->id) && ! $queue->cancel('missing'));
 check('AI worker returns null on an empty queue', $queue->work() === null);
+
+// cancellation stops the worker at the next step
+$cancelling = new class implements Context {
+    public ?Closure $onGet = null;
+
+    public function get(string $input, int $maxTokens): string
+    {
+        ($this->onGet)();
+
+        return '';
+    }
+};
+$provider = new QueueProvider([$spec('Spec')]);
+$cancellable = new Queue($store, fn (): Manager => new Manager($provider, $cancelling, new QueueGenerator([]), $lenient));
+$running = $cancellable->dispatch('Add a feature');
+$cancelling->onGet = function () use ($cancellable, $running): void {
+    $cancellable->cancel($running->id);
+};
+$stopped = $cancellable->work($running->id);
+check(
+    'AI worker stops a cancelled task without calling the provider',
+    $stopped->status === Status::Cancelled && $provider->prompts === [] && $store->get($running->id)->status === Status::Cancelled,
+);
+check('AI worker does not take a cancelled task', $cancellable->work($running->id) === null);
 check('AI store lists tasks of an owner', count($store->all('7')) === 1 && $store->all('8') === []);
 
 $flaky = new Queue($store, fn (): Manager => throw new RuntimeException('Provider timeout'), attempts: 2);
@@ -349,8 +428,97 @@ check('AI store reclaims a task whose worker died', $store->claim(900, $dead->id
 check('AI store rejects ids that leave the directory', $store->get('../x') === null && ! $store->delete('../x'));
 check('AI store deletes tasks', $store->delete($dead->id) && $store->get($dead->id) === null);
 
+// the user renames, archives, or deletes a task while its worker runs
+$renaming = new class implements Context {
+    public ?Closure $onGet = null;
+
+    public function get(string $input, int $maxTokens): string
+    {
+        ($this->onGet)();
+
+        return '';
+    }
+};
+$provider = new QueueProvider([$spec('Spec')]);
+$editable = new Queue($store, fn (): Manager => new Manager($provider, $renaming, new QueueGenerator([]), $lenient));
+$running = $editable->dispatch('Add a feature');
+$renaming->onGet = function () use ($editable, $running): void {
+    $editable->rename($running->id, ' Feedback form ');
+    $editable->archive($running->id);
+};
+$finished = $editable->work($running->id);
+check(
+    'AI worker keeps the title and archive flag changed while it ran',
+    $finished->status === Status::Ready && $store->get($running->id)->title === 'Feedback form' && $store->get($running->id)->isArchived,
+);
+
+$provider = new QueueProvider([$spec('Spec')]);
+$deleted = $editable->dispatch('Add a feature');
+$renaming->onGet = function () use ($editable, $deleted): void {
+    $editable->delete($deleted->id);
+};
+$editable->work($deleted->id);
+check('AI worker stops and does not restore a deleted task', $store->get($deleted->id) === null && $provider->prompts === []);
+check('AI queue reports changes of missing tasks', ! $editable->rename('missing', 'x') && ! $editable->archive('missing'));
+
 array_map(unlink(...), glob($directory . '/{,.}*[!.]', GLOB_BRACE) ?: []);
 rmdir($directory);
+
+// OpenAI-compatible provider against a local server
+$port = 18000 + getmypid() % 1000;
+$server = proc_open(
+    [PHP_BINARY, '-S', "127.0.0.1:{$port}", __DIR__ . '/fixtures/ai-server.php'],
+    array_fill(1, 2, ['file', PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null', 'w']),
+    $pipes,
+);
+for ($i = 0; $i < 50 && ! @fsockopen('127.0.0.1', $port); $i++) {
+    usleep(100_000);
+}
+
+$prompt = new Prompt('System rules', '{"input":"x"}', ['type' => 'object']);
+$completion = new OpenAiProvider("http://127.0.0.1:{$port}/v1", 'test-model', 'secret', options: ['temperature' => 0.2])->complete($prompt, 64);
+$sent = json_decode($completion->text, true);
+check(
+    'AI OpenAI provider sends messages, the schema, the key, and options',
+    $sent['path'] === '/v1/chat/completions' && $sent['authorization'] === 'Bearer secret'
+        && $sent['request']['messages'][0] === ['role' => 'system', 'content' => 'System rules']
+        && $sent['request']['response_format']['json_schema']['schema'] === ['type' => 'object']
+        && $sent['request']['max_tokens'] === 64 && $sent['request']['temperature'] === 0.2,
+);
+check(
+    'AI OpenAI provider reports usage and the finish reason',
+    $completion->inputTokens === 11 && $completion->outputTokens === 4 && $completion->metadata['finish_reason'] === 'stop',
+);
+$sent = json_decode(new OpenAiProvider("http://127.0.0.1:{$port}/v1/", 'test-model', schemas: false)->complete($prompt, 64)->text, true);
+check(
+    'AI OpenAI provider puts the schema into the instructions without structured output',
+    $sent['request']['response_format'] === ['type' => 'json_object'] && str_contains($sent['request']['messages'][0]['content'], 'JSON Schema')
+        && $sent['authorization'] === '',
+);
+try {
+    new OpenAiProvider("http://127.0.0.1:{$port}/v1/", 'limited')->complete($prompt, 64);
+    $reason = '';
+} catch (RequestFailed $error) {
+    $reason = $error->getMessage();
+}
+check('AI OpenAI provider throws on an error status with the reason', str_contains($reason, '429') && str_contains($reason, 'Quota exceeded'));
+proc_terminate($server);
+proc_close($server);
+check('AI OpenAI provider throws when the service is unreachable', throws(fn () => new OpenAiProvider('http://127.0.0.1:1/', 'm', timeout: 2)->complete($prompt, 8), RequestFailed::class));
+
+// documentation context
+$docs = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'expansa-ai-docs-' . getmypid();
+mkdir($docs);
+file_put_contents("{$docs}/Hooks.md", 'Hooks: add and call');
+file_put_contents("{$docs}/Mail.md", 'Mail sends email; mail templates and email queue');
+file_put_contents("{$docs}/Cache.md", 'Cache stores values');
+$found = new FilesContext($docs, always: ['Hooks.md'])->get('Send an email after the order', 1000);
+check(
+    'AI file context puts the always files first, then matching ones, and skips the rest',
+    strpos($found, '## Hooks.md') === 0 && str_contains($found, '## Mail.md') && ! str_contains($found, 'Cache'),
+);
+array_map(unlink(...), glob("{$docs}/*.md"));
+rmdir($docs);
 
 // value objects
 check('AI limits reject negative tool budgets', throws(fn () => new Limits(toolCalls: -1), InvalidConfiguration::class));
