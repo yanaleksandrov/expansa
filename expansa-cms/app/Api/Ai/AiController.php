@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Ai;
 
+use App\Http\Can;
 use Expansa\Http\Request;
 
 /**
@@ -23,6 +24,7 @@ final readonly class AiController
     /**
      * Lists the tasks of the current user, newest first, without their messages.
      */
+    #[Can('plugins_install')]
     public function index(): array
     {
         return $this->service->index();
@@ -31,6 +33,7 @@ final readonly class AiController
     /**
      * Returns one task with its messages and steps.
      */
+    #[Can('plugins_install')]
     public function get(Request $request): array
     {
         return $this->service->get((string) ($request->post['id'] ?? ''));
@@ -39,6 +42,7 @@ final readonly class AiController
     /**
      * Starts a task from the `message` request.
      */
+    #[Can('plugins_install')]
     public function create(Request $request): array
     {
         return $this->service->create((string) ($request->post['message'] ?? ''));
@@ -47,6 +51,7 @@ final readonly class AiController
     /**
      * Sends the `message` answer to the task's questions.
      */
+    #[Can('plugins_install')]
     public function clarify(Request $request): array
     {
         return $this->service->clarify((string) ($request->post['id'] ?? ''), (string) ($request->post['message'] ?? ''));
@@ -55,6 +60,7 @@ final readonly class AiController
     /**
      * Stops a queued or running task.
      */
+    #[Can('plugins_install')]
     public function cancel(Request $request): array
     {
         return $this->service->cancel((string) ($request->post['id'] ?? ''));
@@ -63,6 +69,7 @@ final readonly class AiController
     /**
      * Renames a task to `title`.
      */
+    #[Can('plugins_install')]
     public function rename(Request $request): array
     {
         return $this->service->rename((string) ($request->post['id'] ?? ''), (string) ($request->post['title'] ?? ''));
@@ -71,6 +78,7 @@ final readonly class AiController
     /**
      * Archives a task.
      */
+    #[Can('plugins_install')]
     public function archive(Request $request): array
     {
         return $this->service->archive((string) ($request->post['id'] ?? ''));
@@ -79,6 +87,7 @@ final readonly class AiController
     /**
      * Deletes a task; a running worker stops.
      */
+    #[Can('plugins_install')]
     public function delete(Request $request): array
     {
         return $this->service->delete((string) ($request->post['id'] ?? ''));

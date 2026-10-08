@@ -30,20 +30,27 @@ final class UserService
     private const array PROFILE_FIELDS = ['nicename', 'firstname', 'lastname', 'showname', 'locale', 'email'];
 
     /**
-     * Update the profile of the current user. A new email needs a recent confirmation,
-     * see Confirmation: whoever holds the cookie must not take the account over by its email.
+     * Update the profile of the current user. A new email needs a recent confirmation (see Confirmation:
+     * whoever holds the cookie must not take the account over by its email) and replaces the old one only
+     * after its link is opened, see Verification::changeEmail().
      *
      * @param array<string, mixed> $input Profile fields and the custom fields `bio`, `toolbar`, `format`.
      * @return array<int, array<string, mixed>> Notice fragment.
      */
     public function update(array $input): array
     {
-        $user = User::current();
-        $data = array_intersect_key($input, array_flip(self::PROFILE_FIELDS));
+        $user  = User::current();
+        $data  = array_intersect_key($input, array_flip(self::PROFILE_FIELDS));
+        $email = Safe::email($data['email'] ?? $user->email);
+        unset($data['email']);
 
-        $isNewEmail = isset($data['email']) && mb_strtolower(trim((string) $data['email'])) !== mb_strtolower($user->email);
+        $isNewEmail = $email !== '' && mb_strtolower($email) !== mb_strtolower($user->email);
         if ($isNewEmail && ! Confirmation::check($user)) {
             return [['target' => 'body', 'notify' => t('To change the email, confirm it is you in the Security tab first.')]];
+        }
+
+        if ($isNewEmail && User::find($email, 'email') instanceof User) {
+            return [['target' => 'body', 'notify' => t('Sorry, that email address or login is already in use.')]];
         }
 
         $fields = Safe::data($input, [
@@ -62,7 +69,9 @@ final class UserService
         }
 
         if ($isNewEmail) {
-            Events::record($updated, 'email_changed');
+            Verification::changeEmail($updated, $email);
+
+            return [['target' => 'body', 'notify' => t('User updated. Open the link we have sent to :email to change the email.', $email)]];
         }
 
         return [['target' => 'body', 'notify' => t('User updated.')]];
@@ -84,6 +93,26 @@ final class UserService
         $url = SignIn::finish($user, Safe::bool($input['remember'] ?? false), 'password', (string) ($input['redirect_to'] ?? ''));
 
         return [['target' => 'body', 'redirect' => $url]];
+    }
+
+    /**
+     * Send a sign-in link to an email, when the Security settings allow it. The answer is the same
+     * whether the account exists, so it can't be used to find registered emails.
+     *
+     * @param array<string, mixed> $input `email`, `redirect_to`.
+     * @return array<int, array<string, mixed>> Notice fragment.
+     * @throws TooManyAttempts If the IP asks too often.
+     */
+    public function emailLink(array $input): array
+    {
+        if (! EmailLink::isEnabled()) {
+            return [['target' => 'body', 'notify' => t('Signing in by an email link is turned off.')]];
+        }
+
+        Auth::limit('email-link:' . ($_SERVER['REMOTE_ADDR'] ?? ''), 5, 3600);
+        EmailLink::send(Safe::email($input['email'] ?? ''), (string) ($input['redirect_to'] ?? ''));
+
+        return [['target' => 'body', 'notify' => t('If the account exists, a sign-in link has been sent to the email.')]];
     }
 
     /**
@@ -166,6 +195,101 @@ final class UserService
         }
 
         return $this->confirmed();
+    }
+
+    /**
+     * Second step of a sign-in: a code of the authenticator app or a recovery code.
+     *
+     * @param array<string, mixed> $input `code`.
+     * @return array<int, array<string, mixed>> Redirect or notice fragment.
+     */
+    public function twoFactor(array $input): array
+    {
+        $url = TwoFactor::complete(trim((string) ($input['code'] ?? '')));
+        if ($url instanceof Error) {
+            return [['target' => 'body', 'notify' => $url->messages[0]]];
+        }
+
+        return [['target' => 'body', 'redirect' => $url]];
+    }
+
+    /**
+     * Start setting up two-factor authentication, after a confirmation: the QR code and the secret.
+     *
+     * @param array<string, mixed> $input May carry the current `password`.
+     * @return array<int, array<string, mixed>> Fragment of the setup, or a notice.
+     */
+    public function twoFactorSetup(array $input): array
+    {
+        $user = User::current();
+        if (! Confirmation::check($user, $input)) {
+            return $this->unconfirmed();
+        }
+
+        return [['target' => '#two-factor', 'update' => view('parts/two-factor', ['user' => $user, 'setup' => TwoFactor::setup($user)])->render()]];
+    }
+
+    /**
+     * Turn two-factor authentication on by a code of the app; the recovery codes are shown once.
+     *
+     * @param array<string, mixed> $input `code`.
+     * @return array<int, array<string, mixed>> Fragment with the recovery codes, or a notice.
+     */
+    public function twoFactorEnable(array $input): array
+    {
+        $user  = User::current();
+        $codes = TwoFactor::enable($user, trim((string) ($input['code'] ?? '')));
+        if ($codes === null) {
+            return [['target' => 'body', 'notify' => t('The code is wrong. Check the time on your phone and try again.')]];
+        }
+
+        return [
+            ['target' => 'body', 'notify' => t('Two-factor authentication is on.')],
+            ['target' => '#two-factor', 'update' => view('parts/two-factor', ['user' => $user, 'codes' => $codes])->render()],
+        ];
+    }
+
+    /**
+     * Turn two-factor authentication off, after a confirmation, unless the role requires it.
+     *
+     * @param array<string, mixed> $input May carry the current `password`.
+     * @return array<int, array<string, mixed>> Fragments.
+     */
+    public function twoFactorDisable(array $input): array
+    {
+        $user = User::current();
+        if (! Confirmation::check($user, $input)) {
+            return $this->unconfirmed();
+        }
+
+        if (TwoFactor::isRequired($user)) {
+            return [['target' => 'body', 'notify' => t('Your role requires two-factor authentication.')]];
+        }
+
+        TwoFactor::disable($user);
+
+        return [
+            ['target' => 'body', 'notify' => t('Two-factor authentication is off.')],
+            ['target' => '#two-factor', 'update' => view('parts/two-factor', ['user' => $user])->render()],
+        ];
+    }
+
+    /**
+     * Replace the recovery codes, after a confirmation.
+     *
+     * @param array<string, mixed> $input May carry the current `password`.
+     * @return array<int, array<string, mixed>> Fragment with the new codes, or a notice.
+     */
+    public function twoFactorCodes(array $input): array
+    {
+        $user = User::current();
+        if (! Confirmation::check($user, $input)) {
+            return $this->unconfirmed();
+        }
+
+        $codes = TwoFactor::regenerateCodes($user);
+
+        return [['target' => '#two-factor', 'update' => view('parts/two-factor', ['user' => $user, 'codes' => $codes])->render()]];
     }
 
     /**
@@ -376,6 +500,153 @@ final class UserService
     }
 
     /**
+     * Create a personal API token, after a confirmation; it is shown once.
+     *
+     * @param array<string, mixed> $input `name`, `days`, comma-separated `scopes`, may carry the current `password`.
+     * @return array<int, array<string, mixed>> Fragments with the token, or a notice.
+     */
+    public function tokenCreate(array $input): array
+    {
+        $user = User::current();
+        if (! Confirmation::check($user, $input)) {
+            return $this->unconfirmed();
+        }
+
+        $scopes = array_filter(array_map(trim(...), explode(',', (string) ($input['scopes'] ?? ''))));
+        if ($scopes === []) {
+            return [['target' => 'body', 'notify' => t('Choose at least one permission for the token.')]];
+        }
+
+        $token = Tokens::create($user, (string) ($input['name'] ?? ''), $scopes, (int) ($input['days'] ?? 0));
+
+        return [
+            ['target' => 'body', 'notify' => t('Token created. Copy it now: it is not shown again.')],
+            ['target' => '#token-created', 'update' => '<code class="p-3 card card-border fs-13">' . htmlspecialchars($token) . '</code>'],
+            ['target' => '#tokens', 'update' => view('parts/tokens', ['tokens' => Tokens::all($user)])->render()],
+        ];
+    }
+
+    /**
+     * Revoke a personal API token, after a confirmation.
+     *
+     * @param array<string, mixed> $input Token `id`, may carry the current `password`.
+     * @return array<int, array<string, mixed>>
+     */
+    public function tokenDelete(array $input): array
+    {
+        $user = User::current();
+        if (! Confirmation::check($user, $input)) {
+            return $this->unconfirmed();
+        }
+
+        $id = (int) ($input['id'] ?? 0);
+        if (! Tokens::delete($user, $id)) {
+            return [['target' => 'body', 'notify' => t('Token not found.')]];
+        }
+
+        return [
+            ['target' => 'body', 'notify' => t('Token revoked.')],
+            ['target' => "#token-$id", 'remove' => true],
+        ];
+    }
+
+    /**
+     * Administrator: turn an account on or off, after a confirmation.
+     *
+     * @param array<string, mixed> $input `id`, `active`, may carry the current `password`.
+     * @return array<int, array<string, mixed>>
+     */
+    public function adminStatus(array $input): array
+    {
+        return $this->administer($input, true, function (User $admin, User $user) use ($input): string {
+            $isActive = Safe::bool($input['active'] ?? false);
+
+            return Admin::setActive($admin, $user, $isActive) ?? ($isActive ? t('The account is on.') : t('The account is disabled and signed out.'));
+        });
+    }
+
+    /**
+     * Administrator: sign an account out of every device, after a confirmation.
+     *
+     * @param array<string, mixed> $input `id`, may carry the current `password`.
+     * @return array<int, array<string, mixed>>
+     */
+    public function adminSignOut(array $input): array
+    {
+        return $this->administer($input, true, fn (User $admin, User $user) => t('Signed out of devices: :count.', Admin::signOut($admin, $user)));
+    }
+
+    /**
+     * Administrator: send an account a password reset link.
+     *
+     * @param array<string, mixed> $input `id`.
+     * @return array<int, array<string, mixed>>
+     */
+    public function adminPasswordReset(array $input): array
+    {
+        return $this->administer($input, false, function (User $admin, User $user): string {
+            Admin::sendPasswordReset($admin, $user);
+
+            return t('A password reset link has been sent to :email.', $user->email);
+        });
+    }
+
+    /**
+     * Administrator: turn the two-factor authentication of an account off, after a confirmation.
+     *
+     * @param array<string, mixed> $input `id`, may carry the current `password`.
+     * @return array<int, array<string, mixed>>
+     */
+    public function adminTwoFactorDisable(array $input): array
+    {
+        return $this->administer($input, true, function (User $admin, User $user): string {
+            Admin::disableTwoFactor($admin, $user);
+
+            return t('Two-factor authentication of the account is off.');
+        });
+    }
+
+    /**
+     * Administrator: sign in as the user, after a confirmation.
+     *
+     * @param array<string, mixed> $input `id`, may carry the current `password`.
+     * @return array<int, array<string, mixed>>
+     */
+    public function impersonate(array $input): array
+    {
+        $admin = User::current();
+        $user  = Admin::find((int) ($input['id'] ?? 0));
+        if ($user === null) {
+            return [['target' => 'body', 'notify' => t('User not found.')]];
+        }
+
+        if (! Confirmation::check($admin, $input)) {
+            return [['target' => 'body', 'notify' => t('Confirm it is you: enter your current password.')]];
+        }
+
+        $refusal = Admin::impersonate($admin, $user);
+        if ($refusal !== null) {
+            return [['target' => 'body', 'notify' => $refusal]];
+        }
+
+        return [['target' => 'body', 'redirect' => url('dashboard')]];
+    }
+
+    /**
+     * Go back from an impersonated account to the administrator's own.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function stopImpersonating(): array
+    {
+        if (! Admin::stopImpersonating()) {
+            return [['target' => 'body', 'notify' => t('You are not signed in as another user.')]];
+        }
+
+        return [['target' => 'body', 'redirect' => url('dashboard/users')]];
+    }
+
+    /**
      * Sign up while registration is open; the account signs in after its email is confirmed.
      *
      * @param array<string, mixed> $input `login`, `email`, `password`.
@@ -511,6 +782,32 @@ final class UserService
         return [
             ['target' => 'body', 'notify' => t('Your password has been changed. Sign in with the new password.')],
             ['target' => 'body', 'redirect:1500' => url('sign-in')],
+        ];
+    }
+
+    /**
+     * Run an administrator action on the account of `id`.
+     *
+     * @param array<string, mixed>        $input
+     * @param bool                        $needsConfirmation Ask for the administrator's password first.
+     * @param callable(User, User): string $action           Returns the notice.
+     * @return array<int, array<string, mixed>>
+     */
+    private function administer(array $input, bool $needsConfirmation, callable $action): array
+    {
+        $admin = User::current();
+        $user  = Admin::find((int) ($input['id'] ?? 0));
+        if ($user === null) {
+            return [['target' => 'body', 'notify' => t('User not found.')]];
+        }
+
+        if ($needsConfirmation && ! Confirmation::check($admin, $input)) {
+            return [['target' => 'body', 'notify' => t('Confirm it is you: enter your current password.')]];
+        }
+
+        return [
+            ['target' => 'body', 'notify' => $action($admin, $user)],
+            ['target' => 'body', 'reload:1200' => true],
         ];
     }
 

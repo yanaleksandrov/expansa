@@ -66,7 +66,7 @@ final class Identities
      */
     public static function label(string $provider): string
     {
-        return self::LABELS[$provider] ?? ucfirst($provider);
+        return self::LABELS[$provider] ?? ((string) Option::get("oauth.$provider.label") ?: ucfirst($provider));
     }
 
     /**

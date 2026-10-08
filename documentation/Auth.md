@@ -24,6 +24,7 @@ Auth::logout();
 | `Passkey\Attestation`         | Разобранный ответ регистрации `navigator.credentials.create()`          |
 | `Passkey\Assertion`           | Разобранный ответ входа `navigator.credentials.get()`                   |
 | `Passkey\Credential`          | Сохранённый ключ: всё для проверки следующих входов                     |
+| `Totp`                        | Коды приложений-аутентификаторов (RFC 6238): секрет, ссылка, проверка   |
 | `OAuth\State`                 | Секреты одной попытки входа через провайдера: state, PKCE, nonce        |
 | `OAuth\Profile`               | Пользователь, как его подтверждает провайдер                            |
 | `Providers\AbstractProvider`  | Поток authorization code с PKCE, база провайдеров                       |
@@ -77,12 +78,12 @@ Auth::configure(
 | `rememberLifetime` | `1209600`    | срок с «запомнить меня» (14 дней), cookie переживает перезапуск браузера |
 | `providers`        | `[]`         | имя => конфиг, или колбэк, который вернёт их при первом обращении     |
 | `transport`        | curl         | `fn (string $method, string $url, array $headers, string $body): array{status: int, body: string}` |
-| `maxAttempts`      | `0`          | неудачных паролей на устройство или на логин с неизвестных; 0 — без ограничения |
-| `maxIpAttempts`    | `0`          | неудачных паролей на IP с неизвестных устройств; 0 — без лимита IP     |
-| `lockout`          | `900`        | первая блокировка, секунд; каждая следующая вдвое дольше, до суток    |
+| `throttle`         | `[]`         | `attempts` — неудачных паролей на устройство или логин (0 — без ограничения), `ip_attempts` — на IP (0 — без лимита IP), `lockout` — первая блокировка, секунд; массив или колбэк, который вернёт его при первом обращении |
 | `readAttempts`     | `null`       | `fn (string $key): ?array` — сохранённые попытки                      |
 | `writeAttempts`    | `null`       | `fn (string $key, ?array $attempts, int $ttl): void` — `null` удаляет |
 | `sessions`         | `null`       | `Contracts\Sessions` — записи входов; без них токены без состояния     |
+| `bearer`           | `null`       | `fn (): ?string` — bearer-токен запроса, `null` без заголовка          |
+| `findToken`        | `null`       | `fn (string $token): ?Identity` — владелец API-токена                  |
 
 Конфиг провайдера: `driver` (по умолчанию — имя: `google`, `github`, `openid`), `client_id`, `client_secret`,
 `redirect` — callback URL, зарегистрированный у провайдера, `scopes` (свои по умолчанию у каждого),
@@ -91,16 +92,14 @@ Auth::configure(
 
 Без `configure()` все — гости, а `login()` бросает `LogicException`.
 
-В Expansa ограничение попыток и провайдеры задаются в `env.php`, кнопки на странице входа появляются для каждого
-провайдера:
+В Expansa всё это настраивается в админке, вкладка «Security» настроек:
+- ограничение попыток (`security.attempts`, `ip_attempts`, `lockout` в минутах);
+- проверка паролей по утечкам;
+- вход по ссылке из письма;
+- обязательная 2FA для ролей;
+- ключи Google, GitHub и любого OpenID Connect провайдера (`oauth.<name>`).
 
-```php
-define('EX_AUTH', ['attempts' => 5, 'ip_attempts' => 50, 'lockout' => 900]); // 0 — без ограничения
-
-define('EX_OAUTH', [
-    'google' => ['client_id' => '...', 'client_secret' => '...'],
-]);
-```
+Кнопки на странице входа появляются для провайдеров с client ID.
 
 Попытки хранятся в таблице `cache` (`Cache\Providers\Database`), а не в хранилище кэша по умолчанию: оно может
 быть памятью запроса.
@@ -199,8 +198,8 @@ try {
 
 | Откуда попытка                                   | Счётчики                         | Лимит           |
 |--------------------------------------------------|----------------------------------|-----------------|
-| Доверенное устройство: браузер уже входил как этот пользователь | свой, на устройство | `maxAttempts`   |
-| Неизвестное устройство                           | общий на логин и общий на IP     | `maxAttempts`, `maxIpAttempts` |
+| Доверенное устройство: браузер уже входил как этот пользователь | свой, на устройство | `attempts`      |
+| Неизвестное устройство                           | общий на логин и общий на IP     | `attempts`, `ip_attempts` |
 
 - `login()` выдаёт cookie `device` на год. Её подпись отличается от подписи токена входа, поэтому одну нельзя
   выдать за другую. `logout()` и смена пароля её не трогают.
@@ -220,7 +219,7 @@ try {
 - В хранилище попадают SHA-256 ключей, а не логины и IP. `isTrustedDevice($identifier)` отвечает, доверенный ли
   браузер.
 
-Без `maxAttempts` или хранилища `attempt()` просто возвращает результат проверки.
+Без `attempts` или хранилища `attempt()` просто возвращает результат проверки.
 
 Для запросов, где важна частота, а не неудачи (письма сброса пароля, регистрация, запуск passkey и OAuth), —
 `limit()`: считает каждый вызов и после `$maxAttempts` за `$window` секунд бросает `TooManyAttempts`.
@@ -230,6 +229,49 @@ Auth::limit("reset:$ip", 5, 3600); // не больше 5 писем сброс�
 ```
 
 В Expansa `App\Http\Kernel` превращает `TooManyAttempts` в уведомление «Too many attempts. Try again in N min.».
+### Двухфакторная аутентификация (TOTP)
+
+`Totp` — коды приложений-аутентификаторов по RFC 6238: секрет, ссылка `otpauth://` для QR-кода
+(`Codecs\QrCode`) и проверка кода с допуском в один шаг. Код принимается один раз: `verify()` возвращает
+его шаг, сохраните его и передайте следующему вызову.
+
+```php
+use Expansa\Auth\Totp;
+
+$secret = Totp::createSecret();                        // хранить зашифрованным
+$qr     = new QrCode()->render(Totp::getUri($secret, $login, 'Example'));
+$step   = Totp::verify($secret, $code, $lastStep);     // null — неверный или уже использованный код
+```
+
+В Expansa — `App\Api\User\TwoFactor`:
+- секрет хранится зашифрованным (AES-256-GCM, ключ из `EX_KEYS['auth']`), коды восстановления — только HMAC;
+- после пароля, провайдера или ссылки из письма `SignIn::finish()` отправляет на страницу кода
+  (`sign-in?step=two-factor`), passkey считается вторым фактором сам;
+- 5 неверных кодов за 5 минут сбрасывают вход.
+
+### API-токены
+
+С `bearer` и `findToken` запрос с заголовком `Authorization: Bearer <token>` аутентифицируется только токеном,
+cookie при этом не читаются. `isBearer()` сообщает, что запрос пришёл с токеном.
+
+```php
+Auth::configure(
+    bearer: fn () => preg_match('/^Bearer\s+(\S+)$/i', $_SERVER['HTTP_AUTHORIZATION'] ?? '', $m) ? $m[1] : null,
+    findToken: fn (string $token) => Tokens::authenticate($token),
+);
+```
+
+В Expansa — `App\Api\User\Tokens`, таблица `api_keys`, токены создаются в профиле:
+- права токена — подмножество прав владельца; `App\Support\TokenPermissions` сужает `Access` до них;
+- с токеном доступны только эндпоинты с `#[Can]` из его прав, эндпоинты профиля и безопасности — нет;
+- CSRF для таких запросов не проверяется: заголовок нельзя подделать с чужого сайта.
+
+### Вход от имени пользователя
+
+`login($user, trustDevice: false)` входит, не делая браузер доверенным устройством пользователя. На этом
+построен вход админа от имени пользователя (`App\Api\User\Admin`): аккаунт админа остаётся в браузере,
+баннер в дашборде возвращает к нему, оба действия пишутся в журнал.
+
 ### Passkey
 
 Только протокол: challenge и ключи хранит вызывающий код (в Expansa — `App\Api\User\Passkey`, сессия и

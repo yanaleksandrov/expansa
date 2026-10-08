@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Models\Option;
 use Closure;
+use Expansa\Support\Is;
 
 /**
  * Password rules of sign-up, change and reset: a minimum length, not the login or email, and not
@@ -80,7 +82,8 @@ final class Passwords
      */
     private static function isBreached(string $password): bool
     {
-        if ((defined('EX_AUTH') ? EX_AUTH['breached'] ?? true : true) === false) {
+        // the installation has no settings yet: the check is on
+        if (Is::installed() && ! Option::get('security.breached', true)) {
             return false;
         }
 

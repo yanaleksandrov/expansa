@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Options;
 
+use App\Http\Can;
 use Expansa\Http\Request;
 
 final readonly class OptionsController
@@ -19,6 +20,7 @@ final readonly class OptionsController
     /**
  * @todo not implemented — placeholder carried over from the legacy class
 */
+    #[Can('manage_options')]
     public function create(): array
     {
         return ['method' => 'POST create user'];
@@ -27,11 +29,13 @@ final readonly class OptionsController
     /**
  * @todo not implemented — placeholder carried over from the legacy class
 */
+    #[Can('manage_options')]
     public function index(): array
     {
         return ['method' => 'GET user list'];
     }
 
+    #[Can('manage_options')]
     public function update(Request $request): array
     {
         return $this->service->update($request->post);
@@ -40,6 +44,7 @@ final readonly class OptionsController
     /**
  * @todo not implemented — placeholder carried over from the legacy class
 */
+    #[Can('manage_options')]
     public function delete(): array
     {
         return ['method' => 'DELETE remove user by ID'];

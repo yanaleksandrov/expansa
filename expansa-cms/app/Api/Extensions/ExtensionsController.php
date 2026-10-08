@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Api\Extensions;
 
+use App\Http\Can;
+
 /**
  * Note: nothing in the dashboard currently calls this endpoint — the real extensions
  * list (dashboard/views/table/header.blade.php) renders from the actual framework
@@ -20,6 +22,7 @@ final readonly class ExtensionsController
         private ExtensionsService $service = new ExtensionsService(),
     ) {}
 
+    #[Can('plugins_activate')]
     public function get(): array
     {
         return $this->service->list();

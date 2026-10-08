@@ -10,7 +10,7 @@ use Expansa\Facades\Hook;
 defined('EX_PATH') || exit;
 
 $table = $__data['table'] ?? null;
-if (! $table instanceof Expansa\Builders\Table) {
+if (! $table instanceof Expansa\Builders\Table\AbstractTable) {
     return;
 }
 

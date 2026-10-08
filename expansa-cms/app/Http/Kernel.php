@@ -6,6 +6,8 @@ namespace App\Http;
 
 use Expansa\Access\Exceptions\AccessDenied;
 use Expansa\Auth\Exceptions\TooManyAttempts;
+use Expansa\Facades\Access;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Cookie;
 use Expansa\Facades\Debug;
 use Expansa\Http\Exceptions\HttpError;
@@ -14,6 +16,7 @@ use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Is;
+use ReflectionMethod;
 use Throwable;
 
 /**
@@ -52,6 +55,17 @@ final class Kernel
         $request = Request::createFromGlobals();
 
         try {
+            $permissions = (new ReflectionMethod($controller, $method))->getAttributes(Can::class);
+
+            // an API token reaches only the endpoints that name a permission of its scopes
+            if ($permissions === [] && Auth::isBearer()) {
+                throw new AccessDenied($method);
+            }
+
+            foreach ($permissions as $attribute) {
+                Access::authorize(Auth::user(), $attribute->newInstance()->permission);
+            }
+
             $result = new $controller()->{$method}($request, ...$params);
 
             $response = $result instanceof Response

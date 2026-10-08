@@ -218,9 +218,8 @@ Lifecycle::phase('configure', true, function () {
     ]);
 
     // the signed-in user comes from the auth cookie: a new password or EX_KEYS['auth'] signs everyone out;
-    // the device cookie marks browsers that signed in before; providers of EX_OAUTH return to /oauth/<name>/callback
+    // the device cookie marks browsers that signed in before; throttling and providers come from the Security settings
     $cookiePrefix = defined('EX_DB') ? EX_DB['prefix'] : '';
-    $throttle     = defined('EX_AUTH') ? EX_AUTH : [];
     Auth::configure(
         // a disabled account loses its tokens at once
         find: function (string $login): ?App\Models\User {
@@ -239,18 +238,23 @@ Lifecycle::phase('configure', true, function () {
             httpOnly: true,
             sameSite: Expansa\Cookie\Enums\SameSite::Lax,
         )),
+        // providers with a client ID return to /oauth/<name>/callback
         providers: function (): array {
-            $providers = defined('EX_OAUTH') ? EX_OAUTH : [];
-            foreach ($providers as $name => $config) {
-                $providers[$name] = $config + ['redirect' => url("oauth/$name/callback")];
+            $providers = [];
+            foreach ((array) App\Models\Option::get('oauth', []) as $name => $config) {
+                if (is_array($config) && trim((string) ($config['client_id'] ?? '')) !== '') {
+                    $providers[$name] = $config + ['redirect' => url("oauth/$name/callback")];
+                }
             }
 
             return $providers;
         },
         // failed passwords in the "cache" table: the default store may be the request memory
-        maxAttempts: (int) ($throttle['attempts'] ?? 5),
-        maxIpAttempts: (int) ($throttle['ip_attempts'] ?? 50),
-        lockout: (int) ($throttle['lockout'] ?? 900),
+        throttle: fn () => [
+            'attempts'    => (int) App\Models\Option::get('security.attempts', 5),
+            'ip_attempts' => (int) App\Models\Option::get('security.ip_attempts', 50),
+            'lockout'     => (int) App\Models\Option::get('security.lockout', 15) * 60,
+        ],
         readAttempts: fn (string $key) => (new Expansa\Cache\Providers\Database(Db::instance()))->get($key, 'auth-attempts'),
         writeAttempts: function (string $key, ?array $attempts, int $ttl): void {
             $cache = new Expansa\Cache\Providers\Database(Db::instance());
@@ -262,13 +266,23 @@ Lifecycle::phase('configure', true, function () {
         },
         // a row per signed-in device, so the profile can sign out any of them
         sessions: new App\Api\User\Sessions(),
+        // personal API tokens: Authorization: Bearer exp_..., see App\Api\User\Tokens
+        bearer: fn () => preg_match('/^Bearer\s+(\S+)$/i', (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? ''), $match) ? $match[1] : null,
+        findToken: fn (string $token) => App\Api\User\Tokens::authenticate($token),
     );
 
     // permissions come from the roles of Role::add(); plugins add policies of their resources with Access::setPolicy()
     $roles = new Expansa\Access\Roles();
     Role::swap($roles);
     Access::configure(
-        permissions: $roles,
+        // a request with an API token gets only the permissions of its scopes
+        permissions: new App\Support\TokenPermissions($roles),
+        policies: [App\Models\Post::class => App\Post\Policy::class],
+    );
+
+    // menu items and their pages need every capability of the item
+    Expansa\Builders\Tree::configure(
+        allows: fn (array $capabilities) => array_all($capabilities, fn (string $capability) => Access::allows(App\Models\User::current(), $capability)),
     );
 
     // the version shown by the "list" console command
@@ -477,6 +491,9 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         ],
     );
 
+    // roles changed or added in the Settings replace the defaults above
+    App\Support\RoleSettings::apply();
+
     // post types
     App\Post\Type::register(
         key: 'pages',
@@ -623,7 +640,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
     Route::before('POST|PUT|PATCH|DELETE', '/api/.*', [App\Http\VerifyCsrfToken::class, 'handle']);
 
     // RequireAuth has its own allow-list for installation, account setup, password recovery and passkey sign-in.
-    Route::before('*', '/api/.*', [App\Http\RequireAccess::class, 'handle']);
+    Route::before('*', '/api/.*', [App\Http\RequireAuth::class, 'handle']);
 
     // routes
     Route::prefix('/api', function () {
@@ -696,12 +713,13 @@ Lifecycle::context('sign-out', function (string $uri): bool {
 });
 
 // links of account emails: the email confirmation and "this wasn't me" of a new device sign-in
-Lifecycle::context('account-links', fn (string $uri) => in_array(trim($uri, '/'), ['verify-email', 'secure-account'], true), function () {
+Lifecycle::context('account-links', fn (string $uri) => in_array(trim($uri, '/'), ['verify-email', 'secure-account', 'sign-in-link'], true), function () {
     Route::get('/verify-email', [App\Controllers\Account::class, 'verifyEmail']);
+    Route::get('/sign-in-link', [App\Controllers\Account::class, 'signInLink']);
     Route::get('/secure-account', [App\Controllers\Account::class, 'secure']);
 });
 
-// /oauth/<name> leaves for a provider of EX_OAUTH, /oauth/<name>/callback signs in or connects it, see App\Controllers\OAuth
+// /oauth/<name> leaves for a provider of the Security settings, /oauth/<name>/callback signs in or connects it, see App\Controllers\OAuth
 Lifecycle::context('oauth', fn (string $uri) => str_starts_with(trim($uri, '/'), 'oauth/'), function () {
     Route::get('/oauth/([a-z0-9-]+)', [App\Controllers\OAuth::class, 'redirect']);
     Route::get('/oauth/([a-z0-9-]+)/callback', [App\Controllers\OAuth::class, 'callback']);
@@ -728,6 +746,13 @@ Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '
     // back to the requested page after signing in, like WordPress' redirect_to
     if (! Auth::isLoggedIn()) {
         redirect('sign-in?redirect_to=' . rawurlencode((string) ($_SERVER['REQUEST_URI'] ?? '')));
+    }
+
+    // a role that requires two-factor authentication sees only the profile until it is set up
+    $user = App\Models\User::current();
+    $isProfile = str_contains((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), '/profile');
+    if (! $isProfile && App\Api\User\TwoFactor::isRequired($user) && ! App\Api\User\TwoFactor::isEnabled($user)) {
+        redirect(Hook::call('dashboardRootSlug', 'dashboard') . '/profile');
     }
 
     require_once EX_PATH . 'dashboard/index.php';

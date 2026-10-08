@@ -45,6 +45,7 @@ $table = $__data['table'] ?? null;
     ?>
 </head>
 <body u-data="youla" @keydown.window.prevent.ctrl.s="$notice.add(notifications.ctrlS)">
+    <?php echo view('parts/impersonation'); ?>
     <div class="expansa" :class="showMenu && 'active'">
         <div class="expansa-bar">
             <div class="expansa-bar-burger" :class="showMenu && 'active'" @click="showMenu = !showMenu">

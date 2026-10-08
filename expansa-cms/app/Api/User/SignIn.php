@@ -82,7 +82,7 @@ final class SignIn
         }
 
         // only accounts that signed up themselves wait for a confirmation, created ones are trusted
-        if (! $user->isVerified && $user->verificationToken !== null) {
+        if (Verification::isPending($user)) {
             Verification::send($user);
 
             return error('user-login', t('Confirm your email first: we have sent you a link.'));
@@ -92,15 +92,34 @@ final class SignIn
     }
 
     /**
-     * Sign in a proven user.
+     * Sign in a proven user, or ask for a code first when two-factor authentication is on;
+     * a passkey is a second factor by itself.
      *
      * @param User   $user
      * @param bool   $remember
-     * @param string $method     `password`, `passkey`, a provider name.
+     * @param string $method     `password`, `passkey`, `email-link`, a provider name.
      * @param string $redirectTo Page the user came for, see target().
-     * @return string URL to go to.
+     * @return string URL to go to: the page, or the code form.
      */
     public static function finish(User $user, bool $remember, string $method, string $redirectTo = ''): string
+    {
+        if ($method !== 'passkey' && TwoFactor::isEnabled($user)) {
+            return TwoFactor::challenge($user, $remember, $method, $redirectTo);
+        }
+
+        return self::complete($user, $remember, $method, $redirectTo);
+    }
+
+    /**
+     * Sign in a user whose every factor is proven: issue the token, log it, warn about a new device.
+     *
+     * @param User   $user
+     * @param bool   $remember
+     * @param string $method
+     * @param string $redirectTo
+     * @return string URL to go to.
+     */
+    public static function complete(User $user, bool $remember, string $method, string $redirectTo = ''): string
     {
         $isNewDevice = ! Auth::isTrustedDevice($user->identifier);
 

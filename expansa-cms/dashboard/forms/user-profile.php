@@ -5,12 +5,15 @@ use App\Api\User\Events;
 use App\Api\User\Identities;
 use App\Api\User\Passkey;
 use App\Api\User\Sessions;
+use App\Api\User\Tokens;
+use App\Api\User\TwoFactor;
 use App\Models\User;
 use App\Support\Passwords;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
+use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 
 $user = User::current();
@@ -91,7 +94,9 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-at"></i>',
                             'after'       => '',
-                            'instruction' => t('Not displayed publicly. Used for account access and system notifications'),
+                            'instruction' => (string) $user->field->find('pending_email') !== ''
+                                ? t('Waiting for confirmation: open the link sent to :email. Until then the current email stays.', (string) $user->field->find('pending_email'))
+                                : t('Not displayed publicly. Used for account access and system notifications'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -102,22 +107,6 @@ return Form::enqueue(
                                 'placeholder'    => t('e.g. user@gmail.com'),
                                 'u-autocomplete' => '',
                             ],
-                        ],
-                        [
-                            'type'        => 'confirm-email',
-                            'name'        => 'confirm',
-                            'label'       => t('Please verify your email'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '<i class="ph ph-at"></i>',
-                            'after'       => '',
-                            'instruction' => t('We sent a 4-digit verification code to %s', 'user@gmail.com'),
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [ 'u-prop' => 'confirm' ],
                         ],
                     ],
                 ],
@@ -433,6 +422,28 @@ return Form::enqueue(
                 ],
                 [
                     'type'          => 'group',
+                    'name'          => 'two-factor',
+                    'label'         => t('Two-factor authentication'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'two-factor',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                ?>
+                                <?php if (TwoFactor::isRequired($user) && ! TwoFactor::isEnabled($user)) : ?>
+                                    <div class="df aic g-1 t-red fs-13 mb-2"><i class="ph ph-warning-circle"></i> <?php echo t('Your role requires two-factor authentication: set it up to use the dashboard.'); ?></div>
+                                <?php endif; ?>
+                                <div id="two-factor"><?php echo view('parts/two-factor', ['user' => $user]); ?></div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
+                [
+                    'type'          => 'group',
                     'name'          => 'passkeys',
                     'label'         => t('Passkeys'),
                     'class'         => '',
@@ -545,6 +556,59 @@ return Form::enqueue(
                         ],
                     ],
                 ]]),
+                [
+                    'type'          => 'group',
+                    'name'          => 'tokens',
+                    'label'         => t('API tokens'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'tokens',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $permissions = array_unique(array_merge([], ...array_map(fn (string $role) => Role::get($role)['permissions'] ?? [], $user->roles)));
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Tokens let scripts and other services call the API as you: send the header Authorization: Bearer <token>. A token gets only the permissions you choose.'); ?></div>
+                                    <div class="dg g-2" id="tokens"><?php echo view('parts/tokens', ['tokens' => Tokens::all($user)]); ?></div>
+                                    <div id="token-created"></div>
+                                    <div class="dg g-2 p-4 card card-border">
+                                        <div class="df aic fw g-2">
+                                            <div class="field">
+                                                <div class="field-item">
+                                                    <input type="text" id="token-name" placeholder="<?php echo t_attr('Token name, e.g. Deploy script'); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="field">
+                                                <div class="field-item">
+                                                    <select id="token-days">
+                                                        <option value="30"><?php echo t('30 days'); ?></option>
+                                                        <option value="90" selected><?php echo t('90 days'); ?></option>
+                                                        <option value="365"><?php echo t('A year'); ?></option>
+                                                        <option value="0"><?php echo t('No expiry'); ?></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="df fw g-3 fs-13">
+                                            <?php foreach ($permissions as $permission) : ?>
+                                                <label class="df aic g-1"><input type="checkbox" name="token-scope" value="<?php echo htmlspecialchars($permission); ?>"> <?php echo htmlspecialchars($permission); ?></label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn--outline" type="button" @click="$ajax.post('user/token-create', {name: document.getElementById('token-name').value, days: document.getElementById('token-days').value, scopes: [...document.querySelectorAll('[name=token-scope]:checked')].map(box => box.value).join(','), password: confirmPassword})">
+                                                <i class="ph ph-plus"></i> <?php echo t('Create token'); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
                 [
                     'type'          => 'group',
                     'name'          => 'activity',

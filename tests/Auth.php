@@ -19,6 +19,7 @@ use Expansa\Auth\Passkey\Attestation;
 use Expansa\Auth\Passkey\Credential;
 use Expansa\Auth\Providers\GitHub;
 use Expansa\Auth\Providers\OpenId;
+use Expansa\Auth\Totp;
 use Expansa\Facades\Auth;
 
 // run: php tests/Auth.php
@@ -267,9 +268,7 @@ $connect = function (Manager $auth, int $maxAttempts = 0, ?Sessions $sessions = 
             $cookies[$name] = $value;
             $sent[]         = [$name, $expires];
         },
-        maxAttempts: $maxAttempts,
-        maxIpAttempts: 4,
-        lockout: 600,
+        throttle: fn () => ['attempts' => $maxAttempts, 'ip_attempts' => 4, 'lockout' => 600],
         readAttempts: function (string $key) use (&$store): ?array {
             return $store[$key] ?? null;
         },
@@ -304,6 +303,11 @@ check('login() issues a session token for the lifetime', $identifier === 'admin'
 check('the token is identifier|expires|session|hmac signed with the stamp', $session === '' && hash_equals(hash_hmac('sha256', "admin|$expires||hash-1", 'secret'), $signature));
 check('login() makes the user current', $auth->user() === $members['admin'] && $auth->isLoggedIn());
 check('login() trusts the device for a year', abs($lastSent('device') - time() - 31536000) <= 1 && $auth->isTrustedDevice('admin') && ! $auth->isTrustedDevice('a|b'));
+
+$device = $cookies['device'];
+$connect(new Manager())->login($members['a|b'], trustDevice: false);
+check('login() without trustDevice keeps the device cookie of the browser', $cookies['device'] === $device);
+$connect(new Manager())->login($members['admin']);
 
 $finds = 0;
 $auth  = $connect(new Manager());
@@ -350,6 +354,38 @@ Auth::swap($connect(new Manager()));
 Auth::login($members['admin']);
 check('the facade passes calls to the manager', Auth::user() === $members['admin'] && Auth::isLoggedIn());
 
+/// bearer tokens
+$header = null;
+$bearer = function () use (&$cookies, &$header, &$members): Manager {
+    $auth = new Manager();
+    $auth->configure(
+        find: fn (string $identifier) => $members[$identifier] ?? null,
+        key: 'secret',
+        read: function (string $name) use (&$cookies): string {
+            return $cookies[$name] ?? '';
+        },
+        write: function (string $name, string $value, int $expires) use (&$cookies): void {
+            $cookies[$name] = $value;
+        },
+        bearer: function () use (&$header): ?string {
+            return $header;
+        },
+        findToken: fn (string $token) => $token === 'valid-token' ? $members['a|b'] : null,
+    );
+
+    return $auth;
+};
+
+$cookies = ['auth' => '', 'device' => '', 'accounts' => ''];
+$bearer()->login($members['admin']);
+check('without a bearer header the cookie signs in', $bearer()->user() === $members['admin'] && ! $bearer()->isBearer());
+
+$header = 'valid-token';
+check('a bearer token signs in its owner and wins over the cookie', $bearer()->user() === $members['a|b'] && $bearer()->isBearer());
+
+$header = 'stolen-or-wrong';
+check('a wrong bearer token is a guest, the cookie is not read', $bearer()->user() === null && $bearer()->isBearer());
+$header = null;
 // switching accounts
 $members += ['editor' => new Member('editor', 'hash-3'), 'author' => new Member('author', 'hash-4')];
 $cookies  = ['auth' => '', 'device' => '', 'accounts' => ''];
@@ -529,6 +565,17 @@ $auth->attempt('admin', '4.4.4.5', $fail);
 check('failures further apart than the lockout do not add up', $store[$key]['count'] === 1);
 
 
+/// one-time passwords: the SHA1 vectors of RFC 6238, the last 6 of their 8 digits
+$secret = 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ'; // "12345678901234567890"
+$vectors = [59 => '287082', 1111111109 => '081804', 1111111111 => '050471', 1234567890 => '005924', 2000000000 => '279037'];
+check('verify() accepts the RFC 6238 codes', array_all($vectors, fn (string $code, int $time) => Totp::verify($secret, $code, 0, $time) === intdiv($time, 30)));
+check('verify() accepts a code of the previous and the next step', Totp::verify($secret, '287082', 0, 59 + 30) === 1 && Totp::verify($secret, '287082', 0, 59 - 30) === 1);
+check('verify() refuses a code two steps away', Totp::verify($secret, '287082', 0, 59 + 60) === null);
+check('verify() refuses a used code and older ones', Totp::verify($secret, '287082', 1, 59) === null && Totp::verify($secret, '287082', 2, 59) === null);
+check('verify() refuses a wrong code and garbage', Totp::verify($secret, '000000', 0, 59) === null && Totp::verify($secret, '28708', 0, 59) === null && Totp::verify('not base32!', '287082', 0, 59) === null);
+check('verify() ignores spaces in the code', Totp::verify($secret, '287 082', 0, 59) === 1);
+check('createSecret() makes 160-bit Base32 secrets', (bool) preg_match('/^[A-Z2-7]{32}$/', Totp::createSecret()) && Totp::createSecret() !== Totp::createSecret());
+check('getUri() builds an otpauth link', Totp::getUri('ABC', 'admin user', 'My Site') === 'otpauth://totp/My%20Site:admin%20user?secret=ABC&issuer=My%20Site&algorithm=SHA1&digits=6&period=30');
 // request limits
 $store = [];
 $auth  = $connect(new Manager());

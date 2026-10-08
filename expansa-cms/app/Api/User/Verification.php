@@ -13,11 +13,17 @@ use Expansa\Facades\Mail;
 use Expansa\Facades\View;
 
 /**
- * Email confirmation of accounts that signed up themselves: a link with a one-day token,
- * the table keeps only its hash. Until it is opened the account can't sign in.
+ * Email confirmation by a link with a one-day token, the table keeps only its hash: of accounts that
+ * signed up themselves (they can't sign in until it is opened) and of a new email of an account
+ * (it replaces the old one only when opened, the old address is told about the change).
  */
 final class Verification
 {
+    /**
+     * Field of the user the new email waits in until it is confirmed.
+     */
+    private const string PENDING_EMAIL = 'pending_email';
+
     /**
      * Lifetime of a confirmation link in seconds.
      */
@@ -48,16 +54,46 @@ final class Verification
             'verification_token_expires_at' => date('Y-m-d H:i:s', time() + self::TTL),
         ]);
 
-        $body = View::create('mails/wrapper', [
-            'body_template' => 'mails/verify-email',
-            'name'          => $user->showname ?: $user->login,
-            'verifyUrl'     => url('verify-email?token=' . $token),
-        ])->render();
+        $name = $user->showname ?: $user->login;
+        $data = ['name' => $name, 'verifyUrl' => url('verify-email?token=' . $token)];
+        self::mail($user->email, t('Confirm your email'), 'mails/verify-email', $data);
+    }
 
-        $message = Mail::to($user->email)->subject(t('Confirm your email'))->message($body);
-        if (! $message->send()) {
-            Log::error('Email confirmation: the email was not sent.', ['user' => $user->id, 'error' => $message->error]);
-        }
+    /**
+     * Whether the account signed up itself and its email is not confirmed yet; a pending change
+     * of the email of an existing account doesn't count.
+     *
+     * @param User $user
+     * @return bool
+     */
+    public static function isPending(User $user): bool
+    {
+        return ! $user->isVerified
+            && $user->verificationToken !== null
+            && (string) $user->field->find(self::PENDING_EMAIL) === '';
+    }
+
+    /**
+     * Start changing the email: keep the new address pending and send the link to it,
+     * tell the old address, so its owner notices a change they did not ask for.
+     *
+     * @param User   $user
+     * @param string $email New address, already checked to be free.
+     * @return void
+     */
+    public static function changeEmail(User $user, string $email): void
+    {
+        $token = bin2hex(random_bytes(32));
+        $user->field->mutate(self::PENDING_EMAIL, $email);
+        $user->update([
+            'verification_token'            => hash('sha256', $token),
+            'verification_token_expires_at' => date('Y-m-d H:i:s', time() + self::TTL),
+        ]);
+
+        $name = $user->showname ?: $user->login;
+        $data = ['name' => $name, 'verifyUrl' => url('verify-email?token=' . $token)];
+        self::mail($email, t('Confirm your new email'), 'mails/verify-email', $data);
+        self::mail($user->email, t('Your email is being changed'), 'mails/email-change', ['name' => $name, 'email' => $email]);
     }
 
     /**
@@ -78,13 +114,39 @@ final class Verification
             return null;
         }
 
+        // a link of a new email replaces the address, unless somebody took it meanwhile
+        $pending = (string) $user->field->find(self::PENDING_EMAIL);
+        if ($pending !== '' && User::find($pending, 'email') instanceof User) {
+            return null;
+        }
+
         $user->update([
             'is_verified'                   => true,
             'verification_token'            => null,
             'verification_token_expires_at' => null,
+            ...($pending !== '' ? ['email' => $pending] : []),
         ]);
-        Events::record($user, 'email_verified');
+        $user->field->delete(self::PENDING_EMAIL);
+        Events::record($user, $pending !== '' ? 'email_changed' : 'email_verified');
 
         return $user;
+    }
+
+    /**
+     * Send a mail of the wrapper template; a failure is logged, the change goes on.
+     *
+     * @param string               $to
+     * @param string               $subject
+     * @param string               $template Body template, e.g. `mails/verify-email`.
+     * @param array<string, mixed> $data
+     * @return void
+     */
+    private static function mail(string $to, string $subject, string $template, array $data): void
+    {
+        $body    = View::create('mails/wrapper', ['body_template' => $template] + $data)->render();
+        $message = Mail::to($to)->subject($subject)->message($body);
+        if (! $message->send()) {
+            Log::error('Email confirmation: the email was not sent.', ['to' => $to, 'error' => $message->error]);
+        }
     }
 }

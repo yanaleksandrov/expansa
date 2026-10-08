@@ -30,6 +30,7 @@ check('insert', $sql('insert', 'posts', ['title' => 'a']) === 'INSERT INTO "x_po
 check('update', $sql('update', 'posts', ['title' => 'x'], ['id' => 3]) === 'UPDATE "x_posts" SET "title" = \'x\' WHERE "id" = 3');
 check('delete by a list of ids', $sql('delete', 'posts', ['id' => [1, 2]]) === 'DELETE FROM "x_posts" WHERE "id" IN (1, 2)');
 check('like', $sql('select', 'posts', '*', ['title[~]' => '%x']) === 'SELECT * FROM "x_posts" WHERE ("title" LIKE \'%x\')');
+check('has() selects the constant 1', $sql('has', 'posts', ['id' => 1]) === 'SELECT EXISTS(SELECT 1 FROM "x_posts" WHERE "id" = 1)');
 check('a raw foreign key prefixes both tables', $sql('query', 'ALTER TABLE <posts_fields> ADD CONSTRAINT `fk` FOREIGN KEY (`post_id`) REFERENCES <posts> (`id`)')
     === 'ALTER TABLE "x_posts_fields" ADD CONSTRAINT `fk` FOREIGN KEY (`post_id`) REFERENCES "x_posts" (`id`)');
 

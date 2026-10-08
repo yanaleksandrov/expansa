@@ -61,6 +61,14 @@ final class Web
 
         $title = $this->title($slug);
 
+        // a page of a menu item the user doesn't see is closed as well
+        if (Lifecycle::is('dashboard') && ! Tree::allowsUrl($slug, $_GET)) {
+            http_response_code(403);
+
+            $slug  = '403';
+            $title = $this->title('', t('Access denied'));
+        }
+
         if (Lifecycle::is('auth')) {
             $page = 'welcome';
         }

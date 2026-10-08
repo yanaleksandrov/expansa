@@ -25,6 +25,7 @@ final class Migrations
         $this->createUserIdentitiesTable();
         $this->createUserSessionsTable();
         $this->createUserEventsTable();
+        $this->createUserTwoFactorTable();
         $this->createOptionsTable();
         $this->createCommentsTable();
         $this->createTaxonomiesTable();
@@ -308,6 +309,21 @@ final class Migrations
 
             $table->index('user_id');
             $table->index('created_at');
+            $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
+        });
+    }
+
+    private function createUserTwoFactorTable(): void
+    {
+        // the encrypted TOTP secret, keyed hashes of the recovery codes, the last accepted time step
+        Schema::create('user_two_factor', function (Table $table) {
+            $table->id();
+            $table->bigInt('user_id')->unsigned()->unique();
+            $table->text('secret');
+            $table->text('recovery_codes');
+            $table->bigInt('last_step')->unsigned()->default(0);
+            $table->timestamps();
+
             $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
         });
     }

@@ -881,7 +881,8 @@ abstract class AbstractBuilder
         }
 
         if (isset($columnFn)) {
-            if ($columnFn === 1) {
+            // has() asks for the constant: SELECT EXISTS(SELECT 1 FROM ...)
+            if ($columnFn === '1') {
                 $column = '1';
 
                 if (is_null($where)) {

@@ -91,6 +91,17 @@ final class Events
             'provider_connected'    => t('Account connected'),
             'provider_disconnected' => t('Account disconnected'),
             'account_secured'       => t('Signed out everywhere after an unknown sign-in'),
+            'two_factor_enabled'    => t('Two-factor authentication turned on'),
+            'two_factor_disabled'   => t('Two-factor authentication turned off'),
+            'two_factor_failed'     => t('Wrong two-factor code'),
+            'recovery_codes_new'    => t('New recovery codes'),
+            'recovery_code_used'    => t('Recovery code used'),
+            'account_enabled'       => t('Account turned on'),
+            'account_disabled'      => t('Account disabled'),
+            'impersonation_started' => t('Signed in as another user'),
+            'impersonation_stopped' => t('Stopped signing in as another user'),
+            'token_created'         => t('API token created'),
+            'token_revoked'         => t('API token revoked'),
             default                 => $event,
         };
     }

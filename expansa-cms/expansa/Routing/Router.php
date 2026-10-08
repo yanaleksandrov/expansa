@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Routing;
 
 use ReflectionClass;
+use LogicException;
 use ReflectionException;
 use ReflectionMethod;
 
@@ -620,7 +621,8 @@ final class Router
                     }
                 }
             } catch (ReflectionException $e) {
-                // The controller class is not available or the class does not have the method $method
+                // a missing handler must not pass silently: a middleware that never runs leaves its check undone
+                throw new LogicException("Route handler [$controller::$method] does not exist.", 0, $e);
             }
         }
     }

@@ -7,6 +7,7 @@ namespace App\Api\System;
 use App\Models\Option;
 use App\Models\User;
 use App\Support\Installation;
+use App\Support\Passwords;
 use App\Support\Requirements;
 use Expansa\Database\Query\Builder;
 use Expansa\Facades\Auth;
@@ -216,6 +217,14 @@ final class SystemService
 
         if (!$validator->isValid()) {
             throw new ValidationFailed(t('Please fill in all required fields.'), $validator->errors);
+        }
+
+        // the owner account opens the whole site: the same password rules as everywhere
+        $owner    = (array) ($input['user'] ?? []);
+        $personal = [(string) ($owner['login'] ?? ''), (string) ($owner['email'] ?? '')];
+        $refusal  = Passwords::check(trim((string) ($owner['password'] ?? '')), $personal);
+        if ($refusal !== null) {
+            throw new ValidationFailed($refusal, ['user.password' => [$refusal]]);
         }
     }
 }

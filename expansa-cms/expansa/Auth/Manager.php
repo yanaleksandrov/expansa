@@ -120,19 +120,11 @@ final class Manager
     private ?Closure $transport = null;
 
     /**
-     * Failed passwords allowed per device, or per login from unknown devices; 0 turns throttling off.
+     * Password throttling: `attempts`, `ip_attempts`, `lockout`, or a callback returning them on first use.
+     *
+     * @var array<string, int>|Closure
      */
-    private int $maxAttempts = 0;
-
-    /**
-     * Failed passwords allowed per IP from unknown devices, 0 turns the IP limit off.
-     */
-    private int $maxIpAttempts = 0;
-
-    /**
-     * First lockout in seconds, each next one is twice as long; also the window failures are counted in.
-     */
-    private int $lockout = 900;
+    private array|Closure $throttle = [];
 
     /**
      * Reads the failed attempts of a key: `fn (string $key): ?array`.
@@ -148,6 +140,21 @@ final class Manager
      * Server-side sign-in records, null keeps tokens stateless.
      */
     private ?Sessions $sessions = null;
+
+    /**
+     * Reads the bearer token of the request: `fn (): ?string`, null without an Authorization header.
+     */
+    private ?Closure $bearer = null;
+
+    /**
+     * Finds the user of a bearer token: `fn (string $token): ?Identity`.
+     */
+    private ?Closure $findToken = null;
+
+    /**
+     * Whether the request came with a bearer token: then cookies are not read at all.
+     */
+    private bool $isBearer = false;
 
     /**
      * Custom provider factories by driver.
@@ -206,12 +213,15 @@ final class Manager
      *                                        `redirect`, `scopes`, `issuer` for `openid`; a callback returns them
      *                                        on first use, e.g. with URLs from the database.
      * @param Closure|null  $transport        Request sender of the providers, curl by default.
-     * @param int           $maxAttempts      Failed passwords per device, or per login from unknown devices; 0 — no limit.
-     * @param int           $maxIpAttempts    Failed passwords per IP from unknown devices; 0 — no IP limit.
-     * @param int           $lockout          First lockout in seconds, each next one doubles up to a day.
+     * @param array|Closure $throttle         Password throttling of attempt(): `attempts` per device, or per login from
+     *                                        unknown devices (0 turns it off), `ip_attempts` per IP from unknown devices
+     *                                        (0 — no IP limit), `lockout` — first lockout in seconds, doubling up to a day;
+     *                                        a callback returns them on first use, e.g. from the site settings.
      * @param Closure|null  $readAttempts     `fn (string $key): ?array` — stored attempts, e.g. from a cache.
      * @param Closure|null  $writeAttempts    `fn (string $key, ?array $attempts, int $ttl): void` — null removes them.
      * @param Sessions|null $sessions         Server-side sign-in records, so a device can be signed out.
+     * @param Closure|null  $bearer           `fn (): ?string` — the bearer token of the request, null without one.
+     * @param Closure|null  $findToken        `fn (string $token): ?Identity` — the owner of an API token.
      * @return void
      */
     public function configure(
@@ -223,12 +233,12 @@ final class Manager
         int $rememberLifetime = 1209600,
         array|Closure $providers = [],
         ?Closure $transport = null,
-        int $maxAttempts = 0,
-        int $maxIpAttempts = 0,
-        int $lockout = 900,
+        array|Closure $throttle = [],
         ?Closure $readAttempts = null,
         ?Closure $writeAttempts = null,
         ?Sessions $sessions = null,
+        ?Closure $bearer = null,
+        ?Closure $findToken = null,
     ): void {
         $this->find             = $find;
         $this->key              = $key;
@@ -238,12 +248,13 @@ final class Manager
         $this->rememberLifetime = $rememberLifetime;
         $this->config           = $providers;
         $this->transport        = $transport;
-        $this->maxAttempts      = $maxAttempts;
-        $this->maxIpAttempts    = $maxIpAttempts;
-        $this->lockout          = $lockout;
+        $this->throttle         = $throttle;
         $this->readAttempts     = $readAttempts;
         $this->writeAttempts    = $writeAttempts;
         $this->sessions         = $sessions;
+        $this->bearer           = $bearer;
+        $this->findToken        = $findToken;
+        $this->isBearer         = false;
         $this->providers        = [];
         $this->user             = null;
         $this->resolved         = false;
@@ -292,6 +303,18 @@ final class Manager
     }
 
     /**
+     * Check if the request is authenticated by a bearer token, e.g. to skip CSRF checks or narrow permissions.
+     *
+     * @return bool
+     */
+    public function isBearer(): bool
+    {
+        $this->user();
+
+        return $this->isBearer;
+    }
+
+    /**
      * Check if this browser has signed in as the user before: it carries a valid device token.
      *
      * @param string $identifier
@@ -315,19 +338,20 @@ final class Manager
      */
     public function attempt(string $identifier, string $ip, Closure $check): bool
     {
-        if ($this->maxAttempts < 1 || $this->readAttempts === null || $this->writeAttempts === null) {
+        ['attempts' => $maxAttempts, 'ip_attempts' => $maxIpAttempts] = $this->getThrottle();
+        if ($maxAttempts < 1 || $this->readAttempts === null || $this->writeAttempts === null) {
             return (bool) $check();
         }
 
         // a login or an IP never reaches the store, only hashes of them
         $device = $this->getDeviceToken($identifier);
         $limits = $device !== ''
-            ? [hash('sha256', "device:$device") => $this->maxAttempts]
-            : [hash('sha256', 'login:' . mb_strtolower($identifier)) => $this->maxAttempts];
+            ? [hash('sha256', "device:$device") => $maxAttempts]
+            : [hash('sha256', 'login:' . mb_strtolower($identifier)) => $maxAttempts];
 
-        $ipKey = $device === '' && $ip !== '' && $this->maxIpAttempts > 0 ? hash('sha256', "ip:$ip") : '';
+        $ipKey = $device === '' && $ip !== '' && $maxIpAttempts > 0 ? hash('sha256', "ip:$ip") : '';
         if ($ipKey !== '') {
-            $limits[$ipKey] = $this->maxIpAttempts;
+            $limits[$ipKey] = $maxIpAttempts;
         }
 
         $now     = time();
@@ -393,11 +417,12 @@ final class Manager
      * The account signed in before stays in the browser, see switchAccount().
      *
      * @param Identity $user
-     * @param bool     $remember Keep the token for rememberLifetime across browser restarts.
+     * @param bool     $remember    Keep the token for rememberLifetime across browser restarts.
+     * @param bool     $trustDevice Mark the browser as a device of the user; off when an admin signs in as them.
      * @return void
      * @throws LogicException If Auth is not configured.
      */
-    public function login(Identity $user, bool $remember = false): void
+    public function login(Identity $user, bool $remember = false, bool $trustDevice = true): void
     {
         $previous = $this->user()?->identifier !== $user->identifier ? $this->token : null;
         $others   = array_filter(
@@ -407,6 +432,10 @@ final class Manager
 
         $this->issue($user, time() + ($remember ? $this->rememberLifetime : $this->lifetime), null, $remember);
         $this->writeAccounts($previous !== null ? [$previous, ...$others] : $others);
+
+        if (! $trustDevice) {
+            return;
+        }
 
         $expires = time() + self::DEVICE_LIFETIME;
         $device  = Token::sign($user->identifier, $expires, '', self::DEVICE_STAMP, $this->key);
@@ -560,12 +589,39 @@ final class Manager
     }
 
     /**
+     * Throttling settings, the callback of configure() is called once.
+     *
+     * @return array{attempts: int, ip_attempts: int, lockout: int}
+     */
+    private function getThrottle(): array
+    {
+        if ($this->throttle instanceof Closure) {
+            $this->throttle = ($this->throttle)();
+        }
+
+        return [
+            'attempts'    => (int) ($this->throttle['attempts'] ?? 0),
+            'ip_attempts' => (int) ($this->throttle['ip_attempts'] ?? 0),
+            'lockout'     => max(1, (int) ($this->throttle['lockout'] ?? 900)),
+        ];
+    }
+
+    /**
      * Read the token of the request and find its user; a token that stopped working is removed.
      *
      * @return Identity|null
      */
     private function resolve(): ?Identity
     {
+        // a request with a bearer token is authenticated by it alone, never by a cookie
+        $bearer = $this->bearer !== null ? ($this->bearer)() : null;
+        if ($bearer !== null) {
+            $this->isBearer = true;
+            $user           = $bearer !== '' && $this->findToken !== null ? ($this->findToken)($bearer) : null;
+
+            return $user instanceof Identity ? $user : null;
+        }
+
         $raw   = $this->read !== null ? (string) ($this->read)(self::TOKEN_COOKIE) : '';
         $token = $raw !== '' ? Token::parse($raw) : null;
         $user  = $token !== null ? $this->verify($token) : null;
@@ -743,11 +799,12 @@ final class Manager
     private function writeFailure(string $key, array $record, int $max, int $now): void
     {
         // failures further apart than the lockout don't add up
-        $record['count'] = $now - $record['last'] > $this->lockout ? 1 : $record['count'] + 1;
+        $lockout         = $this->getThrottle()['lockout'];
+        $record['count'] = $now - $record['last'] > $lockout ? 1 : $record['count'] + 1;
         $record['last']  = $now;
 
         if ($record['count'] >= $max) {
-            $record['until'] = $now + (int) min($this->lockout * 2 ** $record['lockouts'], self::MAX_LOCKOUT);
+            $record['until'] = $now + (int) min($lockout * 2 ** $record['lockouts'], self::MAX_LOCKOUT);
             $record['lockouts']++;
             $record['count'] = 0;
         }

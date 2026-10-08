@@ -19,7 +19,7 @@ use Expansa\Support\Error;
 use Throwable;
 
 /**
- * Sign-in through a provider of EX_OAUTH: `/oauth/<name>` leaves a guest for the provider,
+ * Sign-in through a provider of the Security settings: `/oauth/<name>` leaves a guest for the provider,
  * `/oauth/<name>/callback` signs in, or connects the provider started from the profile with
  * the password (see UserService::identityConnect()). A failure returns with a general reason,
  * the details go to the log.

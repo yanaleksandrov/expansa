@@ -27,6 +27,8 @@ final class RequireAuth
         '/api/user/reset-password',
         '/api/user/passkey-options',
         '/api/user/passkey-sign-in',
+        '/api/user/two-factor',
+        '/api/user/email-link',
     ];
 
     public function handle(): void

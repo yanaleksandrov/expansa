@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Posts;
 
+use App\Http\Can;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 
@@ -25,11 +26,13 @@ final readonly class PostsController
     /**
  * @todo not implemented — placeholder carried over from the legacy class
 */
+    #[Can('types_edit')]
     public function create(): array
     {
         return ['method' => 'POST create user'];
     }
 
+    #[Can('read')]
     public function index(): array
     {
         return $this->service->list();
@@ -38,6 +41,7 @@ final readonly class PostsController
     /**
  * @todo not implemented — placeholder carried over from the legacy class
 */
+    #[Can('types_edit')]
     public function update(): array
     {
         return ['method' => 'PUT update user by ID'];
@@ -46,16 +50,19 @@ final readonly class PostsController
     /**
  * @todo not implemented — placeholder carried over from the legacy class
 */
+    #[Can('types_delete')]
     public function delete(): array
     {
         return ['method' => 'DELETE remove user by ID'];
     }
 
+    #[Can('manage_export')]
     public function export(Request $request): Response
     {
         return $this->service->export($request->input);
     }
 
+    #[Can('manage_import')]
     public function import(Request $request): array
     {
         return $this->service->import($request->post);

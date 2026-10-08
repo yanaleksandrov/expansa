@@ -57,6 +57,11 @@ $router->prefix('/api', function () use ($router, &$log) {
 });
 check('before middleware runs first, prefix() nests the route', $router->run() && $log === ['before', 'users']);
 
+$router = request('GET', '/api/users');
+$router->before('GET', '/api/.*', ['App\Http\NoSuchMiddleware', 'handle']);
+$router->get('/api/users', fn () => null);
+check('a missing middleware class throws instead of skipping its check', throws(fn () => $router->run(), LogicException::class));
+
 $router = request('GET', '/%D0%BF%D1%80%D0%B8%D0%B2%D0%B5%D1%82-%E4%B8%96%E7%95%8C');
 check('a percent-encoded URI is decoded, so Unicode slugs match', $router->uri() === '/привет-世界');
 

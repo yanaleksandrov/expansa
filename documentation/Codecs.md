@@ -20,6 +20,7 @@ JavaScript. Все кодеки лежат в `Expansa\Codecs` и устроен
 | `Marshal` | PHP-значения ↔ формат `serialize()` | `Marshal::encode()`, `decode()` | [Marshal.md](Marshal.md) |
 | `Base64` | бинарные данные ↔ Base64 и Base64url | `Base64::encode()`, `decode()` | [Base64.md](Base64.md) |
 | `Ldml` | форматы дат PHP `date()` ↔ шаблоны LDML для JS | `Ldml::encode()`, `decode()` | [Ldml.md](Ldml.md) |
+| `QrCode` | текст → QR-код (byte mode, уровень M, версии 1–10, до 213 байт) | `new QrCode()->encode()` — матрица, `render()` — SVG | — |
 
 ## Какой выбрать
 
@@ -30,6 +31,7 @@ JavaScript. Все кодеки лежат в `Expansa\Codecs` и устроен
 | Сохранить PHP-значение с объектами или сохранить без потерь типов | `Marshal` |
 | Токен для ссылки, бинарные данные внутри JSON или email | `Base64` |
 | Показать дату в браузере в формате из PHP-настроек | `Ldml` |
+| Ссылка для приложения-аутентификатора или телефона: `otpauth://`, адрес страницы | `QrCode` |
 
 `Json` и `Marshal` пересекаются: оба сохраняют PHP-значения в строку. `Json` читается любым языком
 и безопасен сам по себе, но теряет объекты и различие между списком и объектом. `Marshal`

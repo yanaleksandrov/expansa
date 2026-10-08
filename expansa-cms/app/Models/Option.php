@@ -386,6 +386,12 @@ class Option extends Model
                 'default-role' => 'subscriber',
                 'membership'   => 0,
             ],
+            'security'       => [
+                'attempts'    => 5,
+                'ip_attempts' => 50,
+                'lockout'     => 15,
+                'breached'    => 1,
+            ],
             'week-starts-on' => 1,
             'date-format'    => 'F j, Y',
             'time-format'    => 'g:i a',
