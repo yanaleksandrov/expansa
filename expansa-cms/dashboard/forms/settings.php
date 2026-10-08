@@ -11,7 +11,7 @@ use Expansa\Facades\Safe;
  * @since 2025.1
  */
 
-// a plain field of the Security tab: everything but the type, name, texts and attributes is the default
+// a plain field of the Security and Mail tabs: everything but the type, name, texts and attributes is the default
 $field = static fn ( string $type, string $name, string $label, string $instruction, array $attributes = [] ): array => [
 	'type'        => $type,
 	'name'        => $name,
@@ -744,6 +744,91 @@ return Expansa\Facades\Form::enqueue(
 						] ),
 						$field( 'password', 'oauth[openid][client_secret]', t( 'Client secret' ), '', [
 							'value' => (string) Option::get( 'oauth.openid.client_secret' ),
+						] ),
+					],
+				],
+			],
+		],
+		[
+			'name'    => 'mail',
+			'type'    => 'tab',
+			'label'   => t( 'Mail' ),
+			'caption' => t( 'outgoing email' ),
+			'icon'    => 'ph ph-envelope-simple',
+			'fields'  => [
+				[
+					'type'          => 'group',
+					'name'          => 'smtp',
+					'label'         => t( 'SMTP server' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'text', 'mail[host]', t( 'Server' ), t( 'Without a server the mail goes through PHP mail() and often lands in spam.' ), [
+							'value'       => (string) Option::get( 'mail.host' ),
+							'placeholder' => 'smtp.example.com',
+						] ),
+						$field( 'number', 'mail[port]', t( 'Port' ), t( 'Usually 465 for SSL and 587 for STARTTLS.' ), [
+							'value' => (int) Option::get( 'mail.port', 465 ),
+							'min'   => 1,
+						] ),
+						[
+							...$field( 'select', 'mail[encryption]', t( 'Encryption' ), '', [
+								'value' => (string) Option::get( 'mail.encryption', 'ssl' ),
+							] ),
+							'options' => [
+								'ssl'  => t( 'SSL' ),
+								'tls'  => t( 'STARTTLS' ),
+								'none' => t( 'None' ),
+							],
+						],
+						$field( 'text', 'mail[username]', t( 'Login' ), t( 'Leave empty if the server needs no login.' ), [
+							'value'        => (string) Option::get( 'mail.username' ),
+							'autocomplete' => 'off',
+						] ),
+						$field( 'password', 'mail[password]', t( 'Password' ), Option::get( 'mail.password' ) ? t( 'Saved. Leave empty to keep it.' ) : '', [
+							'autocomplete' => 'new-password',
+						] ),
+						$field( 'email', 'mail[from]', t( 'Sender address' ), t( 'An address of the site domain, otherwise the mail lands in spam.' ), [
+							'value'       => (string) Option::get( 'mail.from' ),
+							'placeholder' => 'no-reply@example.com',
+						] ),
+						$field( 'text', 'mail[from_name]', t( 'Sender name' ), t( 'The site name when empty.' ), [
+							'value' => (string) Option::get( 'mail.from_name' ),
+						] ),
+						[
+							'name'     => 'mail-test',
+							'type'     => 'custom',
+							'callback' => static function () {
+								?>
+								<div class="df aic g-3">
+									<button class="btn btn--outline" type="button" @click="$ajax.post('options/mail-test')"><i class="ph ph-paper-plane-tilt"></i> <?php echo t( 'Send a test email' ); ?></button>
+									<span class="fs-13 t-muted"><?php echo t( 'To your email, with the saved settings.' ); ?></span>
+								</div>
+								<?php
+							},
+						],
+					],
+				],
+				[
+					'type'          => 'group',
+					'name'          => 'dkim',
+					'label'         => t( 'DKIM signature' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'text', 'mail[dkim][domain]', t( 'Domain' ), t( 'The site domain when empty.' ), [
+							'value' => (string) Option::get( 'mail.dkim.domain' ),
+						] ),
+						$field( 'text', 'mail[dkim][selector]', t( 'Selector' ), t( 'Name of the DNS record with the public key, e.g. "mail" for mail._domainkey.' ), [
+							'value' => (string) Option::get( 'mail.dkim.selector' ),
+						] ),
+						$field( 'textarea', 'mail[dkim][private]', t( 'Private key' ), Option::get( 'mail.dkim.private' ) ? t( 'Saved. Leave empty to keep it.' ) : t( 'PEM, begins with -----BEGIN PRIVATE KEY-----.' ), [
+							'rows' => 4,
+						] ),
+						$field( 'password', 'mail[dkim][passphrase]', t( 'Key passphrase' ), Option::get( 'mail.dkim.passphrase' ) ? t( 'Saved. Leave empty to keep it.' ) : t( 'Only for an encrypted key.' ), [
+							'autocomplete' => 'new-password',
 						] ),
 					],
 				],

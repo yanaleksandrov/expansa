@@ -410,7 +410,7 @@ Lifecycle::phase('configure', true, function () {
  * 3. register · installed only: needs env.php and the database.
  *
  * Registers the default roles (admin, editor, author, subscriber) and post types
- * (pages, files, api-keys); post types create their missing tables.
+ * (pages, files); post types create their missing tables.
  */
 Lifecycle::phase('register', fn () => Is::installed(), function () {
     // roles
@@ -540,29 +540,6 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         menuIcon: 'ph ph-dropbox-logo',
         menuPosition: 30,
     );
-
-    App\Post\Type::register(
-        key: 'api-keys',
-        labelName: t('API Key'),
-        labelNamePlural: t('API Keys'),
-        labelAllItems: t('All API Keys'),
-        labelAdd: t('Add New Key'),
-        labelEdit: t('Edit Key'),
-        labelUpdate: t('Update Key'),
-        labelView: t('View Key'),
-        labelSearch: t('Search Keys'),
-        labelSave: t('Save Key'),
-        public: false,
-        hierarchical: false,
-        searchable: false,
-        showInMenu: false,
-        showInBar: false,
-        canExport: true,
-        canImport: true,
-        capabilities: ['types_edit'],
-        menuIcon: 'ph ph-key',
-        menuPosition: 30,
-    );
 });
 
 /**
@@ -647,11 +624,10 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
         // reference implementation: routes derived by Router::register() (POST /system/test, POST /system/install)
         Route::register(App\Api\System\SystemController::class, [App\Http\Kernel::class, 'dispatch']);
 
-        // RPC routes instead of Router::register(): the dashboard calls fixed URLs like `apikey/create` with the id in the body
+        // RPC routes instead of Router::register(): the dashboard calls fixed URLs like `user/token-create` with the id in the body
         foreach (
             [
                 App\Api\Ai\AiController::class,
-                App\Api\Apikey\ApikeyController::class,
                 App\Api\Extensions\ExtensionsController::class,
                 App\Api\FieldGroups\FieldGroupsController::class,
                 App\Api\Files\FilesController::class,

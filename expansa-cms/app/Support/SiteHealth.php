@@ -492,34 +492,33 @@ final class SiteHealth
      */
     private static function mail(): array
     {
-        $mail = defined('EX_MAIL') ? EX_MAIL : [];
-        $dkim = defined('EX_DKIM') ? EX_DKIM : [];
-        // the installer leaves the placeholders of env.example.php when SMTP was skipped
+        $mail   = (array) Option::get('mail', []);
         $host   = (string) ($mail['host'] ?? '');
-        $isSmtp = $host !== '' && $host !== 'smtp.host';
+        $isSmtp = $host !== '';
         $from   = (string) ($mail['from'] ?? '');
-        $isDkim = ($dkim['domain'] ?? '') !== '' && is_readable((string) ($dkim['private'] ?? ''));
+        $dkim   = (array) ($mail['dkim'] ?? []);
+        $isDkim = ($dkim['selector'] ?? '') !== '' && ($dkim['private'] ?? '') !== '';
 
         return [
             self::check(
                 t('SMTP server'),
                 $isSmtp ? escape($host) : t('Not set'),
                 $isSmtp,
-                t('Without SMTP mail goes through PHP mail() and often lands in spam. Set EX_MAIL in env.php.'),
+                t('Without SMTP mail goes through PHP mail() and often lands in spam. Set it on the Mail tab of the settings.'),
                 self::RECOMMENDED,
             ),
             self::check(
                 t('Sender address'),
                 Is::email($from) ? escape($from) : t('Not set'),
                 Is::email($from),
-                t('Set "from" in EX_MAIL to an address of the site domain.'),
+                t('Set the sender on the Mail tab of the settings to an address of the site domain.'),
                 self::RECOMMENDED,
             ),
             self::check(
                 t('DKIM signature'),
-                $isDkim ? escape((string) $dkim['domain']) : t('Not set'),
+                $isDkim ? escape((string) ($dkim['domain'] ?? '') ?: t('Enabled')) : t('Not set'),
                 $isDkim,
-                t('A DKIM signature proves the mail comes from your domain. Set EX_DKIM in env.php.'),
+                t('A DKIM signature proves the mail comes from your domain. Set it on the Mail tab of the settings.'),
                 self::RECOMMENDED,
             ),
         ];

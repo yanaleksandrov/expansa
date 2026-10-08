@@ -225,7 +225,7 @@ return \Expansa\Facades\Form::enqueue(
                     'name'  => 'smtp[host]',
                     'label' => t('SMTP server'),
                     'attributes' => [
-                        'placeholder' => 's32.hostia.name',
+                        'placeholder' => 'smtp.example.com',
                         'u-prop'      => 'smtp.host',
                         'u-autocomplete' => '',
                     ],
@@ -245,7 +245,7 @@ return \Expansa\Facades\Form::enqueue(
                     'name'  => 'smtp[username]',
                     'label' => t('SMTP login'),
                     'attributes' => [
-                        'placeholder'    => 'no-reply@expansa.org',
+                        'placeholder'    => 'no-reply@example.com',
                         'u-prop'         => 'smtp.username',
                         'u-autocomplete' => '',
                     ],
@@ -264,7 +264,7 @@ return \Expansa\Facades\Form::enqueue(
                     'name'  => 'smtp[from]',
                     'label' => t('Email sender address'),
                     'attributes' => [
-                        'placeholder'    => 'no-reply@expansa.org',
+                        'placeholder'    => 'no-reply@example.com',
                         'u-prop'         => 'smtp.from',
                         'u-autocomplete' => '',
                     ],

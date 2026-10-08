@@ -2,18 +2,13 @@
 
 namespace Dashboard;
 
-use App\Models\User;
-use App\Query\Query;
 use App\Support\DashboardAssets;
 use App\Support\DashboardFavicons;
 use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
-use Expansa\Database\FieldEav;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
-use Expansa\Facades\Route;
-use Expansa\Facades\Safe;
 
 new class
 {
@@ -53,64 +48,10 @@ new class
                 : ['js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js"];
         });
 
-        $user   = User::current();
-        $userId = $user->id ?? 0;
-
-        // only the profile page lists and manages API keys
-        $isProfile = trim(Route::uri(), '/') === Hook::call('dashboardRootSlug', 'dashboard') . '/profile';
-
         $data = Hook::call(
             'expansa_dashboard_data',
             [
                 'apiurl'              => url('/api/'),
-                'apiKeys'             => ! $isProfile ? [] : Query::apply(
-                    [
-                        'type'      => 'api-keys',
-                        'per_page'  => 25,
-                        'author_id' => $userId,
-                    ],
-                    function ($query, $items) {
-                        $posts = [];
-
-                        foreach ($items as $i => $item) {
-                            foreach ((array) $item as $key => $value) {
-                                if (!in_array($key, ['uuid', 'title', 'status', 'createdAt', 'updatedAt'], true)) {
-                                    continue;
-                                }
-
-                                if (in_array($key, ['createdAt', 'updatedAt'], true)) {
-                                    $date = new \DateTime($value);
-                                    if ($date instanceof \DateTime) {
-                                        $value = $date->format('j F, Y');
-                                    }
-                                }
-
-                                $posts[$i][$key] = $value;
-                            }
-
-                            $fields = new FieldEav($item)->find();
-                            if ($fields) {
-                                foreach ($fields as $field => $values) {
-                                    $key = Safe::camelcase($field);
-                                    if (!isset($key, $values[0])) {
-                                        continue;
-                                    }
-
-                                    if (in_array($key, ['endDate', 'startDate'], true)) {
-                                        $date = \DateTime::createFromFormat('Y-m-d', $values[0]);
-                                        if ($date instanceof \DateTime) {
-                                            $values[0] = $date->format('j F, Y');
-                                        }
-                                    }
-
-                                    $posts[$i][$key] = $values[0];
-                                }
-                            }
-                        }
-
-                        return $posts;
-                    }
-                ),
                 'items'               => [],
                 'locale'              => I18n::locale(),
                 'dateFormat'          => 'd MMMM, yyyy',
@@ -203,10 +144,6 @@ new class
                 ],
                 'takeSelfieDialog'    => [
                     'title' => t('Take a Selfie'),
-                    'class' => 'dialog--sm',
-                ],
-                'apiKeyManagerDialog' => [
-                    'title' => t('Create/update API key'),
                     'class' => 'dialog--sm',
                 ],
                 'mediaLibraryDialog'  => [

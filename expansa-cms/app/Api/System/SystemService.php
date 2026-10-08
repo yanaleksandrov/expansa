@@ -7,6 +7,7 @@ namespace App\Api\System;
 use App\Models\Option;
 use App\Models\User;
 use App\Support\Installation;
+use App\Support\Mailer;
 use App\Support\Passwords;
 use App\Support\Requirements;
 use Expansa\Database\Query\Builder;
@@ -119,11 +120,7 @@ final class SystemService
 
         // env.php is published only after every step succeeded
         $draft = $hasEnvironment ? null : Installation::draft(
-            array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database)
-            + array_combine(
-                ['smtp.host', 'smtp.port', 'smtp.username', 'smtp.password', 'smtp.from'],
-                array_map(static fn (string $value): string => addcslashes($value, "\\'"), $smtp)
-            ) + [
+            array_combine(['db.name', 'db.username', 'db.password', 'db.host', 'db.prefix'], $database) + [
                 'auth.key'  => bin2hex(random_bytes(32)),
                 'nonce.key' => bin2hex(random_bytes(32)),
                 'hash.key'  => bin2hex(random_bytes(32)),
@@ -157,6 +154,9 @@ final class SystemService
 
             // the owner marks the installation as complete, see Installation::isComplete()
             Option::update('site', $site + ['owner' => ['email' => $user->email]]);
+
+            // the Mail tab of the settings edits it later
+            Option::update('mail', Mailer::normalize($smtp + ['encryption' => (int) $smtp['port'] === 587 ? 'tls' : 'ssl']));
 
             if ($draft !== null) {
                 Installation::complete($draft);

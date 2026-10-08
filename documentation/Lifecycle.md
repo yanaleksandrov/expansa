@@ -261,6 +261,7 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
   что-то упало. Известные ошибки PHPStan собраны в `phpstan-baseline.neon`: новые не допускаются, старые
   убираются из файла по мере исправления.
 - Настройки окружения в `env.php` сгруппированы в массивы: `EX_DB` (передаётся в `Db::configure()`),
-  `EX_KEYS`, `EX_DEBUG`, `EX_DKIM`. `EX_DEBUG['enabled']` никогда не включайте на рабочем сайте.
+  `EX_KEYS`, `EX_DEBUG`, `EX_CACHE`, `EX_AI`; почта и вход настраиваются в админке.
+  `EX_DEBUG['enabled']` никогда не включайте на рабочем сайте.
 - `php artisan serve [--host=127.0.0.1] [--port=8000]` запускает сайт на встроенном сервере PHP через
   `server.php`. Роутер выставляет `SCRIPT_NAME` как Apache, иначе `/dashboard` путается с папкой `dashboard/`.

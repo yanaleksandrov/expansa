@@ -133,8 +133,5 @@ OAuth:
 
 ## Позже, без смены архитектуры
 
-- Bearer-токены API (api-keys) — второй способ чтения в `Auth\Manager`.
-- Scopes токенов — через `Access\Contracts\Subject` и свой `Permissions`.
-- TOTP / 2FA — способ входа в `Auth`.
 - Новые провайдеры — класс в `Auth/Providers/` или `Auth::extend()`.
 - Кэш discovery и JWKS.

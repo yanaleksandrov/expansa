@@ -2,7 +2,8 @@
 
 /**
  * Settings of the installation, written by the installer. Real environment variables (Docker, CI, a hosting panel)
- * override EX_DB_*, EX_KEY_* and EX_DEBUG; an empty variable counts as not set. EX_MAIL is set in the installer.
+ * override EX_DB_*, EX_KEY_* and EX_DEBUG; an empty variable counts as not set.
+ * Mail settings live on the Mail tab of the settings.
  */
 
 /**
@@ -97,41 +98,6 @@ define('EX_DEBUG', [
     // the error message, place and trace on the page and in API responses; EX_DEBUG_DISPLAY=0 turns it off
     'display' => filter_var(getenv('EX_DEBUG_DISPLAY') ?: 'on', FILTER_VALIDATE_BOOL),
     'view'    => EX_DASHBOARD . 'debug.php',
-]);
-
-/**
- * SMTP settings for outgoing mail.
- *
- * @since 2025.1
- */
-define('EX_MAIL', [
-    'host'     => 'smtp.host',
-    'port'     => (int) 'smtp.port',
-    'username' => 'smtp.username',
-    'password' => 'smtp.password',
-    'from'     => 'smtp.from',
-]);
-
-/**
- * DKIM (DomainKeys Identified Mail) settings for signing outgoing emails.
- *
- * @since 2025.1
- */
-define('EX_DKIM', [
-    // signing domain, typically the domain of the 'From' address
-    'domain'           => '',
-    // path to the private key
-    'private'          => '',
-    // selector of the DNS record with the public key
-    'selector'         => '',
-    // passphrase of the private key, if any
-    'passphrase'       => '',
-    // signing identity, typically the 'From' address
-    'identity'         => '',
-    // include the signed header fields in the signature
-    'copyHeaderFields' => false,
-    // extra headers to sign
-    'extraHeaders'     => ['List-Unsubscribe', 'List-Help'],
 ]);
 
 /**

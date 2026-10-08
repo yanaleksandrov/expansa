@@ -386,6 +386,11 @@ class Option extends Model
                 'default-role' => 'subscriber',
                 'membership'   => 0,
             ],
+            'mail'           => [
+                'host'       => '',
+                'port'       => 465,
+                'encryption' => 'ssl',
+            ],
             'security'       => [
                 'attempts'    => 5,
                 'ip_attempts' => 50,

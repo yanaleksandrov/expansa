@@ -41,6 +41,12 @@ final readonly class OptionsController
         return $this->service->update($request->post);
     }
 
+    #[Can('manage_options')]
+    public function mailTest(): array
+    {
+        return $this->service->mailTest();
+    }
+
     /**
  * @todo not implemented — placeholder carried over from the legacy class
 */
