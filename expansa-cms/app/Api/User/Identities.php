@@ -36,13 +36,16 @@ final class Identities
     /**
      * Start a sign-in or connecting a provider: keep a new State in the session.
      *
-     * @param string $provider Configured name.
-     * @param bool   $link     Connect to the signed-in user instead of signing in.
+     * @param string $provider   Configured name.
+     * @param bool   $link       Connect to the signed-in user instead of signing in.
+     * @param string $redirectTo Page to go to after signing in, see SignIn::target().
      * @return string URL of the consent page.
-     * @throws Throwable If the provider is not configured or its discovery fails.
+     * @throws Throwable If the IP starts too often, the provider is not configured or its discovery fails.
      */
-    public static function start(string $provider, bool $link = false): string
+    public static function start(string $provider, bool $link = false, string $redirectTo = ''): string
     {
+        Auth::limit('oauth:' . ($_SERVER['REMOTE_ADDR'] ?? ''), 20, 300);
+
         $state = State::create($provider);
         $url   = Auth::provider($provider)->redirect($state);
 
@@ -50,7 +53,7 @@ final class Identities
             Session::start();
         }
 
-        Session::set(self::SESSION_KEY, $state->toArray() + ['link' => $link]);
+        Session::set(self::SESSION_KEY, $state->toArray() + ['link' => $link, 'redirect_to' => $redirectTo]);
 
         return $url;
     }

@@ -25,7 +25,7 @@ $date = new IntlDateFormatter( Expansa\Facades\I18n::locale(), IntlDateFormatter
 		</div>
 	</div>
 	<div class="ml-auto">
-		<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Remove') !!}" @click="$ajax.post('user/passkey-delete', {id: {{ $passkey['id'] }}})">
+		<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Remove') !!}" @click="$ajax.post('user/passkey-delete', {id: {{ $passkey['id'] }}, password: confirmPassword})">
 			<i class="ph ph-trash"></i>
 		</button>
 	</div>

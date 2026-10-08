@@ -86,7 +86,8 @@ define('EX_KEYS', [
  * Password guessing limit. A browser that signed in before gets "attempts" wrong passwords of its own,
  * so nobody can lock out the owner; unknown browsers share "attempts" per login and "ip_attempts" per IP.
  * Then the counter is locked for "lockout" seconds, twice as long each next time, up to a day.
- * 0 attempts turns the limit off, 0 ip_attempts turns off the IP limit.
+ * 0 attempts turns the limit off, 0 ip_attempts turns off the IP limit. "breached" refuses passwords found in
+ * public breaches (Have I Been Pwned; only 5 characters of the password's SHA-1 leave the server).
  *
  * @since 2026.10
  */
@@ -94,6 +95,7 @@ define('EX_AUTH', [
     'attempts'    => (int) (getenv('EX_AUTH_ATTEMPTS') === false ? 5 : getenv('EX_AUTH_ATTEMPTS')),
     'ip_attempts' => (int) (getenv('EX_AUTH_IP_ATTEMPTS') === false ? 50 : getenv('EX_AUTH_IP_ATTEMPTS')),
     'lockout'     => (int) (getenv('EX_AUTH_LOCKOUT') ?: 900),
+    'breached'    => filter_var(getenv('EX_AUTH_BREACHED') ?: 'on', FILTER_VALIDATE_BOOL),
 ]);
 
 /**

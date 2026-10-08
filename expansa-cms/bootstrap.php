@@ -222,7 +222,12 @@ Lifecycle::phase('configure', true, function () {
     $cookiePrefix = defined('EX_DB') ? EX_DB['prefix'] : '';
     $throttle     = defined('EX_AUTH') ? EX_AUTH : [];
     Auth::configure(
-        find: fn (string $login) => ($user = App\Models\User::find($login, 'login')) instanceof App\Models\User ? $user : null,
+        // a disabled account loses its tokens at once
+        find: function (string $login): ?App\Models\User {
+            $user = App\Models\User::find($login, 'login');
+
+            return $user instanceof App\Models\User && $user->status === App\Models\User::STATUS_ACTIVE ? $user : null;
+        },
         key: defined('EX_KEYS') ? EX_KEYS['auth'] : '',
         read: fn (string $name) => (string) Expansa\Cookie\Cookie::get($cookiePrefix . $name, ''),
         write: fn (string $name, string $value, int $expires) => Expansa\Cookie\Cookie::send(new Expansa\Cookie\Cookie(
@@ -681,8 +686,19 @@ Lifecycle::context('sign-out', function (string $uri): bool {
     return $uri === 'sign-out' || $uri === "$root/sign-out";
 }, function () {
     // the next signed-in account of the browser takes over, ?all=1 signs out every one
+    $user = App\Models\User::current();
+    if ($user !== null) {
+        App\Api\User\Events::record($user, 'sign_out', isset($_GET['all']) ? ['all' => true] : []);
+    }
+
     Auth::logout(all: isset($_GET['all']));
     redirect(Auth::isLoggedIn() ? 'dashboard' : 'sign-in');
+});
+
+// links of account emails: the email confirmation and "this wasn't me" of a new device sign-in
+Lifecycle::context('account-links', fn (string $uri) => in_array(trim($uri, '/'), ['verify-email', 'secure-account'], true), function () {
+    Route::get('/verify-email', [App\Controllers\Account::class, 'verifyEmail']);
+    Route::get('/secure-account', [App\Controllers\Account::class, 'secure']);
 });
 
 // /oauth/<name> leaves for a provider of EX_OAUTH, /oauth/<name>/callback signs in or connects it, see App\Controllers\OAuth
@@ -709,8 +725,9 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
  * to sign-in, otherwise dashboard/index.php enqueues the assets and menus, the page comes from Web::index().
  */
 Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '/'), Hook::call('dashboardRootSlug', 'dashboard')), function () {
+    // back to the requested page after signing in, like WordPress' redirect_to
     if (! Auth::isLoggedIn()) {
-        redirect('sign-in');
+        redirect('sign-in?redirect_to=' . rawurlencode((string) ($_SERVER['REQUEST_URI'] ?? '')));
     }
 
     require_once EX_PATH . 'dashboard/index.php';

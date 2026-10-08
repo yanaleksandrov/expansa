@@ -19,6 +19,7 @@ use Expansa\Patterns\Facade;
  * @method static bool          isLoggedIn()
  * @method static bool          isTrustedDevice(string $identifier)
  * @method static bool          attempt(string $identifier, string $ip, Closure $check)
+ * @method static void          limit(string $key, int $maxAttempts, int $window)
  * @method static void          login(Identity $user, bool $remember = false)
  * @method static void          refresh(Identity $user)
  * @method static void          logout(bool $all = false)

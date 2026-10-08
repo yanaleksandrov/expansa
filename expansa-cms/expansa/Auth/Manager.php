@@ -359,6 +359,36 @@ final class Manager
     }
 
     /**
+     * Count a request and throw once a key made more than $maxAttempts within $window seconds, e.g. reset
+     * emails per IP. Unlike attempt() every request counts, successful or not. Without a store it does nothing.
+     *
+     * @param string $key         What is limited, e.g. `"reset:$ip"`; only its hash reaches the store.
+     * @param int    $maxAttempts Requests allowed in the window.
+     * @param int    $window      Seconds since the first request of the window.
+     * @return void
+     * @throws TooManyAttempts If the key used up its requests.
+     */
+    public function limit(string $key, int $maxAttempts, int $window): void
+    {
+        if ($this->readAttempts === null || $this->writeAttempts === null) {
+            return;
+        }
+
+        $key    = hash('sha256', "limit:$key");
+        $now    = time();
+        $stored = ($this->readAttempts)($key);
+        $until  = (int) ($stored['until'] ?? 0);
+        $count  = $until > $now ? (int) ($stored['count'] ?? 0) : 0;
+
+        if ($count >= $maxAttempts) {
+            throw new TooManyAttempts($until - $now);
+        }
+
+        $until = $count > 0 ? $until : $now + $window;
+        ($this->writeAttempts)($key, ['count' => $count + 1, 'until' => $until], $until - $now);
+    }
+
+    /**
      * Sign in a user whose identity is already proven: issue the token and trust the device.
      * The account signed in before stays in the browser, see switchAccount().
      *

@@ -529,6 +529,48 @@ $auth->attempt('admin', '4.4.4.5', $fail);
 check('failures further apart than the lockout do not add up', $store[$key]['count'] === 1);
 
 
+// request limits
+$store = [];
+$auth  = $connect(new Manager());
+$hits  = function (int $count) use ($auth): int {
+    $passed = 0;
+    for ($i = 0; $i < $count; $i++) {
+        try {
+            $auth->limit('reset:1.2.3.4', 3, 600);
+            $passed++;
+        } catch (TooManyAttempts) {
+        }
+    }
+
+    return $passed;
+};
+
+check('without a store limit() lets everything through', $hits(0) === 0 && (function () {
+    $plain = new Manager();
+    for ($i = 0; $i < 10; $i++) {
+        $plain->limit('k', 1, 60);
+    }
+
+    return true;
+})());
+check('limit() lets $maxAttempts requests through and stops the next ones', $hits(5) === 3);
+check('limit() counts every request, the store gets a hash', array_keys($store) === [hash('sha256', 'limit:reset:1.2.3.4')]);
+
+try {
+    $auth->limit('reset:1.2.3.4', 3, 600);
+    $wait = 0;
+} catch (TooManyAttempts $e) {
+    $wait = $e->retryAfter;
+}
+check('the wait is the rest of the window', $wait > 590 && $wait <= 600);
+check('another key has its own window', (function () use ($auth) {
+    $auth->limit('reset:5.6.7.8', 3, 600);
+
+    return true;
+})());
+
+$store[hash('sha256', 'limit:reset:1.2.3.4')]['until'] = time() - 1;
+check('a new window starts after the old one', $hits(3) === 3);
 // sign-in providers
 /**
  * Compact JWS of the claims signed by a private key.

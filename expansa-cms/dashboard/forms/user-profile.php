@@ -1,9 +1,12 @@
 <?php
 
+use App\Api\User\Confirmation;
+use App\Api\User\Events;
 use App\Api\User\Identities;
 use App\Api\User\Passkey;
 use App\Api\User\Sessions;
 use App\Models\User;
+use App\Support\Passwords;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
@@ -393,55 +396,38 @@ return Form::enqueue(
             'fields'        => [
                 [
                     'type'          => 'group',
-                    'name'          => 'sessions',
-                    'label'         => t('Web sessions'),
+                    'name'          => 'confirmation',
+                    'label'         => t('Confirm it is you'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
                     'fields'        => [
                         [
-                            'name'     => 'title',
+                            'name'     => 'confirmation',
                             'type'     => 'custom',
-                            'callback' => function () {
+                            'callback' => function () use ($user) {
                                 ?>
                                 <div class="dg g-2 ga-4">
-                                    <div>This is a list of devices that have logged into your account. Revoke any sessions that you do not recognize.</div>
-                                    <div class="p-4 df fdr g-4 card card-border">
-                                        <div class="avatar">
-                                            <i class="badge"></i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
-                                                <path d="M224 74h-18V64a22 22 0 0 0-22-22H40a22 22 0 0 0-22 22v96a22 22 0 0 0 22 22h114v10a22 22 0 0 0 22 22h48a22 22 0 0 0 22-22V96a22 22 0 0 0-22-22ZM40 170a10 10 0 0 1-10-10V64a10 10 0 0 1 10-10h144a10 10 0 0 1 10 10v10h-18a22 22 0 0 0-22 22v74Zm194 22a10 10 0 0 1-10 10h-48a10 10 0 0 1-10-10V96a10 10 0 0 1 10-10h48a10 10 0 0 1 10 10Zm-100 16a6 6 0 0 1-6 6H88a6 6 0 0 1 0-12h40a6 6 0 0 1 6 6Zm80-96a6 6 0 0 1-6 6h-16a6 6 0 0 1 0-12h16a6 6 0 0 1 6 6Z"/>
-                                            </svg>
+                                    <div><?php echo t('Adding or removing sign-in methods, signing out of devices and changing the email need your current password or a passkey. It is asked once in :minutes minutes.', Confirmation::TTL / 60); ?></div>
+                                    <?php if (Confirmation::isConfirmed($user)) : ?>
+                                        <div class="df aic g-1 fs-13"><i class="ph ph-check-circle"></i> <?php echo t('Confirmed for this session.'); ?></div>
+                                    <?php endif; ?>
+                                    <div class="df aic fw g-2">
+                                        <div class="field">
+                                            <div class="field-item">
+                                                <input type="password" id="confirm-password" u-prop="confirmPassword" autocomplete="current-password" placeholder="<?php echo t_attr('Current password'); ?>" @keydown.enter.prevent="$refs.confirm.click()">
+                                            </div>
                                         </div>
-                                        <div class="dg g-1">
-                                            <h6 class="fs-15">Turkey, Antalya 46.197.118.72</h6>
-                                            <code class="fs-12">Microsoft Edge on Windows</code>
-                                            <div class="fs-12 t-muted lh-xs">Your current session</div>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <button class="btn btn--outline" type="button">Delete</button>
-                                        </div>
-                                    </div>
-                                    <div class="p-4 df fdr g-4 card card-border">
-                                        <div class="avatar">
-                                            <i class="badge badge--green"></i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
-                                                <path d="M176 18H80a22 22 0 0 0-22 22v176a22 22 0 0 0 22 22h96a22 22 0 0 0 22-22V40a22 22 0 0 0-22-22Zm10 198a10 10 0 0 1-10 10H80a10 10 0 0 1-10-10V40a10 10 0 0 1 10-10h96a10 10 0 0 1 10 10ZM138 60a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="dg g-1">
-                                            <h6 class="fs-15">Germany, Berlin 26.144.105.72</h6>
-                                            <code class="fs-12">Chromium on Linux</code>
-                                            <div class="fs-12 t-muted lh-xs">Your current session</div>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <button class="btn btn--outline" type="button">Delete</button>
-                                        </div>
+                                        <button class="btn btn--outline" type="button" u-ref="confirm" :disabled="!confirmPassword" @click="$ajax.post('user/confirm', {password: confirmPassword})">
+                                            <i class="ph ph-lock-key-open"></i> <?php echo t('Confirm'); ?>
+                                        </button>
+                                        <button class="btn btn--outline" type="button" hidden u-show="$passkey.available" @click="$ajax.post('user/confirm-passkey-options').then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post('user/confirm-passkey', {credential}))">
+                                            <i class="ph ph-fingerprint"></i> <?php echo t('Confirm with a passkey'); ?>
+                                        </button>
                                     </div>
                                 </div>
                                 <?php
                             },
-                            'attributes'  => [ 'u-prop' => 'title' ],
                         ],
                     ],
                 ],
@@ -468,16 +454,9 @@ return Form::enqueue(
                                         ?>
                                     </div>
                                     <div hidden u-show="$passkey.available">
-                                        <div class="df aic g-2">
-                                            <div class="field">
-                                                <div class="field-item">
-                                                    <input type="password" id="passkey-password" u-prop="passkeyPassword" autocomplete="current-password" placeholder="<?php echo t_attr('Current password'); ?>" @keydown.enter.prevent="$refs.passkeyAdd.click()">
-                                                </div>
-                                            </div>
-                                            <button class="btn btn--outline" type="button" u-ref="passkeyAdd" :disabled="!passkeyPassword" @click="$ajax.post('user/passkey-create-options', {password: passkeyPassword}).then(({options}) => $passkey.create(options)).then(credential => credential && $ajax.post('user/passkey-create', {credential, name: $passkey.device()}))">
-                                                <i class="ph ph-plus"></i> <?php echo t('Add passkey'); ?>
-                                            </button>
-                                        </div>
+                                        <button class="btn btn--outline" type="button" @click="$ajax.post('user/passkey-create-options', {password: confirmPassword}).then(({options}) => $passkey.create(options)).then(credential => credential && $ajax.post('user/passkey-create', {credential, name: $passkey.device()}))">
+                                            <i class="ph ph-plus"></i> <?php echo t('Add passkey'); ?>
+                                        </button>
                                     </div>
                                 </div>
                                 <?php
@@ -510,7 +489,7 @@ return Form::enqueue(
                                     </div>
                                     <?php if (count($sessions) > 1) : ?>
                                         <div data-session-other>
-                                            <button class="btn btn--outline t-red" type="button" @click="$ajax.post('user/sessions-delete-others')">
+                                            <button class="btn btn--outline t-red" type="button" @click="$ajax.post('user/sessions-delete-others', {password: confirmPassword})">
                                                 <i class="ph ph-sign-out"></i> <?php echo t('Sign out of all other devices'); ?>
                                             </button>
                                         </div>
@@ -534,14 +513,15 @@ return Form::enqueue(
                             'type'     => 'custom',
                             'callback' => function () use ($user) {
                                 $errors = [
-                                    'oauth-denied' => t('Connecting was cancelled.'),
-                                    'oauth-failed' => t('Could not connect the account. Please try again.'),
-                                    'oauth-linked' => t('This account is already connected to another user.'),
+                                    'oauth-denied'  => t('Connecting was cancelled.'),
+                                    'oauth-failed'  => t('Could not connect the account. Please try again.'),
+                                    'oauth-linked'  => t('This account is already connected to another user.'),
+                                    'oauth-limited' => t('Too many attempts. Try again in a few minutes.'),
                                 ];
                                 $error  = $errors[$_GET['error'] ?? ''] ?? '';
                                 ?>
                                 <div class="dg g-2 ga-4">
-                                    <div><?php echo t('Sign in with an account of another service. Connecting asks for the current password.'); ?></div>
+                                    <div><?php echo t('Sign in with an account of another service.'); ?></div>
                                     <?php if ($error !== '') : ?>
                                         <div class="df aic g-1 t-red fs-13"><i class="ph ph-warning-circle"></i> <?php echo $error; ?></div>
                                     <?php endif; ?>
@@ -553,13 +533,8 @@ return Form::enqueue(
                                         ?>
                                     </div>
                                     <div class="df aic fw g-2">
-                                        <div class="field">
-                                            <div class="field-item">
-                                                <input type="password" u-prop="identityPassword" autocomplete="current-password" placeholder="<?php echo t_attr('Current password'); ?>">
-                                            </div>
-                                        </div>
                                         <?php foreach (Auth::getProviders() as $provider) : ?>
-                                            <button class="btn btn--outline" type="button" :disabled="!identityPassword" @click="$ajax.post('user/identity-connect', {provider: '<?php echo $provider; ?>', password: identityPassword})">
+                                            <button class="btn btn--outline" type="button" @click="$ajax.post('user/identity-connect', {provider: '<?php echo $provider; ?>', password: confirmPassword})">
                                                 <i class="ph ph-<?php echo $provider; ?>-logo"></i> <?php echo Identities::label($provider); ?>
                                             </button>
                                         <?php endforeach; ?>
@@ -570,6 +545,36 @@ return Form::enqueue(
                         ],
                     ],
                 ]]),
+                [
+                    'type'          => 'group',
+                    'name'          => 'activity',
+                    'label'         => t('Recent activity'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'activity',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>
+                                    <div class="dg g-1 fs-13">
+                                        <?php foreach (Events::all($user) as $event) : ?>
+                                            <div class="df aic g-2">
+                                                <span><?php echo Events::label($event['event']); ?></span>
+                                                <span class="t-muted"><?php echo htmlspecialchars($event['device'] . ' · ' . $event['ip'] . ' · ' . $date->format(strtotime($event['created_at']))); ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
                 [
                     'type'          => 'group',
                     'name'          => 'passwords',
@@ -587,7 +592,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('At least :count characters.', User::PASSWORD_MIN_LENGTH),
+                            'instruction' => t('At least :count characters.', Passwords::MIN_LENGTH),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -652,7 +657,7 @@ return Form::enqueue(
                                 'class'     => 'btn btn--primary btn--full',
                                 '@click'    => '$ajax.post("user/password-update", {current: passwordOld, password: passwordNew})',
                                 'disabled'  => '',
-                                ':disabled' => '!passwordOld || passwordNew.length < ' . User::PASSWORD_MIN_LENGTH,
+                                ':disabled' => '!passwordOld || passwordNew.length < ' . Passwords::MIN_LENGTH,
                             ],
                         ],
                     ],

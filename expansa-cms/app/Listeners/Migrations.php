@@ -24,6 +24,7 @@ final class Migrations
         $this->createPasskeysTable();
         $this->createUserIdentitiesTable();
         $this->createUserSessionsTable();
+        $this->createUserEventsTable();
         $this->createOptionsTable();
         $this->createCommentsTable();
         $this->createTaxonomiesTable();
@@ -289,6 +290,24 @@ final class Migrations
             $table->timestamp('expires_at')->nullable();
 
             $table->index('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
+        });
+    }
+
+    private function createUserEventsTable(): void
+    {
+        // the security log of the profile: sign-ins, failures, changes of sign-in methods
+        Schema::create('user_events', function (Table $table) {
+            $table->id();
+            $table->bigInt('user_id')->unsigned();
+            $table->string('event', 40);
+            $table->text('details');
+            $table->string('ip', 45)->default('');
+            $table->string('user_agent', 255)->default('');
+            $table->timestamps();
+
+            $table->index('user_id');
+            $table->index('created_at');
             $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
         });
     }

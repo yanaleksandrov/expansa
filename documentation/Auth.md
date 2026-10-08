@@ -221,6 +221,15 @@ try {
   браузер.
 
 Без `maxAttempts` или хранилища `attempt()` просто возвращает результат проверки.
+
+Для запросов, где важна частота, а не неудачи (письма сброса пароля, регистрация, запуск passkey и OAuth), —
+`limit()`: считает каждый вызов и после `$maxAttempts` за `$window` секунд бросает `TooManyAttempts`.
+
+```php
+Auth::limit("reset:$ip", 5, 3600); // не больше 5 писем сброса в час с одного IP
+```
+
+В Expansa `App\Http\Kernel` превращает `TooManyAttempts` в уведомление «Too many attempts. Try again in N min.».
 ### Passkey
 
 Только протокол: challenge и ключи хранит вызывающий код (в Expansa — `App\Api\User\Passkey`, сессия и

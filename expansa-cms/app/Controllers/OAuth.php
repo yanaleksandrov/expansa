@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Api\User\Events;
 use App\Api\User\Identities;
+use App\Api\User\SignIn;
 use App\Models\User;
 use Expansa\Auth\Exceptions\Denied;
+use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Auth\OAuth\State;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Log;
@@ -36,7 +39,9 @@ final class OAuth
         }
 
         try {
-            $url = Identities::start($provider);
+            $url = Identities::start($provider, redirectTo: (string) ($_GET['redirect_to'] ?? ''));
+        } catch (TooManyAttempts) {
+            $this->fail('oauth-limited', 'sign-in');
         } catch (Throwable $e) {
             $this->fail('oauth-failed', 'sign-in', $e);
         }
@@ -73,12 +78,17 @@ final class OAuth
             $this->fail($user->code, $back);
         }
 
-        if ($current === null) {
-            Auth::login($user);
-            Session::regenerateId();
+        if ($current !== null) {
+            Events::record($current, 'provider_connected', ['provider' => $provider]);
+            redirect('dashboard/profile');
         }
 
-        redirect($current !== null ? 'dashboard/profile' : 'dashboard');
+        $refusal = SignIn::refusal($user);
+        if ($refusal !== null) {
+            $this->fail('oauth-refused', 'sign-in');
+        }
+
+        Redirect::send(SignIn::finish($user, false, $provider, (string) ($data['redirect_to'] ?? '')));
     }
 
     /**

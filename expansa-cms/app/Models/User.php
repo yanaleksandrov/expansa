@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Api\User\Events;
 use App\Api\User\Sessions;
 use App\Post\Type;
+use App\Support\Passwords;
 use DateTime;
 use Expansa\Access\Contracts\Subject;
 use Expansa\Auth\Contracts\Identity;
-use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Database\Attribute;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
@@ -26,10 +27,8 @@ use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
 use Expansa\Facades\Role;
-use Expansa\Facades\Safe;
 use Expansa\Support\Error;
 use Expansa\Support\Hash;
-use Expansa\Support\Is;
 
 /**
  * Class User represents a user in the system. Handles authentication,
@@ -161,16 +160,6 @@ class User extends Model implements Fieldable, Identity, Subject
         'verification_token',
         'password_reset_token',
     ];
-
-    /**
-     * Shortest password accepted when it is changed or reset.
-     */
-    public const int PASSWORD_MIN_LENGTH = 8;
-
-    /**
-     * Hash of a random password with the default cost, verified when the login is unknown.
-     */
-    private const string DUMMY_HASH = '$2y$12$WSUJqf7Jrby7LYA0yT6On.NYf5cfGDJBRtro8cfmukrmEFGmfV8M2';
 
     /**
      * Array of rules for sanitize properties.
@@ -465,52 +454,17 @@ class User extends Model implements Fieldable, Identity, Subject
     }
 
     /**
-     * Authorizes the user by password and login/email.
-     *
-     * @param array $data
-     * @return User|Error
-     */
-    public static function login(array $data): User|Error
-    {
-        $loginOrEmail = Safe::login($data['login'] ?? '');
-        $password     = Safe::trim($data['password'] ?? '');
-        $remember     = Safe::bool($data['remember'] ?? false);
-
-        $field = Is::email($loginOrEmail) ? 'email' : 'login';
-        $user  = User::find($loginOrEmail, $field);
-
-        // an unknown login is checked against a dummy hash: a faster answer would reveal that it is not registered
-        try {
-            $isValid = Auth::attempt(
-                $user instanceof User ? $user->identifier : $loginOrEmail,
-                $_SERVER['REMOTE_ADDR'] ?? '',
-                fn () => password_verify($password, $user instanceof User ? $user->password : self::DUMMY_HASH) && $user instanceof User,
-            );
-        } catch (TooManyAttempts $e) {
-            return error('user-login', t('Too many sign-in attempts. Try again in :minutes min.', (int) ceil($e->retryAfter / 60)));
-        }
-
-        // Same message for both cases — telling them apart would let an attacker enumerate registered logins/emails.
-        if (! $isValid) {
-            return error('user-login', t('These credentials do not match our records.'));
-        }
-
-        Auth::login($user, $remember);
-
-        return $user;
-    }
-
-    /**
      * Set a new password. Auth tokens are signed with the password hash, so every device is signed out;
      * for the current user the token is re-signed with the same lifetime and this session goes on.
      *
-     * @param string $password New password, at least PASSWORD_MIN_LENGTH characters.
+     * @param string $password New password, see Passwords::check().
      * @return User|Error
      */
     public function changePassword(string $password): User|Error
     {
-        if (mb_strlen($password) < self::PASSWORD_MIN_LENGTH) {
-            return error('user-password', t('The password must be at least :count characters long.', self::PASSWORD_MIN_LENGTH));
+        $refusal = Passwords::check($password, [$this->login, $this->email]);
+        if ($refusal !== null) {
+            return error('user-password', $refusal);
         }
 
         // resolved before the update: the token of the request is signed with the old hash
@@ -529,6 +483,7 @@ class User extends Model implements Fieldable, Identity, Subject
 
             // tokens of other devices stopped working with the old hash, their rows go too
             Sessions::deleteOthers($this);
+            Events::record($this, 'password_changed');
         }
 
         return $updated;

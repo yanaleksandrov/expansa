@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
-use App\Models\User;
 use Expansa\Http\Request;
 use Expansa\Support\Error;
 
@@ -97,12 +96,27 @@ final readonly class UserController
         return $this->service->sessionDelete($request->post);
     }
 
-    public function sessionsDeleteOthers(): array
+    public function sessionsDeleteOthers(Request $request): array
     {
-        return $this->service->sessionsDeleteOthers();
+        return $this->service->sessionsDeleteOthers($request->post);
     }
 
-    public function signUp(Request $request): array|User
+    public function confirm(Request $request): array
+    {
+        return $this->service->confirm($request->post);
+    }
+
+    public function confirmPasskeyOptions(): array
+    {
+        return $this->service->confirmPasskeyOptions();
+    }
+
+    public function confirmPasskey(Request $request): array
+    {
+        return $this->service->confirmPasskey($request->post);
+    }
+
+    public function signUp(Request $request): array|Error
     {
         return $this->service->signUp($request->input);
     }

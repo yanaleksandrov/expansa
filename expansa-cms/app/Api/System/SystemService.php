@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\Installation;
 use App\Support\Requirements;
 use Expansa\Database\Query\Builder;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Safe;
@@ -175,7 +176,8 @@ final class SystemService
             throw $e;
         }
 
-        User::login($userdata);
+        // the owner signs in right away, without the new device warning: it is the installation itself
+        Auth::login($user, remember: true);
 
         return [
             'target'        => 'body',

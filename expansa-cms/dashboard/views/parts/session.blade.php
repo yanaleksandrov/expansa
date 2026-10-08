@@ -25,7 +25,7 @@ $date = new IntlDateFormatter( Expansa\Facades\I18n::locale(), IntlDateFormatter
 	</div>
 	@if(!$session['current'])
 		<div class="ml-auto">
-			<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Sign out') !!}" @click="$ajax.post('user/session-delete', {id: {{ $session['id'] }}})">
+			<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Sign out') !!}" @click="$ajax.post('user/session-delete', {id: {{ $session['id'] }}, password: confirmPassword})">
 				<i class="ph ph-sign-out"></i>
 			</button>
 		</div>

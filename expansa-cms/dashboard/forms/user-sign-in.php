@@ -85,6 +85,15 @@ return \Expansa\Facades\Form::enqueue(
 			'options' => [],
 		],
 		[
+			'type'       => 'hidden',
+			'name'       => 'redirect_to',
+			'attributes' => [
+				'type'  => 'hidden',
+				'name'  => 'redirect_to',
+				'value' => (string) ( $_GET['redirect_to'] ?? '' ),
+			],
+		],
+		[
 			'type'        => 'submit',
 			'name'        => 'sign-in',
 			'label'      => t( 'Sign In' ),
@@ -130,8 +139,8 @@ return \Expansa\Facades\Form::enqueue(
 			'attributes'  => [
 				'u-show' => '$passkey.available',
 				'hidden' => true,
-				'@load'  => '$passkey.autofill(() => $ajax.post("user/passkey-options")).then(credential => credential && $ajax.post("user/passkey-sign-in", {credential, remember: remember ? 1 : 0}))',
-				'@click' => '$ajax.post("user/passkey-options").then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post("user/passkey-sign-in", {credential, remember: remember ? 1 : 0}))',
+				'@load'  => '$passkey.autofill(() => $ajax.post("user/passkey-options")).then(credential => credential && $ajax.post("user/passkey-sign-in", {credential, remember: remember ? 1 : 0, redirect_to: new URLSearchParams(location.search).get("redirect_to") || ""}))',
+				'@click' => '$ajax.post("user/passkey-options").then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post("user/passkey-sign-in", {credential, remember: remember ? 1 : 0, redirect_to: new URLSearchParams(location.search).get("redirect_to") || ""}))',
 				'class'  => 'btn btn--lg btn--outline btn--full',
 			],
 		],

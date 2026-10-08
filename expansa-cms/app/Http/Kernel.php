@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http;
 
 use Expansa\Access\Exceptions\AccessDenied;
+use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Facades\Cookie;
 use Expansa\Facades\Debug;
 use Expansa\Http\Exceptions\HttpError;
@@ -28,6 +29,7 @@ use Throwable;
  *   success       -> { "data": <return value> }
  *   HttpError -> { "message": ..., "errors"?: ... }  with the exception's status code
  *   AccessDenied  -> { "message": ... }  with status 403
+ *   TooManyAttempts -> a notice fragment with the time to wait
  *   ResponseReady -> the exception's response as-is
  *
  * Cookies queued with the Cookie facade are added to every response.
@@ -59,6 +61,10 @@ final class Kernel
             $response = $e->response;
         } catch (AccessDenied) {
             $response = new Response()->json(self::withMetrics(['message' => t('You are not allowed to do this.')]), 403);
+        } catch (TooManyAttempts $e) {
+            // a notice fragment: the dashboard shows fragments of successful answers only
+            $message  = t('Too many attempts. Try again in :minutes min.', (int) ceil($e->retryAfter / 60));
+            $response = new Response()->json(self::withMetrics(['data' => [['target' => 'body', 'notify' => $message]]]));
         } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationFailed) {
