@@ -42,35 +42,14 @@ trait Columns
     }
 
     /**
-     * CHAR(31), unique, auto-populated on insert via a BEFORE INSERT trigger (registered as a
-     * 'createUlid' command - see {@see \Expansa\Database\Schema\Compilers\Triggers}).
-     *
-     * @param string $column
-     * @return Column
-     */
-    public function ulid(string $column = 'ulid'): Column
-    {
-        $column = $this->addColumn('char(31)', $column)->unique();
-
-        $this->commands[] = $this->addCommand('createUlid', ['column' => $column->attributes]);
-
-        return $column;
-    }
-
-    /**
-     * CHAR(36), auto-populated on insert via a BEFORE INSERT trigger (registered as a
-     * 'createUuid' command - see {@see \Expansa\Database\Schema\Compilers\Triggers}).
+     * CHAR(36) for a UUID; the model fills it on insert, see {@see \Expansa\Database\Traits\HasUuid}.
      *
      * @param string $column
      * @return Column
      */
     public function uuid(string $column = 'uuid'): Column
     {
-        $column = $this->addColumn('char(36)', $column);
-
-        $this->commands[] = $this->addCommand('createUuid', ['column' => $column->attributes]);
-
-        return $column;
+        return $this->addColumn('char(36)', $column);
     }
 
     /**

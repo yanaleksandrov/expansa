@@ -101,6 +101,7 @@ final class Post extends Model
 |-------------------------|-------------------------------------------------------------------------------|
 | `HasSoftDeletes`        | `delete()` ставит `deleted_at` (`$deletedAtColumn`), запросы пропускают такие строки; `withTrashed()`, `onlyTrashed()`, `restore()` |
 | `HasTimestamps`         | `created_at` и `updated_at` читаются как `DateTime`                           |
+| `HasUuid`               | `save()` новой строки заполняет `uuid` (`$uuidColumn`) значением UUIDv7, если он не задан; генерируется в PHP, без триггера |
 | `HasSanitizing`         | правила `getSanitizerRules()` при каждой записи атрибута                      |
 | `HasValidation`         | `isValid()`, `getValidatorErrors()` по `validatorRules()`, свои правила — в `validatorExtend()` |
 | `HasHiddenAttributes`   | атрибуты из `$hidden` не попадают в `toArray()` и JSON                        |

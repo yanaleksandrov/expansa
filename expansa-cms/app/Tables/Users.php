@@ -4,58 +4,42 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
+use App\Models\User;
 use Expansa\Builders\Table\AbstractTable;
+use Expansa\Facades\Db;
+use PDO;
 
 final class Users extends AbstractTable
 {
+    /**
+     * Users with the time of their last sign-in, the first 500 by ID.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public function data(): array
     {
-        return [
-            [
-                'id'     => 1,
-                'image'  => 'https://i.pravatar.cc/150?img=1',
-                'name'   => 'Izabella Tabakova',
-                'email'  => 'codyshop@team.com',
-                'status' => 'Active',
-                'role'   => 'admin',
-                'visit'  => '3 days ago',
-            ],
-            [
-                'id'     => 1,
-                'image'  => 'https://i.pravatar.cc/150?img=2',
-                'name'   => 'Izabella Tabakova',
-                'email'  => 'codyshop@team.com',
-                'status' => 'Active',
-                'role'   => 'subscriber',
-                'visit'  => '3 days ago',
-            ],
-            [
-                'id'     => 1,
-                'image'  => 'https://i.pravatar.cc/150?img=3',
-                'name'   => 'Izabella Tabakova',
-                'email'  => 'codyshop@team.com',
-                'status' => 'Active',
-                'role'   => 'editor',
-                'visit'  => '3 days ago',
-            ],
-            [
-                'id'     => 1,
-                'image'  => 'https://i.pravatar.cc/150?img=4',
-                'name'   => 'Izabella Tabakova',
-                'email'  => 'codyshop@team.com',
-                'status' => 'Active',
-                'role'   => 'author',
-                'visit'  => '3 days ago',
-            ],
-        ];
+        $visits = Db::query('SELECT user_id, MAX(created_at) FROM <user_events> WHERE event = \'sign_in\' GROUP BY user_id')
+            ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
+
+        $columns = ['id [Int]', 'login', 'showname', 'email', 'status', 'roles'];
+        $users   = Db::select('users', $columns, ['ORDER' => ['id' => 'ASC'], 'LIMIT' => 500]) ?? [];
+
+        return array_map(fn (array $user) => [
+            'id'     => $user['id'],
+            'name'   => $user['showname'] ?: $user['login'],
+            'login'  => $user['login'],
+            'email'  => $user['email'],
+            'status' => $user['status'] === User::STATUS_ACTIVE ? t('Active') : t('Disabled'),
+            'role'   => ((array) json_decode((string) $user['roles'], true))[0] ?? '',
+            'visit'  => isset($visits[$user['id']]) ? date('Y-m-d H:i', (int) strtotime($visits[$user['id']])) : t('Never'),
+        ], $users);
     }
 
     public function cells(): array
     {
         return [
             $this->cell('id')->title('<input type="checkbox" u-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
-            $this->cell('image')->fixedWidth('2.5rem')->view('image'),
-            $this->cell('name')->title(t('Name'))->flexibleWidth('16rem')->sortable()->view('title'),
+            $this->cell('name')->title(t('Name'))->flexibleWidth('16rem')->sortable()->view('user'),
             $this->cell('status')->title(t('Status'))->fixedWidth('6rem')->view('raw'),
             $this->cell('visit')->title(t('Last visit'))->fixedWidth('8rem')->view('raw'),
             $this->cell('role')->title(t('Role'))->fixedWidth('8rem')->view('role'),

@@ -20,7 +20,7 @@ if (!defined('EX_PATH')) {
 $slug = Safe::trim($__data['slug'] ?? '');
 $table = $__data['table'] ?? null;
 ?>
-        <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="<?php echo I18n::locale(); ?>">
 <head>
     <meta charset="{{ Option::attr( 'charset', 'UTF-8' ) }}">
@@ -41,10 +41,11 @@ $table = $__data['table'] ?? null;
      *
      * @since 2025.1
      */
-    Hook::call('renderDashboardHeader');
+    Hook::run('renderDashboardHeader');
     ?>
 </head>
 <body u-data="youla" @keydown.window.prevent.ctrl.s="$notice.add(notifications.ctrlS)">
+    <?php echo view('parts/impersonation'); ?>
     <div class="expansa" :class="showMenu && 'active'">
         <div class="expansa-bar">
             <div class="expansa-bar-burger" :class="showMenu && 'active'" @click="showMenu = !showMenu">
@@ -109,7 +110,7 @@ $table = $__data['table'] ?? null;
      *
      * @since 2025.1
      */
-    Hook::call('renderDashboardFooter');
+    Hook::run('renderDashboardFooter');
     ?>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <?php
 
-use App\User\Roles;
+use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 
 /**
@@ -15,7 +15,7 @@ if ( ! defined( 'EX_PATH' ) ) {
 }
 
 $prop = Safe::prop($__data['key'] ?? '');
-$role = Roles::get($__data[$prop] ?? '');
+$role = Role::get($__data[$prop] ?? '');
 $name = $role['name'] ?? '';
 ?>
 <span class="badge {{ $__data[$prop] === 'admin' ? 'badge--green-lt' : '' }}">

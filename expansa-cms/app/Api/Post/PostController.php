@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Post;
 
+use App\Http\Can;
 use Expansa\Http\Request;
 
 final readonly class PostController
@@ -15,33 +16,10 @@ final readonly class PostController
          */
         private PostService $service = new PostService(),
     ) {}
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    public function index(): array
-    {
-        return ['method' => 'PUT update user by ID'];
-    }
-
+
+    #[Can('types_edit')]
     public function create(Request $request): array
     {
         return $this->service->create($request->post);
     }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    public function update(): array
-    {
-        return ['method' => 'PUT update user by ID'];
-    }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    public function delete(): array
-    {
-        return ['method' => 'DELETE remove user by ID'];
-    }
-}
+}

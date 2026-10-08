@@ -17,21 +17,29 @@ final class Redirect
 {
     /**
      * Filter of the location, gets the location and status.
+     *
+     * @var null|Closure
      */
     private static ?Closure $locationFilter = null;
 
     /**
      * Filter of the status code, gets the status and location.
+     *
+     * @var null|Closure
      */
     private static ?Closure $statusFilter = null;
 
     /**
      * Filter of the X-Redirect-By header, gets the value, status and location.
+     *
+     * @var null|Closure
      */
     private static ?Closure $redirectByFilter = null;
 
     /**
      * Storage of flashed values for the next request, gets the key and values.
+     *
+     * @var null|Closure
      */
     private static ?Closure $flashStore = null;
 

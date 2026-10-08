@@ -36,16 +36,22 @@ final class Manager
 
     /**
      * Pattern of a translation file name for sprintf(), gets the locale.
+     *
+     * @var string
      */
     private string $pattern = '';
 
     /**
      * Directory with translation overrides, e.g. edited in the dashboard.
+     *
+     * @var string
      */
     private string $overrides = '';
 
     /**
      * Returns the language list, called once on the first use.
+     *
+     * @var null|Closure
      */
     private ?Closure $languageSource = null;
 
@@ -86,6 +92,8 @@ final class Manager
 
     /**
      * Locale from the Accept-Language header with a dash, false if it can not be detected.
+     *
+     * @var null|false|string
      */
     private string|false|null $httpLocale = null;
 

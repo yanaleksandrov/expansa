@@ -5,26 +5,25 @@ declare(strict_types=1);
 namespace Expansa\Database\Schema;
 
 use Closure;
+use Expansa\Database\Exceptions\SchemaFailed;
 use Expansa\Database\Query\Builder as QueryBuilder;
 use Expansa\Database\Schema\Compilers\Columns;
 use Expansa\Database\Schema\Compilers\Indexes;
-use Expansa\Database\Schema\Compilers\Triggers;
 
 /**
  * Compiles a Table definition (built by the $callback) into the actual DDL: one CREATE TABLE,
- * then one ALTER TABLE/CREATE TRIGGER statement per index/foreign-key/trigger command collected
- * on the Table while $callback ran.
+ * then one ALTER TABLE statement per index and foreign key collected on the Table while $callback ran.
+ * A statement the database refuses throws SchemaFailed instead of leaving the schema half-built.
  */
 class Builder
 {
     use Columns;
     use Indexes;
-    use Triggers;
 
     public function __construct(
 
         /**
-         * The connection new tables/indexes/triggers are created on.
+         * The connection new tables and indexes are created on.
          */
         public QueryBuilder $connection,
     ) {}
@@ -61,17 +60,14 @@ class Builder
             'CHARSET' => $this->compileCharset(),
             'COLLATE' => $this->compileCollate(),
         ]);
+        $this->check("create the table [$name]");
 
         foreach ($table->commands as $command) {
             $statement = $this->compileIndexes($table, $command);
 
             if ($statement) {
                 $this->connection->query($statement);
-            }
-
-            $statement = $this->compileTriggers($table, $command);
-            if ($statement) {
-                $this->connection->query($statement);
+                $this->check("add [$command->name] to [$name]");
             }
         }
     }
@@ -85,6 +81,7 @@ class Builder
     public function drop(string $name): void
     {
         $this->connection->drop($name);
+        $this->check("drop the table [$name]");
     }
 
     /**
@@ -97,5 +94,20 @@ class Builder
     public function rename(string $name, string $to): void
     {
         $this->connection->rename($name, $to);
+        $this->check("rename the table [$name]");
+    }
+
+    /**
+     * Throw if the last statement failed; the connection keeps errors silent by default.
+     *
+     * @param string $action What the statement did, for the message.
+     * @return void
+     * @throws SchemaFailed
+     */
+    private function check(string $action): void
+    {
+        if ($this->connection->error !== null) {
+            throw new SchemaFailed("Could not $action: {$this->connection->error}");
+        }
     }
 }

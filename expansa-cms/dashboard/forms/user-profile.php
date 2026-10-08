@@ -1,10 +1,18 @@
 <?php
 
+use App\Api\User\Confirmation;
+use App\Api\User\Events;
+use App\Api\User\Identities;
 use App\Api\User\Passkey;
+use App\Api\User\Sessions;
+use App\Api\User\Tokens;
+use App\Api\User\TwoFactor;
 use App\Models\User;
+use App\Support\Passwords;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Form;
-use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
+use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 
 $user = User::current();
@@ -85,7 +93,9 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-at"></i>',
                             'after'       => '',
-                            'instruction' => t('Not displayed publicly. Used for account access and system notifications'),
+                            'instruction' => (string) $user->field->find('pending_email') !== ''
+                                ? t('Waiting for confirmation: open the link sent to :email. Until then the current email stays.', (string) $user->field->find('pending_email'))
+                                : t('Not displayed publicly. Used for account access and system notifications'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -96,22 +106,6 @@ return Form::enqueue(
                                 'placeholder'    => t('e.g. user@gmail.com'),
                                 'u-autocomplete' => '',
                             ],
-                        ],
-                        [
-                            'type'        => 'confirm-email',
-                            'name'        => 'confirm',
-                            'label'       => t('Please verify your email'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '<i class="ph ph-at"></i>',
-                            'after'       => '',
-                            'instruction' => t('We sent a 4-digit verification code to %s', 'user@gmail.com'),
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [ 'u-prop' => 'confirm' ],
                         ],
                     ],
                 ],
@@ -390,55 +384,60 @@ return Form::enqueue(
             'fields'        => [
                 [
                     'type'          => 'group',
-                    'name'          => 'sessions',
-                    'label'         => t('Web sessions'),
+                    'name'          => 'confirmation',
+                    'label'         => t('Confirm it is you'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
                     'fields'        => [
                         [
-                            'name'     => 'title',
+                            'name'     => 'confirmation',
                             'type'     => 'custom',
-                            'callback' => function () {
+                            'callback' => function () use ($user) {
                                 ?>
                                 <div class="dg g-2 ga-4">
-                                    <div>This is a list of devices that have logged into your account. Revoke any sessions that you do not recognize.</div>
-                                    <div class="p-4 df fdr g-4 card card-border">
-                                        <div class="avatar">
-                                            <i class="badge"></i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
-                                                <path d="M224 74h-18V64a22 22 0 0 0-22-22H40a22 22 0 0 0-22 22v96a22 22 0 0 0 22 22h114v10a22 22 0 0 0 22 22h48a22 22 0 0 0 22-22V96a22 22 0 0 0-22-22ZM40 170a10 10 0 0 1-10-10V64a10 10 0 0 1 10-10h144a10 10 0 0 1 10 10v10h-18a22 22 0 0 0-22 22v74Zm194 22a10 10 0 0 1-10 10h-48a10 10 0 0 1-10-10V96a10 10 0 0 1 10-10h48a10 10 0 0 1 10 10Zm-100 16a6 6 0 0 1-6 6H88a6 6 0 0 1 0-12h40a6 6 0 0 1 6 6Zm80-96a6 6 0 0 1-6 6h-16a6 6 0 0 1 0-12h16a6 6 0 0 1 6 6Z"/>
-                                            </svg>
+                                    <div><?php echo t('Adding or removing sign-in methods, signing out of devices and changing the email need your current password or a passkey. It is asked once in :minutes minutes.', Confirmation::TTL / 60); ?></div>
+                                    <?php if (Confirmation::isConfirmed($user)) : ?>
+                                        <div class="df aic g-1 fs-13"><i class="ph ph-check-circle"></i> <?php echo t('Confirmed for this session.'); ?></div>
+                                    <?php endif; ?>
+                                    <div class="df aic fw g-2">
+                                        <div class="field">
+                                            <div class="field-item">
+                                                <input type="password" id="confirm-password" u-prop="confirmPassword" autocomplete="current-password" placeholder="<?php echo t_attr('Current password'); ?>" @keydown.enter.prevent="$refs.confirm.click()">
+                                            </div>
                                         </div>
-                                        <div class="dg g-1">
-                                            <h6 class="fs-15">Turkey, Antalya 46.197.118.72</h6>
-                                            <code class="fs-12">Microsoft Edge on Windows</code>
-                                            <div class="fs-12 t-muted lh-xs">Your current session</div>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <button class="btn btn--outline" type="button">Delete</button>
-                                        </div>
-                                    </div>
-                                    <div class="p-4 df fdr g-4 card card-border">
-                                        <div class="avatar">
-                                            <i class="badge badge--green"></i>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
-                                                <path d="M176 18H80a22 22 0 0 0-22 22v176a22 22 0 0 0 22 22h96a22 22 0 0 0 22-22V40a22 22 0 0 0-22-22Zm10 198a10 10 0 0 1-10 10H80a10 10 0 0 1-10-10V40a10 10 0 0 1 10-10h96a10 10 0 0 1 10 10ZM138 60a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
-                                            </svg>
-                                        </div>
-                                        <div class="dg g-1">
-                                            <h6 class="fs-15">Germany, Berlin 26.144.105.72</h6>
-                                            <code class="fs-12">Chromium on Linux</code>
-                                            <div class="fs-12 t-muted lh-xs">Your current session</div>
-                                        </div>
-                                        <div class="ml-auto">
-                                            <button class="btn btn--outline" type="button">Delete</button>
-                                        </div>
+                                        <button class="btn btn--outline" type="button" u-ref="confirm" :disabled="!confirmPassword" @click="$ajax.post('user/confirm', {password: confirmPassword})">
+                                            <i class="ph ph-lock-key-open"></i> <?php echo t('Confirm'); ?>
+                                        </button>
+                                        <button class="btn btn--outline" type="button" hidden u-show="$passkey.available" @click="$ajax.post('user/confirm-passkey-options').then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post('user/confirm-passkey', {credential}))">
+                                            <i class="ph ph-fingerprint"></i> <?php echo t('Confirm with a passkey'); ?>
+                                        </button>
                                     </div>
                                 </div>
                                 <?php
                             },
-                            'attributes'  => [ 'u-prop' => 'title' ],
+                        ],
+                    ],
+                ],
+                [
+                    'type'          => 'group',
+                    'name'          => 'two-factor',
+                    'label'         => t('Two-factor authentication'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'two-factor',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                ?>
+                                <?php if (TwoFactor::isRequired($user) && ! TwoFactor::isEnabled($user)) : ?>
+                                    <div class="df aic g-1 t-red fs-13 mb-2"><i class="ph ph-warning-circle"></i> <?php echo t('Your role requires two-factor authentication: set it up to use the dashboard.'); ?></div>
+                                <?php endif; ?>
+                                <div id="two-factor"><?php echo view('parts/two-factor', ['user' => $user]); ?></div>
+                                <?php
+                            },
                         ],
                     ],
                 ],
@@ -465,16 +464,173 @@ return Form::enqueue(
                                         ?>
                                     </div>
                                     <div hidden u-show="$passkey.available">
-                                        <div class="df aic g-2">
-                                            <div class="field">
-                                                <div class="field-item">
-                                                    <input type="password" id="passkey-password" u-prop="passkeyPassword" autocomplete="current-password" placeholder="<?php echo t_attr('Current password'); ?>" @keydown.enter.prevent="$refs.passkeyAdd.click()">
-                                                </div>
-                                            </div>
-                                            <button class="btn btn--outline" type="button" u-ref="passkeyAdd" :disabled="!passkeyPassword" @click="$ajax.post('user/passkey-create-options', {password: passkeyPassword}).then(({options}) => $passkey.create(options)).then(credential => credential && $ajax.post('user/passkey-create', {credential, name: $passkey.device()}))">
-                                                <i class="ph ph-plus"></i> <?php echo t('Add passkey'); ?>
+                                        <button class="btn btn--outline" type="button" @click="$ajax.post('user/passkey-create-options', {password: confirmPassword}).then(({options}) => $passkey.create(options)).then(credential => credential && $ajax.post('user/passkey-create', {credential, name: $passkey.device()}))">
+                                            <i class="ph ph-plus"></i> <?php echo t('Add passkey'); ?>
+                                        </button>
+                                    </div>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
+                [
+                    'type'          => 'group',
+                    'name'          => 'sessions',
+                    'label'         => t('Devices'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'sessions',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $sessions = Sessions::all($user);
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Devices where you are signed in. Sign out of the ones you do not recognize and change the password.'); ?></div>
+                                    <div class="dg g-2" id="sessions">
+                                        <?php
+                                        foreach ($sessions as $session) {
+                                            echo view('parts/session', ['session' => $session]);
+                                        }
+                                        ?>
+                                    </div>
+                                    <?php if (count($sessions) > 1) : ?>
+                                        <div data-session-other>
+                                            <button class="btn btn--outline t-red" type="button" @click="$ajax.post('user/sessions-delete-others', {password: confirmPassword})">
+                                                <i class="ph ph-sign-out"></i> <?php echo t('Sign out of all other devices'); ?>
                                             </button>
                                         </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
+                ...(Auth::getProviders() === [] ? [] : [[
+                    'type'          => 'group',
+                    'name'          => 'identities',
+                    'label'         => t('Connected accounts'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'identities',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $errors = [
+                                    'oauth-denied'  => t('Connecting was cancelled.'),
+                                    'oauth-failed'  => t('Could not connect the account. Please try again.'),
+                                    'oauth-linked'  => t('This account is already connected to another user.'),
+                                    'oauth-limited' => t('Too many attempts. Try again in a few minutes.'),
+                                ];
+                                $error  = $errors[$_GET['error'] ?? ''] ?? '';
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Sign in with an account of another service.'); ?></div>
+                                    <?php if ($error !== '') : ?>
+                                        <div class="df aic g-1 t-red fs-13"><i class="ph ph-warning-circle"></i> <?php echo $error; ?></div>
+                                    <?php endif; ?>
+                                    <div class="dg g-2" id="identities">
+                                        <?php
+                                        foreach (Identities::all($user) as $identity) {
+                                            echo view('parts/identity', ['identity' => $identity]);
+                                        }
+                                        ?>
+                                    </div>
+                                    <div class="df aic fw g-2">
+                                        <?php foreach (Auth::getProviders() as $provider) : ?>
+                                            <button class="btn btn--outline" type="button" @click="$ajax.post('user/identity-connect', {provider: '<?php echo $provider; ?>', password: confirmPassword})">
+                                                <i class="ph ph-<?php echo $provider; ?>-logo"></i> <?php echo Identities::label($provider); ?>
+                                            </button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ]]),
+                [
+                    'type'          => 'group',
+                    'name'          => 'tokens',
+                    'label'         => t('API tokens'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'tokens',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $permissions = array_unique(array_merge([], ...array_map(fn (string $role) => Role::get($role)['permissions'] ?? [], $user->roles)));
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Tokens let scripts and other services call the API as you: send the header Authorization: Bearer <token>. A token gets only the permissions you choose.'); ?></div>
+                                    <div class="dg g-2" id="tokens"><?php echo view('parts/tokens', ['tokens' => Tokens::all($user)]); ?></div>
+                                    <div id="token-created"></div>
+                                    <div class="dg g-2 p-4 card card-border">
+                                        <div class="df aic fw g-2">
+                                            <div class="field">
+                                                <div class="field-item">
+                                                    <input type="text" id="token-name" placeholder="<?php echo t_attr('Token name, e.g. Deploy script'); ?>">
+                                                </div>
+                                            </div>
+                                            <div class="field">
+                                                <div class="field-item">
+                                                    <select id="token-days">
+                                                        <option value="30"><?php echo t('30 days'); ?></option>
+                                                        <option value="90" selected><?php echo t('90 days'); ?></option>
+                                                        <option value="365"><?php echo t('A year'); ?></option>
+                                                        <option value="0"><?php echo t('No expiry'); ?></option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="df fw g-3 fs-13">
+                                            <?php foreach ($permissions as $permission) : ?>
+                                                <label class="df aic g-1"><input type="checkbox" name="token-scope" value="<?php echo htmlspecialchars($permission); ?>"> <?php echo htmlspecialchars($permission); ?></label>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn--outline" type="button" @click="$ajax.post('user/token-create', {name: document.getElementById('token-name').value, days: document.getElementById('token-days').value, scopes: [...document.querySelectorAll('[name=token-scope]:checked')].map(box => box.value).join(','), password: confirmPassword})">
+                                                <i class="ph ph-plus"></i> <?php echo t('Create token'); ?>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
+                [
+                    'type'          => 'group',
+                    'name'          => 'activity',
+                    'label'         => t('Recent activity'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'activity',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>
+                                    <div class="dg g-1 fs-13">
+                                        <?php foreach (Events::all($user) as $event) : ?>
+                                            <div class="df aic g-2">
+                                                <span><?php echo Events::label($event['event']); ?></span>
+                                                <span class="t-muted"><?php echo htmlspecialchars($event['device'] . ' · ' . $event['ip'] . ' · ' . $date->format(strtotime($event['created_at']))); ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                                 <?php
@@ -499,7 +655,7 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('At least :count characters.', User::PASSWORD_MIN_LENGTH),
+                            'instruction' => t('At least :count characters.', Passwords::MIN_LENGTH),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -564,94 +720,8 @@ return Form::enqueue(
                                 'class'     => 'btn btn--primary btn--full',
                                 '@click'    => '$ajax.post("user/password-update", {current: passwordOld, password: passwordNew})',
                                 'disabled'  => '',
-                                ':disabled' => '!passwordOld || passwordNew.length < ' . User::PASSWORD_MIN_LENGTH,
+                                ':disabled' => '!passwordOld || passwordNew.length < ' . Passwords::MIN_LENGTH,
                             ],
-                        ],
-                    ],
-                ],
-            ],
-        ],
-        [
-            'name'          => 'applications',
-            'type'          => 'tab',
-            'label'         => t('API keys'),
-            'description'   => '',
-            'icon'          => 'ph ph-key',
-            'class_button'  => '',
-            'class_content' => 'p-7 sm:p-5',
-            'fields'        => [
-                [
-                    'type'          => 'group',
-                    'name'          => 'auth',
-                    'label'         => t('Authentication keys'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
-                        [
-                            'name'     => 'title',
-                            'type'     => 'custom',
-                            'callback' => function () {
-                                Hook::add('renderDashboardFooter', function () {
-                                    echo view('dialogs/api-keys-manager');
-                                }, 5);
-                                ?>
-                                <div class="dg ga-4">
-                                    <div>
-	                                    <p><?php echo t('Application passwords allow authentication via non-interactive systems, such as REST API, without providing your actual password. Application passwords can be easily revoked. They cannot be used for traditional logins to your website.'); ?></p>
-	                                    <p>
-		                                    <button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
-			                                    <i class="ph ph-plus"></i> <?php echo t('Add new key'); ?>
-		                                    </button>
-	                                    </p>
-	                                    <template u-if="apiKeys.length">
-		                                    <div>
-			                                    <template u-for="(key, i) in apiKeys">
-				                                    <div class="p-4 df fdr g-4 mb-2 card card-border">
-					                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 256 256">
-						                                    <path d="M160 18a78 78 0 0 0-73.8 103.3l-58.4 58.5A6 6 0 0 0 26 184v40a6 6 0 0 0 6 6h40a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 6-6v-18h18a6 6 0 0 0 4.2-1.8l10.5-10.4A78 78 0 1 0 160 18Zm0 144a65.6 65.6 0 0 1-24.4-4.7 6 6 0 0 0-6.7 1.3L117.5 170H96a6 6 0 0 0-6 6v18H72a6 6 0 0 0-6 6v18H38v-31.5L97.4 127a6 6 0 0 0 1.3-6.7A66 66 0 1 1 160 162Zm30-86a10 10 0 1 1-10-10 10 10 0 0 1 10 10Z"/>
-					                                    </svg>
-					                                    <div class="dg g-1">
-						                                    <h6 class="fs-14" u-text="key.title"></h6>
-						                                    <code class="fs-12 df aic g-3 bg-green-lt t-green">
-							                                    <span class="badge badge--sm badge--green-lt"><?php echo t('Active'); ?></span> <span u-text="key.token"></span>
-							                                    <i class="fs-14 ph ph-copy" title="<?php echo t('Copy'); ?>" @click="$copy(key.token)"></i>
-						                                    </code>
-						                                    <div class="fs-12 t-muted lh-xs"><?php echo t('Created at'); ?> <span u-text="key.createdAt"></span></div>
-					                                    </div>
-					                                    <div class="ml-auto">
-						                                    <button class="btn btn--sm btn--outline" type="button" @click="$dialog.open('tmpl-api-keys-manager', apiKeyManagerDialog)">
-							                                    <i class="ph ph-pen"></i> <?php echo t('Edit'); ?>
-						                                    </button>
-						                                    <button class="btn btn--sm btn--icon t-red" type="button" @click="$ajax.post('apikey/delete', key, e => e.end && apiKeys.splice(i, 1))">
-							                                    <i class="ph ph-trash"></i>
-						                                    </button>
-					                                    </div>
-				                                    </div>
-			                                    </template>
-			                                    <p class="df aic g-1 t-red fs-13">
-				                                    <i class="ph ph-info"></i> <?php echo t('The Expansa support team will never ask you to share your secret keys.'); ?>
-			                                    </p>
-		                                    </div>
-	                                    </template>
-	                                    <template u-if="!apiKeys.length">
-                                            <?php
-                                            echo view(
-                                                'global/state',
-                                                [
-                                                    'icon'        => 'ufo',
-                                                    'class'       => 'dg jic m-auto t-center p-7',
-                                                    'title'       => t('No API keys found'),
-                                                    'description' => t('To begin, click "Add new key" to create your first API key.'),
-                                                ]
-                                            );
-                                            ?>
-	                                    </template>
-                                    </div>
-                                </div>
-                                <?php
-                            },
-                            'attributes'  => [ 'u-prop' => 'title' ],
                         ],
                     ],
                 ],

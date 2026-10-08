@@ -13,6 +13,8 @@ interface Route
 {
     /**
      * Route pattern, e.g. "/posts/(\d+)".
+     *
+     * @var string
      */
     public string $pattern { get; }
 

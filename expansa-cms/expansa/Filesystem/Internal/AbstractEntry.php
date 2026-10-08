@@ -34,6 +34,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Name without the directory and the extension.
+     *
+     * @var string
      */
     public string $filename {
         get => pathinfo($this->path, PATHINFO_FILENAME);
@@ -41,6 +43,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Name with the extension.
+     *
+     * @var string
      */
     public string $basename {
         get => basename($this->path);
@@ -48,6 +52,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Name of the parent directory.
+     *
+     * @var string
      */
     public string $dirname {
         get => basename(dirname($this->path));
@@ -55,6 +61,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Full path of the parent directory.
+     *
+     * @var string
      */
     public string $dirpath {
         get => dirname($this->path);
@@ -66,6 +74,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Entry type from filetype(): `file`, `dir`, `link`; empty for a missing entry.
+     *
+     * @var string
      */
     public string $type {
         get => $this->exists ? (string) filetype($this->path) : '';
@@ -77,6 +87,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Last modification time as `Y-m-d H:i:s`, empty for a missing entry.
+     *
+     * @var string
      */
     public string $modified {
         get => $this->exists ? date('Y-m-d H:i:s', (int) filemtime($this->path)) : '';
@@ -84,6 +96,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Permissions as octal digits read as a number: 644, 755.
+     *
+     * @var int
      */
     public int $permission {
         get => $this->exists ? (int) substr(sprintf('%o', fileperms($this->path)), -4) : 0;
@@ -91,6 +105,8 @@ abstract class AbstractEntry implements Entry
 
     /**
      * Human-readable size: `512 b`, `1.25 Mb`.
+     *
+     * @var string
      */
     public string $size {
         get {

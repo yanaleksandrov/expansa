@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Log\Formatters;
 
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 
 /**
  * Telegram message in the HTML parse mode: level and channel in bold, the context in a code block.
@@ -19,7 +19,7 @@ class Telegram extends AbstractFormatter
      */
     public const int MAX_LENGTH = 4096;
 
-    public function format(LogRecord $record): string
+    public function format(Record $record): string
     {
         $header  = '<b>' . $record->level->label() . '</b> ' . $this->escape($record->channel);
         $context = $record->context === [] ? '' : $this->toJson($this->normalize($record->context));

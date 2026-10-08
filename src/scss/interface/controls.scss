@@ -455,11 +455,9 @@
 }
 
 .badge {
-  color: var(--expansa-text-secondary);
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;
-  border-radius: 0.375em;
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -473,11 +471,14 @@
   border: 1px solid transparent;
   font-weight: 500;
   position: relative;
-  padding: 0.25em 0.45em;
+  padding: 0.1rem 0.5rem;
   min-width: #{calc(30/16)}em;
   height: #{calc(30/16)}em;
   font-size: #{calc(12/16)}rem;
   gap: 0.25em;
+  border-radius: 1rem;
+  background-color: var(--expansa-bg-universal);
+  color: var(--expansa-text-muted);
 
   &:empty{
     display: inline-block;

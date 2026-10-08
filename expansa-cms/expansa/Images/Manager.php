@@ -30,6 +30,8 @@ final class Manager
 {
     /**
      * Spatie image with the Imagick driver, GD without the imagick extension.
+     *
+     * @var Image
      */
     public readonly Image $driver;
 

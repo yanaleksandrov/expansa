@@ -2,7 +2,7 @@
 /**
  * Passkey card of the profile, also returned by the "user/passkey-create" API.
  *
- * @var array{id: int, name: string, created_at: string, used_at: ?string} $passkey
+ * @var array{id: int, name: string, backed_up: bool, created_at: string, used_at: ?string} $passkey
  */
 if ( ! defined( 'EX_PATH' ) ) {
 	exit;
@@ -19,10 +19,13 @@ $date = new IntlDateFormatter( Expansa\Facades\I18n::locale(), IntlDateFormatter
 			@if($passkey['used_at'])
 				· {!! t( 'Last used :date', $date->format( strtotime( $passkey['used_at'] ) ) ) !!}
 			@endif
+			@if($passkey['backed_up'])
+				· {!! t( 'Synced' ) !!}
+			@endif
 		</div>
 	</div>
 	<div class="ml-auto">
-		<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Remove') !!}" @click="$ajax.post('user/passkey-delete', {id: {{ $passkey['id'] }}})">
+		<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Remove') !!}" @click="$ajax.post('user/passkey-delete', {id: {{ $passkey['id'] }}, password: confirmPassword})">
 			<i class="ph ph-trash"></i>
 		</button>
 	</div>

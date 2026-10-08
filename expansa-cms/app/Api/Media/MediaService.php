@@ -6,7 +6,7 @@ namespace App\Api\Media;
 
 use App\Models\Media;
 use App\Models\Post;
-use Expansa\Debug\Error;
+use Expansa\Support\Error;
 use Expansa\Support\Str;
 
 final class MediaService

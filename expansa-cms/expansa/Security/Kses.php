@@ -216,6 +216,8 @@ final class Kses
 
     /**
      * Filtered markup pieces by their source, valid because the rules of a filter never change.
+     *
+     * @var array
      */
     private array $cache = [];
 

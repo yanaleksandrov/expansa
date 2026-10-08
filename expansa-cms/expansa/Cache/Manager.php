@@ -36,6 +36,8 @@ final class Manager implements Provider
 
     /**
      * Store of the provider methods.
+     *
+     * @var string
      */
     public private(set) string $defaultStore = 'memory';
 
@@ -202,6 +204,7 @@ final class Manager implements Provider
     private function createRedisDriver(array $config): Redis
     {
         $client = new RedisClient();
+
         $client->connect($config['host'] ?? '127.0.0.1', (int) ($config['port'] ?? 6379));
 
         if (isset($config['password'])) {
@@ -223,6 +226,7 @@ final class Manager implements Provider
     private function createMemcachedDriver(array $config): Memcached
     {
         $client = new MemcachedClient();
+
         $client->addServers($config['servers'] ?? [['127.0.0.1', 11211]]);
 
         return new Memcached($client);

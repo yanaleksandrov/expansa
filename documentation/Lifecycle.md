@@ -22,8 +22,7 @@ index.php / artisan
    ├─ константы, env.php, autoload.php
    ├─ functions.php                metrics() считает время от начала запроса
    ├─ Requirements::check()        старая версия PHP → страница ошибки (500) или текст в консоли
-   ├─ Is::configure(), Lifecycle::configure() хуки и маршрутизация шагов
-   ├─ $isInstalled = Installation::isComplete() вычисляется один раз
+   ├─ Is::configure(), Lifecycle::configure() хуки и маршрутизация шагов; Is::installed() — ленивая проверка
    ├─ фазы
    │  ├─ boot          вывод ошибок в debug, maintenance.php, ленивые справочники
    │  ├─ configure     configs.php: слушатели хуков, поля форм, переводы
@@ -38,7 +37,7 @@ index.php / artisan
    │  ├─ dashboard     /dashboard/...: проверка входа, ассеты, меню
    │  └─ web           всё остальное: главная и /installed, иначе 404
    ├─ маршрутизация    колбэк route: Route::run() (кроме cli)
-   ├─ run(catch:)      исключение из любого шага → Debug::render(), страница отладки
+   ├─ run(catch:)      исключение из любого шага → Debug::handle(): лог и страница ошибки
    └─ terminate        хук после отправки ответа
 ```
 
@@ -49,7 +48,7 @@ index.php / artisan
 
 ```php
 Lifecycle::configure(
-    hook: fn (string $name) => Hook::call($name),        // before{Phase}, after{Phase}, enter{Context}
+    hook: fn (string $name) => Hook::run($name),         // before{Phase}, after{Phase}, enter{Context}
     terminate: fn () => Hook::defer('terminate'),       // один раз в начале run()
     route: fn () => Route::run(),                       // после контекста, кроме консоли
     uri: fn () => Route::uri(),                         // URI, если run() его не получил
@@ -66,7 +65,7 @@ Lifecycle::configure(
 ```php
 use Expansa\Facades\Lifecycle;
 
-Lifecycle::phase('register', $isInstalled, function () {
+Lifecycle::phase('register', fn () => Is::installed(), function () {
     require_once EX_PATH . 'register.php';
 });
 ```
@@ -208,7 +207,7 @@ return new class extends Plugin
 оставшиеся шаги не выполняются. Без обработчика исключение уходит дальше.
 
 ```php
-Lifecycle::run(catch: fn (Throwable $e) => Debug::render($e, EX_PATH . 'dashboard/debug.php'));
+Lifecycle::run(catch: fn (Throwable $e) => Debug::handle($e));
 ```
 
 ## Таймлайн
@@ -240,10 +239,16 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
   адрес сайта, соединение с базой, версия), приложение передаёт через `configure()` пакета с
   именованными аргументами: `Db`, `Url`, `View`, `Extensions`, `Terminal`, `Table`, `I18n`, `Hook`,
   `Form` — в фазе `configure`; `Is` и `Lifecycle` — до фаз, потому что фаза `boot` читает `Is::debug()`.
-- **Установлено, если есть `env.php`.** Установщик пишет черновик `env.install.php` и переименовывает
-  его в `env.php` только после всех шагов, поэтому прерванная установка не оставляет `env.php`.
-  Проверка `Installation::isComplete()` не обращается к базе и вычисляется один раз, в `$isInstalled`:
-  запрос установки меняет результат.
+- **Установлено, если есть `env.php` и владелец в базе.** `Installation::isComplete()` проверяет, что
+  `env.php` загружен, в базе есть таблица опций и опция `site.owner` — установщик пишет её последней.
+  `Is::installed()` вызывает проверку один раз за запрос, при первом условии фазы `register`, когда фаза
+  `configure` уже подключила базу: запрос установки меняет результат. Недоступная база бросает исключение
+  и показывает страницу ошибки, а не установщик, иначе при сбое базы сайт мог бы переустановить любой.
+- **Установщик с готовым `env.php`.** Если `env.php` есть, а владельца в базе нет (файл скопирован на
+  сервер с пустой базой), открывается установщик: шаг базы не спрашивает и не показывает настройки,
+  проверка и установка берут `EX_DB` из `env.php` и не перезаписывают его. Без `env.php` установщик пишет
+  черновик `env.install.php` и переименовывает его в `env.php` только после всех шагов, поэтому
+  прерванная установка не оставляет `env.php`.
 - **Объявления после старта запрещены.** Фазу или контекст нельзя объявить после
   `Lifecycle::run()` и повторный запуск выбрасывают `Exceptions\AlreadyStarted`, дубль имени —
   `Exceptions\AlreadyDeclared` (оба — `LogicException`).
@@ -256,6 +261,7 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
   что-то упало. Известные ошибки PHPStan собраны в `phpstan-baseline.neon`: новые не допускаются, старые
   убираются из файла по мере исправления.
 - Настройки окружения в `env.php` сгруппированы в массивы: `EX_DB` (передаётся в `Db::configure()`),
-  `EX_KEYS`, `EX_DEBUG`, `EX_DKIM`. `EX_DEBUG['enabled']` никогда не включайте на рабочем сайте.
+  `EX_KEYS`, `EX_DEBUG`, `EX_CACHE`, `EX_AI`; почта и вход настраиваются в админке.
+  `EX_DEBUG['enabled']` никогда не включайте на рабочем сайте.
 - `php artisan serve [--host=127.0.0.1] [--port=8000]` запускает сайт на встроенном сервере PHP через
   `server.php`. Роутер выставляет `SCRIPT_NAME` как Apache, иначе `/dashboard` путается с папкой `dashboard/`.

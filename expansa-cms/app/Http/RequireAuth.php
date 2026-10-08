@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use App\Models\User;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Route;
 use Expansa\Http\Response;
 
@@ -27,6 +27,8 @@ final class RequireAuth
         '/api/user/reset-password',
         '/api/user/passkey-options',
         '/api/user/passkey-sign-in',
+        '/api/user/two-factor',
+        '/api/user/email-link',
     ];
 
     public function handle(): void
@@ -35,7 +37,7 @@ final class RequireAuth
             return;
         }
 
-        if (User::isLogged()) {
+        if (Auth::isLoggedIn()) {
             return;
         }
 

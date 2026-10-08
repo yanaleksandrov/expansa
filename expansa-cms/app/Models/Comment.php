@@ -10,7 +10,7 @@ use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
+use Expansa\Support\Error;
 
 /**
  * Represents a user comment on a post, including nested replies, author details,

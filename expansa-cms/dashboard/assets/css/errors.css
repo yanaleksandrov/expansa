@@ -98,7 +98,7 @@ meter {
   --expansa-placeholder: #9aa0a9;
   --expansa-border: #dfe2e3;
   --expansa-border-hover: #ccced3;
-  --expansa-corner-shape-superellipse: 1.825;
+  --expansa-corner-shape-superellipse: 1.75;
   --expansa-border-radius-scale: 1;
   --expansa-border-radius--xs: calc(0.275rem * var(--expansa-border-radius-scale));
   --expansa-border-radius--sm: calc(0.35rem * var(--expansa-border-radius-scale));
@@ -165,7 +165,6 @@ body {
   box-shadow: var(--expansa-box-shadow);
   overflow: hidden;
   word-break: break-all;
-  max-height: 53em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .errors-wrapper p {
@@ -229,28 +228,47 @@ body {
   padding: 1.5rem 1.75rem;
   border-bottom: 1px solid var(--expansa-border);
 }
-.errors-data {
-  display: flex;
-  flex-wrap: wrap;
+.errors-id {
+  color: var(--expansa-text-muted);
+  font-size: 0.875rem;
 }
-.errors-navigation {
-  border-inline-end: 1px solid var(--expansa-border);
-  padding: 1rem 0;
-  width: 20rem;
-  overflow-y: auto;
+.errors-content a, .errors-frame-link {
+  color: inherit;
+  -webkit-text-decoration: underline dotted;
+          text-decoration: underline dotted;
 }
-.errors-navigation-item {
+.errors-frame, .errors-group {
+  border-bottom: 1px solid var(--expansa-border);
+}
+.errors-frame summary, .errors-group summary {
   padding: 0.875rem 1.75rem;
   cursor: pointer;
+  list-style: none;
 }
-.errors-navigation-item.active, .errors-navigation-item:hover {
+.errors-frame summary:hover, .errors-group summary:hover {
   transition: all 0.25s;
   background-color: var(--expansa-bg);
 }
+.errors-frame[open] > summary, .errors-group[open] > summary {
+  background-color: var(--expansa-bg);
+}
+.errors-frame-link {
+  margin-inline-start: 0.5rem;
+  color: var(--expansa-primary);
+}
+.errors-group > summary {
+  color: var(--expansa-text-muted);
+}
+.errors-group .errors-frame:last-child {
+  border-bottom: 0;
+}
+.errors-request {
+  border-bottom: 0;
+}
 .errors-source {
   padding: 1.5rem 1.75rem;
-  flex: 1;
-  min-width: 20rem;
+  overflow-x: auto;
   white-space: pre;
+  word-break: normal;
   background-color: var(--expansa-bg) !important;
 }

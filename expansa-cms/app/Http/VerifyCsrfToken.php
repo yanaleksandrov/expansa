@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use Expansa\Facades\Auth;
 use Expansa\Http\Response;
 use Expansa\Security\Csrf;
 use Expansa\Security\Csrf\Providers\Cookie;
@@ -47,6 +48,11 @@ final class VerifyCsrfToken
      */
     public function handle(): void
     {
+        // a bearer token can't be sent by a forged cross-site request, and with it no cookie is read
+        if (Auth::isBearer()) {
+            return;
+        }
+
         // A raw $_SERVER read, not a full Request::createFromGlobals() — this middleware
         // needs exactly one header, and Kernel::dispatch() builds a real Request for the
         // controller moments later anyway; building one here too would just be doing the

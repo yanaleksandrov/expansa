@@ -37,6 +37,9 @@ final class Manager
      */
     public private(set) array $shared = [];
 
+    /**
+     * @var Finder
+     */
     private Finder $finder;
 
     /**
@@ -46,6 +49,9 @@ final class Manager
      */
     private array $paths = [];
 
+    /**
+     * @var string
+     */
     private string $cachePath = '';
 
     /**

@@ -38,9 +38,15 @@ final class Markdown
             $text = preg_replace('#^(?:>|&gt;) \s*(.*)$#mx', '<blockquote>$1</blockquote>', $text);
         }
 
-        if (strpbrk($text, '*_') !== false) {
-            $text = preg_replace('/\*\*(.*?)\*\*|__(.*?)__/s', '<strong>${1}${2}</strong>', $text);
-            $text = preg_replace('/\*(.*?)\*|_(.*?)_/s', '<em>${1}${2}</em>', $text);
+        if (str_contains($text, '*')) {
+            $text = preg_replace('/\*\*(.*?)\*\*/s', '<strong>$1</strong>', $text);
+            $text = preg_replace('/\*(.*?)\*/s', '<em>$1</em>', $text);
+        }
+
+        if (str_contains($text, '_')) {
+            // as in CommonMark, underscores inside a word stay: upload_max_filesize, EX_AI_KEY; invalid UTF-8 keeps the text as is
+            $text = preg_replace('/(?<![\p{L}\p{N}_])__(?=\S)(.+?)(?<=\S)__(?![\p{L}\p{N}_])/su', '<strong>$1</strong>', $text) ?? $text;
+            $text = preg_replace('/(?<![\p{L}\p{N}_])_(?=\S)(.+?)(?<=\S)_(?![\p{L}\p{N}_])/su', '<em>$1</em>', $text) ?? $text;
         }
 
         if (str_contains($text, '](')) {

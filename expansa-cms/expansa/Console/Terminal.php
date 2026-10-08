@@ -44,6 +44,8 @@ final class Terminal
 
     /**
      * Name of the command to run.
+     *
+     * @var string
      */
     private string $command = '';
 

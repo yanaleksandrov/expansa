@@ -85,6 +85,15 @@ return \Expansa\Facades\Form::enqueue(
 			'options' => [],
 		],
 		[
+			'type'       => 'hidden',
+			'name'       => 'redirect_to',
+			'attributes' => [
+				'type'  => 'hidden',
+				'name'  => 'redirect_to',
+				'value' => (string) ( $_GET['redirect_to'] ?? '' ),
+			],
+		],
+		[
 			'type'        => 'submit',
 			'name'        => 'sign-in',
 			'label'      => t( 'Sign In' ),
@@ -113,24 +122,27 @@ return \Expansa\Facades\Form::enqueue(
                 'hidden' => true,
             ],
         ],
-        [
-            'name'     => 'instructions',
-            'type'     => 'custom',
-            'callback' => function() {
-                ?>
-                <button
-                    type="button" class="btn btn--lg btn--outline btn--full"
-                    @load="$passkey.autofill(() => $ajax.post('user/passkey-options')).then(credential => credential && $ajax.post('user/passkey-sign-in', {credential, remember: remember ? 1 : 0}))"
-                    @click="$ajax.post('user/passkey-options').then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post('user/passkey-sign-in', {credential, remember: remember ? 1 : 0}))"
-                >
-                    <i class="ph ph-fingerprint"></i> <?php echo t('Sign in with a passkey'); ?>
-                </button>
-                <?php
-            },
-            'attributes'  => [
-                'u-show' => '$passkey.available',
-                'hidden' => true,
-            ],
-        ],
+		[
+			'type'        => 'button',
+			'name'        => 'passkey',
+			'label'       => '<i class="ph ph-fingerprint"></i> ' . t('Sign in with a passkey'),
+			'class'       => '',
+			'label_class' => '',
+			'reset'       => 0,
+			'before'      => '',
+			'after'       => '',
+			'instruction' => '',
+			'tooltip'     => '',
+			'copy'        => 0,
+			'validator'   => '',
+			'conditions'  => [],
+			'attributes'  => [
+				'u-show' => '$passkey.available',
+				'hidden' => true,
+				'@load'  => '$passkey.autofill(() => $ajax.post("user/passkey-options")).then(credential => credential && $ajax.post("user/passkey-sign-in", {credential, remember: remember ? 1 : 0, redirect_to: new URLSearchParams(location.search).get("redirect_to") || ""}))',
+				'@click' => '$ajax.post("user/passkey-options").then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post("user/passkey-sign-in", {credential, remember: remember ? 1 : 0, redirect_to: new URLSearchParams(location.search).get("redirect_to") || ""}))',
+				'class'  => 'btn btn--lg btn--outline btn--full',
+			],
+		],
 	]
 );

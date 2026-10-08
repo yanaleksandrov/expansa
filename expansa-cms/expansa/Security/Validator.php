@@ -74,6 +74,8 @@ final class Validator
 
     /**
      * Translates a message with the arguments of its `:name` placeholders.
+     *
+     * @var null|Closure
      */
     private static ?Closure $translate = null;
 

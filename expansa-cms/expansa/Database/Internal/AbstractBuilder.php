@@ -345,7 +345,7 @@ abstract class AbstractBuilder
         }
 
         $query = preg_replace_callback(
-            '/(([`\'])[\<]*?)?((AFTER DELETE ON|BEFORE INSERT ON|FROM|TABLE|TABLES LIKE|INTO|UPDATE|JOIN|TABLE IF EXISTS)\s*)?\<((' . $this::TABLE_PATTERN . ')(\.' . $this::COLUMN_PATTERN . ')?)\>([^,]*?\2)?/',
+            '/(([`\'])[\<]*?)?((AFTER DELETE ON|BEFORE INSERT ON|FROM|TABLE|TABLES LIKE|INTO|UPDATE|JOIN|TABLE IF EXISTS|REFERENCES)\s*)?\<((' . $this::TABLE_PATTERN . ')(\.' . $this::COLUMN_PATTERN . ')?)\>([^,]*?\2)?/',
             function ($matches) {
                 if (!empty($matches[2]) && isset($matches[8])) {
                     return $matches[0];
@@ -881,7 +881,8 @@ abstract class AbstractBuilder
         }
 
         if (isset($columnFn)) {
-            if ($columnFn === 1) {
+            // has() asks for the constant: SELECT EXISTS(SELECT 1 FROM ...)
+            if ($columnFn === '1') {
                 $column = '1';
 
                 if (is_null($where)) {

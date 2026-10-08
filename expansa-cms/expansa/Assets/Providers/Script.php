@@ -88,7 +88,7 @@ final class Script extends AbstractProvider
         public string $version = '',
 
         /**
-         * uid's (or full ids) of assets that are required before this script.
+         * UID's (or full ids) of assets that are required before this script.
          */
         public array $dependencies = [],
 

@@ -18,6 +18,8 @@ final class Message
 {
     /**
      * Error of the last send(), empty after a successful one.
+     *
+     * @var string
      */
     public string $error {
         get => $this->mailer->ErrorInfo;

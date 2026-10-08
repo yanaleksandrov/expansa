@@ -2,17 +2,13 @@
 
 namespace Dashboard;
 
-use App\Models\User;
-use App\Query\Query;
 use App\Support\DashboardAssets;
 use App\Support\DashboardFavicons;
 use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
-use Expansa\Database\FieldEav;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
-use Expansa\Facades\Route;
-use Expansa\Facades\Safe;
 
 new class
 {
@@ -52,64 +48,10 @@ new class
                 : ['js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js"];
         });
 
-        $user   = User::current();
-        $userId = $user->id ?? 0;
-
-        // only the profile page lists and manages API keys
-        $isProfile = trim(Route::uri(), '/') === Hook::call('dashboardRootSlug', 'dashboard') . '/profile';
-
         $data = Hook::call(
             'expansa_dashboard_data',
             [
                 'apiurl'              => url('/api/'),
-                'apiKeys'             => ! $isProfile ? [] : Query::apply(
-                    [
-                        'type'      => 'api-keys',
-                        'per_page'  => 25,
-                        'author_id' => $userId,
-                    ],
-                    function ($query, $items) {
-                        $posts = [];
-
-                        foreach ($items as $i => $item) {
-                            foreach ((array) $item as $key => $value) {
-                                if (!in_array($key, ['uuid', 'title', 'status', 'createdAt', 'updatedAt'], true)) {
-                                    continue;
-                                }
-
-                                if (in_array($key, ['createdAt', 'updatedAt'], true)) {
-                                    $date = new \DateTime($value);
-                                    if ($date instanceof \DateTime) {
-                                        $value = $date->format('j F, Y');
-                                    }
-                                }
-
-                                $posts[$i][$key] = $value;
-                            }
-
-                            $fields = new FieldEav($item)->find();
-                            if ($fields) {
-                                foreach ($fields as $field => $values) {
-                                    $key = Safe::camelcase($field);
-                                    if (!isset($key, $values[0])) {
-                                        continue;
-                                    }
-
-                                    if (in_array($key, ['endDate', 'startDate'], true)) {
-                                        $date = \DateTime::createFromFormat('Y-m-d', $values[0]);
-                                        if ($date instanceof \DateTime) {
-                                            $values[0] = $date->format('j F, Y');
-                                        }
-                                    }
-
-                                    $posts[$i][$key] = $values[0];
-                                }
-                            }
-                        }
-
-                        return $posts;
-                    }
-                ),
                 'items'               => [],
                 'locale'              => I18n::locale(),
                 'dateFormat'          => 'd MMMM, yyyy',
@@ -204,10 +146,6 @@ new class
                     'title' => t('Take a Selfie'),
                     'class' => 'dialog--sm',
                 ],
-                'apiKeyManagerDialog' => [
-                    'title' => t('Create/update API key'),
-                    'class' => 'dialog--sm',
-                ],
                 'mediaLibraryDialog'  => [
                     'title' => t('Media Library'),
                     'class' => 'dialog--xl',
@@ -283,47 +221,44 @@ new class
         Tree::attach('dashboard-user-menu', fn (Tree $tree) => $tree->addItems(
             [
                 [
-                    'id'           => 'sign-out',
-                    'url'          => 'sign-out',
-                    'title'        => t('Sign out'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-sign-out',
+                    'id'           => 'profile',
+                    'url'          => 'profile',
+                    'title'        => t('Profile'),
+                    'capabilities' => ['read'],
+                    'icon'         => 'ph ph-gear',
                     'position'     => 100,
                 ],
                 [
-                    'id'       => 'divider-content',
+                    'id'       => 'divider-accounts',
                     'title'    => '',
                     'position' => 200,
                 ],
                 [
-                    'id'           => 'profile',
-                    'url'          => 'profile',
-                    'title'        => t('Profile'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-gear',
-                    'position'     => 300,
+                    'id'       => 'add-account',
+                    'url'      => url('sign-in?add=1'),
+                    'title'    => t('Add another account'),
+                    'icon'     => 'ph ph-user-plus',
+                    'position' => 300,
                 ],
                 [
-                    'id'       => 'divider-content',
+                    'id'       => 'divider-sign-out',
                     'title'    => '',
                     'position' => 400,
                 ],
                 [
-                    'id'           => 'comments',
-                    'url'          => 'comments',
-                    'title'        => t('Add account'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-user-plus',
-                    'position'     => 500,
+                    'id'       => 'sign-out',
+                    'url'      => url('sign-out'),
+                    'title'    => t('Sign out'),
+                    'icon'     => 'ph ph-sign-out',
+                    'position' => 500,
                 ],
-                [
-                    'id'           => 'comments',
-                    'url'          => 'comments',
-                    'title'        => t('Igor Ivanov'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-user-plus',
-                    'position'     => 600,
-                ],
+                ...(Auth::getAccounts() === [] ? [] : [[
+                    'id'       => 'sign-out-all',
+                    'url'      => url('sign-out?all=1'),
+                    'title'    => t('Sign out of all accounts'),
+                    'icon'     => 'ph ph-sign-out',
+                    'position' => 600,
+                ]]),
             ]
         ));
 
@@ -354,7 +289,7 @@ new class
                     'id'           => 'comments',
                     'url'          => 'comments',
                     'title'        => 0,
-                    'capabilities' => ['manage_options'],
+                    'capabilities' => ['manage_comments'],
                     'icon'         => 'ph ph-chats',
                     'position'     => 30,
                 ],
@@ -393,7 +328,7 @@ new class
                     'id'           => 'chat',
                     'url'          => 'chat',
                     'title'        => t('Chat'),
-                    'capabilities' => ['manage_options'],
+                    'capabilities' => ['plugins_install'],
                     'icon'         => 'ph ph-chat-circle-text',
                     'position'     => -10,
                 ],
@@ -406,7 +341,7 @@ new class
                     'id'           => 'dialogs',
                     'url'          => 'comments',
                     'title'        => t('Discussions'),
-                    'capabilities' => ['manage_options'],
+                    'capabilities' => ['manage_comments'],
                     'icon'         => 'ph ph-chats',
                     'position'     => 200,
                 ],
@@ -414,7 +349,7 @@ new class
                     'id'           => 'comments',
                     'url'          => 'edit?table=comments',
                     'title'        => t('Comments'),
-                    'capabilities' => ['manage_options'],
+                    'capabilities' => ['manage_comments'],
                     'icon'         => '',
                     'position'     => 0,
                     'parent_id'    => 'dialogs',

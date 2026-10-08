@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Media;
 
+use App\Http\Can;
 use Expansa\Http\Request;
 
 final readonly class MediaController
@@ -16,6 +17,7 @@ final readonly class MediaController
         private MediaService $service = new MediaService(),
     ) {}
 
+    #[Can('files_upload')]
     public function get(Request $request): array
     {
         return $this->service->list([
@@ -24,16 +26,19 @@ final readonly class MediaController
         ]);
     }
 
+    #[Can('files_upload')]
     public function upload(Request $request): array
     {
         return $this->service->upload($request->files);
     }
 
+    #[Can('files_upload')]
     public function grab(Request $request): array
     {
         return $this->service->grab($request->post['urls'] ?? '');
     }
 
+    #[Can('files_delete')]
     public function delete(Request $request): array
     {
         return $this->service->delete((array) ($request->post['ids'] ?? []));

@@ -100,6 +100,36 @@ if (! function_exists('metrics')) {
     }
 }
 
+if (! function_exists('dump')) {
+    /**
+     * Output readable dumps of the values: text in the console, an escaped `<pre>` in the browser.
+     *
+     * @param mixed ...$values
+     * @return void
+     */
+    function dump(mixed ...$values): void
+    {
+        // a variable, not new without parentheses: this file must parse on PHP 8.0
+        $dumper = new Expansa\Debug\Dumper();
+        $dumper->dump(...$values);
+    }
+}
+
+if (! function_exists('dd')) {
+    /**
+     * Dump the values and stop the script.
+     *
+     * @param mixed ...$values
+     * @return never
+     */
+    function dd(mixed ...$values): never
+    {
+        dump(...$values);
+
+        exit(1);
+    }
+}
+
 if (! function_exists('redirect')) {
     /**
      * Redirect to a site path or URL and stop the script; see Redirect::send().
@@ -177,15 +207,15 @@ if (! function_exists('session')) {
 
 if (! function_exists('error')) {
     /**
-     * Add an error with a code, or append a message to the error with this code.
+     * Create an error with a code, returned instead of a result.
      *
      * @param string          $code    Error code: `user-signin`.
      * @param string|string[] $message
-     * @return Expansa\Debug\Error
+     * @return Expansa\Support\Error
      */
-    function error(string $code, string|array $message = ''): Expansa\Debug\Error
+    function error(string $code, string|array $message = ''): Expansa\Support\Error
     {
-        return new Expansa\Debug\Error($code, $message);
+        return new Expansa\Support\Error($code, $message);
     }
 }
 

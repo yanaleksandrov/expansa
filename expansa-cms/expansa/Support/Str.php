@@ -19,74 +19,74 @@ final class Str
     private const array UNCOUNTABLE = [
         // materials and substances
         'water'       => true,
-    'air'         => true,
-    'sand'        => true,
-    'sugar'       => true,
-    'salt'        => true,
-    'rice'        => true,
+        'air'         => true,
+        'sand'        => true,
+        'sugar'       => true,
+        'salt'        => true,
+        'rice'        => true,
         'flour'       => true,
-    'oil'         => true,
-    'butter'      => true,
-    'cheese'      => true,
-    'milk'        => true,
-    'coffee'      => true,
+        'oil'         => true,
+        'butter'      => true,
+        'cheese'      => true,
+        'milk'        => true,
+        'coffee'      => true,
         'tea'         => true,
-    'honey'       => true,
-    'meat'        => true,
-    'fish'        => true,
-    'sheep'       => true,
+        'honey'       => true,
+        'meat'        => true,
+        'fish'        => true,
+        'sheep'       => true,
 
         // abstract concepts and states
         'information' => true,
-    'advice'      => true,
-    'knowledge'   => true,
-    'news'        => true,
-    'progress'    => true,
+        'advice'      => true,
+        'knowledge'   => true,
+        'news'        => true,
+        'progress'    => true,
         'work'        => true,
-    'homework'    => true,
-    'luck'        => true,
-    'happiness'   => true,
-    'freedom'     => true,
+        'homework'    => true,
+        'luck'        => true,
+        'happiness'   => true,
+        'freedom'     => true,
         'education'   => true,
-    'music'       => true,
-    'poetry'      => true,
-    'patience'    => true,
-    'traffic'     => true,
+        'music'       => true,
+        'poetry'      => true,
+        'patience'    => true,
+        'traffic'     => true,
         'press'       => true,
-    'sms'         => true,
+        'sms'         => true,
 
         // money and economic concepts
         'money'       => true,
-    'currency'    => true,
-    'wealth'      => true,
-    'commerce'    => true,
-    'trade'       => true,
+        'currency'    => true,
+        'wealth'      => true,
+        'commerce'    => true,
+        'trade'       => true,
 
         // food and drinks
         'bread'       => true,
-    'food'        => true,
-    'juice'       => true,
-    'wine'        => true,
-    'beer'        => true,
+        'food'        => true,
+        'juice'       => true,
+        'wine'        => true,
+        'beer'        => true,
 
         // languages and academic subjects
         'english'     => true,
-    'french'      => true,
-    'mathematics' => true,
-    'physics'     => true,
-    'chemistry'   => true,
+        'french'      => true,
+        'mathematics' => true,
+        'physics'     => true,
+        'chemistry'   => true,
 
         // others
         'furniture'   => true,
-    'equipment'   => true,
-    'species'     => true,
-    'series'      => true,
-    'software'    => true,
+        'equipment'   => true,
+        'species'     => true,
+        'series'      => true,
+        'software'    => true,
         'hardware'    => true,
-    'clothing'    => true,
-    'luggage'     => true,
-    'weather'     => true,
-    'machinery'   => true,
+        'clothing'    => true,
+        'luggage'     => true,
+        'weather'     => true,
+        'machinery'   => true,
     ];
 
     /**
@@ -154,6 +154,22 @@ final class Str
         $data[8] = chr(ord($data[8]) & 0x3f | 0x80);
 
         return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
+    }
+
+    /**
+     * Generate a UUID version 7 (RFC 9562): milliseconds since the epoch, then random bits,
+     * so new rows sort by creation time and the index stays compact.
+     *
+     * @return string E.g. "01a11b78-5eb2-7b1d-bdfc-cf9987057e56".
+     */
+    public static function uuid7(): string
+    {
+        $data = str_pad(dechex((int) (microtime(true) * 1000)), 12, '0', STR_PAD_LEFT) . bin2hex(random_bytes(10));
+
+        $data[12] = '7';
+        $data[16] = dechex(hexdec($data[16]) & 0x3 | 0x8);
+
+        return substr($data, 0, 8) . '-' . substr($data, 8, 4) . '-' . substr($data, 12, 4) . '-' . substr($data, 16, 4) . '-' . substr($data, 20);
     }
 
     /**

@@ -19,6 +19,9 @@ check('bold and italic in a sentence', $render('Это **важно** и *кур
 check('link', $render('Ссылка на [Google](https://www.google.com).') === 'Ссылка на <a href="https://www.google.com">Google</a>.');
 check('image', $render('![Логотип](https://example.com/logo.png)') === '<img src="https://example.com/logo.png" alt="Логотип"/>');
 check('plain text stays as is', $render('Обычный текст') === 'Обычный текст');
+check('underscores inside words stay', $render('Set upload_max_filesize and EX_AI_KEY') === 'Set upload_max_filesize and EX_AI_KEY');
+check('underscores at word edges emphasize', $render('_курсив_ и __жирный__, «_важно_»') === '<em>курсив</em> и <strong>жирный</strong>, «<em>важно</em>»');
+check('a lone underscore stays', $render('a _ b _ c') === 'a _ b _ c');
 check('a script link is not rendered', ! str_contains($render('[x](javascript://alert(1))'), '<a'));
 
 // placeholders

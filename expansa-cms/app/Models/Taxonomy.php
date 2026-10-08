@@ -6,7 +6,7 @@ namespace App\Models;
 
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
+use Expansa\Support\Error;
 
 /**
  * Represents the usage of a {@see Term} as an actual taxonomy entry: how many times

@@ -7,11 +7,12 @@ namespace App\Controllers;
 use App;
 use App\Models\Option;
 use App\Models\Slug;
-use App\Models\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Asset;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Lifecycle;
+use Expansa\Facades\View;
 
 final class Web
 {
@@ -54,18 +55,26 @@ final class Web
 
         // not allow some slugs for logged user, they are reserved (e.g. "dashboard/sign-in" or "install").
         $blackListSlugs = ['install', 'sign-in', 'sign-up', 'reset-password'];
-        if (in_array($slug, $blackListSlugs, true) && User::isLogged()) {
+        if (in_array($slug, $blackListSlugs, true) && Auth::isLoggedIn() && ! ($slug === 'sign-in' && isset($_GET['add']))) {
             redirect('dashboard');
         }
 
         $title = $this->title($slug);
+
+        // a page of a menu item the user doesn't see is closed as well
+        if (Lifecycle::is('dashboard') && ! Tree::allowsUrl($slug, $_GET)) {
+            http_response_code(403);
+
+            $slug  = '403';
+            $title = $this->title('', t('Access denied'));
+        }
 
         if (Lifecycle::is('auth')) {
             $page = 'welcome';
         }
 
         // dashboard views are not public pages: outside the dashboard only the front page and the post-install page exist
-        if (Lifecycle::is('web') && $slug !== '' && !($slug === 'installed' && User::isLogged())) {
+        if (Lifecycle::is('web') && $slug !== '' && !($slug === 'installed' && Auth::isLoggedIn())) {
             http_response_code(404);
 
             $page  = 'welcome';
@@ -108,6 +117,14 @@ final class Web
                     $slug  = 'edit';
                     $table = new App\Tables\Users();
                 }
+            }
+
+            // a dashboard page without a template, e.g. a menu item of an unfinished section or a missing asset
+            if (Lifecycle::is('dashboard') && ! View::exists($slug)) {
+                http_response_code(404);
+
+                $slug  = '404';
+                $title = $this->title('', t('Page not found'));
             }
 
             // output view to frontend

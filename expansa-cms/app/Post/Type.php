@@ -112,7 +112,7 @@ class Type
          *
          * @var string[]
          */
-        public array $capabilities = ['typesEdit'],
+        public array $capabilities = ['types_edit'],
 
         /**
          * Admin menu icon: a Phosphor class name or a base64-encoded SVG.
@@ -177,7 +177,7 @@ class Type
          */
         $type = Safe::snakecase($key);
         if (!Db::hasTable(EX_DB['prefix'] . $type)) {
-            Hook::call('createPostsTable', $type);
+            Hook::run('createPostsTable', $type);
         }
     }
 

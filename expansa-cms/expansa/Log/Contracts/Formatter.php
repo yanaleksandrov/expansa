@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Expansa\Log\Contracts;
 
-use Expansa\Log\LogRecord;
+use Expansa\Log\Record;
 
 interface Formatter
 {
     /**
      * Turn a record into the text a handler writes or sends.
      *
-     * @param LogRecord $record
+     * @param Record $record
      * @return string
      */
-    public function format(LogRecord $record): string;
+    public function format(Record $record): string;
 }

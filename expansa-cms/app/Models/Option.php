@@ -9,10 +9,10 @@ use Expansa\Database\Model;
 use Expansa\Database\Query;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
+use Expansa\Support\Error;
 use LogicException;
 
 /**
@@ -385,6 +385,23 @@ class Option extends Model
             'users'          => [
                 'default-role' => 'subscriber',
                 'membership'   => 0,
+            ],
+            'ai'             => [
+                'url'     => \App\Support\Ai::URL,
+                'model'   => \App\Support\Ai::MODEL,
+                'schemas' => 1,
+            ],
+            'mail'           => [
+                'host'       => '',
+                'port'       => 465,
+                'encryption' => 'ssl',
+            ],
+            'security'       => [
+                'attempts'    => 5,
+                'ip_attempts' => 50,
+                'lockout'     => 15,
+                'log_days'    => 90,
+                'breached'    => 1,
             ],
             'week-starts-on' => 1,
             'date-format'    => 'F j, Y',

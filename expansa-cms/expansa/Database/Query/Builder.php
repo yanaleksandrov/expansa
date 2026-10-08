@@ -418,15 +418,15 @@ class Builder extends AbstractBuilder
     }
 
     /**
-     * Select data from the table.
+     * Select data from the table: select($table, $columns, $where) or select($table, $join, $columns, $where).
      *
      * @param string            $table
-     * @param array             $join
-     * @param null|array|string $columns
+     * @param array|string      $join    Join map, or the columns when no join is needed.
+     * @param null|array|string $columns Columns after a join, otherwise the where conditions.
      * @param null|array        $where
      * @return array|null
      */
-    public function select(string $table, $join, array|string|null $columns = null, ?array $where = null): ?array
+    public function select(string $table, array|string $join, array|string|null $columns = null, ?array $where = null): ?array
     {
         $map       = [];
         $result    = [];
@@ -722,12 +722,12 @@ class Builder extends AbstractBuilder
      * Get only one record from the table.
      *
      * @param string            $table
-     * @param null|array        $join
-     * @param null|array|string $columns
+     * @param array|string      $join    Join map, or the columns when no join is needed.
+     * @param null|array|string $columns Columns after a join, otherwise the where conditions.
      * @param null|array        $where
      * @return mixed
      */
-    public function get(string $table, $join = null, array|string|null $columns = null, ?array $where = null): mixed
+    public function get(string $table, array|string $join, array|string|null $columns = null, ?array $where = null): mixed
     {
         $map          = [];
         $result       = [];

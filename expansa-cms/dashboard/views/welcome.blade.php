@@ -22,7 +22,7 @@ use Expansa\Facades\I18n;
 	 *
 	 * @since 2025.1
 	 */
-	Hook::call('renderDashboardHeader');
+	Hook::run('renderDashboardHeader');
 	?>
 </head>
 <body class="df jcc p-6">
@@ -34,7 +34,7 @@ use Expansa\Facades\I18n;
 	 *
 	 * @since 2025.1
 	 */
-	Hook::call( 'renderDashboardFooter' );
+	Hook::run( 'renderDashboardFooter' );
 	?>
 </body>
 </html>

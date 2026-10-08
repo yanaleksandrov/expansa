@@ -13,11 +13,15 @@ interface Response
 {
     /**
      * Response body.
+     *
+     * @var string
      */
     public string $content { get; }
 
     /**
      * HTTP status code.
+     *
+     * @var int
      */
     public int $statusCode { get; }
 

@@ -9,7 +9,9 @@ declare(strict_types=1);
  * @see documentation/Lifecycle.md
  */
 
+use Expansa\Facades\Access;
 use Expansa\Facades\Asset;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
@@ -20,12 +22,14 @@ use Expansa\Facades\I18n;
 use Expansa\Facades\Lifecycle;
 use Expansa\Facades\Log;
 use Expansa\Facades\Mail;
+use Expansa\Facades\Role;
 use Expansa\Facades\Route;
 use Expansa\Facades\Safe;
 use Expansa\Facades\Session;
 use Expansa\Facades\Terminal;
 use Expansa\Facades\View;
 use Expansa\Patterns\Registry;
+use Expansa\Scheduler\Scheduler;
 use Expansa\Support\Is;
 use Expansa\Support\Url;
 
@@ -60,42 +64,83 @@ require_once EX_PATH . 'expansa/functions.php';
 // stops with an error page before any PHP 8.4 code is parsed: everything above must stay free of it
 App\Support\Requirements::check();
 
+// as in WordPress: "enabled" is the main switch, "log" and "display" work only under it;
+// true, 1, "1", "on" and "yes" count as true: env.php is written by hand as often as by the installer
+$debug = (defined('EX_DEBUG') ? EX_DEBUG : []) + ['enabled' => false, 'log' => true, 'display' => true, 'view' => EX_DASHBOARD . 'debug.php'];
+$isDebug     = filter_var($debug['enabled'], FILTER_VALIDATE_BOOL);
+$isLogged    = $isDebug && filter_var($debug['log'], FILTER_VALIDATE_BOOL);
+$isDisplayed = $isDebug && filter_var($debug['display'], FILTER_VALIDATE_BOOL);
+
 // needed before the phases: boot reads Is::debug(); the dashboard context is known only after the phases
 Is::configure(
-    debug: defined('EX_DEBUG') && EX_DEBUG['enabled'] === true,
+    debug: $isDebug,
     dashboard: fn () => Lifecycle::is('dashboard'),
+    // env.php and the owner in the database, checked once after the configure phase connects it: the installation request changes the result
+    installed: function () {
+        static $installed;
+
+        return $installed ??= App\Support\Installation::isComplete();
+    },
 );
+
+// every PHP error is reported in debug mode, and thrown by the handler below
+if (Is::debug()) {
+    error_reporting(E_ALL);
+}
+
+// before the phases, so an error in any of them reaches the log and the error page; without debug the page shows only the id
+Debug::configure(
+    view: $debug['view'],
+    details: $isDisplayed,
+    strict: $isDebug,
+    report: $isLogged ? function (Throwable $e, string $id, array $context) {
+        // out of memory, time limit, compile error: critical, to alert on it separately
+        Log::log(Expansa\Debug\Manager::isFatal($e) ? 'critical' : 'error', 'Uncaught {class}: {message}', [
+            'id'        => $id,
+            'class'     => get_class($e),
+            'message'   => $e->getMessage(),
+            'exception' => $e,
+        ] + $context);
+    } : null,
+    warning: $isLogged ? fn (ErrorException $e) => Log::warning('{message} in {file}:{line}', [
+        'message' => $e->getMessage(),
+        'file'    => $e->getFile(),
+        'line'    => $e->getLine(),
+    ]) : null,
+    // a Closure value is resolved on its own: a failing one does not lose the rest
+    context: fn () => PHP_SAPI === 'cli' ? ['command' => implode(' ', $_SERVER['argv'] ?? [])] : [
+        'method' => $_SERVER['REQUEST_METHOD'] ?? '',
+        'url'    => ($_SERVER['HTTP_HOST'] ?? '') . ($_SERVER['REQUEST_URI'] ?? ''),
+        'ip'     => $_SERVER['REMOTE_ADDR'] ?? '',
+        'user'   => fn () => defined('EX_DB') ? App\Models\User::current()?->id : null,
+        'input'  => $_POST,
+    ],
+    json: fn () => str_starts_with(Route::uri(), '/api/') || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'json'),
+    collapse: [EX_CORE, EX_PATH . 'vendor/'],
+);
+Debug::register();
 
 // step hooks, the terminate hook after the response, routing after the context
 Lifecycle::configure(
-    hook: fn (string $name) => Hook::call($name),
+    hook: fn (string $name) => Hook::run($name),
     terminate: fn () => Hook::defer('terminate'),
     route: fn () => Route::run(),
     uri: fn () => Route::uri(),
 );
 
-// computed once: the installation request itself changes the result
-$isInstalled = App\Support\Installation::isComplete();
-
 /**
  * 2. Phases
  *
- * Every request, in declaration order; the ones bound to $isInstalled are skipped before install.
+ * Every request, in declaration order; the ones bound to Is::installed() are skipped before install.
  */
 
 /**
  * 1. boot · always.
  *
- * Turns on error output in debug mode and stops on maintenance.php, if it exists.
+ * Stops on maintenance.php, if it exists.
  * Registers the default data (countries, timezones, languages), loaded on first Registry::get().
  */
 Lifecycle::phase('boot', true, function () {
-    if (Is::debug()) {
-        ini_set('error_reporting', E_ALL);
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-    }
-
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
         require $maintenance;
     }
@@ -115,7 +160,9 @@ Lifecycle::phase('boot', true, function () {
 Lifecycle::phase('configure', true, function () {
     // the connection from env.php; nothing to connect to before install
     if (defined('EX_DB')) {
-        Db::configure(...EX_DB);
+        // every query is kept for the debug panel in debug mode; not in the console, where a long process would pile them up
+        $logging = (EX_DB['logging'] ?? false) || (Is::debug() && PHP_SAPI !== 'cli');
+        Db::configure(...array_merge(EX_DB, ['logging' => $logging]));
     }
 
     // the stores from env.php, the request memory without them; env.php can not hold the connection closure
@@ -148,9 +195,16 @@ Lifecycle::phase('configure', true, function () {
         cachePath: EX_PATH . 'cache/views',
     );
 
-    // extension ids like "plugins/seo" are relative to it
+    // extension ids like "plugins/seo" are relative to it; a plugin that breaks goes to quarantine instead of the site
     Extensions::configure(
-        root: EX_PATH
+        root: EX_PATH,
+        quarantine: EX_STORAGE . 'quarantine.json',
+        failed: fn (string $id, Throwable $error) => Log::error('Extension {id} failed: {message}', [
+            'id'      => $id,
+            'message' => $error->getMessage(),
+            'file'    => $error->getFile(),
+            'line'    => $error->getLine(),
+        ]),
     );
 
     // Log::info() and the others: a file per day in storage/logs, closed to the web, kept for two weeks
@@ -163,6 +217,75 @@ Lifecycle::phase('configure', true, function () {
         ],
     ]);
 
+    // the signed-in user comes from the auth cookie: a new password or EX_KEYS['auth'] signs everyone out;
+    // the device cookie marks browsers that signed in before; throttling and providers come from the Security settings
+    $cookiePrefix = defined('EX_DB') ? EX_DB['prefix'] : '';
+    Auth::configure(
+        // a disabled account loses its tokens at once
+        find: function (string $login): ?App\Models\User {
+            $user = App\Models\User::find($login, 'login');
+
+            return $user instanceof App\Models\User && $user->status === App\Models\User::STATUS_ACTIVE ? $user : null;
+        },
+        key: defined('EX_KEYS') ? EX_KEYS['auth'] : '',
+        read: fn (string $name) => (string) Expansa\Cookie\Cookie::get($cookiePrefix . $name, ''),
+        write: fn (string $name, string $value, int $expires) => Expansa\Cookie\Cookie::send(new Expansa\Cookie\Cookie(
+            name: $cookiePrefix . $name,
+            value: $value,
+            expires: $expires,
+            path: '/',
+            secure: Expansa\Cookie\Cookie::isSecureRequest(),
+            httpOnly: true,
+            sameSite: Expansa\Cookie\Enums\SameSite::Lax,
+        )),
+        // providers with a client ID return to /oauth/<name>/callback
+        providers: function (): array {
+            $providers = [];
+            foreach ((array) App\Models\Option::get('oauth', []) as $name => $config) {
+                if (is_array($config) && trim((string) ($config['client_id'] ?? '')) !== '') {
+                    $secret           = App\Support\Secrets::decrypt((string) ($config['client_secret'] ?? ''));
+                    $providers[$name] = ['client_secret' => $secret, 'redirect' => url("oauth/$name/callback")] + $config;
+                }
+            }
+
+            return $providers;
+        },
+        // failed passwords in the "cache" table: the default store may be the request memory
+        throttle: fn () => [
+            'attempts'    => (int) App\Models\Option::get('security.attempts', 5),
+            'ip_attempts' => (int) App\Models\Option::get('security.ip_attempts', 50),
+            'lockout'     => (int) App\Models\Option::get('security.lockout', 15) * 60,
+        ],
+        readAttempts: fn (string $key) => (new Expansa\Cache\Providers\Database(Db::instance()))->get($key, 'auth-attempts'),
+        writeAttempts: function (string $key, ?array $attempts, int $ttl): void {
+            $cache = new Expansa\Cache\Providers\Database(Db::instance());
+            $cache->forget($key, 'auth-attempts');
+
+            if ($attempts !== null) {
+                $cache->add($key, $attempts, 'auth-attempts', "+$ttl seconds");
+            }
+        },
+        // a row per signed-in device, so the profile can sign out any of them
+        sessions: new App\Api\User\Sessions(),
+        // personal API tokens: Authorization: Bearer exp_..., see App\Api\User\Tokens
+        bearer: fn () => preg_match('/^Bearer\s+(\S+)$/i', (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? ''), $match) ? $match[1] : null,
+        findToken: fn (string $token) => App\Api\User\Tokens::authenticate($token),
+    );
+
+    // permissions come from the roles of Role::add(); plugins add policies of their resources with Access::setPolicy()
+    $roles = new Expansa\Access\Roles();
+    Role::swap($roles);
+    Access::configure(
+        // a request with an API token gets only the permissions of its scopes
+        permissions: new App\Support\TokenPermissions($roles),
+        policies: [App\Models\Post::class => App\Post\Policy::class],
+    );
+
+    // menu items and their pages need every capability of the item
+    Expansa\Builders\Tree::configure(
+        allows: fn (array $capabilities) => array_all($capabilities, fn (string $capability) => Access::allows(App\Models\User::current(), $capability)),
+    );
+
     // the version shown by the "list" console command
     Terminal::configure(
         version: EX_VERSION
@@ -174,7 +297,7 @@ Lifecycle::phase('configure', true, function () {
     );
 
     // scheduled jobs keep their locks in the storage and email their output through Mail
-    Expansa\Scheduler\Scheduler::configure(
+    Scheduler::configure(
         tempDir: EX_STORAGE,
         mailer: fn (string $to, string $subject, string $body, array $attachments) => Mail::send($to, $subject, $body, $attachments),
     );
@@ -229,6 +352,7 @@ Lifecycle::phase('configure', true, function () {
     Hook::configure(
         listeners: [
             App\Listeners\Assets::class,
+            App\Listeners\Debug::class,
             App\Listeners\Migrations::class,
         ],
     );
@@ -287,14 +411,14 @@ Lifecycle::phase('configure', true, function () {
  * 3. register · installed only: needs env.php and the database.
  *
  * Registers the default roles (admin, editor, author, subscriber) and post types
- * (pages, files, api-keys); post types create their missing tables.
+ * (pages, files); post types create their missing tables.
  */
-Lifecycle::phase('register', $isInstalled, function () {
+Lifecycle::phase('register', fn () => Is::installed(), function () {
     // roles
-    App\User\Roles::register(
+    Role::add(
         role: 'admin',
-        displayName: t('Administrator'),
-        capabilities: [
+        name: t('Administrator'),
+        permissions: [
             'read',
             'files_upload',
             'files_edit',
@@ -325,10 +449,10 @@ Lifecycle::phase('register', $isInstalled, function () {
         ],
     );
 
-    App\User\Roles::register(
+    Role::add(
         role: 'editor',
-        displayName: t('Editor'),
-        capabilities: [
+        name: t('Editor'),
+        permissions: [
             'read',
             'files_upload',
             'files_edit',
@@ -346,10 +470,10 @@ Lifecycle::phase('register', $isInstalled, function () {
         ],
     );
 
-    App\User\Roles::register(
+    Role::add(
         role: 'author',
-        displayName: t('Author'),
-        capabilities: [
+        name: t('Author'),
+        permissions: [
             'read',
             'files_upload',
             'files_edit',
@@ -360,13 +484,16 @@ Lifecycle::phase('register', $isInstalled, function () {
         ],
     );
 
-    App\User\Roles::register(
+    Role::add(
         role: 'subscriber',
-        displayName: t('Subscriber'),
-        capabilities: [
+        name: t('Subscriber'),
+        permissions: [
             'read',
         ],
     );
+
+    // roles changed or added in the Settings replace the defaults above
+    App\Support\RoleSettings::apply();
 
     // post types
     App\Post\Type::register(
@@ -414,29 +541,6 @@ Lifecycle::phase('register', $isInstalled, function () {
         menuIcon: 'ph ph-dropbox-logo',
         menuPosition: 30,
     );
-
-    App\Post\Type::register(
-        key: 'api-keys',
-        labelName: t('API Key'),
-        labelNamePlural: t('API Keys'),
-        labelAllItems: t('All API Keys'),
-        labelAdd: t('Add New Key'),
-        labelEdit: t('Edit Key'),
-        labelUpdate: t('Update Key'),
-        labelView: t('View Key'),
-        labelSearch: t('Search Keys'),
-        labelSave: t('Save Key'),
-        public: false,
-        hierarchical: false,
-        searchable: false,
-        showInMenu: false,
-        showInBar: false,
-        canExport: true,
-        canImport: true,
-        capabilities: ['types_edit'],
-        menuIcon: 'ph ph-key',
-        menuPosition: 30,
-    );
 });
 
 /**
@@ -445,7 +549,7 @@ Lifecycle::phase('register', $isInstalled, function () {
  * Loads the active plugins & themes listed in the "extensions.active" option (ids like "plugins/seo")
  * and calls register() on each: plugins first, then themes.
  */
-Lifecycle::phase('extensions', $isInstalled, function () {
+Lifecycle::phase('extensions', fn () => Is::installed(), function () {
     Extensions::load(
         ids: (array) App\Models\Option::get('extensions.active', []),
     );
@@ -459,7 +563,7 @@ Lifecycle::phase('extensions', $isInstalled, function () {
  * Every extension is registered, so boot() runs on plugins, then themes.
  * From here Is::dashboard() and other context checks are available.
  */
-Lifecycle::phase('booted', $isInstalled, function () {
+Lifecycle::phase('booted', fn () => Is::installed(), function () {
     Extensions::boot('plugin');
     Extensions::boot('theme');
 });
@@ -481,8 +585,28 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(Expansa\Assets\Commands\Clean::class);
     Terminal::addCommand(Expansa\Hooks\Commands\Index::class);
     Terminal::addCommand(new Expansa\Scheduler\Commands\Run(
-        schedule: fn (Expansa\Scheduler\Scheduler $scheduler) => Hook::call('schedule', $scheduler),
+        schedule: fn (Expansa\Scheduler\Scheduler $scheduler) => Hook::run('schedule', $scheduler),
     ));
+    Terminal::addCommand(new Expansa\Ai\Commands\Work(
+        queue: fn () => App\Support\Ai::queue(),
+    ));
+
+    // the site-health page tells from the time of this mark whether cron runs the scheduler
+    Hook::add('schedule', fn () => App\Support\SiteHealth::markScheduler());
+
+    // AI tasks whose worker did not start or crashed; a request starts its own worker at once
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->php(EX_PATH . 'artisan', App\Support\Ai::getPhp(), ['ai:work'])->everyMinute()->onlyOne();
+    });
+
+    // the security log older than the Security settings allow and the expired sign-ins
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->call(function () {
+            App\Api\User\Events::prune();
+            App\Api\User\Sessions::prune();
+        }, id: 'security-cleanup')->daily(3);
+    });
+
     Terminal::run();
 });
 
@@ -509,10 +633,10 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
         // reference implementation: routes derived by Router::register() (POST /system/test, POST /system/install)
         Route::register(App\Api\System\SystemController::class, [App\Http\Kernel::class, 'dispatch']);
 
-        // RPC routes instead of Router::register(): the dashboard calls fixed URLs like `apikey/create` with the id in the body
+        // RPC routes instead of Router::register(): the dashboard calls fixed URLs like `user/token-create` with the id in the body
         foreach (
             [
-                App\Api\Apikey\ApikeyController::class,
+                App\Api\Ai\AiController::class,
                 App\Api\Extensions\ExtensionsController::class,
                 App\Api\FieldGroups\FieldGroupsController::class,
                 App\Api\Files\FilesController::class,
@@ -545,7 +669,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
  * Every page except the API shows the installer: its assets come from dashboard/install.php,
  * the page from Web::install().
  */
-Lifecycle::context('install', !$isInstalled, function () {
+Lifecycle::context('install', fn () => ! Is::installed(), function () {
     require_once EX_PATH . 'dashboard/install.php';
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'install']);
@@ -563,12 +687,32 @@ Lifecycle::context('sign-out', function (string $uri): bool {
 
     return $uri === 'sign-out' || $uri === "$root/sign-out";
 }, function () {
-    App\Models\User::logout();
-    redirect('sign-in');
+    // the next signed-in account of the browser takes over, ?all=1 signs out every one
+    $user = App\Models\User::current();
+    if ($user !== null) {
+        App\Api\User\Events::record($user, 'sign_out', isset($_GET['all']) ? ['all' => true] : []);
+    }
+
+    Auth::logout(all: isset($_GET['all']));
+    redirect(Auth::isLoggedIn() ? 'dashboard' : 'sign-in');
+});
+
+// links of account emails: the email confirmation and "this wasn't me" of a new device sign-in
+Lifecycle::context('account-links', fn (string $uri) => in_array(trim($uri, '/'), ['verify-email', 'secure-account', 'sign-in-link'], true), function () {
+    Route::get('/verify-email', [App\Controllers\Account::class, 'verifyEmail']);
+    Route::get('/sign-in-link', [App\Controllers\Account::class, 'signInLink']);
+    Route::get('/secure-account', [App\Controllers\Account::class, 'secure']);
+});
+
+// /oauth/<name> leaves for a provider of the Security settings, /oauth/<name>/callback signs in or connects it, see App\Controllers\OAuth
+Lifecycle::context('oauth', fn (string $uri) => str_starts_with(trim($uri, '/'), 'oauth/'), function () {
+    Route::get('/oauth/([a-z0-9-]+)', [App\Controllers\OAuth::class, 'redirect']);
+    Route::get('/oauth/([a-z0-9-]+)/callback', [App\Controllers\OAuth::class, 'callback']);
 });
 
 Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-in', 'sign-up', 'reset-password'], true), function () {
-    if (App\Models\User::isLogged()) {
+    // ?add=1 signs in to one more account, the current one stays switchable in the user menu
+    if (Auth::isLoggedIn() && ! isset($_GET['add'])) {
         redirect('dashboard');
     }
 
@@ -584,8 +728,16 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
  * to sign-in, otherwise dashboard/index.php enqueues the assets and menus, the page comes from Web::index().
  */
 Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '/'), Hook::call('dashboardRootSlug', 'dashboard')), function () {
-    if (! App\Models\User::isLogged()) {
-        redirect('sign-in');
+    // back to the requested page after signing in, like WordPress' redirect_to
+    if (! Auth::isLoggedIn()) {
+        redirect('sign-in?redirect_to=' . rawurlencode((string) ($_SERVER['REQUEST_URI'] ?? '')));
+    }
+
+    // a role that requires two-factor authentication sees only the profile until it is set up
+    $user = App\Models\User::current();
+    $isProfile = str_contains((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), '/profile');
+    if (! $isProfile && App\Api\User\TwoFactor::isRequired($user) && ! App\Api\User\TwoFactor::isEnabled($user)) {
+        redirect(Hook::call('dashboardRootSlug', 'dashboard') . '/profile');
     }
 
     require_once EX_PATH . 'dashboard/index.php';
@@ -606,11 +758,11 @@ Lifecycle::context('web', true, function () {
  * 4. Run
  *
  * Phases, the matched context, then its routes (not in the console).
- * Errors from any step go to the debug page.
+ * Errors from any step go to the log and the error page, see Debug::configure() above.
  */
 Lifecycle::run(catch: function (Throwable $e) {
-    // EX_DEBUG comes from env.php, which may be missing
-    $view = defined('EX_DEBUG') ? EX_DEBUG['view'] : EX_DASHBOARD . 'debug.php';
+    // a bug in a plugin fails this request only: the plugin is skipped from the next one
+    Extensions::quarantine($e);
 
-    Debug::render($e, $view);
+    Debug::handle($e);
 });

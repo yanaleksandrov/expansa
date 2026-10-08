@@ -6,16 +6,18 @@ namespace App\Api\User;
 
 use App\Models\Option;
 use App\Models\User;
+use Expansa\Auth\Exceptions\InvalidCredential;
+use Expansa\Auth\Passkey as RelyingParty;
+use Expansa\Auth\Passkey\Assertion;
+use Expansa\Auth\Passkey\Attestation;
+use Expansa\Auth\Passkey\Credential;
 use Expansa\Facades\Base64;
 use Expansa\Facades\Db;
 use Expansa\Facades\Session;
-use Expansa\Webauthn\Credential;
-use Expansa\Webauthn\Exceptions\InvalidCredential;
-use Expansa\Webauthn\RelyingParty;
 use RuntimeException;
 
 /**
- * Passkeys of site users: WebAuthn ceremonies of Expansa\Webauthn bound to the site URL,
+ * Passkeys of site users: WebAuthn ceremonies of Expansa\Auth\Passkey bound to the site URL,
  * credentials in the `passkeys` table and pending challenges in the session.
  *
  * Challenges live in the session of the browser that started the ceremony and are removed
@@ -32,6 +34,19 @@ final class Passkey
      * Pending challenges kept per ceremony.
      */
     private const int MAX_PENDING = 5;
+
+    /**
+     * Columns a stored credential is restored from.
+     */
+    private const array COLUMNS = [
+        'credential_id',
+        'algorithm',
+        'public_key',
+        'counter',
+        'transports',
+        'backup_eligible',
+        'backed_up',
+    ];
 
     /**
      * Relying party of the site URL.
@@ -59,11 +74,11 @@ final class Passkey
      * Get the passkeys of a user for the profile, newest first.
      *
      * @param User $user Credentials owner.
-     * @return array<int, array{id: int, name: string, created_at: string, used_at: ?string}>
+     * @return array<int, array{id: int, name: string, backed_up: bool, created_at: string, used_at: ?string}>
      */
     public static function all(User $user): array
     {
-        return Db::select('passkeys', null, ['id', 'name', 'created_at', 'used_at'], [
+        return Db::select('passkeys', ['id', 'name', 'backed_up [Bool]', 'created_at', 'used_at'], [
             'user_id' => $user->id,
             'ORDER'   => ['id' => 'DESC'],
         ]) ?? [];
@@ -91,8 +106,8 @@ final class Passkey
     public function creationOptions(User $user): array
     {
         $exclude = array_map(
-            fn (string $id) => (string) Base64::decode($id),
-            Db::select('passkeys', null, 'credential_id', ['user_id' => $user->id]) ?? []
+            fn (array $row) => $this->credential($row, $user),
+            Db::select('passkeys', self::COLUMNS, ['user_id' => $user->id]) ?? []
         );
 
         return $this->rp->creationOptions(
@@ -110,14 +125,14 @@ final class Passkey
      * @param User   $user
      * @param string $json Browser credential.
      * @param string $name Label shown in the profile.
-     * @return array{id: int, name: string, created_at: string, used_at: null} The stored passkey for the profile.
+     * @return array{id: int, name: string, backed_up: bool, created_at: string, used_at: null} Stored passkey.
      * @throws InvalidCredential|RuntimeException If the challenge expired or the response is invalid.
      */
     public function create(User $user, string $json, string $name): array
     {
-        $json       = $this->parse($json);
-        $credential = $this->rp->register($json, $this->consume('create', $json));
-        $name       = mb_substr(trim($name), 0, 100) ?: 'Passkey';
+        $attestation = Attestation::parse($json);
+        $credential  = $this->rp->register($attestation, $this->consume('create', $attestation->challenge), $user->uuid);
+        $name        = mb_substr(trim($name), 0, 100) ?: 'Passkey';
 
         Db::insert('passkeys', [
             'user_id'         => $user->id,
@@ -127,10 +142,18 @@ final class Passkey
             'public_key'      => $credential->publicKey,
             'counter'         => $credential->counter,
             'transports'      => implode(',', $credential->transports),
+            'backup_eligible' => (int) $credential->backupEligible,
+            'backed_up'       => (int) $credential->backedUp,
             'name'            => $name,
         ]);
 
-        return ['id' => (int) Db::id(), 'name' => $name, 'created_at' => date('Y-m-d H:i:s'), 'used_at' => null];
+        return [
+            'id'         => (int) Db::id(),
+            'name'       => $name,
+            'backed_up'  => $credential->backedUp,
+            'created_at' => date('Y-m-d H:i:s'),
+            'used_at'    => null,
+        ];
     }
 
     /**
@@ -145,7 +168,8 @@ final class Passkey
 
     /**
      * Finish a sign-in: find the credential, verify the signature and resolve its owner.
-     * The new signature counter is saved, so a cloned authenticator is detected.
+     * The new signature counter and backup state are saved, so a cloned authenticator is detected;
+     * the counter only grows, so of two sign-ins with the same response state only one wins.
      *
      * @param string $json Browser credential.
      * @return User
@@ -153,24 +177,29 @@ final class Passkey
      */
     public function verify(string $json): User
     {
-        $credential = $this->parse($json);
-        $challenge  = $this->consume('request', $credential);
-        $id         = $this->rp->credentialId($credential);
+        $assertion = Assertion::parse($json);
+        $challenge = $this->consume('request', $assertion->challenge);
 
-        $row  = Db::get('passkeys', ['id', 'user_id', 'algorithm', 'public_key', 'counter'], ['credential_hash' => hash('sha256', $id)]);
+        $row  = Db::get('passkeys', ['id', 'user_id', ...self::COLUMNS], ['credential_hash' => hash('sha256', $assertion->id)]);
         $user = is_array($row) ? User::find((int) $row['user_id']) : null;
         if (! $user instanceof User) {
             throw new InvalidCredential('The credential is not registered.');
         }
 
-        $counter = $this->rp->authenticate(
-            $credential,
-            $challenge,
-            new Credential($id, (int) $row['algorithm'], $row['public_key'], (int) $row['counter']),
-            $user->uuid,
-        );
+        $credential = $this->rp->authenticate($assertion, $challenge, $this->credential($row, $user));
+        $counted    = $credential->counter !== 0;
 
-        Db::update('passkeys', ['counter' => $counter, 'used_at' => date('Y-m-d H:i:s')], ['id' => $row['id']]);
+        // authenticators without a counter always send 0, there is nothing to race for
+        $where   = $counted ? ['id' => $row['id'], 'counter[<]' => $credential->counter] : ['id' => $row['id']];
+        $updated = Db::update('passkeys', [
+            'counter'   => $credential->counter,
+            'backed_up' => (int) $credential->backedUp,
+            'used_at'   => date('Y-m-d H:i:s'),
+        ], $where)?->rowCount() ?? 0;
+
+        if ($counted && $updated === 0) {
+            throw new InvalidCredential('A concurrent sign-in already used this signature counter.');
+        }
 
         return $user;
     }
@@ -194,20 +223,19 @@ final class Passkey
     }
 
     /**
-     * Take the challenge a credential answers out of the pending ones; it is removed before
+     * Take the challenge a response answers out of the pending ones; it is removed before
      * the check, so a response can't be replayed and a failed one can't be retried.
      *
-     * @param string               $ceremony   `create` or `request`.
-     * @param array<string, mixed> $credential Browser credential.
-     * @return string Raw challenge.
+     * @param string $ceremony  `create` or `request`.
+     * @param string $challenge Raw challenge of the parsed response, not yet verified.
+     * @return string The same challenge, now known to be issued to this session.
      * @throws RuntimeException If the challenge is unknown or expired.
      */
-    private function consume(string $ceremony, array $credential): string
+    private function consume(string $ceremony, string $challenge): string
     {
-        $challenge = $this->rp->challenge($credential);
-        $pending   = $this->pending($ceremony);
-        $key       = bin2hex($challenge);
-        $found     = isset($pending[$key]);
+        $pending = $this->pending($ceremony);
+        $key     = bin2hex($challenge);
+        $found   = isset($pending[$key]);
 
         unset($pending[$key]);
         Session::set("passkey.$ceremony", $pending);
@@ -237,16 +265,23 @@ final class Passkey
     }
 
     /**
-     * Decode the credential JSON the browser sent.
+     * Restore the stored credential of a passkey row.
      *
-     * @param string $json
-     * @return array<string, mixed>
-     * @throws InvalidCredential If it isn't a JSON object.
+     * @param array<string, mixed> $row  Row with the COLUMNS.
+     * @param User                 $user Owner, its UUID is the user handle.
+     * @return Credential
      */
-    private function parse(string $json): array
+    private function credential(array $row, User $user): Credential
     {
-        $credential = json_decode($json, true, 16);
-
-        return is_array($credential) ? $credential : throw new InvalidCredential('The credential is not a JSON object.');
+        return new Credential(
+            (string) Base64::decode($row['credential_id']),
+            $user->uuid,
+            (int) $row['algorithm'],
+            $row['public_key'],
+            (int) $row['counter'],
+            array_values(array_filter(explode(',', $row['transports']))),
+            (bool) $row['backup_eligible'],
+            (bool) $row['backed_up'],
+        );
     }
 }

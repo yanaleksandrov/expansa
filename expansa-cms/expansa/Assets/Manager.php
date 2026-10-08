@@ -43,6 +43,8 @@ final class Manager
     /**
      * Template file extensions stripped when resolving the default co-located structure
      * in {@see self::defaultStructure()}.
+     *
+     * @var array
      */
     private const array TEMPLATE_EXTENSIONS = ['blade.php', 'php', 'html'];
 
@@ -58,6 +60,8 @@ final class Manager
 
     /**
      * Bumped by {@see self::enqueue()}/{@see self::dequeue()} on an actual change (not a dedup no-op).
+     *
+     * @var int
      */
     private static int $assetsRevision = 0;
 

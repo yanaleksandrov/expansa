@@ -4,13 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http;
 
+use Expansa\Access\Exceptions\AccessDenied;
+use Expansa\Auth\Exceptions\TooManyAttempts;
+use Expansa\Facades\Access;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Cookie;
+use Expansa\Facades\Debug;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\ResponseReady;
 use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Is;
+use ReflectionMethod;
 use Throwable;
 
 /**
@@ -25,10 +31,12 @@ use Throwable;
  *
  *   success       -> { "data": <return value> }
  *   HttpError -> { "message": ..., "errors"?: ... }  with the exception's status code
+ *   AccessDenied  -> { "message": ... }  with status 403
+ *   TooManyAttempts -> a notice fragment with the time to wait
  *   ResponseReady -> the exception's response as-is
  *
  * Cookies queued with the Cookie facade are added to every response.
- *   anything else -> { "message": ... }  with status 500
+ *   anything else -> { "message": ... }  with status 500 and the error id, reported by Debug::report()
  *
  * In debug mode (EX_DEBUG['enabled']), every JSON response also carries `benchmark`/`memory`
  * metrics — never in production, so nothing about the server leaks by default.
@@ -47,6 +55,17 @@ final class Kernel
         $request = Request::createFromGlobals();
 
         try {
+            $permissions = (new ReflectionMethod($controller, $method))->getAttributes(Can::class);
+
+            // an API token reaches only the endpoints that name a permission of its scopes
+            if ($permissions === [] && Auth::isBearer()) {
+                throw new AccessDenied($method);
+            }
+
+            foreach ($permissions as $attribute) {
+                Access::authorize(Auth::user(), $attribute->newInstance()->permission);
+            }
+
             $result = new $controller()->{$method}($request, ...$params);
 
             $response = $result instanceof Response
@@ -54,6 +73,12 @@ final class Kernel
                 : new Response()->json(self::withMetrics(['data' => $result]));
         } catch (ResponseReady $e) {
             $response = $e->response;
+        } catch (AccessDenied) {
+            $response = new Response()->json(self::withMetrics(['message' => t('You are not allowed to do this.')]), 403);
+        } catch (TooManyAttempts $e) {
+            // a notice fragment: the dashboard shows fragments of successful answers only
+            $message  = t('Too many attempts. Try again in :minutes min.', (int) ceil($e->retryAfter / 60));
+            $response = new Response()->json(self::withMetrics(['data' => [['target' => 'body', 'notify' => $message]]]));
         } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationFailed) {
@@ -62,8 +87,12 @@ final class Kernel
 
             $response = new Response()->json(self::withMetrics($payload), $e->statusCode);
         } catch (Throwable $e) {
+            // the id is in the log and the response, to find one by the other
+            $id = Debug::report($e, ['controller' => $controller, 'method' => $method]);
+
             $response = new Response()->json(self::withMetrics([
-                'message' => Is::debug() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
+                'message' => Debug::hasDetails() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
+                'id'      => $id,
             ]), 500);
         }
 

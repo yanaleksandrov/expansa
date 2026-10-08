@@ -28,11 +28,15 @@ final class Job
 
     /**
      * Schedule of the job, `null` runs it every minute.
+     *
+     * @var null|CronExpression
      */
     private ?CronExpression $executionTime = null;
 
     /**
      * The only year the job runs in, set by date().
+     *
+     * @var null|string
      */
     private ?string $executionYear = null;
 
@@ -40,6 +44,8 @@ final class Job
 
     /**
      * Lock files directory from the scheduler config, empty for the system temp directory.
+     *
+     * @var string
      */
     private string $tempDir = '';
 
@@ -47,11 +53,15 @@ final class Job
 
     /**
      * Decides if an overlapping job still runs, gets the lock file mtime.
+     *
+     * @var null|Closure
      */
     private ?Closure $whenOverlapping = null;
 
     /**
      * Truth test checked right before the run, the job runs only on `true`.
+     *
+     * @var Closure|bool
      */
     private Closure|bool $truthTest = true;
 
@@ -61,11 +71,15 @@ final class Job
 
     /**
      * Output of the last run, `null` before the first run or for a background job.
+     *
+     * @var null|string
      */
     public private(set) ?string $output = null;
 
     /**
      * Exit code of the last foreground shell run.
+     *
+     * @var int
      */
     public private(set) int $returnCode = 0;
 
@@ -87,11 +101,15 @@ final class Job
 
     /**
      * Email settings: `subject`, `body` and `ignore_empty_output`.
+     *
+     * @var string[]
      */
     private array $email = [];
 
     /**
      * Sends an email: gets the address, subject, body and attached files, returns true when sent.
+     *
+     * @var null|Closure
      */
     private ?Closure $mailer = null;
 

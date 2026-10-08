@@ -11,7 +11,7 @@ use Expansa\Database\Model;
 use Expansa\Database\Traits\HasFieldEav;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasValidation;
-use Expansa\Debug\Error;
+use Expansa\Support\Error;
 
 /**
  * Represents a taxonomy term: a reusable name/slug pair (e.g. a category or tag)

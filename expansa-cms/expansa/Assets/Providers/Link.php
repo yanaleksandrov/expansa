@@ -133,7 +133,7 @@ final class Link extends AbstractProvider
      * linking to it; $minify runs it through minify() first either way - but only for an
      * actual stylesheet (`rel === 'stylesheet'`, the default). `style()`/Link also gets reused
      * for non-CSS `<link>`s (favicons, manifest, preload, ...); minifying/inlining a PNG or a
-     * webmanifest as if it were CSS text would corrupt it, so those always render as-is
+     * web manifest as if it were CSS text would corrupt it, so those always render as-is
      * regardless of the flags. No effect either on an asset with no local file to read.
      *
      * @param bool $minify
@@ -152,7 +152,7 @@ final class Link extends AbstractProvider
         $attributes = array_diff_key(get_object_vars($this), array_flip(['uid', 'path', 'data', 'dependencies', 'toFooter']));
 
         if ($minify && $content !== null) {
-            // Null means the write failed (disk full, permissions, ...) - keep the original
+            // Null means to write failed (disk full, permissions, ...) - keep the original
             // href rather than link to a cached file that was never actually written.
             $attributes['href'] = self::writeCache($this->uid, $content, 'css') ?? $attributes['href'];
         }

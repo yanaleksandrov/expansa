@@ -55,6 +55,8 @@ final class CronExpression
 
     /**
      * Built-in and registered aliases.
+     *
+     * @var array
      */
     private static array $aliases = self::MAPPINGS;
 
@@ -81,6 +83,8 @@ final class CronExpression
 
     /**
      * Both the day of month and the day of week are set, so either of them satisfies the day.
+     *
+     * @var bool
      */
     private bool $eitherDay = false;
 
@@ -93,6 +97,8 @@ final class CronExpression
 
     /**
      * Max iterations when searching for a run date, the search throws after them.
+     *
+     * @var int
      */
     public int $maxIterationCount = 1000;
 

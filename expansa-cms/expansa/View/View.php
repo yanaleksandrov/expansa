@@ -26,6 +26,8 @@ final class View
 
     /**
      * Options of the HTML beautifier: indent_size, indent_char, unformatted and others.
+     *
+     * @var array
      */
     private array $beautifyOptions = [];
 

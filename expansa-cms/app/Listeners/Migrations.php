@@ -22,6 +22,10 @@ final class Migrations
         $this->createTermsTable();
         $this->createUsersTable();
         $this->createPasskeysTable();
+        $this->createUserIdentitiesTable();
+        $this->createUserSessionsTable();
+        $this->createUserEventsTable();
+        $this->createUserTwoFactorTable();
         $this->createOptionsTable();
         $this->createCommentsTable();
         $this->createTaxonomiesTable();
@@ -242,14 +246,84 @@ final class Migrations
             $table->char('credential_hash', 64)->unique();
             $table->smallInt('algorithm');
             $table->text('public_key');
-            $table->bigInt('counter')->unsigned()->default(0);
+            $table->int('counter')->unsigned()->default(0);
             $table->string('transports', 100)->default('');
+            $table->bool('backup_eligible')->default(false);
+            $table->bool('backed_up')->default(false);
 
             $table->string('name', 100)->default('');
             $table->timestamps();
             $table->timestamp('used_at')->nullable();
 
             $table->index('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
+        });
+    }
+
+    private function createUserIdentitiesTable(): void
+    {
+        // accounts at sign-in providers: the provider and its user ID, never its tokens
+        Schema::create('user_identities', function (Table $table) {
+            $table->id();
+            $table->bigInt('user_id')->unsigned();
+            $table->string('provider', 32);
+            $table->string('subject', 255);
+            $table->string('email', 255)->default('');
+            $table->timestamps();
+
+            $table->unique(['provider', 'subject']);
+            $table->index('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
+        });
+    }
+
+    private function createUserSessionsTable(): void
+    {
+        // a row per signed-in device; the session ID itself stays in the browser, only its hash is here
+        Schema::create('user_sessions', function (Table $table) {
+            $table->id();
+            $table->bigInt('user_id')->unsigned();
+            $table->char('token', 64)->unique();
+            $table->string('user_agent', 255)->default('');
+            $table->string('ip', 45)->default('');
+            $table->timestamps();
+            $table->timestamp('used_at')->nullable();
+            $table->timestamp('expires_at')->nullable();
+
+            $table->index('user_id');
+            $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
+        });
+    }
+
+    private function createUserEventsTable(): void
+    {
+        // the security log of the profile: sign-ins, failures, changes of sign-in methods
+        Schema::create('user_events', function (Table $table) {
+            $table->id();
+            $table->bigInt('user_id')->unsigned();
+            $table->string('event', 40);
+            $table->text('details');
+            $table->string('ip', 45)->default('');
+            $table->string('user_agent', 255)->default('');
+            $table->timestamps();
+
+            $table->index('user_id');
+            $table->index('created_at');
+            $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
+        });
+    }
+
+    private function createUserTwoFactorTable(): void
+    {
+        // the encrypted TOTP secret, keyed hashes of the recovery codes, the last accepted time step
+        Schema::create('user_two_factor', function (Table $table) {
+            $table->id();
+            $table->bigInt('user_id')->unsigned()->unique();
+            $table->text('secret');
+            $table->text('recovery_codes');
+            $table->bigInt('last_step')->unsigned()->default(0);
+            $table->timestamps();
+
             $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
         });
     }
@@ -342,7 +416,7 @@ final class Migrations
             $table->bigInt('user_id')->nullable();
 
             // File status
-            $table->enum('status', self::VISIBILITY_STATUSES)->default('published');
+            $table->enum('status', self::VISIBILITY_STATUSES)->default('publish');
             $table->enum('discussion', self::DISCUSSIONS_STATUSES)->default('open');
             $table->string('password', 255);
 

@@ -2,6 +2,7 @@
 
 use App\Models\Option;
 use Expansa\Facades\I18n;
+use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 
 /**
@@ -9,6 +10,28 @@ use Expansa\Facades\Safe;
  *
  * @since 2025.1
  */
+
+// a plain field of the Security, Mail and AI tabs: everything but the type, name, texts and attributes is the default
+$field = static fn ( string $type, string $name, string $label, string $instruction, array $attributes = [] ): array => [
+	'type'        => $type,
+	'name'        => $name,
+	'label'       => $label,
+	'class'       => '',
+	'label_class' => '',
+	'reset'       => 0,
+	'before'      => '',
+	'after'       => '',
+	'instruction' => $instruction,
+	'tooltip'     => '',
+	'copy'        => 0,
+	'validator'   => '',
+	'conditions'  => [],
+	'attributes'  => [ 'name' => $name, ...$attributes ],
+];
+
+// instruction of a secret field: the saved value is never shown back, see App\Support\Secrets
+$saved = static fn ( string $option, string $instruction = '' ): string => Option::get( $option ) ? t( 'Saved. Leave empty to keep it.' ) : $instruction;
+
 return Expansa\Facades\Form::enqueue(
 	'settings',
 	[
@@ -210,13 +233,7 @@ return Expansa\Facades\Form::enqueue(
 								'u-prop' => 'users.role',
 								'value' => Option::get( 'users.role' ),
 							],
-							'options'     => [
-								'subscriber'    => t( 'Subscriber' ),
-								'contributor'   => t( 'Contributor' ),
-								'author'        => t( 'Author' ),
-								'editor'        => t( 'Editor' ),
-								'administrator' => t( 'Administrator' ),
-							],
+							'options'     => array_map( static fn ( array $role ) => $role['name'], Role::all() ),
 						],
 					],
 				],
@@ -595,6 +612,353 @@ return Expansa\Facades\Form::enqueue(
 									'content' => t( 'An avatar generated from the user’s name' ),
 								],
 							],
+						],
+					],
+				],
+			],
+		],
+		[
+			'name'    => 'security',
+			'type'    => 'tab',
+			'label'   => t( 'Security' ),
+			'caption' => t( 'sign-in options' ),
+			'icon'    => 'ph ph-shield-check',
+			'fields'  => [
+				[
+					'type'          => 'group',
+					'name'          => 'sign-in-limits',
+					'label'         => t( 'Password guessing' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'number', 'security[attempts]', t( 'Wrong passwords before a lockout' ), t( 'Per browser that signed in before, or per login from unknown browsers; 0 turns the limit off.' ), [
+							'value' => (int) Option::get( 'security.attempts', 5 ),
+							'min'   => 0,
+						] ),
+						$field( 'number', 'security[ip_attempts]', t( 'Wrong passwords per IP' ), t( 'From unknown browsers, for any login: stops one password tried on many accounts; 0 turns it off.' ), [
+							'value' => (int) Option::get( 'security.ip_attempts', 50 ),
+							'min'   => 0,
+						] ),
+						$field( 'number', 'security[lockout]', t( 'First lockout, minutes' ), t( 'Each next lockout is twice as long, up to a day.' ), [
+							'value' => (int) Option::get( 'security.lockout', 15 ),
+							'min'   => 1,
+						] ),
+						$field( 'number', 'security[log_days]', t( 'Keep the security log, days' ), t( 'Sign-ins and changes shown in the profiles; 0 keeps them forever.' ), [
+							'value' => (int) Option::get( 'security.log_days', 90 ),
+							'min'   => 0,
+						] ),
+						$field( 'hidden', 'security[breached]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
+						$field( 'hidden', 'security[email_link]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
+						[
+							'type'        => 'checkbox',
+							'name'        => '',
+							'label'       => '',
+							'class'       => 'field field--ui',
+							'label_class' => '',
+							'reset'       => 0,
+							'before'      => '',
+							'after'       => '',
+							'instruction' => '',
+							'tooltip'     => '',
+							'copy'        => 0,
+							'validator'   => '',
+							'conditions'  => [],
+							'attributes'  => [ 'u-prop' => '' ],
+							'options'     => [
+								'security[breached]' => [
+									'content'     => t( 'Refuse breached passwords' ),
+									'icon'        => 'ph ph-password',
+									'description' => t( 'Checks new passwords against public breaches; only 5 characters of a hash leave the site' ),
+									'checked'     => (bool) Option::get( 'security.breached', true ),
+								],
+								'security[email_link]' => [
+									'content'     => t( 'Sign in by an email link' ),
+									'icon'        => 'ph ph-envelope-simple-open',
+									'description' => t( 'A one-time link valid for 15 minutes; two-factor authentication still asks for its code' ),
+									'checked'     => (bool) Option::get( 'security.email_link', false ),
+								],
+							],
+						],
+					],
+				],
+				[
+					'type'          => 'group',
+					'name'          => 'two-factor',
+					'label'         => t( 'Two-factor authentication' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'hidden', 'security[two_factor_roles][_]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
+						[
+							'type'        => 'checkbox',
+							'name'        => '',
+							'label'       => t( 'Required for roles' ),
+							'class'       => 'field field--ui',
+							'label_class' => '',
+							'reset'       => 0,
+							'before'      => '',
+							'after'       => '',
+							'instruction' => t( 'Users of these roles set up an authenticator app before they can use the dashboard' ),
+							'tooltip'     => '',
+							'copy'        => 0,
+							'validator'   => '',
+							'conditions'  => [],
+							'attributes'  => [ 'u-prop' => '' ],
+							'options'     => array_map(
+								static fn ( array $role ) => [
+									'content' => $role['name'],
+									'icon'    => 'ph ph-user-circle-gear',
+									'checked' => (bool) ( Option::get( 'security.two_factor_roles', [] )[ $role['key'] ] ?? false ),
+								],
+								array_combine(
+									array_map( static fn ( string $key ) => "security[two_factor_roles][$key]", array_keys( Role::all() ) ),
+									array_map( static fn ( string $key, array $role ) => $role + [ 'key' => $key ], array_keys( Role::all() ), Role::all() )
+								)
+							),
+						],
+					],
+				],
+				[
+					'type'          => 'group',
+					'name'          => 'oauth',
+					'label'         => t( 'Sign-in providers' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'text', 'oauth[google][client_id]', t( 'Google client ID' ), t( 'Callback URL: :url', url( 'oauth/google/callback' ) ), [
+							'value' => (string) Option::get( 'oauth.google.client_id' ),
+						] ),
+						$field( 'password', 'oauth[google][client_secret]', t( 'Google client secret' ), $saved( 'oauth.google.client_secret' ), [
+							'autocomplete' => 'new-password',
+						] ),
+						$field( 'text', 'oauth[github][client_id]', t( 'GitHub client ID' ), t( 'Callback URL: :url', url( 'oauth/github/callback' ) ), [
+							'value' => (string) Option::get( 'oauth.github.client_id' ),
+						] ),
+						$field( 'password', 'oauth[github][client_secret]', t( 'GitHub client secret' ), $saved( 'oauth.github.client_secret' ), [
+							'autocomplete' => 'new-password',
+						] ),
+						$field( 'text', 'oauth[openid][label]', t( 'OpenID Connect provider name' ), t( 'Any OpenID Connect provider, e.g. GitLab or Keycloak. Callback URL: :url', url( 'oauth/openid/callback' ) ), [
+							'value' => (string) Option::get( 'oauth.openid.label' ),
+						] ),
+						$field( 'text', 'oauth[openid][issuer]', t( 'Issuer URL' ), t( 'e.g. https://gitlab.com' ), [
+							'value' => (string) Option::get( 'oauth.openid.issuer' ),
+						] ),
+						$field( 'text', 'oauth[openid][client_id]', t( 'Client ID' ), '', [
+							'value' => (string) Option::get( 'oauth.openid.client_id' ),
+						] ),
+						$field( 'password', 'oauth[openid][client_secret]', t( 'Client secret' ), $saved( 'oauth.openid.client_secret' ), [
+							'autocomplete' => 'new-password',
+						] ),
+					],
+				],
+			],
+		],
+		[
+			'name'    => 'mail',
+			'type'    => 'tab',
+			'label'   => t( 'Mail' ),
+			'caption' => t( 'outgoing email' ),
+			'icon'    => 'ph ph-envelope-simple',
+			'fields'  => [
+				[
+					'type'          => 'group',
+					'name'          => 'smtp',
+					'label'         => t( 'SMTP server' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'text', 'mail[host]', t( 'Server' ), t( 'Without a server the mail goes through PHP mail() and often lands in spam.' ), [
+							'value'       => (string) Option::get( 'mail.host' ),
+							'placeholder' => 'smtp.example.com',
+						] ),
+						$field( 'number', 'mail[port]', t( 'Port' ), t( 'Usually 465 for SSL and 587 for STARTTLS.' ), [
+							'value' => (int) Option::get( 'mail.port', 465 ),
+							'min'   => 1,
+						] ),
+						[
+							...$field( 'select', 'mail[encryption]', t( 'Encryption' ), '', [
+								'value' => (string) Option::get( 'mail.encryption', 'ssl' ),
+							] ),
+							'options' => [
+								'ssl'  => t( 'SSL' ),
+								'tls'  => t( 'STARTTLS' ),
+								'none' => t( 'None' ),
+							],
+						],
+						$field( 'text', 'mail[username]', t( 'Login' ), t( 'Leave empty if the server needs no login.' ), [
+							'value'        => (string) Option::get( 'mail.username' ),
+							'autocomplete' => 'off',
+						] ),
+						$field( 'password', 'mail[password]', t( 'Password' ), $saved( 'mail.password' ), [
+							'autocomplete' => 'new-password',
+						] ),
+						$field( 'email', 'mail[from]', t( 'Sender address' ), t( 'An address of the site domain, otherwise the mail lands in spam.' ), [
+							'value'       => (string) Option::get( 'mail.from' ),
+							'placeholder' => 'no-reply@example.com',
+						] ),
+						$field( 'text', 'mail[from_name]', t( 'Sender name' ), t( 'The site name when empty.' ), [
+							'value' => (string) Option::get( 'mail.from_name' ),
+						] ),
+						[
+							'name'     => 'mail-test',
+							'type'     => 'custom',
+							'callback' => static function () {
+								?>
+								<div class="df aic g-3">
+									<button class="btn btn--outline" type="button" @click="$ajax.post('options/mail-test')"><i class="ph ph-paper-plane-tilt"></i> <?php echo t( 'Send a test email' ); ?></button>
+									<span class="fs-13 t-muted"><?php echo t( 'To your email, with the saved settings.' ); ?></span>
+								</div>
+								<?php
+							},
+						],
+					],
+				],
+				[
+					'type'          => 'group',
+					'name'          => 'dkim',
+					'label'         => t( 'DKIM signature' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'text', 'mail[dkim][domain]', t( 'Domain' ), t( 'The site domain when empty.' ), [
+							'value' => (string) Option::get( 'mail.dkim.domain' ),
+						] ),
+						$field( 'text', 'mail[dkim][selector]', t( 'Selector' ), t( 'Name of the DNS record with the public key, e.g. "mail" for mail._domainkey.' ), [
+							'value' => (string) Option::get( 'mail.dkim.selector' ),
+						] ),
+						$field( 'textarea', 'mail[dkim][private]', t( 'Private key' ), $saved( 'mail.dkim.private', t( 'PEM, begins with -----BEGIN PRIVATE KEY-----.' ) ), [
+							'rows' => 4,
+						] ),
+						$field( 'password', 'mail[dkim][passphrase]', t( 'Key passphrase' ), $saved( 'mail.dkim.passphrase', t( 'Only for an encrypted key.' ) ), [
+							'autocomplete' => 'new-password',
+						] ),
+					],
+				],
+			],
+		],
+		[
+			'name'    => 'ai',
+			'type'    => 'tab',
+			'label'   => t( 'AI' ),
+			'caption' => t( 'plugin generation' ),
+			'icon'    => 'ph ph-sparkle',
+			'fields'  => [
+				[
+					'type'          => 'group',
+					'name'          => 'ai-service',
+					'label'         => t( 'AI service' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'url', 'ai[url]', t( 'Address' ), t( 'Any OpenAI-compatible Chat Completions API: Google Gemini, OpenRouter, a local Ollama at http://localhost:11434/v1/. Empty turns the generation off.' ), [
+							'value'       => (string) Option::get( 'ai.url', App\Support\Ai::URL ),
+							'placeholder' => App\Support\Ai::URL,
+						] ),
+						$field( 'text', 'ai[model]', t( 'Model' ), t( 'e.g. gemini-flash-latest, or a model id of OpenRouter ending in :free.' ), [
+							'value'       => (string) Option::get( 'ai.model', App\Support\Ai::MODEL ),
+							'placeholder' => App\Support\Ai::MODEL,
+						] ),
+						$field( 'password', 'ai[key]', t( 'Service key' ), $saved( 'ai.key', t( 'A local service needs none.' ) ), [
+							'autocomplete' => 'new-password',
+						] ),
+						$field( 'hidden', 'ai[schemas]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
+						[
+							'type'        => 'checkbox',
+							'name'        => '',
+							'label'       => '',
+							'class'       => 'field field--ui',
+							'label_class' => '',
+							'reset'       => 0,
+							'before'      => '',
+							'after'       => '',
+							'instruction' => '',
+							'tooltip'     => '',
+							'copy'        => 0,
+							'validator'   => '',
+							'conditions'  => [],
+							'attributes'  => [ 'u-prop' => '' ],
+							'options'     => [
+								'ai[schemas]' => [
+									'content'     => t( 'Structured output' ),
+									'icon'        => 'ph ph-brackets-curly',
+									'description' => t( 'Turn off for models without json_schema support: the schema then goes into the instructions' ),
+									'checked'     => (bool) Option::get( 'ai.schemas', true ),
+								],
+							],
+						],
+					],
+				],
+			],
+		],
+		[
+			'name'    => 'roles',
+			'type'    => 'tab',
+			'label'   => t( 'Roles' ),
+			'caption' => t( 'permissions of users' ),
+			'icon'    => 'ph ph-users-three',
+			'fields'  => [
+				[
+					'type'          => 'group',
+					'name'          => 'roles',
+					'label'         => t( 'Roles and permissions' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => '',
+					'fields'        => [
+						[
+							'name'     => 'roles',
+							'type'     => 'custom',
+							'callback' => function () {
+								$permissions = App\Support\RoleSettings::getPermissions();
+								?>
+								<div class="dg g-4">
+									<div class="t-muted fs-13"><?php echo t( 'A user gets the permissions of all their roles. The administrator always keeps manage_options and users_edit. Built-in roles can be changed but not deleted.' ); ?></div>
+									<?php foreach ( Role::all() as $key => $role ) : ?>
+										<div class="dg g-2 p-4 card card-border">
+											<div class="df aic fw g-2">
+												<div class="field">
+													<div class="field-item">
+														<input type="text" name="roles[<?php echo $key; ?>][name]" value="<?php echo htmlspecialchars( $role['name'] ); ?>">
+													</div>
+												</div>
+												<code class="fs-12"><?php echo $key; ?></code>
+												<?php if ( ! in_array( $key, App\Support\RoleSettings::BUILT_IN, true ) ) : ?>
+													<label class="df aic g-1 fs-13 t-red ml-auto"><input type="checkbox" name="roles[<?php echo $key; ?>][delete]" value="1"> <?php echo t( 'Delete' ); ?></label>
+												<?php endif; ?>
+											</div>
+											<input type="hidden" name="roles[<?php echo $key; ?>][permissions][_]" value="0">
+											<div class="df fw g-3 fs-13">
+												<?php foreach ( $permissions as $permission ) : ?>
+													<label class="df aic g-1">
+														<input type="checkbox" name="roles[<?php echo $key; ?>][permissions][<?php echo $permission; ?>]" value="1"<?php echo in_array( $permission, $role['permissions'], true ) ? ' checked' : ''; ?>>
+														<?php echo $permission; ?>
+													</label>
+												<?php endforeach; ?>
+											</div>
+										</div>
+									<?php endforeach; ?>
+									<div class="df aic fw g-2">
+										<div class="field">
+											<div class="field-item">
+												<input type="text" name="roles[__new][key]" placeholder="<?php echo t_attr( 'New role key, e.g. moderator' ); ?>">
+											</div>
+										</div>
+										<div class="field">
+											<div class="field-item">
+												<input type="text" name="roles[__new][name]" placeholder="<?php echo t_attr( 'Display name' ); ?>">
+											</div>
+										</div>
+										<span class="t-muted fs-13"><?php echo t( 'Save, then choose its permissions.' ); ?></span>
+									</div>
+								</div>
+								<?php
+							},
 						],
 					],
 				],

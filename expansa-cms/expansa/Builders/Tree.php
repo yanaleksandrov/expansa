@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Builders;
 
+use Closure;
 use Expansa\Security\Sanitizer;
 use Expansa\Patterns\Singleton;
 use Expansa\Support\Arr;
@@ -35,6 +36,61 @@ final class Tree
      * $depth > 0  specifies the number of display levels.
      */
     public int $depth = 99;
+
+    /**
+     * Checks the `capabilities` of an item: `fn (string[] $capabilities): bool`; null shows every item.
+     */
+    private static ?Closure $allows = null;
+
+    /**
+     * Set how the capabilities of items are checked; items that fail are left out of view() and include().
+     *
+     * @param Closure|null $allows `fn (string[] $capabilities): bool`, e.g. through Access.
+     * @return void
+     */
+    public static function configure(?Closure $allows = null): void
+    {
+        self::$allows = $allows;
+    }
+
+    /**
+     * Whether the items of every tree leading to a page allow it: a page of a menu item is closed
+     * to whoever doesn't see the item. A URL of no item is allowed.
+     *
+     * @param string               $path  Page path, e.g. `settings`.
+     * @param array<string, mixed> $query Query of the request: an item URL with a query matches when its values do.
+     * @return bool
+     */
+    public static function allowsUrl(string $path, array $query = []): bool
+    {
+        foreach (self::init()->list as $items) {
+            foreach ($items as $item) {
+                $url = parse_url((string) ($item['url'] ?? ''));
+                parse_str($url['query'] ?? '', $itemQuery);
+
+                $isPage = trim($url['path'] ?? '', '/') === trim($path, '/')
+                    && array_intersect_assoc($itemQuery, $query) === $itemQuery;
+                if ($isPage && ! self::allows($item)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Whether an item passes the capability check of configure().
+     *
+     * @param array<string, mixed> $item
+     * @return bool
+     */
+    private static function allows(array $item): bool
+    {
+        $capabilities = (array) ($item['capabilities'] ?? []);
+
+        return self::$allows === null || $capabilities === [] || (bool) (self::$allows)($capabilities);
+    }
 
     /**
      * Register new tree structure.
@@ -161,7 +217,7 @@ final class Tree
 
         foreach ($elements as $element) {
             $element_id = trim($element['id'] ?? '');
-            if ($element['parent_id'] === $parent_id) {
+            if ($element['parent_id'] === $parent_id && self::allows($element)) {
                 $element['depth'] = $depth;
 
                 $children = $this->parse($elements, $element_id, $depth + 1);

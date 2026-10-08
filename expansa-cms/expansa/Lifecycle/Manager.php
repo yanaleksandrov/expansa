@@ -44,21 +44,29 @@ final class Manager
 
     /**
      * Fires a hook by name: `before{Phase}`, `after{Phase}`, `enter{Context}`.
+     *
+     * @var null|Closure
      */
     private ?Closure $hook = null;
 
     /**
      * Called once by run(), to schedule the work after the response.
+     *
+     * @var null|Closure
      */
     private ?Closure $terminate = null;
 
     /**
      * Dispatches the routes registered by the context.
+     *
+     * @var null|Closure
      */
     private ?Closure $route = null;
 
     /**
      * Returns the request URI the contexts are matched against.
+     *
+     * @var null|Closure
      */
     private ?Closure $uriResolver = null;
 
