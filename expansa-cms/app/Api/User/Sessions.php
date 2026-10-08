@@ -142,6 +142,16 @@ final class Sessions implements SessionStore
     }
 
     /**
+     * Delete the expired sign-ins of all users, run daily by the scheduler.
+     *
+     * @return int Number of rows deleted.
+     */
+    public static function prune(): int
+    {
+        return Db::delete('user_sessions', ['expires_at[<]' => date('Y-m-d H:i:s')])?->rowCount() ?? 0;
+    }
+
+    /**
      * Human name of a device by its user agent: "Chrome, Windows".
      *
      * @param string $userAgent

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Models\Option;
 use Expansa\Ai\Commands\Work;
 use Expansa\Ai\Contexts\Files;
 use Expansa\Ai\Limits;
@@ -13,11 +14,22 @@ use Expansa\Ai\Queue;
 use Expansa\Ai\Stores\File;
 
 /**
- * Builds the plugin generation queue from the EX_AI settings of env.php.
- * Web requests only store tasks; the manager and its provider are created in the `ai:work` worker.
+ * Builds the plugin generation queue from the AI tab of the settings (`ai` option: address, model,
+ * encrypted key) and the server paths of EX_AI in env.php. Web requests only store tasks; the manager
+ * and its provider are created in the `ai:work` worker.
  */
 final class Ai
 {
+    /**
+     * Address of the service until the settings name another; Google Gemini has a free tier.
+     */
+    public const string URL = 'https://generativelanguage.googleapis.com/v1beta/openai/';
+
+    /**
+     * Model of the default service.
+     */
+    public const string MODEL = 'gemini-flash-latest';
+
     /**
      * Queue of the current process, created on the first call.
      *
@@ -44,7 +56,29 @@ final class Ai
     {
         $config = self::config();
 
-        return $config['key'] !== '' || str_contains($config['url'], '://localhost') || str_contains($config['url'], '://127.0.0.1');
+        $isLocal = str_contains($config['url'], '://localhost') || str_contains($config['url'], '://127.0.0.1');
+
+        return $config['url'] !== '' && ($config['key'] !== '' || $isLocal);
+    }
+
+    /**
+     * Model the tasks are generated with.
+     *
+     * @return string
+     */
+    public static function getModel(): string
+    {
+        return self::config()['model'];
+    }
+
+    /**
+     * PHP CLI binary that runs the worker.
+     *
+     * @return string
+     */
+    public static function getPhp(): string
+    {
+        return self::config()['php'];
     }
 
     /**
@@ -69,17 +103,20 @@ final class Ai
     }
 
     /**
-     * Returns EX_AI with defaults for a missing setting.
+     * Returns the service of the AI tab of the settings and the server paths of EX_AI.
      *
      * @return array{url: string, model: string, key: string, schemas: bool, options: array<string, mixed>, context: string, php: string}
      */
     private static function config(): array
     {
-        return (defined('EX_AI') ? EX_AI : []) + [
-            'url'     => 'https://generativelanguage.googleapis.com/v1beta/openai/',
-            'model'   => 'gemini-flash-latest',
-            'key'     => '',
-            'schemas' => true,
+        $ai = (array) Option::get('ai', []);
+
+        return [
+            'url'     => trim((string) ($ai['url'] ?? self::URL)),
+            'model'   => trim((string) ($ai['model'] ?? '')) ?: self::MODEL,
+            'key'     => Secrets::decrypt((string) ($ai['key'] ?? '')),
+            'schemas' => (bool) ($ai['schemas'] ?? true),
+        ] + (defined('EX_AI') ? EX_AI : []) + [
             'options' => [],
             'context' => dirname(EX_PATH) . '/documentation',
             'php'     => PHP_BINARY,

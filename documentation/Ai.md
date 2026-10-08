@@ -47,11 +47,13 @@
 
 ## Настройка
 
-В CMS пакет уже подключён: `App\Support\Ai` собирает очередь из настроек `EX_AI` в env.php, `App\Api\Ai\AiController` отдаёт задачи чату дашборда (`POST /api/ai/{index,get,create,clarify,cancel,rename,archive,delete}`, нужно право `plugins_install`), `ai:work` и его запуск раз в минуту зарегистрированы в bootstrap.php. Для проверки с бесплатной моделью достаточно ключа:
+В CMS пакет уже подключён: `App\Support\Ai` собирает очередь из вкладки «AI» настроек (адрес, модель, ключ — опция `ai`, ключ зашифрован, см. `App\Support\Secrets`) и серверных путей `EX_AI` в env.php (`context`, `php`, `options`), `App\Api\Ai\AiController` отдаёт задачи чату дашборда (`POST /api/ai/{index,get,create,clarify,cancel,rename,archive,delete}`, нужно право `plugins_install`), `ai:work` и его запуск раз в минуту зарегистрированы в bootstrap.php. Для проверки с бесплатной моделью достаточно ключа:
 
-- Google Gemini: ключ на aistudio.google.com, `EX_AI_KEY=<ключ>`; адрес и модель `gemini-flash-latest` стоят по умолчанию. Бесплатный tier Flash ограничен примерно 10 запросами в минуту, а раунд — это 2–5 запросов.
-- OpenRouter: `EX_AI_URL=https://openrouter.ai/api/v1/`, `EX_AI_MODEL=<id с суффиксом :free>`, `EX_AI_KEY=<ключ>`; для моделей без `json_schema` — `EX_AI_SCHEMAS=off`.
-- Ollama локально: `EX_AI_URL=http://localhost:11434/v1/`, `EX_AI_MODEL=<модель>`, ключ не нужен.
+- Google Gemini: ключ на aistudio.google.com; адрес и модель `gemini-flash-latest` стоят по умолчанию. Бесплатный tier Flash ограничен примерно 10 запросами в минуту, а раунд — это 2–5 запросов.
+- OpenRouter: адрес `https://openrouter.ai/api/v1/`, модель — id с суффиксом `:free`; для моделей без `json_schema` снимите «Structured output».
+- Ollama локально: адрес `http://localhost:11434/v1/`, ключ не нужен.
+
+Пустой адрес выключает генерацию.
 
 `Providers\OpenAi` передаёт схему ответа в `response_format` (`json_schema`, а при `schemas: false` — `json_object` и схему в инструкциях), берёт usage из ответа и бросает `RequestFailed` при недоступности сервиса или статусе не 2xx — очередь повторяет такую задачу. `Contexts\Files` отдаёт файлы `always` и файлы каталога, где чаще встречаются слова запроса.
 

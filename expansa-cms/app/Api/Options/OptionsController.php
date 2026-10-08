@@ -16,25 +16,7 @@ final readonly class OptionsController
          */
         private OptionsService $service = new OptionsService(),
     ) {}
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('manage_options')]
-    public function create(): array
-    {
-        return ['method' => 'POST create user'];
-    }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('manage_options')]
-    public function index(): array
-    {
-        return ['method' => 'GET user list'];
-    }
-
+
     #[Can('manage_options')]
     public function update(Request $request): array
     {
@@ -46,13 +28,4 @@ final readonly class OptionsController
     {
         return $this->service->mailTest();
     }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('manage_options')]
-    public function delete(): array
-    {
-        return ['method' => 'DELETE remove user by ID'];
-    }
-}
+}

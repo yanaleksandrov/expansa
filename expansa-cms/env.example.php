@@ -101,18 +101,12 @@ define('EX_DEBUG', [
 ]);
 
 /**
- * AI service for generating plugins: any OpenAI-compatible Chat Completions API.
- * Free for testing: Google Gemini (a key from aistudio.google.com) with the defaults below, or OpenRouter:
- * EX_AI_URL=https://openrouter.ai/api/v1/, EX_AI_MODEL=<model id ending in :free>, EX_AI_KEY=<openrouter key>.
+ * Server side of the AI service for generating plugins; the service itself (address, model, key)
+ * is set on the AI tab of the settings.
  *
  * @since 2026.100
  */
 define('EX_AI', [
-    'url'     => getenv('EX_AI_URL') ?: 'https://generativelanguage.googleapis.com/v1beta/openai/',
-    'model'   => getenv('EX_AI_MODEL') ?: 'gemini-flash-latest',
-    'key'     => getenv('EX_AI_KEY') ?: '',
-    // false for models without json_schema structured output: the schema goes into the instructions
-    'schemas' => filter_var(getenv('EX_AI_SCHEMAS') ?: 'on', FILTER_VALIDATE_BOOL),
     // extra request fields, e.g. ['reasoning_effort' => 'low']
     'options' => [],
     // reference material for the model: Markdown files of the CMS documentation

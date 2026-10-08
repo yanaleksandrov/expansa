@@ -11,7 +11,7 @@ use Expansa\Facades\Safe;
  * @since 2025.1
  */
 
-// a plain field of the Security and Mail tabs: everything but the type, name, texts and attributes is the default
+// a plain field of the Security, Mail and AI tabs: everything but the type, name, texts and attributes is the default
 $field = static fn ( string $type, string $name, string $label, string $instruction, array $attributes = [] ): array => [
 	'type'        => $type,
 	'name'        => $name,
@@ -28,6 +28,9 @@ $field = static fn ( string $type, string $name, string $label, string $instruct
 	'conditions'  => [],
 	'attributes'  => [ 'name' => $name, ...$attributes ],
 ];
+
+// instruction of a secret field: the saved value is never shown back, see App\Support\Secrets
+$saved = static fn ( string $option, string $instruction = '' ): string => Option::get( $option ) ? t( 'Saved. Leave empty to keep it.' ) : $instruction;
 
 return Expansa\Facades\Form::enqueue(
 	'settings',
@@ -641,6 +644,10 @@ return Expansa\Facades\Form::enqueue(
 							'value' => (int) Option::get( 'security.lockout', 15 ),
 							'min'   => 1,
 						] ),
+						$field( 'number', 'security[log_days]', t( 'Keep the security log, days' ), t( 'Sign-ins and changes shown in the profiles; 0 keeps them forever.' ), [
+							'value' => (int) Option::get( 'security.log_days', 90 ),
+							'min'   => 0,
+						] ),
 						$field( 'hidden', 'security[breached]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
 						$field( 'hidden', 'security[email_link]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
 						[
@@ -724,14 +731,14 @@ return Expansa\Facades\Form::enqueue(
 						$field( 'text', 'oauth[google][client_id]', t( 'Google client ID' ), t( 'Callback URL: :url', url( 'oauth/google/callback' ) ), [
 							'value' => (string) Option::get( 'oauth.google.client_id' ),
 						] ),
-						$field( 'password', 'oauth[google][client_secret]', t( 'Google client secret' ), '', [
-							'value' => (string) Option::get( 'oauth.google.client_secret' ),
+						$field( 'password', 'oauth[google][client_secret]', t( 'Google client secret' ), $saved( 'oauth.google.client_secret' ), [
+							'autocomplete' => 'new-password',
 						] ),
 						$field( 'text', 'oauth[github][client_id]', t( 'GitHub client ID' ), t( 'Callback URL: :url', url( 'oauth/github/callback' ) ), [
 							'value' => (string) Option::get( 'oauth.github.client_id' ),
 						] ),
-						$field( 'password', 'oauth[github][client_secret]', t( 'GitHub client secret' ), '', [
-							'value' => (string) Option::get( 'oauth.github.client_secret' ),
+						$field( 'password', 'oauth[github][client_secret]', t( 'GitHub client secret' ), $saved( 'oauth.github.client_secret' ), [
+							'autocomplete' => 'new-password',
 						] ),
 						$field( 'text', 'oauth[openid][label]', t( 'OpenID Connect provider name' ), t( 'Any OpenID Connect provider, e.g. GitLab or Keycloak. Callback URL: :url', url( 'oauth/openid/callback' ) ), [
 							'value' => (string) Option::get( 'oauth.openid.label' ),
@@ -742,8 +749,8 @@ return Expansa\Facades\Form::enqueue(
 						$field( 'text', 'oauth[openid][client_id]', t( 'Client ID' ), '', [
 							'value' => (string) Option::get( 'oauth.openid.client_id' ),
 						] ),
-						$field( 'password', 'oauth[openid][client_secret]', t( 'Client secret' ), '', [
-							'value' => (string) Option::get( 'oauth.openid.client_secret' ),
+						$field( 'password', 'oauth[openid][client_secret]', t( 'Client secret' ), $saved( 'oauth.openid.client_secret' ), [
+							'autocomplete' => 'new-password',
 						] ),
 					],
 				],
@@ -786,7 +793,7 @@ return Expansa\Facades\Form::enqueue(
 							'value'        => (string) Option::get( 'mail.username' ),
 							'autocomplete' => 'off',
 						] ),
-						$field( 'password', 'mail[password]', t( 'Password' ), Option::get( 'mail.password' ) ? t( 'Saved. Leave empty to keep it.' ) : '', [
+						$field( 'password', 'mail[password]', t( 'Password' ), $saved( 'mail.password' ), [
 							'autocomplete' => 'new-password',
 						] ),
 						$field( 'email', 'mail[from]', t( 'Sender address' ), t( 'An address of the site domain, otherwise the mail lands in spam.' ), [
@@ -824,12 +831,67 @@ return Expansa\Facades\Form::enqueue(
 						$field( 'text', 'mail[dkim][selector]', t( 'Selector' ), t( 'Name of the DNS record with the public key, e.g. "mail" for mail._domainkey.' ), [
 							'value' => (string) Option::get( 'mail.dkim.selector' ),
 						] ),
-						$field( 'textarea', 'mail[dkim][private]', t( 'Private key' ), Option::get( 'mail.dkim.private' ) ? t( 'Saved. Leave empty to keep it.' ) : t( 'PEM, begins with -----BEGIN PRIVATE KEY-----.' ), [
+						$field( 'textarea', 'mail[dkim][private]', t( 'Private key' ), $saved( 'mail.dkim.private', t( 'PEM, begins with -----BEGIN PRIVATE KEY-----.' ) ), [
 							'rows' => 4,
 						] ),
-						$field( 'password', 'mail[dkim][passphrase]', t( 'Key passphrase' ), Option::get( 'mail.dkim.passphrase' ) ? t( 'Saved. Leave empty to keep it.' ) : t( 'Only for an encrypted key.' ), [
+						$field( 'password', 'mail[dkim][passphrase]', t( 'Key passphrase' ), $saved( 'mail.dkim.passphrase', t( 'Only for an encrypted key.' ) ), [
 							'autocomplete' => 'new-password',
 						] ),
+					],
+				],
+			],
+		],
+		[
+			'name'    => 'ai',
+			'type'    => 'tab',
+			'label'   => t( 'AI' ),
+			'caption' => t( 'plugin generation' ),
+			'icon'    => 'ph ph-sparkle',
+			'fields'  => [
+				[
+					'type'          => 'group',
+					'name'          => 'ai-service',
+					'label'         => t( 'AI service' ),
+					'class'         => '',
+					'label_class'   => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'fields'        => [
+						$field( 'url', 'ai[url]', t( 'Address' ), t( 'Any OpenAI-compatible Chat Completions API: Google Gemini, OpenRouter, a local Ollama at http://localhost:11434/v1/. Empty turns the generation off.' ), [
+							'value'       => (string) Option::get( 'ai.url', App\Support\Ai::URL ),
+							'placeholder' => App\Support\Ai::URL,
+						] ),
+						$field( 'text', 'ai[model]', t( 'Model' ), t( 'e.g. gemini-flash-latest, or a model id of OpenRouter ending in :free.' ), [
+							'value'       => (string) Option::get( 'ai.model', App\Support\Ai::MODEL ),
+							'placeholder' => App\Support\Ai::MODEL,
+						] ),
+						$field( 'password', 'ai[key]', t( 'Service key' ), $saved( 'ai.key', t( 'A local service needs none.' ) ), [
+							'autocomplete' => 'new-password',
+						] ),
+						$field( 'hidden', 'ai[schemas]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
+						[
+							'type'        => 'checkbox',
+							'name'        => '',
+							'label'       => '',
+							'class'       => 'field field--ui',
+							'label_class' => '',
+							'reset'       => 0,
+							'before'      => '',
+							'after'       => '',
+							'instruction' => '',
+							'tooltip'     => '',
+							'copy'        => 0,
+							'validator'   => '',
+							'conditions'  => [],
+							'attributes'  => [ 'u-prop' => '' ],
+							'options'     => [
+								'ai[schemas]' => [
+									'content'     => t( 'Structured output' ),
+									'icon'        => 'ph ph-brackets-curly',
+									'description' => t( 'Turn off for models without json_schema support: the schema then goes into the instructions' ),
+									'checked'     => (bool) Option::get( 'ai.schemas', true ),
+								],
+							],
+						],
 					],
 				],
 			],

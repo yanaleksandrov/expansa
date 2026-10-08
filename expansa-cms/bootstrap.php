@@ -243,7 +243,8 @@ Lifecycle::phase('configure', true, function () {
             $providers = [];
             foreach ((array) App\Models\Option::get('oauth', []) as $name => $config) {
                 if (is_array($config) && trim((string) ($config['client_id'] ?? '')) !== '') {
-                    $providers[$name] = $config + ['redirect' => url("oauth/$name/callback")];
+                    $secret           = App\Support\Secrets::decrypt((string) ($config['client_secret'] ?? ''));
+                    $providers[$name] = ['client_secret' => $secret, 'redirect' => url("oauth/$name/callback")] + $config;
                 }
             }
 
@@ -591,11 +592,28 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     ));
 
     // the site-health page tells from the time of this mark whether cron runs the scheduler
-    Hook::add('schedule', fn () => App\Support\SiteHealth::markScheduler());
+    // "schedule" is a filter: every listener passes the scheduler on to the next one
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        App\Support\SiteHealth::markScheduler();
+
+        return $scheduler;
+    });
 
     // AI tasks whose worker did not start or crashed; a request starts its own worker at once
     Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
-        $scheduler->raw(PHP_BINARY, [EX_PATH . 'artisan', 'ai:work'])->everyMinute()->onlyOne();
+        $scheduler->php(EX_PATH . 'artisan', App\Support\Ai::getPhp(), ['ai:work'])->everyMinute()->onlyOne();
+
+        return $scheduler;
+    });
+
+    // the security log older than the Security settings allow and the expired sign-ins
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->call(function () {
+            App\Api\User\Events::prune();
+            App\Api\User\Sessions::prune();
+        }, id: 'security-cleanup')->daily(3);
+
+        return $scheduler;
     });
 
     Terminal::run();

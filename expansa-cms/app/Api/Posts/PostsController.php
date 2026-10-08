@@ -22,40 +22,13 @@ final readonly class PostsController
          */
         private PostsService $service = new PostsService(),
     ) {}
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('types_edit')]
-    public function create(): array
-    {
-        return ['method' => 'POST create user'];
-    }
-
+
     #[Can('read')]
     public function index(): array
     {
         return $this->service->list();
     }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('types_edit')]
-    public function update(): array
-    {
-        return ['method' => 'PUT update user by ID'];
-    }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('types_delete')]
-    public function delete(): array
-    {
-        return ['method' => 'DELETE remove user by ID'];
-    }
-
+
     #[Can('manage_export')]
     public function export(Request $request): Response
     {

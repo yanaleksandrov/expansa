@@ -17,7 +17,7 @@ $labels = [
 	'ask'           => t_attr( 'Describe the feature you need...' ),
 	'answer'        => t_attr( 'Answer the questions...' ),
 	'network'       => t_attr( 'The server did not respond. Check the connection and try again.' ),
-	'notConfigured' => t_attr( 'The AI service is not configured: add the service key to EX_AI in env.php.' ),
+	'notConfigured' => t_attr( 'The AI service is not configured: set it on the AI tab of the settings.' ),
 ];
 ?>
 <div class="chat" u-data="chat" data-labels="{{ json_encode( $labels, JSON_UNESCAPED_UNICODE ) }}" @load="init($el)">

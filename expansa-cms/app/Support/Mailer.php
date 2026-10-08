@@ -16,8 +16,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 final class Mailer
 {
     /**
-     * Fields of the option that keep their saved value when the form sends them empty:
-     * the form never shows them back.
+     * Fields of the option encrypted by Secrets; the form never shows them back.
      */
     private const array SECRETS = ['password', 'dkim.private', 'dkim.passphrase'];
 
@@ -38,7 +37,7 @@ final class Mailer
             $mailer->Port        = (int) ($mail['port'] ?? 465) ?: 465;
             $mailer->SMTPAuth    = ($mail['username'] ?? '') !== '';
             $mailer->Username    = (string) ($mail['username'] ?? '');
-            $mailer->Password    = (string) ($mail['password'] ?? '');
+            $mailer->Password    = Secrets::decrypt((string) ($mail['password'] ?? ''));
             $mailer->SMTPSecure  = match ($mail['encryption'] ?? 'ssl') {
                 'tls'   => PHPMailer::ENCRYPTION_STARTTLS,
                 'none'  => '',
@@ -68,11 +67,7 @@ final class Mailer
      */
     public static function normalize(array $mail): array
     {
-        $saved = (array) Option::get('mail', []);
-        foreach (self::SECRETS as $secret) {
-            $value = trim((string) Arr::get($mail, $secret, ''));
-            Arr::set($mail, $secret, $value !== '' ? $value : (string) Arr::get($saved, $secret, ''));
-        }
+        $mail = Secrets::keep($mail, (array) Option::get('mail', []), self::SECRETS);
 
         // clearing the server or the selector is the way to drop the secrets
         if (trim((string) ($mail['host'] ?? '')) === '') {
@@ -99,7 +94,7 @@ final class Mailer
      */
     private static function sign(PHPMailer $mailer, array $dkim): void
     {
-        $key = trim((string) ($dkim['private'] ?? ''));
+        $key = Secrets::decrypt((string) ($dkim['private'] ?? ''));
         if ($key === '' || empty($dkim['selector'])) {
             return;
         }
@@ -107,7 +102,7 @@ final class Mailer
         $mailer->DKIM_domain           = (string) ($dkim['domain'] ?? '') ?: self::host();
         $mailer->DKIM_private_string   = $key;
         $mailer->DKIM_selector         = (string) $dkim['selector'];
-        $mailer->DKIM_passphrase       = (string) ($dkim['passphrase'] ?? '');
+        $mailer->DKIM_passphrase       = Secrets::decrypt((string) ($dkim['passphrase'] ?? ''));
         $mailer->DKIM_identity         = $mailer->From;
         $mailer->DKIM_copyHeaderFields = false;
         $mailer->DKIM_extraHeaders     = ['List-Unsubscribe', 'List-Help'];

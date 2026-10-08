@@ -432,7 +432,7 @@ final class SiteHealth
         $ago    = $mark === false ? null : intdiv(time() - $mark, 60);
         // Work::createLauncher() starts the worker with popen() on Windows and exec() elsewhere
         $start  = PHP_OS_FAMILY === 'Windows' ? 'popen' : 'exec';
-        $php    = defined('EX_AI') ? (string) (EX_AI['php'] ?? PHP_BINARY) : PHP_BINARY;
+        $php    = Ai::getPhp();
         $stuck  = 0;
         $queued = 0;
 
@@ -569,9 +569,9 @@ final class SiteHealth
         return [
             self::check(
                 t('Service'),
-                $isConfigured ? escape((string) (EX_AI['model'] ?? '')) : t('Not configured'),
+                $isConfigured ? escape(Ai::getModel()) : t('Not configured'),
                 $isConfigured,
-                t('Add the service key to EX_AI in env.php to generate plugins in the chat.'),
+                t('Set the service on the AI tab of the settings to generate plugins in the chat.'),
                 self::RECOMMENDED,
             ),
             self::check(

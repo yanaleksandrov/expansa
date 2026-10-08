@@ -17,39 +17,12 @@ final readonly class UserController
          */
         private UserService $service = new UserService(),
     ) {}
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('users_create')]
-    public function create(): array
-    {
-        return ['method' => 'POST create user'];
-    }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('users_edit')]
-    public function index(): array
-    {
-        return ['method' => 'GET user list'];
-    }
-
+
     public function update(Request $request): array
     {
         return $this->service->update($request->post);
     }
-
-    /**
- * @todo not implemented — placeholder carried over from the legacy class
-*/
-    #[Can('users_delete')]
-    public function delete(): array
-    {
-        return ['method' => 'DELETE remove user by ID'];
-    }
-
+
     public function signIn(Request $request): array
     {
         return $this->service->signIn($request->post);

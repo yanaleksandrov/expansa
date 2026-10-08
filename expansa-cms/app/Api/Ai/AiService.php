@@ -74,7 +74,7 @@ final class AiService
             throw new HttpError(422, t_attr('Describe the feature you need.'));
         }
         if (! Ai::isConfigured()) {
-            throw new HttpError(422, t_attr('The AI service is not configured: add the service key to EX_AI in env.php.'));
+            throw new HttpError(422, t_attr('The AI service is not configured: set it on the AI tab of the settings.'));
         }
 
         return $this->present(Ai::queue()->dispatch($message, $owner));

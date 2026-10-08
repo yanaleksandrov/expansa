@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
+use App\Models\Option;
 use App\Models\User;
 use Expansa\Facades\Db;
 
 /**
  * Security log of users, the `user_events` table: sign-ins, failures, sign-outs and changes
  * of sign-in methods, with the IP and the device. The profile shows the recent ones, so the owner
- * notices what they did not do. Rows older than RETENTION days are dropped.
+ * notices what they did not do. Rows older than the days of the Security settings are dropped.
  */
 final class Events
 {
     /**
-     * Days an event is kept.
+     * Days an event is kept until the Security settings say otherwise.
      */
     private const int RETENTION = 90;
 
@@ -37,10 +38,25 @@ final class Events
             'user_agent' => mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
         ]);
 
-        // sign-ins are frequent enough to keep the table trimmed
+        // sign-ins are frequent enough to keep the table trimmed without the scheduler
         if ($event === 'sign_in') {
-            Db::delete('user_events', ['created_at[<]' => date('Y-m-d H:i:s', time() - self::RETENTION * 86400)]);
+            self::prune();
         }
+    }
+
+    /**
+     * Delete the events older than the days of the Security settings; 0 keeps them forever.
+     *
+     * @return int Number of rows deleted.
+     */
+    public static function prune(): int
+    {
+        $days = (int) Option::get('security.log_days', self::RETENTION);
+        if ($days <= 0) {
+            return 0;
+        }
+
+        return Db::delete('user_events', ['created_at[<]' => date('Y-m-d H:i:s', time() - $days * 86400)])?->rowCount() ?? 0;
     }
 
     /**

@@ -6,6 +6,7 @@ namespace App\Api\User;
 
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Secrets;
 use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Auth\Totp;
 use Expansa\Codecs\QrCode;
@@ -110,7 +111,7 @@ final class TwoFactor
         Db::delete('user_two_factor', ['user_id' => $user->id]);
         Db::insert('user_two_factor', [
             'user_id'        => $user->id,
-            'secret'         => self::encrypt((string) $setup['secret']),
+            'secret'         => Secrets::encrypt((string) $setup['secret'], 'two-factor'),
             'recovery_codes' => json_encode($hashes),
             'last_step'      => $step,
         ]);
@@ -242,7 +243,7 @@ final class TwoFactor
         }
 
         // the step only grows, so of two requests with the same code only one wins
-        $step = Totp::verify(self::decrypt($row['secret']), $code, (int) $row['last_step']);
+        $step = Totp::verify(Secrets::decrypt($row['secret'], 'two-factor'), $code, (int) $row['last_step']);
         if ($step !== null) {
             $updated = Db::update('user_two_factor', ['last_step' => $step], ['user_id' => $user->id, 'last_step[<]' => $step]);
 
@@ -286,49 +287,7 @@ final class TwoFactor
      */
     private static function hashRecoveryCode(string $code): string
     {
-        return hash_hmac('sha256', strtolower(str_replace(['-', ' '], '', $code)), self::key());
-    }
-
-    /**
-     * Encrypt the secret with AES-256-GCM.
-     *
-     * @param string $secret
-     * @return string Base64 of the IV, the tag and the ciphertext.
-     */
-    private static function encrypt(string $secret): string
-    {
-        $iv     = random_bytes(12);
-        $cipher = (string) openssl_encrypt($secret, 'aes-256-gcm', self::key(), OPENSSL_RAW_DATA, $iv, $tag);
-
-        return base64_encode($iv . $tag . $cipher);
-    }
-
-    /**
-     * Decrypt the secret.
-     *
-     * @param string $encrypted
-     * @return string Empty if the key changed or the value is damaged.
-     */
-    private static function decrypt(string $encrypted): string
-    {
-        $data = (string) base64_decode($encrypted, true);
-        if (strlen($data) < 28) {
-            return '';
-        }
-
-        [$iv, $tag, $cipher] = [substr($data, 0, 12), substr($data, 12, 16), substr($data, 28)];
-
-        return (string) openssl_decrypt($cipher, 'aes-256-gcm', self::key(), OPENSSL_RAW_DATA, $iv, $tag);
-    }
-
-    /**
-     * Key of the secrets and codes, derived from the site key.
-     *
-     * @return string
-     */
-    private static function key(): string
-    {
-        return hash('sha256', 'two-factor|' . (defined('EX_KEYS') ? EX_KEYS['auth'] : ''), true);
+        return hash_hmac('sha256', strtolower(str_replace(['-', ' '], '', $code)), Secrets::key('two-factor'));
     }
 
     /**

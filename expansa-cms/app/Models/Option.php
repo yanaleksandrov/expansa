@@ -386,6 +386,11 @@ class Option extends Model
                 'default-role' => 'subscriber',
                 'membership'   => 0,
             ],
+            'ai'             => [
+                'url'     => \App\Support\Ai::URL,
+                'model'   => \App\Support\Ai::MODEL,
+                'schemas' => 1,
+            ],
             'mail'           => [
                 'host'       => '',
                 'port'       => 465,
@@ -395,6 +400,7 @@ class Option extends Model
                 'attempts'    => 5,
                 'ip_attempts' => 50,
                 'lockout'     => 15,
+                'log_days'    => 90,
                 'breached'    => 1,
             ],
             'week-starts-on' => 1,
