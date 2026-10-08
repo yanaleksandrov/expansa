@@ -135,7 +135,7 @@ final class SystemService
                 Db::configure(...EX_DB);
             }
 
-            Hook::call('createMainDatabaseTables');
+            Hook::run('createMainDatabaseTables');
 
             Db::updateSchema();
 

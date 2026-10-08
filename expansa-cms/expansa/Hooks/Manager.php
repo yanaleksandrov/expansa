@@ -18,7 +18,8 @@ use ReflectionMethod;
 
 /**
  * Registers, sorts and fires hook listeners, the Hook facade instance.
- * Listeners run in ascending priority; each gets the value returned by the previous one.
+ * Listeners run in ascending priority. A filter (call()) gives each the value returned by the previous one,
+ * an action (run()) gives all of them the same arguments and ignores what they return.
  * The storage is static: every instance shares the listeners of the process.
  *
  * @package Expansa\Hooks
@@ -28,7 +29,7 @@ final class Manager
     use FindsFiles;
 
     /**
-     * Depth after which call() treats a hook as re-triggering itself.
+     * Depth after which a hook is treated as re-triggering itself.
      */
     private const int MAX_RECURSION_DEPTH = 20;
 
@@ -61,16 +62,23 @@ final class Manager
     private static array $instances = [];
 
     /**
-     * Number of call() of each hook, with listeners or without.
+     * Number of call() and run() of each hook, with listeners or without.
      *
      * @var array<string, int>
      */
     private static array $callCounts = [];
 
     /**
+     * Nesting of every hook running now, to catch a listener re-triggering its own hook.
+     *
+     * @var array<string, int>
+     */
+    private static array $depth = [];
+
+    /**
      * Hooks queued by defer().
      *
-     * @var list<array{0: string, 1: mixed, 2: array}>
+     * @var list<array{0: string, 1: array}>
      */
     private static array $deferred = [];
 
@@ -254,7 +262,9 @@ final class Manager
     }
 
     /**
-     * Pass a value through the listeners of a hook in priority order.
+     * Filter: pass a value through the listeners in priority order, each returns the value for the next.
+     * A listener that returns null for a value that was not null triggers a warning: it is an action
+     * listener on a filter, the value after it is lost. Use run() for hooks whose result nobody reads.
      *
      * @param string $name
      * @param mixed  $value     Value to filter.
@@ -264,39 +274,61 @@ final class Manager
      */
     public function call(string $name, mixed $value = null, mixed ...$values): mixed
     {
-        // always back to 0 after a call, so reset() has nothing to reset here
-        static $depthByName = [];
-
+        // the guard of enter() inlined: call() is the hot path
         self::$callCounts[$name] = (self::$callCounts[$name] ?? 0) + 1;
 
         if (! isset(self::$hooks[$name])) {
             return $value;
         }
 
-        $depth = $depthByName[$name] ?? 0;
-
+        $depth = self::$depth[$name] ?? 0;
         if ($depth >= self::MAX_RECURSION_DEPTH) {
-            throw new LogicException(
-                "Hook '$name' recursed more than " . self::MAX_RECURSION_DEPTH . ' levels deep - '
-                . 'a listener is likely re-triggering the same hook it is running on'
-            );
+            $this->recursion($name);
         }
-
-        $depthByName[$name] = $depth + 1;
+        self::$depth[$name] = $depth + 1;
 
         try {
             foreach ($this->getSorted($name) as $hook) {
-                $value = ($hook['function'])($value, ...$values);
+                $result = ($hook['function'])($value, ...$values);
+                if ($result === null && $value !== null) {
+                    $source = $hook['source']['file'] . ':' . $hook['source']['line'];
+                    trigger_error("A listener of the filter '$name' ($source) returned null, the value is lost", E_USER_WARNING);
+                }
+
+                $value = $result;
             }
         } finally {
-            $depthByName[$name]--;
+            self::$depth[$name]--;
         }
 
         return $value;
     }
 
     /**
-     * Get the number of call() of a hook in this process.
+     * Action: run the listeners in priority order with the same arguments, their results are ignored.
+     *
+     * @param string $name
+     * @param mixed  ...$args Arguments of every listener.
+     * @return void
+     * @throws LogicException If the hook recurses deeper than MAX_RECURSION_DEPTH.
+     */
+    public function run(string $name, mixed ...$args): void
+    {
+        if (! $this->enter($name)) {
+            return;
+        }
+
+        try {
+            foreach ($this->getSorted($name) as $hook) {
+                ($hook['function'])(...$args);
+            }
+        } finally {
+            self::$depth[$name]--;
+        }
+    }
+
+    /**
+     * Get the number of call() and run() of a hook in this process.
      *
      * @param string $name
      * @return int
@@ -307,19 +339,18 @@ final class Manager
     }
 
     /**
-     * Call a hook after the response is sent (fastcgi_finish_request() under PHP-FPM), the result is discarded.
+     * Run an action after the response is sent (fastcgi_finish_request() under PHP-FPM).
      *
      * @param string $name
-     * @param mixed  $value
-     * @param mixed  ...$values
+     * @param mixed  ...$args Arguments of every listener.
      * @return void
      */
-    public function defer(string $name, mixed $value = null, mixed ...$values): void
+    public function defer(string $name, mixed ...$args): void
     {
         // a shutdown function can not be unregistered, so the flag is never reset
         static $shutdownRegistered = false;
 
-        self::$deferred[] = [$name, $value, $values];
+        self::$deferred[] = [$name, $args];
 
         if ($shutdownRegistered) {
             return;
@@ -334,8 +365,8 @@ final class Manager
             $queue          = self::$deferred;
             self::$deferred = [];
 
-            foreach ($queue as [$name, $value, $values]) {
-                $this->call($name, $value, ...$values);
+            foreach ($queue as [$name, $args]) {
+                $this->run($name, ...$args);
             }
         });
     }
@@ -353,6 +384,7 @@ final class Manager
         self::$instances       = [];
         self::$callCounts      = [];
         self::$deferred        = [];
+        self::$depth           = [];
     }
 
     /**
@@ -430,6 +462,46 @@ final class Manager
         };
 
         return hash('xxh3', $name . '::' . $identity);
+    }
+
+    /**
+     * Count a run of a hook and mark it as running; the caller decrements the depth in `finally`.
+     *
+     * @param string $name
+     * @return bool Whether the hook has listeners to run.
+     * @throws LogicException If the hook recurses deeper than MAX_RECURSION_DEPTH.
+     */
+    private function enter(string $name): bool
+    {
+        self::$callCounts[$name] = (self::$callCounts[$name] ?? 0) + 1;
+
+        if (! isset(self::$hooks[$name])) {
+            return false;
+        }
+
+        $depth = self::$depth[$name] ?? 0;
+        if ($depth >= self::MAX_RECURSION_DEPTH) {
+            $this->recursion($name);
+        }
+
+        self::$depth[$name] = $depth + 1;
+
+        return true;
+    }
+
+    /**
+     * Stop a hook whose listener keeps re-triggering it.
+     *
+     * @param string $name
+     * @return never
+     * @throws LogicException
+     */
+    private function recursion(string $name): never
+    {
+        throw new LogicException(
+            "Hook '$name' recursed more than " . self::MAX_RECURSION_DEPTH . ' levels deep - '
+            . 'a listener is likely re-triggering the same hook it is running on'
+        );
     }
 
     /**

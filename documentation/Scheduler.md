@@ -79,7 +79,7 @@ Hook::add('schedule', function (Scheduler $scheduler) {
 
 ```php
 Terminal::addCommand(new Expansa\Scheduler\Commands\Run(
-    schedule: fn (Scheduler $scheduler) => Hook::call('schedule', $scheduler),
+    schedule: fn (Scheduler $scheduler) => Hook::run('schedule', $scheduler),
 ));
 ```
 

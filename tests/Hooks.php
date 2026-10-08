@@ -39,6 +39,53 @@ try {
     check('a missing listener class is reported', str_contains($e->getMessage(), 'does not exist'));
 }
 
+// actions: every listener gets the same arguments, what they return is ignored
+$seen = [];
+Hook::add('testAction', function (string $a, int $b) use (&$seen) {
+    $seen[] = "$a$b";
+});
+Hook::add('testAction', function (string $a, int $b) use (&$seen) {
+    $seen[] = "$a$b";
+
+    return 'ignored';
+});
+Hook::run('testAction', 'x', 1);
+check('run() gives every listener the same arguments', $seen === ['x1', 'x1']);
+check('run() is counted by calls()', Hook::calls('testAction') === 1);
+Hook::run('testNobodyListens', 'x');
+check('run() of a hook without listeners is counted too', Hook::calls('testNobodyListens') === 1);
+
+Hook::add('testRecursion', function () {
+    Hook::run('testRecursion');
+});
+check('run() stops a listener re-triggering its own hook', throws(fn () => Hook::run('testRecursion'), LogicException::class));
+Hook::add('testAfterRecursion', fn () => null);
+check('the hook runs again after the recursion error', throws(fn () => Hook::run('testAfterRecursion')) === false);
+
+// filters: a listener that returns nothing loses the value, which is reported
+$warnings = [];
+set_error_handler(function (int $level, string $message) use (&$warnings): bool {
+    $warnings[] = $message;
+
+    return true;
+}, E_USER_WARNING);
+
+Hook::add('testFilter', fn (string $value) => "$value!");
+check('a filter returns the value of its listeners', Hook::call('testFilter', 'hi') === 'hi!' && $warnings === []);
+
+Hook::add('testLostFilter', function (string $value) {
+});
+Hook::add('testLostFilter', fn (?string $value) => $value ?? 'default');
+$result = Hook::call('testLostFilter', 'hi');
+check('a filter listener returning null is reported with its place', count($warnings) === 1 && str_contains($warnings[0], "'testLostFilter'") && str_contains($warnings[0], 'Hooks.php:'));
+check('the next listener gets the null', $result === 'default');
+
+$warnings = [];
+Hook::add('testNullFilter', fn ($value) => null);
+Hook::call('testNullFilter');
+check('a null passed to a filter is not reported', $warnings === []);
+restore_error_handler();
+
 array_map('unlink', glob("$dir/*.php"));
 rmdir($dir);
 

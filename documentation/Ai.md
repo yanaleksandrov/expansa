@@ -139,7 +139,7 @@ $queue->cancel($id);
 Terminal::addCommand(new Expansa\Ai\Commands\Work(queue: fn () => $queue));
 
 Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
-    $scheduler->raw(PHP_BINARY, [EX_PATH . 'artisan', 'ai:work'])->everyMinute()->onlyOne();
+    $scheduler->php(EX_PATH . 'artisan', App\Support\Ai::getPhp(), ['ai:work'])->everyMinute()->onlyOne();
 });
 ```
 

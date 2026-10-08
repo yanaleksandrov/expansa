@@ -177,7 +177,7 @@ class Type
          */
         $type = Safe::snakecase($key);
         if (!Db::hasTable(EX_DB['prefix'] . $type)) {
-            Hook::call('createPostsTable', $type);
+            Hook::run('createPostsTable', $type);
         }
     }
 

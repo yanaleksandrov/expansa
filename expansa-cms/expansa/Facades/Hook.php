@@ -18,8 +18,9 @@ use Expansa\Patterns\Facade;
  * @method static bool  flush(string $name, null|string|array|callable $function = null)
  * @method static int   flushSource(string $path)
  * @method static mixed call(string $name, mixed $value = null, mixed ...$values)
+ * @method static void  run(string $name, mixed ...$args)
  * @method static int   calls(string $name)
- * @method static void  defer(string $name, mixed $value = null, mixed ...$values)
+ * @method static void  defer(string $name, mixed ...$args)
  * @method static void  reset()
  * @method static array multisort(array $array, string $key, bool $descending = false)
  */

@@ -48,7 +48,7 @@ index.php / artisan
 
 ```php
 Lifecycle::configure(
-    hook: fn (string $name) => Hook::call($name),        // before{Phase}, after{Phase}, enter{Context}
+    hook: fn (string $name) => Hook::run($name),         // before{Phase}, after{Phase}, enter{Context}
     terminate: fn () => Hook::defer('terminate'),       // один раз в начале run()
     route: fn () => Route::run(),                       // после контекста, кроме консоли
     uri: fn () => Route::uri(),                         // URI, если run() его не получил

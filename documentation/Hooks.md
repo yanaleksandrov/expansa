@@ -10,18 +10,28 @@
 обработки заказа с кодом уведомления, вы можете создать хук, в котором прикреплённый слушатель 
 добавляет код отправки уведомлений.
 
-## Создание новых хуков
+## Действия и фильтры
 
-Используя фасад Hooks, вы можете вручную регистрировать события в любом доступном вам месте 
-приложения. В качестве значений возможно передать неограниченное число переменных, которые 
-будут доступны слушателю.
+Хук вызывается одним из двух способов, и способ определяет, что делают слушатели:
+
+- **Действие** — `Hook::run()`: событие произошло, слушатели что-то делают. Каждый получает одни и те же
+  аргументы, что он вернул — неважно.
+- **Фильтр** — `Hook::call()`: слушатели меняют значение. Каждый получает значение, которое вернул
+  предыдущий, и обязан вернуть его дальше; результат последнего возвращает `call()`.
 
 ```php
-<?php
 use Expansa\Facades\Hook;
 
-Hook::call('testHook', $var1, $var2, ...);
+// действие: все слушатели получают $order
+Hook::run('commerceOrderCreated', $order);
+
+// фильтр: $title проходит через слушателей, дополнительные аргументы получает каждый
+$title = Hook::call('commerceProductTitle', $title, $product);
 ```
+
+Слушатель фильтра, который ничего не вернул, теряет значение для всех следующих. `call()` сообщает об
+этом предупреждением с местом, где слушатель добавлен: в режиме отладки оно останавливает запрос. Если
+результат никому не нужен, это действие — вызывайте его через `run()`.
 
 ## Создание новых слушателей
 
@@ -32,9 +42,8 @@ Hook::call('testHook', $var1, $var2, ...);
 ```php
 use Expansa\Facades\Hook;
 
-function applyTestHook($var) {
-    $var = 'foo';
-    return $var;
+function applyTestHook(string $title): string {
+    return $title . ' — sale';
 }
 
 Hook::add('testHook', 'applyTestHook');
@@ -46,9 +55,9 @@ Hook::add('testHook', 'applyTestHook');
 use Expansa\Facades\Hook;
 use Expansa\Hooks\Attributes\Alias;
 
-Hook::add('testHook', fn(&$var) => $var = 'foo');
+Hook::add('testHook', fn (string $title) => $title . ' — sale');
 // или
-Hook::add('testHook', #[Alias('applyTestHook')] fn(&$var) => $var = 'foo');
+Hook::add('testHook', #[Alias('applyTestHook')] fn (string $title) => $title . ' — sale');
 ```
 
 Анонимная функция без псевдонима не имеет постоянного идентификатора, поэтому убрать её через 
@@ -78,9 +87,8 @@ Hook::flush('testHook', 'applyTestHook');
 <?php
 class Test
 {
-	public function testHook($var) {
-		$var = 'foo';
-		return $var;
+	public function testHook(string $title): string {
+		return $title . ' — sale';
 	}
 }
 ```
@@ -101,14 +109,6 @@ class Test
 дважды, даже если класс передан и списком, и через каталог. Если же класс слушателя не может быть
 создан (например, объявлен как `abstract`), `configure()` бросит `InvalidListener` с понятным 
 сообщением, а не невнятную ошибку рефлексии.
-
-## Общая информация
-
-TODO: вероятно этот механизм следует исправить
-Хуки не только добавляют функционал, но и позволяют переопределять значение переменных.
-Разработчику нужно быть внимательным, чтобы при создании нового слушателя для таких хуков, функция 
-всегда возвращала значение. В противном случае это может нарушить логику работы последующих 
-слушателей в очереди.
 
 ## Изменение приоритета слушателей
 
@@ -160,7 +160,7 @@ class Test
 use Expansa\Facades\Hook;
 
 Hook::once('testHook', function ($var) {
-    // выполнится только при первом вызове call('testHook', ...)
+    // выполнится только при первом вызове хука
     return $var . '-once';
 });
 ```
@@ -215,14 +215,14 @@ $removed = Hook::flushSource(EX_PATH . 'plugins/telegram-notifier');
 
 ## Проверка, сработал ли хук
 
-`calls()` возвращает, сколько раз хук был реально вызван через `call()` — в отличие от `get()`, 
+`calls()` возвращает, сколько раз хук был реально вызван через `call()` или `run()` — в отличие от `get()`, 
 который считает *слушателей*, а не *вызовы*. Удобно в тестах, чтобы убедиться, что событие вообще 
 произошло, и в отладке — понять, почему хук как будто бы не срабатывает:
 
 ```php
 use Expansa\Facades\Hook;
 
-Hook::call('orderCreated', $order);
+Hook::run('orderCreated', $order);
 
 if (Hook::calls('orderCreated') === 0) {
     // хук ни разу не был вызван за этот процесс
@@ -233,7 +233,7 @@ if (Hook::calls('orderCreated') === 0) {
 
 Некоторые слушатели выполняют побочный эффект, который не должен задерживать ответ пользователю — 
 например, отправку уведомления в Telegram из примера в самом начале этого документа. `defer()` 
-ставит вызов хука в очередь и выполняет его уже после того, как ответ отправлен клиенту (через 
+ставит действие в очередь и выполняет его как `run()` уже после того, как ответ отправлен клиенту (через 
 `register_shutdown_function()` и, если доступно, `fastcgi_finish_request()`), а не сразу же:
 
 ```php
@@ -243,8 +243,7 @@ Hook::defer('orderCreated', $order);
 ```
 
 Поскольку слушатель выполняется уже после отправки ответа, его возвращаемое значение никому не 
-достаётся — используйте `call()`, если слушателю нужно вернуть значение, от которого зависит 
-вызывающий код.
+достаётся — используйте `call()`, если вызывающему коду нужно значение слушателей.
 
 ## Соглашение об именовании хуков
 
@@ -260,10 +259,10 @@ Hook::defer('orderCreated', $order);
 
 ```php
 // правильно:
-\Expansa\Facades\Hook::call("commerceUpdate{$status}{$post}");
+\Expansa\Facades\Hook::run("commerceUpdate{$status}{$post}");
 
 // неправильно:
-\Expansa\Facades\Hook::call('commerceUpdate' . $status . $post);
+\Expansa\Facades\Hook::run('commerceUpdate' . $status . $post);
 ```
 
 Также, в PHP комментариях к динамическому хуку рекомендуется писать возможные варианты 
@@ -277,5 +276,5 @@ Hook::defer('orderCreated', $order);
  *  - `commerceUpdateOldOrder`
  *  - `commerceUpdateDraftPage`
  */
-\Expansa\Facades\Hook::call("commerceUpdate{$status}{$post}");
+\Expansa\Facades\Hook::run("commerceUpdate{$status}{$post}");
 ```

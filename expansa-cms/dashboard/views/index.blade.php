@@ -41,7 +41,7 @@ $table = $__data['table'] ?? null;
      *
      * @since 2025.1
      */
-    Hook::call('renderDashboardHeader');
+    Hook::run('renderDashboardHeader');
     ?>
 </head>
 <body u-data="youla" @keydown.window.prevent.ctrl.s="$notice.add(notifications.ctrlS)">
@@ -110,7 +110,7 @@ $table = $__data['table'] ?? null;
      *
      * @since 2025.1
      */
-    Hook::call('renderDashboardFooter');
+    Hook::run('renderDashboardFooter');
     ?>
 </body>
 </html>

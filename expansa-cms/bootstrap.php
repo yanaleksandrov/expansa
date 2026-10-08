@@ -122,7 +122,7 @@ Debug::register();
 
 // step hooks, the terminate hook after the response, routing after the context
 Lifecycle::configure(
-    hook: fn (string $name) => Hook::call($name),
+    hook: fn (string $name) => Hook::run($name),
     terminate: fn () => Hook::defer('terminate'),
     route: fn () => Route::run(),
     uri: fn () => Route::uri(),
@@ -585,25 +585,18 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
     Terminal::addCommand(Expansa\Assets\Commands\Clean::class);
     Terminal::addCommand(Expansa\Hooks\Commands\Index::class);
     Terminal::addCommand(new Expansa\Scheduler\Commands\Run(
-        schedule: fn (Expansa\Scheduler\Scheduler $scheduler) => Hook::call('schedule', $scheduler),
+        schedule: fn (Expansa\Scheduler\Scheduler $scheduler) => Hook::run('schedule', $scheduler),
     ));
     Terminal::addCommand(new Expansa\Ai\Commands\Work(
         queue: fn () => App\Support\Ai::queue(),
     ));
 
     // the site-health page tells from the time of this mark whether cron runs the scheduler
-    // "schedule" is a filter: every listener passes the scheduler on to the next one
-    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
-        App\Support\SiteHealth::markScheduler();
-
-        return $scheduler;
-    });
+    Hook::add('schedule', fn () => App\Support\SiteHealth::markScheduler());
 
     // AI tasks whose worker did not start or crashed; a request starts its own worker at once
     Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
         $scheduler->php(EX_PATH . 'artisan', App\Support\Ai::getPhp(), ['ai:work'])->everyMinute()->onlyOne();
-
-        return $scheduler;
     });
 
     // the security log older than the Security settings allow and the expired sign-ins
@@ -612,8 +605,6 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
             App\Api\User\Events::prune();
             App\Api\User\Sessions::prune();
         }, id: 'security-cleanup')->daily(3);
-
-        return $scheduler;
     });
 
     Terminal::run();
