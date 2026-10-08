@@ -6,7 +6,9 @@ namespace Expansa\Database;
 
 use Expansa\Database\Internal\Cache;
 use Expansa\Database\Traits\HasSoftDeletes;
+use Expansa\Database\Traits\HasUuid;
 use Expansa\Facades\Db;
+use Expansa\Support\Str;
 
 /**
  * Queries of one model: find by key or where conditions, chunks, soft deletes, save(), delete(), restore().
@@ -214,6 +216,10 @@ final class Query
             $this->model->syncOriginals();
 
             return $this->model;
+        }
+
+        if ($this->model->usesTrait(HasUuid::class) && empty($this->model->attributes[$this->model->uuidColumn])) {
+            $this->model->setAttribute($this->model->uuidColumn, Str::uuid7());
         }
 
         if (! Db::insert($this->model->table, $this->model->attributes)) {

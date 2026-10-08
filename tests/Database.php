@@ -8,7 +8,9 @@ use Expansa\Database\Model;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
+use Expansa\Database\Traits\HasUuid;
 use Expansa\Facades\Db;
+use Expansa\Support\Str;
 
 // run: php tests/Database.php
 require_once __DIR__ . '/bootstrap.php';
@@ -28,6 +30,8 @@ check('insert', $sql('insert', 'posts', ['title' => 'a']) === 'INSERT INTO "x_po
 check('update', $sql('update', 'posts', ['title' => 'x'], ['id' => 3]) === 'UPDATE "x_posts" SET "title" = \'x\' WHERE "id" = 3');
 check('delete by a list of ids', $sql('delete', 'posts', ['id' => [1, 2]]) === 'DELETE FROM "x_posts" WHERE "id" IN (1, 2)');
 check('like', $sql('select', 'posts', '*', ['title[~]' => '%x']) === 'SELECT * FROM "x_posts" WHERE ("title" LIKE \'%x\')');
+check('a raw foreign key prefixes both tables', $sql('query', 'ALTER TABLE <posts_fields> ADD CONSTRAINT `fk` FOREIGN KEY (`post_id`) REFERENCES <posts> (`id`)')
+    === 'ALTER TABLE "x_posts_fields" ADD CONSTRAINT `fk` FOREIGN KEY (`post_id`) REFERENCES "x_posts" (`id`)');
 
 // values and identifiers can't break out of the query
 check('a quote in a value is escaped', $sql('select', 'posts', '*', ['title' => "x' OR '1'='1"])
@@ -63,6 +67,15 @@ final class Tag extends Model
     public protected(set) string $table = 'tags';
 }
 
+final class Member extends Model
+{
+    use HasUuid;
+
+    public protected(set) string $table = 'members';
+
+    public protected(set) array $fillable = ['name', 'uuid'];
+}
+
 Db::configure(driver: 'mysql', database: 'x', username: '', password: '', host: '', testMode: true);
 
 check('a sanitizer rule without a sanitizer throws', throws(fn () => new Post(['title' => ' x ']), LogicException::class));
@@ -94,5 +107,16 @@ Post::get(9);
 check('get() by id goes through the cache', array_key_exists('posts:9', $cache));
 check('the soft delete scope', Db::instance()->queryString === 'SELECT * FROM "posts" WHERE "id" = 9 AND "deleted_at" IS NULL LIMIT 1');
 check('an unknown method throws', throws(fn () => Post::nope(), BadMethodCallException::class));
+
+// UUIDs come from PHP, not from a trigger the host may refuse
+$uuids = [Str::uuid7(), Str::uuid7()];
+check('uuid7() is a version 7 UUID with the RFC variant', array_all($uuids, fn (string $uuid) => (bool) preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid)) && $uuids[0] !== $uuids[1]);
+check('uuid7() starts with the time in milliseconds', hexdec(str_replace('-', '', substr($uuids[0], 0, 13))) - (int) (microtime(true) * 1000) <= 0);
+
+new Member(['name' => 'a'])->save();
+check('save() of a new model with HasUuid fills the UUID', (bool) preg_match('/^INSERT INTO "members" \("name", "uuid"\) VALUES \(\'a\', \'[0-9a-f-]{36}\'\)$/', Db::instance()->queryString));
+
+new Member(['name' => 'b', 'uuid' => 'kept'])->save();
+check('save() keeps a UUID that is set', str_contains(Db::instance()->queryString, "'kept'"));
 
 exit($failures > 0 ? 1 : 0);

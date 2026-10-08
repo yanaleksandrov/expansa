@@ -345,7 +345,7 @@ abstract class AbstractBuilder
         }
 
         $query = preg_replace_callback(
-            '/(([`\'])[\<]*?)?((AFTER DELETE ON|BEFORE INSERT ON|FROM|TABLE|TABLES LIKE|INTO|UPDATE|JOIN|TABLE IF EXISTS)\s*)?\<((' . $this::TABLE_PATTERN . ')(\.' . $this::COLUMN_PATTERN . ')?)\>([^,]*?\2)?/',
+            '/(([`\'])[\<]*?)?((AFTER DELETE ON|BEFORE INSERT ON|FROM|TABLE|TABLES LIKE|INTO|UPDATE|JOIN|TABLE IF EXISTS|REFERENCES)\s*)?\<((' . $this::TABLE_PATTERN . ')(\.' . $this::COLUMN_PATTERN . ')?)\>([^,]*?\2)?/',
             function ($matches) {
                 if (!empty($matches[2]) && isset($matches[8])) {
                     return $matches[0];

@@ -12,7 +12,6 @@ use Expansa\Database\Schema\Traits\Commands;
  * This class provides a fluent interface for defining and manipulating database schema tables.
  *
  * @method Column id(string $column = 'id') Add an auto-incrementing primary key column
- * @method Column ulid(string $column = 'ulid') Add a ULID column
  * @method Column uuid(string $column = 'uuid') Add a UUID column
  * @method Column tinyInt(string $column, int $precision = 3) Add a TINYINT column
  * @method Column smallInt(string $column, int $precision = 5) Add a SMALLINT column

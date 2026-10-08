@@ -157,6 +157,22 @@ final class Str
     }
 
     /**
+     * Generate a UUID version 7 (RFC 9562): milliseconds since the epoch, then random bits,
+     * so new rows sort by creation time and the index stays compact.
+     *
+     * @return string E.g. "01a11b78-5eb2-7b1d-bdfc-cf9987057e56".
+     */
+    public static function uuid7(): string
+    {
+        $data = str_pad(dechex((int) (microtime(true) * 1000)), 12, '0', STR_PAD_LEFT) . bin2hex(random_bytes(10));
+
+        $data[12] = '7';
+        $data[16] = dechex(hexdec($data[16]) & 0x3 | 0x8);
+
+        return substr($data, 0, 8) . '-' . substr($data, 8, 4) . '-' . substr($data, 12, 4) . '-' . substr($data, 16, 4) . '-' . substr($data, 20);
+    }
+
+    /**
      * Generate a cryptographically secure token of 32 hex characters (128 bits).
      *
      * @return string
