@@ -2,13 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn;
+namespace Expansa\Auth;
 
+use Expansa\Auth\Exceptions\InvalidCredential;
+use Expansa\Auth\Internal\AuthenticatorData;
+use Expansa\Auth\Internal\ClientData;
+use Expansa\Auth\Internal\PublicKey;
+use Expansa\Auth\Passkey\Assertion;
+use Expansa\Auth\Passkey\Attestation;
+use Expansa\Auth\Passkey\Credential;
 use Expansa\Codecs\Base64;
-use Expansa\Webauthn\Exceptions\InvalidCredential;
-use Expansa\Webauthn\Internal\AuthenticatorData;
-use Expansa\Webauthn\Internal\ClientData;
-use Expansa\Webauthn\Internal\PublicKey;
 
 /**
  * WebAuthn relying party (W3C Web Authentication, level 3): builds ceremony options for
@@ -26,13 +29,13 @@ use Expansa\Webauthn\Internal\PublicKey;
  * one authenticate() returns.
  *
  * ```php
- * $rp        = new RelyingParty('example.com', 'https://example.com', 'Example');
- * $options   = $rp->requestOptions($challenge);            // to the browser
+ * $passkey   = new Passkey('example.com', 'https://example.com', 'Example');
+ * $options   = $passkey->requestOptions($challenge);       // to the browser
  * $assertion = Assertion::parse($json);                    // find the challenge and credential by it
- * $stored    = $rp->authenticate($assertion, $challenge, $stored);
+ * $stored    = $passkey->authenticate($assertion, $challenge, $stored);
  * ```
  */
-final readonly class RelyingParty
+final readonly class Passkey
 {
     /**
      * URL-safe Base64 for binary fields of the options.

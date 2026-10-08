@@ -6,18 +6,18 @@ namespace App\Api\User;
 
 use App\Models\Option;
 use App\Models\User;
+use Expansa\Auth\Exceptions\InvalidCredential;
+use Expansa\Auth\Passkey as RelyingParty;
+use Expansa\Auth\Passkey\Assertion;
+use Expansa\Auth\Passkey\Attestation;
+use Expansa\Auth\Passkey\Credential;
 use Expansa\Facades\Base64;
 use Expansa\Facades\Db;
 use Expansa\Facades\Session;
-use Expansa\Webauthn\Assertion;
-use Expansa\Webauthn\Attestation;
-use Expansa\Webauthn\Credential;
-use Expansa\Webauthn\Exceptions\InvalidCredential;
-use Expansa\Webauthn\RelyingParty;
 use RuntimeException;
 
 /**
- * Passkeys of site users: WebAuthn ceremonies of Expansa\Webauthn bound to the site URL,
+ * Passkeys of site users: WebAuthn ceremonies of Expansa\Auth\Passkey bound to the site URL,
  * credentials in the `passkeys` table and pending challenges in the session.
  *
  * Challenges live in the session of the browser that started the ceremony and are removed

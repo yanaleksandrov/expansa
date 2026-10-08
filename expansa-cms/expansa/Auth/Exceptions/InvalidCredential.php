@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn\Exceptions;
+namespace Expansa\Auth\Exceptions;
 
 use InvalidArgumentException;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Auth;
+namespace Expansa\Access;
 
-use Expansa\Auth\Contracts\Permissions;
-use Expansa\Auth\Contracts\Subject;
+use Expansa\Access\Contracts\Permissions;
+use Expansa\Access\Contracts\Subject;
 use InvalidArgumentException;
 
 /**
@@ -13,7 +13,7 @@ use InvalidArgumentException;
  * A subject has a permission if any of its roles has it; the roles are kept in memory and
  * registered on every request, the roles of a subject are stored by the application.
  *
- * @package Expansa\Auth
+ * @package Expansa\Access
  */
 final class Roles implements Permissions
 {

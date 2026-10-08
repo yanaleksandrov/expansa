@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\User;
 
 use App\Models\User;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
 use Expansa\Facades\Log;
 use Expansa\Facades\Mail;
@@ -98,7 +99,7 @@ final class UserService
             return [['target' => 'body', 'notify' => t('The passkey could not be verified. Please try again.')]];
         }
 
-        User::authenticate($user, Safe::bool($input['remember'] ?? false));
+        Auth::login($user, Safe::bool($input['remember'] ?? false));
 
         return [['target' => 'body', 'redirect' => url('dashboard')]];
     }
@@ -157,6 +158,97 @@ final class UserService
         return [
             ['target' => 'body', 'notify' => t('Passkey removed.')],
             ['target' => "#passkey-$id", 'remove' => true],
+        ];
+    }
+
+    /**
+     * Start connecting a sign-in provider to the current account. The current password is asked first:
+     * a stolen auth cookie alone must not be enough to attach a sign-in method of one's own.
+     *
+     * @param array<string, mixed> $input `provider` and the current `password`.
+     * @return array<int, array<string, mixed>> Redirect to the provider, or a notice fragment.
+     */
+    public function identityConnect(array $input): array
+    {
+        $user = User::current();
+        if (! password_verify(trim((string) ($input['password'] ?? '')), $user->password)) {
+            return [['target' => 'body', 'notify' => t('The current password is incorrect.')]];
+        }
+
+        try {
+            $url = Identities::start((string) ($input['provider'] ?? ''), link: true);
+        } catch (Throwable) {
+            return [['target' => 'body', 'notify' => t('Could not connect the account. Please try again.')]];
+        }
+
+        return [['target' => 'body', 'redirect' => $url]];
+    }
+
+    /**
+     * Disconnect a sign-in provider from the current account.
+     *
+     * @param array<string, mixed> $input Connected account `id`.
+     * @return array<int, array<string, mixed>> Notice and removal fragments.
+     */
+    public function identityDelete(array $input): array
+    {
+        $id = (int) ($input['id'] ?? 0);
+        if (! Identities::delete(User::current(), $id)) {
+            return [['target' => 'body', 'notify' => t('Account not found.')]];
+        }
+
+        return [
+            ['target' => 'body', 'notify' => t('Account disconnected.')],
+            ['target' => "#identity-$id", 'remove' => true],
+        ];
+    }
+
+    /**
+     * Make another account signed in on this browser current.
+     *
+     * @param array<string, mixed> $input `login` of the account.
+     * @return array<int, array<string, mixed>> Redirect to the dashboard, or a notice fragment.
+     */
+    public function switchAccount(array $input): array
+    {
+        if (! Auth::switchAccount((string) ($input['login'] ?? ''))) {
+            return [['target' => 'body', 'notify' => t('This account is signed out. Sign in to it again.')]];
+        }
+
+        return [['target' => 'body', 'redirect' => url('dashboard')]];
+    }
+
+    /**
+     * Sign out another device of the current user.
+     *
+     * @param array<string, mixed> $input Session `id` from the profile.
+     * @return array<int, array<string, mixed>> Notice and removal fragments.
+     */
+    public function sessionDelete(array $input): array
+    {
+        $id = (int) ($input['id'] ?? 0);
+        if (! Sessions::deleteById(User::current(), $id)) {
+            return [['target' => 'body', 'notify' => t('Device not found.')]];
+        }
+
+        return [
+            ['target' => 'body', 'notify' => t('The device has been signed out.')],
+            ['target' => "#session-$id", 'remove' => true],
+        ];
+    }
+
+    /**
+     * Sign out every device of the current user except this one.
+     *
+     * @return array<int, array<string, mixed>> Notice and removal fragments.
+     */
+    public function sessionsDeleteOthers(): array
+    {
+        $count = Sessions::deleteOthers(User::current());
+
+        return [
+            ['target' => 'body', 'notify' => t('Signed out of other devices: :count.', $count)],
+            ['target' => '[data-session-other]', 'remove' => true],
         ];
     }
 

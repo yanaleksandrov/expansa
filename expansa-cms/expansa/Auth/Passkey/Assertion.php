@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn;
+namespace Expansa\Auth\Passkey;
 
-use Expansa\Webauthn\Exceptions\InvalidCredential;
-use Expansa\Webauthn\Internal\AuthenticatorData;
-use Expansa\Webauthn\Internal\ClientData;
-use Expansa\Webauthn\Internal\Payload;
+use Expansa\Auth\Exceptions\InvalidCredential;
+use Expansa\Auth\Internal\AuthenticatorData;
+use Expansa\Auth\Internal\ClientData;
+use Expansa\Auth\Internal\Payload;
 
 /**
  * Sign-in response of `navigator.credentials.get()`, parsed but not verified: the ID finds
- * the stored credential, the challenge the pending ceremony, then RelyingParty::authenticate() checks everything.
+ * the stored credential, the challenge the pending ceremony, then Passkey::authenticate() checks everything.
  */
 final readonly class Assertion
 {
@@ -35,21 +35,21 @@ final readonly class Assertion
         /**
          * Parsed client data.
          *
-         * @internal Checked by RelyingParty.
+         * @internal Checked by Passkey.
          */
         public ClientData $clientData,
 
         /**
          * Parsed authenticator data.
          *
-         * @internal Checked by RelyingParty.
+         * @internal Checked by Passkey.
          */
         public AuthenticatorData $authenticatorData,
 
         /**
          * Signature over the authenticator data and the client data hash.
          *
-         * @internal Verified by RelyingParty.
+         * @internal Verified by Passkey.
          */
         public string $signature,
     ) {}

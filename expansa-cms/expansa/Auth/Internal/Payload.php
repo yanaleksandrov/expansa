@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn\Internal;
+namespace Expansa\Auth\Internal;
 
+use Expansa\Auth\Exceptions\InvalidCredential;
 use Expansa\Codecs\Base64;
-use Expansa\Webauthn\Exceptions\InvalidCredential;
 
 /**
  * Browser credential in the JSON shape of `PublicKeyCredential.toJSON()`: the credential ID

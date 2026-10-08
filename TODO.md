@@ -1,134 +1,123 @@
-# OAuth: вход через внешних провайдеров
+# Auth: вход паролем, passkey и через внешних провайдеров
 
-Вход через Google, GitHub и любой OpenID Connect провайдер. Слой аутентификации делится на ядро и способы
-входа: способы (`OAuth`, `Webauthn`) только доказывают личность, ядро (`Authentication`) выдаёт токен и знает
-текущего субъекта, `App\` связывает их. Пакеты друг от друга не зависят (CONVENTIONS, «Независимость пакетов»).
+Аутентификация собрана в один пакет `Auth`: ядро знает текущего пользователя и выдаёт токен, способы входа
+(passkey, OAuth/OIDC) только доказывают личность и делят криптографию (`Internal\PublicKey`, `Internal\Jwt`).
+Авторизация — отдельный пакет `Access` (бывший `Auth`): ей нужен только субъект, без криптографии и cookie.
+`App\` хранит данные (cookie, сессия, таблицы) и связывает способ входа с `Auth::login()`.
 
-| Пакет            | Отвечает за                                                   | Статус   |
-|------------------|---------------------------------------------------------------|----------|
-| `Authentication` | текущий субъект: подписанный токен, login, logout             | новый    |
-| `OAuth`          | протокол OAuth 2.0 / OIDC: редирект, обмен code, профиль      | новый    |
-| `Webauthn`       | протокол passkey                                              | есть     |
-| `Auth`           | что субъекту разрешено                                        | без изменений |
-
-```
-Support · Patterns · Codecs            ← базовый слой
-    ↑            ↑         ↑        ↑
-Authentication  OAuth   Webauthn   Auth    (друг о друге не знают)
-    ↑            ↑         ↑        ↑
-    └────── App\ + bootstrap.php ───┘      ← Cookie, Session, Cache, Db
-```
-
-## Решения перед стартом
-
-- [ ] Название: переименовать `Auth` → `Access`, чтобы не путать с `Authentication` (дёшево, пакет новый).
-- [ ] Провайдеры первой версии: Google, GitHub + общий `OpenId`.
-- [ ] Автопривязка по email: выключена по умолчанию или опция для доверенных OIDC-провайдеров.
-
-## 1. Пакет `Authentication` (перенос из `App\Models\User`)
-
-Сначала ядро: OAuth завершается вызовом `Authentication::login()`.
+| Пакет    | Отвечает за                                                        | Фасады          |
+|----------|--------------------------------------------------------------------|-----------------|
+| `Auth`   | кто вошёл: токен, login/logout; passkey; OAuth 2.0 / OIDC          | `Auth`          |
+| `Access` | что субъекту разрешено: permission, policy, роли                   | `Access`, `Role` |
 
 ```
-Authentication/
-├── Manager.php            текущий субъект, login/logout; цель фасада
-├── Token.php              id|expires|hmac(id|expires|stamp, key)
-├── Contracts/Identity.php $identifier, $stamp
-└── Contracts/Users.php    find(string $identifier): ?Identity
+Support · Patterns · Codecs     ← базовый слой
+      ↑                 ↑
+     Auth             Access    (друг о друге не знают)
+      ↑                 ↑
+      └─ App\ + bootstrap.php ─┘  ← Cookie, Session, Db
 ```
 
-- [ ] `Contracts\Identity`: `public string $identifier { get; }` (login/UUID), `public string $stamp { get; }`
-      (хэш пароля или security stamp — его смена убивает все токены).
-- [ ] `Contracts\Users::find()`.
-- [ ] `Token`: подпись и проверка, формат как у текущего cookie — после переноса никто не разлогинится;
-      `hash_equals`, проверка срока.
-- [ ] `Manager`: `configure(users, key, read, write)` — cookie приходит колбэками, без зависимости от `Cookie`;
-      `user(): ?Identity` (лениво, один раз за запрос), `isAuthenticated()`, `login(Identity, bool $remember)`,
-      `logout()`. Без `configure()` — гость.
-- [ ] Фасад `Facades\Authentication` с `@method`.
-- [ ] `User` реализует `Identity`; из модели убрать `current()`, `authenticate()`, `signAuthCookie()`,
-      `verifyAuthCookie()`, `setAuthCookie()`, `clearAuthCookie()`, `$cookieName`; `changePassword()` перевыпускает токен
-      через `Authentication::login()`.
-- [ ] `App\Support\Users` реализует `Contracts\Users` (поиск по login).
-- [ ] Обновить использования: `User::current()`, `User::isLogged()`, `RequireAuth`, `Passkey`, `UserService`,
-      шаблоны, `bootstrap.php` (контекст `sign-out`).
-- [ ] `tests/Authentication.php`, `documentation/Authentication.md`; бенчмарк `user()` — горячий путь.
+```php
+Auth::user();                          // ?Identity, лениво, один раз за запрос
+Auth::check();                         // вошёл ли
+Auth::login($user, remember: true);    // после пароля, passkey или OAuth
+Auth::logout();
+Auth::refresh($user);                  // stamp сменился (пароль): перевыпустить токен текущего
 
-## 2. Пакет `OAuth`
+$state   = State::create('google');                         // в сессию
+$url     = Auth::provider('google')->redirect($state);      // редирект
+$profile = Auth::provider('google')->profile($_GET, $state); // callback → Profile
 
-Как `Webauthn`: только протокол, без состояния; хранение state и сеть — у вызывающего.
-
-```
-OAuth/
-├── Manager.php                     провайдеры из конфигурации, extend(); цель фасада
-├── State.php                       state, PKCE verifier, nonce, провайдер, время создания
-├── Profile.php                     provider, id, email, emailVerified, name, avatar, raw
-├── Contracts/Provider.php          redirect(State): string, profile(array $query, State): Profile
-├── Providers/AbstractProvider.php  общий обмен code → token
-├── Providers/OpenId.php            любой OIDC: discovery, id_token по JWKS
-├── Providers/Google.php            OpenId, issuer accounts.google.com
-├── Providers/GitHub.php            OAuth 2.0: /user + /user/emails
-├── Internal/Jwt.php                RS256/ES256 через openssl_verify
-├── Internal/Jwks.php               JWK → PEM
-└── Exceptions/                     InvalidState, InvalidToken, Denied, RequestFailed
+Access::authorize(Auth::user(), 'update', $article);
 ```
 
-- [ ] `Manager::configure(providers, redirect, transport, cache)`:
-      `providers` — `['google' => ['driver' => 'google', 'client_id' => ..., 'client_secret' => ...]]`;
-      `redirect` — `fn (string $provider): string`; `transport` — HTTP-запрос колбэком (HTTP-клиента во фреймворке нет);
-      `cache` — discovery и JWKS, чтобы не ходить к провайдеру на каждый вход. `createGoogleDriver()` и т. д., `extend()`.
-- [ ] `State::create(string $provider)`: 32 случайных байта state, PKCE verifier, nonce; срок 10 минут.
-- [ ] `Profile` — неизменяемый, `raw` — ответ провайдера как есть.
-- [ ] `OpenId`: discovery `/.well-known/openid-configuration`, обмен code, проверка `id_token`.
-- [ ] `GitHub`: email только из `/user/emails` с `verified: true`.
-- [ ] Фасад `Facades\OAuth` с `@method`.
-- [ ] Исключения: `InvalidState` (нет, чужой, истёк), `InvalidToken` (подпись, claims), `Denied` (`error=` в callback,
-      пользователь отказался), `RequestFailed` (сеть, HTTP-ошибка провайдера).
+## Решения
 
-Безопасность — обязательный минимум:
+- [x] `Auth` → `Access`, `Authentication` + `Webauthn` + `OAuth` → `Auth`.
+- [x] Провайдеры первой версии: Google, GitHub + общий `OpenId`.
+- [x] Автопривязка по email выключена: аккаунт с тем же email привязывают после входа паролем или passkey.
+- [x] HTTP-запросы OAuth — curl внутри пакета (`Internal\Http`), `configure(transport:)` подменяет для тестов.
 
-- [ ] state одноразовый, сравнение `hash_equals` — защита callback от CSRF.
-- [ ] PKCE S256 всегда, даже для confidential-клиента.
-- [ ] nonce проверяется в `id_token`.
-- [ ] `id_token`: подпись по JWKS, `iss`, `aud`, `azp`, `exp`/`iat` с допуском 60 с; алгоритмы из белого списка,
-      `none` и HS* отклоняются; неизвестный `kid` — одно обновление JWKS, не больше.
-- [ ] email подтверждён только при `email_verified = true` (OIDC) или `verified: true` (GitHub).
-- [ ] Токены провайдера не сохраняются: для входа они не нужны.
-- [ ] `tests/OAuth.php` без сети: фиктивный `transport`, свои ключи RSA/EC для подписи `id_token`;
-      `documentation/OAuth.md`.
+## 1. Пакет `Access` (переименование `Auth`)
+
+- [x] `Expansa\Auth` → `Expansa\Access`, фасад `Facades\Auth` → `Facades\Access`, `Role` → `Access\Roles`.
+- [x] Использования: `User`, `Kernel`, `AiService`, `bootstrap.php`, `tests/Access.php`, `documentation/Access.md`.
+
+## 2. Пакет `Auth`
+
+```
+Auth/
+├── Manager.php            user(), check(), login(), logout(), refresh(), provider(), extend(); цель фасада
+├── Passkey.php            бывший Webauthn\RelyingParty
+├── Passkey/               Attestation, Assertion, Credential
+├── OAuth/                 State (state, PKCE verifier, nonce), Profile
+├── Providers/             AbstractProvider, OpenId, Google, GitHub
+├── Contracts/             Identity ($identifier, $stamp), Provider
+├── Internal/              Token, Http, Jwt, PublicKey, Cbor, AuthenticatorData, ClientData, Payload
+└── Exceptions/            InvalidCredential, InvalidState, InvalidToken, Denied, RequestFailed, ProviderNotFound
+```
+
+Ядро (перенос из `App\Models\User`):
+
+- [x] `Contracts\Identity`: `$identifier` (login), `$stamp` (хэш пароля — его смена убивает все токены).
+- [x] `Internal\Token`: `identifier|expires|hmac(identifier|expires|stamp, key)` — формат текущего cookie,
+      после переноса никто не разлогинится; `hash_equals`, проверка срока.
+- [x] `Manager::configure(find, key, read, write, lifetime, remember_lifetime, providers, transport)`:
+      cookie и поиск пользователя — колбэками. Без `configure()` — гость.
+
+Passkey (перенос `Webauthn`):
+
+- [x] `RelyingParty` → `Passkey`, `Attestation`/`Assertion`/`Credential` → `Passkey\`, внутренние — в `Internal\`.
+- [x] `tests/Webauthn.php` → часть `tests/Auth.php`.
+
+OAuth:
+
+- [x] `State::create(provider)`: случайные state, PKCE verifier, nonce, время; `toArray()`/`fromArray()` для сессии.
+- [x] `Profile`: provider, id, email, emailVerified, name, avatar, raw.
+- [x] `Providers\AbstractProvider`: redirect с PKCE (S256), проверка state и срока, обмен code, `error=` → `Denied`.
+- [x] `OpenId`: discovery, `id_token` по JWKS (RS256/ES256), claims `iss`, `aud`, `exp`, `nonce`.
+- [x] `Google` — `OpenId` с issuer `https://accounts.google.com`; `GitHub` — `/user` + `/user/emails` (`verified`).
+- [x] email подтверждён только при `email_verified = true` (OIDC) или `verified: true` (GitHub).
+- [x] Токены провайдера не сохраняются.
+- [x] `tests/Auth.php` без сети: фиктивный `transport`, свои RSA/EC ключи для `id_token`.
+- [x] `documentation/Auth.md`; бенчмарк разбора токена: regex и ручной разбор равны (~0,38 мкс), оставлен regex.
 
 ## 3. Приложение (`App\`)
 
-- [ ] `env.php`: `EX_OAUTH` — учётные данные провайдеров (не в БД); пример в `env.example.php`.
-- [ ] `bootstrap.php`, фаза `configure`: `Authentication::configure()`, `OAuth::configure()`.
-- [ ] `App\Support\Http`: curl-транспорт для `OAuth`.
-- [ ] Миграция `user_identities`: `user_id`, `provider`, `subject` (уникальная пара), `created_at`.
-- [ ] `App\Api\User\OAuth` (как `Passkey`):
-      `GET /sign-in/{provider}` — `State` в `Session` под `oauth.<state>`, редирект на `redirect()`;
-      `GET /oauth/{provider}/callback` — `pull` state, `profile()`, поиск аккаунта, `Authentication::login()`,
-      `Session::regenerateId()`, редирект в дашборд.
-- [ ] Правила привязки:
+- [x] `User` реализует `Identity`; из модели убраны `isLogged()`, `authenticate()`, `logout()`, работа с cookie;
+      `current()` — типизированная обёртка над `Auth::user()`.
+- [x] `bootstrap.php`: `Auth::configure()` с cookie, `EX_KEYS['auth']` и `EX_OAUTH`; `Access::configure()`.
+- [x] `env.php`: `EX_OAUTH` — учётные данные провайдеров; пример в `env.example.php`.
+- [x] Миграция `user_identities`: `user_id`, `provider`, `subject` (уникальная пара), `created_at`.
+- [x] `App\Api\User\OAuth`: `GET /oauth/{provider}` — `State` в сессию, редирект; `GET /oauth/{provider}/callback` —
+      `profile()`, поиск аккаунта, `Auth::login()`, `Session::regenerateId()`, редирект в дашборд.
+- [x] Правила привязки:
       1. пара `(provider, subject)` найдена — вход её владельцем;
       2. пользователь уже вошёл — привязать провайдера к нему;
-      3. есть `User` с тем же email — **не** привязывать автоматически: войти паролем или passkey и привязать
-         (автопривязка — только опцией, для доверенных OIDC и при `emailVerified`);
+      3. есть `User` с тем же email — не привязывать: войти паролем или passkey и привязать;
       4. иначе — регистрация, если она открыта: роль по умолчанию + привязка.
-- [ ] Ошибки callback — на страницу входа с сообщением, без деталей провайдера.
-- [ ] UI: кнопки провайдеров на странице входа (только настроенные); в профиле — привязанные провайдеры,
-      привязать/отвязать (нельзя отвязать последний способ входа без пароля и passkey).
-- [ ] `RequireAuth::PUBLIC_ROUTES`: маршруты входа и callback.
+- [x] Ошибки callback — на страницу входа с сообщением, без деталей провайдера.
+- [x] UI: кнопки настроенных провайдеров на странице входа.
+- [x] Ограничение попыток входа паролем: `Auth::attempt()` с device cookies (OWASP), лимит на IP, нарастающая
+      блокировка; опция `EX_AUTH`. Проверка неизвестного логина против фиктивного хэша.
+- [x] UI профиля: подключённые аккаунты, подключение — с текущим паролем (как passkey), отключение.
+- [x] Несколько аккаунтов в браузере: `Auth::switchAccount()`, меню пользователя, `sign-in?add=1`.
+- [x] Сессии на сервере (`Contracts\Sessions`, таблица `user_sessions`): устройства в профиле, выход с любого.
+- [ ] Проверить вход Google и GitHub на живом сайте с настоящими ключами.
+- [ ] Существующие установки: создать таблицы `media`, `passkeys`, `user_identities`, `user_sessions`, добавить
+      внешние ключи таблиц полей и заполнить пустые `uuid` (миграции есть только в установщике).
 
 ## Не входит
 
-- Пароль — остаётся `password_verify` в `User`.
-- Роли и права — `Auth`.
+- Пароль — `password_verify` в `User`.
 - Хранение access/refresh токенов провайдера и вызовы его API.
 - Expansa как OAuth-сервер.
 
 ## Позже, без смены архитектуры
 
-- Bearer-токены API (api-keys) — второй способ чтения в `Authentication`.
-- Scopes токенов — через `Auth\Contracts\Subject` и свой `Permissions`.
-- TOTP / 2FA — отдельный пакет-способ.
-- Новые провайдеры — класс в `OAuth/Providers/` или `OAuth::extend()`.
-- Ограничение частоты попыток входа.
+- Bearer-токены API (api-keys) — второй способ чтения в `Auth\Manager`.
+- Scopes токенов — через `Access\Contracts\Subject` и свой `Permissions`.
+- TOTP / 2FA — способ входа в `Auth`.
+- Новые провайдеры — класс в `Auth/Providers/` или `Auth::extend()`.
+- Кэш discovery и JWKS.

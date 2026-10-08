@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Auth\Exceptions;
+namespace Expansa\Access\Exceptions;
 
 use RuntimeException;
 
@@ -10,7 +10,7 @@ use RuntimeException;
  * Thrown by Manager::authorize() when the subject lacks the permission or the ability.
  * A decision, not a failure: the caller turns it into a 403 response, a CLI error or a redirect.
  *
- * @package Expansa\Auth
+ * @package Expansa\Access
  */
 final class AccessDenied extends RuntimeException
 {

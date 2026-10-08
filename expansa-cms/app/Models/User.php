@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Api\User\Sessions;
 use App\Post\Type;
 use DateTime;
-use Expansa\Auth\Contracts\Subject;
-use Expansa\Cookie\Cookie;
-use Expansa\Cookie\Enums\SameSite;
+use Expansa\Access\Contracts\Subject;
+use Expansa\Auth\Contracts\Identity;
+use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Database\Attribute;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
@@ -19,7 +20,9 @@ use Expansa\Database\Traits\HasReadonlyAttributes;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Database\Traits\HasTimestamps;
+use Expansa\Database\Traits\HasUuid;
 use Expansa\Database\Traits\HasValidation;
+use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
 use Expansa\Facades\Role;
@@ -54,7 +57,7 @@ use Expansa\Support\Is;
  * @property FieldEav      $field                      A dynamic meta field instance associated with the user.
  * @property array         $roles                      User roles list.
  */
-class User extends Model implements Fieldable, Subject
+class User extends Model implements Fieldable, Identity, Subject
 {
     use HasSanitizing;
     use HasValidation;
@@ -63,6 +66,7 @@ class User extends Model implements Fieldable, Subject
     use HasHiddenAttributes;
     use HasSoftDeletes;
     use HasFieldEav;
+    use HasUuid;
 
     /**
      * The "active" value of the `status` column.
@@ -81,7 +85,7 @@ class User extends Model implements Fieldable, Subject
     private const string DEFAULT_ROLE = 'subscriber';
 
     /**
-     * Role names assigned to the user, the `roles` column through roles(); Auth permissions come from them.
+     * Role names assigned to the user, the `roles` column through roles(); Access permissions come from them.
      *
      * @var string[]
      */
@@ -91,6 +95,20 @@ class User extends Model implements Fieldable, Subject
         set {
             $this->setAttribute('roles', $value);
         }
+    }
+
+    /**
+     * Login: Auth finds the user of a token by it.
+     */
+    public string $identifier {
+        get => $this->login;
+    }
+
+    /**
+     * Password hash: Auth tokens are signed with it, a new password signs out every device.
+     */
+    public string $stamp {
+        get => $this->password;
     }
 
     /**
@@ -145,31 +163,14 @@ class User extends Model implements Fieldable, Subject
     ];
 
     /**
-     * Name of the cookie that carries the signed authentication token.
-     *
-     * @var string
-     */
-    private static string $cookieName = EX_DB['prefix'] . 'auth';
-
-    /**
-     * Lifetime of the authentication cookie when "remember me" is not checked.
-     */
-    private const int COOKIE_TTL_SHORT = 172800; // 2 days
-
-    /**
-     * Lifetime of the authentication cookie when "remember me" is checked.
-     */
-    private const int COOKIE_TTL_LONG = 1209600; // 14 days
-
-    /**
      * Shortest password accepted when it is changed or reset.
      */
     public const int PASSWORD_MIN_LENGTH = 8;
 
     /**
-     * Current user data, cached for the lifetime of the request.
+     * Hash of a random password with the default cost, verified when the login is unknown.
      */
-    private static ?User $current = null;
+    private const string DUMMY_HASH = '$2y$12$WSUJqf7Jrby7LYA0yT6On.NYf5cfGDJBRtro8cfmukrmEFGmfV8M2';
 
     /**
      * Array of rules for sanitize properties.
@@ -395,46 +396,26 @@ class User extends Model implements Fieldable, Subject
     }
 
     /**
-     * Retrieves data of the current, logged-in user.
+     * Get the signed-in user of Auth::user() as a User.
      *
-     * Authentication is resolved from a signed cookie rather than a server-side
-     * session, so anonymous traffic (e.g. bots) never causes anything to be
-     * written on the server.
-     *
-     * @param callable|null $callback
-     * @return User|null
+     * @return User|null Null for a guest.
      */
-    public static function current(?callable $callback = null): ?User
+    public static function current(): ?User
     {
-        if (self::$current !== null) {
-            return self::$current;
-        }
+        $user = Auth::user();
 
-        $cookie = Cookie::get(self::$cookieName, '');
-        if ($cookie) {
-            self::$current = self::verifyAuthCookie($cookie);
-
-            if (! self::$current instanceof self) {
-                self::clearAuthCookie();
-            }
-        }
-
-        if ($callback && self::$current instanceof self) {
-            $callback(self::$current->field);
-        }
-
-        return self::$current;
+        return $user instanceof self ? $user : null;
     }
 
     /**
-     * Returns whether this user has the specified capability, through Auth permissions.
+     * Returns whether this user has the specified capability, through Access permissions.
      *
      * @param string $capability Capability name.
      * @return bool              Whether the user has the given capability.
      */
     public function can(string $capability): bool
     {
-        return Auth::allows($this, $capability);
+        return Access::allows($this, $capability);
     }
 
     /**
@@ -484,16 +465,6 @@ class User extends Model implements Fieldable, Subject
     }
 
     /**
-     * Checks whether the current request carries a valid authentication cookie.
-     *
-     * @return bool
-     */
-    public static function isLogged(): bool
-    {
-        return self::current() instanceof self;
-    }
-
-    /**
      * Authorizes the user by password and login/email.
      *
      * @param array $data
@@ -508,31 +479,30 @@ class User extends Model implements Fieldable, Subject
         $field = Is::email($loginOrEmail) ? 'email' : 'login';
         $user  = User::find($loginOrEmail, $field);
 
+        // an unknown login is checked against a dummy hash: a faster answer would reveal that it is not registered
+        try {
+            $isValid = Auth::attempt(
+                $user instanceof User ? $user->identifier : $loginOrEmail,
+                $_SERVER['REMOTE_ADDR'] ?? '',
+                fn () => password_verify($password, $user instanceof User ? $user->password : self::DUMMY_HASH) && $user instanceof User,
+            );
+        } catch (TooManyAttempts $e) {
+            return error('user-login', t('Too many sign-in attempts. Try again in :minutes min.', (int) ceil($e->retryAfter / 60)));
+        }
+
         // Same message for both cases — telling them apart would let an attacker enumerate registered logins/emails.
-        if (! $user instanceof User || ! password_verify($password, $user->password)) {
+        if (! $isValid) {
             return error('user-login', t('These credentials do not match our records.'));
         }
 
-        return self::authenticate($user, $remember);
+        Auth::login($user, $remember);
+
+        return $user;
     }
 
     /**
-     * Signs in a user whose identity is already proven (password, passkey): issues the auth cookie.
-     *
-     * @param User $user     Verified user.
-     * @param bool $remember Keep the cookie for 14 days instead of 2.
-     * @return User
-     */
-    public static function authenticate(User $user, bool $remember = false): User
-    {
-        self::setAuthCookie($user, time() + ($remember ? self::COOKIE_TTL_LONG : self::COOKIE_TTL_SHORT), $remember);
-
-        return self::$current = $user;
-    }
-
-    /**
-     * Set a new password. Auth cookies are signed with the password hash, so every device is signed out;
-     * for the current user the cookie is re-signed with the same lifetime and this session goes on.
+     * Set a new password. Auth tokens are signed with the password hash, so every device is signed out;
+     * for the current user the token is re-signed with the same lifetime and this session goes on.
      *
      * @param string $password New password, at least PASSWORD_MIN_LENGTH characters.
      * @return User|Error
@@ -543,8 +513,8 @@ class User extends Model implements Fieldable, Subject
             return error('user-password', t('The password must be at least :count characters long.', self::PASSWORD_MIN_LENGTH));
         }
 
-        $expiration = preg_match('/\|(\d+)\|[a-f0-9]{64}$/', (string) Cookie::get(self::$cookieName, ''), $matches) ? (int) $matches[1] : 0;
-        $isCurrent  = self::$current?->id === $this->id;
+        // resolved before the update: the token of the request is signed with the old hash
+        $isCurrent = Auth::user()?->identifier === $this->login;
 
         $updated = $this->update([
             'password'                  => $password,
@@ -552,105 +522,16 @@ class User extends Model implements Fieldable, Subject
             'password_reset_expires_at' => null,
         ]);
 
-        if ($updated instanceof self && $isCurrent && $expiration > time()) {
-            self::setAuthCookie($this, $expiration, $expiration - time() > self::COOKIE_TTL_SHORT);
+        if ($updated instanceof self) {
+            if ($isCurrent) {
+                Auth::refresh($this);
+            }
+
+            // tokens of other devices stopped working with the old hash, their rows go too
+            Sessions::deleteOthers($this);
         }
 
         return $updated;
-    }
-
-    /**
-     * Logs out the current user by discarding the authentication cookie.
-     *
-     * @return void
-     */
-    public static function logout(): void
-    {
-        self::clearAuthCookie();
-
-        self::$current = null;
-    }
-
-    /**
-     * Sign an authentication payload for the given user.
-     *
-     * The user's password hash is folded into the signature, so changing the
-     * password (or rotating EX_KEYS['auth']) invalidates every cookie issued before.
-     *
-     * @param User $user       The user to issue the cookie for.
-     * @param int  $expiration Unix timestamp after which the cookie is no longer valid.
-     * @return string
-     */
-    private static function signAuthCookie(User $user, int $expiration): string
-    {
-        $payload = "$user->login|$expiration";
-
-        return $payload . '|' . hash_hmac('sha256', $payload . '|' . $user->password, EX_KEYS['auth']);
-    }
-
-    /**
-     * Verify a signed authentication cookie and resolve it to a user.
-     *
-     * @param string $cookie Raw cookie value.
-     * @return User|null The user if the cookie is valid and not expired, null otherwise.
-     */
-    private static function verifyAuthCookie(string $cookie): ?User
-    {
-        // login is matched greedily, so a "|" inside it can't desynchronize the trailing timestamp/hmac.
-        if (! preg_match('/^(.+)\|(\d+)\|([a-f0-9]{64})$/', $cookie, $matches)) {
-            return null;
-        }
-
-        [ , $login, $expiration, $hmac ] = $matches;
-        if ((int) $expiration < time()) {
-            return null;
-        }
-
-        $user = self::find($login, 'login');
-        if (! $user instanceof self) {
-            return null;
-        }
-
-        $expected = hash_hmac('sha256', "$login|$expiration|$user->password", EX_KEYS['auth']);
-
-        return hash_equals($expected, $hmac) ? $user : null;
-    }
-
-    /**
-     * Issue the signed authentication cookie for the given user.
-     *
-     * @param User $user       The user that has just logged in.
-     * @param int  $expiration Unix timestamp embedded in and validated against the signature.
-     * @param bool $remember   Whether the cookie should survive browser restarts.
-     * @return void
-     */
-    private static function setAuthCookie(User $user, int $expiration, bool $remember): void
-    {
-        Cookie::send(new Cookie(
-            name: self::$cookieName,
-            value: self::signAuthCookie($user, $expiration),
-            expires: $remember ? $expiration : 0,
-            path: '/',
-            secure: Cookie::isSecureRequest(),
-            httpOnly: true,
-            sameSite: SameSite::Lax,
-        ));
-    }
-
-    /**
-     * Discard the authentication cookie.
-     *
-     * @return void
-     */
-    private static function clearAuthCookie(): void
-    {
-        Cookie::send(new Cookie(
-            name: self::$cookieName,
-            path: '/',
-            secure: Cookie::isSecureRequest(),
-            httpOnly: true,
-            sameSite: SameSite::Lax,
-        ));
     }
 
     /**

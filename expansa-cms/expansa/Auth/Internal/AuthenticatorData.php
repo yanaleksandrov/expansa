@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn\Internal;
+namespace Expansa\Auth\Internal;
 
-use Expansa\Webauthn\Exceptions\InvalidCredential;
+use Expansa\Auth\Exceptions\InvalidCredential;
 
 /**
  * Authenticator data: RP ID hash, flags, signature counter and, after registration,

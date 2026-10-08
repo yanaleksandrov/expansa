@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn;
+namespace Expansa\Auth\Passkey;
 
 /**
  * A registered credential as the relying party stores it: everything needed to verify
  * later sign-ins. The private key never leaves the authenticator.
  *
- * RelyingParty::register() creates it, authenticate() returns a copy with the new counter
+ * Passkey::register() creates it, authenticate() returns a copy with the new counter
  * and backup state: store all fields and replace them after each sign-in.
  */
 final readonly class Credential

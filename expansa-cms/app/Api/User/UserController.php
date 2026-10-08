@@ -77,6 +77,31 @@ final readonly class UserController
         return $this->service->passkeyDelete($request->post);
     }
 
+    public function identityConnect(Request $request): array
+    {
+        return $this->service->identityConnect($request->post);
+    }
+
+    public function identityDelete(Request $request): array
+    {
+        return $this->service->identityDelete($request->post);
+    }
+
+    public function switchAccount(Request $request): array
+    {
+        return $this->service->switchAccount($request->post);
+    }
+
+    public function sessionDelete(Request $request): array
+    {
+        return $this->service->sessionDelete($request->post);
+    }
+
+    public function sessionsDeleteOthers(): array
+    {
+        return $this->service->sessionsDeleteOthers();
+    }
+
     public function signUp(Request $request): array|User
     {
         return $this->service->signUp($request->input);

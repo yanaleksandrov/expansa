@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Auth\Contracts;
+namespace Expansa\Access\Contracts;
 
 /**
  * Subject granted permissions through roles: a user, an API key, a service account.
  * Roles gives permissions only to subjects implementing it.
  *
- * @package Expansa\Auth
+ * @package Expansa\Access
  */
 interface Subject
 {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use App\Models\User;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Route;
 use Expansa\Http\Response;
 
@@ -35,7 +35,7 @@ final class RequireAuth
             return;
         }
 
-        if (User::isLogged()) {
+        if (Auth::isLoggedIn()) {
             return;
         }
 

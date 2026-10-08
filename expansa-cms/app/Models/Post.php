@@ -9,6 +9,7 @@ use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
+use Expansa\Support\Str;
 use LogicException;
 
 /**
@@ -149,7 +150,7 @@ class Post
         )->apply();
 
         // insert to DB
-        Db::insert($type->table, array_diff_key($data, array_flip([ 'slug', 'fields' ])));
+        Db::insert($type->table, ['uuid' => Str::uuid7()] + array_diff_key($data, array_flip([ 'slug', 'fields' ])));
 
         $post = self::get($type->key, Db::id());
         if ($post instanceof Post) {

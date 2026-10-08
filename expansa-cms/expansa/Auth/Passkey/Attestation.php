@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn;
+namespace Expansa\Auth\Passkey;
 
-use Expansa\Webauthn\Exceptions\InvalidCredential;
-use Expansa\Webauthn\Internal\AuthenticatorData;
-use Expansa\Webauthn\Internal\Cbor;
-use Expansa\Webauthn\Internal\ClientData;
-use Expansa\Webauthn\Internal\Payload;
+use Expansa\Auth\Exceptions\InvalidCredential;
+use Expansa\Auth\Internal\AuthenticatorData;
+use Expansa\Auth\Internal\Cbor;
+use Expansa\Auth\Internal\ClientData;
+use Expansa\Auth\Internal\Payload;
 
 /**
  * Registration response of `navigator.credentials.create()`, parsed but not verified:
- * the challenge finds the pending ceremony, then RelyingParty::register() checks everything.
+ * the challenge finds the pending ceremony, then Passkey::register() checks everything.
  */
 final readonly class Attestation
 {
@@ -38,14 +38,14 @@ final readonly class Attestation
         /**
          * Parsed client data.
          *
-         * @internal Checked by RelyingParty.
+         * @internal Checked by Passkey.
          */
         public ClientData $clientData,
 
         /**
          * Parsed authenticator data with the attested credential.
          *
-         * @internal Checked by RelyingParty.
+         * @internal Checked by Passkey.
          */
         public AuthenticatorData $authenticatorData,
     ) {}

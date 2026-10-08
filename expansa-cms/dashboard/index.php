@@ -9,6 +9,7 @@ use App\Support\DashboardFavicons;
 use Expansa\Assets\Manager;
 use Expansa\Builders\Tree;
 use Expansa\Database\FieldEav;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Route;
@@ -283,47 +284,44 @@ new class
         Tree::attach('dashboard-user-menu', fn (Tree $tree) => $tree->addItems(
             [
                 [
-                    'id'           => 'sign-out',
-                    'url'          => 'sign-out',
-                    'title'        => t('Sign out'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-sign-out',
-                    'position'     => 100,
-                ],
-                [
-                    'id'       => 'divider-content',
-                    'title'    => '',
-                    'position' => 200,
-                ],
-                [
                     'id'           => 'profile',
                     'url'          => 'profile',
                     'title'        => t('Profile'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-gear',
-                    'position'     => 300,
+                    'position'     => 100,
                 ],
                 [
-                    'id'       => 'divider-content',
+                    'id'       => 'divider-accounts',
+                    'title'    => '',
+                    'position' => 200,
+                ],
+                [
+                    'id'       => 'add-account',
+                    'url'      => url('sign-in?add=1'),
+                    'title'    => t('Add another account'),
+                    'icon'     => 'ph ph-user-plus',
+                    'position' => 300,
+                ],
+                [
+                    'id'       => 'divider-sign-out',
                     'title'    => '',
                     'position' => 400,
                 ],
                 [
-                    'id'           => 'comments',
-                    'url'          => 'comments',
-                    'title'        => t('Add account'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-user-plus',
-                    'position'     => 500,
+                    'id'       => 'sign-out',
+                    'url'      => url('sign-out'),
+                    'title'    => t('Sign out'),
+                    'icon'     => 'ph ph-sign-out',
+                    'position' => 500,
                 ],
-                [
-                    'id'           => 'comments',
-                    'url'          => 'comments',
-                    'title'        => t('Igor Ivanov'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-user-plus',
-                    'position'     => 600,
-                ],
+                ...(Auth::getAccounts() === [] ? [] : [[
+                    'id'       => 'sign-out-all',
+                    'url'      => url('sign-out?all=1'),
+                    'title'    => t('Sign out of all accounts'),
+                    'icon'     => 'ph ph-sign-out',
+                    'position' => 600,
+                ]]),
             ]
         ));
 

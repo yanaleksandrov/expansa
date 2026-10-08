@@ -1,7 +1,10 @@
 <?php
 
+use App\Api\User\Identities;
 use App\Api\User\Passkey;
+use App\Api\User\Sessions;
 use App\Models\User;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Form;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
@@ -482,6 +485,91 @@ return Form::enqueue(
                         ],
                     ],
                 ],
+                [
+                    'type'          => 'group',
+                    'name'          => 'sessions',
+                    'label'         => t('Devices'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'sessions',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $sessions = Sessions::all($user);
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Devices where you are signed in. Sign out of the ones you do not recognize and change the password.'); ?></div>
+                                    <div class="dg g-2" id="sessions">
+                                        <?php
+                                        foreach ($sessions as $session) {
+                                            echo view('parts/session', ['session' => $session]);
+                                        }
+                                        ?>
+                                    </div>
+                                    <?php if (count($sessions) > 1) : ?>
+                                        <div data-session-other>
+                                            <button class="btn btn--outline t-red" type="button" @click="$ajax.post('user/sessions-delete-others')">
+                                                <i class="ph ph-sign-out"></i> <?php echo t('Sign out of all other devices'); ?>
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ],
+                ...(Auth::getProviders() === [] ? [] : [[
+                    'type'          => 'group',
+                    'name'          => 'identities',
+                    'label'         => t('Connected accounts'),
+                    'class'         => '',
+                    'label_class'   => '',
+                    'content_class' => '',
+                    'fields'        => [
+                        [
+                            'name'     => 'identities',
+                            'type'     => 'custom',
+                            'callback' => function () use ($user) {
+                                $errors = [
+                                    'oauth-denied' => t('Connecting was cancelled.'),
+                                    'oauth-failed' => t('Could not connect the account. Please try again.'),
+                                    'oauth-linked' => t('This account is already connected to another user.'),
+                                ];
+                                $error  = $errors[$_GET['error'] ?? ''] ?? '';
+                                ?>
+                                <div class="dg g-2 ga-4">
+                                    <div><?php echo t('Sign in with an account of another service. Connecting asks for the current password.'); ?></div>
+                                    <?php if ($error !== '') : ?>
+                                        <div class="df aic g-1 t-red fs-13"><i class="ph ph-warning-circle"></i> <?php echo $error; ?></div>
+                                    <?php endif; ?>
+                                    <div class="dg g-2" id="identities">
+                                        <?php
+                                        foreach (Identities::all($user) as $identity) {
+                                            echo view('parts/identity', ['identity' => $identity]);
+                                        }
+                                        ?>
+                                    </div>
+                                    <div class="df aic fw g-2">
+                                        <div class="field">
+                                            <div class="field-item">
+                                                <input type="password" u-prop="identityPassword" autocomplete="current-password" placeholder="<?php echo t_attr('Current password'); ?>">
+                                            </div>
+                                        </div>
+                                        <?php foreach (Auth::getProviders() as $provider) : ?>
+                                            <button class="btn btn--outline" type="button" :disabled="!identityPassword" @click="$ajax.post('user/identity-connect', {provider: '<?php echo $provider; ?>', password: identityPassword})">
+                                                <i class="ph ph-<?php echo $provider; ?>-logo"></i> <?php echo Identities::label($provider); ?>
+                                            </button>
+                                        <?php endforeach; ?>
+                                    </div>
+                                </div>
+                                <?php
+                            },
+                        ],
+                    ],
+                ]]),
                 [
                     'type'          => 'group',
                     'name'          => 'passwords',

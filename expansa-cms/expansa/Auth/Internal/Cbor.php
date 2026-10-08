@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn\Internal;
+namespace Expansa\Auth\Internal;
 
-use Expansa\Webauthn\Exceptions\InvalidCredential;
+use Expansa\Auth\Exceptions\InvalidCredential;
 
 /**
  * CBOR decoder (RFC 8949) for the subset authenticators emit: integers, byte and text strings,

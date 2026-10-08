@@ -83,6 +83,39 @@ define('EX_KEYS', [
 ]);
 
 /**
+ * Password guessing limit. A browser that signed in before gets "attempts" wrong passwords of its own,
+ * so nobody can lock out the owner; unknown browsers share "attempts" per login and "ip_attempts" per IP.
+ * Then the counter is locked for "lockout" seconds, twice as long each next time, up to a day.
+ * 0 attempts turns the limit off, 0 ip_attempts turns off the IP limit.
+ *
+ * @since 2026.10
+ */
+define('EX_AUTH', [
+    'attempts'    => (int) (getenv('EX_AUTH_ATTEMPTS') === false ? 5 : getenv('EX_AUTH_ATTEMPTS')),
+    'ip_attempts' => (int) (getenv('EX_AUTH_IP_ATTEMPTS') === false ? 50 : getenv('EX_AUTH_IP_ATTEMPTS')),
+    'lockout'     => (int) (getenv('EX_AUTH_LOCKOUT') ?: 900),
+]);
+
+/**
+ * Sign-in providers: a button on the sign-in page for each one with a client ID.
+ * Register the callback URL https://<site>/oauth/<name>/callback at the provider.
+ * "driver" is the name by default: google, github, or openid with an "issuer" for any OpenID Connect provider.
+ *
+ * @since 2026.10
+ */
+define('EX_OAUTH', array_filter([
+    'google' => [
+        'client_id'     => getenv('EX_OAUTH_GOOGLE_ID') ?: '',
+        'client_secret' => getenv('EX_OAUTH_GOOGLE_SECRET') ?: '',
+    ],
+    'github' => [
+        'client_id'     => getenv('EX_OAUTH_GITHUB_ID') ?: '',
+        'client_secret' => getenv('EX_OAUTH_GITHUB_SECRET') ?: '',
+    ],
+    // 'gitlab' => ['driver' => 'openid', 'issuer' => 'https://gitlab.com', 'client_id' => '', 'client_secret' => ''],
+], fn (array $provider) => $provider['client_id'] !== ''));
+
+/**
  * Debug mode, as in WordPress: "enabled" is the main switch, "log" and "display" work only when it is on.
  * Without it the error page shows only the error id, nothing is logged and PHP warnings do not stop the request.
  * Never leave "display" on a public site: the errors with the code around them show to every visitor.
@@ -139,7 +172,7 @@ define('EX_DKIM', [
  * Free for testing: Google Gemini (a key from aistudio.google.com) with the defaults below, or OpenRouter:
  * EX_AI_URL=https://openrouter.ai/api/v1/, EX_AI_MODEL=<model id ending in :free>, EX_AI_KEY=<openrouter key>.
  *
- * @since 2026.10
+ * @since 2026.100
  */
 define('EX_AI', [
     'url'     => getenv('EX_AI_URL') ?: 'https://generativelanguage.googleapis.com/v1beta/openai/',

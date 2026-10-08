@@ -2,7 +2,7 @@
 
 use App\Models\User;
 use Expansa\Builders\Tree;
-use Expansa\Facades\Safe;
+use Expansa\Facades\Auth;
 
 /**
  * Output user account button.
@@ -11,15 +11,6 @@ use Expansa\Facades\Safe;
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[$class, $rating, $reviews] = Safe::data(
-    $__data ?? [],
-    [
-        'class' => 'class:df aic g-1',
-        'rating' => 'float',
-        'reviews' => 'absint',
-    ]
-)->values();
 
 $user = User::current();
 
@@ -32,35 +23,49 @@ ob_start();
 <?php
 $label = ob_get_clean();
 
-echo view('form/details', ['label' => $label,
-    'instruction' => '',
-'content' => Tree::include ('dashboard-user-menu', $test = function ($items, $tree)
+ob_start();
+$accounts = Auth::getAccounts();
+if ($accounts !== []) {
+    ?>
+    <ul class="user-menu">
+        <li class="user-menu-divider"><?php echo t('Switch account'); ?></li>
+        <?php foreach ($accounts as $account) : ?>
+            <li class="user-menu-item">
+                <a class="user-menu-link" href="#" @click.prevent="$ajax.post('user/switch-account', {login: <?php echo htmlspecialchars(json_encode($account->identifier), ENT_QUOTES); ?>})">
+                    <i class="ph ph-user-circle"></i> <?php echo htmlspecialchars($account->showname ?: $account->identifier); ?>
+                </a>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+    <?php
+}
 
-use (&$test)
-
-{
-    if (empty($items) || !is_array($items)) {
+echo Tree::include('dashboard-user-menu', function ($items, $tree) {
+    if (empty($items) || ! is_array($items)) {
         return false;
     }
     ?>
-<ul class="user-menu">
+    <ul class="user-menu">
         <?php
-    foreach ($items as $item) {
-        ob_start();
-    if (empty($item['url'])) {
+        foreach ($items as $item) {
+            ob_start();
+            if (empty($item['url'])) {
+                ?>
+                <li class="user-menu-divider">%title$s</li>
+                <?php
+            } else {
+                ?>
+                <li class="user-menu-item">
+                    <a class="user-menu-link" href="%url$s"><i class="%icon$s"></i> %title$s</a>
+                </li>
+                <?php
+            }
+            echo $tree->vsprintf(ob_get_clean(), $item);
+        }
         ?>
-    <li class="user-menu-divider">%title$s</li>
-        <?php
-    } else {
-        ?>
-    <li class="user-menu-item">
-        <a class="user-menu-link" href="%url$s"><i class="%icon$s"></i> %title$s</a>
-    </li>
-        <?php
-    }
-        echo $tree->vsprintf(ob_get_clean(), $item);
-    }
-        ?>
-</ul>
+    </ul>
     <?php
-}),]);
+});
+$content = ob_get_clean();
+
+echo view('form/details', ['label' => $label, 'instruction' => '', 'content' => $content]);

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Webauthn\Internal;
+namespace Expansa\Auth\Internal;
 
+use Expansa\Auth\Exceptions\InvalidCredential;
 use Expansa\Codecs\Base64;
-use Expansa\Webauthn\Exceptions\InvalidCredential;
 
 /**
  * Client data the browser collected for the authenticator: ceremony type, challenge and origin.
- * Parsing checks only the form; RelyingParty compares the values with the ceremony.
+ * Parsing checks only the form; Passkey compares the values with the ceremony.
  *
  * @internal
  */

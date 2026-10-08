@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use Expansa\Auth\Exceptions\AccessDenied;
+use Expansa\Access\Exceptions\AccessDenied;
 use Expansa\Facades\Cookie;
 use Expansa\Facades\Debug;
 use Expansa\Http\Exceptions\HttpError;

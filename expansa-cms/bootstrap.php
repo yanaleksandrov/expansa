@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @see documentation/Lifecycle.md
  */
 
+use Expansa\Facades\Access;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Cache;
@@ -216,10 +217,52 @@ Lifecycle::phase('configure', true, function () {
         ],
     ]);
 
-    // permissions come from the roles of Role::add(); plugins add policies of their resources with Auth::setPolicy()
-    $roles = new Expansa\Auth\Roles();
-    Role::swap($roles);
+    // the signed-in user comes from the auth cookie: a new password or EX_KEYS['auth'] signs everyone out;
+    // the device cookie marks browsers that signed in before; providers of EX_OAUTH return to /oauth/<name>/callback
+    $cookiePrefix = defined('EX_DB') ? EX_DB['prefix'] : '';
+    $throttle     = defined('EX_AUTH') ? EX_AUTH : [];
     Auth::configure(
+        find: fn (string $login) => ($user = App\Models\User::find($login, 'login')) instanceof App\Models\User ? $user : null,
+        key: defined('EX_KEYS') ? EX_KEYS['auth'] : '',
+        read: fn (string $name) => (string) Expansa\Cookie\Cookie::get($cookiePrefix . $name, ''),
+        write: fn (string $name, string $value, int $expires) => Expansa\Cookie\Cookie::send(new Expansa\Cookie\Cookie(
+            name: $cookiePrefix . $name,
+            value: $value,
+            expires: $expires,
+            path: '/',
+            secure: Expansa\Cookie\Cookie::isSecureRequest(),
+            httpOnly: true,
+            sameSite: Expansa\Cookie\Enums\SameSite::Lax,
+        )),
+        providers: function (): array {
+            $providers = defined('EX_OAUTH') ? EX_OAUTH : [];
+            foreach ($providers as $name => $config) {
+                $providers[$name] = $config + ['redirect' => url("oauth/$name/callback")];
+            }
+
+            return $providers;
+        },
+        // failed passwords in the "cache" table: the default store may be the request memory
+        maxAttempts: (int) ($throttle['attempts'] ?? 5),
+        maxIpAttempts: (int) ($throttle['ip_attempts'] ?? 50),
+        lockout: (int) ($throttle['lockout'] ?? 900),
+        readAttempts: fn (string $key) => (new Expansa\Cache\Providers\Database(Db::instance()))->get($key, 'auth-attempts'),
+        writeAttempts: function (string $key, ?array $attempts, int $ttl): void {
+            $cache = new Expansa\Cache\Providers\Database(Db::instance());
+            $cache->forget($key, 'auth-attempts');
+
+            if ($attempts !== null) {
+                $cache->add($key, $attempts, 'auth-attempts', "+$ttl seconds");
+            }
+        },
+        // a row per signed-in device, so the profile can sign out any of them
+        sessions: new App\Api\User\Sessions(),
+    );
+
+    // permissions come from the roles of Role::add(); plugins add policies of their resources with Access::setPolicy()
+    $roles = new Expansa\Access\Roles();
+    Role::swap($roles);
+    Access::configure(
         permissions: $roles,
     );
 
@@ -575,7 +618,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
     Route::before('POST|PUT|PATCH|DELETE', '/api/.*', [App\Http\VerifyCsrfToken::class, 'handle']);
 
     // RequireAuth has its own allow-list for installation, account setup, password recovery and passkey sign-in.
-    Route::before('*', '/api/.*', [App\Http\RequireAuth::class, 'handle']);
+    Route::before('*', '/api/.*', [App\Http\RequireAccess::class, 'handle']);
 
     // routes
     Route::prefix('/api', function () {
@@ -637,12 +680,20 @@ Lifecycle::context('sign-out', function (string $uri): bool {
 
     return $uri === 'sign-out' || $uri === "$root/sign-out";
 }, function () {
-    App\Models\User::logout();
-    redirect('sign-in');
+    // the next signed-in account of the browser takes over, ?all=1 signs out every one
+    Auth::logout(all: isset($_GET['all']));
+    redirect(Auth::isLoggedIn() ? 'dashboard' : 'sign-in');
+});
+
+// /oauth/<name> leaves for a provider of EX_OAUTH, /oauth/<name>/callback signs in or connects it, see App\Controllers\OAuth
+Lifecycle::context('oauth', fn (string $uri) => str_starts_with(trim($uri, '/'), 'oauth/'), function () {
+    Route::get('/oauth/([a-z0-9-]+)', [App\Controllers\OAuth::class, 'redirect']);
+    Route::get('/oauth/([a-z0-9-]+)/callback', [App\Controllers\OAuth::class, 'callback']);
 });
 
 Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-in', 'sign-up', 'reset-password'], true), function () {
-    if (App\Models\User::isLogged()) {
+    // ?add=1 signs in to one more account, the current one stays switchable in the user menu
+    if (Auth::isLoggedIn() && ! isset($_GET['add'])) {
         redirect('dashboard');
     }
 
@@ -658,7 +709,7 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
  * to sign-in, otherwise dashboard/index.php enqueues the assets and menus, the page comes from Web::index().
  */
 Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '/'), Hook::call('dashboardRootSlug', 'dashboard')), function () {
-    if (! App\Models\User::isLogged()) {
+    if (! Auth::isLoggedIn()) {
         redirect('sign-in');
     }
 

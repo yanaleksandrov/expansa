@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Auth\Contracts;
+namespace Expansa\Access\Contracts;
 
 /**
  * Source of granted permissions: roles in the database, a config array, an external service.
- * Auth only asks it, the storage and the meaning of the subject are up to the implementation.
+ * Access only asks it, the storage and the meaning of the subject are up to the implementation.
  *
- * @package Expansa\Auth
+ * @package Expansa\Access
  */
 interface Permissions
 {

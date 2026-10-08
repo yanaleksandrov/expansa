@@ -10,7 +10,7 @@ use Expansa\Ai\Enums\Stage;
 use Expansa\Ai\Enums\Status;
 use Expansa\Ai\Step;
 use Expansa\Ai\Task;
-use Expansa\Facades\Auth;
+use Expansa\Facades\Access;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\NotFound;
 
@@ -162,7 +162,7 @@ final class AiService
     private function owner(): string
     {
         $user = User::current();
-        Auth::authorize($user, 'plugins_install');
+        Access::authorize($user, 'plugins_install');
 
         return (string) $user->id;
     }
