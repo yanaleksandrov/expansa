@@ -67,12 +67,8 @@ Log::configure(
 );
 ```
 
-Папка `storage/logs` закрыта от веба: для Apache — `storage/logs/.htaccess`, для
-`php artisan serve` — проверка в `server.php`. На nginx закройте её сами:
-
-```nginx
-location ^~ /storage/logs/ { deny all; }
-```
+Папка `storage/logs` закрыта от веба: для Apache — `storage/logs/.htaccess`, для nginx — `nginx.conf`
+(вся `storage/`), для `php artisan serve` — проверка в `server.php`.
 
 ## Уровни
 

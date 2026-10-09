@@ -287,7 +287,7 @@ final class SiteHealth
                 $exposed === [],
                 $exposed === null
                     ? t('The site did not answer its own request, e.g. a firewall blocks it. Open /storage/logs/ in a browser: it must not show files.')
-                    : t('Logs, AI tasks or the PHP source can be downloaded. On nginx add: %s', escape('location ~ ^/(storage|cache/views)/ { deny all; }')),
+                    : t('Logs, AI tasks or the PHP source can be downloaded. On Apache, keep .htaccess and allow it with AllowOverride All; on nginx, include nginx.conf in the server block of the site.'),
                 $exposed === null ? self::RECOMMENDED : self::CRITICAL,
             ),
             self::check(

@@ -4,32 +4,30 @@
         Options -MultiViews -Indexes
     </IfModule>
 
+    # /dashboard is a page, not the folder: no redirect to /dashboard/
+    <IfModule mod_dir.c>
+        DirectorySlash Off
+    </IfModule>
+
     RewriteEngine On
 
-    # Never serve the storage (logs, AI tasks, quarantine) and the compiled views
+    # Never serve the storage (logs, AI tasks, quarantine), the compiled views and the system files
     RewriteRule ^(storage|cache/views)/ - [F,L]
+    RewriteRule ^(\.htaccess|env(\.install|\.example)?\.php|artisan|nginx\.conf)$ - [F,L]
 
-    # The PHP files of the dashboard (templates, forms, data) are only included by the app, never run directly
-    RewriteRule ^dashboard/.+\.php$ - [F,L]
-
-    # Handle Authorization Header
+    # Pass the Authorization header to PHP, CGI and FastCGI drop it
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # Handle X-XSRF-Token Header
-    RewriteCond %{HTTP:x-xsrf-token} .
-    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
-
-    # Redirect Trailing Slashes If Not A Folder...
-    RewriteCond %{REQUEST_FILENAME} !-d
+    # No trailing slash: pages and folders alike, the same as nginx.conf
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Send Requests To Front Controller...
+    # Only index.php runs: every other PHP file is a part of the code, the front controller answers
+    RewriteRule ^(?!index\.php$).+\.php$ index.php [L]
+
+    # Send the rest that is not a file to the front controller
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
-
-    # Deny access to env.php and other system files
-    RewriteRule ^(\.htaccess|env(\.install|\.example)?\.php|artisan)$ / [L,R=301]
 </IfModule>
 # END Expansa

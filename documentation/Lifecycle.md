@@ -266,3 +266,24 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
   `EX_DEBUG['enabled']` никогда не включайте на рабочем сайте.
 - `php artisan serve [--host=127.0.0.1] [--port=8000]` запускает сайт на встроенном сервере PHP через
   `server.php`. Роутер выставляет `SCRIPT_NAME` как Apache, иначе `/dashboard` путается с папкой `dashboard/`.
+- Веб-сервер: для Apache правила в `.htaccess`, для nginx — в `nginx.conf`. Его подключают внутрь своего
+  блока `server`, а всё, что отличается между установками, остаётся в файле сайта:
+
+  ```nginx
+  upstream expansa-php {
+      server unix:/run/php/php8.4-fpm.sock;   # или 127.0.0.1:9000, или php:9000 в Docker
+  }
+
+  server {
+      listen      80;
+      server_name example.com;
+      root        /path/to/expansa-cms;        # папка с index.php
+      include     /path/to/expansa-cms/nginx.conf;
+  }
+  ```
+
+  На обоих серверах, как и в `server.php`, исполняется только `index.php`: остальные PHP-файлы и
+  несуществующие пути уходят в него, адрес с `/` в конце перенаправляется на адрес без неё; `storage/`,
+  `cache/views/`, `env.php`, `artisan` и скрытые файлы закрыты. Expansa должна быть
+  корнем сайта (свой домен или поддомен). `client_max_body_size` в `nginx.conf` — не меньше
+  `upload_max_filesize` и `post_max_size` PHP.

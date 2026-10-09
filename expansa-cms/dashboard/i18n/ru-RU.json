@@ -568,7 +568,7 @@
     "Log Size": "Размер логов",
     "Login": "Логин",
     "Login or Email": "Логин или email",
-    "Logs, AI tasks or the PHP source can be downloaded. On nginx add: %s": "Логи, задачи ИИ или исходный код PHP можно скачать. Для nginx добавьте: %s",
+    "Logs, AI tasks or the PHP source can be downloaded. On Apache, keep .htaccess and allow it with AllowOverride All; on nginx, include nginx.conf in the server block of the site.": "Логи, задачи ИИ и исходный код PHP можно скачать. На Apache оставьте .htaccess и разрешите его через AllowOverride All; на nginx подключите nginx.conf в блоке server сайта.",
     "Logs, tasks and uploads are written to %s.": "Логи, задачи и загрузки записываются в %s.",
     "Machine Translation": "Машинный перевод",
     "Mail": "Почта",
