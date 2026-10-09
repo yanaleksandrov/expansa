@@ -11,17 +11,19 @@ return [
         'currency' => [
             'code'   => 'AFN',
             'name'   => 'Afghan afghani',
+            'native' => 'افغانی افغانستان',
             'symbol' => '؋',
         ],
     ],
     [
-        'name'     => 'Aland Islands — Åland',
+        'name'     => 'Åland Islands — Åland',
         'iso2'     => 'AX',
         'iso3'     => 'ALA',
         'region'   => 'EU',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -33,6 +35,7 @@ return [
         'currency' => [
             'code'   => 'ALL',
             'name'   => 'Albanian lek',
+            'native' => 'Leku shqiptar',
             'symbol' => 'Lek',
         ],
     ],
@@ -44,6 +47,7 @@ return [
         'currency' => [
             'code'   => 'DZD',
             'name'   => 'Algerian dinar',
+            'native' => 'دينار جزائري',
             'symbol' => 'دج',
         ],
     ],
@@ -55,6 +59,7 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'US Dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -66,6 +71,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -77,6 +83,7 @@ return [
         'currency' => [
             'code'   => 'AOA',
             'name'   => 'Angolan kwanza',
+            'native' => 'Kwanza angolano',
             'symbol' => 'Kz',
         ],
     ],
@@ -84,10 +91,11 @@ return [
         'name'     => 'Anguilla — Anguilla',
         'iso2'     => 'AI',
         'iso3'     => 'AIA',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'East Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
         ],
     ],
@@ -95,21 +103,23 @@ return [
         'name'     => 'Antarctica — Antarctica',
         'iso2'     => 'AQ',
         'iso3'     => 'ATA',
-        'region'   => '',
+        'region'   => 'AN',
         'currency' => [
-            'code'   => 'AAD',
-            'name'   => 'Antarctican dollar',
-            'symbol' => '$',
+            'code'   => '',
+            'name'   => '',
+            'native' => '',
+            'symbol' => '',
         ],
     ],
     [
-        'name'     => 'Antigua And Barbuda — Antigua and Barbuda',
+        'name'     => 'Antigua and Barbuda — Antigua and Barbuda',
         'iso2'     => 'AG',
         'iso3'     => 'ATG',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'Eastern Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
         ],
     ],
@@ -121,6 +131,7 @@ return [
         'currency' => [
             'code'   => 'ARS',
             'name'   => 'Argentine peso',
+            'native' => 'Peso argentino',
             'symbol' => '$',
         ],
     ],
@@ -132,6 +143,7 @@ return [
         'currency' => [
             'code'   => 'AMD',
             'name'   => 'Armenian dram',
+            'native' => 'Հայկական դրամ',
             'symbol' => '֏',
         ],
     ],
@@ -139,10 +151,11 @@ return [
         'name'     => 'Aruba — Aruba',
         'iso2'     => 'AW',
         'iso3'     => 'ABW',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'AWG',
             'name'   => 'Aruban florin',
+            'native' => 'Arubaanse gulden',
             'symbol' => 'ƒ',
         ],
     ],
@@ -154,6 +167,7 @@ return [
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
             'symbol' => '$',
         ],
     ],
@@ -165,6 +179,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -176,28 +191,43 @@ return [
         'currency' => [
             'code'   => 'AZN',
             'name'   => 'Azerbaijani manat',
+            'native' => 'Azərbaycan Manatı',
             'symbol' => 'm',
         ],
     ],
     [
-        'name'     => 'Bahrain — ‏البحرين',
+        'name'     => 'Bahamas — Bahamas',
+        'iso2'     => 'BS',
+        'iso3'     => 'BHS',
+        'region'   => 'NA',
+        'currency' => [
+            'code'   => 'BSD',
+            'name'   => 'Bahamian dollar',
+            'native' => 'Bahamian Dollar',
+            'symbol' => 'B$',
+        ],
+    ],
+    [
+        'name'     => 'Bahrain — البحرين',
         'iso2'     => 'BH',
         'iso3'     => 'BHR',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'BHD',
             'name'   => 'Bahraini dinar',
+            'native' => 'دينار بحريني',
             'symbol' => '.د.ب',
         ],
     ],
     [
-        'name'     => 'Bangladesh — Bangladesh',
+        'name'     => 'Bangladesh — বাংলাদেশ',
         'iso2'     => 'BD',
         'iso3'     => 'BGD',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'BDT',
             'name'   => 'Bangladeshi taka',
+            'native' => 'বাংলাদেশী টাকা',
             'symbol' => '৳',
         ],
     ],
@@ -205,21 +235,23 @@ return [
         'name'     => 'Barbados — Barbados',
         'iso2'     => 'BB',
         'iso3'     => 'BRB',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'BBD',
             'name'   => 'Barbadian dollar',
+            'native' => 'Barbadian Dollar',
             'symbol' => 'Bds$',
         ],
     ],
     [
-        'name'     => 'Belarus — Белару́сь',
+        'name'     => 'Belarus — Беларусь',
         'iso2'     => 'BY',
         'iso3'     => 'BLR',
         'region'   => 'EU',
         'currency' => [
             'code'   => 'BYN',
             'name'   => 'Belarusian ruble',
+            'native' => 'Беларускі рубель',
             'symbol' => 'Br',
         ],
     ],
@@ -231,6 +263,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -238,10 +271,11 @@ return [
         'name'     => 'Belize — Belize',
         'iso2'     => 'BZ',
         'iso3'     => 'BLZ',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'BZD',
             'name'   => 'Belize dollar',
+            'native' => 'Belize Dollar',
             'symbol' => '$',
         ],
     ],
@@ -253,6 +287,7 @@ return [
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franc CFA (BCEAO)',
             'symbol' => 'CFA',
         ],
     ],
@@ -260,21 +295,23 @@ return [
         'name'     => 'Bermuda — Bermuda',
         'iso2'     => 'BM',
         'iso3'     => 'BMU',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'BMD',
             'name'   => 'Bermudian dollar',
+            'native' => 'Bermudian Dollar',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Bhutan — ʼbrug-yul',
+        'name'     => 'Bhutan — འབྲུག་ཡུལ་',
         'iso2'     => 'BT',
         'iso3'     => 'BTN',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'BTN',
             'name'   => 'Bhutanese ngultrum',
+            'native' => 'དངུལ་ཀྲམ',
             'symbol' => 'Nu.',
         ],
     ],
@@ -286,6 +323,7 @@ return [
         'currency' => [
             'code'   => 'BOB',
             'name'   => 'Bolivian boliviano',
+            'native' => 'Boliviano',
             'symbol' => 'Bs.',
         ],
     ],
@@ -293,10 +331,11 @@ return [
         'name'     => 'Bonaire, Sint Eustatius and Saba — Caribisch Nederland',
         'iso2'     => 'BQ',
         'iso3'     => 'BES',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'Amerikaanse dollar',
             'symbol' => '$',
         ],
     ],
@@ -308,6 +347,7 @@ return [
         'currency' => [
             'code'   => 'BAM',
             'name'   => 'Bosnia and Herzegovina convertible mark',
+            'native' => 'Bosanskohercegovačka konvertibilna marka',
             'symbol' => 'KM',
         ],
     ],
@@ -319,6 +359,7 @@ return [
         'currency' => [
             'code'   => 'BWP',
             'name'   => 'Botswana pula',
+            'native' => 'Botswana pula',
             'symbol' => 'P',
         ],
     ],
@@ -326,10 +367,11 @@ return [
         'name'     => 'Bouvet Island — Bouvetøya',
         'iso2'     => 'BV',
         'iso3'     => 'BVT',
-        'region'   => '',
+        'region'   => 'AN',
         'currency' => [
             'code'   => 'NOK',
             'name'   => 'Norwegian Krone',
+            'native' => 'Norwegian Krone',
             'symbol' => 'kr',
         ],
     ],
@@ -341,6 +383,7 @@ return [
         'currency' => [
             'code'   => 'BRL',
             'name'   => 'Brazilian real',
+            'native' => 'Real brasileiro',
             'symbol' => 'R$',
         ],
     ],
@@ -352,6 +395,19 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
+            'symbol' => '$',
+        ],
+    ],
+    [
+        'name'     => 'British Virgin Islands — British Virgin Islands',
+        'iso2'     => 'VG',
+        'iso3'     => 'VGB',
+        'region'   => 'NA',
+        'currency' => [
+            'code'   => 'USD',
+            'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -363,6 +419,7 @@ return [
         'currency' => [
             'code'   => 'BND',
             'name'   => 'Brunei dollar',
+            'native' => 'Dolar Brunei',
             'symbol' => 'B$',
         ],
     ],
@@ -374,6 +431,7 @@ return [
         'currency' => [
             'code'   => 'BGN',
             'name'   => 'Bulgarian lev',
+            'native' => 'Български лев',
             'symbol' => 'Лв.',
         ],
     ],
@@ -385,6 +443,7 @@ return [
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franc CFA (BCEAO)',
             'symbol' => 'CFA',
         ],
     ],
@@ -396,28 +455,31 @@ return [
         'currency' => [
             'code'   => 'BIF',
             'name'   => 'Burundian franc',
+            'native' => 'Franc burundais',
             'symbol' => 'FBu',
         ],
     ],
     [
-        'name'     => 'Cambodia — Kâmpŭchéa',
+        'name'     => 'Cambodia — កម្ពុជា',
         'iso2'     => 'KH',
         'iso3'     => 'KHM',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'KHR',
             'name'   => 'Cambodian riel',
+            'native' => 'រៀល​កម្ពុជា',
             'symbol' => 'KHR',
         ],
     ],
     [
-        'name'     => 'Cameroon — Cameroon',
+        'name'     => 'Cameroon — Cameroun',
         'iso2'     => 'CM',
         'iso3'     => 'CMR',
         'region'   => 'AF',
         'currency' => [
             'code'   => 'XAF',
             'name'   => 'Central African CFA franc',
+            'native' => 'Franc CFA (BEAC)',
             'symbol' => 'FCFA',
         ],
     ],
@@ -425,10 +487,11 @@ return [
         'name'     => 'Canada — Canada',
         'iso2'     => 'CA',
         'iso3'     => 'CAN',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'CAD',
             'name'   => 'Canadian dollar',
+            'native' => 'Canadian Dollar',
             'symbol' => '$',
         ],
     ],
@@ -440,6 +503,7 @@ return [
         'currency' => [
             'code'   => 'CVE',
             'name'   => 'Cape Verdean escudo',
+            'native' => 'Escudo cabo-verdiano',
             'symbol' => '$',
         ],
     ],
@@ -447,10 +511,11 @@ return [
         'name'     => 'Cayman Islands — Cayman Islands',
         'iso2'     => 'KY',
         'iso3'     => 'CYM',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'KYD',
             'name'   => 'Cayman Islands dollar',
+            'native' => 'Cayman Islands Dollar',
             'symbol' => '$',
         ],
     ],
@@ -462,6 +527,7 @@ return [
         'currency' => [
             'code'   => 'XAF',
             'name'   => 'Central African CFA franc',
+            'native' => 'Franc CFA (BEAC)',
             'symbol' => 'FCFA',
         ],
     ],
@@ -473,6 +539,7 @@ return [
         'currency' => [
             'code'   => 'XAF',
             'name'   => 'Central African CFA franc',
+            'native' => 'Franc CFA (BEAC)',
             'symbol' => 'FCFA',
         ],
     ],
@@ -484,6 +551,7 @@ return [
         'currency' => [
             'code'   => 'CLP',
             'name'   => 'Chilean peso',
+            'native' => 'Peso chileno',
             'symbol' => '$',
         ],
     ],
@@ -495,6 +563,7 @@ return [
         'currency' => [
             'code'   => 'CNY',
             'name'   => 'Chinese yuan',
+            'native' => '人民币',
             'symbol' => '¥',
         ],
     ],
@@ -506,6 +575,7 @@ return [
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
             'symbol' => '$',
         ],
     ],
@@ -517,6 +587,7 @@ return [
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
             'symbol' => '$',
         ],
     ],
@@ -528,6 +599,7 @@ return [
         'currency' => [
             'code'   => 'COP',
             'name'   => 'Colombian peso',
+            'native' => 'Peso colombiano',
             'symbol' => '$',
         ],
     ],
@@ -539,6 +611,7 @@ return [
         'currency' => [
             'code'   => 'KMF',
             'name'   => 'Comorian franc',
+            'native' => 'Franc comorien',
             'symbol' => 'CF',
         ],
     ],
@@ -550,6 +623,7 @@ return [
         'currency' => [
             'code'   => 'XAF',
             'name'   => 'Central African CFA franc',
+            'native' => 'Franc CFA (BEAC)',
             'symbol' => 'FC',
         ],
     ],
@@ -561,6 +635,7 @@ return [
         'currency' => [
             'code'   => 'NZD',
             'name'   => 'Cook Islands dollar',
+            'native' => 'New Zealand Dollar',
             'symbol' => '$',
         ],
     ],
@@ -568,21 +643,23 @@ return [
         'name'     => 'Costa Rica — Costa Rica',
         'iso2'     => 'CR',
         'iso3'     => 'CRI',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'CRC',
             'name'   => 'Costa Rican colón',
+            'native' => 'Colón costarricense',
             'symbol' => '₡',
         ],
     ],
     [
-        'name'     => 'Cote D’Ivoire (Ivory Coast) — ',
+        'name'     => 'Côte d’Ivoire — Côte d’Ivoire',
         'iso2'     => 'CI',
         'iso3'     => 'CIV',
         'region'   => 'AF',
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franc CFA (BCEAO)',
             'symbol' => 'CFA',
         ],
     ],
@@ -592,19 +669,21 @@ return [
         'iso3'     => 'HRV',
         'region'   => 'EU',
         'currency' => [
-            'code'   => 'HRK',
-            'name'   => 'Croatian kuna',
-            'symbol' => 'kn',
+            'code'   => 'EUR',
+            'name'   => 'Euro',
+            'native' => 'Euro',
+            'symbol' => '€',
         ],
     ],
     [
         'name'     => 'Cuba — Cuba',
         'iso2'     => 'CU',
         'iso3'     => 'CUB',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'CUP',
             'name'   => 'Cuban peso',
+            'native' => 'Peso cubano',
             'symbol' => '$',
         ],
     ],
@@ -612,11 +691,12 @@ return [
         'name'     => 'Curaçao — Curaçao',
         'iso2'     => 'CW',
         'iso3'     => 'CUW',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
-            'code'   => 'ANG',
-            'name'   => 'Netherlands Antillean guilder',
-            'symbol' => 'ƒ',
+            'code'   => 'XCG',
+            'name'   => 'Caribbean guilder',
+            'native' => 'Caribische gulden',
+            'symbol' => 'Cg',
         ],
     ],
     [
@@ -627,17 +707,19 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Ευρώ',
             'symbol' => '€',
         ],
     ],
     [
-        'name'     => 'Czech Republic — Česká republika',
+        'name'     => 'Czechia — Česko',
         'iso2'     => 'CZ',
         'iso3'     => 'CZE',
         'region'   => 'EU',
         'currency' => [
             'code'   => 'CZK',
             'name'   => 'Czech koruna',
+            'native' => 'Česká koruna',
             'symbol' => 'Kč',
         ],
     ],
@@ -649,6 +731,7 @@ return [
         'currency' => [
             'code'   => 'CDF',
             'name'   => 'Congolese Franc',
+            'native' => 'Franc congolais',
             'symbol' => 'FC',
         ],
     ],
@@ -660,6 +743,7 @@ return [
         'currency' => [
             'code'   => 'DKK',
             'name'   => 'Danish krone',
+            'native' => 'Dansk krone',
             'symbol' => 'Kr.',
         ],
     ],
@@ -671,6 +755,7 @@ return [
         'currency' => [
             'code'   => 'DJF',
             'name'   => 'Djiboutian franc',
+            'native' => 'Franc djiboutien',
             'symbol' => 'Fdj',
         ],
     ],
@@ -678,10 +763,11 @@ return [
         'name'     => 'Dominica — Dominica',
         'iso2'     => 'DM',
         'iso3'     => 'DMA',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'Eastern Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
         ],
     ],
@@ -689,21 +775,11 @@ return [
         'name'     => 'Dominican Republic — República Dominicana',
         'iso2'     => 'DO',
         'iso3'     => 'DOM',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'DOP',
             'name'   => 'Dominican peso',
-            'symbol' => '$',
-        ],
-    ],
-    [
-        'name'     => 'East Timor — Timor-Leste',
-        'iso2'     => 'TL',
-        'iso3'     => 'TLS',
-        'region'   => 'AS',
-        'currency' => [
-            'code'   => 'USD',
-            'name'   => 'United States dollar',
+            'native' => 'Peso dominicano',
             'symbol' => '$',
         ],
     ],
@@ -715,17 +791,19 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'Dólar estadounidense',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Egypt — مصر‎',
+        'name'     => 'Egypt — مصر',
         'iso2'     => 'EG',
         'iso3'     => 'EGY',
         'region'   => 'AF',
         'currency' => [
             'code'   => 'EGP',
             'name'   => 'Egyptian pound',
+            'native' => 'جنيه مصري',
             'symbol' => 'ج.م',
         ],
     ],
@@ -733,10 +811,11 @@ return [
         'name'     => 'El Salvador — El Salvador',
         'iso2'     => 'SV',
         'iso3'     => 'SLV',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'Dólar estadounidense',
             'symbol' => '$',
         ],
     ],
@@ -748,6 +827,7 @@ return [
         'currency' => [
             'code'   => 'XAF',
             'name'   => 'Central African CFA franc',
+            'native' => 'Franco CFA de África Central',
             'symbol' => 'FCFA',
         ],
     ],
@@ -759,6 +839,7 @@ return [
         'currency' => [
             'code'   => 'ERN',
             'name'   => 'Eritrean nakfa',
+            'native' => 'ናቕፋ',
             'symbol' => 'Nfk',
         ],
     ],
@@ -770,7 +851,20 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
+        ],
+    ],
+    [
+        'name'     => 'Eswatini — eSwatini',
+        'iso2'     => 'SZ',
+        'iso3'     => 'SWZ',
+        'region'   => 'AF',
+        'currency' => [
+            'code'   => 'SZL',
+            'name'   => 'Lilangeni',
+            'native' => 'Lilangeni',
+            'symbol' => 'E',
         ],
     ],
     [
@@ -781,6 +875,7 @@ return [
         'currency' => [
             'code'   => 'ETB',
             'name'   => 'Ethiopian birr',
+            'native' => 'የኢትዮጵያ ብር',
             'symbol' => 'Nkf',
         ],
     ],
@@ -792,6 +887,7 @@ return [
         'currency' => [
             'code'   => 'FKP',
             'name'   => 'Falkland Islands pound',
+            'native' => 'Falkland Islands Pound',
             'symbol' => '£',
         ],
     ],
@@ -803,17 +899,19 @@ return [
         'currency' => [
             'code'   => 'DKK',
             'name'   => 'Danish krone',
+            'native' => 'Donsk króna',
             'symbol' => 'Kr.',
         ],
     ],
     [
-        'name'     => 'Fiji Islands — Fiji',
+        'name'     => 'Fiji — Fiji',
         'iso2'     => 'FJ',
         'iso3'     => 'FJI',
         'region'   => 'OC',
         'currency' => [
             'code'   => 'FJD',
             'name'   => 'Fijian dollar',
+            'native' => 'Fijian Dollar',
             'symbol' => 'FJ$',
         ],
     ],
@@ -825,6 +923,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -836,6 +935,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -847,6 +947,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -858,17 +959,19 @@ return [
         'currency' => [
             'code'   => 'XPF',
             'name'   => 'CFP franc',
+            'native' => 'Franc CFP',
             'symbol' => '₣',
         ],
     ],
     [
-        'name'     => 'French Southern Territories — Territoire des Terres australes et antarctiques fr',
+        'name'     => 'French Southern Territories — Terres australes et antarctiques françaises',
         'iso2'     => 'TF',
         'iso3'     => 'ATF',
-        'region'   => 'AF',
+        'region'   => 'AN',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -880,17 +983,19 @@ return [
         'currency' => [
             'code'   => 'XAF',
             'name'   => 'Central African CFA franc',
+            'native' => 'Franc CFA (BEAC)',
             'symbol' => 'FCFA',
         ],
     ],
     [
-        'name'     => 'Gambia The — Gambia',
+        'name'     => 'Gambia — Gambia',
         'iso2'     => 'GM',
         'iso3'     => 'GMB',
         'region'   => 'AF',
         'currency' => [
             'code'   => 'GMD',
             'name'   => 'Gambian dalasi',
+            'native' => 'Gambian Dalasi',
             'symbol' => 'D',
         ],
     ],
@@ -902,6 +1007,7 @@ return [
         'currency' => [
             'code'   => 'GEL',
             'name'   => 'Georgian lari',
+            'native' => 'Ქართული ლარი',
             'symbol' => 'ლ',
         ],
     ],
@@ -913,6 +1019,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -924,6 +1031,7 @@ return [
         'currency' => [
             'code'   => 'GHS',
             'name'   => 'Ghanaian cedi',
+            'native' => 'Ghanaian Cedi',
             'symbol' => 'GH₵',
         ],
     ],
@@ -935,6 +1043,7 @@ return [
         'currency' => [
             'code'   => 'GIP',
             'name'   => 'Gibraltar pound',
+            'native' => 'Gibraltar Pound',
             'symbol' => '£',
         ],
     ],
@@ -946,6 +1055,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Ευρώ',
             'symbol' => '€',
         ],
     ],
@@ -953,10 +1063,11 @@ return [
         'name'     => 'Greenland — Kalaallit Nunaat',
         'iso2'     => 'GL',
         'iso3'     => 'GRL',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'DKK',
             'name'   => 'Danish krone',
+            'native' => 'Danish krone',
             'symbol' => 'Kr.',
         ],
     ],
@@ -964,10 +1075,11 @@ return [
         'name'     => 'Grenada — Grenada',
         'iso2'     => 'GD',
         'iso3'     => 'GRD',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'Eastern Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
         ],
     ],
@@ -975,10 +1087,11 @@ return [
         'name'     => 'Guadeloupe — Guadeloupe',
         'iso2'     => 'GP',
         'iso3'     => 'GLP',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -990,6 +1103,7 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'US Dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -997,21 +1111,23 @@ return [
         'name'     => 'Guatemala — Guatemala',
         'iso2'     => 'GT',
         'iso3'     => 'GTM',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'GTQ',
             'name'   => 'Guatemalan quetzal',
+            'native' => 'Quetzal',
             'symbol' => 'Q',
         ],
     ],
     [
-        'name'     => 'Guernsey and Alderney — Guernsey',
+        'name'     => 'Guernsey — Guernsey',
         'iso2'     => 'GG',
         'iso3'     => 'GGY',
         'region'   => 'EU',
         'currency' => [
             'code'   => 'GBP',
             'name'   => 'British pound',
+            'native' => 'UK Pound',
             'symbol' => '£',
         ],
     ],
@@ -1023,6 +1139,7 @@ return [
         'currency' => [
             'code'   => 'GNF',
             'name'   => 'Guinean franc',
+            'native' => 'Franc guinéen',
             'symbol' => 'FG',
         ],
     ],
@@ -1034,6 +1151,7 @@ return [
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franco CFA de BCEAO',
             'symbol' => 'CFA',
         ],
     ],
@@ -1045,6 +1163,7 @@ return [
         'currency' => [
             'code'   => 'GYD',
             'name'   => 'Guyanese dollar',
+            'native' => 'Guyanaese Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1052,10 +1171,11 @@ return [
         'name'     => 'Haiti — Haïti',
         'iso2'     => 'HT',
         'iso3'     => 'HTI',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'HTG',
             'name'   => 'Haitian gourde',
+            'native' => 'Gourde haïtienne',
             'symbol' => 'G',
         ],
     ],
@@ -1063,10 +1183,11 @@ return [
         'name'     => 'Heard Island and McDonald Islands — Heard Island and McDonald Islands',
         'iso2'     => 'HM',
         'iso3'     => 'HMD',
-        'region'   => '',
+        'region'   => 'AN',
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1074,21 +1195,23 @@ return [
         'name'     => 'Honduras — Honduras',
         'iso2'     => 'HN',
         'iso3'     => 'HND',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'HNL',
             'name'   => 'Honduran lempira',
+            'native' => 'Lempira hondureño',
             'symbol' => 'L',
         ],
     ],
     [
-        'name'     => 'Hong Kong S.A.R. — 香港',
+        'name'     => 'Hong Kong — 香港',
         'iso2'     => 'HK',
         'iso3'     => 'HKG',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'HKD',
             'name'   => 'Hong Kong dollar',
+            'native' => '港元',
             'symbol' => '$',
         ],
     ],
@@ -1100,6 +1223,7 @@ return [
         'currency' => [
             'code'   => 'HUF',
             'name'   => 'Hungarian forint',
+            'native' => 'Magyar forint',
             'symbol' => 'Ft',
         ],
     ],
@@ -1111,6 +1235,7 @@ return [
         'currency' => [
             'code'   => 'ISK',
             'name'   => 'Icelandic króna',
+            'native' => 'Íslensk króna',
             'symbol' => 'kr',
         ],
     ],
@@ -1122,6 +1247,7 @@ return [
         'currency' => [
             'code'   => 'INR',
             'name'   => 'Indian rupee',
+            'native' => 'भारतीय रुपया',
             'symbol' => '₹',
         ],
     ],
@@ -1133,6 +1259,7 @@ return [
         'currency' => [
             'code'   => 'IDR',
             'name'   => 'Indonesian rupiah',
+            'native' => 'Rupiah Indonesia',
             'symbol' => 'Rp',
         ],
     ],
@@ -1144,6 +1271,7 @@ return [
         'currency' => [
             'code'   => 'IRR',
             'name'   => 'Iranian rial',
+            'native' => 'ریال ایران',
             'symbol' => '﷼',
         ],
     ],
@@ -1155,6 +1283,7 @@ return [
         'currency' => [
             'code'   => 'IQD',
             'name'   => 'Iraqi dinar',
+            'native' => 'دينار عراقي',
             'symbol' => 'د.ع',
         ],
     ],
@@ -1166,17 +1295,31 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
     [
-        'name'     => 'Israel — יִשְׂרָאֵל',
+        'name'     => 'Isle of Man — Isle of Man',
+        'iso2'     => 'IM',
+        'iso3'     => 'IMN',
+        'region'   => 'EU',
+        'currency' => [
+            'code'   => 'GBP',
+            'name'   => 'British pound',
+            'native' => 'UK Pound',
+            'symbol' => '£',
+        ],
+    ],
+    [
+        'name'     => 'Israel — ישראל',
         'iso2'     => 'IL',
         'iso3'     => 'ISR',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'ILS',
             'name'   => 'Israeli new shekel',
+            'native' => 'שקל חדש',
             'symbol' => '₪',
         ],
     ],
@@ -1188,6 +1331,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -1195,10 +1339,11 @@ return [
         'name'     => 'Jamaica — Jamaica',
         'iso2'     => 'JM',
         'iso3'     => 'JAM',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'JMD',
             'name'   => 'Jamaican dollar',
+            'native' => 'Jamaican Dollar',
             'symbol' => 'J$',
         ],
     ],
@@ -1210,6 +1355,7 @@ return [
         'currency' => [
             'code'   => 'JPY',
             'name'   => 'Japanese yen',
+            'native' => '日本円',
             'symbol' => '¥',
         ],
     ],
@@ -1221,6 +1367,7 @@ return [
         'currency' => [
             'code'   => 'GBP',
             'name'   => 'British pound',
+            'native' => 'UK Pound',
             'symbol' => '£',
         ],
     ],
@@ -1232,6 +1379,7 @@ return [
         'currency' => [
             'code'   => 'JOD',
             'name'   => 'Jordanian dinar',
+            'native' => 'دينار أردني',
             'symbol' => 'ا.د',
         ],
     ],
@@ -1243,6 +1391,7 @@ return [
         'currency' => [
             'code'   => 'KZT',
             'name'   => 'Kazakhstani tenge',
+            'native' => 'Қазақстан теңгесі',
             'symbol' => 'лв',
         ],
     ],
@@ -1254,6 +1403,7 @@ return [
         'currency' => [
             'code'   => 'KES',
             'name'   => 'Kenyan shilling',
+            'native' => 'Shilingi ya Kenya',
             'symbol' => 'KSh',
         ],
     ],
@@ -1265,6 +1415,7 @@ return [
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1276,6 +1427,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euroja',
             'symbol' => '€',
         ],
     ],
@@ -1287,6 +1439,7 @@ return [
         'currency' => [
             'code'   => 'KWD',
             'name'   => 'Kuwaiti dinar',
+            'native' => 'دينار كويتي',
             'symbol' => 'ك.د',
         ],
     ],
@@ -1298,6 +1451,7 @@ return [
         'currency' => [
             'code'   => 'KGS',
             'name'   => 'Kyrgyzstani som',
+            'native' => 'Кыргызстан сому',
             'symbol' => 'лв',
         ],
     ],
@@ -1309,6 +1463,7 @@ return [
         'currency' => [
             'code'   => 'LAK',
             'name'   => 'Lao kip',
+            'native' => 'ລາວ ກີບ',
             'symbol' => '₭',
         ],
     ],
@@ -1320,6 +1475,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Eiro',
             'symbol' => '€',
         ],
     ],
@@ -1331,6 +1487,7 @@ return [
         'currency' => [
             'code'   => 'LBP',
             'name'   => 'Lebanese pound',
+            'native' => 'جنيه لبناني',
             'symbol' => '£',
         ],
     ],
@@ -1342,6 +1499,7 @@ return [
         'currency' => [
             'code'   => 'LSL',
             'name'   => 'Lesotho loti',
+            'native' => 'Lesotho loti',
             'symbol' => 'L',
         ],
     ],
@@ -1353,17 +1511,19 @@ return [
         'currency' => [
             'code'   => 'LRD',
             'name'   => 'Liberian dollar',
+            'native' => 'Liberian Dollar',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Libya — ‏ليبيا',
+        'name'     => 'Libya — ليبيا',
         'iso2'     => 'LY',
         'iso3'     => 'LBY',
         'region'   => 'AF',
         'currency' => [
             'code'   => 'LYD',
             'name'   => 'Libyan dinar',
+            'native' => 'دينار ليبي',
             'symbol' => 'د.ل',
         ],
     ],
@@ -1375,6 +1535,7 @@ return [
         'currency' => [
             'code'   => 'CHF',
             'name'   => 'Swiss franc',
+            'native' => 'Schweizer Franken',
             'symbol' => 'CHf',
         ],
     ],
@@ -1386,6 +1547,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euras',
             'symbol' => '€',
         ],
     ],
@@ -1397,17 +1559,19 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
     [
-        'name'     => 'Macau S.A.R. — 澳門',
+        'name'     => 'Macao — 澳門',
         'iso2'     => 'MO',
         'iso3'     => 'MAC',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'MOP',
             'name'   => 'Macanese pataca',
+            'native' => '澳門元',
             'symbol' => '$',
         ],
     ],
@@ -1419,6 +1583,7 @@ return [
         'currency' => [
             'code'   => 'MGA',
             'name'   => 'Malagasy ariary',
+            'native' => 'Ariary',
             'symbol' => 'Ar',
         ],
     ],
@@ -1430,6 +1595,7 @@ return [
         'currency' => [
             'code'   => 'MWK',
             'name'   => 'Malawian kwacha',
+            'native' => 'Malawian kwacha',
             'symbol' => 'MK',
         ],
     ],
@@ -1441,17 +1607,19 @@ return [
         'currency' => [
             'code'   => 'MYR',
             'name'   => 'Malaysian ringgit',
+            'native' => 'Ringgit Malaysia',
             'symbol' => 'RM',
         ],
     ],
     [
-        'name'     => 'Maldives — Maldives',
+        'name'     => 'Maldives — ދިވެހިރާއްޖެ',
         'iso2'     => 'MV',
         'iso3'     => 'MDV',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'MVR',
             'name'   => 'Maldivian rufiyaa',
+            'native' => 'Maldivian rufiyaa',
             'symbol' => 'Rf',
         ],
     ],
@@ -1463,6 +1631,7 @@ return [
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franc CFA (BCEAO)',
             'symbol' => 'CFA',
         ],
     ],
@@ -1474,18 +1643,8 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Ewro',
             'symbol' => '€',
-        ],
-    ],
-    [
-        'name'     => 'Man (Isle of) — Isle of Man',
-        'iso2'     => 'IM',
-        'iso3'     => 'IMN',
-        'region'   => 'EU',
-        'currency' => [
-            'code'   => 'GBP',
-            'name'   => 'British pound',
-            'symbol' => '£',
         ],
     ],
     [
@@ -1496,6 +1655,7 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1503,10 +1663,11 @@ return [
         'name'     => 'Martinique — Martinique',
         'iso2'     => 'MQ',
         'iso3'     => 'MTQ',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -1516,9 +1677,10 @@ return [
         'iso3'     => 'MRT',
         'region'   => 'AF',
         'currency' => [
-            'code'   => 'MRO',
+            'code'   => 'MRU',
             'name'   => 'Mauritanian ouguiya',
-            'symbol' => 'MRU',
+            'native' => 'أوقية موريتانية',
+            'symbol' => 'UM',
         ],
     ],
     [
@@ -1529,6 +1691,7 @@ return [
         'currency' => [
             'code'   => 'MUR',
             'name'   => 'Mauritian rupee',
+            'native' => 'Mauritian Rupee',
             'symbol' => '₨',
         ],
     ],
@@ -1540,6 +1703,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -1547,10 +1711,11 @@ return [
         'name'     => 'Mexico — México',
         'iso2'     => 'MX',
         'iso3'     => 'MEX',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'MXN',
             'name'   => 'Mexican peso',
+            'native' => 'Peso mexicano',
             'symbol' => '$',
         ],
     ],
@@ -1562,6 +1727,7 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1573,6 +1739,7 @@ return [
         'currency' => [
             'code'   => 'MDL',
             'name'   => 'Moldovan leu',
+            'native' => 'Leu moldovenesc',
             'symbol' => 'L',
         ],
     ],
@@ -1584,6 +1751,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -1595,6 +1763,7 @@ return [
         'currency' => [
             'code'   => 'MNT',
             'name'   => 'Mongolian tögrög',
+            'native' => 'Монгол төгрөг',
             'symbol' => '₮',
         ],
     ],
@@ -1606,6 +1775,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Evro',
             'symbol' => '€',
         ],
     ],
@@ -1613,10 +1783,11 @@ return [
         'name'     => 'Montserrat — Montserrat',
         'iso2'     => 'MS',
         'iso3'     => 'MSR',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'Eastern Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1628,6 +1799,7 @@ return [
         'currency' => [
             'code'   => 'MAD',
             'name'   => 'Moroccan dirham',
+            'native' => 'درهم مغربي',
             'symbol' => 'DH',
         ],
     ],
@@ -1639,6 +1811,7 @@ return [
         'currency' => [
             'code'   => 'MZN',
             'name'   => 'Mozambican metical',
+            'native' => 'Metical moçambicano',
             'symbol' => 'MT',
         ],
     ],
@@ -1650,6 +1823,7 @@ return [
         'currency' => [
             'code'   => 'MMK',
             'name'   => 'Burmese kyat',
+            'native' => 'မြန်မာ ကျပ်',
             'symbol' => 'K',
         ],
     ],
@@ -1661,6 +1835,7 @@ return [
         'currency' => [
             'code'   => 'NAD',
             'name'   => 'Namibian dollar',
+            'native' => 'Namibian Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1672,17 +1847,19 @@ return [
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Nepal — नपल',
+        'name'     => 'Nepal — नेपाल',
         'iso2'     => 'NP',
         'iso3'     => 'NPL',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'NPR',
             'name'   => 'Nepalese rupee',
+            'native' => 'नेपाली रूपैयाँ',
             'symbol' => '₨',
         ],
     ],
@@ -1694,6 +1871,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -1705,6 +1883,7 @@ return [
         'currency' => [
             'code'   => 'XPF',
             'name'   => 'CFP franc',
+            'native' => 'Franc CFP',
             'symbol' => '₣',
         ],
     ],
@@ -1716,6 +1895,7 @@ return [
         'currency' => [
             'code'   => 'NZD',
             'name'   => 'New Zealand dollar',
+            'native' => 'New Zealand Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1723,10 +1903,11 @@ return [
         'name'     => 'Nicaragua — Nicaragua',
         'iso2'     => 'NI',
         'iso3'     => 'NIC',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'NIO',
             'name'   => 'Nicaraguan córdoba',
+            'native' => 'Córdoba nicaragüense',
             'symbol' => 'C$',
         ],
     ],
@@ -1738,6 +1919,7 @@ return [
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franc CFA (BCEAO)',
             'symbol' => 'CFA',
         ],
     ],
@@ -1749,6 +1931,7 @@ return [
         'currency' => [
             'code'   => 'NGN',
             'name'   => 'Nigerian naira',
+            'native' => 'Nigerian Naira',
             'symbol' => '₦',
         ],
     ],
@@ -1760,6 +1943,7 @@ return [
         'currency' => [
             'code'   => 'NZD',
             'name'   => 'New Zealand dollar',
+            'native' => 'New Zealand Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1771,17 +1955,19 @@ return [
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'North Korea — 북한',
+        'name'     => 'North Korea — 조선',
         'iso2'     => 'KP',
         'iso3'     => 'PRK',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'KPW',
             'name'   => 'North Korean Won',
+            'native' => '조선 민주주의 인민 공화국 원',
             'symbol' => '₩',
         ],
     ],
@@ -1793,6 +1979,7 @@ return [
         'currency' => [
             'code'   => 'MKD',
             'name'   => 'Denar',
+            'native' => 'Македонски денар',
             'symbol' => 'ден',
         ],
     ],
@@ -1804,6 +1991,7 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1815,6 +2003,7 @@ return [
         'currency' => [
             'code'   => 'NOK',
             'name'   => 'Norwegian krone',
+            'native' => 'Norwegian krone',
             'symbol' => 'kr',
         ],
     ],
@@ -1826,17 +2015,19 @@ return [
         'currency' => [
             'code'   => 'OMR',
             'name'   => 'Omani rial',
+            'native' => 'ريال عماني',
             'symbol' => '.ع.ر',
         ],
     ],
     [
-        'name'     => 'Pakistan — Pakistan',
+        'name'     => 'Pakistan — پاکستان',
         'iso2'     => 'PK',
         'iso3'     => 'PAK',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'PKR',
             'name'   => 'Pakistani rupee',
+            'native' => 'پاکستانی روپیہ',
             'symbol' => '₨',
         ],
     ],
@@ -1848,17 +2039,19 @@ return [
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Palestinian Territory Occupied — فلسطين',
+        'name'     => 'Palestine — فلسطين',
         'iso2'     => 'PS',
         'iso3'     => 'PSE',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'ILS',
             'name'   => 'Israeli new shekel',
+            'native' => 'شيكل إسرائيلي جديد',
             'symbol' => '₪',
         ],
     ],
@@ -1866,21 +2059,23 @@ return [
         'name'     => 'Panama — Panamá',
         'iso2'     => 'PA',
         'iso3'     => 'PAN',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'PAB',
             'name'   => 'Panamanian balboa',
+            'native' => 'Balboa panameño',
             'symbol' => 'B/.',
         ],
     ],
     [
-        'name'     => 'Papua new Guinea — Papua Niugini',
+        'name'     => 'Papua New Guinea — Papua Niugini',
         'iso2'     => 'PG',
         'iso3'     => 'PNG',
         'region'   => 'OC',
         'currency' => [
             'code'   => 'PGK',
             'name'   => 'Papua New Guinean kina',
+            'native' => 'Papua New Guinean Kina',
             'symbol' => 'K',
         ],
     ],
@@ -1892,6 +2087,7 @@ return [
         'currency' => [
             'code'   => 'PYG',
             'name'   => 'Paraguayan guarani',
+            'native' => 'Guaraní paraguayo',
             'symbol' => '₲',
         ],
     ],
@@ -1903,6 +2099,7 @@ return [
         'currency' => [
             'code'   => 'PEN',
             'name'   => 'Peruvian sol',
+            'native' => 'Sol peruano',
             'symbol' => 'S/.',
         ],
     ],
@@ -1914,17 +2111,19 @@ return [
         'currency' => [
             'code'   => 'PHP',
             'name'   => 'Philippine peso',
+            'native' => 'Piso ng Pilipinas',
             'symbol' => '₱',
         ],
     ],
     [
-        'name'     => 'Pitcairn Island — Pitcairn Islands',
+        'name'     => 'Pitcairn Islands — Pitcairn Islands',
         'iso2'     => 'PN',
         'iso3'     => 'PCN',
         'region'   => 'OC',
         'currency' => [
             'code'   => 'NZD',
             'name'   => 'New Zealand dollar',
+            'native' => 'New Zealand Dollar',
             'symbol' => '$',
         ],
     ],
@@ -1936,6 +2135,7 @@ return [
         'currency' => [
             'code'   => 'PLN',
             'name'   => 'Polish złoty',
+            'native' => 'Złoty polski',
             'symbol' => 'zł',
         ],
     ],
@@ -1947,6 +2147,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -1954,10 +2155,11 @@ return [
         'name'     => 'Puerto Rico — Puerto Rico',
         'iso2'     => 'PR',
         'iso3'     => 'PRI',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'Dólar estadounidense',
             'symbol' => '$',
         ],
     ],
@@ -1969,17 +2171,19 @@ return [
         'currency' => [
             'code'   => 'QAR',
             'name'   => 'Qatari riyal',
+            'native' => 'ريال قطري',
             'symbol' => 'ق.ر',
         ],
     ],
     [
-        'name'     => 'Reunion — La Réunion',
+        'name'     => 'Réunion — La Réunion',
         'iso2'     => 'RE',
         'iso3'     => 'REU',
         'region'   => 'AF',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -1991,6 +2195,7 @@ return [
         'currency' => [
             'code'   => 'RON',
             'name'   => 'Romanian leu',
+            'native' => 'Leu românesc',
             'symbol' => 'lei',
         ],
     ],
@@ -2002,6 +2207,7 @@ return [
         'currency' => [
             'code'   => 'RUB',
             'name'   => 'Russian ruble',
+            'native' => 'Российский рубль',
             'symbol' => '₽',
         ],
     ],
@@ -2013,7 +2219,20 @@ return [
         'currency' => [
             'code'   => 'RWF',
             'name'   => 'Rwandan franc',
+            'native' => 'Rwandan franc',
             'symbol' => 'FRw',
+        ],
+    ],
+    [
+        'name'     => 'Saint Barthélemy — Saint-Barthélemy',
+        'iso2'     => 'BL',
+        'iso3'     => 'BLM',
+        'region'   => 'NA',
+        'currency' => [
+            'code'   => 'EUR',
+            'name'   => 'Euro',
+            'native' => 'Euro',
+            'symbol' => '€',
         ],
     ],
     [
@@ -2024,17 +2243,19 @@ return [
         'currency' => [
             'code'   => 'SHP',
             'name'   => 'Saint Helena pound',
+            'native' => 'St Helena Pound',
             'symbol' => '£',
         ],
     ],
     [
-        'name'     => 'Saint Kitts And Nevis — Saint Kitts and Nevis',
+        'name'     => 'Saint Kitts and Nevis — Saint Kitts and Nevis',
         'iso2'     => 'KN',
         'iso3'     => 'KNA',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'Eastern Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2042,10 +2263,11 @@ return [
         'name'     => 'Saint Lucia — Saint Lucia',
         'iso2'     => 'LC',
         'iso3'     => 'LCA',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'Eastern Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2053,43 +2275,35 @@ return [
         'name'     => 'Saint Pierre and Miquelon — Saint-Pierre-et-Miquelon',
         'iso2'     => 'PM',
         'iso3'     => 'SPM',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
     [
-        'name'     => 'Saint Vincent And The Grenadines — Saint Vincent and the Grenadines',
+        'name'     => 'Saint Vincent and the Grenadines — Saint Vincent and the Grenadines',
         'iso2'     => 'VC',
         'iso3'     => 'VCT',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'XCD',
             'name'   => 'Eastern Caribbean dollar',
+            'native' => 'East Caribbean Dollar',
             'symbol' => '$',
-        ],
-    ],
-    [
-        'name'     => 'Saint-Barthelemy — Saint-Barthélemy',
-        'iso2'     => 'BL',
-        'iso3'     => 'BLM',
-        'region'   => '',
-        'currency' => [
-            'code'   => 'EUR',
-            'name'   => 'Euro',
-            'symbol' => '€',
         ],
     ],
     [
         'name'     => 'Saint-Martin (French part) — Saint-Martin',
         'iso2'     => 'MF',
         'iso3'     => 'MAF',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -2101,6 +2315,7 @@ return [
         'currency' => [
             'code'   => 'WST',
             'name'   => 'Samoan tālā',
+            'native' => 'Samoan tālā',
             'symbol' => 'SAT',
         ],
     ],
@@ -2112,17 +2327,19 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
     [
-        'name'     => 'Sao Tome and Principe — São Tomé e Príncipe',
+        'name'     => 'São Tomé and Príncipe — São Tomé e Príncipe',
         'iso2'     => 'ST',
         'iso3'     => 'STP',
         'region'   => 'AF',
         'currency' => [
-            'code'   => 'STD',
-            'name'   => 'Dobra',
+            'code'   => 'STN',
+            'name'   => 'São Tomé and Príncipe dobra',
+            'native' => 'Dobra de São Tomé e Príncipe',
             'symbol' => 'Db',
         ],
     ],
@@ -2134,6 +2351,7 @@ return [
         'currency' => [
             'code'   => 'SAR',
             'name'   => 'Saudi riyal',
+            'native' => 'ريال سعودي',
             'symbol' => '﷼',
         ],
     ],
@@ -2145,6 +2363,7 @@ return [
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franc CFA (BCEAO)',
             'symbol' => 'CFA',
         ],
     ],
@@ -2156,6 +2375,7 @@ return [
         'currency' => [
             'code'   => 'RSD',
             'name'   => 'Serbian dinar',
+            'native' => 'Српски динар',
             'symbol' => 'din',
         ],
     ],
@@ -2167,6 +2387,7 @@ return [
         'currency' => [
             'code'   => 'SCR',
             'name'   => 'Seychellois rupee',
+            'native' => 'Seychellois Rupee',
             'symbol' => 'SRe',
         ],
     ],
@@ -2176,8 +2397,9 @@ return [
         'iso3'     => 'SLE',
         'region'   => 'AF',
         'currency' => [
-            'code'   => 'SLL',
+            'code'   => 'SLE',
             'name'   => 'Sierra Leonean leone',
+            'native' => 'Sierra Leonean Leone',
             'symbol' => 'Le',
         ],
     ],
@@ -2189,6 +2411,7 @@ return [
         'currency' => [
             'code'   => 'SGD',
             'name'   => 'Singapore dollar',
+            'native' => 'Singapore Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2196,11 +2419,12 @@ return [
         'name'     => 'Sint Maarten (Dutch part) — Sint Maarten',
         'iso2'     => 'SX',
         'iso3'     => 'SXM',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
-            'code'   => 'ANG',
-            'name'   => 'Netherlands Antillean guilder',
-            'symbol' => 'ƒ',
+            'code'   => 'XCG',
+            'name'   => 'Caribbean guilder',
+            'native' => 'Caribische gulden',
+            'symbol' => 'Cg',
         ],
     ],
     [
@@ -2211,6 +2435,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -2222,6 +2447,7 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Evro',
             'symbol' => '€',
         ],
     ],
@@ -2233,6 +2459,7 @@ return [
         'currency' => [
             'code'   => 'SBD',
             'name'   => 'Solomon Islands dollar',
+            'native' => 'Solomon Islands Dollar',
             'symbol' => 'Si$',
         ],
     ],
@@ -2244,6 +2471,7 @@ return [
         'currency' => [
             'code'   => 'SOS',
             'name'   => 'Somali shilling',
+            'native' => 'Shilingka Soomaaliya',
             'symbol' => 'Sh.so.',
         ],
     ],
@@ -2255,17 +2483,19 @@ return [
         'currency' => [
             'code'   => 'ZAR',
             'name'   => 'South African rand',
+            'native' => 'South African Rand',
             'symbol' => 'R',
         ],
     ],
     [
-        'name'     => 'South Georgia — South Georgia',
+        'name'     => 'South Georgia and the South Sandwich Islands — South Georgia and the South Sandwich Islands',
         'iso2'     => 'GS',
         'iso3'     => 'SGS',
-        'region'   => 'SA',
+        'region'   => 'AN',
         'currency' => [
             'code'   => 'GBP',
             'name'   => 'British pound',
+            'native' => 'British Pound',
             'symbol' => '£',
         ],
     ],
@@ -2277,6 +2507,7 @@ return [
         'currency' => [
             'code'   => 'KRW',
             'name'   => 'Won',
+            'native' => '대한민국 원',
             'symbol' => '₩',
         ],
     ],
@@ -2288,6 +2519,7 @@ return [
         'currency' => [
             'code'   => 'SSP',
             'name'   => 'South Sudanese pound',
+            'native' => 'South Sudanese Pound',
             'symbol' => '£',
         ],
     ],
@@ -2299,17 +2531,19 @@ return [
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
     [
-        'name'     => 'Sri Lanka — śrī laṃkāva',
+        'name'     => 'Sri Lanka — ශ්‍රී ලංකාව',
         'iso2'     => 'LK',
         'iso3'     => 'LKA',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'LKR',
             'name'   => 'Sri Lankan rupee',
+            'native' => 'ශ්‍රී ලංකා රුපියල',
             'symbol' => 'Rs',
         ],
     ],
@@ -2321,6 +2555,7 @@ return [
         'currency' => [
             'code'   => 'SDG',
             'name'   => 'Sudanese pound',
+            'native' => 'جنيه سوداني',
             'symbol' => '.س.ج',
         ],
     ],
@@ -2332,29 +2567,20 @@ return [
         'currency' => [
             'code'   => 'SRD',
             'name'   => 'Surinamese dollar',
+            'native' => 'Surinaamse dollar',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Svalbard And Jan Mayen Islands — Svalbard og Jan Mayen',
+        'name'     => 'Svalbard and Jan Mayen — Svalbard og Jan Mayen',
         'iso2'     => 'SJ',
         'iso3'     => 'SJM',
         'region'   => 'EU',
         'currency' => [
             'code'   => 'NOK',
             'name'   => 'Norwegian Krone',
+            'native' => 'Norwegian Krone',
             'symbol' => 'kr',
-        ],
-    ],
-    [
-        'name'     => 'Swaziland — Swaziland',
-        'iso2'     => 'SZ',
-        'iso3'     => 'SWZ',
-        'region'   => 'AF',
-        'currency' => [
-            'code'   => 'SZL',
-            'name'   => 'Lilangeni',
-            'symbol' => 'E',
         ],
     ],
     [
@@ -2365,6 +2591,7 @@ return [
         'currency' => [
             'code'   => 'SEK',
             'name'   => 'Swedish krona',
+            'native' => 'Svensk krona',
             'symbol' => 'kr',
         ],
     ],
@@ -2376,6 +2603,7 @@ return [
         'currency' => [
             'code'   => 'CHF',
             'name'   => 'Swiss franc',
+            'native' => 'Schweizer Franken',
             'symbol' => 'CHf',
         ],
     ],
@@ -2387,6 +2615,7 @@ return [
         'currency' => [
             'code'   => 'SYP',
             'name'   => 'Syrian pound',
+            'native' => 'ليرة سورية',
             'symbol' => 'LS',
         ],
     ],
@@ -2398,6 +2627,7 @@ return [
         'currency' => [
             'code'   => 'TWD',
             'name'   => 'New Taiwan dollar',
+            'native' => '新台幣',
             'symbol' => '$',
         ],
     ],
@@ -2409,6 +2639,7 @@ return [
         'currency' => [
             'code'   => 'TJS',
             'name'   => 'Tajikistani somoni',
+            'native' => 'Сомонӣ',
             'symbol' => 'SM',
         ],
     ],
@@ -2420,6 +2651,7 @@ return [
         'currency' => [
             'code'   => 'TZS',
             'name'   => 'Tanzanian shilling',
+            'native' => 'Shilingi ya Tanzania',
             'symbol' => 'TSh',
         ],
     ],
@@ -2431,18 +2663,20 @@ return [
         'currency' => [
             'code'   => 'THB',
             'name'   => 'Thai baht',
+            'native' => 'บาท',
             'symbol' => '฿',
         ],
     ],
     [
-        'name'     => 'The Bahamas — Bahamas',
-        'iso2'     => 'BS',
-        'iso3'     => 'BHS',
-        'region'   => '',
+        'name'     => 'Timor-Leste — Timor-Leste',
+        'iso2'     => 'TL',
+        'iso3'     => 'TLS',
+        'region'   => 'AS',
         'currency' => [
-            'code'   => 'BSD',
-            'name'   => 'Bahamian dollar',
-            'symbol' => 'B$',
+            'code'   => 'USD',
+            'name'   => 'United States dollar',
+            'native' => 'Dólar americano',
+            'symbol' => '$',
         ],
     ],
     [
@@ -2453,6 +2687,7 @@ return [
         'currency' => [
             'code'   => 'XOF',
             'name'   => 'West African CFA franc',
+            'native' => 'Franc CFA (BCEAO)',
             'symbol' => 'CFA',
         ],
     ],
@@ -2464,6 +2699,7 @@ return [
         'currency' => [
             'code'   => 'NZD',
             'name'   => 'New Zealand dollar',
+            'native' => 'New Zealand Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2475,17 +2711,19 @@ return [
         'currency' => [
             'code'   => 'TOP',
             'name'   => 'Tongan paʻanga',
+            'native' => 'Paʻanga fakatonga',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Trinidad And Tobago — Trinidad and Tobago',
+        'name'     => 'Trinidad and Tobago — Trinidad and Tobago',
         'iso2'     => 'TT',
         'iso3'     => 'TTO',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'TTD',
             'name'   => 'Trinidad and Tobago dollar',
+            'native' => 'Trinidad & Tobago Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2497,17 +2735,19 @@ return [
         'currency' => [
             'code'   => 'TND',
             'name'   => 'Tunisian dinar',
+            'native' => 'دينار تونسي',
             'symbol' => 'ت.د',
         ],
     ],
     [
-        'name'     => 'Turkey — Türkiye',
+        'name'     => 'Türkiye — Türkiye',
         'iso2'     => 'TR',
         'iso3'     => 'TUR',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'TRY',
             'name'   => 'Turkish lira',
+            'native' => 'Türk lirası',
             'symbol' => '₺',
         ],
     ],
@@ -2519,17 +2759,19 @@ return [
         'currency' => [
             'code'   => 'TMT',
             'name'   => 'Turkmenistan manat',
+            'native' => 'Türkmen manady',
             'symbol' => 'T',
         ],
     ],
     [
-        'name'     => 'Turks And Caicos Islands — Turks and Caicos Islands',
+        'name'     => 'Turks and Caicos Islands — Turks and Caicos Islands',
         'iso2'     => 'TC',
         'iso3'     => 'TCA',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2541,6 +2783,19 @@ return [
         'currency' => [
             'code'   => 'AUD',
             'name'   => 'Australian dollar',
+            'native' => 'Australian Dollar',
+            'symbol' => '$',
+        ],
+    ],
+    [
+        'name'     => 'U.S. Virgin Islands — United States Virgin Islands',
+        'iso2'     => 'VI',
+        'iso3'     => 'VIR',
+        'region'   => 'NA',
+        'currency' => [
+            'code'   => 'USD',
+            'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2552,6 +2807,7 @@ return [
         'currency' => [
             'code'   => 'UGX',
             'name'   => 'Ugandan shilling',
+            'native' => 'Ugandan Shilling',
             'symbol' => 'USh',
         ],
     ],
@@ -2563,6 +2819,7 @@ return [
         'currency' => [
             'code'   => 'UAH',
             'name'   => 'Ukrainian hryvnia',
+            'native' => 'Українська гривня',
             'symbol' => '₴',
         ],
     ],
@@ -2574,6 +2831,7 @@ return [
         'currency' => [
             'code'   => 'AED',
             'name'   => 'United Arab Emirates dirham',
+            'native' => 'درهم إماراتي',
             'symbol' => 'إ.د',
         ],
     ],
@@ -2585,6 +2843,7 @@ return [
         'currency' => [
             'code'   => 'GBP',
             'name'   => 'British pound',
+            'native' => 'British Pound',
             'symbol' => '£',
         ],
     ],
@@ -2592,10 +2851,11 @@ return [
         'name'     => 'United States — United States',
         'iso2'     => 'US',
         'iso3'     => 'USA',
-        'region'   => '',
+        'region'   => 'NA',
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2603,10 +2863,11 @@ return [
         'name'     => 'United States Minor Outlying Islands — United States Minor Outlying Islands',
         'iso2'     => 'UM',
         'iso3'     => 'UMI',
-        'region'   => '',
+        'region'   => 'OC',
         'currency' => [
             'code'   => 'USD',
             'name'   => 'United States dollar',
+            'native' => 'US Dollar',
             'symbol' => '$',
         ],
     ],
@@ -2618,17 +2879,19 @@ return [
         'currency' => [
             'code'   => 'UYU',
             'name'   => 'Uruguayan peso',
+            'native' => 'Peso uruguayo',
             'symbol' => '$',
         ],
     ],
     [
-        'name'     => 'Uzbekistan — O‘zbekiston',
+        'name'     => 'Uzbekistan — Oʻzbekiston',
         'iso2'     => 'UZ',
         'iso3'     => 'UZB',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'UZS',
             'name'   => 'Uzbekistani soʻm',
+            'native' => 'Oʻzbekiston soʻmi',
             'symbol' => 'лв',
         ],
     ],
@@ -2640,17 +2903,19 @@ return [
         'currency' => [
             'code'   => 'VUV',
             'name'   => 'Vanuatu vatu',
+            'native' => 'Vanuatu Vatu',
             'symbol' => 'VT',
         ],
     ],
     [
-        'name'     => 'Vatican City State (Holy See) — Vaticano',
+        'name'     => 'Vatican City — Città del Vaticano',
         'iso2'     => 'VA',
         'iso3'     => 'VAT',
         'region'   => 'EU',
         'currency' => [
             'code'   => 'EUR',
             'name'   => 'Euro',
+            'native' => 'Euro',
             'symbol' => '€',
         ],
     ],
@@ -2660,9 +2925,10 @@ return [
         'iso3'     => 'VEN',
         'region'   => 'SA',
         'currency' => [
-            'code'   => 'VEF',
-            'name'   => 'Bolívar',
-            'symbol' => 'Bs',
+            'code'   => 'VES',
+            'name'   => 'Venezuelan bolívar',
+            'native' => 'Bolívar soberano',
+            'symbol' => 'Bs.',
         ],
     ],
     [
@@ -2673,39 +2939,19 @@ return [
         'currency' => [
             'code'   => 'VND',
             'name'   => 'Vietnamese đồng',
+            'native' => 'Đồng Việt Nam',
             'symbol' => '₫',
         ],
     ],
     [
-        'name'     => 'Virgin Islands (British) — British Virgin Islands',
-        'iso2'     => 'VG',
-        'iso3'     => 'VGB',
-        'region'   => '',
-        'currency' => [
-            'code'   => 'USD',
-            'name'   => 'United States dollar',
-            'symbol' => '$',
-        ],
-    ],
-    [
-        'name'     => 'Virgin Islands (US) — United States Virgin Islands',
-        'iso2'     => 'VI',
-        'iso3'     => 'VIR',
-        'region'   => '',
-        'currency' => [
-            'code'   => 'USD',
-            'name'   => 'United States dollar',
-            'symbol' => '$',
-        ],
-    ],
-    [
-        'name'     => 'Wallis And Futuna Islands — Wallis et Futuna',
+        'name'     => 'Wallis and Futuna — Wallis-et-Futuna',
         'iso2'     => 'WF',
         'iso3'     => 'WLF',
         'region'   => 'OC',
         'currency' => [
             'code'   => 'XPF',
             'name'   => 'CFP franc',
+            'native' => 'Franc CFP',
             'symbol' => '₣',
         ],
     ],
@@ -2717,17 +2963,19 @@ return [
         'currency' => [
             'code'   => 'MAD',
             'name'   => 'Moroccan Dirham',
+            'native' => 'درهم مغربي',
             'symbol' => 'MAD',
         ],
     ],
     [
-        'name'     => 'Yemen — اليَمَن',
+        'name'     => 'Yemen — اليمن',
         'iso2'     => 'YE',
         'iso3'     => 'YEM',
         'region'   => 'AS',
         'currency' => [
             'code'   => 'YER',
             'name'   => 'Yemeni rial',
+            'native' => 'ريال يمني',
             'symbol' => '﷼',
         ],
     ],
@@ -2739,6 +2987,7 @@ return [
         'currency' => [
             'code'   => 'ZMW',
             'name'   => 'Zambian kwacha',
+            'native' => 'Zambian Kwacha',
             'symbol' => 'ZK',
         ],
     ],
@@ -2748,9 +2997,10 @@ return [
         'iso3'     => 'ZWE',
         'region'   => 'AF',
         'currency' => [
-            'code'   => 'ZWL',
-            'name'   => 'Zimbabwe Dollar',
-            'symbol' => '$',
+            'code'   => 'ZWG',
+            'name'   => 'Zimbabwe Gold',
+            'native' => 'Zimbabwe Gold',
+            'symbol' => 'ZiG',
         ],
     ],
 ];
