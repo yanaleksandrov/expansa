@@ -15,7 +15,7 @@ return new class extends Plugin
     {
         $this
             ->setName('eCommerce')
-            ->setVersion('2025.2')
+            ->setVersion('2027.2')
             ->setAuthor('Expansa Team')
             ->setDescription(t('Everything you need to launch an online store in days and keep it growing for years.'));
     }

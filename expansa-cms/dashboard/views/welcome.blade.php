@@ -28,7 +28,7 @@ use Expansa\Facades\I18n;
     /**
      * Prints scripts or data before the closing body tag on the dashboard.
      *
-     * @since 2025.1
+     * @since 2027.1
      */
     Hook::run('renderDashboardHeader');
     ?>
@@ -71,7 +71,7 @@ use Expansa\Facades\I18n;
 
         <div class="expansa-board">
             <a href="#" class="dif g-1 aic t-dark" title="Get Support"><i class="ph ph-headset fs-12"></i> support</a>
-            <a href="#" class="dif g-1 aic t-dark" title="Expansa CMS version"><i class="ph ph-git-branch fs-12"></i> 2025.1</a>
+            <a href="#" class="dif g-1 aic t-dark" title="Expansa CMS version"><i class="ph ph-git-branch fs-12"></i> 2027.1</a>
         </div>
     </div>
 
@@ -100,7 +100,7 @@ use Expansa\Facades\I18n;
     /**
      * Prints scripts or data before the closing body tag on the dashboard.
      *
-     * @since 2025.1
+     * @since 2027.1
      */
     Hook::run('renderDashboardFooter');
     ?>

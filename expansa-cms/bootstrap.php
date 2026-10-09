@@ -40,7 +40,7 @@ use Expansa\Support\Url;
  */
 
 const EX_PATH                   = __DIR__ . '/';
-const EX_VERSION                = '2025.6';
+const EX_VERSION                = '2027.6';
 const EX_REQUIRED_PHP_VERSION   = '8.4';
 const EX_REQUIRED_MYSQL_VERSION = '8.0';
 const EX_REQUIRED_MEMORY        = 128;

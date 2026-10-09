@@ -33,7 +33,7 @@ final class Plugins extends Table
                 'date'            => '18 September, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
         ];

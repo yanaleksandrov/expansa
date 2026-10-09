@@ -27,7 +27,7 @@ use Expansa\Facades\I18n;
 	/**
 	 * Prints scripts or data before the closing body tag on the dashboard.
 	 *
-	 * @since 2025.1
+	 * @since 2027.1
 	 */
 	Hook::run('renderDashboardHeader');
 	?>
@@ -39,7 +39,7 @@ use Expansa\Facades\I18n;
 	/**
 	 * Prints scripts or data before the closing body tag on the dashboard.
 	 *
-	 * @since 2025.1
+	 * @since 2027.1
 	 */
 	Hook::run( 'renderDashboardFooter' );
 	?>

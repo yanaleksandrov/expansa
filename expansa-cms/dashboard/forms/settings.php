@@ -9,7 +9,7 @@ use Expansa\Patterns\Registry;
 /**
  * Website settings in dashboard
  *
- * @since 2025.1
+ * @since 2027.1
  */
 
 // a plain field of the Security, Mail and AI tabs: everything but the type, name, texts and attributes is the default;

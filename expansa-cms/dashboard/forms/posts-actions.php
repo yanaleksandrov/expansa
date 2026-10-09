@@ -2,7 +2,7 @@
 /**
  * Posts actions.
  *
- * @since 2025.1
+ * @since 2027.1
  */
 return \Expansa\Builders\Form::enqueue(
 	'posts-actions',

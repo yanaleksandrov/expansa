@@ -65,7 +65,7 @@ return new class extends Plugin
         /*
          * Sign In form
          *
-         * @since 2025.1
+         * @since 2027.1
          */
         \Expansa\Builders\Form::enqueue(
             'builder/fields',

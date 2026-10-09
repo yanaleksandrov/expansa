@@ -41,8 +41,8 @@ final class Updates
                 'title' => t('Translations'),
                 'icon'  => 'ph ph-translate',
                 'items' => [
-                    ['name' => t('Russian'), 'current' => '2025.6', 'latest' => '2025.7', 'type' => 'patch', 'note' => t('128 new strings')],
-                    ['name' => t('German'), 'current' => '2025.6', 'latest' => '2025.7', 'type' => 'patch', 'note' => t('96 new strings')],
+                    ['name' => t('Russian'), 'current' => '2027.6', 'latest' => '2027.7', 'type' => 'patch', 'note' => t('128 new strings')],
+                    ['name' => t('German'), 'current' => '2027.6', 'latest' => '2027.7', 'type' => 'patch', 'note' => t('96 new strings')],
                 ],
             ],
         ];
@@ -51,7 +51,7 @@ final class Updates
             'checkedAt'   => '02.10.2026, 14:20',
             'core'        => [
                 'current' => EX_VERSION,
-                'latest'  => '2025.7',
+                'latest'  => '2027.7',
                 'date'    => '28.09.2026',
                 'size'    => '4.8 MB',
                 'notes'   => [
@@ -64,7 +64,7 @@ final class Updates
             'groups'      => $groups,
             'count'       => 1 + array_sum(array_map(fn (array $group) => count($group['items']), $groups)),
             'history'     => [
-                ['name' => 'Expansa', 'from' => '2025.5', 'to' => '2025.6', 'date' => '14.08.2026', 'ok' => true],
+                ['name' => 'Expansa', 'from' => '2027.5', 'to' => '2027.6', 'date' => '14.08.2026', 'ok' => true],
                 ['name' => 'SEO Toolkit', 'from' => '1.3.4', 'to' => '1.3.5', 'date' => '02.08.2026', 'ok' => true],
                 ['name' => 'Forms', 'from' => '0.9.1', 'to' => '0.9.2', 'date' => '19.07.2026', 'ok' => false],
             ],

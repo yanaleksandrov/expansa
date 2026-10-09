@@ -20,7 +20,7 @@ $user = User::current();
 /**
  * Profile page.
  *
- * @since 2025.1
+ * @since 2027.1
  */
 return Form::enqueue(
     'user-profile',

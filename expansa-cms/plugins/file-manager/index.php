@@ -14,7 +14,7 @@ return new class extends Plugin
     {
         $this
             ->setName('File Manager')
-            ->setVersion('2025.2')
+            ->setVersion('2027.2')
             ->setAuthor('Expansa Team')
             ->setDescription(t('Edit, delete, upload, download, copy, and paste files and folders.'));
     }

@@ -267,7 +267,7 @@ Manager::configure(resolver: function (string $file, array $context = []) use ($
 
 ### #5 Удаление версии скрипта или файла стилей из URL
 
-При регистрации скрипта ему можно указать версию, например: `/assets/js/alpine.js?ver=2025.1`.
+При регистрации скрипта ему можно указать версию, например: `/assets/js/alpine.js?ver=2027.1`.
 Это делается через параметр `version` в `...$data`:
 
 ```php
