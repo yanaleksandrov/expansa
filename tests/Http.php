@@ -176,6 +176,8 @@ check('class, attribute and scroll actions use the names of youla-ajax.js', $dom
     ['target' => '#a', 'scrollTo' => true],
     ['target' => '#a', 'scrollIntoView' => ['block' => 'center']],
 ]);
+check('several classes go as a list', new Response()->addClass('#a', ['on', 'open'])->fragments
+    === [['target' => '#a', 'classList.add' => ['on', 'open']]]);
 
 check('repeated actions are all kept', count(new Response()->remove('#a')->remove('#a')->fragments) === 2);
 check('no actions is an empty list', json_encode(new Response()->fragments) === '[]');

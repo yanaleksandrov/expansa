@@ -51,7 +51,6 @@ new class
         $data = Hook::call(
             'expansa_dashboard_data',
             [
-                'apiurl'              => url('/api/'),
                 'items'               => [],
                 'locale'              => I18n::locale(),
                 'dateFormat'          => 'd MMMM, yyyy',

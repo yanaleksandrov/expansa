@@ -1,4 +1,8 @@
 document.addEventListener('youla:init', () => {
+    Youla.ajax = {
+        ...window.youla?.ajax,
+        ...Youla.ajax
+    };
     (() => {
         function hasUData(el) {
             return [ ...el.attributes ].some(({name}) => name === 'u-data' || name.startsWith('u-data.'));

@@ -23,8 +23,8 @@ DashboardFavicons::enqueue();
 DashboardAssets::enqueue(
     ['phosphor', 'expansa', 'controls', 'utility'],
     [
-        // only `apiurl`: youla-ajax.js builds the $ajax.post() base URL from it
-        'youla' => ['data' => ['apiurl' => url('/api/')]],
+        // a key, not a name: DashboardAssets adds the `$ajax` settings to its data
+        'youla' => [],
         'youla-ajax',
         'youla-expansa',
         'youla-passkeys',

@@ -37,10 +37,19 @@ final class VerifyCsrfToken
     private const string KEY = 'token';
 
     /**
-     * Csrf::generate()/check() build the cookie name as $prefix . KEY — this
-     * override makes it `x_csrf_token`, the exact name youla-ajax.js reads.
+     * Csrf::generate()/check() build the cookie name as $prefix . KEY.
      */
     private const string COOKIE_PREFIX = 'x_csrf_';
+
+    /**
+     * Cookie with the token; DashboardAssets passes the name to youla-ajax.js.
+     */
+    public const string COOKIE = self::COOKIE_PREFIX . self::KEY;
+
+    /**
+     * Header that youla-ajax.js sends the token back in; read below as HTTP_X_CSRF_TOKEN.
+     */
+    public const string HEADER = 'X-CSRF-Token';
 
     /**
      * Route "before" middleware. Ends the request with a 403 JSON response on failure —

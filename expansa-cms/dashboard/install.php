@@ -14,7 +14,6 @@ DashboardAssets::enqueue(
     [
         'youla' => [
             'data' => [
-                'apiurl'   => url('/api/'),
                 'flagsUrl' => url('/dashboard/assets/sprites/flags.svg'),
             ],
         ],

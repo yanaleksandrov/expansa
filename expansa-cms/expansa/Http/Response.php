@@ -303,27 +303,27 @@ final class Response implements ResponseContract
     }
 
     /**
-     * Add a class to the target.
+     * Add classes to the target.
      *
-     * @param string $target CSS selector.
-     * @param string $class
-     * @param int    $delay
+     * @param string          $target CSS selector.
+     * @param string|string[] $class  One class or several.
+     * @param int             $delay
      * @return static
      */
-    public function addClass(string $target, string $class, int $delay = 0): static
+    public function addClass(string $target, string|array $class, int $delay = 0): static
     {
         return $this->add($target, 'classList.add', $class, $delay);
     }
 
     /**
-     * Remove a class from the target.
+     * Remove classes from the target.
      *
-     * @param string $target CSS selector.
-     * @param string $class
-     * @param int    $delay
+     * @param string          $target CSS selector.
+     * @param string|string[] $class  One class or several.
+     * @param int             $delay
      * @return static
      */
-    public function removeClass(string $target, string $class, int $delay = 0): static
+    public function removeClass(string $target, string|array $class, int $delay = 0): static
     {
         return $this->add($target, 'classList.remove', $class, $delay);
     }

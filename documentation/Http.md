@@ -200,8 +200,11 @@ throw new ResponseReady(new Response($csv, headers: ['Content-Type' => 'text/csv
 - сообщения полей — под полем с их `data-error` в форме, из которой ушёл запрос: `.field-error`, класс `is-invalid` у
   `.field`, `aria-invalid`; ошибка снимается при вводе в поле и перед следующим запросом;
 - сообщения без поля, а также полей скрытых, например в другой вкладке или шаге, — уведомлением;
-- без `errors` — уведомлением `message`, без него или без сети — текстами `youla.ajaxErrors`,
-  которые `DashboardAssets` добавляет на страницу.
+- без `errors` — уведомлением `message`, без него или без сети — текстами `messages`.
+
+Селектор поля, места ошибки и классы, адрес API, имена CSRF-cookie и заголовка, тексты — настройки
+`Youla.ajax`. `DashboardAssets` кладёт их в данные `youla` (`ajax`), а youla-expansa.js переносит в
+`Youla.ajax`.
 
 Промис `$ajax` при этом отклоняется, `.then()` не выполняется, а в консоли нет «Uncaught (in promise)».
 Ошибку, которая не относится к полю, — неверный пароль при входе, лимит попыток — по-прежнему
@@ -229,7 +232,7 @@ return response()
 | `before`, `prepend`, `append`, `after`          | Вставить HTML рядом с целью или в неё                 |
 | `remove`                                        | Удалить цель                                          |
 | `value`                                         | Значение поля с событием `input`                      |
-| `addClass`, `removeClass`                       | Класс цели                                            |
+| `addClass`, `removeClass`                       | Класс цели, один или массивом                         |
 | `setAttribute`, `removeAttribute`               | Атрибут цели                                          |
 | `scrollTo`, `scrollIntoView`                    | Прокрутить к цели                                     |
 
