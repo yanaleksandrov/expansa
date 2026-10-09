@@ -20,9 +20,9 @@ use Expansa\Facades\I18n;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --expansa-font-text: "Inter", sustem-ui, sans-serif !important;
-        }
+    :root {
+        --expansa-font-text: "Inter", sustem-ui, sans-serif !important;
+    }
     </style>
     <?php
     /**
@@ -56,8 +56,7 @@ use Expansa\Facades\I18n;
 
         <div class="expansa-panel">
             <a href="<?php echo url(); ?>" target="_blank">
-                <img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34"
-                     alt="Expansa Logo">
+                <img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34" alt="Expansa Logo">
             </a>
             <?php echo view('components/menu-panel'); ?>
         </div>
@@ -89,11 +88,15 @@ use Expansa\Facades\I18n;
         </div>
     </div>
 
-    <!-- media library dialog start: registered globally (not per-field/page) since it must be
-         reachable from anywhere - see src/js/youla-storage.js and dialogs/media-library.blade.php -->
-    <?php echo view('components/dialogs/media-library'); ?>
-
     <?php
+    /**
+     * Media library dialog start: registered globally (not per-field/page) since it must
+     * be reachable from anywhere - see src/js/youla-storage.js and dialogs/media-library.blade.php
+     *
+     * @since 2027.1
+     */
+    echo view('components/dialogs/media-library');
+
     /**
      * Prints scripts or data before the closing body tag on the dashboard.
      *
