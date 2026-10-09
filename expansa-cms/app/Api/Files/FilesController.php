@@ -20,6 +20,6 @@ final readonly class FilesController
     #[Can('files_upload')]
     public function upload(Request $request): array
     {
-        return $this->service->upload($request->files, $request->post['encoding'] ?? 'auto');
+        return $this->service->upload($request);
     }
 }

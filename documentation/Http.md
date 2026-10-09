@@ -214,10 +214,17 @@ throw new ResponseReady(new Response($csv, headers: ['Content-Type' => 'text/csv
 
 `Response` может вместо тела нести действия, которые `$ajax` (src/js/youla-ajax.js) выполнит на
 странице по порядку. Методы повторяют действия youla-ajax.js, у каждого последний аргумент
-`$delay` — задержка в миллисекундах:
+`$delay` — задержка в миллисекундах. Метод контроллера получает `Response $response` от `Kernel` так же,
+как `Request $request`, — по типу параметра — и передаёт его в сервис:
 
 ```php
-return response()
+public function tokenCreate(Request $request, Response $response): Response
+{
+    return $this->service->tokenCreate($request, $response);
+}
+
+// в сервисе
+return $response
     ->notify(t('Token created.'), Notice::Success)
     ->update('#tokens', $html)
     ->remove("#token-$id")
@@ -238,9 +245,9 @@ return response()
 
 Цель — CSS-селектор, действие применяется ко всем найденным элементам. У действий всей страницы
 (уведомление, переход) цели нет. `Kernel` отправляет фрагменты в `data` как список
-`{target, action[:delay]: value}`. `response()` — то же, что `new Response()`, новый объект на каждый
-вызов. Каждый метод сразу перестраивает тело `{"data": [...]}`, так что
-ответ готов и без `Kernel`; список лежит в `$response->fragments`. Это действия `$ajax`, а не HTTP:
+`{target, action[:delay]: value}`. Действие возвращает новый ответ, а исходный не меняет, поэтому
+вызовы связываются в цепочку, а заготовка `$invalid = $response->notify(...)` не попадает в другие
+ответы. Каждое действие сразу перестраивает тело `{"data": [...]}`, так что ответ готов и без `Kernel`; список лежит в `$response->fragments`. Это действия `$ajax`, а не HTTP:
 `redirect()` не ставит заголовок `Location` — для него есть `Redirect`.
 
 `Status::getText(404)` — `Not Found`, неизвестный код — `InvalidArgumentException`; `Status::isValid()`.

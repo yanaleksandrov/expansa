@@ -8,6 +8,7 @@ use App\Models\FieldGroup;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Http\Enums\Notice;
+use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Error;
 
@@ -24,7 +25,7 @@ final class FieldGroupsService
     /**
      * List every field group, newest first, with a `fieldsCount` summary for the sidebar.
      */
-    public function index(): Response
+    public function index(Response $response): Response
     {
         $groups = array_map(
             fn (FieldGroup $group) => [
@@ -38,55 +39,55 @@ final class FieldGroupsService
             FieldGroup::all()
         );
 
-        return response()->json(['groups' => $groups]);
+        return $response->json(['groups' => $groups]);
     }
 
-    public function create(array $input): Response
+    public function create(Request $request, Response $response): Response
     {
-        $group = FieldGroup::create($this->prepare($input));
+        $group = FieldGroup::create($this->prepare($request->post));
 
         if ($group instanceof Error) {
-            return response()->notify($this->flatten($group), Notice::Error);
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        return response()->notify(t('Field group created.'), Notice::Success)->redirect('?group=' . $group->id, 600);
+        return $response->notify(t('Field group created.'), Notice::Success)->redirect('?group=' . $group->id, 600);
     }
 
-    public function update(array $input): Response
+    public function update(Request $request, Response $response): Response
     {
-        $id = Safe::absint($input['id'] ?? 0);
+        $id = Safe::absint($request->post['id'] ?? 0);
         if (! $id) {
-            return response()->notify(t('Field group ID is missing.'), Notice::Error);
+            return $response->notify(t('Field group ID is missing.'), Notice::Error);
         }
 
         $group = FieldGroup::find($id);
         if ($group instanceof Error) {
-            return response()->notify($this->flatten($group), Notice::Error);
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        $group = $group->update($this->prepare($input));
+        $group = $group->update($this->prepare($request->post));
         if ($group instanceof Error) {
-            return response()->notify($this->flatten($group), Notice::Error);
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        return response()->notify(t('Field group updated.'), Notice::Success);
+        return $response->notify(t('Field group updated.'), Notice::Success);
     }
 
-    public function delete(array $input): Response
+    public function delete(Request $request, Response $response): Response
     {
-        $id = Safe::absint($input['id'] ?? 0);
+        $id = Safe::absint($request->post['id'] ?? 0);
         if (! $id) {
-            return response()->notify(t('Field group ID is missing.'), Notice::Error);
+            return $response->notify(t('Field group ID is missing.'), Notice::Error);
         }
 
         $group = FieldGroup::find($id);
         if ($group instanceof Error) {
-            return response()->notify($this->flatten($group), Notice::Error);
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
         $group->delete();
 
-        return response()->notify(t('Field group deleted.'), Notice::Success)->redirect('/dashboard/field-groups', 600);
+        return $response->notify(t('Field group deleted.'), Notice::Success)->redirect('/dashboard/field-groups', 600);
     }
 
     /**
@@ -161,7 +162,10 @@ final class FieldGroupsService
     private function flatten(Error $error): string
     {
         $messages = [];
-        array_walk_recursive($error->jsonSerialize()['message'] ?? [], function ($message) use (&$messages) {
+
+        $nested = $error->messages;
+
+        array_walk_recursive($nested, function ($message) use (&$messages) {
             $messages[] = $message;
         });
 

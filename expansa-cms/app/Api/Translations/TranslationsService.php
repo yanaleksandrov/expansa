@@ -7,6 +7,7 @@ namespace App\Api\Translations;
 use Expansa\Facades\Disk;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
+use Expansa\Http\Request;
 
 final class TranslationsService
 {
@@ -17,9 +18,9 @@ final class TranslationsService
      * exist anywhere in the framework (would fatal the moment this ran) — the real,
      * equivalent API is Disk::dir()->files() / Disk::file()->read().
      */
-    public function get(string $project): array
+    public function get(Request $request): array
     {
-        $dirpath = Safe::path(EX_PATH . $project);
+        $dirpath = Safe::path(EX_PATH . (string) ($request->post['project'] ?? ''));
         $paths   = Disk::dir($dirpath)->files('*.php', 10);
 
         $result = [];
@@ -62,9 +63,9 @@ final class TranslationsService
         ];
     }
 
-    public function update(array $input): array
+    public function update(Request $request): array
     {
-        [$project, $translations] = Safe::data($input, [
+        [$project, $translations] = Safe::data($request->post, [
             'project'      => 'trim',
             'translations' => 'array',
         ])->values();

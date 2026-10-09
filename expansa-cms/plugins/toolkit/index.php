@@ -27,7 +27,7 @@ return new class extends Plugin
 
         Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
 
-        Hook::add('viewPart', function ($filepath) {
+        Hook::add('viewPart', static function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/fields-builder.php') {
                 $filepath = __DIR__ . '/views/fields-builder.php';
             }
@@ -37,7 +37,7 @@ return new class extends Plugin
             return $filepath;
         });
 
-        Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'toolkit',

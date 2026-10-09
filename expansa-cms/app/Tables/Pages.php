@@ -73,7 +73,7 @@ final class Pages extends AbstractTable
 
     public function filter(): void
     {
-        Form::override('items-filter', fn (\Expansa\Builders\Forms\Form $form) => $form->before('submit')->attach(
+        Form::override('items-filter', static fn (\Expansa\Builders\Forms\Form $form) => $form->before('submit')->attach(
             [
                 [
                     'type'        => 'select',

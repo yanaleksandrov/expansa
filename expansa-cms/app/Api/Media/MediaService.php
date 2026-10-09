@@ -6,24 +6,29 @@ namespace App\Api\Media;
 
 use App\Models\Media;
 use App\Models\Post;
+use Expansa\Http\Request;
 use Expansa\Support\Error;
 use Expansa\Support\Str;
 
 final class MediaService
 {
-    public function list(array $args = []): array
+    public function list(Request $request): array
     {
         return [
-            'posts' => Media::get([ ...$args, 'per_page' => 60 ]),
+            'posts' => Media::get([
+                'page'     => max(1, $request->getInt('page', 1)),
+                's'        => $request->getString('s'),
+                'per_page' => 60,
+            ]),
         ];
     }
 
-    public function upload(array $files): array
+    public function upload(Request $request): array
     {
         $errors = [];
         $posts  = [];
 
-        foreach ($files as $file) {
+        foreach ($request->files as $file) {
             $filename = $file['name'] ?? '';
             $postId   = Media::upload($file);
 
@@ -42,11 +47,11 @@ final class MediaService
         ];
     }
 
-    public function grab(string $urls): array
+    public function grab(Request $request): array
     {
         $errors = [];
         $posts  = [];
-        $urls   = Str::extractUrls($urls);
+        $urls   = Str::extractUrls((string) ($request->post['urls'] ?? ''));
 
         foreach ($urls as $url) {
             $postId = Media::grab($url);
@@ -66,11 +71,11 @@ final class MediaService
         ];
     }
 
-    public function delete(array $ids): array
+    public function delete(Request $request): array
     {
         $deleted = [];
 
-        foreach (array_unique(array_map('intval', $ids)) as $id) {
+        foreach (array_unique(array_map('intval', (array) ($request->post['ids'] ?? []))) as $id) {
             if ($id > 0 && Media::delete($id)) {
                 $deleted[] = $id;
             }

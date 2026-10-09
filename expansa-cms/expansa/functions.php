@@ -219,22 +219,6 @@ if (! function_exists('error')) {
     }
 }
 
-if (! function_exists('response')) {
-    /**
-     * Create a response, usually to chain the `$ajax` actions of an API answer:
-     * `return response()->notify(t('Saved.'))->remove('#row-1')`. A new one on every call.
-     *
-     * @param string                $content
-     * @param int                   $statusCode
-     * @param array<string, string> $headers
-     * @return Expansa\Http\Response
-     */
-    function response(string $content = '', int $statusCode = 200, array $headers = []): Expansa\Http\Response
-    {
-        return new Expansa\Http\Response($content, $statusCode, $headers);
-    }
-}
-
 if (! function_exists('value')) {
     /**
      * Resolve a value: a Closure is called with the arguments, anything else is returned as is.

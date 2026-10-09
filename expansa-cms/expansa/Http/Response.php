@@ -15,12 +15,15 @@ use Stringable;
  * An API response can instead ask `$ajax` (src/js/youla-ajax.js) to run actions on the page, in order:
  *
  * ```php
- * return response()->notify(t('Token revoked.'))->remove("#token-$id");
+ * return $response->notify(t('Token revoked.'))->remove("#token-$id");
  * ```
  *
  * Each action is a fragment `{target, action[:delay]: value}`; page-wide ones (notify, redirect, reload,
  * changeUrl) have no target. `$delay` runs an action that many milliseconds later. These are page
  * actions of `$ajax`, not HTTP: `redirect()` here is not a `Location` header, see Redirect for that.
+ *
+ * The actions return a new response and leave this one as it was, so chain them; the other
+ * methods (json(), setHeader(), setCookie()) change the response itself.
  *
  * @package Expansa\Http
  */
@@ -418,7 +421,8 @@ final class Response implements ResponseContract
     }
 
     /**
-     * Append one fragment and render the body anew.
+     * Copy the response with one more fragment and the body rendered anew. A copy, so a response
+     * passed around keeps its fragments: `$invalid = $response->notify(...)` does not add to the others.
      *
      * @param string|null $target CSS selector, null for a page-wide action.
      * @param string      $action Action name in youla-ajax.js.
@@ -428,9 +432,11 @@ final class Response implements ResponseContract
      */
     private function add(?string $target, string $action, mixed $value, int $delay): static
     {
-        $this->fragments[] = ($target === null ? [] : ['target' => $target]) + [($delay > 0 ? "$action:$delay" : $action) => $value];
+        $copy = clone $this;
 
-        return $this->json(['data' => $this->fragments], $this->statusCode);
+        $copy->fragments[] = ($target === null ? [] : ['target' => $target]) + [($delay > 0 ? "$action:$delay" : $action) => $value];
+
+        return $copy->json(['data' => $copy->fragments], $copy->statusCode);
     }
 
     /**

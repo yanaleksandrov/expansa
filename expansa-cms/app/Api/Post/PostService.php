@@ -6,12 +6,13 @@ namespace App\Api\Post;
 
 use App\Models\Post;
 use Expansa\Facades\Safe;
+use Expansa\Http\Request;
 
 final class PostService
 {
-    public function create(array $input): array
+    public function create(Request $request): array
     {
-        $data = Safe::data($input, [
+        $data = Safe::data($request->post, [
             'post-type' => 'text',
             'title'     => 'text',
             'status'    => 'text',

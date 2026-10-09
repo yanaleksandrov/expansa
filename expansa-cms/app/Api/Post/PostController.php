@@ -20,6 +20,6 @@ final readonly class PostController
     #[Can('types_edit')]
     public function create(Request $request): array
     {
-        return $this->service->create($request->post);
+        return $this->service->create($request);
     }
 }

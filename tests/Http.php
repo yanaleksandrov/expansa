@@ -16,7 +16,6 @@ use Expansa\Http\Status;
 use Expansa\Support\Error as ModelError;
 
 require __DIR__ . '/bootstrap.php';
-require_once EX_PATH . 'expansa/functions.php';
 
 $get = Request::create('https://Example.com:8443/posts/?page=2&s=+cat+', server: [
     'HTTP_USER_AGENT'      => 'Test',
@@ -192,6 +191,9 @@ check('a plain model error becomes the message', ValidationFailed::from(new Mode
 check('fragments are the JSON body of the response', new Response()->notify('Hi')->remove('#x')->content === '{"data":[{"notify":"Hi"},{"target":"#x","remove":true}]}');
 check('a response with fragments is JSON', (new Response()->notify('Hi')->headers['Content-Type'] ?? '') === 'application/json');
 
-check('response() makes a new response every time', response() !== response() && response()->notify('Hi')->fragments === [['notify' => 'Hi']] && response()->fragments === []);
+$base    = new Response();
+$invalid = $base->notify('Bad');
+check('actions return a new response and leave the original as it was', $base->fragments === [] && $base->content === ''
+    && $invalid->fragments === [['notify' => 'Bad']] && $invalid->notify('More')->fragments !== $invalid->fragments);
 
 exit($failures ? 1 : 0);

@@ -18,6 +18,7 @@ use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\ValidationFailed;
+use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Arr;
 
@@ -32,14 +33,14 @@ final class SystemService
     /**
      * Checks the server + a candidate database connection against the minimum requirements.
      */
-    public function checkRequirements(array $input): array
+    public function checkRequirements(Request $request): array
     {
         if (!Installation::hasEnvironment()) {
             require_once EX_PATH . 'env.example.php';
         }
 
         // with env.php the installer does not ask for the database: its settings are checked
-        $data = Installation::hasEnvironment() ? EX_DB : Safe::data($input, [
+        $data = Installation::hasEnvironment() ? EX_DB : Safe::data($request->post, [
             'database' => 'trim',
             'username' => 'trim',
             'password' => 'trim',
@@ -80,12 +81,14 @@ final class SystemService
     /**
      * Writes the environment config, creates the schema, and creates the owner account.
      *
+     * @param Request  $request  `site`, `user`, `db` and `smtp` fields of the installer.
+     * @param Response $response
      * @return Response Redirect to the installed page once the last step had time to show.
      * @throws HttpError       When Expansa is already installed.
      * @throws ValidationFailed When required fields are missing, the env file can't be
      *                              written, or the owner account is invalid.
      */
-    public function install(array $input): Response
+    public function install(Request $request, Response $response): Response
     {
         if (Installation::isComplete()) {
             throw new HttpError(409, t('Expansa is already installed.'));
@@ -93,12 +96,12 @@ final class SystemService
 
         // an existing env.php keeps its settings: the configure phase has already connected its database
         $hasEnvironment = Installation::hasEnvironment();
-        $this->validateInstallInput($input, $hasEnvironment);
+        $this->validateInstallInput($request->post, $hasEnvironment);
 
         $protocol = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ? 'https://' : 'http://';
         $siteUrl  = $protocol . $_SERVER['SERVER_NAME'];
 
-        [$site, $userdata, $database, $smtp] = Safe::data($input, [
+        [$site, $userdata, $database, $smtp] = Safe::data($request->post, [
             'site.name'        => 'text',
             'site.tagline'     => 'text',
             'site.url'         => "url:$siteUrl",
@@ -182,7 +185,7 @@ final class SystemService
         // the owner signs in right away, without the new device warning: it is the installation itself
         Auth::login($user, remember: true);
 
-        return response()->redirect(url('installed'), 7000);
+        return $response->redirect(url('installed'), 7000);
     }
 
     /**

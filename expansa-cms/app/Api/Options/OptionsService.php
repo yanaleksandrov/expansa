@@ -12,14 +12,15 @@ use App\Support\Secrets;
 use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Mail;
+use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Arr;
 
 final class OptionsService
 {
-    public function update(array $input): Response
+    public function update(Request $request, Response $response): Response
     {
-        $options = Arr::exclude($input, ['nonce']);
+        $options = Arr::exclude($request->post, ['nonce']);
 
         foreach ($options as $option => $value) {
             // the roles keep the administrator's permissions and take the new role, see RoleSettings
@@ -46,7 +47,7 @@ final class OptionsService
             Option::update($option, $value);
         }
 
-        return response()->notify(t('Options updated successfully.'));
+        return $response->notify(t('Options updated successfully.'));
     }
 
     /**
@@ -78,16 +79,17 @@ final class OptionsService
     /**
      * Send a test email to the current user with the saved Mail settings; five in ten minutes.
      *
+     * @param Response $response
      * @return Response Notice with the result or the SMTP error.
      */
-    public function mailTest(): Response
+    public function mailTest(Response $response): Response
     {
         $user = User::current();
 
         try {
             Auth::limit("mail-test:$user->id", 5, 600);
         } catch (TooManyAttempts) {
-            return response()->notify(t('Too many test emails. Try again in a few minutes.'));
+            return $response->notify(t('Too many test emails. Try again in a few minutes.'));
         }
 
         $message = Mail::to($user->email)
@@ -98,6 +100,6 @@ final class OptionsService
             ? t('Test email sent to :email.', $user->email)
             : t('The email was not sent: :error', $message->error);
 
-        return response()->notify($notice);
+        return $response->notify($notice);
     }
 }

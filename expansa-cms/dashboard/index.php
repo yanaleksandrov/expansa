@@ -26,7 +26,7 @@ new class
          *
          * @since 2025.1
          */
-        Manager::configure(resolver: function (string $file, array $context = []) use ($suffix): array {
+        Manager::configure(resolver: static function (string $file, array $context = []) use ($suffix): array {
             if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/form/')) {
                 return Manager::defaultStructure($file);
             }
@@ -175,7 +175,7 @@ new class
          *
          * @since 2025.1
          */
-        Tree::attach('dashboard-panel-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'users',
@@ -217,7 +217,7 @@ new class
          *
          * @since 2025.1
          */
-        Tree::attach('dashboard-user-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-user-menu', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'profile',
@@ -266,7 +266,7 @@ new class
          *
          * @since 2025.1
          */
-        Tree::attach('dashboard-menu-bar', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-menu-bar', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'website',
@@ -316,7 +316,7 @@ new class
          *
          * @since 2025.1
          */
-        Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'       => 'divider-workspace',

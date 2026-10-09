@@ -20,7 +20,7 @@ return new class extends Plugin
     public function boot(): void
     {
         spl_autoload_register(
-            function ($class) {
+            static function ($class) {
                 $parts = explode('\\', $class);
                 $parts = array_map(
                     function ($part, $index) {
@@ -62,7 +62,7 @@ return new class extends Plugin
             menuPosition: 200,
         );
 
-        Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'docify',

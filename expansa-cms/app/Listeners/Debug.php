@@ -23,21 +23,21 @@ final class Debug
             return $content;
         }
 
-        Panel::add('Metrics', fn () => [
+        Panel::add('Metrics', static fn () => [
             'time'         => metrics()->time(),
             'memory peak'  => metrics()->memory(),
             'memory limit' => metrics()->memoryPercent() === null ? 'unlimited' : metrics()->memoryPercent() . '%',
         ]);
 
-        Panel::add('Timeline', fn () => array_map(fn (array $step) => [
+        Panel::add('Timeline', static fn () => array_map(fn (array $step) => [
             'type'   => $step['type'],
             'name'   => $step['name'],
             'time'   => $step['time'] . 'ms',
             'memory' => round($step['memory'] / 1024, 1) . 'KB',
         ], Lifecycle::timeline()));
 
-        Panel::add('Queries', fn () => array_map(fn (string $query) => ['query' => $query], Db::log()));
-        Panel::add('Request', fn () => DebugFacade::getContext());
+        Panel::add('Queries', static fn () => array_map(fn (string $query) => ['query' => $query], Db::log()));
+        Panel::add('Request', static fn () => DebugFacade::getContext());
 
         $html = '<link rel="stylesheet" id="debug-css" href="/dashboard/assets/css/debug.css">' . Panel::render();
 

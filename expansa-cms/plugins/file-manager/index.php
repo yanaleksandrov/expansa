@@ -26,7 +26,7 @@ return new class extends Plugin
         }
 
         // TODO: переделать подключение файлов плагинов
-        Hook::add('viewPart', function ($filepath) {
+        Hook::add('viewPart', static function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/file-manager.php') {
                 $filepath = __DIR__ . '/views/file-manager.php';
             }
@@ -35,7 +35,7 @@ return new class extends Plugin
 
         Asset::style('file-manager', '/plugins/file-manager/assets/css/main.css');
 
-        Tree::attach('dashboard-panel-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'           => 'file-manager',

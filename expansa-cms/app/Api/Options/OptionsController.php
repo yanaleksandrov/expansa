@@ -19,14 +19,14 @@ final readonly class OptionsController
     ) {}
 
     #[Can('manage_options')]
-    public function update(Request $request): Response
+    public function update(Request $request, Response $response): Response
     {
-        return $this->service->update($request->post);
+        return $this->service->update($request, $response);
     }
 
     #[Can('manage_options')]
-    public function mailTest(): Response
+    public function mailTest(Response $response): Response
     {
-        return $this->service->mailTest();
+        return $this->service->mailTest($response);
     }
 }

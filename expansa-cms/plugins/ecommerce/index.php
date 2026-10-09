@@ -23,7 +23,7 @@ return new class extends Plugin
     public function boot(): void
     {
         // TODO: переделать подключение файлов плагинов
-        Hook::add('viewPart', function ($filepath) {
+        Hook::add('viewPart', static function ($filepath) {
             if ($filepath === EX_DASHBOARD . 'views/order.php') {
                 $filepath = __DIR__ . '/views/order.php';
             }
@@ -95,7 +95,7 @@ return new class extends Plugin
             menuPosition: 280,
         );
 
-        Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
             [
                 [
                     'id'       => 'divider-ecommerce',

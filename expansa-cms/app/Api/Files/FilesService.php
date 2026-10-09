@@ -9,6 +9,7 @@ use Expansa\Facades\Disk;
 use Expansa\Facades\Safe;
 use Expansa\Filesystem\Exceptions\OperationFailed;
 use Expansa\Filesystem\Exceptions\UploadRejected;
+use Expansa\Http\Request;
 
 /**
  * Handles the CSV file upload step of the posts importer (dashboard/forms/posts-import.php,
@@ -54,13 +55,14 @@ final class FilesService
     /**
      * Stores the uploaded CSV file and renders the column mapping form with its first row as samples.
      *
-     * @param array $files    Uploaded files from $_FILES.
-     * @param mixed $encoding Encoding chosen in the form, see CSV_ENCODINGS.
+     * @param Request $request Uploaded files and the `encoding` chosen in the form, see CSV_ENCODINGS.
      * @return array
      */
-    public function upload(array $files, mixed $encoding = 'auto'): array
+    public function upload(Request $request): array
     {
-        foreach ($files as $file) {
+        $encoding = $request->post['encoding'] ?? 'auto';
+
+        foreach ($request->files as $file) {
             try {
                 $filepath = Disk::upload($file, EX_STORAGE . 'i/')->path;
             } catch (UploadRejected | OperationFailed) {

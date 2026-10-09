@@ -20,12 +20,12 @@ final readonly class TranslationsController
     #[Can('manage_options')]
     public function get(Request $request): array
     {
-        return $this->service->get($request->post['project'] ?? '');
+        return $this->service->get($request);
     }
 
     #[Can('manage_options')]
     public function update(Request $request): array
     {
-        return $this->service->update($request->post);
+        return $this->service->update($request);
     }
 }
