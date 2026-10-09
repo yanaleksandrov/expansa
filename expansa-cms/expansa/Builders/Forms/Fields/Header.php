@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/header.blade.php` - a section heading with an optional description.
+ * Renders `components/form/header.blade.php` - a section heading with an optional description.
  */
 final class Header extends AbstractField
 {

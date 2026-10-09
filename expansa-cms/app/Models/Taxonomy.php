@@ -87,7 +87,7 @@ class Taxonomy extends Model
 
         $taxonomy = parent::get($value, $by);
 
-        return $taxonomy instanceof Taxonomy ? $taxonomy : error('taxonomy-find', t('Taxonomy not found.'));
+        return $taxonomy instanceof Taxonomy ? $taxonomy : error('taxonomy-find', t('Taxonomy not found'));
     }
 
     /**

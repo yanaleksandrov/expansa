@@ -40,7 +40,7 @@ final class MediaService
         }
 
         return [
-            'notice'   => empty($errors) ? t('%d files have been successfully uploaded to the library', count($posts)) : '',
+            'notice'   => empty($errors) ? t('%d files have been successfully uploaded to the library.', count($posts)) : '',
             'uploaded' => count($posts) > 0,
             'posts'    => $posts,
             'errors'   => $errors,
@@ -64,7 +64,7 @@ final class MediaService
         }
 
         return [
-            'notice'   => empty($errors) ? t('%d files have been successfully uploaded to the library', count($posts)) : '',
+            'notice'   => empty($errors) ? t('%d files have been successfully uploaded to the library.', count($posts)) : '',
             'uploaded' => count($posts) > 0,
             'posts'    => $posts,
             'errors'   => $errors,
@@ -82,7 +82,7 @@ final class MediaService
         }
 
         return [
-            'notice'  => $deleted ? t('%d files have been deleted from the library', count($deleted)) : '',
+            'notice'  => $deleted ? t('%d files have been deleted from the library.', count($deleted)) : '',
             'deleted' => $deleted,
         ];
     }

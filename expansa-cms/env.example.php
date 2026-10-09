@@ -97,7 +97,7 @@ define('EX_DEBUG', [
     'log'     => filter_var(getenv('EX_DEBUG_LOG') ?: 'on', FILTER_VALIDATE_BOOL),
     // the error message, place and trace on the page and in API responses; EX_DEBUG_DISPLAY=0 turns it off
     'display' => filter_var(getenv('EX_DEBUG_DISPLAY') ?: 'on', FILTER_VALIDATE_BOOL),
-    'view'    => EX_DASHBOARD . 'debug.php',
+    'view'    => EX_DASHBOARD . 'views/fallback/debug.php',
 ]);
 
 /**

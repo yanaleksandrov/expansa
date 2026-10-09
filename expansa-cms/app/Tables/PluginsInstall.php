@@ -324,7 +324,7 @@ final class PluginsInstall extends AbstractTable
         return [
             'icon'        => 'no-plugins',
             'title'       => t('No plugins found'),
-            'description' => t('You don&apos;t have any plugins installed yet. <a @click="$dialog.open(`tmpl-post-editor`)">Download some</a>'),
+            'description' => t('You don&apos;t have any plugins installed yet. <a @click="$dialog.open(`tmpl-post-editor`)">Download some</a>.'),
         ];
     }
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * A generic single-file input. There is no dedicated `form/file.blade.php` template
- * (unlike the richer {@see Uploader}), so this reuses `form/input.blade.php` with
+ * A generic single-file input. There is no dedicated `components/form/file.blade.php` template
+ * (unlike the richer {@see Uploader}), so this reuses `components/form/input.blade.php` with
  * its `type` attribute forced to `file`.
  */
 final class File extends AbstractField
@@ -29,7 +29,7 @@ final class File extends AbstractField
 
     public function view(): string
     {
-        return 'form/input';
+        return 'components/form/input';
     }
 
     public function render(array $field = []): string
@@ -43,7 +43,7 @@ final class File extends AbstractField
     {
         return [
             ...$this->baseSettings(false),
-            ['type' => 'text', 'name' => 'attributes.accept', 'label' => t('Accepted file types')],
+            ['type' => 'text', 'name' => 'attributes.accept', 'label' => t('Accepted File Types')],
         ];
     }
 

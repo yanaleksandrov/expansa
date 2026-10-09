@@ -66,7 +66,7 @@ final class Posts extends AbstractTable
     {
         return [
             'title'       => t('No pages found'),
-            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
+            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink).', url('/dashboard/import')),
         ];
     }
 }

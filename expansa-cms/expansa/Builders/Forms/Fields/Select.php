@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/select.blade.php` - a dropdown list, with support for `<optgroup>` via nested options.
+ * Renders `components/form/select.blade.php` - a dropdown list, with support for `<optgroup>` via nested options.
  */
 final class Select extends AbstractField
 {

@@ -7,7 +7,7 @@
 use Expansa\Facades\Debug;
 use Expansa\Facades\Panel;
 
-Debug::configure(view: EX_DASHBOARD . 'debug.php', details: Is::debug(), strict: Is::debug(), report: fn (Throwable $e, string $id, array $context) => ...);
+Debug::configure(view: EX_DASHBOARD . 'views/fallback/debug.php', details: Is::debug(), strict: Is::debug(), report: fn (Throwable $e, string $id, array $context) => ...);
 Debug::register();
 
 $id = Debug::report($e);            // в лог, вернёт id ошибки: 7f3a9c1e

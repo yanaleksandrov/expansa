@@ -80,7 +80,7 @@ final class Form
     /**
      * Render a template with the configured renderer, an empty string without configure().
      *
-     * @param string $template Template name, e.g. `form/input`.
+     * @param string $template Template name, e.g. `components/form/input`.
      * @param array  $data
      * @return string
      */
@@ -92,7 +92,7 @@ final class Form
     /**
      * Connect the CSS and JS of a template with the configured loader, nothing without configure().
      *
-     * @param string $template Template name, e.g. `form/input`.
+     * @param string $template Template name, e.g. `components/form/input`.
      * @param string $uid      Asset uid, templates shared by several field types get the type.
      * @return void
      */

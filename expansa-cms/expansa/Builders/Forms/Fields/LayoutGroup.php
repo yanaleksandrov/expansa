@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/layout-group.blade.php` - groups nested fields together in a responsive grid.
+ * Renders `components/form/layout-group.blade.php` - groups nested fields together in a responsive grid.
  * Nested fields are parsed into `$field['content']` by {@see \Expansa\Builders\Forms\Field::parse()}
  * before this class ever sees them.
  */

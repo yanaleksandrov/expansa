@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/custom.blade.php` - developer-supplied markup via a `callback`
+ * Renders `components/form/custom.blade.php` - developer-supplied markup via a `callback`
  * (callable or raw HTML string), for cases the field builder doesn't natively cover.
  */
 final class Custom extends AbstractField

@@ -38,7 +38,7 @@ final class Comments extends AbstractTable
                 ->flexibleWidth('6rem')
                 ->view('raw'),
             $this->cell('date')
-                ->title(t('In response to'))
+                ->title(t('In Response To'))
                 ->fixedWidth('9rem')
                 ->sortable()
                 ->view('date'),

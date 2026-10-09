@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/input.blade.php`, shared by every plain HTML5 input subtype
+ * Renders `components/form/input.blade.php`, shared by every plain HTML5 input subtype
  * (text, color, date, datetime-local, email, month, range, search, tel, time, url, week).
  * The concrete subtype is carried in `$field['attributes']['type']`, not on this class.
  */

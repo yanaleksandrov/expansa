@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/number.blade.php` - a numeric input with increment/decrement controls.
+ * Renders `components/form/number.blade.php` - a numeric input with increment/decrement controls.
  */
 final class Number extends AbstractField
 {
@@ -29,8 +29,8 @@ final class Number extends AbstractField
     {
         return [
             ...$this->baseSettings(),
-            ['type' => 'number', 'name' => 'attributes.min', 'label' => t('Minimum value')],
-            ['type' => 'number', 'name' => 'attributes.max', 'label' => t('Maximum value')],
+            ['type' => 'number', 'name' => 'attributes.min', 'label' => t('Minimum Value')],
+            ['type' => 'number', 'name' => 'attributes.max', 'label' => t('Maximum Value')],
             ['type' => 'number', 'name' => 'attributes.step', 'label' => t('Step')],
         ];
     }

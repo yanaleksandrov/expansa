@@ -47,7 +47,7 @@ final class Admin
     public static function setActive(User $admin, User $user, bool $isActive): ?string
     {
         if ($user->id === $admin->id) {
-            return t('You can not disable your own account.');
+            return t('You cannot disable your own account.');
         }
 
         $user->update(['status' => $isActive ? User::STATUS_ACTIVE : User::STATUS_INACTIVE]);
@@ -120,7 +120,7 @@ final class Admin
         }
 
         if (Access::allows($user, 'users_edit')) {
-            return t('Other administrators can not be impersonated.');
+            return t('Other administrators cannot be impersonated.');
         }
 
         Auth::login($user, remember: false, trustDevice: false);

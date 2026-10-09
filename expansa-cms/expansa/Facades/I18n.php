@@ -10,7 +10,7 @@ use Expansa\Patterns\Facade;
 /**
  * Translations of Expansa\Translation\Manager: placeholders, plural forms, Markdown, locale and languages.
  *
- * @method static void   configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null)
+ * @method static void   configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null, ?Closure $locale = null)
  * @method static string translate(string $string, mixed ...$args)
  * @method static string translatePlural(string $forms, int $count, mixed ...$args)
  * @method static string translateAttribute(string $string, mixed ...$args)

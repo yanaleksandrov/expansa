@@ -136,7 +136,7 @@ class FieldGroup extends Model
 
         $group = parent::get($value, $by);
 
-        return $group instanceof FieldGroup ? $group : error('field-group-find', t('Field group not found.'));
+        return $group instanceof FieldGroup ? $group : error('field-group-find', t('Field group not found'));
     }
 
     /**

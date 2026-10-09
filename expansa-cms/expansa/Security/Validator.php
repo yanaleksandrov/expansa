@@ -17,14 +17,14 @@ use DateTime;
  *     'age'   => 'numeric|min:18',
  *     'from'  => 'date|earlier:to',
  *     'time'  => 'time:H:i:s',
- * ])->extend('time', t('Time must be in \'%s\' format'), function (Validator $validator, $value, $format) {
+ * ])->extend('time', t('Time must be in \'%s\' format.'), function (Validator $validator, $value, $format) {
  *     $time = DateTime::createFromFormat($format, $value);
  *
  *     return $time && $time->format($format) === $value;
- * })->extend('age:numeric', t('Age must be a number'))->apply();
+ * })->extend('age:numeric', t('Age must be a number.'))->apply();
  *
  * $validator->isValid();
- * $validator->errors; // ['age' => ['Age must be a number', 'Must be at least 18.']]
+ * $validator->errors; // ['age' => ['Age must be a number.', 'Must be at least 18.']]
  * ```
  *
  * @package Expansa\Security

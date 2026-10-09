@@ -29,6 +29,11 @@ abstract class AbstractTable
     public readonly array $cells;
 
     /**
+     * Inline style of the table and its rows: `--expansa-grid-template-columns` from the column widths.
+     */
+    public readonly string $style;
+
+    /**
      * Set the file included before every table.
      *
      * @param string $filter File that enqueues the items filter form.
@@ -47,6 +52,7 @@ abstract class AbstractTable
 
         $this->data  = $this->data();
         $this->cells = $this->cells();
+        $this->style = self::style($this->cells);
     }
 
     /**
@@ -75,30 +81,29 @@ abstract class AbstractTable
     }
 
     /**
-     * Get the `--expansa-grid-template-columns` style from the column widths, repeated widths merged.
+     * Get the `--expansa-grid-template-columns` style from the column widths, a run of the same width as repeat().
      *
-     * @param Cell[] $columns
+     * @param Cell[] $cells
      * @return string Empty without columns.
      */
-    public function stylize(array $columns): string
+    private static function style(array $cells): string
     {
-        $repeat = 1;
-        $styles = [];
-        foreach ($columns as $i => $column) {
-            $width = trim($column->width ?: '1fr');
-            if ($column->flexible) {
-                $width = sprintf('minmax(%s, 1fr)', $width);
-            }
+        $widths = [];
+        foreach ($cells as $cell) {
+            $width    = trim($cell->width ?: '1fr');
+            $widths[] = $cell->flexible ? "minmax($width, 1fr)" : $width;
+        }
 
-            if ($width === ($styles[$i - 1] ?? null)) {
-                $repeat++;
-                $styles[$i - 1] = sprintf('repeat(%s, %s)', $repeat, $width);
-            } else {
-                $repeat     = 1;
-                $styles[$i] = $width;
+        $parts = [];
+        $run   = 0;
+        foreach ($widths as $i => $width) {
+            $run++;
+            if (($widths[$i + 1] ?? null) !== $width) {
+                $parts[] = $run > 1 ? "repeat($run, $width)" : $width;
+                $run     = 0;
             }
         }
 
-        return $styles ? sprintf('--expansa-grid-template-columns: %s', implode(' ', $styles)) : '';
+        return $parts ? '--expansa-grid-template-columns: ' . implode(' ', $parts) : '';
     }
 }

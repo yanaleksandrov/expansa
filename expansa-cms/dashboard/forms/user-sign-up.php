@@ -14,10 +14,10 @@ return Expansa\Facades\Form::enqueue(
 	[
 		[
 			'type'        => 'header',
-			'label'       => t( 'Create new account' ),
+			'label'       => t( 'Create New Account' ),
 			'name'        => 'title',
 			'class'       => '',
-			'instruction' => t( 'Create an account to unlock more platform features' ),
+			'instruction' => t( 'Create an account to unlock more platform features.' ),
 			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
@@ -30,7 +30,7 @@ return Expansa\Facades\Form::enqueue(
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Notifications will be sent to this email' ),
+			'instruction' => t( 'Notifications will be sent to this email.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',

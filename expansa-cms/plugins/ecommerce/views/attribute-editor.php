@@ -29,7 +29,7 @@
                 <div class="attributes-list">
                     <?php
                     echo view(
-                        'form/input',
+                        'components/form/input',
                         [
                             'type'        => 'text',
                             'name'        => 'value',
@@ -70,7 +70,7 @@
                         <template u-if="!values.length">
                             <?php
                             echo view(
-                                'global/state',
+                                'components/state',
                                 [
                                     'icon'        => 'empty-pack',
                                     'class'       => 'dg jic m-auto t-center p-8 mw-320',

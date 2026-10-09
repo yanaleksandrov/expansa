@@ -116,7 +116,7 @@ class Term extends Model implements Fieldable
 
         $term = parent::get($value, $by);
 
-        return $term instanceof Term ? $term : error('term-find', t('Term not found.'));
+        return $term instanceof Term ? $term : error('term-find', t('Term not found'));
     }
 
     /**

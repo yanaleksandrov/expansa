@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/password.blade.php` - a password input with an optional visibility
+ * Renders `components/form/password.blade.php` - a password input with an optional visibility
  * switcher, strength indicator and generator.
  */
 final class Password extends AbstractField

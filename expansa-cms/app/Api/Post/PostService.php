@@ -21,7 +21,7 @@ final class PostService
         [$type, $args] = [array_shift($data), $data];
 
         if (!$type) {
-            return ['method' => t('Post type is missing')];
+            return ['method' => t('Post type is missing.')];
         }
 
         Post::add($type, $args);

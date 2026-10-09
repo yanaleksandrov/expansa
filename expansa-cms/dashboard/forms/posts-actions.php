@@ -33,7 +33,7 @@ return \Expansa\Facades\Form::enqueue(
 			'options' => [
 				''      => t( 'Bulk Actions' ),
 				'edit'  => t( 'Edit' ),
-				'trash' => t( 'Move to trash' ),
+				'trash' => t( 'Move to Trash' ),
 				'copy'  => t( 'Copy' ),
 			],
 		],

@@ -6,7 +6,7 @@ namespace Expansa\Builders\Forms\Fields;
 
 /**
  * Multiple image uploads with inline previews. There is no dedicated
- * `form/gallery.blade.php` template, so this reuses `form/media.blade.php`
+ * `components/form/gallery.blade.php` template, so this reuses `components/form/media.blade.php`
  * (which already supports multiple items) with `multiple` and an image `accept` filter forced on.
  */
 final class Gallery extends AbstractField
@@ -29,7 +29,7 @@ final class Gallery extends AbstractField
 
     public function view(): string
     {
-        return 'form/media';
+        return 'components/form/media';
     }
 
     public function render(array $field = []): string

@@ -26,7 +26,7 @@ return \Expansa\Facades\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => t( '25% of 2GB used' ),
+			'instruction' => t( '25% of 2 GB used' ),
 			'attributes'  => [
 				'u-prop'      => 'progress',
 				'placeholder' => t( 'e.g. image name' ),
@@ -60,7 +60,7 @@ return \Expansa\Facades\Form::enqueue(
 		],
 		[
 			'type'        => 'checkbox',
-			'label'       => t( 'File types' ),
+			'label'       => t( 'File Types' ),
 			'name'        => 'types',
 			'error'       => 'types',
 			'value'       => '',
@@ -106,10 +106,7 @@ return \Expansa\Facades\Form::enqueue(
                 'u-prop' => 'authors',
             ],
 			'conditions'  => [],
-			'options' => [
-				''                => t( 'Select an author' ),
-				'user-registered' => t( 'New user registered' ),
-			],
+			'options' => [ '' => t( 'Select an author' ) ] + App\Models\User::options(),
 		],
 	]
 );

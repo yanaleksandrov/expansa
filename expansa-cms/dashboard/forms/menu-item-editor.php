@@ -17,7 +17,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function() {
 				?>
-				<h6><?php echo t( 'Menu item data' ); ?></h6>
+				<h6><?php echo t( 'Menu Item Data' ); ?></h6>
 				<?php
 			},
 			'attributes'  => [ 'u-prop' => 'instructions' ],

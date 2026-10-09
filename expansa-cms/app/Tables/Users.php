@@ -41,7 +41,7 @@ final class Users extends AbstractTable
             $this->cell('id')->title('<input type="checkbox" u-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
             $this->cell('name')->title(t('Name'))->flexibleWidth('16rem')->sortable()->view('user'),
             $this->cell('status')->title(t('Status'))->fixedWidth('6rem')->view('raw'),
-            $this->cell('visit')->title(t('Last visit'))->fixedWidth('8rem')->view('raw'),
+            $this->cell('visit')->title(t('Last Visit'))->fixedWidth('8rem')->view('raw'),
             $this->cell('role')->title(t('Role'))->fixedWidth('8rem')->view('role'),
         ];
     }
@@ -59,7 +59,7 @@ final class Users extends AbstractTable
     {
         return [
             'title'       => t('No users found'),
-            'description' => t('You don&apos;t have any users yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
+            'description' => t('You don&apos;t have any users yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink).', url('/dashboard/import')),
         ];
     }
 }

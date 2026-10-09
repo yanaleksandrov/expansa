@@ -66,7 +66,7 @@ App\Support\Requirements::check();
 
 // as in WordPress: "enabled" is the main switch, "log" and "display" work only under it;
 // true, 1, "1", "on" and "yes" count as true: env.php is written by hand as often as by the installer
-$debug = (defined('EX_DEBUG') ? EX_DEBUG : []) + ['enabled' => false, 'log' => true, 'display' => true, 'view' => EX_DASHBOARD . 'debug.php'];
+$debug = (defined('EX_DEBUG') ? EX_DEBUG : []) + ['enabled' => false, 'log' => true, 'display' => true, 'view' => EX_DASHBOARD . 'views/fallback/debug.php'];
 $isDebug     = filter_var($debug['enabled'], FILTER_VALIDATE_BOOL);
 $isLogged    = $isDebug && filter_var($debug['log'], FILTER_VALIDATE_BOOL);
 $isDisplayed = $isDebug && filter_var($debug['display'], FILTER_VALIDATE_BOOL);
@@ -335,17 +335,20 @@ Lifecycle::phase('configure', true, function () {
         translate: fn (string $message, string ...$args) => t($message, ...$args)
     );
 
-    // translations lookup priority; the languages with their plural rules, extended by the "languages" hook
+    // translations lookup priority, the rest of the installation (app/, compiled views) uses the dashboard ones;
+    // the languages with their plural rules, extended by the "languages" hook; the language of the user's profile
     I18n::configure(
         routes: [
             EX_CORE      => EX_DASHBOARD,
             EX_DASHBOARD => EX_DASHBOARD,
             EX_PLUGINS   => EX_PLUGINS . ':dirname',
             EX_THEMES    => EX_THEMES . ':dirname',
+            EX_PATH      => EX_DASHBOARD,
         ],
         pattern: 'i18n/%s',
         overrides: EX_I18N,
         languages: fn () => Hook::call('languages', Registry::get('languages')),
+        locale: defined('EX_DB') ? fn () => App\Models\User::current()?->locale : null,
     );
 
     // a new listener class has to be added here
@@ -560,10 +563,13 @@ Lifecycle::phase('extensions', fn () => Is::installed(), function () {
 /**
  * 5. booted · installed only.
  *
- * Every extension is registered, so boot() runs on plugins, then themes.
+ * The core registers its dashboard pages, then boot() runs on plugins, then themes.
  * From here Is::dashboard() and other context checks are available.
  */
 Lifecycle::phase('booted', fn () => Is::installed(), function () {
+    // the dashboard pages of the core first: plugins and themes change them with the same API
+    App\Dashboard\Core::register();
+
     Extensions::boot('plugin');
     Extensions::boot('theme');
 });
@@ -666,11 +672,11 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
 /**
  * 3. install · not installed yet.
  *
- * Every page except the API shows the installer: its assets come from dashboard/install.php,
+ * Every page except the API shows the installer: its assets come from Dashboard\Assets::install(),
  * the page from Web::install().
  */
 Lifecycle::context('install', fn () => ! Is::installed(), function () {
-    require_once EX_PATH . 'dashboard/install.php';
+    App\Dashboard\Assets::install();
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'install']);
 });
@@ -678,7 +684,7 @@ Lifecycle::context('install', fn () => ! Is::installed(), function () {
 /**
  * 4. auth · sign-in, sign-up and reset-password pages.
  *
- * A logged-in user goes straight to the dashboard. Otherwise, dashboard/auth.php enqueues
+ * A logged-in user goes straight to the dashboard. Otherwise, Dashboard\Assets::auth() enqueues
  * only the assets the auth forms need, without the admin panel.
  */
 Lifecycle::context('sign-out', function (string $uri): bool {
@@ -716,7 +722,7 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
         redirect('dashboard');
     }
 
-    require_once EX_PATH . 'dashboard/auth.php';
+    App\Dashboard\Assets::auth();
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
@@ -725,7 +731,7 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
  * 5. dashboard · URI starts with the dashboard slug.
  *
  * The slug is "dashboard" by default, changed with the "dashboardRootSlug" hook. A guest is redirected
- * to sign-in, otherwise dashboard/index.php enqueues the assets and menus, the page comes from Web::index().
+ * to sign-in, otherwise Dashboard\Assets and Dashboard\Menus add the assets and menus, the page comes from Web::index().
  */
 Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '/'), Hook::call('dashboardRootSlug', 'dashboard')), function () {
     // back to the requested page after signing in, like WordPress' redirect_to
@@ -740,7 +746,8 @@ Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '
         redirect(Hook::call('dashboardRootSlug', 'dashboard') . '/profile');
     }
 
-    require_once EX_PATH . 'dashboard/index.php';
+    App\Dashboard\Assets::dashboard();
+    App\Dashboard\Menus::register();
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });

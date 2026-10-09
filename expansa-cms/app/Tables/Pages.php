@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
+use App\Models\User;
 use Expansa\Builders\Table\AbstractTable;
 use Expansa\Facades\Form;
 
@@ -67,7 +68,7 @@ final class Pages extends AbstractTable
     {
         return [
             'title'       => t('No pages found'),
-            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
+            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink).', url('/dashboard/import')),
         ];
     }
 
@@ -91,10 +92,7 @@ final class Pages extends AbstractTable
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [ 'u-prop' => 'authors' ],
-                    'options'     => [
-                        ''                => t('Select an author'),
-                        'user-registered' => t('New user registered'),
-                    ],
+                    'options'     => ['' => t('Select an author')] + User::options(),
                 ],
                 [
                     'type'        => 'date',

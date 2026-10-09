@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App;
-use App\Models\Option;
-use App\Models\Slug;
-use Expansa\Builders\Tree;
+use App\Facades\Dashboard;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Lifecycle;
-use Expansa\Facades\View;
+use Expansa\Http\Request;
 
 final class Web
 {
@@ -25,7 +22,7 @@ final class Web
             redirect('install');
         }
 
-        $welcome = view('welcome', ['slug' => 'install', 'title' => t('Install Expansa')]);
+        $welcome = view('guest', ['page' => 'screens/install', 'title' => t('Install Expansa')]);
 
         Asset::discover($welcome->path);
 
@@ -33,7 +30,8 @@ final class Web
     }
 
     /**
-     * Pages of the "auth", "dashboard" and "web" lifecycle contexts; access checks and assets are done by the context.
+     * Pages of the "auth", "dashboard" and "web" lifecycle contexts; access checks and assets are done by the context,
+     * the page itself by Dashboard::render().
      */
     public function index($slug): void
     {
@@ -59,86 +57,12 @@ final class Web
             redirect('dashboard');
         }
 
-        $title = $this->title($slug);
-
-        // a page of a menu item the user doesn't see is closed as well
-        if (Lifecycle::is('dashboard') && ! Tree::allowsUrl($slug, $_GET)) {
-            http_response_code(403);
-
-            $slug  = '403';
-            $title = $this->title('', t('Access denied'));
-        }
-
-        if (Lifecycle::is('auth')) {
-            $page = 'welcome';
-        }
+        $layout = Lifecycle::is('auth') ? 'guest' : 'welcome';
 
         // dashboard views are not public pages: outside the dashboard only the front page and the post-install page exist
-        if (Lifecycle::is('web') && $slug !== '' && !($slug === 'installed' && Auth::isLoggedIn())) {
-            http_response_code(404);
-
-            $page  = 'welcome';
-            $slug  = '404';
-            $title = $this->title('', t('Page not found'));
-        }
-
-        if (empty($slug)) {
-            $slug = 'welcome';
-        } else {
-            // try to get entity from slug
-            $entity = Slug::find($slug);
-            if (! $entity instanceof Slug) {
-                //$page = '404';
-            }
-
-            $tableName = $_GET['table'] ?? 'pages';
-            if ($slug === 'users') {
-                $slug  = 'edit';
-                $tableName = 'users';
-            }
-
-            if ($slug === 'edit') {
-                $instances = [
-                    'comments'    => App\Tables\Comments::class,
-                    'translation' => App\Tables\Translations::class,
-                    'emails'      => App\Tables\Emails::class,
-                    'users'       => App\Tables\Users::class,
-                    'pages'       => App\Tables\Pages::class,
-                ];
-
-                $table = new ($instances[$tableName] ?? App\Tables\Pages::class)();
-
-                if ($tableName === 'files') {
-                    $slug  = 'media';
-                    $table = new App\Tables\Media();
-                }
-
-                if ($tableName === 'users') {
-                    $slug  = 'edit';
-                    $table = new App\Tables\Users();
-                }
-            }
-
-            // a dashboard page without a template, e.g. a menu item of an unfinished section or a missing asset
-            if (Lifecycle::is('dashboard') && ! View::exists($slug)) {
-                http_response_code(404);
-
-                $slug  = '404';
-                $title = $this->title('', t('Page not found'));
-            }
-
-            // output view to frontend
-            $content = view($page ?? 'index', [
-                'slug'   => $slug,
-                'title'  => $title,
-                'table'  => $table ?? null,
-                'entity' => $entity,
-            ]);
-
-            // Auto-connect co-located CSS/JS for this page's template - see Manager::discover().
-            Asset::discover($content->path);
-
-            $content = $content->beautify()->render();
+        if (Lifecycle::is('web') && $slug !== '' && ! ($slug === 'installed' && Auth::isLoggedIn())) {
+            $layout = 'guest';
+            $slug   = '404';
         }
 
         /**
@@ -147,47 +71,6 @@ final class Web
          * @param string $content Current page content.
          * @param string $slug    Current page slug.
          */
-        echo Hook::call('dashboardLoaded', $content ?? '', $slug);
-    }
-
-    /**
-     * Document title: "{page} — {site name}". The page name is the label of the dashboard menu item
-     * linking to the current URL, e.g. "Custom Fields" for "field-groups".
-     */
-    private function title(string $slug, ?string $page = null): string
-    {
-        $site = (string) Option::get('site.name', '');
-        $site = $site !== '' ? $site : 'Expansa';
-
-        if ($page === null && $slug !== '') {
-            $query = isset($_GET['table']) ? $slug . '?table=' . $_GET['table'] : $slug;
-
-            $page = match ($slug) {
-                'sign-in'        => t('Sign In'),
-                'sign-up'        => t('Sign Up'),
-                'reset-password' => t('Reset password'),
-                'installed'      => t('Installed'),
-                default          => $this->menuTitle($query)
-                    ?? $this->menuTitle($_GET['table'] ?? $slug)
-                    ?? ucfirst(str_replace('-', ' ', $slug)),
-            };
-        }
-
-        return $page === null || $page === '' ? $site : "$page — $site";
-    }
-
-    private function menuTitle(string $url): ?string
-    {
-        $tree = Tree::init();
-
-        foreach (['dashboard-main-menu', 'dashboard-panel-menu', 'dashboard-user-menu'] as $menu) {
-            foreach ($tree->list[$menu] ?? [] as $item) {
-                if (($item['url'] ?? null) === $url && is_string($item['title'] ?? null) && $item['title'] !== '') {
-                    return $item['title'];
-                }
-            }
-        }
-
-        return null;
+        echo Hook::call('dashboardLoaded', $slug === '' ? '' : Dashboard::render($slug, Request::createFromGlobals(), $layout), $slug ?: 'welcome');
     }
 }

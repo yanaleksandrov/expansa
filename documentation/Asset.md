@@ -100,18 +100,18 @@ Asset::discover('/absolute/path/to/index.blade.php');
 
 Ядро Expansa (`Expansa\View`, `Expansa\Assets`) намеренно ничего не знает друг о друге — ни один
 компонент фреймворка не вызывает `discover()` сам. Связка делается на уровне приложения, в
-`app/Controllers/Web.php`, ровно там, где уже рендерится страница:
+`App\Dashboard\Manager::render()`, ровно там, где уже рендерится страница:
 
 ```php
-$content = view($page ?? 'index', [...]);
+$content = view($layout, [...$data, 'page' => $view, 'title' => $title]);
 
-// index.css / index.js рядом с index.blade.php подключатся сами, если существуют
+// welcome.css / welcome.js рядом с welcome.blade.php подключатся сами, если существуют
 Asset::discover($content->path);
 
 $content = $content->beautify()->render();
 ```
 
-Поэтому на практике достаточно положить `index.css`/`index.js` рядом с `index.blade.php` темы —
+Поэтому на практике достаточно положить `welcome.css`/`welcome.js` рядом с `welcome.blade.php` —
 они подключатся автоматически при рендере страницы, без единой строчки
 `Asset::style()`/`Asset::script()`:
 
@@ -199,7 +199,7 @@ Asset::configure(resolver: fn (string $file): array => [
 `Field::parse()` реально рендерит соответствующее поле.
 
 Отдельная сложность в том, что несколько разных по смыслу типов полей (`date`, `range`, `color`,
-обычный текст) используют **один и тот же** файл шаблона — `form/input.blade.php` (см.
+обычный текст) используют **один и тот же** файл шаблона — `components/form/input.blade.php` (см.
 `Field::parse()`: они все схлопываются в тип `input` перед рендером). По одному только имени файла
 их не различить, поэтому `discover()` умеет принимать третий аргумент `$context` — то, что не
 следует из пути к файлу, но известно в момент рендера — и передавать его вторым аргументом в
@@ -221,9 +221,9 @@ if (in_array($type, ['color', 'date', /* ... */], true)) {
 // $inputType используется и как uid, и как контекст: без этого color-поле и date-поле
 // на одной странице столкнулись бы на одном uid "input" от общего шаблона, и второе
 // поле по рендеру молча осталось бы без своего скрипта (enqueue дедуплицирует по id).
-Form::assets("form/{$prefix}{$type}", $inputType);
+Form::assets("components/form/{$prefix}{$type}", $inputType);
 
-$content .= Form::view("form/{$prefix}{$type}", $field);
+$content .= Form::view("components/form/{$prefix}{$type}", $field);
 ```
 
 Сам `Builders` не вызывает фасады `View` и `Asset`: шаблон рендерит колбэк `view`, а `discover()`
@@ -237,7 +237,7 @@ Form::configure(
 );
 ```
 
-А в `dashboard/index.php` резолвер использует и путь к файлу, и этот контекст:
+А в `App\Dashboard\Assets` резолвер использует и путь к файлу, и этот контекст:
 
 ```php
 use Expansa\Assets\Manager;
@@ -245,7 +245,7 @@ use Expansa\Assets\Manager;
 $suffix = ! Is::debug() ? '.min' : '';
 
 Manager::configure(resolver: function (string $file, array $context = []) use ($suffix): array {
-    if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/form/')) {
+    if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/components/form/')) {
         return Manager::defaultStructure($file); // всё остальное — по конвенции по умолчанию
     }
 

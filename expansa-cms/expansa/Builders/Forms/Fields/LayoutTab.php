@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/layout-tab.blade.php` - a single tab panel of a tabbed form,
+ * Renders `components/form/layout-tab.blade.php` - a single tab panel of a tabbed form,
  * paired with {@see LayoutTabMenu} for its navigation.
  */
 final class LayoutTab extends AbstractField
@@ -30,7 +30,7 @@ final class LayoutTab extends AbstractField
     public function settings(): array
     {
         return [
-            ['type' => 'text', 'name' => 'label', 'label' => t('Tab label'), 'attributes' => ['required' => true]],
+            ['type' => 'text', 'name' => 'label', 'label' => t('Tab Label'), 'attributes' => ['required' => true]],
             ['type' => 'text', 'name' => 'icon', 'label' => t('Icon')],
             ['type' => 'text', 'name' => 'instruction', 'label' => t('Description')],
         ];

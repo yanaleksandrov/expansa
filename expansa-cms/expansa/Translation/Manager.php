@@ -56,6 +56,13 @@ final class Manager
     private ?Closure $languageSource = null;
 
     /**
+     * Returns the locale chosen for the request, e.g. by the user, or null to detect it from Accept-Language.
+     *
+     * @var null|Closure
+     */
+    private ?Closure $localeSource = null;
+
+    /**
      * Languages from the source, null until the first use.
      *
      * @var array[]|null
@@ -91,11 +98,11 @@ final class Manager
     private array $files = [];
 
     /**
-     * Locale from the Accept-Language header with a dash, false if it can not be detected.
+     * Locale of the request with a dash, false if it can not be detected.
      *
      * @var null|false|string
      */
-    private string|false|null $httpLocale = null;
+    private string|false|null $requestLocale = null;
 
     /**
      * Set the translation lookup and the language list, replacing the previous configuration.
@@ -105,14 +112,18 @@ final class Manager
      * @param string                $overrides Directory with translation overrides.
      * @param Closure|null          $languages `fn (): array` of languages with `locale`, `iso_639_1`, `plural`...,
      *                                         called on the first use; without it plurals follow English.
+     * @param Closure|null          $locale    `fn (): ?string` chosen locale, e.g. of the user, called on the first use;
+     *                                         null or an empty string falls back to Accept-Language.
      * @return void
      */
-    public function configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null): void
+    public function configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null, ?Closure $locale = null): void
     {
         $this->routes         = $routes;
         $this->pattern        = $pattern;
         $this->overrides      = $overrides;
         $this->languageSource = $languages;
+        $this->localeSource   = $locale;
+        $this->requestLocale  = null;
         $this->languages      = null;
         $this->languageIndex  = [];
         $this->pluralRules    = [];
@@ -217,19 +228,32 @@ final class Manager
     }
 
     /**
-     * Get the locale of the request from the Accept-Language header: `en-US`.
+     * Get the locale of the request: the chosen one of configure(), otherwise from the Accept-Language header.
+     * A bare language code like `ru` becomes the locale of that language in the list: `ru-RU`.
      *
-     * @param string $default Locale when the header is missing or can not be parsed.
+     * @param string $default Locale when none is chosen and the header is missing or can not be parsed.
      * @return string
      */
     public function locale(string $default = 'en-US'): string
     {
-        $this->httpLocale ??= function_exists('locale_accept_from_http')
-            && ($locale = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $default)) !== false
-            ? str_replace('_', '-', $locale)
-            : false;
+        if ($this->requestLocale === null) {
+            // a translation inside the callback gets the default instead of calling it again
+            $this->requestLocale = false;
 
-        return $this->httpLocale ?: $default;
+            $locale = (string) ($this->localeSource === null ? '' : ($this->localeSource)());
+            if ($locale === '' && function_exists('locale_accept_from_http')) {
+                $locale = (string) locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $default);
+            }
+
+            $locale = str_replace('_', '-', $locale);
+            if ($locale !== '' && ! str_contains($locale, '-')) {
+                $locale = $this->language(strtolower($locale), 'iso_639_1')['locale'] ?? $locale;
+            }
+
+            $this->requestLocale = $locale ?: false;
+        }
+
+        return $this->requestLocale ?: $default;
     }
 
     /**

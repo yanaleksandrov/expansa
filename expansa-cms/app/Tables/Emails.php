@@ -57,7 +57,7 @@ final class Emails extends AbstractTable
     {
         return [
             'title'       => t('No email templates found'),
-            'description' => t('Add a [new email template](:emailDialog) manually', url('/dashboard/import')),
+            'description' => t('Add a [new email template](:emailDialog) manually.', url('/dashboard/import')),
         ];
     }
 }

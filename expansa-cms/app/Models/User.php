@@ -311,7 +311,7 @@ class User extends Model implements Fieldable, Identity, Subject
 
         $user = parent::get($value, $by);
 
-        return $user instanceof User ? $user : error('user-find', t('User not found.'));
+        return $user instanceof User ? $user : error('user-find', t('User not found'));
     }
 
     /**
@@ -394,6 +394,19 @@ class User extends Model implements Fieldable, Identity, Subject
         $user = Auth::user();
 
         return $user instanceof self ? $user : null;
+    }
+
+    /**
+     * Get the users as select options by id: the shown name or the login, by name; the first 500,
+     * the same limit as the users table.
+     *
+     * @return array<int, string>
+     */
+    public static function options(): array
+    {
+        $users = Db::select('users', ['id [Int]', 'login', 'showname'], ['ORDER' => ['showname' => 'ASC', 'login' => 'ASC'], 'LIMIT' => 500]) ?? [];
+
+        return array_column(array_map(fn (array $user) => ['id' => $user['id'], 'name' => $user['showname'] ?: $user['login']], $users), 'name', 'id');
     }
 
     /**

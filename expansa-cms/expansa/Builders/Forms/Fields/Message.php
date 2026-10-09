@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/message.blade.php` - a static informational or warning message block.
+ * Renders `components/form/message.blade.php` - a static informational or warning message block.
  */
 final class Message extends AbstractField
 {

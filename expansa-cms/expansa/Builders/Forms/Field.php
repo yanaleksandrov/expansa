@@ -32,7 +32,7 @@ class Field
 
             if ($type === 'tab' && ! isset($startTab)) {
                 $startTab = true;
-                $content .= Form::view('form/layout-tab-menu', compact('fields'));
+                $content .= Form::view('components/form/layout-tab-menu', compact('fields'));
             }
 
             // add required attributes & other manipulations
@@ -95,9 +95,9 @@ class Field
             $prefix = in_array($type, [ 'tab', 'step', 'group' ], true) ? 'layout-' : '';
 
             // $inputType is the asset uid, so subtypes sharing form/input (date, range, color) do not collide
-            Form::assets("form/{$prefix}{$type}", $inputType);
+            Form::assets("components/form/{$prefix}{$type}", $inputType);
 
-            $content .= Form::view("form/{$prefix}{$type}", $field);
+            $content .= Form::view("components/form/{$prefix}{$type}", $field);
         }
         return $content;
     }

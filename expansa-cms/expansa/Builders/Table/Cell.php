@@ -26,7 +26,7 @@ final class Cell
         /**
          * Path to get view for render column cell.
          */
-        public string $view = 'table/cell',
+        public string $view = 'components/table/cell',
 
         /**
          * Column is sortable.
@@ -133,7 +133,7 @@ final class Cell
     }
 
     /**
-     * Set the view of the cells: a file path, or a suffix of the default `table/cell` view.
+     * Set the view of the cells: a file path, or a suffix of the default `components/table/cell` view.
      *
      * @param string $filepath
      * @return Cell

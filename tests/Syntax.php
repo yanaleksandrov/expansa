@@ -88,7 +88,7 @@ $files = [
     'env.php',
     'expansa/functions.php',
     'app/Support/Requirements.php',
-    'dashboard/error.php',
+    'dashboard/views/fallback/error.php',
     'index.php',
 ];
 foreach ($files as $file) {

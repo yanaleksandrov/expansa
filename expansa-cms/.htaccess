@@ -9,6 +9,9 @@
     # Never serve the storage (logs, AI tasks, quarantine) and the compiled views
     RewriteRule ^(storage|cache/views)/ - [F,L]
 
+    # The PHP files of the dashboard (templates, forms, data) are only included by the app, never run directly
+    RewriteRule ^dashboard/.+\.php$ - [F,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

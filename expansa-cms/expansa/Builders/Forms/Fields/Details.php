@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/details.blade.php` - a collapsible `<details>` block, typically used
+ * Renders `components/form/details.blade.php` - a collapsible `<details>` block, typically used
  * to group optional or advanced content.
  */
 final class Details extends AbstractField

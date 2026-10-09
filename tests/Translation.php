@@ -79,4 +79,26 @@ check('languageOptions() gives flag and name', $listing->languageOptions()['ru-R
 check('the language source is called once', $calls === 1);
 check('no configured languages give an empty list', $translator->languageOptions() === [] && $translator->language('ru') === []);
 
+// the chosen locale picks the translation file; without it the Accept-Language header decides
+$dir = sys_get_temp_dir() . '/expansa-i18n-' . getmypid();
+@mkdir("$dir/i18n", 0777, true);
+file_put_contents("$dir/i18n/ru-RU.json", json_encode(['Users' => 'Пользователи', ':count file|:count files' => ':count файл|:count файла|:count файлов']));
+
+$russian = new Manager();
+$russian->configure(routes: [__DIR__ => $dir], pattern: 'i18n/%s', languages: fn () => $languages, locale: fn () => 'ru-RU');
+check('the chosen locale is used', $russian->locale() === 'ru-RU');
+check('a string is translated from the file of the chosen locale', $russian->translate('Users') === 'Пользователи');
+check('the plural rule of the chosen locale picks the form', $russian->translatePlural(':count file|:count files', 3) === '3 файла'
+    && $russian->translatePlural(':count file|:count files', 5) === '5 файлов');
+check('a missing string stays English', $russian->translate('Pages') === 'Pages');
+
+$_SERVER['HTTP_ACCEPT_LANGUAGE'] = 'ru';
+$header = new Manager();
+$header->configure(routes: [], pattern: '%s', languages: fn () => $languages, locale: fn () => null);
+check('no chosen locale falls back to Accept-Language, a language code becomes its locale', $header->locale() === (function_exists('locale_accept_from_http') ? 'ru-RU' : 'en-US'));
+
+array_map('unlink', glob("$dir/i18n/*"));
+rmdir("$dir/i18n");
+rmdir($dir);
+
 exit($failures > 0 ? 1 : 0);

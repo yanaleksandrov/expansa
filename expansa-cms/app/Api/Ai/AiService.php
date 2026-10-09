@@ -348,7 +348,7 @@ final class AiService
                 'text' => t_attr('The task needs PHP extensions that are not installed: %s. Install them or change the task.', implode(', ', $draft->missingExtensions)),
             ],
             Status::Failed    => [...$message, 'text' => t_attr('The generation failed.'), 'errors' => [$task->error]],
-            Status::Cancelled => [...$message, 'text' => t_attr('Stopped.')],
+            Status::Cancelled => [...$message, 'text' => t_attr('Stopped')],
         };
     }
 

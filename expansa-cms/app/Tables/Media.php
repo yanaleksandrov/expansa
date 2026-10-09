@@ -37,7 +37,7 @@ final class Media extends AbstractTable
         return [
             'icon'        => 'no-media',
             'title'       => t('No files found in the library'),
-            'description' => t('Either nothing has been uploaded yet or no files match the current filters'),
+            'description' => t('Either nothing has been uploaded yet or no files match the current filters.'),
         ];
     }
 }

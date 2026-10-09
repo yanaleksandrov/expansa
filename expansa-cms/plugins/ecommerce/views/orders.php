@@ -11,7 +11,7 @@
 ?>
 <div class="expansa-main">
     <?php
-    echo view('table/header', [
+    echo view('components/table/header', [
         'title' => t('Orders'),
     ]);
     ?>

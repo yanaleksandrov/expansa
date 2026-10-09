@@ -4,6 +4,7 @@ use App\Models\Option;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
+use Expansa\Patterns\Registry;
 
 /**
  * Website settings in dashboard
@@ -47,7 +48,7 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'general',
 			'type'    => 'tab',
 			'label'   => t( 'General' ),
-			'caption' => t( 'main settings' ),
+			'caption' => t( 'Main Settings' ),
 			'icon'    => 'ph ph-tree-structure',
 			'fields'  => [
 				[
@@ -90,7 +91,7 @@ return Expansa\Facades\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'In a few words, explain what this site is about' ),
+							'instruction' => t( 'In a few words, explain what this site is about.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -111,7 +112,7 @@ return Expansa\Facades\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'Some description' ),
+							'instruction' => t( 'Main language of the site. The dashboard of each user follows the language of their profile.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -127,7 +128,7 @@ return Expansa\Facades\Form::enqueue(
 							'type'        => 'text',
 							'name'        => 'site[url]',
 							'error'       => 'site.url',
-							'label'       => t( 'Site address (URL)' ),
+							'label'       => t( 'Site Address (URL)' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -159,7 +160,7 @@ return Expansa\Facades\Form::enqueue(
 							'type'        => 'text',
 							'name'        => 'owner[email]',
 							'error'       => 'owner.email',
-							'label'       => t( 'Owner email address' ),
+							'label'       => t( 'Owner Email Address' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -206,13 +207,13 @@ return Expansa\Facades\Form::enqueue(
 								'users[membership]' => [
 									'content'     => t( 'Anyone can register' ),
 									'icon'        => 'ph ph-user-list',
-									'description' => t( 'Allow visitors to create an account on the site' ),
+									'description' => t( 'Allow visitors to create an account on the site.' ),
 									'checked'     => Option::get( 'users.membership', true ),
 								],
 								'users[moderate]' => [
 									'content'     => t( 'Must confirm' ),
 									'icon'        => 'ph ph-police-car',
-									'description' => t( 'Choose how new accounts are verified' ),
+									'description' => t( 'Choose how new accounts are verified.' ),
 									'checked'     => Option::get( 'users.moderate', false ),
 								],
 							],
@@ -221,13 +222,13 @@ return Expansa\Facades\Form::enqueue(
 							'type'        => 'select',
 							'name'        => 'users[role]',
 							'error'       => 'users.role',
-							'label'       => '',
+							'label'       => t( 'Default Role' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'New user default role' ),
+							'instruction' => t( 'Role given to people who sign up on the site.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -249,7 +250,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'dates',
-					'label'         => t( 'Date and time' ),
+					'label'         => t( 'Date and Time' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -353,16 +354,11 @@ return Expansa\Facades\Form::enqueue(
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'u-prop' => 'timezone',
-								'value' => Option::get( 'timezone' ),
+								'u-prop'   => 'timezone',
+								'u-select' => '{"showSearch": 1}',
+								'value'    => Option::get( 'timezone', 'UTC' ),
 							],
-							'options' => [
-								'subscriber'    => t( 'Subscriber' ),
-								'contributor'   => t( 'Contributor' ),
-								'author'        => t( 'Author' ),
-								'editor'        => t( 'Editor' ),
-								'administrator' => t( 'Administrator' ),
-							],
+							'options'     => Registry::get( 'timezones' ),
 						],
 					],
 				],
@@ -372,13 +368,13 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'reading',
 			'type'    => 'tab',
 			'label'   => t( 'Reading' ),
-			'caption' => t( 'displaying posts' ),
+			'caption' => t( 'Displaying Posts' ),
 			'icon'    => 'ph ph-book-open-text',
 			'fields'  => [
 				[
 					'type'          => 'group',
 					'name'          => 'search_engine',
-					'label'         => t( 'Search engine' ),
+					'label'         => t( 'Search Engine' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -416,13 +412,13 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'discussions',
 			'type'    => 'tab',
 			'label'   => t( 'Discussions' ),
-			'caption' => t( 'comments' ),
+			'caption' => t( 'Comments' ),
 			'icon'    => 'ph ph-chats-circle',
 			'fields'  => [
 				[
 					'type'          => 'group',
 					'name'          => 'comments',
-					'label'         => t( 'Post comments' ),
+					'label'         => t( 'Post Comments' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -453,7 +449,7 @@ return Expansa\Facades\Form::enqueue(
 								'comments[require_name_email]' => [
 									'content'     => t( 'Comment author must fill out name and email' ),
 									'icon'        => 'ph ph-textbox',
-									'description' => t( 'If disabled, only the name is required' ),
+									'description' => t( 'If disabled, only the name is required.' ),
 									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[registration]' => [
@@ -481,7 +477,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'comments',
-					'label'         => t( 'Email me whenever' ),
+					'label'         => t( 'Email Me Whenever' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -522,7 +518,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'appears',
-					'label'         => t( 'Before a comment appears' ),
+					'label'         => t( 'Before a Comment Appears' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -563,7 +559,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'avatars',
-					'label'         => t( 'Avatar display' ),
+					'label'         => t( 'Avatar Display' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -638,30 +634,30 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'security',
 			'type'    => 'tab',
 			'label'   => t( 'Security' ),
-			'caption' => t( 'sign-in options' ),
+			'caption' => t( 'Sign-In Options' ),
 			'icon'    => 'ph ph-shield-check',
 			'fields'  => [
 				[
 					'type'          => 'group',
 					'name'          => 'sign-in-limits',
-					'label'         => t( 'Password guessing' ),
+					'label'         => t( 'Password Guessing' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
 					'fields'        => [
-						$field( 'number', 'security[attempts]', t( 'Wrong passwords before a lockout' ), t( 'Per browser that signed in before, or per login from unknown browsers; 0 turns the limit off.' ), [
+						$field( 'number', 'security[attempts]', t( 'Wrong Passwords Before a Lockout' ), t( 'Per browser that signed in before, or per login from unknown browsers; 0 turns the limit off.' ), [
 							'value' => (int) Option::get( 'security.attempts', 5 ),
 							'min'   => 0,
 						] ),
-						$field( 'number', 'security[ip_attempts]', t( 'Wrong passwords per IP' ), t( 'From unknown browsers, for any login: stops one password tried on many accounts; 0 turns it off.' ), [
+						$field( 'number', 'security[ip_attempts]', t( 'Wrong Passwords per IP' ), t( 'From unknown browsers, for any login: stops one password tried on many accounts; 0 turns it off.' ), [
 							'value' => (int) Option::get( 'security.ip_attempts', 50 ),
 							'min'   => 0,
 						] ),
-						$field( 'number', 'security[lockout]', t( 'First lockout, minutes' ), t( 'Each next lockout is twice as long, up to a day.' ), [
+						$field( 'number', 'security[lockout]', t( 'First Lockout, Minutes' ), t( 'Each next lockout is twice as long, up to a day.' ), [
 							'value' => (int) Option::get( 'security.lockout', 15 ),
 							'min'   => 1,
 						] ),
-						$field( 'number', 'security[log_days]', t( 'Keep the security log, days' ), t( 'Sign-ins and changes shown in the profiles; 0 keeps them forever.' ), [
+						$field( 'number', 'security[log_days]', t( 'Keep the Security Log, Days' ), t( 'Sign-ins and changes shown in the profiles; 0 keeps them forever.' ), [
 							'value' => (int) Option::get( 'security.log_days', 90 ),
 							'min'   => 0,
 						] ),
@@ -685,15 +681,15 @@ return Expansa\Facades\Form::enqueue(
 							'attributes'  => [ 'u-prop' => '' ],
 							'options'     => [
 								'security[breached]' => [
-									'content'     => t( 'Refuse breached passwords' ),
+									'content'     => t( 'Refuse Breached Passwords' ),
 									'icon'        => 'ph ph-password',
-									'description' => t( 'Checks new passwords against public breaches; only 5 characters of a hash leave the site' ),
+									'description' => t( 'Checks new passwords against public breaches; only 5 characters of a hash leave the site.' ),
 									'checked'     => (bool) Option::get( 'security.breached', true ),
 								],
 								'security[email_link]' => [
-									'content'     => t( 'Sign in by an email link' ),
+									'content'     => t( 'Sign In by an Email Link' ),
 									'icon'        => 'ph ph-envelope-simple-open',
-									'description' => t( 'A one-time link valid for 15 minutes; two-factor authentication still asks for its code' ),
+									'description' => t( 'A one-time link valid for 15 minutes; two-factor authentication still asks for its code.' ),
 									'checked'     => (bool) Option::get( 'security.email_link', false ),
 								],
 							],
@@ -703,7 +699,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'two-factor',
-					'label'         => t( 'Two-factor authentication' ),
+					'label'         => t( 'Two-Factor Authentication' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -713,13 +709,13 @@ return Expansa\Facades\Form::enqueue(
 							'type'        => 'checkbox',
 							'name'        => '',
 							'error'       => '',
-							'label'       => t( 'Required for roles' ),
+							'label'       => t( 'Required for Roles' ),
 							'class'       => 'field field--ui',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'Users of these roles set up an authenticator app before they can use the dashboard' ),
+							'instruction' => t( 'Users of these roles set up an authenticator app before they can use the dashboard.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -742,24 +738,24 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'oauth',
-					'label'         => t( 'Sign-in providers' ),
+					'label'         => t( 'Sign-In Providers' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
 					'fields'        => [
-						$field( 'text', 'oauth[google][client_id]', t( 'Google client ID' ), t( 'Callback URL: :url', url( 'oauth/google/callback' ) ), [
+						$field( 'text', 'oauth[google][client_id]', t( 'Google Client ID' ), t( 'Callback URL: :url', url( 'oauth/google/callback' ) ), [
 							'value' => (string) Option::get( 'oauth.google.client_id' ),
 						] ),
-						$field( 'password', 'oauth[google][client_secret]', t( 'Google client secret' ), $saved( 'oauth.google.client_secret' ), [
+						$field( 'password', 'oauth[google][client_secret]', t( 'Google Client Secret' ), $saved( 'oauth.google.client_secret' ), [
 							'autocomplete' => 'new-password',
 						] ),
-						$field( 'text', 'oauth[github][client_id]', t( 'GitHub client ID' ), t( 'Callback URL: :url', url( 'oauth/github/callback' ) ), [
+						$field( 'text', 'oauth[github][client_id]', t( 'GitHub Client ID' ), t( 'Callback URL: :url', url( 'oauth/github/callback' ) ), [
 							'value' => (string) Option::get( 'oauth.github.client_id' ),
 						] ),
-						$field( 'password', 'oauth[github][client_secret]', t( 'GitHub client secret' ), $saved( 'oauth.github.client_secret' ), [
+						$field( 'password', 'oauth[github][client_secret]', t( 'GitHub Client Secret' ), $saved( 'oauth.github.client_secret' ), [
 							'autocomplete' => 'new-password',
 						] ),
-						$field( 'text', 'oauth[openid][label]', t( 'OpenID Connect provider name' ), t( 'Any OpenID Connect provider, e.g. GitLab or Keycloak. Callback URL: :url', url( 'oauth/openid/callback' ) ), [
+						$field( 'text', 'oauth[openid][label]', t( 'OpenID Connect Provider Name' ), t( 'Any OpenID Connect provider, e.g. GitLab or Keycloak. Callback URL: :url', url( 'oauth/openid/callback' ) ), [
 							'value' => (string) Option::get( 'oauth.openid.label' ),
 						] ),
 						$field( 'text', 'oauth[openid][issuer]', t( 'Issuer URL' ), t( 'e.g. https://gitlab.com' ), [
@@ -768,7 +764,7 @@ return Expansa\Facades\Form::enqueue(
 						$field( 'text', 'oauth[openid][client_id]', t( 'Client ID' ), '', [
 							'value' => (string) Option::get( 'oauth.openid.client_id' ),
 						] ),
-						$field( 'password', 'oauth[openid][client_secret]', t( 'Client secret' ), $saved( 'oauth.openid.client_secret' ), [
+						$field( 'password', 'oauth[openid][client_secret]', t( 'Client Secret' ), $saved( 'oauth.openid.client_secret' ), [
 							'autocomplete' => 'new-password',
 						] ),
 					],
@@ -779,13 +775,13 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'mail',
 			'type'    => 'tab',
 			'label'   => t( 'Mail' ),
-			'caption' => t( 'outgoing email' ),
+			'caption' => t( 'Outgoing Email' ),
 			'icon'    => 'ph ph-envelope-simple',
 			'fields'  => [
 				[
 					'type'          => 'group',
 					'name'          => 'smtp',
-					'label'         => t( 'SMTP server' ),
+					'label'         => t( 'SMTP Server' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -803,8 +799,8 @@ return Expansa\Facades\Form::enqueue(
 								'value' => (string) Option::get( 'mail.encryption', 'ssl' ),
 							] ),
 							'options' => [
-								'ssl'  => t( 'SSL' ),
-								'tls'  => t( 'STARTTLS' ),
+								'ssl'  => 'SSL',
+								'tls'  => 'STARTTLS',
 								'none' => t( 'None' ),
 							],
 						],
@@ -815,11 +811,11 @@ return Expansa\Facades\Form::enqueue(
 						$field( 'password', 'mail[password]', t( 'Password' ), $saved( 'mail.password' ), [
 							'autocomplete' => 'new-password',
 						] ),
-						$field( 'email', 'mail[from]', t( 'Sender address' ), t( 'An address of the site domain, otherwise the mail lands in spam.' ), [
+						$field( 'email', 'mail[from]', t( 'Sender Address' ), t( 'An address of the site domain, otherwise the mail lands in spam.' ), [
 							'value'       => (string) Option::get( 'mail.from' ),
 							'placeholder' => 'no-reply@example.com',
 						] ),
-						$field( 'text', 'mail[from_name]', t( 'Sender name' ), t( 'The site name when empty.' ), [
+						$field( 'text', 'mail[from_name]', t( 'Sender Name' ), t( 'The site name when empty.' ), [
 							'value' => (string) Option::get( 'mail.from_name' ),
 						] ),
 						[
@@ -828,7 +824,7 @@ return Expansa\Facades\Form::enqueue(
 							'callback' => static function () {
 								?>
 								<div class="df aic g-3">
-									<button class="btn btn--outline" type="button" @click="$ajax.post('options/mail-test')"><i class="ph ph-paper-plane-tilt"></i> <?php echo t( 'Send a test email' ); ?></button>
+									<button class="btn btn--outline" type="button" @click="$ajax.post('options/mail-test')"><i class="ph ph-paper-plane-tilt"></i> <?php echo t( 'Send a Test Email' ); ?></button>
 									<span class="fs-13 t-muted"><?php echo t( 'To your email, with the saved settings.' ); ?></span>
 								</div>
 								<?php
@@ -839,7 +835,7 @@ return Expansa\Facades\Form::enqueue(
 				[
 					'type'          => 'group',
 					'name'          => 'dkim',
-					'label'         => t( 'DKIM signature' ),
+					'label'         => t( 'DKIM Signature' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -850,10 +846,10 @@ return Expansa\Facades\Form::enqueue(
 						$field( 'text', 'mail[dkim][selector]', t( 'Selector' ), t( 'Name of the DNS record with the public key, e.g. "mail" for mail._domainkey.' ), [
 							'value' => (string) Option::get( 'mail.dkim.selector' ),
 						] ),
-						$field( 'textarea', 'mail[dkim][private]', t( 'Private key' ), $saved( 'mail.dkim.private', t( 'PEM, begins with -----BEGIN PRIVATE KEY-----.' ) ), [
+						$field( 'textarea', 'mail[dkim][private]', t( 'Private Key' ), $saved( 'mail.dkim.private', t( 'PEM, begins with -----BEGIN PRIVATE KEY-----.' ) ), [
 							'rows' => 4,
 						] ),
-						$field( 'password', 'mail[dkim][passphrase]', t( 'Key passphrase' ), $saved( 'mail.dkim.passphrase', t( 'Only for an encrypted key.' ) ), [
+						$field( 'password', 'mail[dkim][passphrase]', t( 'Key Passphrase' ), $saved( 'mail.dkim.passphrase', t( 'Only for an encrypted key.' ) ), [
 							'autocomplete' => 'new-password',
 						] ),
 					],
@@ -864,13 +860,13 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'ai',
 			'type'    => 'tab',
 			'label'   => t( 'AI' ),
-			'caption' => t( 'plugin generation' ),
+			'caption' => t( 'Plugin Generation' ),
 			'icon'    => 'ph ph-sparkle',
 			'fields'  => [
 				[
 					'type'          => 'group',
 					'name'          => 'ai-service',
-					'label'         => t( 'AI service' ),
+					'label'         => t( 'AI Service' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -879,11 +875,11 @@ return Expansa\Facades\Form::enqueue(
 							'value'       => (string) Option::get( 'ai.url', App\Support\Ai::URL ),
 							'placeholder' => App\Support\Ai::URL,
 						] ),
-						$field( 'text', 'ai[model]', t( 'Model' ), t( 'e.g. gemini-flash-latest, or a model id of OpenRouter ending in :free.' ), [
+						$field( 'text', 'ai[model]', t( 'Model' ), t( 'e.g. gemini-flash-latest, or a model ID of OpenRouter ending in :free.' ), [
 							'value'       => (string) Option::get( 'ai.model', App\Support\Ai::MODEL ),
 							'placeholder' => App\Support\Ai::MODEL,
 						] ),
-						$field( 'password', 'ai[key]', t( 'Service key' ), $saved( 'ai.key', t( 'A local service needs none.' ) ), [
+						$field( 'password', 'ai[key]', t( 'Service Key' ), $saved( 'ai.key', t( 'A local service needs none.' ) ), [
 							'autocomplete' => 'new-password',
 						] ),
 						$field( 'hidden', 'ai[schemas]', '', '', [ 'type' => 'hidden', 'value' => 0 ] ),
@@ -905,9 +901,9 @@ return Expansa\Facades\Form::enqueue(
 							'attributes'  => [ 'u-prop' => '' ],
 							'options'     => [
 								'ai[schemas]' => [
-									'content'     => t( 'Structured output' ),
+									'content'     => t( 'Structured Output' ),
 									'icon'        => 'ph ph-brackets-curly',
-									'description' => t( 'Turn off for models without json_schema support: the schema then goes into the instructions' ),
+									'description' => t( 'Turn off for models without json_schema support: the schema then goes into the instructions.' ),
 									'checked'     => (bool) Option::get( 'ai.schemas', true ),
 								],
 							],
@@ -920,13 +916,13 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'roles',
 			'type'    => 'tab',
 			'label'   => t( 'Roles' ),
-			'caption' => t( 'permissions of users' ),
+			'caption' => t( 'Permissions of Users' ),
 			'icon'    => 'ph ph-users-three',
 			'fields'  => [
 				[
 					'type'          => 'group',
 					'name'          => 'roles',
-					'label'         => t( 'Roles and permissions' ),
+					'label'         => t( 'Roles and Permissions' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => '',
@@ -988,13 +984,13 @@ return Expansa\Facades\Form::enqueue(
 			'name'    => 'storage',
 			'type'    => 'tab',
 			'label'   => t( 'Storage' ),
-			'caption' => t( 'media options' ),
+			'caption' => t( 'Media Options' ),
 			'icon'    => 'ph ph-lockers',
 			'fields'  => [
 				[
 					'type'          => 'group',
 					'name'          => 'images',
-					'label'         => t( 'File uploads' ),
+					'label'         => t( 'File Uploads' ),
 					'class'         => '',
 					'label_class'   => '',
 					'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -1003,7 +999,7 @@ return Expansa\Facades\Form::enqueue(
 							'type'        => 'select',
 							'name'        => 'images[format]',
 							'error'       => 'images.format',
-							'label'       => t( 'Convert images to' ),
+							'label'       => t( 'Convert Images To' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -1020,14 +1016,14 @@ return Expansa\Facades\Form::enqueue(
 							],
 							'options'     => [
 								''     => t( 'Do not convert' ),
-								'wepb' => t( 'WebP' ),
+								'wepb' => 'WebP',
 							],
 						],
 						[
 							'type'        => 'select',
 							'name'        => 'images[organization]',
 							'error'       => 'images.organization',
-							'label'       => t( 'File organization' ),
+							'label'       => t( 'File Organization' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -1052,8 +1048,8 @@ return Expansa\Facades\Form::enqueue(
 			'name'        => 'permalinks',
 			'type'        => 'tab',
 			'label'       => t( 'Permalinks' ),
-			'caption'     => t( 'URL structure' ),
-			'description' => t( 'custom URL structures can improve the aesthetics, usability, and forward-compatibility of your links' ),
+			'caption'     => t( 'URL Structure' ),
+			'description' => t( 'Custom URL structures can improve the aesthetics, usability, and forward-compatibility of your links.' ),
 			'icon'        => 'ph ph-link',
 			'fields'      => [
 				[
@@ -1068,7 +1064,7 @@ return Expansa\Facades\Form::enqueue(
 							'type'        => 'text',
 							'name'        => 'permalinks[pages][single]',
 							'error'       => 'permalinks.pages.single',
-							'label'       => t( 'Single page' ),
+							'label'       => t( 'Single Page' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,

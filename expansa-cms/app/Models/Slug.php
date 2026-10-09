@@ -111,7 +111,7 @@ class Slug extends Model
 
         $slug = parent::get($value, $by);
 
-        return $slug instanceof Slug ? $slug : error('slug-find', t('Slug not found.'));
+        return $slug instanceof Slug ? $slug : error('slug-find', t('Slug not found'));
     }
 
     /**
@@ -125,7 +125,7 @@ class Slug extends Model
     {
         $slug = static::where(['entity_id' => $entityId, 'entity_table' => $entityTable])->first();
 
-        return $slug instanceof Slug ? $slug : error('slug-find', t('Slug not found.'));
+        return $slug instanceof Slug ? $slug : error('slug-find', t('Slug not found'));
     }
 
     /**

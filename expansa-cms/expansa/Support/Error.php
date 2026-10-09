@@ -7,7 +7,7 @@ namespace Expansa\Support;
 use JsonSerializable;
 
 /**
- * Error with a code, returned instead of a result: `return new Error('media_upload', t('...'))`.
+ * Error with a code, returned instead of a result: `return new Error('media_upload', '...')`.
  * The caller checks it with `instanceof Error`. Each instance keeps only its own messages.
  *
  * @package Expansa\Support

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Facades\Dashboard;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;
-use Expansa\Facades\Hook;
 use Expansa\Support\Is;
 
 return new class extends Plugin
@@ -27,15 +27,9 @@ return new class extends Plugin
 
         Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
 
-        Hook::add('viewPart', static function ($filepath) {
-            if ($filepath === EX_DASHBOARD . 'views/fields-builder.php') {
-                $filepath = __DIR__ . '/views/fields-builder.php';
-            }
-            if ($filepath === EX_DASHBOARD . 'views/forms-builder.php') {
-                $filepath = __DIR__ . '/views/forms-builder.php';
-            }
-            return $filepath;
-        });
+        foreach (['fields-builder', 'forms-builder'] as $page) {
+            Dashboard::page($page, view: __DIR__ . "/views/$page");
+        }
 
         Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
             [

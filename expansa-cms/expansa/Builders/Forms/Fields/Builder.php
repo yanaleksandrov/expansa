@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/builder.blade.php` - a visual rule builder for constructing
+ * Renders `components/form/builder.blade.php` - a visual rule builder for constructing
  * custom field location/visibility conditions (post type, status, role, ...).
  */
 final class Builder extends AbstractField

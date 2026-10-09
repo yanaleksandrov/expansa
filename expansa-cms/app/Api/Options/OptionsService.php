@@ -47,7 +47,7 @@ final class OptionsService
             Option::update($option, $value);
         }
 
-        return $response->notify(t('Options updated successfully.'));
+        return $response->notify(t('Options updated successfully'));
     }
 
     /**
@@ -97,7 +97,7 @@ final class OptionsService
             ->message('<p>' . t('The mail settings work.') . '</p>');
 
         $notice = $message->send()
-            ? t('Test email sent to :email.', $user->email)
+            ? t('Test email sent to :email', $user->email)
             : t('The email was not sent: :error', $message->error);
 
         return $response->notify($notice);

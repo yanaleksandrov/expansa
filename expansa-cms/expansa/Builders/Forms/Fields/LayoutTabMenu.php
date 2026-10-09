@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/layout-tab-menu.blade.php` - the navigation menu for a set of
+ * Renders `components/form/layout-tab-menu.blade.php` - the navigation menu for a set of
  * {@see LayoutTab} fields. Expects the full fields array under `fields`.
  */
 final class LayoutTabMenu extends AbstractField

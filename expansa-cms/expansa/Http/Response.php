@@ -15,7 +15,7 @@ use Stringable;
  * An API response can instead ask `$ajax` (src/js/youla-ajax.js) to run actions on the page, in order:
  *
  * ```php
- * return $response->notify(t('Token revoked.'))->remove("#token-$id");
+ * return $response->notify(t('Token revoked'))->remove("#token-$id");
  * ```
  *
  * Each action is a fragment `{target, action[:delay]: value}`; page-wide ones (notify, redirect, reload,

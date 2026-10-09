@@ -9,7 +9,7 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 
 /**
- * Resolves view names to template files: `form/checkbox` in the view directories, `seo::panel` in the
+ * Resolves view names to template files: `components/form/checkbox` in the view directories, `seo::panel` in the
  * directories of a namespace, an absolute path without extension as is. A directory is listed once,
  * a found or missing view is remembered.
  *

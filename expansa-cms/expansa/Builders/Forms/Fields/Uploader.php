@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/uploader.blade.php` - a drag-and-drop file uploader with a
+ * Renders `components/form/uploader.blade.php` - a drag-and-drop file uploader with a
  * configurable maximum size.
  */
 final class Uploader extends AbstractField
@@ -30,8 +30,8 @@ final class Uploader extends AbstractField
     {
         return [
             ...$this->baseSettings(false),
-            ['type' => 'text', 'name' => 'max_size', 'label' => t('Maximum file size')],
-            ['type' => 'text', 'name' => 'attributes.accept', 'label' => t('Accepted file types')],
+            ['type' => 'text', 'name' => 'max_size', 'label' => t('Maximum File Size')],
+            ['type' => 'text', 'name' => 'attributes.accept', 'label' => t('Accepted File Types')],
         ];
     }
 

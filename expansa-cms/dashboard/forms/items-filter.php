@@ -36,7 +36,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'submit',
 			'name'        => 'submit',
-			'label'       => t( 'Apply filter' ),
+			'label'       => t( 'Apply Filter' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

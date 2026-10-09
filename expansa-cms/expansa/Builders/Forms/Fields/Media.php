@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 use Expansa\Security\Sanitizer;
 
 /**
- * Renders `form/media.blade.php` - attaches one or more media files with inline previews.
+ * Renders `components/form/media.blade.php` - attaches one or more media files with inline previews.
  */
 final class Media extends AbstractField
 {
@@ -31,7 +31,7 @@ final class Media extends AbstractField
     {
         return [
             ...$this->baseSettings(false),
-            ['type' => 'text', 'name' => 'attributes.accept', 'label' => t('Accepted file types')],
+            ['type' => 'text', 'name' => 'attributes.accept', 'label' => t('Accepted File Types')],
         ];
     }
 

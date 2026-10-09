@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/hidden.blade.php` - stores a fixed or computed value without displaying an input.
+ * Renders `components/form/hidden.blade.php` - stores a fixed or computed value without displaying an input.
  */
 final class Hidden extends AbstractField
 {

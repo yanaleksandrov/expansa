@@ -91,9 +91,9 @@ final class PostsService
 
         return [
             'completed' => true,
-            'output'    => View::create(EX_DASHBOARD . 'views/global/state', [
+            'output'    => View::create(EX_DASHBOARD . 'views/components/state', [
                 'icon'        => 'success',
-                'title'       => t('Import is complete!'),
+                'title'       => t('Import Is Complete'),
                 'description' => t(':counts posts were imported successfully. Do you want to [start another import](:link)?', count($imported), url('/dashboard/import')),
             ]),
         ];

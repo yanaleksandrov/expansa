@@ -50,7 +50,7 @@ final class FieldGroupsService
             return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        return $response->notify(t('Field group created.'), Notice::Success)->redirect('?group=' . $group->id, 600);
+        return $response->notify(t('Field group created'), Notice::Success)->redirect('?group=' . $group->id, 600);
     }
 
     public function update(Request $request, Response $response): Response
@@ -70,7 +70,7 @@ final class FieldGroupsService
             return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        return $response->notify(t('Field group updated.'), Notice::Success);
+        return $response->notify(t('Field group updated'), Notice::Success);
     }
 
     public function delete(Request $request, Response $response): Response
@@ -87,7 +87,7 @@ final class FieldGroupsService
 
         $group->delete();
 
-        return $response->notify(t('Field group deleted.'), Notice::Success)->redirect('/dashboard/field-groups', 600);
+        return $response->notify(t('Field group deleted'), Notice::Success)->redirect('/dashboard/field-groups', 600);
     }
 
     /**

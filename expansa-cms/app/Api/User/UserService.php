@@ -79,7 +79,7 @@ final class UserService
             return $response->notify(t('User updated. Open the link we have sent to :email to change the email.', $email));
         }
 
-        return $response->notify(t('User updated.'));
+        return $response->notify(t('User updated'));
     }
 
     /**
@@ -238,7 +238,7 @@ final class UserService
             return $this->unconfirmed($response);
         }
 
-        return $response->update('#two-factor', view('parts/two-factor', ['user' => $user, 'setup' => TwoFactor::setup($user)])->render());
+        return $response->update('#two-factor', view('components/two-factor', ['user' => $user, 'setup' => TwoFactor::setup($user)])->render());
     }
 
     /**
@@ -258,7 +258,7 @@ final class UserService
 
         return $response
             ->notify(t('Two-factor authentication is on.'))
-            ->update('#two-factor', view('parts/two-factor', ['user' => $user, 'codes' => $codes])->render());
+            ->update('#two-factor', view('components/two-factor', ['user' => $user, 'codes' => $codes])->render());
     }
 
     /**
@@ -283,7 +283,7 @@ final class UserService
 
         return $response
             ->notify(t('Two-factor authentication is off.'))
-            ->update('#two-factor', view('parts/two-factor', ['user' => $user])->render());
+            ->update('#two-factor', view('components/two-factor', ['user' => $user])->render());
     }
 
     /**
@@ -302,7 +302,7 @@ final class UserService
 
         $codes = TwoFactor::regenerateCodes($user);
 
-        return $response->update('#two-factor', view('parts/two-factor', ['user' => $user, 'codes' => $codes])->render());
+        return $response->update('#two-factor', view('components/two-factor', ['user' => $user, 'codes' => $codes])->render());
     }
 
     /**
@@ -343,8 +343,8 @@ final class UserService
         Events::record($user, 'passkey_added', ['name' => $passkey['name']]);
 
         return $response
-            ->notify(t('Passkey added to your account.'))
-            ->prepend('#passkeys', view('parts/passkey', ['passkey' => $passkey])->render());
+            ->notify(t('Passkey added to your account'))
+            ->prepend('#passkeys', view('components/passkey', ['passkey' => $passkey])->render());
     }
 
     /**
@@ -363,13 +363,13 @@ final class UserService
 
         $id = (int) ($request->post['id'] ?? 0);
         if (! Passkey::delete($user, $id)) {
-            return $response->notify(t('Passkey not found.'));
+            return $response->notify(t('Passkey not found'));
         }
 
         Events::record($user, 'passkey_removed');
 
         return $response
-            ->notify(t('Passkey removed.'))
+            ->notify(t('Passkey removed'))
             ->remove("#passkey-$id");
     }
 
@@ -411,13 +411,13 @@ final class UserService
 
         $id = (int) ($request->post['id'] ?? 0);
         if (! Identities::delete($user, $id)) {
-            return $response->notify(t('Account not found.'));
+            return $response->notify(t('Account not found'));
         }
 
         Events::record($user, 'provider_disconnected');
 
         return $response
-            ->notify(t('Account disconnected.'))
+            ->notify(t('Account disconnected'))
             ->remove("#identity-$id");
     }
 
@@ -453,7 +453,7 @@ final class UserService
 
         $id = (int) ($request->post['id'] ?? 0);
         if (! Sessions::deleteById($user, $id)) {
-            return $response->notify(t('Device not found.'));
+            return $response->notify(t('Device not found'));
         }
 
         Events::record($user, 'session_revoked');
@@ -481,7 +481,7 @@ final class UserService
         Events::record($user, 'sessions_revoked', ['count' => $count]);
 
         return $response
-            ->notify(t('Signed out of other devices: :count.', $count))
+            ->notify(t('Signed out of other devices: :count', $count))
             ->remove('[data-session-other]');
     }
 
@@ -538,7 +538,7 @@ final class UserService
         return $response
             ->notify(t('Token created. Copy it now: it is not shown again.'))
             ->update('#token-created', '<code class="p-3 card card-border fs-13">' . htmlspecialchars($token) . '</code>')
-            ->update('#tokens', view('parts/tokens', ['tokens' => Tokens::all($user)])->render());
+            ->update('#tokens', view('components/tokens', ['tokens' => Tokens::all($user)])->render());
     }
 
     /**
@@ -557,11 +557,11 @@ final class UserService
 
         $id = (int) ($request->post['id'] ?? 0);
         if (! Tokens::delete($user, $id)) {
-            return $response->notify(t('Token not found.'));
+            return $response->notify(t('Token not found'));
         }
 
         return $response
-            ->notify(t('Token revoked.'))
+            ->notify(t('Token revoked'))
             ->remove("#token-$id");
     }
 
@@ -590,7 +590,7 @@ final class UserService
      */
     public function adminSignOut(Request $request, Response $response): Response
     {
-        return $this->administer($request, $response, true, fn (User $admin, User $user) => t('Signed out of devices: :count.', Admin::signOut($admin, $user)));
+        return $this->administer($request, $response, true, fn (User $admin, User $user) => t('Signed out of devices: :count', Admin::signOut($admin, $user)));
     }
 
     /**
@@ -637,7 +637,7 @@ final class UserService
         $admin = User::current();
         $user  = Admin::find((int) ($request->post['id'] ?? 0));
         if ($user === null) {
-            return $response->notify(t('User not found.'));
+            return $response->notify(t('User not found'));
         }
 
         if (! Confirmation::check($admin, $request->post)) {
@@ -821,7 +821,7 @@ final class UserService
         $admin = User::current();
         $user  = Admin::find((int) ($request->post['id'] ?? 0));
         if ($user === null) {
-            return $response->notify(t('User not found.'));
+            return $response->notify(t('User not found'));
         }
 
         if ($needsConfirmation && ! Confirmation::check($admin, $request->post)) {

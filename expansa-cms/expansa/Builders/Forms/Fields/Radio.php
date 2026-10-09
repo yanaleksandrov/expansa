@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/radio.blade.php` - a group of radio buttons for a single-value choice.
+ * Renders `components/form/radio.blade.php` - a group of radio buttons for a single-value choice.
  */
 final class Radio extends AbstractField
 {

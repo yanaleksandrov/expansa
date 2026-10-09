@@ -203,7 +203,7 @@ throw new ResponseReady(new Response($csv, headers: ['Content-Type' => 'text/csv
 - без `errors` — уведомлением `message`, без него или без сети — текстами `messages`.
 
 Селектор поля, места ошибки и классы, адрес API, имена CSRF-cookie и заголовка, тексты — настройки
-`Youla.ajax`. `DashboardAssets` кладёт их в данные `youla` (`ajax`), а youla-expansa.js переносит в
+`Youla.ajax`. `App\Dashboard\Assets` кладёт их в данные `youla` (`ajax`), а youla-expansa.js переносит в
 `Youla.ajax`.
 
 Промис `$ajax` при этом отклоняется, `.then()` не выполняется, а в консоли нет «Uncaught (in promise)».

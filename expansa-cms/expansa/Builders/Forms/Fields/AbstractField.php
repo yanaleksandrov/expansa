@@ -12,7 +12,7 @@ use Expansa\Security\Sanitizer;
  * Base class for all field type descriptors registered via {@see \Expansa\Builders\Form::configure()}.
  *
  * A subclass describes one entry in the field type palette (label/icon/description),
- * knows which `dashboard/views/form/*.blade.php` template renders it, and provides the
+ * knows which `dashboard/views/components/form/*.blade.php` template renders it, and provides the
  * settings & validation rules for that field type.
  */
 abstract class AbstractField implements Field
@@ -20,7 +20,7 @@ abstract class AbstractField implements Field
     public function __construct(
 
         /**
-         * Template name under `views/form/` (without extension).
+         * Template name under `views/components/form/` (without extension).
          */
         public readonly string $type,
 
@@ -60,7 +60,7 @@ abstract class AbstractField implements Field
      */
     public function view(): string
     {
-        return "form/{$this->type}";
+        return "components/form/{$this->type}";
     }
 
     public function assets(): void

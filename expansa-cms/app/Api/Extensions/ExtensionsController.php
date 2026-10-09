@@ -8,7 +8,7 @@ use App\Http\Can;
 
 /**
  * Note: nothing in the dashboard currently calls this endpoint — the real extensions
- * list (dashboard/views/table/header.blade.php) renders from the actual framework
+ * list (dashboard/views/components/table/header.blade.php) renders from the actual framework
  * facade Expansa\Facades\Extensions, not this class. This is UI-prototype mock data,
  * kept as-is per the migration (not deleted, since that wasn't asked for here).
  */

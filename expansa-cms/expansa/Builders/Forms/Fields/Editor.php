@@ -6,7 +6,7 @@ namespace Expansa\Builders\Forms\Fields;
 
 /**
  * A rich text editor for formatted content. No WYSIWYG asset is wired into the
- * dashboard yet, so this renders `form/textarea.blade.php` as a plain-text fallback
+ * dashboard yet, so this renders `components/form/textarea.blade.php` as a plain-text fallback
  * until a real editor (and its own template) is registered.
  */
 final class Editor extends AbstractField
@@ -29,7 +29,7 @@ final class Editor extends AbstractField
 
     public function view(): string
     {
-        return 'form/textarea';
+        return 'components/form/textarea';
     }
 
     public function settings(): array

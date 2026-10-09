@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/progress.blade.php` - an animated progress bar indicator.
+ * Renders `components/form/progress.blade.php` - an animated progress bar indicator.
  */
 final class Progress extends AbstractField
 {
@@ -31,10 +31,10 @@ final class Progress extends AbstractField
     {
         return [
             ['type' => 'text', 'name' => 'label', 'label' => t('Label')],
-            ['type' => 'number', 'name' => 'min', 'label' => t('Minimum value')],
-            ['type' => 'number', 'name' => 'max', 'label' => t('Maximum value')],
-            ['type' => 'number', 'name' => 'value', 'label' => t('Current value')],
-            ['type' => 'number', 'name' => 'speed', 'label' => t('Animation speed (ms)')],
+            ['type' => 'number', 'name' => 'min', 'label' => t('Minimum Value')],
+            ['type' => 'number', 'name' => 'max', 'label' => t('Maximum Value')],
+            ['type' => 'number', 'name' => 'value', 'label' => t('Current Value')],
+            ['type' => 'number', 'name' => 'speed', 'label' => t('Animation Speed (ms)')],
         ];
     }
 

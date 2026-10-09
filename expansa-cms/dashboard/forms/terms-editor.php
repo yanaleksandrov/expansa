@@ -37,7 +37,7 @@ return \Expansa\Facades\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => t( 'The name is how it appears on your site' ),
+			'instruction' => t( 'The name is how it appears on your site.' ),
 			'attributes'  => [
 				'u-prop' => 'title',
 				'@input' => 'slug = $safe.slug(title)',
@@ -65,7 +65,7 @@ return \Expansa\Facades\Form::enqueue(
 		],
 		[
 			'type'        => 'select',
-			'label'       => t( 'Parent category' ),
+			'label'       => t( 'Parent Category' ),
 			'name'        => 'parent',
 			'error'       => 'parent',
 			'value'       => '',
@@ -87,7 +87,7 @@ return \Expansa\Facades\Form::enqueue(
 		],
 		[
 			'type'        => 'textarea',
-			'label'       => t( 'Short description' ),
+			'label'       => t( 'Short Description' ),
 			'name'        => 'description',
 			'error'       => 'description',
 			'value'       => '',

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/layout-step.blade.php` - a single step of a multi-step (wizard) form.
+ * Renders `components/form/layout-step.blade.php` - a single step of a multi-step (wizard) form.
  */
 final class LayoutStep extends AbstractField
 {

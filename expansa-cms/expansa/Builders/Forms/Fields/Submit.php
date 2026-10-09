@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders\Forms\Fields;
 
 /**
- * Renders `form/submit.blade.php` - a submit button.
+ * Renders `components/form/submit.blade.php` - a submit button.
  */
 final class Submit extends AbstractField
 {
@@ -28,7 +28,7 @@ final class Submit extends AbstractField
     public function settings(): array
     {
         return [
-            ['type' => 'text', 'name' => 'label', 'label' => t('Button text'), 'attributes' => ['required' => true]],
+            ['type' => 'text', 'name' => 'label', 'label' => t('Button Text'), 'attributes' => ['required' => true]],
         ];
     }
 

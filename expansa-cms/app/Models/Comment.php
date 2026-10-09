@@ -164,7 +164,7 @@ class Comment extends Model
 
         $comment = parent::get($value, $by);
 
-        return $comment instanceof Comment ? $comment : error('comment-find', t('Comment not found.'));
+        return $comment instanceof Comment ? $comment : error('comment-find', t('Comment not found'));
     }
 
     /**

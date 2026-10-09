@@ -7,7 +7,7 @@ namespace Expansa\Builders\Forms\Fields;
 use Expansa\Security\Sanitizer;
 
 /**
- * Renders `form/textarea.blade.php` - a multi-line free text input.
+ * Renders `components/form/textarea.blade.php` - a multi-line free text input.
  */
 final class Textarea extends AbstractField
 {

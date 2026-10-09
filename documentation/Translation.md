@@ -24,12 +24,22 @@ I18n::translatePlural(':count file|:count files', 5);            // '5 files'
 
 ```php
 I18n::configure(
-    routes: [EX_CORE => EX_DASHBOARD, EX_PLUGINS => EX_PLUGINS . ':dirname'],
+    routes: [EX_CORE => EX_DASHBOARD, EX_PLUGINS => EX_PLUGINS . ':dirname', EX_PATH => EX_DASHBOARD],
     pattern: 'i18n/%s',
     overrides: EX_I18N,
     languages: fn () => Hook::call('languages', Registry::get('languages')),
+    locale: fn () => App\Models\User::current()?->locale,
 );
 ```
+
+Перевод строки ищется по файлу, из которого вызван `t()`: первый маршрут, путь которого содержит этот
+файл, даёт каталог переводов, а `pattern` с локалью — имя файла (`dashboard/i18n/ru-RU.json`). Последний
+маршрут `EX_PATH` отдаёт переводам дашборда всё остальное: `app/`, скомпилированные шаблоны в `cache/views`,
+`bootstrap.php`. Файл — JSON `{"исходная строка": "перевод"}`; строки без перевода остаются английскими.
+`dashboard/i18n/en-US.json` — каталог всех строк ядра и дашборда, с него начинается перевод на новый язык.
+
+`locale` — колбэк выбранной локали, у дашборда это язык из профиля пользователя. Он вызывается один раз,
+при первом переводе; `null` или пустая строка — локаль из `Accept-Language`.
 
 `languages` — колбэк, возвращающий список языков: `name`, `native`, `locale`, `iso_639_1`,
 `country`, `nplurals`, `plural`. Он вызывается один раз, при первом обращении к языкам, поэтому
@@ -80,13 +90,14 @@ I18n::translateAttributePlural('One comment|:count comments', $total); // для
 ## Языки и локаль
 
 ```php
-I18n::locale();                       // 'ru-RU' из Accept-Language, иначе 'en-US'
+I18n::locale();                       // 'ru-RU': выбранная в configure(), иначе из Accept-Language, иначе 'en-US'
 I18n::language('ru', 'iso_639_1');    // язык по полю, [] если не найден
 I18n::languageOptions();              // ['ru-RU' => ['flag' => 'ru', 'content' => 'Russian - Русский'], ...]
 ```
 
 `language()` строит индекс по полю при первом поиске, дальше поиск не зависит от длины списка.
-Для `locale()` нужен `ext-intl`, без него возвращается значение по умолчанию.
+Код языка без региона (`ru` из заголовка) становится локалью этого языка из списка: `ru-RU`. Для
+`Accept-Language` нужен `ext-intl`, без него возвращается значение по умолчанию.
 
 ## Производительность
 

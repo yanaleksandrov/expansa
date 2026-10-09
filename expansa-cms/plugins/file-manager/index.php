@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Facades\Dashboard;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;
-use Expansa\Facades\Hook;
 use Expansa\Support\Is;
 
 return new class extends Plugin
@@ -25,13 +25,7 @@ return new class extends Plugin
             return;
         }
 
-        // TODO: переделать подключение файлов плагинов
-        Hook::add('viewPart', static function ($filepath) {
-            if ($filepath === EX_DASHBOARD . 'views/file-manager.php') {
-                $filepath = __DIR__ . '/views/file-manager.php';
-            }
-            return $filepath;
-        });
+        Dashboard::page('file-manager', view: __DIR__ . '/views/file-manager');
 
         Asset::style('file-manager', '/plugins/file-manager/assets/css/main.css');
 

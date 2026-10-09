@@ -82,7 +82,7 @@ final class Plugins extends AbstractTable
         return [
             'icon'        => 'no-plugins',
             'title'       => t('No plugins installed yet'),
-            'description' => t('You can upload them manually or install them from the repository'),
+            'description' => t('You can upload them manually or install them from the repository.'),
         ];
     }
 }

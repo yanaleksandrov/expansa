@@ -6,9 +6,9 @@
 ```php
 use Expansa\Facades\View;
 
-echo view('global/state', ['title' => t('Nothing found')]);
+echo view('components/state', ['title' => t('Nothing found')]);
 
-$view = View::create('form/checkbox', $field);
+$view = View::create('components/form/checkbox', $field);
 Asset::discover($view->path);
 echo $view->render();
 ```
@@ -39,7 +39,7 @@ Blade-шаблоны: файл пересобирается, когда он с�
 
 ## Использование
 
-Имя вида — путь от каталога видов без расширения: `form/checkbox`. Ещё два вида имён:
+Имя вида — путь от каталога видов без расширения: `components/form/checkbox`. Ещё два вида имён:
 
 - `seo::panel` — вид из каталогов пространства имён, их добавляет `View::addNamespace('seo', $dir)`;
 - абсолютный путь без расширения — файл как есть: `View::create(EX_DASHBOARD . 'forms/posts-import-fields')`.
@@ -51,7 +51,7 @@ Blade-шаблоны: файл пересобирается, когда он с�
 ```php
 View::share('user', $user);            // переменная всех видов
 View::getShared('user');               // её значение
-View::exists('dialogs/media-editor');  // есть ли вид
+View::exists('components/dialogs/media-editor');  // есть ли вид
 
 view('page')->with('title', 'Главная')->withSlug('home')->beautify()->render();
 ```

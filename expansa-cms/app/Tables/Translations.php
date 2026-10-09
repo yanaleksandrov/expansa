@@ -31,7 +31,7 @@ final class Translations extends AbstractTable
     public function cells(): array
     {
         return [
-            $this->cell('source')->title(t('Source text'))->view('raw'),
+            $this->cell('source')->title(t('Source Text'))->view('raw'),
             $this->cell('value')->title(t('Translations'))->view('text'),
         ];
     }
