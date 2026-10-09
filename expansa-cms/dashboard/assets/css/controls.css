@@ -1145,16 +1145,17 @@ input[type=radio]:checked {
   line-height: 1.2em;
   font-size: 0.9285714286em;
   color: var(--expansa-danger);
-  margin-top: -1em;
-  padding: 0.875rem 0.75rem 0.375rem;
+  margin-top: -0.875rem;
+  padding: 1.25rem 0.6875rem 0.5rem;
   z-index: -1;
+  background-color: rgb(252.13, 241.14, 241.14);
   border-bottom-left-radius: var(--expansa-border-radius);
   border-bottom-right-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field.is-invalid .field-item, .field.is-invalid .field-item:focus-within {
-  border-color: var(--expansa-danger);
-  box-shadow: 0 0 0 2px rgba(214, 57, 57, 0.2196078431);
+  border-color: var(--expansa-danger) !important;
+  box-shadow: 0 0 0 2px rgb(252.13, 241.14, 241.14) !important;
 }
 .field-item {
   padding-inline: 0.8em;
