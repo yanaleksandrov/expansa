@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Facades\Form;
+use Expansa\Builders\Form;
 use Expansa\Facades\Safe;
 
 $resetToken = Safe::trim($_GET['token'] ?? '');

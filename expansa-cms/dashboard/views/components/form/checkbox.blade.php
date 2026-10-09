@@ -52,7 +52,7 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 			<span class="field-icon"><i class="{{ $icon }}"></i></span>
 		@endif
 		<input class="field-checkbox"<?php echo Arr::toHtmlAttributes( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'u-prop' => $prop, 'checked' => $checked ] ); ?>>
-		<div class="<?php echo $label_class; ?>">
+		<div class="<?php echo $label_class; ?>"<?php echo ! $key && ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
 			<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>
 				<span class="field-instruction"><?php echo $instruction; ?></span>

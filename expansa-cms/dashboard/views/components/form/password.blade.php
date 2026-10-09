@@ -42,7 +42,7 @@ $attributes = [
 ];
 ?>
 <div class="{{ $class }}" u-data="password">
-	<div class="{{ $labelClass }}">
+	<div class="{{ $labelClass }}"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
 		{!! $label !!}
 		@if($generator)
 			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = generate()">{{ t( 'Generate' ) }}</div>

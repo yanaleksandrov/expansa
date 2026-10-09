@@ -10,7 +10,7 @@ use App\Tables\Media;
 use App\Tables\Pages;
 use App\Tables\Translations;
 use App\Tables\Users;
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 use Expansa\Http\Request;
 
 /**
@@ -23,7 +23,7 @@ final class Tables
     /**
      * Tables of the lists that are not post types, by `table`.
      *
-     * @var array<string, class-string<AbstractTable>>
+     * @var array<string, class-string<Table>>
      */
     private const array TABLES = [
         'comments'    => Comments::class,
@@ -48,7 +48,7 @@ final class Tables
      * Data of the `edit` page: the table.
      *
      * @param Request $request
-     * @return array{table: AbstractTable}
+     * @return array{table: Table}
      */
     public static function data(Request $request): array
     {

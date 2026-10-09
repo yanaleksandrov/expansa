@@ -43,7 +43,7 @@ Hook::add('renderDashboardFooter', function () {
             </template>
         </div>
 
-        @foreach($table->data as $item)
+        @foreach($table->getData() as $item)
             <div class="storage__item" @click="$dialog.open('tmpl-media-editor', item)">
                 <img class="storage__image" src="{{ $item['sizes']['thumbnail']['url'] ?? $item['url'] ?? $item['icon'] ?? '' }}" width="200" height="200" alt>
                 <div class="storage__meta">

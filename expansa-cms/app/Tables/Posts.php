@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 
-final class Posts extends AbstractTable
+final class Posts extends Table
 {
     public function data(): array
     {

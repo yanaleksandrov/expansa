@@ -34,7 +34,7 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 ?>
 <div class="<?php echo $class; ?> field--timezone">
 	@if($label || $instruction)
-		<div class="{{ $labelClass }}">
+		<div class="{{ $labelClass }}"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
 			{!! $label !!}
 
 			@if($instruction)

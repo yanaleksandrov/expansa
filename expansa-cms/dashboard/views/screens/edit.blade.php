@@ -5,7 +5,7 @@ use Expansa\Facades\Hook;
 /**
  * Posts list template can be overridden by copying it to themes/yourtheme/dashboard/views/screens/edit.php
  *
- * @var Expansa\Builders\Table\AbstractTable $table
+ * @var Expansa\Builders\Table $table
  *
  * @package Expansa\Templates
  */
@@ -25,8 +25,8 @@ Hook::add('renderDashboardFooter', function () {
         </div>
     </div>
 
-    @if($table->data)
-        @foreach($table->data as $item)
+    @if($table->getData())
+        @foreach($table->getData() as $item)
             <div class="table__row hover">
                 @foreach($table->cells as $cell)
                     <div class="{{ $cell->key }}">

@@ -47,7 +47,7 @@ echo tree('dashboard-main-menu', $test = function ($items, $tree) use (&$test) {
                 </li>
                 <?php
             }
-                echo $tree->vsprintf(ob_get_clean(), $item);
+                echo $tree->format(ob_get_clean(), $item);
             }
         ?>
     </ul>

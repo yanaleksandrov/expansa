@@ -36,7 +36,7 @@ unset( $attributes['value'] );
 ?>
 <div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes( $conditions ); ?>>
 	<?php if ( $label ) : ?>
-		<div class="<?php echo $label_class; ?>"><?php
+		<div class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php
 			echo $label;
 			if ( $reset ) :
 				$click = sprintf( "%s = '%s'", $prop, $value );

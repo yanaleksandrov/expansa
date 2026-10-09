@@ -67,7 +67,7 @@ return new class extends Plugin
          *
          * @since 2025.1
          */
-        \Expansa\Facades\Form::enqueue(
+        \Expansa\Builders\Form::enqueue(
             'builder/fields',
             [
                 'class'  => 'dg p-7 g-7',

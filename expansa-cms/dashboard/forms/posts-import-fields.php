@@ -10,7 +10,7 @@ if ( empty( $samples ) ) {
     return;
 }
 
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'import-fields',
 	fields: [
 		[

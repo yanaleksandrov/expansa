@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 use Expansa\Facades\Disk;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Json;
 
-final class Translations extends AbstractTable
+final class Translations extends Table
 {
     public function data(): array
     {

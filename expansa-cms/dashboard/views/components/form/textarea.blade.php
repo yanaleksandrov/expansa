@@ -38,7 +38,7 @@ unset( $attributes['value'] );
 ?>
 <div class="<?php echo $class; ?>"<?php echo $conditions ? " u-show=\"{$conditions}\" hidden" : ''; ?>>
 	<?php if ( $label ) : ?>
-		<span class="<?php echo $label_class; ?>"><?php echo $label; ?></span>
+		<span class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php echo $label; ?></span>
 	<?php endif; ?>
 	<label class="field-item">
 		<?php echo $before; ?>

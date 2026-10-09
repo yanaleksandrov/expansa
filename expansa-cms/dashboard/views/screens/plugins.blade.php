@@ -11,9 +11,9 @@
 ?>
 <?php echo view('components/table/header', $table->headData()); ?>
 
-@if($table->data)
+@if($table->getData())
     <div class="plugins">
-        @foreach($table->data as $item)
+        @foreach($table->getData() as $item)
             <?php echo view($table->cells[0]->view, $item); ?>
         @endforeach
     </div>

@@ -20,7 +20,7 @@ echo tree('dashboard-panel-menu', $test = function ($items, $tree) use (&$test) 
                 <a class="panel__link" href="%url$s"><i class="%icon$s"></i></a>
             </li>
             <?php
-            echo $tree->vsprintf(ob_get_clean(), $item);
+            echo $tree->format(ob_get_clean(), $item);
         }
         ?>
     </ul>

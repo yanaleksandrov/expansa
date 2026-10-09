@@ -1,5 +1,5 @@
 <?php
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
     'system-install',
     [
         'class'           => 'dg g-2',

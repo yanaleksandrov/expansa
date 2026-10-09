@@ -213,10 +213,8 @@ final class Manager
      */
     private function menuTitle(string $url): ?string
     {
-        $tree = Tree::init();
-
         foreach (['dashboard-main-menu', 'dashboard-panel-menu', 'dashboard-user-menu'] as $menu) {
-            foreach ($tree->list[$menu] ?? [] as $item) {
+            foreach (Tree::get($menu)->items as $item) {
                 if (($item['url'] ?? null) === $url && is_string($item['title'] ?? null) && $item['title'] !== '') {
                     return $item['title'];
                 }

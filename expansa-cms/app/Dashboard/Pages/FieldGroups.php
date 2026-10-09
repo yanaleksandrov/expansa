@@ -51,7 +51,7 @@ final class FieldGroups
 
     /**
      * Curated palette of field types a group can be built from. Deliberately narrower than the
-     * full `Expansa\Builders\Forms\Fields\*` registry: structural/internal types (layout-group,
+     * full `Expansa\Builders\Form\Fields\*` registry: structural/internal types (layout-group,
      * layout-tab, submit, hidden, custom, builder) aren't things an editor picks ad hoc here.
      *
      * @return array<string, array{label: string, options: array<string, array{label: string, icon: string}>}>

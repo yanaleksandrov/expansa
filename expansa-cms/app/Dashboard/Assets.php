@@ -157,7 +157,7 @@ final class Assets
 
     /**
      * Assets of a template for Assets\Manager::discover(): a form field gets the vendor JS of its type,
-     * the rest the co-located files. date/range/color share form/input.blade.php, so Field::parse()
+     * the rest the co-located files. date/range/color share form/input.blade.php, so Renderer::render()
      * passes the original subtype as `$context['type']` to tell them apart.
      *
      * @param string               $file

@@ -14,14 +14,14 @@
         <?php echo form('terms-editor', EX_DASHBOARD . 'forms/terms-editor.php'); ?>
     </div>
     <div class="terms-main">
-        @if($table->data)
+        @if($table->getData())
             <div class="table" u-data="table">
                 <div class="table__head" style="{{ $table->style }}">
                     @foreach($table->cells as $cell)
                         <?php echo view('components/table/cell-head', [ 'cell' => $cell ]); ?>
                     @endforeach
                 </div>
-                @foreach($table->data as $item)
+                @foreach($table->getData() as $item)
                     <div class="table__row" style="{{ $table->style }}">
                         @foreach($table->cells as $cell)
                             <?php echo view($cell->view, ['class' => $cell->key, ...$item]); ?>

@@ -50,7 +50,7 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 			<span class="field-icon"><i class="<?php echo $icon; ?>"></i></span>
 		<?php endif; ?>
 		<input<?php echo Arr::toHtmlAttributes( [ ...$attributes, 'type' => 'radio', 'value' => $value, 'name' => $name, 'u-prop' => $prop, 'checked' => $checked ] ); ?>>
-		<span class="<?php echo $label_class; ?>">
+		<span class="<?php echo $label_class; ?>"<?php echo ! $key && ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
 		<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>
 				<span class="field-instruction"><?php echo $instruction; ?></span>

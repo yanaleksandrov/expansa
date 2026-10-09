@@ -40,7 +40,7 @@ if ($accounts !== []) {
     <?php
 }
 
-echo Tree::include('dashboard-user-menu', function ($items, $tree) {
+echo Tree::render('dashboard-user-menu', function ($items, $tree) {
     if (empty($items) || ! is_array($items)) {
         return false;
     }
@@ -60,7 +60,7 @@ echo Tree::include('dashboard-user-menu', function ($items, $tree) {
                 </li>
                 <?php
             }
-            echo $tree->vsprintf(ob_get_clean(), $item);
+            echo $tree->format(ob_get_clean(), $item);
         }
         ?>
     </ul>

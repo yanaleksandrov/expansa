@@ -52,7 +52,7 @@ Hook::add('renderDashboardFooter', function () {
 		</div>
 		<div class="dg g-1 mw50x9">
 			<?php if ( $label ) : ?>
-				<div class="<?php echo $label_class; ?>"><?php echo $label; ?></div>
+				<div class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php echo $label; ?></div>
 			<?php endif; ?>
 			<div class="fs-13 t-muted lh-xs dg g-1">
 				<div>

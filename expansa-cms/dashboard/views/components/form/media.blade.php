@@ -41,7 +41,7 @@ $appendSelected = $multiple
 ?>
 <div class="<?php echo $class; ?>" u-data="{<?php echo $name; ?>: []}">
     <?php if ($label) : ?>
-        <span class="<?php echo $label_class; ?>">
+        <span class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
             <?php Safe::html($label); ?>
             <?php if ($tooltip) : ?>
                 <i class="ph ph-info" u-tooltip.click.prevent="'<?php echo $tooltip; ?>'"></i>

@@ -24,7 +24,7 @@ foreach ($languages as $language) {
  *
  * @since 2025.1
  */
-return Expansa\Facades\Form::enqueue(
+return Expansa\Builders\Form::enqueue(
     'multilingual-settings',
     [
         'class'   => 'tab tab--vertical',

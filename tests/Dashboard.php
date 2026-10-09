@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Dashboard\Manager;
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 use Expansa\Http\Request;
 
 // run: php tests/Dashboard.php
@@ -46,7 +46,7 @@ check('a later provider overrides the keys of an earlier one', $data['user'] ===
 check('providers of other pages do not run', ! isset($data['invoices']));
 check('`*` runs on a page without providers of its own', $collect->invoke($manager, 'reports', $request, []) === ['user' => 'admin']);
 
-$table = new class extends AbstractTable {
+$table = new class extends Table {
     public function data(): array
     {
         return [];

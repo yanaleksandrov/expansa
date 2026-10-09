@@ -10,7 +10,7 @@ use App\Api\User\TwoFactor;
 use App\Models\User;
 use App\Support\Passwords;
 use Expansa\Facades\Auth;
-use Expansa\Facades\Form;
+use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 use Expansa\Facades\Safe;

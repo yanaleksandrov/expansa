@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use App\Models\User;
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 use Expansa\Facades\Db;
 use PDO;
 
-final class Users extends AbstractTable
+final class Users extends Table
 {
     /**
      * Users with the time of their last sign-in, the first 500 by ID.

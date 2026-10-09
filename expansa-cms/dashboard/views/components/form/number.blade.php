@@ -32,7 +32,7 @@ $prop = Safe::prop($attributes['name'] ?? $name);
 ?>
 <div class="<?php echo $class; ?>">
 	<?php if ( $label ) : ?>
-		<div class="<?php echo $label_class; ?>"><?php echo $label; ?></div>
+		<div class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php echo $label; ?></div>
 	<?php endif; ?>
 	<div class="field-item">
 		<i class="ph ph-minus" @click="<?php echo $prop; ?>--"></i>

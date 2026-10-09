@@ -35,7 +35,7 @@ $field = static fn ( string $type, string $name, string $label, string $instruct
 // instruction of a secret field: the saved value is never shown back, see App\Support\Secrets
 $saved = static fn ( string $option, string $instruction = '' ): string => Option::get( $option ) ? t( 'Saved. Leave empty to keep it.' ) : $instruction;
 
-return Expansa\Facades\Form::enqueue(
+return Expansa\Builders\Form::enqueue(
 	'settings',
 	[
 		'class'           => 'tab tab--vertical',

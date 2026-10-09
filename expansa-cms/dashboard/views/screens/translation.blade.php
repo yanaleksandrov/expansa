@@ -14,7 +14,7 @@ if (! $table instanceof Expansa\Builders\Table) {
 echo view('components/table/header', $table->headData());
 ?>
 
-@if($table->data)
+@if($table->getData())
     <form class="translation" method="POST" @input.debounce.500ms="$ajax.post('translations/update',{project})" u-data="{items: {}}">
         <div class="translation-head">
             @foreach($table->cells as $i => $cell)
@@ -29,7 +29,7 @@ echo view('components/table/header', $table->headData());
                 <textarea rows="1" u-textarea="7" :value="item.value">{{ $item['value'] ?? '' }}</textarea>
             </label>
         </div>
-        @foreach($table->data as $item)
+        @foreach($table->getData() as $item)
             <div class="translation-grid">
                 <div class="translation-source">{{ $item['source'] ?? '' }}</div>
                 <label class="translation-value">

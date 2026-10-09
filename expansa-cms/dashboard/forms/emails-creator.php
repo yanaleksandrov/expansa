@@ -7,7 +7,7 @@ use Expansa\Facades\Safe;
  *
  * @since 2025.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'emails-creator',
 	[
 		'@submit.window' => '$ajax.post("import-email")',

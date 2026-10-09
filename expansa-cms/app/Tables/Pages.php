@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use App\Models\User;
-use Expansa\Builders\Table\AbstractTable;
-use Expansa\Facades\Form;
+use Expansa\Builders\Form;
+use Expansa\Builders\Table;
 
-final class Pages extends AbstractTable
+final class Pages extends Table
 {
     public function data(): array
     {
@@ -74,7 +74,8 @@ final class Pages extends AbstractTable
 
     public function filter(): void
     {
-        Form::override('items-filter', static fn (\Expansa\Builders\Forms\Form $form) => $form->before('submit')->attach(
+        Form::override('items-filter', static fn (Form $form) => $form->before(
+            'submit',
             [
                 [
                     'type'        => 'select',
@@ -115,7 +116,7 @@ final class Pages extends AbstractTable
                         'placeholder' => t('Select dates'),
                     ],
                 ],
-            ]
+            ],
         ));
     }
 }

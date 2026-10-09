@@ -93,7 +93,7 @@ final class FieldGroupsService
     /**
      * Normalize the raw request payload (title/status/location/fields, the latter two sent
      * as JSON strings by the builder UI) into the shape {@see FieldGroup} expects - `fields`
-     * ends up in exactly the shape {@see \Expansa\Builders\Forms\Field::parse()} consumes.
+     * ends up in exactly the shape {@see \Expansa\Builders\Form::renderFields()} consumes.
      */
     private function prepare(array $input): array
     {
@@ -113,7 +113,7 @@ final class FieldGroupsService
 
     /**
      * One field row from the builder UI (flat: type/label/name/required/placeholder/...)
-     * into the canonical `Field::parse()` shape (attributes nested, options as an assoc array).
+     * into the canonical `Form::renderFields()` shape (attributes nested, options as an assoc array).
      */
     private function normalizeField(array $field): array
     {

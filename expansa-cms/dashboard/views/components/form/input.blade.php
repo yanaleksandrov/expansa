@@ -34,7 +34,7 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 ?>
 <div class="<?php echo $class; ?>">
 	@if($label)
-		<div class="{{ $labelClass }}">{!! $label !!}</div>
+		<div class="{{ $labelClass }}"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>{!! $label !!}</div>
 	@endif
 	<label class="field-item">
 		{!! $before !!}

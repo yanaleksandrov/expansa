@@ -155,10 +155,7 @@ if (! function_exists('tree')) {
      */
     function tree(string $name, callable $function): string
     {
-        ob_start();
-        Expansa\Builders\Tree::view($name, $function);
-
-        return (string) ob_get_clean();
+        return Expansa\Builders\Tree::render($name, $function);
     }
 }
 
@@ -176,7 +173,7 @@ if (! function_exists('form')) {
             require_once $path;
         }
 
-        return Expansa\Facades\Form::render($uid);
+        return Expansa\Builders\Form::render($uid);
     }
 }
 

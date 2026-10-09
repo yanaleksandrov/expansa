@@ -9,9 +9,9 @@
 ?>
 <?php echo view('components/table/header', $table->headData()); ?>
 
-@if($table->data)
+@if($table->getData())
     <div class="themes">
-        @foreach($table->data as $item)
+        @foreach($table->getData() as $item)
             <div class="themes-item">
                 <?php echo view($table->cells[0]->view, $item); ?>
             </div>

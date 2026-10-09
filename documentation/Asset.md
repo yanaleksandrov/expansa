@@ -196,44 +196,36 @@ Asset::configure(resolver: fn (string $file): array => [
 В дашборде часть JS-виджетов (`youla-select.js` и т.п.) раньше подключалась безусловно на каждой
 странице — независимо от того, есть ли на ней вообще поле нужного типа. С `discover()` и
 `configure()` это подключение стало условным: скрипт грузится только на страницах, где
-`Field::parse()` реально рендерит соответствующее поле.
+`Renderer::render()` реально рендерит соответствующее поле.
 
 Отдельная сложность в том, что несколько разных по смыслу типов полей (`date`, `range`, `color`,
 обычный текст) используют **один и тот же** файл шаблона — `components/form/input.blade.php` (см.
-`Field::parse()`: они все схлопываются в тип `input` перед рендером). По одному только имени файла
+`Renderer::renderTemplate()`: все они рендерятся шаблоном `input`). По одному только имени файла
 их не различить, поэтому `discover()` умеет принимать третий аргумент `$context` — то, что не
 следует из пути к файлу, но известно в момент рендера — и передавать его вторым аргументом в
 резолвер `configure()`.
 
-В `Expansa\Builders\Forms\Field::parse()`, там же, где рендерится шаблон поля, до схлопывания типа
-запоминается исходный подтип поля:
+В `Expansa\Builders\Form\Internal\Renderer::renderTemplate()` шаблон выбирается по типу поля, а uid ассета —
+сам тип:
 
 ```php
-// $type ещё не схлопнут в 'input' — сохраняем его для discover().
-$inputType = $type;
+$template = match (true) { /* ... */ }; // date, range, color → input
 
-if (in_array($type, ['color', 'date', /* ... */], true)) {
-    $type = 'input';
-}
+// без этого color-поле и date-поле на одной странице столкнулись бы на одном uid "input"
+// от общего шаблона, и второе молча осталось бы без своего скрипта (enqueue дедуплицирует по id).
+Form::assets($template, $type);
 
-// ...
-
-// $inputType используется и как uid, и как контекст: без этого color-поле и date-поле
-// на одной странице столкнулись бы на одном uid "input" от общего шаблона, и второе
-// поле по рендеру молча осталось бы без своего скрипта (enqueue дедуплицирует по id).
-Form::assets("components/form/{$prefix}{$type}", $inputType);
-
-$content .= Form::view("components/form/{$prefix}{$type}", $field);
+return Form::view($template, $field);
 ```
 
-Сам `Builders` не вызывает фасады `View` и `Asset`: шаблон рендерит колбэк `view`, а `discover()`
-вызывает колбэк `assets` из `Form::configure()` в `bootstrap.php`:
+`Builders` не знает ни каталога шаблонов, ни фасадов `View` и `Asset`: имя шаблона (`input`,
+`layout-tab`) превращают в файл колбэки `view` и `assets` из `Form::configure()` в `bootstrap.php`:
 
 ```php
 Form::configure(
-    fields: [/* ... */],
-    view: fn (string $template, array $data) => (string) View::create($template, $data),
-    assets: fn (string $template, string $uid) => Asset::discover(View::create($template)->path, $uid, ['type' => $uid]),
+    types: [/* ... */],
+    view: fn (string $template, array $data) => (string) View::create("components/form/$template", $data),
+    assets: fn (string $template, string $uid) => Asset::discover(View::create("components/form/$template")->path, $uid, ['type' => $uid]),
 );
 ```
 
