@@ -14,6 +14,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'uploader',
 			'name'        => 'files',
+			'error'       => 'files',
 			'label'       => '',
 			'class'       => '',
 			'label_class' => '',
@@ -42,6 +43,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'textarea',
 			'name'        => 'urls',
+			'error'       => 'urls',
 			'label'       => t( 'Or upload from an external URL' ),
 			'class'       => '',
 			'label_class' => '',

@@ -78,6 +78,7 @@ final class Pages extends AbstractTable
                 [
                     'type'        => 'select',
                     'name'        => 'authors',
+                    'error'       => 'authors',
                     'label'       => '',
                     'class'       => 'field field--sm field--outline',
                     'label_class' => '',
@@ -98,6 +99,7 @@ final class Pages extends AbstractTable
                 [
                     'type'        => 'date',
                     'name'        => 'date',
+                    'error'       => 'date',
                     'label'       => '',
                     'class'       => 'field field--sm field--outline',
                     'label_class' => '',

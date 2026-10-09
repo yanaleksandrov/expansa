@@ -16,6 +16,7 @@ defined('EX_PATH') || exit;
                 [
                     'type' => 'select',
                     'name' => 'menu-editing',
+                    'error' => 'menu-editing',
                     'label' => t('Select a menu to edit'),
                     'class' => 'field field--outline',
                     'label_class' => 'df fs-13 t-muted',
@@ -63,6 +64,7 @@ defined('EX_PATH') || exit;
                 [
                     'type' => 'text',
                     'name' => 'menu-name',
+                    'error' => 'menu-name',
                     'label' => '',
                     'class' => '',
                     'label_class' => '',
@@ -86,6 +88,7 @@ defined('EX_PATH') || exit;
                 [
                     'type' => 'select',
                     'name' => 'menu-location',
+                    'error' => 'menu-location',
                     'label' => '',
                     'class' => '',
                     'label_class' => '',
@@ -117,6 +120,7 @@ defined('EX_PATH') || exit;
                 [
                     'type' => 'text',
                     'name' => 'menu-create',
+                    'error' => 'menu-create',
                     'label' => t('Create Menu'),
                     'class' => '',
                     'label_class' => '',

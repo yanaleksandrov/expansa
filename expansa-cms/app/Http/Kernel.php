@@ -43,7 +43,8 @@ use Throwable;
  *
  * A controller that needs to send something other than JSON (a file download, an
  * HTML fragment) can return an Expansa\Http\Response directly — Kernel sends it
- * as-is, skipping the envelope entirely.
+ * as-is, skipping the envelope entirely. A Response with fragments (notify(), remove(), ...)
+ * is the `{ "data": [...] }` envelope already and only gets the debug metrics.
  *
  * Route registration for a controller looks like:
  *   Route::post('/system/test', fn (...$p) => Kernel::dispatch(SystemController::class, 'test', $p));
@@ -78,7 +79,7 @@ final class Kernel
         } catch (TooManyAttempts $e) {
             // a notice fragment: the dashboard shows fragments of successful answers only
             $message  = t('Too many attempts. Try again in :minutes min.', (int) ceil($e->retryAfter / 60));
-            $response = new Response()->json(self::withMetrics(['data' => [['target' => 'body', 'notify' => $message]]]));
+            $response = response()->notify($message);
         } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationFailed) {
@@ -94,6 +95,11 @@ final class Kernel
                 'message' => Debug::hasDetails() ? $e->getMessage() : t('Something went wrong. Please try again later.'),
                 'id'      => $id,
             ]), 500);
+        }
+
+        // fragments get the same metrics as the other JSON answers
+        if ($response->fragments !== []) {
+            $response->json(self::withMetrics(['data' => $response->fragments]), $response->statusCode);
         }
 
         foreach (Cookie::getQueue() as $cookie) {

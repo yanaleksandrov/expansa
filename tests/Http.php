@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Expansa\Http\Contracts\Error;
 use Expansa\Http\Contracts\Session;
+use Expansa\Http\Enums\Notice;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\NotFound;
 use Expansa\Http\Exceptions\ResponseReady;
@@ -12,8 +13,10 @@ use Expansa\Http\Redirect;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Http\Status;
+use Expansa\Support\Error as ModelError;
 
 require __DIR__ . '/bootstrap.php';
+require_once EX_PATH . 'expansa/functions.php';
 
 $get = Request::create('https://Example.com:8443/posts/?page=2&s=+cat+', server: [
     'HTTP_USER_AGENT'      => 'Test',
@@ -136,5 +139,57 @@ check('unknown status', throws(fn () => Status::getText(299), InvalidArgumentExc
 
 $html = Redirect::render('https://example.com/?a=1&b="2"', 3);
 check('delayed redirect page', str_contains($html, 'content="3;url=https://example.com/?a=1&amp;b=&quot;2&quot;"') && str_contains($html, '<strong>3</strong>'));
+
+// fragments: actions of $ajax on the page
+check('page-wide actions have no target', json_encode(new Response()->notify('Saved.')->redirect('/a')->reload()->changeUrl('/b')->fragments)
+    === '[{"notify":"Saved."},{"redirect":"\/a"},{"reload":true},{"changeURL":"\/b"}]');
+
+check('a notice type and duration go as a list', json_encode(new Response()->notify('Oops', Notice::Error)->notify('Wait', Notice::Loading, 0)->fragments)
+    === '[{"notify":["Oops","error"]},{"notify":["Wait","loading",0]}]');
+
+check('a delay is the suffix of the action', json_encode(new Response()->redirect('/a', 1500)->remove('#x', 300)->fragments)
+    === '[{"redirect:1500":"\/a"},{"target":"#x","remove:300":true}]');
+
+$html = new Response()
+    ->update('#a', '<b>1</b>')
+    ->replace('#b', '<i></i>')
+    ->before('#c', 'x')
+    ->prepend('#c', 'y')
+    ->append('#c', 'z')
+    ->after('#c', 'w')
+    ->value('[name="q"]', '');
+check('element actions keep their target and order', array_map(fn (array $f) => $f['target'] . '|' . array_key_last($f), $html->fragments)
+    === ['#a|update', '#b|replace', '#c|before', '#c|prepend', '#c|append', '#c|after', '[name="q"]|value']);
+
+$dom = new Response()
+    ->addClass('#a', 'on')
+    ->removeClass('#a', 'off')
+    ->setAttribute('#a', 'aria-busy', 'true')
+    ->removeAttribute('#a', 'hidden')
+    ->scrollTo('#a')
+    ->scrollIntoView('#a', ['block' => 'center']);
+check('class, attribute and scroll actions use the names of youla-ajax.js', $dom->fragments === [
+    ['target' => '#a', 'classList.add' => 'on'],
+    ['target' => '#a', 'classList.remove' => 'off'],
+    ['target' => '#a', 'setAttribute' => ['aria-busy', 'true']],
+    ['target' => '#a', 'removeAttribute' => 'hidden'],
+    ['target' => '#a', 'scrollTo' => true],
+    ['target' => '#a', 'scrollIntoView' => ['block' => 'center']],
+]);
+
+check('repeated actions are all kept', count(new Response()->remove('#a')->remove('#a')->fragments) === 2);
+check('no actions is an empty list', json_encode(new Response()->fragments) === '[]');
+
+$field = ValidationFailed::field('email', 'Taken.');
+check('a field error keeps its message and field', $field->getMessage() === 'Taken.' && $field->errors === ['email' => ['Taken.']]);
+
+$model = ValidationFailed::from(new ModelError('user-add', ['email' => ['Taken.']]), 'Check the fields.');
+check('validator errors keep their fields with the summary', $model->errors === ['email' => ['Taken.']] && $model->getMessage() === 'Check the fields.');
+check('a plain model error becomes the message', ValidationFailed::from(new ModelError('user-add', 'Not saved.'), 'Summary')->getMessage() === 'Not saved.');
+
+check('fragments are the JSON body of the response', new Response()->notify('Hi')->remove('#x')->content === '{"data":[{"notify":"Hi"},{"target":"#x","remove":true}]}');
+check('a response with fragments is JSON', (new Response()->notify('Hi')->headers['Content-Type'] ?? '') === 'application/json');
+
+check('response() makes a new response every time', response() !== response() && response()->notify('Hi')->fragments === [['notify' => 'Hi']] && response()->fragments === []);
 
 exit($failures ? 1 : 0);

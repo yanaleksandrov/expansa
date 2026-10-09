@@ -15,6 +15,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'select',
 			'name'        => 'action',
+			'error'       => 'action',
 			'label'       => '',
 			'class'       => 'field field--sm field--outline',
 			'label_class' => '',

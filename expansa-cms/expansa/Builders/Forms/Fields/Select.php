@@ -33,6 +33,7 @@ final class Select extends AbstractField
             [
                 'type'  => 'repeater',
                 'name'  => 'options',
+                'error' => 'options',
                 'label' => t('Options'),
             ],
         ];

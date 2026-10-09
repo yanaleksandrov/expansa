@@ -42,6 +42,7 @@ return Form::enqueue(
                         [
                             'type'        => 'image',
                             'name'        => 'avatar',
+                            'error'       => 'avatar',
                             'label'       => t('Profile Settings'),
                             'class'       => '',
                             'label_class' => 'field-label fw-500 fs-18',
@@ -87,6 +88,7 @@ return Form::enqueue(
                         [
                             'type'        => 'email',
                             'name'        => 'email',
+                            'error'       => 'email',
                             'label'       => t('Your email'),
                             'class'       => '',
                             'label_class' => '',
@@ -120,6 +122,7 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'login',
+                            'error'       => 'login',
                             'label'       => t('Login'),
                             'class'       => '',
                             'label_class' => '',
@@ -142,6 +145,7 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'nicename',
+                            'error'       => 'nicename',
                             'label'       => t('Nicename'),
                             'class'       => '',
                             'label_class' => '',
@@ -163,6 +167,7 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'firstname',
+                            'error'       => 'firstname',
                             'label'       => t('First name'),
                             'class'       => '',
                             'label_class' => '',
@@ -184,6 +189,7 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'lastname',
+                            'error'       => 'lastname',
                             'label'       => t('Last name'),
                             'class'       => '',
                             'label_class' => '',
@@ -205,6 +211,7 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'showname',
+                            'error'       => 'showname',
                             'label'       => t('Show name as'),
                             'class'       => '',
                             'label_class' => '',
@@ -234,6 +241,7 @@ return Form::enqueue(
                         [
                             'type'        => 'textarea',
                             'name'        => 'bio',
+                            'error'       => 'bio',
                             'label'       => t('Biographical info'),
                             'class'       => '',
                             'label_class' => '',
@@ -276,6 +284,7 @@ return Form::enqueue(
                         [
                             'type'        => 'radio',
                             'name'        => 'format',
+                            'error'       => 'format',
                             'label'       => '',
                             'class'       => 'field field--grid',
                             'label_class' => '',
@@ -321,6 +330,7 @@ return Form::enqueue(
                         [
                             'type'        => 'checkbox',
                             'name'        => 'toolbar',
+                            'error'       => 'toolbar',
                             'label'       => t('Show when viewing site'),
                             'class'       => '',
                             'label_class' => '',
@@ -351,6 +361,7 @@ return Form::enqueue(
                         [
                             'type'        => 'select',
                             'name'        => 'locale',
+                            'error'       => 'locale',
                             'label'       => t('Language'),
                             'class'       => '',
                             'label_class' => '',
@@ -649,6 +660,7 @@ return Form::enqueue(
                         [
                             'type'        => 'password',
                             'name'        => 'password-new',
+                            'error'       => 'password',
                             'label'       => t('New password'),
                             'class'       => '',
                             'label_class' => '',
@@ -679,6 +691,7 @@ return Form::enqueue(
                         [
                             'type'        => 'password',
                             'name'        => 'password-old',
+                            'error'       => 'current',
                             'label'       => t('Old password'),
                             'class'       => '',
                             'label_class' => '',

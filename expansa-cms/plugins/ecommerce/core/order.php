@@ -23,6 +23,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'select',
                     'name'        => 'customer',
+                    'error'       => 'customer',
                     'label'       => t('Customer'),
                     'class'       => '',
                     'label_class' => '',
@@ -46,6 +47,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'datetime-local',
                     'name'        => 'datetime',
+                    'error'       => 'datetime',
                     'label'       => t('Date created'),
                     'class'       => '',
                     'label_class' => '',
@@ -131,6 +133,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'firstname',
+                            'error'       => 'firstname',
                             'label'       => t('First Name'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -147,6 +150,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'lastname',
+                            'error'       => 'lastname',
                             'label'       => t('Last Name'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -163,6 +167,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'company',
+                            'error'       => 'company',
                             'label'       => t('Company Name'),
                             'class'       => 'field ga-2',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -179,6 +184,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'address',
+                            'error'       => 'address',
                             'label'       => t('Phone'),
                             'class'       => 'field ga-2',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -195,6 +201,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'select',
                             'name'        => 'country',
+                            'error'       => 'country',
                             'label'       => t('Country / Region'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -218,6 +225,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'select',
                             'name'        => 'country',
+                            'error'       => 'country',
                             'label'       => t('State / County'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -241,6 +249,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'city',
+                            'error'       => 'city',
                             'label'       => t('City'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -257,6 +266,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'zip',
+                            'error'       => 'zip',
                             'label'       => t('Postal code / ZIP'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -273,6 +283,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'address',
+                            'error'       => 'address',
                             'label'       => t('Address'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -289,6 +300,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'address',
+                            'error'       => 'address',
                             'label'       => t('Apartment, suite, etc.'),
                             'class'       => '',
                             'label_class' => 'df aic fs-12 t-muted',
@@ -305,6 +317,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'textarea',
                             'name'        => 'note',
+                            'error'       => 'note',
                             'label'       => t('Customer provided note:'),
                             'class'       => 'field ga-2',
                             'label_class' => 'df aic fs-12 t-muted',

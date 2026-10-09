@@ -24,6 +24,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'type',
+					'error'       => 'type',
 					'label'       => t( 'Post type' ),
 					'class'       => '',
 					'label_class' => '',
@@ -41,6 +42,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'status',
+					'error'       => 'status',
 					'label'       => t( 'Post status' ),
 					'class'       => '',
 					'label_class' => '',
@@ -58,6 +60,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'author',
+					'error'       => 'author',
 					'label'       => t( 'Post author' ),
 					'class'       => '',
 					'label_class' => '',
@@ -87,6 +90,7 @@ return \Expansa\Facades\Form::enqueue(
 				'type'        => 'select',
 				'label'       => '',
 				'name'        => 'map[' . $index . ']',
+				'error'       => 'map.' . $index,
 				'value'       => '',
 				'placeholder' => '',
 				'class'       => 'dg g-1 ga-2',

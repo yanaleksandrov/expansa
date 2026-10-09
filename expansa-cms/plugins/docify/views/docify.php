@@ -62,6 +62,7 @@ return \Expansa\Facades\Form::enqueue(
                     'type'        => 'select',
                     'label'       => t('Select a project to document'),
                     'name'        => 'project',
+                    'error'       => 'project',
                     'value'       => 'none',
                     'placeholder' => '',
                     'class'       => '',

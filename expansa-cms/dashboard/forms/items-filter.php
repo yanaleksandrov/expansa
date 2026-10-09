@@ -16,6 +16,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'search',
 			'name'        => 's',
+			'error'       => 's',
 			'label'       => '',
 			'class'       => 'field field--sm field--outline',
 			'label_class' => '',

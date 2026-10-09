@@ -22,6 +22,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'text',
 			'name'        => 'login',
+			'error'       => 'login',
 			'label'       => t( 'Login or email' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
@@ -43,6 +44,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'password',
 			'name'        => 'password',
+			'error'       => 'password',
 			'label'       => t('Password'),
 			'class'       => 'field field--lg',
 			'label_class' => '',
@@ -67,6 +69,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'checkbox',
 			'name'        => 'remember',
+			'error'       => 'remember',
 			'label'       => t( 'Remember me on this device' ),
 			'class'       => '',
 			'label_class' => '',

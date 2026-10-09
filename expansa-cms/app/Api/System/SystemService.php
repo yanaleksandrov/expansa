@@ -18,6 +18,7 @@ use Expansa\Facades\Safe;
 use Expansa\Facades\Validator;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\ValidationFailed;
+use Expansa\Http\Response;
 use Expansa\Support\Arr;
 
 /**
@@ -79,11 +80,12 @@ final class SystemService
     /**
      * Writes the environment config, creates the schema, and creates the owner account.
      *
+     * @return Response Redirect to the installed page once the last step had time to show.
      * @throws HttpError       When Expansa is already installed.
      * @throws ValidationFailed When required fields are missing, the env file can't be
      *                              written, or the owner account is invalid.
      */
-    public function install(array $input): array
+    public function install(array $input): Response
     {
         if (Installation::isComplete()) {
             throw new HttpError(409, t('Expansa is already installed.'));
@@ -180,10 +182,7 @@ final class SystemService
         // the owner signs in right away, without the new device warning: it is the installation itself
         Auth::login($user, remember: true);
 
-        return [
-            'target'        => 'body',
-            'redirect:7000' => url('installed'),
-        ];
+        return response()->redirect(url('installed'), 7000);
     }
 
     /**

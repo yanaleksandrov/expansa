@@ -28,6 +28,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'event',
+					'error'       => 'event',
 					'label'       => t( 'Events' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -52,6 +53,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'subject',
+					'error'       => 'subject',
 					'label'       => t( 'Email subject' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -73,6 +75,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'title',
+					'error'       => 'title',
 					'label'       => t( 'Title' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -94,6 +97,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'subtitle',
+					'error'       => 'subtitle',
 					'label'       => t( 'Subtitle' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -115,6 +119,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'content',
+					'error'       => 'content',
 					'label'       => t( 'Content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -137,6 +142,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'recipients',
+					'error'       => 'recipients',
 					'label'       => t( 'Recipient(s)' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -172,6 +178,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'bottom',
+					'error'       => 'bottom',
 					'label'       => t( 'Email bottom content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -192,6 +199,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'footer',
+					'error'       => 'footer',
 					'label'       => t( 'Footer content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -225,6 +233,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'email',
 					'name'        => 'email',
+					'error'       => 'email',
 					'label'       => t( 'Send to' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',

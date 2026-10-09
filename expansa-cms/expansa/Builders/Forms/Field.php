@@ -50,6 +50,12 @@ class Field
                 $field['attributes'] = ['type' => $type, 'name' => $name, ...$field['attributes']];
             }
 
+            // youla-ajax.js shows the response errors of this key at the field
+            $error = (string) ($field['error'] ?? '');
+            if ($error !== '') {
+                $field['attributes']['data-error'] = $error;
+            }
+
             if (in_array($type, [ 'tab', 'step', 'group' ], true)) {
                 $field = [
                     'content' => $this->parse($field['fields'] ?? [], $step + 1),

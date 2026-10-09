@@ -15,6 +15,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'textarea',
             'name'        => 'title',
+            'error'       => 'title',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -36,6 +37,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'text',
             'name'        => 'permalink',
+            'error'       => 'permalink',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -55,6 +57,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'textarea',
             'name'        => 'excerpt',
+            'error'       => 'excerpt',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -76,6 +79,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'select',
             'name'        => 'status',
+            'error'       => 'status',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -100,6 +104,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'select',
             'name'        => 'visibility',
+            'error'       => 'visibility',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -124,6 +129,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'date',
             'name'        => 'from',
+            'error'       => 'from',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -143,6 +149,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'date',
             'name'        => 'to',
+            'error'       => 'to',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -162,6 +169,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'select',
             'name'        => 'language',
+            'error'       => 'language',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -196,6 +204,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'select',
             'name'        => 'discussion',
+            'error'       => 'discussion',
             'label'       => '',
             'class'       => '',
             'label_class' => '',

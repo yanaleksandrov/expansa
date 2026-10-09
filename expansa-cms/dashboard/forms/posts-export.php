@@ -25,6 +25,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'select',
 			'name'        => 'types[]',
+			'error'       => 'types',
 			'label'       => t( 'Post types' ),
 			'class'       => '',
 			'label_class' => '',
@@ -49,6 +50,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'radio',
 			'name'        => 'format',
+			'error'       => 'format',
 			'label'       => t( 'File format' ),
 			'class'       => 'field field--grid',
 			'label_class' => '',

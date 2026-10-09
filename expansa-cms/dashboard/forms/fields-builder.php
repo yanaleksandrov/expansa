@@ -14,6 +14,7 @@ return \Expansa\Facades\Form::enqueue(
 	[
 		[
 			'name'       => 'builder',
+			'error'      => 'builder',
 			'type'       => 'builder',
 			'attributes' => [
                 'u-prop' => 'builder',

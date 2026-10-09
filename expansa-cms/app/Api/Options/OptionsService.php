@@ -12,11 +12,12 @@ use App\Support\Secrets;
 use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Mail;
+use Expansa\Http\Response;
 use Expansa\Support\Arr;
 
 final class OptionsService
 {
-    public function update(array $input): array
+    public function update(array $input): Response
     {
         $options = Arr::exclude($input, ['nonce']);
 
@@ -45,9 +46,7 @@ final class OptionsService
             Option::update($option, $value);
         }
 
-        return [
-            ['target' => 'body', 'notify' => t('Options updated successfully.')],
-        ];
+        return response()->notify(t('Options updated successfully.'));
     }
 
     /**
@@ -79,16 +78,16 @@ final class OptionsService
     /**
      * Send a test email to the current user with the saved Mail settings; five in ten minutes.
      *
-     * @return array<int, array<string, mixed>> Notice fragment with the result or the SMTP error.
+     * @return Response Notice with the result or the SMTP error.
      */
-    public function mailTest(): array
+    public function mailTest(): Response
     {
         $user = User::current();
 
         try {
             Auth::limit("mail-test:$user->id", 5, 600);
         } catch (TooManyAttempts) {
-            return [['target' => 'body', 'notify' => t('Too many test emails. Try again in a few minutes.')]];
+            return response()->notify(t('Too many test emails. Try again in a few minutes.'));
         }
 
         $message = Mail::to($user->email)
@@ -99,6 +98,6 @@ final class OptionsService
             ? t('Test email sent to :email.', $user->email)
             : t('The email was not sent: :error', $message->error);
 
-        return [['target' => 'body', 'notify' => $notice]];
+        return response()->notify($notice);
     }
 }

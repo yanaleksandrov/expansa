@@ -30,6 +30,7 @@ if ($hasToken) {
     $fields[] = [
         'type'        => 'password',
         'name'        => 'password',
+        'error'       => 'password',
         'label'       => t('New password'),
         'class'       => 'field field--lg',
         'instruction' => t('At least 12 characters.'),
@@ -55,6 +56,7 @@ if ($hasToken) {
     $fields[] = [
         'type'        => 'email',
         'name'        => 'email',
+        'error'       => 'email',
         'label'       => t('Your email'),
         'class'       => 'field field--lg',
         'instruction' => '',

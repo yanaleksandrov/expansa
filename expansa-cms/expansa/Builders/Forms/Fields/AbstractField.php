@@ -85,24 +85,28 @@ abstract class AbstractField implements Field
             [
                 'type'       => 'text',
                 'name'       => 'label',
+                'error'      => 'label',
                 'label'      => t('Label'),
                 'attributes' => ['required' => true],
             ],
             [
                 'type'       => 'text',
                 'name'       => 'name',
+                'error'      => 'name',
                 'label'      => t('Name'),
                 'attributes' => ['required' => true],
             ],
             [
                 'type'  => 'text',
                 'name'  => 'instruction',
+                'error' => 'instruction',
                 'label' => t('Instructions'),
             ],
             ...($withRequired ? [
                 [
                     'type'    => 'checkbox',
                     'name'    => 'required',
+                    'error'   => 'required',
                     'label'   => '',
                     'options' => [
                         'required' => [

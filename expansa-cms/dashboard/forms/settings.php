@@ -11,10 +11,12 @@ use Expansa\Facades\Safe;
  * @since 2025.1
  */
 
-// a plain field of the Security, Mail and AI tabs: everything but the type, name, texts and attributes is the default
+// a plain field of the Security, Mail and AI tabs: everything but the type, name, texts and attributes is the default;
+// it shows the errors of its name with dots, mail[dkim][domain] → mail.dkim.domain
 $field = static fn ( string $type, string $name, string $label, string $instruction, array $attributes = [] ): array => [
 	'type'        => $type,
 	'name'        => $name,
+	'error'       => $type === 'hidden' ? '' : str_replace( [ '][', '[', ']' ], [ '.', '.', '' ], $name ),
 	'label'       => $label,
 	'class'       => '',
 	'label_class' => '',
@@ -59,6 +61,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'site[name]',
+							'error'       => 'site.name',
 							'label'       => t( 'Name' ),
 							'class'       => '',
 							'label_class' => '',
@@ -80,6 +83,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'site[tagline]',
+							'error'       => 'site.tagline',
 							'label'       => t( 'Tagline' ),
 							'class'       => '',
 							'label_class' => '',
@@ -100,6 +104,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'site[language]',
+							'error'       => 'site.language',
 							'label'       => t( 'Site Language' ),
 							'class'       => '',
 							'label_class' => '',
@@ -121,6 +126,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'site[url]',
+							'error'       => 'site.url',
 							'label'       => t( 'Site address (URL)' ),
 							'class'       => '',
 							'label_class' => '',
@@ -152,6 +158,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'owner[email]',
+							'error'       => 'owner.email',
 							'label'       => t( 'Owner email address' ),
 							'class'       => '',
 							'label_class' => '',
@@ -182,6 +189,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => '',
+							'error'       => '',
 							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -212,6 +220,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'users[role]',
+							'error'       => 'users.role',
 							'label'       => '',
 							'class'       => '',
 							'label_class' => '',
@@ -302,6 +311,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'week-starts-on',
+							'error'       => 'week-starts-on',
 							'label'       => t( 'Week Starts On' ),
 							'class'       => '',
 							'label_class' => '',
@@ -330,6 +340,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'timezone',
+							'error'       => 'timezone',
 							'label'       => t( 'Timezone' ),
 							'class'       => '',
 							'label_class' => '',
@@ -375,6 +386,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => 'discourage',
+							'error'       => 'discourage',
 							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -418,6 +430,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments',
+							'error'       => 'comments',
 							'label'       => t( 'Allow people to submit comments on new posts' ),
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -476,6 +489,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments[notify_posts]',
+							'error'       => 'comments.notify_posts',
 							'label'       => t( 'Anyone posts a comment' ),
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -516,6 +530,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments',
+							'error'       => 'comments',
 							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -556,6 +571,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => 'avatars[show]',
+							'error'       => 'avatars.show',
 							'label'       => t( 'Show Avatars' ),
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -580,6 +596,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'radio',
 							'name'        => 'avatars[type]',
+							'error'       => 'avatars.type',
 							'label'       => t( 'Default Avatar' ),
 							'class'       => '',
 							'label_class' => '',
@@ -653,6 +670,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => '',
+							'error'       => '',
 							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -694,6 +712,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => '',
+							'error'       => '',
 							'label'       => t( 'Required for roles' ),
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -871,6 +890,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'checkbox',
 							'name'        => '',
+							'error'       => '',
 							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
@@ -982,6 +1002,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'images[format]',
+							'error'       => 'images.format',
 							'label'       => t( 'Convert images to' ),
 							'class'       => '',
 							'label_class' => '',
@@ -1005,6 +1026,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'select',
 							'name'        => 'images[organization]',
+							'error'       => 'images.organization',
 							'label'       => t( 'File organization' ),
 							'class'       => '',
 							'label_class' => '',
@@ -1045,6 +1067,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'permalinks[pages][single]',
+							'error'       => 'permalinks.pages.single',
 							'label'       => t( 'Single page' ),
 							'class'       => '',
 							'label_class' => '',
@@ -1065,6 +1088,7 @@ return Expansa\Facades\Form::enqueue(
 						[
 							'type'        => 'text',
 							'name'        => 'permalinks[pages][categories]',
+							'error'       => 'permalinks.pages.categories',
 							'label'       => t( 'Categories' ),
 							'class'       => '',
 							'label_class' => '',

@@ -23,6 +23,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'email',
 			'name'        => 'email',
+			'error'       => 'email',
 			'label'       => t( 'User Email' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
@@ -44,6 +45,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'text',
 			'name'        => 'login',
+			'error'       => 'login',
 			'label'       => t( 'User Login' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
@@ -64,6 +66,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'password',
 			'name'        => 'password',
+			'error'       => 'password',
 			'label'       => t( 'Password' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',

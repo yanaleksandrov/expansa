@@ -34,6 +34,7 @@ final class Textarea extends AbstractField
             [
                 'type'  => 'number',
                 'name'  => 'attributes.rows',
+                'error' => 'attributes.rows',
                 'label' => t('Rows'),
             ],
         ];

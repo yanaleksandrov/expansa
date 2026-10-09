@@ -6,7 +6,7 @@ namespace App\Api\User;
 
 use App\Http\Can;
 use Expansa\Http\Request;
-use Expansa\Support\Error;
+use Expansa\Http\Response;
 
 final readonly class UserController
 {
@@ -17,18 +17,18 @@ final readonly class UserController
          */
         private UserService $service = new UserService(),
     ) {}
-
-    public function update(Request $request): array
+
+    public function update(Request $request): Response
     {
         return $this->service->update($request->post);
     }
-
-    public function signIn(Request $request): array
+
+    public function signIn(Request $request): Response
     {
         return $this->service->signIn($request->post);
     }
 
-    public function emailLink(Request $request): array
+    public function emailLink(Request $request): Response
     {
         return $this->service->emailLink($request->post);
     }
@@ -38,122 +38,122 @@ final readonly class UserController
         return $this->service->passkeyOptions();
     }
 
-    public function passkeySignIn(Request $request): array
+    public function passkeySignIn(Request $request): Response
     {
         return $this->service->passkeySignIn($request->post);
     }
 
-    public function passkeyCreateOptions(Request $request): array
+    public function passkeyCreateOptions(Request $request): array|Response
     {
         return $this->service->passkeyCreateOptions($request->post);
     }
 
-    public function passkeyCreate(Request $request): array
+    public function passkeyCreate(Request $request): Response
     {
         return $this->service->passkeyCreate($request->post);
     }
 
-    public function passkeyDelete(Request $request): array
+    public function passkeyDelete(Request $request): Response
     {
         return $this->service->passkeyDelete($request->post);
     }
 
-    public function identityConnect(Request $request): array
+    public function identityConnect(Request $request): Response
     {
         return $this->service->identityConnect($request->post);
     }
 
-    public function identityDelete(Request $request): array
+    public function identityDelete(Request $request): Response
     {
         return $this->service->identityDelete($request->post);
     }
 
-    public function switchAccount(Request $request): array
+    public function switchAccount(Request $request): Response
     {
         return $this->service->switchAccount($request->post);
     }
 
-    public function sessionDelete(Request $request): array
+    public function sessionDelete(Request $request): Response
     {
         return $this->service->sessionDelete($request->post);
     }
 
-    public function sessionsDeleteOthers(Request $request): array
+    public function sessionsDeleteOthers(Request $request): Response
     {
         return $this->service->sessionsDeleteOthers($request->post);
     }
 
-    public function twoFactor(Request $request): array
+    public function twoFactor(Request $request): Response
     {
         return $this->service->twoFactor($request->post);
     }
 
-    public function twoFactorSetup(Request $request): array
+    public function twoFactorSetup(Request $request): Response
     {
         return $this->service->twoFactorSetup($request->post);
     }
 
-    public function twoFactorEnable(Request $request): array
+    public function twoFactorEnable(Request $request): Response
     {
         return $this->service->twoFactorEnable($request->post);
     }
 
-    public function twoFactorDisable(Request $request): array
+    public function twoFactorDisable(Request $request): Response
     {
         return $this->service->twoFactorDisable($request->post);
     }
 
-    public function twoFactorCodes(Request $request): array
+    public function twoFactorCodes(Request $request): Response
     {
         return $this->service->twoFactorCodes($request->post);
     }
 
-    public function tokenCreate(Request $request): array
+    public function tokenCreate(Request $request): Response
     {
         return $this->service->tokenCreate($request->post);
     }
 
-    public function tokenDelete(Request $request): array
+    public function tokenDelete(Request $request): Response
     {
         return $this->service->tokenDelete($request->post);
     }
 
     #[Can('users_edit')]
-    public function adminStatus(Request $request): array
+    public function adminStatus(Request $request): Response
     {
         return $this->service->adminStatus($request->post);
     }
 
     #[Can('users_edit')]
-    public function adminSignOut(Request $request): array
+    public function adminSignOut(Request $request): Response
     {
         return $this->service->adminSignOut($request->post);
     }
 
     #[Can('users_edit')]
-    public function adminPasswordReset(Request $request): array
+    public function adminPasswordReset(Request $request): Response
     {
         return $this->service->adminPasswordReset($request->post);
     }
 
     #[Can('users_edit')]
-    public function adminTwoFactorDisable(Request $request): array
+    public function adminTwoFactorDisable(Request $request): Response
     {
         return $this->service->adminTwoFactorDisable($request->post);
     }
 
     #[Can('users_edit')]
-    public function impersonate(Request $request): array
+    public function impersonate(Request $request): Response
     {
         return $this->service->impersonate($request->post);
     }
 
-    public function stopImpersonating(): array
+    public function stopImpersonating(): Response
     {
         return $this->service->stopImpersonating();
     }
 
-    public function confirm(Request $request): array
+    public function confirm(Request $request): Response
     {
         return $this->service->confirm($request->post);
     }
@@ -163,22 +163,22 @@ final readonly class UserController
         return $this->service->confirmPasskeyOptions();
     }
 
-    public function confirmPasskey(Request $request): array
+    public function confirmPasskey(Request $request): Response
     {
         return $this->service->confirmPasskey($request->post);
     }
 
-    public function signUp(Request $request): array|Error
+    public function signUp(Request $request): Response
     {
         return $this->service->signUp($request->input);
     }
 
-    public function resetPassword(Request $request): array
+    public function resetPassword(Request $request): Response
     {
         return $this->service->resetPassword($request->input);
     }
 
-    public function passwordUpdate(Request $request): array
+    public function passwordUpdate(Request $request): Response
     {
         return $this->service->passwordUpdate($request->post);
     }

@@ -34,6 +34,7 @@ final class Input extends AbstractField
             [
                 'type'  => 'text',
                 'name'  => 'attributes.placeholder',
+                'error' => 'attributes.placeholder',
                 'label' => t('Placeholder'),
             ],
         ];

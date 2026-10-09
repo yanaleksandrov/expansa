@@ -31,6 +31,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'site[name]',
+                    'error'       => 'site.name',
                     'label'       => t('Site name'),
                     'class'       => '',
                     'label_class' => '',
@@ -52,6 +53,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'site[tagline]',
+                    'error'       => 'site.tagline',
                     'label'       => t('Site tagline'),
                     'class'       => '',
                     'label_class' => '',
@@ -100,6 +102,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'db[database]',
+                    'error'       => 'db.database',
                     'label'       => t('Database name'),
                     'class'       => '',
                     'label_class' => '',
@@ -121,6 +124,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'db[username]',
+                    'error'       => 'db.username',
                     'label'       => t('MySQL username'),
                     'class'       => '',
                     'label_class' => '',
@@ -171,6 +175,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'db[host]',
+                            'error'       => 'db.host',
                             'label'       => t('Hostname'),
                             'class'       => '',
                             'label_class' => '',
@@ -193,6 +198,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'db[prefix]',
+                            'error'       => 'db.prefix',
                             'label'       => t('Prefix'),
                             'class'       => '',
                             'label_class' => '',
@@ -223,6 +229,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'text',
                     'name'  => 'smtp[host]',
+                    'error' => 'smtp.host',
                     'label' => t('SMTP server'),
                     'attributes' => [
                         'placeholder' => 'smtp.example.com',
@@ -233,6 +240,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'number',
                     'name'  => 'smtp[port]',
+                    'error' => 'smtp.port',
                     'label' => t('SMTP port'),
                     'attributes' => [
                         'value'       => 465,
@@ -243,6 +251,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'email',
                     'name'  => 'smtp[username]',
+                    'error' => 'smtp.username',
                     'label' => t('SMTP login'),
                     'attributes' => [
                         'placeholder'    => 'no-reply@example.com',
@@ -253,6 +262,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'password',
                     'name'  => 'smtp[password]',
+                    'error' => 'smtp.password',
                     'label' => t('SMTP password'),
                     'attributes' => [
                         'u-prop'         => 'smtp.password',
@@ -262,6 +272,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'email',
                     'name'  => 'smtp[from]',
+                    'error' => 'smtp.from',
                     'label' => t('Email sender address'),
                     'attributes' => [
                         'placeholder'    => 'no-reply@example.com',
@@ -296,6 +307,7 @@ return \Expansa\Facades\Form::enqueue(
                 ],
                 [
                     'name' => 'checker',
+                    'error' => 'checker',
                     'type' => 'checker',
                     'attributes'  => [ 'u-prop' => 'checker' ],
                 ],
@@ -344,6 +356,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'email',
                     'name'        => 'user[email]',
+                    'error'       => 'user.email',
                     'label'       => t('Your email address'),
                     'class'       => '',
                     'label_class' => '',
@@ -366,6 +379,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'select',
                     'name'        => 'user[locale]',
+                    'error'       => 'user.locale',
                     'label'       => t('Your language'),
                     'class'       => '',
                     'label_class' => '',
@@ -387,6 +401,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'user[login]',
+                    'error'       => 'user.login',
                     'label'       => t('Your login'),
                     'class'       => '',
                     'label_class' => '',
@@ -408,6 +423,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'password',
                     'name'        => 'user[password]',
+                    'error'       => 'user.password',
                     'label'       => t('Your password'),
                     'class'       => '',
                     'label_class' => '',

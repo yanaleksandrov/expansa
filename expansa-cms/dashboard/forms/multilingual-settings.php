@@ -50,6 +50,7 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'radio',
                             'name'        => 'site[language]',
+                            'error'       => 'site.language',
                             'label'       => t( 'URL modifications' ),
                             'class'       => 'field field--ui',
                             'label_class' => '',
@@ -93,6 +94,7 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'checkbox',
                             'name'        => 'comments',
+                            'error'       => 'comments',
                             'label'       => t( 'Allow access for' ),
                             'class'       => 'field field--ui',
                             'label_class' => '',
@@ -141,6 +143,7 @@ return Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'checkbox',
                     'name'        => 'site[language]',
+                    'error'       => 'site.language',
                     'label'       => t( 'URL modifications' ),
                     'class'       => 'field field--ui',
                     'label_class' => '',
@@ -179,6 +182,7 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'site[tagline]',
+                            'error'       => 'site.tagline',
                             'label'       => t( 'DeepL Translator' ),
                             'class'       => '',
                             'label_class' => '',
@@ -199,6 +203,7 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'site[tagline]',
+                            'error'       => 'site.tagline',
                             'label'       => t( 'Google Translate' ),
                             'class'       => '',
                             'label_class' => '',

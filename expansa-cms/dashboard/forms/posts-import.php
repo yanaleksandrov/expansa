@@ -48,6 +48,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'encoding',
+					'error'       => 'encoding',
 					'label'       => t( 'File encoding' ),
 					'class'       => '',
 					'label_class' => '',
@@ -65,6 +66,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'uploader',
 					'name'        => 'uploader',
+					'error'       => 'uploader',
 					'label'       => '',
 					'class'       => '',
 					'label_class' => '',

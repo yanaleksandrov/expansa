@@ -5,6 +5,7 @@
         Youla.method("ajax", (e, el) => {
             const ajax = (method, route, payload, onProgress, options = {}) => {
                 abortPrevious(el);
+                clearErrors(scopeOf(el));
                 const xhr = el.__ajax = new XMLHttpRequest;
                 const url = /^https?:\/\//.test(route) ? route : Youla.baseURL + route;
                 const done = toggleLoading(el);
@@ -24,13 +25,20 @@
                 };
                 return new Promise((resolve, reject) => {
                     xhr.__reject = reject;
-                    xhr.onerror = () => reject(new Error('Youla.js: "$ajax" network error.'));
+                    xhr.onerror = () => {
+                        notify(message("network"));
+                        reject(Object.assign(new Error('Youla.js: "$ajax" network error.'), {
+                            handled: true
+                        }));
+                    };
                     xhr.onload = () => {
                         const parsed = parseJSON(xhr.responseText);
                         if (xhr.status < 200 || xhr.status >= 300) {
+                            showErrors(el, parsed);
                             reject(Object.assign(new Error(`Youla.js: "$ajax" failed with status ${xhr.status}.`), {
                                 status: xhr.status,
-                                data: parsed ?? xhr.responseText
+                                data: parsed ?? xhr.responseText,
+                                handled: true
                             }));
                             return;
                         }
@@ -69,6 +77,80 @@
                 [method.toLowerCase()]: (route, payload, onProgress, options) => ajax(method, route, payload, onProgress, options)
             }), {});
         });
+        window.addEventListener("unhandledrejection", event => {
+            if (event.reason?.handled || event.reason?.name === "AbortError") {
+                event.preventDefault();
+            }
+        });
+        function scopeOf(el) {
+            return el.closest("form") ?? el.closest("[u-data]") ?? document;
+        }
+        function message(key) {
+            const fallback = {
+                failed: "Something went wrong. Please try again later.",
+                network: "No connection. Check the internet and try again."
+            };
+            return (typeof youla !== "undefined" ? youla?.ajaxErrors?.[key] : null) ?? fallback[key];
+        }
+        function notify(text) {
+            document.querySelector('[u-data="notice"]')?.__x?.data?.add(text, "error");
+        }
+        function showErrors(el, data) {
+            const scope = scopeOf(el);
+            const errors = data?.errors && typeof data.errors === "object" ? data.errors : {};
+            const unplaced = [];
+            let first = null;
+            Object.entries(errors).forEach(([name, messages]) => {
+                const texts = [].concat(messages).filter(text => typeof text === "string" && text !== "");
+                const input = /^\d+$/.test(name) ? null : findField(scope, name);
+                if (!input) {
+                    unplaced.push(...texts);
+                    return;
+                }
+                markField(input, texts);
+                first ??= input;
+            });
+            if (!first && !unplaced.length) {
+                unplaced.push(typeof data?.message === "string" && data.message ? data.message : message("failed"));
+            }
+            [ ...new Set(unplaced) ].forEach(notify);
+            first?.focus({
+                preventScroll: true
+            });
+            first?.scrollIntoView({
+                block: "center",
+                behavior: "smooth"
+            });
+        }
+        function findField(scope, key) {
+            return [ ...scope.querySelectorAll(`[data-error="${CSS.escape(key)}"]`) ].find(input => input.type !== "hidden" && (input.closest(".field") ?? input).checkVisibility()) ?? null;
+        }
+        function markField(input, texts) {
+            const field = input.closest(".field") ?? input.parentElement;
+            const error = document.createElement("div");
+            error.className = "field-error";
+            error.id = `field-error-${Math.random().toString(36).slice(2)}`;
+            error.textContent = texts.join(" ");
+            (input.closest(".field-item") ?? input).after(error);
+            field.classList.add("is-invalid");
+            input.setAttribute("aria-invalid", "true");
+            input.setAttribute("aria-errormessage", error.id);
+            const clear = () => clearErrors(field);
+            input.addEventListener("input", clear, {
+                once: true
+            });
+            input.addEventListener("change", clear, {
+                once: true
+            });
+        }
+        function clearErrors(scope) {
+            scope.querySelectorAll(".field-error").forEach(error => error.remove());
+            [ scope, ...scope.querySelectorAll(".is-invalid") ].forEach(field => field.classList?.remove("is-invalid"));
+            scope.querySelectorAll('[aria-invalid="true"]').forEach(input => {
+                input.removeAttribute("aria-invalid");
+                input.removeAttribute("aria-errormessage");
+            });
+        }
         function readCookie(name) {
             const match = document.cookie.match("(?:^|; )" + name + "=([^;]*)");
             return match ? decodeURIComponent(match[1]) : null;

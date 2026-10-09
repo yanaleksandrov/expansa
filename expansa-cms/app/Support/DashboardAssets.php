@@ -23,6 +23,7 @@ final class DashboardAssets
      * Enqueue styles and scripts in the given order, minified outside debug mode. Also seeds the CSRF
      * cookie that youla-ajax.js sends back with every request and adds the notifications of `$notice`
      * and the `notify` API fragments: every page with the dashboard runtime shows them the same way.
+     * The `youla` data also gets the fallback texts of failed requests.
      *
      * @param string[]                 $styles  Style names, e.g. ['expansa', 'controls'].
      * @param array<int|string, mixed> $scripts Script names, or name => extra Asset::script() data.
@@ -32,6 +33,14 @@ final class DashboardAssets
         VerifyCsrfToken::seed();
 
         $suffix = self::suffix();
+
+        // youla-ajax.js shows them when a request fails without a message of its own
+        if (isset($scripts['youla'])) {
+            $scripts['youla']['data']['ajaxErrors'] ??= [
+                'failed'  => t('Something went wrong. Please try again later.'),
+                'network' => t('No connection. Check the internet and try again.'),
+            ];
+        }
 
         foreach (array_unique([...$styles, 'notifications']) as $style) {
             Asset::style($style, url("/dashboard/assets/css/$style$suffix.css"));

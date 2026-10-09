@@ -33,6 +33,7 @@
                         [
                             'type'        => 'text',
                             'name'        => 'value',
+                            'error'       => 'value',
                             'label'       => '',
                             'class'       => '',
                             'label_class' => '',
