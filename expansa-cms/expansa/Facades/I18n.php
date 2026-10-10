@@ -20,6 +20,7 @@ use Expansa\Patterns\Facade;
  * @method static string locale(string $default = 'en-US')
  * @method static array  language(string $value, string $getBy = 'locale')
  * @method static array  languageOptions()
+ * @method static array  getLanguages()
  */
 class I18n extends Facade
 {

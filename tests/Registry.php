@@ -28,9 +28,4 @@ check('lazy() does not replace an existing value', Registry::get('eager') === 'v
 
 check('missing key returns default', Registry::get('missing', 'default') === 'default');
 
-foreach (['countries' => 250, 'timezones' => 418, 'languages' => 119] as $key => $count) {
-    Registry::lazy($key, fn () => require EX_PATH . "dashboard/data/$key.php");
-    check("dashboard/data/$key.php resolves to $count entries", count(Registry::get($key)) === $count);
-}
-
 exit($failures > 0 ? 1 : 0);

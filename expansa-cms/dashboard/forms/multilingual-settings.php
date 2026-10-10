@@ -3,7 +3,7 @@
 use App\Models\Option;
 use Expansa\Facades\Safe;
 
-$languages = Expansa\Patterns\Registry::get('languages');
+$languages = Expansa\Facades\I18n::getLanguages();
 
 $options = [];
 foreach ($languages as $language) {

@@ -41,8 +41,8 @@ $currentClass  = class_exists('Expansa\Translation\Manager') ? 'Expansa\Translat
 $old = new $baselineClass();
 $new = new $currentClass();
 
-// the baseline filtered its two built-in languages, the current version gets the bundled list of the dashboard
-$bundled = require EX_PATH . 'dashboard/data/languages.php';
+// the baseline filtered its two built-in languages, the current version gets the bundled list
+$bundled = Expansa\Translation\Languages::all();
 $filter  = fn (?array $languages = null) => $languages ?? $bundled;
 $old->configure(routes: [], pattern: 'i18n/%s', languages: $filter);
 $new->configure(routes: [], pattern: 'i18n/%s', languages: $filter);
@@ -71,9 +71,11 @@ $cases = [
     'language'     => fn ($t) => $t->language('ru', 'iso_639_1'),
 ];
 
+// forms of the whole string in older versions, a block of forms in braces now
 if (method_exists($new, 'translatePlural')) {
-    $plural = fn ($t) => $t->translatePlural(':count file|:count files', 5);
-    printf("%-14s %12s %12.3f\n", 'plural', '—', measure(fn () => $plural($new), $iterations));
+    $before = method_exists($old, 'translatePlural') ? measure(fn () => $old->translatePlural(':count file|:count files', 5), $iterations) : null;
+    $after  = measure(fn () => $new->translatePlural(':count {file|files}', 5), $iterations);
+    printf("%-14s %12s %12.3f %8s\n", 'plural', $before === null ? '—' : sprintf('%.3f', $before), $after, $before === null ? '' : sprintf('%+.0f%%', ($after / $before - 1) * 100));
 }
 
 printf("%-14s %12s %12s %8s\n", 'case', "$ref, µs", 'current, µs', 'diff');

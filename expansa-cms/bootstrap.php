@@ -28,7 +28,6 @@ use Expansa\Facades\Safe;
 use Expansa\Facades\Session;
 use Expansa\Facades\Terminal;
 use Expansa\Facades\View;
-use Expansa\Patterns\Registry;
 use Expansa\Scheduler\Scheduler;
 use Expansa\Support\Is;
 use Expansa\Support\Url;
@@ -138,16 +137,10 @@ Lifecycle::configure(
  * 1. boot · always.
  *
  * Stops on maintenance.php, if it exists.
- * Registers the default data (countries, timezones, languages), loaded on first Registry::get().
  */
 Lifecycle::phase('boot', true, function () {
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
         require $maintenance;
-    }
-
-    // default data, loaded on first Registry::get()
-    foreach (['countries', 'timezones', 'languages'] as $data) {
-        Registry::lazy($data, fn () => require EX_PATH . "dashboard/data/$data.php");
     }
 });
 
@@ -351,7 +344,7 @@ Lifecycle::phase('configure', true, function () {
         ],
         pattern: 'i18n/%s',
         overrides: EX_I18N,
-        languages: fn () => Hook::call('languages', Registry::get('languages')),
+        languages: fn () => Hook::call('languages', Expansa\Translation\Languages::all()),
         locale: defined('EX_DB') ? fn () => App\Models\User::current()?->locale : null,
     );
 

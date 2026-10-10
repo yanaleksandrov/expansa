@@ -4,7 +4,6 @@ use App\Models\Option;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
-use Expansa\Patterns\Registry;
 
 /**
  * Website settings in dashboard
@@ -358,7 +357,7 @@ return Expansa\Builders\Form::enqueue(
 								'u-select' => '{"showSearch": 1}',
 								'value'    => Option::get( 'timezone', 'UTC' ),
 							],
-							'options'     => Registry::get( 'timezones' ),
+							'options'     => App\Support\Timezones::all(),
 						],
 					],
 				],
