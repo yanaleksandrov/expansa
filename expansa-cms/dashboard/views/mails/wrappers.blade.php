@@ -7,9 +7,7 @@
  * @package Expansa\Templates
  */
 
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
 $template = trim( $__data['body_template'] ?? '' );
 if ( empty( $template ) ) {

@@ -3,12 +3,11 @@
  * Connected sign-in provider account of the profile.
  *
  * @var array{id: int, provider: string, email: string, created_at: string} $identity
+ * @var App\Support\Site $site Settings of the site: name, language, charset, addresses, version; shared with every view.
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
-$date = new IntlDateFormatter( Expansa\Facades\I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE );
+$date = new IntlDateFormatter( $site->locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE );
 ?>
 <div class="p-4 df fdr aic g-4 card card-border" id="identity-{{ $identity['id'] }}">
 	<i class="ph ph-{{ $identity['provider'] }}-logo fs-24"></i>

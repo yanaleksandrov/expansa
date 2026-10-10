@@ -58,6 +58,11 @@ final class Form
      */
     private static ?Closure $assets = null;
 
+    /**
+     * Directory of the files that register forms, `<uid>.php` each; '' without one.
+     */
+    private static string $directory = '';
+
     public function __construct(
 
         /**
@@ -79,18 +84,25 @@ final class Form
     ) {}
 
     /**
-     * Set the field types, the template renderer and the template assets loader.
+     * Set the field types, the template renderer, the template assets loader and the directory of form files.
      *
-     * @param array<string, class-string<Form\Contracts\Field>> $types  Field type classes by type name.
-     * @param Closure|null                                      $view   `fn (string $template, array $data): string`.
-     * @param Closure|null                                      $assets `fn (string $template, string $uid): void`.
+     * @param array<string, class-string<Form\Contracts\Field>> $types     Field type classes by type name.
+     * @param Closure|null                                      $view      `fn (string $template, array $data): string`.
+     * @param Closure|null                                      $assets    `fn (string $template, string $uid): void`.
+     * @param string                                            $directory Files that register forms: render('settings')
+     *                                                                     loads `<directory>/settings.php` once.
      * @return void
      */
-    public static function configure(array $types = [], ?Closure $view = null, ?Closure $assets = null): void
-    {
-        self::$types  = $types;
-        self::$view   = $view;
-        self::$assets = $assets;
+    public static function configure(
+        array $types = [],
+        ?Closure $view = null,
+        ?Closure $assets = null,
+        string $directory = '',
+    ): void {
+        self::$types     = $types;
+        self::$view      = $view;
+        self::$assets    = $assets;
+        self::$directory = rtrim($directory, '/\\');
     }
 
     /**
@@ -165,7 +177,8 @@ final class Form
     }
 
     /**
-     * Render a registered form in a form tag, an empty string for an unknown one.
+     * Render a form in a form tag: a form not registered yet is loaded from `<uid>.php`
+     * of the configured directory; an empty string for an unknown one.
      *
      * @param string $uid
      * @return string
@@ -173,7 +186,13 @@ final class Form
      */
     public static function render(string $uid): string
     {
-        $form = self::$forms[self::uid($uid)] ?? null;
+        $uid  = self::uid($uid);
+        $file = self::$directory . "/$uid.php";
+        if (! isset(self::$forms[$uid]) && self::$directory !== '' && is_file($file)) {
+            require_once $file;
+        }
+
+        $form = self::$forms[$uid] ?? null;
         if ($form === null) {
             return '';
         }

@@ -6,4 +6,4 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<?php echo form('settings', EX_DASHBOARD . 'forms/settings.php'); ?>
+<?php echo form('settings'); ?>

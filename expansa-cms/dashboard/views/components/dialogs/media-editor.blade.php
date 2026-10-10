@@ -23,7 +23,7 @@ defined('EX_PATH') || exit;
                 <div><strong><?php echo t('File Size'); ?>:</strong> <span u-text="entry.sizeHumanize"></span>
                 </div>
             </div>
-            <?php echo form('media-editor', EX_DASHBOARD . 'forms/media-editor.php'); ?>
+            <?php echo form('media-editor'); ?>
         </div>
     </div>
 </template>

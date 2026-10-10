@@ -7,24 +7,22 @@
  *
  * @var array[]            $groups Sections with their `checks` and `status`.
  * @var array<string, int> $count  Number of checks by status.
- * @var string             $status Status of the whole site.
+ * @var string             $status Status of the whole site: `good`, `recommended` or `critical`.
  * @var string             $open   Section open on load: the first one with a problem.
  *
  * @package Expansa\Templates
  */
 
-use App\Support\SiteHealth;
-
 $meta = [
-    SiteHealth::GOOD        => ['icon' => 'ph ph-check-circle', 'badge' => 'badge--green-lt', 'label' => t('Good')],
-    SiteHealth::RECOMMENDED => ['icon' => 'ph ph-warning-circle', 'badge' => 'badge--orange-lt', 'label' => t('Recommended')],
-    SiteHealth::CRITICAL    => ['icon' => 'ph ph-x-circle', 'badge' => 'badge--red-lt', 'label' => t('Critical')],
+    'good'        => ['icon' => 'ph ph-check-circle', 'badge' => 'badge--green-lt', 'label' => t('Good')],
+    'recommended' => ['icon' => 'ph ph-warning-circle', 'badge' => 'badge--orange-lt', 'label' => t('Recommended')],
+    'critical'    => ['icon' => 'ph ph-x-circle', 'badge' => 'badge--red-lt', 'label' => t('Critical')],
 ];
 
 $summary = [
-    SiteHealth::GOOD        => t('Everything is fine'),
-    SiteHealth::RECOMMENDED => t('A few things can be improved'),
-    SiteHealth::CRITICAL    => t('Some problems need attention'),
+    'good'        => t('Everything is fine'),
+    'recommended' => t('A few things can be improved'),
+    'critical'    => t('Some problems need attention'),
 ];
 ?>
 <div class="site-health">

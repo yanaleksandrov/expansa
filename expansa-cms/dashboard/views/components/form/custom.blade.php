@@ -6,9 +6,7 @@
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
 $callback = $__data['callback'] ?? null;
 if (is_callable($callback)) {

@@ -3,24 +3,25 @@
  * User sign-in template, the data comes from App\Dashboard\Pages\SignIn.
  * It can be overridden by copying it to themes/yourtheme/dashboard/views/screens/sign-in.php
  *
- * @var string                $error      Message of a failed sign-in by a provider.
- * @var string                $notice     Message of an account link: email confirmed, devices signed out.
- * @var array[]               $providers  OAuth sign-in buttons: `id`, `label`, `url`.
- * @var bool                  $add        Signing in to one more account.
- * @var bool                  $challenged The password is right, the second factor is asked.
- * @var bool                  $emailLink  Signing in by an emailed link is on.
- * @var bool                  $membership Anyone can sign up.
+ * @var string           $error      Message of a failed sign-in by a provider.
+ * @var string           $notice     Message of an account link: email confirmed, devices signed out.
+ * @var array[]          $providers  OAuth sign-in buttons: `id`, `label`, `url`.
+ * @var bool             $add        Signing in to one more account.
+ * @var bool             $challenged The password is right, the second factor is asked.
+ * @var bool             $emailLink  Signing in by an emailed link is on.
+ * @var bool             $membership Anyone can sign up.
+ * @var App\Support\Site $site       Settings of the site: name, language, charset, addresses, version; shared with every view.
  *
  * @package Expansa\Templates
  */
 ?>
 <main class="mw-360" u-data>
-	<a href="{{ url() }}" class="df jcc mb-4" target="_blank">
+	<a href="{{ $site->url }}" class="df jcc mb-4" target="_blank">
 		<img src="{{ url('dashboard/assets/images/logo-grid.svg') }}" width="212" height="124" alt="Expansa CMS">
 	</a>
 	@if($add)
 		<div class="df aic g-1 fs-13 mb-3">
-			<i class="ph ph-user-plus"></i> {!! t('Sign in to another account. You can switch back in the user menu. [Cancel](:url)', url('dashboard')) !!}
+			<i class="ph ph-user-plus"></i> {!! t('Sign in to another account. You can switch back in the user menu. [Cancel](:url)', $site->dashboard) !!}
 		</div>
 	@endif
 	@if($notice)
@@ -45,7 +46,7 @@
 		</form>
 	@else
 	<?php
-	echo form('user-sign-in', EX_DASHBOARD . 'forms/user-sign-in.php');
+	echo form('user-sign-in');
     ?>
 	@if($providers)
 		<div class="dg g-2 mt-2">

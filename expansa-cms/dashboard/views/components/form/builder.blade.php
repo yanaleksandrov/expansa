@@ -20,9 +20,7 @@
  *
  * @package Expansa\Templates
  */
-if (! defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 $locations = $__data['locations'] ?? [];
 ?>

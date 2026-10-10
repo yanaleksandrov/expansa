@@ -3,12 +3,11 @@
  * Passkey card of the profile, also returned by the "user/passkey-create" API.
  *
  * @var array{id: int, name: string, backed_up: bool, created_at: string, used_at: ?string} $passkey
+ * @var App\Support\Site $site Settings of the site: name, language, charset, addresses, version; shared with every view.
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
-$date = new IntlDateFormatter( Expansa\Facades\I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT );
+$date = new IntlDateFormatter( $site->locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT );
 ?>
 <div class="p-4 df fdr aic g-4 card card-border" id="passkey-{{ $passkey['id'] }}">
 	<i class="ph ph-fingerprint fs-24"></i>

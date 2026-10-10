@@ -6,4 +6,4 @@
  */
 defined('EX_PATH') || exit;
 ?>
-{!! form('multilingual-settings', EX_DASHBOARD . 'forms/multilingual-settings.php') !!}
+{!! form('multilingual-settings') !!}

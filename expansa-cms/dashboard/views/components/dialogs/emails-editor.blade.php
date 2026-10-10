@@ -12,7 +12,7 @@ defined('EX_PATH') || exit;
 <template id="tmpl-email-editor" u-init="$dialog.init(() => emailDialog)">
     <div class="email">
         <div class="email-form">
-            <?php echo form('emails-creator', EX_DASHBOARD . 'forms/emails-creator.php'); ?>
+            <?php echo form('emails-creator'); ?>
         </div>
         <div class="email-preview">
             <?php

@@ -6,4 +6,4 @@
  */
 defined('EX_PATH') || exit;
 ?>
-{!! form('user-profile', EX_DASHBOARD . 'forms/user-profile.php') !!}
+{!! form('user-profile') !!}

@@ -4,11 +4,8 @@
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
-?>
-<?php
+defined('EX_PATH') || exit;
+
 $labels = [
 	'newProcess'    => t_attr( 'New Process' ),
 	'queued'        => t_attr( 'Waiting for the worker to start' ),

@@ -7,5 +7,5 @@
 defined('EX_PATH') || exit;
 ?>
 <div class="p-7">
-    <?php echo form('tools-list', EX_DASHBOARD . 'forms/tools-list.php'); ?>
+    <?php echo form('tools-list'); ?>
 </div>

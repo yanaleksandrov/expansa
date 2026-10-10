@@ -35,6 +35,7 @@ Form::configure(
     types: ['text' => Fields\Input::class, 'select' => Fields\Select::class /* ... */],
     view: fn (string $template, array $data) => (string) View::create("components/form/$template", $data),
     assets: fn (string $template, string $uid) => Asset::discover(View::create("components/form/$template")->path, $uid, ['type' => $uid]),
+    directory: EX_DASHBOARD . 'forms',
 );
 
 Table::configure(
@@ -52,6 +53,7 @@ Tree::configure(
 | `Form` `types`      | Классы типов полей по имени типа, их читает конструктор полей через `getTypes()`  |
 | `Form` `view`       | Вывод шаблона поля по имени (`input`, `select`, `layout-tab`); без него — пустая строка |
 | `Form` `assets`     | Подключение CSS и JS шаблона; uid — тип поля, чтобы `date` и `color` с общим шаблоном `input` получили свои скрипты |
+| `Form` `directory`  | Папка файлов форм: `render('settings')` сам подключает `<directory>/settings.php`  |
 | `Table` `filter`    | Файл, который регистрирует форму фильтра, подключается перед каждой таблицей      |
 | `Table` `cellView`  | Вид ячеек по умолчанию, `->view('date')` колонки превращает его в `…/cell-date`   |
 | `Tree` `allows`     | Проверка `capabilities` элемента; без неё видны все элементы                      |
@@ -60,15 +62,19 @@ Tree::configure(
 
 ### Регистрация и вывод
 
-Форма описывается в файле, который возвращает её uid, и выводится функцией `form()`: файл подключается
-один раз, затем `Form::render()` собирает разметку.
+Форма описывается в файле, который возвращает её uid, и выводится функцией `form()`: файл формы из папки
+`directory` подключается один раз, затем `Form::render()` собирает разметку. Плагин со своими формами
+передаёт путь вторым аргументом.
 
 ```php
 // dashboard/forms/user-sign-in.php
 return Form::enqueue('user-sign-in', ['@submit.prevent' => '$ajax.post("user/sign-in")'], [/* поля */]);
 
 // шаблон
-echo form('user-sign-in', EX_DASHBOARD . 'forms/user-sign-in.php');
+echo form('user-sign-in');
+
+// плагин
+echo form('order-editor', EX_PLUGINS . 'ecommerce/core/order.php');
 ```
 
 `enqueue()` очищает uid и бросает `InvalidArgumentException`, если он пуст или занят. У тега формы

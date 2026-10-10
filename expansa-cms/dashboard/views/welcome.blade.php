@@ -2,18 +2,17 @@
 /**
  * Document of a dashboard page: the bar, the menus and the dialogs around the page template.
  *
- * @var string $page  Template of the page, e.g. `screens/user`; it gets the same data.
- * @var string $title Document title.
+ * @var string           $page  Template of the page, e.g. `screens/user`; it gets the same data.
+ * @var string           $title Document title.
+ * @var App\Support\Site $site  Settings of the site: name, language, charset, addresses, version; shared with every view.
  */
 
-use App\Models\Option;
 use Expansa\Facades\Hook;
-use Expansa\Facades\I18n;
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo I18n::locale(); ?>">
+<html lang="{{ $site->locale }}">
 <head>
-    <meta charset="{{ Option::attr( 'charset', 'UTF-8' ) }}">
+    <meta charset="{{ $site->charset }}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Expansa' }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,7 +54,7 @@ use Expansa\Facades\I18n;
         </div>
 
         <div class="expansa-panel">
-            <a href="<?php echo url(); ?>" target="_blank">
+            <a href="{{ $site->url }}" target="_blank">
                 <img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34" alt="Expansa Logo">
             </a>
             <?php echo view('components/menu-panel'); ?>

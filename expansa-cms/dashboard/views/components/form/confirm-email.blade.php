@@ -34,11 +34,11 @@ defined('EX_PATH') || exit;
 		<div class="confirm-email-top">
 			<div class="confirm-email-side">
 				<?php if ( $label ) : ?>
-				<span class="confirm-email-title"><?php echo $label; ?></span>
+					<span class="confirm-email-title"><?php echo $label; ?></span>
 				<?php endif; ?>
 
 				<?php if ( $instruction ) : ?>
-				<span class="confirm-email-instruction"><?php echo $instruction; ?></span>
+					<span class="confirm-email-instruction"><?php echo $instruction; ?></span>
 				<?php endif; ?>
 			</div>
 			<div class="confirm-email-code">

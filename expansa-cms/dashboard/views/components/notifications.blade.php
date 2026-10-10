@@ -6,9 +6,7 @@
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <div class="notifications" u-data="notice" @mouseenter="pause()" @mouseleave="resume()">
 	<div u-each="(item, index) in items" class="notifications-item" :class="item.classes()" :style="`--notice-scale: ${1 - (items.length - index - 1) * 0.005}`">

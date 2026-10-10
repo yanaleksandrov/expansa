@@ -2,15 +2,15 @@
 /**
  * Document of the pages without the dashboard: sign-in, sign-up, reset password, the installer.
  *
- * @var string $page  Template of the page, e.g. `screens/sign-in`; it gets the same data.
- * @var string $title Document title.
+ * @var string           $page  Template of the page, e.g. `screens/sign-in`; it gets the same data.
+ * @var string           $title Document title.
+ * @var App\Support\Site $site  Settings of the site: name, language, charset, addresses, version; shared with every view.
  */
 
 use Expansa\Facades\Hook;
-use Expansa\Facades\I18n;
 ?>
 <!DOCTYPE html>
-<html lang="<?php echo I18n::locale(); ?>">
+<html lang="{{ $site->locale }}">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">

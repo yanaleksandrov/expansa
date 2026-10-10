@@ -195,6 +195,9 @@ Lifecycle::phase('configure', true, function () {
         cachePath: EX_PATH . 'cache/views',
     );
 
+    // name and charset of the site for every view, read from the options only when shown
+    View::share('site', new App\Support\Site());
+
     // extension ids like "plugins/seo" are relative to it; a plugin that breaks goes to quarantine instead of the site
     Extensions::configure(
         root: EX_PATH,
@@ -412,6 +415,7 @@ Lifecycle::phase('configure', true, function () {
             $uid,
             ['type' => $uid],
         ),
+        directory: EX_DASHBOARD . 'forms',
     );
 });
 

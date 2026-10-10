@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Api\User\Admin;
 use App\Facades\Dashboard;
+use App\Models\User;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Lifecycle;
+use Expansa\Facades\View;
 use Expansa\Http\Request;
 
 final class Web
@@ -64,6 +67,12 @@ final class Web
             $layout = 'guest';
             $slug   = '404';
         }
+
+        // who views the page, for every template of the dashboard; mails and the site do not get it
+        View::share([
+            'viewer'       => User::current(),
+            'impersonator' => Admin::getImpersonator(),
+        ]);
 
         /**
          * Expansa page is fully loaded.

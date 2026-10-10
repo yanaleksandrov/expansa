@@ -6,9 +6,7 @@
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <div class="df fdc aic jcc t-center t-muted">
 	<h1 class="fs-64">404</h1>

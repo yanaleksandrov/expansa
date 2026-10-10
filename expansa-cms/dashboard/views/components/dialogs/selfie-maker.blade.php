@@ -6,9 +6,7 @@
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <!-- selfie maker start -->
 <template id="take-selfie">

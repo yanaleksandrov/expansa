@@ -1,21 +1,20 @@
 <?php
 
-use App\Models\User;
 use Expansa\Facades\Auth;
 
 /**
  * Output user account button.
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/user-account.php
  *
+ * @var App\Models\User|null $viewer User who views the page, shared with dashboard views.
+ *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-$user = User::current();
 ?>
 <details class="details" @click.outside="$el.removeAttribute('open')">
     <summary class="details-summary">
-        <span class="expansa-user-name">{{ t('Hi, :Username', $user->showname ?? '') }}</span>
+        <span class="expansa-user-name">{{ t('Hi, :Username', $viewer->showname ?? '') }}</span>
         <span class="avatar avatar--xs" style="background-image: url(https://i.pravatar.cc/150?img=3)">
             <i class="badge bg-green" title="{{ t('Online') }}"></i>
         </span>

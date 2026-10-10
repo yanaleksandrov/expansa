@@ -6,9 +6,7 @@
  * @var array{secret: string, qr: string}|null $setup Secret being set up.
  * @var string[]|null                        $codes Recovery codes to show once.
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
 $setup     = $setup ?? null;
 $codes     = $codes ?? null;

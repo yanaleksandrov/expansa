@@ -57,7 +57,7 @@ Dashboard::data('user', App\Dashboard\Pages\User::data(...));
 Dashboard::data('user', fn (Request $request, array $data) => ['orders' => Order::forUser($data['user'])]);
 
 // на всех страницах
-Dashboard::data('*', fn () => ['currentUser' => App\Models\User::current()]);
+Dashboard::data('*', fn () => ['announcement' => App\Models\Option::get('dashboard.announcement')]);
 ```
 
 - Порядок: по `priority` (меньше — раньше, по умолчанию `10`), при равном — `*`, затем в порядке регистрации.

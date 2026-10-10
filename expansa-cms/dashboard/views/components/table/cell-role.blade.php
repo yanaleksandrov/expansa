@@ -10,9 +10,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
 $prop = Safe::prop($__data['key'] ?? '');
 $role = Role::get($__data[$prop] ?? '');

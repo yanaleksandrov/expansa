@@ -4,9 +4,7 @@
  *
  * @var array<int, array{id: int, name: string, prefix: string, scopes: string[], last_used_at: ?string, expires_at: ?string}> $tokens
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 ?>
 @foreach($tokens as $token)
 	<div class="p-4 df fdr aic g-4 card card-border" id="token-{{ $token['id'] }}">

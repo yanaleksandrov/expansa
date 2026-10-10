@@ -8,9 +8,7 @@ use Expansa\Facades\Safe;
  *
  * @package Expansa\Templates
  */
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
 [ $label, $instruction, $class, $content ] = Safe::data(
 	$__data ?? [],

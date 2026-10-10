@@ -166,12 +166,13 @@ if (! function_exists('form')) {
      * Render a form: the file that registers it is loaded once, then Form::render() builds the markup.
      *
      * @param string $uid  Form id.
-     * @param string $path File registering the form, skipped if missing.
+     * @param string $path File registering the form, skipped if missing; by default `<uid>.php`
+     *                     of the directory set in Form::configure().
      * @return string Markup, empty for an unknown form.
      */
-    function form(string $uid, string $path): string
+    function form(string $uid, string $path = ''): string
     {
-        if (is_file($path)) {
+        if ($path !== '' && is_file($path)) {
             require_once $path;
         }
 

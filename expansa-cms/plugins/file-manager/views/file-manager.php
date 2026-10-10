@@ -10,9 +10,7 @@ use Expansa\Facades\Disk;
  * @package Expansa\Templates
  */
 
-if (! defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 $directories = Disk::dir(EX_PATH)->directories();
 $folders     = Disk::dir(EX_PATH)->directories();

@@ -117,6 +117,15 @@ check('a form renders its fields in a form tag with the id and POST', Form::rend
 check('a taken uid throws', throws(fn () => Form::enqueue('profile'), InvalidArgumentException::class));
 check('an unknown form renders empty', Form::render('missing') === '');
 
+$forms = sys_get_temp_dir() . '/expansa-forms-' . getmypid();
+@mkdir($forms);
+file_put_contents("$forms/newsletter.php", '<?php return Expansa\Builders\Form::enqueue("newsletter", [], [["type" => "email", "name" => "email"]]);');
+Form::configure(view: fn (string $template, array $data) => "[$template:" . ($data['name'] ?? '') . ']', directory: $forms);
+check('render() loads a form not registered yet from <uid>.php of the directory', Form::render('newsletter') === "<form id=\"newsletter\" method=\"POST\">\n[input:email]</form>\n");
+check('the form file is loaded once', Form::render('newsletter') === Form::render('newsletter'));
+unlink("$forms/newsletter.php");
+rmdir($forms);
+
 $names = fn (Form $form) => array_map(fn (array $field) => $field['name'] ?? '-', $form->fields);
 
 $form = Form::override('profile', fn (Form $form) => $form

@@ -224,7 +224,7 @@ defined('EX_PATH') || exit;
         <!--				</ul>-->
         <!--			</template>-->
 
-        <?php echo form('menu-item-editor', EX_DASHBOARD . 'forms/menu-item-editor.php'); ?>
+        <?php echo form('menu-item-editor'); ?>
     </div>
 </div>
 

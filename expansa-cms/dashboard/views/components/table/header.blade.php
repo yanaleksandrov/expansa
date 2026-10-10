@@ -205,7 +205,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
 
         <?php if ($actions) : ?>
             <div class="df aic g-1" u-show="bulk" hidden>
-                <?php echo form('posts-actions', EX_DASHBOARD . 'forms/posts-actions.php'); ?>
+                <?php echo form('posts-actions'); ?>
                 <button type="button" class="btn btn--sm t-red" u-bind="reset">
                     <i class="ph ph-trash"></i> <?php echo t('Reset'); ?>
                 </button>

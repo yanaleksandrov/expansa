@@ -8,6 +8,6 @@ defined('EX_PATH') || exit;
 ?>
 <div class="h-full bg-gray-lt p-7 md:px-5">
     <div class="mw-600 m-auto">
-        <?php echo form('posts-export', EX_DASHBOARD . 'forms/posts-export.php'); ?>
+        <?php echo form('posts-export'); ?>
     </div>
 </div>

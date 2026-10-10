@@ -11,7 +11,7 @@
 
 <div class="terms">
     <div class="terms-side">
-        <?php echo form('terms-editor', EX_DASHBOARD . 'forms/terms-editor.php'); ?>
+        <?php echo form('terms-editor'); ?>
     </div>
     <div class="terms-main">
         @if($table->getData())
