@@ -3,10 +3,10 @@
 /**
  * Form for create & edit emails.
  *
- * @since 2025.1
+ * @since 2027.1
  */
 
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
     'attributes',
     [
         'class' => 'dg g-3 p-5 pt-4',
@@ -23,6 +23,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'name',
+                    'error'       => 'name',
                     'label'       => t('Category Name'),
                     'class'       => '',
                     'label_class' => '',
@@ -42,6 +43,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'slug',
+                    'error'       => 'slug',
                     'label'       => t('Slug'),
                     'class'       => '',
                     'label_class' => '',
@@ -71,6 +73,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'select',
                     'name'        => 'type',
+                    'error'       => 'type',
                     'label'       => t('The parent category of the product'),
                     'class'       => '',
                     'label_class' => '',
@@ -96,6 +99,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'media',
                     'name'        => 'image',
+                    'error'       => 'image',
                     'label'       => t('Image'),
                     'class'       => '',
                     'label_class' => '',
@@ -115,6 +119,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'textarea',
                     'name'        => 'description',
+                    'error'       => 'description',
                     'label'       => t('Description'),
                     'class'       => '',
                     'label_class' => '',

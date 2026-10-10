@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Builders\Tree;
 use Expansa\Facades\Disk;
 
 /**
@@ -11,9 +10,7 @@ use Expansa\Facades\Disk;
  * @package Expansa\Templates
  */
 
-if (! defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 
 $directories = Disk::dir(EX_PATH)->directories();
 $folders     = Disk::dir(EX_PATH)->directories();
@@ -106,18 +103,17 @@ $files       = [
         </div>
         <div class="fm-main">
             <div class="fm-folders">
-                <?php echo Tree::build($directories, function (int $depth, $directory) { ?>
-                    <ul class="fm-folders-list" data-depth="<?php echo $depth; ?>">
+                <?php foreach ($directories as $directory) : ?>
+                    <ul class="fm-folders-list" data-depth="1">
                         <li class="fm-folder-item">
                             <span class="fm-folder-item-name"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 14 14">
                               <g>
                                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="M6.331 1.688a.991.991 0 0 0-.883-.648 26.605 26.605 0 0 0-3.456.033 1.004 1.004 0 0 0-.92.893C.735 4.903.623 7.85.975 10.792c.119 1 .937 1.725 1.915 1.832 2.762.3 5.485.293 8.247-.008a2.092 2.092 0 0 0 1.845-1.823c.218-1.82.276-3.684.14-5.971a1.906 1.906 0 0 0-1.745-1.788c-1.344-.112-2.279-.118-3.931-.153a.998.998 0 0 1-.915-.652l-.2-.54Z"/>
                               </g>
-                            </svg> <?php echo $directory; ?></span>
-                            @nested
+                            </svg> <?php echo escape(basename($directory)); ?></span>
                         </li>
                     </ul>
-                <?php }); ?>
+                <?php endforeach; ?>
             </div>
             <div class="fm-files">
                 <div class="fm-files-head">

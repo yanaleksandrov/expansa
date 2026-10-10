@@ -5,9 +5,9 @@ use Expansa\Facades\Safe;
 /**
  * Form for create & edit emails.
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'emails-creator',
 	[
 		'@submit.window' => '$ajax.post("import-email")',
@@ -28,6 +28,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'event',
+					'error'       => 'event',
 					'label'       => t( 'Events' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -52,7 +53,8 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'subject',
-					'label'       => t( 'Email subject' ),
+					'error'       => 'subject',
+					'label'       => t( 'Email Subject' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -67,12 +69,13 @@ return \Expansa\Facades\Form::enqueue(
 						'u-prop'      => 'subject',
 						'value'       => '',
 						'required'    => true,
-						'placeholder' => t( 'Email subject' ),
+						'placeholder' => t( 'Email Subject' ),
 					],
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'title',
+					'error'       => 'title',
 					'label'       => t( 'Title' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -88,12 +91,13 @@ return \Expansa\Facades\Form::enqueue(
 						'u-prop'      => 'title',
 						'value'       => t( 'You\'re registered' ),
 						'required'    => true,
-						'placeholder' => t( 'Email title...' ),
+						'placeholder' => t( 'Email title' ),
 					],
 				],
 				[
 					'type'        => 'text',
 					'name'        => 'subtitle',
+					'error'       => 'subtitle',
 					'label'       => t( 'Subtitle' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -115,6 +119,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'content',
+					'error'       => 'content',
 					'label'       => t( 'Content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
@@ -137,7 +142,8 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'recipients',
-					'label'       => t( 'Recipient(s)' ),
+					'error'       => 'recipients',
+					'label'       => t( 'Recipients' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -172,7 +178,8 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'textarea',
 					'name'        => 'bottom',
-					'label'       => t( 'Email bottom content' ),
+					'error'       => 'bottom',
+					'label'       => t( 'Email Bottom Content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -185,14 +192,15 @@ return \Expansa\Facades\Form::enqueue(
 					'conditions'  => [],
 					'attributes'  => [
 						'u-prop'      => 'bottom',
-						'value'       => t( 'Team, PO Box 16122, Collins Street West, <a href="#" target="_blank">Victoria 8007, Australia</a>' ),
+						'value'       => escape('Team, PO Box 16122, Collins Street West, <a href="#" target="_blank">Victoria 8007, Australia</a>'),
 						'placeholder' => t( 'N/A' ),
 					],
 				],
 				[
 					'type'        => 'textarea',
 					'name'        => 'footer',
-					'label'       => t( 'Footer content' ),
+					'error'       => 'footer',
+					'label'       => t( 'Footer Content' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -225,7 +233,8 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'email',
 					'name'        => 'email',
-					'label'       => t( 'Send to' ),
+					'error'       => 'email',
+					'label'       => t( 'Send To' ),
 					'class'       => '',
 					'label_class' => 'df aic fs-12 t-muted',
 					'reset'       => 0,
@@ -241,7 +250,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'submit',
 					'name'        => 'check',
-					'label'       => t( 'Send a test email' ),
+					'label'       => t( 'Send a Test Email' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,

@@ -10,6 +10,7 @@ use App\Query\Query;
 use Expansa\Facades\Csv;
 use Expansa\Facades\Json;
 use Expansa\Facades\View;
+use Expansa\Http\Request;
 use Expansa\Http\Response;
 
 final class PostsService
@@ -27,10 +28,10 @@ final class PostsService
      * Returns a raw file-download response — not JSON, so the controller returns this
      * Response object directly rather than a plain array (Kernel sends it as-is).
      */
-    public function export(array $input): Response
+    public function export(Request $request, Response $response): Response
     {
-        $format = trim(strval($input['format'] ?? ''));
-        $types  = $input['types'] ?? [];
+        $format = trim(strval($request->input['format'] ?? ''));
+        $types  = $request->input['types'] ?? [];
         $types  = is_array($types) ? $types : [];
         $date   = date('YmdHis');
 
@@ -50,21 +51,22 @@ final class PostsService
             }
         );
 
-        return new Response(is_string($content) ? $content : Json::encode($content), headers: [
-            'Content-Type'        => 'application/force-download',
-            'Content-Disposition' => sprintf('inline; filename="core-posts-%s.%s"', $date, $format),
-        ]);
+        $response->content = is_string($content) ? $content : Json::encode($content);
+
+        return $response
+            ->setHeader('Content-Type', 'application/force-download')
+            ->setHeader('Content-Disposition', sprintf('inline; filename="core-posts-%s.%s"', $date, $format));
     }
 
-    public function import(array $input): array
+    public function import(Request $request): array
     {
         $imported = [];
-        $filename = $input['filename'] ?? '';
-        $map      = $input['map'] ?? [];
-        $status   = $input['status'] ?? '';
-        $author   = $input['author'] ?? '';
-        $type     = $input['type'] ?? '';
-        $encoding = FilesService::csvEncoding($input['encoding'] ?? null);
+        $filename = $request->post['filename'] ?? '';
+        $map      = $request->post['map'] ?? [];
+        $status   = $request->post['status'] ?? '';
+        $author   = $request->post['author'] ?? '';
+        $type     = $request->post['type'] ?? '';
+        $encoding = FilesService::csvEncoding($request->post['encoding'] ?? null);
 
         if (file_exists($filename)) {
             foreach (Csv::iterate($filename, encoding: $encoding) as $row) {
@@ -89,9 +91,9 @@ final class PostsService
 
         return [
             'completed' => true,
-            'output'    => View::create(EX_DASHBOARD . 'views/global/state', [
+            'output'    => View::create(EX_DASHBOARD . 'views/components/state', [
                 'icon'        => 'success',
-                'title'       => t('Import is complete!'),
+                'title'       => t('Import Is Complete'),
                 'description' => t(':counts posts were imported successfully. Do you want to [start another import](:link)?', count($imported), url('/dashboard/import')),
             ]),
         ];

@@ -24,9 +24,10 @@ public function export(Request $request): Response
 | Класс                            | Назначение                                                         |
 |----------------------------------|--------------------------------------------------------------------|
 | `Request`                        | Значения суперглобальных массивов и то, что из них следует         |
-| `Response`                       | Статус, заголовки, cookie и тело; `send()` отправляет              |
+| `Response`                       | Статус, заголовки, cookie и тело; `send()` отправляет; фрагменты для `$ajax` |
 | `Redirect`                       | Заголовок `Location` с фильтрами из `configure()`, страница с отсчётом |
 | `Status`                         | Тексты кодов статуса: `Status::getText(404)`                       |
+| `Enums\Notice`                   | Вид уведомления: `Info`, `Success`, `Warning`, `Error`, `Loading`  |
 | `Contracts\Request`, `Response`  | Контракты запроса и ответа                                         |
 | `Contracts\Error`                | Исключение, которое становится ответом с ошибкой                   |
 | `Contracts\Session`, `Route`     | Что Http ждёт от сессии и маршрутизатора; реализуют другие пакеты  |
@@ -174,5 +175,79 @@ throw new NotFound(t('Post not found'));
 throw new ValidationFailed(t('Check the form'), ['email' => [t('Required')]]);
 throw new ResponseReady(new Response($csv, headers: ['Content-Type' => 'text/csv']));
 ```
+
+Ошибку одного поля короче бросить через `ValidationFailed::field('email', $message)`, ошибку модели —
+через `ValidationFailed::from($error, $summary)`: ошибки валидатора сохраняют поля, первое строковое
+сообщение становится `message`, иначе берётся `$summary`.
+
+### Ошибки в формах
+
+Поле показывает ошибки того ключа `errors`, который указан в его атрибуте `data-error`; по имени поле
+не угадывается. Конструктор форм ставит атрибут из ключа `error` поля, поэтому у каждого поля со
+значением он указан явно; у заголовков, вкладок, кнопок и скрытых полей его нет. Вложенность в ключе —
+через точку, как в ответе: `user[password]` → `user.password`. API и форма не зависят от имён друг друга:
+
+```php
+['type' => 'email', 'name' => 'user[email]', 'error' => 'user.email'],
+// запрос шлёт `current`, а поле называется password-old
+['type' => 'password', 'name' => 'password-old', 'error' => 'current'],
+```
+
+Поле без `error` ошибок не показывает: они уходят уведомлением. В написанной вручную разметке атрибут
+ставится сам: `<input name="code" data-error="code">`.
+`$ajax` (src/js/youla-ajax.js) на любой ответ не из `2xx` сам показывает ошибки:
+
+- сообщения полей — под полем с их `data-error` в форме, из которой ушёл запрос: `.field-error`, класс `is-invalid` у
+  `.field`, `aria-invalid`; ошибка снимается при вводе в поле и перед следующим запросом;
+- сообщения без поля, а также полей скрытых, например в другой вкладке или шаге, — уведомлением;
+- без `errors` — уведомлением `message`, без него или без сети — текстами `messages`.
+
+Селектор поля, места ошибки и классы, адрес API, имена CSRF-cookie и заголовка, тексты — настройки
+`Youla.ajax`. `App\Dashboard\Assets` кладёт их в данные `youla` (`ajax`), а youla-expansa.js переносит в
+`Youla.ajax`.
+
+Промис `$ajax` при этом отклоняется, `.then()` не выполняется, а в консоли нет «Uncaught (in promise)».
+Ошибку, которая не относится к полю, — неверный пароль при входе, лимит попыток — по-прежнему
+возвращайте уведомлением `Response::notify()` со статусом `200`.
+
+## Фрагменты
+
+`Response` может вместо тела нести действия, которые `$ajax` (src/js/youla-ajax.js) выполнит на
+странице по порядку. Методы повторяют действия youla-ajax.js, у каждого последний аргумент
+`$delay` — задержка в миллисекундах. Метод контроллера получает `Response $response` от `Kernel` так же,
+как `Request $request`, — по типу параметра — и передаёт его в сервис:
+
+```php
+public function tokenCreate(Request $request, Response $response): Response
+{
+    return $this->service->tokenCreate($request, $response);
+}
+
+// в сервисе
+return $response
+    ->notify(t('Token created.'), Notice::Success)
+    ->update('#tokens', $html)
+    ->remove("#token-$id")
+    ->redirect(url('dashboard'), delay: 1500);
+```
+
+| Метод                                           | Действие                                              |
+|-------------------------------------------------|-------------------------------------------------------|
+| `notify($message, $type, $duration)`             | Уведомление; `$duration` `null` — по умолчанию, `0` — до закрытия |
+| `redirect($url)`, `reload()`, `changeUrl($url)`  | Переход, перезагрузка, смена адреса без загрузки      |
+| `update`, `replace`                             | Заменить содержимое цели или её саму                  |
+| `before`, `prepend`, `append`, `after`          | Вставить HTML рядом с целью или в неё                 |
+| `remove`                                        | Удалить цель                                          |
+| `value`                                         | Значение поля с событием `input`                      |
+| `addClass`, `removeClass`                       | Класс цели, один или массивом                         |
+| `setAttribute`, `removeAttribute`               | Атрибут цели                                          |
+| `scrollTo`, `scrollIntoView`                    | Прокрутить к цели                                     |
+
+Цель — CSS-селектор, действие применяется ко всем найденным элементам. У действий всей страницы
+(уведомление, переход) цели нет. `Kernel` отправляет фрагменты в `data` как список
+`{target, action[:delay]: value}`. Действие возвращает новый ответ, а исходный не меняет, поэтому
+вызовы связываются в цепочку, а заготовка `$invalid = $response->notify(...)` не попадает в другие
+ответы. Каждое действие сразу перестраивает тело `{"data": [...]}`, так что ответ готов и без `Kernel`; список лежит в `$response->fragments`. Это действия `$ajax`, а не HTTP:
+`redirect()` не ставит заголовок `Location` — для него есть `Redirect`.
 
 `Status::getText(404)` — `Not Found`, неизвестный код — `InvalidArgumentException`; `Status::isValid()`.

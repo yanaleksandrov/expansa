@@ -432,7 +432,7 @@ final class Migrations
 
     /**
      * Field groups for the ACF-style Custom Fields builder: a group of fields (stored as one
-     * JSON document, the same shape {@see \Expansa\Builders\Forms\Field::parse()} already
+     * JSON document, the same shape {@see \Expansa\Builders\Form::renderFields()} already
      * consumes) plus its location rules (built by the `builder` field type).
      */
     private function createFieldGroupsTable(): void

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 
-final class Plugins extends AbstractTable
+final class Plugins extends Table
 {
     public function data(): array
     {
@@ -33,7 +33,7 @@ final class Plugins extends AbstractTable
                 'date'            => '18 September, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
         ];
@@ -82,7 +82,7 @@ final class Plugins extends AbstractTable
         return [
             'icon'        => 'no-plugins',
             'title'       => t('No plugins installed yet'),
-            'description' => t('You can upload them manually or install them from the repository'),
+            'description' => t('You can upload them manually or install them from the repository.'),
         ];
     }
 }

@@ -2,9 +2,9 @@
 /**
  * Media files editor.
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'media-editor',
 	[
 		'class' => 'dg g-3',
@@ -21,6 +21,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'alt',
+					'error'       => 'alt',
 					'label'       => '',
 					'class'       => 'field field--outline fs-13',
 					'label_class' => '',
@@ -50,6 +51,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'title',
+					'error'       => 'title',
 					'label'       => '',
 					'class'       => 'field field--outline fs-13',
 					'label_class' => '',
@@ -79,6 +81,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'caption',
+					'error'       => 'caption',
 					'label'       => '',
 					'class'       => 'field field--outline fs-13',
 					'label_class' => '',
@@ -105,6 +108,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'description',
+					'error'       => 'description',
 					'label'       => '',
 					'class'       => 'field field--outline fs-13',
 					'label_class' => '',
@@ -134,6 +138,7 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'text',
 					'name'        => 'url',
+					'error'       => 'url',
 					'label'       => '',
 					'class'       => 'field field--outline fs-13',
 					'label_class' => '',

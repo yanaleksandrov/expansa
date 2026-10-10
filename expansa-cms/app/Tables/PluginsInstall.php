@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 
-final class PluginsInstall extends AbstractTable
+final class PluginsInstall extends Table
 {
     public function data(): array
     {
@@ -33,7 +33,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -66,7 +66,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -123,7 +123,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 0,
                 'rating'          => 0,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -148,7 +148,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -173,7 +173,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -198,7 +198,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -223,7 +223,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -248,7 +248,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -273,7 +273,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
             [
@@ -298,7 +298,7 @@ final class PluginsInstall extends AbstractTable
                 'date'            => '18 Sep, 2024',
                 'reviews'         => 23,
                 'rating'          => 4,
-                'expansa_version' => '2025.1',
+                'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
         ];
@@ -324,7 +324,7 @@ final class PluginsInstall extends AbstractTable
         return [
             'icon'        => 'no-plugins',
             'title'       => t('No plugins found'),
-            'description' => t('You don&apos;t have any plugins installed yet. <a @click="$dialog.open(`tmpl-post-editor`)">Download some</a>'),
+            'description' => t('You don&apos;t have any plugins installed yet. <a @click="$dialog.open(`tmpl-post-editor`)">Download some</a>.'),
         ];
     }
 }

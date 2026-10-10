@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
-use Expansa\Facades\Form;
+use App\Models\User;
+use Expansa\Builders\Form;
+use Expansa\Builders\Table;
 
-final class Pages extends AbstractTable
+final class Pages extends Table
 {
     public function data(): array
     {
@@ -67,17 +68,19 @@ final class Pages extends AbstractTable
     {
         return [
             'title'       => t('No pages found'),
-            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink)', url('/dashboard/import')),
+            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink).', url('/dashboard/import')),
         ];
     }
 
     public function filter(): void
     {
-        Form::override('items-filter', fn (\Expansa\Builders\Forms\Form $form) => $form->before('submit')->attach(
+        Form::override('items-filter', static fn (Form $form) => $form->before(
+            'submit',
             [
                 [
                     'type'        => 'select',
                     'name'        => 'authors',
+                    'error'       => 'authors',
                     'label'       => '',
                     'class'       => 'field field--sm field--outline',
                     'label_class' => '',
@@ -90,14 +93,12 @@ final class Pages extends AbstractTable
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [ 'u-prop' => 'authors' ],
-                    'options'     => [
-                        ''                => t('Select an author'),
-                        'user-registered' => t('New user registered'),
-                    ],
+                    'options'     => ['' => t('Select an author')] + User::options(),
                 ],
                 [
                     'type'        => 'date',
                     'name'        => 'date',
+                    'error'       => 'date',
                     'label'       => '',
                     'class'       => 'field field--sm field--outline',
                     'label_class' => '',
@@ -115,7 +116,7 @@ final class Pages extends AbstractTable
                         'placeholder' => t('Select dates'),
                     ],
                 ],
-            ]
+            ],
         ));
     }
 }

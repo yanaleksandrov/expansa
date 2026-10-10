@@ -147,18 +147,17 @@ if (! function_exists('redirect')) {
 
 if (! function_exists('tree')) {
     /**
-     * Render a tree registered by Tree::attach(): menu items, comments, taxonomies.
+     * Output a tree with a callback for one level, which wraps and loops over its items; inside it,
+     * `tree($item['children'])` outputs the children with the same callback. See Tree::walk().
      *
-     * @param string   $name     Name of the tree.
-     * @param callable $function Gets the parsed items and the tree, prints the markup.
-     * @return string The printed markup.
+     * @param mixed                       $items    Name of a tree registered by Tree::attach(), or items;
+     *                                              an empty list or not a list outputs nothing.
+     * @param callable(array): mixed|null $callback Null inside another tree() to reuse its callback.
+     * @return void
      */
-    function tree(string $name, callable $function): string
+    function tree(mixed $items, ?callable $callback = null): void
     {
-        ob_start();
-        Expansa\Builders\Tree::view($name, $function);
-
-        return (string) ob_get_clean();
+        Expansa\Builders\Tree::walk($items, $callback);
     }
 }
 
@@ -167,16 +166,17 @@ if (! function_exists('form')) {
      * Render a form: the file that registers it is loaded once, then Form::render() builds the markup.
      *
      * @param string $uid  Form id.
-     * @param string $path File registering the form, skipped if missing.
+     * @param string $path File registering the form, skipped if missing; by default `<uid>.php`
+     *                     of the directory set in Form::configure().
      * @return string Markup, empty for an unknown form.
      */
-    function form(string $uid, string $path): string
+    function form(string $uid, string $path = ''): string
     {
-        if (is_file($path)) {
+        if ($path !== '' && is_file($path)) {
             require_once $path;
         }
 
-        return Expansa\Facades\Form::render($uid);
+        return Expansa\Builders\Form::render($uid);
     }
 }
 

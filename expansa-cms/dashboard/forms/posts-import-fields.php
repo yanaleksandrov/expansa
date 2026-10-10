@@ -10,7 +10,7 @@ if ( empty( $samples ) ) {
     return;
 }
 
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'import-fields',
 	fields: [
 		[
@@ -24,7 +24,8 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'type',
-					'label'       => t( 'Post type' ),
+					'error'       => 'type',
+					'label'       => t( 'Post Type' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -41,7 +42,8 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'status',
-					'label'       => t( 'Post status' ),
+					'error'       => 'status',
+					'label'       => t( 'Post Status' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -58,7 +60,8 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'select',
 					'name'        => 'author',
-					'label'       => t( 'Post author' ),
+					'error'       => 'author',
+					'label'       => t( 'Post Author' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
@@ -87,6 +90,7 @@ return \Expansa\Facades\Form::enqueue(
 				'type'        => 'select',
 				'label'       => '',
 				'name'        => 'map[' . $index . ']',
+				'error'       => 'map.' . $index,
 				'value'       => '',
 				'placeholder' => '',
 				'class'       => 'dg g-1 ga-2',
@@ -102,16 +106,16 @@ return \Expansa\Facades\Form::enqueue(
 				'options'     => [
 					''         => t( 'Don\'t import' ),
 					'optgroup' => [
-						'label'   => t( 'Main fields' ),
+						'label'   => t( 'Main Fields' ),
 						'options' => [
 							'name'     => t( 'Post ID' ),
 							'author'   => t( 'Author ID' ),
-							'views'    => t( 'View count' ),
+							'views'    => t( 'View Count' ),
 							'type'     => t( 'Type' ),
 							'title'    => t( 'Title' ),
 							'content'  => t( 'Content' ),
-							'created'  => t( 'Created at' ),
-							'modified' => t( 'Modified at' ),
+							'created'  => t( 'Created At' ),
+							'modified' => t( 'Modified At' ),
 							'status'   => t( 'Status' ),
 						],
 					],

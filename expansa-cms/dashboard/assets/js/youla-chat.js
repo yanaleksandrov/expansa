@@ -77,13 +77,14 @@ document.addEventListener('youla:init', () => {
             const body = new FormData;
             Object.entries(payload).forEach(([key, value]) => body.append(key, value));
             const headers = {};
-            const token = readCookie('x_csrf_token');
+            const {baseURL = '', csrf} = Youla.ajax ?? {};
+            const token = csrf && readCookie(csrf.cookie);
             if (token) {
-                headers['X-CSRF-Token'] = token;
+                headers[csrf.header] = token;
             }
             let response;
             try {
-                response = await fetch((Youla.baseURL ?? '') + route, {
+                response = await fetch(baseURL + route, {
                     method: 'POST',
                     body,
                     headers,

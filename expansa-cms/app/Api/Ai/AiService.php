@@ -13,6 +13,7 @@ use Expansa\Ai\Task;
 use Expansa\Facades\Access;
 use Expansa\Http\Exceptions\HttpError;
 use Expansa\Http\Exceptions\NotFound;
+use Expansa\Http\Request;
 
 /**
  * Plugin generation tasks of the current user, shaped for the dashboard chat.
@@ -51,25 +52,26 @@ final class AiService
     /**
      * Returns a task with its messages.
      *
-     * @param string $id Task id
+     * @param Request $request Task `id`.
      * @return array<string, mixed>
      * @throws NotFound When the task does not exist or belongs to another user
      */
-    public function get(string $id): array
+    public function get(Request $request): array
     {
-        return $this->present($this->find($id));
+        return $this->present($this->find((string) ($request->post['id'] ?? '')));
     }
 
     /**
      * Queues a new task and starts its worker.
      *
-     * @param string $message User's request
+     * @param Request $request User's request in `message`.
      * @return array<string, mixed>
      * @throws HttpError When the request is empty or no AI service is configured
      */
-    public function create(string $message): array
+    public function create(Request $request): array
     {
-        $owner = $this->owner();
+        $message = (string) ($request->post['message'] ?? '');
+        $owner   = $this->owner();
         if (trim($message) === '') {
             throw new HttpError(422, t_attr('Describe the feature you need.'));
         }
@@ -83,14 +85,14 @@ final class AiService
     /**
      * Queues the answer to the task's questions.
      *
-     * @param string $id Task id
-     * @param string $message User's answer
+     * @param Request $request Task `id` and the user's answer in `message`.
      * @return array<string, mixed>
      * @throws HttpError When the answer is empty or the task asks nothing
      */
-    public function clarify(string $id, string $message): array
+    public function clarify(Request $request): array
     {
-        $task = $this->find($id);
+        $task    = $this->find((string) ($request->post['id'] ?? ''));
+        $message = (string) ($request->post['message'] ?? '');
         if (trim($message) === '') {
             throw new HttpError(422, t_attr('Write an answer to the questions.'));
         }
@@ -104,40 +106,41 @@ final class AiService
     /**
      * Cancels a task.
      *
-     * @param string $id Task id
+     * @param Request $request Task `id`.
      * @return array<string, mixed>
      */
-    public function cancel(string $id): array
+    public function cancel(Request $request): array
     {
-        $task = $this->find($id);
+        $task = $this->find((string) ($request->post['id'] ?? ''));
         Ai::queue()->cancel($task->id);
 
-        return $this->get($task->id);
+        return $this->present($this->find($task->id));
     }
 
     /**
      * Renames a task.
      *
-     * @param string $id Task id
-     * @param string $title New name, empty shows the request
+     * @param Request $request Task `id` and the new name in `title`, empty shows the request.
      * @return array<string, mixed>
      */
-    public function rename(string $id, string $title): array
+    public function rename(Request $request): array
     {
-        $task = $this->find($id);
+        $task  = $this->find((string) ($request->post['id'] ?? ''));
+        $title = (string) ($request->post['title'] ?? '');
         Ai::queue()->rename($task->id, mb_substr(strip_tags($title), 0, 120));
 
-        return $this->summary($this->find($id));
+        return $this->summary($this->find($task->id));
     }
 
     /**
      * Archives a task.
      *
-     * @param string $id Task id
+     * @param Request $request Task `id`.
      * @return array{id: string}
      */
-    public function archive(string $id): array
+    public function archive(Request $request): array
     {
+        $id = (string) ($request->post['id'] ?? '');
         Ai::queue()->archive($this->find($id)->id);
 
         return ['id' => $id];
@@ -146,11 +149,12 @@ final class AiService
     /**
      * Deletes a task.
      *
-     * @param string $id Task id
+     * @param Request $request Task `id`.
      * @return array{id: string}
      */
-    public function delete(string $id): array
+    public function delete(Request $request): array
     {
+        $id = (string) ($request->post['id'] ?? '');
         Ai::queue()->delete($this->find($id)->id);
 
         return ['id' => $id];
@@ -344,7 +348,7 @@ final class AiService
                 'text' => t_attr('The task needs PHP extensions that are not installed: %s. Install them or change the task.', implode(', ', $draft->missingExtensions)),
             ],
             Status::Failed    => [...$message, 'text' => t_attr('The generation failed.'), 'errors' => [$task->error]],
-            Status::Cancelled => [...$message, 'text' => t_attr('Stopped.')],
+            Status::Cancelled => [...$message, 'text' => t_attr('Stopped')],
         };
     }
 

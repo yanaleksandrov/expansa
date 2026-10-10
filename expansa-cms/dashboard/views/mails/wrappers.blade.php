@@ -7,9 +7,7 @@
  * @package Expansa\Templates
  */
 
-if ( ! defined( 'EX_PATH' ) ) {
-	exit;
-}
+defined('EX_PATH') || exit;
 
 $template = trim( $__data['body_template'] ?? '' );
 if ( empty( $template ) ) {
@@ -39,7 +37,7 @@ if ( empty( $template ) ) {
 					<tr>
 						<td>
 							<p style="margin: 0; text-align: center; font-size: 10.35px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: #7c8188; height: 7px;">
-								<span style="background-color: #fff; display: inline-block; padding: 0 8px;"><?php echo t( "What's next?" ); ?></span>
+								<span style="background-color: #fff; display: inline-block; padding: 0 8px;"><?php echo t( "What's Next?" ); ?></span>
 							</p>
 						</td>
 					</tr>

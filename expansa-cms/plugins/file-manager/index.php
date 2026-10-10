@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Facades\Dashboard;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;
-use Expansa\Facades\Hook;
 use Expansa\Support\Is;
 
 return new class extends Plugin
@@ -14,7 +14,7 @@ return new class extends Plugin
     {
         $this
             ->setName('File Manager')
-            ->setVersion('2025.2')
+            ->setVersion('2027.2')
             ->setAuthor('Expansa Team')
             ->setDescription(t('Edit, delete, upload, download, copy, and paste files and folders.'));
     }
@@ -25,17 +25,11 @@ return new class extends Plugin
             return;
         }
 
-        // TODO: переделать подключение файлов плагинов
-        Hook::add('viewPart', function ($filepath) {
-            if ($filepath === EX_DASHBOARD . 'views/file-manager.php') {
-                $filepath = __DIR__ . '/views/file-manager.php';
-            }
-            return $filepath;
-        });
+        Dashboard::page('file-manager', view: __DIR__ . '/views/file-manager');
 
         Asset::style('file-manager', '/plugins/file-manager/assets/css/main.css');
 
-        Tree::attach('dashboard-panel-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'           => 'file-manager',

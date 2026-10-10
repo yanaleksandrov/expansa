@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 
-final class Emails extends AbstractTable
+final class Emails extends Table
 {
     public function data(): array
     {
@@ -57,7 +57,7 @@ final class Emails extends AbstractTable
     {
         return [
             'title'       => t('No email templates found'),
-            'description' => t('Add a [new email template](:emailDialog) manually', url('/dashboard/import')),
+            'description' => t('Add a [new email template](:emailDialog) manually.', url('/dashboard/import')),
         ];
     }
 }

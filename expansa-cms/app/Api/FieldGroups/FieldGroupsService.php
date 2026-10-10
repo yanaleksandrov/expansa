@@ -7,6 +7,8 @@ namespace App\Api\FieldGroups;
 use App\Models\FieldGroup;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
+use Expansa\Http\Enums\Notice;
+use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Error;
 
@@ -23,7 +25,7 @@ final class FieldGroupsService
     /**
      * List every field group, newest first, with a `fieldsCount` summary for the sidebar.
      */
-    public function index(): Response
+    public function index(Response $response): Response
     {
         $groups = array_map(
             fn (FieldGroup $group) => [
@@ -37,61 +39,61 @@ final class FieldGroupsService
             FieldGroup::all()
         );
 
-        return new Response()->json(['groups' => $groups]);
+        return $response->json(['groups' => $groups]);
     }
 
-    public function create(array $input): Response
+    public function create(Request $request, Response $response): Response
     {
-        $group = FieldGroup::create($this->prepare($input));
+        $group = FieldGroup::create($this->prepare($request->post));
 
         if ($group instanceof Error) {
-            return $this->notify($this->flatten($group), 'error');
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        return $this->notify(t('Field group created.'), 'success', '?group=' . $group->id);
+        return $response->notify(t('Field group created'), Notice::Success)->redirect('?group=' . $group->id, 600);
     }
 
-    public function update(array $input): Response
+    public function update(Request $request, Response $response): Response
     {
-        $id = Safe::absint($input['id'] ?? 0);
+        $id = Safe::absint($request->post['id'] ?? 0);
         if (! $id) {
-            return $this->notify(t('Field group ID is missing.'), 'error');
+            return $response->notify(t('Field group ID is missing.'), Notice::Error);
         }
 
         $group = FieldGroup::find($id);
         if ($group instanceof Error) {
-            return $this->notify($this->flatten($group), 'error');
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        $group = $group->update($this->prepare($input));
+        $group = $group->update($this->prepare($request->post));
         if ($group instanceof Error) {
-            return $this->notify($this->flatten($group), 'error');
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
-        return $this->notify(t('Field group updated.'));
+        return $response->notify(t('Field group updated'), Notice::Success);
     }
 
-    public function delete(array $input): Response
+    public function delete(Request $request, Response $response): Response
     {
-        $id = Safe::absint($input['id'] ?? 0);
+        $id = Safe::absint($request->post['id'] ?? 0);
         if (! $id) {
-            return $this->notify(t('Field group ID is missing.'), 'error');
+            return $response->notify(t('Field group ID is missing.'), Notice::Error);
         }
 
         $group = FieldGroup::find($id);
         if ($group instanceof Error) {
-            return $this->notify($this->flatten($group), 'error');
+            return $response->notify($this->flatten($group), Notice::Error);
         }
 
         $group->delete();
 
-        return $this->notify(t('Field group deleted.'), 'success', '/dashboard/field-groups');
+        return $response->notify(t('Field group deleted'), Notice::Success)->redirect('/dashboard/field-groups', 600);
     }
 
     /**
      * Normalize the raw request payload (title/status/location/fields, the latter two sent
      * as JSON strings by the builder UI) into the shape {@see FieldGroup} expects - `fields`
-     * ends up in exactly the shape {@see \Expansa\Builders\Forms\Field::parse()} consumes.
+     * ends up in exactly the shape {@see \Expansa\Builders\Form::renderFields()} consumes.
      */
     private function prepare(array $input): array
     {
@@ -111,7 +113,7 @@ final class FieldGroupsService
 
     /**
      * One field row from the builder UI (flat: type/label/name/required/placeholder/...)
-     * into the canonical `Field::parse()` shape (attributes nested, options as an assoc array).
+     * into the canonical `Form::renderFields()` shape (attributes nested, options as an assoc array).
      */
     private function normalizeField(array $field): array
     {
@@ -160,28 +162,13 @@ final class FieldGroupsService
     private function flatten(Error $error): string
     {
         $messages = [];
-        array_walk_recursive($error->jsonSerialize()['message'] ?? [], function ($message) use (&$messages) {
+
+        $nested = $error->messages;
+
+        array_walk_recursive($nested, function ($message) use (&$messages) {
             $messages[] = $message;
         });
 
         return $messages ? implode(' ', $messages) : t('Something went wrong.');
-    }
-
-    /**
-     * A single `$ajax` response fragment: a notification, optionally followed by a
-     * redirect once the notification has had time to appear.
-     */
-    private function notify(string $message, string $type = 'success', ?string $redirect = null): Response
-    {
-        $fragment = [
-            'target' => 'body',
-            'notify' => [$message, $type],
-        ];
-
-        if ($redirect !== null) {
-            $fragment['redirect:600'] = $redirect;
-        }
-
-        return new Response()->json(['data' => [$fragment]]);
     }
 }

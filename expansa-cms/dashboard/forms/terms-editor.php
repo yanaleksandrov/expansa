@@ -2,9 +2,9 @@
 /**
  * Form for terms editor
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'terms-editor',
 	[
 		'class'           => 'dg g-6',
@@ -26,6 +26,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'text',
 			'label'       => t( 'Name' ),
 			'name'        => 'title',
+			'error'       => 'title',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--outline',
@@ -36,7 +37,7 @@ return \Expansa\Facades\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => t( 'The name is how it appears on your site' ),
+			'instruction' => t( 'The name is how it appears on your site.' ),
 			'attributes'  => [
 				'u-prop' => 'title',
 				'@input' => 'slug = $safe.slug(title)',
@@ -47,6 +48,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'text',
 			'label'       => t( 'Slug' ),
 			'name'        => 'slug',
+			'error'       => 'slug',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--outline',
@@ -63,8 +65,9 @@ return \Expansa\Facades\Form::enqueue(
 		],
 		[
 			'type'        => 'select',
-			'label'       => t( 'Parent category' ),
+			'label'       => t( 'Parent Category' ),
 			'name'        => 'parent',
+			'error'       => 'parent',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--outline',
@@ -84,8 +87,9 @@ return \Expansa\Facades\Form::enqueue(
 		],
 		[
 			'type'        => 'textarea',
-			'label'       => t( 'Short description' ),
+			'label'       => t( 'Short Description' ),
 			'name'        => 'description',
+			'error'       => 'description',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--outline',

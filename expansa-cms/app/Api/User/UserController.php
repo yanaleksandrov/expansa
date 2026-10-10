@@ -6,7 +6,7 @@ namespace App\Api\User;
 
 use App\Http\Can;
 use Expansa\Http\Request;
-use Expansa\Support\Error;
+use Expansa\Http\Response;
 
 final readonly class UserController
 {
@@ -17,20 +17,20 @@ final readonly class UserController
          */
         private UserService $service = new UserService(),
     ) {}
-
-    public function update(Request $request): array
+
+    public function update(Request $request, Response $response): Response
     {
-        return $this->service->update($request->post);
-    }
-
-    public function signIn(Request $request): array
-    {
-        return $this->service->signIn($request->post);
+        return $this->service->update($request, $response);
     }
 
-    public function emailLink(Request $request): array
+    public function signIn(Request $request, Response $response): Response
     {
-        return $this->service->emailLink($request->post);
+        return $this->service->signIn($request, $response);
+    }
+
+    public function emailLink(Request $request, Response $response): Response
+    {
+        return $this->service->emailLink($request, $response);
     }
 
     public function passkeyOptions(): array
@@ -38,124 +38,124 @@ final readonly class UserController
         return $this->service->passkeyOptions();
     }
 
-    public function passkeySignIn(Request $request): array
+    public function passkeySignIn(Request $request, Response $response): Response
     {
-        return $this->service->passkeySignIn($request->post);
+        return $this->service->passkeySignIn($request, $response);
     }
 
-    public function passkeyCreateOptions(Request $request): array
+    public function passkeyCreateOptions(Request $request, Response $response): array|Response
     {
-        return $this->service->passkeyCreateOptions($request->post);
+        return $this->service->passkeyCreateOptions($request, $response);
     }
 
-    public function passkeyCreate(Request $request): array
+    public function passkeyCreate(Request $request, Response $response): Response
     {
-        return $this->service->passkeyCreate($request->post);
+        return $this->service->passkeyCreate($request, $response);
     }
 
-    public function passkeyDelete(Request $request): array
+    public function passkeyDelete(Request $request, Response $response): Response
     {
-        return $this->service->passkeyDelete($request->post);
+        return $this->service->passkeyDelete($request, $response);
     }
 
-    public function identityConnect(Request $request): array
+    public function identityConnect(Request $request, Response $response): Response
     {
-        return $this->service->identityConnect($request->post);
+        return $this->service->identityConnect($request, $response);
     }
 
-    public function identityDelete(Request $request): array
+    public function identityDelete(Request $request, Response $response): Response
     {
-        return $this->service->identityDelete($request->post);
+        return $this->service->identityDelete($request, $response);
     }
 
-    public function switchAccount(Request $request): array
+    public function switchAccount(Request $request, Response $response): Response
     {
-        return $this->service->switchAccount($request->post);
+        return $this->service->switchAccount($request, $response);
     }
 
-    public function sessionDelete(Request $request): array
+    public function sessionDelete(Request $request, Response $response): Response
     {
-        return $this->service->sessionDelete($request->post);
+        return $this->service->sessionDelete($request, $response);
     }
 
-    public function sessionsDeleteOthers(Request $request): array
+    public function sessionsDeleteOthers(Request $request, Response $response): Response
     {
-        return $this->service->sessionsDeleteOthers($request->post);
+        return $this->service->sessionsDeleteOthers($request, $response);
     }
 
-    public function twoFactor(Request $request): array
+    public function twoFactor(Request $request, Response $response): Response
     {
-        return $this->service->twoFactor($request->post);
+        return $this->service->twoFactor($request, $response);
     }
 
-    public function twoFactorSetup(Request $request): array
+    public function twoFactorSetup(Request $request, Response $response): Response
     {
-        return $this->service->twoFactorSetup($request->post);
+        return $this->service->twoFactorSetup($request, $response);
     }
 
-    public function twoFactorEnable(Request $request): array
+    public function twoFactorEnable(Request $request, Response $response): Response
     {
-        return $this->service->twoFactorEnable($request->post);
+        return $this->service->twoFactorEnable($request, $response);
     }
 
-    public function twoFactorDisable(Request $request): array
+    public function twoFactorDisable(Request $request, Response $response): Response
     {
-        return $this->service->twoFactorDisable($request->post);
+        return $this->service->twoFactorDisable($request, $response);
     }
 
-    public function twoFactorCodes(Request $request): array
+    public function twoFactorCodes(Request $request, Response $response): Response
     {
-        return $this->service->twoFactorCodes($request->post);
+        return $this->service->twoFactorCodes($request, $response);
     }
 
-    public function tokenCreate(Request $request): array
+    public function tokenCreate(Request $request, Response $response): Response
     {
-        return $this->service->tokenCreate($request->post);
+        return $this->service->tokenCreate($request, $response);
     }
 
-    public function tokenDelete(Request $request): array
+    public function tokenDelete(Request $request, Response $response): Response
     {
-        return $this->service->tokenDelete($request->post);
-    }
-
-    #[Can('users_edit')]
-    public function adminStatus(Request $request): array
-    {
-        return $this->service->adminStatus($request->post);
+        return $this->service->tokenDelete($request, $response);
     }
 
     #[Can('users_edit')]
-    public function adminSignOut(Request $request): array
+    public function adminStatus(Request $request, Response $response): Response
     {
-        return $this->service->adminSignOut($request->post);
+        return $this->service->adminStatus($request, $response);
     }
 
     #[Can('users_edit')]
-    public function adminPasswordReset(Request $request): array
+    public function adminSignOut(Request $request, Response $response): Response
     {
-        return $this->service->adminPasswordReset($request->post);
+        return $this->service->adminSignOut($request, $response);
     }
 
     #[Can('users_edit')]
-    public function adminTwoFactorDisable(Request $request): array
+    public function adminPasswordReset(Request $request, Response $response): Response
     {
-        return $this->service->adminTwoFactorDisable($request->post);
+        return $this->service->adminPasswordReset($request, $response);
     }
 
     #[Can('users_edit')]
-    public function impersonate(Request $request): array
+    public function adminTwoFactorDisable(Request $request, Response $response): Response
     {
-        return $this->service->impersonate($request->post);
+        return $this->service->adminTwoFactorDisable($request, $response);
     }
 
-    public function stopImpersonating(): array
+    #[Can('users_edit')]
+    public function impersonate(Request $request, Response $response): Response
     {
-        return $this->service->stopImpersonating();
+        return $this->service->impersonate($request, $response);
     }
 
-    public function confirm(Request $request): array
+    public function stopImpersonating(Response $response): Response
     {
-        return $this->service->confirm($request->post);
+        return $this->service->stopImpersonating($response);
+    }
+
+    public function confirm(Request $request, Response $response): Response
+    {
+        return $this->service->confirm($request, $response);
     }
 
     public function confirmPasskeyOptions(): array
@@ -163,23 +163,23 @@ final readonly class UserController
         return $this->service->confirmPasskeyOptions();
     }
 
-    public function confirmPasskey(Request $request): array
+    public function confirmPasskey(Request $request, Response $response): Response
     {
-        return $this->service->confirmPasskey($request->post);
+        return $this->service->confirmPasskey($request, $response);
     }
 
-    public function signUp(Request $request): array|Error
+    public function signUp(Request $request, Response $response): Response
     {
-        return $this->service->signUp($request->input);
+        return $this->service->signUp($request, $response);
     }
 
-    public function resetPassword(Request $request): array
+    public function resetPassword(Request $request, Response $response): Response
     {
-        return $this->service->resetPassword($request->input);
+        return $this->service->resetPassword($request, $response);
     }
 
-    public function passwordUpdate(Request $request): array
+    public function passwordUpdate(Request $request, Response $response): Response
     {
-        return $this->service->passwordUpdate($request->post);
+        return $this->service->passwordUpdate($request, $response);
     }
 }

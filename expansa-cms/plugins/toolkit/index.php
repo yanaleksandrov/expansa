@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Facades\Dashboard;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;
-use Expansa\Facades\Hook;
 use Expansa\Support\Is;
 
 return new class extends Plugin
@@ -27,17 +27,11 @@ return new class extends Plugin
 
         Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
 
-        Hook::add('viewPart', function ($filepath) {
-            if ($filepath === EX_DASHBOARD . 'views/fields-builder.php') {
-                $filepath = __DIR__ . '/views/fields-builder.php';
-            }
-            if ($filepath === EX_DASHBOARD . 'views/forms-builder.php') {
-                $filepath = __DIR__ . '/views/forms-builder.php';
-            }
-            return $filepath;
-        });
+        foreach (['fields-builder', 'forms-builder'] as $page) {
+            Dashboard::page($page, view: __DIR__ . "/views/$page");
+        }
 
-        Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'           => 'toolkit',
@@ -71,9 +65,9 @@ return new class extends Plugin
         /*
          * Sign In form
          *
-         * @since 2025.1
+         * @since 2027.1
          */
-        \Expansa\Facades\Form::enqueue(
+        \Expansa\Builders\Form::enqueue(
             'builder/fields',
             [
                 'class'  => 'dg p-7 g-7',
@@ -99,6 +93,7 @@ return new class extends Plugin
                                     'type'        => 'select',
                                     'label'       => t('Field Type'),
                                     'name'        => 'type',
+                                    'error'       => 'type',
                                     'value'       => '',
                                     'placeholder' => '',
                                     'class'       => 'df aic fs-12 t-muted',
@@ -252,6 +247,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'label',
+                                    'error'       => 'label',
                                     'type'        => 'text',
                                     'label'       => t('Field Label'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -266,6 +262,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'name',
+                                    'error'       => 'name',
                                     'type'        => 'text',
                                     'label'       => t('Field Name'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -280,6 +277,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'value',
+                                    'error'       => 'value',
                                     'type'        => 'text',
                                     'label'       => t('Default Value'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -293,6 +291,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'options',
+                                    'error'       => 'options',
                                     'type'        => 'textarea',
                                     'label'       => t('Options'),
                                     'class'       => 'df aic fs-12 t-muted',
@@ -327,6 +326,7 @@ return new class extends Plugin
                                     'type'        => 'checkbox',
                                     'label'       => t('Required'),
                                     'name'        => 'required',
+                                    'error'       => 'required',
                                     'value'       => '',
                                     'placeholder' => '',
                                     'class'       => '',
@@ -352,6 +352,7 @@ return new class extends Plugin
                             'fields'      => [
                                 [
                                     'name'        => 'label_class',
+                                    'error'       => 'label_class',
                                     'type'        => 'text',
                                     'label'       => t('Label class'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -365,6 +366,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'before',
+                                    'error'       => 'before',
                                     'type'        => 'text',
                                     'label'       => t('Before content'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -378,6 +380,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'after',
+                                    'error'       => 'after',
                                     'type'        => 'text',
                                     'label'       => t('After content'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -391,6 +394,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'reset',
+                                    'error'       => 'reset',
                                     'type'        => 'select',
                                     'label'       => t('Show reset button'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -404,6 +408,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'copy',
+                                    'error'       => 'copy',
                                     'type'        => 'select',
                                     'label'       => t('Show copy button'),
                                     'label_class' => 'df aic fs-12 t-muted',
@@ -417,6 +422,7 @@ return new class extends Plugin
                                 ],
                                 [
                                     'name'        => 'description',
+                                    'error'       => 'description',
                                     'type'        => 'textarea',
                                     'value'       => '',
                                     'default'     => '',

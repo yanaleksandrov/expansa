@@ -2,9 +2,9 @@
 /**
  * Posts actions.
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'posts-actions',
 	[
 		'class'           => 'df fww g-1',
@@ -15,6 +15,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'select',
 			'name'        => 'action',
+			'error'       => 'action',
 			'label'       => '',
 			'class'       => 'field field--sm field--outline',
 			'label_class' => '',
@@ -32,7 +33,7 @@ return \Expansa\Facades\Form::enqueue(
 			'options' => [
 				''      => t( 'Bulk Actions' ),
 				'edit'  => t( 'Edit' ),
-				'trash' => t( 'Move to trash' ),
+				'trash' => t( 'Move to Trash' ),
 				'copy'  => t( 'Copy' ),
 			],
 		],

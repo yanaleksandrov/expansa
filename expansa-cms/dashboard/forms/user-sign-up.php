@@ -2,9 +2,9 @@
 /**
  * Sign Up form
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return Expansa\Facades\Form::enqueue(
+return Expansa\Builders\Form::enqueue(
 	'user-sign-up',
 	[
 		'class'           => 'dg g-6',
@@ -14,22 +14,23 @@ return Expansa\Facades\Form::enqueue(
 	[
 		[
 			'type'        => 'header',
-			'label'       => t( 'Create new account' ),
+			'label'       => t( 'Create New Account' ),
 			'name'        => 'title',
 			'class'       => '',
-			'instruction' => t( 'Create an account to unlock more platform features' ),
+			'instruction' => t( 'Create an account to unlock more platform features.' ),
 			'attributes'  => [ 'u-prop' => 'title' ],
 		],
 		[
 			'type'        => 'email',
 			'name'        => 'email',
+			'error'       => 'email',
 			'label'       => t( 'User Email' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Notifications will be sent to this email' ),
+			'instruction' => t( 'Notifications will be sent to this email.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -44,6 +45,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'text',
 			'name'        => 'login',
+			'error'       => 'login',
 			'label'       => t( 'User Login' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
@@ -64,6 +66,7 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'password',
 			'name'        => 'password',
+			'error'       => 'password',
 			'label'       => t( 'Password' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',

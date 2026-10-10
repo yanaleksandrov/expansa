@@ -41,9 +41,13 @@ use Throwable;
  * In debug mode (EX_DEBUG['enabled']), every JSON response also carries `benchmark`/`memory`
  * metrics — never in production, so nothing about the server leaks by default.
  *
+ * A controller method gets the Request and a new Response by the type of its parameters, in any
+ * order; the other parameters get the route parameters in order.
+ *
  * A controller that needs to send something other than JSON (a file download, an
  * HTML fragment) can return an Expansa\Http\Response directly — Kernel sends it
- * as-is, skipping the envelope entirely.
+ * as-is, skipping the envelope entirely. A Response with fragments (notify(), remove(), ...)
+ * is the `{ "data": [...] }` envelope already and only gets the debug metrics.
  *
  * Route registration for a controller looks like:
  *   Route::post('/system/test', fn (...$p) => Kernel::dispatch(SystemController::class, 'test', $p));
@@ -55,7 +59,8 @@ final class Kernel
         $request = Request::createFromGlobals();
 
         try {
-            $permissions = (new ReflectionMethod($controller, $method))->getAttributes(Can::class);
+            $reflection  = new ReflectionMethod($controller, $method);
+            $permissions = $reflection->getAttributes(Can::class);
 
             // an API token reaches only the endpoints that name a permission of its scopes
             if ($permissions === [] && Auth::isBearer()) {
@@ -66,7 +71,7 @@ final class Kernel
                 Access::authorize(Auth::user(), $attribute->newInstance()->permission);
             }
 
-            $result = new $controller()->{$method}($request, ...$params);
+            $result = new $controller()->{$method}(...self::arguments($reflection, $request, $params));
 
             $response = $result instanceof Response
                 ? $result
@@ -78,7 +83,7 @@ final class Kernel
         } catch (TooManyAttempts $e) {
             // a notice fragment: the dashboard shows fragments of successful answers only
             $message  = t('Too many attempts. Try again in :minutes min.', (int) ceil($e->retryAfter / 60));
-            $response = new Response()->json(self::withMetrics(['data' => [['target' => 'body', 'notify' => $message]]]));
+            $response = new Response()->notify($message);
         } catch (HttpError $e) {
             $payload = ['message' => $e->getMessage()];
             if ($e instanceof ValidationFailed) {
@@ -96,11 +101,43 @@ final class Kernel
             ]), 500);
         }
 
+        // fragments get the same metrics as the other JSON answers
+        if ($response->fragments !== []) {
+            $response->json(self::withMetrics(['data' => $response->fragments]), $response->statusCode);
+        }
+
         foreach (Cookie::getQueue() as $cookie) {
             $response->setCookie($cookie);
         }
 
         $response->prepare($request)->send();
+    }
+
+    /**
+     * Arguments of a controller method: the request and a new response for the parameters of their
+     * type, the route parameters for the rest.
+     *
+     * @param ReflectionMethod   $reflection
+     * @param Request            $request
+     * @param array<int, mixed>  $params     Route parameters.
+     * @return array<string, mixed> By parameter name: a missing route parameter keeps its default.
+     */
+    private static function arguments(ReflectionMethod $reflection, Request $request, array $params): array
+    {
+        $arguments = [];
+        foreach ($reflection->getParameters() as $parameter) {
+            $type = (string) $parameter->getType();
+
+            if ($type === Request::class) {
+                $arguments[$parameter->name] = $request;
+            } elseif ($type === Response::class) {
+                $arguments[$parameter->name] = new Response();
+            } elseif ($params !== []) {
+                $arguments[$parameter->name] = array_shift($params);
+            }
+        }
+
+        return $arguments;
     }
 
     /**

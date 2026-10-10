@@ -5,37 +5,35 @@ declare(strict_types=1);
 namespace Expansa\Builders;
 
 use Closure;
-use Expansa\Security\Sanitizer;
-use Expansa\Patterns\Singleton;
-use Expansa\Support\Arr;
+use Expansa\Builders\Tree\Item;
 use InvalidArgumentException;
+use LogicException;
 
 /**
- * A class for displaying various tree-like structures.
- * Use it for output a tree of menu items, comments, taxonomies & many more.
+ * Named tree of items: menu, comments, taxonomies. Items are added flat with `id` and `parent_id`,
+ * get() gives them nested under `children` and sorted by `position`, a template loops over them:
+ *
+ * ```php
+ * Tree::attach('main-menu', fn (Tree $tree) => $tree->append([
+ *     ['id' => 'posts', 'title' => 'Posts', 'url' => 'posts', 'position' => 10],
+ *     ['id' => 'tags', 'title' => 'Tags', 'url' => 'tags', 'parent_id' => 'posts'],
+ * ]));
+ *
+ * foreach (Tree::get('main-menu') as $item) {
+ *     echo $item->title, $item->depth, count($item->children);
+ * }
+ * ```
+ *
+ * @package Expansa\Builders
  */
 final class Tree
 {
-    use Singleton;
-
     /**
-     * Tree structures list.
-     */
-    public array $list = [];
-
-    /**
-     * Tree structure name.
-     */
-    public string $name = '';
-
-    /**
-     * TODO: The maximum number of items to crawl.
+     * Trees by name.
      *
-     * $depth = -1 means flatly display every element (including child elements).
-     * $depth = 0  means display all levels.
-     * $depth > 0  specifies the number of display levels.
+     * @var array<string, Tree>
      */
-    public int $depth = 99;
+    private static array $trees = [];
 
     /**
      * Checks the `capabilities` of an item: `fn (string[] $capabilities): bool`; null shows every item.
@@ -43,7 +41,22 @@ final class Tree
     private static ?Closure $allows = null;
 
     /**
-     * Set how the capabilities of items are checked; items that fail are left out of view() and include().
+     * Items as added, without nesting and sorting.
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public private(set) array $items = [];
+
+    public function __construct(
+
+        /**
+         * Name of the tree, e.g. `dashboard-main-menu`.
+         */
+        public readonly string $name,
+    ) {}
+
+    /**
+     * Set how the capabilities of items are checked; items that fail are left out of get().
      *
      * @param Closure|null $allows `fn (string[] $capabilities): bool`, e.g. through Access.
      * @return void
@@ -54,23 +67,88 @@ final class Tree
     }
 
     /**
-     * Whether the items of every tree leading to a page allow it: a page of a menu item is closed
-     * to whoever doesn't see the item. A URL of no item is allowed.
+     * Get the items of a tree to output: the visible ones with their visible `children` (empty for a leaf)
+     * and `depth` from 0, sorted by `position`; items of the same position keep the order they were added in.
+     *
+     * @param string $name
+     * @return Item[] Empty for a tree nothing is attached to.
+     */
+    public static function get(string $name): array
+    {
+        return isset(self::$trees[$name]) ? self::$trees[$name]->nested() : [];
+    }
+
+    /**
+     * Change a tree, usually add its items: `fn (Tree $tree) => $tree->append([...])`.
+     * The tree is created on the first attach.
+     *
+     * @param string                $name
+     * @param callable(Tree): mixed $function
+     * @return void
+     */
+    public static function attach(string $name, callable $function): void
+    {
+        $function(self::$trees[$name] ??= new Tree($name));
+    }
+
+    /**
+     * Output a level of a tree: the callback gets its items and their depth, wraps and loops over them.
+     * Inside it, walk() without a callback reuses the callback it runs in: `Tree::walk($item->children)`.
+     * An empty list or not a list outputs nothing, so neither the template checks it.
+     *
+     * @param mixed                             $items    Name of a tree, or items from get().
+     * @param callable(Item[], int): mixed|null $callback Null inside another walk() to reuse its callback
+     *                                                    for the next level.
+     * @return void
+     * @throws LogicException If there is no callback to reuse.
+     */
+    public static function walk(mixed $items, ?callable $callback = null): void
+    {
+        // levels being output, innermost last: the callback and the depth
+        static $levels = [];
+
+        if (is_string($items)) {
+            $items = self::get($items);
+        }
+        if (! is_array($items) || $items === []) {
+            return;
+        }
+
+        if ($callback !== null) {
+            $depth = 0;
+        } else {
+            [$callback, $depth] = end($levels)
+                ?: throw new LogicException('Tree::walk() needs a callback outside another walk().');
+            $depth++;
+        }
+
+        $levels[] = [$callback, $depth];
+        try {
+            $callback($items, $depth);
+        } finally {
+            array_pop($levels);
+        }
+    }
+
+    /**
+     * Whether the page can be opened: a page of a menu item is closed to whoever doesn't see
+     * the item in every tree that leads to it. A URL of no item can be opened.
      *
      * @param string               $path  Page path, e.g. `settings`.
      * @param array<string, mixed> $query Query of the request: an item URL with a query matches when its values do.
      * @return bool
      */
-    public static function allowsUrl(string $path, array $query = []): bool
+    public static function canOpen(string $path, array $query = []): bool
     {
-        foreach (self::init()->list as $items) {
-            foreach ($items as $item) {
+        foreach (self::$trees as $tree) {
+            foreach ($tree->items as $item) {
                 $url = parse_url((string) ($item['url'] ?? ''));
+
                 parse_str($url['query'] ?? '', $itemQuery);
 
                 $isPage = trim($url['path'] ?? '', '/') === trim($path, '/')
                     && array_intersect_assoc($itemQuery, $query) === $itemQuery;
-                if ($isPage && ! self::allows($item)) {
+                if ($isPage && ! self::isVisible($item)) {
                     return false;
                 }
             }
@@ -80,192 +158,80 @@ final class Tree
     }
 
     /**
+     * Add items: `id` is required, `parent_id` nests an item, `position` orders it among its siblings,
+     * `capabilities` hide it from whoever lacks one of them; other keys are free.
+     *
+     * @param array<int, array<string, mixed>> $items
+     * @return static
+     * @throws InvalidArgumentException If an item has no `id`.
+     */
+    public function append(array $items): static
+    {
+        foreach ($items as $item) {
+            if (trim((string) ($item['id'] ?? '')) === '') {
+                throw new InvalidArgumentException(sprintf('An item of the "%s" tree has no ID.', $this->name));
+            }
+
+            $this->items[] = [
+                'position'  => 0,
+                'parent_id' => '',
+                ...$item,
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get the visible items nested by parents, see get().
+     *
+     * @return Item[]
+     */
+    private function nested(): array
+    {
+        // children by parent, so every level is taken at once instead of searching all items for it
+        $children = [];
+        foreach ($this->items as $item) {
+            if (self::isVisible($item)) {
+                $children[$item['parent_id']][] = $item;
+            }
+        }
+
+        return self::level($children, '', 0);
+    }
+
+    /**
+     * Get the items of a parent with their children, sorted by `position`.
+     *
+     * @param array<int|string, array<int, array<string, mixed>>> $children Visible items by parent.
+     * @param string                                               $parentId
+     * @param int                                                  $depth
+     * @return Item[]
+     */
+    private static function level(array $children, string $parentId, int $depth): array
+    {
+        $level = $children[$parentId] ?? [];
+
+        usort($level, fn (array $a, array $b) => $a['position'] <=> $b['position']);
+
+        $items = [];
+        foreach ($level as $item) {
+            $items[] = new Item($item, $depth, self::level($children, trim((string) $item['id']), $depth + 1));
+        }
+
+        return $items;
+    }
+
+    /**
      * Whether an item passes the capability check of configure().
      *
      * @param array<string, mixed> $item
      * @return bool
      */
-    private static function allows(array $item): bool
+    private static function isVisible(array $item): bool
     {
         $capabilities = (array) ($item['capabilities'] ?? []);
 
         return self::$allows === null || $capabilities === [] || (bool) (self::$allows)($capabilities);
-    }
-
-    /**
-     * Register new tree structure.
-     *
-     * @param string $name
-     * @param callable|null $function
-     */
-    public static function attach(string $name, ?callable $function = null): void
-    {
-        $tree = self::init($name);
-        $name = Sanitizer::html($name);
-
-        if (empty($tree->list[$name])) {
-            $tree->list[$name] = [];
-        }
-
-        $tree->name = $name;
-        if (is_callable($function)) {
-            $function($tree);
-        }
-    }
-
-    /**
-     * Output data of tree structure.
-     *
-     * @param string $name
-     * @param callable $function
-     */
-    public static function view(string $name, callable $function): void
-    {
-        $tree  = self::init($name);
-        $items = $tree->parse($tree->list[$name] ?? []);
-
-        if (is_callable($function)) {
-            $function($items, $tree);
-        }
-    }
-
-    /**
-     * Return data of tree structure.
-     *
-     * @param string $name
-     * @param callable $function
-     * @return string
-     */
-    public static function include(string $name, callable $function): string
-    {
-        ob_start();
-        self::view($name, $function);
-        return ob_get_clean();
-    }
-
-    public static function build(array $items, callable $callback, int $depth = 0): string
-    {
-        $content = '';
-        foreach ($items as $key => $item) {
-            ob_start();
-            $callback($depth + 1, $key, $item);
-            $content .= ob_get_clean();
-
-            if (is_array($item)) {
-                $content = str_replace('@nested', self::build($item, $callback, $depth + 1), $content);
-                // remove empty string
-                $content = preg_replace("/^\s*[\r\n]*\s*$/m", '', $content);
-            }
-        }
-        return $content;
-    }
-
-    /**
-     * Add a top-level menu page.
-     * This function takes a capability that is used to determine whether
-     * a page is included in the menu or not.
-     *
-     * The function which is hooked in to handle the output of the page must check
-     * that the user has the required capability as well.
-     */
-    public function addItem(array $item): void
-    {
-        $item_id = trim((string) ( $item['id'] ?? '' ));
-        if (! $item_id) {
-            throw new InvalidArgumentException(t('Tree item ID is required.'));
-        }
-
-        $item = array_replace(
-            [
-                'id'        => '',
-                'position'  => 0,
-                'parent_id' => '',
-            ],
-            $item
-        );
-
-        $this->list[$this->name][] = $item;
-    }
-
-    /**
-     * Bulk add tree items.
-     *
-     * @param array $items
-     */
-    public function addItems(array $items): void
-    {
-        foreach ($items as $item) {
-            $this->addItem($item);
-        }
-    }
-
-    /**
-     * The method takes over the routine work of forming dependencies and sorting tree elements.
-     *
-     * Parses a one-dimensional array with elements and forms a multidimensional one, taking into account nesting.
-     * Sorts array elements in ascending order of the value of the `position` field.
-     *
-     * @param array $elements List of tree
-     * @param string|null $parent_id Parent ID
-     * @param int $depth depth of parsing
-     *
-     * @return array
-     */
-    public function parse(array $elements, ?string $parent_id = '', int $depth = 0): array
-    {
-        $tree = [];
-
-        foreach ($elements as $element) {
-            $element_id = trim($element['id'] ?? '');
-            if ($element['parent_id'] === $parent_id && self::allows($element)) {
-                $element['depth'] = $depth;
-
-                $children = $this->parse($elements, $element_id, $depth + 1);
-
-                if ($children) {
-                    $element['children'] = $children;
-                }
-
-                $tree[] = $element;
-            }
-        }
-
-        // TODO: sorts incorrectly when every element shares the same `position` value.
-        return Arr::sort($tree, 'position');
-    }
-
-    /**
-     * Like native vsprintf, but accepts $args keys instead of order index.
-     * Both numeric and strings matching /[a-zA-Z0-9_-]+/ are allowed.
-     *
-     * Example: vsprintf( 'y = %y$d, x = %x$1.1f', [ 'x' => 1, 'y' => 2 ] )
-     * Result:  'y = 2, x = 1.0'
-     *
-     * $args also can be object, then it's properties are retrieved using get_object_vars().
-     * '%s' without argument name works fine too. Everything vsprintf() can do is supported.
-     *
-     * @param string       $str
-     * @param array|object $args
-     * @return string
-     */
-    public function vsprintf(string $str, array|object $args): string
-    {
-        if (is_object($args)) {
-            $args = get_object_vars($args);
-        } elseif (! is_array($args)) {
-            return '';
-        }
-
-        $map = array_flip(array_keys($args));
-
-        $new_str = preg_replace_callback(
-            '/(^|[^%])%([a-zA-Z0-9_-]+)\$/',
-            function ($m) use ($map) {
-                return $m[1] . '%' . ( ( $map[$m[2]] ?? 0 ) + 1 ) . '$';
-            },
-            $str
-        );
-
-        return vsprintf($new_str, $args);
     }
 }

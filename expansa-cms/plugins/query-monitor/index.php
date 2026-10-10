@@ -56,7 +56,7 @@ return new class extends Plugin
         }
 
         // lifecycle timeline for browser devtools (Network → Timing), sent before the page is output
-        Hook::add('dashboardLoaded', function (string $content): string {
+        Hook::add('dashboardLoaded', static function (string $content): string {
             if (! headers_sent()) {
                 $metrics = array_map(
                     fn (array $step) => sprintf('%s-%s;dur=%s', $step['type'], $step['name'], $step['time']),

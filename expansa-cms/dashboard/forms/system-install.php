@@ -1,5 +1,5 @@
 <?php
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
     'system-install',
     [
         'class'           => 'dg g-2',
@@ -16,7 +16,7 @@ return \Expansa\Facades\Form::enqueue(
             'fields'     => [
                 [
                     'type'        => 'header',
-                    'label'       => t('Welcome to Expansa!'),
+                    'label'       => t('Welcome to Expansa'),
                     'name'        => 'title',
                     'class'       => 't-center',
                     'instruction' => t('This is the installation wizard. Before you begin, please fill in some information about your website.'),
@@ -25,13 +25,14 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'name'  => 'website-data',
                     'type'  => 'divider',
-                    'label' => t('Website data'),
+                    'label' => t('Website Data'),
                     'attributes'  => [ 'u-prop' => 'websiteData' ],
                 ],
                 [
                     'type'        => 'text',
                     'name'        => 'site[name]',
-                    'label'       => t('Site name'),
+                    'error'       => 'site.name',
+                    'label'       => t('Site Name'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
@@ -52,13 +53,14 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'site[tagline]',
-                    'label'       => t('Site tagline'),
+                    'error'       => 'site.tagline',
+                    'label'       => t('Site Tagline'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t("Don't worry, you can always change these settings later"),
+                    'instruction' => t("Don't worry, you can always change these settings later."),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',
@@ -92,7 +94,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'name'        => 'credits',
                     'type'        => 'divider',
-                    'label'       => t('Database credentials'),
+                    'label'       => t('Database Credentials'),
                     'attributes'  => [
 						'u-prop' => 'credits',
                     ],
@@ -100,19 +102,20 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'db[database]',
-                    'label'       => t('Database name'),
+                    'error'       => 'db.database',
+                    'label'       => t('Database Name'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t('Enter the name of an empty database'),
+                    'instruction' => t('Enter the name of an empty database.'),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'placeholder'    => t('database_name'),
+                        'placeholder'    => 'database_name',
 	                    'u-prop'         => 'db.database',
                         'required'       => true,
                         'u-autocomplete' => '',
@@ -121,7 +124,8 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'db[username]',
-                    'label'       => t('MySQL username'),
+                    'error'       => 'db.username',
+                    'label'       => t('MySQL Username'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
@@ -133,7 +137,7 @@ return \Expansa\Facades\Form::enqueue(
                     'validator'   => '',
                     'conditions'  => [],
                     'attributes'  => [
-                        'placeholder'    => t('user_name'),
+                        'placeholder'    => 'user_name',
 	                    'u-prop'         => 'db.username',
                         'required'       => true,
                         'u-autocomplete' => '',
@@ -142,7 +146,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                 'type'        => 'text',
                     'name'        => 'db[password]',
-                    'label'       => t('MySQL password'),
+                    'label'       => t('MySQL Password'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
@@ -171,6 +175,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'db[host]',
+                            'error'       => 'db.host',
                             'label'       => t('Hostname'),
                             'class'       => '',
                             'label_class' => '',
@@ -193,6 +198,7 @@ return \Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'db[prefix]',
+                            'error'       => 'db.prefix',
                             'label'       => t('Prefix'),
                             'class'       => '',
                             'label_class' => '',
@@ -217,13 +223,14 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'name'       => 'smtp-settings',
                     'type'       => 'divider',
-                    'label'      => t('Outgoing email (optional)'),
+                    'label'      => t('Outgoing Email (Optional)'),
                     'attributes' => [ 'u-prop' => 'smtpSettings' ],
                 ],
                 [
                     'type'  => 'text',
                     'name'  => 'smtp[host]',
-                    'label' => t('SMTP server'),
+                    'error' => 'smtp.host',
+                    'label' => t('SMTP Server'),
                     'attributes' => [
                         'placeholder' => 'smtp.example.com',
                         'u-prop'      => 'smtp.host',
@@ -233,7 +240,8 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'number',
                     'name'  => 'smtp[port]',
-                    'label' => t('SMTP port'),
+                    'error' => 'smtp.port',
+                    'label' => t('SMTP Port'),
                     'attributes' => [
                         'value'       => 465,
                         'placeholder' => '465',
@@ -243,7 +251,8 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'email',
                     'name'  => 'smtp[username]',
-                    'label' => t('SMTP login'),
+                    'error' => 'smtp.username',
+                    'label' => t('SMTP Login'),
                     'attributes' => [
                         'placeholder'    => 'no-reply@example.com',
                         'u-prop'         => 'smtp.username',
@@ -253,7 +262,8 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'password',
                     'name'  => 'smtp[password]',
-                    'label' => t('SMTP password'),
+                    'error' => 'smtp.password',
+                    'label' => t('SMTP Password'),
                     'attributes' => [
                         'u-prop'         => 'smtp.password',
                         'u-autocomplete' => 'new-password',
@@ -262,7 +272,8 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'  => 'email',
                     'name'  => 'smtp[from]',
-                    'label' => t('Email sender address'),
+                    'error' => 'smtp.from',
+                    'label' => t('Email Sender Address'),
                     'attributes' => [
                         'placeholder'    => 'no-reply@example.com',
                         'u-prop'         => 'smtp.from',
@@ -284,18 +295,19 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'name'        => 'title',
                     'type'        => 'header',
-                    'label'       => t('Step 2: System check'),
+                    'label'       => t('Step 2: System Check'),
                     'instruction' => t('This step makes sure your server is properly configured and ready for installation.'),
                     'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
                     'name'  => 'website-data',
                     'type'  => 'divider',
-                    'label' => t('System check'),
+                    'label' => t('System Check'),
                     'attributes'  => [ 'u-prop' => 'websiteData' ],
                 ],
                 [
                     'name' => 'checker',
+                    'error' => 'checker',
                     'type' => 'checker',
                     'attributes'  => [ 'u-prop' => 'checker' ],
                 ],
@@ -312,14 +324,14 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'name'        => 'title',
                     'type'        => 'header',
-                    'label'       => t('Step 3: Create account'),
-                    'instruction' => t('Almost done! As a final step, add the website owner\'s details.'),
+                    'label'       => t('Step 3: Create Account'),
+                    'instruction' => t('Almost done. As a final step, add the website owner\'s details.'),
                     'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
                     'name'  => 'user-credits',
                     'type'  => 'divider',
-                    'label' => t('Owner credentials'),
+                    'label' => t('Owner Credentials'),
                     'attributes'  => [ 'u-prop' => 'userCredits' ],
                 ],
                 [
@@ -344,13 +356,14 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'email',
                     'name'        => 'user[email]',
-                    'label'       => t('Your email address'),
+                    'error'       => 'user.email',
+                    'label'       => t('Your Email Address'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t('Double-check your email address before continuing'),
+                    'instruction' => t('Double-check your email address before continuing.'),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',
@@ -366,13 +379,14 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'select',
                     'name'        => 'user[locale]',
-                    'label'       => t('Your language'),
+                    'error'       => 'user.locale',
+                    'label'       => t('Your Language'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t('Set the language of your dashboard'),
+                    'instruction' => t('Set the language of your dashboard.'),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',
@@ -387,13 +401,14 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'user[login]',
-                    'label'       => t('Your login'),
+                    'error'       => 'user.login',
+                    'label'       => t('Your Login'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
                     'before'      => '',
                     'after'       => '',
-                    'instruction' => t('Only letters, numbers, underscores, hyphens, and the @ symbol are allowed'),
+                    'instruction' => t('Only letters, numbers, underscores, hyphens, and the @ symbol are allowed.'),
                     'tooltip'     => '',
                     'copy'        => 0,
                     'validator'   => '',
@@ -408,7 +423,8 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'password',
                     'name'        => 'user[password]',
-                    'label'       => t('Your password'),
+                    'error'       => 'user.password',
+                    'label'       => t('Your Password'),
                     'class'       => '',
                     'label_class' => '',
                     'reset'       => 0,
@@ -449,9 +465,9 @@ return \Expansa\Facades\Form::enqueue(
             'fields'     => [
                 [
                     'type'     => 'custom',
-                    'callback' => view('global/state', [
+                    'callback' => view('components/state', [
                         'icon'        => 'success',
-                        'title'       => t('Woo-hoo, Expansa has been successfully installed!'),
+                        'title'       => t('Woo-hoo, Expansa has been successfully installed.'),
                         'description' => t('We hope the installation process was easy. Thank you, and enjoy.'),
                     ])->render()
                 ],
@@ -471,7 +487,7 @@ return \Expansa\Facades\Form::enqueue(
                     <button type="submit" class="btn btn--primary" u-show="isStep(4)" :disabled="cannotGoNext()" hidden disabled>
                         <?php echo t('Install Expansa'); ?>
                     </button>
-                    <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" u-show="isLast()" hidden><?php echo t('Go to dashboard'); ?></a>
+                    <a href="<?php echo url('/dashboard/profile'); ?>" class="btn btn--primary mx-auto" u-show="isLast()" hidden><?php echo t('Go to Dashboard'); ?></a>
                 </div>
                 <?php
             },

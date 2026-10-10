@@ -6,6 +6,7 @@ namespace App\Api\Options;
 
 use App\Http\Can;
 use Expansa\Http\Request;
+use Expansa\Http\Response;
 
 final readonly class OptionsController
 {
@@ -18,14 +19,14 @@ final readonly class OptionsController
     ) {}
 
     #[Can('manage_options')]
-    public function update(Request $request): array
+    public function update(Request $request, Response $response): Response
     {
-        return $this->service->update($request->post);
+        return $this->service->update($request, $response);
     }
 
     #[Can('manage_options')]
-    public function mailTest(): array
+    public function mailTest(Response $response): Response
     {
-        return $this->service->mailTest();
+        return $this->service->mailTest($response);
     }
 }

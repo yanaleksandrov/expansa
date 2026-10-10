@@ -19,26 +19,26 @@ final readonly class FieldGroupsController
     ) {}
 
     #[Can('manage_options')]
-    public function index(): Response
+    public function index(Response $response): Response
     {
-        return $this->service->index();
+        return $this->service->index($response);
     }
 
     #[Can('manage_options')]
-    public function create(Request $request): Response
+    public function create(Request $request, Response $response): Response
     {
-        return $this->service->create($request->post);
+        return $this->service->create($request, $response);
     }
 
     #[Can('manage_options')]
-    public function update(Request $request): Response
+    public function update(Request $request, Response $response): Response
     {
-        return $this->service->update($request->post);
+        return $this->service->update($request, $response);
     }
 
     #[Can('manage_options')]
-    public function delete(Request $request): Response
+    public function delete(Request $request, Response $response): Response
     {
-        return $this->service->delete($request->post);
+        return $this->service->delete($request, $response);
     }
 }

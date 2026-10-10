@@ -40,7 +40,7 @@ function measure(callable $callback, int $iterations, int $rounds = 5): float
 // the bootstrap.php shape of configure()
 $configure = function (Manager $debug): void {
     $debug->configure(
-        view: EX_PATH . 'dashboard/debug.php',
+        view: EX_PATH . 'dashboard/views/fallback/debug.php',
         details: false,
         report: fn (Throwable $e, string $id, array $context) => null,
         warning: fn (ErrorException $e) => null,

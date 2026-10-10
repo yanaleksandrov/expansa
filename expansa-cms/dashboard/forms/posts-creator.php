@@ -2,9 +2,9 @@
 /**
  * Form for create & edit posts.
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
     'posts-creator',
     [
         'class'           => 'builder',
@@ -15,6 +15,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'textarea',
             'name'        => 'title',
+            'error'       => 'title',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -30,12 +31,13 @@ return \Expansa\Facades\Form::enqueue(
                 'u-prop'      => 'title',
                 'rows'        => 1,
                 'required'    => true,
-                'placeholder' => t('Add title...'),
+                'placeholder' => t('Add title'),
             ],
         ],
         [
             'type'        => 'text',
             'name'        => 'permalink',
+            'error'       => 'permalink',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -55,6 +57,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'textarea',
             'name'        => 'excerpt',
+            'error'       => 'excerpt',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -70,12 +73,13 @@ return \Expansa\Facades\Form::enqueue(
                 'u-prop'      => 'excerpt',
                 'rows'        => 1,
                 'value'       => '',
-                'placeholder' => t('Write an excerpt (optional)...'),
+                'placeholder' => t('Write an excerpt (optional)'),
             ],
         ],
         [
             'type'        => 'select',
             'name'        => 'status',
+            'error'       => 'status',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -100,6 +104,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'select',
             'name'        => 'visibility',
+            'error'       => 'visibility',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -118,12 +123,13 @@ return \Expansa\Facades\Form::enqueue(
             'options'     => [
                 'public'  => t('Public'),
                 'private' => t('Private'),
-                'pending' => t('Password protected'),
+                'pending' => t('Password Protected'),
             ],
         ],
         [
             'type'        => 'date',
             'name'        => 'from',
+            'error'       => 'from',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -143,6 +149,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'date',
             'name'        => 'to',
+            'error'       => 'to',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -162,6 +169,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'select',
             'name'        => 'language',
+            'error'       => 'language',
             'label'       => '',
             'class'       => '',
             'label_class' => '',
@@ -181,21 +189,22 @@ return \Expansa\Facades\Form::enqueue(
             'options'     => [
                 'us' => [
                     'image'   => 'assets/images/flags/us.svg',
-                    'content' => t('English - English'),
+                    'content' => 'English - English',
                 ],
                 'ru' => [
                     'image'   => 'assets/images/flags/ru.svg',
-                    'content' => t('Russian - русский'),
+                    'content' => 'Russian - русский',
                 ],
                 'he' => [
                     'image'   => 'assets/images/flags/il.svg',
-                    'content' => t('עִבְרִית - Hebrew'),
+                    'content' => 'עִבְרִית - Hebrew',
                 ],
             ],
         ],
         [
             'type'        => 'select',
             'name'        => 'discussion',
+            'error'       => 'discussion',
             'label'       => '',
             'class'       => '',
             'label_class' => '',

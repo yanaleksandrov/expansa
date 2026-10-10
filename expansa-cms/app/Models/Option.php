@@ -406,10 +406,7 @@ class Option extends Model
             'week-starts-on' => 1,
             'date-format'    => 'F j, Y',
             'time-format'    => 'g:i a',
-            'timezone'       => [
-                'name'   => date_default_timezone_set('Europe/London'),
-                'offset' => 0,
-            ],
+            'timezone'       => 'UTC',
             'comments'       => [
                 'status'                => 'open',
                 'requires_registration' => 0,

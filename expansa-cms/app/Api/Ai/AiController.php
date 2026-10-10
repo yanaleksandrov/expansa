@@ -36,7 +36,7 @@ final readonly class AiController
     #[Can('plugins_install')]
     public function get(Request $request): array
     {
-        return $this->service->get((string) ($request->post['id'] ?? ''));
+        return $this->service->get($request);
     }
 
     /**
@@ -45,7 +45,7 @@ final readonly class AiController
     #[Can('plugins_install')]
     public function create(Request $request): array
     {
-        return $this->service->create((string) ($request->post['message'] ?? ''));
+        return $this->service->create($request);
     }
 
     /**
@@ -54,7 +54,7 @@ final readonly class AiController
     #[Can('plugins_install')]
     public function clarify(Request $request): array
     {
-        return $this->service->clarify((string) ($request->post['id'] ?? ''), (string) ($request->post['message'] ?? ''));
+        return $this->service->clarify($request);
     }
 
     /**
@@ -63,7 +63,7 @@ final readonly class AiController
     #[Can('plugins_install')]
     public function cancel(Request $request): array
     {
-        return $this->service->cancel((string) ($request->post['id'] ?? ''));
+        return $this->service->cancel($request);
     }
 
     /**
@@ -72,7 +72,7 @@ final readonly class AiController
     #[Can('plugins_install')]
     public function rename(Request $request): array
     {
-        return $this->service->rename((string) ($request->post['id'] ?? ''), (string) ($request->post['title'] ?? ''));
+        return $this->service->rename($request);
     }
 
     /**
@@ -81,7 +81,7 @@ final readonly class AiController
     #[Can('plugins_install')]
     public function archive(Request $request): array
     {
-        return $this->service->archive((string) ($request->post['id'] ?? ''));
+        return $this->service->archive($request);
     }
 
     /**
@@ -90,6 +90,6 @@ final readonly class AiController
     #[Can('plugins_install')]
     public function delete(Request $request): array
     {
-        return $this->service->delete((string) ($request->post['id'] ?? ''));
+        return $this->service->delete($request);
     }
 }

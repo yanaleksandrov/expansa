@@ -37,10 +37,19 @@ final class VerifyCsrfToken
     private const string KEY = 'token';
 
     /**
-     * Csrf::generate()/check() build the cookie name as $prefix . KEY — this
-     * override makes it `x_csrf_token`, the exact name youla-ajax.js reads.
+     * Csrf::generate()/check() build the cookie name as $prefix . KEY.
      */
     private const string COOKIE_PREFIX = 'x_csrf_';
+
+    /**
+     * Cookie with the token; Dashboard\Assets passes the name to youla-ajax.js.
+     */
+    public const string COOKIE = self::COOKIE_PREFIX . self::KEY;
+
+    /**
+     * Header that youla-ajax.js sends the token back in; read below as HTTP_X_CSRF_TOKEN.
+     */
+    public const string HEADER = 'X-CSRF-Token';
 
     /**
      * Route "before" middleware. Ends the request with a 403 JSON response on failure —
@@ -63,7 +72,7 @@ final class VerifyCsrfToken
         try {
             $this->csrf()->check(self::KEY, $token, 3600);
         } catch (InvalidCsrfToken) {
-            $response = new Response()->json(['message' => t('Invalid or missing CSRF token.')], 403);
+            $response = new Response()->json(['message' => t('Invalid or missing CSRF token')], 403);
 
             // HEAD must never carry a body — Response::prepare(Request) would normally
             // enforce this, kept here as a plain check instead of pulling in a Request.

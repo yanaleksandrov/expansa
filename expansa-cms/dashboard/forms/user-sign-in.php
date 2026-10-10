@@ -2,9 +2,9 @@
 /**
  * Sign In form
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'user-sign-in',
 	[
 		'class'           => 'dg g-6',
@@ -22,7 +22,8 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'text',
 			'name'        => 'login',
-			'label'       => t( 'Login or email' ),
+			'error'       => 'login',
+			'label'       => t( 'Login or Email' ),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
@@ -43,13 +44,14 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'password',
 			'name'        => 'password',
+			'error'       => 'password',
 			'label'       => t('Password'),
 			'class'       => 'field field--lg',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t('Forgot your password? You can [reset it here](:resetPasswordLink)', url('/reset-password')),
+			'instruction' => t('Forgot your password? You can [reset it here](:resetPasswordLink).', url('/reset-password')),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -67,6 +69,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'checkbox',
 			'name'        => 'remember',
+			'error'       => 'remember',
 			'label'       => t( 'Remember me on this device' ),
 			'class'       => '',
 			'label_class' => '',
@@ -125,7 +128,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'button',
 			'name'        => 'passkey',
-			'label'       => '<i class="ph ph-fingerprint"></i> ' . t('Sign in with a passkey'),
+			'label'       => '<i class="ph ph-fingerprint"></i> ' . t('Sign In with a Passkey'),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

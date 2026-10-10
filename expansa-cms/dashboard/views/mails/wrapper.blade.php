@@ -1,9 +1,8 @@
 <?php
-
-use App\Models\Option;
-
 /**
  * Email wrapper template can be overridden by copying it to themes/yourtheme/dashboard/views/mails/wrapper.php
+ *
+ * @var App\Support\Site $site Settings of the site: name, language, charset, addresses, version; shared with every view.
  *
  * @package Expansa\Templates
  */
@@ -15,7 +14,7 @@ if (empty($template) || ! $__env->exists($template)) {
 }
 ?>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="<?php echo Expansa\Facades\I18n::locale(); ?>">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ $site->locale }}">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -26,7 +25,7 @@ if (empty($template) || ! $__env->exists($template)) {
         <tbody>
             <tr>
                 <td style="text-align: center;">
-                    <img src="{{ url('dashboard/assets/images/logo-grid.png') }}" width="212" height="124" alt="{{ Option::get('site.name', '') ?: 'Expansa' }}" style="display: inline-block; border: 0;">
+                    <img src="{{ url('dashboard/assets/images/logo-grid.png') }}" width="212" height="124" alt="{{ $site->name }}" style="display: inline-block; border: 0;">
                 </td>
             </tr>
         </tbody>
@@ -41,7 +40,7 @@ if (empty($template) || ! $__env->exists($template)) {
             <tr>
                 <td style="opacity: 0.75; font-size: 11px; line-height: 145%; text-align: center;">
                     <p>{!! t('This message was sent automatically, please do not reply to it.') !!}</p>
-                    <p>{!! t('© :currentYear :companyName. All rights reserved.', date('Y'), Option::get('site.name', '') ?: 'Expansa') !!}</p>
+                    <p>{!! t('© :currentYear :companyName. All rights reserved.', date('Y'), $site->name) !!}</p>
                 </td>
             </tr>
         </tbody>

@@ -83,10 +83,10 @@ final class SiteHealth
             ['id' => 'security', 'title' => t('Security'), 'icon' => 'ph ph-shield-check', 'checks' => self::security()],
             ['id' => 'database', 'title' => t('Database'), 'icon' => 'ph ph-database', 'checks' => self::database()],
             ['id' => 'storage', 'title' => t('Storage'), 'icon' => 'ph ph-folder-simple', 'checks' => self::storage()],
-            ['id' => 'tasks', 'title' => t('Background tasks'), 'icon' => 'ph ph-clock-countdown', 'checks' => self::tasks()],
+            ['id' => 'tasks', 'title' => t('Background Tasks'), 'icon' => 'ph ph-clock-countdown', 'checks' => self::tasks()],
             ['id' => 'mail', 'title' => t('Mail'), 'icon' => 'ph ph-envelope-simple', 'checks' => self::mail()],
-            ['id' => 'extensions', 'title' => t('Plugins and themes'), 'icon' => 'ph ph-plug', 'checks' => self::extensions()],
-            ['id' => 'ai', 'title' => t('AI assistant'), 'icon' => 'ph ph-sparkle', 'checks' => self::ai()],
+            ['id' => 'extensions', 'title' => t('Plugins and Themes'), 'icon' => 'ph ph-plug', 'checks' => self::extensions()],
+            ['id' => 'ai', 'title' => t('AI Assistant'), 'icon' => 'ph ph-sparkle', 'checks' => self::ai()],
         ];
     }
 
@@ -150,55 +150,55 @@ final class SiteHealth
 
         return [
             self::check(
-                t('PHP version'),
+                t('PHP Version'),
                 escape(PHP_VERSION),
                 Requirements::php(),
                 t('Expansa needs PHP %s or newer.', EX_REQUIRED_PHP_VERSION),
             ),
             self::check(
-                t('PHP extensions'),
-                $missing === [] ? t('All required') : t('Missing: %s', escape(implode(', ', $missing))),
+                t('PHP Extensions'),
+                $missing === [] ? t('All Required') : t('Missing: %s', escape(implode(', ', $missing))),
                 $missing === [],
                 t('Ask your hosting provider to enable the missing extensions.'),
             ),
             self::check(
-                t('Recommended extensions'),
-                $optional === [] ? t('All installed') : t('Missing: %s', escape(implode(', ', $optional))),
+                t('Recommended Extensions'),
+                $optional === [] ? t('All Installed') : t('Missing: %s', escape(implode(', ', $optional))),
                 $optional === [],
                 t('zip installs plugins from archives, fileinfo checks upload types, exif reads photo orientation, intl formats dates and numbers, sodium encrypts.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Disabled functions'),
+                t('Disabled Functions'),
                 $disabled === [] ? t('None') : escape(implode(', ', $disabled)),
                 $disabled === [],
                 in_array('curl_exec', $disabled, true)
-                    ? t('Without curl_exec the AI assistant and other requests to services do not work.')
+                    ? t('Without curl_exec, the AI assistant and other requests to services do not work.')
                     : t('The CMS works around them, but background workers or disk checks are limited.'),
                 in_array('curl_exec', $disabled, true) ? self::CRITICAL : self::RECOMMENDED,
             ),
             self::check(
-                t('Memory limit'),
+                t('Memory Limit'),
                 escape((string) ini_get('memory_limit')),
                 $memory < 0 || $memory >= EX_REQUIRED_MEMORY * 1048576,
                 t('Set memory_limit to at least %sM in php.ini.', EX_REQUIRED_MEMORY),
             ),
             self::check(
-                t('Execution time'),
-                $execution === 0 ? t('No limit') : t('%s s', $execution),
+                t('Execution Time'),
+                $execution === 0 ? t('No Limit') : t('%s s', $execution),
                 $execution === 0 || $execution >= 30,
                 t('Imports, updates and image processing need max_execution_time of at least 30 seconds.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Upload size'),
+                t('Upload Size'),
                 self::size($upload),
                 $upload < 0 || $upload >= 8 * 1048576,
                 t('Raise upload_max_filesize and post_max_size to upload larger files.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('OPcache'),
+                'OPcache',
                 $opcache ? t('Enabled') : t('Disabled'),
                 $opcache,
                 t('OPcache keeps compiled PHP in memory and makes every page faster.'),
@@ -208,7 +208,7 @@ final class SiteHealth
                 t('Architecture'),
                 PHP_INT_SIZE === 8 ? t('64-bit') : t('32-bit'),
                 PHP_INT_SIZE === 8,
-                t('32-bit PHP can not hold dates after 2038 and file sizes over 2 GB.'),
+                t('32-bit PHP cannot hold dates after 2038 and file sizes over 2 GB.'),
                 self::RECOMMENDED,
             ),
         ];
@@ -239,73 +239,73 @@ final class SiteHealth
 
         return [
             self::check(
-                t('HTTPS'),
+                'HTTPS',
                 Is::ssl() ? t('Enabled') : t('Disabled'),
                 Is::ssl(),
-                t('Without HTTPS passwords and cookies travel unencrypted. Install a certificate.'),
+                t('Without HTTPS, passwords and cookies travel unencrypted. Install a certificate.'),
             ),
             self::check(
                 t('Administrators'),
                 $admins === null ? t('Unknown') : (string) $admins,
                 $admins === null || $admins > 0,
-                t('No user has the admin role: settings, plugins and users can not be managed. Assign the role in the database.'),
+                t('No user has the admin role: settings, plugins and users cannot be managed. Assign the role in the database.'),
             ),
             self::check(
-                t('Debug mode'),
+                t('Debug Mode'),
                 Is::debug() ? t('Enabled') : t('Disabled'),
                 ! Is::debug(),
                 t('Debug mode slows the site down and stops pages on PHP warnings. Disable it on a public site.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Error details'),
-                $isDisplayed ? t('Shown to visitors') : t('Hidden'),
+                t('Error Details'),
+                $isDisplayed ? t('Shown to Visitors') : t('Hidden'),
                 ! $isDisplayed,
                 t('Turn off enabled or display in EX_DEBUG once the error is found.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Secret keys'),
-                $isGenerated ? t('Generated') : t('Default values'),
+                t('Secret Keys'),
+                $isGenerated ? t('Generated') : t('Default Values'),
                 $isGenerated,
                 t('Replace the keys in env.php with random values of 64 characters.'),
             ),
             self::check(
-                t('Configuration file'),
-                is_writable(EX_PATH . 'env.php') ? t('Writable') : t('Read-only'),
+                t('Configuration File'),
+                is_writable(EX_PATH . 'env.php') ? t('Writable') : t('Read-Only'),
                 ! is_writable(EX_PATH . 'env.php'),
-                t('Make env.php read-only, so a vulnerable plugin can not change it.'),
+                t('Make env.php read-only, so a vulnerable plugin cannot change it.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Private files'),
+                t('Private Files'),
                 match (true) {
-                    $exposed === null => t('Could not check'),
-                    $exposed === []   => t('Closed to the web'),
+                    $exposed === null => t('Could Not Check'),
+                    $exposed === []   => t('Closed to the Web'),
                     default           => t('Open: %s', escape(implode(', ', $exposed))),
                 },
                 $exposed === [],
                 $exposed === null
                     ? t('The site did not answer its own request, e.g. a firewall blocks it. Open /storage/logs/ in a browser: it must not show files.')
-                    : t('Logs, AI tasks or the PHP source can be downloaded. On nginx add: %s', escape('location ~ ^/(storage|cache/views)/ { deny all; }')),
+                    : t('Logs, AI tasks or the PHP source can be downloaded. On Apache, keep .htaccess and allow it with AllowOverride All; on nginx, include nginx.conf in the server block of the site.'),
                 $exposed === null ? self::RECOMMENDED : self::CRITICAL,
             ),
             self::check(
-                t('Code changes'),
-                $writable === [] ? t('Read-only') : t('Writable: %s', escape(implode(', ', $writable))),
+                t('Code Changes'),
+                $writable === [] ? t('Read-Only') : t('Writable: %s', escape(implode(', ', $writable))),
                 $writable === [],
                 t('A vulnerable plugin could change the core. Leave writing to storage/, cache/ and plugins/ only.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Site address'),
+                t('Site Address'),
                 escape($siteUrl ?: $requestUrl),
                 $siteUrl === '' || $siteUrl === $requestUrl,
                 t('The site address in the settings is %s, but the site is open at %s: links, redirects and cookies use the first one.', escape($siteUrl), escape($requestUrl)),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('PHP version header'),
+                t('PHP Version Header'),
                 $isExposed ? t('Sent') : t('Hidden'),
                 ! $isExposed,
                 t('Set expose_php = Off in php.ini, so responses do not tell the PHP version.'),
@@ -341,7 +341,7 @@ final class SiteHealth
         return [
             self::check(t('Connection'), t('Established'), true, ''),
             self::check(
-                t('Server version'),
+                t('Server Version'),
                 escape($version),
                 Requirements::database($version),
                 t('Expansa needs MySQL %s or newer.', EX_REQUIRED_MYSQL_VERSION),
@@ -350,11 +350,11 @@ final class SiteHealth
                 t('Encoding'),
                 escape($charset),
                 $charset === 'utf8mb4',
-                t('Use utf8mb4: utf8 can not store emoji and some characters of Asian languages.'),
+                t('Use utf8mb4: utf8 cannot store emoji and some characters of Asian languages.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Table prefix'),
+                t('Table Prefix'),
                 defined('EX_DB') ? escape(EX_DB['prefix']) : '',
                 defined('EX_DB') && EX_DB['prefix'] !== '',
                 t('A prefix keeps the tables apart from other applications in the same database.'),
@@ -386,33 +386,33 @@ final class SiteHealth
 
         return [
             self::check(
-                t('Storage directory'),
-                is_writable(EX_STORAGE) ? t('Writable') : t('Not writable'),
+                t('Storage Directory'),
+                is_writable(EX_STORAGE) ? t('Writable') : t('Not Writable'),
                 is_writable(EX_STORAGE),
                 t('Logs, tasks and uploads are written to %s.', 'storage/'),
             ),
             self::check(
-                t('Cache directory'),
-                is_writable(EX_PATH . 'cache') ? t('Writable') : t('Not writable'),
+                t('Cache Directory'),
+                is_writable(EX_PATH . 'cache') ? t('Writable') : t('Not Writable'),
                 is_writable(EX_PATH . 'cache'),
                 t('Compiled views are written to %s.', 'cache/'),
             ),
             self::check(
-                t('Free disk space'),
+                t('Free Disk Space'),
                 $free === false ? t('Unknown') : self::size((int) $free),
                 $free === false || $free >= 1073741824,
                 t('Less than 1 GB is left: backups and uploads may fail.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Cache store'),
+                t('Cache Store'),
                 escape($driver),
                 $driver !== 'memory',
                 t('The memory store forgets everything after each request. Set EX_CACHE_STORE=%s or "default" of EX_CACHE.', $better),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Log size'),
+                t('Log Size'),
                 self::size($logs),
                 $logs < self::LOGS_SIZE,
                 t('The logs are large: an error probably repeats on every request. Look at storage/logs.'),
@@ -451,35 +451,35 @@ final class SiteHealth
         return [
             self::check(
                 t('Scheduler'),
-                $ago === null ? t('Never ran') : t('%s min ago', $ago),
+                $ago === null ? t('Never Ran') : t('%s min ago', $ago),
                 $ago !== null && $ago <= self::SCHEDULER_DELAY,
                 // the asterisks of the cron line would become emphasis in the Markdown of t()
                 t('Add a cron job running every minute: %s', str_replace('*', '&#42;', escape('* * * * * php ' . EX_PATH . 'artisan schedule:run'))),
             ),
             self::check(
-                t('Background start'),
-                function_exists($start) ? t('Available') : t('%s is disabled', $start),
+                t('Background Start'),
+                function_exists($start) ? t('Available') : t('%s Is Disabled', $start),
                 function_exists($start),
-                t('Without %s a request can not start its worker at once: tasks wait for the next scheduler run.', $start),
+                t('Without %s, a request cannot start its worker at once: tasks wait for the next scheduler run.', $start),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('PHP for the console'),
+                t('PHP for the Console'),
                 escape($php),
                 ! str_contains(strtolower(basename($php)), 'fpm') && ! str_contains(strtolower(basename($php)), 'cgi'),
-                t('This is the web server PHP, it can not run console commands. Set the path of the PHP CLI in the "php" of EX_AI.'),
+                t('This is the web server PHP; it cannot run console commands. Set the path of the PHP CLI in the "php" of EX_AI.'),
             ),
             self::check(
-                t('Waiting tasks'),
+                t('Waiting Tasks'),
                 (string) $queued,
                 $queued === 0,
                 t('Tasks have waited for a worker for more than 5 minutes: check the scheduler and the background start.'),
             ),
             self::check(
-                t('Stuck tasks'),
+                t('Stuck Tasks'),
                 (string) $stuck,
                 $stuck === 0,
-                t('A worker stopped without finishing, the scheduler retries such tasks.'),
+                t('A worker stopped without finishing; the scheduler retries such tasks.'),
                 self::RECOMMENDED,
             ),
         ];
@@ -501,22 +501,22 @@ final class SiteHealth
 
         return [
             self::check(
-                t('SMTP server'),
-                $isSmtp ? escape($host) : t('Not set'),
+                t('SMTP Server'),
+                $isSmtp ? escape($host) : t('Not Set'),
                 $isSmtp,
-                t('Without SMTP mail goes through PHP mail() and often lands in spam. Set it on the Mail tab of the settings.'),
+                t('Without SMTP, mail goes through PHP mail() and often lands in spam. Set it on the Mail tab of the settings.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Sender address'),
-                Is::email($from) ? escape($from) : t('Not set'),
+                t('Sender Address'),
+                Is::email($from) ? escape($from) : t('Not Set'),
                 Is::email($from),
                 t('Set the sender on the Mail tab of the settings to an address of the site domain.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('DKIM signature'),
-                $isDkim ? escape((string) ($dkim['domain'] ?? '') ?: t('Enabled')) : t('Not set'),
+                t('DKIM Signature'),
+                $isDkim ? escape((string) ($dkim['domain'] ?? '') ?: t('Enabled')) : t('Not Set'),
                 $isDkim,
                 t('A DKIM signature proves the mail comes from your domain. Set it on the Mail tab of the settings.'),
                 self::RECOMMENDED,
@@ -536,20 +536,20 @@ final class SiteHealth
 
         return [
             self::check(
-                t('Active plugins'),
+                t('Active Plugins'),
                 (string) count(Extensions::get('plugin')),
                 true,
                 '',
             ),
             self::check(
-                t('Active theme'),
+                t('Active Theme'),
                 $themes > 0 ? t('Active') : t('None'),
                 $themes > 0,
-                t('Without a theme the public site shows only the default page. Activate a theme.'),
+                t('Without a theme, the public site shows only the default page. Activate a theme.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Plugins in quarantine'),
+                t('Plugins in Quarantine'),
                 $quarantined === [] ? t('None') : escape(implode(', ', array_keys($quarantined))),
                 $quarantined === [],
                 t('These plugins failed and were turned off. Fix or reinstall them, then release them.'),
@@ -569,14 +569,14 @@ final class SiteHealth
         return [
             self::check(
                 t('Service'),
-                $isConfigured ? escape(Ai::getModel()) : t('Not configured'),
+                $isConfigured ? escape(Ai::getModel()) : t('Not Configured'),
                 $isConfigured,
                 t('Set the service on the AI tab of the settings to generate plugins in the chat.'),
                 self::RECOMMENDED,
             ),
             self::check(
-                t('Task directory'),
-                is_dir(EX_STORAGE . 'ai') ? t('Created') : t('Created on the first task'),
+                t('Task Directory'),
+                is_dir(EX_STORAGE . 'ai') ? t('Created') : t('Created on the First Task'),
                 ! is_dir(EX_STORAGE . 'ai') || is_writable(EX_STORAGE . 'ai'),
                 t('The background worker saves the tasks to %s.', 'storage/ai/'),
             ),
@@ -738,7 +738,7 @@ final class SiteHealth
     private static function size(int $bytes): string
     {
         return match (true) {
-            $bytes < 0           => t('No limit'),
+            $bytes < 0           => t('No Limit'),
             $bytes >= 1073741824 => t('%s GB', number_format($bytes / 1073741824, 1)),
             $bytes >= 1048576    => t('%s MB', number_format($bytes / 1048576)),
             default              => t('%s KB', number_format($bytes / 1024)),

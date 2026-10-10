@@ -8,9 +8,7 @@
  * @package Expansa\Templates
  */
 
-if (! defined('EX_PATH')) {
-    exit;
-}
+defined('EX_PATH') || exit;
 ?>
 <div class="expansa-main">
     <div class="fields-builder" u-data>
@@ -18,7 +16,7 @@ if (! defined('EX_PATH')) {
             <div class="fields-builder__header">
                 <h4>Fields Builder</h4>
             </div>
-            <?php echo form('fields-builder', EX_DASHBOARD . 'forms/fields-builder.php'); ?>
+            <?php echo form('fields-builder'); ?>
         </div>
         <div class="fields-builder__main">
             <div class="fields-builder__code">

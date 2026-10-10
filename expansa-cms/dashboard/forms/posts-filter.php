@@ -2,9 +2,9 @@
 /**
  * Form for filter posts
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'posts-filter',
 	[
 		'class'    => 'dg g-7 p-8',
@@ -26,7 +26,7 @@ return \Expansa\Facades\Form::enqueue(
 			'before'      => '',
 			'after'       => '',
 			'tooltip'     => '',
-			'instruction' => t( '25% of 2GB used' ),
+			'instruction' => t( '25% of 2 GB used' ),
 			'attributes'  => [
 				'u-prop'      => 'progress',
 				'placeholder' => t( 'e.g. image name' ),
@@ -40,6 +40,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'search',
 			'label'       => t( 'Search' ),
 			'name'        => 's',
+			'error'       => 's',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--outline',
@@ -59,8 +60,9 @@ return \Expansa\Facades\Form::enqueue(
 		],
 		[
 			'type'        => 'checkbox',
-			'label'       => t( 'File types' ),
+			'label'       => t( 'File Types' ),
 			'name'        => 'types',
+			'error'       => 'types',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--outline',
@@ -88,6 +90,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'select',
 			'label'       => t( 'Author' ),
 			'name'        => 'authors',
+			'error'       => 'authors',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--sm field--outline',
@@ -103,10 +106,7 @@ return \Expansa\Facades\Form::enqueue(
                 'u-prop' => 'authors',
             ],
 			'conditions'  => [],
-			'options' => [
-				''                => t( 'Select an author' ),
-				'user-registered' => t( 'New user registered' ),
-			],
+			'options' => [ '' => t( 'Select an author' ) ] + App\Models\User::options(),
 		],
 	]
 );

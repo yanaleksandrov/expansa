@@ -151,7 +151,7 @@ class Type
          * Show in dashboard menu.
          */
         if ($this->showInMenu) {
-            Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
+            Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->append(
                 [
                     [
                         'id'           => $postType,

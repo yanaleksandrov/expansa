@@ -88,7 +88,7 @@ final class PluralRule
         $this->expect(':');
         $else = $this->ternary();
 
-        return fn (int $n): int|bool => $condition($n) ? $then($n) : $else($n);
+        return static fn (int $n): int|bool => $condition($n) ? $then($n) : $else($n);
     }
 
     /**
@@ -120,13 +120,13 @@ final class PluralRule
         if ($this->accept('!')) {
             $operand = $this->unary();
 
-            return fn (int $n): bool => ! $operand($n);
+            return static fn (int $n): bool => ! $operand($n);
         }
 
         if ($this->accept('-')) {
             $operand = $this->unary();
 
-            return fn (int $n): int => -$operand($n);
+            return static fn (int $n): int => -$operand($n);
         }
 
         return $this->primary();
@@ -137,13 +137,13 @@ final class PluralRule
         $token = $this->tokens[$this->position++] ?? '';
 
         if ($token === 'n') {
-            return fn (int $n): int => $n;
+            return static fn (int $n): int => $n;
         }
 
         if (ctype_digit($token)) {
             $value = (int) $token;
 
-            return fn (): int => $value;
+            return static fn (): int => $value;
         }
 
         if ($token === '(') {

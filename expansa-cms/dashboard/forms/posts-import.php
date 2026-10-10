@@ -2,9 +2,9 @@
 /**
  * Form for build custom fields
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'posts-import',
 	[
 		'class'           => 'card card-border',
@@ -19,7 +19,7 @@ return \Expansa\Facades\Form::enqueue(
 				?>
 				<div class="progress" :style="'--expansa-progress:' + progress().progress"></div>
 				<div class="p-7 df aic jcsb">
-					<span u-text="current().title"><?php echo t( 'Upload CSV file' ); ?></span>
+					<span u-text="current().title"><?php echo t( 'Upload CSV File' ); ?></span>
 					<span class="t-muted">
 						step <strong u-text="progress().current">1</strong> from <strong u-text="progress().total">2</strong>
 					</span>
@@ -34,27 +34,28 @@ return \Expansa\Facades\Form::enqueue(
 			'attributes' => [
 				'class'          => 'pl-7 pr-7',
 				'u-step'         => 'fields.trim()',
-				'u-wizard:title' => t( 'Upload CSV file' ),
+				'u-wizard:title' => t( 'Upload CSV File' ),
 			],
 			'fields' => [
 				[
 					'name'        => 'title',
 					'type'        => 'header',
 					'class'       => 'p-7 t-center',
-					'label'       => t( 'Import posts from a CSV file' ),
+					'label'       => t( 'Import Posts from a CSV File' ),
 					'instruction' => t( 'This tool lets you import (or merge) post data into your website from a CSV or TXT file. %sDownload%s a sample file or choose one from your computer:', '<a href="/dashboard/assets/files/example-posts.csv" download>', '</a>' ),
 					'attributes'  => [ 'u-prop' => 'title' ],
 				],
 				[
 					'type'        => 'select',
 					'name'        => 'encoding',
-					'label'       => t( 'File encoding' ),
+					'error'       => 'encoding',
+					'label'       => t( 'File Encoding' ),
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => t( 'If the column samples in the next step look garbled, go back, choose a different encoding, and upload the file again' ),
+					'instruction' => t( 'If the column samples in the next step look garbled, go back, choose a different encoding, and upload the file again.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -65,13 +66,14 @@ return \Expansa\Facades\Form::enqueue(
 				[
 					'type'        => 'uploader',
 					'name'        => 'uploader',
+					'error'       => 'uploader',
 					'label'       => '',
 					'class'       => '',
 					'label_class' => '',
 					'reset'       => 0,
 					'before'      => '',
 					'after'       => '',
-					'instruction' => t( 'Click to upload or drag & drop' ),
+					'instruction' => t( 'Click to upload or drag & drop.' ),
 					'tooltip'     => '',
 					'copy'        => 0,
 					'validator'   => '',
@@ -90,15 +92,15 @@ return \Expansa\Facades\Form::enqueue(
 				'class'          => 'pl-7 pr-7',
 				'hidden'         => true,
 				'u-step'         => 'output.trim()',
-				'u-wizard:title' => t( 'Column mapping' ),
+				'u-wizard:title' => t( 'Column Mapping' ),
 			],
 			'fields' => [
 				[
 					'name'        => 'title',
 					'type'        => 'header',
 					'class'       => 'p-7 t-center',
-					'label'       => t( 'Map CSV fields to posts' ),
-					'instruction' => t( 'Choose which fields from your CSV file to map to post fields and which to skip during import' ),
+					'label'       => t( 'Map CSV Fields to Posts' ),
+					'instruction' => t( 'Choose which fields from your CSV file to map to post fields and which to skip during import.' ),
 					'attributes'  => [ 'u-prop' => 'title' ],
 				],
 				[
@@ -113,7 +115,7 @@ return \Expansa\Facades\Form::enqueue(
 				'class'          => 'dg p-7',
 				'u-html'         => 'output',
 				'hidden'        => true,
-				'u-wizard:title' => t( 'Import complete' ),
+				'u-wizard:title' => t( 'Import Complete' ),
 			],
 		],
 		[
@@ -124,7 +126,7 @@ return \Expansa\Facades\Form::enqueue(
 				<div class="p-7 df jcsb g-2" u-show="!output.trim()">
 					<button type="button" class="btn btn--outline" :disabled="cannotGoBack()" u-show="isNotLast()" @click="goBack()" disabled><?php echo t( 'Back' ); ?></button>
 					<button type="button" class="btn btn--primary" :disabled="cannotGoNext()" u-show="isFirst()" @click="goNext()" disabled><?php echo t( 'Continue' ); ?></button>
-					<button type="submit" class="btn btn--primary" u-show="isStep(1)" hidden><?php echo t( 'Run the importer' ); ?></button>
+					<button type="submit" class="btn btn--primary" u-show="isStep(1)" hidden><?php echo t( 'Run the Importer' ); ?></button>
 				</div>
 				<?php
 			},

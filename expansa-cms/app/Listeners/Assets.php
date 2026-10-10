@@ -23,7 +23,7 @@ final class Assets
     {
         return str_replace(
             '0Q 0.001s 999kb',
-            t(':queries\Q :memory :memory_peak', count(Db::log()), metrics()->time(), metrics()->memory()),
+            sprintf('%dQ %s %s', count(Db::log()), metrics()->time(), metrics()->memory()),
             $content
         );
     }

@@ -16,7 +16,7 @@ use Expansa\Support\Error;
  * A group of custom fields (ACF-style "Field Group"): a title, a set of location rules
  * describing where it should appear, and the field definitions themselves. `location` and
  * `fields` are stored as JSON - `fields` uses the exact same array shape already consumed by
- * {@see \Expansa\Builders\Forms\Field::parse()}, so a saved group can be rendered as-is.
+ * {@see \Expansa\Builders\Form::renderFields()}, so a saved group can be rendered as-is.
  *
  * @property int    $id
  * @property string $title
@@ -106,7 +106,7 @@ class FieldGroup extends Model
     }
 
     /**
-     * Field definitions, in the same shape {@see \Expansa\Builders\Forms\Field::parse()} expects.
+     * Field definitions, in the same shape {@see \Expansa\Builders\Form::renderFields()} expects.
      */
     protected function fields(): Attribute
     {
@@ -136,7 +136,7 @@ class FieldGroup extends Model
 
         $group = parent::get($value, $by);
 
-        return $group instanceof FieldGroup ? $group : error('field-group-find', t('Field group not found.'));
+        return $group instanceof FieldGroup ? $group : error('field-group-find', t('Field group not found'));
     }
 
     /**

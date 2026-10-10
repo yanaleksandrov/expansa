@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 
-final class Comments extends AbstractTable
+final class Comments extends Table
 {
     public function data(): array
     {
@@ -38,7 +38,7 @@ final class Comments extends AbstractTable
                 ->flexibleWidth('6rem')
                 ->view('raw'),
             $this->cell('date')
-                ->title(t('In response to'))
+                ->title(t('In Response To'))
                 ->fixedWidth('9rem')
                 ->sortable()
                 ->view('date'),

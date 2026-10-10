@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
-use Expansa\Builders\Table\AbstractTable;
+use Expansa\Builders\Table;
 
-final class Media extends AbstractTable
+final class Media extends Table
 {
     public function data(): array
     {
@@ -37,7 +37,7 @@ final class Media extends AbstractTable
         return [
             'icon'        => 'no-media',
             'title'       => t('No files found in the library'),
-            'description' => t('Either nothing has been uploaded yet or no files match the current filters'),
+            'description' => t('Either nothing has been uploaded yet or no files match the current filters.'),
         ];
     }
 }

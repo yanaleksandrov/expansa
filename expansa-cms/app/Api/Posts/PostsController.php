@@ -30,14 +30,14 @@ final readonly class PostsController
     }
 
     #[Can('manage_export')]
-    public function export(Request $request): Response
+    public function export(Request $request, Response $response): Response
     {
-        return $this->service->export($request->input);
+        return $this->service->export($request, $response);
     }
 
     #[Can('manage_import')]
     public function import(Request $request): array
     {
-        return $this->service->import($request->post);
+        return $this->service->import($request);
     }
 }

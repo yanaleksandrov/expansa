@@ -436,7 +436,7 @@ final class Manager
      */
     private function createListener(string $class, string $method): Closure
     {
-        return function (mixed $value = null, mixed ...$values) use ($class, $method): mixed {
+        return static function (mixed $value = null, mixed ...$values) use ($class, $method): mixed {
             $instance = self::$instances[$class] ??= new $class();
 
             return $instance->$method($value, ...$values);

@@ -1179,7 +1179,7 @@
                 options.once = true;
             }
             if (event === 'load') {
-                queueMicrotask(() => handler(createEvent(event, {})));
+                handler(createEvent(event, {}));
             }
             if (event === 'intersect') {
                 const observer = new IntersectionObserver(entries => entries.forEach(entry => {

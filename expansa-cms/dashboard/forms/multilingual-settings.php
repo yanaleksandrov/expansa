@@ -3,7 +3,7 @@
 use App\Models\Option;
 use Expansa\Facades\Safe;
 
-$languages = Expansa\Patterns\Registry::get('languages');
+$languages = Expansa\Facades\I18n::getLanguages();
 
 $options = [];
 foreach ($languages as $language) {
@@ -22,9 +22,9 @@ foreach ($languages as $language) {
 /**
  * Profile page.
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return Expansa\Facades\Form::enqueue(
+return Expansa\Builders\Form::enqueue(
     'multilingual-settings',
     [
         'class'   => 'tab tab--vertical',
@@ -36,13 +36,13 @@ return Expansa\Facades\Form::enqueue(
             'name'    => 'general',
             'type'    => 'tab',
             'label'   => t( 'General' ),
-            'caption' => t( 'main settings' ),
+            'caption' => t( 'Main Settings' ),
             'icon'    => 'ph ph-translate',
             'fields'  => [
                 [
                     'type'          => 'group',
                     'name'          => 'comments',
-                    'label'         => t( 'URL modifications' ),
+                    'label'         => t( 'URL Modifications' ),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -50,13 +50,14 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'radio',
                             'name'        => 'site[language]',
-                            'label'       => t( 'URL modifications' ),
+                            'error'       => 'site.language',
+                            'label'       => t( 'URL Modifications' ),
                             'class'       => 'field field--ui',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t( 'Choose how your URLs will look' ),
+                            'instruction' => t( 'Choose how your URLs will look.' ),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -67,13 +68,13 @@ return Expansa\Facades\Form::enqueue(
                             ],
                             'options' => [
                                 'comments[default_status]' => [
-                                    'content'     => t( 'The language is set from the directory name in pretty permalinks' ),
+                                    'content'     => t( 'The language is set from the directory name in pretty permalinks.' ),
                                     'icon'        => 'ph ph-link',
                                     'description' => t('Example:') . '<code>' . url('/en/my-post/') . '</code>',
                                     'checked'     => Option::get( 'comments.default_status', true ),
                                 ],
                                 'comments[require_name_email]' => [
-                                    'content'     => t( 'The language is set from the subdomain name in pretty permalinks' ),
+                                    'content'     => t( 'The language is set from the subdomain name in pretty permalinks.' ),
                                     'icon'        => 'ph ph-link',
                                     'description' => t('Example:') . '<code>https://en.greenapple.jewelry/my-post/</code>',
                                     'checked'     => Option::get( 'comments.default_status', true ),
@@ -85,7 +86,7 @@ return Expansa\Facades\Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'comments',
-                    'label'         => t( 'Allow access for' ),
+                    'label'         => t( 'Allow Access For' ),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -93,7 +94,8 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'checkbox',
                             'name'        => 'comments',
-                            'label'       => t( 'Allow access for' ),
+                            'error'       => 'comments',
+                            'label'       => t( 'Allow Access For' ),
                             'class'       => 'field field--ui',
                             'label_class' => '',
                             'reset'       => 0,
@@ -135,13 +137,14 @@ return Expansa\Facades\Form::enqueue(
             'type'        => 'tab',
             'label'       => t('Languages'),
             'caption'     => t('Active languages'),
-            'description' => t('Third-party translation services are subject to their own terms of use and may incur costs from the provider'),
+            'description' => t('Third-party translation services are subject to their own terms of use and may incur costs from the provider.'),
             'icon'        => 'ph ph-globe-hemisphere-west',
             'fields'      => [
                 [
                     'type'        => 'checkbox',
                     'name'        => 'site[language]',
-                    'label'       => t( 'URL modifications' ),
+                    'error'       => 'site.language',
+                    'label'       => t( 'URL Modifications' ),
                     'class'       => 'field field--ui',
                     'label_class' => '',
                     'reset'       => 0,
@@ -163,15 +166,15 @@ return Expansa\Facades\Form::enqueue(
         [
             'name'        => 'api',
             'type'        => 'tab',
-            'label'       => t( 'API keys' ),
+            'label'       => t( 'API Keys' ),
             'caption'     => t( 'Machine Translation' ),
-			'description' => t('Third-party translation services are subject to their own terms of use and may incur costs from the provider'),
+			'description' => t('Third-party translation services are subject to their own terms of use and may incur costs from the provider.'),
             'icon'        => 'ph ph-key',
             'fields'      => [
 				[
                     'type'          => 'group',
                     'name'          => 'comments',
-                    'label'         => t( 'Allow access for' ),
+                    'label'         => t( 'Allow Access For' ),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -179,13 +182,14 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'site[tagline]',
-                            'label'       => t( 'DeepL Translator' ),
+                            'error'       => 'site.tagline',
+                            'label'       => 'DeepL Translator',
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t( 'In a few words, explain what this site is about' ),
+                            'instruction' => t( 'In a few words, explain what this site is about.' ),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -199,13 +203,14 @@ return Expansa\Facades\Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'site[tagline]',
-                            'label'       => t( 'Google Translate' ),
+                            'error'       => 'site.tagline',
+                            'label'       => 'Google Translate',
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t( 'In a few words, explain what this site is about' ),
+                            'instruction' => t( 'In a few words, explain what this site is about.' ),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',

@@ -25,6 +25,26 @@
     font-weight: 400;
   }
 
+  &-error {
+    line-height: 1.2em;
+    font-size: 0.92857142857em;
+    color: var(--expansa-danger);
+
+    margin-top: -0.875rem;
+    padding: 1.25rem 0.6875rem 0.5rem;
+    z-index: -1;
+    background-color: rgb(252.13, 241.14, 241.14);
+    border-bottom-left-radius: var(--expansa-border-radius);
+    border-bottom-right-radius: var(--expansa-border-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  }
+
+  &.is-invalid &-item,
+  &.is-invalid &-item:focus-within {
+    border-color: var(--expansa-danger) !important;
+    box-shadow: 0 0 0 2px rgb(252.13, 241.14, 241.14) !important;
+  }
+
   &-item {
     padding-inline: 0.8em;
     display: flex;
@@ -35,6 +55,7 @@
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     background-color: var(--expansa-bg);
     transition: background-color 0.2s;
+    position: relative;
 
     @each $suffix, $properties in constants.$fieldSizes {
       .field#{$suffix} & {

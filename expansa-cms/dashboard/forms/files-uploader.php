@@ -2,9 +2,9 @@
 /**
  * Form for build custom fields
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return Expansa\Facades\Form::enqueue(
+return Expansa\Builders\Form::enqueue(
 	'files-uploader',
 	[
 		'class'  => 'dg g-6 p-6',
@@ -14,13 +14,14 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'uploader',
 			'name'        => 'files',
+			'error'       => 'files',
 			'label'       => '',
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Click to upload or drag & drop' ),
+			'instruction' => t( 'Click to upload or drag & drop.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -42,7 +43,8 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'textarea',
 			'name'        => 'urls',
-			'label'       => t( 'Or upload from an external URL' ),
+			'error'       => 'urls',
+			'label'       => t( 'Or Upload from an External URL' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

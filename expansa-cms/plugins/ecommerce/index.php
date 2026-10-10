@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Facades\Dashboard;
 use App\Post\Type;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;
-use Expansa\Facades\Hook;
 use Expansa\Support\Is;
 
 return new class extends Plugin
@@ -15,32 +15,16 @@ return new class extends Plugin
     {
         $this
             ->setName('eCommerce')
-            ->setVersion('2025.2')
+            ->setVersion('2027.2')
             ->setAuthor('Expansa Team')
             ->setDescription(t('Everything you need to launch an online store in days and keep it growing for years.'));
     }
 
     public function boot(): void
     {
-        // TODO: переделать подключение файлов плагинов
-        Hook::add('viewPart', function ($filepath) {
-            if ($filepath === EX_DASHBOARD . 'views/order.php') {
-                $filepath = __DIR__ . '/views/order.php';
-            }
-            if ($filepath === EX_DASHBOARD . 'views/orders.php') {
-                $filepath = __DIR__ . '/views/orders.php';
-            }
-            if ($filepath === EX_DASHBOARD . 'views/categories.php') {
-                $filepath = __DIR__ . '/views/categories.php';
-            }
-            if ($filepath === EX_DASHBOARD . 'views/attributes.php') {
-                $filepath = __DIR__ . '/views/attributes.php';
-            }
-            if ($filepath === EX_DASHBOARD . 'views/attribute-editor.php') {
-                $filepath = __DIR__ . '/views/attribute-editor.php';
-            }
-            return $filepath;
-        });
+        foreach (['order', 'orders', 'categories', 'attributes', 'attribute-editor'] as $page) {
+            Dashboard::page($page, view: __DIR__ . "/views/$page");
+        }
 
         Asset::style('ecommerce-main', '/plugins/ecommerce/assets/css/main.css');
         Asset::style('ecommerce-order', '/plugins/ecommerce/assets/css/order.css');
@@ -95,7 +79,7 @@ return new class extends Plugin
             menuPosition: 280,
         );
 
-        Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'       => 'divider-ecommerce',

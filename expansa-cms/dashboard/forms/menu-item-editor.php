@@ -2,9 +2,9 @@
 /**
  * Form for menu editor
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'menu-item-editor',
 	[
 		'class'           => 'dg g-4',
@@ -17,7 +17,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function() {
 				?>
-				<h6><?php echo t( 'Menu item data' ); ?></h6>
+				<h6><?php echo t( 'Menu Item Data' ); ?></h6>
 				<?php
 			},
 			'attributes'  => [ 'u-prop' => 'instructions' ],
@@ -26,6 +26,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'text',
 			'label'       => t( 'Navigation Label' ),
 			'name'        => 'title',
+			'error'       => 'title',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--sm',
@@ -47,6 +48,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'text',
 			'label'       => t( 'CSS Classes (optional)' ),
 			'name'        => 'classes',
+			'error'       => 'classes',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--sm',
@@ -65,6 +67,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'checkbox',
 			'label'       => t( 'Open link in a new tab' ),
 			'name'        => 'link-target',
+			'error'       => 'link-target',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => '',
@@ -83,6 +86,7 @@ return \Expansa\Facades\Form::enqueue(
 			'type'        => 'textarea',
 			'label'       => t( 'Description' ),
 			'name'        => 'description',
+			'error'       => 'description',
 			'value'       => '',
 			'placeholder' => '',
 			'class'       => 'field field--sm',

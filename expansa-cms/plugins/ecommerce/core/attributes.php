@@ -3,10 +3,10 @@
 /**
  * Form for create & edit emails.
  *
- * @since 2025.1
+ * @since 2027.1
  */
 
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
     'attribute-editor',
     [
         'class' => 'dg g-3 p-5 pt-4',
@@ -23,6 +23,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'name',
+                    'error'       => 'name',
                     'label'       => t('Attribute Name'),
                     'class'       => 'field ga-4',
                     'label_class' => '',
@@ -43,6 +44,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'slug',
+                    'error'       => 'slug',
                     'label'       => t('Slug'),
                     'class'       => 'field ga-4',
                     'label_class' => '',
@@ -63,6 +65,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'textarea',
                     'name'        => 'description',
+                    'error'       => 'description',
                     'label'       => t('Description'),
                     'class'       => 'field ga-4',
                     'label_class' => '',
@@ -79,6 +82,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'select',
                     'name'        => 'type',
+                    'error'       => 'type',
                     'label'       => t('Type'),
                     'class'       => 'field ga-3',
                     'label_class' => '',
@@ -104,6 +108,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'text',
                     'name'        => 'unit',
+                    'error'       => 'unit',
                     'label'       => t('Unit'),
                     'class'       => 'field ga-1',
                     'label_class' => '',
@@ -130,6 +135,7 @@ return \Expansa\Facades\Form::enqueue(
                 [
                     'type'        => 'select',
                     'name'        => 'assignments',
+                    'error'       => 'assignments',
                     'label'       => t('Category assignments'),
                     'class'       => '',
                     'label_class' => '',
@@ -155,6 +161,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'checkbox',
             'name'        => 'unique',
+            'error'       => 'unique',
             'label'       => '',
             'class'       => 'field field--ui',
             'label_class' => '',
@@ -179,6 +186,7 @@ return \Expansa\Facades\Form::enqueue(
         [
             'type'        => 'checkbox',
             'name'        => 'filterable',
+            'error'       => 'filterable',
             'label'       => '',
             'class'       => 'field field--ui',
             'label_class' => '',

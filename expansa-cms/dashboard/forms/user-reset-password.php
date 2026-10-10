@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Facades\Form;
+use Expansa\Builders\Form;
 use Expansa\Facades\Safe;
 
 $resetToken = Safe::trim($_GET['token'] ?? '');
@@ -9,7 +9,7 @@ $fields     = [
     [
         'name'        => 'title',
         'type'        => 'header',
-        'label'       => t('Reset password'),
+        'label'       => t('Reset Password'),
         'class'       => 't-center',
         'instruction' => $hasToken
             ? t('Choose a new password for your account.')
@@ -30,7 +30,8 @@ if ($hasToken) {
     $fields[] = [
         'type'        => 'password',
         'name'        => 'password',
-        'label'       => t('New password'),
+        'error'       => 'password',
+        'label'       => t('New Password'),
         'class'       => 'field field--lg',
         'instruction' => t('At least 12 characters.'),
         'validator'   => '',
@@ -55,6 +56,7 @@ if ($hasToken) {
     $fields[] = [
         'type'        => 'email',
         'name'        => 'email',
+        'error'       => 'email',
         'label'       => t('Your email'),
         'class'       => 'field field--lg',
         'instruction' => '',
@@ -70,7 +72,7 @@ if ($hasToken) {
 $fields[] = [
     'type'       => 'submit',
     'name'       => 'submit',
-    'label'      => $hasToken ? t('Save new password') : t('Send me instructions'),
+    'label'      => $hasToken ? t('Save New Password') : t('Send Me Instructions'),
     'attributes' => [
         'class'     => 'btn btn--lg btn--primary btn--full',
         'disabled'  => true,

@@ -101,7 +101,8 @@ Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '
         redirect('sign-in');
     }
 
-    require_once EX_PATH . 'dashboard/index.php';
+    App\Dashboard\Assets::dashboard();
+    App\Dashboard\Menus::register();
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
@@ -127,9 +128,9 @@ Is::dashboard();               // то же самое
 |-------------|-------------------------------------------|-------------------------------------------------------------------|
 | `cli`       | `PHP_SAPI === 'cli'`                      | Консольные команды                                                |
 | `api`       | URI начинается с `/api/`                  | API-маршруты прямо в `bootstrap.php`                              |
-| `install`   | система не установлена                    | `dashboard/install.php`, `Web::install()`                         |
-| `auth`      | `sign-in`, `sign-up`, `reset-password`    | `dashboard/auth.php`; вошедшего пользователя ведёт в дашборд       |
-| `dashboard` | URI начинается с корня дашборда           | `dashboard/index.php`; гостя ведёт на `sign-in`                    |
+| `install`   | система не установлена                    | `Dashboard\Assets::install()`, `Web::install()`                |
+| `auth`      | `sign-in`, `sign-up`, `reset-password`    | `Dashboard\Assets::auth()`; вошедшего пользователя ведёт в дашборд |
+| `dashboard` | URI начинается с корня дашборда           | `Dashboard\Assets::dashboard()`, `Dashboard\Menus`; гостя ведёт на `sign-in` |
 | `web`       | всё остальное                             | Главная `/` и `/installed` (для вошедшего), остальное — 404       |
 
 ## Хуки жизненного цикла
@@ -233,7 +234,7 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
 
 - **В `bootstrap.php` нет синтаксиса PHP 8.4.** Проверка версии PHP стоит в этом же файле, и на
   старом PHP он должен хотя бы разобраться, чтобы показать страницу требований. То же относится к
-  `env.php`, `autoload.php`, `expansa/functions.php`, `App\Support\Requirements` и `dashboard/error.php`.
+  `env.php`, `autoload.php`, `expansa/functions.php`, `App\Support\Requirements` и `dashboard/views/fallback/error.php`.
   Правило проверяет `tests/Syntax.php`: он падает на синтаксисе новее PHP 8.0 в этих файлах.
 - **Фреймворк не знает про `app` и константы `EX_`.** Всё, что ему нужно от приложения (пути,
   адрес сайта, соединение с базой, версия), приложение передаёт через `configure()` пакета с
@@ -252,8 +253,8 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
 - **Объявления после старта запрещены.** Фазу или контекст нельзя объявить после
   `Lifecycle::run()` и повторный запуск выбрасывают `Exceptions\AlreadyStarted`, дубль имени —
   `Exceptions\AlreadyDeclared` (оба — `LogicException`).
-- **Ассеты дашборда подключаются через `DashboardAssets::enqueue()`**: он сам выбирает `.min` и
-  выставляет CSRF-cookie, который читает `youla-ajax.js`.
+- **Ассеты дашборда подключает `App\Dashboard\Assets`**: набор на контекст (`dashboard()`, `auth()`,
+  `install()`), сам выбирает `.min` и выставляет CSRF-cookie, который читает `youla-ajax.js`.
 
 ## Разработка
 
@@ -265,3 +266,24 @@ Server-Timing: phase-boot;dur=0.136, phase-configure;dur=0.605, phase-register;d
   `EX_DEBUG['enabled']` никогда не включайте на рабочем сайте.
 - `php artisan serve [--host=127.0.0.1] [--port=8000]` запускает сайт на встроенном сервере PHP через
   `server.php`. Роутер выставляет `SCRIPT_NAME` как Apache, иначе `/dashboard` путается с папкой `dashboard/`.
+- Веб-сервер: для Apache правила в `.htaccess`, для nginx — в `nginx.conf`. Его подключают внутрь своего
+  блока `server`, а всё, что отличается между установками, остаётся в файле сайта:
+
+  ```nginx
+  upstream expansa-php {
+      server unix:/run/php/php8.4-fpm.sock;   # или 127.0.0.1:9000, или php:9000 в Docker
+  }
+
+  server {
+      listen      80;
+      server_name example.com;
+      root        /path/to/expansa-cms;        # папка с index.php
+      include     /path/to/expansa-cms/nginx.conf;
+  }
+  ```
+
+  На обоих серверах, как и в `server.php`, исполняется только `index.php`: остальные PHP-файлы и
+  несуществующие пути уходят в него, адрес с `/` в конце перенаправляется на адрес без неё; `storage/`,
+  `cache/views/`, `env.php`, `artisan` и скрытые файлы закрыты. Expansa должна быть
+  корнем сайта (свой домен или поддомен). `client_max_body_size` в `nginx.conf` — не меньше
+  `upload_max_filesize` и `post_max_size` PHP.

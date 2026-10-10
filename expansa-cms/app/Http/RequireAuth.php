@@ -42,7 +42,7 @@ final class RequireAuth
         }
 
         new Response()
-            ->json(['message' => t('Authentication required.')], 401)
+            ->json(['message' => t('Authentication required')], 401)
             ->send();
         exit;
     }

@@ -1,4 +1,7 @@
 document.addEventListener('youla:init', ()=> {
+    // settings of youla-ajax.js from DashboardAssets: API address, CSRF names, error markup, texts
+    Youla.ajax = { ...window.youla?.ajax, ...Youla.ajax };
+
     /**
      * Multi-step wizard: `u-step="condition"` marks a panel's completion; use as `u-data="step"`.
      * `u-step.required` also requires every required field's native `checkValidity()`.

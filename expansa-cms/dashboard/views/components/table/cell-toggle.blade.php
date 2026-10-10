@@ -1,0 +1,42 @@
+<?php
+
+use Expansa\Facades\Safe;
+
+/**
+ * Table checkbox
+ *
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-checkbox.php
+ *
+ * @package Expansa\Templates
+ */
+defined('EX_PATH') || exit;
+
+$class = Safe::class($__data['key'] ?? []);
+$prop  = Safe::prop($__data['key'] ?? []);
+?>
+<div class="<?php echo $class; ?>">
+	<?php
+	echo view(
+		'components/form/checkbox',
+		[
+			'type'        => 'checkbox',
+			'name'        => 'uid',
+			'label'       => '',
+			'class'       => '',
+			'label_class' => '',
+			'reset'       => 0,
+			'before'      => '',
+			'after'       => '',
+			'instruction' => '',
+			'tooltip'     => '',
+			'copy'        => 0,
+			'validator'   => '',
+			'conditions'  => [],
+			'attributes'  => [
+				':checked' => "item.$prop === true",
+				'@change'  => '$ajax.post("plugin/deactivate")',
+			],
+		]
+	);
+	?>
+</div>

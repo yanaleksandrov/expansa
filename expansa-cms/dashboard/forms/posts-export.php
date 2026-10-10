@@ -2,9 +2,9 @@
 /**
  * Form for build custom fields
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return Expansa\Facades\Form::enqueue(
+return Expansa\Builders\Form::enqueue(
 	'posts-export',
 	[
 		'class'           => 'card card-border px-7 pb-7 g-7',
@@ -16,8 +16,8 @@ return Expansa\Facades\Form::enqueue(
 			'name'        => 'title',
 			'type'        => 'header',
 			'class'       => 'pt-7 px-7 t-center',
-			'label'       => t( 'Export posts' ),
-			'instruction' => t( 'Choose which content to export and the file format' ),
+			'label'       => t( 'Export Posts' ),
+			'instruction' => t( 'Choose which content to export and the file format.' ),
 			'attributes'  => [
 				'u-prop' => 'title'
 			],
@@ -25,13 +25,14 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'select',
 			'name'        => 'types[]',
-			'label'       => t( 'Post types' ),
+			'error'       => 'types',
+			'label'       => t( 'Post Types' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Choose which types of posts you want to export' ),
+			'instruction' => t( 'Choose which types of posts you want to export.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -49,13 +50,14 @@ return Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'radio',
 			'name'        => 'format',
-			'label'       => t( 'File format' ),
+			'error'       => 'format',
+			'label'       => t( 'File Format' ),
 			'class'       => 'field field--grid',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
 			'after'       => '',
-			'instruction' => t( 'Choose the format that best fits how you\'ll use the data' ),
+			'instruction' => t( 'Choose the format that best fits how you\'ll use the data.' ),
 			'tooltip'     => '',
 			'copy'        => 0,
 			'validator'   => '',
@@ -68,13 +70,13 @@ return Expansa\Facades\Form::enqueue(
 				'csv' => [
 					'icon'        => 'ph ph-file-csv',
 					'image'       => url( 'dashboard/assets/images/dashboard-light.svg' ),
-					'content'     => t( 'CSV file' ),
+					'content'     => t( 'CSV File' ),
 					'description' => t( 'A simple format for spreadsheet apps' ),
 				],
 				'json' => [
 					'icon'        => 'ph ph-file-txt',
 					'image'       => url( 'dashboard/assets/images/dashboard-dark.svg' ),
-					'content'     => t( 'JSON file' ),
+					'content'     => t( 'JSON File' ),
 					'description' => t( 'A universal format for exchanging data across platforms' ),
 				],
 			],
@@ -83,7 +85,7 @@ return Expansa\Facades\Form::enqueue(
 			'type'     => 'custom',
 			'callback' => function () {
 				?>
-				<button type="submit" class="btn btn--primary"><?php echo t( 'Export posts' ); ?></button>
+				<button type="submit" class="btn btn--primary"><?php echo t( 'Export Posts' ); ?></button>
 				<?php
 			},
 		],

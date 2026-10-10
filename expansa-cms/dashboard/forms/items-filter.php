@@ -2,9 +2,9 @@
 /**
  * Posts actions.
  *
- * @since 2025.1
+ * @since 2027.1
  */
-return \Expansa\Facades\Form::enqueue(
+return \Expansa\Builders\Form::enqueue(
 	'items-filter',
 	[
 		'class'           => 'table__filter',
@@ -16,6 +16,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'search',
 			'name'        => 's',
+			'error'       => 's',
 			'label'       => '',
 			'class'       => 'field field--sm field--outline',
 			'label_class' => '',
@@ -35,7 +36,7 @@ return \Expansa\Facades\Form::enqueue(
 		[
 			'type'        => 'submit',
 			'name'        => 'submit',
-			'label'       => t( 'Apply filter' ),
+			'label'       => t( 'Apply Filter' ),
 			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,

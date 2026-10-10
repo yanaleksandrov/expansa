@@ -10,7 +10,7 @@ use App\Api\User\TwoFactor;
 use App\Models\User;
 use App\Support\Passwords;
 use Expansa\Facades\Auth;
-use Expansa\Facades\Form;
+use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
@@ -20,7 +20,7 @@ $user = User::current();
 /**
  * Profile page.
  *
- * @since 2025.1
+ * @since 2027.1
  */
 return Form::enqueue(
     'user-profile',
@@ -38,18 +38,19 @@ return Form::enqueue(
                 <div class="dg g-1 p-7 sm:p-5 pb-4 sm:pb-4 bg-gray-lt">
                     <?php
                     echo view(
-                        'form/image',
+                        'components/form/image',
                         [
                             'type'        => 'image',
                             'name'        => 'avatar',
+                            'error'       => 'avatar',
                             'label'       => t('Profile Settings'),
                             'class'       => '',
                             'label_class' => 'field-label fw-500 fs-18',
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('Click to upload your avatar'),
-                            'tooltip'     => t('This is a tooltip'),
+                            'instruction' => t('Click to upload your avatar.'),
+                            'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
                             'conditions'  => [],
@@ -79,7 +80,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'contacts',
-                    'label'         => t('Contact info'),
+                    'label'         => t('Contact Info'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -87,6 +88,7 @@ return Form::enqueue(
                         [
                             'type'        => 'email',
                             'name'        => 'email',
+                            'error'       => 'email',
                             'label'       => t('Your email'),
                             'class'       => '',
                             'label_class' => '',
@@ -95,7 +97,7 @@ return Form::enqueue(
                             'after'       => '',
                             'instruction' => (string) $user->field->find('pending_email') !== ''
                                 ? t('Waiting for confirmation: open the link sent to :email. Until then the current email stays.', (string) $user->field->find('pending_email'))
-                                : t('Not displayed publicly. Used for account access and system notifications'),
+                                : t('Not displayed publicly. Used for account access and system notifications.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -120,13 +122,14 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'login',
+                            'error'       => 'login',
                             'label'       => t('Login'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-user"></i>',
                             'after'       => '',
-                            'instruction' => t('Can\'t be changed because it\'s used to sign in to your account'),
+                            'instruction' => t('Can\'t be changed because it\'s used to sign in to your account.'),
                             'tooltip'     => '',
                             'copy'        => 1,
                             'validator'   => '',
@@ -142,13 +145,14 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'nicename',
+                            'error'       => 'nicename',
                             'label'       => t('Nicename'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('This field is used as part of the profile page URL'),
+                            'instruction' => t('This field is used as part of the profile page URL.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -163,7 +167,8 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'firstname',
-                            'label'       => t('First name'),
+                            'error'       => 'firstname',
+                            'label'       => t('First Name'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
@@ -184,7 +189,8 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'lastname',
-                            'label'       => t('Last name'),
+                            'error'       => 'lastname',
+                            'label'       => t('Last Name'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
@@ -205,13 +211,14 @@ return Form::enqueue(
                         [
                             'type'        => 'text',
                             'name'        => 'showname',
-                            'label'       => t('Show name as'),
+                            'error'       => 'showname',
+                            'label'       => t('Show Name As'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-identification-badge"></i>',
                             'after'       => '',
-                            'instruction' => t('Your name may appear on the website wherever you contribute or are mentioned'),
+                            'instruction' => t('Your name may appear on the website wherever you contribute or are mentioned.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -226,7 +233,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'about-yourself',
-                    'label'         => t('About yourself'),
+                    'label'         => t('About Yourself'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -234,7 +241,8 @@ return Form::enqueue(
                         [
                             'type'        => 'textarea',
                             'name'        => 'bio',
-                            'label'       => t('Biographical info'),
+                            'error'       => 'bio',
+                            'label'       => t('Biographical Info'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
@@ -268,7 +276,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'theme',
-                    'label'         => t('Theme preferences'),
+                    'label'         => t('Theme Preferences'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => 'dg ga-4 g-7 gtc-1',
@@ -276,6 +284,7 @@ return Form::enqueue(
                         [
                             'type'        => 'radio',
                             'name'        => 'format',
+                            'error'       => 'format',
                             'label'       => '',
                             'class'       => 'field field--grid',
                             'label_class' => '',
@@ -293,16 +302,16 @@ return Form::enqueue(
                             ],
                             'options'     => [
                                 'light' => [
-                                    'content'     => t('Light mode'),
+                                    'content'     => t('Light Mode'),
                                     'icon'        => 'ph ph-user-list',
-                                    'description' => t('This theme will be active when your system is set to “light mode”'),
+                                    'description' => t('This theme will be active when your system is set to “light mode”.'),
                                     'checked'     => $user->field->find('format') === 'light',
                                     'image'       => url('dashboard/assets/images/dashboard-light.svg'),
                                 ],
                                 'dark'  => [
-                                    'content'     => t('Dark mode'),
+                                    'content'     => t('Dark Mode'),
                                     'icon'        => 'ph ph-police-car',
-                                    'description' => t('This theme will be active when your system is set to “night mode”'),
+                                    'description' => t('This theme will be active when your system is set to “night mode”.'),
                                     'checked'     => $user->field->find('format') === 'dark',
                                     'image'       => url('dashboard/assets/images/dashboard-dark.svg'),
                                 ],
@@ -321,13 +330,14 @@ return Form::enqueue(
                         [
                             'type'        => 'checkbox',
                             'name'        => 'toolbar',
-                            'label'       => t('Show when viewing site'),
+                            'error'       => 'toolbar',
+                            'label'       => t('Show When Viewing Site'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('these settings can be changed for each user separately'),
+                            'instruction' => t('These settings can be changed for each user separately.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -351,6 +361,7 @@ return Form::enqueue(
                         [
                             'type'        => 'select',
                             'name'        => 'locale',
+                            'error'       => 'locale',
                             'label'       => t('Language'),
                             'class'       => '',
                             'label_class' => '',
@@ -385,7 +396,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'confirmation',
-                    'label'         => t('Confirm it is you'),
+                    'label'         => t('Confirm It Is You'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
@@ -410,7 +421,7 @@ return Form::enqueue(
                                             <i class="ph ph-lock-key-open"></i> <?php echo t('Confirm'); ?>
                                         </button>
                                         <button class="btn btn--outline" type="button" hidden u-show="$passkey.available" @click="$ajax.post('user/confirm-passkey-options').then(({options}) => $passkey.get(options)).then(credential => credential && $ajax.post('user/confirm-passkey', {credential}))">
-                                            <i class="ph ph-fingerprint"></i> <?php echo t('Confirm with a passkey'); ?>
+                                            <i class="ph ph-fingerprint"></i> <?php echo t('Confirm with a Passkey'); ?>
                                         </button>
                                     </div>
                                 </div>
@@ -422,7 +433,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'two-factor',
-                    'label'         => t('Two-factor authentication'),
+                    'label'         => t('Two-Factor Authentication'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
@@ -435,7 +446,7 @@ return Form::enqueue(
                                 <?php if (TwoFactor::isRequired($user) && ! TwoFactor::isEnabled($user)) : ?>
                                     <div class="df aic g-1 t-red fs-13 mb-2"><i class="ph ph-warning-circle"></i> <?php echo t('Your role requires two-factor authentication: set it up to use the dashboard.'); ?></div>
                                 <?php endif; ?>
-                                <div id="two-factor"><?php echo view('parts/two-factor', ['user' => $user]); ?></div>
+                                <div id="two-factor"><?php echo view('components/two-factor', ['user' => $user]); ?></div>
                                 <?php
                             },
                         ],
@@ -459,13 +470,13 @@ return Form::enqueue(
                                     <div class="dg g-2" id="passkeys">
                                         <?php
                                         foreach (Passkey::all($user) as $passkey) {
-                                            echo view('parts/passkey', ['passkey' => $passkey]);
+                                            echo view('components/passkey', ['passkey' => $passkey]);
                                         }
                                         ?>
                                     </div>
                                     <div hidden u-show="$passkey.available">
                                         <button class="btn btn--outline" type="button" @click="$ajax.post('user/passkey-create-options', {password: confirmPassword}).then(({options}) => $passkey.create(options)).then(credential => credential && $ajax.post('user/passkey-create', {credential, name: $passkey.device()}))">
-                                            <i class="ph ph-plus"></i> <?php echo t('Add passkey'); ?>
+                                            <i class="ph ph-plus"></i> <?php echo t('Add Passkey'); ?>
                                         </button>
                                     </div>
                                 </div>
@@ -493,14 +504,14 @@ return Form::enqueue(
                                     <div class="dg g-2" id="sessions">
                                         <?php
                                         foreach ($sessions as $session) {
-                                            echo view('parts/session', ['session' => $session]);
+                                            echo view('components/session', ['session' => $session]);
                                         }
                                         ?>
                                     </div>
                                     <?php if (count($sessions) > 1) : ?>
                                         <div data-session-other>
                                             <button class="btn btn--outline t-red" type="button" @click="$ajax.post('user/sessions-delete-others', {password: confirmPassword})">
-                                                <i class="ph ph-sign-out"></i> <?php echo t('Sign out of all other devices'); ?>
+                                                <i class="ph ph-sign-out"></i> <?php echo t('Sign Out of All Other Devices'); ?>
                                             </button>
                                         </div>
                                     <?php endif; ?>
@@ -513,7 +524,7 @@ return Form::enqueue(
                 ...(Auth::getProviders() === [] ? [] : [[
                     'type'          => 'group',
                     'name'          => 'identities',
-                    'label'         => t('Connected accounts'),
+                    'label'         => t('Connected Accounts'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
@@ -538,7 +549,7 @@ return Form::enqueue(
                                     <div class="dg g-2" id="identities">
                                         <?php
                                         foreach (Identities::all($user) as $identity) {
-                                            echo view('parts/identity', ['identity' => $identity]);
+                                            echo view('components/identity', ['identity' => $identity]);
                                         }
                                         ?>
                                     </div>
@@ -558,7 +569,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'tokens',
-                    'label'         => t('API tokens'),
+                    'label'         => t('API Tokens'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
@@ -571,7 +582,7 @@ return Form::enqueue(
                                 ?>
                                 <div class="dg g-2 ga-4">
                                     <div><?php echo t('Tokens let scripts and other services call the API as you: send the header Authorization: Bearer <token>. A token gets only the permissions you choose.'); ?></div>
-                                    <div class="dg g-2" id="tokens"><?php echo view('parts/tokens', ['tokens' => Tokens::all($user)]); ?></div>
+                                    <div class="dg g-2" id="tokens"><?php echo view('components/tokens', ['tokens' => Tokens::all($user)]); ?></div>
                                     <div id="token-created"></div>
                                     <div class="dg g-2 p-4 card card-border">
                                         <div class="df aic fw g-2">
@@ -583,10 +594,10 @@ return Form::enqueue(
                                             <div class="field">
                                                 <div class="field-item">
                                                     <select id="token-days">
-                                                        <option value="30"><?php echo t('30 days'); ?></option>
-                                                        <option value="90" selected><?php echo t('90 days'); ?></option>
-                                                        <option value="365"><?php echo t('A year'); ?></option>
-                                                        <option value="0"><?php echo t('No expiry'); ?></option>
+                                                        <option value="30"><?php echo t('30 Days'); ?></option>
+                                                        <option value="90" selected><?php echo t('90 Days'); ?></option>
+                                                        <option value="365"><?php echo t('A Year'); ?></option>
+                                                        <option value="0"><?php echo t('No Expiry'); ?></option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -598,7 +609,7 @@ return Form::enqueue(
                                         </div>
                                         <div>
                                             <button class="btn btn--outline" type="button" @click="$ajax.post('user/token-create', {name: document.getElementById('token-name').value, days: document.getElementById('token-days').value, scopes: [...document.querySelectorAll('[name=token-scope]:checked')].map(box => box.value).join(','), password: confirmPassword})">
-                                                <i class="ph ph-plus"></i> <?php echo t('Create token'); ?>
+                                                <i class="ph ph-plus"></i> <?php echo t('Create Token'); ?>
                                             </button>
                                         </div>
                                     </div>
@@ -611,7 +622,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'activity',
-                    'label'         => t('Recent activity'),
+                    'label'         => t('Recent Activity'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
@@ -641,7 +652,7 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'passwords',
-                    'label'         => t('Change password'),
+                    'label'         => t('Change Password'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => '',
@@ -649,7 +660,8 @@ return Form::enqueue(
                         [
                             'type'        => 'password',
                             'name'        => 'password-new',
-                            'label'       => t('New password'),
+                            'error'       => 'password',
+                            'label'       => t('New Password'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
@@ -663,7 +675,7 @@ return Form::enqueue(
                             'attributes'  => [
                                 'u-prop' => 'passwordNew',
                                 'autocomplete' => 'new-password',
-                                'placeholder' => t('New password'),
+                                'placeholder' => t('New Password'),
                             ],
                             'switcher'    => 1,
                             'generator'   => 1,
@@ -679,7 +691,8 @@ return Form::enqueue(
                         [
                             'type'        => 'password',
                             'name'        => 'password-old',
-                            'label'       => t('Old password'),
+                            'error'       => 'current',
+                            'label'       => t('Old Password'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
@@ -694,7 +707,7 @@ return Form::enqueue(
                                 'u-prop' => 'passwordOld',
                                 'autocomplete' => 'current-password',
                                 'u-autocomplete' => '',
-                                'placeholder'    => t('Old password'),
+                                'placeholder'    => t('Old Password'),
                             ],
                             'switcher'    => 1,
                             'generator'   => 0,
@@ -704,7 +717,7 @@ return Form::enqueue(
                         [
                             'type'        => 'submit',
                             'name'        => 'password-save',
-                            'label'       => t('Update password'),
+                            'label'       => t('Update Password'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,

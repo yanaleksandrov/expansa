@@ -10,7 +10,7 @@ use Expansa\View\Manager;
 use Expansa\View\View as BaseView;
 
 /**
- * Static access to the view manager: `View::create('form/checkbox', $data)->render()`.
+ * Static access to the view manager: `View::create('components/form/checkbox', $data)->render()`.
  *
  * @method static void     configure(string|array $paths, string $cachePath = '')
  * @method static Manager  extend(string $extension, Closure $factory)

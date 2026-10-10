@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Expansa\Translation;
 
 use Closure;
+use Expansa\Translation\Internal\Forms;
 use Expansa\Translation\Internal\Markdown;
 use Expansa\Translation\Internal\PluralRule;
 use InvalidArgumentException;
+use NumberFormatter;
 
 /**
  * Translations with placeholders, plural forms and basic Markdown, the locale of the request and the language list.
@@ -56,6 +58,13 @@ final class Manager
     private ?Closure $languageSource = null;
 
     /**
+     * Returns the locale chosen for the request, e.g. by the user, or null to detect it from Accept-Language.
+     *
+     * @var null|Closure
+     */
+    private ?Closure $localeSource = null;
+
+    /**
      * Languages from the source, null until the first use.
      *
      * @var array[]|null
@@ -68,6 +77,20 @@ final class Manager
      * @var array<string, array<string, array>>
      */
     private array $languageIndex = [];
+
+    /**
+     * Number formatters by locale.
+     *
+     * @var array<string, NumberFormatter>
+     */
+    private array $formatters = [];
+
+    /**
+     * Counts formatted for the locale, by count.
+     *
+     * @var array<int, string>
+     */
+    private array $numbers = [];
 
     /**
      * Compiled plural rules by locale.
@@ -91,11 +114,11 @@ final class Manager
     private array $files = [];
 
     /**
-     * Locale from the Accept-Language header with a dash, false if it can not be detected.
+     * Locale of the request with a dash, false if it can not be detected.
      *
      * @var null|false|string
      */
-    private string|false|null $httpLocale = null;
+    private string|false|null $requestLocale = null;
 
     /**
      * Set the translation lookup and the language list, replacing the previous configuration.
@@ -104,17 +127,23 @@ final class Manager
      * @param string                $pattern   sprintf() pattern of a translation file name, gets the locale.
      * @param string                $overrides Directory with translation overrides.
      * @param Closure|null          $languages `fn (): array` of languages with `locale`, `iso_639_1`, `plural`...,
-     *                                         called on the first use; without it plurals follow English.
+     *                                         called on the first use; without it the bundled Languages::all().
+     * @param Closure|null          $locale    `fn (): ?string` chosen locale, e.g. of the user, called on the first use;
+     *                                         null or an empty string falls back to Accept-Language.
      * @return void
      */
-    public function configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null): void
+    public function configure(array $routes, string $pattern, string $overrides = '', ?Closure $languages = null, ?Closure $locale = null): void
     {
         $this->routes         = $routes;
         $this->pattern        = $pattern;
         $this->overrides      = $overrides;
         $this->languageSource = $languages;
+        $this->localeSource   = $locale;
+        $this->requestLocale  = null;
         $this->languages      = null;
         $this->languageIndex  = [];
+        $this->formatters     = [];
+        $this->numbers        = [];
         $this->pluralRules    = [];
         $this->sources        = [];
         $this->files          = [];
@@ -129,40 +158,41 @@ final class Manager
      * - `%s`, `%d` — the next value as is, for markup around the text like `<a href="...">` and `</a>`.
      *
      * Placeholders without a value stay unchanged. HTML of the string itself is escaped;
-     * Markdown gives bold, italic, headers, quotes, images and links.
+     * Markdown gives bold, italic, headers, quotes, images and links. Blocks of plural forms take the count
+     * as the first value: `{file|files}` in the order of the plural rule, `=0 No files` for an exact count,
+     * `#` and `:count` for the number in the format of the locale; `\{` is a literal brace.
      *
      * ```php
      * t('Hi, ::Firstname, you have :count\st none closed "::TASKNAME" task.', 'john', 1, 'test');
      * // 'Hi, John, you have 1st none closed "TEST" task.'
+     * t(':count {item|items} in :folder', 5, 'Docs');
+     * // ru, ":count {товар|товара|товаров} в :folder": '5 товаров в Docs'
      * ```
      *
      * @param string $string
-     * @param mixed  ...$args Values of the placeholders, in order of appearance.
+     * @param mixed  ...$args Values of the placeholders, in order of appearance; the count first for plural forms.
      * @return string
      */
     public function translate(string $string, mixed ...$args): string
     {
+        if ($args !== [] && Forms::has($string) && is_numeric($args[0])) {
+            return $this->translateForms($string, (int) array_shift($args), $args);
+        }
+
         return Markdown::render($this->fill($this->get($string), $args));
     }
 
     /**
-     * Translate the plural form of a string for a count, in the plural rule of the request locale.
-     * Forms are separated by `|`, in the order of the rule: `one|few|many` for Russian.
-     * `:count` is replaced by the count, the other placeholders take the values in order.
+     * Translate a string with blocks of plural forms for a count, the same as translate() with the count first.
      *
-     * ```php
-     * I18n::translatePlural(':count file in :folder|:count files in :folder', 3, 'Docs');
-     * // English: '3 files in Docs'; Russian forms '… файл|… файла|… файлов' give '3 файла'
-     * ```
-     *
-     * @param string $forms
+     * @param string $forms   String with `{...|...}` blocks, see translate().
      * @param int    $count
-     * @param mixed  ...$args Values of the placeholders except `:count`.
+     * @param mixed  ...$args Values of the other placeholders.
      * @return string
      */
     public function translatePlural(string $forms, int $count, mixed ...$args): string
     {
-        return Markdown::render($this->fill($this->chooseForm($this->get($forms), $count), $args, $count));
+        return $this->translate($forms, $count, ...$args);
     }
 
     /**
@@ -178,7 +208,7 @@ final class Manager
     }
 
     /**
-     * Translate the plural form of a string for an HTML attribute value.
+     * Translate a string with blocks of plural forms for an HTML attribute value, see translatePlural().
      *
      * @param string $forms
      * @param int    $count
@@ -187,7 +217,7 @@ final class Manager
      */
     public function translateAttributePlural(string $forms, int $count, mixed ...$args): string
     {
-        return $this->toAttribute($this->translatePlural($forms, $count, ...$args));
+        return $this->translateAttribute($forms, $count, ...$args);
     }
 
     /**
@@ -217,19 +247,32 @@ final class Manager
     }
 
     /**
-     * Get the locale of the request from the Accept-Language header: `en-US`.
+     * Get the locale of the request: the chosen one of configure(), otherwise from the Accept-Language header.
+     * A bare language code like `ru` becomes the locale of that language in the list: `ru-RU`.
      *
-     * @param string $default Locale when the header is missing or can not be parsed.
+     * @param string $default Locale when none is chosen and the header is missing or can not be parsed.
      * @return string
      */
     public function locale(string $default = 'en-US'): string
     {
-        $this->httpLocale ??= function_exists('locale_accept_from_http')
-            && ($locale = locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $default)) !== false
-            ? str_replace('_', '-', $locale)
-            : false;
+        if ($this->requestLocale === null) {
+            // a translation inside the callback gets the default instead of calling it again
+            $this->requestLocale = false;
 
-        return $this->httpLocale ?: $default;
+            $locale = (string) ($this->localeSource === null ? '' : ($this->localeSource)());
+            if ($locale === '' && function_exists('locale_accept_from_http')) {
+                $locale = (string) locale_accept_from_http($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $default);
+            }
+
+            $locale = str_replace('_', '-', $locale);
+            if ($locale !== '' && ! str_contains($locale, '-')) {
+                $locale = $this->language(strtolower($locale), 'iso_639_1')['locale'] ?? $locale;
+            }
+
+            $this->requestLocale = $locale ?: false;
+        }
+
+        return $this->requestLocale ?: $default;
     }
 
     /**
@@ -242,7 +285,7 @@ final class Manager
     public function language(string $value, string $getBy = 'locale'): array
     {
         // the first language wins when several share a value, as a linear search would give
-        $this->languageIndex[$getBy] ??= array_column(array_reverse($this->resolveLanguages()), null, $getBy);
+        $this->languageIndex[$getBy] ??= array_column(array_reverse($this->getLanguages()), null, $getBy);
 
         return $this->languageIndex[$getBy][$value] ?? [];
     }
@@ -255,7 +298,7 @@ final class Manager
     public function languageOptions(): array
     {
         $options = [];
-        foreach ($this->resolveLanguages() as $language) {
+        foreach ($this->getLanguages() as $language) {
             $key  = $language['locale'] ?? $language['iso_639_1'];
             $name = $language['name'] === $language['native'] ? $language['name'] : "{$language['name']} - {$language['native']}";
 
@@ -273,9 +316,10 @@ final class Manager
      * uses its own directory, the rest the directory of its route. The override file wins.
      *
      * @param string $string
-     * @return string The translation, or the string itself if there is none.
+     * @param bool   $forms  Keep a list of whole sentences of a string with forms instead of its first one.
+     * @return ($forms is true ? string|string[] : string) The translation, or the string itself if there is none.
      */
-    private function get(string $string): string
+    private function get(string $string, bool $forms = false): string|array
     {
         if ($this->routes === []) {
             return $string;
@@ -288,7 +332,9 @@ final class Manager
 
         [$file, $override] = $this->sources[$source] ??= $this->resolve($source);
 
-        return $this->lookup($string, $file, $override);
+        $translation = $this->lookup($string, $file, $override);
+
+        return $forms || ! is_array($translation) ? $translation : (string) reset($translation);
     }
 
     /**
@@ -363,10 +409,10 @@ final class Manager
      *
      * @param string   $string
      * @param array    $args  Values in order of appearance.
-     * @param int|null $count Value of `:count` in a plural form, null for a plain translation.
+     * @param string|null $count Value of `:count` in a string with forms, null for a plain translation.
      * @return string
      */
-    private function fill(string $string, array $args, ?int $count = null): string
+    private function fill(string $string, array $args, ?string $count = null): string
     {
         $string = htmlspecialchars($string, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 
@@ -393,7 +439,7 @@ final class Manager
                 $placeholder = $matches[2];
 
                 if ($count !== null && $placeholder === 'count') {
-                    $value = (string) $count;
+                    $value = $count;
                 } elseif (array_key_exists($index, $args)) {
                     $value = (string) $args[$index++];
                 } else {
@@ -415,18 +461,42 @@ final class Manager
     }
 
     /**
-     * Choose the plural form for a count, the last form when the rule points past them.
+     * Translate a string with blocks of forms: a translation given as a list holds whole sentences,
+     * one per plural form; `#` and `:count` become the count formatted for the locale.
      *
-     * @param string $forms Forms separated by `|`.
+     * @param string $string
      * @param int    $count
+     * @param array  $args   Values of the other placeholders.
      * @return string
      */
-    private function chooseForm(string $forms, int $count): string
+    private function translateForms(string $string, int $count, array $args): string
     {
-        $forms = explode('|', $forms);
-        $index = ($this->pluralRules[$this->locale()] ??= $this->compilePluralRule())(abs($count));
+        $rule        = $this->pluralRules[$this->locale()] ??= $this->compilePluralRule();
+        $number      = $this->numbers[$count] ??= $this->number($count);
+        $translation = $this->get($string, forms: true);
 
-        return $forms[$index] ?? $forms[array_key_last($forms)];
+        if (is_array($translation)) {
+            $translation = str_replace('#', $number, (string) ($translation[$rule(abs($count))] ?? end($translation)));
+        }
+
+        return Markdown::render($this->fill(Forms::choose($translation, $count, $rule, $number), $args, $number));
+    }
+
+    /**
+     * Format a count for the locale: `12 345` in Russian, `12,345` in English; digits only without intl.
+     *
+     * @param int $count
+     * @return string
+     */
+    private function number(int $count): string
+    {
+        if (! class_exists(NumberFormatter::class, false)) {
+            return (string) $count;
+        }
+
+        $formatter = $this->formatters[$this->locale()] ??= new NumberFormatter($this->locale(), NumberFormatter::DECIMAL);
+
+        return $formatter->format($count) ?: (string) $count;
     }
 
     /**
@@ -448,13 +518,13 @@ final class Manager
     }
 
     /**
-     * Get the language list from the configured source, once.
+     * Get the languages: from the configured source, Languages::all() without one; read once.
      *
      * @return array[]
      */
-    private function resolveLanguages(): array
+    public function getLanguages(): array
     {
-        return $this->languages ??= $this->languageSource === null ? [] : ($this->languageSource)();
+        return $this->languages ??= $this->languageSource === null ? Languages::all() : ($this->languageSource)();
     }
 
     /**
@@ -475,9 +545,9 @@ final class Manager
      * @param string $string
      * @param string $path
      * @param string $overridePath
-     * @return string
+     * @return string|string[]
      */
-    private function lookup(string $string, string $path, string $overridePath = ''): string
+    private function lookup(string $string, string $path, string $overridePath = ''): string|array
     {
         foreach ([$overridePath, $path] as $file) {
             if ($file === '') {

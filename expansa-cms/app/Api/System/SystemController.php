@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\System;
 
 use Expansa\Http\Request;
+use Expansa\Http\Response;
 
 /**
  * Reference controller: thin HTTP layer only.
@@ -30,14 +31,14 @@ final readonly class SystemController
      */
     public function test(Request $request): array
     {
-        return $this->service->checkRequirements($request->post);
+        return $this->service->checkRequirements($request);
     }
 
     /**
      * @url POST /api/system/install
      */
-    public function install(Request $request): array
+    public function install(Request $request, Response $response): Response
     {
-        return $this->service->install($request->post);
+        return $this->service->install($request, $response);
     }
 }

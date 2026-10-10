@@ -16,7 +16,7 @@ use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
 use Expansa\Facades\Extensions;
-use Expansa\Facades\Form;
+use Expansa\Builders\Form;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Lifecycle;
@@ -28,7 +28,6 @@ use Expansa\Facades\Safe;
 use Expansa\Facades\Session;
 use Expansa\Facades\Terminal;
 use Expansa\Facades\View;
-use Expansa\Patterns\Registry;
 use Expansa\Scheduler\Scheduler;
 use Expansa\Support\Is;
 use Expansa\Support\Url;
@@ -40,7 +39,7 @@ use Expansa\Support\Url;
  */
 
 const EX_PATH                   = __DIR__ . '/';
-const EX_VERSION                = '2025.6';
+const EX_VERSION                = '2027.6';
 const EX_REQUIRED_PHP_VERSION   = '8.4';
 const EX_REQUIRED_MYSQL_VERSION = '8.0';
 const EX_REQUIRED_MEMORY        = 128;
@@ -66,7 +65,7 @@ App\Support\Requirements::check();
 
 // as in WordPress: "enabled" is the main switch, "log" and "display" work only under it;
 // true, 1, "1", "on" and "yes" count as true: env.php is written by hand as often as by the installer
-$debug = (defined('EX_DEBUG') ? EX_DEBUG : []) + ['enabled' => false, 'log' => true, 'display' => true, 'view' => EX_DASHBOARD . 'debug.php'];
+$debug = (defined('EX_DEBUG') ? EX_DEBUG : []) + ['enabled' => false, 'log' => true, 'display' => true, 'view' => EX_DASHBOARD . 'views/fallback/debug.php'];
 $isDebug     = filter_var($debug['enabled'], FILTER_VALIDATE_BOOL);
 $isLogged    = $isDebug && filter_var($debug['log'], FILTER_VALIDATE_BOOL);
 $isDisplayed = $isDebug && filter_var($debug['display'], FILTER_VALIDATE_BOOL);
@@ -138,16 +137,10 @@ Lifecycle::configure(
  * 1. boot · always.
  *
  * Stops on maintenance.php, if it exists.
- * Registers the default data (countries, timezones, languages), loaded on first Registry::get().
  */
 Lifecycle::phase('boot', true, function () {
     if (is_file($maintenance = EX_PATH . 'maintenance.php')) {
         require $maintenance;
-    }
-
-    // default data, loaded on first Registry::get()
-    foreach (['countries', 'timezones', 'languages'] as $data) {
-        Registry::lazy($data, fn () => require EX_PATH . "dashboard/data/$data.php");
     }
 });
 
@@ -194,6 +187,9 @@ Lifecycle::phase('configure', true, function () {
         paths: EX_PATH . 'dashboard/views',
         cachePath: EX_PATH . 'cache/views',
     );
+
+    // name and charset of the site for every view, read from the options only when shown
+    View::share('site', new App\Support\Site());
 
     // extension ids like "plugins/seo" are relative to it; a plugin that breaks goes to quarantine instead of the site
     Extensions::configure(
@@ -325,9 +321,10 @@ Lifecycle::phase('configure', true, function () {
         },
     );
 
-    // every dashboard table renders the items filter form
-    Expansa\Builders\Table\AbstractTable::configure(
-        filter: EX_DASHBOARD . 'forms/items-filter.php'
+    // every dashboard table renders the items filter form, its cells use components/table/cell-<kind> views
+    Expansa\Builders\Table::configure(
+        filter: EX_DASHBOARD . 'forms/items-filter.php',
+        cellView: 'components/table/cell',
     );
 
     // validation error messages in the site language
@@ -335,17 +332,20 @@ Lifecycle::phase('configure', true, function () {
         translate: fn (string $message, string ...$args) => t($message, ...$args)
     );
 
-    // translations lookup priority; the languages with their plural rules, extended by the "languages" hook
+    // translations lookup priority, the rest of the installation (app/, compiled views) uses the dashboard ones;
+    // the languages with their plural rules, extended by the "languages" hook; the language of the user's profile
     I18n::configure(
         routes: [
             EX_CORE      => EX_DASHBOARD,
             EX_DASHBOARD => EX_DASHBOARD,
             EX_PLUGINS   => EX_PLUGINS . ':dirname',
             EX_THEMES    => EX_THEMES . ':dirname',
+            EX_PATH      => EX_DASHBOARD,
         ],
         pattern: 'i18n/%s',
         overrides: EX_I18N,
-        languages: fn () => Hook::call('languages', Registry::get('languages')),
+        languages: fn () => Hook::call('languages', Expansa\Translation\Languages::all()),
+        locale: defined('EX_DB') ? fn () => App\Models\User::current()?->locale : null,
     );
 
     // a new listener class has to be added here
@@ -359,51 +359,56 @@ Lifecycle::phase('configure', true, function () {
 
     // form fields: input types, basic fields, composite fields
     Form::configure(
-        fields: [
-            'text'            => Expansa\Builders\Forms\Fields\Input::class,
-            'color'           => Expansa\Builders\Forms\Fields\Input::class,
-            'date'            => Expansa\Builders\Forms\Fields\Input::class,
-            'datetime-local'  => Expansa\Builders\Forms\Fields\Input::class,
-            'email'           => Expansa\Builders\Forms\Fields\Input::class,
-            'month'           => Expansa\Builders\Forms\Fields\Input::class,
-            'range'           => Expansa\Builders\Forms\Fields\Input::class,
-            'search'          => Expansa\Builders\Forms\Fields\Input::class,
-            'tel'             => Expansa\Builders\Forms\Fields\Input::class,
-            'time'            => Expansa\Builders\Forms\Fields\Input::class,
-            'url'             => Expansa\Builders\Forms\Fields\Input::class,
-            'week'            => Expansa\Builders\Forms\Fields\Input::class,
+        types: [
+            'text'            => Expansa\Builders\Form\Fields\Input::class,
+            'color'           => Expansa\Builders\Form\Fields\Input::class,
+            'date'            => Expansa\Builders\Form\Fields\Input::class,
+            'datetime-local'  => Expansa\Builders\Form\Fields\Input::class,
+            'email'           => Expansa\Builders\Form\Fields\Input::class,
+            'month'           => Expansa\Builders\Form\Fields\Input::class,
+            'range'           => Expansa\Builders\Form\Fields\Input::class,
+            'search'          => Expansa\Builders\Form\Fields\Input::class,
+            'tel'             => Expansa\Builders\Form\Fields\Input::class,
+            'time'            => Expansa\Builders\Form\Fields\Input::class,
+            'url'             => Expansa\Builders\Form\Fields\Input::class,
+            'week'            => Expansa\Builders\Form\Fields\Input::class,
 
-            'builder'         => Expansa\Builders\Forms\Fields\Builder::class,
-            'checkbox'        => Expansa\Builders\Forms\Fields\Checkbox::class,
-            'custom'          => Expansa\Builders\Forms\Fields\Custom::class,
-            'details'         => Expansa\Builders\Forms\Fields\Details::class,
-            'divider'         => Expansa\Builders\Forms\Fields\Divider::class,
-            'file'            => Expansa\Builders\Forms\Fields\File::class,
-            'header'          => Expansa\Builders\Forms\Fields\Header::class,
-            'hidden'          => Expansa\Builders\Forms\Fields\Hidden::class,
-            'image'           => Expansa\Builders\Forms\Fields\Image::class,
-            'input'           => Expansa\Builders\Forms\Fields\Input::class,
-            'layout-group'    => Expansa\Builders\Forms\Fields\LayoutGroup::class,
-            'layout-step'     => Expansa\Builders\Forms\Fields\LayoutStep::class,
-            'layout-tab'      => Expansa\Builders\Forms\Fields\LayoutTab::class,
-            'layout-tab-menu' => Expansa\Builders\Forms\Fields\LayoutTabMenu::class,
-            'media'           => Expansa\Builders\Forms\Fields\Media::class,
-            'number'          => Expansa\Builders\Forms\Fields\Number::class,
-            'password'        => Expansa\Builders\Forms\Fields\Password::class,
-            'progress'        => Expansa\Builders\Forms\Fields\Progress::class,
-            'radio'           => Expansa\Builders\Forms\Fields\Radio::class,
-            'select'          => Expansa\Builders\Forms\Fields\Select::class,
-            'submit'          => Expansa\Builders\Forms\Fields\Submit::class,
-            'textarea'        => Expansa\Builders\Forms\Fields\Textarea::class,
-            'uploader'        => Expansa\Builders\Forms\Fields\Uploader::class,
+            'builder'         => Expansa\Builders\Form\Fields\Builder::class,
+            'checkbox'        => Expansa\Builders\Form\Fields\Checkbox::class,
+            'custom'          => Expansa\Builders\Form\Fields\Custom::class,
+            'details'         => Expansa\Builders\Form\Fields\Details::class,
+            'divider'         => Expansa\Builders\Form\Fields\Divider::class,
+            'file'            => Expansa\Builders\Form\Fields\File::class,
+            'header'          => Expansa\Builders\Form\Fields\Header::class,
+            'hidden'          => Expansa\Builders\Form\Fields\Hidden::class,
+            'image'           => Expansa\Builders\Form\Fields\Image::class,
+            'input'           => Expansa\Builders\Form\Fields\Input::class,
+            'layout-group'    => Expansa\Builders\Form\Fields\LayoutGroup::class,
+            'layout-step'     => Expansa\Builders\Form\Fields\LayoutStep::class,
+            'layout-tab'      => Expansa\Builders\Form\Fields\LayoutTab::class,
+            'layout-tab-menu' => Expansa\Builders\Form\Fields\LayoutTabMenu::class,
+            'media'           => Expansa\Builders\Form\Fields\Media::class,
+            'number'          => Expansa\Builders\Form\Fields\Number::class,
+            'password'        => Expansa\Builders\Form\Fields\Password::class,
+            'progress'        => Expansa\Builders\Form\Fields\Progress::class,
+            'radio'           => Expansa\Builders\Form\Fields\Radio::class,
+            'select'          => Expansa\Builders\Form\Fields\Select::class,
+            'submit'          => Expansa\Builders\Form\Fields\Submit::class,
+            'textarea'        => Expansa\Builders\Form\Fields\Textarea::class,
+            'uploader'        => Expansa\Builders\Form\Fields\Uploader::class,
 
-            'editor'          => Expansa\Builders\Forms\Fields\Editor::class,
-            'gallery'         => Expansa\Builders\Forms\Fields\Gallery::class,
-            'repeater'        => Expansa\Builders\Forms\Fields\Repeater::class,
-            'message'         => Expansa\Builders\Forms\Fields\Message::class,
+            'editor'          => Expansa\Builders\Form\Fields\Editor::class,
+            'gallery'         => Expansa\Builders\Form\Fields\Gallery::class,
+            'repeater'        => Expansa\Builders\Form\Fields\Repeater::class,
+            'message'         => Expansa\Builders\Form\Fields\Message::class,
         ],
-        view: fn (string $template, array $data) => (string) View::create($template, $data),
-        assets: fn (string $template, string $uid) => Asset::discover(View::create($template)->path, $uid, ['type' => $uid]),
+        view: fn (string $template, array $data) => (string) View::create("components/form/$template", $data),
+        assets: fn (string $template, string $uid) => Asset::discover(
+            View::create("components/form/$template")->path,
+            $uid,
+            ['type' => $uid],
+        ),
+        directory: EX_DASHBOARD . 'forms',
     );
 });
 
@@ -560,10 +565,13 @@ Lifecycle::phase('extensions', fn () => Is::installed(), function () {
 /**
  * 5. booted · installed only.
  *
- * Every extension is registered, so boot() runs on plugins, then themes.
+ * The core registers its dashboard pages, then boot() runs on plugins, then themes.
  * From here Is::dashboard() and other context checks are available.
  */
 Lifecycle::phase('booted', fn () => Is::installed(), function () {
+    // the dashboard pages of the core first: plugins and themes change them with the same API
+    App\Dashboard\Core::register();
+
     Extensions::boot('plugin');
     Extensions::boot('theme');
 });
@@ -666,11 +674,11 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
 /**
  * 3. install · not installed yet.
  *
- * Every page except the API shows the installer: its assets come from dashboard/install.php,
+ * Every page except the API shows the installer: its assets come from Dashboard\Assets::install(),
  * the page from Web::install().
  */
 Lifecycle::context('install', fn () => ! Is::installed(), function () {
-    require_once EX_PATH . 'dashboard/install.php';
+    App\Dashboard\Assets::install();
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'install']);
 });
@@ -678,7 +686,7 @@ Lifecycle::context('install', fn () => ! Is::installed(), function () {
 /**
  * 4. auth · sign-in, sign-up and reset-password pages.
  *
- * A logged-in user goes straight to the dashboard. Otherwise, dashboard/auth.php enqueues
+ * A logged-in user goes straight to the dashboard. Otherwise, Dashboard\Assets::auth() enqueues
  * only the assets the auth forms need, without the admin panel.
  */
 Lifecycle::context('sign-out', function (string $uri): bool {
@@ -716,7 +724,7 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
         redirect('dashboard');
     }
 
-    require_once EX_PATH . 'dashboard/auth.php';
+    App\Dashboard\Assets::auth();
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
@@ -725,7 +733,7 @@ Lifecycle::context('auth', fn (string $uri) => in_array(trim($uri, '/'), ['sign-
  * 5. dashboard · URI starts with the dashboard slug.
  *
  * The slug is "dashboard" by default, changed with the "dashboardRootSlug" hook. A guest is redirected
- * to sign-in, otherwise dashboard/index.php enqueues the assets and menus, the page comes from Web::index().
+ * to sign-in, otherwise Dashboard\Assets and Dashboard\Menus add the assets and menus, the page comes from Web::index().
  */
 Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '/'), Hook::call('dashboardRootSlug', 'dashboard')), function () {
     // back to the requested page after signing in, like WordPress' redirect_to
@@ -740,7 +748,8 @@ Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '
         redirect(Hook::call('dashboardRootSlug', 'dashboard') . '/profile');
     }
 
-    require_once EX_PATH . 'dashboard/index.php';
+    App\Dashboard\Assets::dashboard();
+    App\Dashboard\Menus::register();
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });

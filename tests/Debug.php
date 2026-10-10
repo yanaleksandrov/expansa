@@ -113,12 +113,12 @@ $text = debugRender($error, true, [], '');
 check('the text has the id, the error, the trace and the cause', str_starts_with($text, "Error ID: abc123" . PHP_EOL . 'LogicException: <script>') && str_contains($text, __FILE__) && str_contains($text, 'Caused by RuntimeException: database is down'));
 
 // template
-$html = debugRender($error, true, ['input' => ['password' => 'secret']], EX_PATH . 'dashboard/debug.php');
+$html = debugRender($error, true, ['input' => ['password' => 'secret']], EX_PATH . 'dashboard/views/fallback/debug.php');
 check('the page escapes the message', ! str_contains($html, '<script>alert') && str_contains($html, '&lt;script&gt;alert(1)'));
 check('the page escapes the code', str_contains($html, 'new LogicException(&#039;&lt;script&gt;'));
 check('the page shows the error id and the request', str_contains($html, 'abc123') && str_contains($html, '&quot;password&quot;:&quot;********&quot;'));
 
-$html = debugRender($error, false, [], EX_PATH . 'dashboard/debug.php');
+$html = debugRender($error, false, [], EX_PATH . 'dashboard/views/fallback/debug.php');
 check('the public page has the id but no trace or code', str_contains($html, 'abc123') && ! str_contains($html, 'errors-source') && ! str_contains($html, __FILE__));
 unlink($template);
 
@@ -126,7 +126,7 @@ unlink($template);
 $reported = [];
 $manager  = new Manager(console: false);
 $manager->configure(
-    view: EX_PATH . 'dashboard/debug.php',
+    view: EX_PATH . 'dashboard/views/fallback/debug.php',
     report: function (Throwable $e, string $id, array $context) use (&$reported) {
         $reported = [$e, $id, $context];
     },
@@ -207,7 +207,7 @@ check('isFatal() is false for a warning and an exception', ! Manager::isFatal(ne
 // output of a registered manager: the buffers started after register() are dropped
 ob_start();
 $buffers = new Manager(console: false);
-$buffers->configure(view: EX_PATH . 'dashboard/debug.php');
+$buffers->configure(view: EX_PATH . 'dashboard/views/fallback/debug.php');
 $buffers->register();
 ob_start();
 echo '<main>half-rendered page';

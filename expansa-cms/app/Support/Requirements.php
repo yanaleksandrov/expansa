@@ -6,7 +6,7 @@ namespace App\Support;
 
 /**
  * Minimum server requirements shared by the bootstrap and the installer.
- * Runs before any PHP 8.4 code is loaded, so keep it (and dashboard/error.php) free of PHP 8.4 syntax.
+ * Runs before any PHP 8.4 code is loaded, so keep it (and dashboard/views/fallback/error.php) free of PHP 8.4 syntax.
  */
 final class Requirements
 {
@@ -54,7 +54,7 @@ final class Requirements
 
         $baseUrl = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
 
-        require EX_PATH . 'dashboard/error.php';
+        require EX_PATH . 'dashboard/views/fallback/error.php';
         exit;
     }
 }
