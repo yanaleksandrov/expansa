@@ -147,15 +147,17 @@ if (! function_exists('redirect')) {
 
 if (! function_exists('tree')) {
     /**
-     * Render a tree registered by Tree::attach(): menu items, comments, taxonomies.
+     * Output a tree with a callback for one level, which wraps and loops over its items; inside it,
+     * `tree($item['children'])` outputs the children with the same callback. See Tree::walk().
      *
-     * @param string   $name     Name of the tree.
-     * @param callable $function Gets the parsed items and the tree, prints the markup.
-     * @return string The printed markup.
+     * @param mixed                       $items    Name of a tree registered by Tree::attach(), or items;
+     *                                              an empty list or not a list outputs nothing.
+     * @param callable(array): mixed|null $callback Null inside another tree() to reuse its callback.
+     * @return void
      */
-    function tree(string $name, callable $function): string
+    function tree(mixed $items, ?callable $callback = null): void
     {
-        return Expansa\Builders\Tree::render($name, $function);
+        Expansa\Builders\Tree::walk($items, $callback);
     }
 }
 

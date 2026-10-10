@@ -5,12 +5,14 @@ declare(strict_types=1);
 use Expansa\Builders\Form;
 use Expansa\Builders\Table;
 use Expansa\Builders\Tree;
+use Expansa\Builders\Tree\Item;
 
 // run: php tests/Builders.php
 require_once __DIR__ . '/bootstrap.php';
+require_once EX_PATH . 'expansa/functions.php';
 
 // Tree: items are nested by parent_id and sorted by position, equal positions keep their order
-Tree::attach('menu', fn (Tree $tree) => $tree->addItems([
+Tree::attach('menu', fn (Tree $tree) => $tree->append([
     ['id' => 'c', 'title' => 'C', 'position' => 5],
     ['id' => 'a', 'title' => 'A', 'position' => 1],
     ['id' => 'b', 'title' => 'B', 'position' => 1],
@@ -18,37 +20,91 @@ Tree::attach('menu', fn (Tree $tree) => $tree->addItems([
     ['id' => 'b2', 'title' => 'B2', 'parent_id' => 'b'],
     ['id' => 'secret', 'title' => 'Secret', 'capabilities' => ['manage_options']],
 ]));
-Tree::attach('menu', fn (Tree $tree) => $tree->addItem(['id' => 'd', 'title' => 'D', 'position' => 1]));
+Tree::attach('menu', fn (Tree $tree) => $tree->append([['id' => 'd', 'title' => 'D', 'position' => 1]]));
 
-$nested = [];
-Tree::render('menu', function (array $items) use (&$nested) {
-    $nested = $items;
+$nested = Tree::get('menu');
+
+$ids = fn (array $items) => array_map(fn (Item $item) => $item->id, $items);
+
+check('tree items are sorted by position, equal ones in the order they were added', $ids($nested) === ['secret', 'a', 'b', 'd', 'c']);
+check('tree children go under `children` with the next depth', $ids($nested[2]->children) === ['b1', 'b2'] && $nested[2]->children[0]->depth === 1);
+check('a leaf has an empty list of children', $nested[1]->children === [] && $nested[2]->children[0]->children === []);
+check('an item reads its keys as properties, a missing one is null', $nested[1]->title === 'A' && $nested[1]->url === null && ! isset($nested[1]->url));
+Tree::attach('menu', function (Tree $tree) use (&$count) {
+    $count = count($tree->items);
 });
-
-check('tree items are sorted by position, equal ones in the order they were added', array_column($nested, 'id') === ['secret', 'a', 'b', 'd', 'c']);
-check('tree children go under `children` with the next depth', array_column($nested[2]['children'], 'id') === ['b1', 'b2'] && $nested[2]['children'][0]['depth'] === 1);
-check('attach() of the same name adds to one tree', count(Tree::get('menu')->items) === 7);
-check('an item without id throws', throws(fn () => Tree::get('menu')->addItem(['title' => 'No ID']), InvalidArgumentException::class));
+check('attach() of the same name adds to one tree', $count === 7);
+check('an item without id throws', throws(fn () => Tree::attach('menu', fn (Tree $tree) => $tree->append([['title' => 'No ID']])), InvalidArgumentException::class));
 
 Tree::configure(allows: fn (array $capabilities) => ! in_array('manage_options', $capabilities, true));
-$ids = [];
-Tree::render('menu', function (array $items) use (&$ids) {
-    $ids = array_column($items, 'id');
-});
-check('items failing the capability check are left out', ! in_array('secret', $ids, true));
+check('items failing the capability check are left out', ! in_array('secret', $ids(Tree::get('menu')), true));
 
-Tree::attach('pages', fn (Tree $tree) => $tree->addItem(['id' => 'mail', 'url' => 'settings?tab=mail', 'capabilities' => ['manage_options']]));
-check('allowsUrl() closes the page of a hidden item', ! Tree::allowsUrl('settings', ['tab' => 'mail']));
-check('allowsUrl() allows a page of no item', Tree::allowsUrl('settings', ['tab' => 'other']));
+Tree::attach('pages', fn (Tree $tree) => $tree->append([['id' => 'mail', 'url' => 'settings?tab=mail', 'capabilities' => ['manage_options']]]));
+check('canOpen() closes the page of a hidden item', ! Tree::canOpen('settings', ['tab' => 'mail']));
+check('canOpen() allows a page of no item', Tree::canOpen('settings', ['tab' => 'other']));
 Tree::configure();
+check('an unknown tree has no items', Tree::get('missing') === []);
 
-$html = Tree::render('menu', fn (array $items, Tree $tree) => print($tree->format('<a href="#%id$s">%title$s</a>', $items[1])));
-check('format() puts item values by name', $html === '<a href="#a">A</a>');
-
-$html = Tree::build(['docs' => ['img' => []]], function (int $depth, string $key) {
-    echo "<ul data-depth=\"$depth\"><li>$key@nested</li></ul>";
+$html = '';
+Tree::walk('menu', function (array $items, int $depth) use (&$html) {
+    $html .= "<ul $depth>";
+    foreach ($items as $item) {
+        $html .= '<' . $item->id . '>';
+        Tree::walk($item->children);
+        $html .= '</' . $item->id . '>';
+    }
+    $html .= '</ul>';
 });
-check('build() replaces @nested with the children', $html === '<ul data-depth="1"><li>docs<ul data-depth="2"><li>img</li></ul></li></ul>');
+check('walk() wraps every level, without a callback it outputs the children with the one it runs in', $html === '<ul 0><secret></secret><a></a><b><ul 1><b1></b1><b2></b2></ul></b><d></d><c></c></ul>');
+
+$calls = 0;
+Tree::walk([], function () use (&$calls) {
+    $calls++;
+});
+Tree::walk(null, fn () => $calls++);
+Tree::walk('missing', fn () => $calls++);
+check('walk() skips an empty list, not a list and an unknown tree', $calls === 0);
+
+$html = '';
+Tree::walk([['id' => 'p', 'children' => [['id' => 'q', 'children' => []]]]], function (array $items) use (&$html) {
+    foreach ($items as $item) {
+        $html .= $item['id'] . '(';
+        Tree::walk([['id' => 'x', 'children' => [['id' => 'y', 'children' => []]]]], function (array $tags) use (&$html) {
+            foreach ($tags as $tag) {
+                $html .= $tag['id'];
+                Tree::walk($tag['children']);
+            }
+        });
+        Tree::walk($item['children']);
+        $html .= ')';
+    }
+});
+check('another tree inside walk() has its own callback, the outer one comes back after it', $html === 'p(xyq(xy))');
+
+$html = '';
+tree('menu', function (array $items) use (&$html) {
+    $html .= '[';
+    foreach ($items as $item) {
+        $html .= $item->id;
+        tree($item->children);
+    }
+    $html .= ']';
+});
+
+$depths = [];
+tree([['id' => 'x', 'children' => [['id' => 'y', 'children' => [['id' => 'z', 'children' => []]]]]]], function (array $items, int $depth) use (&$depths) {
+    $depths[] = $depth;
+    tree($items[0]['children']);
+});
+check('the depth of a level is counted by tree() calls, for any items', $depths === [0, 1, 2]);
+check('tree() outputs a tree by name level by level', $html === '[secretab[b1b2]dc]');
+check('walk() without a callback outside another walk() throws', throws(fn () => Tree::walk([['id' => 'x']]), LogicException::class));
+
+try {
+    Tree::walk([['id' => 'e', 'children' => []]], fn () => throw new RuntimeException());
+} catch (RuntimeException) {
+}
+check('a callback that throws is not left for the next walk()', throws(fn () => Tree::walk([['id' => 'x']]), LogicException::class));
 
 // Form: templates are named by type, conditions become u-show and hidden
 Form::configure(view: fn (string $template, array $data) => "[$template:" . ($data['name'] ?? '') . ']');

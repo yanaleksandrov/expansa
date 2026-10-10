@@ -5,24 +5,13 @@
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-echo tree('dashboard-panel-menu', $test = function ($items, $tree) use (&$test) {
-    if (empty($items) || !is_array($items)) {
-        return false;
-    }
-    ?>
+?>
+<?php tree('dashboard-panel-menu', function (array $items) { ?>
     <ul class="panel">
-        <?php
-        foreach ($items as $item) {
-            ob_start();
-            ?>
-            <li class="panel__item" u-tooltip.hover.right="'%title$s'">
-                <a class="panel__link" href="%url$s"><i class="%icon$s"></i></a>
+        @foreach($items as $item)
+            <li class="panel__item" u-tooltip.hover.right="'{{ $item->title }}'">
+                <a class="panel__link" href="{{ $item->url }}"><i class="{{ $item->icon }}"></i></a>
             </li>
-            <?php
-            echo $tree->format(ob_get_clean(), $item);
-        }
-        ?>
+        @endforeach
     </ul>
-    <?php
-});
+<?php }); ?>

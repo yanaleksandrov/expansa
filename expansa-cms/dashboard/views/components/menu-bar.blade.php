@@ -1,29 +1,23 @@
 <?php
-
-use Expansa\Facades\Safe;
-
 /**
  * Expansa dashboard menu top bar template can be overridden by copying it to themes/yourtheme/dashboard/views/components/menu-bar.php
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-echo tree('dashboard-menu-bar', function($items) {
-    ?>
+?>
+<?php tree('dashboard-menu-bar', function (array $items) { ?>
     <ul id="dashboard-menu-bar" class="menu">
-        <?php
-        foreach ($items as $item) :
-            [$url, $icon, $title] = Safe::data($item, [
-                'url'   => 'url',
-                'icon'  => 'class',
-                'title' => 'trim',
-            ])->values();
-            ?>
+        @foreach($items as $item)
             <li class="menu__item">
-                <a class="menu__link" href="<?php echo $url; ?>"><?php $icon && printf('<i class="%s"></i> ', $icon); ?><?php echo $title; ?></a>
+                <a class="menu__link" href="{{ $item->url }}">
+                    @if($item->icon)
+                        <i class="{{ $item->icon }}"></i>
+                    @endif
+
+                    {{ $item->title }}
+                </a>
             </li>
-        <?php endforeach; ?>
+        @endforeach
     </ul>
-    <?php
-});
+<?php }); ?>

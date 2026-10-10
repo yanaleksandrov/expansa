@@ -1,55 +1,46 @@
 <?php
 /**
  * Expansa dashboard menu template can be overridden by copying it to themes/yourtheme/dashboard/views/components/menu.php
+ * Children of a first level item collapse together with deeper levels.
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-echo tree('dashboard-main-menu', $test = function ($items, $tree) use (&$test) {
-    if (empty($items) || !is_array($items)) {
-        return false;
-    }
-
-    $id    = strval($items[0]['parent_id'] ?? '');
-    $depth = intval($items[0]['depth'] ?? 0);
-    $class = $depth === 0 ? 'class="nav" u-data="{i:\'' . $id . '\'}" u-sticky' : 'class="nav__list" u-show="i === \'' . $id . '\'" u-collapse hidden';
-    ?>
-    <ul <?php echo $class; ?>>
-        <?php
-        foreach ($items as $item) {
-            ob_start();
-            if (empty($item['url'])) {
-                ?>
-                <li class="nav__item nav__item--divider">%title$s</li>
-                <?php
-            } elseif ($item['depth'] > 0) {
-                ?>
-                <li><a class="nav__link" href="%url$s">%title$s</a></li>
-                <?php
-            } elseif (empty($item['children'])) {
-                ?>
+?>
+<?php tree('dashboard-main-menu', function (array $items) { ?>
+    <ul class="nav" u-data="{i:''}" u-sticky>
+        @foreach($items as $item)
+            @if(! $item->url)
+                <li class="nav__item nav__item--divider">{{ $item->title }}</li>
+            @elseif(! $item->children)
                 <li class="nav__item">
-                    <a class="nav__link" href="%url$s"><i class="%icon$s"></i> %title$s</a>
+                    <a class="nav__link" href="{{ $item->url }}"><i class="{{ $item->icon }}"></i> {{ $item->title }}</a>
                 </li>
-                <?php
-            } else {
-                $id = (string)($item['id'] ?? '');
-                ?>
+            @else
                 <li class="nav__item nav__item--parent">
-                    <a class="nav__link" href="%url$s" @click.prevent="i = '<?php echo $id; ?>'">
-                        <i class="%icon$s"></i> %title$s
-                            <?php if (isset($item['count'])) { ?>
-                        <span class="badge badge--blue-lt ml-auto">%count$d</span>
-                        <?php } ?>
+                    <a class="nav__link" href="{{ $item->url }}" @click.prevent="i = '{{ $item->id }}'">
+                        <i class="{{ $item->icon }}"></i> {{ $item->title }}
+                        @isset($item->count)
+                            <span class="badge badge--blue-lt ml-auto">{{ (int) $item->count }}</span>
+                        @endisset
                     </a>
-                    <?php $test($item['children'] ?? [], $tree); ?>
+
+                    <?php tree($item->children, function (array $children) use ($item) { ?>
+                        <ul class="nav__list" u-show="i === '{{ $item->id }}'" u-collapse hidden>
+                            @foreach($children as $child)
+                                @if($child->url)
+                                    <li>
+                                        <a class="nav__link" href="{{ $child->url }}">{{ $child->title }}</a>
+                                        <?php tree($child->children); ?>
+                                    </li>
+                                @else
+                                    <li class="nav__item nav__item--divider">{{ $child->title }}</li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    <?php }); ?>
                 </li>
-                <?php
-            }
-                echo $tree->format(ob_get_clean(), $item);
-            }
-        ?>
+            @endif
+        @endforeach
     </ul>
-  <?php
-});
+<?php }); ?>

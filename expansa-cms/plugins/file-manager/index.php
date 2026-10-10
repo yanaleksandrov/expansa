@@ -29,7 +29,7 @@ return new class extends Plugin
 
         Asset::style('file-manager', '/plugins/file-manager/assets/css/main.css');
 
-        Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'           => 'file-manager',

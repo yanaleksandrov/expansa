@@ -79,7 +79,7 @@ return new class extends Plugin
             menuPosition: 280,
         );
 
-        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'       => 'divider-ecommerce',

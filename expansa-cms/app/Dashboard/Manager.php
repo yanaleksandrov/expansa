@@ -149,7 +149,7 @@ final class Manager
             return false;
         }
 
-        return Tree::allowsUrl($slug, $request->query);
+        return Tree::canOpen($slug, $request->query);
     }
 
     /**
@@ -213,14 +213,18 @@ final class Manager
      */
     private function menuTitle(string $url): ?string
     {
+        $title = null;
         foreach (['dashboard-main-menu', 'dashboard-panel-menu', 'dashboard-user-menu'] as $menu) {
-            foreach (Tree::get($menu)->items as $item) {
-                if (($item['url'] ?? null) === $url && is_string($item['title'] ?? null) && $item['title'] !== '') {
-                    return $item['title'];
+            Tree::walk($menu, function (array $items) use ($url, &$title) {
+                foreach ($items as $item) {
+                    if ($item->url === $url && is_string($item->title) && $item->title !== '') {
+                        $title ??= $item->title;
+                    }
+                    Tree::walk($item->children);
                 }
-            }
+            });
         }
 
-        return null;
+        return $title;
     }
 }

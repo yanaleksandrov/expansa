@@ -31,7 +31,7 @@ return new class extends Plugin
             Dashboard::page($page, view: __DIR__ . "/views/$page");
         }
 
-        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'           => 'toolkit',

@@ -22,7 +22,7 @@ final class Menus
      */
     public static function register(): void
     {
-        Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'           => 'users',
@@ -59,7 +59,7 @@ final class Menus
             ]
         ));
 
-        Tree::attach('dashboard-user-menu', static fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-user-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'           => 'profile',
@@ -103,7 +103,7 @@ final class Menus
             ]
         ));
 
-        Tree::attach('dashboard-menu-bar', static fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-menu-bar', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'           => 'website',
@@ -148,7 +148,7 @@ final class Menus
             ]
         ));
 
-        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->addItems(
+        Tree::attach('dashboard-main-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
                     'id'       => 'divider-workspace',
