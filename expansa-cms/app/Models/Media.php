@@ -172,6 +172,7 @@ class Media
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_TIMEOUT        => 30,
             CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_OPTIONS    => CURLSSLOPT_NATIVE_CA,
         ]);
         $downloaded = curl_exec($ch);
         $curlError  = curl_error($ch);

@@ -107,6 +107,7 @@ final class Disk
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS      => 5,
             CURLOPT_PROTOCOLS      => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+            CURLOPT_SSL_OPTIONS    => CURLSSLOPT_NATIVE_CA,
         ]);
 
         $done  = curl_exec($curl);

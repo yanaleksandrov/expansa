@@ -45,6 +45,7 @@ final class Http
             CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_SSL_OPTIONS    => CURLSSLOPT_NATIVE_CA,
         ] + ($method === 'POST' ? [CURLOPT_POSTFIELDS => $body] : []));
 
         $response = curl_exec($curl);
