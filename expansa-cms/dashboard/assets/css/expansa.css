@@ -607,6 +607,8 @@ img:after {
   position: relative;
   text-align: start;
   container: tab/inline-size;
+  display: flex;
+  flex-flow: wrap;
 }
 .tab__nav {
   -webkit-user-select: none;
@@ -659,6 +661,7 @@ img:after {
   max-width: 56rem;
   width: 100%;
   flex: 1;
+  padding: 1.75rem;
 }
 @media screen and (max-width: 768px) {
   .tab__content {
@@ -666,45 +669,22 @@ img:after {
   }
 }
 .tab--btn .tab__nav {
-  border: 1px solid var(--expansa-border);
   justify-content: space-evenly;
   background-color: var(--expansa-bg);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  padding: 0.142857em;
-  gap: 0.142857em;
   height: 2.57143em;
-}
-.tab--btn .tab__title {
-  width: 100%;
-  justify-content: center;
-  background-color: var(--expansa-bg);
-  border-radius: 0.3rem;
-  padding: 0 0.5rem;
-}
-.tab--btn .tab__title:after {
-  content: none;
-}
-.tab--btn .tab__title:hover, .tab--btn .tab__title.active {
-  background-color: var(--expansa-bg-active);
-}
-.tab--vertical {
-  display: flex;
-  flex-flow: wrap;
-}
-.tab--vertical .tab__nav {
   max-width: 13rem;
   width: 13rem;
   min-width: 13rem;
   flex-direction: column;
   align-items: flex-start;
   margin: 0;
-  border: 0;
   gap: 0.25rem;
   padding: 1.75rem 1rem 1.75rem 1.75rem;
 }
 @container tab (max-width: 768px) {
-  .tab--vertical .tab__nav {
+  .tab--btn .tab__nav {
     max-width: 100%;
     width: 100%;
     min-width: 100%;
@@ -714,30 +694,30 @@ img:after {
   }
 }
 @media screen and (max-width: 768px) {
-  .tab--vertical .tab__nav {
+  .tab--btn .tab__nav {
     padding: 1.25rem;
   }
 }
-.tab--vertical .tab__title {
+.tab--btn .tab__title {
+  width: 100%;
+  justify-content: center;
+  background-color: var(--expansa-bg);
   height: auto;
   padding: 0.4rem 0.8rem;
-  width: 100%;
   border-radius: var(--expansa-border-radius--lg);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
-.tab--vertical .tab__title:after {
+.tab--btn .tab__title:after {
   content: none;
 }
-.tab--vertical .tab__title:hover, .tab--vertical .tab__title.active {
+.tab--btn .tab__title:hover, .tab--btn .tab__title.active {
   background-color: var(--expansa-bg-active);
 }
-.tab--vertical .tab__content {
-  padding: 1.75rem;
+.tab--btn .tab__title:after {
+  content: none;
 }
-@media screen and (max-width: 768px) {
-  .tab--vertical .tab__content {
-    padding: 1.25rem;
-  }
+.tab--btn .tab__title:hover, .tab--btn .tab__title.active {
+  background-color: var(--expansa-bg-active);
 }
 
 .image {

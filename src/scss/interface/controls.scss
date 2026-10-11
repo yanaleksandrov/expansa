@@ -135,6 +135,9 @@
   text-align: start;
   container: tab / inline-size;
 
+  display: flex;
+  flex-flow: wrap;
+
   &__nav {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -194,6 +197,7 @@
     max-width: 56rem;
     width: 100%;
     flex: 1;
+    padding: 1.75rem;
 
     @media screen and (max-width: 768px) {
       padding: 1.25rem;
@@ -203,46 +207,17 @@
   &--btn {
 
     .tab__nav {
-      border: 1px solid var(--expansa-border);
       justify-content: space-evenly;
       background-color: var(--expansa-bg);
       border-radius: var(--expansa-border-radius);
       corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-      padding: .142857em;
-      gap: .142857em;
       height: 2.57143em;
-    }
-
-    .tab__title {
-      width: 100%;
-      justify-content: center;
-      background-color: var(--expansa-bg);
-      border-radius: 0.3rem;
-      padding: 0 .5rem;
-
-      &:after {
-        content: none;
-      }
-
-      &:hover,
-      &.active {
-        background-color: var(--expansa-bg-active);
-      }
-    }
-  }
-
-  &--vertical {
-    display: flex;
-    flex-flow: wrap;
-
-    .tab__nav {
       max-width: 13rem;
       width: 13rem;
       min-width: 13rem;
       flex-direction: column;
       align-items: flex-start;
       margin: 0;
-      border: 0;
       gap: 0.25rem;
       padding: 1.75rem 1rem 1.75rem 1.75rem;
 
@@ -261,9 +236,11 @@
     }
 
     .tab__title {
+      width: 100%;
+      justify-content: center;
+      background-color: var(--expansa-bg);
       height: auto;
       padding: 0.4rem 0.8rem;
-      width: 100%;
       border-radius: var(--expansa-border-radius--lg);
       corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
@@ -275,13 +252,14 @@
       &.active {
         background-color: var(--expansa-bg-active);
       }
-    }
 
-    .tab__content {
-      padding: 1.75rem;
+      &:after {
+        content: none;
+      }
 
-      @media screen and (max-width: 768px) {
-        padding: 1.25rem;
+      &:hover,
+      &.active {
+        background-color: var(--expansa-bg-active);
       }
     }
   }

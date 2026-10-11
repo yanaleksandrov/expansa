@@ -27,7 +27,7 @@ foreach ($languages as $language) {
 return Expansa\Builders\Form::enqueue(
     'multilingual-settings',
     [
-        'class'   => 'tab tab--vertical',
+        'class'   => 'tab',
         'u-data'  => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'general')),
         '@change' => '$ajax.post("user/update")',
     ],
