@@ -113,7 +113,7 @@
         box-shadow: none;
       }
 
-      &.load {
+      &.is-loading {
         background-position: calc(100% - 0.25rem) center;
       }
     }

@@ -15,7 +15,7 @@
   visibility: hidden;
   height: fit-content;
 
-  &.active {
+  &.is-active {
     display: flex;
     opacity: 1;
     visibility: visible;

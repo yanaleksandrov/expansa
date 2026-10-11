@@ -42,7 +42,7 @@ $summary = [
             @foreach($groups as $group)
                 <?php $groupStatus = $group['status']; ?>
                 <div class="accordion-item">
-                    <button type="button" class="accordion-title site-health-title" @click="open = open === '{{ $group['id'] }}' ? '' : '{{ $group['id'] }}'" :class="open === '{{ $group['id'] }}' && 'active'">
+                    <button type="button" class="accordion-title site-health-title" @click="open = open === '{{ $group['id'] }}' ? '' : '{{ $group['id'] }}'" :class="open === '{{ $group['id'] }}' && 'is-active'">
                         <i class="{{ $group['icon'] }} site-health-title-icon"></i>
                         <span class="site-health-title-text">{!! $group['title'] !!}</span>
                         <span class="badge badge--sm {{ $meta[$groupStatus]['badge'] }}">{!! $meta[$groupStatus]['label'] !!}</span>

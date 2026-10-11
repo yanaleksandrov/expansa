@@ -5,25 +5,21 @@
   border-radius: var(--expansa-border-radius--lg);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   position: relative;
-  display: none;
+  display: flex;
 
   i {
     color: #d63939;
     font-size: 1rem;
   }
 
-  &.active {
-    display: flex;
-
-    &:before {
-      position: absolute;
-      content: '';
-      width: 2px;
-      inset-block: 0.75rem;
-      left: -1px;
-      border-radius: 1rem;
-      background-color: #d63939;
-    }
+  &:before {
+    position: absolute;
+    content: '';
+    width: 2px;
+    inset-block: 0.75rem;
+    left: -1px;
+    border-radius: 1rem;
+    background-color: #d63939;
   }
 
   &-main {

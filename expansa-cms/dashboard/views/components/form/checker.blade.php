@@ -28,7 +28,7 @@ $requirements = [
 	<ul class="dg g-1">
 		@foreach ($requirements as $requirement => $title)
 			<li class="df aic">
-				<span class="badge badge--xl badge--round badge--icon" :class="compat.{{ $requirement }} === undefined ? 'badge--load' : (compat.{{ $requirement }} ? 't-green' : 't-red')">
+				<span class="badge badge--xl badge--round badge--icon" :class="compat.{{ $requirement }} === undefined ? 'is-loading' : (compat.{{ $requirement }} ? 't-green' : 't-red')">
 					<i class="ph" :class="compat.{{ $requirement }} ? 'ph-check' : 'ph-x'"></i>
 				</span>
 				<span class="ml-4">{{ $title }}</span>

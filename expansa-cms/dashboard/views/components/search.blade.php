@@ -20,7 +20,7 @@
 		<template u-if="links.length">
 			<ul class="expansa-search-results">
 				<template u-for="(link, i) in links" :key="i">
-					<li class="expansa-search-item" :class="link.url && {'active': i === currentIdx}">
+					<li class="expansa-search-item" :class="link.url && {'is-active': i === currentIdx}">
 						<template u-if="link.url">
 							<a class="expansa-search-link" :href="link.url">
 								<span class="expansa-search-text" u-html="link.text"></span>

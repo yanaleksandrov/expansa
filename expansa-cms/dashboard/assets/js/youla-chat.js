@@ -304,7 +304,7 @@ document.addEventListener('youla:init', () => {
         processRow(task) {
             return {
                 ':class'() {
-                    return task.id === this.activeId && 'active';
+                    return task.id === this.activeId && 'is-active';
                 }
             };
         },

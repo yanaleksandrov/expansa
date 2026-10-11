@@ -26,11 +26,8 @@
   position: relative;
   padding-top: 0.2rem;
 }
-.notifications-item.init {
-  animation: notificationShow 0;
-}
-.notifications-item.removed {
-  animation: notificationHide 0.25s;
+.notifications-item.is-hiding {
+  animation: notificationHide 0.25s forwards;
   z-index: -1;
 }
 .notifications-wrapper {

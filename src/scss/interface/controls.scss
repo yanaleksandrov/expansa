@@ -1,21 +1,16 @@
 @use "sass:color";
 @use '../constants';
 
-.hover {
+// shown while the pointer is over the closest .hover
+.hover-reveal {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
 
-  &--show {
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
-  }
-
-  &:hover {
-
-    .hover--show {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
+.hover:hover .hover-reveal {
+  opacity: 1;
+  visibility: visible;
 }
 
 /* CARD */
@@ -130,137 +125,77 @@
 
 /** TABS **/
 .tab {
-  width: 100%;
-  position: relative;
-  text-align: start;
   container: tab / inline-size;
-
+  position: relative;
   display: flex;
-  flex-flow: wrap;
+  flex-wrap: wrap;
+  width: 100%;
+  text-align: start;
 
   &__nav {
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
     z-index: 2;
-    background-color: inherit;
-    border-bottom: 1px solid var(--expansa-border);
     display: flex;
     align-items: center;
-    min-width: 100%;
     gap: 1.75rem;
+    width: 100%;
     height: 3em;
+    border-bottom: 1px solid var(--expansa-border);
+    background-color: inherit;
+    user-select: none;
   }
 
   &__title {
     position: relative;
     display: inline-flex;
-    gap: 0.65em;
-    transition: color .3s, background-color .3s;
-    background-color: transparent;
-    cursor: pointer;
-    height: 100%;
     align-items: center;
+    gap: 0.65em;
+    height: 100%;
     font-weight: 500;
     white-space: nowrap;
     color: var(--expansa-text-secondary);
+    background-color: transparent;
+    cursor: pointer;
+    transition: color .3s, background-color .3s;
 
-    &:hover,
-    &.active {
-      color: var(--expansa-dark);
-    }
-
+    // underline of the active tab, over the bottom border of the menu
     &:after {
       content: '';
       position: absolute;
+      bottom: -1px;
       left: 0;
       width: 100%;
       height: 2px;
-      bottom: -1px;
       background-color: var(--expansa-dark);
       transform: scaleX(0);
-      transition: all .15s;
+      transition: transform .15s;
     }
 
-    &.active:after {
-      transform: scaleX(1);
+    &:hover {
+      color: var(--expansa-dark);
     }
 
-    &.disabled {
-      pointer-events: none;
+    &.is-active {
+      color: var(--expansa-dark);
+
+      &:after {
+        transform: scaleX(1);
+      }
+    }
+
+    &[disabled] {
       color: var(--expansa-text-muted);
+      pointer-events: none;
     }
   }
 
   &__content {
-    max-width: 56rem;
-    width: 100%;
     flex: 1;
+    width: 100%;
+    max-width: 56rem;
     padding: 1.75rem;
 
     @media screen and (max-width: 768px) {
       padding: 1.25rem;
-    }
-  }
-
-  &--btn {
-
-    .tab__nav {
-      justify-content: space-evenly;
-      background-color: var(--expansa-bg);
-      border-radius: var(--expansa-border-radius);
-      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-      height: 2.57143em;
-      max-width: 13rem;
-      width: 13rem;
-      min-width: 13rem;
-      flex-direction: column;
-      align-items: flex-start;
-      margin: 0;
-      gap: 0.25rem;
-      padding: 1.75rem 1rem 1.75rem 1.75rem;
-
-      @container tab (max-width: 768px) {
-        max-width: 100%;
-        width: 100%;
-        min-width: 100%;
-        height: auto;
-        padding: 1.75rem 1.75rem 0;
-        position: initial !important;
-      }
-
-      @media screen and (max-width: 768px) {
-        padding: 1.25rem;
-      }
-    }
-
-    .tab__title {
-      width: 100%;
-      justify-content: center;
-      background-color: var(--expansa-bg);
-      height: auto;
-      padding: 0.4rem 0.8rem;
-      border-radius: var(--expansa-border-radius--lg);
-      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-
-      &:after {
-        content: none;
-      }
-
-      &:hover,
-      &.active {
-        background-color: var(--expansa-bg-active);
-      }
-
-      &:after {
-        content: none;
-      }
-
-      &:hover,
-      &.active {
-        background-color: var(--expansa-bg-active);
-      }
     }
   }
 }
@@ -487,7 +422,7 @@
     aspect-ratio: 1 / 1;
   }
 
-  &--load {
+  &.is-loading {
     pointer-events: none;
     color: transparent !important;
     text-shadow: none !important;
@@ -669,7 +604,7 @@
     -ms-user-select: none;
     user-select: none;
 
-    &.active {
+    &.is-active {
       border-color: var(--expansa-primary);
       outline: 1px solid var(--expansa-primary);
     }
