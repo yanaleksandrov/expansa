@@ -1,4 +1,6 @@
 <?php
+use App\Support\Passwords;
+
 /**
  * Sign Up form
  *
@@ -90,7 +92,7 @@ return Expansa\Builders\Form::enqueue(
 				'lowercase' => 2,
 				'uppercase' => 2,
 				'special'   => 2,
-				'length'    => 12,
+				'length'    => Passwords::MIN_LENGTH,
 				'digit'     => 2,
 			],
 		],

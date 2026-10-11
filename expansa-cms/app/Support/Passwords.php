@@ -18,7 +18,7 @@ final class Passwords
     /**
      * Shortest password accepted.
      */
-    public const int MIN_LENGTH = 8;
+    public const int MIN_LENGTH = 12;
 
     /**
      * Range endpoint of the breach service, followed by the 5-character SHA-1 prefix.
