@@ -2120,10 +2120,12 @@ body.is-unsaved .expansa-search-btn {
 }
 
 .user-menu {
-  font-size: 0.875rem;
   font-weight: 400;
   padding: 0.25rem;
   width: 100%;
+  flex-direction: column;
+  gap: 1px;
+  display: flex;
 }
 .user-menu-divider {
   margin: 4px -5px;
@@ -2141,10 +2143,9 @@ body.is-unsaved .expansa-search-btn {
   color: var(--expansa-dark) !important;
   display: flex;
   gap: 0.4rem;
-  padding: 7px 9px;
+  padding: 6px 8px;
   position: relative;
   transition: color 0.3s, background-color 0.3s !important;
-  height: 2rem;
 }
 .user-menu-link:hover {
   background-color: var(--expansa-bg-active);

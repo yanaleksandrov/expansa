@@ -746,10 +746,12 @@
 }
 
 .user-menu {
-  font-size: 0.875rem;
   font-weight: 400;
   padding: 0.25rem;
   width: 100%;
+  flex-direction: column;
+  gap: 1px;
+  display: flex;
 
   &-divider {
     margin: 4px -5px;
@@ -769,10 +771,9 @@
     color: var(--expansa-dark) !important;
     display: flex;
     gap: .4rem;
-    padding: 7px 9px;
+    padding: 6px 8px;
     position: relative;
     transition: color .3s, background-color .3s !important;
-    height: 2rem;
 
     &:hover {
       background-color: var(--expansa-bg-active);

@@ -916,6 +916,14 @@ input[type=radio]:checked {
   font-weight: 500;
   line-height: 1.35em;
 }
+.field-label:after {
+  color: var(--expansa-danger);
+  content: attr(data-required);
+  margin-inline-end: auto;
+}
+.field-label > * {
+  order: 1;
+}
 .field-instruction {
   line-height: 1.2em;
   font-size: 0.9285714286em;
