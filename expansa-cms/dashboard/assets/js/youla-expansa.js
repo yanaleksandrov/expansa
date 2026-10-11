@@ -849,24 +849,33 @@ document.addEventListener('youla:init', () => {
             console.warn('Youla.js: "u-sticky" requires its parent to have position: relative.');
             return;
         }
-        const paddingTop = parseInt(getComputedStyle(parent).paddingTop) + 42;
-        const paddingBottom = parseInt(getComputedStyle(parent).paddingBottom);
-        let top = paddingTop;
-        let lastScroll = window.scrollY;
-        const reposition = () => {
-            const rect = el.getBoundingClientRect();
-            const overflow = rect.height - window.innerHeight;
-            const delta = window.scrollY - lastScroll;
-            lastScroll = window.scrollY;
-            if (overflow <= 0 || rect.top > top) {
-                return;
-            }
-            top = Math.min(paddingTop, Math.max(-overflow - paddingBottom, top - delta));
-            el.style.top = `${top}px`;
+        let maxTop, bottom;
+        const measure = () => {
+            const root = getComputedStyle(document.documentElement);
+            const style = getComputedStyle(parent);
+            maxTop = (parseFloat(root.scrollPaddingTop) || 0) + parseFloat(style.paddingTop);
+            bottom = (parseFloat(root.scrollPaddingBottom) || 0) + parseFloat(style.paddingBottom);
         };
+        measure();
         el.style.position = 'sticky';
-        el.style.top = `${paddingTop}px`;
-        [ 'load', 'scroll', 'resize' ].forEach(event => window.addEventListener(event, reposition));
+        el.style.top = `${maxTop}px`;
+        let lastScroll = window.scrollY;
+        let lastTop = el.getBoundingClientRect().top;
+        const reposition = () => {
+            const delta = window.scrollY - lastScroll;
+            const minTop = Math.min(maxTop, window.innerHeight - el.offsetHeight - bottom);
+            lastScroll = window.scrollY;
+            el.style.top = `${Math.min(maxTop, Math.max(minTop, lastTop - delta))}px`;
+            lastTop = el.getBoundingClientRect().top;
+        };
+        window.addEventListener('scroll', reposition, {
+            passive: true
+        });
+        window.addEventListener('load', reposition);
+        window.addEventListener('resize', () => {
+            measure();
+            reposition();
+        });
     });
     Youla.directive('collapse', (el, output) => {
         const isOpen = !!output;

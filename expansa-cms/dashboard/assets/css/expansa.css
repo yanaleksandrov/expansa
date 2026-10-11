@@ -178,6 +178,12 @@ html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
+  scroll-padding: 42px 0 24px;
+}
+@media (max-width: 1024px) {
+  html {
+    scroll-padding-top: 52px;
+  }
 }
 
 body {
@@ -627,6 +633,8 @@ img:after {
   border: 0;
   gap: 2px;
   padding: 1.5rem 0 1.5rem 1.5rem;
+  height: -moz-fit-content;
+  height: fit-content;
 }
 @container tab (max-width: 768px) {
   .tab__nav {

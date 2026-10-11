@@ -215,11 +215,10 @@ textarea[u-textarea] {
   background-color: var(--expansa-white);
   top: calc(100% + 0.125rem);
   right: 0;
-  font-size: 0.75rem;
   letter-spacing: -0.01em;
   box-shadow: var(--expansa-box-shadow);
   animation: contextMenu 0.3s cubic-bezier(0, 0.1, 0.1, 1) backwards;
-  min-width: 12rem;
+  min-width: 13rem;
   line-height: 1.3;
 }
 .details-head {
@@ -1173,6 +1172,7 @@ input[type=radio]:checked {
 .field--ui .field-item:has([type=radio]) .field-checkbox, .field--ui .field-item:has([type=checkbox]) .field-checkbox {
   position: relative;
   display: flex;
+  corner-shape: initial;
   border-radius: 2.25rem;
   min-width: 2.25rem;
   width: 2.25rem;

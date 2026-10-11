@@ -1091,32 +1091,44 @@ document.addEventListener('youla:init', ()=> {
             return;
         }
 
-        const paddingTop    = parseInt(getComputedStyle(parent).paddingTop) + 42;
-        const paddingBottom = parseInt(getComputedStyle(parent).paddingBottom);
+        let maxTop, bottom;
 
-        let top        = paddingTop;
-        let lastScroll = window.scrollY;
+        // Fixed bars are taken from the root's scroll-padding, so their heights stay in CSS.
+        const measure = () => {
+            const root  = getComputedStyle(document.documentElement);
+            const style = getComputedStyle(parent);
 
-        // Recomputed on every call (not cached) so a resize is picked up for free.
-        const reposition = () => {
-            const rect     = el.getBoundingClientRect();
-            const overflow = rect.height - window.innerHeight;
-            const delta    = window.scrollY - lastScroll;
-            lastScroll     = window.scrollY;
-
-            // Only slide while actually stuck — rect.top runs ahead of "top" otherwise.
-            if (overflow <= 0 || rect.top > top) {
-                return;
-            }
-
-            top = Math.min(paddingTop, Math.max(-overflow - paddingBottom, top - delta));
-            el.style.top = `${top}px`;
+            maxTop = (parseFloat(root.scrollPaddingTop) || 0) + parseFloat(style.paddingTop);
+            bottom = (parseFloat(root.scrollPaddingBottom) || 0) + parseFloat(style.paddingBottom);
         };
 
-        el.style.position = 'sticky';
-        el.style.top      = `${paddingTop}px`;
+        measure();
 
-        ['load', 'scroll', 'resize'].forEach(event => window.addEventListener(event, reposition));
+        el.style.position = 'sticky';
+        el.style.top      = `${maxTop}px`;
+
+        let lastScroll = window.scrollY;
+        let lastTop    = el.getBoundingClientRect().top;
+
+        /**
+         * Moves the element by the scroll delta from where it was actually drawn, clamped between
+         * its top and bottom edges being in view, so it never slides ahead of the page.
+         */
+        const reposition = () => {
+            const delta  = window.scrollY - lastScroll;
+            const minTop = Math.min(maxTop, window.innerHeight - el.offsetHeight - bottom);
+            lastScroll   = window.scrollY;
+
+            el.style.top = `${Math.min(maxTop, Math.max(minTop, lastTop - delta))}px`;
+            lastTop      = el.getBoundingClientRect().top;
+        };
+
+        window.addEventListener('scroll', reposition, { passive: true });
+        window.addEventListener('load', reposition);
+        window.addEventListener('resize', () => {
+            measure();
+            reposition();
+        });
     });
 
     /**
