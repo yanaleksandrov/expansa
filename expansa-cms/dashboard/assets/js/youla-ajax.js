@@ -197,7 +197,9 @@
             wrapper.classList.add(options.invalidClass);
             input.setAttribute('aria-invalid', 'true');
             input.setAttribute('aria-errormessage', error.id);
+            const unwatch = watchProp(input, () => clear());
             const clear = input.__ajaxClear = () => {
+                unwatch?.();
                 error.remove();
                 wrapper.classList.remove(options.invalidClass);
                 input.removeAttribute('aria-invalid');
@@ -208,6 +210,14 @@
             };
             input.addEventListener('input', clear);
             input.addEventListener('change', clear);
+        }
+        function watchProp(input, callback) {
+            const path = [ ...input.attributes ].find(({name}) => name === 'u-prop' || name.startsWith('u-prop.'))?.value;
+            let host = input;
+            while (host && !host.__x) {
+                host = host.parentElement;
+            }
+            return path ? host?.__x.watch(path, callback) : undefined;
         }
         function clearErrors(scope) {
             scope.querySelectorAll('[aria-errormessage]').forEach(input => input.__ajaxClear?.());
