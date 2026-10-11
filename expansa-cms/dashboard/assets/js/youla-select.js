@@ -1966,7 +1966,8 @@
             const settings = {
                 showSearch: false,
                 hideSelected: false,
-                closeOnSelect: true
+                closeOnSelect: true,
+                contentPosition: 'fixed'
             };
             if (el.hasAttribute('multiple')) {
                 settings.hideSelected = true;

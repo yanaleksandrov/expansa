@@ -53,7 +53,7 @@ use Expansa\Facades\Hook;
             </div>
         </div>
 
-        <div class="expansa-panel">
+        <div class="expansa-panel" u-sticky>
             <a href="{{ $site->url }}" target="_blank">
                 <img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34" alt="Expansa Logo">
             </a>

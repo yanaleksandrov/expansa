@@ -7,14 +7,16 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<?php tree('dashboard-main-menu', function (array $items) { ?>
+<?php tree('dashboard-main-menu', function (array $items, int $depth) { ?>
     <ul class="nav" u-data="{i:''}" u-sticky>
         @foreach($items as $item)
             @if(! $item->url)
                 <li class="nav__item nav__item--divider">{{ $item->title }}</li>
             @elseif(! $item->children)
                 <li class="nav__item">
-                    <a class="nav__link" href="{{ $item->url }}"><i class="{{ $item->icon }}"></i> {{ $item->title }}</a>
+                    <a class="nav__link" href="{{ $item->url }}">
+                        <i class="{{ $item->icon }}"></i> {{ $item->title }}
+                    </a>
                 </li>
             @else
                 <li class="nav__item nav__item--parent">
