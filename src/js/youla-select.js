@@ -1986,6 +1986,7 @@
                     value: option.value,
                     html: html,
                     selected: option.selected,
+                    defaultSelected: option.defaultSelected,
                     display: true,
                     disabled: false,
                     mandatory: false,
@@ -2011,11 +2012,21 @@
                 return acc;
             }, []);
             try {
-                el._x_slimSelect = new SlimSelect({
+                const slim = el._x_slimSelect = new SlimSelect({
                     settings: settings,
                     select: el,
                     data: data
                 });
+                const form = el.form;
+                if (form) {
+                    const onReset = () => setTimeout(() => slim.setSelected([ ...el.selectedOptions ].map(o => o.value), false));
+                    const destroy = slim.destroy.bind(slim);
+                    form.addEventListener("reset", onReset);
+                    slim.destroy = () => {
+                        form.removeEventListener("reset", onReset);
+                        destroy();
+                    };
+                }
             } catch {
                 console.error('Youla.js: "SlimSelect" is not defined — u-select requires SlimSelect to be loaded.');
             }
