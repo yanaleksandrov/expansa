@@ -899,7 +899,7 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Tabs, synced with the page URL: `u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
+     * Tabs, synced with the page URL:`u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
      * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab is read from the
      * `?tab=` query param if present, else `data-tab` on the `u-data` element itself.
      *

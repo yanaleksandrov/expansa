@@ -43,6 +43,7 @@ final class Assets
                 'youla'         => ['data' => self::data()],
                 'youla-ajax',
                 'youla-expansa',
+                'youla-tooltip',
                 'youla-passkeys',
                 'youla-chat',
                 // global, not co-located: the media library must be reachable from any field on any page

@@ -19,11 +19,11 @@ defined('EX_PATH') || exit;
     </summary>
 
     <div class="details-content">
-        <?php tree('dashboard-user-menu', function (array $items, int $depth) { ?>
-            <ul class="user-menu user-menu-level-{{ $depth }}">
+        <?php tree('dashboard-user-menu', function (array $items) { ?>
+            <ul class="user-menu">
                 @foreach($items as $item)
                     @if($item->account !== null)
-                        <li class="user-menu-item {{ $item->current ? 'is-active' : '' }}">
+                        <li class="user-menu-item{{ $item->current ? ' is-active' : '' }}">
                             @if($item->current)
                                 <span class="user-menu-link"><i class="ph ph-check"></i> {{ $item->title }}</span>
                             @else
@@ -37,9 +37,7 @@ defined('EX_PATH') || exit;
                         </li>
                     @elseif($item->url)
                         <li class="user-menu-item">
-                            <a class="user-menu-link" href="{{ $item->url }}">
-                                <i class="{{ $item->icon }}"></i> {{ $item->title }}
-                            </a>
+                            <a class="user-menu-link" href="{{ $item->url }}"><i class="{{ $item->icon }}"></i> {{ $item->title }}</a>
                             <?php tree($item->children); ?>
                         </li>
                     @else

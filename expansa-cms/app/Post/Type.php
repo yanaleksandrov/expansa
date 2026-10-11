@@ -108,6 +108,11 @@ class Type
         public bool $canImport = true,
 
         /**
+         * Whether the admin menu item has a "+" button that creates a draft item.
+         */
+        public bool $canCreate = false,
+
+        /**
          * User capabilities required to see the type's admin menu items.
          *
          * @var string[]
@@ -160,6 +165,7 @@ class Type
                         'capabilities' => $this->capabilities,
                         'icon'         => $this->menuIcon,
                         'position'     => $this->menuPosition,
+                        'create'       => $this->canCreate ? $this->labelAdd : null,
                     ],
                     [
                         'id'           => sprintf('type-%s', $postType),

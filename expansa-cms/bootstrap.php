@@ -519,6 +519,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         showInBar: true,
         canExport: true,
         canImport: true,
+        canCreate: true,
         capabilities: ['types_edit'],
         menuIcon: 'ph ph-folders',
         menuPosition: 20,

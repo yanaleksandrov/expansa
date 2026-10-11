@@ -45,6 +45,18 @@ check('canOpen() allows a page of no item', Tree::canOpen('settings', ['tab' => 
 Tree::configure();
 check('an unknown tree has no items', Tree::get('missing') === []);
 
+Tree::attach('active', fn (Tree $tree) => $tree->append([
+    ['id' => 'pages', 'url' => 'edit?table=pages'],
+    ['id' => 'all', 'url' => 'edit?table=pages&status=all', 'parent_id' => 'pages'],
+    ['id' => 'users', 'url' => 'users'],
+]));
+check('no item is active before setCurrent()', ! Tree::get('active')[0]->active);
+Tree::setCurrent('edit', ['table' => 'pages', 'status' => 'all', 'page' => '2']);
+[$pages, $users] = Tree::get('active');
+check('the item of the current page and its parent are active', $pages->active && $pages->children[0]->active && ! $users->active);
+Tree::setCurrent('edit', ['table' => 'pages']);
+check('a parent is active by its own URL without an active child', Tree::get('active')[0]->active && ! Tree::get('active')[0]->children[0]->active);
+
 $html = '';
 Tree::walk('menu', function (array $items, int $depth) use (&$html) {
     $html .= "<ul $depth>";

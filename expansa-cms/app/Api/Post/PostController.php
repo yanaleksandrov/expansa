@@ -6,6 +6,7 @@ namespace App\Api\Post;
 
 use App\Http\Can;
 use Expansa\Http\Request;
+use Expansa\Http\Response;
 
 final readonly class PostController
 {
@@ -16,10 +17,10 @@ final readonly class PostController
          */
         private PostService $service = new PostService(),
     ) {}
-
+
     #[Can('types_edit')]
-    public function create(Request $request): array
+    public function create(Request $request, Response $response): Response
     {
-        return $this->service->create($request);
+        return $this->service->create($request, $response);
     }
-}
+}

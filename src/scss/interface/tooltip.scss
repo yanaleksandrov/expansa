@@ -1,0 +1,120 @@
+.u-tooltip {
+  // Variant classes below only override these three custom properties, not the box/arrow rules.
+  --u-tooltip-bg: #fff;
+  --u-tooltip-border: var(--expansa-border, #dfe2e3);
+  --u-tooltip-color: inherit;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999999;
+  max-width: 280px;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--u-tooltip-bg);
+  color: var(--u-tooltip-color);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+  transform-origin: center;
+
+  border: 1px solid var(--u-tooltip-border);
+  border-radius: var(--expansa-border-radius, 10px);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse, 1.825));
+
+  &:after {
+    content: '';
+    height: 10px;
+    position: absolute;
+    width: 10px;
+    background-color: var(--u-tooltip-bg);
+    z-index: 0;
+    transition: 0.2s ease-in-out;
+    border-right: 1px solid var(--u-tooltip-border);
+    border-bottom: 1px solid var(--u-tooltip-border);
+    border-bottom-right-radius: 3px;
+    border-top-left-radius: 8px;
+  }
+
+  &--in {
+    animation: u-tooltip-bounce-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  &--out {
+    animation: u-tooltip-bounce-out 0.15s ease-in forwards;
+  }
+
+  &--top:after {
+    bottom: -5px;
+    left: calc(50% - 5px);
+    transform: rotate(45deg);
+  }
+
+  &--right:after {
+    left: -5px;
+    top: calc(50% - 5px);
+    transform: rotate(135deg);
+  }
+
+  &--bottom:after {
+    top: -5px;
+    left: calc(50% - 5px);
+    transform: rotate(-135deg);
+  }
+
+  &--left:after {
+    right: -5px;
+    top: calc(50% - 5px);
+    transform: rotate(-45deg);
+  }
+
+  &--error {
+    --u-tooltip-bg: #fdecea;
+    --u-tooltip-border: #f5b5ab;
+    --u-tooltip-color: #611a15;
+  }
+
+  &--warning {
+    --u-tooltip-bg: #fff4e5;
+    --u-tooltip-border: #ffcc80;
+    --u-tooltip-color: #663c00;
+  }
+
+  &--success {
+    --u-tooltip-bg: #edf7ed;
+    --u-tooltip-border: #a5d6a7;
+    --u-tooltip-color: #1e4620;
+  }
+
+  &--dark {
+    --u-tooltip-bg: #171717;
+    --u-tooltip-border: #171717;
+    --u-tooltip-color: #ffffff;
+  }
+}
+
+@keyframes u-tooltip-bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.125);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.025);
+  }
+  75% {
+    transform: scale(0.975);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes u-tooltip-bounce-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+}

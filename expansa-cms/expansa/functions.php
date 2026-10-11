@@ -56,7 +56,7 @@ if (! function_exists('root')) {
 
 if (! function_exists('escape')) {
     /**
-     * Escape a scalar for HTML output and trim it; any other value gives an empty string.
+     * Escape a scalar for HTML output; any other value gives an empty string.
      *
      * @param mixed $value
      * @param bool  $doubleEncode False keeps existing entities like `&amp;` as they are.
@@ -68,7 +68,7 @@ if (! function_exists('escape')) {
             return '';
         }
 
-        return trim(htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8', $doubleEncode));
+        return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8', $doubleEncode);
     }
 }
 
