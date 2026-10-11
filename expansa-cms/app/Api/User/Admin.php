@@ -52,7 +52,7 @@ final class Admin
 
         $user->update(['status' => $isActive ? User::STATUS_ACTIVE : User::STATUS_INACTIVE]);
         if (! $isActive) {
-            Db::delete('user_sessions', ['user_id' => $user->id]);
+            Db::delete('users_sessions', ['user_id' => $user->id]);
         }
 
         Events::record($user, $isActive ? 'account_enabled' : 'account_disabled', ['by' => $admin->login]);
@@ -69,7 +69,7 @@ final class Admin
      */
     public static function signOut(User $admin, User $user): int
     {
-        $count = (int) (Db::delete('user_sessions', ['user_id' => $user->id])?->rowCount() ?? 0);
+        $count = (int) (Db::delete('users_sessions', ['user_id' => $user->id])?->rowCount() ?? 0);
         Events::record($user, 'sessions_revoked', ['count' => $count, 'by' => $admin->login]);
 
         return $count;
@@ -97,7 +97,7 @@ final class Admin
      */
     public static function disableTwoFactor(User $admin, User $user): void
     {
-        Db::delete('user_two_factor', ['user_id' => $user->id]);
+        Db::delete('users_two_factor', ['user_id' => $user->id]);
         Events::record($user, 'two_factor_disabled', ['by' => $admin->login]);
     }
 

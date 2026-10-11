@@ -263,7 +263,7 @@ final class Migrations
     private function createUserIdentitiesTable(): void
     {
         // accounts at sign-in providers: the provider and its user ID, never its tokens
-        Schema::create('user_identities', function (Table $table) {
+        Schema::create('users_identities', function (Table $table) {
             $table->id();
             $table->bigInt('user_id')->unsigned();
             $table->string('provider', 32);
@@ -280,7 +280,7 @@ final class Migrations
     private function createUserSessionsTable(): void
     {
         // a row per signed-in device; the session ID itself stays in the browser, only its hash is here
-        Schema::create('user_sessions', function (Table $table) {
+        Schema::create('users_sessions', function (Table $table) {
             $table->id();
             $table->bigInt('user_id')->unsigned();
             $table->char('token', 64)->unique();
@@ -298,7 +298,7 @@ final class Migrations
     private function createUserEventsTable(): void
     {
         // the security log of the profile: sign-ins, failures, changes of sign-in methods
-        Schema::create('user_events', function (Table $table) {
+        Schema::create('users_events', function (Table $table) {
             $table->id();
             $table->bigInt('user_id')->unsigned();
             $table->string('event', 40);
@@ -316,7 +316,7 @@ final class Migrations
     private function createUserTwoFactorTable(): void
     {
         // the encrypted TOTP secret, keyed hashes of the recovery codes, the last accepted time step
-        Schema::create('user_two_factor', function (Table $table) {
+        Schema::create('users_two_factor', function (Table $table) {
             $table->id();
             $table->bigInt('user_id')->unsigned()->unique();
             $table->text('secret');

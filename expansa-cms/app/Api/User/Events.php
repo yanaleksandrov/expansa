@@ -9,7 +9,7 @@ use App\Models\User;
 use Expansa\Facades\Db;
 
 /**
- * Security log of users, the `user_events` table: sign-ins, failures, sign-outs and changes
+ * Security log of users, the `users_events` table: sign-ins, failures, sign-outs and changes
  * of sign-in methods, with the IP and the device. The profile shows the recent ones, so the owner
  * notices what they did not do. Rows older than the days of the Security settings are dropped.
  */
@@ -30,7 +30,7 @@ final class Events
      */
     public static function record(User $user, string $event, array $details = []): void
     {
-        Db::insert('user_events', [
+        Db::insert('users_events', [
             'user_id'    => $user->id,
             'event'      => $event,
             'details'    => $details === [] ? '' : (string) json_encode($details, JSON_UNESCAPED_UNICODE),
@@ -56,7 +56,7 @@ final class Events
             return 0;
         }
 
-        return Db::delete('user_events', ['created_at[<]' => date('Y-m-d H:i:s', time() - $days * 86400)])?->rowCount() ?? 0;
+        return Db::delete('users_events', ['created_at[<]' => date('Y-m-d H:i:s', time() - $days * 86400)])?->rowCount() ?? 0;
     }
 
     /**
@@ -68,7 +68,7 @@ final class Events
      */
     public static function all(User $user, int $limit = 20): array
     {
-        $rows = Db::select('user_events', ['event', 'details', 'ip', 'user_agent', 'created_at'], [
+        $rows = Db::select('users_events', ['event', 'details', 'ip', 'user_agent', 'created_at'], [
             'user_id' => $user->id,
             'ORDER'   => ['id' => 'DESC'],
             'LIMIT'   => $limit,

@@ -89,7 +89,7 @@ OAuth:
       `current()` — типизированная обёртка над `Auth::user()`.
 - [x] `bootstrap.php`: `Auth::configure()` с cookie, `EX_KEYS['auth']` и `EX_OAUTH`; `Access::configure()`.
 - [x] `env.php`: `EX_OAUTH` — учётные данные провайдеров; пример в `env.example.php`.
-- [x] Миграция `user_identities`: `user_id`, `provider`, `subject` (уникальная пара), `created_at`.
+- [x] Миграция `users_identities`: `user_id`, `provider`, `subject` (уникальная пара), `created_at`.
 - [x] `App\Api\User\OAuth`: `GET /oauth/{provider}` — `State` в сессию, редирект; `GET /oauth/{provider}/callback` —
       `profile()`, поиск аккаунта, `Auth::login()`, `Session::regenerateId()`, редирект в дашборд.
 - [x] Правила привязки:
@@ -108,11 +108,11 @@ OAuth:
 - [x] Повторное подтверждение паролем или passkey (`App\Api\User\Confirmation`, 15 минут) для смены email,
       добавления и удаления способов входа, выхода с устройств.
 - [x] Письмо о входе с нового устройства со ссылкой «это не я»: выход везде и сброс пароля.
-- [x] Журнал безопасности (`user_events`) и блок «Recent activity» в профиле.
+- [x] Журнал безопасности (`users_events`) и блок «Recent activity» в профиле.
 - [x] Проверка паролей: длина, не логин и не email, база утечек HIBP; в регистрации, смене, сбросе и установщике.
 - [x] UI профиля: подключённые аккаунты, подключение — с текущим паролем (как passkey), отключение.
 - [x] Несколько аккаунтов в браузере: `Auth::switchAccount()`, меню пользователя, `sign-in?add=1`.
-- [x] Сессии на сервере (`Contracts\Sessions`, таблица `user_sessions`): устройства в профиле, выход с любого.
+- [x] Сессии на сервере (`Contracts\Sessions`, таблица `users_sessions`): устройства в профиле, выход с любого.
 - [x] Новый email применяется только после ссылки на новый адрес, старый получает уведомление.
 - [x] Настройки безопасности и провайдеры OAuth — в админке (вкладка Security), а не в `env.php`.
 - [x] 2FA (TOTP, `Auth\Totp`, QR — `Codecs\QrCode`): коды восстановления, обязательность для ролей.

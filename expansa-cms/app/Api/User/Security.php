@@ -73,7 +73,7 @@ final class Security
             return false;
         }
 
-        Db::delete('user_sessions', ['user_id' => $user->id]);
+        Db::delete('users_sessions', ['user_id' => $user->id]);
         Events::record($user, 'account_secured');
         new UserService()->requestPasswordReset($user);
 
