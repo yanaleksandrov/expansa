@@ -13,7 +13,6 @@ use Expansa\Facades\Auth;
 use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
-use Expansa\Facades\Safe;
 
 $user = User::current();
 
@@ -32,51 +31,37 @@ return Form::enqueue(
     ],
     [
         [
-            'type'     => 'custom',
-            'callback' => function () {
-                ?>
-                <div class="dg g-1 p-7 sm:p-5 pb-4 sm:pb-4 bg-gray-lt">
-                    <?php
-                    echo view(
-                        'components/form/image',
-                        [
-                            'type'        => 'image',
-                            'name'        => 'avatar',
-                            'error'       => 'avatar',
-                            'label'       => t('Profile Settings'),
-                            'class'       => '',
-                            'label_class' => 'field-label fw-500 fs-18',
-                            'reset'       => 0,
-                            'before'      => '',
-                            'after'       => '',
-                            'instruction' => t('Click to upload your avatar.'),
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop' => 'avatar',
-                                'name'    => 'avatar',
-                                '@change' => '[...$refs.uploader.files].map(file => $ajax.post("upload/media").then(response => files.unshift(response[0])))',
-                            ],
-                        ]
-                    );
-                    ?>
-                </div>
-                <?php
-            },
-        ],
-        [
             'type'          => 'tab',
             'label'         => t('Overview'),
             'name'          => 'profile',
             'caption'       => '',
             'description'   => '',
             'icon'          => 'ph ph-user',
-            'class_menu'    => 'bg-gray-lt',
-            'class_button'  => 'ml-7 sm:ml-5',
-            'class_content' => 'p-7 sm:p-5',
+            'class_menu'    => '',
+            'class_button'  => '',
+            'class_content' => '',
             'fields'        => [
+	            [
+		            'type'        => 'image',
+		            'name'        => 'avatar',
+		            'error'       => 'avatar',
+		            'label'       => t('Profile Settings'),
+		            'class'       => '',
+		            'label_class' => 'field-label fw-500 fs-18',
+		            'reset'       => 0,
+		            'before'      => '',
+		            'after'       => '',
+		            'instruction' => t('Click to upload your avatar.'),
+		            'tooltip'     => '',
+		            'copy'        => 0,
+		            'validator'   => '',
+		            'conditions'  => [],
+		            'attributes'  => [
+			            'u-prop'  => 'avatar',
+			            'name'    => 'avatar',
+			            '@change' => '[...$refs.uploader.files].map(file => $ajax.post("upload/media").then(response => files.unshift(response[0])))',
+		            ],
+	            ],
                 [
                     'type'          => 'group',
                     'name'          => 'contacts',
@@ -103,7 +88,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'email',
+                                'u-prop'         => 'email',
                                 'value'          => $user->email ?? '',
                                 'placeholder'    => t('e.g. user@gmail.com'),
                                 'u-autocomplete' => '',
@@ -135,7 +120,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'login',
+                                'u-prop'      => 'login',
                                 'value'       => $user->login ?? '',
                                 'placeholder' => t('e.g. admin'),
                                 'required'    => true,
@@ -158,7 +143,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'nicename',
+                                'u-prop'      => 'nicename',
                                 'value'       => $user->nicename ?? '',
                                 'placeholder' => t('Username'),
                                 'required'    => true,
@@ -180,7 +165,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'firstname',
+                                'u-prop'      => 'firstname',
                                 'value'       => $user->firstname ?? '',
                                 'placeholder' => t('e.g. John'),
                                 '@input'      => 'showname = `${firstname} ${lastname}`',
@@ -202,7 +187,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'lastname',
+                                'u-prop'      => 'lastname',
                                 'value'       => $user->lastname ?? '',
                                 'placeholder' => t('e.g. Doe'),
                                 '@input'      => 'showname = `${firstname} ${lastname}`',
@@ -225,7 +210,7 @@ return Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop' => 'showname',
-                                'value' => $user->showname ?? '',
+                                'value'  => $user->showname ?? '',
                             ],
                         ],
                     ],
@@ -254,7 +239,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'bio',
+                                'u-prop'      => 'bio',
                                 'rows'        => count(explode("\n", $user->field->find('bio') ?? '')),
                                 'value'       => $user->field->find('bio'),
                                 'placeholder' => t('A few words about yourself'),
@@ -298,7 +283,7 @@ return Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop' => 'format',
-                                'value' => $user->field->find('format'),
+                                'value'  => $user->field->find('format'),
                             ],
                             'options'     => [
                                 'light' => [
@@ -343,7 +328,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'toolbar',
+                                'u-prop'  => 'toolbar',
                                 'checked' => $user->field->find('toolbar'),
                             ],
                             'options'     => [],
@@ -374,7 +359,7 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'locale',
+                                'u-prop'   => 'locale',
                                 'u-select' => '',
                                 'value'    => $user->locale ?? '',
                             ],
@@ -539,7 +524,7 @@ return Form::enqueue(
                                     'oauth-linked'  => t('This account is already connected to another user.'),
                                     'oauth-limited' => t('Too many attempts. Try again in a few minutes.'),
                                 ];
-                                $error  = $errors[$_GET['error'] ?? ''] ?? '';
+                                $error = $errors[$_GET['error'] ?? ''] ?? '';
                                 ?>
                                 <div class="dg g-2 ga-4">
                                     <div><?php echo t('Sign in with an account of another service.'); ?></div>
@@ -602,7 +587,7 @@ return Form::enqueue(
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="df fw g-3 fs-13">
+                                        <div class="df fw fdc g-3 fs-13">
                                             <?php foreach ($permissions as $permission) : ?>
                                                 <label class="df aic g-1"><input type="checkbox" name="token-scope" value="<?php echo htmlspecialchars($permission); ?>"> <?php echo htmlspecialchars($permission); ?></label>
                                             <?php endforeach; ?>
@@ -673,9 +658,9 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'passwordNew',
+                                'u-prop'       => 'passwordNew',
                                 'autocomplete' => 'new-password',
-                                'placeholder' => t('New Password'),
+                                'placeholder'  => t('New Password'),
                             ],
                             'switcher'    => 1,
                             'generator'   => 1,
@@ -684,7 +669,7 @@ return Form::enqueue(
                                 'lowercase' => 2,
                                 'uppercase' => 2,
                                 'special'   => 2,
-                                'length'    => 12,
+                                'length'    => Passwords::MIN_LENGTH,
                                 'digit'     => 2,
                             ],
                         ],
@@ -704,15 +689,21 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop' => 'passwordOld',
-                                'autocomplete' => 'current-password',
+                                'u-prop'         => 'passwordOld',
+                                'autocomplete'   => 'current-password',
                                 'u-autocomplete' => '',
                                 'placeholder'    => t('Old Password'),
                             ],
                             'switcher'    => 1,
                             'generator'   => 0,
                             'indicator'   => 0,
-                            'characters'  => [],
+	                        'characters'  => [
+		                        'lowercase' => 2,
+		                        'uppercase' => 2,
+		                        'special'   => 2,
+		                        'length'    => Passwords::MIN_LENGTH,
+		                        'digit'     => 2,
+	                        ],
                         ],
                         [
                             'type'        => 'submit',

@@ -1,4 +1,7 @@
 <?php
+
+use App\Support\Passwords;
+
 return \Expansa\Builders\Form::enqueue(
     'system-install',
     [
@@ -395,6 +398,7 @@ return \Expansa\Builders\Form::enqueue(
                         'u-prop'   => 'user.locale',
                         'u-select' => '{"showSearch": 1}',
                         'required' => true,
+	                    'value'    => explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? 'ru-RU')[0],
                     ],
                     'options'     => Expansa\Facades\I18n::languageOptions(),
                 ],
@@ -449,7 +453,7 @@ return \Expansa\Builders\Form::enqueue(
                         'lowercase' => 2,
                         'uppercase' => 2,
                         'special'   => 2,
-                        'length'    => 12,
+                        'length'    => Passwords::MIN_LENGTH,
                         'digit'     => 2,
                     ],
                 ],

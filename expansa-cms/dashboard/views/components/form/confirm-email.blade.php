@@ -28,7 +28,7 @@ defined('EX_PATH') || exit;
 	]
 )->values();
 ?>
-<div class="confirm-email active">
+<div class="confirm-email">
 	<i class="ph ph-mailbox"></i>
 	<div class="confirm-email-main">
 		<div class="confirm-email-top">

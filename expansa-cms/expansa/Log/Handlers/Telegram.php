@@ -65,6 +65,7 @@ class Telegram extends AbstractHandler
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
             CURLOPT_TIMEOUT        => $this->timeout,
+            CURLOPT_SSL_OPTIONS    => CURLSSLOPT_NATIVE_CA,
             CURLOPT_POSTFIELDS     => [
                 'chat_id'                  => $this->chatId,
                 'text'                     => $message,

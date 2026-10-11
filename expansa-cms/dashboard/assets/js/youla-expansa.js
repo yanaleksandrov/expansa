@@ -223,7 +223,7 @@ document.addEventListener('youla:init', () => {
                     clearTimeout(item.timer);
                     this.items = this.items.map(item => item.id === id ? {
                         ...item,
-                        selectors: [ ...item.selectors, 'hide' ]
+                        selectors: [ ...item.selectors, 'hiding' ]
                     } : item);
                     setTimeout(() => {
                         this.items = this.items.filter(item => item.id !== id);
@@ -744,7 +744,7 @@ document.addEventListener('youla:init', () => {
         tabButton(id) {
             return {
                 ':class'() {
-                    return this.tab === id ? 'active' : '';
+                    return this.tab === id ? 'is-active' : '';
                 },
                 '@click'() {
                     this.tab = id;

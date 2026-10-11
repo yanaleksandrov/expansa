@@ -6,19 +6,21 @@ namespace App\Support;
 
 use App\Models\Option;
 use Closure;
+use Expansa\Facades\Log;
 use Expansa\Support\Is;
 
 /**
  * Password rules of sign-up, change and reset: a minimum length, not the login or email, and not
  * found in public breaches (Have I Been Pwned, k-anonymity: only the first 5 characters of the
- * SHA-1 leave the server). An unreachable breach service never blocks a password.
+ * SHA-1 leave the server). An unreachable breach service never blocks a password: the failure goes
+ * to the log, and Site Health shows whether the service answers.
  */
 final class Passwords
 {
     /**
      * Shortest password accepted.
      */
-    public const int MIN_LENGTH = 8;
+    public const int MIN_LENGTH = 12;
 
     /**
      * Range endpoint of the breach service, followed by the 5-character SHA-1 prefix.
@@ -34,6 +36,11 @@ final class Passwords
      * Fetches a range: `fn (string $prefix): ?string` — the response body, null if unreachable; curl by default.
      */
     private static ?Closure $transport = null;
+
+    /**
+     * Why the last request of curl failed, for the log.
+     */
+    private static string $failure = '';
 
     /**
      * Replace the request to the breach service, e.g. by a fake in tests.
@@ -75,6 +82,34 @@ final class Passwords
     }
 
     /**
+     * Whether new passwords are checked against breaches: the Security setting, always on before installation.
+     *
+     * @return bool
+     */
+    public static function isCheckEnabled(): bool
+    {
+        return ! Is::installed() || (bool) Option::get('security.breached', true);
+    }
+
+    /**
+     * Ask the breach service for a range of hashes, for Site Health.
+     *
+     * @return string|null Why the service is unavailable, e.g. a curl error or "HTTP 503"; null if it answers.
+     */
+    public static function checkService(): ?string
+    {
+        self::$failure = '';
+
+        $body = (self::$transport ?? self::fetch(...))('00000');
+
+        return match (true) {
+            $body === null                                   => self::$failure ?: 'No response.',
+            preg_match('/^[0-9A-F]{35}:\d+/m', $body) !== 1 => 'Unexpected response.',
+            default                                          => null,
+        };
+    }
+
+    /**
      * Whether the breach service knows the password; false if it can't be reached.
      *
      * @param string $password
@@ -82,8 +117,7 @@ final class Passwords
      */
     private static function isBreached(string $password): bool
     {
-        // the installation has no settings yet: the check is on
-        if (Is::installed() && ! Option::get('security.breached', true)) {
+        if (! self::isCheckEnabled()) {
             return false;
         }
 
@@ -91,7 +125,15 @@ final class Passwords
         $body   = (self::$transport ?? self::fetch(...))(substr($hash, 0, 5));
         $suffix = substr($hash, 5);
 
-        foreach (explode("\n", (string) $body) as $line) {
+        if ($body === null) {
+            Log::warning('Breached passwords: the service did not answer, the password was accepted without the check.', [
+                'error' => self::$failure,
+            ]);
+
+            return false;
+        }
+
+        foreach (explode("\n", $body) as $line) {
             [$candidate, $count] = array_pad(explode(':', trim($line)), 2, '0');
             if ($candidate === $suffix && (int) $count > 0) {
                 return true;
@@ -110,6 +152,8 @@ final class Passwords
     private static function fetch(string $prefix): ?string
     {
         if (! function_exists('curl_init')) {
+            self::$failure = 'The curl extension is not available.';
+
             return null;
         }
 
@@ -118,10 +162,18 @@ final class Passwords
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => self::TIMEOUT,
             CURLOPT_HTTPHEADER     => ['Add-Padding: true', 'User-Agent: Expansa'],
+            CURLOPT_SSL_OPTIONS    => CURLSSLOPT_NATIVE_CA,
         ]);
 
-        $body = curl_exec($curl);
+        $body   = curl_exec($curl);
+        $status = curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
 
-        return is_string($body) && curl_getinfo($curl, CURLINFO_RESPONSE_CODE) === 200 ? $body : null;
+        self::$failure = match (true) {
+            ! is_string($body) => curl_error($curl) ?: 'No response.',
+            $status !== 200    => "HTTP $status",
+            default            => '',
+        };
+
+        return self::$failure === '' ? $body : null;
     }
 }

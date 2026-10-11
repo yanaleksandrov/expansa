@@ -14,7 +14,7 @@ final class Themes extends Table
             [
                 'title'       => 'Rgbcode',
                 'description' => 'Multipurpose theme for blog, startup, portfolio, business & e-commerce.',
-                'screenshot'  => 'https://dev.codyshop.ru/wp-content/themes/rgbcode/screenshot.png',
+                'screenshot'  => url('dashboard/assets/images/placeholder.svg'),
                 'reviews'     => 973,
                 'version'     => '2027.1',
                 'rating'      => 3.75,
@@ -23,7 +23,7 @@ final class Themes extends Table
             [
                 'title'       => 'Daria',
                 'description' => 'Multipurpose theme for blog, startup, portfolio, business & e-commerce.',
-                'screenshot'  => 'https://dev.codyshop.ru/wp-content/themes/daria/screenshot.jpg',
+                'screenshot'  => url('dashboard/assets/images/placeholder.svg'),
                 'reviews'     => 111,
                 'version'     => '2027.1',
                 'rating'      => 4.5,
@@ -32,7 +32,7 @@ final class Themes extends Table
             [
                 'title'       => 'Twenty Twenty-Two',
                 'description' => 'Multipurpose theme for blog, startup, portfolio, business & e-commerce.',
-                'screenshot'  => '//ts.w.org/wp-content/themes/twentytwentytwo/screenshot.png',
+                'screenshot'  => url('dashboard/assets/images/placeholder.svg'),
                 'reviews'     => 200,
                 'version'     => '2027.1',
                 'rating'      => 5,
@@ -41,7 +41,7 @@ final class Themes extends Table
             [
                 'title'       => 'Lemony Health',
                 'description' => 'Lemony Health is multipurpose eCommerce theme for any goals.',
-                'screenshot'  => '//ts.w.org/wp-content/themes/lemmony/screenshot.png',
+                'screenshot'  => url('dashboard/assets/images/placeholder.svg'),
                 'reviews'     => 0,
                 'version'     => '2027.1',
                 'rating'      => 0,

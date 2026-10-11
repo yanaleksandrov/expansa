@@ -14,7 +14,7 @@
 		<div class="product-table-row">
 			<div class="product-table-col">
 				<div class="product-table-item">
-					<img class="product-table-image" src="https://cdn.shopify.com/s/files/1/0703/7560/4260/files/avatar_40x40@3x.jpg?v=1734901120" width="48" height="48" alt="Product Name">
+					<img class="product-table-image" src="<?php echo url( 'dashboard/assets/images/placeholder.svg' ); ?>" width="48" height="48" alt="Product Name">
 					<ul class="product-table-data">
 						<li><a href="#" target="_blank"><strong>Test product</strong></a></li>
 						<li>$0.00</li>

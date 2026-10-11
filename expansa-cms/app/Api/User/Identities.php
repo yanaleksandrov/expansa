@@ -17,7 +17,7 @@ use Expansa\Support\Hash;
 use Throwable;
 
 /**
- * Accounts of users at sign-in providers, the `user_identities` table: the provider and its
+ * Accounts of users at sign-in providers, the `users_identities` table: the provider and its
  * user ID, never its tokens. An account with the same email is never linked automatically:
  * whoever controls a provider account must not take over a local one by its email.
  */
@@ -80,7 +80,7 @@ final class Identities
      */
     public static function resolve(Profile $profile, ?User $current): User|Error
     {
-        $row = Db::get('user_identities', ['user_id'], ['provider' => $profile->provider, 'subject' => $profile->id]);
+        $row = Db::get('users_identities', ['user_id'], ['provider' => $profile->provider, 'subject' => $profile->id]);
 
         if (is_array($row)) {
             $owner = User::find((int) $row['user_id']);
@@ -127,7 +127,7 @@ final class Identities
      */
     public static function all(User $user): array
     {
-        return Db::select('user_identities', ['id [Int]', 'provider', 'email', 'created_at'], [
+        return Db::select('users_identities', ['id [Int]', 'provider', 'email', 'created_at'], [
             'user_id' => $user->id,
             'ORDER'   => ['provider' => 'ASC'],
         ]) ?? [];
@@ -142,7 +142,7 @@ final class Identities
      */
     public static function delete(User $user, int $id): bool
     {
-        return (Db::delete('user_identities', ['id' => $id, 'user_id' => $user->id])?->rowCount() ?? 0) > 0;
+        return (Db::delete('users_identities', ['id' => $id, 'user_id' => $user->id])?->rowCount() ?? 0) > 0;
     }
 
     /**
@@ -154,7 +154,7 @@ final class Identities
      */
     private static function link(User $user, Profile $profile): bool
     {
-        return (Db::insert('user_identities', [
+        return (Db::insert('users_identities', [
             'user_id'  => $user->id,
             'provider' => $profile->provider,
             'subject'  => $profile->id,

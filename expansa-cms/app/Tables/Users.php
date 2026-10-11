@@ -18,7 +18,7 @@ final class Users extends Table
      */
     public function data(): array
     {
-        $visits = Db::query('SELECT user_id, MAX(created_at) FROM <user_events> WHERE event = \'sign_in\' GROUP BY user_id')
+        $visits = Db::query('SELECT user_id, MAX(created_at) FROM <users_events> WHERE event = \'sign_in\' GROUP BY user_id')
             ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
 
         $columns = ['id [Int]', 'login', 'showname', 'email', 'status', 'roles'];

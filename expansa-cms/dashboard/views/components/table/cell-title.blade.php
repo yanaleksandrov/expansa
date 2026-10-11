@@ -25,7 +25,7 @@ defined('EX_PATH') || exit;
         <a href="#" class="fw-500 t-dark" @click="$dialog.open('jb-add-item')">{{ $__data[$prop] ?? '' }}</a>
         <span class="t-muted">— Draft</span>
     </div>
-    <div class="df aic g-2 mt-1 hover--show">
+    <div class="df aic g-2 mt-1 hover-reveal">
         <a href="#">{{ t('View') }}</a>
         <a href="#">{{ t('Duplicate') }}</a>
         <a class="t-red" href="#">{{ t('Trash') }}</a>

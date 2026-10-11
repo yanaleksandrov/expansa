@@ -16,7 +16,7 @@ use Expansa\Facades\Session;
 use Expansa\Support\Error;
 
 /**
- * Two-factor authentication by an authenticator app (TOTP), the `user_two_factor` table: the secret
+ * Two-factor authentication by an authenticator app (TOTP), the `users_two_factor` table: the secret
  * encrypted with the site key, recovery codes only as keyed hashes. After a password or a provider the
  * sign-in waits in the session for a code; a passkey is a second factor by itself and skips it.
  */
@@ -50,7 +50,7 @@ final class TwoFactor
      */
     public static function isEnabled(User $user): bool
     {
-        return (bool) Db::has('user_two_factor', ['user_id' => $user->id]);
+        return (bool) Db::has('users_two_factor', ['user_id' => $user->id]);
     }
 
     /**
@@ -108,8 +108,8 @@ final class TwoFactor
 
         [$codes, $hashes] = self::createRecoveryCodes();
 
-        Db::delete('user_two_factor', ['user_id' => $user->id]);
-        Db::insert('user_two_factor', [
+        Db::delete('users_two_factor', ['user_id' => $user->id]);
+        Db::insert('users_two_factor', [
             'user_id'        => $user->id,
             'secret'         => Secrets::encrypt((string) $setup['secret'], 'two-factor'),
             'recovery_codes' => json_encode($hashes),
@@ -129,7 +129,7 @@ final class TwoFactor
      */
     public static function disable(User $user): void
     {
-        Db::delete('user_two_factor', ['user_id' => $user->id]);
+        Db::delete('users_two_factor', ['user_id' => $user->id]);
         Events::record($user, 'two_factor_disabled');
     }
 
@@ -142,7 +142,7 @@ final class TwoFactor
     public static function regenerateCodes(User $user): array
     {
         [$codes, $hashes] = self::createRecoveryCodes();
-        Db::update('user_two_factor', ['recovery_codes' => json_encode($hashes)], ['user_id' => $user->id]);
+        Db::update('users_two_factor', ['recovery_codes' => json_encode($hashes)], ['user_id' => $user->id]);
         Events::record($user, 'recovery_codes_new');
 
         return $codes;
@@ -237,7 +237,7 @@ final class TwoFactor
      */
     private static function verify(User $user, string $code): bool
     {
-        $row = Db::get('user_two_factor', ['secret', 'recovery_codes', 'last_step'], ['user_id' => $user->id]);
+        $row = Db::get('users_two_factor', ['secret', 'recovery_codes', 'last_step'], ['user_id' => $user->id]);
         if (! is_array($row)) {
             return false;
         }
@@ -245,7 +245,7 @@ final class TwoFactor
         // the step only grows, so of two requests with the same code only one wins
         $step = Totp::verify(Secrets::decrypt($row['secret'], 'two-factor'), $code, (int) $row['last_step']);
         if ($step !== null) {
-            $updated = Db::update('user_two_factor', ['last_step' => $step], ['user_id' => $user->id, 'last_step[<]' => $step]);
+            $updated = Db::update('users_two_factor', ['last_step' => $step], ['user_id' => $user->id, 'last_step[<]' => $step]);
 
             return ($updated?->rowCount() ?? 0) > 0;
         }
@@ -257,7 +257,7 @@ final class TwoFactor
         }
 
         $left = array_values(array_diff($hashes, [$hash]));
-        Db::update('user_two_factor', ['recovery_codes' => json_encode($left)], ['user_id' => $user->id]);
+        Db::update('users_two_factor', ['recovery_codes' => json_encode($left)], ['user_id' => $user->id]);
         Events::record($user, 'recovery_code_used', ['left' => count($left)]);
 
         return true;

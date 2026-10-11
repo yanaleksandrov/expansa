@@ -113,7 +113,7 @@ document.addEventListener('youla:init', () => {
             const rect = this.band.rect;
             this.hits = this.candidates.filter(candidate => RubberBand.intersects(rect, candidate.rect));
             this.candidates.forEach(candidate => {
-                candidate.node.classList.toggle('active', this.hits.includes(candidate));
+                candidate.node.classList.toggle('is-active', this.hits.includes(candidate));
             });
         }
         finish() {

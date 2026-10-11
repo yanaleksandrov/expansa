@@ -52,7 +52,7 @@
   }
 
   .site-health-accordion {
-    .accordion-item:last-child .site-health-title:not(.active) {
+    .accordion-item:last-child .site-health-title:not(.is-active) {
       border-bottom: 0;
     }
   }
@@ -92,7 +92,7 @@
     color: var(--expansa-text-muted);
     transition: transform .2s;
 
-    .active & {
+    .is-active & {
       transform: rotate(180deg);
     }
   }

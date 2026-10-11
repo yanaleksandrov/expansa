@@ -158,7 +158,6 @@
                 if (this.toSlider) {
                     this.toSlider.disabled = this.disabled;
                 }
-                this.wrapper.classList.toggle('is-disabled', this.disabled);
             }
             if ('fixedRange' in options && this.isRange) {
                 this.rangeSize = typeof this.fixedRange === 'number' ? this.fixedRange : Number(this.toSlider.value) - Number(this.fromSlider.value);
@@ -241,7 +240,6 @@
                 if (this.toSlider) {
                     this.toSlider.disabled = true;
                 }
-                wrapper.classList.add('is-disabled');
             } else if (this.isRange) {
                 this.fill.classList.add('is-draggable');
             }

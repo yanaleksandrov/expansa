@@ -34,9 +34,9 @@ use Expansa\Facades\Hook;
 </head>
 <body u-data="youla" @keydown.window.prevent.ctrl.s="$notice.add(notifications.ctrlS)">
     <?php echo view('components/impersonation'); ?>
-    <div class="expansa" :class="showMenu && 'active'">
+    <div class="expansa" :class="showMenu && 'is-active'">
         <div class="expansa-bar">
-            <div class="expansa-bar-burger" :class="showMenu && 'active'" @click="showMenu = !showMenu">
+            <div class="expansa-bar-burger" :class="showMenu && 'is-active'" @click="showMenu = !showMenu">
                 <i class="ph ph-list"></i>
             </div>
 
@@ -75,7 +75,7 @@ use Expansa\Facades\Hook;
     </div>
 
     <!-- dialog windows start -->
-    <div class="dialog" u-data="dialog" :class="stack.length ? ['active', stack.at(-1)?.class].filter(Boolean).join(' ') : ''" @keydown.esc.window="close()" id="expansa-dialog">
+    <div class="dialog" u-data="dialog" :class="stack.length ? ['is-active', stack.at(-1)?.class].filter(Boolean).join(' ') : ''" @keydown.esc.window="close()" id="expansa-dialog">
         <div u-each="entry in stack" class="dialog-wrapper" @click.outside="close(entry.id)">
             <div class="dialog-header">
                 <template u-if="entry.title">

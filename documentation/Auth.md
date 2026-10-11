@@ -182,7 +182,7 @@ Auth::getSessionId(); // ID сессии текущего устройства, 
 - `isActive()` вызывается на каждом запросе вошедшего пользователя: держите поиск по индексу, отметку
   последнего использования пишите не чаще раза в несколько минут.
 - `logout()` удаляет сессию, `refresh()` сохраняет её. Анонимные запросы по-прежнему ничего не пишут.
-- В Expansa — `App\Api\User\Sessions`, таблица `user_sessions` (хранится SHA-256 ID). В профиле блок
+- В Expansa — `App\Api\User\Sessions`, таблица `users_sessions` (хранится SHA-256 ID). В профиле блок
   «Devices»: устройства, «This device», выход с любого (`user/session-delete`) и со всех остальных
   (`user/sessions-delete-others`). Смена пароля удаляет записи остальных устройств.
 
@@ -398,7 +398,7 @@ final class Gitea extends AbstractProvider
 | Права, роли, policy          | `Access`                           | авторизация не зависит от способа входа      |
 | Cookie, сессия               | приложение, колбэки `configure()`  | пакет не зависит от `Cookie` и `Session`     |
 | Пароль                       | `App\Models\User`                  | `password_verify`, затем `Auth::login()`     |
-| Хранение passkey и аккаунтов провайдеров | приложение (`passkeys`, `user_identities`) | схема — дело приложения     |
+| Хранение passkey и аккаунтов провайдеров | приложение (`passkeys`, `users_identities`) | схема — дело приложения     |
 | Правила привязки аккаунтов   | `App\Api\User\Identities`          | политика сайта: регистрация, email           |
 | HTTP к провайдерам           | `Internal\Http` (curl)             | без зависимости от пакета `Http`             |
 | Токены провайдера, его API   | нет                                | для входа не нужны                           |

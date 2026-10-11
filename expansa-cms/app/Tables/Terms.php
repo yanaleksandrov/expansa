@@ -12,13 +12,13 @@ final class Terms extends Table
     {
         return [
             [
-                'image' => 'https://dev.codyshop.ru/wp-content/themes/rgbcode/screenshot.png',
+                'image' => url('dashboard/assets/images/placeholder.svg'),
                 'title' => 'Hello World',
                 'slug'  => 'hello-world',
                 'count' => 23,
             ],
             [
-                'image' => 'https://dev.codyshop.ru/wp-content/themes/rgbcode/screenshot.png',
+                'image' => url('dashboard/assets/images/placeholder.svg'),
                 'title' => 'Uncategorized',
                 'slug'  => 'uncategorized',
                 'count' => 5,

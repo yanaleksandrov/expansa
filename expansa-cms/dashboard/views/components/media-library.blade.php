@@ -43,7 +43,7 @@ defined('EX_PATH') || exit;
 
     <div class="media-library-body df">
         <div class="storage media-library-grid" u-dragselect="applyDragSelection($event.detail)">
-            <div class="storage__item" :class="isSelected(item.id) && 'active'" :data-id="item.id"
+            <div class="storage__item" :class="isSelected(item.id) && 'is-active'" :data-id="item.id"
                  u-each.lazy="(item, i) in visible"
                  @click="toggle(item, $event)" @dblclick="confirm(); $dialog.close()">
                 <template u-if="item.url || item.icon">

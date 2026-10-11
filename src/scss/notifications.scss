@@ -30,12 +30,8 @@
     position: relative;
     padding-top: 0.2rem;
 
-    &.init {
-      animation: notificationShow 0;
-    }
-
-    &.removed {
-      animation: notificationHide 0.25s;
+    &.is-hiding {
+      animation: notificationHide 0.25s forwards;
       z-index: -1;
     }
   }

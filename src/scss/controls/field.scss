@@ -15,6 +15,16 @@
     align-items: center;
     font-weight: 500;
     line-height: 1.35em;
+
+    &:after {
+      color: var(--expansa-danger);
+      content: attr(data-required);
+      margin-inline-end: auto;
+    }
+
+    & > * {
+      order: 1;
+    }
   }
 
   &-instruction {
@@ -84,7 +94,6 @@
 
     i {
       font-size: inherit;
-      margin-top: 0.15em;
     }
 
     code,
@@ -113,7 +122,7 @@
         box-shadow: none;
       }
 
-      &.load {
+      &.is-loading {
         background-position: calc(100% - 0.25rem) center;
       }
     }

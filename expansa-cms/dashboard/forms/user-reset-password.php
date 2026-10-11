@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Passwords;
 use Expansa\Builders\Form;
 use Expansa\Facades\Safe;
 
@@ -48,7 +49,7 @@ if ($hasToken) {
             'lowercase' => 2,
             'uppercase' => 2,
             'special'   => 2,
-            'length'    => 12,
+            'length'    => Passwords::MIN_LENGTH,
             'digit'     => 2,
         ],
     ];

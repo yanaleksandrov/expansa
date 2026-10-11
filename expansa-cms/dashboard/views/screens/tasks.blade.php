@@ -27,7 +27,7 @@ echo view(
                     </div>
                 </div>
                 <div class="kanban__img">
-                    <img src="https://placeimg.com/300/150/hello" width="300" height="150" alt="Post image">
+                    <img src="{{ url('dashboard/assets/images/placeholder.svg') }}" width="300" height="150" alt="Post image">
                 </div>
                 <div class="kanban__progress">
                     <div class="progress" u-progress.100.0.25.1000ms></div>

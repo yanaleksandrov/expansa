@@ -12,7 +12,7 @@ use Expansa\Facades\Db;
 use LogicException;
 
 /**
- * Sign-ins of users, the `user_sessions` table: one row per device, so the profile can list
+ * Sign-ins of users, the `users_sessions` table: one row per device, so the profile can list
  * the devices and sign out any of them. The table keeps only a hash of the session ID: the ID
  * itself lives in the signed token of the browser.
  */
@@ -53,8 +53,8 @@ final class Sessions implements SessionStore
         $id = bin2hex(random_bytes(16));
 
         // sign-ins are rare enough to clean up the expired rows of everyone here
-        Db::delete('user_sessions', ['expires_at[<]' => date('Y-m-d H:i:s')]);
-        Db::insert('user_sessions', [
+        Db::delete('users_sessions', ['expires_at[<]' => date('Y-m-d H:i:s')]);
+        Db::insert('users_sessions', [
             'user_id'    => $this->userId($user),
             'token'      => hash('sha256', $id),
             'user_agent' => mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
@@ -68,14 +68,14 @@ final class Sessions implements SessionStore
 
     public function isActive(string $id, Identity $user): bool
     {
-        $row = Db::get('user_sessions', ['id', 'user_id', 'used_at', 'expires_at'], ['token' => hash('sha256', $id)]);
+        $row = Db::get('users_sessions', ['id', 'user_id', 'used_at', 'expires_at'], ['token' => hash('sha256', $id)]);
         if (! is_array($row) || (int) $row['user_id'] !== $this->userId($user) || strtotime($row['expires_at']) < time()) {
             return false;
         }
 
         if (strtotime((string) $row['used_at']) < time() - self::TOUCH_INTERVAL) {
             $touched = ['used_at' => date('Y-m-d H:i:s'), 'ip' => (string) ($_SERVER['REMOTE_ADDR'] ?? '')];
-            Db::update('user_sessions', $touched, ['id' => $row['id']]);
+            Db::update('users_sessions', $touched, ['id' => $row['id']]);
         }
 
         return true;
@@ -83,7 +83,7 @@ final class Sessions implements SessionStore
 
     public function delete(string $id): void
     {
-        Db::delete('user_sessions', ['token' => hash('sha256', $id)]);
+        Db::delete('users_sessions', ['token' => hash('sha256', $id)]);
     }
 
     /**
@@ -95,7 +95,7 @@ final class Sessions implements SessionStore
     public static function all(User $user): array
     {
         $current = hash('sha256', Auth::getSessionId());
-        $rows    = Db::select('user_sessions', ['id [Int]', 'token', 'user_agent', 'ip', 'created_at', 'used_at'], [
+        $rows    = Db::select('users_sessions', ['id [Int]', 'token', 'user_agent', 'ip', 'created_at', 'used_at'], [
             'user_id'        => $user->id,
             'expires_at[>=]' => date('Y-m-d H:i:s'),
             'ORDER'          => ['used_at' => 'DESC'],
@@ -124,7 +124,7 @@ final class Sessions implements SessionStore
      */
     public static function deleteById(User $user, int $id): bool
     {
-        return (Db::delete('user_sessions', ['id' => $id, 'user_id' => $user->id])?->rowCount() ?? 0) > 0;
+        return (Db::delete('users_sessions', ['id' => $id, 'user_id' => $user->id])?->rowCount() ?? 0) > 0;
     }
 
     /**
@@ -135,7 +135,7 @@ final class Sessions implements SessionStore
      */
     public static function deleteOthers(User $user): int
     {
-        return Db::delete('user_sessions', [
+        return Db::delete('users_sessions', [
             'user_id'  => $user->id,
             'token[!]' => hash('sha256', Auth::getSessionId()),
         ])?->rowCount() ?? 0;
@@ -148,7 +148,7 @@ final class Sessions implements SessionStore
      */
     public static function prune(): int
     {
-        return Db::delete('user_sessions', ['expires_at[<]' => date('Y-m-d H:i:s')])?->rowCount() ?? 0;
+        return Db::delete('users_sessions', ['expires_at[<]' => date('Y-m-d H:i:s')])?->rowCount() ?? 0;
     }
 
     /**

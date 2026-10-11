@@ -518,16 +518,30 @@ final class Manager
 
     /**
      * Sign out the current account, the next signed-in one of the browser becomes current;
-     * with $all every account of the browser. The device stays trusted.
+     * with $all every account of the browser, with $account another one, the current stays.
+     * The device stays trusted.
      *
-     * @param bool $all
+     * @param bool   $all
+     * @param string $account Identifier of a signed-in account of the browser, empty for the current one.
      * @return void
      */
-    public function logout(bool $all = false): void
+    public function logout(bool $all = false, string $account = ''): void
     {
-        $this->user();
-
+        $current  = $this->user()?->identifier;
         $accounts = $this->readAccounts();
+
+        if (! $all && $account !== '' && $account !== $current) {
+            $token = array_find($accounts, fn (Token $token) => $token->identifier === $account);
+            if ($token !== null) {
+                if ($token->session !== '') {
+                    $this->sessions?->delete($token->session);
+                }
+                $this->writeAccounts(array_filter($accounts, fn (Token $other) => $other !== $token));
+            }
+
+            return;
+        }
+
         foreach ($all ? [$this->token, ...$accounts] : [$this->token] as $token) {
             if ($token !== null && $token->session !== '') {
                 $this->sessions?->delete($token->session);

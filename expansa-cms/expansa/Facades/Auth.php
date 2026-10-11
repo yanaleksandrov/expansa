@@ -23,7 +23,7 @@ use Expansa\Patterns\Facade;
  * @method static void          limit(string $key, int $maxAttempts, int $window)
  * @method static void          login(Identity $user, bool $remember = false, bool $trustDevice = true)
  * @method static void          refresh(Identity $user)
- * @method static void          logout(bool $all = false)
+ * @method static void          logout(bool $all = false, string $account = '')
  * @method static bool          switchAccount(string $identifier)
  * @method static Identity[]    getAccounts()
  * @method static string        getSessionId()

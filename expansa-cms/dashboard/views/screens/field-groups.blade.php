@@ -33,7 +33,7 @@ use Expansa\Facades\Safe;
             <div class="field-groups__list">
                 <?php if ($groups) : ?>
                     <?php foreach ($groups as $group) : ?>
-                        <a class="field-groups__item <?php echo $group->id === $groupId ? 'active' : ''; ?>"
+                        <a class="field-groups__item <?php echo $group->id === $groupId ? 'is-active' : ''; ?>"
                            href="<?php echo url('/dashboard/field-groups?group=' . $group->id); ?>">
                             <span><?php echo Safe::html($group->title); ?></span>
                             <span class="badge badge--<?php echo $group->status === 'active' ? 'green' : 'muted'; ?>">

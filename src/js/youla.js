@@ -637,6 +637,7 @@
     method("dispatch", (e, el) => (name, detail = {}) => {
         el.dispatchEvent(createEvent(name, detail));
     });
+    method("watch", (e, el, component) => (path, callback) => component.watch(path, callback));
     function debounce(callback, wait) {
         let timeout;
         return function(...args) {
@@ -713,27 +714,6 @@
         const [head, ...rest] = parsePropPath(path);
         return rest.reduce((accessor, key) => `${accessor}[${JSON.stringify(key)}]`, head);
     }
-    function setNestedObjectValue(array, lastValue) {
-        if (array.length === 0) {
-            return lastValue;
-        }
-        const unsafeKey = array.find(isUnsafeKey);
-        if (unsafeKey) {
-            console.warn(`Youla.js: refusing to write through unsafe key "${unsafeKey}".`);
-            return {};
-        }
-        let result = {};
-        let current = result;
-        array.forEach((key, index) => {
-            if (index === array.length - 1) {
-                current[key] = lastValue;
-            } else {
-                current[key] = {};
-                current = current[key];
-            }
-        });
-        return result;
-    }
     function getNestedObjectValue(obj, path) {
         return parsePropPath(path).reduce((acc, key) => isUnsafeKey(key) ? undefined : acc?.[key], obj);
     }
@@ -753,15 +733,28 @@
                 return;
             }
             const owner = modifiers.includes("up") ? parent ? parent.scope : data : parent && key in parent.scope ? parent.scope : data;
-            if (owner[key] === undefined) {
-                if (providerName && owner === data && key === providerName) {
-                    console.warn(`Youla.js: u-prop="${expression}" on <${rootElement.tagName.toLowerCase()} u-data="${providerName}"> names its field after the very provider it's nested in — "${providerName}" (registered via Youla.data()) never declared a "${key}" field itself, so this likely wasn't meant to invoke that provider at all. Check its own fields for what you meant (e.g. "value"), or rename this field if the collision is accidental.`);
+            if (owner[key] === undefined && providerName && owner === data && key === providerName) {
+                console.warn(`Youla.js: u-prop="${expression}" on <${rootElement.tagName.toLowerCase()} u-data="${providerName}"> names its field after the very provider it's nested in — "${providerName}" (registered via Youla.data()) never declared a "${key}" field itself, so this likely wasn't meant to invoke that provider at all. Check its own fields for what you meant (e.g. "value"), or rename this field if the collision is accidental.`);
+            }
+            const path = [ key, ...prop ];
+            const leaf = path.pop();
+            let target = owner;
+            for (const segment of path) {
+                if (target[segment] === undefined) {
+                    target[segment] = {};
                 }
+                if (target[segment] === null || typeof target[segment] !== "object") {
+                    console.warn(`Youla.js: u-prop="${expression}" can't nest under "${segment}", which already holds a non-object value — skipped.`);
+                    return;
+                }
+                target = target[segment];
+            }
+            if (target[leaf] === undefined) {
                 let fields = [];
                 if (el.type === "checkbox") {
                     fields = closestDirective(el, "u-data").querySelectorAll(`[${CSS.escape(attribute.name)}="${expression.replace(/["\\]/g, "\\$&")}"]`);
                 }
-                owner[key] = setNestedObjectValue(prop, fields.length > 1 ? [] : "");
+                target[leaf] = fields.length > 1 ? [] : "";
             }
             let value = generateExpressionForProp(el, owner, attribute);
             saferEval(value, withMagicVariables(owner, createMagicVariables(rootElement, el)));
@@ -843,6 +836,13 @@
         const arrowIndex = source.indexOf("=>");
         return arrowIndex !== -1 && (braceIndex === -1 || arrowIndex < braceIndex);
     }
+    function serialize(value) {
+        try {
+            return JSON.stringify(value);
+        } catch (error) {
+            return value;
+        }
+    }
     class Component {
         constructor(el) {
             let dataProviderContext = injectDataProviders(el);
@@ -856,6 +856,7 @@
             this.parent = parentEl ? parentEl.__x : null;
             this.children = [];
             this.parent?.children.push(this);
+            this.watchers = [];
             this.name = (dataExpression ?? expression).trim();
             this.alias = alias || null;
             this.storageType = isStorageModifier(modifiers) ? getStorageType(modifiers) : null;
@@ -1124,6 +1125,26 @@
                 });
             }
             self.concernedData = [];
+            self.watchers.forEach(watcher => watcher.check());
+        }
+        watch(path, callback) {
+            let value = getNestedObjectValue(this.scope, path);
+            let snapshot = serialize(value);
+            const watcher = {
+                check: () => {
+                    const next = getNestedObjectValue(this.scope, path);
+                    const nextSnapshot = serialize(next);
+                    if (nextSnapshot !== snapshot) {
+                        const oldValue = value;
+                        [value, snapshot] = [ next, nextSnapshot ];
+                        callback(next, oldValue);
+                    }
+                }
+            };
+            this.watchers.push(watcher);
+            return () => {
+                this.watchers = this.watchers.filter(item => item !== watcher);
+            };
         }
         attachListener(el, event, modifiers, expression) {
             const wrapHandler = (callback, wrapper) => e => wrapper(callback, e);
