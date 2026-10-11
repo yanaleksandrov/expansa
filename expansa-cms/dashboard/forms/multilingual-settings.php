@@ -45,7 +45,7 @@ return Expansa\Builders\Form::enqueue(
                     'label'         => t( 'URL Modifications' ),
                     'class'         => '',
                     'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-7 gtc-1',
+                    'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
                             'type'        => 'radio',
@@ -89,7 +89,7 @@ return Expansa\Builders\Form::enqueue(
                     'label'         => t( 'Allow Access For' ),
                     'class'         => '',
                     'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-7 gtc-1',
+                    'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
                             'type'        => 'checkbox',
@@ -177,7 +177,7 @@ return Expansa\Builders\Form::enqueue(
                     'label'         => t( 'Allow Access For' ),
                     'class'         => '',
                     'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-7 gtc-1',
+                    'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
                             'type'        => 'text',

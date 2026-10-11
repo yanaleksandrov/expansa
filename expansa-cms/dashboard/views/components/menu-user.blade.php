@@ -12,7 +12,7 @@ defined('EX_PATH') || exit;
 ?>
 <details class="details" @click.outside="$el.removeAttribute('open')">
     <summary class="details-summary" title="{{ t('Online') }}">
-        <span class="user-greeting">{{ t('Hi, :Username', $viewer->showname ?? '') }}</span>
+        <strong>{{ t('Hi, :Username', $viewer->showname ?? '') }}</strong>
         <span class="avatar avatar--xs" style="background-image: url({{ url('dashboard/assets/images/avatar.svg') }})">
             <i class="badge badge--green"></i>
         </span>

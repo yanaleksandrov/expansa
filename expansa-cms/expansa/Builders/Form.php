@@ -15,7 +15,7 @@ use InvalidArgumentException;
  * a plugin changes a registered one in override():
  *
  * ```php
- * Form::enqueue('profile', ['class' => 'dg g-7'], [
+ * Form::enqueue('profile', ['class' => 'dg g-6'], [
  *     ['type' => 'email', 'name' => 'email', 'label' => t('Email')],
  * ]);
  *

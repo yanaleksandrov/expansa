@@ -68,3 +68,7 @@ $colors: (
 	blue: #206bc4,
 	purple: #6a20c5,
 );
+// white share in badge "-lt" tints, overrides the 85% default
+$badge-lt-weights: (
+	dark: 96.5%,
+);

@@ -48,7 +48,7 @@ use Expansa\Facades\Safe;
         </div>
 
         <div class="field-groups__main">
-            <form class="dg g-7" @submit.prevent="$ajax.post(id ? 'field-groups/update' : 'field-groups/create', {location: JSON.stringify(groups), fields: JSON.stringify(fields)})">
+            <form class="dg g-6" @submit.prevent="$ajax.post(id ? 'field-groups/update' : 'field-groups/create', {location: JSON.stringify(groups), fields: JSON.stringify(fields)})">
                 <input type="hidden" name="id" u-prop="id">
 
                 <div class="field">

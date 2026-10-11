@@ -171,7 +171,7 @@ return \Expansa\Builders\Form::enqueue(
                     'type'          => 'group',
                     'name'          => 'system',
                     'label'         => '',
-                    'class'         => 'dg g-7 gtc-4 sm:gtc-1',
+                    'class'         => 'dg g-6 gtc-4 sm:gtc-1',
                     'label_class'   => '',
                     'content_class' => '',
                     'fields'        => [

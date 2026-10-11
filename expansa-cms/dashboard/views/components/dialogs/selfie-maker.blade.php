@@ -10,11 +10,11 @@ defined('EX_PATH') || exit;
 ?>
 <!-- selfie maker start -->
 <template id="take-selfie">
-	<div class="p-7 t-center" u-data="{second: '', showImg: ''}">
-		<div u-init="$stream.start($refs)" style="position: relative; overflow: hidden;">
+	<div class="p-7 t-center" u-data="stream">
+		<div @load="start()" style="position: relative; overflow: hidden;">
 			<video u-ref="video" class="db mw" autoplay style="object-fit: cover; aspect-ratio: 4/3;"></video>
-			<canvas u-ref="canvas" u-show="!showImg" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 60%);"></canvas>
-			<img u-ref="image" u-show="showImg" hidden alt="" src="/dashboard/assets/images/1x1.png" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 98%);">
+			<canvas u-ref="canvas" u-show="!photo" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 60%);"></canvas>
+			<img u-ref="image" u-show="photo" hidden alt="" src="/dashboard/assets/images/1x1.png" style="border-radius: 20rem; width: 240px; height: 240px; position: absolute; margin: auto; inset: 0; box-shadow: 0 0 0 999px rgb(255 255 255 / 98%);">
 		</div>
 		<div
 			class="fs-48"
@@ -23,25 +23,25 @@ defined('EX_PATH') || exit;
 			:style="second && 'position: fixed; top: 1rem; left: 0; right: 0; margin: 0 auto; transition: all 1s; animation: ticker 1s ease infinite;'"
 		></div>
 
-		<div u-show="!showImg">
+		<div u-show="!photo">
 			<h6><?php echo t( 'Center Your Face' ); ?></h6>
 			<div class="fs-14 t-muted mt-2 pl-4 pr-4">
 				<?php echo t( 'Center your face in the frame, then take a photo.' ); ?>
 			</div>
 			<div class="df jcsb mt-6 mw">
-				<button type="button" class="btn btn--outline" @click="$dialog.close(), $stream.stop()"><?php echo t( 'Cancel' ); ?></button>
-				<button class="btn btn--primary" @click="$countdown.start(3, () => second = $countdown.second, () => showImg = $stream.snapshot($refs))"><?php echo t( 'Take Selfie' ); ?></button>
+				<button type="button" class="btn btn--outline" @click="stop(), $dialog.close()"><?php echo t( 'Cancel' ); ?></button>
+				<button class="btn btn--primary" type="button" @click="capture(3)"><?php echo t( 'Take Selfie' ); ?></button>
 			</div>
 		</div>
 
-		<div u-show="showImg">
+		<div u-show="photo">
 			<h6><?php echo t( 'Check Quality' ); ?></h6>
 			<div class="fs-14 t-muted mt-2 pl-4 pr-4">
 				<?php echo t( 'Make sure your face isn\'t blurry or out of frame before continuing.' ); ?>
 			</div>
 			<div class="df jcsb mt-6 mw">
-				<button class="btn btn--outline" type="button" @click="showImg = ''"><i class="ph ph-arrows-clockwise"></i> <?php echo t( 'Retake' ); ?></button>
-				<button class="btn btn--primary" type="button" @click="showImg = ''"><i class="ph ph-user-focus"></i> <?php echo t( 'Use This Photo' ); ?></button>
+				<button class="btn btn--outline" type="button" @click="photo = ''"><i class="ph ph-arrows-clockwise"></i> <?php echo t( 'Retake' ); ?></button>
+				<button class="btn btn--primary" type="button" @click="photo = ''"><i class="ph ph-user-focus"></i> <?php echo t( 'Use This Photo' ); ?></button>
 			</div>
 		</div>
 	</div>

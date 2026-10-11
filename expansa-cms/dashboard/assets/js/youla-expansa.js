@@ -589,6 +589,8 @@ document.addEventListener('youla:init', () => {
     Youla.data('stream', root => ({
         error: null,
         canvas: null,
+        second: 0,
+        photo: '',
         videoRef: {
             'u-ref': 'video'
         },
@@ -687,6 +689,19 @@ document.addEventListener('youla:init', () => {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
             return imageData;
+        },
+        capture(seconds = 3) {
+            if (this.second > 0) {
+                return;
+            }
+            this.second = seconds;
+            const timer = setInterval(() => {
+                if (--this.second > 0) {
+                    return;
+                }
+                clearInterval(timer);
+                this.photo = this.snap() || '';
+            }, 1e3);
         },
         stop() {
             const video = this.refs.video;

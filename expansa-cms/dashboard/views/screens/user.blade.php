@@ -15,7 +15,7 @@
  * @package Expansa\Templates
  */
 ?>
-<div class="dg g-7 p-7 sm:p-5 mw-900" u-data>
+<div class="dg g-6 p-7 sm:p-5 mw-900" u-data>
 	<div class="dg g-1">
 		<h2>{{ $user->showname ?: $user->login }}</h2>
 		<div class="t-muted">

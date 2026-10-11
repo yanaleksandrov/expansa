@@ -922,7 +922,7 @@ img:after {
   color: #fff;
 }
 .badge--dark-lt {
-  background-color: rgb(219.9, 221.1, 222.45) !important;
+  background-color: rgb(246.81, 247.09, 247.405) !important;
   color: #151d26;
 }
 .badge--muted {
@@ -2242,17 +2242,6 @@ body.is-unsaved .expansa-search-btn {
   transition: opacity 0.25s, color 0.25s, background-color 0.25s;
   height: 1.875rem;
   opacity: 0;
-}
-
-.user-greeting {
-  line-height: 1.2em;
-  font-size: 0.8125rem;
-  font-weight: 500;
-}
-@media (max-width: 1024px) {
-  .user-greeting {
-    display: none;
-  }
 }
 
 .email {

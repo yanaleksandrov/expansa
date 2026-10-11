@@ -23,7 +23,7 @@ echo view('components/table/header', $table->headData());
                 </div>
             @endforeach
         </div>
-        <div class="translation-grid" u-each.lazy="item in items" u-init="console.log(item)">
+        <div class="translation-grid" u-each.lazy="item in items">
             <div class="translation-source" u-text="item.source">{{ $item['source'] ?? '' }}</div>
             <label class="translation-value">
                 <textarea rows="1" u-textarea="7" :value="item.value">{{ $item['value'] ?? '' }}</textarea>

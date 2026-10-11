@@ -1,4 +1,5 @@
 @use "sass:color";
+@use "sass:map";
 @use '../constants';
 
 // shown while the pointer is over the closest .hover
@@ -459,7 +460,7 @@
     }
 
     &--#{"" + $name}-lt {
-      background-color: #{color.mix(rgba(255, 255, 255, 1), $color, 85%)} !important;
+      background-color: #{color.mix(#fff, $color, map.get(constants.$badge-lt-weights, $name) or 85%)} !important;
 
       @if $color != #ffffff {
         color: #{$color};

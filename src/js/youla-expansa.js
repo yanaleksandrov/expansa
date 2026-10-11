@@ -728,6 +728,8 @@ document.addEventListener('youla:init', ()=> {
     Youla.data('stream', (root) => ({
         error: null,
         canvas: null,
+        second: 0,
+        photo: '',
         videoRef: { 'u-ref': 'video' },
         imageRef: { 'u-ref': 'image' },
         canvasRef: { 'u-ref': 'canvas' },
@@ -838,6 +840,26 @@ document.addEventListener('youla:init', ()=> {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
             return imageData;
+        },
+        /**
+         * Counts "seconds" down in "second", then puts the snapshot into "photo".
+         *
+         * @param {number} seconds
+         */
+        capture(seconds = 3) {
+            if (this.second > 0) {
+                return;
+            }
+            this.second = seconds;
+
+            const timer = setInterval(() => {
+                if (--this.second > 0) {
+                    return;
+                }
+                clearInterval(timer);
+
+                this.photo = this.snap() || '';
+            }, 1000);
         },
         stop() {
             const video = this.refs.video;

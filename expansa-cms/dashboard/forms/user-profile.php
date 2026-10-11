@@ -68,7 +68,7 @@ return Form::enqueue(
                     'label'         => t('Contact Info'),
                     'class'         => '',
                     'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-7 gtc-1',
+                    'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
                             'type'        => 'email',
@@ -221,7 +221,7 @@ return Form::enqueue(
                     'label'         => t('About Yourself'),
                     'class'         => '',
                     'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-7 gtc-1',
+                    'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
                             'type'        => 'textarea',
@@ -264,7 +264,7 @@ return Form::enqueue(
                     'label'         => t('Theme Preferences'),
                     'class'         => '',
                     'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-7 gtc-1',
+                    'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
                             'type'        => 'radio',
