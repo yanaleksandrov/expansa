@@ -229,6 +229,8 @@ final class SiteHealth
         $exposed     = self::exposed();
         $writable    = array_values(array_filter(self::CODE, fn (string $path) => is_writable(EX_PATH . $path)));
         [$siteUrl, $requestUrl] = self::urls();
+        $isBreachCheck = Passwords::isCheckEnabled();
+        $breachFailure = $isBreachCheck ? Passwords::checkService() : null;
 
         try {
             // roles are stored as a JSON list, e.g. ["admin"]
@@ -302,6 +304,19 @@ final class SiteHealth
                 escape($siteUrl ?: $requestUrl),
                 $siteUrl === '' || $siteUrl === $requestUrl,
                 t('The site address in the settings is %s, but the site is open at %s: links, redirects and cookies use the first one.', escape($siteUrl), escape($requestUrl)),
+                self::RECOMMENDED,
+            ),
+            self::check(
+                t('Breached Passwords Check'),
+                match (true) {
+                    ! $isBreachCheck        => t('Disabled'),
+                    $breachFailure === null => t('Available'),
+                    default                 => t('Service Unavailable'),
+                },
+                $isBreachCheck && $breachFailure === null,
+                $isBreachCheck
+                    ? t('The server cannot reach api.pwnedpasswords.com (%s): new passwords are accepted without the check. A certificate or connection error is fixed on the server: allow outgoing HTTPS requests or set up the CA certificates of PHP; an HTTP 5xx error or a timeout may be the service itself, then wait.', escape((string) $breachFailure))
+                    : t('New passwords are not checked against public breaches. Turn the check on in the Security settings.'),
                 self::RECOMMENDED,
             ),
             self::check(
