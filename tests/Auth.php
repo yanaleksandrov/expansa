@@ -425,6 +425,17 @@ check('the switch after logout() lasts', $connect(new Manager())->user() === $me
 
 $auth = $connect(new Manager());
 $auth->login($members['admin']);
+$auth->logout(account: 'author');
+check('logout(account:) signs out another account and keeps the current', $auth->user() === $members['admin'] && $accountsOf($auth) === []);
+check('the other account stays signed out', $accountsOf($connect(new Manager())) === [] && ! $connect(new Manager())->switchAccount('author'));
+
+$auth = $connect(new Manager());
+$auth->login($members['author']);
+$auth->logout(account: 'author');
+check('logout(account:) of the current account switches to the next', $auth->user() === $members['admin'] && $accountsOf($auth) === []);
+
+$auth = $connect(new Manager());
+$auth->login($members['admin']);
 $auth->logout(all: true);
 check('logout(all: true) signs out every account', $auth->user() === null && $cookies['auth'] === '' && $cookies['accounts'] === '' && $connect(new Manager())->user() === null);
 

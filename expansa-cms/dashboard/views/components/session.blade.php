@@ -15,7 +15,7 @@ $date = new IntlDateFormatter( $site->locale, IntlDateFormatter::MEDIUM, IntlDat
 		<h6 class="fs-15">
 			{{ $session['device'] }}
 			@if($session['current'])
-				<span class="badge bg-green">{!! t( 'This Device' ) !!}</span>
+				<span class="badge badge--green-lt">{!! t( 'This Device' ) !!}</span>
 			@endif
 		</h6>
 		<div class="fs-12 t-muted lh-xs">

@@ -31,51 +31,37 @@ return Form::enqueue(
     ],
     [
         [
-            'type'     => 'custom',
-            'callback' => function () {
-                ?>
-                <div class="dg g-1 p-7 sm:p-5 pb-4 sm:pb-4 bg-gray-lt">
-                    <?php
-                    echo view(
-                        'components/form/image',
-                        [
-                            'type'        => 'image',
-                            'name'        => 'avatar',
-                            'error'       => 'avatar',
-                            'label'       => t('Profile Settings'),
-                            'class'       => '',
-                            'label_class' => 'field-label fw-500 fs-18',
-                            'reset'       => 0,
-                            'before'      => '',
-                            'after'       => '',
-                            'instruction' => t('Click to upload your avatar.'),
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop'  => 'avatar',
-                                'name'    => 'avatar',
-                                '@change' => '[...$refs.uploader.files].map(file => $ajax.post("upload/media").then(response => files.unshift(response[0])))',
-                            ],
-                        ]
-                    );
-                    ?>
-                </div>
-                <?php
-            },
-        ],
-        [
             'type'          => 'tab',
             'label'         => t('Overview'),
             'name'          => 'profile',
             'caption'       => '',
             'description'   => '',
             'icon'          => 'ph ph-user',
-            'class_menu'    => 'bg-gray-lt',
-            'class_button'  => 'ml-7 sm:ml-5',
-            'class_content' => 'p-7 sm:p-5',
+            'class_menu'    => '',
+            'class_button'  => '',
+            'class_content' => '',
             'fields'        => [
+	            [
+		            'type'        => 'image',
+		            'name'        => 'avatar',
+		            'error'       => 'avatar',
+		            'label'       => t('Profile Settings'),
+		            'class'       => '',
+		            'label_class' => 'field-label fw-500 fs-18',
+		            'reset'       => 0,
+		            'before'      => '',
+		            'after'       => '',
+		            'instruction' => t('Click to upload your avatar.'),
+		            'tooltip'     => '',
+		            'copy'        => 0,
+		            'validator'   => '',
+		            'conditions'  => [],
+		            'attributes'  => [
+			            'u-prop'  => 'avatar',
+			            'name'    => 'avatar',
+			            '@change' => '[...$refs.uploader.files].map(file => $ajax.post("upload/media").then(response => files.unshift(response[0])))',
+		            ],
+	            ],
                 [
                     'type'          => 'group',
                     'name'          => 'contacts',
@@ -601,7 +587,7 @@ return Form::enqueue(
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="df fw g-3 fs-13">
+                                        <div class="df fw fdc g-3 fs-13">
                                             <?php foreach ($permissions as $permission) : ?>
                                                 <label class="df aic g-1"><input type="checkbox" name="token-scope" value="<?php echo htmlspecialchars($permission); ?>"> <?php echo htmlspecialchars($permission); ?></label>
                                             <?php endforeach; ?>

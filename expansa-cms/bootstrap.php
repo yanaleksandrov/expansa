@@ -695,13 +695,17 @@ Lifecycle::context('sign-out', function (string $uri): bool {
 
     return $uri === 'sign-out' || $uri === "$root/sign-out";
 }, function () {
-    // the next signed-in account of the browser takes over, ?all=1 signs out every one
-    $user = App\Models\User::current();
-    if ($user !== null) {
-        App\Api\User\Events::record($user, 'sign_out', isset($_GET['all']) ? ['all' => true] : []);
+    // the next signed-in account of the browser takes over, ?all=1 signs out every one, ?account=<login> another one
+    $all     = isset($_GET['all']);
+    $account = $all ? '' : (string) ($_GET['account'] ?? '');
+    $user    = $account === '' || $account === Auth::user()?->identifier
+        ? App\Models\User::current()
+        : array_find(Auth::getAccounts(), fn ($user) => $user->identifier === $account);
+    if ($user instanceof App\Models\User) {
+        App\Api\User\Events::record($user, 'sign_out', $all ? ['all' => true] : []);
     }
 
-    Auth::logout(all: isset($_GET['all']));
+    Auth::logout($all, $account);
     redirect(Auth::isLoggedIn() ? 'dashboard' : 'sign-in');
 });
 

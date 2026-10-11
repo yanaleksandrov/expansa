@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dashboard;
 
+use App\Models\User;
 use Expansa\Builders\Tree;
 use Expansa\Facades\Auth;
 
@@ -64,42 +65,31 @@ final class Menus
                 [
                     'id'           => 'profile',
                     'url'          => 'profile',
-                    'title'        => t('Profile'),
+                    'title'        => t('Settings'),
                     'capabilities' => ['read'],
-                    'icon'         => 'ph ph-gear',
+                    'icon'         => 'ph ph-sliders',
                     'position'     => 100,
                 ],
                 [
                     'id'       => 'divider-accounts',
-                    'title'    => '',
+                    'title'    => t('Switch account'),
                     'position' => 200,
                 ],
+                ...self::accounts(300),
                 [
                     'id'       => 'add-account',
                     'url'      => url('sign-in?add=1'),
-                    'title'    => t('Add Another Account'),
-                    'icon'     => 'ph ph-user-plus',
-                    'position' => 300,
-                ],
-                [
-                    'id'       => 'divider-sign-out',
-                    'title'    => '',
+                    'title'    => t('Add Account'),
+                    'icon'     => 'ph ph-plus',
                     'position' => 400,
                 ],
                 [
-                    'id'       => 'sign-out',
-                    'url'      => url('sign-out'),
-                    'title'    => t('Sign Out'),
+                    'id'       => 'sign-out-all',
+                    'url'      => url('sign-out?all=1'),
+                    'title'    => Auth::getAccounts() === [] ? t('Sign Out') : t('Sign Out of All Accounts'),
                     'icon'     => 'ph ph-sign-out',
                     'position' => 500,
                 ],
-                ...(Auth::getAccounts() === [] ? [] : [[
-                    'id'       => 'sign-out-all',
-                    'url'      => url('sign-out?all=1'),
-                    'title'    => t('Sign Out of All Accounts'),
-                    'icon'     => 'ph ph-sign-out',
-                    'position' => 600,
-                ]]),
             ]
         ));
 
@@ -304,5 +294,32 @@ final class Menus
                 ],
             ]
         ));
+    }
+
+    /**
+     * Get the user menu items of the signed-in accounts of the browser: the current one first,
+     * the others switch to on click. Each carries `account` and its own `sign_out` URL.
+     *
+     * @param int $position Position of the current account, the others follow it.
+     * @return array<int, array<string, mixed>>
+     */
+    private static function accounts(int $position): array
+    {
+        $current = User::current();
+        $items   = [];
+
+        foreach ($current !== null ? [$current, ...Auth::getAccounts()] : Auth::getAccounts() as $i => $user) {
+            $items[] = [
+                'id'       => 'account-' . $user->identifier,
+                'title'    => $user instanceof User && $user->showname !== '' ? $user->showname : $user->identifier,
+                'icon'     => 'ph ph-user-circle',
+                'account'  => $user->identifier,
+                'current'  => $user === $current,
+                'sign_out' => url('sign-out?account=' . rawurlencode($user->identifier)),
+                'position' => $position + $i,
+            ];
+        }
+
+        return $items;
     }
 }

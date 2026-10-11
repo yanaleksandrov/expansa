@@ -1416,7 +1416,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Roles and Permissions' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => '',
+					'content_class' => 'dg ga-4 g-7 gtc-1',
 					'fields'        => [
 						[
 							'name'     => 'roles',
@@ -1440,7 +1440,7 @@ return Expansa\Builders\Form::enqueue(
 												<?php endif; ?>
 											</div>
 											<input type="hidden" name="roles[<?php echo $key; ?>][permissions][_]" value="0">
-											<div class="df fw g-3 fs-13">
+											<div class="df fw fdc g-3 fs-13">
 												<?php foreach ( $permissions as $permission ) : ?>
 													<label class="df aic g-1">
 														<input type="checkbox" name="roles[<?php echo $key; ?>][permissions][<?php echo $permission; ?>]" value="1"<?php echo in_array( $permission, $role['permissions'], true ) ? ' checked' : ''; ?>>
