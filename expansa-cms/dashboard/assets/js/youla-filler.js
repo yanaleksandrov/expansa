@@ -685,7 +685,6 @@
                 [ el, alphaInput, swatch ].forEach(e => {
                     e.disabled = true;
                 });
-                wrapper.classList.add('is-disabled');
             }
             this.addListeners();
             this.render();
@@ -1897,9 +1896,8 @@
                 sources: options.sources?.length ? [ ...options.sources ] : this.sources
             });
             if ('disabled' in options) {
-                const {disabled, el, alphaInput, swatch, wrapper} = this;
+                const {disabled, el, alphaInput, swatch} = this;
                 el.disabled = alphaInput.disabled = swatch.disabled = disabled;
-                wrapper.classList.toggle('is-disabled', disabled);
                 if (disabled) {
                     this.closeDropdown();
                     this.closeDialog();

@@ -13,6 +13,7 @@
                 cookie: "XSRF-TOKEN",
                 header: "X-XSRF-TOKEN"
             },
+            loadingClass: "is-loading",
             errors: {
                 field: '[name="{name}"]',
                 wrapper: null,
@@ -36,7 +37,7 @@
                 const body = buildRequestBody(el, payload);
                 const safe = SAFE.includes(method);
                 const url = resolveURL(route, config.baseURL, safe ? body : null);
-                const done = toggleLoading(el);
+                const done = xhr.__done = toggleLoading(el, config.loadingClass);
                 xhr.open(method, url);
                 xhr.withCredentials = options.credentials ?? config.credentials;
                 xhr.timeout = options.timeout ?? config.timeout;
@@ -240,12 +241,17 @@
             }
             xhr.onload = xhr.onerror = xhr.ontimeout = xhr.onloadstart = xhr.onloadend = xhr.upload.onprogress = null;
             xhr.abort();
+            xhr.__done?.();
             xhr.__reject?.(handled(new DOMException('Superseded by a new "$ajax" call on the same element.', "AbortError")));
         }
-        function toggleLoading(el) {
+        function toggleLoading(el, className) {
             const elements = [ el, ...el.querySelectorAll('[type="submit"]') ];
-            elements.forEach(element => element.classList.add("is-load"));
-            return () => elements.forEach(element => element.classList.remove("is-load"));
+            elements.forEach(element => element.classList.add(className));
+            el.setAttribute("aria-busy", "true");
+            return () => {
+                elements.forEach(element => element.classList.remove(className));
+                el.removeAttribute("aria-busy");
+            };
         }
         function buildRequestBody(el, payload) {
             const isForm = el.tagName === "FORM";
