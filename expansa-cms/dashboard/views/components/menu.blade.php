@@ -7,7 +7,7 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<?php tree('dashboard-main-menu', function (array $items, int $depth) { ?>
+<?php tree('dashboard-main-menu', function (array $items) { ?>
     <ul class="nav" u-data="{open: '{{ array_find($items, fn ($item) => $item->active)?->id }}'}" u-sticky>
         @foreach($items as $item)
             @if(! $item->url)
@@ -36,7 +36,7 @@ defined('EX_PATH') || exit;
                         <ul class="nav__list" u-collapse="open === '{{ $item->id }}'"{{ $item->active ? '' : ' hidden' }}>
                             @foreach($children as $child)
                                 @if($child->url)
-                                    <li<?php echo $child->active ? ' class="is-active"' : ''; ?>>
+                                    <li class="{{ $child->active ? 'is-active' : '' }}">
                                         <a class="nav__link" href="{{ $child->url }}">{{ $child->title }}</a>
                                         <?php tree($child->children); ?>
                                     </li>
