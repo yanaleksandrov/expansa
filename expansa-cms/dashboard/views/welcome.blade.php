@@ -49,7 +49,7 @@ use Expansa\Facades\Hook;
             </div>
 
             <div class="expansa-bar-account">
-                <?php echo view('components/user-account'); ?>
+                <?php echo view('components/menu-user'); ?>
             </div>
         </div>
 

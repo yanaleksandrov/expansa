@@ -3,7 +3,11 @@
   display: flex;
   justify-content: center;
   min-height: 100%;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem;
+
+  @media screen and (max-width: 768px) {
+    padding: 1rem;
+  }
 
   .site-health-inner {
     display: flex;

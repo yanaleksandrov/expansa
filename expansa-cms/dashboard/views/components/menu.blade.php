@@ -14,9 +14,7 @@ defined('EX_PATH') || exit;
                 <li class="nav__item nav__item--divider">{{ $item->title }}</li>
             @elseif(! $item->children)
                 <li class="nav__item{{ $item->active ? ' is-active' : '' }}">
-                    <a class="nav__link" href="{{ $item->url }}">
-                        <i class="{{ $item->icon }}"></i> {{ $item->title }}
-                    </a>
+                    <a class="nav__link" href="{{ $item->url }}"><i class="{{ $item->icon }}"></i> {{ $item->title }}</a>
                 </li>
             @else
                 <li class="nav__item nav__item--parent{{ $item->active ? ' is-active' : '' }}">
@@ -31,12 +29,11 @@ defined('EX_PATH') || exit;
                             <i class="ph ph-plus"></i>
                         </button>
                     @endisset
-
                     <?php tree($item->children, function (array $children) use ($item) { ?>
                         <ul class="nav__list" u-collapse="open === '{{ $item->id }}'"{{ $item->active ? '' : ' hidden' }}>
                             @foreach($children as $child)
                                 @if($child->url)
-                                    <li class="{{ $child->active ? 'is-active' : '' }}">
+                                    <li class="nav__item{{ $child->active ? ' is-active' : '' }}">
                                         <a class="nav__link" href="{{ $child->url }}">{{ $child->title }}</a>
                                         <?php tree($child->children); ?>
                                     </li>

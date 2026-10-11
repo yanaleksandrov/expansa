@@ -490,6 +490,7 @@ select[multiple] + .ss-main {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   transform: translateY(4px);
   visibility: visible;
+  opacity: 1;
 }
 .ss-content.ss-open-above {
   transform: translateY(-4px);
@@ -497,7 +498,6 @@ select[multiple] + .ss-main {
   transform-origin: center bottom;
 }
 .ss-content.ss-open-below {
-  opacity: 1;
   transform-origin: center top;
 }
 .ss-content .ss-search {

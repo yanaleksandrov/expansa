@@ -9,7 +9,7 @@ defined('EX_PATH') || exit;
 <?php tree('dashboard-panel-menu', function (array $items) { ?>
     <ul class="panel">
         @foreach($items as $item)
-            <li class="panel__item" u-tooltip.hover.right="'{{ $item->title }}'">
+            <li class="panel__item" u-tooltip.hover.1000ms="'{{ $item->title }}'">
                 <a class="panel__link" href="{{ $item->url }}"><i class="{{ $item->icon }}"></i></a>
             </li>
         @endforeach

@@ -121,19 +121,19 @@ $labels = [
 						<i class="ph ph-dots-three-vertical"></i>
 					</summary>
 					<div class="details-content">
-						<ul class="user-menu">
-							<li class="user-menu-item">
-								<button type="button" class="user-menu-link" u-bind="renameProcessButton(process)">
+						<ul class="dropdown-menu">
+							<li class="dropdown-menu__item">
+								<button type="button" class="dropdown-menu__link" u-bind="renameProcessButton(process)">
 									<i class="ph ph-pencil-simple"></i> <?php echo t( 'Rename' ); ?>
 								</button>
 							</li>
-							<li class="user-menu-item">
-								<button type="button" class="user-menu-link" u-bind="archiveProcessButton(process)">
+							<li class="dropdown-menu__item">
+								<button type="button" class="dropdown-menu__link" u-bind="archiveProcessButton(process)">
 									<i class="ph ph-archive"></i> <?php echo t( 'Archive' ); ?>
 								</button>
 							</li>
-							<li class="user-menu-item">
-								<button type="button" class="user-menu-link" u-bind="deleteProcessButton(process)">
+							<li class="dropdown-menu__item">
+								<button type="button" class="dropdown-menu__link" u-bind="deleteProcessButton(process)">
 									<i class="ph ph-trash"></i> <?php echo t( 'Delete' ); ?>
 								</button>
 							</li>

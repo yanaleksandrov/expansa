@@ -274,6 +274,7 @@
       corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
       transform: translateY(4px);
       visibility: visible;
+      opacity: 1;
     }
 
     &.ss-open-above {
@@ -283,7 +284,6 @@
     }
 
     &.ss-open-below {
-      opacity: 1;
       transform-origin: center top;
     }
 
