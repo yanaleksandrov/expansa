@@ -14,7 +14,7 @@ final class Plugins extends Table
             [
                 'title'           => 'Classic Editor 1 and very longadable pluginsnameand hello world',
                 'description'     => 'Customize WordPress with powerful, professional and intuitive fields.',
-                'screenshot'      => 'https://ps.w.org/buddypress/assets/icon.svg',
+                'screenshot'      => url('dashboard/assets/images/placeholder.svg'),
                 'author'          => [
                     [
                         'title' => 'Expansa Team',

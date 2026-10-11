@@ -15,7 +15,7 @@ defined('EX_PATH') || exit;
 <details class="details" @click.outside="$el.removeAttribute('open')">
     <summary class="details-summary">
         <span class="expansa-user-name">{{ t('Hi, :Username', $viewer->showname ?? '') }}</span>
-        <span class="avatar avatar--xs" style="background-image: url(https://i.pravatar.cc/150?img=3)">
+        <span class="avatar avatar--xs" style="background-image: url({{ url('dashboard/assets/images/avatar.svg') }})">
             <i class="badge bg-green" title="{{ t('Online') }}"></i>
         </span>
     </summary>

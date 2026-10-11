@@ -1,7 +1,7 @@
 <div class="cart">
 	<div class="cart-item">
 		<div class="cart-item-thumbnail">
-			<a class="cart-item-link" href="#"><img class="cart-item-image" src="https://placehold.co/400x400"></a>
+			<a class="cart-item-link" href="#"><img class="cart-item-image" src="<?php echo url( 'dashboard/assets/images/placeholder.svg' ); ?>"></a>
 		</div>
 		<div class="cart-item-name">
 			<a class="cart-item-link" href="#">Kosher | 100% F1 Brazilian Beef</a>
@@ -22,7 +22,7 @@
 	</div>
 	<div class="cart-item">
 		<div class="cart-item-thumbnail">
-			<a class="cart-item-link" href="#"><img class="cart-item-image" src="https://placehold.co/400x400"></a>
+			<a class="cart-item-link" href="#"><img class="cart-item-image" src="<?php echo url( 'dashboard/assets/images/placeholder.svg' ); ?>"></a>
 		</div>
 		<div class="cart-item-name">
 			<a class="cart-item-link" href="#">Chuck eye Steak | Kosher | 100% Fullblood American Wagyu Beef</a>

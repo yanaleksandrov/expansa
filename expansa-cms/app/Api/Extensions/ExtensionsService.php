@@ -17,7 +17,7 @@ final class ExtensionsService
                 [
                     'title'           => 'Classic Editor 1 and very longadable',
                     'description'     => 'Customize WordPress with powerful, professional and intuitive fields.',
-                    'image'           => 'https://ps.w.org/buddypress/assets/icon.svg',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -49,7 +49,7 @@ final class ExtensionsService
                 [
                     'title'           => 'Classic Editor 2',
                     'description'     => 'Universal tool for managing the WordPress theme customizer, metaboxes and custom fields.',
-                    'image'           => 'https://ps.w.org/performance-lab/assets/icon.svg',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => '$9.99',
                     'author'          => [
                         [
@@ -89,7 +89,7 @@ final class ExtensionsService
                 [
                     'title'           => 'Classic Editor 3',
                     'description'     => 'Convert Non-Latin characters in post and term slugs to Latin characters. Useful for creating human-readable URLs.',
-                    'image'           => 'https://s.w.org/plugins/geopattern-icon/classic-widgets.svg',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -153,7 +153,7 @@ final class ExtensionsService
                 [
                     'title'           => 'Classic Editor 4',
                     'description'     => 'Envato Theme Check is a modified fork of the original Theme Check by Otto42 with additional Themeforest specific WordPress checks.',
-                    'image'           => 'https://ps.w.org/woocommerce/assets/icon-256x256.gif',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -185,7 +185,7 @@ final class ExtensionsService
                 [
                     'title'           => 'Classic Editor 2',
                     'description'     => 'The best anti-spam protection to block spam comments and spam in a contact form. The most trusted antispam solution.',
-                    'image'           => 'https://ps.w.org/woocommerce-payments/assets/icon-256x256.png',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -217,7 +217,7 @@ final class ExtensionsService
                 [
                     'title'           => 'Query Monitor',
                     'description'     => 'The developer tools panel for Expansa.',
-                    'image'           => 'https://ps.w.org/customer-reviews-woocommerce/assets/icon-256x256.png',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -249,7 +249,7 @@ final class ExtensionsService
                 [
                     'title'           => 'SVG Support',
                     'description'     => 'Upload SVG files to the Media Library and render SVG files inline for direct styling/animation of an SVG\'s internal elements using CSS/JS.',
-                    'image'           => 'https://s.w.org/plugins/geopattern-icon/classic-widgets.svg',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -281,7 +281,7 @@ final class ExtensionsService
                 [
                     'title'           => 'Classic Editor',
                     'description'     => 'The best anti-spam protection to block spam comments and spam in a contact form.',
-                    'image'           => 'https://s.w.org/plugins/geopattern-icon/classic-widgets.svg',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -313,7 +313,7 @@ final class ExtensionsService
                 [
                     'title'           => 'eCommerce',
                     'description'     => 'An ecommerce toolkit that helps you sell anything. Beautifully.',
-                    'image'           => 'https://s.w.org/plugins/geopattern-icon/classic-widgets.svg',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
@@ -345,7 +345,7 @@ final class ExtensionsService
                 [
                     'title'           => 'WP Reset',
                     'description'     => 'Reset the entire site or just selected parts while reserving the option to undo by using snapshots.',
-                    'image'           => 'https://s.w.org/plugins/geopattern-icon/classic-widgets.svg',
+                    'image'           => url('dashboard/assets/images/placeholder.svg'),
                     'license'         => 'Free',
                     'author'          => [
                         [
