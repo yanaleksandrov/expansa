@@ -59,7 +59,9 @@ Hook::add('renderDashboardFooter', function () {
 					<a @click.prevent="$refs.input.click()"><?php echo $instruction ?: t( 'Upload a photo' ); ?></a>
 					<span><?php echo t( 'WEBP, PNG, JPG or GIF (max. 400×400px)' ); ?></span>
 				</div>
-				<a @click.prevent="$dialog.open('tmpl-media-library', { ...mediaLibraryDialog, multiple: false, type: 'image', onSelect(item) { if (item) { image = item.sizes?.thumbnail?.url || item.url; } } })"><?php echo t( 'Or choose from the media library' ); ?></a>
+				<a class="btn btn--outline" @click.prevent="$dialog.open('tmpl-media-library', { ...mediaLibraryDialog, multiple: false, type: 'image', onSelect(item) { if (item) { image = item.sizes?.thumbnail?.url || item.url; } } })">
+					<?php echo t( 'Or choose from the media library' ); ?>
+				</a>
 			</div>
 		</div>
 	</div>

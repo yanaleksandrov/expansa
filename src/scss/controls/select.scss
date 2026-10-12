@@ -68,8 +68,8 @@
       color: inherit;
       outline: 0;
       background-color: #fff;
-      border-color: var(--expansa-link);
-      box-shadow: 0 0 0 1px var(--expansa-link);
+      border-color: var(--expansa-primary);
+      box-shadow: 0 0 0 1px var(--expansa-primary);
     }
 
     .ss-arrow {
@@ -129,7 +129,7 @@
         display: flex;
         align-items: baseline;
         gap: 0.5rem;
-        color: var(--expansa-dark);
+        color: var(--expansa-secondary);
 
         .ss-description {
           font-size: 0.85em;
@@ -295,7 +295,7 @@
 
       input {
         -webkit-appearance: textfield;
-        background-color: var(--expansa-white);
+        background-color: var(--expansa-bg-white);
         border-radius: 0.3rem;
         box-sizing: border-box;
         color: inherit;
@@ -488,16 +488,16 @@
     .ss-list .ss-option {
       padding: 0.45rem 0.85rem;
       font-size: 0.95em;
-      color: var(--expansa-dark);
-      background-color: var(--expansa-white);
+      color: var(--expansa-secondary);
+      background-color: var(--expansa-bg-white);
       display: flex;
       cursor: pointer;
       user-select: none;
     }
 
     .ss-list .ss-option:hover {
-      background-color: var(--expansa-link);
-      color: var(--expansa-white);
+      background-color: var(--expansa-primary);
+      color: var(--expansa-text-white);
     }
 
     .ss-list .ss-option * {
@@ -548,7 +548,7 @@
 
     .ss-list .ss-option.ss-highlighted,
     .ss-list .ss-option:not(.ss-disabled).ss-selected {
-      color: var(--expansa-dark);
+      color: var(--expansa-secondary);
       background-color: var(--expansa-bg-active);
       cursor: no-drop;
     }
@@ -560,7 +560,7 @@
     }
 
     .ss-list .ss-option .ss-search-highlight {
-      background-color: var(--expansa-white);
+      background-color: var(--expansa-bg-white);
     }
   }
 }

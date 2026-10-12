@@ -1,20 +1,16 @@
 :root {
-  --expansa-white: #fff;
-
   --expansa-bg: #f7f7f7;
   --expansa-bg-hover: #f2f2f2;
+  --expansa-bg-white: #ffffff;
   --expansa-bg-dark: #efefef;
   --expansa-bg-universal: rgba(142, 142, 142, 0.07);
   --expansa-bg-active: rgba(134, 134, 134, 0.06);
-  --expansa-bg-light: rgba(255, 255, 255, 0.85);
 
-  --expansa-info: #1871ba;
-  --expansa-warning: #f76707;
-  --expansa-error: #d63939;
-  --expansa-dark: #1e1e1e;
-  --expansa-text-secondary: #5f6873;
+  --expansa-text: #131313;
+  --expansa-text-hover: #000000;
+  --expansa-text-white: #ffffff;
   --expansa-text-muted: #71777F;
-  --expansa-placeholder: #9aa0a9;
+  --expansa-text-placeholder: #9aa0a9;
 
   --expansa-border: #dfe2e3;
   --expansa-border-hover: #ccced3;
@@ -29,10 +25,6 @@
 
   --expansa-box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
 
-  --expansa-link: #005bd3;
-  --expansa-link-hover: #054aa5;
-  --expansa-link-active: #6aeea7;
-
   --expansa-primary: #005cf4;
   --expansa-primary-hover: #1867ea;
   --expansa-primary-active: #004fd1;
@@ -44,6 +36,10 @@
   --expansa-success: #39b64d;
   --expansa-success-hover: #51c263;
   --expansa-success-active: #2eae43;
+
+  --expansa-warning: #f76707;
+  --expansa-warning-hover: #ff761d;
+  --expansa-warning-active: #dc5901;
 
   --expansa-danger: #cb2c2c;
   --expansa-danger-hover: #d32828;

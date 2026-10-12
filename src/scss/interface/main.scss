@@ -25,15 +25,15 @@
 }
 
 *::-webkit-input-placeholder {
-  color: var(--expansa-placeholder);
+  color: var(--expansa-text-placeholder);
 }
 
 *::-moz-placeholder {
-  color: var(--expansa-placeholder);
+  color: var(--expansa-text-placeholder);
 }
 
 *::placeholder {
-  color: var(--expansa-placeholder);
+  color: var(--expansa-text-placeholder);
 }
 
 *:focus::-webkit-input-placeholder {
@@ -73,6 +73,7 @@ body {
   overflow-x: hidden;
   scrollbar-gutter: stable;
   font-size: 13px;
+  color: var(--expansa-text);
 
   &::-webkit-scrollbar-thumb {
     background-color: hsla(216, 3%, 64%, 0.6);
@@ -110,7 +111,7 @@ p {
 }
 
 a:not(.btn) {
-  color: var(--expansa-link);
+  color: var(--expansa-primary);
   cursor: pointer;
   text-decoration: none;
   outline: 0;
@@ -229,7 +230,7 @@ textarea {
   width: 100%;
   position: relative;
   outline: 0;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   transition: color, box-shadow 0.2s ease;
   overflow: auto;
   height: 1.875rem;
@@ -242,8 +243,8 @@ textarea {
     color: inherit;
     outline: 0;
     background-color: #fff;
-    border-color: var(--expansa-link);
-    box-shadow: 0 0 0 1px var(--expansa-link);
+    border-color: var(--expansa-primary);
+    box-shadow: 0 0 0 1px var(--expansa-primary);
     z-index: 1;
   }
 

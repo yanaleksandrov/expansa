@@ -1,18 +1,15 @@
 :root {
-  --expansa-white: #fff;
   --expansa-bg: #f7f7f7;
   --expansa-bg-hover: #f2f2f2;
+  --expansa-bg-white: #ffffff;
   --expansa-bg-dark: #efefef;
   --expansa-bg-universal: rgba(142, 142, 142, 0.07);
   --expansa-bg-active: rgba(134, 134, 134, 0.06);
-  --expansa-bg-light: rgba(255, 255, 255, 0.85);
-  --expansa-info: #1871ba;
-  --expansa-warning: #f76707;
-  --expansa-error: #d63939;
-  --expansa-dark: #1e1e1e;
-  --expansa-text-secondary: #5f6873;
+  --expansa-text: #131313;
+  --expansa-text-hover: #000000;
+  --expansa-text-white: #ffffff;
   --expansa-text-muted: #71777F;
-  --expansa-placeholder: #9aa0a9;
+  --expansa-text-placeholder: #9aa0a9;
   --expansa-border: #dfe2e3;
   --expansa-border-hover: #ccced3;
   --expansa-corner-shape-superellipse: 1.75;
@@ -23,9 +20,6 @@
   --expansa-border-radius--lg: calc(0.5rem * var(--expansa-border-radius-scale));
   --expansa-border-radius--xl: calc(0.625rem * var(--expansa-border-radius-scale));
   --expansa-box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
-  --expansa-link: #005bd3;
-  --expansa-link-hover: #054aa5;
-  --expansa-link-active: #6aeea7;
   --expansa-primary: #005cf4;
   --expansa-primary-hover: #1867ea;
   --expansa-primary-active: #004fd1;
@@ -35,6 +29,9 @@
   --expansa-success: #39b64d;
   --expansa-success-hover: #51c263;
   --expansa-success-active: #2eae43;
+  --expansa-warning: #f76707;
+  --expansa-warning-hover: #ff761d;
+  --expansa-warning-active: #dc5901;
   --expansa-danger: #cb2c2c;
   --expansa-danger-hover: #d32828;
   --expansa-danger-active: #b52020;
@@ -157,11 +154,11 @@ meter {
 }
 
 *::-moz-placeholder {
-  color: var(--expansa-placeholder);
+  color: var(--expansa-text-placeholder);
 }
 
 *::placeholder {
-  color: var(--expansa-placeholder);
+  color: var(--expansa-text-placeholder);
 }
 
 *:focus::-moz-placeholder {
@@ -197,6 +194,7 @@ body {
   overflow-x: hidden;
   scrollbar-gutter: stable;
   font-size: 13px;
+  color: var(--expansa-text);
 }
 body::-webkit-scrollbar-thumb {
   background-color: hsla(216, 3%, 64%, 0.6);
@@ -229,7 +227,7 @@ p:last-child {
 }
 
 a:not(.btn) {
-  color: var(--expansa-link);
+  color: var(--expansa-primary);
   cursor: pointer;
   text-decoration: none;
   outline: 0;
@@ -355,7 +353,7 @@ textarea {
   width: 100%;
   position: relative;
   outline: 0;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   transition: color, box-shadow 0.2s ease;
   overflow: auto;
   height: 1.875rem;
@@ -371,8 +369,8 @@ textarea:focus {
   color: inherit;
   outline: 0;
   background-color: #fff;
-  border-color: var(--expansa-link);
-  box-shadow: 0 0 0 1px var(--expansa-link);
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary);
   z-index: 1;
 }
 input[readonly], input[disabled],
@@ -517,7 +515,7 @@ img:after {
 /* CARD */
 .card {
   position: relative;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   transition: box-shadow 0.2s;
   display: flex;
   flex-direction: column;
@@ -588,7 +586,7 @@ img:after {
   border-top-right-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   min-height: 3.5rem;
-  background: var(--expansa-white);
+  background: var(--expansa-bg-white);
   padding: 0 0 0 1.5rem;
   position: relative;
   flex: 1;
@@ -658,7 +656,7 @@ img:after {
   gap: 0.65em;
   font-weight: 500;
   white-space: nowrap;
-  color: var(--expansa-text-secondary);
+  color: var(--expansa-text-muted);
   background-color: transparent;
   cursor: pointer;
   transition: color 0.3s, background-color 0.3s;
@@ -669,7 +667,7 @@ img:after {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .tab__title:hover, .tab__title.is-active {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   background-color: var(--expansa-bg-active);
 }
 .tab__title[disabled], .tab__title.is-disabled {
@@ -680,7 +678,7 @@ img:after {
 .tab__content {
   flex: 1;
   width: 100%;
-  max-width: 56rem;
+  max-width: 54rem;
   padding: 1.5rem;
 }
 @media screen and (max-width: 768px) {
@@ -763,7 +761,7 @@ img:after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--expansa-text-secondary);
+  color: var(--expansa-text-muted);
   text-align: center;
   text-transform: uppercase;
   vertical-align: bottom;
@@ -909,7 +907,7 @@ img:after {
   border: 1px solid currentColor;
   border-right-color: transparent;
   border-radius: 50%;
-  color: var(--expansa-text-secondary);
+  color: var(--expansa-text-muted);
   position: absolute;
   width: 1em;
   height: 1em;
@@ -1049,7 +1047,7 @@ img:after {
 
 .icons__item {
   align-content: center;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -1071,7 +1069,7 @@ img:after {
   background-color: var(--expansa-border);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  color: var(--expansa-info);
+  color: var(--expansa-primary);
   cursor: pointer;
   font-size: 0.8rem;
   margin: 0.125rem;
@@ -1204,7 +1202,7 @@ img:after {
   justify-content: center;
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.55);
-  color: var(--expansa-white);
+  color: var(--expansa-text-white);
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.15s;
@@ -1222,7 +1220,7 @@ img:after {
   padding: 2rem;
   border: 1px solid var(--expansa-border);
   border-radius: 4px 4px 0 0;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 
 .sample__item.bg {
@@ -1250,7 +1248,7 @@ img:after {
 }
 
 .sample__code:hover:after {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
 }
 
 .kanban {
@@ -1320,7 +1318,7 @@ img:after {
   white-space: nowrap;
 }
 .kanban__label {
-  color: var(--expansa-dark) !important;
+  color: var(--expansa-secondary) !important;
 }
 .kanban__img {
   border-radius: 4px;
@@ -1466,7 +1464,7 @@ img:after {
   grid-template-rows: 42px 1fr 24px;
   min-height: 100vh;
   min-height: 100dvh;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   position: relative;
 }
 @media (max-width: 1024px) {
@@ -1713,7 +1711,7 @@ body.is-unsaved .expansa-search-btn {
   display: none;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.15), 0 10px 32px rgba(0, 0, 0, 0.1);
   padding: 4px;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border-radius: var(--expansa-border-radius--xl);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   position: fixed;
@@ -1752,7 +1750,7 @@ body.is-unsaved .expansa-search-btn {
   height: 1.25rem;
   display: grid;
   place-items: center;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -1762,7 +1760,7 @@ body.is-unsaved .expansa-search-btn {
 }
 .expansa-search-item {
   transition: background-color 0.25s;
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   width: 100%;
 }
 .expansa-search-item.is-active {
@@ -1792,7 +1790,7 @@ body.is-unsaved .expansa-search-btn {
 
 .nav {
   position: relative;
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   margin: 0;
   padding: 0 1rem;
   line-height: 1.3;
@@ -1825,18 +1823,19 @@ body.is-unsaved .expansa-search-btn {
   display: flex;
   align-items: center;
   padding: 0.25rem 0.775rem;
-  color: var(--expansa-text-muted) !important;
   border: none !important;
+  color: var(--expansa-text-muted) !important;
+  background-color: transparent !important;
 }
 .nav__item ul li a:hover {
-  color: var(--expansa-info);
+  color: var(--expansa-primary);
   background-color: transparent;
 }
 .nav__item ul li.is-active > a {
-  color: var(--expansa-dark) !important;
+  color: var(--expansa-secondary) !important;
 }
 .nav__item.is-active > .nav__link {
-  background-color: var(--expansa-bg-light);
+  background-color: var(--expansa-bg-active);
 }
 .nav__item:has(> .nav__action) > .nav__link {
   padding-right: 2.25rem;
@@ -1865,7 +1864,7 @@ body.is-unsaved .expansa-search-btn {
   height: 1.875rem;
 }
 .nav__link:hover {
-  background-color: var(--expansa-bg-light);
+  background-color: var(--expansa-bg-active);
   color: inherit;
 }
 .nav__action {
@@ -1886,7 +1885,7 @@ body.is-unsaved .expansa-search-btn {
   transition: color 0.2s, background-color 0.2s;
 }
 .nav__action:hover {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   background-color: var(--expansa-bg);
 }
 
@@ -1896,7 +1895,7 @@ body.is-unsaved .expansa-search-btn {
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   padding: 1.25rem 0;
 }
 .panel__link {
@@ -1914,21 +1913,21 @@ body.is-unsaved .expansa-search-btn {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .panel__link:hover {
-  background-color: var(--expansa-bg-light);
+  background-color: var(--expansa-bg-active);
 }
 
 .menu {
   margin: 0;
   padding: 0;
   display: flex;
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   height: 100%;
 }
 .menu__item {
   position: relative;
 }
 .menu__item.is-active a {
-  color: var(--expansa-link);
+  color: var(--expansa-primary);
 }
 .menu__item:hover > .menu__sub {
   top: 100%;
@@ -1953,7 +1952,7 @@ body.is-unsaved .expansa-search-btn {
   transition: color 0.3s, background-color 0.3s;
 }
 .menu__link:hover {
-  color: var(--expansa-link) !important;
+  color: var(--expansa-primary) !important;
 }
 @media (max-width: 1024px) {
   .menu__link {
@@ -1987,7 +1986,7 @@ body.is-unsaved .expansa-search-btn {
   position: relative;
   display: flex;
   align-items: center;
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   padding: 8px 20px;
   text-decoration: none;
   line-height: 100%;
@@ -1996,7 +1995,7 @@ body.is-unsaved .expansa-search-btn {
 }
 .menu__sub li a:hover {
   left: 4px;
-  color: var(--expansa-dark) !important;
+  color: var(--expansa-secondary) !important;
 }
 
 .plugins {
@@ -2023,7 +2022,7 @@ body.is-unsaved .expansa-search-btn {
 .plugins__card {
   display: flex;
   gap: 1rem;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border-radius: var(--expansa-border-radius--xl);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   padding: 1rem;
@@ -2114,7 +2113,7 @@ body.is-unsaved .expansa-search-btn {
   aspect-ratio: 1/1;
   word-wrap: break-word;
   background-clip: border-box;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -2233,7 +2232,7 @@ body.is-unsaved .expansa-search-btn {
   align-items: center;
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  color: var(--expansa-error);
+  color: var(--expansa-danger);
   display: flex;
   gap: 0.375rem;
   flex-shrink: 0;
@@ -2253,7 +2252,7 @@ body.is-unsaved .expansa-search-btn {
 }
 .email-form {
   flex: 1 1 20rem;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 .email-preview {
   flex: 1 1 40rem;
@@ -2397,7 +2396,7 @@ body.is-unsaved .expansa-search-btn {
   min-width: 14rem;
   max-height: 20rem;
   overflow-y: auto;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   border-radius: var(--expansa-border-radius--lg);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -2562,7 +2561,7 @@ body.is-unsaved .expansa-search-btn {
   gap: 0.25rem;
   display: flex;
   align-items: center;
-  color: var(--expansa-text-secondary);
+  color: var(--expansa-text-muted);
   font-weight: 500;
   padding-block: 0 0.375rem !important;
   border: 0;
@@ -2642,7 +2641,7 @@ body.is-unsaved .expansa-search-btn {
   white-space: nowrap;
   width: 100%;
   z-index: 10;
-  color: var(--expansa-text-secondary);
+  color: var(--expansa-text-muted);
   font-weight: 500;
   font-size: 0.8rem;
   text-align: start;
@@ -2670,7 +2669,7 @@ body.is-unsaved .expansa-search-btn {
   cursor: pointer;
 }
 .table__head > *:has(i):hover {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
 }
 .table__head i {
   font-size: 0.8rem;
@@ -2783,7 +2782,7 @@ body.is-unsaved .expansa-search-btn {
 }
 .updates-icon--primary {
   background-color: var(--expansa-primary);
-  color: var(--expansa-white);
+  color: var(--expansa-text-white);
 }
 
 .updates-core-head {

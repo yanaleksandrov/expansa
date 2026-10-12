@@ -419,7 +419,7 @@ return Expansa\Builders\Form::enqueue(
 							'type'        => 'url',
 							'name'        => 'seo[organization][facebook]',
 							'error'       => 'seo.organization.facebook',
-							'label'       => t( 'Facebook' ),
+							'label'       => '',
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -439,26 +439,27 @@ return Expansa\Builders\Form::enqueue(
 							'type'        => 'text',
 							'name'        => 'seo[organization][x]',
 							'error'       => 'seo.organization.x',
-							'label'       => t( 'X' ),
+							'label'       => '',
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => '<i class="ph ph-x-logo"></i>',
 							'after'       => '',
-							'instruction' => t( 'A username or a profile URL.' ),
+							'instruction' => '',
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value' => (string) Option::get( 'seo.organization.x' ),
+								'value'       => (string) Option::get( 'seo.organization.x' ),
+								'placeholder' => t( 'https://x.com/username or @username' ),
 							],
 						],
 						[
 							'type'        => 'url',
 							'name'        => 'seo[organization][mastodon]',
 							'error'       => 'seo.organization.mastodon',
-							'label'       => t( 'Mastodon' ),
+							'label'       => '',
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
@@ -481,19 +482,18 @@ return Expansa\Builders\Form::enqueue(
 								$profiles = array_map( static fn ( string $url ) => [ 'url' => $url ], (array) Option::get( 'seo.organization.profiles', [] ) );
 								?>
 								<div class="dg g-2" u-data="{ profiles: <?php echo htmlspecialchars( json_encode( $profiles ), ENT_QUOTES ); ?> }">
-									<div class="field-label"><?php echo t( 'Other Profiles' ); ?></div>
-									<div class="field" u-each="(profile, i) in profiles">
-										<label class="field-item">
-											<input type="url" name="seo[organization][profiles][]" u-prop="profile.url" placeholder="https://">
-											<i class="ph ph-trash-simple t-red" @click="profiles = profiles.filter((removed, index) => index !== i)" title="<?php echo t_attr( 'Remove' ); ?>"></i>
-										</label>
+									<div>
+										<div class="field" u-each="(profile, i) in profiles">
+											<label class="field-item">
+												<input type="url" name="seo[organization][profiles][]" u-prop="profile.url" placeholder="https://">
+												<i class="ph ph-trash-simple t-red" @click="profiles = profiles.filter((removed, index) => index !== i)" title="<?php echo t_attr( 'Remove' ); ?>"></i>
+											</label>
+										</div>
 									</div>
 									<div class="field-instruction"><?php echo t( 'Any other profiles of the organization on the web: YouTube, LinkedIn, Pinterest or Wikipedia.' ); ?></div>
-									<div>
-										<button type="button" class="btn btn--outline dif aic g-1" @click="profiles = [...profiles, { url: '' }]">
-											<i class="ph ph-plus"></i> <?php echo t( 'Add Another Profile' ); ?>
-										</button>
-									</div>
+									<button type="button" class="btn btn--outline" @click="profiles = [...profiles, { url: '' }]">
+										<i class="ph ph-plus"></i> <?php echo t( 'Add Another Profile' ); ?>
+									</button>
 								</div>
 								<?php
 							},

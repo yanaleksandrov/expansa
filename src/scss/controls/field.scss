@@ -83,15 +83,15 @@
     }
 
     &:has(textarea) {
-      height: initial;
+      height: initial !important;
     }
 
     .field--outline & {
       border: 1px solid var(--expansa-border);
-      background-color: var(--expansa-white);
+      background-color: var(--expansa-bg-white);
 
       .ss-content {
-        background-color: var(--expansa-white) !important;
+        background-color: var(--expansa-bg-white) !important;
         border: 1px solid var(--expansa-border);
       }
     }
@@ -267,7 +267,7 @@
           background-color: #f1f1f1d6;
         }
 
-        .field-checkbox {
+        [type="checkbox"] {
           position: relative;
           display: flex;
           corner-shape: initial;
@@ -292,12 +292,19 @@
           }
         }
 
+        [type="radio"] {
+
+          &:checked {
+            background-color: var(--expansa-primary);
+          }
+        }
+
         .field-label {
           font-weight: 500;
         }
 
         .field-icon {
-          background-color: var(--expansa-white);
+          background-color: var(--expansa-bg-white);
         }
 
         .field-instruction {
@@ -319,9 +326,9 @@
 
       &:hover,
       &:has([type="radio"]:checked) {
-        background-color: var(--expansa-white);
+        background-color: var(--expansa-bg-white);
         border: 1px solid var(--expansa-border);
-        box-shadow: 0 5px 5px -3px rgba(0, 0, 0, .05) !important;
+        box-shadow: var(--expansa-box-shadow) !important;
 
         .field-icon {
           background-color: var(--expansa-bg);
@@ -347,8 +354,8 @@
       color: inherit;
       outline: 0;
       background-color: #fff;
-      border-color: var(--expansa-link);
-      box-shadow: 0 0 0 1px var(--expansa-link);
+      border-color: var(--expansa-primary);
+      box-shadow: 0 0 0 1px var(--expansa-primary);
       z-index: 1;
     }
 
@@ -358,7 +365,7 @@
       background-color: var(--expansa-bg);
 
       .field--outline & {
-        background-color: var(--expansa-white);
+        background-color: var(--expansa-bg-white);
       }
     }
 
@@ -380,8 +387,8 @@
     }
 
     &:has([x-datepicker][readonly]):focus-within {
-      border-color: var(--expansa-link);
-      box-shadow: 0 0 0 1px var(--expansa-link);
+      border-color: var(--expansa-primary);
+      box-shadow: 0 0 0 1px var(--expansa-primary);
     }
 
     &:has([type="radio"]) {
@@ -399,7 +406,7 @@
       }
 
       .field-icon {
-        background-color: var(--expansa-white);
+        background-color: var(--expansa-bg-white);
       }
 
       .field--ui & {
@@ -412,8 +419,8 @@
         border-width: 6px;
 
         &:not(:checked) {
-          border-color: var(--expansa-white);
-          background-color: var(--expansa-white);
+          border-color: var(--expansa-text-white);
+          background-color: var(--expansa-bg-white);
           outline: 1px solid var(--expansa-border);
         }
 

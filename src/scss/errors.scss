@@ -20,11 +20,12 @@ body {
   overflow-x: hidden;
   scrollbar-gutter: stable;
   font-size: 0.8125rem;
+  color: var(--expansa-text);
 }
 
 .errors {
   background-color: var(--expansa-bg);
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   padding-block: 1.5rem;
   padding-inline: clamp(1rem, calc(50vw - 34rem), 68rem);
 
@@ -87,7 +88,7 @@ body {
 
   &-header {
     gap: 0.5rem;
-    color: var(--expansa-error);
+    color: var(--expansa-danger);
     width: 100%;
     margin-bottom: 1rem;
     display: grid;

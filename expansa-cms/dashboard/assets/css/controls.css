@@ -146,7 +146,7 @@ textarea[u-textarea] {
   margin-inline-end: auto;
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  color: var(--expansa-text-secondary);
+  color: var(--expansa-text-muted);
   border: 1px solid var(--expansa-border);
   background: var(--expansa-bg);
   line-height: initial;
@@ -212,7 +212,7 @@ textarea[u-textarea] {
   border-radius: var(--expansa-border-radius--lg);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   border: 1px solid var(--expansa-border);
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   top: calc(100% + 0.125rem);
   right: 0;
   letter-spacing: -0.01em;
@@ -302,8 +302,8 @@ select[multiple] + .ss-main {
   color: inherit;
   outline: 0;
   background-color: #fff;
-  border-color: var(--expansa-link);
-  box-shadow: 0 0 0 1px var(--expansa-link);
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary);
 }
 .ss-main .ss-arrow {
   display: none;
@@ -357,7 +357,7 @@ select[multiple] + .ss-main {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
 }
 .ss-main .ss-values .ss-text .ss-description {
   font-size: 0.85em;
@@ -508,7 +508,7 @@ select[multiple] + .ss-main {
 }
 .ss-content .ss-search input {
   -webkit-appearance: textfield;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border-radius: 0.3rem;
   box-sizing: border-box;
   color: inherit;
@@ -678,8 +678,8 @@ select[multiple] + .ss-main {
 .ss-content .ss-list .ss-option {
   padding: 0.45rem 0.85rem;
   font-size: 0.95em;
-  color: var(--expansa-dark);
-  background-color: var(--expansa-white);
+  color: var(--expansa-secondary);
+  background-color: var(--expansa-bg-white);
   display: flex;
   cursor: pointer;
   -webkit-user-select: none;
@@ -687,8 +687,8 @@ select[multiple] + .ss-main {
           user-select: none;
 }
 .ss-content .ss-list .ss-option:hover {
-  background-color: var(--expansa-link);
-  color: var(--expansa-white);
+  background-color: var(--expansa-primary);
+  color: var(--expansa-text-white);
 }
 .ss-content .ss-list .ss-option * {
   display: inline-block;
@@ -729,7 +729,7 @@ select[multiple] + .ss-main {
 }
 .ss-content .ss-list .ss-option.ss-highlighted,
 .ss-content .ss-list .ss-option:not(.ss-disabled).ss-selected {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   background-color: var(--expansa-bg-active);
   cursor: no-drop;
 }
@@ -739,7 +739,7 @@ select[multiple] + .ss-main {
   cursor: not-allowed;
 }
 .ss-content .ss-list .ss-option .ss-search-highlight {
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 
 @keyframes ss-valueIn {
@@ -809,7 +809,7 @@ input[type=checkbox], input[type=radio] {
   position: relative;
   border-radius: calc(var(--expansa-border-radius) / 1.5);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   clear: none;
   cursor: pointer !important;
@@ -864,8 +864,8 @@ input[type=radio]:checked {
   overflow: hidden;
 }
 .radio--image:has(input:checked), .radio--described:has(input:checked) {
-  border-color: var(--expansa-link);
-  box-shadow: 0 0 0 1px var(--expansa-link);
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary);
 }
 .radio--image {
   padding: 0;
@@ -1021,14 +1021,14 @@ input[type=radio]:checked {
   line-height: 1.2;
 }
 .field-item:has(textarea) {
-  height: initial;
+  height: initial !important;
 }
 .field--outline .field-item {
   border: 1px solid var(--expansa-border);
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 .field--outline .field-item .ss-content {
-  background-color: var(--expansa-white) !important;
+  background-color: var(--expansa-bg-white) !important;
   border: 1px solid var(--expansa-border);
 }
 .field-item i {
@@ -1176,7 +1176,7 @@ input[type=radio]:checked {
 .field--ui .field-item:has([type=radio]):hover, .field--ui .field-item:has([type=checkbox]):hover {
   background-color: rgba(241, 241, 241, 0.8392156863);
 }
-.field--ui .field-item:has([type=radio]) .field-checkbox, .field--ui .field-item:has([type=checkbox]) .field-checkbox {
+.field--ui .field-item:has([type=radio]) [type=checkbox], .field--ui .field-item:has([type=checkbox]) [type=checkbox] {
   position: relative;
   display: flex;
   corner-shape: initial;
@@ -1194,16 +1194,19 @@ input[type=radio]:checked {
   margin: 0 0 auto;
   order: 2;
 }
-.field--ui .field-item:has([type=radio]) .field-checkbox:checked, .field--ui .field-item:has([type=checkbox]) .field-checkbox:checked {
+.field--ui .field-item:has([type=radio]) [type=checkbox]:checked, .field--ui .field-item:has([type=checkbox]) [type=checkbox]:checked {
   outline: none;
   background-color: var(--expansa-success);
   background-position: 100% center;
+}
+.field--ui .field-item:has([type=radio]) [type=radio]:checked, .field--ui .field-item:has([type=checkbox]) [type=radio]:checked {
+  background-color: var(--expansa-primary);
 }
 .field--ui .field-item:has([type=radio]) .field-label, .field--ui .field-item:has([type=checkbox]) .field-label {
   font-weight: 500;
 }
 .field--ui .field-item:has([type=radio]) .field-icon, .field--ui .field-item:has([type=checkbox]) .field-icon {
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 .field--ui .field-item:has([type=radio]) .field-instruction, .field--ui .field-item:has([type=checkbox]) .field-instruction {
   order: 3;
@@ -1219,9 +1222,9 @@ input[type=radio]:checked {
   font-weight: 500;
 }
 .field--button .field-item:hover, .field--button .field-item:has([type=radio]:checked) {
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.05) !important;
+  box-shadow: var(--expansa-box-shadow) !important;
 }
 .field--button .field-item:hover .field-icon, .field--button .field-item:has([type=radio]:checked) .field-icon {
   background-color: var(--expansa-bg);
@@ -1241,8 +1244,8 @@ input[type=radio]:checked {
   color: inherit;
   outline: 0;
   background-color: #fff;
-  border-color: var(--expansa-link);
-  box-shadow: 0 0 0 1px var(--expansa-link);
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary);
   z-index: 1;
 }
 .field-item:has(.ss-main:not(.ss-open-below)):focus-within {
@@ -1251,7 +1254,7 @@ input[type=radio]:checked {
   background-color: var(--expansa-bg);
 }
 .field--outline .field-item:has(.ss-main:not(.ss-open-below)):focus-within {
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 .field-item:has(:nth-child(1 of code)) {
   padding-inline-start: 0.275em;
@@ -1266,8 +1269,8 @@ input[type=radio]:checked {
   padding-inline: 0.65em !important;
 }
 .field-item:has([x-datepicker][readonly]):focus-within {
-  border-color: var(--expansa-link);
-  box-shadow: 0 0 0 1px var(--expansa-link);
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary);
 }
 .field-item:has([type=radio]) {
   align-items: flex-start;
@@ -1282,7 +1285,7 @@ input[type=radio]:checked {
   line-height: 1.5em;
 }
 .field-item:has([type=radio]) .field-icon {
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 .field--ui .field-item:has([type=radio]) {
   margin: 0;
@@ -1293,8 +1296,8 @@ input[type=radio]:checked {
   border-width: 6px;
 }
 .field-item:has([type=radio]) *[type=radio]:not(:checked) {
-  border-color: var(--expansa-white);
-  background-color: var(--expansa-white);
+  border-color: var(--expansa-text-white);
+  background-color: var(--expansa-bg-white);
   outline: 1px solid var(--expansa-border);
 }
 .field-item:has([type=radio]):has(.field-icon) *[type=radio] {
@@ -1335,7 +1338,7 @@ input[type=radio]:checked {
 }
 
 .btn {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   font: inherit;
   font-weight: 500;
   overflow: hidden;
@@ -1398,7 +1401,7 @@ input[type=radio]:checked {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .btn--primary, .btn--secondary, .btn--success, .btn--danger {
-  color: var(--expansa-white);
+  color: var(--expansa-text-white);
   box-shadow: 0 1px 1px rgba(255, 255, 255, 0.2) inset, 0 -1px 1px rgba(0, 0, 0, 0.2) inset;
 }
 .btn--primary {
@@ -1439,7 +1442,7 @@ input[type=radio]:checked {
 }
 .btn--outline {
   border: 1px solid var(--expansa-border);
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 .btn--outline:hover {
   border-color: var(--expansa-border-hover);
@@ -1467,13 +1470,13 @@ input[type=radio]:checked {
   transition: color 0.2s, background-color 0.15s;
 }
 .btn--animated:hover:before {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   opacity: 1;
   transform: scale(1);
   transition: color 0.2s, transform 0.4s, opacity 0.5s, background-color 0.15s;
 }
 .btn--animated[class*=primary]:hover:before, .btn--animated[class*=secondary]:hover:before, .btn--animated[class*=success]:hover:before, .btn--animated[class*=danger]:hover:before {
-  color: var(--expansa-white);
+  color: var(--expansa-text-white);
 }
 .btn--full {
   width: 100%;
@@ -1499,7 +1502,7 @@ input[type=radio]:checked {
   border: 1.5px solid currentColor;
   border-right-color: transparent;
   border-radius: 50%;
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   position: absolute;
   width: 1em;
   height: 1em;
@@ -1508,7 +1511,7 @@ input[type=radio]:checked {
   animation: spinner-border 0.5s linear infinite;
 }
 .btn.is-loading[class*=primary]:after, .btn.is-loading[class*=secondary]:after, .btn.is-loading[class*=success]:after, .btn.is-loading[class*=danger]:after {
-  color: var(--expansa-white);
+  color: var(--expansa-text-white);
 }
 
 @keyframes spinner-border {
