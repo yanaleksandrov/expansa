@@ -42,9 +42,6 @@ final class Plugins extends Table
                 ->title('<input type="checkbox" u-bind="trigger">')
                 ->fixedWidth('1rem')
                 ->view('cb'),
-            $this->cell('image')
-                ->fixedWidth('2.5rem')
-                ->view('image'),
             $this->cell('plugin')
                 ->title(t('Plugin'))
                 ->flexibleWidth('14rem')

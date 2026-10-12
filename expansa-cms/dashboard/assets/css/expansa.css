@@ -1576,7 +1576,7 @@ img:after {
   min-width: 1px;
   position: relative;
   grid-area: 2/3/3/4;
-  background-color: var(--expansa-main-bg, var(--expansa-bg-white));
+  background-color: var(--expansa-bg-white);
 }
 @media (max-width: 1024px) {
   .expansa-main {
@@ -1584,10 +1584,10 @@ img:after {
   }
 }
 .expansa-main--muted {
-  --expansa-main-bg: var(--expansa-bg);
+  background-color: var(--expansa-bg);
 }
 .expansa-main--canvas {
-  --expansa-main-bg: var(--expansa-bg-universal);
+  background-color: var(--expansa-bg-universal);
 }
 .expansa-board {
   min-height: 24px;
@@ -2645,9 +2645,9 @@ body.is-unsaved .expansa-search-btn {
   min-width: 100%;
   height: 2rem;
 }
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 768px) {
   .table .table-head {
-    padding-inline: 1.25rem;
+    padding-inline: 1rem;
   }
 }
 .table .table-head > * {
@@ -2666,16 +2666,13 @@ body.is-unsaved .expansa-search-btn {
 .table .table-head i {
   font-size: 0.8rem;
 }
-.table .table-row:has(.table-row-data) .table-row-inner {
-  border-radius: var(--expansa-border-radius);
-  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  background-color: var(--expansa-bg-white);
-  border: 1px solid var(--expansa-border);
-}
 .table .table-row:has(.table-row-data) .table-row-data {
-  background-color: var(--expansa-bg);
-  border-radius: var(--expansa-border-radius);
-  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  padding: 0 1.5rem 1.5rem 3.75rem;
+}
+@media screen and (max-width: 768px) {
+  .table .table-row:has(.table-row-data) .table-row-data {
+    padding: 0 1rem 1rem 3.25rem;
+  }
 }
 .table .table-row-inner {
   display: grid;

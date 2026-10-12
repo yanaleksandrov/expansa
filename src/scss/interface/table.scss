@@ -31,8 +31,8 @@
     min-width: 100%;
     height: 2rem;
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    @media screen and (max-width: 768px) {
+      padding-inline: 1rem;
     }
 
     > * {
@@ -60,17 +60,12 @@
 
     &:has(.table-row-data) {
 
-      .table-row-inner {
-        border-radius: var(--expansa-border-radius);
-        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-        background-color: var(--expansa-bg-white);
-        border: 1px solid var(--expansa-border);
-      }
-
       .table-row-data {
-        background-color: var(--expansa-bg);
-        border-radius: var(--expansa-border-radius);
-        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+        padding: 0 1.5rem 1.5rem 3.75rem;
+
+        @media screen and (max-width: 768px) {
+          padding: 0 1rem 1rem 3.25rem;
+        }
       }
     }
   }

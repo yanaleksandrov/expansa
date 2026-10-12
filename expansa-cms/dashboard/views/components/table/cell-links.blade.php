@@ -23,9 +23,9 @@ $more = count($links) - 3;
 <div u-data="{show: false}">
     @foreach ($links as $i => $link)
         @if ($i === 3)
-            <span class="table__more" u-show="show" hidden>
+            <span class="table-more" u-show="show" hidden>
         @endif
-        <span class="table__link">
+        <span class="table-link">
             @if (! empty($link['href']))
                 <a href="{{ $link['href'] }}">{{ $link['title'] ?? '' }}</a>
             @else
