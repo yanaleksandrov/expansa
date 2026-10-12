@@ -292,13 +292,6 @@
           }
         }
 
-        [type="radio"] {
-
-          &:checked {
-            background-color: var(--expansa-primary);
-          }
-        }
-
         .field-label {
           font-weight: 500;
         }
@@ -417,6 +410,7 @@
         max-width: 1.35rem;
         height: 1.35rem;
         border-width: 6px;
+        corner-shape: initial;
 
         &:not(:checked) {
           border-color: var(--expansa-text-white);

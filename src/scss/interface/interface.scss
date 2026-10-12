@@ -392,6 +392,7 @@
           border: none !important;
           color: var(--expansa-text-muted) !important;
           background-color: transparent !important;
+          height: auto;
 
           &:hover {
             color: var(--expansa-primary);

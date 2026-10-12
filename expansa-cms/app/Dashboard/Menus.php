@@ -293,6 +293,15 @@ final class Menus
                     'position'     => 900,
                 ],
                 [
+                    'id'           => 'general',
+                    'url'          => 'seo',
+                    'title'        => t('General'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 10,
+                    'parent_id'    => 'settings',
+                ],
+                [
                     'id'           => 'seo',
                     'url'          => 'seo',
                     'title'        => t('SEO'),

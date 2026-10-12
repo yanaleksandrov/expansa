@@ -1199,9 +1199,6 @@ input[type=radio]:checked {
   background-color: var(--expansa-success);
   background-position: 100% center;
 }
-.field--ui .field-item:has([type=radio]) [type=radio]:checked, .field--ui .field-item:has([type=checkbox]) [type=radio]:checked {
-  background-color: var(--expansa-primary);
-}
 .field--ui .field-item:has([type=radio]) .field-label, .field--ui .field-item:has([type=checkbox]) .field-label {
   font-weight: 500;
 }
@@ -1294,6 +1291,7 @@ input[type=radio]:checked {
   max-width: 1.35rem;
   height: 1.35rem;
   border-width: 6px;
+  corner-shape: initial;
 }
 .field-item:has([type=radio]) *[type=radio]:not(:checked) {
   border-color: var(--expansa-text-white);
