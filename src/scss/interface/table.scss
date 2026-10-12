@@ -15,6 +15,24 @@
     }
   }
 
+  .table-header {
+    max-width: 100%;
+    position: sticky;
+    top: 42px;
+    background-color: var(--expansa-bg);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    z-index: 90;
+    border-bottom: 1px solid var(--expansa-border);
+
+    @media screen and (max-width: 1024px) {
+      top: 52px;
+    }
+  }
+
   .table-head {
     white-space: nowrap;
     width: 100%;
@@ -57,6 +75,29 @@
   }
 
   .table-row {
+    width: 100%;
+
+    &:nth-child(1 of .table-row) {
+
+      .table-row-inner {
+        padding-top: 1.5rem;
+
+        @media screen and (max-width: 768px) {
+          padding-top: 1rem;
+        }
+      }
+    }
+
+    &:last-child {
+
+      .table-row-inner {
+        padding-bottom: 1.5rem;
+
+        @media screen and (max-width: 768px) {
+          padding-bottom: 1rem;
+        }
+      }
+    }
 
     &:has(.table-row-data) {
 
@@ -91,22 +132,6 @@
       }
     }
 
-    &:nth-child(1 of .table-row) {
-      padding-top: 1.5rem;
-
-      @media screen and (max-width: 768px) {
-        padding-top: 1rem;
-      }
-    }
-
-    &:last-child {
-      padding-bottom: 1.5rem;
-
-      @media screen and (max-width: 768px) {
-        padding-bottom: 1rem;
-      }
-    }
-
     @media screen and (max-width: 768px) {
       padding-inline: 1rem;
     }
@@ -126,24 +151,6 @@
 
     @media screen and (max-width: 768px) {
       padding-inline: 1rem;
-    }
-  }
-
-  .table-header {
-    max-width: 100%;
-    position: sticky;
-    top: 42px;
-    background-color: var(--expansa-bg);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    z-index: 99;
-    border-bottom: 1px solid var(--expansa-border);
-
-    @media screen and (max-width: 1024px) {
-      top: 52px;
     }
   }
 

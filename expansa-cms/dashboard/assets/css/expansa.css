@@ -2629,6 +2629,24 @@ body.is-unsaved .expansa-search-btn {
     padding-inline: 1rem;
   }
 }
+.table .table-header {
+  max-width: 100%;
+  position: sticky;
+  top: 42px;
+  background-color: var(--expansa-bg);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  z-index: 90;
+  border-bottom: 1px solid var(--expansa-border);
+}
+@media screen and (max-width: 1024px) {
+  .table .table-header {
+    top: 52px;
+  }
+}
 .table .table-head {
   white-space: nowrap;
   width: 100%;
@@ -2666,6 +2684,25 @@ body.is-unsaved .expansa-search-btn {
 .table .table-head i {
   font-size: 0.8rem;
 }
+.table .table-row {
+  width: 100%;
+}
+.table .table-row:nth-child(1 of .table-row) .table-row-inner {
+  padding-top: 1.5rem;
+}
+@media screen and (max-width: 768px) {
+  .table .table-row:nth-child(1 of .table-row) .table-row-inner {
+    padding-top: 1rem;
+  }
+}
+.table .table-row:last-child .table-row-inner {
+  padding-bottom: 1.5rem;
+}
+@media screen and (max-width: 768px) {
+  .table .table-row:last-child .table-row-inner {
+    padding-bottom: 1rem;
+  }
+}
 .table .table-row:has(.table-row-data) .table-row-data {
   padding: 0 1.5rem 1.5rem 3.75rem;
 }
@@ -2690,22 +2727,6 @@ body.is-unsaved .expansa-search-btn {
   opacity: 1;
   visibility: visible;
 }
-.table .table-row-inner:nth-child(1 of .table-row) {
-  padding-top: 1.5rem;
-}
-@media screen and (max-width: 768px) {
-  .table .table-row-inner:nth-child(1 of .table-row) {
-    padding-top: 1rem;
-  }
-}
-.table .table-row-inner:last-child {
-  padding-bottom: 1.5rem;
-}
-@media screen and (max-width: 768px) {
-  .table .table-row-inner:last-child {
-    padding-bottom: 1rem;
-  }
-}
 @media screen and (max-width: 768px) {
   .table .table-row-inner {
     padding-inline: 1rem;
@@ -2726,24 +2747,6 @@ body.is-unsaved .expansa-search-btn {
 @media screen and (max-width: 768px) {
   .table .table-bulk {
     padding-inline: 1rem;
-  }
-}
-.table .table-header {
-  max-width: 100%;
-  position: sticky;
-  top: 42px;
-  background-color: var(--expansa-bg);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  z-index: 99;
-  border-bottom: 1px solid var(--expansa-border);
-}
-@media screen and (max-width: 1024px) {
-  .table .table-header {
-    top: 52px;
   }
 }
 .table .table-link {
