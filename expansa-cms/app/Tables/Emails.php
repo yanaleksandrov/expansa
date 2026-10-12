@@ -12,9 +12,10 @@ final class Emails extends Table
     {
         return [
             [
-                'cb'         => '<input type="checkbox" value="1">',
-                'image'      => 'image',
+                'id'         => 1,
+                'image'      => url('dashboard/assets/images/placeholder.svg'),
                 'title'      => 'Post title',
+                'status'     => t('Draft'),
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
                 'date'       => '24 august 2024',
@@ -25,8 +26,8 @@ final class Emails extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')
-                ->title('<input type="checkbox" u-bind="trigger" />')
+            $this->cell('id')
+                ->title('<input type="checkbox" u-bind="trigger">')
                 ->fixedWidth('1rem')
                 ->view('cb'),
             $this->cell('title')

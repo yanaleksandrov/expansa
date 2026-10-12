@@ -501,17 +501,6 @@ img:after {
   transition: opacity 0.3s;
 }
 
-.hover-reveal {
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
-}
-
-.hover:hover .hover-reveal {
-  opacity: 1;
-  visibility: visible;
-}
-
 /* CARD */
 .card {
   position: relative;
@@ -2629,18 +2618,18 @@ body.is-unsaved .expansa-search-btn {
   margin-bottom: auto;
   grid-template-rows: max-content;
 }
-.table__filter {
+.table .table-filter {
   display: flex;
   gap: 0.25rem;
   padding-inline: 1.5rem;
   padding-bottom: 1rem;
 }
-@media screen and (max-width: 1024px) {
-  .table__filter {
-    padding-inline: 1.25rem;
+@media screen and (max-width: 768px) {
+  .table .table-filter {
+    padding-inline: 1rem;
   }
 }
-.table__head {
+.table .table-head {
   white-space: nowrap;
   width: 100%;
   z-index: 10;
@@ -2657,55 +2646,75 @@ body.is-unsaved .expansa-search-btn {
   height: 2rem;
 }
 @media screen and (max-width: 1024px) {
-  .table__head {
+  .table .table-head {
     padding-inline: 1.25rem;
   }
 }
-.table__head > * {
+.table .table-head > * {
   padding: 0.4rem 0;
   transition: color 0.3s;
   text-transform: uppercase;
   font-size: 10px;
   letter-spacing: 0.05em;
 }
-.table__head > *:has(i) {
+.table .table-head > *:has(i) {
   cursor: pointer;
 }
-.table__head > *:has(i):hover {
+.table .table-head > *:has(i):hover {
   color: var(--expansa-secondary);
 }
-.table__head i {
+.table .table-head i {
   font-size: 0.8rem;
 }
-.table__row {
+.table .table-row:has(.table-row-data) .table-row-inner {
+  border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  background-color: var(--expansa-bg-white);
+  border: 1px solid var(--expansa-border);
+}
+.table .table-row:has(.table-row-data) .table-row-data {
+  background-color: var(--expansa-bg);
+  border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+}
+.table .table-row-inner {
   display: grid;
   gap: 1.25rem;
   position: relative;
   padding: 0.75rem 1.5rem;
   grid-template-columns: var(--expansa-grid-template-columns);
 }
-.table__row:nth-child(1 of .table__row) {
+.table .table-row-inner .table-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s;
+}
+.table .table-row-inner:hover .table-hidden {
+  opacity: 1;
+  visibility: visible;
+}
+.table .table-row-inner:nth-child(1 of .table-row) {
   padding-top: 1.5rem;
 }
-@media screen and (max-width: 1024px) {
-  .table__row:nth-child(1 of .table__row) {
+@media screen and (max-width: 768px) {
+  .table .table-row-inner:nth-child(1 of .table-row) {
     padding-top: 1rem;
   }
 }
-.table__row:last-child {
+.table .table-row-inner:last-child {
   padding-bottom: 1.5rem;
 }
-@media screen and (max-width: 1024px) {
-  .table__row:last-child {
+@media screen and (max-width: 768px) {
+  .table .table-row-inner:last-child {
     padding-bottom: 1rem;
   }
 }
-@media screen and (max-width: 1024px) {
-  .table__row {
-    padding-inline: 1.25rem;
+@media screen and (max-width: 768px) {
+  .table .table-row-inner {
+    padding-inline: 1rem;
   }
 }
-.table__bulk {
+.table .table-bulk {
   padding: 0.75rem 1.5rem;
   width: 100%;
   background-color: var(--expansa-bg);
@@ -2717,12 +2726,12 @@ body.is-unsaved .expansa-search-btn {
   top: 0;
   bottom: 2rem;
 }
-@media screen and (max-width: 1024px) {
-  .table__bulk {
-    padding-inline: 1.25rem;
+@media screen and (max-width: 768px) {
+  .table .table-bulk {
+    padding-inline: 1rem;
   }
 }
-.table__header {
+.table .table-header {
   max-width: 100%;
   position: sticky;
   top: 42px;
@@ -2736,15 +2745,15 @@ body.is-unsaved .expansa-search-btn {
   border-bottom: 1px solid var(--expansa-border);
 }
 @media screen and (max-width: 1024px) {
-  .table__header {
+  .table .table-header {
     top: 52px;
   }
 }
-.table__link {
+.table .table-link {
   display: inline-flex;
 }
-.table__link:not(:nth-last-child(2)):after {
-  content: ", ";
+.table .table-link + .table .table-link::before, .table .table-link + .table-more .table .table-link:first-child::before {
+  content: ",";
   padding-inline-end: 0.25rem;
 }
 

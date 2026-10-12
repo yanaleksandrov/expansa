@@ -1,23 +1,17 @@
 <?php
-
-use Expansa\Facades\Safe;
-use Expansa\Support\Arr;
-
 /**
- * Badge
+ * Value in a badge, nothing for an empty one.
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-badge.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-badge.blade.php
+ *
+ * @var Expansa\Builders\Table\Cell $cell
+ * @var array<string, mixed>        $item
+ * @var mixed                       $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[ $prop, $attributes ] = Safe::data(
-    $__data ?? [],
-	[
-		'key'        => 'prop',
-		'attributes' => 'array',
-	]
-)->values();
 ?>
-<span class="badge badge--green-lt"><i class="ph ph-person-simple-throw"></i> {{ $__data[$prop] ?? '' }}</span>
+@if (is_scalar($value) && $value !== '')
+    <span class="badge">{{ $value }}</span>
+@endif

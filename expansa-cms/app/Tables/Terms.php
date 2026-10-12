@@ -12,12 +12,14 @@ final class Terms extends Table
     {
         return [
             [
+                'id'    => 1,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
                 'title' => 'Hello World',
                 'slug'  => 'hello-world',
                 'count' => 23,
             ],
             [
+                'id'    => 2,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
                 'title' => 'Uncategorized',
                 'slug'  => 'uncategorized',
@@ -29,7 +31,7 @@ final class Terms extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')->title('<input type="checkbox" u-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
+            $this->cell('id')->title('<input type="checkbox" u-bind="trigger">')->fixedWidth('1rem')->view('cb'),
             $this->cell('image')->title(t('Image'))->fixedWidth('2.5rem')->view('image'),
             $this->cell('title')->title(t('Title'))->view('title'),
             $this->cell('slug')->title(t('Slug'))->view('raw'),

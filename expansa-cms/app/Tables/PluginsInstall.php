@@ -315,7 +315,7 @@ final class PluginsInstall extends Table
     {
         return [
             'title'  => t('Add Plugins'),
-            'search' => true,
+            'search' => t('Search plugins'),
         ];
     }
 

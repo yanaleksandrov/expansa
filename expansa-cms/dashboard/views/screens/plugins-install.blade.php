@@ -8,13 +8,15 @@
  *
  * @package Expansa\Templates
  */
+
+$cell = $table->cells[0];
 ?>
 <?php echo view('components/table/header', $table->headData()); ?>
 
-@if($table->getData())
+@if ($table->getData())
     <div class="plugins">
-        @foreach($table->getData() as $item)
-            <?php echo view($table->cells[0]->view, $item); ?>
+        @foreach ($table->getData() as $item)
+            <?php echo view($cell->view, ['cell' => $cell, 'item' => $item, 'value' => $item[$cell->key] ?? null]); ?>
         @endforeach
     </div>
 @else

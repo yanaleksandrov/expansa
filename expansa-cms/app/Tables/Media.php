@@ -24,11 +24,7 @@ final class Media extends Table
     {
         return [
             'title'    => t('Media Library'),
-            'actions'  => false,
-            'filter'   => false,
             'uploader' => true,
-            'show'     => 'false',
-            'content'  => '',
         ];
     }
 

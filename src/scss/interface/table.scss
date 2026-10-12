@@ -4,18 +4,18 @@
   margin-bottom: auto;
   grid-template-rows: max-content;
 
-  &__filter {
+  .table-filter {
     display: flex;
     gap: 0.25rem;
     padding-inline: 1.5rem;
     padding-bottom: 1rem;
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    @media screen and (max-width: 768px) {
+      padding-inline: 1rem;
     }
   }
 
-  &__head {
+  .table-head {
     white-space: nowrap;
     width: 100%;
     z-index: 10;
@@ -56,17 +56,50 @@
     }
   }
 
-  &__row {
+  .table-row {
+
+    &:has(.table-row-data) {
+
+      .table-row-inner {
+        border-radius: var(--expansa-border-radius);
+        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+        background-color: var(--expansa-bg-white);
+        border: 1px solid var(--expansa-border);
+      }
+
+      .table-row-data {
+        background-color: var(--expansa-bg);
+        border-radius: var(--expansa-border-radius);
+        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+      }
+    }
+  }
+
+  .table-row-inner {
     display: grid;
     gap: 1.25rem;
     position: relative;
     padding: 0.75rem 1.5rem;
     grid-template-columns: var(--expansa-grid-template-columns);
 
-    &:nth-child(1 of .table__row) {
+    .table-hidden {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s;
+    }
+
+    &:hover {
+
+      .table-hidden {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    &:nth-child(1 of .table-row) {
       padding-top: 1.5rem;
 
-      @media screen and (max-width: 1024px) {
+      @media screen and (max-width: 768px) {
         padding-top: 1rem;
       }
     }
@@ -74,17 +107,17 @@
     &:last-child {
       padding-bottom: 1.5rem;
 
-      @media screen and (max-width: 1024px) {
+      @media screen and (max-width: 768px) {
         padding-bottom: 1rem;
       }
     }
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    @media screen and (max-width: 768px) {
+      padding-inline: 1rem;
     }
   }
 
-  &__bulk {
+  .table-bulk {
     padding: 0.75rem 1.5rem;
     width: 100%;
     background-color: var(--expansa-bg);
@@ -96,12 +129,12 @@
     top: 0;
     bottom: 2rem;
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    @media screen and (max-width: 768px) {
+      padding-inline: 1rem;
     }
   }
 
-  &__header {
+  .table-header {
     max-width: 100%;
     position: sticky;
     top: 42px;
@@ -119,11 +152,12 @@
     }
   }
 
-  &__link {
+  .table-link {
     display: inline-flex;
 
-    &:not(:nth-last-child(2)):after {
-      content: ', ';
+    & + &::before,
+    & + .table-more &:first-child::before {
+      content: ',';
       padding-inline-end: 0.25rem;
     }
   }

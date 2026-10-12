@@ -8,7 +8,8 @@ use Expansa\Builders\Table\Cell;
 
 /**
  * Base of a dashboard table: a subclass returns the rows in data() and describes the columns
- * in cells() with cell(). The template renders a row cell by cell, each with the view of its column.
+ * in cells() with cell(). The template renders a row cell by cell, each with the view of its column,
+ * see Table\Cell for the variables of the view.
  *
  * @package Expansa\Builders
  */
@@ -20,12 +21,9 @@ abstract class Table
     private static string $filter = '';
 
     /**
-     * Default view of the cells, `->view('date')` of a column adds `-date` to it.
-     */
-    private static string $cellView = '';
-
-    /**
      * Rows from data(), null until getData() is called.
+     *
+     * @var array<int, array<string, mixed>>|null
      */
     private ?array $rows = null;
 
@@ -45,13 +43,14 @@ abstract class Table
      * Set the file included before every table and the default view of the cells.
      *
      * @param string $filter   File that enqueues the items filter form.
-     * @param string $cellView View name, e.g. `components/table/cell`.
+     * @param string $cellView Prefix of the cell views, e.g. `components/table/cell`.
      * @return void
      */
     public static function configure(string $filter = '', string $cellView = ''): void
     {
-        self::$filter   = $filter;
-        self::$cellView = $cellView;
+        self::$filter = $filter;
+
+        Cell::configure($cellView);
     }
 
     public function __construct()
@@ -67,14 +66,14 @@ abstract class Table
     /**
      * Get the rows of the table; templates read them through getData().
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     abstract public function data(): array;
 
     /**
      * Get the rows to render: data() runs on the first call, so creating a table runs no queries.
      *
-     * @return array
+     * @return array<int, array<string, mixed>>
      */
     public function getData(): array
     {
@@ -89,6 +88,26 @@ abstract class Table
     abstract public function cells(): array;
 
     /**
+     * Get the data of the header above the table: title, badge and the tools to show.
+     *
+     * @return array<string, mixed>
+     */
+    public function headData(): array
+    {
+        return [];
+    }
+
+    /**
+     * Get the data of the state shown instead of the rows when there are none: icon, title, description.
+     *
+     * @return array<string, mixed>
+     */
+    public function notFoundData(): array
+    {
+        return [];
+    }
+
+    /**
      * Start a column description.
      *
      * @param string $key Key of the value in a row.
@@ -96,7 +115,7 @@ abstract class Table
      */
     public function cell(string $key): Cell
     {
-        return new Cell($key, view: self::$cellView);
+        return new Cell($key);
     }
 
     /**

@@ -21,19 +21,6 @@ use Expansa\Http\Request;
 final class Tables
 {
     /**
-     * Tables of the lists that are not post types, by `table`.
-     *
-     * @var array<string, class-string<Table>>
-     */
-    private const array TABLES = [
-        'comments'    => Comments::class,
-        'translation' => Translations::class,
-        'emails'      => Emails::class,
-        'users'       => Users::class,
-        'files'       => Media::class,
-    ];
-
-    /**
      * Template of the `edit` page: files are shown by the media library.
      *
      * @param Request $request
@@ -45,13 +32,22 @@ final class Tables
     }
 
     /**
-     * Data of the `edit` page: the table.
+     * Data of the `edit` page: the table of the list named by `table`, posts by default.
      *
      * @param Request $request
      * @return array{table: Table}
      */
     public static function data(Request $request): array
     {
-        return ['table' => new (self::TABLES[$request->getString('table')] ?? Pages::class)()];
+        $table = match ($request->getString('table')) {
+            'comments'    => new Comments(),
+            'translation' => new Translations($request->getString('project')),
+            'emails'      => new Emails(),
+            'users'       => new Users(),
+            'files'       => new Media(),
+            default       => new Pages(),
+        };
+
+        return ['table' => $table];
     }
 }

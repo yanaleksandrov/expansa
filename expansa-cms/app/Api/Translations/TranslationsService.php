@@ -12,55 +12,54 @@ use Expansa\Http\Request;
 final class TranslationsService
 {
     /**
-     * Scans a project's PHP files for translatable strings (t()/t_attr()/_c() calls).
+     * Get the strings of a project to translate, see scan().
      *
-     * Fixed from the legacy code: it referenced `Dir` and `File` classes that don't
-     * exist anywhere in the framework (would fatal the moment this ran) — the real,
-     * equivalent API is Disk::dir()->files() / Disk::file()->read().
+     * @param Request $request
+     * @return array{items: list<array{source: string, value: string}>}
      */
     public function get(Request $request): array
     {
-        $dirpath = Safe::path(EX_PATH . (string) ($request->post['project'] ?? ''));
-        $paths   = Disk::dir($dirpath)->files('*.php', 10);
+        $items = array_map(
+            fn (string $source) => ['source' => $source, 'value' => ''],
+            $this->scan((string) ($request->post['project'] ?? '')),
+        );
 
-        $result = [];
-        foreach ($paths as $path) {
-            $content = Disk::file($path)->read();
+        return ['items' => $items];
+    }
 
-            $pattern = '/I18n::   # Match the literal "I18n::"
-                translate(?:Attribute)?  # translate() or translateAttribute()
-                \s*               # Match any whitespace characters (optional)
-                \(                # Match the opening parenthesis
-                \s*               # Match any whitespace characters (optional)
-                [\'"]             # Match either single or double quote
-                (.*?)             # Capture the content inside the quotes (non-greedy match)
-                [\'"]             # Match either single or double quote
-                \s*               # Match any whitespace characters (optional)
-                (?:,\s*[^)]+)?    # Optionally match additional parameters before closing parenthesis
-                \)                # Match the closing parenthesis
-            /ux';                 // Enable extended mode and Unicode support
+    /**
+     * Find the translatable strings in the PHP files of a project: arguments of I18n::translate()
+     * and I18n::translateAttribute(), unique, sorted case-insensitively.
+     *
+     * @param string $project Folder under the root: `core`, a plugin or theme id.
+     * @return list<string>
+     */
+    public function scan(string $project): array
+    {
+        $pattern = '/I18n::   # Match the literal "I18n::"
+            translate(?:Attribute)?  # translate() or translateAttribute()
+            \s*               # Match any whitespace characters (optional)
+            \(                # Match the opening parenthesis
+            \s*               # Match any whitespace characters (optional)
+            [\'"]             # Match either single or double quote
+            (.*?)             # Capture the content inside the quotes (non-greedy match)
+            [\'"]             # Match either single or double quote
+            \s*               # Match any whitespace characters (optional)
+            (?:,\s*[^)]+)?    # Optionally match additional parameters before closing parenthesis
+            \)                # Match the closing parenthesis
+        /ux';                 // Enable extended mode and Unicode support
 
-            preg_match_all($pattern, $content, $matches, PREG_SET_ORDER);
+        $strings = [];
+        foreach (Disk::dir(Safe::path(EX_PATH . $project))->files('*.php', 10) as $path) {
+            preg_match_all($pattern, (string) Disk::file($path)->read(), $matches);
 
-            // extracting the found strings into a separate array
-            $i18nStrings = array_map(fn($match) => $match[1] ?? '', $matches);
-            if ($i18nStrings) {
-                $result = [...$result, ...$i18nStrings];
-            }
-
-            usort($result, fn($a, $b) => strcasecmp($a, $b));
+            $strings = [...$strings, ...$matches[1]];
         }
 
-        $result = array_values(array_unique($result));
+        $strings = array_values(array_unique($strings));
+        usort($strings, strcasecmp(...));
 
-        $result = array_map(fn($item) => [
-            'source' => $item,
-            'value'  => '',
-        ], $result);
-
-        return [
-            'items' => $result,
-        ];
+        return $strings;
     }
 
     public function update(Request $request): array

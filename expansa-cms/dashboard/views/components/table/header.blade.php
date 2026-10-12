@@ -1,115 +1,88 @@
 <?php
 
 use Expansa\Builders\Form;
+use Expansa\Extensions\Plugin;
+use Expansa\Extensions\Theme;
+use Expansa\Facades\Extensions;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
 /**
- * Table header
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/header.php
+ * Header above a table: the title with a badge, the tools and the bulk actions shown while rows are selected.
+ *
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/header.blade.php
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $show, $content, $uploader, $filter, $actions, $search, $translation] = Safe::data($__data ?? [], [
+[$title, $badge, $content, $uploader, $filter, $actions, $search, $translation, $project] = Safe::data($__data ?? [], [
     'title'       => 'trim',
     'badge'       => 'trim',
-    'show'        => 'bool:true',
     'content'     => 'trim',
     'uploader'    => 'bool:false',
     'filter'      => 'bool:false',
     'actions'     => 'bool:false',
-    'search'      => 'bool:false',
+    'search'      => 'trim',
     'translation' => 'bool:false',
+    'project'     => 'trim',
 ])->values();
 
-$plugins = Expansa\Facades\Extensions::get('plugin');
-$themes  = Expansa\Facades\Extensions::get('theme');
+$progress = static fn (string $name) => ['content' => $name, 'description' => t(':percent% complete', 0)];
 ?>
-<!-- table head start -->
 <div class="mw df fww aic jcsb g-3 py-5 px-6 sm:p-4">
-    <?php if ($title) : ?>
-        <h4><?php echo $title; ?>
-            <?php $badge && print('<span class="badge">' . $badge . '</span>'); ?>
+    @if ($title)
+        <h4>
+            {!! $title !!}
+            @if ($badge)
+                <span class="badge">{!! $badge !!}</span>
+            @endif
         </h4>
-    <?php endif; ?>
+    @endif
 
     <div class="df aic g-1">
         <div class="df aic g-1" u-show="!bulk">
-            <?php if ($filter) : ?>
+            @if ($filter)
                 <div class="df aic g-1">
-                    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '{{ t('Reset filter') }}' : '<?php echo t( 'Filter' ); ?>'">
+                    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '{{ t('Reset filter') }}' : '{{ t('Filter') }}'">
                         <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
-                        <span u-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'"><?php echo t('Filter'); ?></span>
+                        <span u-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'">{{ t('Filter') }}</span>
                     </button>
                     <?php
-                    echo Form::view(
-                        'number',
-                        [
-                            'type' => 'number',
-                            'name' => 'page',
-                            'label' => '',
-                            'class' => 'field field--sm field--outline',
-                            'label_class' => '',
-                            'reset' => 0,
-                            'before' => '',
-                            'after' => '',
-                            'instruction' => '',
-                            'tooltip' => '',
-                            'copy' => 0,
-                            'validator' => '',
-                            'conditions' => [],
-                            'attributes' => [
-                                'min' => 0,
-                                'value' => 3,
-                            ],
-                        ]
-                    );
+                    echo Form::view('number', [
+                        'type'       => 'number',
+                        'name'       => 'page',
+                        'class'      => 'field field--sm field--outline',
+                        'attributes' => ['min' => 0, 'value' => 3],
+                    ]);
                     ?>
                 </div>
-            <?php endif; ?>
+            @endif
 
-            <?php if ($search) : ?>
+            @if ($search)
                 <div class="df aic g-1">
                     <?php
-                    echo Form::view(
-                        'input',
-                        [
-                            'type' => 'search',
-                            'name' => 's',
-                            'label' => '',
-                            'class' => 'field field--outline',
-                            'label_class' => '',
-                            'reset' => 0,
-                            'before' => '',
-                            'after' => '',
-                            'instruction' => '',
-                            'tooltip' => '',
-                            'copy' => 0,
-                            'validator' => '',
-                            'conditions' => [],
-                            'attributes' => [
-                                'type' => 'search',
-                                'name' => 's',
-                                'placeholder' => t('Search plugins'),
-                            ],
-                        ]
-                    );
+                    echo Form::view('input', [
+                        'type'       => 'search',
+                        'name'       => 's',
+                        'class'      => 'field field--outline',
+                        'attributes' => ['type' => 'search', 'name' => 's', 'placeholder' => $search],
+                    ]);
                     ?>
                 </div>
-            <?php endif; ?>
+            @endif
 
-            <?php if ($uploader) : ?>
+            @if ($uploader)
                 <div class="df aic g-1">
-                    <button class="btn btn--sm btn--outline" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
-                        <i class="ph ph-upload-simple"></i> <?php echo t('Add New File'); ?>
+                    <button class="btn btn--sm btn--outline" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
+                        <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}
                     </button>
                 </div>
-            <?php endif; ?>
+            @endif
 
-            <?php if ($translation) : ?>
-                <div class="df aic g-2">
+            @if ($translation)
+                <form class="df aic g-2" method="GET">
+                    <input type="hidden" name="table" value="translation">
                     <div class="df aic g-1">
                         <svg width="16" height="16">
                             <use xlink:href="{{ url('/dashboard/assets/sprites/flags.svg#us') }}"></use>
@@ -117,102 +90,52 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                         English
                     </div>
                     <span class="badge badge--round badge--icon badge--lg"><i class="ph ph-arrows-left-right"></i></span>
-                        <?php
-                        echo Form::view(
-                            'select',
-                            [
-                                'type' => 'select',
-                                'name' => 'language',
-                                'label' => '',
-                                'class' => 'field field--sm field--outline',
-                                'label_class' => '',
-                                'reset' => 0,
-                                'before' => '',
-                                'after' => '',
-                                'instruction' => '',
-                                'tooltip' => '',
-                                'copy' => 0,
-                                'validator' => '',
-                                'conditions' => [],
-                                'attributes' => [
-                                    'u-select' => '',
-                                    'name' => 'language',
-                                ],
-                                'options' => I18n::languageOptions(),
-                            ]
-                        );
+                    <?php
+                    echo Form::view('select', [
+                        'type'       => 'select',
+                        'name'       => 'language',
+                        'class'      => 'field field--sm field--outline',
+                        'attributes' => ['u-select' => '', 'name' => 'language'],
+                        'options'    => I18n::languageOptions(),
+                    ]);
 
-                        echo Form::view(
-                            'select',
-                            [
-                                'type' => 'select',
-                                'name' => 'project',
-                                'label' => '',
-                                'class' => 'field field--sm field--outline',
-                                'label_class' => '',
-                                'reset' => 0,
-                                'before' => '',
-                                'after' => '',
-                                'instruction' => '',
-                                'tooltip' => '',
-                                'copy' => 0,
-                                'validator' => '',
-                                'conditions' => [],
-                                'attributes' => [
-                                    'name' => 'project',
-                                    'u-prop' => 'project',
-                                    'u-select' => '',
-                                ],
-                                'options' => [
-                                    'core' => [
-                                        'label' => t('Core'),
-                                        'options' => [
-                                            'core' => [
-                                                'content' => t('Expansa Core'),
-                                                'description' => t(':percent\% complete', 0),
-                                            ],
-                                        ],
-                                    ],
-                                    'plugins' => [
-                                        'label' => t('Plugins'),
-                                        'options' => array_reduce($plugins, function ($carry, Expansa\Extensions\Plugin $plugin) {
-                                            $carry[$plugin->id] = [
-                                                'content'     => $plugin->name,
-                                                'description' => t(':percent% complete', 0),
-                                            ];
-                                            return $carry;
-                                        }, []),
-                                    ],
-                                    'themes' => [
-                                        'label' => t('Themes'),
-                                        'options' => array_reduce($themes, function ($carry, Expansa\Extensions\Theme $theme) {
-                                            $carry[$theme->id] = [
-                                                'content'     => $theme->name,
-                                                'description' => t(':percent% complete', 0),
-                                            ];
-                                            return $carry;
-                                        }, []),
-                                    ],
-                                ],
-                            ]
-                        );
-                        ?>
-                    <button type="button" class="btn btn--sm btn--outline" @click="$ajax.post('translations/get', {project}).then(data => items = data.items)">
-                        <i class="ph ph-scan"></i> <?php echo t('Scan'); ?>
+                    echo Form::view('select', [
+                        'type'       => 'select',
+                        'name'       => 'project',
+                        'class'      => 'field field--sm field--outline',
+                        'attributes' => ['u-select' => '', 'name' => 'project', 'value' => $project],
+                        // an empty group would render as an option
+                        'options'    => array_filter([
+                            'core'    => [
+                                'label'   => t('Core'),
+                                'options' => ['core' => $progress(t('Expansa Core'))],
+                            ],
+                            'plugins' => [
+                                'label'   => t('Plugins'),
+                                'options' => array_map(fn (Plugin $plugin) => $progress($plugin->name), array_column(Extensions::get('plugin'), null, 'id')),
+                            ],
+                            'themes'  => [
+                                'label'   => t('Themes'),
+                                'options' => array_map(fn (Theme $theme) => $progress($theme->name), array_column(Extensions::get('theme'), null, 'id')),
+                            ],
+                        ], fn (array $group) => $group['options'] !== []),
+                    ]);
+                    ?>
+                    <button type="submit" class="btn btn--sm btn--outline">
+                        <i class="ph ph-scan"></i> {{ t('Scan') }}
                     </button>
-                </div>
-            <?php endif; ?>
+                </form>
+            @endif
         </div>
 
-        <?php if ($actions) : ?>
+        @if ($actions)
             <div class="df aic g-1" u-show="bulk" hidden>
                 <?php echo form('posts-actions'); ?>
                 <button type="button" class="btn btn--sm t-red" u-bind="reset">
-                    <i class="ph ph-trash"></i> <?php echo t('Reset'); ?>
+                    <i class="ph ph-trash"></i> {{ t('Reset') }}
                 </button>
             </div>
-        <?php endif; ?>
+        @endif
     </div>
 </div>
-<?php //Dashboard\Form::render( 'items-filter' ); ?>
-<?php $content && print($content . PHP_EOL); ?>
+{!! $content !!}

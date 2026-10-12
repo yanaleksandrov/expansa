@@ -66,6 +66,13 @@ $table = new class extends Table {
 };
 check('a table style lists the column widths, a run of the same width as repeat()', $table->style === '--expansa-grid-template-columns: 2rem minmax(16rem, 1fr) repeat(3, 1fr) 6rem');
 
+Table::configure(cellView: 'components/table/cell');
+$cell = $table->cell('date');
+check('a cell renders with the raw view by default', $cell->view === 'components/table/cell-raw');
+check('a cell kind is added to the views prefix', $cell->view('date')->view === 'components/table/cell-date');
+check('a later kind replaces the earlier one', $cell->view('badge')->view === 'components/table/cell-badge');
+check('a view name with a slash is kept as is', $cell->view('plugins/shop/cell')->view === 'plugins/shop/cell');
+
 check('Timezones::all() has 418 zones by identifier', count(App\Support\Timezones::all()) === 418 && isset(App\Support\Timezones::all()['Europe/Moscow']));
 check('Countries::all() has 250 countries', count(App\Support\Countries::all()) === 250);
 

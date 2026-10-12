@@ -38,8 +38,8 @@ final class Plugins extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')
-                ->title('<input type="checkbox" u-bind="trigger" />')
+            $this->cell('id')
+                ->title('<input type="checkbox" u-bind="trigger">')
                 ->fixedWidth('1rem')
                 ->view('cb'),
             $this->cell('image')
@@ -62,8 +62,8 @@ final class Plugins extends Table
                 ->fixedWidth('4rem')
                 ->attributes([
                     // a failed request turns the switch back
-                    '@change' => '$ajax.post($el.checked ? "extensions/activate" : "extensions/deactivate", {id: item.id})'
-                        . '.catch(() => $el.checked = !$el.checked)',
+                    '@change' => '$ajax.post($event.target.checked ? "extensions/activate" : "extensions/deactivate",'
+                        . ' {id: $event.target.value}).catch(() => $event.target.checked = !$event.target.checked)',
                 ])
                 ->view('toggle'),
         ];

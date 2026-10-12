@@ -2,18 +2,6 @@
 @use "sass:map";
 @use '../constants';
 
-// shown while the pointer is over the closest .hover
-.hover-reveal {
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
-}
-
-.hover:hover .hover-reveal {
-  opacity: 1;
-  visibility: visible;
-}
-
 /* CARD */
 .card {
   position: relative;
