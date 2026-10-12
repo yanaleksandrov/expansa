@@ -16,7 +16,7 @@
     font-weight: 500;
     line-height: 1.35em;
 
-    &:after {
+    &[data-required]:after {
       color: var(--expansa-danger);
       content: attr(data-required);
       margin-inline-end: auto;
