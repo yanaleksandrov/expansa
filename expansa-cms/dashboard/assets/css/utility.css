@@ -2107,7 +2107,7 @@
     padding-block: 2rem;
   }
 }
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .sm\:gtc-0 {
     grid-template-columns: repeat(0, 1fr);
   }

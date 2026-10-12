@@ -30,7 +30,7 @@ defined('EX_PATH') || exit;
 )->values();
 ?>
 <div class="plugins__item" u-data="<?php printf( '{installed: %s, active: %s}', $installed ? 'true' : 'false', $active ? 'true' : 'false' ); ?>">
-	<div class="plugins__pretitle"><i class="ph ph-bag"></i> {{ t( 'Business & Commerce' ) }}</div>
+	<div class="plugins__pretitle"><i class="ph ph-bag"></i> {!! t( 'Business & Commerce' ) !!}</div>
 	<div class="plugins__card">
 		<div class="plugins__image" style="background-image: url(<?php echo $screenshot; ?>)"></div>
 		<div class="plugins__data">

@@ -28,7 +28,7 @@ $plugins = Expansa\Facades\Extensions::get('plugin');
 $themes  = Expansa\Facades\Extensions::get('theme');
 ?>
 <!-- table head start -->
-<div class="mw df fww aic jcsb g-3 py-5 px-6 md:p-5">
+<div class="mw df fww aic jcsb g-3 py-5 px-6 sm:p-4">
     <?php if ($title) : ?>
         <h4><?php echo $title; ?>
             <?php $badge && print('<span class="badge">' . $badge . '</span>'); ?>
@@ -79,7 +79,7 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                             'type' => 'search',
                             'name' => 's',
                             'label' => '',
-                            'class' => 'field field--sm field--outline',
+                            'class' => 'field field--outline',
                             'label_class' => '',
                             'reset' => 0,
                             'before' => '',

@@ -7,7 +7,6 @@
   display: grid;
   grid-template-columns: 56px $side-width 1fr;
   grid-template-rows: $bar-height 1fr $board-height;
-  min-height: 100vh;
   min-height: 100dvh;
   background-color: var(--expansa-bg-white);
   position: relative;
@@ -600,13 +599,12 @@
 .plugins {
   display: grid;
   align-content: start;
-  gap: 1.5rem;
+  gap: 0.5rem;
   grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
-  padding: 1.5rem;
+  padding: 0 1.5rem 1.5rem;
 
   @media (max-width: 768px) {
-    gap: 1rem;
-    padding: 1rem;
+    padding: 0 1rem 1rem;
     grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
   }
 
@@ -619,7 +617,6 @@
     background-color: var(--expansa-bg);
     border-radius: var(--expansa-border-radius--xl);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-    padding-inline: 4px;
     margin-bottom: auto;
   }
 
@@ -632,7 +629,6 @@
     padding: 1rem;
     overflow: hidden;
     border: 1px solid var(--expansa-border);
-    margin: -1px;
   }
 
   &__action {
@@ -710,13 +706,12 @@
   grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
   min-height: calc(100% - 100px);
   font-size: 0.8125rem;
-  line-height: 1.4;
-  gap: 2.5rem;
-  padding: 2.25rem;
+  gap: 1.5rem;
+  padding: 1.5rem;
 
   @media screen and (max-width: 1024px) {
-    padding: 1.75rem;
-    gap: 2rem;
+    padding: 1rem;
+    gap: 1rem;
   }
 
   &-item {
@@ -739,7 +734,7 @@
     position: relative;
     overflow: hidden;
     border: 1px solid var(--expansa-border);
-    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, .05);
+    box-shadow: var(--expansa-box-shadow);
     outline: 1px solid var(--expansa-border);
     outline-offset: 0.4rem;
   }
