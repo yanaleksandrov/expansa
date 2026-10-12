@@ -1,5 +1,6 @@
 <?php
 
+use Expansa\Builders\Form;
 use Expansa\Facades\Safe;
 
 /**
@@ -16,8 +17,8 @@ $prop  = Safe::prop($__data['key'] ?? []);
 ?>
 <div class="<?php echo $class; ?>">
 	<?php
-	echo view(
-		'components/form/checkbox',
+	echo Form::view(
+		'checkbox',
 		[
 			'type'        => 'checkbox',
 			'name'        => 'uid',

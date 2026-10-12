@@ -39,6 +39,7 @@ check('toHtmlAttributes() trims and escapes values', Arr::toHtmlAttributes(['cla
 check('toHtmlAttributes() renders scalars', Arr::toHtmlAttributes(['tabindex' => 3, 'u-if' => true]) === ' tabindex="3" u-if="1"');
 check('toHtmlAttributes() renders boolean attributes by value', Arr::toHtmlAttributes(['checked' => true, 'disabled' => false]) === ' checked');
 check('toHtmlAttributes() skips empty values without extra spaces', Arr::toHtmlAttributes(['class' => '', 'id' => 'x', 'title' => null]) === ' id="x"');
+check('toHtmlAttributes() keeps zero values', Arr::toHtmlAttributes(['min' => 0, 'step' => '0']) === ' min="0" step="0"');
 check('toHtmlAttributes() keeps an empty value attribute', Arr::toHtmlAttributes(['value' => '']) === ' value=""');
 check('toHtmlAttributes() keeps empty u- attributes', Arr::toHtmlAttributes(['u-text' => '']) === ' u-text');
 check('toHtmlAttributes() returns an empty string for nothing', Arr::toHtmlAttributes(['' => 'x', 'class' => '']) === '');

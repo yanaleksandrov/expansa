@@ -1,14 +1,15 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
 
 /**
  * Hidden input field
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/hidden.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 ?>
-<input<?php echo Safe::attributes($__data['attributes'] ?? []); ?>>
+<input{!! $field->htmlAttributes !!}>

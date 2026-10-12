@@ -1,32 +1,15 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
 
 /**
- * Custom field markup.
+ * Button.
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/custom.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/button.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[ $name, $label, $class, $labelClass, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
-    $__data ?? [],
-    [
-        'name'        => 'name',
-        'label'       => 'trim',
-        'class'       => 'class:field',
-        'label_class' => 'class:field-label',
-        'reset'       => 'bool:false',
-        'before'      => 'trim',
-        'after'       => 'trim',
-        'instruction' => 'trim',
-        'tooltip'     => 'attribute',
-        'copy'        => 'bool:false',
-        'conditions'  => 'array',
-        'attributes'  => 'array',
-    ]
-)->values();
 ?>
-<button<?php echo Safe::attributes($attributes); ?>><?php echo Safe::markup($label); ?></button>
+<button{!! $field->htmlAttributes !!}>{!! $field->label !!}</button>

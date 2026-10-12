@@ -1,5 +1,6 @@
 <?php
 
+use Expansa\Builders\Form\Data;
 use Expansa\Facades\Safe;
 
 /**
@@ -7,35 +8,40 @@ use Expansa\Facades\Safe;
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/tab-menu.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-$fields    = Safe::array( $__data['fields'] ?? [] );
-$fields    = array_filter( $fields, fn( $field ) => $field['type'] === 'tab' );
-$classMenu = array_filter( array_column( $fields, 'class_menu' ), fn ( $field ) => $field )[0] ?? '';
+$tabs = [];
+$menu = '';
+foreach ($field->fields as $tab) {
+    if (($tab['type'] ?? '') !== 'tab') {
+        continue;
+    }
 
-if (count($fields) === 0) {
+    // the first tab with a menu class gives it to the whole menu
+    $menu = $menu ?: Safe::class($tab['class_menu'] ?? '');
+
+    $tabs[] = [
+        'prop'  => Safe::prop($tab['name'] ?? '') ?: 'tab',
+        'label' => Safe::trim($tab['label'] ?? ''),
+        'icon'  => Safe::attribute($tab['icon'] ?? ''),
+        'class' => Safe::class($tab['class_button'] ?? ''),
+    ];
+}
+
+if ($tabs === []) {
     return;
 }
 ?>
-<ul class="<?php echo trim( sprintf( 'tab__nav %s', $classMenu ) ); ?>" u-sticky>
-	<?php
-	foreach ( $fields as $field ) :
-		[ $prop, $label, $icon, $class ] = Safe::data(
-			$field,
-            [
-				'name'         => 'prop:tab',
-				'label'        => 'trim',
-				'icon'         => 'attribute',
-				'class_button' => 'class',
-            ]
-        )->values();
-		?>
-		<li class="<?php echo trim( sprintf( 'tab__title %s', $class ) ); ?>" u-bind="tabButton('<?php echo $prop; ?>')">
-			<?php $icon && printf( '<i class="%s"></i> ', $icon ); ?>
-			<?php echo $label; ?>
-
+<ul class="{{ trim('tab__nav ' . $menu) }}" u-sticky>
+	@foreach($tabs as $tab)
+		<li class="{{ trim('tab__title ' . $tab['class']) }}" u-bind="tabButton('{{ $tab['prop'] }}')">
+			@if($tab['icon'])
+				<i class="{!! $tab['icon'] !!}"></i>
+			@endif
+			{!! $tab['label'] !!}
 		</li>
-	<?php endforeach; ?>
+	@endforeach
 </ul>

@@ -1,76 +1,54 @@
 <?php
 
+use Expansa\Builders\Form\Data;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
-/*
+/**
  * Radio buttons template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/radio.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-		'options'     => 'array',
-	]
-)->values();
-
-$render = function( $key = '', $option = [] ) use ( $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ) {
-	$prop  = Safe::prop( $name );
-	$value = Safe::attribute( $key ?: $name );
-
-	[ $label, $icon, $instruction, $checked ] = Safe::data(
-		$option,
-		[
-			'content'     => 'trim:' . $label,
-			'icon'        => 'attribute',
-			'description' => 'trim',
-			'checked'     => 'bool:' . strval( $attributes['checked'] ?? false ),
-		]
-	)->values();
-
-	ob_start();
-	?>
-	<label class="field-item">
-		<?php if ( $icon ) : ?>
-			<span class="field-icon"><i class="<?php echo $icon; ?>"></i></span>
-		<?php endif; ?>
-		<input<?php echo Arr::toHtmlAttributes( [ ...$attributes, 'type' => 'radio', 'value' => $value, 'name' => $name, 'u-prop' => $prop, 'checked' => $checked ] ); ?>>
-		<span class="<?php echo $label_class; ?>"<?php echo ! $key && ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
-		<?php echo $label; ?>
-			<?php if ( $instruction ) : ?>
-				<span class="field-instruction"><?php echo $instruction; ?></span>
-			<?php endif; ?>
-		</span>
-	</label>
-	<?php
-	return ob_get_clean();
-};
-
-echo '<div class="dg g-2"' . Arr::toHtmlAttributes( $conditions ) . '>';
-if ( $options && $label ) {
-	echo '<div class="' . $label_class . '">' . $label . '</div>';
+// a single radio is an option without a key
+$radios = [];
+foreach ($field->options ?: ['' => []] as $key => $option) {
+    $radios[] = [
+        'label'       => Safe::trim($option['content'] ?? '') ?: $field->label,
+        'icon'        => Safe::attribute($option['icon'] ?? ''),
+        'instruction' => Safe::trim($option['description'] ?? ''),
+        'required'    => ! $key && $field->required,
+        'attributes'  => [
+            ...$field->attributes,
+            'type'    => 'radio',
+            'value'   => Safe::attribute($key ?: $field->name),
+            'name'    => $field->name,
+            'u-prop'  => Safe::prop($field->name),
+            'checked' => Safe::bool($option['checked'] ?? $field->attributes['checked'] ?? false),
+        ],
+    ];
 }
-echo '<div class="' . $class . '">';
-if ( $options ) {
-	foreach ( $options as $key => $option ) {
-		echo $render( $key, $option );
-	}
-} else {
-	echo $render();
-}
-echo '</div></div>';
+?>
+<div class="dg g-2"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+	@if($field->options && $field->label)
+		<div class="{{ $field->label_class ?: 'field-label' }}">{!! $field->label !!}</div>
+	@endif
+	<div class="{{ $field->class ?: 'field' }}">
+		@foreach($radios as $radio)
+			<label class="field-item">
+				@if($radio['icon'])
+					<span class="field-icon"><i class="{!! $radio['icon'] !!}"></i></span>
+				@endif
+				<input{!! Arr::toHtmlAttributes($radio['attributes']) !!}>
+				<span class="{{ $field->label_class ?: 'field-label' }}"@if($radio['required']) data-required="*"@endif>
+					{!! $radio['label'] !!}
+					@if($radio['instruction'])
+						<span class="field-instruction">{!! $radio['instruction'] !!}</span>
+					@endif
+				</span>
+			</label>
+		@endforeach
+	</div>
+</div>

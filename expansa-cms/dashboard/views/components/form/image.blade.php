@@ -1,48 +1,31 @@
 <?php
 
+use Expansa\Builders\Form\Data;
 use Expansa\Facades\Hook;
-use Expansa\Facades\Safe;
 
 /**
  * Single image uploader.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/image.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-	]
-)->values();
 
 Hook::add('renderDashboardFooter', function () {
     echo view('components/dialogs/selfie-maker');
 }, 5);
 ?>
-<div class="<?php echo $class; ?>">
+<div class="{{ $field->class ?: 'field' }}">
 	<div class="df aife g-4">
 		<div class="image" u-data="avatar">
-			<input type="file" u-ref="input" u-bind="uploader" accept="image/*" id="image-<?php echo $name; ?>" hidden>
-			<span class="image__close" u-bind="remover" title="<?php echo t( 'Remove image' ); ?>">
+			<input type="file" u-ref="input" u-bind="uploader" accept="image/*" id="image-{{ $field->name }}" hidden>
+			<span class="image__close" u-bind="remover" title="{!! t('Remove image') !!}">
 				<i class="ph ph-x"></i>
 			</span>
 			<div class="image__container">
-				<label for="image-<?php echo $name; ?>">
+				<label for="image-{{ $field->name }}">
 					<span class="avatar avatar--xl" u-bind="picture">
 						<span u-bind="initials"></span>
 					</span>
@@ -51,19 +34,19 @@ Hook::add('renderDashboardFooter', function () {
 			</div>
 		</div>
 		<div class="dg g-1 mw50x9">
-			<?php if ( $label ) : ?>
-				<div class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php echo $label; ?></div>
-			<?php endif; ?>
+			@if($field->label)
+				<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>{!! $field->label !!}</div>
+			@endif
 			<div class="fs-13 t-muted lh-xs dg g-1">
 				<div>
-					<a @click.prevent="$refs.input.click()"><?php echo $instruction ?: t( 'Upload a photo' ); ?></a>
-					<span><?php echo t( 'WEBP, PNG, JPG or GIF (max. 400×400px)' ); ?></span>
+					<a @click.prevent="$refs.input.click()">{!! $field->instruction ?: t('Upload a photo') !!}</a>
+					<span>{!! t('WEBP, PNG, JPG or GIF (max. 400×400px)') !!}</span>
 				</div>
 				<a class="btn btn--outline" @click.prevent="$dialog.open('tmpl-media-library', { ...mediaLibraryDialog, multiple: false, type: 'image', onSelect(item) { if (item) { image = item.sizes?.thumbnail?.url || item.url; } } })">
-					<?php echo t( 'Or choose from the media library' ); ?>
+					{!! t('Or choose from the media library') !!}
 				</a>
 			</div>
 		</div>
 	</div>
-	<input type="hidden" name="<?php echo $name; ?>" u-prop="image">
+	<input type="hidden" name="{{ $field->name }}" u-prop="image">
 </div>

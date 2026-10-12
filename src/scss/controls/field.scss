@@ -87,22 +87,23 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     }
 
     &:has([type="number"]) {
-      cursor: not-allowed;
+      width: fit-content;
 
       i {
+        cursor: pointer;
         opacity: 0.35;
-        pointer-events: none;
+        transition: opacity 0.25s;
+
+        &:hover {
+          opacity: 1;
+        }
       }
 
-      &:not(:has([disabled])) {
-        cursor: inherit;
+      &:has(:disabled, [readonly]) {
+        cursor: not-allowed;
 
-        i[\@click] {
-          transition: opacity 0.25s;
-
-          &:hover {
-            opacity: 1;
-          }
+        i {
+          pointer-events: none;
         }
       }
     }
@@ -207,10 +208,6 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     textarea:hover {
       background-color: inherit;
       color: inherit;
-    }
-
-    &:has([type="number"]) {
-      width: fit-content;
     }
 
     &:has([type="radio"]),

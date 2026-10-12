@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
 use Expansa\Support\Arr;
 
 /**
@@ -8,46 +8,27 @@ use Expansa\Support\Arr;
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/text.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[ $name, $label, $class, $labelClass, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-	]
-)->values();
-
-$prop = Safe::prop( $attributes['name'] ?? $name );
 ?>
-<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes( $conditions ); ?>>
-	@if($label)
-		<div class="{{ $labelClass }}"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>{!! $label !!}</div>
+<div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+	@if($field->label)
+		<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>{!! $field->label !!}</div>
 	@endif
 	<label class="field-item">
-		{!! $before !!}
-		<input<?php echo Arr::toHtmlAttributes( $attributes ); ?>>
-		{{$after}}
-		@if($copy)
-			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{$prop}})"></i>
+		{!! $field->before !!}
+		<input{!! $field->htmlAttributes !!}>
+		{{ $field->after }}
+		@if($field->copy)
+			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{ $field->prop }})"></i>
 		@endif
-		@if($tooltip)
-			<i class="ph ph-info" u-tooltip.click.prevent="'{{$tooltip}}'"></i>
+		@if($field->tooltip)
+			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif
 	</label>
-	@if($instruction)
-		<div class="field-instruction">{!! $instruction !!}</div>
+	@if($field->instruction)
+		<div class="field-instruction">{!! $field->instruction !!}</div>
 	@endif
 </div>

@@ -1024,20 +1024,22 @@ input[type=radio]:checked {
   line-height: 1.2;
 }
 .field-item:has([type=number]) {
-  cursor: not-allowed;
+  width: -moz-fit-content;
+  width: fit-content;
 }
 .field-item:has([type=number]) i {
+  cursor: pointer;
   opacity: 0.35;
-  pointer-events: none;
-}
-.field-item:has([type=number]):not(:has([disabled])) {
-  cursor: inherit;
-}
-.field-item:has([type=number]):not(:has([disabled])) i[\@click] {
   transition: opacity 0.25s;
 }
-.field-item:has([type=number]):not(:has([disabled])) i[\@click]:hover {
+.field-item:has([type=number]) i:hover {
   opacity: 1;
+}
+.field-item:has([type=number]):has(:disabled, [readonly]) {
+  cursor: not-allowed;
+}
+.field-item:has([type=number]):has(:disabled, [readonly]) i {
+  pointer-events: none;
 }
 .field-item:has(textarea) {
   height: initial !important;
@@ -1126,10 +1128,6 @@ input[type=radio]:checked {
 .field-item textarea:hover {
   background-color: inherit;
   color: inherit;
-}
-.field-item:has([type=number]) {
-  width: -moz-fit-content;
-  width: fit-content;
 }
 .field-item:has([type=radio]), .field-item:has([type=checkbox]) {
   background-color: transparent;

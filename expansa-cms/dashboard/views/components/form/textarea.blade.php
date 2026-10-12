@@ -1,63 +1,40 @@
 <?php
 
+use Expansa\Builders\Form\Data;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
-/*
+/**
  * Textarea field template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/textarea.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-		'options'     => 'array',
-	]
-)->values();
-
-$value = Safe::textarea( $attributes['value'] ?? '' );
-$prop  = Safe::prop( $attributes['name'] ?? $name );
+$attributes = $field->attributes;
+$value      = Safe::textarea($attributes['value'] ?? '');
 
 $attributes['rows'] ??= 1;
 
-unset( $attributes['value'] );
+unset($attributes['value']);
 ?>
-<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes( $conditions ); ?>>
-	<?php if ( $label ) : ?>
-		<span class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php echo $label; ?></span>
-	<?php endif; ?>
+<div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+	@if($field->label)
+		<span class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>{!! $field->label !!}</span>
+	@endif
 	<label class="field-item">
-		<?php echo $before; ?>
-		<textarea<?php echo Arr::toHtmlAttributes( $attributes ); ?>><?php echo $value; ?></textarea>
-		<?php
-		echo $after;
-		if ( $copy ) {
-			?>
-			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy(<?php echo $prop; ?>)"></i>
-			<?php
-		}
-		if ( $tooltip ) {
-			?>
-			<i class="ph ph-info" u-tooltip.click.prevent="'<?php echo $tooltip; ?>'"></i>
-			<?php
-		}
-		?>
+		{!! $field->before !!}
+		<textarea{!! Arr::toHtmlAttributes($attributes) !!}>{!! $value !!}</textarea>
+		{!! $field->after !!}
+		@if($field->copy)
+			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{ $field->prop }})"></i>
+		@endif
+		@if($field->tooltip)
+			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
+		@endif
 	</label>
-	<?php if ( $instruction ) : ?>
-		<div class="field-instruction"><?php echo $instruction; ?></div>
-	<?php endif; ?>
+	@if($field->instruction)
+		<div class="field-instruction">{!! $field->instruction !!}</div>
+	@endif
 </div>

@@ -1,47 +1,34 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
 
 /**
  * Form tab markup
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/tab.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[$name, $property, $caption, $description, $content, $class_content] = Safe::data(
-    $__data ?? [],
-    [
-		'name'          => 'name',
-		'property'      => 'prop:tab',
-		'caption'       => 'trim|ucfirst',
-		'description'   => 'trim',
-		'content'       => 'trim',
-		'class_content' => 'class',
-    ]
-)->values();
-
-if (empty($content)) {
+if ($field->content === '') {
     return;
 }
 ?>
-<!-- tab "<?php echo $name; ?>" start -->
-<div class="tab__content <?php echo $class_content; ?>" u-bind="tabContent('<?php echo $name; ?>')" hidden>
-	<?php if ( $caption || $description ) : ?>
+<!-- tab "{{ $field->name }}" start -->
+<div class="tab__content {{ $field->class_content }}" u-bind="tabContent('{{ $field->name }}')" hidden>
+	@if($field->caption || $field->description)
 		<div class="dg mb-8">
-			<?php if ( $caption ) : ?>
-				<h4><?php echo $caption; ?></h4>
-				<?php
-			endif;
-			if ( $description ) :
-				?>
-				<div class="t-muted fs-13 mt-1 mw-800"><?php echo $description; ?></div>
-			<?php endif; ?>
+			@if($field->caption)
+				<h4>{!! $field->caption !!}</h4>
+			@endif
+			@if($field->description)
+				<div class="t-muted fs-13 mt-1 mw-800">{!! $field->description !!}</div>
+			@endif
 		</div>
-	<?php endif; ?>
+	@endif
 	<div class="dg g-8">
-		<?php echo $content; ?>
+		{!! $field->content !!}
 	</div>
 </div>

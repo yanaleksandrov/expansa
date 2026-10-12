@@ -1,35 +1,19 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
 use Expansa\Support\Arr;
 
 /**
  * Submit button template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/submit.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-	]
-)->values();
-
+$attributes = $field->attributes;
 $attributes['type'] ??= 'submit';
 ?>
-<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes($conditions); ?>>
-    <button<?php echo Arr::toHtmlAttributes($attributes); ?>><?php echo $label; ?></button>
+<div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+    <button{!! Arr::toHtmlAttributes($attributes) !!}>{!! $field->label !!}</button>
 </div>
