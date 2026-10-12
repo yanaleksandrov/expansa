@@ -30,6 +30,7 @@ defined('EX_PATH') || exit;
 )->values();
 ?>
 <div class="plugins__item" u-data="<?php printf( '{installed: %s, active: %s}', $installed ? 'true' : 'false', $active ? 'true' : 'false' ); ?>">
+	<div class="plugins__pretitle"><i class="ph ph-bag"></i> {{ t( 'Business & Commerce' ) }}</div>
 	<div class="plugins__card">
 		<div class="plugins__image" style="background-image: url(<?php echo $screenshot; ?>)"></div>
 		<div class="plugins__data">
@@ -45,8 +46,8 @@ defined('EX_PATH') || exit;
 		</div>
 	</div>
 	<div class="plugins__info">
-		<span class="plugins__text"><i class="ph ph-desktop-tower"></i> <?php echo $installations; ?></span>
-		<span class="plugins__text"><i class="ph ph-calendar-dots"></i> <?php echo t( 'Last updated: :date', $date ); ?></span>
+		<span class="plugins__text"><i class="ph ph-desktop-tower"></i> {{ t( 'Installs: :installsCount', $installations ) }}</span>
+		<span class="plugins__text"><i class="ph ph-calendar-dots"></i> {{ t( 'Last updated: :date', $date ) }}</span>
 		<span class="plugins__text">
 			<?php
 			if ( $reviews > 0 ) :
