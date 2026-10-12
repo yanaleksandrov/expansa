@@ -579,8 +579,8 @@
   padding: 1.5rem;
   position: relative;
 
-  @media (max-width: 1024px) {
-    padding: 1.25rem;
+  @media (max-width: 768px) {
+    padding: 1rem;
   }
 
   &__head {

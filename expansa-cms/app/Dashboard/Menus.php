@@ -310,6 +310,15 @@ final class Menus
                     'position'     => 20,
                     'parent_id'    => 'settings',
                 ],
+                [
+                    'id'           => 'site-health',
+                    'url'          => 'site-health',
+                    'title'        => t('Site Health'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 30,
+                    'parent_id'    => 'settings',
+                ],
             ]
         ));
     }

@@ -28,7 +28,7 @@ return Expansa\Builders\Form::enqueue(
     'multilingual-settings',
     [
         'class'   => 'tab',
-        'u-data'  => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'general')),
+        'u-data'  => 'tab',
         '@change' => '$ajax.post("user/update")',
     ],
     [
