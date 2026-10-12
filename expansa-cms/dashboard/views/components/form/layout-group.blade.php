@@ -1,33 +1,23 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
+use Expansa\Support\Arr;
 
 /**
  * Group
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/group.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[$name, $label, $class, $labelClass, $contentClass, $content] = Safe::data(
-    $__data ?? [],
-    [
-        'name'          => 'name',
-		'label'         => 'trim',
-        'class'         => 'class:dg g-7 gtc-5 sm:gtc-1',
-		'label_class'   => 'class:ga-1 fw-500',
-        'content_class' => 'class:dg ga-4 g-7 gtc-2 sm:gtc-1',
-		'content'       => 'trim',
-    ]
-)->values();
 ?>
-<div class="<?php echo $class; ?>">
-	@if($label)
-		<div class="{{ $labelClass }}">{{ $label }}</div>
+<div class="{{ $field->class ?: 'dg g-6 gtc-5 sm:gtc-1' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+	@if($field->label)
+		<div class="{{ $field->label_class ?: 'ga-1 fw-500' }}">{{ $field->label }}</div>
 	@endif
-	<div class="{{ $contentClass }}">
-		{!! $content !!}
+	<div class="{{ $field->content_class ?: 'dg ga-4 g-6 gtc-2 sm:gtc-1' }}">
+		{!! $field->content !!}
 	</div>
 </div>

@@ -6,6 +6,7 @@ namespace App\Api\Options;
 
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Llms;
 use App\Support\Mailer;
 use App\Support\RoleSettings;
 use App\Support\Secrets;
@@ -33,6 +34,15 @@ final class OptionsService
                 $value = Mailer::normalize($value);
             }
 
+            // the SEO form sends only the name and the tagline of the site
+            if ($option === 'site' && is_array($value)) {
+                $value = [...(array) Option::get('site', []), ...$value];
+            }
+
+            if ($option === 'seo' && is_array($value)) {
+                $value = $this->normalizeSeo($value);
+            }
+
             if ($option === 'oauth' && is_array($value)) {
                 $value = $this->normalizeProviders($value);
             }
@@ -47,7 +57,40 @@ final class OptionsService
             Option::update($option, $value);
         }
 
+        // llms.txt follows the SEO settings at once, not at the next weekly rebuild
+        if (isset($options['seo']) && ! Llms::generate()) {
+            return $response->notify(t('Options updated, but the llms.txt file could not be written to :path', Llms::PATH));
+        }
+
         return $response->notify(t('Options updated successfully'));
+    }
+
+    /**
+     * Bring the SEO settings to their types: switches to booleans, the post types of the sitemap
+     * to a list of keys, the profiles without empty ones, the robots.txt rules with `\n` line breaks.
+     *
+     * @param array<string, mixed> $seo Form values.
+     * @return array<string, mixed>
+     */
+    private function normalizeSeo(array $seo): array
+    {
+        $seo['organization']['profiles'] = array_values(array_filter(
+            array_map(trim(...), (array) ($seo['organization']['profiles'] ?? [])),
+            static fn (string $profile) => $profile !== ''
+        ));
+
+        foreach ([['llms', 'enabled'], ['robots', 'discourage'], ['robots', 'ai'], ['sitemap', 'enabled']] as [$group, $key]) {
+            $seo[$group][$key] = (bool) ($seo[$group][$key] ?? false);
+        }
+
+        // the hidden `_` sends the field when no type is checked
+        $types = (array) ($seo['sitemap']['types'] ?? []);
+        $seo['sitemap']['types'] = array_keys(array_filter($types, static fn ($checked, $type) => $type !== '_' && $checked, ARRAY_FILTER_USE_BOTH));
+
+        $rules = preg_split('/\R/', (string) ($seo['robots']['rules'] ?? '')) ?: [];
+        $seo['robots']['rules'] = trim(implode("\n", array_map(rtrim(...), $rules)));
+
+        return $seo;
     }
 
     /**

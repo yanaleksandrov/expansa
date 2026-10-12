@@ -1,5 +1,7 @@
 @use '../constants/index' as constants;
 
+$danger-soft: rgb(252.13, 241.14, 241.14);
+
 .field {
   display: grid;
   gap: 0.25em;
@@ -16,14 +18,17 @@
     font-weight: 500;
     line-height: 1.35em;
 
-    &:after {
-      color: var(--expansa-danger);
-      content: attr(data-required);
-      margin-inline-end: auto;
-    }
+    &[data-required] {
 
-    & > * {
-      order: 1;
+      &:after {
+        color: var(--expansa-danger);
+        content: attr(data-required);
+        margin-inline-end: auto;
+      }
+
+      & > * {
+        order: 1;
+      }
     }
   }
 
@@ -43,16 +48,15 @@
     margin-top: -0.875rem;
     padding: 1.25rem 0.6875rem 0.5rem;
     z-index: -1;
-    background-color: rgb(252.13, 241.14, 241.14);
-    border-bottom-left-radius: var(--expansa-border-radius);
-    border-bottom-right-radius: var(--expansa-border-radius);
+    background-color: $danger-soft;
+    border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
   &.is-invalid &-item,
   &.is-invalid &-item:focus-within {
     border-color: var(--expansa-danger) !important;
-    box-shadow: 0 0 0 2px rgb(252.13, 241.14, 241.14) !important;
+    box-shadow: 0 0 0 2px $danger-soft !important;
   }
 
   &-item {
@@ -82,12 +86,37 @@
       }
     }
 
+    &:has([type="number"]) {
+      width: fit-content;
+
+      i {
+        cursor: pointer;
+        opacity: 0.35;
+        transition: opacity 0.25s;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
+
+      &:has(:disabled, [readonly]) {
+        cursor: not-allowed;
+
+        i {
+          pointer-events: none;
+        }
+      }
+    }
+
+    &:has(textarea) {
+      height: initial !important;
+    }
+
     .field--outline & {
-      border: 1px solid var(--expansa-border);
-      background-color: var(--expansa-white);
+      background-color: var(--expansa-bg-white);
 
       .ss-content {
-        background-color: var(--expansa-white) !important;
+        background-color: var(--expansa-bg-white) !important;
         border: 1px solid var(--expansa-border);
       }
     }
@@ -131,40 +160,36 @@
       padding-inline-start: 2.7em;
     }
 
-    input {
+    input[type="number"] {
+      -moz-appearance: textfield;
+      text-align: center;
+      width: 2.75em;
 
-      &[type="number"] {
-        -moz-appearance: textfield;
-        text-align: center;
-        width: 2.75em;
-      }
-
-      &[type="number"]::-webkit-inner-spin-button,
-      &[type="number"]::-webkit-outer-spin-button {
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
+    }
 
-      &[type="checkbox"] {
-        border: 1px solid var(--expansa-border);
-        border-radius: calc(var(--expansa-border-radius) / 1.5);
-        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-        margin: 0 0 auto;
-        height: auto;
+    input[type="checkbox"] {
+      border: 1px solid var(--expansa-border);
+      border-radius: calc(var(--expansa-border-radius) / 1.5);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+      margin: 0 0 auto;
+      height: auto;
 
-        &:checked {
-          border-color: var(--expansa-primary);
-        }
-      }
-
-      &[u-datepicker][readonly] {
-        color: inherit !important;
-        pointer-events: initial;
-        cursor: pointer;
+      &:checked {
+        border-color: var(--expansa-primary);
       }
     }
 
-    // select
+    input[u-datepicker][readonly] {
+      color: inherit !important;
+      pointer-events: initial;
+      cursor: pointer;
+    }
+
     select {
       padding-inline: 0.85em 1.65em;
 
@@ -180,15 +205,11 @@
       }
     }
 
-    textarea {
-
-      &:hover {
-        background-color: inherit;
-        color: inherit;
-      }
+    textarea:hover {
+      background-color: inherit;
+      color: inherit;
     }
 
-    // checkbox
     &:has([type="radio"]),
     &:has([type="checkbox"]) {
       background-color: transparent;
@@ -206,7 +227,6 @@
         order: 1;
         flex-wrap: wrap;
         flex: 1;
-        gap: 0.25rem;
       }
 
       .field-icon {
@@ -224,17 +244,15 @@
       .field--ui & {
         justify-content: space-between;
         flex-wrap: wrap;
-        height: auto;
         padding: 0.875rem 1rem;
         border: none;
-        gap: 0.75rem;
         margin: 0;
         background-color: var(--expansa-bg);
         transition: background-color 0.3s;
+        width: 100%;
 
         &:focus-within {
           border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
-          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
           border-color: var(--expansa-border) !important;
           box-shadow: none !important;
           background-color: var(--expansa-bg) !important;
@@ -248,21 +266,20 @@
 
         &:not(:only-child):first-child {
           border-radius: var(--expansa-border-radius) var(--expansa-border-radius) 0 0;
-          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         }
 
         &:not(:only-child):last-child {
           border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
-          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         }
 
-        &:hover {
+        &:hover:not(:has([disabled])) {
           background-color: #f1f1f1d6;
         }
 
-        .field-checkbox {
+        [type="checkbox"] {
           position: relative;
           display: flex;
+          corner-shape: initial;
           border-radius: 2.25rem;
           min-width: 2.25rem;
           width: 2.25rem;
@@ -282,6 +299,11 @@
             background-color: var(--expansa-success);
             background-position: 100% center;
           }
+
+          &[readonly],
+          &[disabled] {
+            background-color: var(--expansa-border);
+          }
         }
 
         .field-label {
@@ -289,7 +311,7 @@
         }
 
         .field-icon {
-          background-color: var(--expansa-white);
+          background-color: var(--expansa-bg-white);
         }
 
         .field-instruction {
@@ -311,9 +333,9 @@
 
       &:hover,
       &:has([type="radio"]:checked) {
-        background-color: var(--expansa-white);
+        background-color: var(--expansa-bg-white);
         border: 1px solid var(--expansa-border);
-        box-shadow: 0 5px 5px -3px rgba(0, 0, 0, .05) !important;
+        box-shadow: var(--expansa-box-shadow) !important;
 
         .field-icon {
           background-color: var(--expansa-bg);
@@ -335,12 +357,12 @@
       }
     }
 
-    &:not(:has([readonly])):not(:has(.choices)):focus-within {
+    &:not(:has([readonly])):focus-within {
       color: inherit;
       outline: 0;
       background-color: #fff;
-      border-color: var(--expansa-link);
-      box-shadow: 0 0 0 1px var(--expansa-link);
+      border-color: var(--expansa-primary);
+      box-shadow: 0 0 0 1px var(--expansa-primary);
       z-index: 1;
     }
 
@@ -350,16 +372,12 @@
       background-color: var(--expansa-bg);
 
       .field--outline & {
-        background-color: var(--expansa-white);
+        background-color: var(--expansa-bg-white);
       }
     }
 
     &:has(:nth-child(1 of code)) {
       padding-inline-start: 0.275em;
-    }
-
-    &:has(textarea[x-textarea]) {
-      height: initial;
     }
 
     &:has(select),
@@ -369,11 +387,6 @@
 
     &:has(.datepicker select) {
       padding-inline: 0.65em !important;
-    }
-
-    &:has([x-datepicker][readonly]):focus-within {
-      border-color: var(--expansa-link);
-      box-shadow: 0 0 0 1px var(--expansa-link);
     }
 
     &:has([type="radio"]) {
@@ -391,47 +404,24 @@
       }
 
       .field-icon {
-        background-color: var(--expansa-white);
+        background-color: var(--expansa-bg-white);
       }
 
-      .field--ui & {
-        margin: 0;
-      }
-
-      & *[type="radio"] {
+      [type="radio"] {
         max-width: 1.35rem;
         height: 1.35rem;
         border-width: 6px;
+        corner-shape: initial;
 
         &:not(:checked) {
-          border-color: var(--expansa-white);
-          background-color: var(--expansa-white);
+          border-color: var(--expansa-text-white);
+          background-color: var(--expansa-bg-white);
           outline: 1px solid var(--expansa-border);
         }
-
-        &:checked {
-
-        }
       }
 
-      &:has(.field-icon) *[type="radio"] {
+      &:has(.field-icon) [type="radio"] {
         order: 2;
-      }
-    }
-
-    .field--grid & {
-      flex: 1;
-      margin: 0;
-      padding: 0.875rem;
-      background-color: var(--expansa-bg);
-      border-color: var(--expansa-border) !important;
-
-      &:focus-within {
-        background-color: var(--expansa-bg);
-      }
-
-      .field-label {
-        font-weight: 500;
       }
     }
   }
@@ -443,11 +433,6 @@
     background-color: var(--expansa-bg);
     border-radius: var(--expansa-border-radius--xl);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  }
-
-  &--grid {
-    display: flex;
-    flex-wrap: wrap;
   }
 
   &--timezone {
@@ -463,7 +448,6 @@
       background-color: var(--expansa-bg) !important;
       height: auto;
       overflow: hidden;
-      position: relative;
       margin: 0;
     }
 

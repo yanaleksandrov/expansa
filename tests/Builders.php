@@ -45,6 +45,18 @@ check('canOpen() allows a page of no item', Tree::canOpen('settings', ['tab' => 
 Tree::configure();
 check('an unknown tree has no items', Tree::get('missing') === []);
 
+Tree::attach('active', fn (Tree $tree) => $tree->append([
+    ['id' => 'pages', 'url' => 'edit?table=pages'],
+    ['id' => 'all', 'url' => 'edit?table=pages&status=all', 'parent_id' => 'pages'],
+    ['id' => 'users', 'url' => 'users'],
+]));
+check('no item is active before setCurrent()', ! Tree::get('active')[0]->active);
+Tree::setCurrent('edit', ['table' => 'pages', 'status' => 'all', 'page' => '2']);
+[$pages, $users] = Tree::get('active');
+check('the item of the current page and its parent are active', $pages->active && $pages->children[0]->active && ! $users->active);
+Tree::setCurrent('edit', ['table' => 'pages']);
+check('a parent is active by its own URL without an active child', Tree::get('active')[0]->active && ! Tree::get('active')[0]->children[0]->active);
+
 $html = '';
 Tree::walk('menu', function (array $items, int $depth) use (&$html) {
     $html .= "<ul $depth>";
@@ -107,7 +119,7 @@ try {
 check('a callback that throws is not left for the next walk()', throws(fn () => Tree::walk([['id' => 'x']]), LogicException::class));
 
 // Form: templates are named by type, conditions become u-show and hidden
-Form::configure(view: fn (string $template, array $data) => "[$template:" . ($data['name'] ?? '') . ']');
+Form::configure(view: fn (string $template, array $data) => "[$template:" . $data['field']->name . ']');
 
 $uid = Form::enqueue('profile', ['class' => 'form'], [
     ['type' => 'email', 'name' => 'email'],
@@ -120,7 +132,7 @@ check('an unknown form renders empty', Form::render('missing') === '');
 $forms = sys_get_temp_dir() . '/expansa-forms-' . getmypid();
 @mkdir($forms);
 file_put_contents("$forms/newsletter.php", '<?php return Expansa\Builders\Form::enqueue("newsletter", [], [["type" => "email", "name" => "email"]]);');
-Form::configure(view: fn (string $template, array $data) => "[$template:" . ($data['name'] ?? '') . ']', directory: $forms);
+Form::configure(view: fn (string $template, array $data) => "[$template:" . $data['field']->name . ']', directory: $forms);
 check('render() loads a form not registered yet from <uid>.php of the directory', Form::render('newsletter') === "<form id=\"newsletter\" method=\"POST\">\n[input:email]</form>\n");
 check('the form file is loaded once', Form::render('newsletter') === Form::render('newsletter'));
 unlink("$forms/newsletter.php");
@@ -152,8 +164,8 @@ Form::forget('profile');
 check('forget() removes a form', Form::render('profile') === '');
 
 $data = [];
-Form::configure(view: function (string $template, array $field) use (&$data) {
-    $data[$field['name']] = $field;
+Form::configure(view: function (string $template, array $view) use (&$data) {
+    $data[$view['field']->name] = $view['field'];
     return '';
 });
 Form::renderFields([
@@ -163,11 +175,26 @@ Form::renderFields([
     ['type' => 'text', 'name' => 'letters', 'conditions' => [['field' => 'code', 'operator' => 'pattern', 'value' => ['^[a-z]+$']]]],
     ['type' => 'text', 'name' => 'big', 'conditions' => [['field' => 'code', 'operator' => '>', 'value' => 100]]],
 ]);
-check('a select gets its widget and no type', $data['country']['attributes'] === ['name' => 'country', 'required' => true, 'u-select' => '']);
-check('a matching pattern leaves the field shown', $data['digits']['conditions']['hidden'] === false);
-check('no matching pattern hides the field', $data['letters']['conditions']['hidden'] === true);
-check('a pattern condition is checked in the browser by RegExp', str_contains($data['digits']['conditions']['u-show'], "new RegExp(pattern, 'u').test(code)"));
-check('a comparison becomes a JS expression', $data['big']['conditions']['u-show'] === 'code > 100' && $data['big']['conditions']['hidden'] === true);
+check('a select gets its widget and no type', $data['country']->attributes === ['name' => 'country', 'required' => true, 'u-select' => '']);
+check('a matching pattern leaves the field shown', $data['digits']->conditions['hidden'] === false);
+check('no matching pattern hides the field', $data['letters']->conditions['hidden'] === true);
+check('a pattern condition is checked in the browser by RegExp', str_contains($data['digits']->conditions['u-show'], "new RegExp(pattern, 'u').test(code)"));
+check('a comparison becomes a JS expression', $data['big']->conditions['u-show'] === 'code > 100' && $data['big']->conditions['hidden'] === true);
+
+Form::renderFields([
+    ['type' => 'group', 'name' => 'kind', 'fields' => [['type' => 'radio', 'name' => 'seo[kind]', 'attributes' => ['value' => 'person']]]],
+    ['type' => 'group', 'name' => 'company', 'fields' => [], 'conditions' => [['field' => 'seo[kind]', 'operator' => '==', 'value' => 'company']]],
+    ['type' => 'group', 'name' => 'person', 'fields' => [], 'conditions' => [['field' => 'seo[kind]', 'operator' => '==', 'value' => 'person']]],
+]);
+check('a group is shown by a field of a sibling group', $data['person']->conditions === ['u-show' => "seo.kind == 'person'", 'hidden' => false]);
+check('a group is hidden by a field of a sibling group', $data['company']->conditions['hidden'] === true);
+
+$callback = fn () => '';
+Form::view('custom', ['label' => ' Email <b>', 'copy' => '1', 'class' => 'a "b"', 'step' => '', 'callback' => $callback]);
+$field = $data[''];
+check('view() gives the template cleaned data', $field->label === 'Email <b>' && $field->copy === true && $field->class === 'a b');
+check('empty and absent values get the defaults', $field->step === 1 && $field->switcher === true && $field->attributes === []);
+check('a callback passes as is', $field->callback === $callback);
 
 // Table: cells use the configured view with the kind of the column
 Table::configure(cellView: 'components/table/cell');

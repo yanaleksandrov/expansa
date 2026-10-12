@@ -1,5 +1,6 @@
 <?php
 
+use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
@@ -43,8 +44,8 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                         <span u-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'"><?php echo t('Filter'); ?></span>
                     </button>
                     <?php
-                    echo view(
-                        'components/form/number',
+                    echo Form::view(
+                        'number',
                         [
                             'type' => 'number',
                             'name' => 'page',
@@ -72,8 +73,8 @@ $themes  = Expansa\Facades\Extensions::get('theme');
             <?php if ($search) : ?>
                 <div class="df aic g-1">
                     <?php
-                    echo view(
-                        'components/form/input',
+                    echo Form::view(
+                        'input',
                         [
                             'type' => 'search',
                             'name' => 's',
@@ -117,8 +118,8 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                     </div>
                     <span class="badge badge--round badge--icon badge--lg"><i class="ph ph-arrows-left-right"></i></span>
                         <?php
-                        echo view(
-                            'components/form/select',
+                        echo Form::view(
+                            'select',
                             [
                                 'type' => 'select',
                                 'name' => 'language',
@@ -141,8 +142,8 @@ $themes  = Expansa\Facades\Extensions::get('theme');
                             ]
                         );
 
-                        echo view(
-                            'components/form/select',
+                        echo Form::view(
+                            'select',
                             [
                                 'type' => 'select',
                                 'name' => 'project',

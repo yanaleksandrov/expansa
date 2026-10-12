@@ -1,105 +1,82 @@
 <?php
 
+use Expansa\Builders\Form\Data;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
  * Select field template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/select.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-		'options'     => 'array',
-	]
-)->values();
+$attributes = $field->attributes;
+$value      = Safe::attribute($attributes['value'] ?? '');
 
-$value = Safe::attribute( $attributes['value'] ?? '' );
-$prop  = Safe::prop( $attributes['name'] ?? $name );
+unset($attributes['value']);
 
-unset( $attributes['value'] );
+// an option is a label or an array with `content` and data attributes
+$toOption = function (int|string $key, mixed $option) use ($value): array {
+    $attributes = [
+        'value'    => trim((string) $key),
+        'selected' => $key === $value,
+    ];
+
+    if (is_array($option)) {
+        foreach ($option as $attribute => $data) {
+            if ($attribute !== 'content') {
+                $attributes["data-$attribute"] = trim((string) $data);
+            }
+        }
+    }
+
+    return [
+        'content'    => trim(is_scalar($option) ? (string) $option : (string) ($option['content'] ?? '')),
+        'attributes' => $attributes,
+    ];
+};
+
+// an option with `options` is a group
+$choices = [];
+foreach ($field->options as $key => $option) {
+    $choices[] = empty($option['options']) ? $toOption($key, $option) : [
+        'label'   => Safe::attribute($option['label'] ?? ''),
+        'options' => array_map($toOption, array_keys($option['options']), $option['options']),
+    ];
+}
 ?>
-<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes( $conditions ); ?>>
-	<?php if ( $label ) : ?>
-		<div class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php
-			echo $label;
-			if ( $reset ) :
-				$click = sprintf( "%s = '%s'", $prop, $value );
-				$show  = sprintf( "%s !== '%s'", $prop, $value );
-				?>
-				<span class="ml-auto t-red" @click="<?php echo $click; ?>" u-show="<?php echo $show; ?>" hidden><?php echo t( 'Reset' ); ?></span>
-				<?php
-			endif;
-			$tooltip && printf( ' <i class="ph ph-info" u-tooltip.click.prevent="\'%s\'"></i>', $tooltip );
-			?>
+<div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+	@if($field->label)
+		<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>
+			{!! $field->label !!}
+			@if($field->reset)
+				<span class="ml-auto t-red" @click="{{ $field->prop }} = '{!! $value !!}'" u-show="{{ $field->prop }} !== '{!! $value !!}'" hidden>{!! t('Reset') !!}</span>
+			@endif
+			@if($field->tooltip)
+				<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
+			@endif
 		</div>
-	<?php endif; ?>
+	@endif
 	<label class="field-item">
-		<?php echo $before; ?>
-		<select<?php echo Arr::toHtmlAttributes( $attributes ); ?>>
-			<?php
-			$get_attributes = function ( $key, $value, $option ) {
-				$attributes = [
-					'value'    => trim( (string) $key ),
-					'selected' => $key === $value,
-				];
-
-				if ( is_array( $option ) ) {
-					unset( $option['content'] );
-
-					foreach ( $option as $attribute => $value ) {
-						$attributes['data-' . $attribute] = trim( (string) $value );
-					}
-				}
-
-				return $attributes;
-			};
-
-			foreach ( $options as $option_key => $option ) {
-				$optgroup_options = $option['options'] ?? [];
-				if ( $optgroup_options ) {
-					$label = Safe::attribute( $option['label'] ?? '' );
-					?>
-					<optgroup label="<?php echo $label; ?>">
-						<?php
-						foreach ( $optgroup_options as $i => $optgroup_option ) {
-							$content = trim( is_scalar( $optgroup_option ) ? $optgroup_option : strval( $optgroup_option['content'] ?? '' ) );
-							$atts    = $get_attributes( $i, $value, $optgroup_option );
-							?>
-							<option<?php echo Arr::toHtmlAttributes( $atts ); ?>><?php echo $content; ?></option>
-							<?php
-						}
-						?>
+		{!! $field->before !!}
+		<select{!! Arr::toHtmlAttributes($attributes) !!}>
+			@foreach($choices as $choice)
+				@if(isset($choice['options']))
+					<optgroup label="{!! $choice['label'] !!}">
+						@foreach($choice['options'] as $option)
+							<option{!! Arr::toHtmlAttributes($option['attributes']) !!}>{!! $option['content'] !!}</option>
+						@endforeach
 					</optgroup>
-					<?php
-				} else {
-					$content = trim( is_scalar( $option ) ? $option : strval( $option['content'] ?? '' ) );
-					$atts    = $get_attributes( $option_key, $value, $option );
-					?>
-					<option<?php echo Arr::toHtmlAttributes( $atts ); ?>><?php echo $content; ?></option>
-					<?php
-				}
-			}
-			?>
+				@else
+					<option{!! Arr::toHtmlAttributes($choice['attributes']) !!}>{!! $choice['content'] !!}</option>
+				@endif
+			@endforeach
 		</select>
-		<?php echo $after; ?>
+		{!! $field->after !!}
 	</label>
-	<?php if ( $instruction ) : ?>
-		<div class="field-instruction"><?php echo $instruction; ?></div>
-	<?php endif; ?>
+	@if($field->instruction)
+		<div class="field-instruction">{!! $field->instruction !!}</div>
+	@endif
 </div>

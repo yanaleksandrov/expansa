@@ -1,56 +1,36 @@
 <?php
 
-use Expansa\Facades\Safe;
-use Expansa\Support\Arr;
+use Expansa\Builders\Form\Data;
 
 /**
  * Time zone picker.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/timezone.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[ $name, $label, $class, $labelClass, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-	]
-)->values();
-
-$prop = Safe::prop( $attributes['name'] ?? $name );
 ?>
-<div class="<?php echo $class; ?> field--timezone">
-	@if($label || $instruction)
-		<div class="{{ $labelClass }}"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
-			{!! $label !!}
+<div class="{{ $field->class ?: 'field' }} field--timezone">
+	@if($field->label || $field->instruction)
+		<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>
+			{!! $field->label !!}
 
-			@if($instruction)
-				<div class="field-instruction">{!! $instruction !!}</div>
+			@if($field->instruction)
+				<div class="field-instruction">{!! $field->instruction !!}</div>
 			@endif
 		</div>
 	@endif
 	<div class="field-item">
-		@if($copy)
-			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{$prop}})"></i>
+		@if($field->copy)
+			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{ $field->prop }})"></i>
 		@endif
-		@if($tooltip)
-			<i class="ph ph-info" u-tooltip.click.prevent="'{{$tooltip}}'"></i>
+		@if($field->tooltip)
+			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif
 
-		{!! $before !!}
+		{!! $field->before !!}
 		<svg class="field-map" xmlns="http://www.w3.org/2000/svg" width="600" height="360" fill="none" viewBox="0 0 600 360">
 			<style>
 			path {
@@ -123,18 +103,18 @@ $prop = Safe::prop( $attributes['name'] ?? $name );
 				]]>
 			</script>
 		</svg>
-		{{$after}}
+		{{ $field->after }}
 	</div>
 
 	<div class="field-bottom">
 		<span class="avatar avatar--rounded avatar--sm bg-blue-lt t-blue"><i class="ph ph-globe"></i></span>
 		<div class="df jcsb g-3">
 			<div class="field-label fs-14 g-1">
-				<div class="field-instruction fs-11"><?php echo t('Eastern Europe Time (EET)'); ?></div>
+				<div class="field-instruction fs-11">{!! t('Eastern Europe Time (EET)') !!}</div>
 				<div class="df g-2 aic">(UTC+3:00) Europe / Istanbul</div>
 			</div>
 			<div class="field-label fs-14 g-1">
-				<div class="field-instruction fs-11"><?php echo t('Current Time'); ?></div>
+				<div class="field-instruction fs-11">{!! t('Current Time') !!}</div>
 				<div class="df g-2 aic">14:30 <span class="badge bg-blue-lt t-blue fs-11">GMT+3</span></div>
 			</div>
 		</div>

@@ -1,7 +1,7 @@
 @use '../constants/index.scss' as constants;
 
 .btn {
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
   font: inherit;
   font-weight: 500;
   overflow: hidden;
@@ -45,7 +45,7 @@
   &--secondary,
   &--success,
   &--danger {
-    color: var(--expansa-white);
+    color: var(--expansa-text-white);
     box-shadow: 0 1px 1px #fff3 inset, 0 -1px 1px #0003 inset;
   }
 
@@ -99,7 +99,7 @@
 
   &--outline {
     border: 1px solid var(--expansa-border);
-    background-color: var(--expansa-white);
+    background-color: var(--expansa-bg-white);
 
     &:hover {
       border-color: var(--expansa-border-hover);
@@ -132,7 +132,7 @@
     }
 
     &:hover:before {
-      color: var(--expansa-dark);
+      color: var(--expansa-secondary);
       opacity: 1;
       transform: scale(1);
       transition: color 0.2s, transform 0.4s, opacity 0.5s, background-color 0.15s;
@@ -142,7 +142,7 @@
     &[class*="secondary"]:hover:before,
     &[class*="success"]:hover:before,
     &[class*="danger"]:hover:before {
-      color: var(--expansa-white);
+      color: var(--expansa-text-white);
     }
   }
 
@@ -173,7 +173,7 @@
       border: 1.5px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
-      color: var(--expansa-dark);
+      color: var(--expansa-secondary);
       position: absolute;
       width: 1em;
       height: 1em;
@@ -186,7 +186,7 @@
     &[class*="secondary"]:after,
     &[class*="success"]:after,
     &[class*="danger"]:after {
-      color: var(--expansa-white);
+      color: var(--expansa-text-white);
     }
   }
 }

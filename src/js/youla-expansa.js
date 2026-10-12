@@ -728,6 +728,8 @@ document.addEventListener('youla:init', ()=> {
     Youla.data('stream', (root) => ({
         error: null,
         canvas: null,
+        second: 0,
+        photo: '',
         videoRef: { 'u-ref': 'video' },
         imageRef: { 'u-ref': 'image' },
         canvasRef: { 'u-ref': 'canvas' },
@@ -839,6 +841,26 @@ document.addEventListener('youla:init', ()=> {
             }
             return imageData;
         },
+        /**
+         * Counts "seconds" down in "second", then puts the snapshot into "photo".
+         *
+         * @param {number} seconds
+         */
+        capture(seconds = 3) {
+            if (this.second > 0) {
+                return;
+            }
+            this.second = seconds;
+
+            const timer = setInterval(() => {
+                if (--this.second > 0) {
+                    return;
+                }
+                clearInterval(timer);
+
+                this.photo = this.snap() || '';
+            }, 1000);
+        },
         stop() {
             const video = this.refs.video;
             if (video._x_streamObserver) {
@@ -899,7 +921,7 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Tabs, synced with the page URL: `u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
+     * Tabs, synced with the page URL:`u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
      * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab is read from the
      * `?tab=` query param if present, else `data-tab` on the `u-data` element itself.
      *
@@ -1008,6 +1030,24 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
+     * Steps the sibling number input up or down, e.g. `@click="$spin(-1)"`.
+     * Respects its min, max and step, then fires `input` so listeners see the change.
+     *
+     * @since 1.0
+     */
+    Youla.method('spin', (e, el) => (direction) => {
+        const input = el.parentElement.querySelector('input[type="number"]');
+
+        if (input.step === 'any') {
+            input.value = Number(input.value || 0) + direction;
+        } else {
+            direction < 0 ? input.stepDown() : input.stepUp();
+        }
+
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    /**
      * Data sanitizing.
      *
      * @since 1.0
@@ -1091,32 +1131,44 @@ document.addEventListener('youla:init', ()=> {
             return;
         }
 
-        const paddingTop    = parseInt(getComputedStyle(parent).paddingTop) + 42;
-        const paddingBottom = parseInt(getComputedStyle(parent).paddingBottom);
+        let maxTop, bottom;
 
-        let top        = paddingTop;
-        let lastScroll = window.scrollY;
+        // Fixed bars are taken from the root's scroll-padding, so their heights stay in CSS.
+        const measure = () => {
+            const root  = getComputedStyle(document.documentElement);
+            const style = getComputedStyle(parent);
 
-        // Recomputed on every call (not cached) so a resize is picked up for free.
-        const reposition = () => {
-            const rect     = el.getBoundingClientRect();
-            const overflow = rect.height - window.innerHeight;
-            const delta    = window.scrollY - lastScroll;
-            lastScroll     = window.scrollY;
-
-            // Only slide while actually stuck — rect.top runs ahead of "top" otherwise.
-            if (overflow <= 0 || rect.top > top) {
-                return;
-            }
-
-            top = Math.min(paddingTop, Math.max(-overflow - paddingBottom, top - delta));
-            el.style.top = `${top}px`;
+            maxTop = (parseFloat(root.scrollPaddingTop) || 0) + parseFloat(style.paddingTop);
+            bottom = (parseFloat(root.scrollPaddingBottom) || 0) + parseFloat(style.paddingBottom);
         };
 
-        el.style.position = 'sticky';
-        el.style.top      = `${paddingTop}px`;
+        measure();
 
-        ['load', 'scroll', 'resize'].forEach(event => window.addEventListener(event, reposition));
+        el.style.position = 'sticky';
+        el.style.top      = `${maxTop}px`;
+
+        let lastScroll = window.scrollY;
+        let lastTop    = el.getBoundingClientRect().top;
+
+        /**
+         * Moves the element by the scroll delta from where it was actually drawn, clamped between
+         * its top and bottom edges being in view, so it never slides ahead of the page.
+         */
+        const reposition = () => {
+            const delta  = window.scrollY - lastScroll;
+            const minTop = Math.min(maxTop, window.innerHeight - el.offsetHeight - bottom);
+            lastScroll   = window.scrollY;
+
+            el.style.top = `${Math.min(maxTop, Math.max(minTop, lastTop - delta))}px`;
+            lastTop      = el.getBoundingClientRect().top;
+        };
+
+        window.addEventListener('scroll', reposition, { passive: true });
+        window.addEventListener('load', reposition);
+        window.addEventListener('resize', () => {
+            measure();
+            reposition();
+        });
     });
 
     /**

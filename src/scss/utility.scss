@@ -114,6 +114,7 @@
     color: #{$color}11 !important;
   }
 }
+
 @each $name, $color in constants.$colors {
   .bg-#{'' + $name} {
     background-color: $color !important;

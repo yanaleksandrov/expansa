@@ -1,27 +1,19 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
 
 /**
  * Form step
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/step.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[$attributes, $content, $step] = Safe::data(
-    $__data ?? [],
-    [
-        'attributes' => 'attributes',
-        'content'    => 'trim',
-        'step'       => 'absint:1',
-    ]
-)->values();
 ?>
-<!-- step <?php echo $step; ?> -->
-<div{!! $attributes !!}>
-    {!! $content !!}
+<!-- step {{ $field->step }} -->
+<div{!! $field->htmlAttributes !!}>
+    {!! $field->content !!}
 </div>
 

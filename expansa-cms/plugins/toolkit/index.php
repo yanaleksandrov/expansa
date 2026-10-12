@@ -70,7 +70,7 @@ return new class extends Plugin
         \Expansa\Builders\Form::enqueue(
             'builder/fields',
             [
-                'class'  => 'dg p-7 g-7',
+                'class'  => 'dg p-7 g-6',
                 'u-data' => "{type: '', tab:'general'}",
             ],
             [

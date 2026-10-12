@@ -19,8 +19,8 @@ return Expansa\Builders\Form::enqueue(
 	[
 		'class'           => 'tab',
 		'u-data'          => 'tab',
-        'u-init'          => '$dirty.watch($el)',
-        '@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
+		'@load'           => '$dirty.watch($el)',
+		'@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
 	],
 	[
 		[
@@ -164,7 +164,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Memberships' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'checkbox',
@@ -350,52 +350,6 @@ return Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'name'    => 'reading',
-			'type'    => 'tab',
-			'label'   => t( 'Reading' ),
-			'caption' => t( 'Displaying Posts' ),
-			'icon'    => 'ph ph-book-open-text',
-			'fields'  => [
-				[
-					'type'          => 'group',
-					'name'          => 'search_engine',
-					'label'         => t( 'Search Engine' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
-					'fields'        => [
-						[
-							'type'        => 'checkbox',
-							'name'        => 'discourage',
-							'error'       => 'discourage',
-							'label'       => '',
-							'class'       => 'field field--ui',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => '',
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop' => 'discourage',
-							],
-							'options'     => [
-								'discourage' => [
-									'content'     => t( 'Discourage search engines from indexing this site' ),
-									'icon'        => 'ph ph-globe-hemisphere-west',
-									'description' => t( 'It is up to search engines to honor this request.' ),
-									'checked'     => Option::get( 'discourage', false ),
-								],
-							],
-						],
-					],
-				],
-			],
-		],
-		[
 			'name'    => 'discussions',
 			'type'    => 'tab',
 			'label'   => t( 'Discussions' ),
@@ -408,13 +362,13 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Post Comments' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments',
 							'error'       => 'comments',
-							'label'       => t( 'Allow people to submit comments on new posts' ),
+							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
 							'reset'       => 0,
@@ -469,13 +423,13 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Email Me Whenever' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments[notify_posts]',
 							'error'       => 'comments.notify_posts',
-							'label'       => t( 'Anyone posts a comment' ),
+							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
 							'reset'       => 0,
@@ -512,7 +466,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Before a Comment Appears' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'checkbox',
@@ -555,13 +509,13 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Avatar Display' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'avatars[show]',
 							'error'       => 'avatars.show',
-							'label'       => t( 'Show Avatars' ),
+							'label'       => '',
 							'class'       => 'field field--ui',
 							'label_class' => '',
 							'reset'       => 0,
@@ -638,7 +592,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Password Guessing' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'number',
@@ -801,7 +755,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Two-Factor Authentication' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'hidden',
@@ -861,7 +815,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Sign-In Providers' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'text',
@@ -1024,7 +978,7 @@ return Expansa\Builders\Form::enqueue(
 			'type'    => 'tab',
 			'label'   => t( 'Mail' ),
 			'caption' => t( 'Outgoing Email' ),
-			'icon'    => 'ph ph-envelope-simple',
+			'icon'    => 'ph ph-mailbox',
 			'fields'  => [
 				[
 					'type'          => 'group',
@@ -1032,7 +986,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'SMTP Server' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'text',
@@ -1196,7 +1150,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'DKIM Signature' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'text',
@@ -1291,7 +1245,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'AI Service' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'url',
@@ -1416,7 +1370,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Roles and Permissions' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'name'     => 'roles',
@@ -1484,7 +1438,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'File Uploads' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'select',
@@ -1551,7 +1505,7 @@ return Expansa\Builders\Form::enqueue(
 					'label'         => t( 'Pages' ),
 					'class'         => '',
 					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-7 gtc-1',
+					'content_class' => 'dg ga-4 g-6 gtc-1',
 					'fields'        => [
 						[
 							'type'        => 'text',

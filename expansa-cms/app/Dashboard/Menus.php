@@ -46,16 +46,8 @@ final class Menus
                     'url'          => 'tasks',
                     'title'        => t('My Plans and Tasks'),
                     'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-list-checks',
+                    'icon'         => 'ph ph-strategy',
                     'position'     => 800,
-                ],
-                [
-                    'id'           => 'settings',
-                    'url'          => 'settings',
-                    'title'        => t('Settings'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => 'ph ph-gear',
-                    'position'     => 900,
                 ],
             ]
         ));
@@ -291,6 +283,32 @@ final class Menus
                     'icon'         => '',
                     'position'     => 30,
                     'parent_id'    => 'translation',
+                ],
+                [
+                    'id'           => 'settings',
+                    'url'          => 'settings',
+                    'title'        => t('Settings'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => 'ph ph-gear',
+                    'position'     => 900,
+                ],
+                [
+                    'id'           => 'general',
+                    'url'          => 'settings',
+                    'title'        => t('General'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 10,
+                    'parent_id'    => 'settings',
+                ],
+                [
+                    'id'           => 'seo',
+                    'url'          => 'seo',
+                    'title'        => t('SEO'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 20,
+                    'parent_id'    => 'settings',
                 ],
             ]
         ));

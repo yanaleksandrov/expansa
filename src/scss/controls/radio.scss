@@ -19,8 +19,8 @@
     overflow: hidden;
 
     &:has(input:checked) {
-      border-color: var(--expansa-link);
-      box-shadow: 0 0 0 1px var(--expansa-link);
+      border-color: var(--expansa-primary);
+      box-shadow: 0 0 0 1px var(--expansa-primary);
     }
   }
 

@@ -126,6 +126,8 @@ final class Manager
             http_response_code((int) $slug);
         }
 
+        Tree::setCurrent($slug, $request->query);
+
         // the layout keys win: `page` is the template the layout includes
         $content = view($layout, [...$data, 'page' => $view, 'title' => $title]);
 

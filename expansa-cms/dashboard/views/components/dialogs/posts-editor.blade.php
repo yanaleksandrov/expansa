@@ -8,6 +8,6 @@
 defined('EX_PATH') || exit;
 ?>
 <!-- post editor template start -->
-<template id="tmpl-post-editor" u-init="$dialog.init(() => postEditorDialog)">
+<template id="tmpl-post-editor" @load="$dialog.init('tmpl-post-editor', () => postEditorDialog)">
     <?php echo form('posts-creator'); ?>
 </template>

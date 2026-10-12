@@ -41,6 +41,13 @@ final class Tree
     private static ?Closure $allows = null;
 
     /**
+     * Path and query of the current page, see setCurrent(); null marks no item active.
+     *
+     * @var array{string, array<string, mixed>}|null
+     */
+    private static ?array $current = null;
+
+    /**
      * Items as added, without nesting and sorting.
      *
      * @var array<int, array<string, mixed>>
@@ -64,6 +71,18 @@ final class Tree
     public static function configure(?Closure $allows = null): void
     {
         self::$allows = $allows;
+    }
+
+    /**
+     * Set the current page: items linking to it and their parents get `active` in get().
+     *
+     * @param string               $path  Page path, e.g. `settings`.
+     * @param array<string, mixed> $query Query of the request, see matches().
+     * @return void
+     */
+    public static function setCurrent(string $path, array $query = []): void
+    {
+        self::$current = [$path, $query];
     }
 
     /**
@@ -142,19 +161,32 @@ final class Tree
     {
         foreach (self::$trees as $tree) {
             foreach ($tree->items as $item) {
-                $url = parse_url((string) ($item['url'] ?? ''));
-
-                parse_str($url['query'] ?? '', $itemQuery);
-
-                $isPage = trim($url['path'] ?? '', '/') === trim($path, '/')
-                    && array_intersect_assoc($itemQuery, $query) === $itemQuery;
-                if ($isPage && ! self::isVisible($item)) {
+                if (self::matches((string) ($item['url'] ?? ''), $path, $query) && ! self::isVisible($item)) {
                     return false;
                 }
             }
         }
 
         return true;
+    }
+
+    /**
+     * Whether a URL of an item leads to the page: the paths are equal and the page query has
+     * every value of the URL query, so `edit?table=pages` matches `edit?table=pages&page=2`.
+     *
+     * @param string               $url
+     * @param string               $path
+     * @param array<string, mixed> $query
+     * @return bool
+     */
+    public static function matches(string $url, string $path, array $query = []): bool
+    {
+        $url = parse_url($url);
+
+        parse_str($url['query'] ?? '', $urlQuery);
+
+        return trim($url['path'] ?? '', '/') === trim($path, '/')
+            && array_intersect_assoc($urlQuery, $query) === $urlQuery;
     }
 
     /**
@@ -216,7 +248,13 @@ final class Tree
 
         $items = [];
         foreach ($level as $item) {
-            $items[] = new Item($item, $depth, self::level($children, trim((string) $item['id']), $depth + 1));
+            $nested = self::level($children, trim((string) $item['id']), $depth + 1);
+            $active = self::$current !== null && (
+                self::matches((string) ($item['url'] ?? ''), ...self::$current)
+                || array_any($nested, fn (Item $child) => $child->active)
+            );
+
+            $items[] = new Item($item, $depth, $nested, $active);
         }
 
         return $items;

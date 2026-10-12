@@ -7,7 +7,7 @@
 return Expansa\Builders\Form::enqueue(
 	'posts-export',
 	[
-		'class'           => 'card card-border px-7 pb-7 g-7',
+		'class'           => 'card card-border px-7 pb-7 g-6',
 		'@submit.prevent' => '$ajax.post("posts/export").then(response => output = response.output)',
 		'u-data'          => '{posts:[]}',
 	],
@@ -52,7 +52,7 @@ return Expansa\Builders\Form::enqueue(
 			'name'        => 'format',
 			'error'       => 'format',
 			'label'       => t( 'File Format' ),
-			'class'       => 'field field--grid',
+			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',

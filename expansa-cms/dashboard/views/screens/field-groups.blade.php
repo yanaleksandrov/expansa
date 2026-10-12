@@ -16,6 +16,7 @@
  * @package Expansa\Templates
  */
 
+use Expansa\Builders\Form;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 ?>
@@ -48,7 +49,7 @@ use Expansa\Facades\Safe;
         </div>
 
         <div class="field-groups__main">
-            <form class="dg g-7" @submit.prevent="$ajax.post(id ? 'field-groups/update' : 'field-groups/create', {location: JSON.stringify(groups), fields: JSON.stringify(fields)})">
+            <form class="dg g-6" @submit.prevent="$ajax.post(id ? 'field-groups/update' : 'field-groups/create', {location: JSON.stringify(groups), fields: JSON.stringify(fields)})">
                 <input type="hidden" name="id" u-prop="id">
 
                 <div class="field">
@@ -107,7 +108,7 @@ use Expansa\Facades\Safe;
                 <div class="card-hr"><?php echo t('Location Rules'); ?></div>
                 <p class="t-muted fs-13"><?php echo t('Show this field group when any of these rule groups match (rules within a group must all match).'); ?></p>
 
-                <?php echo view('components/form/builder', ['locations' => $locations]); ?>
+                <?php echo Form::view('builder', ['locations' => $locations]); ?>
 
                 <div class="df g-2 mt-4">
                     <button type="submit" class="btn btn--primary"><?php echo t('Save Field Group'); ?></button>

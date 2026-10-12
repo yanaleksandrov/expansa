@@ -7,7 +7,7 @@
 return \Expansa\Builders\Form::enqueue(
 	'posts-filter',
 	[
-		'class'    => 'dg g-7 p-8',
+		'class'    => 'dg g-6 p-8',
 		'@change'  => '$ajax.post("posts/filter")',
 		'u-sticky' => '',
 	],

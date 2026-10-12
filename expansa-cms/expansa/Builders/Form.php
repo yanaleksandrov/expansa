@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Builders;
 
 use Closure;
+use Expansa\Builders\Form\Data;
 use Expansa\Builders\Form\Internal\Renderer;
 use Expansa\Security\Sanitizer;
 use Expansa\Support\Arr;
@@ -15,7 +16,7 @@ use InvalidArgumentException;
  * a plugin changes a registered one in override():
  *
  * ```php
- * Form::enqueue('profile', ['class' => 'dg g-7'], [
+ * Form::enqueue('profile', ['class' => 'dg g-6'], [
  *     ['type' => 'email', 'name' => 'email', 'label' => t('Email')],
  * ]);
  *
@@ -215,6 +216,7 @@ final class Form
 
     /**
      * Render a template with the configured renderer, an empty string without configure().
+     * The template gets the cleaned data as `$field`, see Form\Data.
      *
      * @param string $template Template name, e.g. `input`.
      * @param array  $data
@@ -222,7 +224,7 @@ final class Form
      */
     public static function view(string $template, array $data = []): string
     {
-        return self::$view !== null ? (self::$view)($template, $data) : '';
+        return self::$view !== null ? (self::$view)($template, ['field' => new Data($data)]) : '';
     }
 
     /**

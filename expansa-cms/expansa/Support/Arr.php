@@ -212,7 +212,8 @@ final class Arr
 
     /**
      * Renders escaped attributes with a leading space, e.g. ' type="text" required'.
-     * Empty values are skipped except 'value' and 'u-*', boolean attributes render without a value.
+     * Empty strings, null and false are skipped except 'value' and 'u-*', `0` is kept.
+     * Boolean attributes render without a value.
      *
      * @param array $attributes
      * @return string
@@ -234,7 +235,7 @@ final class Arr
                 if ($value) {
                     $atts .= ' ' . $attribute;
                 }
-            } elseif ($value || $attribute === 'value') {
+            } elseif ($value !== '' || $attribute === 'value') {
                 $atts .= ' ' . $attribute . '="' . $value . '"';
             } elseif (str_starts_with($attribute, 'u-')) {
                 $atts .= ' ' . $attribute;

@@ -1,5 +1,6 @@
 <?php
 
+use Expansa\Builders\Form\Data;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
@@ -8,67 +9,49 @@ use Expansa\Support\Arr;
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/checkbox.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-		'options'     => 'array',
-	]
-)->values();
+// a single checkbox is an option without a key
+$checkboxes = [];
+foreach ($field->options ?: ['' => []] as $key => $option) {
+    $name = $key ?: $field->name;
 
-$prop   = Safe::prop( $attributes['name'] ?? $name );
-$render = function( $key = '', $option = [] ) use ( $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ) {
-	$prop = Safe::prop( $key ?: $name );
-
-	[ $label, $icon, $instruction, $checked ] = Safe::data(
-		$option,
-		[
-			'content'     => 'trim:' . $label,
-			'icon'        => 'attribute',
-			'description' => 'trim:' . $instruction,
-			'checked'     => 'bool:' . strval( $attributes['checked'] ?? false ),
-		]
-	)->values();
-
-	ob_start();
-	?>
-	<div class="field-item">
-		@if($icon)
-			<span class="field-icon"><i class="{{ $icon }}"></i></span>
-		@endif
-		<input class="field-checkbox"<?php echo Arr::toHtmlAttributes( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'u-prop' => $prop, 'checked' => $checked ] ); ?>>
-		<div class="<?php echo $label_class; ?>"<?php echo ! $key && ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
-			<?php echo $label; ?>
-			<?php if ( $instruction ) : ?>
-				<span class="field-instruction"><?php echo $instruction; ?></span>
-			<?php endif; ?>
-		</div>
-	</div>
-	<?php
-	return ob_get_clean();
-};
-
-echo '<div class="' . $class . '">';
-if ( $options ) {
-	foreach ( $options as $key => $option ) {
-		echo $render( $key, $option );
-	}
-} else {
-	echo $render();
+    $checkboxes[] = [
+        'label'       => Safe::trim($option['content'] ?? '') ?: $field->label,
+        'icon'        => Safe::attribute($option['icon'] ?? ''),
+        'instruction' => Safe::trim($option['description'] ?? '') ?: $field->instruction,
+        'required'    => ! $key && $field->required,
+        'attributes'  => [
+            ...$field->attributes,
+            'type'    => 'checkbox',
+            'name'    => $name,
+            'u-prop'  => Safe::prop($name),
+            'checked' => Safe::bool($option['checked'] ?? $field->attributes['checked'] ?? false),
+        ],
+    ];
 }
-echo '</div>';
+?>
+<div class="dg g-2"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+	@if($field->options && $field->label)
+		<div class="{{ $field->label_class ?: 'field-label' }}">{!! $field->label !!}</div>
+	@endif
+	<div class="{{ $field->class ?: 'field' }}">
+		@foreach($checkboxes as $checkbox)
+			<div class="field-item">
+				@if($checkbox['icon'])
+					<span class="field-icon"><i class="{!! $checkbox['icon'] !!}"></i></span>
+				@endif
+				<input{!! Arr::toHtmlAttributes($checkbox['attributes']) !!}>
+				<div class="{{ $field->label_class ?: 'field-label' }}"@if($checkbox['required']) data-required="*"@endif>
+					{!! $checkbox['label'] !!}
+					@if($checkbox['instruction'])
+						<span class="field-instruction">{!! $checkbox['instruction'] !!}</span>
+					@endif
+				</div>
+			</div>
+		@endforeach
+	</div>
+</div>

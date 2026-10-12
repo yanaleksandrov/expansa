@@ -1,4 +1,5 @@
 @use "sass:color";
+@use "sass:map";
 @use '../constants';
 
 // shown while the pointer is over the closest .hover
@@ -16,7 +17,7 @@
 /* CARD */
 .card {
   position: relative;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   transition: box-shadow .2s;
   display: flex;
   flex-direction: column;
@@ -101,7 +102,7 @@
     border-top-right-radius: var(--expansa-border-radius);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     min-height: 3.5rem;
-    background: var(--expansa-white);
+    background: var(--expansa-bg-white);
     padding: 0 0 0 1.5rem;
     position: relative;
     flex: 1;
@@ -146,6 +147,7 @@
     border: 0;
     gap: 2px;
     padding: 1.5rem 0 1.5rem 1.5rem;
+    height: fit-content;
 
     @container tab (max-width: 768px) {
       max-width: 100%;
@@ -168,7 +170,7 @@
     gap: 0.65em;
     font-weight: 500;
     white-space: nowrap;
-    color: var(--expansa-text-secondary);
+    color: var(--expansa-text-muted);
     background-color: transparent;
     cursor: pointer;
     transition: color .3s, background-color .3s;
@@ -180,7 +182,7 @@
 
     &:hover,
     &.is-active {
-      color: var(--expansa-dark);
+      color: var(--expansa-secondary);
       background-color: var(--expansa-bg-active);
     }
 
@@ -195,7 +197,7 @@
   &__content {
     flex: 1;
     width: 100%;
-    max-width: 56rem;
+    max-width: 54rem;
     padding: 1.5rem;
 
     @media screen and (max-width: 768px) {
@@ -282,7 +284,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--expansa-text-secondary);
+  color: var(--expansa-text-muted);
   text-align: center;
   text-transform: uppercase;
   vertical-align: bottom;
@@ -438,7 +440,7 @@
       border: 1px solid currentColor;
       border-right-color: transparent;
       border-radius: 50%;
-      color: var(--expansa-text-secondary);
+      color: var(--expansa-text-muted);
       position: absolute;
       width: 1em;
       height: 1em;
@@ -458,7 +460,7 @@
     }
 
     &--#{"" + $name}-lt {
-      background-color: #{color.mix(rgba(255, 255, 255, 1), $color, 85%)} !important;
+      background-color: #{color.mix(#fff, $color, map.get(constants.$badge-lt-weights, $name) or 85%)} !important;
 
       @if $color != #ffffff {
         color: #{$color};
@@ -516,7 +518,7 @@
 }
 .icons__item {
   align-content: center;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -536,7 +538,7 @@
   background-color: var(--expansa-border);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  color: var(--expansa-info);
+  color: var(--expansa-primary);
   cursor: pointer;
   font-size: 0.8rem;
   margin: 0.125rem;
@@ -678,7 +680,7 @@
     justify-content: center;
     border-radius: 50%;
     background-color: rgb(0 0 0 / 0.55);
-    color: var(--expansa-white);
+    color: var(--expansa-text-white);
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.15s;
@@ -697,7 +699,7 @@
   padding: 2rem;
   border: 1px solid var(--expansa-border);
   border-radius: 4px 4px 0 0;
-  background-color: var(--expansa-white);
+  background-color: var(--expansa-bg-white);
 }
 .sample__item.bg{
   background: var(--expansa-bg);
@@ -721,7 +723,7 @@
   transition: color .3s ease;
 }
 .sample__code:hover:after{
-  color: var(--expansa-dark);
+  color: var(--expansa-secondary);
 }
 
 .kanban {
@@ -799,7 +801,7 @@
   }
 
   &__label {
-    color: var(--expansa-dark) !important;
+    color: var(--expansa-secondary) !important;
   }
 
   &__img {

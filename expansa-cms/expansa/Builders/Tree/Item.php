@@ -33,6 +33,11 @@ final class Item
          * @var Item[]
          */
         public readonly array $children = [],
+
+        /**
+         * Whether the item or one of its children links to the current page, see Tree::setCurrent().
+         */
+        public readonly bool $active = false,
     ) {}
 
     /**

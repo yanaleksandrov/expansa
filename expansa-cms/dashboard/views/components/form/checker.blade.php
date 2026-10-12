@@ -1,17 +1,16 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Data;
 
 /**
  * Check system.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/checker.php
  *
+ * @var Data $field
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-$class = Safe::class($__data['class'] ?? 'field');
 
 $requirements = [
 	'pdo'        => t('PDO PHP Extension'),
@@ -24,7 +23,7 @@ $requirements = [
 	'mysql'      => t('MySQL version %s or higher', EX_REQUIRED_MYSQL_VERSION),
 ];
 ?>
-<div class="<?php echo $class; ?>">
+<div class="{{ $field->class ?: 'field' }}">
 	<ul class="dg g-1">
 		@foreach ($requirements as $requirement => $title)
 			<li class="df aic">

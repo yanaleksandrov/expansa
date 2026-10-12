@@ -1,4 +1,7 @@
 <?php
+
+use Expansa\Builders\Form;
+
 /**
  * Expansa dashboard menu template can be overridden by copying it to themes/yourtheme/dashboard/views/screens/nav-menu.php
  *
@@ -11,8 +14,8 @@ defined('EX_PATH') || exit;
         <h4><?php echo t('Menus'); ?></h4>
         <div class="dg g-2 p-4">
             <?php
-            echo view(
-                'components/form/select',
+            echo Form::view(
+                'select',
                 [
                     'type' => 'select',
                     'name' => 'menu-editing',
@@ -59,8 +62,8 @@ defined('EX_PATH') || exit;
         </div>
         <div class="df fww g-2 p-6">
             <?php
-            echo view(
-                'components/form/input',
+            echo Form::view(
+                'input',
                 [
                     'type' => 'text',
                     'name' => 'menu-name',
@@ -83,8 +86,8 @@ defined('EX_PATH') || exit;
                     ],
                 ],
             );
-            echo view(
-                'components/form/select',
+            echo Form::view(
+                'select',
                 [
                     'type' => 'select',
                     'name' => 'menu-location',
@@ -115,8 +118,8 @@ defined('EX_PATH') || exit;
                     ],
                 ],
             );
-            echo view(
-                'components/form/submit',
+            echo Form::view(
+                'submit',
                 [
                     'type' => 'text',
                     'name' => 'menu-create',

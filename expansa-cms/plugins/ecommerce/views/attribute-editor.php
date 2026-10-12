@@ -1,5 +1,7 @@
 <?php
 
+use Expansa\Builders\Form;
+
 /**
  * Attributes list
  *
@@ -28,8 +30,8 @@
                 <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
                 <div class="attributes-list">
                     <?php
-                    echo view(
-                        'components/form/input',
+                    echo Form::view(
+                        'input',
                         [
                             'type'        => 'text',
                             'name'        => 'value',
