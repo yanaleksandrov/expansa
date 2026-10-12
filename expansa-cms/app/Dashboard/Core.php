@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dashboard;
 
+use App\Dashboard\Enums\Surface;
 use App\Dashboard\Pages\FieldGroups;
 use App\Dashboard\Pages\SignIn;
 use App\Dashboard\Pages\SiteHealth;
@@ -41,6 +42,7 @@ final class Core
         Dashboard::page('user', can: 'users_edit');
         Dashboard::page('edit', view: Tables::view(...));
         Dashboard::page('users', view: 'screens/edit');
+        Dashboard::page('plugins-install', surface: Surface::Muted);
 
         Dashboard::data('sign-in', SignIn::data(...));
         Dashboard::data('user', User::data(...));

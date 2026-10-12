@@ -136,9 +136,18 @@
     min-width: 1px;
     position: relative;
     grid-area: 2 / 3 / 3 / 4;
+    background-color: var(--expansa-main-bg, var(--expansa-bg-white));
 
     @media (max-width: 1024px) {
       grid-area: 2 / 1 / 3 / 2;
+    }
+
+    &--muted {
+      --expansa-main-bg: var(--expansa-bg);
+    }
+
+    &--canvas {
+      --expansa-main-bg: var(--expansa-bg-universal);
     }
   }
 
@@ -614,9 +623,6 @@
 
   &__item {
     display: grid;
-    background-color: var(--expansa-bg);
-    border-radius: var(--expansa-border-radius--xl);
-    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     margin-bottom: auto;
   }
 

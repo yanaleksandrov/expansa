@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dashboard;
 
+use App\Dashboard\Enums\Surface;
 use App\Models\Option;
 use App\Models\User;
 use Closure;
@@ -20,7 +21,7 @@ use Expansa\Http\Request;
  * registered for it fill the template. The core registers its pages the same way as plugins:
  *
  * ```php
- * Dashboard::page('orders', can: 'orders_read', title: t('Orders'));
+ * Dashboard::page('orders', can: 'orders_read', title: t('Orders'), surface: Surface::Muted);
  * Dashboard::data('orders', fn (Request $request) => ['orders' => Order::latest()]);
  * ```
  *
@@ -35,7 +36,7 @@ final class Manager
     /**
      * Options of the registered pages by slug.
      *
-     * @var array<string, array{view?: string|Closure(Request): string, can?: string, title?: string|Closure(array<string, mixed>): string}>
+     * @var array<string, array{view?: string|Closure(Request): string, can?: string, title?: string|Closure(array<string, mixed>): string, surface?: Surface}>
      */
     private array $pages = [];
 
@@ -49,15 +50,23 @@ final class Manager
     /**
      * Register a page or change the options of a registered one; the options left out keep their values.
      *
-     * @param string                                         $slug  Path after the dashboard slug: `site-health`.
-     * @param string|Closure(Request): string|null           $view  Template name or absolute path, `screens/{slug}` by default.
-     * @param string|null                                    $can   Permission to open the page.
-     * @param string|Closure(array<string, mixed>): string|null $title Title, a closure gets the page data; the menu item label by default.
+     * @param string                                            $slug    Path after the dashboard slug: `site-health`.
+     * @param string|Closure(Request): string|null              $view    Template name or absolute path, `screens/{slug}` by default.
+     * @param string|null                                       $can     Permission to open the page.
+     * @param string|Closure(array<string, mixed>): string|null $title   Title, a closure gets the page data; the menu item label by default.
+     * @param Surface|null                                      $surface Background of the page area, Surface::Plain by default.
      * @return void
      */
-    public function page(string $slug, string|Closure|null $view = null, ?string $can = null, string|Closure|null $title = null): void
-    {
-        $this->pages[$slug] = array_filter(['view' => $view, 'can' => $can, 'title' => $title], fn ($option) => $option !== null)
+    public function page(
+        string $slug,
+        string|Closure|null $view = null,
+        ?string $can = null,
+        string|Closure|null $title = null,
+        ?Surface $surface = null,
+    ): void {
+        $options = ['view' => $view, 'can' => $can, 'title' => $title, 'surface' => $surface];
+
+        $this->pages[$slug] = array_filter($options, fn ($option) => $option !== null)
             + ($this->pages[$slug] ?? []);
     }
 
@@ -129,7 +138,7 @@ final class Manager
         Tree::setCurrent($slug, $request->query);
 
         // the layout keys win: `page` is the template the layout includes
-        $content = view($layout, [...$data, 'page' => $view, 'title' => $title]);
+        $content = view($layout, [...$data, 'page' => $view, 'title' => $title, 'surface' => $page['surface'] ?? Surface::Plain]);
 
         // co-located CSS/JS of the page template, see Assets\Manager::discover()
         Asset::discover($content->path);

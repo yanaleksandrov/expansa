@@ -10,70 +10,68 @@
 
 defined('EX_PATH') || exit;
 ?>
-<div class="expansa-main">
-    <div class="fields-builder" u-data>
-        <div class="fields-builder__side">
-            <div class="fields-builder__header">
-                <h4>Fields Builder</h4>
-            </div>
-            <?php echo form('fields-builder'); ?>
+<div class="fields-builder" u-data>
+    <div class="fields-builder__side">
+        <div class="fields-builder__header">
+            <h4>Fields Builder</h4>
         </div>
-        <div class="fields-builder__main">
-            <div class="fields-builder__code">
-                <div class="fields-builder__preview">
-                    <div class="fields-builder__preview-field" data-title="Field Preview">
-                        <?php
-                        echo view(
-                            'templates/form/image',
-                            [
-                                'name'        => 'perpage',
-                                'type'        => 'select',
-                                'label'       => t('Number of items per page'),
-                                'label_class' => 'df aic fs-12 t-muted',
-                                'value'       => '',
-                                'reset'       => false,
-                                'attributes'  => [
-                                    'u-select' => '{"showSearch":0}',
-                                ],
-                                'options'     => [
-                                    '25'  => 25,
-                                    '50'  => 50,
-                                    '100' => 100,
-                                    '250' => 250,
-                                    '500' => 500,
-                                ],
-                            ]
-                        );
-                        ?>
-                    </div>
+        <?php echo form('fields-builder'); ?>
+    </div>
+    <div class="fields-builder__main">
+        <div class="fields-builder__code">
+            <div class="fields-builder__preview">
+                <div class="fields-builder__preview-field" data-title="Field Preview">
+                    <?php
+                    echo view(
+                        'templates/form/image',
+                        [
+                            'name'        => 'perpage',
+                            'type'        => 'select',
+                            'label'       => t('Number of items per page'),
+                            'label_class' => 'df aic fs-12 t-muted',
+                            'value'       => '',
+                            'reset'       => false,
+                            'attributes'  => [
+                                'u-select' => '{"showSearch":0}',
+                            ],
+                            'options'     => [
+                                '25'  => 25,
+                                '50'  => 50,
+                                '100' => 100,
+                                '250' => 250,
+                                '500' => 500,
+                            ],
+                        ]
+                    );
+                    ?>
                 </div>
-                <div class="fields-builder__title">
-                    Code Preview <i class="ph ph-copy" title="<?php echo t('Copy to clipboard'); ?>" u-copy="$refs.code.innerText"></i>
-                </div>
-                <pre u-ref="code" u-highlight.php>
+            </div>
+            <div class="fields-builder__title">
+                Code Preview <i class="ph ph-copy" title="<?php echo t('Copy to clipboard'); ?>" u-copy="$refs.code.innerText"></i>
+            </div>
+            <pre u-ref="code" u-highlight.php>
 echo view(
-    'templates/form/image',
-    [
-        'name'        =&gt; 'perpage',
-        'type'        =&gt; 'select',
-        'label'       =&gt; t( 'Number of items per page' ),
-        'label_class' =&gt; 'df aic fs-12 t-muted',
-        'value'       =&gt; '',
-        'reset'       =&gt; false,
-        'attributes'  =&gt; [
-            'u-select' =&gt; '{"showSearch":1}',
-        ],
-        'options'     =&gt; [
-            '25'  =&gt; 25,
-            '50'  =&gt; 50,
-            '100' =&gt; 100,
-            '250' =&gt; 250,
-            '500' =&gt; 500,
-        ],
-    ]
+'templates/form/image',
+[
+    'name'        =&gt; 'perpage',
+    'type'        =&gt; 'select',
+    'label'       =&gt; t( 'Number of items per page' ),
+    'label_class' =&gt; 'df aic fs-12 t-muted',
+    'value'       =&gt; '',
+    'reset'       =&gt; false,
+    'attributes'  =&gt; [
+        'u-select' =&gt; '{"showSearch":1}',
+    ],
+    'options'     =&gt; [
+        '25'  =&gt; 25,
+        '50'  =&gt; 50,
+        '100' =&gt; 100,
+        '250' =&gt; 250,
+        '500' =&gt; 500,
+    ],
+]
 );
 </pre>
-            </div>
         </div>
     </div>
 </div>

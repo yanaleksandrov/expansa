@@ -10,7 +10,7 @@
 
 defined('EX_PATH') || exit;
 ?>
-<div class="expansa-main p-7">
+<div class="p-7">
     <div class="df aic mb-8 sm:mb-5">
         <div class="mr-2">
             <h4>Fields Groups</h4>
