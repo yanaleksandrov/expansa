@@ -13,7 +13,8 @@ use Expansa\Facades\Safe;
 defined('EX_PATH') || exit;
 
 $class = Safe::class($__data['key'] ?? []);
-$prop  = Safe::prop($__data['key'] ?? []);
+$prop       = Safe::prop($__data['key'] ?? []);
+$attributes = (array) ($__data['attributes'] ?? []);
 ?>
 <div class="<?php echo $class; ?>">
 	<?php
@@ -35,7 +36,7 @@ $prop  = Safe::prop($__data['key'] ?? []);
 			'conditions'  => [],
 			'attributes'  => [
 				':checked' => "item.$prop === true",
-				'@change'  => '$ajax.post("plugin/deactivate")',
+				...$attributes,
 			],
 		]
 	);

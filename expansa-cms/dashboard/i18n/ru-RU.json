@@ -1238,5 +1238,12 @@
     "Your sign-in link": "Ваша ссылка для входа",
     "ZIP %s": "ZIP %s",
     "zip installs plugins from archives, fileinfo checks upload types, exif reads photo orientation, intl formats dates and numbers, sodium encrypts.": "zip устанавливает плагины из архивов, fileinfo проверяет типы загружаемых файлов, exif считывает ориентацию фото, intl форматирует даты и числа, sodium выполняет шифрование.",
-    "© :currentYear :companyName. All rights reserved.": "© :currentYear :companyName. Все права защищены."
+    "© :currentYear :companyName. All rights reserved.": "© :currentYear :companyName. Все права защищены.",
+    "by": "от",
+    "The plugin is not installed.": "Плагин не установлен.",
+    "The plugin :name could not be activated, see the log.": "Не удалось активировать плагин :name, подробности в журнале.",
+    "The plugin :name is activated.": "Плагин :name активирован.",
+    "The plugin is not active.": "Плагин не активен.",
+    "The plugin is deactivated.": "Плагин деактивирован.",
+    "The plugin is deactivated, but its cleanup failed, see the log.": "Плагин деактивирован, но его очистка не удалась, подробности в журнале."
 }

@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace App\Api\Extensions;
 
 use App\Http\Can;
+use Expansa\Http\Request;
+use Expansa\Http\Response;
 
-/**
- * Note: nothing in the dashboard currently calls this endpoint — the real extensions
- * list (dashboard/views/components/table/header.blade.php) renders from the actual framework
- * facade Expansa\Facades\Extensions, not this class. This is UI-prototype mock data,
- * kept as-is per the migration (not deleted, since that wasn't asked for here).
- */
 final readonly class ExtensionsController
 {
     public function __construct(
@@ -23,8 +19,14 @@ final readonly class ExtensionsController
     ) {}
 
     #[Can('plugins_activate')]
-    public function get(): array
+    public function activate(Request $request, Response $response): Response
     {
-        return $this->service->list();
+        return $this->service->activate((string) ($request->post['id'] ?? ''), $response);
+    }
+
+    #[Can('plugins_activate')]
+    public function deactivate(Request $request, Response $response): Response
+    {
+        return $this->service->deactivate((string) ($request->post['id'] ?? ''), $response);
     }
 }

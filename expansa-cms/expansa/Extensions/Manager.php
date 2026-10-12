@@ -37,6 +37,13 @@ final class Manager
     private static array $extensions = [];
 
     /**
+     * Every extension required in this request by id, loaded or only read for its metadata.
+     *
+     * @var array<string, Extension>
+     */
+    private static array $instances = [];
+
+    /**
      * Directory the extension ids are relative to, with a trailing slash.
      */
     private static string $root = '';
@@ -89,6 +96,32 @@ final class Manager
     public function get(string $type): array
     {
         return self::$extensions[$type] ?? [];
+    }
+
+    /**
+     * Get the extensions of a type found in its folder, active or not, by id; quarantined ones are left out.
+     * An inactive extension is only constructed for its metadata: register() and boot() are not called.
+     *
+     * @param string $type `plugin` or `theme`
+     * @return array<string, Extension> Id like "plugins/seo" mapped to the extension
+     */
+    public function getInstalled(string $type): array
+    {
+        $ids = array_map(
+            fn (string $path): string => "{$type}s/" . basename(dirname($path)),
+            glob(self::$root . "{$type}s/*/index.php") ?: [],
+        );
+
+        $installed   = [];
+        $quarantined = $this->getQuarantined();
+        foreach ($this->paths($ids) as $id => $path) {
+            $extension = isset($quarantined[$id]) ? null : $this->instance($id, $path);
+            if ($extension?->type === $type) {
+                $installed[$id] = $extension;
+            }
+        }
+
+        return $installed;
     }
 
     /**
@@ -153,29 +186,12 @@ final class Manager
      */
     public function load(array $ids): void
     {
-        $this->watch();
-
         $quarantined = $this->getQuarantined();
         foreach ($this->paths($ids) as $id => $path) {
-            if (isset($quarantined[$id]) || ! is_file($path)) {
-                continue;
+            $extension = isset($quarantined[$id]) ? null : $this->instance($id, $path);
+            if ($extension !== null && ! in_array($extension, self::$extensions[$extension->type] ?? [], true)) {
+                self::$extensions[$extension->type][] = $extension;
             }
-
-            $extension = null;
-            $loaded = $this->guard($id, function () use ($path, &$extension): void {
-                $extension = require_once $path;
-                if ($extension instanceof Extension) {
-                    $this->validate($extension);
-                }
-            });
-            if (! $loaded || ! $extension instanceof Extension) {
-                continue;
-            }
-
-            $extension->id   = $id;
-            $extension->path = $path;
-
-            self::$extensions[$extension->type][] = $extension;
         }
     }
 
@@ -200,43 +216,97 @@ final class Manager
     }
 
     /**
-     * Call activate() of every loaded extension of the type.
+     * Call activate() of an extension, before the application adds it to the active ones.
      *
-     * @param string $type `plugin` or `theme`
+     * @param string $id Extension id like "plugins/seo"
+     * @return bool Whether the extension exists and activate() finished without throwing
      */
-    public function activate(string $type): void
+    public function activate(string $id): bool
     {
-        $this->call($type, 'activate');
+        return $this->run($id, 'activate');
     }
 
     /**
-     * Call deactivate() of every loaded extension of the type.
+     * Call deactivate() of an extension, before the application removes it from the active ones.
      *
-     * @param string $type `plugin` or `theme`
+     * @param string $id Extension id like "plugins/seo"
+     * @return bool Whether the extension exists and deactivate() finished without throwing
      */
-    public function deactivate(string $type): void
+    public function deactivate(string $id): bool
     {
-        $this->call($type, 'deactivate');
+        return $this->run($id, 'deactivate');
     }
 
     /**
-     * Call install() of every loaded extension of the type.
+     * Call install() of an extension.
      *
-     * @param string $type `plugin` or `theme`
+     * @param string $id Extension id like "plugins/seo"
+     * @return bool Whether the extension exists and install() finished without throwing
      */
-    public function install(string $type): void
+    public function install(string $id): bool
     {
-        $this->call($type, 'install');
+        return $this->run($id, 'install');
     }
 
     /**
-     * Call uninstall() of every loaded extension of the type.
+     * Call uninstall() of an extension.
      *
-     * @param string $type `plugin` or `theme`
+     * @param string $id Extension id like "plugins/seo"
+     * @return bool Whether the extension exists and uninstall() finished without throwing
      */
-    public function uninstall(string $type): void
+    public function uninstall(string $id): bool
     {
-        $this->call($type, 'uninstall');
+        return $this->run($id, 'uninstall');
+    }
+
+    /**
+     * Calls a lifecycle method of one extension, requiring its file when this request has not yet.
+     *
+     * @param string $id Extension id
+     * @param string $method Lifecycle method name
+     * @return bool Whether the extension exists and the method finished without throwing
+     */
+    private function run(string $id, string $method): bool
+    {
+        $path      = $this->paths([$id])[$id] ?? '';
+        $extension = $path === '' ? null : $this->instance($id, $path);
+
+        return $extension !== null && $this->guard($id, $extension->$method(...));
+    }
+
+    /**
+     * Requires the entry file of an extension once per request and validates it.
+     *
+     * @param string $id Extension id
+     * @param string $path Entry file
+     * @return Extension|null The extension, or null when the file is missing or fails to load
+     */
+    private function instance(string $id, string $path): ?Extension
+    {
+        if (isset(self::$instances[$id])) {
+            return self::$instances[$id];
+        }
+        if (! is_file($path)) {
+            return null;
+        }
+
+        $this->watch();
+
+        $extension = null;
+        $loaded = $this->guard($id, function () use ($path, &$extension): void {
+            $extension = require_once $path;
+            if ($extension instanceof Extension) {
+                $this->validate($extension);
+            }
+        });
+        if (! $loaded || ! $extension instanceof Extension) {
+            return null;
+        }
+
+        $extension->id   = $id;
+        $extension->path = $path;
+
+        return self::$instances[$id] = $extension;
     }
 
     /**

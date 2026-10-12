@@ -11,16 +11,17 @@ use Expansa\Patterns\Facade;
  *
  * @method static void        configure(string $root, string $quarantine = '', ?\Closure $failed = null)
  * @method static array       get(string $type)
+ * @method static array       getInstalled(string $type)
  * @method static array       getQuarantined()
  * @method static bool        forget(string $id)
  * @method static string|null quarantine(\Throwable $error)
  * @method static void        load(array $ids)
  * @method static void        register(string $type)
  * @method static void        boot(string $type)
- * @method static void        activate(string $type)
- * @method static void        deactivate(string $type)
- * @method static void        install(string $type)
- * @method static void        uninstall(string $type)
+ * @method static bool        activate(string $id)
+ * @method static bool        deactivate(string $id)
+ * @method static bool        install(string $id)
+ * @method static bool        uninstall(string $id)
  */
 class Extensions extends Facade
 {
