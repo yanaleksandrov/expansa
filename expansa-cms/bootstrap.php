@@ -354,6 +354,7 @@ Lifecycle::phase('configure', true, function () {
             App\Listeners\Assets::class,
             App\Listeners\Debug::class,
             App\Listeners\Migrations::class,
+            App\Listeners\Seo::class,
         ],
     );
 
@@ -614,6 +615,11 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
             App\Api\User\Events::prune();
             App\Api\User\Sessions::prune();
         }, id: 'security-cleanup')->daily(3);
+    });
+
+    // llms.txt of the SEO settings lists the latest content, so it is rebuilt weekly
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->call(fn () => App\Support\Llms::generate(), id: 'llms')->weekly(1, 4);
     });
 
     Terminal::run();

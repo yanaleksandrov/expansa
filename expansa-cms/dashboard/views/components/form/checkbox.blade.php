@@ -63,6 +63,10 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 	return ob_get_clean();
 };
 
+echo '<div class="dg g-2"' . Arr::toHtmlAttributes( $conditions ) . '>';
+if ( $options && $label ) {
+	echo '<div class="' . $label_class . '">' . $label . '</div>';
+}
 echo '<div class="' . $class . '">';
 if ( $options ) {
 	foreach ( $options as $key => $option ) {
@@ -71,4 +75,4 @@ if ( $options ) {
 } else {
 	echo $render();
 }
-echo '</div>';
+echo '</div></div>';

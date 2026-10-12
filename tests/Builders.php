@@ -181,6 +181,14 @@ check('no matching pattern hides the field', $data['letters']['conditions']['hid
 check('a pattern condition is checked in the browser by RegExp', str_contains($data['digits']['conditions']['u-show'], "new RegExp(pattern, 'u').test(code)"));
 check('a comparison becomes a JS expression', $data['big']['conditions']['u-show'] === 'code > 100' && $data['big']['conditions']['hidden'] === true);
 
+Form::renderFields([
+    ['type' => 'group', 'name' => 'kind', 'fields' => [['type' => 'radio', 'name' => 'seo[kind]', 'attributes' => ['value' => 'person']]]],
+    ['type' => 'group', 'name' => 'company', 'fields' => [], 'conditions' => [['field' => 'seo[kind]', 'operator' => '==', 'value' => 'company']]],
+    ['type' => 'group', 'name' => 'person', 'fields' => [], 'conditions' => [['field' => 'seo[kind]', 'operator' => '==', 'value' => 'person']]],
+]);
+check('a group is shown by a field of a sibling group', $data['person']['conditions'] === ['u-show' => "seo.kind == 'person'", 'hidden' => false]);
+check('a group is hidden by a field of a sibling group', $data['company']['conditions']['hidden'] === true);
+
 // Table: cells use the configured view with the kind of the column
 Table::configure(cellView: 'components/table/cell');
 $table = new class extends Table {

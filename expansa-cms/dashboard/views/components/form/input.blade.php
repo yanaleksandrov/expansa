@@ -32,7 +32,7 @@ defined('EX_PATH') || exit;
 
 $prop = Safe::prop( $attributes['name'] ?? $name );
 ?>
-<div class="<?php echo $class; ?>">
+<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes( $conditions ); ?>>
 	@if($label)
 		<div class="{{ $labelClass }}"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>{!! $label !!}</div>
 	@endif

@@ -52,7 +52,7 @@ return Expansa\Builders\Form::enqueue(
 			'name'        => 'format',
 			'error'       => 'format',
 			'label'       => t( 'File Format' ),
-			'class'       => 'field field--grid',
+			'class'       => '',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',

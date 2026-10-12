@@ -271,7 +271,7 @@ return Form::enqueue(
                             'name'        => 'format',
                             'error'       => 'format',
                             'label'       => '',
-                            'class'       => 'field field--grid',
+                            'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
                             'before'      => '',

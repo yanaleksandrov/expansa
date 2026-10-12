@@ -179,7 +179,8 @@ final class Renderer
     }
 
     /**
-     * Get the current values of fields by name; each option of a checkbox is a separate value.
+     * Get the current values of fields by name, with the fields of nested groups;
+     * each option of a checkbox is a separate value.
      *
      * @param array $fields
      * @return array<string, mixed>
@@ -188,6 +189,12 @@ final class Renderer
     {
         $values = [];
         foreach ($fields as $field) {
+            // a group is shown by a field of a sibling group, e.g. a radio choosing between them
+            if (($field['type'] ?? '') === 'group') {
+                $values += $this->values($field['fields'] ?? []);
+                continue;
+            }
+
             $options = $field['options'] ?? [];
             if ($options && ($field['type'] ?? '') === 'checkbox') {
                 $values += array_combine(array_keys($options), array_column($options, 'checked'));

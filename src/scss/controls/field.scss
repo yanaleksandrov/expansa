@@ -82,6 +82,10 @@
       }
     }
 
+    &:has(textarea) {
+      height: initial;
+    }
+
     .field--outline & {
       border: 1px solid var(--expansa-border);
       background-color: var(--expansa-white);
@@ -188,7 +192,10 @@
       }
     }
 
-    // checkbox
+    &:has([type="number"]) {
+      width: fit-content;
+    }
+
     &:has([type="radio"]),
     &:has([type="checkbox"]) {
       background-color: transparent;
@@ -419,22 +426,6 @@
         order: 2;
       }
     }
-
-    .field--grid & {
-      flex: 1;
-      margin: 0;
-      padding: 0.875rem;
-      background-color: var(--expansa-bg);
-      border-color: var(--expansa-border) !important;
-
-      &:focus-within {
-        background-color: var(--expansa-bg);
-      }
-
-      .field-label {
-        font-weight: 500;
-      }
-    }
   }
 
   &--button {
@@ -444,11 +435,6 @@
     background-color: var(--expansa-bg);
     border-radius: var(--expansa-border-radius--xl);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  }
-
-  &--grid {
-    display: flex;
-    flex-wrap: wrap;
   }
 
   &--timezone {

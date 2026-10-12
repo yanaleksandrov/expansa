@@ -36,7 +36,7 @@ $attributes['rows'] ??= 1;
 
 unset( $attributes['value'] );
 ?>
-<div class="<?php echo $class; ?>"<?php echo $conditions ? " u-show=\"{$conditions}\" hidden" : ''; ?>>
+<div class="<?php echo $class; ?>"<?php echo Arr::toHtmlAttributes( $conditions ); ?>>
 	<?php if ( $label ) : ?>
 		<span class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php echo $label; ?></span>
 	<?php endif; ?>

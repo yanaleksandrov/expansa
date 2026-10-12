@@ -1824,7 +1824,7 @@ body.is-unsaved .expansa-search-btn {
 .nav__item ul li a {
   display: flex;
   align-items: center;
-  padding: 0.25rem 1rem;
+  padding: 0.25rem 0.775rem;
   color: var(--expansa-text-muted) !important;
   border: none !important;
 }
