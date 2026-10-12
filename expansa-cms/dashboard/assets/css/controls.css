@@ -917,12 +917,12 @@ input[type=radio]:checked {
   font-weight: 500;
   line-height: 1.35em;
 }
-.field-label:after {
+.field-label[data-required]:after {
   color: var(--expansa-danger);
   content: attr(data-required);
   margin-inline-end: auto;
 }
-.field-label > * {
+.field-label[data-required] > * {
   order: 1;
 }
 .field-instruction {
@@ -940,8 +940,7 @@ input[type=radio]:checked {
   padding: 1.25rem 0.6875rem 0.5rem;
   z-index: -1;
   background-color: rgb(252.13, 241.14, 241.14);
-  border-bottom-left-radius: var(--expansa-border-radius);
-  border-bottom-right-radius: var(--expansa-border-radius);
+  border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field.is-invalid .field-item, .field.is-invalid .field-item:focus-within {
@@ -1024,7 +1023,6 @@ input[type=radio]:checked {
   height: initial !important;
 }
 .field--outline .field-item {
-  border: 1px solid var(--expansa-border);
   background-color: var(--expansa-bg-white);
 }
 .field--outline .field-item .ss-content {
@@ -1033,6 +1031,13 @@ input[type=radio]:checked {
 }
 .field-item i {
   font-size: inherit;
+}
+.field-item i[\@click] {
+  opacity: 0.5;
+  transition: opacity 0.25s;
+}
+.field-item i[\@click]:hover {
+  opacity: 1;
 }
 .field-item code,
 .field-item samp {
@@ -1129,7 +1134,6 @@ input[type=radio]:checked {
   order: 1;
   flex-wrap: wrap;
   flex: 1;
-  gap: 0.25rem;
 }
 .field-item:has([type=radio]) .field-icon, .field-item:has([type=checkbox]) .field-icon {
   background-color: var(--expansa-bg);
@@ -1145,17 +1149,15 @@ input[type=radio]:checked {
 .field--ui .field-item:has([type=radio]), .field--ui .field-item:has([type=checkbox]) {
   justify-content: space-between;
   flex-wrap: wrap;
-  height: auto;
   padding: 0.875rem 1rem;
   border: none;
-  gap: 0.75rem;
   margin: 0;
   background-color: var(--expansa-bg);
   transition: background-color 0.3s;
+  width: 100%;
 }
 .field--ui .field-item:has([type=radio]):focus-within, .field--ui .field-item:has([type=checkbox]):focus-within {
   border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
-  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   border-color: var(--expansa-border) !important;
   box-shadow: none !important;
   background-color: var(--expansa-bg) !important;
@@ -1167,11 +1169,9 @@ input[type=radio]:checked {
 }
 .field--ui .field-item:has([type=radio]):not(:only-child):first-child, .field--ui .field-item:has([type=checkbox]):not(:only-child):first-child {
   border-radius: var(--expansa-border-radius) var(--expansa-border-radius) 0 0;
-  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field--ui .field-item:has([type=radio]):not(:only-child):last-child, .field--ui .field-item:has([type=checkbox]):not(:only-child):last-child {
   border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
-  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field--ui .field-item:has([type=radio]):hover, .field--ui .field-item:has([type=checkbox]):hover {
   background-color: rgba(241, 241, 241, 0.8392156863);
@@ -1237,7 +1237,7 @@ input[type=radio]:checked {
 .field--button .field-item:not(:has(.field-icon)):not(:has(.field-instruction)) [type=radio] {
   display: none;
 }
-.field-item:not(:has([readonly])):not(:has(.choices)):focus-within {
+.field-item:not(:has([readonly])):focus-within {
   color: inherit;
   outline: 0;
   background-color: #fff;
@@ -1256,18 +1256,11 @@ input[type=radio]:checked {
 .field-item:has(:nth-child(1 of code)) {
   padding-inline-start: 0.275em;
 }
-.field-item:has(textarea[x-textarea]) {
-  height: initial;
-}
 .field-item:has(select), .field-item:has(.ss-main) {
   padding-inline: 0 !important;
 }
 .field-item:has(.datepicker select) {
   padding-inline: 0.65em !important;
-}
-.field-item:has([x-datepicker][readonly]):focus-within {
-  border-color: var(--expansa-primary);
-  box-shadow: 0 0 0 1px var(--expansa-primary);
 }
 .field-item:has([type=radio]) {
   align-items: flex-start;
@@ -1284,21 +1277,18 @@ input[type=radio]:checked {
 .field-item:has([type=radio]) .field-icon {
   background-color: var(--expansa-bg-white);
 }
-.field--ui .field-item:has([type=radio]) {
-  margin: 0;
-}
-.field-item:has([type=radio]) *[type=radio] {
+.field-item:has([type=radio]) [type=radio] {
   max-width: 1.35rem;
   height: 1.35rem;
   border-width: 6px;
   corner-shape: initial;
 }
-.field-item:has([type=radio]) *[type=radio]:not(:checked) {
+.field-item:has([type=radio]) [type=radio]:not(:checked) {
   border-color: var(--expansa-text-white);
   background-color: var(--expansa-bg-white);
   outline: 1px solid var(--expansa-border);
 }
-.field-item:has([type=radio]):has(.field-icon) *[type=radio] {
+.field-item:has([type=radio]):has(.field-icon) [type=radio] {
   order: 2;
 }
 .field--button {
@@ -1321,7 +1311,6 @@ input[type=radio]:checked {
   background-color: var(--expansa-bg) !important;
   height: auto;
   overflow: hidden;
-  position: relative;
   margin: 0;
 }
 .field--timezone .field-map {

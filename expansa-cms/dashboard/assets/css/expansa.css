@@ -1826,6 +1826,7 @@ body.is-unsaved .expansa-search-btn {
   border: none !important;
   color: var(--expansa-text-muted) !important;
   background-color: transparent !important;
+  height: auto;
 }
 .nav__item ul li a:hover {
   color: var(--expansa-primary);

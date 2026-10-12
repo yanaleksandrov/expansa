@@ -1,18 +1,19 @@
 @use '../constants/index' as constants;
 
+$danger-soft: rgb(252.13, 241.14, 241.14);
+
 .field {
   display: grid;
   gap: 0.25em;
   align-content: start;
 
-  .field-icon {
+  &-icon {
     transition: background-color 0.2s;
   }
 
-  .field-label {
+  &-label {
     gap: 0.25rem;
     display: flex;
-    justify-content: space-between;
     align-items: center;
     font-weight: 500;
     line-height: 1.35em;
@@ -31,7 +32,7 @@
     }
   }
 
-  .field-instruction {
+  &-instruction {
     line-height: 1.2em;
     font-size: 0.92857142857em;
     min-width: 8rem;
@@ -39,7 +40,7 @@
     font-weight: 400;
   }
 
-  .field-error {
+  &-error {
     line-height: 1.2em;
     font-size: 0.92857142857em;
     color: var(--expansa-danger);
@@ -47,19 +48,18 @@
     margin-top: -0.875rem;
     padding: 1.25rem 0.6875rem 0.5rem;
     z-index: -1;
-    background-color: rgb(252.13, 241.14, 241.14);
-    border-bottom-left-radius: var(--expansa-border-radius);
-    border-bottom-right-radius: var(--expansa-border-radius);
+    background-color: $danger-soft;
+    border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
   &.is-invalid &-item,
   &.is-invalid &-item:focus-within {
     border-color: var(--expansa-danger) !important;
-    box-shadow: 0 0 0 2px rgb(252.13, 241.14, 241.14) !important;
+    box-shadow: 0 0 0 2px $danger-soft !important;
   }
 
-  .field-item {
+  &-item {
     padding-inline: 0.8em;
     display: flex;
     align-items: center;
@@ -91,7 +91,6 @@
     }
 
     .field--outline & {
-      border: 1px solid var(--expansa-border);
       background-color: var(--expansa-bg-white);
 
       .ss-content {
@@ -102,6 +101,15 @@
 
     i {
       font-size: inherit;
+
+      &[\@click] {
+        opacity: 0.5;
+        transition: opacity 0.25s;
+
+        &:hover {
+          opacity: 1;
+        }
+      }
     }
 
     code,
@@ -139,40 +147,36 @@
       padding-inline-start: 2.7em;
     }
 
-    input {
+    input[type="number"] {
+      -moz-appearance: textfield;
+      text-align: center;
+      width: 2.75em;
 
-      &[type="number"] {
-        -moz-appearance: textfield;
-        text-align: center;
-        width: 2.75em;
-      }
-
-      &[type="number"]::-webkit-inner-spin-button,
-      &[type="number"]::-webkit-outer-spin-button {
+      &::-webkit-inner-spin-button,
+      &::-webkit-outer-spin-button {
         -webkit-appearance: none;
         margin: 0;
       }
+    }
 
-      &[type="checkbox"] {
-        border: 1px solid var(--expansa-border);
-        border-radius: calc(var(--expansa-border-radius) / 1.5);
-        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-        margin: 0 0 auto;
-        height: auto;
+    input[type="checkbox"] {
+      border: 1px solid var(--expansa-border);
+      border-radius: calc(var(--expansa-border-radius) / 1.5);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+      margin: 0 0 auto;
+      height: auto;
 
-        &:checked {
-          border-color: var(--expansa-primary);
-        }
-      }
-
-      &[u-datepicker][readonly] {
-        color: inherit !important;
-        pointer-events: initial;
-        cursor: pointer;
+      &:checked {
+        border-color: var(--expansa-primary);
       }
     }
 
-    // select
+    input[u-datepicker][readonly] {
+      color: inherit !important;
+      pointer-events: initial;
+      cursor: pointer;
+    }
+
     select {
       padding-inline: 0.85em 1.65em;
 
@@ -188,12 +192,9 @@
       }
     }
 
-    textarea {
-
-      &:hover {
-        background-color: inherit;
-        color: inherit;
-      }
+    textarea:hover {
+      background-color: inherit;
+      color: inherit;
     }
 
     &:has([type="number"]) {
@@ -217,7 +218,6 @@
         order: 1;
         flex-wrap: wrap;
         flex: 1;
-        gap: 0.25rem;
       }
 
       .field-icon {
@@ -235,17 +235,15 @@
       .field--ui & {
         justify-content: space-between;
         flex-wrap: wrap;
-        height: auto;
         padding: 0.875rem 1rem;
         border: none;
-        gap: 0.75rem;
         margin: 0;
         background-color: var(--expansa-bg);
         transition: background-color 0.3s;
+        width: 100%;
 
         &:focus-within {
           border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
-          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
           border-color: var(--expansa-border) !important;
           box-shadow: none !important;
           background-color: var(--expansa-bg) !important;
@@ -259,12 +257,10 @@
 
         &:not(:only-child):first-child {
           border-radius: var(--expansa-border-radius) var(--expansa-border-radius) 0 0;
-          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         }
 
         &:not(:only-child):last-child {
           border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
-          corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         }
 
         &:hover {
@@ -347,7 +343,7 @@
       }
     }
 
-    &:not(:has([readonly])):not(:has(.choices)):focus-within {
+    &:not(:has([readonly])):focus-within {
       color: inherit;
       outline: 0;
       background-color: #fff;
@@ -370,10 +366,6 @@
       padding-inline-start: 0.275em;
     }
 
-    &:has(textarea[x-textarea]) {
-      height: initial;
-    }
-
     &:has(select),
     &:has(.ss-main) {
       padding-inline: 0 !important;
@@ -381,11 +373,6 @@
 
     &:has(.datepicker select) {
       padding-inline: 0.65em !important;
-    }
-
-    &:has([x-datepicker][readonly]):focus-within {
-      border-color: var(--expansa-primary);
-      box-shadow: 0 0 0 1px var(--expansa-primary);
     }
 
     &:has([type="radio"]) {
@@ -406,11 +393,7 @@
         background-color: var(--expansa-bg-white);
       }
 
-      .field--ui & {
-        margin: 0;
-      }
-
-      & *[type="radio"] {
+      [type="radio"] {
         max-width: 1.35rem;
         height: 1.35rem;
         border-width: 6px;
@@ -421,13 +404,9 @@
           background-color: var(--expansa-bg-white);
           outline: 1px solid var(--expansa-border);
         }
-
-        &:checked {
-
-        }
       }
 
-      &:has(.field-icon) *[type="radio"] {
+      &:has(.field-icon) [type="radio"] {
         order: 2;
       }
     }
@@ -455,7 +434,6 @@
       background-color: var(--expansa-bg) !important;
       height: auto;
       overflow: hidden;
-      position: relative;
       margin: 0;
     }
 
