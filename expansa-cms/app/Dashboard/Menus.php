@@ -294,7 +294,7 @@ final class Menus
                 ],
                 [
                     'id'           => 'general',
-                    'url'          => 'seo',
+                    'url'          => 'settings',
                     'title'        => t('General'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
