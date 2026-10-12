@@ -1,5 +1,6 @@
 <?php
 
+use Expansa\Builders\Form;
 use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
@@ -12,24 +13,9 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes, $options ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-		'options'     => 'array',
-	]
-)->values();
+extract(Form::data($__data, [
+	'options' => 'array',
+]));
 
 $prop   = Safe::prop( $attributes['name'] ?? $name );
 $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ) {
@@ -41,7 +27,7 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 			'content'     => 'trim:' . $label,
 			'icon'        => 'attribute',
 			'description' => 'trim:' . $instruction,
-			'checked'     => 'bool:' . strval( $attributes['checked'] ?? false ),
+			'checked'     => 'bool:' . ( $attributes['checked'] ?? false ),
 		]
 	)->values();
 
@@ -51,7 +37,14 @@ $render = function( $key = '', $option = [] ) use ( $name, $label, $class, $labe
 		@if($icon)
 			<span class="field-icon"><i class="{{ $icon }}"></i></span>
 		@endif
-		<input class="field-checkbox"<?php echo Arr::toHtmlAttributes( [ ...$attributes, 'type' => 'checkbox', 'name' => $key ?: $name, 'u-prop' => $prop, 'checked' => $checked ] ); ?>>
+		<input <?php echo Arr::toHtmlAttributes(
+			[ ...$attributes,
+				'type'    => 'checkbox',
+				'name'    => $key ?: $name,
+				'u-prop'  => $prop,
+				'checked' => $checked
+			]
+		); ?>>
 		<div class="<?php echo $label_class; ?>"<?php echo ! $key && ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>>
 			<?php echo $label; ?>
 			<?php if ( $instruction ) : ?>

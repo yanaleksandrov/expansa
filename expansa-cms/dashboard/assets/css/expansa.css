@@ -5,6 +5,7 @@
   --expansa-bg-dark: #efefef;
   --expansa-bg-universal: rgba(142, 142, 142, 0.07);
   --expansa-bg-active: rgba(134, 134, 134, 0.06);
+  --expansa-bg-disabled: #dfe2e3;
   --expansa-text: #131313;
   --expansa-text-hover: #000000;
   --expansa-text-white: #ffffff;
@@ -378,24 +379,18 @@ select[readonly],
 select[disabled],
 textarea[readonly],
 textarea[disabled] {
-  background-color: #f7f7f7;
   border-color: var(--expansa-border) !important;
-  cursor: not-allowed;
-  resize: none;
-  transition: none;
-}
-input[readonly]:not([u-autocomplete]), input[disabled]:not([u-autocomplete]),
-select[readonly]:not([u-autocomplete]),
-select[disabled]:not([u-autocomplete]),
-textarea[readonly]:not([u-autocomplete]),
-textarea[disabled]:not([u-autocomplete]) {
-  cursor: initial;
   color: var(--expansa-text-muted) !important;
+  resize: none !important;
+  transition: none !important;
 }
 input[disabled],
 select[disabled],
 textarea[disabled] {
-  pointer-events: none;
+  -webkit-user-select: none !important;
+     -moz-user-select: none !important;
+          user-select: none !important;
+  cursor: not-allowed !important;
 }
 input.is-loading,
 select.is-loading,
@@ -404,28 +399,6 @@ textarea.is-loading {
   background-repeat: no-repeat;
   background-size: 0.85rem;
   background-position: calc(100% - 0.875rem) center;
-}
-
-button {
-  font-size: 0.875rem;
-  outline: 0;
-  background-color: transparent;
-  height: 1.875rem;
-  padding: 0 0.875em;
-  border-radius: 0.5em;
-}
-button:hover {
-  background-color: var(--expansa-bg-universal);
-}
-button[readonly], button[disabled] {
-  background-color: #f7f7f7 !important;
-  border: 1px solid var(--expansa-border) !important;
-  color: var(--expansa-text-muted) !important;
-  box-shadow: none;
-  cursor: not-allowed;
-  pointer-events: none;
-  resize: none;
-  transition: none;
 }
 
 select {
@@ -452,12 +425,39 @@ select:focus {
   background-color: #fff;
 }
 
+button {
+  font-size: 0.875rem;
+  outline: 0;
+  background-color: transparent;
+  height: 1.875rem;
+  padding: 0 0.875em;
+  border-radius: 0.5em;
+}
+button:hover {
+  background-color: var(--expansa-bg-universal);
+}
+button[disabled] {
+  background-color: #f7f7f7 !important;
+  border: 1px solid var(--expansa-border) !important;
+  color: var(--expansa-text-muted) !important;
+  box-shadow: none;
+  resize: none;
+  transition: none;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  cursor: not-allowed;
+}
+
 summary {
   list-style: none;
 }
 
 label {
   cursor: pointer;
+}
+label:has([disabled]) {
+  cursor: not-allowed;
 }
 
 svg {

@@ -826,6 +826,17 @@ document.addEventListener('youla:init', () => {
             setTimeout(classesToggle, 1e3);
         });
     });
+    Youla.method('spin', (e, el) => direction => {
+        const input = el.parentElement.querySelector('input[type="number"]');
+        if (input.step === 'any') {
+            input.value = Number(input.value || 0) + direction;
+        } else {
+            direction < 0 ? input.stepDown() : input.stepUp();
+        }
+        input.dispatchEvent(new Event('input', {
+            bubbles: true
+        }));
+    });
     Youla.method('safe', () => ({
         slug(value) {
             return value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').toLowerCase();

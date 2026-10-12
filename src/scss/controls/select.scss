@@ -51,6 +51,12 @@
     &.ss-disabled {
       background-color: var(--ss-disabled-color);
       cursor: not-allowed;
+      color: var(--expansa-text-muted);
+
+      svg,
+      img {
+        filter: grayscale(1);
+      }
     }
 
     &.ss-disabled .ss-values .ss-disabled {
@@ -129,7 +135,6 @@
         display: flex;
         align-items: baseline;
         gap: 0.5rem;
-        color: var(--expansa-secondary);
 
         .ss-description {
           font-size: 0.85em;

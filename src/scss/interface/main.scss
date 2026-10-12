@@ -250,20 +250,15 @@ textarea {
 
   &[readonly],
   &[disabled] {
-    background-color: #f7f7f7;
     border-color: var(--expansa-border) !important;
-    cursor: not-allowed;
-    resize: none;
-    transition: none;
-
-    &:not([u-autocomplete]) {
-      cursor: initial;
-      color: var(--expansa-text-muted) !important;
-    }
+    color: var(--expansa-text-muted) !important;
+    resize: none !important;
+    transition: none !important;
   }
 
   &[disabled] {
-    pointer-events: none;
+    user-select: none !important;
+    cursor: not-allowed !important;
   }
 
   &.is-loading {
@@ -271,31 +266,6 @@ textarea {
     background-repeat: no-repeat;
     background-size: 0.85rem;
     background-position: calc(100% - 0.875rem) center;
-  }
-}
-
-button {
-  font-size: 0.875rem;
-  outline: 0;
-  background-color: transparent;
-  height: 1.875rem;
-  padding: 0 0.875em;
-  border-radius: 0.5em;
-
-  &:hover {
-    background-color: var(--expansa-bg-universal);
-  }
-
-  &[readonly],
-  &[disabled] {
-    background-color: #f7f7f7 !important;
-    border: 1px solid var(--expansa-border) !important;
-    color: var(--expansa-text-muted) !important;
-    box-shadow: none;
-    cursor: not-allowed;
-    pointer-events: none;
-    resize: none;
-    transition: none;
   }
 }
 
@@ -327,12 +297,40 @@ select {
   }
 }
 
+button {
+  font-size: 0.875rem;
+  outline: 0;
+  background-color: transparent;
+  height: 1.875rem;
+  padding: 0 0.875em;
+  border-radius: 0.5em;
+
+  &:hover {
+    background-color: var(--expansa-bg-universal);
+  }
+
+  &[disabled] {
+    background-color: #f7f7f7 !important;
+    border: 1px solid var(--expansa-border) !important;
+    color: var(--expansa-text-muted) !important;
+    box-shadow: none;
+    resize: none;
+    transition: none;
+    user-select: none;
+    cursor: not-allowed;
+  }
+}
+
 summary {
   list-style: none;
 }
 
 label {
   cursor: pointer;
+
+  &:has([disabled]) {
+    cursor: not-allowed;
+  }
 }
 
 svg {

@@ -289,6 +289,11 @@ select[multiple] + .ss-main {
 .ss-main.ss-disabled {
   background-color: var(--ss-disabled-color);
   cursor: not-allowed;
+  color: var(--expansa-text-muted);
+}
+.ss-main.ss-disabled svg,
+.ss-main.ss-disabled img {
+  filter: grayscale(1);
 }
 .ss-main.ss-disabled .ss-values .ss-disabled {
   color: var(--ss-font-color);
@@ -357,7 +362,6 @@ select[multiple] + .ss-main {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  color: var(--expansa-secondary);
 }
 .ss-main .ss-values .ss-text .ss-description {
   font-size: 0.85em;
@@ -812,7 +816,7 @@ input[type=checkbox], input[type=radio] {
   background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   clear: none;
-  cursor: pointer !important;
+  cursor: pointer;
   vertical-align: text-top;
   height: 18px;
   width: 18px;
@@ -1019,6 +1023,22 @@ input[type=radio]:checked {
   max-height: inherit;
   line-height: 1.2;
 }
+.field-item:has([type=number]) {
+  cursor: not-allowed;
+}
+.field-item:has([type=number]) i {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.field-item:has([type=number]):not(:has([disabled])) {
+  cursor: inherit;
+}
+.field-item:has([type=number]):not(:has([disabled])) i[\@click] {
+  transition: opacity 0.25s;
+}
+.field-item:has([type=number]):not(:has([disabled])) i[\@click]:hover {
+  opacity: 1;
+}
 .field-item:has(textarea) {
   height: initial !important;
 }
@@ -1031,13 +1051,6 @@ input[type=radio]:checked {
 }
 .field-item i {
   font-size: inherit;
-}
-.field-item i[\@click] {
-  opacity: 0.5;
-  transition: opacity 0.25s;
-}
-.field-item i[\@click]:hover {
-  opacity: 1;
 }
 .field-item code,
 .field-item samp {
@@ -1173,7 +1186,7 @@ input[type=radio]:checked {
 .field--ui .field-item:has([type=radio]):not(:only-child):last-child, .field--ui .field-item:has([type=checkbox]):not(:only-child):last-child {
   border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
 }
-.field--ui .field-item:has([type=radio]):hover, .field--ui .field-item:has([type=checkbox]):hover {
+.field--ui .field-item:has([type=radio]):hover:not(:has([disabled])), .field--ui .field-item:has([type=checkbox]):hover:not(:has([disabled])) {
   background-color: rgba(241, 241, 241, 0.8392156863);
 }
 .field--ui .field-item:has([type=radio]) [type=checkbox], .field--ui .field-item:has([type=checkbox]) [type=checkbox] {
@@ -1198,6 +1211,9 @@ input[type=radio]:checked {
   outline: none;
   background-color: var(--expansa-success);
   background-position: 100% center;
+}
+.field--ui .field-item:has([type=radio]) [type=checkbox][readonly], .field--ui .field-item:has([type=radio]) [type=checkbox][disabled], .field--ui .field-item:has([type=checkbox]) [type=checkbox][readonly], .field--ui .field-item:has([type=checkbox]) [type=checkbox][disabled] {
+  background-color: var(--expansa-border);
 }
 .field--ui .field-item:has([type=radio]) .field-label, .field--ui .field-item:has([type=checkbox]) .field-label {
   font-weight: 500;

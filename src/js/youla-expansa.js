@@ -1030,6 +1030,24 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
+     * Steps the sibling number input up or down, e.g. `@click="$spin(-1)"`.
+     * Respects its min, max and step, then fires `input` so listeners see the change.
+     *
+     * @since 1.0
+     */
+    Youla.method('spin', (e, el) => (direction) => {
+        const input = el.parentElement.querySelector('input[type="number"]');
+
+        if (input.step === 'any') {
+            input.value = Number(input.value || 0) + direction;
+        } else {
+            direction < 0 ? input.stepDown() : input.stepUp();
+        }
+
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    /**
      * Data sanitizing.
      *
      * @since 1.0

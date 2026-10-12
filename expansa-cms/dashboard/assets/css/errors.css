@@ -88,6 +88,7 @@ meter {
   --expansa-bg-dark: #efefef;
   --expansa-bg-universal: rgba(142, 142, 142, 0.07);
   --expansa-bg-active: rgba(134, 134, 134, 0.06);
+  --expansa-bg-disabled: #dfe2e3;
   --expansa-text: #131313;
   --expansa-text-hover: #000000;
   --expansa-text-white: #ffffff;

@@ -1,6 +1,6 @@
 <?php
 
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form;
 use Expansa\Support\Arr;
 
 /**
@@ -10,34 +10,18 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 
-[ $name, $label, $class, $label_class, $reset, $before, $after, $instruction, $tooltip, $copy, $conditions, $attributes ] = Safe::data(
-	$__data ?? [],
-	[
-		'name'        => 'name',
-		'label'       => 'trim',
-		'class'       => 'class:field',
-		'label_class' => 'class:field-label',
-		'reset'       => 'bool:false',
-		'before'      => 'trim',
-		'after'       => 'trim',
-		'instruction' => 'trim',
-		'tooltip'     => 'attribute',
-		'copy'        => 'bool:false',
-		'conditions'  => 'array',
-		'attributes'  => 'array',
-	]
-)->values();
-
-$prop = Safe::prop($attributes['name'] ?? $name);
+extract(Form::data($__data, [
+	'class' => 'class:field field--number',
+]));
 ?>
 <div class="<?php echo $class; ?>">
 	<?php if ( $label ) : ?>
 		<div class="<?php echo $label_class; ?>"<?php echo ! empty( $attributes['required'] ) ? ' data-required="*"' : ''; ?>><?php echo $label; ?></div>
 	<?php endif; ?>
 	<div class="field-item">
-		<i class="ph ph-minus" @click="<?php echo $prop; ?>--"></i>
-		<input type="number"<?php echo Arr::toHtmlAttributes( $attributes ); ?> u-prop="{{ $prop }}" @keydown.e.prevent>
-		<i class="ph ph-plus" @click="<?php echo $prop; ?>++"></i>
+		<i class="ph ph-minus" @click="$spin(-1)"></i>
+		<input type="number"<?php echo Arr::toHtmlAttributes( $attributes ); ?> @keydown.e.prevent>
+		<i class="ph ph-plus" @click="$spin(1)"></i>
 	</div>
 	<?php if ( $instruction ) : ?>
 		<div class="field-instruction"><?php echo $instruction; ?></div>

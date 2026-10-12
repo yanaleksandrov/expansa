@@ -86,6 +86,27 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       }
     }
 
+    &:has([type="number"]) {
+      cursor: not-allowed;
+
+      i {
+        opacity: 0.35;
+        pointer-events: none;
+      }
+
+      &:not(:has([disabled])) {
+        cursor: inherit;
+
+        i[\@click] {
+          transition: opacity 0.25s;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+    }
+
     &:has(textarea) {
       height: initial !important;
     }
@@ -101,15 +122,6 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
     i {
       font-size: inherit;
-
-      &[\@click] {
-        opacity: 0.5;
-        transition: opacity 0.25s;
-
-        &:hover {
-          opacity: 1;
-        }
-      }
     }
 
     code,
@@ -263,7 +275,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
           border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
         }
 
-        &:hover {
+        &:hover:not(:has([disabled])) {
           background-color: #f1f1f1d6;
         }
 
@@ -289,6 +301,11 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
             outline: none;
             background-color: var(--expansa-success);
             background-position: 100% center;
+          }
+
+          &[readonly],
+          &[disabled] {
+            background-color: var(--expansa-border);
           }
         }
 
