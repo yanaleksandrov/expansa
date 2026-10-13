@@ -3,7 +3,9 @@
 use Expansa\Facades\Safe;
 
 /**
- * States template can be overridden by copying it to themes/yourtheme/dashboard/views/components/state.php
+ * State instead of content, e.g. an empty table: an icon, the title and the description, both HTML of t().
+ *
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/state.php
  *
  * @package Expansa\Templates
  */
@@ -24,7 +26,7 @@ defined('EX_PATH') || exit;
 		<svg><use xlink:href="{{ url('/dashboard/assets/sprites/states.svg#' . $icon) }}"></use></svg>
 	@endif
 	@if($title)
-		<h6 class="mt-4 mw">{{ $title }}</h6>
+		<h6 class="mt-4 mw">{!! $title !!}</h6>
 	@endif
 	@if($description)
 		<p class="t-muted">{!! $description !!}</p>

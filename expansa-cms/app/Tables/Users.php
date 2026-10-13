@@ -65,7 +65,7 @@ final class Users extends Table
         return [
             'title'       => t('No users found'),
             'description' => t(
-                'You don&apos;t have any users yet. [Add them manually](:createLink) or [import via CSV](:importLink).',
+                "You don't have any users yet. [Add them manually](:createLink) or [import via CSV](:importLink).",
                 url('/dashboard/profile?new'),
                 url('/dashboard/import'),
             ),

@@ -128,7 +128,7 @@ final class Comments extends Table
 
         return [
             'title'       => t('No comments found'),
-            'description' => t('Don&apos;t worry, they will appear as soon as someone leaves a comment.'),
+            'description' => t("Don't worry, they will appear as soon as someone leaves a comment."),
         ];
     }
 
