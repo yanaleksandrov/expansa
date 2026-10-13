@@ -622,7 +622,7 @@ img:after {
   height: -moz-fit-content;
   height: fit-content;
 }
-@container tab (max-width: 1024px) {
+@container tab (max-width: 768px) {
   .tab__nav {
     max-width: 100%;
     width: 100%;
@@ -2630,6 +2630,9 @@ body.is-unsaved .expansa-search-btn {
 .table .table-head-data > *:has(i):hover {
   color: var(--expansa-secondary);
 }
+.table .table-head-data a {
+  color: inherit;
+}
 .table .table-head-data i {
   font-size: 0.8rem;
 }
@@ -2744,6 +2747,7 @@ body.is-unsaved .expansa-search-btn {
   align-items: center;
   gap: 0.25rem;
   flex: 1;
+  min-width: 10rem;
 }
 
 .table-header-translation {

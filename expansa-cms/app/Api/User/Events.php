@@ -112,6 +112,7 @@ final class Events
             'two_factor_failed'     => t('Wrong two-factor code'),
             'recovery_codes_new'    => t('New recovery codes'),
             'recovery_code_used'    => t('Recovery code used'),
+            'account_created'       => t('Account created'),
             'account_enabled'       => t('Account turned on'),
             'account_disabled'      => t('Account disabled'),
             'impersonation_started' => t('Signed in as another user'),

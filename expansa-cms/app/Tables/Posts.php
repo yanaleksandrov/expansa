@@ -28,7 +28,7 @@ final class Posts extends Table
         return [
             $this->cell('id')
                 ->title('<input type="checkbox" u-bind="trigger">')
-                ->fixedWidth('1rem')
+                ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('image')
                 ->fixedWidth('2.5rem')
@@ -58,7 +58,7 @@ final class Posts extends Table
     {
         return [
             'title'   => t('Pages'),
-            'actions' => true,
+            'actions' => 'posts-actions',
             'filter'  => true,
         ];
     }

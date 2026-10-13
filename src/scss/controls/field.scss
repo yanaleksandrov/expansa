@@ -156,6 +156,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       color: inherit;
       font-size: inherit;
       box-shadow: none;
+      width: auto;
 
       &:focus,
       &:hover {
@@ -169,6 +170,10 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
     select:has(option[data-html]) {
       padding-inline-start: 2.7em;
+    }
+
+    input[type="search"] {
+      background-image: none;
     }
 
     input[type="number"] {

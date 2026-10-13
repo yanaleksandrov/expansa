@@ -119,6 +119,12 @@ final readonly class UserController
     }
 
     #[Can('users_edit')]
+    public function create(Request $request, Response $response): Response
+    {
+        return $this->service->create($request, $response);
+    }
+
+    #[Can('users_edit')]
     public function adminStatus(Request $request, Response $response): Response
     {
         return $this->service->adminStatus($request, $response);

@@ -19,7 +19,8 @@ use IntlDateFormatter;
 
 /**
  * Profile page: the current user edits their own account, an administrator opens the account
- * of another user by `id` and also gets its status, devices, security log and actions.
+ * of another user by `id` and also gets its status, devices, security log and actions, or fills
+ * in a new account by `new`.
  *
  * @package App\Dashboard
  */
@@ -28,36 +29,42 @@ final class Profile
     /**
      * Data of the `profile` page: the account it edits.
      *
-     * @param Request $request `id` of another account, the current one without it.
+     * @param Request $request `id` of another account, the current one without it; `new` for a new one.
      * @return array<string, mixed>
      * @throws AccessDenied When the current user may not edit other accounts.
      * @throws NotFound     When there is no such account.
      */
     public static function data(Request $request): array
     {
-        $user = self::user($request->getInt('id'));
+        $isNew = isset($request->query['new']);
+        $user  = self::user($request->getInt('id'), $isNew);
 
-        return ['user' => $user, 'isSelf' => $user->id === User::current()?->id];
+        return ['user' => $user, 'isSelf' => ! $isNew && $user->id === User::current()?->id, 'isNew' => $isNew];
     }
 
     /**
-     * Get the account the profile edits: the current one for no `id` or its own, another one
-     * only with the `users_edit` permission.
+     * Get the account the profile edits: the current one for no `id` or its own; another one,
+     * or a new unsaved one, only with the `users_edit` permission.
      *
-     * @param int $id
+     * @param int  $id
+     * @param bool $isNew A new account, `id` is ignored.
      * @return User
      * @throws AccessDenied When the current user may not edit other accounts.
      * @throws NotFound     When there is no such account.
      */
-    public static function user(int $id): User
+    public static function user(int $id, bool $isNew = false): User
     {
         $current = User::current();
-        if ($id === 0 || $id === $current?->id) {
+        if (! $isNew && ($id === 0 || $id === $current?->id)) {
             return $current ?? throw new AccessDenied('read');
         }
 
         if (! Access::allows($current, 'users_edit')) {
             throw new AccessDenied('users_edit');
+        }
+
+        if ($isNew) {
+            return new User();
         }
 
         return Admin::find($id) ?? throw new NotFound(t('User not found'));

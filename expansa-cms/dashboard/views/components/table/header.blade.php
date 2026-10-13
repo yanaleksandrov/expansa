@@ -9,6 +9,8 @@ use Expansa\Facades\Safe;
 
 /**
  * Header above a table: the title with a badge, the tools and the bulk actions shown while rows are selected.
+ * `create` is the label of the button leading to the `link` URL, e.g. of the page of a new item;
+ * `actions` is the ID of the form of the bulk actions.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/header.blade.php
  *
@@ -16,16 +18,18 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $content, $uploader, $filter, $actions, $search, $translation, $project] = Safe::data($__data ?? [], [
+[$title, $badge, $content, $uploader, $filter, $actions, $search, $translation, $project, $create, $link] = Safe::data($__data ?? [], [
     'title'       => 'trim',
     'badge'       => 'trim',
     'content'     => 'trim',
     'uploader'    => 'bool:false',
     'filter'      => 'bool:false',
-    'actions'     => 'bool:false',
+    'actions'     => 'trim',
     'search'      => 'trim',
     'translation' => 'bool:false',
     'project'     => 'trim',
+    'create'      => 'trim',
+    'link'        => 'trim',
 ])->values();
 
 $progress = static fn (string $name) => [
@@ -51,9 +55,9 @@ $progress = static fn (string $name) => [
             'class'      => 'field field--plain',
             'before'     => '<i class="ph ph-terminal"></i>',
             'attributes' => [
-                'type'        => 'search',
-                'name'        => 's',
-                'placeholder' => t('Describe what you want...'),
+                'name'         => 's',
+                'placeholder'  => t('Describe what you want...'),
+                'u-noautofill' => 'terminal',
             ],
         ]);
         ?>
@@ -90,6 +94,12 @@ $progress = static fn (string $name) => [
             <button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
                 <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}
             </button>
+        @endif
+
+        @if ($create && $link)
+            <a class="btn btn--primary" href="{{ $link }}">
+                <i class="ph ph-plus"></i> {{ $create }}
+            </a>
         @endif
 
         @if ($translation)
@@ -142,7 +152,7 @@ $progress = static fn (string $name) => [
 
     @if ($actions)
         <div class="table-header-group" u-show="bulk" hidden>
-            <?php echo form('posts-actions'); ?>
+            <?php echo form($actions); ?>
             <button type="button" class="btn t-red" u-bind="reset">
                 <i class="ph ph-trash"></i> {{ t('Reset') }}
             </button>

@@ -652,6 +652,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
         foreach (
             [
                 App\Api\Ai\AiController::class,
+                App\Api\Comments\CommentsController::class,
                 App\Api\Extensions\ExtensionsController::class,
                 App\Api\FieldGroups\FieldGroupsController::class,
                 App\Api\Files\FilesController::class,

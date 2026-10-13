@@ -40,7 +40,7 @@ final class Plugins extends Table
         return [
             $this->cell('id')
                 ->title('<input type="checkbox" u-bind="trigger">')
-                ->fixedWidth('1rem')
+                ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('plugin')
                 ->title(t('Plugin'))
@@ -70,7 +70,7 @@ final class Plugins extends Table
     {
         return [
             'title'   => t('Plugins'),
-            'actions' => true,
+            'actions' => 'posts-actions',
             'filter'  => true,
         ];
     }

@@ -8,6 +8,7 @@ use App\Api\User\Sessions;
 use App\Api\User\Tokens;
 use App\Api\User\TwoFactor;
 use App\Dashboard\Pages\Profile;
+use App\Models\Option;
 use App\Models\User;
 use App\Support\Passwords;
 use Expansa\Facades\Auth;
@@ -15,11 +16,13 @@ use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 
-$user   = Profile::user(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
-$isSelf = $user->id === User::current()?->id;
+$isNew  = isset($_GET['new']);
+$user   = Profile::user(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0, $isNew);
+$isSelf = ! $isNew && $user->id === User::current()?->id;
 
 /**
- * Profile page: the account of the current user, or of another one by `id` for an administrator.
+ * Profile page: the account of the current user, or of another one by `id` for an administrator,
+ * or a new account by `new`.
  *
  * @since 2027.1
  */
@@ -98,6 +101,8 @@ $uid = Form::enqueue(
                                 'value'          => $user->email ?? '',
                                 'placeholder'    => t('e.g. user@gmail.com'),
                                 'u-autocomplete' => '',
+                                'required'       => $isNew,
+                                '@change'        => $isNew ? "login ||= email.split('@')[0]" : '',
                             ],
                         ],
                     ],
@@ -120,9 +125,11 @@ $uid = Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-user"></i>',
                             'after'       => '',
-                            'instruction' => $isSelf
-                                ? t('Can\'t be changed because it\'s used to sign in to your account.')
-                                : t('Can\'t be changed because it\'s used to sign in to the account.'),
+                            'instruction' => match (true) {
+                                $isNew  => t('Can\'t be changed later: it is used to sign in to the account.'),
+                                $isSelf => t('Can\'t be changed because it\'s used to sign in to your account.'),
+                                default => t('Can\'t be changed because it\'s used to sign in to the account.'),
+                            },
                             'tooltip'     => '',
                             'copy'        => 1,
                             'validator'   => '',
@@ -132,7 +139,7 @@ $uid = Form::enqueue(
                                 'value'       => $user->login ?? '',
                                 'placeholder' => t('e.g. admin'),
                                 'required'    => true,
-                                'readonly'    => true,
+                                'readonly'    => ! $isNew,
                             ],
                         ],
                         [
@@ -154,7 +161,7 @@ $uid = Form::enqueue(
                                 'u-prop'      => 'nicename',
                                 'value'       => $user->nicename ?? '',
                                 'placeholder' => t('Username'),
-                                'required'    => true,
+                                'required'    => ! $isNew,
                             ],
                         ],
                         [
@@ -780,7 +787,85 @@ $uid = Form::enqueue(
     ]
 );
 
-if (! $isSelf) {
+if ($isNew) {
+    Form::override($uid, fn (Form $form) => $form
+        ->attributes(['@submit.prevent' => '$ajax.post("user/create", "", () => $dirty.remove($el))'])
+        ->replace('password', [
+            [
+                'name'          => 'access',
+                'type'          => 'tab',
+                'label'         => t('Access'),
+                'caption'       => '',
+                'icon'          => 'ph ph-key',
+                'class_button'  => '',
+                'class_content' => 'p-7 sm:p-5',
+                'fields'        => [
+                    [
+                        'type'          => 'group',
+                        'name'          => 'access',
+                        'label'         => t('Access'),
+                        'class'         => '',
+                        'label_class'   => '',
+                        'content_class' => '',
+                        'fields'        => [
+                            [
+                                'type'        => 'select',
+                                'name'        => 'role',
+                                'error'       => 'role',
+                                'label'       => t('Role'),
+                                'class'       => '',
+                                'label_class' => '',
+                                'reset'       => 0,
+                                'before'      => '',
+                                'after'       => '',
+                                'instruction' => '',
+                                'tooltip'     => '',
+                                'copy'        => 0,
+                                'validator'   => '',
+                                'conditions'  => [],
+                                'attributes'  => [
+                                    'u-prop' => 'role',
+                                    'value'  => Option::get('users.role'),
+                                ],
+                                'options'     => array_map(static fn (array $role) => $role['name'], Role::all()),
+                            ],
+                            [
+                                'type'        => 'password',
+                                'name'        => 'password',
+                                'error'       => 'password',
+                                'label'       => t('Password'),
+                                'class'       => '',
+                                'label_class' => '',
+                                'reset'       => 0,
+                                'before'      => '',
+                                'after'       => '',
+                                'instruction' => t('Leave it empty to email the user a link to set the password.'),
+                                'tooltip'     => '',
+                                'copy'        => 0,
+                                'validator'   => '',
+                                'conditions'  => [],
+                                'attributes'  => [
+                                    'u-prop'       => 'password',
+                                    'autocomplete' => 'new-password',
+                                    'placeholder'  => t('Password'),
+                                ],
+                                'switcher'    => 1,
+                                'generator'   => 1,
+                                'indicator'   => 0,
+                                'characters'  => [
+                                    'lowercase' => 2,
+                                    'uppercase' => 2,
+                                    'special'   => 2,
+                                    'length'    => Passwords::MIN_LENGTH,
+                                    'digit'     => 2,
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+} elseif (! $isSelf) {
     Form::override($uid, fn (Form $form) => $form
         ->prepend([
             [

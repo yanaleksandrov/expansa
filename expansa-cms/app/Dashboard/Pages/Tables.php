@@ -40,7 +40,11 @@ final class Tables
     public static function data(Request $request): array
     {
         $table = match ($request->getString('table')) {
-            'comments'    => new Comments(),
+            'comments'    => new Comments(
+                $request->getString('status'),
+                $request->getString('s'),
+                $request->getString('order') === 'asc',
+            ),
             'translation' => new Translations($request->getString('project')),
             'emails'      => new Emails(),
             'users'       => new Users(),

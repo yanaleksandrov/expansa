@@ -6,6 +6,7 @@ namespace App\Tables;
 
 use App\Models\User;
 use Expansa\Builders\Table;
+use Expansa\Facades\Access;
 use Expansa\Facades\Db;
 use PDO;
 
@@ -38,7 +39,7 @@ final class Users extends Table
     public function cells(): array
     {
         return [
-            $this->cell('id')->title('<input type="checkbox" u-bind="trigger">')->fixedWidth('1rem')->view('cb'),
+            $this->cell('id')->title('<input type="checkbox" u-bind="trigger">')->fixedWidth('1.125rem')->view('cb'),
             $this->cell('name')->title(t('Name'))->flexibleWidth('16rem')->sortable()->view('user'),
             $this->cell('status')->title(t('Status'))->fixedWidth('6rem')->view('raw'),
             $this->cell('visit')->title(t('Last Visit'))->fixedWidth('8rem')->view('raw'),
@@ -48,10 +49,14 @@ final class Users extends Table
 
     public function headData(): array
     {
+        $canCreate = Access::allows(User::current(), 'users_edit');
+
         return [
             'title'   => t('Users'),
-            'actions' => true,
+            'actions' => 'posts-actions',
             'filter'  => true,
+            'create'  => $canCreate ? t('Add New User') : '',
+            'link'    => $canCreate ? url('dashboard/profile?new') : '',
         ];
     }
 
@@ -59,7 +64,11 @@ final class Users extends Table
     {
         return [
             'title'       => t('No users found'),
-            'description' => t('You don&apos;t have any users yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink).', url('/dashboard/import')),
+            'description' => t(
+                'You don&apos;t have any users yet. [Add them manually](:createLink) or [import via CSV](:importLink).',
+                url('/dashboard/profile?new'),
+                url('/dashboard/import'),
+            ),
         ];
     }
 }

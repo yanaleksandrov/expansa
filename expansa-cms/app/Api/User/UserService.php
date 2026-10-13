@@ -19,6 +19,7 @@ use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Error;
+use Expansa\Support\Hash;
 use Throwable;
 
 final class UserService
@@ -74,12 +75,7 @@ final class UserService
             throw ValidationFailed::field('email', t('Sorry, that email address is already in use.'));
         }
 
-        $fields = Safe::data($request->post, [
-            'bio'     => 'trim',
-            'toolbar' => 'bool',
-            'format'  => 'text',
-        ])->apply();
-
+        $fields  = $this->customFields($request);
         $updated = $user->update($data);
         if (! $updated instanceof User) {
             return $response->notify(t('Could not update the profile. Please try again.'));
@@ -584,6 +580,47 @@ final class UserService
     }
 
     /**
+     * Administrator: create an account from the profile form, verified at once. Without a password the
+     * account gets a random one and the user an email link to set their own.
+     *
+     * @param Request  $request  `login`, `role`, `password`, profile fields and the custom fields `bio`, `toolbar`, `format`.
+     * @param Response $response
+     * @return Response Notice and redirect to the profile of the account.
+     * @throws ValidationFailed With the fields that are refused.
+     */
+    public function create(Request $request, Response $response): Response
+    {
+        $data     = array_intersect_key($request->post, array_flip(['login', 'role', ...self::PROFILE_FIELDS]));
+        $password = trim((string) ($request->post['password'] ?? ''));
+        if ($password !== '') {
+            $refusal = Passwords::check($password, [(string) ($data['login'] ?? ''), (string) ($data['email'] ?? '')]);
+            if ($refusal !== null) {
+                throw ValidationFailed::field('password', $refusal);
+            }
+        }
+
+        $user = User::create([...$data, 'password' => $password ?: Hash::generate(32), 'is_verified' => true]);
+        if ($user instanceof Error) {
+            throw ValidationFailed::from($user, t('Could not create the account. Check the fields.'));
+        }
+
+        foreach ($this->customFields($request) as $key => $value) {
+            $user->field->update($key, $value);
+        }
+
+        Events::record($user, 'account_created', ['by' => User::current()?->login]);
+        if ($password === '') {
+            $this->requestPasswordReset($user);
+        }
+
+        return $response
+            ->notify($password === ''
+                ? t('User added. A link to set the password has been sent to :email.', $user->email)
+                : t('User added'))
+            ->redirect(url('dashboard/profile?id=' . $user->id), 1200);
+    }
+
+    /**
      * Administrator: turn an account on or off, after a confirmation.
      *
      * @param Request  $request  `id`, `active`, may carry the current `password`.
@@ -849,6 +886,21 @@ final class UserService
         return $response
             ->notify($action($admin, $user))
             ->reload(1200);
+    }
+
+    /**
+     * Custom fields of the profile form.
+     *
+     * @param Request $request
+     * @return array{bio?: string, toolbar?: bool, format?: string}
+     */
+    private function customFields(Request $request): array
+    {
+        return Safe::data($request->post, [
+            'bio'     => 'trim',
+            'toolbar' => 'bool',
+            'format'  => 'text',
+        ])->apply();
     }
 
     /**

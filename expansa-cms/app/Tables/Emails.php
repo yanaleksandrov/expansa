@@ -28,7 +28,7 @@ final class Emails extends Table
         return [
             $this->cell('id')
                 ->title('<input type="checkbox" u-bind="trigger">')
-                ->fixedWidth('1rem')
+                ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('title')
                 ->title(t('Name'))
@@ -50,7 +50,7 @@ final class Emails extends Table
     {
         return [
             'title'   => t('Emails'),
-            'actions' => true,
+            'actions' => 'posts-actions',
         ];
     }
 

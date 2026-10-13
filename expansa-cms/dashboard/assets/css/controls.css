@@ -1083,6 +1083,7 @@ input[type=radio]:checked {
   color: inherit;
   font-size: inherit;
   box-shadow: none;
+  width: auto;
 }
 .field-item input:focus, .field-item input:hover,
 .field-item select:focus,
@@ -1098,6 +1099,9 @@ input[type=radio]:checked {
 }
 .field-item select:has(option[data-html]) {
   padding-inline-start: 2.7em;
+}
+.field-item input[type=search] {
+  background-image: none;
 }
 .field-item input[type=number] {
   -moz-appearance: textfield;

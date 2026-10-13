@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dashboard;
 
 use App\Dashboard\Enums\Surface;
+use App\Dashboard\Pages\Comment;
 use App\Dashboard\Pages\FieldGroups;
 use App\Dashboard\Pages\Profile;
 use App\Dashboard\Pages\SignIn;
@@ -39,15 +40,19 @@ final class Core
         Dashboard::page('sign-up', title: fn () => t('Sign Up'));
         Dashboard::page('reset-password', title: fn () => t('Reset Password'));
         Dashboard::page('installed', title: fn () => t('Installed'));
-        Dashboard::page('profile', title: fn (array $data) => $data['isSelf']
-            ? t('Settings')
-            : ($data['user']->showname ?: $data['user']->login));
+        Dashboard::page('profile', title: fn (array $data) => match (true) {
+            $data['isNew']  => t('Add New User'),
+            $data['isSelf'] => t('Settings'),
+            default         => $data['user']->showname ?: $data['user']->login,
+        });
+        Dashboard::page('comment', can: 'manage_comments', title: fn () => t('Edit Comment'));
         Dashboard::page('edit', view: Tables::view(...));
         Dashboard::page('users', view: 'screens/edit');
         Dashboard::page('plugins-install', surface: Surface::Muted);
 
         Dashboard::data('sign-in', SignIn::data(...));
         Dashboard::data('profile', Profile::data(...));
+        Dashboard::data('comment', Comment::data(...));
         Dashboard::data('field-groups', FieldGroups::data(...));
         Dashboard::data('site-health', SiteHealth::data(...));
         Dashboard::data('updates', Updates::data(...));
