@@ -1097,7 +1097,12 @@ input[type=radio]:checked {
 .field-item textarea.is-loading {
   background-position: calc(100% - 0.25rem) center;
 }
-.field-item select:has(option[data-html]) {
+.field-item select:has(option[data-flag],
+option[data-image],
+option[data-icon],
+option[data-html*="<svg"],
+option[data-html*="<img"],
+option[data-html*="<i "]) {
   padding-inline-start: 2.7em;
 }
 .field-item input[type=search] {
@@ -1138,6 +1143,17 @@ input[type=radio]:checked {
 }
 .field-item select[multiple] + .ss-main {
   padding-inline-start: 0.25em;
+}
+.field-item select[u-select]:not([multiple]) {
+  padding-inline-end: 2.25em;
+}
+.field-item:has(> select:not([multiple]):first-child + .ss-main:last-child) > select {
+  display: block !important;
+  visibility: hidden;
+}
+.field-item:has(> select:not([multiple]):first-child + .ss-main:last-child) > .ss-main {
+  position: absolute;
+  inset: 0;
 }
 .field-item textarea:hover {
   background-color: inherit;

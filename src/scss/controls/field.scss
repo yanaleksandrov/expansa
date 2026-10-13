@@ -168,7 +168,15 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       }
     }
 
-    select:has(option[data-html]) {
+    // room of the option icon: data-* of the markup, u-select then moves it into data-html
+    select:has(
+      option[data-flag],
+      option[data-image],
+      option[data-icon],
+      option[data-html*="<svg"],
+      option[data-html*="<img"],
+      option[data-html*="<i "]
+    ) {
       padding-inline-start: 2.7em;
     }
 
@@ -218,6 +226,25 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
       &[multiple] + .ss-main {
         padding-inline-start: 0.25em;
+      }
+
+      // room of the end padding of .ss-text, so the select is as wide before and after u-select starts
+      &[u-select]:not([multiple]) {
+        padding-inline-end: 2.25em;
+      }
+    }
+
+    // the hidden select keeps the width of its longest option, as a native one, so u-select does not jump
+    &:has(> select:not([multiple]):first-child + .ss-main:last-child) {
+
+      > select {
+        display: block !important;
+        visibility: hidden;
+      }
+
+      > .ss-main {
+        position: absolute;
+        inset: 0;
       }
     }
 
