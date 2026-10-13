@@ -81,6 +81,12 @@ final class Plugins extends Table
             'icon'        => 'no-plugins',
             'title'       => t('No plugins installed yet'),
             'description' => t('You can upload them manually or install them from the repository.'),
+            'buttons'     => [
+                [
+                    'label' => t('Add New'),
+                    'url'   => url('/dashboard/plugins-install'),
+                ],
+            ],
         ];
     }
 }

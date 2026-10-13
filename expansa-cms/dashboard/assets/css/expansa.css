@@ -1535,6 +1535,9 @@ img:after {
 .expansa-main--canvas {
   background-color: var(--expansa-bg-universal);
 }
+.expansa-main:has(.state) {
+  place-content: center;
+}
 .expansa-board {
   min-height: 24px;
   grid-area: 3/1/4/4;
@@ -2759,6 +2762,36 @@ body.is-unsaved .expansa-search-btn {
     translate: calc(100cqw - 100%) 0;
   }
 }
+.state {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  max-width: 20rem;
+  margin: auto;
+  padding: 1.5rem;
+  text-align: center;
+  transform: translateY(-42px);
+}
+@media (max-width: 1024px) {
+  .state {
+    padding: 1rem;
+  }
+}
+.state-title {
+  width: 100%;
+  margin-top: 1rem;
+}
+.state-description {
+  color: var(--expansa-text-muted);
+}
+.state-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 .updates {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 18rem;

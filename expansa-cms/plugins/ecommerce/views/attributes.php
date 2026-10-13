@@ -42,7 +42,6 @@
                             'components/state',
                             [
                                 'icon'        => 'empty-pack',
-                                'class'       => 'dg jic m-auto t-center p-8 mw-320',
                                 'title'       => t('No attributes found'),
                                 'description' => t('Add an attribute and it will appear here'),
                             ]

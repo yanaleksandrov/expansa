@@ -3,7 +3,9 @@
 use Expansa\Facades\Safe;
 
 /**
- * State instead of content, e.g. an empty table: an icon, the title and the description, both HTML of t().
+ * State instead of content, e.g. an empty table: an icon, the title and the description, both HTML of t(),
+ * and up to two buttons below: `['label' => t('Add'), 'url' => ...]` or with a `click` expression instead
+ * of the URL; the first one is the primary.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/state.php
  *
@@ -11,24 +13,37 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$class, $title, $description, $icon] = Safe::data(
+[$title, $description, $icon, $buttons] = Safe::data(
     $__data ?? [],
 	[
-		'class'       => 'class:dg jic m-auto t-center p-5 mw-320',
 		'title'       => 'trim',
 		'description' => 'trim',
 		'icon'        => 'id:empty-page',
+		'buttons'     => 'array',
 	]
 )->values();
+
+$buttons = array_slice(array_filter($buttons, is_array(...)), 0, 2);
 ?>
-<div class="{{ $class }}">
+<div class="state">
 	@if($icon)
 		<svg><use xlink:href="{{ url('/dashboard/assets/sprites/states.svg#' . $icon) }}"></use></svg>
 	@endif
 	@if($title)
-		<h6 class="mt-4 mw">{!! $title !!}</h6>
+		<h6 class="state-title">{!! $title !!}</h6>
 	@endif
 	@if($description)
-		<p class="t-muted">{!! $description !!}</p>
+		<p class="state-description">{!! $description !!}</p>
+	@endif
+	@if($buttons)
+		<div class="state-buttons">
+			@foreach($buttons as $i => $button)
+				@if(! empty($button['url']))
+					<a class="btn {{ $i === 0 ? 'btn--primary' : 'btn--outline' }}" href="{{ $button['url'] }}">{!! $button['label'] ?? '' !!}</a>
+				@else
+					<button class="btn {{ $i === 0 ? 'btn--primary' : 'btn--outline' }}" type="button" @click="{{ $button['click'] ?? '' }}">{!! $button['label'] ?? '' !!}</button>
+				@endif
+			@endforeach
+		</div>
 	@endif
 </div>

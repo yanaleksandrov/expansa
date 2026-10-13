@@ -149,6 +149,10 @@
     &--canvas {
       background-color: var(--expansa-bg-universal);
     }
+
+    &:has(.state) {
+      place-content: center;
+    }
   }
 
   &-board {

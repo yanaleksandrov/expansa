@@ -42,7 +42,6 @@
                             'components/state',
                             [
                                 'icon'        => 'empty-pack',
-                                'class'       => 'dg jic m-auto t-center p-8 mw-320',
                                 'title'       => t('No categories found'),
                                 'description' => t('Add a category and it will appear here'),
                             ]

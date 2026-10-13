@@ -58,7 +58,13 @@ final class Emails extends Table
     {
         return [
             'title'       => t('No email templates found'),
-            'description' => t('Add a [new email template](:emailDialog) manually.', url('/dashboard/import')),
+            'description' => t('Emails the site sends are made from these templates.'),
+            'buttons'     => [
+                [
+                    'label' => t('Add Email Template'),
+                    'click' => "\$dialog.open('tmpl-email-editor')",
+                ],
+            ],
         ];
     }
 }

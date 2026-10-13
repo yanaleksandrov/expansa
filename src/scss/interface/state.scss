@@ -1,0 +1,31 @@
+.state {
+  display: grid;
+  justify-items: center;
+  width: 100%;
+  max-width: 20rem;
+  margin: auto;
+  padding: 1.5rem;
+  text-align: center;
+  transform: translateY(-42px);
+
+  @media (max-width: 1024px) {
+    padding: 1rem;
+  }
+
+  &-title {
+    width: 100%;
+    margin-top: 1rem;
+  }
+
+  &-description {
+    color: var(--expansa-text-muted);
+  }
+
+  &-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+}

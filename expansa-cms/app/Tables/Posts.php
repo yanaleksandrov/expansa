@@ -67,7 +67,13 @@ final class Posts extends Table
     {
         return [
             'title'       => t('No pages found'),
-            'description' => t("You don't have any pages yet. Add them manually or [import via CSV](:importLink).", url('/dashboard/import')),
+            'description' => t("You don't have any pages yet. Add them manually or import them from a CSV file."),
+            'buttons'     => [
+                [
+                    'label' => t('Import'),
+                    'url'   => url('/dashboard/import'),
+                ],
+            ],
         ];
     }
 }

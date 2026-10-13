@@ -62,13 +62,25 @@ final class Users extends Table
 
     public function notFoundData(): array
     {
+        $create = Access::allows(User::current(), 'users_edit')
+            ? [
+                [
+                    'label' => t('Add New User'),
+                    'url'   => url('/dashboard/profile?new'),
+                ],
+            ]
+            : [];
+
         return [
             'title'       => t('No users found'),
-            'description' => t(
-                "You don't have any users yet. [Add them manually](:createLink) or [import via CSV](:importLink).",
-                url('/dashboard/profile?new'),
-                url('/dashboard/import'),
-            ),
+            'description' => t("You don't have any users yet. Add them manually or import them from a CSV file."),
+            'buttons'     => [
+                ...$create,
+                [
+                    'label' => t('Import'),
+                    'url'   => url('/dashboard/import'),
+                ],
+            ],
         ];
     }
 }

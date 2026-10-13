@@ -17,19 +17,18 @@ defined('EX_PATH') || exit;
 
 $items = $table->getData();
 ?>
+@if ($items)
 <div class="table" u-data="table" style="{{ $table->style }}">
-    @if ($items)
-        <div class="table-head">
-            @if ($header ?? true)
-                <?php echo view('components/table/header', $table->headData()); ?>
-            @endif
-            <div class="table-head-data">
-                @foreach ($table->cells as $cell)
-                    <?php echo view('components/table/cell-head', ['cell' => $cell]); ?>
-                @endforeach
-            </div>
+    <div class="table-head">
+        @if ($header ?? true)
+            <?php echo view('components/table/header', $table->headData()); ?>
+        @endif
+        <div class="table-head-data">
+            @foreach ($table->cells as $cell)
+                <?php echo view('components/table/cell-head', ['cell' => $cell]); ?>
+            @endforeach
         </div>
-    @endif
+    </div>
     <div class="table-body">
         @foreach ($items as $item)
             <div class="table-row">
@@ -52,8 +51,8 @@ $items = $table->getData();
                 Additional data
             </div>
         @endforeach
-        @if (! $items)
-            <?php echo view('components/state', $table->notFoundData()); ?>
-        @endif
     </div>
 </div>
+@else
+<?php echo view('components/state', $table->notFoundData()); ?>
+@endif

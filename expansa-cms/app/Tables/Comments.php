@@ -119,10 +119,13 @@ final class Comments extends Table
         if ($this->status !== '' || $this->search !== '') {
             return [
                 'title'       => t('No comments found'),
-                'description' => t(
-                    'Nothing matches the filter. [Show all comments](:link).',
-                    url('dashboard/edit?table=comments'),
-                ),
+                'description' => t('Nothing matches the filter.'),
+                'buttons'     => [
+                    [
+                        'label' => t('Show All Comments'),
+                        'url'   => url('dashboard/edit?table=comments'),
+                    ],
+                ],
             ];
         }
 
