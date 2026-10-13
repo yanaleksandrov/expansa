@@ -22,11 +22,13 @@ $items = $table->getData();
         @if ($header ?? true)
             <?php echo view('components/table/header', $table->headData()); ?>
         @endif
-        <div class="table-head-data">
-            @foreach ($table->cells as $cell)
-                <?php echo view('components/table/cell-head', ['cell' => $cell]); ?>
-            @endforeach
-        </div>
+        @if ($items)
+            <div class="table-head-data">
+                @foreach ($table->cells as $cell)
+                    <?php echo view('components/table/cell-head', ['cell' => $cell]); ?>
+                @endforeach
+            </div>
+        @endif
     </div>
     <div class="table-body">
         @foreach ($items as $item)

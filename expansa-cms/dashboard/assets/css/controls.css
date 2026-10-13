@@ -1103,7 +1103,7 @@ option[data-icon],
 option[data-html*="<svg"],
 option[data-html*="<img"],
 option[data-html*="<i "]) {
-  padding-inline-start: 2.7em;
+  padding-inline-start: 2.6em;
 }
 .field-item input[type=search] {
   background-image: none;
@@ -1153,7 +1153,12 @@ option[data-html*="<i "]) {
 }
 .field-item:has(> select:not([multiple]):first-child + .ss-main:last-child) > .ss-main {
   position: absolute;
-  inset: 0;
+  inset: -1px 0;
+  height: auto;
+  align-items: flex-start;
+  padding-block: 0.325rem;
+  line-height: 1.6;
+  background-position: right 0.85em top 55%;
 }
 .field-item textarea:hover {
   background-color: inherit;
