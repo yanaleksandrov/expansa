@@ -3,10 +3,24 @@
 $danger-soft: rgb(252.13, 241.14, 241.14);
 
 .field {
+  --field-bg: var(--expansa-bg);
+  --field-bg-focus: var(--expansa-bg-white);
+  --field-border: var(--expansa-border);
+
   display: grid;
   gap: 0.25em;
   align-content: start;
   width: 100%;
+
+  &--raised {
+    --field-bg: var(--expansa-bg-white);
+  }
+
+  &--plain {
+    --field-bg: transparent;
+    --field-bg-focus: transparent;
+    --field-border: transparent;
+  }
 
   &-icon {
     transition: background-color 0.2s;
@@ -65,10 +79,10 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     display: flex;
     align-items: center;
     gap: 0.5em;
-    border: 1px solid var(--expansa-border);
+    border: 1px solid var(--field-border);
     border-radius: var(--expansa-border-radius);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-    background-color: var(--expansa-bg);
+    background-color: var(--field-bg);
     transition: background-color 0.2s;
     position: relative;
 
@@ -113,13 +127,9 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       height: initial !important;
     }
 
-    .field--outline & {
-      background-color: var(--expansa-bg-white);
-
-      .ss-content {
-        background-color: var(--expansa-bg-white) !important;
-        border: 1px solid var(--expansa-border);
-      }
+    .field--raised & .ss-content {
+      background-color: var(--expansa-bg-white) !important;
+      border: 1px solid var(--expansa-border);
     }
 
     i {
@@ -361,20 +371,21 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     &:not(:has([readonly])):focus-within {
       color: inherit;
       outline: 0;
-      background-color: #fff;
+      background-color: var(--field-bg-focus);
       border-color: var(--expansa-primary);
       box-shadow: 0 0 0 1px var(--expansa-primary);
       z-index: 1;
+
+      .field--plain & {
+        border-color: transparent;
+        box-shadow: none;
+      }
     }
 
     &:has(.ss-main:not(.ss-open-below)):focus-within {
       box-shadow: none;
-      border-color: var(--expansa-border);
-      background-color: var(--expansa-bg);
-
-      .field--outline & {
-        background-color: var(--expansa-bg-white);
-      }
+      border-color: var(--field-border);
+      background-color: var(--field-bg);
     }
 
     &:has(:nth-child(1 of code)) {

@@ -93,7 +93,7 @@ $files       = [
         </div>
         <div class="df aic g-3">
             <?php echo t(':count items', count([ ...$folders, ...$files ])); ?>
-            <div class="field field--xs field--outline">
+            <div class="field field--xs field--raised">
                 <label class="field-item">
                     <input type="search" name="search" placeholder="Search">
                 </label>

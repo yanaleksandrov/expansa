@@ -908,9 +908,21 @@ input[type=radio]:checked {
 }
 
 .field {
+  --field-bg: var(--expansa-bg);
+  --field-bg-focus: var(--expansa-bg-white);
+  --field-border: var(--expansa-border);
   display: grid;
   gap: 0.25em;
   align-content: start;
+  width: 100%;
+}
+.field--raised {
+  --field-bg: var(--expansa-bg-white);
+}
+.field--plain {
+  --field-bg: transparent;
+  --field-bg-focus: transparent;
+  --field-border: transparent;
 }
 .field-icon {
   transition: background-color 0.2s;
@@ -957,10 +969,10 @@ input[type=radio]:checked {
   display: flex;
   align-items: center;
   gap: 0.5em;
-  border: 1px solid var(--expansa-border);
+  border: 1px solid var(--field-border);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  background-color: var(--expansa-bg);
+  background-color: var(--field-bg);
   transition: background-color 0.2s;
   position: relative;
 }
@@ -1045,10 +1057,7 @@ input[type=radio]:checked {
 .field-item:has(textarea) {
   height: initial !important;
 }
-.field--outline .field-item {
-  background-color: var(--expansa-bg-white);
-}
-.field--outline .field-item .ss-content {
+.field--raised .field-item .ss-content {
   background-color: var(--expansa-bg-white) !important;
   border: 1px solid var(--expansa-border);
 }
@@ -1255,18 +1264,19 @@ input[type=radio]:checked {
 .field-item:not(:has([readonly])):focus-within {
   color: inherit;
   outline: 0;
-  background-color: #fff;
+  background-color: var(--field-bg-focus);
   border-color: var(--expansa-primary);
   box-shadow: 0 0 0 1px var(--expansa-primary);
   z-index: 1;
 }
+.field--plain .field-item:not(:has([readonly])):focus-within {
+  border-color: transparent;
+  box-shadow: none;
+}
 .field-item:has(.ss-main:not(.ss-open-below)):focus-within {
   box-shadow: none;
-  border-color: var(--expansa-border);
-  background-color: var(--expansa-bg);
-}
-.field--outline .field-item:has(.ss-main:not(.ss-open-below)):focus-within {
-  background-color: var(--expansa-bg-white);
+  border-color: var(--field-border);
+  background-color: var(--field-bg);
 }
 .field-item:has(:nth-child(1 of code)) {
   padding-inline-start: 0.275em;

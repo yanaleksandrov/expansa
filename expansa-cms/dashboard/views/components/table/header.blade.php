@@ -28,9 +28,12 @@ defined('EX_PATH') || exit;
     'project'     => 'trim',
 ])->values();
 
-$progress = static fn (string $name) => ['content' => $name, 'description' => t(':percent% complete', 0)];
+$progress = static fn (string $name) => [
+    'content'     => $name,
+    'description' => t(':percent% complete', 0),
+];
 ?>
-<div class="mw df fww aic jcsb g-3 py-5 px-6 sm:p-4">
+<div class="mw df fww aib jcsb g-3 py-5 px-6 sm:p-4">
     @if ($title)
         <h4>
             {!! $title !!}
@@ -45,7 +48,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
         echo Form::view('input', [
             'type'       => 'input',
             'name'       => 'terminal',
-            'class'      => 'field',
+            'class'      => 'field field--plain',
             'before'     => '<i class="ph ph-terminal"></i>',
             'attributes' => [
                 'type'        => 'search',
@@ -60,7 +63,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
         <div class="df aic g-1" u-show="!bulk">
             @if ($filter)
                 <div class="df aic g-1">
-                    <button class="btn btn--sm btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '{{ t('Reset filter') }}' : '{{ t('Filter') }}'">
+                    <button class="btn btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '{{ t('Reset filter') }}' : '{{ t('Filter') }}'">
                         <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
                         <span u-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'">{{ t('Filter') }}</span>
                     </button>
@@ -68,7 +71,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
                     echo Form::view('number', [
                         'type'       => 'number',
                         'name'       => 'page',
-                        'class'      => 'field field--sm field--outline',
+                        'class'      => 'field field--raised',
                         'attributes' => ['min' => 0, 'value' => 3],
                     ]);
                     ?>
@@ -81,7 +84,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
                     echo Form::view('input', [
                         'type'       => 'search',
                         'name'       => 's',
-                        'class'      => 'field field--outline',
+                        'class'      => 'field field--raised',
                         'attributes' => ['type' => 'search', 'name' => 's', 'placeholder' => $search],
                     ]);
                     ?>
@@ -90,7 +93,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
 
             @if ($uploader)
                 <div class="df aic g-1">
-                    <button class="btn btn--sm btn--outline" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
+                    <button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
                         <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}
                     </button>
                 </div>
@@ -110,7 +113,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
                     echo Form::view('select', [
                         'type'       => 'select',
                         'name'       => 'language',
-                        'class'      => 'field field--sm field--outline',
+                        'class'      => 'field field--raised',
                         'attributes' => ['u-select' => '', 'name' => 'language'],
                         'options'    => I18n::languageOptions(),
                     ]);
@@ -118,7 +121,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
                     echo Form::view('select', [
                         'type'       => 'select',
                         'name'       => 'project',
-                        'class'      => 'field field--sm field--outline',
+                        'class'      => 'field field--raised',
                         'attributes' => ['u-select' => '', 'name' => 'project', 'value' => $project],
                         // an empty group would render as an option
                         'options'    => array_filter([
@@ -137,7 +140,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
                         ], fn (array $group) => $group['options'] !== []),
                     ]);
                     ?>
-                    <button type="submit" class="btn btn--sm btn--outline">
+                    <button type="submit" class="btn btn--outline">
                         <i class="ph ph-scan"></i> {{ t('Scan') }}
                     </button>
                 </form>
@@ -147,7 +150,7 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
         @if ($actions)
             <div class="df aic g-1" u-show="bulk" hidden>
                 <?php echo form('posts-actions'); ?>
-                <button type="button" class="btn btn--sm t-red" u-bind="reset">
+                <button type="button" class="btn t-red" u-bind="reset">
                     <i class="ph ph-trash"></i> {{ t('Reset') }}
                 </button>
             </div>

@@ -17,7 +17,7 @@ return \Expansa\Builders\Form::enqueue(
 			'name'        => 'action',
 			'error'       => 'action',
 			'label'       => '',
-			'class'       => 'field field--sm field--outline',
+			'class'       => 'field field--sm field--raised',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',

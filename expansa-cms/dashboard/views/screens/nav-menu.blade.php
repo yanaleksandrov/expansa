@@ -21,7 +21,7 @@ defined('EX_PATH') || exit;
                     'name' => 'menu-editing',
                     'error' => 'menu-editing',
                     'label' => t('Select a Menu to Edit'),
-                    'class' => 'field field--outline',
+                    'class' => 'field field--raised',
                     'label_class' => 'df fs-13 t-muted',
                     'reset' => 0,
                     'before' => '',
