@@ -1245,5 +1245,19 @@
     "The plugin :name is activated.": "Плагин :name активирован.",
     "The plugin is not active.": "Плагин не активен.",
     "The plugin is deactivated.": "Плагин деактивирован.",
-    "The plugin is deactivated, but its cleanup failed, see the log.": "Плагин деактивирован, но его очистка не удалась, подробности в журнале."
+    "The plugin is deactivated, but its cleanup failed, see the log.": "Плагин деактивирован, но его очистка не удалась, подробности в журнале.",
+    "Administration": "Администрирование",
+    "Sorry, you are not allowed to edit this user.": "У вас нет прав на редактирование этого пользователя.",
+    "Click to upload the avatar of the user.": "Нажмите, чтобы загрузить аватар пользователя.",
+    "Email of the user": "Email пользователя",
+    "Can't be changed because it's used to sign in to the account.": "Нельзя изменить, так как используется для входа в аккаунт.",
+    "The name may appear on the website wherever the user contributes or is mentioned.": "Имя может отображаться на сайте везде, где пользователь публикует материалы или упоминается.",
+    "About the User": "О пользователе",
+    "Biographical information of the user. This may be shown publicly.": "Немного о пользователе. Эта информация может отображаться публично.",
+    "A few words about the user": "Несколько слов о пользователе",
+    "Choose how the dashboard looks to the user. Select a single theme, or sync with their system to switch between light and dark themes automatically.": "Выберите оформление панели для пользователя. Задайте одну тему или синхронизируйте с системой, чтобы светлая и тёмная темы переключались автоматически.",
+    "The theme will follow the system’s light mode settings.": "Тема будет следовать настройкам светлого режима системы.",
+    "The theme will follow the system’s dark mode settings.": "Тема будет следовать настройкам тёмного режима системы.",
+    "The theme will automatically adjust to match the system’s appearance settings.": "Тема будет автоматически подстраиваться под оформление системы.",
+    "Dashboard language of the user": "Язык панели управления пользователя"
 }

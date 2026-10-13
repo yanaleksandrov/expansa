@@ -6,6 +6,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
   display: grid;
   gap: 0.25em;
   align-content: start;
+  width: 100%;
 
   &-icon {
     transition: background-color 0.2s;

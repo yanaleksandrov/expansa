@@ -11,8 +11,8 @@ use Expansa\Facades\Db;
 use Expansa\Facades\Session;
 
 /**
- * What an administrator does with the account of another user: disable it, sign it out everywhere,
- * send a password reset, turn its two-factor authentication off, and sign in as the user to see the
+ * What an administrator does with the account of another user: disable it, change its email, sign it
+ * out everywhere, send a password reset, turn its two-factor authentication off, and sign in as the user to see the
  * site with their eyes. Every action is logged on the account; signing in as somebody keeps the
  * administrator's own account in the browser, one click brings it back.
  */
@@ -86,6 +86,27 @@ final class Admin
     {
         new UserService()->requestPasswordReset($user);
         Events::record($user, 'password_reset', ['by' => $admin->login]);
+    }
+
+    /**
+     * Change the email of an account at once, without a link to the new address; a change the user
+     * started is dropped, its link stops working.
+     *
+     * @param User   $admin
+     * @param User   $user
+     * @param string $email New address, already checked to be free.
+     * @return void
+     */
+    public static function changeEmail(User $admin, User $user, string $email): void
+    {
+        $changes = ['email' => $email];
+        if ((string) $user->field->find(Verification::PENDING_EMAIL) !== '') {
+            $changes += ['verification_token' => null, 'verification_token_expires_at' => null];
+            $user->field->delete(Verification::PENDING_EMAIL);
+        }
+
+        $user->update($changes);
+        Events::record($user, 'email_changed', ['by' => $admin->login]);
     }
 
     /**

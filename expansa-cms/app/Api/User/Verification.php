@@ -22,7 +22,7 @@ final class Verification
     /**
      * Field of the user the new email waits in until it is confirmed.
      */
-    private const string PENDING_EMAIL = 'pending_email';
+    public const string PENDING_EMAIL = 'pending_email';
 
     /**
      * Lifetime of a confirmation link in seconds.

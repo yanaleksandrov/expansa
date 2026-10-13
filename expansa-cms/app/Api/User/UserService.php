@@ -8,6 +8,7 @@ use App\Models\Option;
 use App\Models\User;
 use App\Support\Passwords;
 use Expansa\Auth\Exceptions\TooManyAttempts;
+use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
 use Expansa\Facades\Log;
@@ -33,24 +34,39 @@ final class UserService
     private const array PROFILE_FIELDS = ['nicename', 'firstname', 'lastname', 'showname', 'locale', 'email'];
 
     /**
-     * Update the profile of the current user. A new email needs a recent confirmation (see Confirmation:
-     * whoever holds the cookie must not take the account over by its email) and replaces the old one only
-     * after its link is opened, see Verification::changeEmail().
+     * Update the profile of the current user, or of another one by `id` with the `users_edit` permission.
+     * A new email of their own needs a recent confirmation (see Confirmation: whoever holds the cookie
+     * must not take the account over by its email) and replaces the old one only after its link is
+     * opened, see Verification::changeEmail(); an administrator changes the email of another account at once.
      *
-     * @param Request  $request  Profile fields and the custom fields `bio`, `toolbar`, `format`.
+     * @param Request  $request  `id`, profile fields and the custom fields `bio`, `toolbar`, `format`.
      * @param Response $response
      * @return Response Notice.
      * @throws ValidationFailed When the new email is taken.
      */
     public function update(Request $request, Response $response): Response
     {
-        $user  = User::current();
+        $current = User::current();
+        $user    = $current;
+        $id      = (int) ($request->post['id'] ?? 0);
+        if ($id !== 0 && $id !== $current->id) {
+            if (! Access::allows($current, 'users_edit')) {
+                return $response->notify(t('Sorry, you are not allowed to edit this user.'));
+            }
+
+            $user = Admin::find($id);
+            if ($user === null) {
+                return $response->notify(t('User not found'));
+            }
+        }
+
         $data  = array_intersect_key($request->post, array_flip(self::PROFILE_FIELDS));
         $email = Safe::email($data['email'] ?? $user->email);
         unset($data['email']);
 
+        $isSelf     = $user === $current;
         $isNewEmail = $email !== '' && mb_strtolower($email) !== mb_strtolower($user->email);
-        if ($isNewEmail && ! Confirmation::check($user)) {
+        if ($isNewEmail && $isSelf && ! Confirmation::check($user)) {
             return $response->notify(t('To change the email, confirm it is you in the Security tab first.'));
         }
 
@@ -73,7 +89,9 @@ final class UserService
             $updated->field->update($key, $value);
         }
 
-        if ($isNewEmail) {
+        if ($isNewEmail && ! $isSelf) {
+            Admin::changeEmail($current, $updated, $email);
+        } elseif ($isNewEmail) {
             Verification::changeEmail($updated, $email);
 
             return $response->notify(t('User updated. Open the link we have sent to :email to change the email.', $email));

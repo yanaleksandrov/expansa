@@ -2,7 +2,7 @@
 /**
  * Document of a dashboard page: the bar, the menus and the dialogs around the page template.
  *
- * @var string           $page    Template of the page, e.g. `screens/user`; it gets the same data.
+ * @var string           $page    Template of the page, e.g. `screens/profile`; it gets the same data.
  * @var string           $title   Document title.
  * @var Surface          $surface Background of the page area.
  * @var App\Support\Site $site    Settings of the site: name, language, charset, addresses, version; shared with every view.

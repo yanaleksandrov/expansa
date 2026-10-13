@@ -41,6 +41,22 @@ $progress = static fn (string $name) => ['content' => $name, 'description' => t(
     @endif
 
     <div class="df aic g-1">
+        <?php
+        echo Form::view('input', [
+            'type'       => 'input',
+            'name'       => 'terminal',
+            'class'      => 'field',
+            'before'     => '<i class="ph ph-terminal"></i>',
+            'attributes' => [
+                'type'        => 'search',
+                'name'        => 's',
+                'placeholder' => t('Describe what you want...'),
+            ],
+        ]);
+        ?>
+    </div>
+
+    <div class="df aic g-1">
         <div class="df aic g-1" u-show="!bulk">
             @if ($filter)
                 <div class="df aic g-1">

@@ -362,6 +362,7 @@ select[multiple] + .ss-main {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
+  padding-inline: 0 2.25em;
 }
 .ss-main .ss-values .ss-text .ss-description {
   font-size: 0.85em;

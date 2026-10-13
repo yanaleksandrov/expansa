@@ -7,6 +7,7 @@ use App\Api\User\Passkey;
 use App\Api\User\Sessions;
 use App\Api\User\Tokens;
 use App\Api\User\TwoFactor;
+use App\Dashboard\Pages\Profile;
 use App\Models\User;
 use App\Support\Passwords;
 use Expansa\Facades\Auth;
@@ -14,14 +15,15 @@ use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 
-$user = User::current();
+$user   = Profile::user(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
+$isSelf = $user->id === User::current()?->id;
 
 /**
- * Profile page.
+ * Profile page: the account of the current user, or of another one by `id` for an administrator.
  *
  * @since 2027.1
  */
-return Form::enqueue(
+$uid = Form::enqueue(
     'user-profile',
     [
         'class'           => 'tab',
@@ -51,7 +53,9 @@ return Form::enqueue(
 		            'reset'       => 0,
 		            'before'      => '',
 		            'after'       => '',
-		            'instruction' => t('Click to upload your avatar.'),
+		            'instruction' => $isSelf
+		                ? t('Click to upload your avatar.')
+		                : t('Click to upload the avatar of the user.'),
 		            'tooltip'     => '',
 		            'copy'        => 0,
 		            'validator'   => '',
@@ -74,7 +78,9 @@ return Form::enqueue(
                             'type'        => 'email',
                             'name'        => 'email',
                             'error'       => 'email',
-                            'label'       => t('Your email'),
+                            'label'       => $isSelf
+                                ? t('Your email')
+                                : t('Email of the user'),
                             'class'       => '',
                             'label_class' => '',
                             'reset'       => 0,
@@ -114,7 +120,9 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-user"></i>',
                             'after'       => '',
-                            'instruction' => t('Can\'t be changed because it\'s used to sign in to your account.'),
+                            'instruction' => $isSelf
+                                ? t('Can\'t be changed because it\'s used to sign in to your account.')
+                                : t('Can\'t be changed because it\'s used to sign in to the account.'),
                             'tooltip'     => '',
                             'copy'        => 1,
                             'validator'   => '',
@@ -203,7 +211,9 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '<i class="ph ph-identification-badge"></i>',
                             'after'       => '',
-                            'instruction' => t('Your name may appear on the website wherever you contribute or are mentioned.'),
+                            'instruction' => $isSelf
+                                ? t('Your name may appear on the website wherever you contribute or are mentioned.')
+                                : t('The name may appear on the website wherever the user contributes or is mentioned.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -218,7 +228,9 @@ return Form::enqueue(
                 [
                     'type'          => 'group',
                     'name'          => 'about-yourself',
-                    'label'         => t('About Yourself'),
+                    'label'         => $isSelf
+                        ? t('About Yourself')
+                        : t('About the User'),
                     'class'         => '',
                     'label_class'   => '',
                     'content_class' => 'dg ga-4 g-6 gtc-1',
@@ -233,7 +245,9 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('Share a little biographical information to fill out your profile. This may be shown publicly.'),
+                            'instruction' => $isSelf
+                                ? t('Share a little biographical information to fill out your profile. This may be shown publicly.')
+                                : t('Biographical information of the user. This may be shown publicly.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -242,7 +256,9 @@ return Form::enqueue(
                                 'u-prop'      => 'bio',
                                 'rows'        => count(explode("\n", $user->field->find('bio') ?? '')),
                                 'value'       => $user->field->find('bio'),
-                                'placeholder' => t('A few words about yourself'),
+                                'placeholder' => $isSelf
+                                    ? t('A few words about yourself')
+                                    : t('A few words about the user'),
                             ],
                         ],
                     ],
@@ -276,7 +292,9 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('Choose how the dashboard looks to you. Select a single theme, or sync with your system to switch between light and dark themes automatically.'),
+                            'instruction' => $isSelf
+                                ? t('Choose how the dashboard looks to you. Select a single theme, or sync with your system to switch between light and dark themes automatically.')
+                                : t('Choose how the dashboard looks to the user. Select a single theme, or sync with their system to switch between light and dark themes automatically.'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -289,19 +307,25 @@ return Form::enqueue(
                                 'light' => [
                                     'content'     => t('Light Mode'),
                                     'icon'        => 'ph ph-sun',
-                                    'description' => t('Your theme will follow your system’s light mode settings.'),
+                                    'description' => $isSelf
+                                        ? t('Your theme will follow your system’s light mode settings.')
+                                        : t('The theme will follow the system’s light mode settings.'),
                                     'checked'     => $user->field->find('format') === 'light',
                                 ],
                                 'dark'  => [
                                     'content'     => t('Dark Mode'),
                                     'icon'        => 'ph ph-cloud',
-                                    'description' => t('Your theme will follow your system’s dark mode settings.'),
+                                    'description' => $isSelf
+                                        ? t('Your theme will follow your system’s dark mode settings.')
+                                        : t('The theme will follow the system’s dark mode settings.'),
                                     'checked'     => $user->field->find('format') === 'dark',
                                 ],
 	                            'auto'  => [
 		                            'content'     => t('Auto Mode'),
 		                            'icon'        => 'ph ph-cloud-sun',
-		                            'description' => t('Your theme will automatically adjust to match your system’s appearance settings.'),
+		                            'description' => $isSelf
+		                                ? t('Your theme will automatically adjust to match your system’s appearance settings.')
+		                                : t('The theme will automatically adjust to match the system’s appearance settings.'),
 		                            'checked'     => $user->field->find('format') === 'dark',
 	                            ],
                             ],
@@ -357,7 +381,9 @@ return Form::enqueue(
                             'reset'       => 0,
                             'before'      => '',
                             'after'       => '',
-                            'instruction' => t('Your dashboard language'),
+                            'instruction' => $isSelf
+                                ? t('Your dashboard language')
+                                : t('Dashboard language of the user'),
                             'tooltip'     => '',
                             'copy'        => 0,
                             'validator'   => '',
@@ -753,3 +779,46 @@ return Form::enqueue(
         ],
     ]
 );
+
+if (! $isSelf) {
+    Form::override($uid, fn (Form $form) => $form
+        ->prepend([
+            [
+                'type'       => 'hidden',
+                'name'       => 'id',
+                'attributes' => ['type' => 'hidden', 'name' => 'id', 'value' => $user->id],
+            ],
+        ])
+        ->replace('password', [
+            [
+                'name'          => 'administration',
+                'type'          => 'tab',
+                'label'         => t('Administration'),
+                'caption'       => '',
+                'icon'          => 'ph ph-shield-check',
+                'class_button'  => '',
+                'class_content' => 'p-7 sm:p-5',
+                'fields'        => [
+                    [
+                        'type'          => 'group',
+                        'name'          => 'account',
+                        'label'         => $user->showname ?: $user->login,
+                        'class'         => '',
+                        'label_class'   => '',
+                        'content_class' => '',
+                        'fields'        => [
+                            [
+                                'name'     => 'account',
+                                'type'     => 'custom',
+                                'callback' => function () use ($user) {
+                                    echo view('components/user-admin', Profile::admin($user));
+                                },
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]));
+}
+
+return $uid;
