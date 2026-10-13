@@ -18,18 +18,18 @@ defined('EX_PATH') || exit;
 $items = $table->getData();
 ?>
 <div class="table" u-data="table" style="{{ $table->style }}">
-    <div class="table-head">
-        @if ($header ?? true)
-            <?php echo view('components/table/header', $table->headData()); ?>
-        @endif
-        @if ($items)
+    @if ($items)
+        <div class="table-head">
+            @if ($header ?? true)
+                <?php echo view('components/table/header', $table->headData()); ?>
+            @endif
             <div class="table-head-data">
                 @foreach ($table->cells as $cell)
                     <?php echo view('components/table/cell-head', ['cell' => $cell]); ?>
                 @endforeach
             </div>
-        @endif
-    </div>
+        </div>
+    @endif
     <div class="table-body">
         @foreach ($items as $item)
             <div class="table-row">

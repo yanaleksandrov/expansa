@@ -130,6 +130,17 @@ class Option extends Model
     }
 
     /**
+     * Sanitize an option name part by part, keeping the dots of a nested option: `extensions.active`.
+     *
+     * @param string $option
+     * @return string Empty when no part is left.
+     */
+    private static function name(string $option): string
+    {
+        return implode('.', array_filter(array_map(Safe::id(...), explode('.', $option)), fn (string $part) => $part !== ''));
+    }
+
+    /**
      * Get all options.
      */
     public static function fetch(): array
@@ -157,7 +168,7 @@ class Option extends Model
     public static function add(string $option, mixed $value): int|bool
     {
         $options = self::fetch();
-        $option  = Safe::id($option);
+        $option  = self::name($option);
         if (empty($option)) {
             return false;
         }
@@ -196,26 +207,24 @@ class Option extends Model
      */
     public static function update(string $option, mixed $value): bool|int
     {
-        $option = Safe::id($option);
+        $option = self::name($option);
         if (empty($option)) {
             return false;
         }
 
         /**
-         * Update dotted options
+         * Update dotted options: the nested value is replaced whole, so a shorter list loses its tail
          */
         $options = self::fetch();
         if (str_contains($option, '.')) {
-            $new = [];
-            $old = Arr::get($options, $option);
-            Arr::set($new, $option, $value);
-
-            if ($value === $old) {
+            if (Arr::get($options, $option) === $value) {
                 return false;
             }
 
-            [ $option ] = explode('.', $option, 2);
-            $value      = array_replace_recursive($options[ $option ] ?? [], $new[ $option ]);
+            [$option, $path] = explode('.', $option, 2);
+            $nested          = (array) ($options[$option] ?? []);
+            Arr::set($nested, $path, $value);
+            $value = $nested;
         }
 
         if (! isset($options[ $option ])) {
