@@ -501,7 +501,6 @@ img:after {
   transition: opacity 0.3s;
 }
 
-/* CARD */
 .card {
   position: relative;
   background-color: var(--expansa-bg-white);
@@ -623,7 +622,7 @@ img:after {
   height: -moz-fit-content;
   height: fit-content;
 }
-@container tab (max-width: 768px) {
+@container tab (max-width: 1024px) {
   .tab__nav {
     max-width: 100%;
     width: 100%;
@@ -633,7 +632,7 @@ img:after {
     position: initial !important;
   }
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .tab__nav {
     padding: 1rem;
   }
@@ -670,7 +669,7 @@ img:after {
   max-width: 54rem;
   padding: 1.5rem;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .tab__content {
     padding: 1rem;
   }
@@ -1099,7 +1098,7 @@ img:after {
   padding: 1.5rem;
   position: relative;
 }
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .storage {
     padding: 1rem;
   }
@@ -1200,52 +1199,17 @@ img:after {
   opacity: 1;
 }
 
-.sample {
-  position: relative;
-}
-
-.sample__item {
-  position: relative;
-  padding: 2rem;
-  border: 1px solid var(--expansa-border);
-  border-radius: 4px 4px 0 0;
-  background-color: var(--expansa-bg-white);
-}
-
-.sample__item.bg {
-  background: var(--expansa-bg);
-}
-
-.sample__code {
-  display: block;
-  padding: 8px 12px;
-  color: var(--expansa-muted);
-  font-size: 12px;
-  text-align: center;
-  background-color: #FAFBFC;
-  cursor: pointer;
-  border-radius: 0 0 4px 4px;
-  margin-block-start: -1px;
-  line-height: 120%;
-  border: 1px solid var(--expansa-border);
-}
-
-.sample__code:after {
-  content: "Show code";
-  line-height: 1;
-  transition: color 0.3s ease;
-}
-
-.sample__code:hover:after {
-  color: var(--expansa-secondary);
-}
-
 .kanban {
   display: flex;
   max-width: 100vw;
   overflow-y: auto;
-  padding: 0.75rem 1.75rem 1.75rem;
+  padding: 0.75rem 1.5rem 1.5rem;
   transform: rotateZ(180deg) rotateY(180deg);
+}
+@media (max-width: 1024px) {
+  .kanban {
+    padding: 0.5rem 1rem 1rem;
+  }
 }
 .kanban__wrapper {
   transform: rotateZ(-180deg) rotateY(180deg);
@@ -1339,24 +1303,6 @@ img:after {
 }
 .kanban__meta span i {
   font-size: inherit;
-}
-
-*[x-anchor] {
-  cursor: pointer;
-}
-*[x-anchor]:before {
-  content: "#";
-  font-family: var(--expansa-font-code);
-  line-height: inherit;
-  margin-inline-start: -1em;
-  margin-inline-end: 0.3em;
-  opacity: 0;
-  transition: all 0.25s;
-  width: 0.5em;
-  max-width: 0.5em;
-}
-*[x-anchor]:hover:before {
-  opacity: 0.3;
 }
 
 .accordion {
@@ -1865,8 +1811,8 @@ body.is-unsaved .expansa-search-btn {
 }
 .nav__action {
   position: absolute;
-  top: 0.25rem;
-  right: 0.25rem;
+  top: 3px;
+  right: 3px;
   width: 1.5rem;
   height: 1.5rem;
   display: grid;
@@ -2001,7 +1947,7 @@ body.is-unsaved .expansa-search-btn {
   grid-template-columns: repeat(auto-fill, minmax(24rem, 1fr));
   padding: 0 1.5rem 1.5rem;
 }
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .plugins {
     padding: 0 1rem 1rem;
     grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
@@ -2094,7 +2040,7 @@ body.is-unsaved .expansa-search-btn {
   gap: 1.5rem;
   padding: 1.5rem;
 }
-@media screen and (max-width: 1024px) {
+@media (max-width: 1024px) {
   .themes {
     padding: 1rem;
     gap: 1rem;
@@ -2268,7 +2214,7 @@ body.is-unsaved .expansa-search-btn {
   margin-inline-end: -1px;
   padding: 1.75rem 1.75rem 1.5rem;
 }
-@media screen and (max-width: 1024px) {
+@media (max-width: 1024px) {
   .terms-side {
     padding: 1.25rem;
   }
@@ -2623,7 +2569,7 @@ body.is-unsaved .expansa-search-btn {
   padding-inline: 1.5rem;
   padding-bottom: 1rem;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .table .table-filter {
     padding-inline: 1rem;
   }
@@ -2642,7 +2588,7 @@ body.is-unsaved .expansa-search-btn {
   border-bottom: 1px solid var(--expansa-border);
   overflow-x: clip;
 }
-@media screen and (max-width: 1024px) {
+@media (max-width: 1024px) {
   .table .table-head {
     top: 52px;
   }
@@ -2666,7 +2612,7 @@ body.is-unsaved .expansa-search-btn {
   animation: table-head-scroll linear both;
   animation-timeline: --table-scroll-x;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .table .table-head-data {
     padding-inline: 1rem;
   }
@@ -2711,7 +2657,7 @@ body.is-unsaved .expansa-search-btn {
 .table .table-row:nth-child(1 of .table-row) {
   padding-top: 1.5rem;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .table .table-row:nth-child(1 of .table-row) {
     padding-top: 1rem;
   }
@@ -2719,7 +2665,7 @@ body.is-unsaved .expansa-search-btn {
 .table .table-row:last-child {
   padding-bottom: 1.5rem;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .table .table-row:last-child {
     padding-bottom: 1rem;
   }
@@ -2733,7 +2679,7 @@ body.is-unsaved .expansa-search-btn {
   opacity: 1;
   visibility: visible;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .table .table-row {
     padding-inline: 1rem;
   }
@@ -2741,7 +2687,7 @@ body.is-unsaved .expansa-search-btn {
 .table .table-row-data {
   padding: 0 1.5rem 1.5rem 3.75rem;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .table .table-row-data {
     padding: 0 1rem 1rem 3.25rem;
   }
@@ -2758,7 +2704,7 @@ body.is-unsaved .expansa-search-btn {
   top: 0;
   bottom: 2rem;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .table .table-bulk {
     padding-inline: 1rem;
   }
@@ -2769,6 +2715,39 @@ body.is-unsaved .expansa-search-btn {
 .table .table-link + .table .table-link::before, .table .table-link + .table-more .table .table-link:first-child::before {
   content: ",";
   padding-inline-end: 0.25rem;
+}
+
+.table-header {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+@media (max-width: 1024px) {
+  .table-header {
+    padding: 1rem;
+  }
+}
+
+.table-header-group,
+.table-header-translation {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.table-header-terminal {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.table-header-translation {
+  gap: 0.5rem;
 }
 
 @keyframes table-head-scroll {
@@ -2951,7 +2930,7 @@ body.is-unsaved .expansa-search-btn {
   min-height: 100%;
   padding: 1.5rem;
 }
-@media screen and (max-width: 768px) {
+@media (max-width: 1024px) {
   .site-health {
     padding: 1rem;
   }

@@ -2,7 +2,7 @@
   display: flex;
   height: 100%;
 
-  @media screen and (max-width: 840px) {
+  @media (max-width: 840px) {
     flex-direction: column;
   }
 
@@ -15,7 +15,7 @@
     margin-inline-end: -1px;
     padding: 1.5rem 0;
 
-    @media screen and (max-width: 1024px) {
+    @media (max-width: 1024px) {
       padding: 1.25rem 0;
     }
   }

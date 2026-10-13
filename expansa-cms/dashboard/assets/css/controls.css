@@ -109,7 +109,7 @@ textarea[u-textarea] {
     padding: 1.25rem;
   }
 }
-@media screen and (max-width: 1024px) {
+@media (max-width: 1024px) {
   .builder-wrapper {
     padding: 1.25rem;
   }
