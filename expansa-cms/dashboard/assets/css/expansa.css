@@ -838,7 +838,6 @@ img:after {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  background: var(--expansa-bg-universal);
   overflow: hidden;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -852,7 +851,8 @@ img:after {
   height: 1.875em;
   font-size: 0.75rem;
   gap: 0.25em;
-  border-radius: 1rem;
+  border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   background-color: var(--expansa-bg-universal);
   color: var(--expansa-text-muted);
 }
@@ -879,6 +879,7 @@ img:after {
 }
 .badge--round {
   border-radius: 2rem;
+  corner-shape: initial;
 }
 .badge--icon {
   aspect-ratio: 1/1;
@@ -2691,11 +2692,11 @@ body.is-unsaved .expansa-search-btn {
   }
 }
 .table .table-row-data {
-  padding: 0 1.5rem 1.5rem 3.75rem;
+  padding: 0 1.5rem 1.5rem 3.875rem;
 }
 @media (max-width: 1024px) {
   .table .table-row-data {
-    padding: 0 1rem 1rem 3.25rem;
+    padding: 0 1rem 1rem 3.375rem;
   }
 }
 .table .table-bulk {
