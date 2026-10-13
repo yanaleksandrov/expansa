@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Post\Type;
 use DateTime;
 use Expansa\Database\Model;
+use Expansa\Database\Query;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
+use Expansa\Facades\Db;
 use Expansa\Support\Error;
 
 /**
  * Represents a user comment on a post, including nested replies, author details,
- * status tracking, and reaction metrics.
+ * status tracking, and reaction metrics. Creating, changing and deleting a comment
+ * keeps the `comments` count of its post: the approved comments that are not deleted.
  *
  * @property int         $id          Unique identifier for the comment.
  * @property int         $postId      ID of the post this comment belongs to.
@@ -150,6 +154,21 @@ class Comment extends Model
     }
 
     /**
+     * Get the statuses with their human names, in the order of moderation.
+     *
+     * @return array<string, string>
+     */
+    public static function statuses(): array
+    {
+        return [
+            self::STATUS_PENDING  => t('Pending'),
+            self::STATUS_APPROVED => t('Approved'),
+            self::STATUS_SPAM     => t('Spam'),
+            self::STATUS_REJECTED => t('Rejected'),
+        ];
+    }
+
+    /**
      * Retrieves a comment by a given field.
      *
      * @param int|string $value A value for $by field. A comment ID.
@@ -187,6 +206,8 @@ class Comment extends Model
             return error('comment-add', t('Failed to save the comment to the database.'));
         }
 
+        self::recount($comment->postType, $comment->postId);
+
         return $comment;
     }
 
@@ -198,6 +219,8 @@ class Comment extends Model
      */
     public function update(array $data): Comment|Error
     {
+        [$postType, $postId] = [$this->postType, $this->postId];
+
         $this->fill($data);
 
         if (! $this->isValid()) {
@@ -208,6 +231,64 @@ class Comment extends Model
             return error('comment-update', t('Failed to save the comment to the database.'));
         }
 
+        self::recount($this->postType, $this->postId);
+        if ($postType !== $this->postType || $postId !== $this->postId) {
+            self::recount($postType, $postId);
+        }
+
         return $this;
+    }
+
+    /**
+     * Delete this comment: soft-deleted, see HasSoftDeletes.
+     *
+     * @return int The number of rows affected.
+     */
+    public function delete(): int
+    {
+        $count = new Query($this)->delete();
+
+        self::recount($this->postType, $this->postId);
+
+        return $count;
+    }
+
+    /**
+     * Restore this comment after a soft deletion.
+     *
+     * @return int The number of rows affected.
+     */
+    public function restore(): int
+    {
+        $count = new Query($this)->restore();
+
+        self::recount($this->postType, $this->postId);
+
+        return $count;
+    }
+
+    /**
+     * Store the number of the approved comments that are not deleted in the `comments` column of the post.
+     *
+     * @param string $postType
+     * @param int    $postId
+     * @return void
+     */
+    public static function recount(string $postType, int $postId): void
+    {
+        $type = Type::get($postType);
+        if ($type === null || $postId === 0) {
+            return;
+        }
+
+        $count = Db::count('comments', [
+            'post_type'  => $postType,
+            'post_id'    => $postId,
+            'status'     => self::STATUS_APPROVED,
+            'deleted_at' => null,
+        ]);
+
+        // the column is an unsigned SMALLINT
+        Db::update($type->table, ['comments' => min((int) $count, 65535)], ['id' => $postId]);
     }
 }

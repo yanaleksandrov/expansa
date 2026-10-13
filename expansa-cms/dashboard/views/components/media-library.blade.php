@@ -13,10 +13,10 @@ defined('EX_PATH') || exit;
 <div class="media-library" u-data="storage" @load="configure(typeof entry === 'undefined' ? null : entry); $ajax.post('media/get', {page: 1}).then(({posts}) => setItems(posts, true))">
     <div class="media-library-toolbar df aic jcsb g-3 fw p-4">
         <div class="df aic g-2 fw">
-            <input type="search" class="field field--outline fs-13" placeholder="<?php echo t('Search media'); ?>"
+            <input type="search" class="field field--raised fs-13" placeholder="<?php echo t('Search media'); ?>"
                    @input.delay.400ms="search($el.value); $ajax.post('media/get', {page: 1, s: query}).then(({posts}) => setItems(posts, true))">
 
-            <select class="field field--outline fs-13" :value="type" @change="setType($el.value)">
+            <select class="field field--raised fs-13" :value="type" @change="setType($el.value)">
                 <option value=""><?php echo t('All Media Items'); ?></option>
                 <option value="image"><?php echo t('Images'); ?></option>
                 <option value="video"><?php echo t('Video'); ?></option>
@@ -74,7 +74,7 @@ defined('EX_PATH') || exit;
                 <div class="dg g-1">
                     <span class="fs-12 t-muted"><?php echo t('File URL'); ?></span>
                     <div class="df g-2">
-                        <input type="text" class="field field--outline fs-13" readonly :value="editing().url" u-ref="fileUrl">
+                        <input type="text" class="field field--raised fs-13" readonly :value="editing().url" u-ref="fileUrl">
                         <button type="button" class="btn btn--outline" @click="$copy(editing().url)" title="<?php echo t('Copy URL to clipboard'); ?>"><i class="ph ph-copy"></i></button>
                     </div>
                 </div>

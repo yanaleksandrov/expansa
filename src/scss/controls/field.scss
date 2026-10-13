@@ -3,9 +3,24 @@
 $danger-soft: rgb(252.13, 241.14, 241.14);
 
 .field {
+  --field-bg: var(--expansa-bg);
+  --field-bg-focus: var(--expansa-bg-white);
+  --field-border: var(--expansa-border);
+
   display: grid;
   gap: 0.25em;
   align-content: start;
+  width: 100%;
+
+  &--raised {
+    --field-bg: var(--expansa-bg-white);
+  }
+
+  &--plain {
+    --field-bg: transparent;
+    --field-bg-focus: transparent;
+    --field-border: transparent;
+  }
 
   &-icon {
     transition: background-color 0.2s;
@@ -64,10 +79,10 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     display: flex;
     align-items: center;
     gap: 0.5em;
-    border: 1px solid var(--expansa-border);
+    border: 1px solid var(--field-border);
     border-radius: var(--expansa-border-radius);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-    background-color: var(--expansa-bg);
+    background-color: var(--field-bg);
     transition: background-color 0.2s;
     position: relative;
 
@@ -112,13 +127,9 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       height: initial !important;
     }
 
-    .field--outline & {
-      background-color: var(--expansa-bg-white);
-
-      .ss-content {
-        background-color: var(--expansa-bg-white) !important;
-        border: 1px solid var(--expansa-border);
-      }
+    .field--raised & .ss-content {
+      background-color: var(--expansa-bg-white) !important;
+      border: 1px solid var(--expansa-border);
     }
 
     i {
@@ -145,6 +156,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       color: inherit;
       font-size: inherit;
       box-shadow: none;
+      width: auto;
 
       &:focus,
       &:hover {
@@ -156,8 +168,21 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       }
     }
 
-    select:has(option[data-html]) {
-      padding-inline-start: 2.7em;
+    // room of the option icon: data-* of the markup, u-select moves it into data-html
+    select:has(
+      option[data-flag],
+      option[data-image],
+      option[data-icon],
+      option[data-html*="<svg"],
+      option[data-html*="<img"],
+      option[data-html*="<i "]
+    ) {
+      // 0.85em of the padding, 1.25em of the icon and 0.5em of the gap in .ss-single
+      padding-inline-start: 2.6em;
+    }
+
+    input[type="search"] {
+      background-image: none;
     }
 
     input[type="number"] {
@@ -202,6 +227,31 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
       &[multiple] + .ss-main {
         padding-inline-start: 0.25em;
+      }
+
+      // room of the end padding of .ss-text, so the select is as wide before and after u-select starts
+      &[u-select]:not([multiple]) {
+        padding-inline-end: 2.25em;
+      }
+    }
+
+    // the hidden select keeps the width of its longest option, as a native one, so u-select does not jump
+    &:has(> select:not([multiple]):first-child + .ss-main:last-child) {
+
+      > select {
+        display: block !important;
+        visibility: hidden;
+      }
+
+      // the box, the text and the arrow of the select, which is as tall as the field with its border
+      > .ss-main {
+        position: absolute;
+        inset: -1px 0;
+        height: auto;
+        align-items: flex-start;
+        padding-block: 0.325rem;
+        line-height: 1.6;
+        background-position: right 0.85em top 55%;
       }
     }
 
@@ -360,20 +410,21 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     &:not(:has([readonly])):focus-within {
       color: inherit;
       outline: 0;
-      background-color: #fff;
+      background-color: var(--field-bg-focus);
       border-color: var(--expansa-primary);
       box-shadow: 0 0 0 1px var(--expansa-primary);
       z-index: 1;
+
+      .field--plain & {
+        border-color: transparent;
+        box-shadow: none;
+      }
     }
 
     &:has(.ss-main:not(.ss-open-below)):focus-within {
       box-shadow: none;
-      border-color: var(--expansa-border);
-      background-color: var(--expansa-bg);
-
-      .field--outline & {
-        background-color: var(--expansa-bg-white);
-      }
+      border-color: var(--field-border);
+      background-color: var(--field-bg);
     }
 
     &:has(:nth-child(1 of code)) {

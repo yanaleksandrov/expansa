@@ -12,9 +12,10 @@ final class Posts extends Table
     {
         return [
             [
-                'cb'         => '<input type="checkbox" value="1">',
-                'image'      => 'image',
+                'id'         => 1,
+                'image'      => url('dashboard/assets/images/placeholder.svg'),
                 'title'      => 'Post title',
+                'status'     => t('Draft'),
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
                 'date'       => '24 august 2024',
@@ -25,9 +26,9 @@ final class Posts extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')
-                ->title('<input type="checkbox" u-bind="trigger" />')
-                ->fixedWidth('1rem')
+            $this->cell('id')
+                ->title('<input type="checkbox" u-bind="trigger">')
+                ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('image')
                 ->fixedWidth('2.5rem')
@@ -57,7 +58,7 @@ final class Posts extends Table
     {
         return [
             'title'   => t('Pages'),
-            'actions' => true,
+            'actions' => 'posts-actions',
             'filter'  => true,
         ];
     }
@@ -66,7 +67,13 @@ final class Posts extends Table
     {
         return [
             'title'       => t('No pages found'),
-            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink).', url('/dashboard/import')),
+            'description' => t("You don't have any pages yet. Add them manually or import them from a CSV file."),
+            'buttons'     => [
+                [
+                    'label' => t('Import'),
+                    'url'   => url('/dashboard/import'),
+                ],
+            ],
         ];
     }
 }

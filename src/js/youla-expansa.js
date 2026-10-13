@@ -568,17 +568,25 @@ document.addEventListener('youla:init', ()=> {
      */
     Youla.data('table', () => ({
         anchor: null,
+        bulk: 0,
         trigger: {
             '@change': 'selectAll($el, $root)',
         },
         item: {
             '@click': 'selectItem($el, $root, $event)',
         },
+        reset: {
+            '@click': 'resetAll($root)',
+        },
         items(root) {
             return [...root.querySelectorAll('[u-bind~="item"]')];
         },
+        count(root) {
+            this.bulk = this.items(root).filter(input => input.checked).length;
+        },
         selectAll(el, root) {
             this.items(root).forEach(input => input.checked = el.checked);
+            this.count(root);
         },
         selectItem(el, root, event) {
             let items   = this.items(root);
@@ -590,6 +598,12 @@ document.addEventListener('youla:init', ()=> {
                 items[i].checked = checked;
             }
             this.anchor = index;
+            this.count(root);
+        },
+        resetAll(root) {
+            root.querySelectorAll('[u-bind~="trigger"], [u-bind~="item"]').forEach(input => input.checked = false);
+            this.anchor = null;
+            this.bulk   = 0;
         },
     }));
 

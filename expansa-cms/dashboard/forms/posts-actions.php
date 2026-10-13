@@ -7,7 +7,7 @@
 return \Expansa\Builders\Form::enqueue(
 	'posts-actions',
 	[
-		'class'           => 'df fww g-1',
+		'class'           => 'df g-1',
 		'u-data'          => '{email: ""}',
 		'@submit.prevent' => '$ajax.post("items/options")',
 	],
@@ -17,7 +17,7 @@ return \Expansa\Builders\Form::enqueue(
 			'name'        => 'action',
 			'error'       => 'action',
 			'label'       => '',
-			'class'       => 'field field--sm field--outline',
+			'class'       => 'field field--raised',
 			'label_class' => '',
 			'reset'       => 0,
 			'before'      => '',
@@ -53,7 +53,7 @@ return \Expansa\Builders\Form::enqueue(
 			'conditions'  => [],
 			'attributes'  => [
 				'u-prop' => 'uid',
-				'class'  => 'btn btn--sm btn--primary',
+				'class'  => 'btn btn--secondary',
 			],
 		],
 	]

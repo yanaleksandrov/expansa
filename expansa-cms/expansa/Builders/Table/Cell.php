@@ -8,10 +8,17 @@ namespace Expansa\Builders\Table;
  * Column of a dashboard table, described with fluent setters:
  * `$this->cell('date')->title(t('Date'))->fixedWidth('9rem')->view('date')`.
  *
+ * The view of a cell gets the column as `$cell`, the row as `$item` and its value by the key as `$value`.
+ *
  * @package Expansa\Builders\Table
  */
 final class Cell
 {
+    /**
+     * Prefix of the cell views, a kind is added to it: `components/table/cell` + `date`.
+     */
+    private static string $views = '';
+
     public function __construct(
 
         /**
@@ -25,9 +32,11 @@ final class Cell
         public string $title = '',
 
         /**
-         * View that renders the cells of the column.
+         * View that renders the cells of the column, the `raw` kind by default.
          */
-        public string $view = '',
+        public string $view = '' {
+            get => $this->view !== '' ? $this->view : self::$views . '-raw';
+        },
 
         /**
          * Whether the column can be sorted.
@@ -51,9 +60,22 @@ final class Cell
 
         /**
          * HTML attributes of the cell wrapper.
+         *
+         * @var array<string, mixed>
          */
         public array $attributes = [],
     ) {}
+
+    /**
+     * Set the prefix of the cell views.
+     *
+     * @param string $views View name, e.g. `components/table/cell`.
+     * @return void
+     */
+    public static function configure(string $views): void
+    {
+        self::$views = $views;
+    }
 
     /**
      * Set the column title.
@@ -71,7 +93,7 @@ final class Cell
     /**
      * Set the HTML attributes of the cell wrapper.
      *
-     * @param array $attributes
+     * @param array<string, mixed> $attributes
      * @return static
      */
     public function attributes(array $attributes): static
@@ -134,14 +156,15 @@ final class Cell
     }
 
     /**
-     * Set the view of the cells: a file path, or a kind added to the default view (`date` → `<default>-date`).
+     * Set the view of the cells: a view name with `/` or a file path as is, a kind otherwise
+     * (`date` → `components/table/cell-date`).
      *
      * @param string $view
      * @return static
      */
     public function view(string $view): static
     {
-        $this->view = file_exists($view) ? $view : "{$this->view}-$view";
+        $this->view = str_contains($view, '/') || file_exists($view) ? $view : self::$views . "-$view";
 
         return $this;
     }

@@ -7,6 +7,7 @@ namespace App\Api\User;
 use App\Models\Option;
 use App\Models\User;
 use Expansa\Facades\Db;
+use Expansa\Facades\Hook;
 
 /**
  * Security log of users, the `users_events` table: sign-ins, failures, sign-outs and changes
@@ -84,7 +85,7 @@ final class Events
     }
 
     /**
-     * Human name of an event for the profile.
+     * Human name of an event for the profile; plugins name their events with the `userEventLabel` filter.
      *
      * @param string $event
      * @return string
@@ -112,13 +113,14 @@ final class Events
             'two_factor_failed'     => t('Wrong two-factor code'),
             'recovery_codes_new'    => t('New recovery codes'),
             'recovery_code_used'    => t('Recovery code used'),
+            'account_created'       => t('Account created'),
             'account_enabled'       => t('Account turned on'),
             'account_disabled'      => t('Account disabled'),
             'impersonation_started' => t('Signed in as another user'),
             'impersonation_stopped' => t('Stopped signing in as another user'),
             'token_created'         => t('API token created'),
             'token_revoked'         => t('API token revoked'),
-            default                 => $event,
+            default                 => (string) Hook::call('userEventLabel', $event, $event),
         };
     }
 }

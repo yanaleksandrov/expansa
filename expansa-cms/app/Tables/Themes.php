@@ -77,7 +77,7 @@ final class Themes extends Table
     {
         return [
             'title'       => t('No themes found'),
-            'description' => t('You don\'t have any themes installed yet. <a @click="$dialog.open(`tmpl-post-editor`)">Download some</a>.'),
+            'description' => t("You don't have any themes installed yet."),
         ];
     }
 }

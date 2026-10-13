@@ -845,6 +845,7 @@
     }
     class Component {
         constructor(el) {
+            el.__x = this;
             let dataProviderContext = injectDataProviders(el);
             const {expression, modifiers} = getAttributes(el).find(({directive}) => directive === 'u-data') || {
                 expression: '{}',
@@ -1200,7 +1201,7 @@
                 options.once = true;
             }
             if (event === 'load') {
-                handler(createEvent(event, {}));
+                queueMicrotask(() => handler(createEvent(event, {})));
             }
             if (event === 'intersect') {
                 const observer = new IntersectionObserver(entries => entries.forEach(entry => {
@@ -1280,7 +1281,12 @@
             });
         },
         componentInitialize: el => {
-            el.__x = new Component(el);
+            try {
+                new Component(el);
+            } catch (error) {
+                delete el.__x;
+                console.error('Youla.js: failed to initialize component', el, error);
+            }
         }
     };
     window.Youla = Youla;

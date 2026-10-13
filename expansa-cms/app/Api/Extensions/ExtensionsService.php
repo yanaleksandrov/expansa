@@ -4,377 +4,75 @@ declare(strict_types=1);
 
 namespace App\Api\Extensions;
 
+use App\Models\Option;
+use Expansa\Facades\Extensions;
+use Expansa\Http\Enums\Notice;
+use Expansa\Http\Exceptions\HttpError;
+use Expansa\Http\Response;
+
 /**
- * Hardcoded mock data for the extensions marketplace UI prototype — moved verbatim
- * from the old App\Api\Extensions::get(), nothing real to fix here.
+ * Turns plugins on and off: calls their activate() or deactivate() and keeps the ids
+ * in the "extensions.active" option, which bootstrap.php loads on every request.
  */
 final class ExtensionsService
 {
-    public function list(): array
+    /**
+     * Activates an installed plugin; a quarantined one is released first, so activating retries it.
+     *
+     * @param string   $id       Plugin id like "plugins/seo".
+     * @param Response $response Response to add the notice and the reload to.
+     * @return Response
+     * @throws HttpError When the plugin is not installed or its activate() fails.
+     */
+    public function activate(string $id, Response $response): Response
     {
-        return [
-            'items' => [
-                [
-                    'title'           => 'Classic Editor 1 and very longadable',
-                    'description'     => 'Customize WordPress with powerful, professional and intuitive fields.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => true,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Active',
-                            'class' => 'bg-green-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'Classic Editor 2',
-                    'description'     => 'Universal tool for managing the WordPress theme customizer, metaboxes and custom fields.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => '$9.99',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'My test link',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Active',
-                            'class' => 'bg-green-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'Classic Editor 3',
-                    'description'     => 'Convert Non-Latin characters in post and term slugs to Latin characters. Useful for creating human-readable URLs.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                        [
-                            'title' => 'New link',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => true,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Active',
-                            'class' => 'bg-green-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'Classic Editor 4',
-                    'description'     => 'Envato Theme Check is a modified fork of the original Theme Check by Otto42 with additional Themeforest specific WordPress checks.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Active',
-                            'class' => 'bg-green-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'Classic Editor 2',
-                    'description'     => 'The best anti-spam protection to block spam comments and spam in a contact form. The most trusted antispam solution.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Draft',
-                            'class' => 'bg-blue-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'Query Monitor',
-                    'description'     => 'The developer tools panel for Expansa.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Draft',
-                            'class' => 'bg-blue-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'SVG Support',
-                    'description'     => 'Upload SVG files to the Media Library and render SVG files inline for direct styling/animation of an SVG\'s internal elements using CSS/JS.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Draft',
-                            'class' => 'bg-blue-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'Classic Editor',
-                    'description'     => 'The best anti-spam protection to block spam comments and spam in a contact form.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Draft',
-                            'class' => 'bg-blue-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'eCommerce',
-                    'description'     => 'An ecommerce toolkit that helps you sell anything. Beautifully.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Install',
-                            'class' => 'bg-red-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-                [
-                    'title'           => 'WP Reset',
-                    'description'     => 'Reset the entire site or just selected parts while reserving the option to undo by using snapshots.',
-                    'image'           => url('dashboard/assets/images/placeholder.svg'),
-                    'license'         => 'Free',
-                    'author'          => [
-                        [
-                            'title' => 'Expansa Team',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'categories'      => [
-                        [
-                            'title' => 'Test category',
-                            'href'  => 'https://core.com',
-                        ],
-                    ],
-                    'installed'       => true,
-                    'active'          => false,
-                    'installations'   => '5+ Million Installations',
-                    'status'          => [
-                        [
-                            'title' => 'Install',
-                            'class' => 'bg-red-lt',
-                        ],
-                    ],
-                    'date'            => '2023/09/18 at 10:13 am',
-                    'reviews'         => 23,
-                    'rating'          => 4,
-                    'expansa_version' => 1,
-                    'version'         => '1.3.5',
-                ],
-            ],
-        ];
+        Extensions::forget($id);
+
+        $plugin = Extensions::getInstalled('plugin')[$id] ?? throw new HttpError(404, t('The plugin is not installed.'));
+        if (! Extensions::activate($id)) {
+            throw new HttpError(500, t('The plugin :name could not be activated, see the log.', $plugin->name));
+        }
+
+        Option::update('extensions.active', array_values(array_unique([...$this->active(), $id])));
+
+        // the menu and the pages of the plugin appear only in the next request
+        return $response->notify(t('The plugin :name is activated.', $plugin->name), Notice::Success)->reload(600);
+    }
+
+    /**
+     * Deactivates a plugin; it leaves the active ones even when its deactivate() fails or it is quarantined.
+     *
+     * @param string   $id       Plugin id like "plugins/seo".
+     * @param Response $response Response to add the notice and the reload to.
+     * @return Response
+     * @throws HttpError When the plugin is not active.
+     */
+    public function deactivate(string $id, Response $response): Response
+    {
+        $active = $this->active();
+        if (! in_array($id, $active, true)) {
+            throw new HttpError(404, t('The plugin is not active.'));
+        }
+
+        // code of a quarantined plugin is not run again
+        $done = isset(Extensions::getQuarantined()[$id]) || Extensions::deactivate($id);
+
+        Option::update('extensions.active', array_values(array_diff($active, [$id])));
+
+        $message = $done
+            ? $response->notify(t('The plugin is deactivated.'), Notice::Success)
+            : $response->notify(t('The plugin is deactivated, but its cleanup failed, see the log.'), Notice::Warning);
+
+        return $message->reload(600);
+    }
+
+    /**
+     * Ids of the active extensions.
+     *
+     * @return string[]
+     */
+    private function active(): array
+    {
+        return array_filter((array) Option::get('extensions.active', []), is_string(...));
     }
 }

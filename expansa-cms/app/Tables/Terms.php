@@ -12,12 +12,14 @@ final class Terms extends Table
     {
         return [
             [
+                'id'    => 1,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
                 'title' => 'Hello World',
                 'slug'  => 'hello-world',
                 'count' => 23,
             ],
             [
+                'id'    => 2,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
                 'title' => 'Uncategorized',
                 'slug'  => 'uncategorized',
@@ -29,7 +31,7 @@ final class Terms extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')->title('<input type="checkbox" u-bind="trigger" />')->fixedWidth('1rem')->view('cb'),
+            $this->cell('id')->title('<input type="checkbox" u-bind="trigger">')->fixedWidth('1.125rem')->view('cb'),
             $this->cell('image')->title(t('Image'))->fixedWidth('2.5rem')->view('image'),
             $this->cell('title')->title(t('Title'))->view('title'),
             $this->cell('slug')->title(t('Slug'))->view('raw'),
@@ -41,7 +43,7 @@ final class Terms extends Table
     {
         return [
             'title'   => t('Terms'),
-            'actions' => true,
+            'actions' => 'posts-actions',
             'filter'  => true,
         ];
     }
@@ -50,7 +52,13 @@ final class Terms extends Table
     {
         return [
             'title'       => t('No pages found'),
-            'description' => t('You don&apos;t have any pages yet. <a @click="$dialog.open(`tmpl-post-editor`, postEditorDialog)">Add them manually</a> or [import via CSV](:importLink).', url('/dashboard/import')),
+            'description' => t("You don't have any pages yet. Add them manually or import them from a CSV file."),
+            'buttons'     => [
+                [
+                    'label' => t('Import'),
+                    'url'   => url('/dashboard/import'),
+                ],
+            ],
         ];
     }
 }

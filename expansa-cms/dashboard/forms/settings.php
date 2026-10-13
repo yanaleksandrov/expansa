@@ -402,13 +402,13 @@ return Expansa\Builders\Form::enqueue(
 									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[close_comments_for_old_posts]' => [
-									'content'     => t( 'Automatically close comments on posts older than %s days', '<label class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></label>' ),
+									'content'     => t( 'Automatically close comments on posts older than %s days', '<label class="field--xs field--raised"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="14"></samp></label>' ),
 									'icon'        => 'ph ph-hourglass-medium',
 									'description' => '',
 									'checked'     => Option::get( 'comments.default_status' ),
 								],
 								'comments[thread_comments]' => [
-									'content'     => t( 'Enable threaded (nested) comments %s levels deep', '<label class="field--xs field--outline"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></label>' ),
+									'content'     => t( 'Enable threaded (nested) comments %s levels deep', '<label class="field--xs field--raised"><samp class="field-item"><input type="number" name="close_comments_for_old_posts" value="5"></samp></label>' ),
 									'icon'        => 'ph ph-stack',
 									'description' => '',
 									'checked'     => Option::get( 'comments.default_status' ),

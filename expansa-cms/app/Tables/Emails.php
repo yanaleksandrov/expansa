@@ -12,9 +12,10 @@ final class Emails extends Table
     {
         return [
             [
-                'cb'         => '<input type="checkbox" value="1">',
-                'image'      => 'image',
+                'id'         => 1,
+                'image'      => url('dashboard/assets/images/placeholder.svg'),
                 'title'      => 'Post title',
+                'status'     => t('Draft'),
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
                 'date'       => '24 august 2024',
@@ -25,9 +26,9 @@ final class Emails extends Table
     public function cells(): array
     {
         return [
-            $this->cell('cb')
-                ->title('<input type="checkbox" u-bind="trigger" />')
-                ->fixedWidth('1rem')
+            $this->cell('id')
+                ->title('<input type="checkbox" u-bind="trigger">')
+                ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('title')
                 ->title(t('Name'))
@@ -49,7 +50,7 @@ final class Emails extends Table
     {
         return [
             'title'   => t('Emails'),
-            'actions' => true,
+            'actions' => 'posts-actions',
         ];
     }
 
@@ -57,7 +58,13 @@ final class Emails extends Table
     {
         return [
             'title'       => t('No email templates found'),
-            'description' => t('Add a [new email template](:emailDialog) manually.', url('/dashboard/import')),
+            'description' => t('Emails the site sends are made from these templates.'),
+            'buttons'     => [
+                [
+                    'label' => t('Add Email Template'),
+                    'click' => "\$dialog.open('tmpl-email-editor')",
+                ],
+            ],
         ];
     }
 }

@@ -1,21 +1,39 @@
 .table {
   width: 100%;
-  display: grid;
-  margin-bottom: auto;
-  grid-template-rows: max-content;
+  container-type: inline-size;
+  timeline-scope: --table-scroll-x;
 
-  &__filter {
+  .table-filter {
     display: flex;
     gap: 0.25rem;
     padding-inline: 1.5rem;
     padding-bottom: 1rem;
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    @media (max-width: 1024px) {
+      padding-inline: 1rem;
     }
   }
 
-  &__head {
+  .table-head {
+    max-width: 100%;
+    position: sticky;
+    top: 42px;
+    background-color: var(--expansa-bg);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    z-index: 90;
+    border-bottom: 1px solid var(--expansa-border);
+    overflow-x: clip;
+
+    @media (max-width: 1024px) {
+      top: 52px;
+    }
+  }
+
+  .table-head-data {
     white-space: nowrap;
     width: 100%;
     z-index: 10;
@@ -28,11 +46,13 @@
     display: grid;
     gap: 1.25rem;
     grid-template-columns: var(--expansa-grid-template-columns);
-    min-width: 100%;
+    min-width: min-content;
     height: 2rem;
+    animation: table-head-scroll linear both;
+    animation-timeline: --table-scroll-x;
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    @media (max-width: 1024px) {
+      padding-inline: 1rem;
     }
 
     > * {
@@ -51,22 +71,41 @@
       }
     }
 
+    a {
+      color: inherit;
+    }
+
     i {
       font-size: 0.8rem;
     }
   }
 
-  &__row {
+  .table-body {
+    display: flex;
+    flex-direction: column-reverse;
+    margin-bottom: auto;
+    overflow: auto;
+    scroll-timeline: --table-scroll-x x;
+    transform: scaleY(-1);
+
+    > * {
+      transform: scaleY(-1);
+    }
+  }
+
+  .table-row {
+    width: 100%;
     display: grid;
     gap: 1.25rem;
     position: relative;
     padding: 0.75rem 1.5rem;
     grid-template-columns: var(--expansa-grid-template-columns);
+    min-width: min-content;
 
-    &:nth-child(1 of .table__row) {
+    &:nth-child(1 of .table-row) {
       padding-top: 1.5rem;
 
-      @media screen and (max-width: 1024px) {
+      @media (max-width: 1024px) {
         padding-top: 1rem;
       }
     }
@@ -74,17 +113,39 @@
     &:last-child {
       padding-bottom: 1.5rem;
 
-      @media screen and (max-width: 1024px) {
+      @media (max-width: 1024px) {
         padding-bottom: 1rem;
       }
     }
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    .table-hidden {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s;
+    }
+
+    &:hover {
+
+      .table-hidden {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      padding-inline: 1rem;
     }
   }
 
-  &__bulk {
+  .table-row-data {
+    padding: 0 1.5rem 1.5rem 3.875rem;
+
+    @media (max-width: 1024px) {
+      padding: 0 1rem 1rem 3.375rem;
+    }
+  }
+
+  .table-bulk {
     padding: 0.75rem 1.5rem;
     width: 100%;
     background-color: var(--expansa-bg);
@@ -96,35 +157,57 @@
     top: 0;
     bottom: 2rem;
 
-    @media screen and (max-width: 1024px) {
-      padding-inline: 1.25rem;
+    @media (max-width: 1024px) {
+      padding-inline: 1rem;
     }
   }
 
-  &__header {
-    max-width: 100%;
-    position: sticky;
-    top: 42px;
-    background-color: var(--expansa-bg);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    z-index: 99;
-    border-bottom: 1px solid var(--expansa-border);
-
-    @media screen and (max-width: 1024px) {
-      top: 52px;
-    }
-  }
-
-  &__link {
+  .table-link {
     display: inline-flex;
 
-    &:not(:nth-last-child(2)):after {
-      content: ', ';
+    & + &::before,
+    & + .table-more &:first-child::before {
+      content: ',';
       padding-inline-end: 0.25rem;
     }
+  }
+}
+
+.table-header {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+
+  @media (max-width: 1024px) {
+    padding: 1rem;
+  }
+}
+
+.table-header-group,
+.table-header-translation {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.table-header-terminal {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 10rem;
+}
+
+.table-header-translation {
+  gap: 0.5rem;
+}
+
+@keyframes table-head-scroll {
+  to {
+    translate: calc(100cqw - 100%) 0;
   }
 }

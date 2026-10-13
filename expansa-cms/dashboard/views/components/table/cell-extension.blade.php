@@ -1,68 +1,61 @@
 <?php
-
-use Expansa\Facades\Safe;
-
 /**
- * Table extension item.
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-extension.php
+ * Card of a plugin from the repository: screenshot, description, authors, category and stats.
+ * The row is `title`, `description`, `screenshot`, `author` and `categories` as links lists,
+ * `installed`, `active`, `installations`, `date`, `reviews`, `rating`.
+ *
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-extension.blade.php
+ *
+ * @var Expansa\Builders\Table\Cell $cell
+ * @var array<string, mixed>        $item
+ * @var mixed                       $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[$title, $description, $screenshot, $author, $categories, $installed, $active, $installations, $date, $reviews, $rating, $expansa, $version] = Safe::data(
-    $__data ?? [],
-	[
-		'title'         => 'trim',
-		'description'   => 'trim',
-		'screenshot'    => 'url',
-		'author'        => 'array',
-		'categories'    => 'array',
-		'installed'     => 'bool',
-		'active'        => 'bool',
-		'installations' => 'trim',
-		'date'          => 'trim',
-		'reviews'       => 'absint',
-		'rating'        => 'float',
-		'expansa'       => 'trim',
-		'version'       => 'trim',
-	]
-)->values();
+$installed = ! empty($item['installed']);
+$active    = ! empty($item['active']);
+$reviews   = (int) ($item['reviews'] ?? 0);
+$category  = $item['categories'][0]['title'] ?? '';
 ?>
-<div class="plugins__item" u-data="<?php printf( '{installed: %s, active: %s}', $installed ? 'true' : 'false', $active ? 'true' : 'false' ); ?>">
-	<div class="plugins__card">
-		<div class="plugins__image" style="background-image: url(<?php echo $screenshot; ?>)"></div>
-		<div class="plugins__data">
-			<h4 class="plugins__title"><?php echo $title; ?></h4>
-			<div class="plugins__description"><?php echo $description; ?></div>
-			<div class="plugins__author">
-				by <a href="#" target="_blank">Our Team</a>
-			</div>
-		</div>
-		<div class="plugins__action">
-			<button class="btn btn--outline"<?php ( $installed && $active ) && print( ' hidden' ); ?>><?php echo t( 'Install' ); ?></button>
-			<button class="btn btn--primary"<?php ( $installed && ! $active ) && print( ' hidden' ); ?>><?php echo t( 'Activate' ); ?></button>
-		</div>
-	</div>
-	<div class="plugins__info">
-		<span class="plugins__text"><i class="ph ph-desktop-tower"></i> <?php echo $installations; ?></span>
-		<span class="plugins__text"><i class="ph ph-calendar-dots"></i> <?php echo t( 'Last updated: :date', $date ); ?></span>
-		<span class="plugins__text">
-			<?php
-			if ( $reviews > 0 ) :
-				echo view(
-					'components/rating',
-					[
-						'class'   => 'df aic g-1',
-						'rating'  => $rating,
-						'reviews' => $reviews,
-					]
-				);
-			else :
-				t( 'This plugin has not been rated yet.' );
-			endif;
-			?>
-		</span>
-		<span class="plugins__text"><i class="ph ph-check"></i> <?php echo t( 'Compatible' ); ?></span>
-	</div>
+<div class="plugins__item">
+    @if ($category !== '')
+        <div class="plugins__pretitle"><i class="ph ph-bag"></i> {{ $category }}</div>
+    @endif
+    <div class="plugins__card">
+        <div class="plugins__image" style="background-image: url({{ $item['screenshot'] ?? '' }})"></div>
+        <div class="plugins__data">
+            <h4 class="plugins__title">{{ $item['title'] ?? '' }}</h4>
+            <div class="plugins__description">{{ $item['description'] ?? '' }}</div>
+            @if (! empty($item['author']))
+                <div class="plugins__author">
+                    {{ t('by') }}
+                    @foreach ($item['author'] as $i => $author)
+                        {{ $i > 0 ? ',' : '' }} <a href="{{ $author['href'] ?? '#' }}" target="_blank">{{ $author['title'] ?? '' }}</a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+        <div class="plugins__action">
+            @if (! $installed || ! $active)
+                <button class="btn btn--outline" type="button">{{ t('Install') }}</button>
+            @endif
+            @if (! $installed || $active)
+                <button class="btn btn--primary" type="button">{{ t('Activate') }}</button>
+            @endif
+        </div>
+    </div>
+    <div class="plugins__info">
+        <span class="plugins__text"><i class="ph ph-desktop-tower"></i> {{ t('Installs: :installsCount', $item['installations'] ?? '') }}</span>
+        <span class="plugins__text"><i class="ph ph-calendar-dots"></i> {{ t('Last updated: :date', $item['date'] ?? '') }}</span>
+        <span class="plugins__text">
+            @if ($reviews > 0)
+                <?php echo view('components/rating', ['class' => 'df aic g-1', 'rating' => (float) ($item['rating'] ?? 0), 'reviews' => $reviews]); ?>
+            @else
+                {{ t('This plugin has not been rated yet.') }}
+            @endif
+        </span>
+        <span class="plugins__text"><i class="ph ph-check"></i> {{ t('Compatible') }}</span>
+    </div>
 </div>

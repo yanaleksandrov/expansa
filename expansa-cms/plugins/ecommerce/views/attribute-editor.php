@@ -11,80 +11,77 @@ use Expansa\Builders\Form;
  */
 
 ?>
-<div class="expansa-main">
-    <div class="attributes">
-        <form class="attributes-wrapper" u-data="{values: []}">
-            <div class="attributes-editor">
-                <h5 class="attributes-title">
-                    <a class="btn btn--icon btn--sm" href="<?php echo url('/dashboard/attributes'); ?>"><i class="ph ph-arrow-left"></i></a>
-                    <span class="fw-600 mr-auto"><?php echo t('Add new attribute'); ?></span>
-                    <button class="btn btn--danger" type="button" hidden hidden><?php echo t('Delete'); ?></button>
-                    <button class="btn btn--primary" type="submit" disabled><?php echo t('Save'); ?></button>
-                </h5>
-                <div class="attributes-description">
-                    <p><?php echo t('Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.'); ?></p>
-                </div>
-                <?php echo form('attribute-editor', EX_PLUGINS . 'ecommerce/core/attributes.php'); ?>
+<div class="attributes">
+    <form class="attributes-wrapper" u-data="{values: []}">
+        <div class="attributes-editor">
+            <h5 class="attributes-title">
+                <a class="btn btn--icon btn--sm" href="<?php echo url('/dashboard/attributes'); ?>"><i class="ph ph-arrow-left"></i></a>
+                <span class="fw-600 mr-auto"><?php echo t('Add new attribute'); ?></span>
+                <button class="btn btn--danger" type="button" hidden hidden><?php echo t('Delete'); ?></button>
+                <button class="btn btn--primary" type="submit" disabled><?php echo t('Save'); ?></button>
+            </h5>
+            <div class="attributes-description">
+                <p><?php echo t('Deleting an attribute removes it from all assigned products. Recreating it won’t reassign it automatically.'); ?></p>
             </div>
-            <div class="attributes-side">
-                <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
-                <div class="attributes-list">
-                    <?php
-                    echo Form::view(
-                        'input',
-                        [
-                            'type'        => 'text',
-                            'name'        => 'value',
-                            'error'       => 'value',
-                            'label'       => '',
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '<i class="ph ph-text-t"></i>',
-                            'after'       => '',
-                            'instruction' => '',
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'name'                 => 'value',
-                                'placeholder'          => t('Type a value and press Enter'),
-                                '@keyup.enter.prevent' => '$el.value.trim() && values.push({title: $el.value.trim(), slug: $safe.slug($el.value)}), $el.value = "", values.sort((a, b) => a.title.localeCompare(b.title))',
-                            ],
+            <?php echo form('attribute-editor', EX_PLUGINS . 'ecommerce/core/attributes.php'); ?>
+        </div>
+        <div class="attributes-side">
+            <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
+            <div class="attributes-list">
+                <?php
+                echo Form::view(
+                    'input',
+                    [
+                        'type'        => 'text',
+                        'name'        => 'value',
+                        'error'       => 'value',
+                        'label'       => '',
+                        'class'       => '',
+                        'label_class' => '',
+                        'reset'       => 0,
+                        'before'      => '<i class="ph ph-text-t"></i>',
+                        'after'       => '',
+                        'instruction' => '',
+                        'tooltip'     => '',
+                        'copy'        => 0,
+                        'validator'   => '',
+                        'conditions'  => [],
+                        'attributes'  => [
+                            'name'                 => 'value',
+                            'placeholder'          => t('Type a value and press Enter'),
+                            '@keyup.enter.prevent' => '$el.value.trim() && values.push({title: $el.value.trim(), slug: $safe.slug($el.value)}), $el.value = "", values.sort((a, b) => a.title.localeCompare(b.title))',
                         ],
-                    );
-                    ?>
-                    <div class="attributes-values">
-                        <template u-if="values.length">
-                            <template u-for="(value, i) in values" :key="i">
-                                <div class="attributes-value">
-                                    <div class="attributes-value-title">
-                                        <input type="text" :name="`values.${i}.title`" u-model="value.title" placeholder="<?php echo t('Title'); ?>" required>
-                                    </div>
-                                    <div class="attributes-value-slug">
-                                        <input type="text" :name="`values.${i}.slug`" u-model="value.slug" placeholder="<?php echo t('Slug'); ?>" required>
-                                    </div>
-                                    <div class="btn btn--icon t-red" @click="values.splice(i, 1)"><i class="ph ph-trash"></i></div>
+                    ],
+                );
+                ?>
+                <div class="attributes-values">
+                    <template u-if="values.length">
+                        <template u-for="(value, i) in values" :key="i">
+                            <div class="attributes-value">
+                                <div class="attributes-value-title">
+                                    <input type="text" :name="`values.${i}.title`" u-model="value.title" placeholder="<?php echo t('Title'); ?>" required>
                                 </div>
-                            </template>
+                                <div class="attributes-value-slug">
+                                    <input type="text" :name="`values.${i}.slug`" u-model="value.slug" placeholder="<?php echo t('Slug'); ?>" required>
+                                </div>
+                                <div class="btn btn--icon t-red" @click="values.splice(i, 1)"><i class="ph ph-trash"></i></div>
+                            </div>
                         </template>
-                        <template u-if="!values.length">
-                            <?php
-                            echo view(
-                                'components/state',
-                                [
-                                    'icon'        => 'empty-pack',
-                                    'class'       => 'dg jic m-auto t-center p-8 mw-320',
-                                    'title'       => t('No values found'),
-                                    'description' => t('Add a value and it will appear here'),
-                                ]
-                            );
-                            ?>
-                        </template>
-                    </div>
+                    </template>
+                    <template u-if="!values.length">
+                        <?php
+                        echo view(
+                            'components/state',
+                            [
+                                'icon'        => 'empty-pack',
+                                'title'       => t('No values found'),
+                                'description' => t('Add a value and it will appear here'),
+                            ]
+                        );
+                        ?>
+                    </template>
                 </div>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>

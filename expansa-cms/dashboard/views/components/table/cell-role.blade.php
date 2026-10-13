@@ -1,21 +1,22 @@
 <?php
 
 use Expansa\Facades\Role;
-use Expansa\Facades\Safe;
 
 /**
- * Badge
+ * Name of the user role in a badge, the green one for administrators.
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-badge.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-role.blade.php
+ *
+ * @var Expansa\Builders\Table\Cell $cell
+ * @var array<string, mixed>        $item
+ * @var mixed                       $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-$prop = Safe::prop($__data['key'] ?? '');
-$role = Role::get($__data[$prop] ?? '');
-$name = $role['name'] ?? '';
+$role = is_string($value) ? $value : '';
 ?>
-<span class="badge {{ $__data[$prop] === 'admin' ? 'badge--green-lt' : '' }}">
-	<i class="ph ph-person-simple-run"></i> {{ $name }}
+<span class="badge{{ $role === 'admin' ? ' badge--green-lt' : '' }}">
+    <i class="ph ph-person-simple-run"></i> {{ Role::get($role)['name'] ?? '' }}
 </span>

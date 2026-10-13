@@ -9,7 +9,7 @@ $options = [];
 foreach ($languages as $language) {
     $locale = strtolower($language['locale'] ?? '');
     $url    = url();
-    $input  = '<label class="field--xs field--outline"><samp class="field-item dif h-2 mw-80"><input type="text" value="' . $locale .'"></samp></label>';
+    $input  = '<label class="field--xs field--raised"><samp class="field-item dif h-2 mw-80"><input type="text" value="' . $locale .'"></samp></label>';
 
     $options[$language['locale']] = [
         'content'     => "{$language['name']} - {$language['native']}",
@@ -28,7 +28,7 @@ return Expansa\Builders\Form::enqueue(
     'multilingual-settings',
     [
         'class'   => 'tab',
-        'u-data'  => sprintf("tab('%s')", Safe::prop($_GET['tab'] ?? 'general')),
+        'u-data'  => 'tab',
         '@change' => '$ajax.post("user/update")',
     ],
     [

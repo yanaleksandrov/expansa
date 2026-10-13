@@ -4,51 +4,44 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
+use App\Models\Option;
 use Expansa\Builders\Table;
+use Expansa\Facades\Extensions;
 
 final class Plugins extends Table
 {
+    /**
+     * Installed plugins, the active ones as listed in the "extensions.active" option.
+     *
+     * @return array<int, array<string, mixed>>
+     */
     public function data(): array
     {
-        return [
-            [
-                'title'           => 'Classic Editor 1 and very longadable pluginsnameand hello world',
-                'description'     => 'Customize WordPress with powerful, professional and intuitive fields.',
-                'screenshot'      => url('dashboard/assets/images/placeholder.svg'),
-                'author'          => [
-                    [
-                        'title' => 'Expansa Team',
-                        'href'  => 'https://core.com',
-                    ],
-                ],
-                'categories'      => [
-                    [
-                        'title' => 'Test category',
-                        'href'  => 'https://core.com',
-                    ],
-                ],
-                'installed'       => false,
-                'active'          => false,
-                'installations'   => '300k+ installations',
-                'date'            => '18 September, 2024',
-                'reviews'         => 23,
-                'rating'          => 4,
-                'expansa_version' => '2027.1',
-                'version'         => '1.3.5',
-            ],
-        ];
+        $active = (array) Option::get('extensions.active', []);
+
+        $rows = [];
+        foreach (Extensions::getInstalled('plugin') as $id => $plugin) {
+            $rows[] = [
+                'id'          => $id,
+                'title'       => $plugin->name,
+                'description' => $plugin->description,
+                'author'      => $plugin->author,
+                'image'       => url('dashboard/assets/images/placeholder.svg'),
+                'version'     => $plugin->version,
+                'active'      => in_array($id, $active, true),
+            ];
+        }
+
+        return $rows;
     }
 
     public function cells(): array
     {
         return [
-            $this->cell('cb')
-                ->title('<input type="checkbox" u-bind="trigger" />')
-                ->fixedWidth('1rem')
+            $this->cell('id')
+                ->title('<input type="checkbox" u-bind="trigger">')
+                ->fixedWidth('1.125rem')
                 ->view('cb'),
-            $this->cell('image')
-                ->fixedWidth('2.5rem')
-                ->view('image'),
             $this->cell('plugin')
                 ->title(t('Plugin'))
                 ->flexibleWidth('14rem')
@@ -64,6 +57,11 @@ final class Plugins extends Table
             $this->cell('active')
                 ->title(t('Activity'))
                 ->fixedWidth('4rem')
+                ->attributes([
+                    // a failed request turns the switch back
+                    '@change' => '$ajax.post($event.target.checked ? "extensions/activate" : "extensions/deactivate",'
+                        . ' {id: $event.target.value}).catch(() => $event.target.checked = !$event.target.checked)',
+                ])
                 ->view('toggle'),
         ];
     }
@@ -72,7 +70,7 @@ final class Plugins extends Table
     {
         return [
             'title'   => t('Plugins'),
-            'actions' => true,
+            'actions' => 'posts-actions',
             'filter'  => true,
         ];
     }
@@ -83,6 +81,12 @@ final class Plugins extends Table
             'icon'        => 'no-plugins',
             'title'       => t('No plugins installed yet'),
             'description' => t('You can upload them manually or install them from the repository.'),
+            'buttons'     => [
+                [
+                    'label' => t('Add New'),
+                    'url'   => url('/dashboard/plugins-install'),
+                ],
+            ],
         ];
     }
 }

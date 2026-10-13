@@ -67,6 +67,21 @@ check(
     $next->forget('plugins/buggy') && ! $next->forget('plugins/buggy') && ! isset($next->getQuarantined()['plugins/buggy']),
 );
 
+$plugin('idle', ['activate' => '$GLOBALS["activated"][] = "idle";', 'deactivate' => 'throw new RuntimeException("Cleanup failed");']);
+$installed = $next->getInstalled('plugin');
+check(
+    'Extensions list installed plugins without the quarantined and the broken ones',
+    array_keys($installed) === ['plugins/buggy', 'plugins/idle', 'plugins/throws', 'plugins/works'] && $installed['plugins/idle']->name === 'idle',
+);
+check('Extensions do not load listed plugins', count($next->get('plugin')) === 1);
+check(
+    'Extensions activate and deactivate one plugin by id',
+    $next->activate('plugins/idle') && $GLOBALS['activated'] === ['idle'] && ! $next->deactivate('plugins/idle'),
+);
+check('Extensions do not activate unknown ids', ! $next->activate('plugins/missing') && ! $next->activate('../etc'));
+$next->load(['plugins/idle', 'plugins/idle']);
+check('Extensions load a plugin read before once', count($next->get('plugin')) === 2);
+
 $plugin('hooked', source: "<?php\nfunction hooked_callback() { return strlen([]); }\n");
 require "{$root}plugins/hooked/index.php";
 $error = null;

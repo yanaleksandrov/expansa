@@ -1,12 +1,13 @@
 <?php
 /**
- * Account of a user for an administrator: status, devices, security log and actions; the data comes from
- * App\Dashboard\Pages\User. This template can be overridden by copying it to themes/yourtheme/dashboard/views/screens/user.php
+ * Administration of another account in its profile: status, devices, security log and actions; the data
+ * comes from App\Dashboard\Pages\Profile::admin().
+ *
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/user-admin.blade.php
  *
  * @var App\Models\User $user
  * @var string[]        $roles
  * @var bool            $isActive
- * @var bool            $isSelf
  * @var bool            $hasTwoFactor
  * @var bool            $canImpersonate
  * @var array[]         $sessions
@@ -14,17 +15,15 @@
  *
  * @package Expansa\Templates
  */
+defined('EX_PATH') || exit;
 ?>
-<div class="dg g-6 p-7 sm:p-5 mw-900" u-data>
-	<div class="dg g-1">
-		<h2>{{ $user->showname ?: $user->login }}</h2>
-		<div class="t-muted">
-			{{ $user->login }} · {{ $user->email }} · {{ implode(', ', $roles) ?: t('No role') }} ·
-			{{ $isActive ? t('Active') : t('Disabled') }}
-			@if($hasTwoFactor)
-				· {{ t('Two-factor authentication on') }}
-			@endif
-		</div>
+<div class="dg g-6 ga-4" u-data>
+	<div class="t-muted">
+		{{ $user->login }} · {{ $user->email }} · {{ implode(', ', $roles) ?: t('No role') }} ·
+		{{ $isActive ? t('Active') : t('Disabled') }}
+		@if($hasTwoFactor)
+			· {{ t('Two-factor authentication on') }}
+		@endif
 	</div>
 
 	<div class="dg g-2">
@@ -36,11 +35,9 @@
 					<input type="password" u-prop="adminPassword" autocomplete="current-password" placeholder="{{ t_attr('Your current password') }}">
 				</div>
 			</div>
-			@if(!$isSelf)
-				<button class="btn btn--outline {{ $isActive ? 't-red' : '' }}" type="button" @click="$ajax.post('user/admin-status', {id: {{ $user->id }}, active: {{ $isActive ? 0 : 1 }}, password: adminPassword})">
-					<i class="ph ph-power"></i> {{ $isActive ? t('Disable') : t('Turn On') }}
-				</button>
-			@endif
+			<button class="btn btn--outline {{ $isActive ? 't-red' : '' }}" type="button" @click="$ajax.post('user/admin-status', {id: {{ $user->id }}, active: {{ $isActive ? 0 : 1 }}, password: adminPassword})">
+				<i class="ph ph-power"></i> {{ $isActive ? t('Disable') : t('Turn On') }}
+			</button>
 			<button class="btn btn--outline" type="button" @click="$ajax.post('user/admin-sign-out', {id: {{ $user->id }}, password: adminPassword})">
 				<i class="ph ph-sign-out"></i> {{ t('Sign Out Everywhere') }}
 			</button>

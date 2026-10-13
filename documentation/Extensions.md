@@ -33,6 +33,18 @@ Extensions::configure(
 
 `root` — каталог с папками `plugins` и `themes`; id вида `plugins/<slug>` отсчитываются от него, другие id игнорируются. `quarantine` — JSON-файл карантина, без него сбои изолируются только в текущем запросе. `failed` получает id и ошибку каждого сбоя.
 
+## Установленные и активные
+
+Пакет не хранит, какие расширения активны: список id передаёт приложение. В Expansa это опция `extensions.active`, её читает `bootstrap.php` и меняет `App\Api\Extensions\ExtensionsService` (эндпоинты `extensions/activate` и `extensions/deactivate` с `id` в теле, право `plugins_activate`).
+
+```php
+Extensions::getInstalled('plugin'); // ['plugins/seo' => Plugin, ...] — все из папки plugins, кроме карантина
+Extensions::activate('plugins/seo');   // вызвать activate(); false — нет такого расширения или метод бросил
+Extensions::deactivate('plugins/seo'); // то же для deactivate(); также install() и uninstall()
+```
+
+`getInstalled()` только создаёт объекты неактивных расширений ради метаданных: `register()` и `boot()` не вызываются, поэтому конструктор плагина не должен иметь побочных эффектов. Каждый файл подключается один раз за запрос, `load()` и `getInstalled()` делят один объект.
+
 ## Изоляция сбоев
 
 Сломанный плагин не должен ронять сайт — особенно сгенерированный пользователем без программиста (см. [Ai.md](Ai.md)). Поэтому код каждого расширения выполняется под защитой:

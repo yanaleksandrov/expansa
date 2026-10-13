@@ -1,25 +1,15 @@
 <?php
-
-use Expansa\Facades\Safe;
-use Expansa\Support\Arr;
-
 /**
- * Table raw text cell
+ * Value as plain text.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-raw.blade.php
+ *
+ * @var Expansa\Builders\Table\Cell $cell
+ * @var array<string, mixed>        $item
+ * @var mixed                       $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-[$prop, $attributes, $source, $value] = Safe::data(
-    $__data ?? [],
-    [
-        'key'        => 'prop',
-        'attributes' => 'array',
-        'source'     => 'trim',
-        'value'      => 'trim',
-    ]
-)->values();
 ?>
-{{ $__data[$prop] ?? '' }}
+{{ is_scalar($value) ? $value : '' }}

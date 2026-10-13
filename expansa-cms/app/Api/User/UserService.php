@@ -8,6 +8,7 @@ use App\Models\Option;
 use App\Models\User;
 use App\Support\Passwords;
 use Expansa\Auth\Exceptions\TooManyAttempts;
+use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
 use Expansa\Facades\Log;
@@ -18,6 +19,7 @@ use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Error;
+use Expansa\Support\Hash;
 use Throwable;
 
 final class UserService
@@ -33,24 +35,39 @@ final class UserService
     private const array PROFILE_FIELDS = ['nicename', 'firstname', 'lastname', 'showname', 'locale', 'email'];
 
     /**
-     * Update the profile of the current user. A new email needs a recent confirmation (see Confirmation:
-     * whoever holds the cookie must not take the account over by its email) and replaces the old one only
-     * after its link is opened, see Verification::changeEmail().
+     * Update the profile of the current user, or of another one by `id` with the `users_edit` permission.
+     * A new email of their own needs a recent confirmation (see Confirmation: whoever holds the cookie
+     * must not take the account over by its email) and replaces the old one only after its link is
+     * opened, see Verification::changeEmail(); an administrator changes the email of another account at once.
      *
-     * @param Request  $request  Profile fields and the custom fields `bio`, `toolbar`, `format`.
+     * @param Request  $request  `id`, profile fields and the custom fields `bio`, `toolbar`, `format`.
      * @param Response $response
      * @return Response Notice.
      * @throws ValidationFailed When the new email is taken.
      */
     public function update(Request $request, Response $response): Response
     {
-        $user  = User::current();
+        $current = User::current();
+        $user    = $current;
+        $id      = (int) ($request->post['id'] ?? 0);
+        if ($id !== 0 && $id !== $current->id) {
+            if (! Access::allows($current, 'users_edit')) {
+                return $response->notify(t('Sorry, you are not allowed to edit this user.'));
+            }
+
+            $user = Admin::find($id);
+            if ($user === null) {
+                return $response->notify(t('User not found'));
+            }
+        }
+
         $data  = array_intersect_key($request->post, array_flip(self::PROFILE_FIELDS));
         $email = Safe::email($data['email'] ?? $user->email);
         unset($data['email']);
 
+        $isSelf     = $user === $current;
         $isNewEmail = $email !== '' && mb_strtolower($email) !== mb_strtolower($user->email);
-        if ($isNewEmail && ! Confirmation::check($user)) {
+        if ($isNewEmail && $isSelf && ! Confirmation::check($user)) {
             return $response->notify(t('To change the email, confirm it is you in the Security tab first.'));
         }
 
@@ -58,12 +75,7 @@ final class UserService
             throw ValidationFailed::field('email', t('Sorry, that email address is already in use.'));
         }
 
-        $fields = Safe::data($request->post, [
-            'bio'     => 'trim',
-            'toolbar' => 'bool',
-            'format'  => 'text',
-        ])->apply();
-
+        $fields  = $this->customFields($request);
         $updated = $user->update($data);
         if (! $updated instanceof User) {
             return $response->notify(t('Could not update the profile. Please try again.'));
@@ -73,7 +85,9 @@ final class UserService
             $updated->field->update($key, $value);
         }
 
-        if ($isNewEmail) {
+        if ($isNewEmail && ! $isSelf) {
+            Admin::changeEmail($current, $updated, $email);
+        } elseif ($isNewEmail) {
             Verification::changeEmail($updated, $email);
 
             return $response->notify(t('User updated. Open the link we have sent to :email to change the email.', $email));
@@ -566,6 +580,47 @@ final class UserService
     }
 
     /**
+     * Administrator: create an account from the profile form, verified at once. Without a password the
+     * account gets a random one and the user an email link to set their own.
+     *
+     * @param Request  $request  `login`, `role`, `password`, profile fields and the custom fields `bio`, `toolbar`, `format`.
+     * @param Response $response
+     * @return Response Notice and redirect to the profile of the account.
+     * @throws ValidationFailed With the fields that are refused.
+     */
+    public function create(Request $request, Response $response): Response
+    {
+        $data     = array_intersect_key($request->post, array_flip(['login', 'role', ...self::PROFILE_FIELDS]));
+        $password = trim((string) ($request->post['password'] ?? ''));
+        if ($password !== '') {
+            $refusal = Passwords::check($password, [(string) ($data['login'] ?? ''), (string) ($data['email'] ?? '')]);
+            if ($refusal !== null) {
+                throw ValidationFailed::field('password', $refusal);
+            }
+        }
+
+        $user = User::create([...$data, 'password' => $password ?: Hash::generate(32), 'is_verified' => true]);
+        if ($user instanceof Error) {
+            throw ValidationFailed::from($user, t('Could not create the account. Check the fields.'));
+        }
+
+        foreach ($this->customFields($request) as $key => $value) {
+            $user->field->update($key, $value);
+        }
+
+        Events::record($user, 'account_created', ['by' => User::current()?->login]);
+        if ($password === '') {
+            $this->requestPasswordReset($user);
+        }
+
+        return $response
+            ->notify($password === ''
+                ? t('User added. A link to set the password has been sent to :email.', $user->email)
+                : t('User added'))
+            ->redirect(url('dashboard/profile?id=' . $user->id), 1200);
+    }
+
+    /**
      * Administrator: turn an account on or off, after a confirmation.
      *
      * @param Request  $request  `id`, `active`, may carry the current `password`.
@@ -831,6 +886,21 @@ final class UserService
         return $response
             ->notify($action($admin, $user))
             ->reload(1200);
+    }
+
+    /**
+     * Custom fields of the profile form.
+     *
+     * @param Request $request
+     * @return array{bio?: string, toolbar?: bool, format?: string}
+     */
+    private function customFields(Request $request): array
+    {
+        return Safe::data($request->post, [
+            'bio'     => 'trim',
+            'toolbar' => 'bool',
+            'format'  => 'text',
+        ])->apply();
     }
 
     /**

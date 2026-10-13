@@ -1,20 +1,17 @@
 <?php
-
-use Expansa\Facades\Safe;
-
 /**
- * Table title with actions cell
+ * Editable value: a textarea named `{key}[{id}]` by the row id.
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-text.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/cell-text.blade.php
+ *
+ * @var Expansa\Builders\Table\Cell $cell
+ * @var array<string, mixed>        $item
+ * @var mixed                       $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-$class = Safe::class($__data['key'] ?? [] );
-$prop  = Safe::prop($__data['key'] ?? [] );
-$value = Safe::trim($__data['value'] ?? '' );
 ?>
-<label class="<?php echo $class; ?>">
-    <textarea :name="`items[${i}]`" u-text="item.<?php echo $prop; ?>" rows="1" u-textarea="7"></textarea>
+<label class="db">
+    <textarea name="{{ $cell->key }}[{{ $item['id'] ?? '' }}]" rows="1" u-textarea="7">{{ is_scalar($value) ? $value : '' }}</textarea>
 </label>
