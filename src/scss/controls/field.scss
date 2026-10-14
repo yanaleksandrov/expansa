@@ -49,7 +49,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
   }
 
   &-instruction {
-    line-height: 1.2em;
+    line-height: 1.3;
     font-size: 0.92857142857em;
     min-width: 8rem;
     color: var(--expansa-text-muted);
@@ -57,7 +57,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
   }
 
   &-error {
-    line-height: 1.2em;
+    line-height: 1.3;
     font-size: 0.92857142857em;
     color: var(--expansa-danger);
 

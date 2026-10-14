@@ -37,7 +37,7 @@
   gap: 0.75rem;
 }
 .confirm-email-bottom a {
-  line-height: 1.2em;
+  line-height: 1.3;
   font-size: 0.9285714286em;
   color: var(--expansa-text-muted);
   text-decoration: underline;
@@ -58,7 +58,7 @@
   margin-top: 0.125rem;
 }
 .confirm-email-instruction {
-  line-height: 1.2em;
+  line-height: 1.3;
   font-size: 0.9285714286em;
   color: var(--expansa-text-muted);
   font-weight: 400;
@@ -898,14 +898,14 @@ input[type=radio]:checked {
   order: 1;
 }
 .field-instruction {
-  line-height: 1.2em;
+  line-height: 1.3;
   font-size: 0.9285714286em;
   min-width: 8rem;
   color: var(--expansa-text-muted);
   font-weight: 400;
 }
 .field-error {
-  line-height: 1.2em;
+  line-height: 1.3;
   font-size: 0.9285714286em;
   color: var(--expansa-danger);
   margin-top: -0.875rem;
