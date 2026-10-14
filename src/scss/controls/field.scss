@@ -32,6 +32,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     align-items: center;
     font-weight: 500;
     line-height: 1.35em;
+    justify-content: space-between;
 
     &[data-required] {
 
