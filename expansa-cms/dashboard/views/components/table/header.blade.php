@@ -150,9 +150,6 @@ $progress = static fn (string $name) => [
     @if ($actions)
         <div class="table-header-group" u-show="bulk" hidden>
             <?php echo form($actions); ?>
-            <button type="button" class="btn t-red" u-bind="reset">
-                <i class="ph ph-trash"></i> {{ t('Reset') }}
-            </button>
         </div>
     @endif
 </div>

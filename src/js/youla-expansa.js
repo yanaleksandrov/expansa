@@ -593,9 +593,6 @@ document.addEventListener('youla:init', ()=> {
             item: {
                 '@click': 'selectItem($el, $root, $event)',
             },
-            reset: {
-                '@click': 'resetAll($root)',
-            },
             items(root) {
                 return [...root.querySelectorAll('[u-bind~="item"]')];
             },
@@ -625,6 +622,10 @@ document.addEventListener('youla:init', ()=> {
             },
             activeFilters() {
                 return this.rows.filter(row => row.values.length);
+            },
+            // Every field has a filter with values, so there is nothing to add.
+            isFullyFiltered() {
+                return Object.keys(this.fields).every(field => this.rows.some(row => row.field === field && row.values.length));
             },
             isFirstActive(index) {
                 return this.rows.findIndex(row => row.values.length) === index;
