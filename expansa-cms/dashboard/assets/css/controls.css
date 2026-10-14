@@ -309,7 +309,8 @@ select[multiple] + .ss-main {
   display: inline-flex;
   flex: 1 1 100%;
   flex-wrap: wrap;
-  gap: 3px;
+  gap: 2px;
+  height: inherit;
 }
 .ss-main .ss-placeholder {
   display: flex;

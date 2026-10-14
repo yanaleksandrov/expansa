@@ -158,9 +158,10 @@ $progress = static fn (string $name) => [
 </div>
 
 @if ($filters)
+    <?php $popover = 'table-filter-' . bin2hex(random_bytes(4)); ?>
     <div class="table-header">
-        <?php echo view('components/table/filter', ['filters' => $filters]); ?>
-        <?php echo view('components/table/filter-chips'); ?>
+        <?php echo view('components/table/filter', ['filters' => $filters, 'popover' => $popover]); ?>
+        <?php echo view('components/table/filter-chips', ['popover' => $popover]); ?>
     </div>
 @endif
 

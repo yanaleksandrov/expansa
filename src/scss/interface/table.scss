@@ -206,18 +206,64 @@
   gap: 0.5rem;
 }
 
-.table-filter {
-  > summary .badge {
-    color: var(--expansa-text-white);
-    background-color: var(--expansa-primary);
+.table-filter-toggle .badge {
+  color: var(--expansa-text-white);
+  background-color: var(--expansa-primary);
+}
+
+.table-filter-content,
+.table-filter-values {
+  inset: auto;
+  margin: 0.125rem 0 0;
+  color: inherit;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  background-color: var(--expansa-bg-white);
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius--lg);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  box-shadow: var(--expansa-box-shadow);
+  overflow: visible;
+  position-area: bottom span-left;
+  position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+
+  &:popover-open {
+    display: grid;
+    animation: contextMenu 0.3s cubic-bezier(0, 0.1, 0.1, 1) backwards;
+  }
+
+  // without anchor positioning the popover is centered on the screen
+  @supports not (position-area: bottom) {
+    inset: 0;
+    margin: auto;
   }
 }
 
 .table-filter-content {
-  display: grid;
   gap: 0.75rem;
   width: min(36rem, calc(100vw - 2rem));
   padding: 0.75rem;
+}
+
+.table-filter-values {
+  min-width: 12rem;
+  max-height: 18rem;
+  padding: 0.25rem;
+  overflow: auto;
+  position-area: bottom span-right;
+}
+
+.table-filter-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border-radius: var(--expansa-border-radius);
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--expansa-bg);
+  }
 }
 
 .table-filter-head,
@@ -284,6 +330,7 @@
   }
 }
 
+.table-filter-chip-list,
 .table-filter-chip-wrap {
   display: contents;
 }
@@ -304,7 +351,8 @@
     font-weight: 500;
   }
 
-  button {
+  &-edit,
+  &-remove {
     display: inline-flex;
     padding: 0.25rem;
     color: inherit;
@@ -313,10 +361,21 @@
     border: 0;
     border-radius: var(--expansa-border-radius);
     cursor: pointer;
+    height: auto;
+  }
 
-    &:hover {
-      color: var(--expansa-danger);
+  &-edit {
+    gap: 0.375rem;
+    align-items: center;
+    padding-inline: 0;
+
+    &:hover strong {
+      color: var(--expansa-primary);
     }
+  }
+
+  &-remove:hover {
+    color: var(--expansa-danger);
   }
 }
 

@@ -1317,5 +1317,6 @@
     "Remove filter": "Удалить фильтр",
     "Add filter:": "Добавить фильтр:",
     ":count selected": "Выбрано: :count",
-    "No items match the filter.": "Нет записей, подходящих под фильтр."
+    "No items match the filter.": "Нет записей, подходящих под фильтр.",
+    "Add": "Добавить"
 }

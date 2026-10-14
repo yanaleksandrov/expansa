@@ -20,7 +20,7 @@ $isAscending = $isSorted && ($_GET['order'] ?? '') === 'asc';
 @if ($cell->sortable)
     <a class="{{ $cell->key }} df aic g-1" href="?{{ http_build_query([...$_GET, 'orderby' => $cell->key, 'order' => $isAscending ? 'desc' : 'asc']) }}">
         {!! $cell->title !!}
-        <i class="ph {{ $isSorted ? ($isAscending ? 'ph-sort-ascending' : 'ph-sort-descending') : 'ph-arrows-down-up' }}"></i>
+        <i class="ph {{ $isSorted ? ($isAscending ? 'ph-sort-ascending' : 'ph-sort-descending') : '' }}"></i>
     </a>
 @else
     <div class="{{ $cell->key }} df aic g-1">

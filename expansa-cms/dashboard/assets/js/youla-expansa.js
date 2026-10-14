@@ -477,6 +477,7 @@ document.addEventListener('youla:init', () => {
         return {
             fields: parse(root.dataset.fields, {}),
             rows: parse(root.dataset.rows, []),
+            editing: null,
             anchor: null,
             bulk: 0,
             trigger: {
@@ -569,6 +570,22 @@ document.addEventListener('youla:init', () => {
             filterOptions(row) {
                 const options = this.fields[row.field]?.options || {};
                 return Object.entries(options).map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
+            },
+            filterChoices(index) {
+                const row = this.rows[index];
+                const options = this.fields[row?.field]?.options || {};
+                return Object.entries(options).map(([value, label]) => `<label class="table-filter-choice"><input type="checkbox" value="${escapeHtml(value)}"${row.values.includes(value) ? ' checked' : ''}> ${escapeHtml(label)}</label>`).join('');
+            },
+            toggleFilterValue(input) {
+                const row = this.rows[this.editing];
+                if (!row || input.type !== 'checkbox') {
+                    return;
+                }
+                row.values = input.checked ? [ ...row.values, input.value ] : row.values.filter(value => value !== input.value);
+                if (!row.values.length) {
+                    input.closest('[popover]')?.hidePopover();
+                }
+                this.applyFilters();
             },
             filterLabels(row, selected) {
                 const options = this.fields[row.field]?.options || {};
