@@ -1294,6 +1294,50 @@ option[data-html*="<i "]) {
 .field-item:has([type=radio]):has(.field-icon) [type=radio] {
   order: 2;
 }
+.field:has(.field-box) {
+  display: flex;
+  gap: 1rem;
+}
+.field:has(.field-box) .field-box {
+  display: grid;
+  gap: 0.25em;
+}
+.field:has(.field-box) .field-buttons {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  height: -moz-fit-content;
+  height: fit-content;
+  background-color: var(--expansa-bg-universal);
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+}
+.field:has(.field-box) .field-buttons input[type=radio] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.field:has(.field-box) .field-buttons .field-buttons-item {
+  white-space: nowrap;
+  height: calc(2rem - 4px);
+  padding: 0.375em 0.75em;
+  border-radius: calc(var(--expansa-border-radius) - 2px);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  color: var(--expansa-text-muted);
+  transition: all 0.25s;
+}
+.field:has(.field-box) .field-buttons .field-buttons-item:hover {
+  color: var(--expansa-text);
+}
+.field:has(.field-box) .field-buttons .field-buttons-item:has(> input:checked) {
+  color: var(--expansa-text);
+  box-shadow: var(--expansa-box-shadow);
+  background-color: var(--expansa-bg-white);
+}
 .field--button {
   display: flex;
   flex-wrap: wrap;

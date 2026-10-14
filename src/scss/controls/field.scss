@@ -477,6 +477,54 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     }
   }
 
+  &:has(.field-box) {
+    display: flex;
+    gap: 1rem;
+
+    .field-box {
+      display: grid;
+      gap: 0.25em;
+    }
+
+    .field-buttons {
+      display: flex;
+      gap: 2px;
+      padding: 2px;
+      height: fit-content;
+      background-color: var(--expansa-bg-universal);
+      border: 1px solid var(--expansa-border);
+      border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+
+      input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .field-buttons-item {
+        white-space: nowrap;
+        height: calc(2rem - 4px);
+        padding: 0.375em 0.75em;
+        border-radius: calc(var(--expansa-border-radius) - 2px);
+        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+        user-select: none;
+        color: var(--expansa-text-muted);
+        transition: all 0.25s;
+
+        &:hover {
+          color: var(--expansa-text);
+        }
+
+        &:has(> input:checked) {
+          color: var(--expansa-text);
+          box-shadow: var(--expansa-box-shadow);
+          background-color: var(--expansa-bg-white);
+        }
+      }
+    }
+  }
+
   &--button {
     display: flex;
     flex-wrap: wrap;

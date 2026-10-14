@@ -186,7 +186,7 @@ return Form::enqueue(
                             'options'     => $convert_options,
                         ],
                         [
-                            'type'        => 'button-group',
+                            'type'        => 'buttons',
                             'name'        => 'images[convert_existing]',
                             'label'       => t('Convert Existing Images'),
                             'class'       => '',
@@ -519,7 +519,7 @@ return Form::enqueue(
                             ],
                         ],
                         [
-                            'type'        => 'button-group',
+                            'type'        => 'buttons',
                             'name'        => 'images[cleanup_actions]',
                             'label'       => t('Cleanup'),
                             'class'       => '',
@@ -556,7 +556,7 @@ return Form::enqueue(
                     'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
-                            'type'        => 'button-group',
+                            'type'        => 'buttons',
                             'name'        => 'images[check_actions]',
                             'label'       => '',
                             'class'       => '',
@@ -593,7 +593,7 @@ return Form::enqueue(
                     'content_class' => 'dg ga-4 g-6 gtc-1',
                     'fields'        => [
                         [
-                            'type'        => 'button-group',
+                            'type'        => 'buttons',
                             'name'        => 'images[merge_duplicates]',
                             'label'       => t('Merge Duplicate Files'),
                             'class'       => '',

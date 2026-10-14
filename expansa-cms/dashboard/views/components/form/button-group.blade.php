@@ -12,42 +12,42 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 
-// an option is a button: `content`, `icon`, `class` and `attributes` with its action
-$buttons = [];
-foreach ($field->options as $option) {
-    $buttons[] = [
-        'content'    => Safe::trim($option['content'] ?? ''),
-        'icon'       => Safe::attribute($option['icon'] ?? ''),
+// an option is `value => label`, the radio of the current value is checked
+$radios = [];
+foreach ($field->options as $value => $label) {
+    $radios[] = [
+        'label'      => Safe::trim($label),
         'attributes' => [
-            'type'  => 'button',
-            'class' => Safe::attribute($option['class'] ?? 'btn btn--outline'),
-            ...Safe::array($option['attributes'] ?? []),
+            ...$field->attributes,
+            'type'    => 'radio',
+            'value'   => Safe::attribute($value),
+            'name'    => $field->name,
+            'u-prop'  => Safe::prop($field->name),
+            'checked' => (string) $value === (string) ($field->attributes['value'] ?? ''),
         ],
     ];
 }
 ?>
 <div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
-	@if($field->label)
-		<div class="{{ $field->label_class ?: 'field-label' }}">
-			{!! $field->label !!}
-			@if($field->tooltip)
-				<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
-			@endif
-		</div>
-	@endif
-	{!! $field->before !!}
-	<div class="df fww g-2">
-		@foreach($buttons as $button)
-			<button{!! Arr::toHtmlAttributes($button['attributes']) !!}>
-				@if($button['icon'])
-					<i class="{!! $button['icon'] !!}"></i>
+	<div class="field-box">
+		@if($field->label)
+			<div class="{{ $field->label_class ?: 'field-label' }}">
+				{!! $field->label !!}
+				@if($field->tooltip)
+					<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 				@endif
-				{!! $button['content'] !!}
-			</button>
+			</div>
+		@endif
+		@if($field->instruction)
+			<div class="field-instruction">{!! $field->instruction !!}</div>
+		@endif
+	</div>
+	<div class="field-buttons">
+		@foreach($radios as $radio)
+			<label class="field-buttons-item">
+				<input{!! Arr::toHtmlAttributes($radio['attributes']) !!}>
+				{!! $radio['label'] !!}
+			</label>
 		@endforeach
 	</div>
-	{!! $field->after !!}
-	@if($field->instruction)
-		<div class="field-instruction">{!! $field->instruction !!}</div>
-	@endif
 </div>
