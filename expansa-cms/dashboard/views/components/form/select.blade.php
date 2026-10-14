@@ -21,7 +21,7 @@ unset($attributes['value']);
 $toOption = function (int|string $key, mixed $option) use ($value): array {
     $attributes = [
         'value'    => trim((string) $key),
-        'selected' => $key === $value,
+        'selected' => (string) $key === $value,
     ];
 
     if (is_array($option)) {
