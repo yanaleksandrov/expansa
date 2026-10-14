@@ -1306,5 +1306,16 @@
     "Nothing matches the filter.": "Под фильтр ничего не подходит.",
     "Show All Comments": "Показать все комментарии",
     "Emails the site sends are made from these templates.": "Письма, которые отправляет сайт, собираются из этих шаблонов.",
-    "Add Email Template": "Добавить шаблон письма"
+    "Add Email Template": "Добавить шаблон письма",
+    "Filters": "Фильтры",
+    "Clear all": "Очистить все",
+    "No filters applied. Combine filters to narrow the list, e.g. Status is Draft and Author is you.": "Фильтры не заданы. Сочетайте их, чтобы сузить список, например: статус — черновик и автор — вы.",
+    "and": "и",
+    "Where": "Где",
+    "is": "равно",
+    "is not": "не равно",
+    "Remove filter": "Удалить фильтр",
+    "Add filter:": "Добавить фильтр:",
+    ":count selected": "Выбрано: :count",
+    "No items match the filter.": "Нет записей, подходящих под фильтр."
 }

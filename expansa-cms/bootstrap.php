@@ -660,6 +660,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
                 App\Api\Options\OptionsController::class,
                 App\Api\Post\PostController::class,
                 App\Api\Posts\PostsController::class,
+                App\Api\Tables\TablesController::class,
                 App\Api\Translations\TranslationsController::class,
                 App\Api\User\UserController::class,
             ] as $class

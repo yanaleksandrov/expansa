@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use App\Models\User;
-use Expansa\Builders\Form;
+use App\Post\Status;
 use Expansa\Builders\Table;
 
 final class Pages extends Table
@@ -17,7 +17,8 @@ final class Pages extends Table
                 'id'         => 1,
                 'image'      => url('dashboard/assets/images/placeholder.svg'),
                 'title'      => 'Post title',
-                'status'     => t('Draft'),
+                'status'     => 'draft',
+                'author_id'  => 1,
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
                 'date'       => '24 august 2024',
@@ -61,7 +62,22 @@ final class Pages extends Table
         return [
             'title'   => t('Pages'),
             'actions' => 'posts-actions',
-            'filter'  => true,
+        ];
+    }
+
+    public function filters(): array
+    {
+        return [
+            'status'    => [
+                'label'   => t('Status'),
+                'icon'    => 'ph ph-circle-dashed',
+                'options' => Status::getStatuses(),
+            ],
+            'author_id' => [
+                'label'   => t('Author'),
+                'icon'    => 'ph ph-user',
+                'options' => User::options(),
+            ],
         ];
     }
 
@@ -77,53 +93,5 @@ final class Pages extends Table
                 ],
             ],
         ];
-    }
-
-    public function filter(): void
-    {
-        Form::override('items-filter', static fn (Form $form) => $form->before(
-            'submit',
-            [
-                [
-                    'type'        => 'select',
-                    'name'        => 'authors',
-                    'error'       => 'authors',
-                    'label'       => '',
-                    'class'       => 'field field--sm field--raised',
-                    'label_class' => '',
-                    'reset'       => 0,
-                    'before'      => '',
-                    'after'       => '',
-                    'instruction' => '',
-                    'tooltip'     => '',
-                    'copy'        => 0,
-                    'validator'   => '',
-                    'conditions'  => [],
-                    'attributes'  => [ 'u-prop' => 'authors' ],
-                    'options'     => ['' => t('Select an author')] + User::options(),
-                ],
-                [
-                    'type'        => 'date',
-                    'name'        => 'date',
-                    'error'       => 'date',
-                    'label'       => '',
-                    'class'       => 'field field--sm field--raised',
-                    'label_class' => '',
-                    'reset'       => 0,
-                    'before'      => '',
-                    'after'       => '',
-                    'instruction' => '',
-                    'tooltip'     => '',
-                    'copy'        => 0,
-                    'validator'   => '',
-                    'conditions'  => [],
-                    'attributes'  => [
-                        'u-prop'      => 'date',
-                        'readonly'    => true,
-                        'placeholder' => t('Select dates'),
-                    ],
-                ],
-            ],
-        ));
     }
 }

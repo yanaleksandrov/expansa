@@ -18,12 +18,13 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $content, $uploader, $filter, $actions, $search, $translation, $project, $create, $link] = Safe::data($__data ?? [], [
+[$title, $badge, $content, $uploader, $filter, $filters, $actions, $search, $translation, $project, $create, $link] = Safe::data($__data ?? [], [
     'title'       => 'trim',
     'badge'       => 'trim',
     'content'     => 'trim',
     'uploader'    => 'bool:false',
     'filter'      => 'bool:false',
+    'filters'     => 'array',
     'actions'     => 'trim',
     'search'      => 'trim',
     'translation' => 'bool:false',
@@ -65,10 +66,6 @@ $progress = static fn (string $name) => [
 
     <div class="table-header-group" u-show="!bulk">
         @if ($filter)
-            <button class="btn btn--outline" type="reset" form="expansa-items-filter" @click="showFilter = !showFilter" :class="showFilter && 't-red'" :title="showFilter ? '{{ t('Reset filter') }}' : '{{ t('Filter') }}'">
-                <i class="ph ph-funnel" :class="showFilter ? 'ph-funnel-x' : 'ph-funnel'"></i>
-                <span u-text="showFilter ? '{{ t('Reset') }}' : '{{ t('Filter') }}'">{{ t('Filter') }}</span>
-            </button>
             <?php
             echo Form::view('number', [
                 'type'       => 'number',
@@ -159,4 +156,12 @@ $progress = static fn (string $name) => [
         </div>
     @endif
 </div>
+
+@if ($filters)
+    <div class="table-header">
+        <?php echo view('components/table/filter', ['filters' => $filters]); ?>
+        <?php echo view('components/table/filter-chips'); ?>
+    </div>
+@endif
+
 {!! $content !!}

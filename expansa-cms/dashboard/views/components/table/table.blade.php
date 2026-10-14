@@ -1,10 +1,8 @@
 <?php
 
-use Expansa\Support\Arr;
-
 /**
  * Table with the header, the column titles and a row per item, each cell rendered by the view
- * of its column; the not found state without items.
+ * of its column; the not found state without items, unless the filter left them out.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/components/table/table.blade.php
  *
@@ -15,13 +13,15 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 
-$items = $table->getData();
+$items   = $table->getData();
+$active  = $table->activeFilters();
+$filters = $table->filters();
 ?>
-@if ($items)
-<div class="table" u-data="table" style="{{ $table->style }}">
+@if ($items || $active)
+<div class="table" u-data="table" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
     <div class="table-head">
         @if ($header ?? true)
-            <?php echo view('components/table/header', $table->headData()); ?>
+            <?php echo view('components/table/header', [...$table->headData(), 'filters' => $filters]); ?>
         @endif
         <div class="table-head-data">
             @foreach ($table->cells as $cell)
@@ -30,27 +30,7 @@ $items = $table->getData();
         </div>
     </div>
     <div class="table-body">
-        @foreach ($items as $item)
-            <div class="table-row">
-                @foreach ($table->cells as $cell)
-                    <div{!! Arr::toHtmlAttributes(['class' => "table-cell table-cell--$cell->key", ...$cell->attributes]) !!}>
-                        <?php
-                        echo view(
-                            $cell->view,
-                            [
-                                'cell'  => $cell,
-                                'item'  => $item,
-                                'value' => $item[$cell->key] ?? null
-                            ]
-                        );
-                        ?>
-                    </div>
-                @endforeach
-            </div>
-            <div class="table-row-data">
-                Additional data
-            </div>
-        @endforeach
+        <?php echo view('components/table/body', ['table' => $table]); ?>
     </div>
 </div>
 @else
