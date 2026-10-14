@@ -1107,7 +1107,6 @@ option[data-html*="<i "]) {
 }
 .field-item:has(> select:not([multiple]):first-child + .ss-main:last-child) > .ss-main {
   position: absolute;
-  inset: -1px 0;
   height: auto;
   align-items: flex-start;
   padding-block: 0.325rem;

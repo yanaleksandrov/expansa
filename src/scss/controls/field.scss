@@ -247,7 +247,6 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       // the box, the text and the arrow of the select, which is as tall as the field with its border
       > .ss-main {
         position: absolute;
-        inset: -1px 0;
         height: auto;
         align-items: flex-start;
         padding-block: 0.325rem;
