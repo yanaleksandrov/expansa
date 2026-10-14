@@ -1,0 +1,212 @@
+// example folder layout under the "File Organization" setting
+.storage-tree {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 1rem;
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius--sm);
+  background-color: var(--expansa-bg-universal);
+
+  .storage-tree-list,
+  .storage-tree-list ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .storage-tree-list {
+    font-family: var(--expansa-font-code);
+    font-size: .8125rem;
+    line-height: 1.75;
+  }
+
+  .storage-tree-list ul {
+    margin-inline-start: .45rem;
+    padding-inline-start: 1rem;
+    border-inline-start: 1px dashed var(--expansa-border);
+  }
+
+  .ph-folder-open {
+    color: var(--expansa-warning);
+  }
+
+  .ph-file-image {
+    color: var(--expansa-text-muted);
+  }
+
+  .storage-tree-note {
+    margin: 0;
+    font-size: .8125rem;
+    color: var(--expansa-text-muted);
+  }
+}
+
+// file size curve of the `image-quality` field, the plot itself is the range control
+.quality-chart {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  padding: 0.675rem 1rem;
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius--sm);
+  background-color: var(--expansa-bg-universal);
+  font-size: 0.92857142857em;
+  line-height: 1.2em;
+
+  .quality-chart-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  // the margins leave room for the axis labels around the plot
+  .quality-chart-plot {
+    position: relative;
+    height: 7rem;
+    margin: 0.5rem 0 2.25rem 2.75rem;
+    border-inline-start: 1px solid var(--expansa-text-muted);
+    border-bottom: 1px solid var(--expansa-text-muted);
+    background: linear-gradient(var(--expansa-border), var(--expansa-border)) 0 50% / 100% 1px no-repeat;
+
+    svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+    }
+  }
+
+  .quality-chart-optimal {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background-color: var(--expansa-success);
+    opacity: .15;
+  }
+
+  .quality-chart-curve {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .quality-chart-y,
+  .quality-chart-x,
+  .quality-chart-title {
+    position: absolute;
+    white-space: nowrap;
+    color: var(--expansa-text-muted);
+  }
+
+  .quality-chart-y {
+    right: calc(100% + .5rem);
+    transform: translateY(-50%);
+  }
+
+  .quality-chart-x {
+    top: calc(100% + .25rem);
+    transform: translateX(-50%);
+  }
+
+  .quality-chart-title {
+    font-weight: 500;
+    top: calc(100% + 1.25rem);
+    right: 0;
+  }
+
+  // a dashed drop line from the point on the curve down to the axis
+  .quality-chart-marker {
+    position: absolute;
+    bottom: 0;
+    border-inline-start: 1px dashed currentColor;
+    pointer-events: none;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -.5px;
+      width: .625rem;
+      height: .625rem;
+      border: 2px solid currentColor;
+      border-radius: 50%;
+      background-color: var(--expansa-bg-white);
+      transform: translate(-50%, -50%);
+      transition: width .15s, height .15s;
+    }
+  }
+
+  .quality-chart-plot:hover .quality-chart-marker::before,
+  .quality-chart-range:focus-visible + .quality-chart-marker::before {
+    width: .875rem;
+    height: .875rem;
+  }
+
+  // the transparent range covers the plot, half a thumb wider on each side so its center matches the marker
+  .quality-chart-range {
+    --thumb: 16px;
+    position: absolute;
+    top: 0;
+    left: calc(var(--thumb) / -2);
+    width: calc(100% + var(--thumb));
+    height: 100%;
+    margin: 0;
+    background: transparent;
+    cursor: ew-resize;
+    appearance: none;
+
+    &::-webkit-slider-runnable-track {
+      height: 100%;
+      background: transparent;
+    }
+
+    &::-webkit-slider-thumb {
+      width: var(--thumb);
+      height: 100%;
+      background: transparent;
+      border: 0;
+      appearance: none;
+    }
+
+    &::-moz-range-track {
+      height: 100%;
+      background: transparent;
+    }
+
+    &::-moz-range-thumb {
+      width: var(--thumb);
+      height: 100%;
+      background: transparent;
+      border: 0;
+    }
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .quality-chart-note {
+    color: var(--expansa-text-muted);
+  }
+
+  .quality-chart-examples {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: .25rem .5rem .25rem 0;
+      text-align: start;
+    }
+
+    th {
+      font-weight: 500;
+      color: var(--expansa-text-muted);
+    }
+  }
+}

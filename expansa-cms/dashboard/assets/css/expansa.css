@@ -3086,6 +3086,189 @@ body.is-unsaved .expansa-search-btn {
   color: var(--expansa-danger);
 }
 
+.storage-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius--sm);
+  background-color: var(--expansa-bg-universal);
+}
+.storage-tree .storage-tree-list,
+.storage-tree .storage-tree-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.storage-tree .storage-tree-list {
+  font-family: var(--expansa-font-code);
+  font-size: 0.8125rem;
+  line-height: 1.75;
+}
+.storage-tree .storage-tree-list ul {
+  margin-inline-start: 0.45rem;
+  padding-inline-start: 1rem;
+  border-inline-start: 1px dashed var(--expansa-border);
+}
+.storage-tree .ph-folder-open {
+  color: var(--expansa-warning);
+}
+.storage-tree .ph-file-image {
+  color: var(--expansa-text-muted);
+}
+.storage-tree .storage-tree-note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--expansa-text-muted);
+}
+
+.quality-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.675rem 1rem;
+  border: 1px solid var(--expansa-border);
+  border-radius: var(--expansa-border-radius--sm);
+  background-color: var(--expansa-bg-universal);
+  font-size: 0.9285714286em;
+  line-height: 1.2em;
+}
+.quality-chart .quality-chart-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.quality-chart .quality-chart-plot {
+  position: relative;
+  height: 7rem;
+  margin: 0.5rem 0 2.25rem 2.75rem;
+  border-inline-start: 1px solid var(--expansa-text-muted);
+  border-bottom: 1px solid var(--expansa-text-muted);
+  background: linear-gradient(var(--expansa-border), var(--expansa-border)) 0 50%/100% 1px no-repeat;
+}
+.quality-chart .quality-chart-plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.quality-chart .quality-chart-optimal {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background-color: var(--expansa-success);
+  opacity: 0.15;
+}
+.quality-chart .quality-chart-curve {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.quality-chart .quality-chart-y,
+.quality-chart .quality-chart-x,
+.quality-chart .quality-chart-title {
+  position: absolute;
+  white-space: nowrap;
+  color: var(--expansa-text-muted);
+}
+.quality-chart .quality-chart-y {
+  right: calc(100% + 0.5rem);
+  transform: translateY(-50%);
+}
+.quality-chart .quality-chart-x {
+  top: calc(100% + 0.25rem);
+  transform: translateX(-50%);
+}
+.quality-chart .quality-chart-title {
+  font-weight: 500;
+  top: calc(100% + 1.25rem);
+  right: 0;
+}
+.quality-chart .quality-chart-marker {
+  position: absolute;
+  bottom: 0;
+  border-inline-start: 1px dashed currentColor;
+  pointer-events: none;
+}
+.quality-chart .quality-chart-marker::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -0.5px;
+  width: 0.625rem;
+  height: 0.625rem;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background-color: var(--expansa-bg-white);
+  transform: translate(-50%, -50%);
+  transition: width 0.15s, height 0.15s;
+}
+.quality-chart .quality-chart-plot:hover .quality-chart-marker::before,
+.quality-chart .quality-chart-range:focus-visible + .quality-chart-marker::before {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+.quality-chart .quality-chart-range {
+  --thumb: 16px;
+  position: absolute;
+  top: 0;
+  left: calc(var(--thumb) / -2);
+  width: calc(100% + var(--thumb));
+  height: 100%;
+  margin: 0;
+  background: transparent;
+  cursor: ew-resize;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+}
+.quality-chart .quality-chart-range::-webkit-slider-runnable-track {
+  height: 100%;
+  background: transparent;
+}
+.quality-chart .quality-chart-range::-webkit-slider-thumb {
+  width: var(--thumb);
+  height: 100%;
+  background: transparent;
+  border: 0;
+  -webkit-appearance: none;
+          appearance: none;
+}
+.quality-chart .quality-chart-range::-moz-range-track {
+  height: 100%;
+  background: transparent;
+}
+.quality-chart .quality-chart-range::-moz-range-thumb {
+  width: var(--thumb);
+  height: 100%;
+  background: transparent;
+  border: 0;
+}
+.quality-chart .quality-chart-range:focus {
+  outline: none;
+}
+.quality-chart .quality-chart-note {
+  color: var(--expansa-text-muted);
+}
+.quality-chart .quality-chart-examples {
+  width: 100%;
+  border-collapse: collapse;
+}
+.quality-chart .quality-chart-examples th,
+.quality-chart .quality-chart-examples td {
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  text-align: start;
+}
+.quality-chart .quality-chart-examples th {
+  font-weight: 500;
+  color: var(--expansa-text-muted);
+}
+
 @keyframes shake {
   0% {
     transform: translateX(0);

@@ -10,6 +10,7 @@
 @use 'interface/state';
 @use 'interface/updates';
 @use 'interface/site-health';
+@use 'interface/site-storage';
 
 @keyframes shake {
   0%    { transform: translateX(0); }
