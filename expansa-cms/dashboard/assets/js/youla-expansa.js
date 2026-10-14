@@ -515,9 +515,6 @@ document.addEventListener('youla:init', () => {
             activeFilters() {
                 return this.rows.filter(row => row.values.length);
             },
-            isFullyFiltered() {
-                return Object.keys(this.fields).every(field => this.rows.some(row => row.field === field && row.values.length));
-            },
             isFirstActive(index) {
                 return this.rows.findIndex(row => row.values.length) === index;
             },
