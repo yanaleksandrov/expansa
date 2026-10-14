@@ -379,7 +379,7 @@
   padding: 0.1em 0.5em;
   min-width: #{calc(30/16)}em;
   height: #{calc(30/16)}em;
-  font-size: #{calc(14/16)}em;
+  font-size: #{calc(14/16)}em !important;
   gap: 0.25em;
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
