@@ -53,7 +53,7 @@ return Form::enqueue(
 							'label'         => '',
 							'class'         => 'post-editor-main',
 							'label_class'   => '',
-							'content_class' => 'dg',
+							'content_class' => '12',
 							'fields'        => [
 									[
 										'name'     => 'header',

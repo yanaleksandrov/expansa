@@ -2,19 +2,18 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  justify-content: center;
   container: post-editor / inline-size;
 
-  &-main {
-    flex: 1;
-    max-width: 48rem;
+  .post-editor-main {
+    width: 100%;
+    min-width: 40rem;
 
     @container post-editor (max-width: 768px) {
-      width: 100%;
+      min-width: 100%;
     }
   }
 
-  &-title {
+  .post-editor-title {
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -26,14 +25,14 @@
     }
   }
 
-  &-description {
+  .post-editor-description {
     line-height: 1.25em;
     color: var(--expansa-text-muted);
     margin-bottom: 1rem;
     padding-inline: 1rem;
   }
 
-  &-card {
+  .post-editor-card {
     display: grid;
     align-content: flex-start;
     gap: 0.75rem;
@@ -46,7 +45,7 @@
     box-shadow: var(--expansa-box-shadow);
   }
 
-  &-side {
+  .post-editor-side {
     width: 20rem;
     position: sticky;
     top: 4.125rem;
@@ -58,7 +57,7 @@
     }
   }
 
-  &-props {
+  .post-editor-props {
     display: grid;
     grid-template-columns: 7rem minmax(0, 1fr);
     row-gap: 2px;
@@ -92,7 +91,7 @@
   }
 
   // a value that looks like text until hovered, as an inline control of the props
-  &-pill {
+  .post-editor-pill {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
@@ -131,7 +130,7 @@
     }
   }
 
-  &-actions {
+  .post-editor-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -139,7 +138,7 @@
     border-top: 1px solid var(--expansa-border);
   }
 
-  &-text {
+  .post-editor-text {
     min-height: 20rem;
     resize: vertical;
     font-family: var(--expansa-font-code);

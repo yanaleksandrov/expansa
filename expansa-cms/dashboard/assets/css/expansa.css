@@ -3429,35 +3429,34 @@ body.is-unsaved .expansa-search-btn {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
-  justify-content: center;
   container: post-editor/inline-size;
 }
-.post-editor-main {
-  flex: 1;
-  max-width: 48rem;
+.post-editor .post-editor-main {
+  width: 100%;
+  min-width: 40rem;
 }
 @container post-editor (max-width: 768px) {
-  .post-editor-main {
-    width: 100%;
+  .post-editor .post-editor-main {
+    min-width: 100%;
   }
 }
-.post-editor-title {
+.post-editor .post-editor-title {
   display: flex;
   align-items: center;
   gap: 0.25rem;
   margin-bottom: 0.5rem;
   padding-inline: 1rem;
 }
-.post-editor-title > .btn:first-child {
+.post-editor .post-editor-title > .btn:first-child {
   margin-left: -0.5rem;
 }
-.post-editor-description {
+.post-editor .post-editor-description {
   line-height: 1.25em;
   color: var(--expansa-text-muted);
   margin-bottom: 1rem;
   padding-inline: 1rem;
 }
-.post-editor-card {
+.post-editor .post-editor-card {
   display: grid;
   align-content: flex-start;
   gap: 0.75rem;
@@ -3469,19 +3468,19 @@ body.is-unsaved .expansa-search-btn {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   box-shadow: var(--expansa-box-shadow);
 }
-.post-editor-side {
+.post-editor .post-editor-side {
   width: 20rem;
   position: sticky;
   top: 4.125rem;
 }
 @media (max-width: 1024px) {
-  .post-editor-side {
+  .post-editor .post-editor-side {
     position: static;
     width: 100%;
     max-width: 48rem;
   }
 }
-.post-editor-props {
+.post-editor .post-editor-props {
   display: grid;
   grid-template-columns: 7rem minmax(0, 1fr);
   row-gap: 2px;
@@ -3489,7 +3488,7 @@ body.is-unsaved .expansa-search-btn {
   margin: 0;
   font-size: 0.8125rem;
 }
-.post-editor-props > dt {
+.post-editor .post-editor-props > dt {
   display: flex;
   align-items: center;
   gap: 0.4375rem;
@@ -3497,11 +3496,11 @@ body.is-unsaved .expansa-search-btn {
   margin: 0;
   color: var(--expansa-text-muted);
 }
-.post-editor-props > dt > i {
+.post-editor .post-editor-props > dt > i {
   font-size: 0.875rem;
   opacity: 0.7;
 }
-.post-editor-props > dd {
+.post-editor .post-editor-props > dd {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -3510,7 +3509,7 @@ body.is-unsaved .expansa-search-btn {
   min-height: 1.875rem;
   margin: 0;
 }
-.post-editor-pill {
+.post-editor .post-editor-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
@@ -3532,29 +3531,29 @@ body.is-unsaved .expansa-search-btn {
           appearance: none;
   outline: none;
 }
-.post-editor-pill:is(select, input, a):hover, .post-editor-pill:focus-visible {
+.post-editor .post-editor-pill:is(select, input, a):hover, .post-editor .post-editor-pill:focus-visible {
   background-color: var(--expansa-bg);
 }
-.post-editor-pill:is(select) {
+.post-editor .post-editor-pill:is(select) {
   cursor: pointer;
 }
-.post-editor-pill:is(input) {
+.post-editor .post-editor-pill:is(input) {
   width: 100%;
 }
-.post-editor-pill::-moz-placeholder {
+.post-editor .post-editor-pill::-moz-placeholder {
   color: var(--expansa-text-placeholder);
 }
-.post-editor-pill::placeholder, .post-editor-pill.is-empty {
+.post-editor .post-editor-pill::placeholder, .post-editor .post-editor-pill.is-empty {
   color: var(--expansa-text-placeholder);
 }
-.post-editor-actions {
+.post-editor .post-editor-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--expansa-border);
 }
-.post-editor-text {
+.post-editor .post-editor-text {
   min-height: 20rem;
   resize: vertical;
   font-family: var(--expansa-font-code);
