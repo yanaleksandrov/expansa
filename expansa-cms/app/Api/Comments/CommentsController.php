@@ -31,6 +31,12 @@ final readonly class CommentsController
     }
 
     #[Can('manage_comments')]
+    public function add(Request $request, Response $response): Response
+    {
+        return $this->service->add($request, $response);
+    }
+
+    #[Can('manage_comments')]
     public function reply(Request $request, Response $response): Response
     {
         return $this->service->reply($request, $response);

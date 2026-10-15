@@ -54,7 +54,6 @@ class Query
      *                                                 * `[ 'draft' ]` - draft.
      *                                                 * `[ 'protected' ]` - password protected post.
      *                                                 * `[ 'private' ]` - personal post.
-     *                                                 * `[ 'trash' ]` - deleted post (in the trash).
      *                                                 * `[ 'future' ]` - scheduled post. When the date is reached, JitBit will change it to the `publish` status.
      *     @type string           $slug            Post type slug.
      *     @type boolean          $slug_strict     The default is `true`, which means that posts are selected by an exact match of the column value.
@@ -246,6 +245,11 @@ class Query
 
         if ($theStatuses) {
             $where[] = 't.status IN (' . implode(',', $theStatuses) . ')';
+        }
+
+        // the union of the tables has the column only when every type has a trash
+        if (array_all($postTypes, fn ($postType) => Type::get(Safe::trim($postType))?->canTrash ?? false)) {
+            $where[] = 't.deleted_at IS NULL';
         }
 
         /**

@@ -562,50 +562,174 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Table checkboxes
+     * Table checkboxes and filter: rows "field is/is not values" from `data-fields` (key => {label, icon, options})
+     * and `data-rows`; every change of a filter with values reloads the rows through the API and the page URL.
      *
      * @since 1.0
      */
-    Youla.data('table', () => ({
-        anchor: null,
-        bulk: 0,
-        trigger: {
-            '@change': 'selectAll($el, $root)',
-        },
-        item: {
-            '@click': 'selectItem($el, $root, $event)',
-        },
-        reset: {
-            '@click': 'resetAll($root)',
-        },
-        items(root) {
-            return [...root.querySelectorAll('[u-bind~="item"]')];
-        },
-        count(root) {
-            this.bulk = this.items(root).filter(input => input.checked).length;
-        },
-        selectAll(el, root) {
-            this.items(root).forEach(input => input.checked = el.checked);
-            this.count(root);
-        },
-        selectItem(el, root, event) {
-            let items   = this.items(root);
-            let index   = items.indexOf(el);
-            let checked = el.checked;
-            let start   = event.shiftKey && this.anchor !== null ? this.anchor : index;
-
-            for (let i = Math.min(start, index); i <= Math.max(start, index); i++) {
-                items[i].checked = checked;
+    Youla.data('table', (root) => {
+        const parse = (json, fallback) => {
+            try {
+                return JSON.parse(json || '') ?? fallback;
+            } catch {
+                return fallback;
             }
-            this.anchor = index;
-            this.count(root);
-        },
-        resetAll(root) {
-            root.querySelectorAll('[u-bind~="trigger"], [u-bind~="item"]').forEach(input => input.checked = false);
-            this.anchor = null;
-            this.bulk   = 0;
-        },
-    }));
+        };
+
+        const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        })[char]);
+
+        return {
+            fields: parse(root.dataset.fields, {}),
+            rows: parse(root.dataset.rows, []),
+            // index of the filter whose chip opened the values popover
+            editing: null,
+            anchor: null,
+            bulk: 0,
+            trigger: {
+                '@change': 'selectAll($el, $root)',
+            },
+            item: {
+                '@click': 'selectItem($el, $root, $event)',
+            },
+            items(root) {
+                return [...root.querySelectorAll('[u-bind~="item"]')];
+            },
+            count(root) {
+                this.bulk = this.items(root).filter(input => input.checked).length;
+            },
+            selectAll(el, root) {
+                this.items(root).forEach(input => input.checked = el.checked);
+                this.count(root);
+            },
+            selectItem(el, root, event) {
+                let items   = this.items(root);
+                let index   = items.indexOf(el);
+                let checked = el.checked;
+                let start   = event.shiftKey && this.anchor !== null ? this.anchor : index;
+
+                for (let i = Math.min(start, index); i <= Math.max(start, index); i++) {
+                    items[i].checked = checked;
+                }
+                this.anchor = index;
+                this.count(root);
+            },
+            resetAll(root) {
+                root.querySelectorAll('[u-bind~="trigger"], [u-bind~="item"]').forEach(input => input.checked = false);
+                this.anchor = null;
+                this.bulk   = 0;
+            },
+            activeFilters() {
+                return this.rows.filter(row => row.values.length);
+            },
+            isFirstActive(index) {
+                return this.rows.findIndex(row => row.values.length) === index;
+            },
+            addFilter(field) {
+                this.rows.push({ field, operator: 'is', values: [] });
+            },
+            removeFilter(index) {
+                const [row] = this.rows.splice(index, 1);
+                if (row.values.length) {
+                    this.applyFilters();
+                }
+            },
+            clearFilters() {
+                const applied = this.activeFilters().length;
+                this.rows     = [];
+                if (applied) {
+                    this.applyFilters();
+                }
+            },
+            // The values of the previous field are not options of the new one.
+            setFilterField(index, field) {
+                const row = this.rows[index];
+                if (row.field === field) {
+                    return;
+                }
+                const applied = row.values.length;
+                row.field     = field;
+                row.values    = [];
+                if (applied) {
+                    this.applyFilters();
+                }
+            },
+            setFilterOperator(index, operator) {
+                const row = this.rows[index];
+                if (row.operator === operator) {
+                    return;
+                }
+                row.operator = operator;
+                if (row.values.length) {
+                    this.applyFilters();
+                }
+            },
+            setFilterValues(index, select) {
+                this.rows[index].values = Array.from(select.selectedOptions, option => option.value);
+                this.applyFilters();
+            },
+            // Rendered via u-html before :value in the tag, as in `builder`: options must exist before the value is selected.
+            filterOptions(row) {
+                const options = this.fields[row.field]?.options || {};
+                return Object.entries(options)
+                    .map(([value, label]) => `<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`)
+                    .join('');
+            },
+            filterChoices(index) {
+                const row     = this.rows[index];
+                const options = this.fields[row?.field]?.options || {};
+                return Object.entries(options)
+                    .map(([value, label]) => `<label class="table-filter-choice"><input type="checkbox" value="${escapeHtml(value)}"${row.values.includes(value) ? ' checked' : ''}> ${escapeHtml(label)}</label>`)
+                    .join('');
+            },
+            // A filter without values has no chip, so its popover would lose the anchor.
+            toggleFilterValue(input) {
+                const row = this.rows[this.editing];
+                if (!row || input.type !== 'checkbox') {
+                    return;
+                }
+                row.values = input.checked ? [ ...row.values, input.value ] : row.values.filter(value => value !== input.value);
+                if (!row.values.length) {
+                    input.closest('[popover]')?.hidePopover();
+                }
+                this.applyFilters();
+            },
+            filterLabels(row, selected) {
+                const options = this.fields[row.field]?.options || {};
+                return row.values.length > 2
+                    ? selected.replace(':count', row.values.length)
+                    : row.values.map(value => options[value] ?? value).join(', ');
+            },
+            applyFilters() {
+                const url     = new URL(window.location.href);
+                const payload = { table: url.searchParams.get('table') || '', view: url.searchParams.get('view') || '' };
+
+                [ ...url.searchParams.keys() ]
+                    .filter(key => key.startsWith('filter['))
+                    .forEach(key => url.searchParams.delete(key));
+
+                this.activeFilters().forEach((row, i) => {
+                    url.searchParams.set(`filter[${i}][field]`, row.field);
+                    url.searchParams.set(`filter[${i}][operator]`, row.operator);
+                    payload[`filter[${i}][field]`]    = row.field;
+                    payload[`filter[${i}][operator]`] = row.operator;
+                    row.values.forEach((value, j) => {
+                        url.searchParams.append(`filter[${i}][values][]`, value);
+                        payload[`filter[${i}][values][${j}]`] = value;
+                    });
+                });
+
+                window.history.replaceState(null, '', url);
+
+                // the API replaces the rows: their bindings to this component are initialized again
+                this.$ajax.post('tables/filter', payload).then(() => {
+                    this.resetAll(root);
+                    root.__x.initialize(root.querySelector('.table-body'));
+                });
+            },
+        };
+    });
 
     /**
      * Custom fields builder - the whole Custom Fields group editor page
@@ -941,30 +1065,36 @@ document.addEventListener('youla:init', ()=> {
      *
      * @since 1.0
      */
-    Youla.data('tab', (root) => ({
-        tab: new URLSearchParams(window.location.search).get('tab') || root.dataset.tab || null,
-        tabButton(id) {
-            return {
-                ':class'() {
-                    return this.tab === id ? 'is-active' : '';
-                },
-                '@click'() {
-                    this.tab = id;
+    Youla.data('tab', (root) => {
+        // the server renders the tab of the `tab` parameter, or the first one, visible: the state starts from it
+        const query = new URLSearchParams(window.location.search).get('tab');
+        const tabs  = [...root.querySelectorAll('[data-tab]')].map(el => el.dataset.tab);
 
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('tab', id);
-                    window.history.pushState({}, '', url);
-                },
-            };
-        },
-        tabContent(id) {
-            return {
-                'u-show'() {
-                    return this.tab === id;
-                },
-            };
-        },
-    }));
+        return {
+            tab: tabs.includes(query) ? query : root.querySelector('[data-tab]:not([hidden])')?.dataset.tab || root.dataset.tab || tabs[0] || null,
+            tabButton(id) {
+                return {
+                    ':class'() {
+                        return { 'is-active': this.tab === id };
+                    },
+                    '@click'() {
+                        this.tab = id;
+
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('tab', id);
+                        window.history.pushState({}, '', url);
+                    },
+                };
+            },
+            tabContent(id) {
+                return {
+                    'u-show'() {
+                        return this.tab === id;
+                    },
+                };
+            },
+        };
+    });
 
     /**
      * `$dirty` — warns about unsaved form changes. Call `$dirty.watch($el)` once per form (e.g.

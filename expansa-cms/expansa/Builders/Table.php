@@ -28,6 +28,18 @@ abstract class Table
     private ?array $rows = null;
 
     /**
+     * Filters of the request, null until activeFilters() is called.
+     *
+     * @var array<int, array{field: string, operator: string, values: string[]}>|null
+     */
+    private ?array $active = null;
+
+    /**
+     * Raw `filter` input set by filterBy(), null reads the query parameter.
+     */
+    private ?array $input = null;
+
+    /**
      * Columns, from cells().
      *
      * @var Cell[]
@@ -43,7 +55,7 @@ abstract class Table
      * Set the file included before every table and the default view of the cells.
      *
      * @param string $filter   File that enqueues the items filter form.
-     * @param string $cellView Prefix of the cell views, e.g. `components/table/cell`.
+     * @param string $cellView Prefix of the cell views, e.g. `parts/table/cell`.
      * @return void
      */
     public static function configure(string $filter = '', string $cellView = ''): void
@@ -72,12 +84,97 @@ abstract class Table
 
     /**
      * Get the rows to render: data() runs on the first call, so creating a table runs no queries.
+     * Rows that do not match the active filters are left out.
      *
      * @return array<int, array<string, mixed>>
      */
     public function getData(): array
     {
-        return $this->rows ??= $this->data();
+        if ($this->rows === null) {
+            $filters    = $this->activeFilters();
+            $this->rows = $filters ? array_values(array_filter($this->data(), fn (array $row) => self::matches($row, $filters))) : $this->data();
+        }
+
+        return $this->rows;
+    }
+
+    /**
+     * Describe the fields the rows can be filtered by, keyed by the row key:
+     * `label`, `icon` and `options` as value => label. Without fields the table has no filter.
+     *
+     * @return array<string, array{label: string, icon?: string, options: array<string|int, string>}>
+     */
+    public function filters(): array
+    {
+        return [];
+    }
+
+    /**
+     * Filter the rows by the given input instead of the `filter` query parameter, e.g. of an API request.
+     *
+     * @param array $filter Items with `field`, `operator` and `values`.
+     * @return static
+     */
+    public function filterBy(array $filter): static
+    {
+        $this->input  = $filter;
+        $this->active = null;
+        $this->rows   = null;
+
+        return $this;
+    }
+
+    /**
+     * Get the filters of the `filter` query parameter, each a field of filters(), the operator
+     * `is` or `not` and the known values of the field; a filter without values is skipped.
+     *
+     * @return array<int, array{field: string, operator: string, values: string[]}>
+     */
+    public function activeFilters(): array
+    {
+        if ($this->active !== null) {
+            return $this->active;
+        }
+
+        $fields = $this->filters();
+        $query  = $this->input ?? (is_array($_GET['filter'] ?? null) ? $_GET['filter'] : []);
+
+        $this->active = [];
+        foreach ($query as $filter) {
+            $field   = is_array($filter) ? (string) ($filter['field'] ?? '') : '';
+            $options = $fields[$field]['options'] ?? [];
+            $values  = array_values(array_intersect(array_map('strval', (array) ($filter['values'] ?? [])), array_map('strval', array_keys($options))));
+            if ($values === []) {
+                continue;
+            }
+
+            $this->active[] = [
+                'field'    => $field,
+                'operator' => ($filter['operator'] ?? '') === 'not' ? 'not' : 'is',
+                'values'   => $values,
+            ];
+        }
+
+        return $this->active;
+    }
+
+    /**
+     * Check a row against all filters: a scalar value is one of the values, a list has one of them.
+     *
+     * @param array<string, mixed> $row
+     * @param array<int, array{field: string, operator: string, values: string[]}> $filters
+     * @return bool
+     */
+    private static function matches(array $row, array $filters): bool
+    {
+        foreach ($filters as ['field' => $field, 'operator' => $operator, 'values' => $values]) {
+            $found = array_intersect(array_map('strval', (array) ($row[$field] ?? [])), $values) !== [];
+            if ($found === ($operator === 'not')) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

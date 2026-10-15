@@ -39,11 +39,27 @@ final class Users extends Table
     public function cells(): array
     {
         return [
-            $this->cell('id')->title('<input type="checkbox" u-bind="trigger">')->fixedWidth('1.125rem')->view('cb'),
-            $this->cell('name')->title(t('Name'))->flexibleWidth('16rem')->sortable()->view('user'),
-            $this->cell('status')->title(t('Status'))->fixedWidth('6rem')->view('raw'),
-            $this->cell('visit')->title(t('Last Visit'))->fixedWidth('8rem')->view('raw'),
-            $this->cell('role')->title(t('Role'))->fixedWidth('8rem')->view('role'),
+            $this->cell('id')
+                ->title('<input type="checkbox" u-bind="trigger">')
+                ->fixedWidth('1.125rem')
+                ->view('cb'),
+            $this->cell('name')
+                ->title(t('Name'))
+                ->flexibleWidth('16rem')
+                ->sortable()
+                ->view('user'),
+            $this->cell('status')
+                ->title(t('Status'))
+                ->fixedWidth('6rem')
+                ->view('raw'),
+            $this->cell('visit')
+                ->title(t('Last Visit'))
+                ->fixedWidth('8rem')
+                ->view('raw'),
+            $this->cell('role')
+                ->title(t('Role'))
+                ->fixedWidth('8rem')
+                ->view('role'),
         ];
     }
 

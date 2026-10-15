@@ -14,6 +14,7 @@ use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
 use Expansa\Facades\Db;
 use Expansa\Support\Error;
+use PDO;
 
 /**
  * Represents a user comment on a post, including nested replies, author details,
@@ -208,7 +209,126 @@ class Comment extends Model
 
         self::recount($comment->postType, $comment->postId);
 
-        return $comment;
+        // the database fills the dates, the saved model does not have them yet
+        $saved = self::find($comment->id);
+
+        return $saved instanceof self ? $saved : $comment;
+    }
+
+    /**
+     * Create an approved comment by a user of the dashboard: the user is the author, the request
+     * gives the IP address and the browser.
+     *
+     * @param User  $user
+     * @param array $data `post_id`, `post_type`, `content`, optional `parent_id` and `locale`.
+     * @return Comment|Error
+     */
+    public static function createBy(User $user, array $data): Comment|Error
+    {
+        return self::create([
+            ...$data,
+            'author_id'    => $user->id,
+            'author_name'  => $user->showname ?: $user->login,
+            'author_email' => $user->email ?? '',
+            'author_ip'    => $_SERVER['REMOTE_ADDR'] ?? '',
+            'author_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
+            'locale'       => $data['locale'] ?? $user->locale,
+            'status'       => self::STATUS_APPROVED,
+        ]);
+    }
+
+    /**
+     * Get the comments of a post that are not deleted, the oldest first.
+     *
+     * @param string $postType
+     * @param int    $postId
+     * @param int    $limit
+     * @return Comment[]
+     */
+    public static function getByPost(string $postType, int $postId, int $limit = 200): array
+    {
+        if ($postId === 0) {
+            return [];
+        }
+
+        return self::where([
+            'post_id'   => $postId,
+            'post_type' => $postType,
+            'ORDER'     => ['id' => 'ASC'],
+            'LIMIT'     => $limit,
+        ])->find();
+    }
+
+    /**
+     * Group comments into threads by the parent ID: `0` holds the top-level comments, and the replies
+     * whose parent is not among the comments, e.g. deleted, so none of them is lost.
+     *
+     * @param Comment[] $comments
+     * @return array<int, Comment[]>
+     */
+    public static function groupByParent(array $comments): array
+    {
+        $ids     = array_flip(array_map(fn (Comment $comment) => $comment->id, $comments));
+        $threads = [];
+        foreach ($comments as $comment) {
+            $threads[isset($ids[$comment->parentId]) ? $comment->parentId : 0][] = $comment;
+        }
+
+        return $threads;
+    }
+
+    /**
+     * Get the post the comment answers, null when its type or the post is gone.
+     *
+     * @return Post|null
+     */
+    public function getPost(): ?Post
+    {
+        return $this->postId > 0 ? Post::get((string) $this->postType, (int) $this->postId) : null;
+    }
+
+    /**
+     * Whether the comment takes replies: the discussion of its post is open; a comment without a post takes none.
+     *
+     * @return bool
+     */
+    public function canReply(): bool
+    {
+        return $this->getPost()?->isDiscussionOpen() ?? false;
+    }
+
+    /**
+     * Get the name of the author, "Anonymous" for a comment without one.
+     *
+     * @return string
+     */
+    public function getAuthorName(): string
+    {
+        return $this->authorName !== '' ? $this->authorName : t('Anonymous');
+    }
+
+    /**
+     * Get the initials of the author for the avatar: the first letters of up to two words of the name.
+     *
+     * @return string
+     */
+    public function getInitials(): string
+    {
+        $words = array_slice(preg_split('/\s+/u', trim($this->getAuthorName())) ?: [], 0, 2);
+
+        return mb_strtoupper(implode('', array_map(fn (string $word) => mb_substr($word, 0, 1), $words)));
+    }
+
+    /**
+     * Get the color of the author avatar, the same for every comment of the name.
+     *
+     * @return string A name of the dashboard palette, e.g. `blue`.
+     */
+    public function getColor(): string
+    {
+        $colors = ['blue', 'green', 'amber', 'purple', 'royal', 'red'];
+
+        return $colors[crc32($this->getAuthorName()) % count($colors)];
     }
 
     /**
@@ -268,6 +388,46 @@ class Comment extends Model
     }
 
     /**
+     * Count the approved comments of a post that are not deleted, as kept in its `comments` column.
+     *
+     * @param string $postType
+     * @param int    $postId
+     * @return int
+     */
+    public static function countByPost(string $postType, int $postId): int
+    {
+        // the column is an unsigned SMALLINT
+        return min((int) Db::count('comments', [
+            'post_type'  => $postType,
+            'post_id'    => $postId,
+            'status'     => self::STATUS_APPROVED,
+            'deleted_at' => null,
+        ]), 65535);
+    }
+
+    /**
+     * Count the comments of a post that are not deleted by status, e.g. for the post editor.
+     *
+     * @param string $postType
+     * @param int    $postId
+     * @return array<string, int> Counts by status, without the statuses that have no comments.
+     */
+    public static function countByStatus(string $postType, int $postId): array
+    {
+        $counts = Db::query(
+            'SELECT status, COUNT(*) FROM <comments>
+            WHERE post_type = :type AND post_id = :id AND deleted_at IS NULL
+            GROUP BY status',
+            [
+                ':type' => $postType,
+                ':id'   => $postId,
+            ]
+        )?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
+
+        return array_map(intval(...), $counts);
+    }
+
+    /**
      * Store the number of the approved comments that are not deleted in the `comments` column of the post.
      *
      * @param string $postType
@@ -281,14 +441,6 @@ class Comment extends Model
             return;
         }
 
-        $count = Db::count('comments', [
-            'post_type'  => $postType,
-            'post_id'    => $postId,
-            'status'     => self::STATUS_APPROVED,
-            'deleted_at' => null,
-        ]);
-
-        // the column is an unsigned SMALLINT
-        Db::update($type->table, ['comments' => min((int) $count, 65535)], ['id' => $postId]);
+        Db::update($type->table, ['comments' => self::countByPost($postType, $postId)], ['id' => $postId]);
     }
 }

@@ -27,7 +27,7 @@ $labels = [
 			<div class="chat-empty" u-bind="emptyState">
 				<?php
 				echo view(
-                    'components/state',
+                    'parts/state',
 					[
 						'icon'        => 'ufo',
 						'title'       => t('Start of the process'),

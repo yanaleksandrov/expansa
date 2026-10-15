@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use Expansa\Database\Query\Builder;
+use Expansa\Facades\Db;
 use Expansa\Database\Schema;
 use Expansa\Database\Schema\Table;
 use Expansa\Support\Str;
 
 final class Migrations
 {
-    public const array VISIBILITY_STATUSES = ['publish', 'pending', 'draft', 'protected', 'private', 'trash', 'future'];
+    public const array VISIBILITY_STATUSES = ['publish', 'pending', 'draft', 'protected', 'private', 'future'];
 
     public const array DISCUSSIONS_STATUSES = ['open', 'closed'];
 
@@ -50,15 +51,43 @@ final class Migrations
             $table->enum('discussion', self::DISCUSSIONS_STATUSES)->default('open');
             $table->string('password', 255);
             $table->timestamps();
+            $table->timestamp('deleted_at')->nullable();
 
             // indexes
             $table->index('author_id');
             $table->index('parent_id');
             $table->index('status');
+            $table->index('deleted_at');
             $table->fulltext(['title', 'content']);
         });
 
         $this->createFieldsTable($postType, 'posts');
+    }
+
+    /**
+     * Add the `deleted_at` column of the trash to a posts table created without it.
+     *
+     * @param string $postType
+     * @return void
+     */
+    public function addSoftDeletes(string $postType): void
+    {
+        Db::query("ALTER TABLE <$postType> ADD COLUMN deleted_at TIMESTAMP NULL DEFAULT NULL, ADD INDEX deleted_at (deleted_at)");
+        Db::updateSchema();
+    }
+
+    /**
+     * Make the `deleted_at` column of a table created NOT NULL take NULL: the database stamped every new row
+     * with a zero date there, so soft-deleting models took the rows for deleted. The zero dates become NULL.
+     *
+     * @param string $table Table name without the prefix.
+     * @return void
+     */
+    public function repairSoftDeletes(string $table): void
+    {
+        Db::query("ALTER TABLE <$table> MODIFY deleted_at TIMESTAMP NULL DEFAULT NULL");
+        Db::query("UPDATE <$table> SET deleted_at = NULL WHERE deleted_at < '1971-01-01'");
+        Db::updateSchema();
     }
 
     private function createFieldsTable(string $name, ?string $idColumnName = null): void
@@ -347,7 +376,7 @@ final class Migrations
             $table->smallInt('dislikes')->unsigned()->default(0);
             $table->smallInt('rating')->unsigned()->nullable()->default(null);
             $table->timestamps();
-            $table->timestamp('deleted_at');
+            $table->timestamp('deleted_at')->nullable();
 
             // indexes
             $table->index('post_id');

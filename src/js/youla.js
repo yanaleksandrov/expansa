@@ -717,6 +717,20 @@
     function getNestedObjectValue(obj, path) {
         return parsePropPath(path).reduce((acc, key) => isUnsafeKey(key) ? undefined : acc?.[key], obj);
     }
+    function getLoopVariableNames(el) {
+        const names = new Set(Object.keys(getForData(el) ?? {}));
+        for (let node = el; node; node = node.parentElement) {
+            getAttributes(node).filter(({directive: directive}) => directive === "u-each").forEach(({expression: expression}) => {
+                const {item: item, index: index} = parseEachExpression(expression);
+                [ item, index ].filter(Boolean).forEach(name => names.add(name));
+            });
+        }
+        return names;
+    }
+    function resolvePropSource(expression, data, localVariables = {}) {
+        const [key] = parsePropPath(expression);
+        return key !== undefined && Object.hasOwn(localVariables, key) ? localVariables : data;
+    }
     function hydrateProps(rootElement, data, parent, providerName = null) {
         domWalk(rootElement, el => getAttributes(el).filter(({directive: directive}) => directive === "u-prop").forEach(attribute => {
             let {expression: expression, modifiers: modifiers} = attribute;
@@ -730,6 +744,9 @@
             const unsafeKey = [ key, ...prop ].find(isUnsafeKey);
             if (unsafeKey) {
                 console.warn(`Youla.js: u-prop expression "${expression}" uses unsafe key "${unsafeKey}" — skipped.`);
+                return;
+            }
+            if (getLoopVariableNames(el).has(key)) {
                 return;
             }
             const owner = modifiers.includes("up") ? parent ? parent.scope : data : parent && key in parent.scope ? parent.scope : data;
@@ -768,12 +785,14 @@
         }));
         return data;
     }
-    function generateExpressionForProp(el, data, attribute) {
+    function generateExpressionForProp(el, data, attribute, localVariables = {}) {
         let {expression: expression, modifiers: modifiers} = attribute;
         const accessor = toJsPropAccessor(expression);
+        const source = resolvePropSource(expression, data, localVariables);
+        const target = source === localVariables ? accessor : `$data.${accessor}`;
         let rightSideOfExpression, tag = el.tagName.toLowerCase();
         if (el.type === "checkbox") {
-            let value = getNestedObjectValue(data, expression);
+            let value = getNestedObjectValue(source, expression);
             if (Array.isArray(value)) {
                 rightSideOfExpression = `$el.checked ? ${accessor}.concat([$el.value]) : [...${accessor}.splice(0, ${accessor}.indexOf($el.value)), ...${accessor}.splice(${accessor}.indexOf($el.value)+1)]`;
             } else {
@@ -784,13 +803,13 @@
         } else if (tag === "select" && el.multiple) {
             rightSideOfExpression = `Array.from($el.selectedOptions).map(option => ${modifiers.includes("number") ? "parseFloat(option.value || option.text)" : "option.value || option.text"})`;
         } else if (modifiers.includes("number")) {
-            return `($el.value = $el.value.replace(/[^\\d]/g, ''), $data.${accessor} = $el.value === '' ? '' : parseFloat($el.value))`;
+            return `($el.value = $el.value.replace(/[^\\d]/g, ''), ${target} = $el.value === '' ? '' : parseFloat($el.value))`;
         } else if (modifiers.includes("trim")) {
             rightSideOfExpression = `($el.value = $el.value.replace(/^\\s+|\\s+$/g, ''), $el.value)`;
         } else {
             rightSideOfExpression = "$el.value";
         }
-        return `$data.${accessor} = ${rightSideOfExpression}`;
+        return `${target} = ${rightSideOfExpression}`;
     }
     let datas = {};
     function data(name, callback) {
@@ -1004,7 +1023,8 @@
                     deps = rootIdentifier ? [ rootIdentifier ] : [];
                 }
             } else if (directive === "u-prop") {
-                output = getNestedObjectValue(this.scope, expression);
+                const {otherVariables: otherVariables} = splitMagicVariables(additionalHelperVariables);
+                output = getNestedObjectValue(resolvePropSource(expression, this.scope, otherVariables), expression);
                 if (withDeps) {
                     const [rootIdentifier] = parsePropPath(expression);
                     deps = rootIdentifier ? [ rootIdentifier ] : [];
@@ -1047,7 +1067,7 @@
                         let {directive: directive, event: event, expression: expression, modifiers: modifiers, bind: bind} = attribute;
                         let propExpression;
                         if (directive === "u-prop") {
-                            propExpression = generateExpressionForProp(el, self.scope, attribute);
+                            propExpression = generateExpressionForProp(el, self.scope, attribute, splitMagicVariables(additionalHelperVariables).otherVariables);
                             event = [ "select-multiple", "select", "checkbox", "radio" ].includes(el.type) || modifiers.includes("lazy") ? "change" : "input";
                         }
                         if (event) {

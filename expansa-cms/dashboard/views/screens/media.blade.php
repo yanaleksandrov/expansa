@@ -11,19 +11,11 @@ use Expansa\Facades\Hook;
  */
 
 Hook::add('renderDashboardFooter', function () {
-    echo view('components/dialogs/media-editor');
+    echo view('parts/dialogs/media-editor');
+    echo view('parts/dialogs/media-uploader');
 }, 0);
 ?>
 <div class="storage" u-data="{items: [], selected: []}" u-dragselect="selected = [...new Set([...selected, ...$event.detail.ids])]">
-    <div class="storage__head">
-        <h4>{{ t('Media Library') }}</h4>
-        <button class="btn btn--sm btn--outline" @click=""><i class="ph ph-upload-simple"></i> {{ t('Add New File') }}</button>
-    </div>
-
-    <div class="storage__uploader" hidden>
-        <?php echo view('components/dialogs/media-uploader'); ?>
-    </div>
-
     <div class="df aic g-3" u-show="selected.length" hidden>
         <span class="fs-13"><span u-text="selected.length"></span> <?php echo t('selected'); ?></span>
         <button type="button" class="btn btn--sm btn--outline" @click="selected = []"><?php echo t('Cancel'); ?></button>
@@ -54,7 +46,7 @@ Hook::add('renderDashboardFooter', function () {
     </div>
 
     <div u-show="items.length === 0" @load="console.log(items.length)">
-        <?php echo view('components/state', $table->notFoundData()); ?>
+        <?php echo view('parts/state', $table->notFoundData()); ?>
     </div>
 
     <div @intersect="$ajax.post('media/get', '', ({posts}) => items = posts)"></div>

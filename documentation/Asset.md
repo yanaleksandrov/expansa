@@ -199,7 +199,7 @@ Asset::configure(resolver: fn (string $file): array => [
 `Renderer::render()` реально рендерит соответствующее поле.
 
 Отдельная сложность в том, что несколько разных по смыслу типов полей (`date`, `range`, `color`,
-обычный текст) используют **один и тот же** файл шаблона — `components/form/input.blade.php` (см.
+обычный текст) используют **один и тот же** файл шаблона — `parts/form/input.blade.php` (см.
 `Renderer::renderTemplate()`: все они рендерятся шаблоном `input`). По одному только имени файла
 их не различить, поэтому `discover()` умеет принимать третий аргумент `$context` — то, что не
 следует из пути к файлу, но известно в момент рендера — и передавать его вторым аргументом в
@@ -224,8 +224,8 @@ return Form::view($template, $field);
 ```php
 Form::configure(
     types: [/* ... */],
-    view: fn (string $template, array $data) => (string) View::create("components/form/$template", $data),
-    assets: fn (string $template, string $uid) => Asset::discover(View::create("components/form/$template")->path, $uid, ['type' => $uid]),
+    view: fn (string $template, array $data) => (string) View::create("parts/form/$template", $data),
+    assets: fn (string $template, string $uid) => Asset::discover(View::create("parts/form/$template")->path, $uid, ['type' => $uid]),
 );
 ```
 
@@ -237,7 +237,7 @@ use Expansa\Assets\Manager;
 $suffix = ! Is::debug() ? '.min' : '';
 
 Manager::configure(resolver: function (string $file, array $context = []) use ($suffix): array {
-    if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/components/form/')) {
+    if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/parts/form/')) {
         return Manager::defaultStructure($file); // всё остальное — по конвенции по умолчанию
     }
 

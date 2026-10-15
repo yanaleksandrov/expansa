@@ -321,10 +321,10 @@ Lifecycle::phase('configure', true, function () {
         },
     );
 
-    // every dashboard table renders the items filter form, its cells use components/table/cell-<kind> views
+    // every dashboard table renders the items filter form, its cells use parts/table/cell-<kind> views
     Expansa\Builders\Table::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php',
-        cellView: 'components/table/cell',
+        cellView: 'parts/table/cell',
     );
 
     // validation error messages in the site language
@@ -403,9 +403,9 @@ Lifecycle::phase('configure', true, function () {
             'repeater'        => Expansa\Builders\Form\Fields\Repeater::class,
             'message'         => Expansa\Builders\Form\Fields\Message::class,
         ],
-        view: fn (string $template, array $data) => (string) View::create("components/form/$template", $data),
+        view: fn (string $template, array $data) => (string) View::create("parts/form/$template", $data),
         assets: fn (string $template, string $uid) => Asset::discover(
-            View::create("components/form/$template")->path,
+            View::create("parts/form/$template")->path,
             $uid,
             ['type' => $uid],
         ),
@@ -501,6 +501,11 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
     // roles changed or added in the Settings replace the defaults above
     App\Support\RoleSettings::apply();
 
+    // the columns are loaded once per request anyway, so the check costs no query
+    if (Db::isNullable(EX_DB['prefix'] . 'comments', 'deleted_at') === false) {
+        Hook::run('repairSoftDeletes', 'comments');
+    }
+
     // post types
     App\Post\Type::register(
         key: 'pages',
@@ -544,6 +549,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         showInBar: false,
         canExport: true,
         canImport: true,
+        canTrash: false,
         capabilities: ['types_edit'],
         menuIcon: 'ph ph-dropbox-logo',
         menuPosition: 30,
@@ -660,6 +666,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
                 App\Api\Options\OptionsController::class,
                 App\Api\Post\PostController::class,
                 App\Api\Posts\PostsController::class,
+                App\Api\Tables\TablesController::class,
                 App\Api\Translations\TranslationsController::class,
                 App\Api\User\UserController::class,
             ] as $class

@@ -7,7 +7,6 @@
  *
  * @package Expansa\Templates
  */
-
 ?>
 <div class="attributes">
     <form class="attributes-wrapper" u-data="{attributes: []}">

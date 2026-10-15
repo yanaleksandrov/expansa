@@ -200,7 +200,7 @@ class Media
             return false;
         }
 
-        if (! Post::delete('files', $id)) {
+        if (! $post->delete()) {
             return false;
         }
 

@@ -39,7 +39,7 @@
                     <template u-if="!values.length">
                         <?php
                         echo view(
-                            'components/state',
+                            'parts/state',
                             [
                                 'icon'        => 'empty-pack',
                                 'title'       => t('No categories found'),

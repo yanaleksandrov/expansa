@@ -31,11 +31,24 @@ final class Terms extends Table
     public function cells(): array
     {
         return [
-            $this->cell('id')->title('<input type="checkbox" u-bind="trigger">')->fixedWidth('1.125rem')->view('cb'),
-            $this->cell('image')->title(t('Image'))->fixedWidth('2.5rem')->view('image'),
-            $this->cell('title')->title(t('Title'))->view('title'),
-            $this->cell('slug')->title(t('Slug'))->view('raw'),
-            $this->cell('count')->title(t('Count'))->fixedWidth('2rem')->view('raw'),
+            $this->cell('id')
+                ->title('<input type="checkbox" u-bind="trigger">')
+                ->fixedWidth('1.125rem')
+                ->view('cb'),
+            $this->cell('image')
+                ->title(t('Image'))
+                ->fixedWidth('2.5rem')
+                ->view('image'),
+            $this->cell('title')
+                ->title(t('Title'))
+                ->view('title'),
+            $this->cell('slug')
+                ->title(t('Slug'))
+                ->view('raw'),
+            $this->cell('count')
+                ->title(t('Count'))
+                ->fixedWidth('2rem')
+                ->view('raw'),
         ];
     }
 

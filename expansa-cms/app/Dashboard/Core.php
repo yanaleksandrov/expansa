@@ -7,6 +7,7 @@ namespace App\Dashboard;
 use App\Dashboard\Enums\Surface;
 use App\Dashboard\Pages\Comment;
 use App\Dashboard\Pages\FieldGroups;
+use App\Dashboard\Pages\Post;
 use App\Dashboard\Pages\Profile;
 use App\Dashboard\Pages\SignIn;
 use App\Dashboard\Pages\SiteHealth;
@@ -45,7 +46,17 @@ final class Core
             $data['isSelf'] => t('Settings'),
             default         => $data['user']->showname ?: $data['user']->login,
         });
-        Dashboard::page('comment', can: 'manage_comments', title: fn () => t('Edit Comment'));
+        Dashboard::page('comment', can: 'manage_comments', title: fn () => t('Edit Comment'), surface: Surface::Muted);
+        Dashboard::page(
+            'post',
+            can: 'types_edit',
+            title: fn (array $data) => match (true) {
+                $data['post']->id === 0     => $data['type']->labelAdd,
+                $data['post']->title !== '' => $data['post']->title,
+                default                     => $data['type']->labelEdit,
+            },
+            surface: Surface::Muted,
+        );
         Dashboard::page('edit', view: Tables::view(...));
         Dashboard::page('users', view: 'screens/edit');
         Dashboard::page('plugins-install', surface: Surface::Muted);
@@ -53,6 +64,7 @@ final class Core
         Dashboard::data('sign-in', SignIn::data(...));
         Dashboard::data('profile', Profile::data(...));
         Dashboard::data('comment', Comment::data(...));
+        Dashboard::data('post', Post::data(...));
         Dashboard::data('field-groups', FieldGroups::data(...));
         Dashboard::data('site-health', SiteHealth::data(...));
         Dashboard::data('updates', Updates::data(...));

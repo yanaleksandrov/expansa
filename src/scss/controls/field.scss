@@ -32,6 +32,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     align-items: center;
     font-weight: 500;
     line-height: 1.35em;
+    justify-content: space-between;
 
     &[data-required] {
 
@@ -48,7 +49,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
   }
 
   &-instruction {
-    line-height: 1.2em;
+    line-height: 1.3;
     font-size: 0.92857142857em;
     min-width: 8rem;
     color: var(--expansa-text-muted);
@@ -56,7 +57,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
   }
 
   &-error {
-    line-height: 1.2em;
+    line-height: 1.3;
     font-size: 0.92857142857em;
     color: var(--expansa-danger);
 
@@ -246,7 +247,6 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       // the box, the text and the arrow of the select, which is as tall as the field with its border
       > .ss-main {
         position: absolute;
-        inset: -1px 0;
         height: auto;
         align-items: flex-start;
         padding-block: 0.325rem;
@@ -473,6 +473,54 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
       &:has(.field-icon) [type="radio"] {
         order: 2;
+      }
+    }
+  }
+
+  &:has(.field-box) {
+    display: flex;
+    gap: 1rem;
+
+    .field-box {
+      display: grid;
+      gap: 0.25em;
+    }
+
+    .field-buttons {
+      display: flex;
+      gap: 2px;
+      padding: 2px;
+      height: fit-content;
+      background-color: var(--expansa-bg-universal);
+      border: 1px solid var(--expansa-border);
+      border-radius: var(--expansa-border-radius);
+      corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+
+      input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .field-buttons-item {
+        white-space: nowrap;
+        height: calc(2rem - 4px);
+        padding: 0.375em 0.75em;
+        border-radius: calc(var(--expansa-border-radius) - 2px);
+        corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+        user-select: none;
+        color: var(--expansa-text-muted);
+        transition: all 0.25s;
+
+        &:hover {
+          color: var(--expansa-text);
+        }
+
+        &:has(> input:checked) {
+          color: var(--expansa-text);
+          box-shadow: var(--expansa-box-shadow);
+          background-color: var(--expansa-bg-white);
+        }
       }
     }
   }

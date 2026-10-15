@@ -319,6 +319,15 @@ final class Menus
                     'position'     => 30,
                     'parent_id'    => 'settings',
                 ],
+                [
+                    'id'           => 'site-storage',
+                    'url'          => 'site-storage',
+                    'title'        => t('Storage'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 40,
+                    'parent_id'    => 'settings',
+                ],
             ]
         ));
     }

@@ -15,7 +15,7 @@ namespace Expansa\Builders\Table;
 final class Cell
 {
     /**
-     * Prefix of the cell views, a kind is added to it: `components/table/cell` + `date`.
+     * Prefix of the cell views, a kind is added to it: `parts/table/cell` + `date`.
      */
     private static string $views = '';
 
@@ -69,7 +69,7 @@ final class Cell
     /**
      * Set the prefix of the cell views.
      *
-     * @param string $views View name, e.g. `components/table/cell`.
+     * @param string $views View name, e.g. `parts/table/cell`.
      * @return void
      */
     public static function configure(string $views): void
@@ -157,7 +157,7 @@ final class Cell
 
     /**
      * Set the view of the cells: a view name with `/` or a file path as is, a kind otherwise
-     * (`date` → `components/table/cell-date`).
+     * (`date` → `parts/table/cell-date`).
      *
      * @param string $view
      * @return static

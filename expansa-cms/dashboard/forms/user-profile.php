@@ -468,7 +468,7 @@ $uid = Form::enqueue(
                                 <?php if (TwoFactor::isRequired($user) && ! TwoFactor::isEnabled($user)) : ?>
                                     <div class="df aic g-1 t-red fs-13 mb-2"><i class="ph ph-warning-circle"></i> <?php echo t('Your role requires two-factor authentication: set it up to use the dashboard.'); ?></div>
                                 <?php endif; ?>
-                                <div id="two-factor"><?php echo view('components/two-factor', ['user' => $user]); ?></div>
+                                <div id="two-factor"><?php echo view('parts/two-factor', ['user' => $user]); ?></div>
                                 <?php
                             },
                         ],
@@ -492,7 +492,7 @@ $uid = Form::enqueue(
                                     <div class="dg g-2" id="passkeys">
                                         <?php
                                         foreach (Passkey::all($user) as $passkey) {
-                                            echo view('components/passkey', ['passkey' => $passkey]);
+                                            echo view('parts/passkey', ['passkey' => $passkey]);
                                         }
                                         ?>
                                     </div>
@@ -526,7 +526,7 @@ $uid = Form::enqueue(
                                     <div class="dg g-2" id="sessions">
                                         <?php
                                         foreach ($sessions as $session) {
-                                            echo view('components/session', ['session' => $session]);
+                                            echo view('parts/session', ['session' => $session]);
                                         }
                                         ?>
                                     </div>
@@ -571,7 +571,7 @@ $uid = Form::enqueue(
                                     <div class="dg g-2" id="identities">
                                         <?php
                                         foreach (Identities::all($user) as $identity) {
-                                            echo view('components/identity', ['identity' => $identity]);
+                                            echo view('parts/identity', ['identity' => $identity]);
                                         }
                                         ?>
                                     </div>
@@ -604,7 +604,7 @@ $uid = Form::enqueue(
                                 ?>
                                 <div class="dg g-2 ga-4">
                                     <div><?php echo t('Tokens let scripts and other services call the API as you: send the header Authorization: Bearer <token>. A token gets only the permissions you choose.'); ?></div>
-                                    <div class="dg g-2" id="tokens"><?php echo view('components/tokens', ['tokens' => Tokens::all($user)]); ?></div>
+                                    <div class="dg g-2" id="tokens"><?php echo view('parts/tokens', ['tokens' => Tokens::all($user)]); ?></div>
                                     <div id="token-created"></div>
                                     <div class="dg g-2 p-4 card card-border">
                                         <div class="df aic fw g-2">
@@ -896,7 +896,7 @@ if ($isNew) {
                                 'name'     => 'account',
                                 'type'     => 'custom',
                                 'callback' => function () use ($user) {
-                                    echo view('components/user-admin', Profile::admin($user));
+                                    echo view('parts/user-admin', Profile::admin($user));
                                 },
                             ],
                         ],

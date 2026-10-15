@@ -9,7 +9,7 @@
 
 $cell = $table->cells[0];
 ?>
-<?php echo view('components/table/header', $table->headData()); ?>
+<?php echo view('parts/table/header', $table->headData()); ?>
 
 @if ($table->getData())
     <div class="themes">
@@ -18,5 +18,5 @@ $cell = $table->cells[0];
         @endforeach
     </div>
 @else
-    <?php echo view('components/state', $table->notFoundData()); ?>
+    <?php echo view('parts/state', $table->notFoundData()); ?>
 @endif

@@ -9,4 +9,4 @@
  * @package Expansa\Templates
  */
 
-echo view('components/table/table', ['table' => $table]);
+echo view('parts/table/table', ['table' => $table]);

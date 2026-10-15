@@ -113,6 +113,11 @@ class Type
         public bool $canCreate = false,
 
         /**
+         * Whether deleted items go to the trash first, see Models\Post::delete(); without it they are deleted at once.
+         */
+        public bool $canTrash = true,
+
+        /**
          * User capabilities required to see the type's admin menu items.
          *
          * @var string[]
@@ -181,9 +186,13 @@ class Type
         /**
          * Add DB table for post type if not exists.
          */
-        $type = Safe::snakecase($key);
-        if (!Db::hasTable(EX_DB['prefix'] . $type)) {
+        $type  = Safe::snakecase($key);
+        $table = EX_DB['prefix'] . $type;
+        if (! Db::hasTable($table)) {
             Hook::run('createPostsTable', $type);
+        } elseif ($this->canTrash && ! isset(Db::schema($table)['deleted_at'])) {
+            // the columns are already loaded by hasTable(), so the check costs no query
+            Hook::run('addSoftDeletes', $type);
         }
     }
 

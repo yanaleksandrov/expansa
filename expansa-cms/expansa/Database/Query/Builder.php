@@ -1071,7 +1071,7 @@ class Builder extends AbstractBuilder
             $query = $this->query(
                 '
 				SELECT
-    				COLUMN_NAME as name, DATA_TYPE as type, TABLE_NAME as tbl
+    				COLUMN_NAME as name, DATA_TYPE as type, TABLE_NAME as tbl, IS_NULLABLE as nullable
 				FROM
 				    INFORMATION_SCHEMA.COLUMNS
 				WHERE
@@ -1084,7 +1084,8 @@ class Builder extends AbstractBuilder
             if ($query instanceof PDOStatement) {
                 $columns = $query->fetchAll(PDO::FETCH_ASSOC);
                 foreach ($columns as $column) {
-                    $this->schema[$column['tbl']][$column['name']] = $column['type'];
+                    $this->schema[$column['tbl']][$column['name']]   = $column['type'];
+                    $this->nullable[$column['tbl']][$column['name']] = $column['nullable'] === 'YES';
                 }
             }
         }
@@ -1096,6 +1097,20 @@ class Builder extends AbstractBuilder
     }
 
     /**
+     * Whether a column takes NULL, from the same query as {@see self::schema()}, so it costs no query of its own.
+     *
+     * @param string $table  Table name with the prefix.
+     * @param string $column
+     * @return bool|null Null when there is no such column.
+     */
+    public function isNullable(string $table, string $column): ?bool
+    {
+        $this->schema();
+
+        return $this->nullable[$table][$column] ?? null;
+    }
+
+    /**
      * Forces {@see self::schema()} to re-query INFORMATION_SCHEMA instead of reusing its
      * request-lifetime cache - for after a migration changes the schema mid-request.
      *
@@ -1103,7 +1118,8 @@ class Builder extends AbstractBuilder
      */
     public function updateSchema(): array
     {
-        $this->schema = [];
+        $this->schema   = [];
+        $this->nullable = [];
 
         return $this->schema();
     }

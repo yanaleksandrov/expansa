@@ -197,7 +197,7 @@ check('empty and absent values get the defaults', $field->step === 1 && $field->
 check('a callback passes as is', $field->callback === $callback);
 
 // Table: cells use the configured view with the kind of the column
-Table::configure(cellView: 'components/table/cell');
+Table::configure(cellView: 'parts/table/cell');
 $table = new class extends Table {
     public function data(): array
     {
@@ -209,7 +209,7 @@ $table = new class extends Table {
         return [$this->cell('date')->view('date')];
     }
 };
-check('a cell view adds its kind to the configured one', $table->cells[0]->view === 'components/table/cell-date');
+check('a cell view adds its kind to the configured one', $table->cells[0]->view === 'parts/table/cell-date');
 
 $table = new class extends Table {
     public int $queries = 0;

@@ -21,14 +21,28 @@ final class Plugins extends Table
 
         $rows = [];
         foreach (Extensions::getInstalled('plugin') as $id => $plugin) {
+            $is_active = in_array($id, $active, true);
+
             $rows[] = [
                 'id'          => $id,
                 'title'       => $plugin->name,
                 'description' => $plugin->description,
                 'author'      => $plugin->author,
                 'image'       => url('dashboard/assets/images/placeholder.svg'),
-                'version'     => $plugin->version,
-                'active'      => in_array($id, $active, true),
+                'active'      => $is_active,
+                'version'     => [
+                    'class' => '',
+                    'icon'  => '',
+                    'value' => $plugin->version,
+                ],
+                'status'      => [
+                    'class'      => 'badge' . ($is_active ? ' badge--green-lt' : ''),
+                    'icon'       => 'ph' . ($is_active ? ' ph-check' : ' ph-circle-half'),
+                    'value'      => $is_active ? t('Active') : t('Inactive'),
+                    'attributes' => [
+                        '@click' => $is_active ? "\$ajax.post('extensions/deactivate',{id: '$id'})" : "\$ajax.post('extensions/activate',{id: '$id'})",
+                    ],
+                ],
             ];
         }
 
@@ -42,27 +56,24 @@ final class Plugins extends Table
                 ->title('<input type="checkbox" u-bind="trigger">')
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
+            $this->cell('image')
+                ->fixedWidth('2.5rem')
+                ->view('image'),
             $this->cell('plugin')
                 ->title(t('Plugin'))
                 ->flexibleWidth('14rem')
                 ->view('plugin'),
             $this->cell('description')
                 ->title(t('Description'))
-                ->flexibleWidth('14rem')
-                ->view('raw'),
+                ->flexibleWidth('14rem'),
             $this->cell('version')
                 ->title(t('Version'))
-                ->fixedWidth('4rem')
+                ->fixedWidth('5rem')
                 ->view('badge'),
-            $this->cell('active')
-                ->title(t('Activity'))
-                ->fixedWidth('4rem')
-                ->attributes([
-                    // a failed request turns the switch back
-                    '@change' => '$ajax.post($event.target.checked ? "extensions/activate" : "extensions/deactivate",'
-                        . ' {id: $event.target.value}).catch(() => $event.target.checked = !$event.target.checked)',
-                ])
-                ->view('toggle'),
+            $this->cell('status')
+                ->title(t('Status'))
+                ->fixedWidth('5rem')
+                ->view('badge'),
         ];
     }
 
@@ -83,7 +94,7 @@ final class Plugins extends Table
             'description' => t('You can upload them manually or install them from the repository.'),
             'buttons'     => [
                 [
-                    'label' => t('Add New'),
+                    'label' => '<i class="ph ph-plus"></i> ' . t('Add New Plugin'),
                     'url'   => url('/dashboard/plugins-install'),
                 ],
             ],
