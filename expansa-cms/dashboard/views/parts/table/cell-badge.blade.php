@@ -13,5 +13,5 @@
 defined('EX_PATH') || exit;
 ?>
 @if (is_scalar($value) && $value !== '')
-    <span class="badge">{{ $value }}</span>
+    <span class="badge"><i class="badge badge--dark"></i>{{ $value }}</span>
 @endif

@@ -6,7 +6,7 @@ use Expansa\Support\Arr;
  * Rows of a table, each cell rendered by the view of its column; the message when the filter left out every row.
  * Rendered by the table and by the API that applies the filter.
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/body.blade.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/table-row.blade.php
  *
  * @var Expansa\Builders\Table $table
  *

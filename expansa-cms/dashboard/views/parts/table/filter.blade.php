@@ -45,17 +45,17 @@ $select = "{ contentLocation: \$root.querySelector('.table-filter-content') }";
     <div class="table-filter-rows">
         <div class="table-filter-row" u-each="(row, i) in rows">
             <span class="table-filter-conjunction" u-text="i ? {{ json_encode(t('and')) }} : {{ json_encode(t('Where')) }}"></span>
-            <select class="field" :value="row.field" @change="setFilterField(i, $el.value)" u-select="{{ $select }}">
+            <select class="field field--xs" :value="row.field" @change="setFilterField(i, $el.value)" u-select="{{ $select }}">
                 @foreach ($filters as $key => $field)
                     <option value="{{ $key }}">{{ $field['label'] }}</option>
                 @endforeach
             </select>
-            <select class="field" :value="row.operator" @change="setFilterOperator(i, $el.value)" u-select="{{ $select }}">
+            <select class="field field--xs" :value="row.operator" @change="setFilterOperator(i, $el.value)" u-select="{{ $select }}">
                 <option value="is">{{ t('is') }}</option>
                 <option value="not">{{ t('is not') }}</option>
             </select>
-            <select class="field" multiple u-html="filterOptions(row)" :value="row.values" @change="setFilterValues(i, $el)" u-select="{{ $select }}"></select>
-            <button class="btn btn--icon t-red" type="button" title="{{ t('Remove filter') }}" @click="removeFilter(i)"><i class="ph ph-trash-simple"></i></button>
+            <select class="field field--xs" multiple u-html="filterOptions(row)" :value="row.values" @change="setFilterValues(i, $el)" u-select="{{ $select }}"></select>
+            <button class="btn btn--xs btn--icon t-red" type="button" title="{{ t('Remove filter') }}" @click="removeFilter(i)"><i class="ph ph-trash-simple"></i></button>
         </div>
     </div>
     <div class="table-filter-add">

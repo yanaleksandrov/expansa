@@ -30,7 +30,7 @@ $filters = $table->filters();
         </div>
     </div>
     <div class="table-body">
-        <?php echo view('parts/table/body', ['table' => $table]); ?>
+        <?php echo view('parts/table/table-row', ['table' => $table]); ?>
     </div>
 </div>
 @else

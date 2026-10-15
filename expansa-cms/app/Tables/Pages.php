@@ -12,31 +12,30 @@ final class Pages extends Table
 {
     public function data(): array
     {
-        return [];
         return [
             [
                 'id'         => 1,
                 'image'      => url('dashboard/assets/images/placeholder.svg'),
                 'title'      => 'Post title',
-                'status'     => 'draft',
+                'status'     => 'Draft',
                 'author_id'  => 1,
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
-                'date'       => '24 august 2024',
+                'date'       => '24 Aug 2024',
                 'actions'    => [
                     [
                         'href'  => '#',
-                        'class' => '#',
+                        'class' => 't-muted',
                         'title' => t('View'),
                     ],
                     [
                         'href'  => '#',
-                        'class' => '#',
+                        'class' => 't-muted',
                         'title' => t('Duplicate'),
                     ],
                     [
                         'href'  => '#',
-                        'class' => '#',
+                        'class' => 't-red',
                         'title' => t('Delete'),
                     ],
                 ],
@@ -61,17 +60,21 @@ final class Pages extends Table
                 ->view('title'),
             $this->cell('author')
                 ->title(t('Author'))
-                ->flexibleWidth('6rem')
+                ->fixedWidth('8rem')
                 ->view('links'),
             $this->cell('categories')
                 ->title(t('Categories'))
                 ->flexibleWidth('6rem')
                 ->view('links'),
+            $this->cell('status')
+                ->title(t('Status'))
+                ->fixedWidth('4rem')
+                ->sortable()
+                ->view('badge'),
             $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('6rem')
                 ->sortable()
-                ->view('date'),
         ];
     }
 

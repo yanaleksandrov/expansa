@@ -1405,7 +1405,7 @@ option[data-html*="<i "]) {
 .btn:active:not(:disabled) {
   transform: scale(0.97);
 }
-.btn > * {
+.btn > i {
   font-size: inherit;
 }
 .btn {

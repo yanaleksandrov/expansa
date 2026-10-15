@@ -13,12 +13,10 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="fs-14 lh-sm">
-    <a href="{{ $item['url'] ?? '#' }}" class="fw-500 t-dark">{{ is_scalar($value) ? $value : '' }}</a>
-    @if (! empty($item['status']))
-        <span class="t-muted">— {{ $item['status'] }}</span>
-    @endif
-</div>
+<a href="{{ $item['url'] ?? '#' }}" class="fw-500 t-dark">{{ is_scalar($value) ? $value : '' }}</a>
+@if (! empty($item['status']))
+    <span class="t-muted">— {{ $item['status'] }}</span>
+@endif
 @if (! empty($item['actions']))
     <div class="df aic g-2 mt-1 table-hidden">
         @foreach ($item['actions'] as $action)

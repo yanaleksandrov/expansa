@@ -2,6 +2,7 @@
   width: 100%;
   container-type: inline-size;
   timeline-scope: --table-scroll-x;
+  height: 100%;
 
   form.table-filter {
     display: flex;
@@ -87,6 +88,7 @@
     overflow: auto;
     scroll-timeline: --table-scroll-x x;
     transform: scaleY(-1);
+    min-height: 70vh;
 
     > * {
       transform: scaleY(-1);
@@ -319,10 +321,6 @@
   color: var(--expansa-text-muted);
   font-size: 0.85em;
   border-top: 1px solid var(--expansa-border);
-
-  @media (max-width: 1024px) {
-    padding-inline: 1rem;
-  }
 }
 
 .table-filter-chip-list,
