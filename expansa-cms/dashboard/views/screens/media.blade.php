@@ -12,16 +12,13 @@ use Expansa\Facades\Hook;
 
 Hook::add('renderDashboardFooter', function () {
     echo view('parts/dialogs/media-editor');
+    echo view('parts/dialogs/media-uploader');
 }, 0);
 ?>
 <div class="storage" u-data="{items: [], selected: []}" u-dragselect="selected = [...new Set([...selected, ...$event.detail.ids])]">
     <div class="storage__head">
         <h4>{{ t('Media Library') }}</h4>
-        <button class="btn btn--sm btn--outline" @click=""><i class="ph ph-upload-simple"></i> {{ t('Add New File') }}</button>
-    </div>
-
-    <div class="storage__uploader" hidden>
-        <?php echo view('parts/dialogs/media-uploader'); ?>
+        <button class="btn btn--sm btn--outline" @click="$dialog.open('files-uploader')"><i class="ph ph-upload-simple"></i> {{ t('Add New File') }}</button>
     </div>
 
     <div class="df aic g-3" u-show="selected.length" hidden>

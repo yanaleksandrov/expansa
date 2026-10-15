@@ -12,11 +12,9 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="fs-14 lh-sm">
-    @if (! empty($item['author_id']))
-        <a href="{{ url('dashboard/profile?id=' . $item['author_id']) }}" class="fw-500 t-dark">{{ is_scalar($value) ? $value : '' }}</a>
-    @else
-        <span class="fw-500">{{ is_scalar($value) ? $value : '' }}</span>
-    @endif
-</div>
+@if (! empty($item['author_id']))
+    <a href="{{ url('dashboard/profile?id=' . $item['author_id']) }}" class="fw-500 t-dark">{{ is_scalar($value) ? $value : '' }}</a>
+@else
+    <strong>{{ is_scalar($value) ? $value : '' }}</strong>
+@endif
 <div class="fs-12 t-muted mt-1">{{ $item['email'] ?? '' }}</div>

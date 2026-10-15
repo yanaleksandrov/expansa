@@ -17,7 +17,9 @@ final class Pages extends Table
                 'id'         => 1,
                 'image'      => url('dashboard/assets/images/placeholder.svg'),
                 'title'      => 'Post title',
-                'status'     => 'Draft',
+                'status'     => [
+                    'value' => 'Draft',
+                ],
                 'author_id'  => 1,
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
@@ -68,7 +70,7 @@ final class Pages extends Table
                 ->view('links'),
             $this->cell('status')
                 ->title(t('Status'))
-                ->fixedWidth('4rem')
+                ->fixedWidth('5rem')
                 ->sortable()
                 ->view('badge'),
             $this->cell('date')

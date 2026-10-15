@@ -95,13 +95,11 @@ final class Comments extends Table
                 ->view('title'),
             $this->cell('post')
                 ->title(t('In Response To'))
-                ->fixedWidth('12rem')
-                ->view('raw'),
+                ->fixedWidth('12rem'),
             $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('9rem')
-                ->sortable()
-                ->view('raw'),
+                ->sortable(),
         ];
     }
 

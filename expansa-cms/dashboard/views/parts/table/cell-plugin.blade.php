@@ -1,4 +1,6 @@
 <?php
+use Expansa\Facades\Safe;
+
 /**
  * Plugin name with the description and the author.
  *
@@ -11,13 +13,21 @@
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
+
+[ $title, $author ] = Safe::data(
+    $item,
+    [
+        'title'  => 'trim',
+        'author' => 'trim',
+    ]
+)->values();
 ?>
-<div class="fs-15 lh-sm fw-500">{{ $item['title'] ?? '' }}</div>
-<div class="mt-1 t-muted">{{ $item['description'] ?? '' }}</div>
+<strong>{{ $title }}</strong>
 <div class="df g-1 mt-1 t-muted">
-    @if (! empty($item['author']))
-        <span class="dib">{{ t('by :author', $item['author']) }}</span> ·
+    @if ($author)
+        <span class="dib">{{ t('by :author', $author) }}</span>
     @endif
-    <a href="#" class="dib">{{ t('Settings') }}</a> ·
-    <a href="#" class="dib t-red">{{ t('Delete') }}</a>
+    <div class="table-hidden"> ·
+        <a href="#" class="dib">{{ t('Settings') }}</a> · <a href="#" class="dib t-red">{{ t('Delete') }}</a>
+    </div>
 </div>
