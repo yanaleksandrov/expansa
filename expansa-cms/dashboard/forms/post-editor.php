@@ -20,7 +20,7 @@ $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDat
 return Form::enqueue(
     'post-editor',
     [
-        'class'           => 'post-editor',
+        'class'           => 'tab post-editor',
 		'u-data'          => 'tab',
         '@load'           => '$dirty.watch($el)',
         '@submit.prevent' => sprintf('$ajax.post("%s", "", () => $dirty.remove($el))', $post->id === 0 ? 'post/create' : 'post/update'),
@@ -51,9 +51,9 @@ return Form::enqueue(
 							'type'          => 'group',
 							'name'          => 'main',
 							'label'         => '',
-							'class'         => 'post-editor-main',
+							'class'         => '',
 							'label_class'   => '',
-							'content_class' => '12',
+							'content_class' => 'dg ga-5 g-6 gtc-1',
 							'fields'        => [
 									[
 										'name'     => 'header',
@@ -206,9 +206,9 @@ return Form::enqueue(
             'type'          => 'group',
             'name'          => 'side',
             'label'         => '',
-            'class'         => 'post-editor-side',
+            'class'         => 'dg g-6 gtc-1 py-6 sm:py-4',
             'label_class'   => '',
-            'content_class' => 'post-editor-card',
+            'content_class' => 'dg g-6 gtc-1',
             'fields'        => [
                 [
                     'name'     => 'properties',

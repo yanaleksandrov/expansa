@@ -662,15 +662,18 @@ img:after {
   pointer-events: none;
   background-color: transparent;
 }
-.tab__content {
+.tab .tab__content {
   flex: 1;
   width: 100%;
   max-width: 54rem;
   padding: 1.5rem;
+  display: grid;
+  gap: 1.5rem;
 }
 @media (max-width: 1024px) {
-  .tab__content {
+  .tab .tab__content {
     padding: 1rem;
+    gap: 1rem;
   }
 }
 
@@ -3426,14 +3429,12 @@ body.is-unsaved .expansa-search-btn {
 }
 
 .post-editor {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
   container: post-editor/inline-size;
 }
 .post-editor .post-editor-main {
+  min-width: 34rem;
   width: 100%;
-  min-width: 40rem;
+  align-content: start;
 }
 @container post-editor (max-width: 768px) {
   .post-editor .post-editor-main {
@@ -3444,7 +3445,6 @@ body.is-unsaved .expansa-search-btn {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  margin-bottom: 0.5rem;
   padding-inline: 1rem;
 }
 .post-editor .post-editor-title > .btn:first-child {
@@ -3482,22 +3482,22 @@ body.is-unsaved .expansa-search-btn {
 }
 .post-editor .post-editor-props {
   display: grid;
-  grid-template-columns: 7rem minmax(0, 1fr);
+  grid-template-columns: 6rem minmax(0, 1fr);
   row-gap: 2px;
   align-items: center;
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: 0.78125rem;
 }
 .post-editor .post-editor-props > dt {
   display: flex;
   align-items: center;
   gap: 0.4375rem;
-  height: 1.875rem;
+  height: 1.75rem;
   margin: 0;
   color: var(--expansa-text-muted);
 }
 .post-editor .post-editor-props > dt > i {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   opacity: 0.7;
 }
 .post-editor .post-editor-props > dd {
@@ -3506,7 +3506,7 @@ body.is-unsaved .expansa-search-btn {
   flex-wrap: wrap;
   gap: 0.25rem;
   min-width: 0;
-  min-height: 1.875rem;
+  min-height: 1.75rem;
   margin: 0;
 }
 .post-editor .post-editor-pill {

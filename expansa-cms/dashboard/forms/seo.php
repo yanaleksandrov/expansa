@@ -249,7 +249,7 @@ return Expansa\Builders\Form::enqueue(
 		[
 			'name'        => 'representation',
 			'type'        => 'tab',
-			'label'       => t( 'Site Representation' ),
+			'label'       => t( 'Identity' ),
 			'caption'     => t( 'Site Representation' ),
 			'description' => t( 'This info is intended to appear in Google\'s Knowledge Graph.' ),
 			'icon'        => 'ph ph-buildings',

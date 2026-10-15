@@ -180,14 +180,17 @@
     }
   }
 
-  &__content {
+  .tab__content {
     flex: 1;
     width: 100%;
     max-width: 54rem;
     padding: 1.5rem;
+    display: grid;
+    gap: 1.5rem;
 
     @media (max-width: 1024px) {
       padding: 1rem;
+      gap: 1rem;
     }
   }
 }
