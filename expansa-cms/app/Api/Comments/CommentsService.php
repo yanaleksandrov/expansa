@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Api\Comments;
 
 use App\Models\Comment;
+use App\Models\Post;
 use App\Models\User;
+use App\Post\Type;
 use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
@@ -47,11 +49,13 @@ final class CommentsService
     }
 
     /**
-     * Delete a comment from its page and go back to the list; the comment is kept as soft-deleted.
+     * Delete a comment, kept as soft-deleted, and go back to the list, or with `from` = `post` to the Comments
+     * tab of the editor of its post. With `stay`, e.g. from the post editor, the page stays: the comment leaves its thread
+     * and its replies take its place.
      *
-     * @param Request  $request  `id`.
+     * @param Request  $request  `id`, optional `stay` and `from`.
      * @param Response $response
-     * @return Response Notice and redirect.
+     * @return Response Notice and redirect, or the comment replaced by its replies.
      */
     public function delete(Request $request, Response $response): Response
     {
@@ -61,10 +65,87 @@ final class CommentsService
         }
 
         $comment->delete();
+        $response->notify(t('Comment deleted'));
+
+        if (empty($request->post['stay'])) {
+            $toPost = ($request->post['from'] ?? '') === 'post' && Type::get($comment->postType) !== null;
+            $url    = $toPost
+                ? 'dashboard/post?type=' . $comment->postType . '&id=' . $comment->postId . '&tab=comments'
+                : 'dashboard/edit?table=comments';
+
+            return $response->redirect(url($url), 1200);
+        }
+
+        $threads = Comment::groupByParent(Comment::getByPost($comment->postType, (int) $comment->postId));
+        $isOpen  = Post::get($comment->postType, (int) $comment->postId)?->isDiscussionOpen() ?? false;
+        $replies = array_map(
+            fn (Comment $reply) => view('parts/post-comment', [
+                'comment' => $reply,
+                'replies' => $threads,
+                'isOpen'  => $isOpen,
+            ])->render(),
+            $threads[$comment->id] ?? []
+        );
 
         return $response
-            ->notify(t('Comment deleted'))
-            ->redirect(url('dashboard/edit?table=comments'), 1200);
+            ->replace("#post-comment-$comment->id", implode('', $replies))
+            ->update('#post-comments-count', self::count($comment->postType, (int) $comment->postId));
+    }
+
+    /**
+     * Comment a post from its editor as the current user: an approved comment, added at the end of the list,
+     * or of the replies of `parent_id`, a comment of the same post.
+     *
+     * @param Request  $request  `post-type` and `id` of the post, `content` of the comment, optional `parent_id`.
+     * @param Response $response
+     * @return Response The comment after the others, the field cleared.
+     * @throws ValidationFailed When the comment is refused, e.g. empty.
+     */
+    public function add(Request $request, Response $response): Response
+    {
+        $post = Post::get((string) ($request->post['post-type'] ?? ''), (int) ($request->post['id'] ?? 0));
+        if (! $post instanceof Post) {
+            return $response->notify(t('Item not found'));
+        }
+
+        $user = User::current();
+        if (! $user instanceof User) {
+            return $response->notify(t('You are not allowed to do this.'));
+        }
+
+        if (! $post->isDiscussionOpen()) {
+            return $response->notify(t('The discussion is closed.'));
+        }
+
+        $parentId = (int) ($request->post['parent_id'] ?? 0);
+        $parent   = $parentId > 0 ? Comment::find($parentId) : null;
+        $isOther = $parent instanceof Comment && ((int) $parent->postId !== $post->id || $parent->postType !== $post->type);
+        if ($parent instanceof Error || $isOther) {
+            return $response->notify(t('Comment not found'));
+        }
+
+        $comment = Comment::createBy($user, [
+            'post_id'   => $post->id,
+            'post_type' => $post->type,
+            'parent_id' => $parent->id ?? 0,
+            'locale'    => $parent?->locale,
+            'content'   => (string) ($request->post['content'] ?? ''),
+        ]);
+        if ($comment instanceof Error) {
+            throw ValidationFailed::from($comment, t('Could not add the comment. Check the text.'));
+        }
+
+        $html = view('parts/post-comment', ['comment' => $comment])->render();
+        $response->update('#post-comments-count', self::count($post->type, $post->id));
+        if ($parent !== null) {
+            return $response
+                ->append("#post-comment-replies-$parent->id", $html)
+                ->value("#post-comment-reply-$parent->id", '');
+        }
+
+        return $response
+            ->append('.post-comments-list', $html)
+            ->value('#post-comment-text', '');
     }
 
     /**
@@ -82,19 +163,17 @@ final class CommentsService
             return $response->notify(t('Comment not found'));
         }
 
-        $user  = User::current();
-        $reply = Comment::create([
-            'post_id'      => $parent->postId,
-            'post_type'    => $parent->postType,
-            'parent_id'    => $parent->id,
-            'author_id'    => $user?->id ?? 0,
-            'author_name'  => $user === null ? '' : ($user->showname ?: $user->login),
-            'author_email' => $user->email ?? '',
-            'author_ip'    => $_SERVER['REMOTE_ADDR'] ?? '',
-            'author_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
-            'locale'       => $parent->locale,
-            'status'       => Comment::STATUS_APPROVED,
-            'content'      => (string) ($request->post['reply'] ?? ''),
+        $user = User::current();
+        if (! $user instanceof User) {
+            return $response->notify(t('You are not allowed to do this.'));
+        }
+
+        $reply = Comment::createBy($user, [
+            'post_id'   => $parent->postId,
+            'post_type' => $parent->postType,
+            'parent_id' => $parent->id,
+            'locale'    => $parent->locale,
+            'content'   => (string) ($request->post['reply'] ?? ''),
         ]);
         if ($reply instanceof Error) {
             throw ValidationFailed::from($reply, t('Could not send the reply. Check the text.'));
@@ -134,5 +213,17 @@ final class CommentsService
         return $response
             ->notify(t('Comments changed: :count', $count))
             ->reload(1200);
+    }
+
+    /**
+     * Render the number of the comments of a post by status for the side panel of its editor.
+     *
+     * @param string $postType
+     * @param int    $postId
+     * @return string
+     */
+    private static function count(string $postType, int $postId): string
+    {
+        return view('parts/post-comments-count', ['counts' => Comment::countByStatus($postType, $postId)])->render();
     }
 }

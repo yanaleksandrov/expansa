@@ -362,7 +362,7 @@ final class Migrations
             $table->smallInt('dislikes')->unsigned()->default(0);
             $table->smallInt('rating')->unsigned()->nullable()->default(null);
             $table->timestamps();
-            $table->timestamp('deleted_at');
+            $table->timestamp('deleted_at')->nullable();
 
             // indexes
             $table->index('post_id');

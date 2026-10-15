@@ -326,6 +326,16 @@ class Post
     }
 
     /**
+     * Whether the post takes new comments: its discussion is not closed.
+     *
+     * @return bool
+     */
+    public function isDiscussionOpen(): bool
+    {
+        return $this->discussion !== 'closed';
+    }
+
+    /**
      * Whether the post is in the trash.
      *
      * @return bool

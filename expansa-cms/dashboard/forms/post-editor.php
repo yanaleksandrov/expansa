@@ -1,6 +1,8 @@
 <?php
 
 use App\Dashboard\Pages\Post as Page;
+use App\Models\Comment;
+use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
 use Expansa\Builders\Form;
@@ -19,6 +21,7 @@ return Form::enqueue(
     'post-editor',
     [
         'class'           => 'post-editor',
+		'u-data'          => 'tab',
         '@load'           => '$dirty.watch($el)',
         '@submit.prevent' => sprintf('$ajax.post("%s", "", () => $dirty.remove($el))', $post->id === 0 ? 'post/create' : 'post/update'),
     ],
@@ -39,131 +42,166 @@ return Form::enqueue(
 			'name'          => 'main',
 			'caption'       => '',
 			'description'   => '',
-			'icon'          => 'ph ph-chat-text',
+			'icon'          => 'ph ph-article',
 			'class_menu'    => '',
 			'class_button'  => '',
 			'class_content' => '',
-			'fields'        => [],
+			'fields'        => [
+					[
+							'type'          => 'group',
+							'name'          => 'main',
+							'label'         => '',
+							'class'         => 'post-editor-main',
+							'label_class'   => '',
+							'content_class' => 'dg',
+							'fields'        => [
+									[
+										'name'     => 'header',
+										'type'     => 'custom',
+										'callback' => function () use ($post, $type, $date) {
+											?>
+											<h5 class="post-editor-title">
+												<a class="btn btn--icon btn--sm" href="<?php echo url('dashboard/edit?table=' . $type->key); ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
+													<i class="ph ph-arrow-left"></i>
+												</a>
+												<span class="fw-600 mr-auto"><?php echo $post->id === 0 ? $type->labelAdd : $type->labelEdit; ?></span>
+												<?php if ($post->isTrashed()) : ?>
+													<span class="badge t-red"><?php echo t('In the trash'); ?></span>
+												<?php endif; ?>
+												<?php if ($type->public && $post->slug !== '') : ?>
+													<a class="btn btn--sm btn--outline" href="<?php echo url($post->slug); ?>" target="_blank"><?php echo $type->labelView; ?></a>
+												<?php endif; ?>
+												<button class="btn btn--sm btn--primary" type="submit"><?php echo $type->labelSave; ?></button>
+											</h5>
+											<?php
+										},
+									],
+									[
+											'type'          => 'group',
+											'name'          => 'content',
+											'label'         => '',
+											'class'         => 'post-editor-card',
+											'label_class'   => '',
+											'content_class' => 'dg g-5',
+											'fields'        => [
+													[
+															'type'        => 'text',
+															'name'        => 'title',
+															'error'       => 'title',
+															'label'       => t('Title'),
+															'class'       => '',
+															'label_class' => '',
+															'reset'       => 0,
+															'before'      => '',
+															'after'       => '',
+															'instruction' => '',
+															'tooltip'     => '',
+															'copy'        => 0,
+															'validator'   => '',
+															'conditions'  => [],
+															'attributes'  => [
+																	'u-prop'   => 'title',
+																	'value'    => $post->title,
+																	'required' => true,
+															],
+													],
+													...($type->public ? [
+															[
+																	'type'        => 'text',
+																	'name'        => 'slug',
+																	'error'       => 'slug',
+																	'label'       => t('Slug'),
+																	'class'       => '',
+																	'label_class' => '',
+																	'reset'       => 0,
+																	'before'      => '<span class="t-muted">' . htmlspecialchars(rtrim(url(), '/')) . '/</span>',
+																	'after'       => '',
+																	'instruction' => t('The URL-friendly version of the title: lowercase letters, numbers and hyphens. Leave it empty to make it from the title.'),
+																	'tooltip'     => '',
+																	'copy'        => 0,
+																	'validator'   => '',
+																	'conditions'  => [],
+																	'attributes'  => [
+																			'u-prop' => 'slug',
+																			'value'  => $post->slug,
+																	],
+															],
+													] : []),
+													[
+															'name'     => 'content',
+															'type'     => 'custom',
+															'callback' => function () use ($post) {
+																?>
+																<div class="field">
+																	<div class="field-label"><?php echo t('Content'); ?></div>
+																	<label class="field-item">
+																		<textarea class="post-editor-text" name="content" u-prop="content" rows="16"><?php echo htmlspecialchars($post->content); ?></textarea>
+																	</label>
+																	<div class="field-instruction"><?php echo t('HTML is allowed: unsafe tags and attributes are removed on saving.'); ?></div>
+																</div>
+																<?php
+															},
+													],
+											],
+									],
+							],
+					],
+			],
 		],
-        [
-            'type'          => 'group',
-            'name'          => 'main',
-            'label'         => '',
-            'class'         => 'post-editor-main',
-            'label_class'   => '',
-            'content_class' => 'dg',
-            'fields'        => [
-                [
-                    'name'     => 'header',
-                    'type'     => 'custom',
-                    'callback' => function () use ($post, $type, $date) {
-                        $author  = Page::author($post);
-                        $updated = $post->updatedAt ? $date->format(strtotime($post->updatedAt)) : '';
-                        ?>
-                        <h5 class="post-editor-title">
-                            <a class="btn btn--icon btn--sm" href="<?php echo url('dashboard/edit?table=' . $type->key); ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
-                                <i class="ph ph-arrow-left"></i>
-                            </a>
-                            <span class="fw-600 mr-auto"><?php echo $post->id === 0 ? $type->labelAdd : $type->labelEdit; ?></span>
-	                        <?php
-	                        echo Form::view('input', [
-		                        'type'       => 'input',
-		                        'name'       => 'terminal',
-		                        'class'      => 'field field--plain',
-		                        'before'     => '<i class="ph ph-terminal"></i>',
-		                        'attributes' => [
-				                        'name'         => 's',
-				                        'placeholder'  => t('Describe what you want...'),
-				                        'u-noautofill' => 'terminal',
-		                        ],
-	                        ]);
-	                        ?>
-	                        <?php if ($post->isTrashed()) : ?>
-                                <span class="badge t-red"><?php echo t('In the trash'); ?></span>
-                            <?php endif; ?>
-                            <?php if ($type->public && $post->slug !== '') : ?>
-                                <a class="btn btn--sm btn--outline" href="<?php echo url($post->slug); ?>" target="_blank"><?php echo $type->labelView; ?></a>
-                            <?php endif; ?>
-                            <button class="btn btn--sm btn--primary" type="submit"><?php echo $type->labelSave; ?></button>
-                        </h5>
-                        <?php if ($updated !== '') : ?>
-                            <div class="post-editor-description">
-                                <?php echo $author !== '' ? t('Updated :date, author :name', $updated, htmlspecialchars($author)) : t('Updated :date', $updated); ?>
-                            </div>
-                        <?php endif; ?>
-                        <?php
-                    },
-                ],
-                [
-                    'type'          => 'group',
-                    'name'          => 'content',
-                    'label'         => '',
-                    'class'         => 'post-editor-card',
-                    'label_class'   => '',
-                    'content_class' => 'dg g-5',
-                    'fields'        => [
-                        [
-                            'type'        => 'text',
-                            'name'        => 'title',
-                            'error'       => 'title',
-                            'label'       => t('Title'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '',
-                            'after'       => '',
-                            'instruction' => '',
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop'   => 'title',
-                                'value'    => $post->title,
-                                'required' => true,
-                            ],
-                        ],
-                        ...($type->public ? [
-                            [
-                                'type'        => 'text',
-                                'name'        => 'slug',
-                                'error'       => 'slug',
-                                'label'       => t('Slug'),
-                                'class'       => '',
-                                'label_class' => '',
-                                'reset'       => 0,
-                                'before'      => '<span class="t-muted">' . htmlspecialchars(rtrim(url(), '/')) . '/</span>',
-                                'after'       => '',
-                                'instruction' => t('The URL-friendly version of the title: lowercase letters, numbers and hyphens. Leave it empty to make it from the title.'),
-                                'tooltip'     => '',
-                                'copy'        => 0,
-                                'validator'   => '',
-                                'conditions'  => [],
-                                'attributes'  => [
-                                    'u-prop' => 'slug',
-                                    'value'  => $post->slug,
-                                ],
-                            ],
-                        ] : []),
-                        [
-                            'name'     => 'content',
-                            'type'     => 'custom',
-                            'callback' => function () use ($post) {
-                                ?>
-                                <div class="field">
-                                    <div class="field-label"><?php echo t('Content'); ?></div>
-                                    <label class="field-item">
-                                        <textarea class="post-editor-text" name="content" u-prop="content" rows="16"><?php echo htmlspecialchars($post->content); ?></textarea>
-                                    </label>
-                                    <div class="field-instruction"><?php echo t('HTML is allowed: unsafe tags and attributes are removed on saving.'); ?></div>
-                                </div>
-                                <?php
-                            },
-                        ],
-                    ],
-                ],
-            ],
-        ],
+	    [
+		    'type'          => 'tab',
+		    'label'         => t('Comments'),
+		    'name'          => 'comments',
+		    'caption'       => '',
+		    'description'   => '',
+		    'icon'          => 'ph ph-chat-circle',
+		    'class_menu'    => '',
+		    'class_button'  => '',
+		    'class_content' => '',
+		    'fields'        => [
+		        [
+		            'name'     => 'comments',
+		            'type'     => 'custom',
+		            'callback' => function () use ($post) {
+		                $comments   = Comment::getByPost($post->type, $post->id);
+		                $user       = User::current();
+		                $name       = $user === null ? '' : ($user->showname ?: $user->login);
+		                $canComment = $user?->can('manage_comments') ?? false;
+		                ?>
+		                <div class="post-editor-main post-comments">
+		                    <div class="post-comments-list">
+		                        <?php $threads = Comment::groupByParent($comments); ?>
+		                        <?php foreach ($threads[0] ?? [] as $comment) : ?>
+		                            <?php echo view('parts/post-comment', ['comment' => $comment, 'replies' => $threads, 'isOpen' => $post->isDiscussionOpen()]); ?>
+		                        <?php endforeach; ?>
+		                    </div>
+		                    <?php if ($post->id === 0) : ?>
+		                        <p class="post-comments-empty"><?php echo t('Save the item to start the conversation.'); ?></p>
+		                    <?php else : ?>
+		                        <p class="post-comments-empty"><?php echo $canComment ? t('No comments yet. Start the conversation.') : t('No comments yet.'); ?></p>
+		                    <?php endif; ?>
+		                    <?php if ($post->id > 0 && ! $post->isDiscussionOpen()) : ?>
+		                        <p class="post-comments-closed">
+		                            <i class="ph ph-lock-simple"></i> <?php echo t('The discussion is closed: new comments and replies are not accepted.'); ?>
+		                        </p>
+		                    <?php elseif ($post->id > 0 && $canComment) : ?>
+		                        <div class="post-comment">
+		                            <span class="avatar avatar--rounded avatar--sm bg-blue-lt t-blue"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($name, 0, 1))); ?></span>
+		                            <div class="post-comment-box">
+		                                <textarea id="post-comment-text" name="content" form="post-comment" rows="2" required placeholder="<?php echo t_attr('Leave a comment…'); ?>" aria-label="<?php echo t_attr('Comment'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
+		                                <div class="post-comment-tools">
+		                                    <span class="t-muted fs-12"><?php echo t('Ctrl+Enter to send'); ?></span>
+		                                    <button class="btn btn--sm btn--primary" type="submit" form="post-comment"><?php echo t('Comment'); ?></button>
+		                                </div>
+		                            </div>
+		                        </div>
+		                    <?php endif; ?>
+		                </div>
+		                <?php
+		            },
+		        ],
+		    ],
+	    ],
         [
             'type'          => 'group',
             'name'          => 'side',
@@ -187,7 +225,6 @@ return Form::enqueue(
                         $facts    = $post->id === 0 ? [] : [
                             ['ph ph-calendar-plus', t('Created'), $post->createdAt ? $date->format(strtotime($post->createdAt)) : ''],
                             ['ph ph-clock-clockwise', t('Updated'), $post->updatedAt ? $date->format(strtotime($post->updatedAt)) : ''],
-                            ['ph ph-chat-circle-text', t('Comments'), (string) $post->comments],
                             ['ph ph-eye', t('Views'), (string) $post->views],
                             ['ph ph-hash', t('ID'), (string) $post->id],
                         ];
@@ -219,12 +256,16 @@ return Form::enqueue(
                             </dd>
                             <dt><i class="ph ph-user"></i><?php echo t('Author'); ?></dt>
                             <dd>
-                                <?php if ($author !== '') : ?>
+                                <?php if ($author) : ?>
                                     <a class="post-editor-pill" href="<?php echo url('dashboard/profile?id=' . $post->authorId); ?>"><?php echo htmlspecialchars($author); ?></a>
                                 <?php else : ?>
                                     <span class="post-editor-pill is-empty"><?php echo t('No author'); ?></span>
                                 <?php endif; ?>
                             </dd>
+                            <?php if ($post->id > 0) : ?>
+                                <dt><i class="ph ph-chat-circle-text"></i><?php echo t('Comments'); ?></dt>
+                                <dd id="post-comments-count"><?php echo view('parts/post-comments-count', ['counts' => Comment::countByStatus($post->type, $post->id)]); ?></dd>
+                            <?php endif; ?>
                             <?php foreach ($facts as [$icon, $label, $fact]) : ?>
                                 <dt><i class="<?php echo $icon; ?>"></i><?php echo $label; ?></dt>
                                 <dd><span class="post-editor-pill<?php echo $fact === '' ? ' is-empty' : ''; ?>"><?php echo $fact !== '' ? htmlspecialchars($fact) : '—'; ?></span></dd>

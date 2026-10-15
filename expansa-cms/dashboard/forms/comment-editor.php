@@ -6,6 +6,7 @@ use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 
 $comment = Page::comment(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
+$from    = filter_input(INPUT_GET, 'from') === 'post' ? 'post' : '';
 
 /**
  * Comment page: the text, status and author of a comment, the facts of where it came from.
@@ -266,12 +267,12 @@ return Form::enqueue(
                         [
                             'name'     => 'removal',
                             'type'     => 'custom',
-                            'callback' => function () use ($comment) {
+                            'callback' => function () use ($comment, $from) {
                                 ?>
                                 <div class="dg g-2 ga-4">
                                     <div><?php echo t('The comment disappears from the site and the list. Its replies stay.'); ?></div>
                                     <div>
-                                        <button class="btn btn--outline t-red" type="button" @click="confirm('<?php echo t_attr('Delete this comment?'); ?>') && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>})">
+                                        <button class="btn btn--outline t-red" type="button" @click="confirm('<?php echo t_attr('Delete this comment?'); ?>') && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>, from: '<?php echo $from; ?>'})">
                                             <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
                                         </button>
                                     </div>
