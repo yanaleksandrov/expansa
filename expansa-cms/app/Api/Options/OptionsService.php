@@ -43,6 +43,10 @@ final class OptionsService
                 $value = $this->normalizeSeo($value);
             }
 
+            if ($option === 'comments' && is_array($value)) {
+                $value = $this->normalizeComments($value);
+            }
+
             if ($option === 'oauth' && is_array($value)) {
                 $value = $this->normalizeProviders($value);
             }
@@ -91,6 +95,36 @@ final class OptionsService
         $seo['robots']['rules'] = trim(implode("\n", array_map(rtrim(...), $rules)));
 
         return $seo;
+    }
+
+    /**
+     * Bring the Discussions settings to their types: the switches to booleans, false when unchecked
+     * as the form does not send them, the days before closing and the levels of threads to numbers.
+     *
+     * @param array<string, mixed> $comments Form values.
+     * @return array<string, mixed>
+     */
+    private function normalizeComments(array $comments): array
+    {
+        $switches = [
+            'default_status',
+            'require_name_email',
+            'registration',
+            'close_comments_for_old_posts',
+            'thread_comments',
+            'notify_posts',
+            'notify_moderation',
+            'moderation',
+            'previously_approved',
+        ];
+        foreach ($switches as $key) {
+            $comments[$key] = isset($comments[$key]) && $comments[$key] !== '' && $comments[$key] !== '0';
+        }
+
+        $comments['close_comments_days_old'] = max(1, (int) ($comments['close_comments_days_old'] ?? 14));
+        $comments['thread_comments_depth']   = max(2, min(10, (int) ($comments['thread_comments_depth'] ?? 5)));
+
+        return $comments;
     }
 
     /**

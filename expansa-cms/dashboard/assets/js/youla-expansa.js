@@ -892,6 +892,7 @@ document.addEventListener('youla:init', () => {
         return {
             value: root.querySelector?.('.slug-line input')?.value || '',
             base: root.dataset?.base || '',
+            bases: JSON.parse(root.dataset?.bases || '{}'),
             source: from?.value || '',
             synced: root.dataset?.synced === '1',
             before: null,
@@ -915,6 +916,19 @@ document.addEventListener('youla:init', () => {
                         if (this.synced) {
                             this.value = this.generated();
                         }
+                    }
+                },
+                ':data-url'() {
+                    const url = this.base + this.value;
+                    root.dispatchEvent(new CustomEvent('slug-url', {
+                        detail: url,
+                        bubbles: true
+                    }));
+                    return url;
+                },
+                '@change.document'(e) {
+                    if (root.dataset?.parent && e.target.name === root.dataset.parent && e.target.form === root.closest('form')) {
+                        this.base = this.bases[e.target.value] ?? this.base;
                     }
                 }
             },
@@ -994,6 +1008,7 @@ document.addEventListener('youla:init', () => {
         tabButton(id) {
             return {
                 ':class'() {
+                    this.tab ??= this.$el.classList.contains('is-active') ? id : null;
                     return {
                         'is-active': this.tab === id
                     };

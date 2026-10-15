@@ -1083,6 +1083,7 @@ document.addEventListener('youla:init', ()=> {
         return {
             value: root.querySelector?.('.slug-line input')?.value || '',
             base: root.dataset?.base || '',
+            bases: JSON.parse(root.dataset?.bases || '{}'),
             source: from?.value || '',
             synced: root.dataset?.synced === '1',
             before: null,
@@ -1108,6 +1109,19 @@ document.addEventListener('youla:init', ()=> {
                         if (this.synced) {
                             this.value = this.generated();
                         }
+                    }
+                },
+                // the URL as shown, for the links to the page outside the field, e.g. in the breadcrumbs
+                ':data-url'() {
+                    const url = this.base + this.value;
+                    root.dispatchEvent(new CustomEvent('slug-url', { detail: url, bubbles: true }));
+
+                    return url;
+                },
+                // the URL of the chosen parent, before saving
+                '@change.document'(e) {
+                    if (root.dataset?.parent && e.target.name === root.dataset.parent && e.target.form === root.closest('form')) {
+                        this.base = this.bases[e.target.value] ?? this.base;
                     }
                 },
             },
@@ -1185,8 +1199,8 @@ document.addEventListener('youla:init', ()=> {
 
     /**
      * Tabs, synced with the page URL: `u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
-     * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab starts from the first
-     * panel that is not `hidden`: the server leaves the tab of `?tab=` open, plain markup opens the first.
+     * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab starts from the button
+     * the server marks `is-active` or the first panel that is not `hidden`: the tab of `?tab=`, else the first.
      *
      * @since 1.0
      */
@@ -1195,6 +1209,8 @@ document.addEventListener('youla:init', ()=> {
         tabButton(id) {
             return {
                 ':class'() {
+                    this.tab ??= this.$el.classList.contains('is-active') ? id : null;
+
                     return { 'is-active': this.tab === id };
                 },
                 '@click'() {

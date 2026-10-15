@@ -42,6 +42,11 @@ final readonly class CommentsController
         return $this->service->reply($request, $response);
     }
 
+    public function submit(Request $request, Response $response): Response
+    {
+        return $this->service->submit($request, $response);
+    }
+
     #[Can('manage_comments')]
     public function bulk(Request $request, Response $response): Response
     {

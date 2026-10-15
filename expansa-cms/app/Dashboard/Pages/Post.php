@@ -59,19 +59,41 @@ final class Post
     }
 
     /**
-     * Get the posts of the same type a post can be nested in: all but itself, by title.
+     * Get the posts of the same type a post can be nested in, as a tree by title: a child after its parent
+     * with a dash per level; the post and its descendants are left out, nesting in them makes a loop.
      *
      * @param Entry $post
      * @return array<int, string> Titles by ID, `0` for no parent.
      */
     public static function parents(Entry $post): array
     {
-        $rows = Db::select($post->table, ['id [Int]', 'title'], [
-            'id[!]' => $post->id,
-            'ORDER' => ['title' => 'ASC'],
-        ]);
+        $where = ['ORDER' => ['title' => 'ASC']];
+        if (Type::get($post->type)?->canTrash) {
+            $where['deleted_at'] = null;
+        }
 
-        return [0 => t('No parent')] + array_column($rows ?: [], 'title', 'id');
+        $rows     = Db::select($post->table, ['id [Int]', 'parent_id [Int]', 'title'], $where) ?: [];
+        $ids      = array_flip(array_column($rows, 'id'));
+        $children = [];
+        foreach ($rows as $row) {
+            // a child of a deleted or trashed post is shown at the top
+            $children[isset($ids[$row['parent_id']]) ? $row['parent_id'] : 0][] = $row;
+        }
+
+        $parents = [0 => t('No parent')];
+        $walk    = function (int $parentId, int $depth) use (&$walk, &$parents, $children, $post): void {
+            foreach ($children[$parentId] ?? [] as $row) {
+                if ($row['id'] === $post->id) {
+                    continue;
+                }
+
+                $parents[$row['id']] = str_repeat('— ', $depth) . ($row['title'] !== '' ? $row['title'] : '#' . $row['id']);
+                $walk($row['id'], $depth + 1);
+            }
+        };
+        $walk(0, 0);
+
+        return $parents;
     }
 
     /**

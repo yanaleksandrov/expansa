@@ -32,10 +32,7 @@ return Form::enqueue(
     [
         'class'           => 'df g-1',
         'u-data'          => '{action: ""}',
-        '@submit.prevent' => sprintf(
-            '(action !== "delete" || confirm(%s)) && $ajax.post("post/bulk", {ids: [...$el.closest(".table").querySelectorAll("[u-bind~=item]:checked")].map(input => input.value).join(",")})',
-            json_encode(t('Delete the selected items permanently?')),
-        ),
+        '@submit.prevent' => '(action !== "delete" || confirm(texts.deleteItems)) && $ajax.post("post/bulk", {ids: [...$el.closest(".table").querySelectorAll("[u-bind~=item]:checked")].map(input => input.value).join(",")})',
     ],
     [
         [

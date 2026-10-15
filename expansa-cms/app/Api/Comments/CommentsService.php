@@ -8,6 +8,7 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use App\Post\Type;
+use Expansa\Facades\Auth;
 use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
@@ -124,6 +125,10 @@ final class CommentsService
             return $response->notify(t('Comment not found'));
         }
 
+        if ($parent instanceof Comment && $parent->depth() >= Comment::maxDepth()) {
+            return $response->notify(t('This comment does not take replies.'));
+        }
+
         $comment = Comment::createBy($user, [
             'post_id'   => $post->id,
             'post_type' => $post->type,
@@ -135,7 +140,7 @@ final class CommentsService
             throw ValidationFailed::from($comment, t('Could not add the comment. Check the text.'));
         }
 
-        $html = view('parts/post-comment', ['comment' => $comment])->render();
+        $html = view('parts/post-comment', ['comment' => $comment, 'depth' => $parent instanceof Comment ? $parent->depth() + 1 : 1])->render();
         $response->update('#post-comments-count', self::count($post->type, $post->id));
         if ($parent !== null) {
             return $response
@@ -146,6 +151,37 @@ final class CommentsService
         return $response
             ->append('.post-comments-list', $html)
             ->value('#post-comment-text', '');
+    }
+
+    /**
+     * Comment a post from the site as a visitor or a signed-in user, see Comment::submit(); ten in ten minutes
+     * from one address.
+     *
+     * @param Request  $request  `post-type` and `id` of the post, `content`, optional `parent_id`,
+     *                           `author_name` and `author_email` of a guest.
+     * @param Response $response
+     * @return Response Notice whether the comment is published or waits for moderation.
+     * @throws ValidationFailed When the comment is refused, e.g. without a name.
+     */
+    public function submit(Request $request, Response $response): Response
+    {
+        Auth::limit('comment-submit:' . ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 600);
+
+        $comment = Comment::submit([
+            'post_type'    => (string) ($request->post['post-type'] ?? ''),
+            'post_id'      => (int) ($request->post['id'] ?? 0),
+            'parent_id'    => (int) ($request->post['parent_id'] ?? 0),
+            'author_name'  => (string) ($request->post['author_name'] ?? ''),
+            'author_email' => (string) ($request->post['author_email'] ?? ''),
+            'content'      => (string) ($request->post['content'] ?? ''),
+        ], User::current());
+        if ($comment instanceof Error) {
+            throw ValidationFailed::from($comment, t('Could not add the comment. Check the text.'));
+        }
+
+        return $response->notify($comment->status === Comment::STATUS_APPROVED
+            ? t('Your comment is published.')
+            : t('Your comment is awaiting moderation.'));
     }
 
     /**
@@ -164,7 +200,7 @@ final class CommentsService
         }
 
         if (! $parent->canReply()) {
-            return $response->notify(t('The discussion is closed.'));
+            return $response->notify(t('This comment does not take replies.'));
         }
 
         $user = User::current();

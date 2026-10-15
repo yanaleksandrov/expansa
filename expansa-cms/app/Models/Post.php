@@ -159,10 +159,15 @@ class Post
                 'views'      => 'absint:0',
                 'position'   => 'absint:0',
                 'status'     => 'text:draft',
-                'discussion' => 'text:open',
+                'discussion' => 'text:' . (Option::get('comments.default_status', true) ? 'open' : 'closed'),
                 'password'   => 'text',
             ]
         )->apply();
+
+        // a parent only for a hierarchical type, and one that exists
+        if ($data['parent_id'] > 0 && (! $type->hierarchical || ! Db::has($type->table, ['id' => $data['parent_id']]))) {
+            $data['parent_id'] = 0;
+        }
 
         // insert to DB
         Db::insert($type->table, ['uuid' => Str::uuid7()] + array_diff_key($data, array_flip([ 'slug', 'fields' ])));
@@ -197,12 +202,85 @@ class Post
         return $post;
     }
 
-    public static function getBySlug(string $value): ?Post
+    /**
+     * Get a post by the path of its URL, see path(): `parent/child` for a hierarchical type.
+     *
+     * @param string $path
+     * @return Post|null Null when there is no such post, it is in the trash or the path is not its own.
+     */
+    public static function getByPath(string $path): ?Post
     {
-        $slug = Slug::find($value, 'slug');
+        $path = trim($path, '/');
+        $slug = Slug::find(substr($path, (int) strrpos('/' . $path, '/')), 'slug');
         $post = $slug instanceof Slug ? self::get(Safe::tablename($slug->entityTable), $slug->entityId) : null;
 
-        return $post?->isTrashed() ? null : $post;
+        // a page of a hierarchical type opens only under the slugs of its parents
+        return $post === null || $post->isTrashed() || $post->path() !== $path ? null : $post;
+    }
+
+    /**
+     * Get the path of the post in its URL: the slug, under the slugs of the parents for a hierarchical type.
+     *
+     * @return string `parent/child`, empty for a post without a slug.
+     */
+    public function path(): string
+    {
+        return self::paths($this->type, [$this->id])[$this->id] ?? '';
+    }
+
+    /**
+     * Get the paths of posts of a public type in their URLs: the slug, under the slugs of the parents
+     * for a hierarchical type, `parent/child`. The parents are read a level per query, the slugs in one.
+     *
+     * @param string $type Key of the post type.
+     * @param int[]  $ids
+     * @return array<int, string> Paths by ID; a post without a slug has none, a parent without one is skipped.
+     */
+    public static function paths(string $type, array $ids): array
+    {
+        $type = Type::get($type);
+        $ids  = array_values(array_unique(array_filter(array_map(intval(...), $ids))));
+        if (! $type instanceof Type || ! $type->public || $ids === []) {
+            return [];
+        }
+
+        $parents = [];
+        $level   = $type->hierarchical ? $ids : [];
+        while ($level !== []) {
+            $next = [];
+            foreach (Db::select($type->table, ['id [Int]', 'parent_id [Int]'], ['id' => $level]) ?: [] as $row) {
+                $parents[$row['id']] = $row['parent_id'];
+                if ($row['parent_id'] > 0 && ! isset($parents[$row['parent_id']])) {
+                    $next[$row['parent_id']] = $row['parent_id'];
+                }
+            }
+            $level = array_values($next);
+        }
+
+        $slugs = array_column(Db::select('slugs', ['entity_id [Int]', 'slug'], [
+            'entity_table' => $type->table,
+            'entity_id'    => array_values(array_unique([...$ids, ...array_keys($parents)])),
+        ]) ?: [], 'slug', 'entity_id');
+
+        $paths = [];
+        foreach ($ids as $id) {
+            if (! isset($slugs[$id])) {
+                continue;
+            }
+
+            $path = [$slugs[$id]];
+            $seen = [$id => true];
+            for ($parent = $parents[$id] ?? 0; $parent > 0 && ! isset($seen[$parent]); $parent = $parents[$parent] ?? 0) {
+                $seen[$parent] = true;
+                if (isset($slugs[$parent])) {
+                    array_unshift($path, $slugs[$parent]);
+                }
+            }
+
+            $paths[$id] = implode('/', $path);
+        }
+
+        return $paths;
     }
 
     /**
@@ -262,9 +340,9 @@ class Post
 
         $data = Safe::data(array_intersect_key($args, $rules), array_intersect_key($rules, $args))->apply();
 
-        // a post can not be the parent of itself
-        if (($data['parent_id'] ?? 0) === $this->id) {
-            $data['parent_id'] = 0;
+        // a parent that would make a loop or is not allowed for the type keeps the saved one
+        if (isset($data['parent_id']) && ! $this->canHaveParent($data['parent_id'])) {
+            unset($data['parent_id']);
         }
 
         if (isset($data['status']) && ! array_key_exists($data['status'], Status::getStatuses())) {
@@ -336,13 +414,22 @@ class Post
     }
 
     /**
-     * Whether the post takes new comments: its discussion is not closed.
+     * Whether the post takes new comments: its discussion is not closed, and the post is not older
+     * than the days of the Discussions settings when they close the comments on old posts.
      *
      * @return bool
      */
     public function isDiscussionOpen(): bool
     {
-        return $this->discussion !== 'closed';
+        if ($this->discussion === 'closed') {
+            return false;
+        }
+
+        if ($this->createdAt === '' || ! Option::get('comments.close_comments_for_old_posts', false)) {
+            return true;
+        }
+
+        return strtotime($this->createdAt) > time() - 86400 * max(1, (int) Option::get('comments.close_comments_days_old', 14));
     }
 
     /**
@@ -407,7 +494,8 @@ class Post
     }
 
     /**
-     * Delete the post permanently with its slug, bypassing the trash; its fields go with it by the foreign key.
+     * Delete the post permanently with its slug, bypassing the trash; its fields go with it by the foreign key,
+     * its children move up to its parent.
      *
      * @return bool False when there was no such row.
      */
@@ -416,9 +504,44 @@ class Post
         $deleted = Db::delete($this->table, ['id' => $this->id])?->rowCount() > 0;
         if ($deleted) {
             Db::delete('slugs', ['entity_id' => $this->id, 'entity_table' => $this->table]);
+            Db::update($this->table, ['parent_id' => $this->parentId], ['parent_id' => $this->id]);
             Activity::forget($this->table, $this->id);
         }
 
         return $deleted;
+    }
+
+    /**
+     * Whether a post can be the parent of this one: the type is hierarchical, the parent is a post
+     * of the same type and neither this post nor one of its descendants, so no loop appears.
+     *
+     * @param int $parentId `0` for no parent, always allowed.
+     * @return bool
+     */
+    public function canHaveParent(int $parentId): bool
+    {
+        if ($parentId === 0) {
+            return true;
+        }
+
+        if (! (Type::get($this->type)?->hierarchical ?? false)) {
+            return false;
+        }
+
+        // up from the parent to the root: meeting this post means the parent is its descendant
+        $seen = [];
+        for ($id = $parentId; $id > 0; $id = (int) $next) {
+            if ($id === $this->id || isset($seen[$id])) {
+                return false;
+            }
+
+            $seen[$id] = true;
+            $next      = Db::get($this->table, 'parent_id', ['id' => $id]);
+            if (! is_scalar($next)) {
+                return $id !== $parentId;
+            }
+        }
+
+        return true;
     }
 }

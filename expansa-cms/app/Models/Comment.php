@@ -14,6 +14,10 @@ use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
 use Expansa\Facades\Db;
+use Expansa\Facades\I18n;
+use Expansa\Facades\Log;
+use Expansa\Facades\Mail;
+use Expansa\Facades\View;
 use Expansa\Support\Error;
 use PDO;
 
@@ -226,7 +230,7 @@ class Comment extends Model
      */
     public static function createBy(User $user, array $data): Comment|Error
     {
-        return self::create([
+        $comment = self::create([
             ...$data,
             'author_id'    => $user->id,
             'author_name'  => $user->showname ?: $user->login,
@@ -236,6 +240,156 @@ class Comment extends Model
             'locale'       => $data['locale'] ?? $user->locale,
             'status'       => self::STATUS_APPROVED,
         ]);
+
+        if ($comment instanceof self) {
+            $comment->notify();
+        }
+
+        return $comment;
+    }
+
+    /**
+     * Submit a comment of a visitor from the site by the Discussions settings: signing in, the name
+     * and the email, the depth of a reply; the comment is approved or held for moderation, then
+     * the post author or the site owner gets an email.
+     *
+     * @param array     $data `post_id`, `post_type`, `content`, optional `parent_id`, `author_name`, `author_email`.
+     * @param User|null $user Signed-in author, null for a guest.
+     * @return Comment|Error
+     */
+    public static function submit(array $data, ?User $user): Comment|Error
+    {
+        $post = Post::get((string) ($data['post_type'] ?? ''), (int) ($data['post_id'] ?? 0));
+        if (! $post instanceof Post || $post->status !== 'publish' || ! (Type::get($post->type)?->public ?? false)) {
+            return error('comment-submit', t('Item not found'));
+        }
+
+        if (! $post->isDiscussionOpen()) {
+            return error('comment-submit', t('The discussion is closed.'));
+        }
+
+        if ($user === null && Option::get('comments.registration', false)) {
+            return error('comment-submit', t('Sign in to leave a comment.'));
+        }
+
+        $parentId = (int) ($data['parent_id'] ?? 0);
+        if ($parentId > 0) {
+            $parent = self::find($parentId);
+            if (! $parent instanceof self || (int) $parent->postId !== $post->id || $parent->postType !== $post->type || $parent->status !== self::STATUS_APPROVED) {
+                return error('comment-submit', t('Comment not found'));
+            }
+
+            if ($parent->depth() >= self::maxDepth()) {
+                return error('comment-submit', t('This comment does not take replies.'));
+            }
+        }
+
+        $name  = $user === null ? trim((string) ($data['author_name'] ?? '')) : ($user->showname ?: $user->login);
+        $email = $user === null ? trim((string) ($data['author_email'] ?? '')) : (string) $user->email;
+        if ($name === '') {
+            return error('comment-submit', ['author_name' => t('Enter your name.')]);
+        }
+
+        if ($email === '' && $user === null && Option::get('comments.require_name_email', true)) {
+            return error('comment-submit', ['author_email' => t('Enter your email.')]);
+        }
+
+        if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            return error('comment-submit', ['author_email' => t('Enter a valid email.')]);
+        }
+
+        $comment = self::create([
+            'post_id'      => $post->id,
+            'post_type'    => $post->type,
+            'parent_id'    => $parentId,
+            'author_id'    => $user->id ?? 0,
+            'author_name'  => mb_substr($name, 0, 100),
+            'author_email' => $email,
+            'author_ip'    => $_SERVER['REMOTE_ADDR'] ?? '',
+            'author_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
+            'locale'       => $user->locale ?? I18n::locale(),
+            'status'       => self::moderate($user, $email),
+            'content'      => (string) ($data['content'] ?? ''),
+        ]);
+
+        if ($comment instanceof self) {
+            $comment->notify();
+        }
+
+        return $comment;
+    }
+
+    /**
+     * Get the status of a new comment of a visitor: approved for a moderator; pending when every comment
+     * is approved manually, or the author must have an approved comment and has none, by the email or the account.
+     *
+     * @param User|null $user
+     * @param string    $email
+     * @return string
+     */
+    private static function moderate(?User $user, string $email): string
+    {
+        if ($user?->can('manage_comments')) {
+            return self::STATUS_APPROVED;
+        }
+
+        if (Option::get('comments.moderation', true)) {
+            return self::STATUS_PENDING;
+        }
+
+        if (! Option::get('comments.previously_approved', false)) {
+            return self::STATUS_APPROVED;
+        }
+
+        $author   = $user === null ? ['author_email' => $email] : ['author_id' => $user->id];
+        $approved = ($user !== null || $email !== '') && Db::has('comments', [
+            ...$author,
+            'status'     => self::STATUS_APPROVED,
+            'deleted_at' => null,
+        ]);
+
+        return $approved ? self::STATUS_APPROVED : self::STATUS_PENDING;
+    }
+
+    /**
+     * Email about the new comment by the Discussions settings: the owner of the site when it waits
+     * for moderation, the author of the post when it is published by someone else.
+     *
+     * @return void
+     */
+    private function notify(): void
+    {
+        $post = $this->getPost();
+        if (! $post instanceof Post) {
+            return;
+        }
+
+        $pending = $this->status === self::STATUS_PENDING;
+        if ($pending) {
+            $email = Option::get('comments.notify_moderation', true) ? (string) Option::get('site.owner.email', '') : '';
+        } else {
+            $author = $post->authorId > 0 && $post->authorId !== (int) $this->authorId ? User::find($post->authorId) : null;
+            $email  = $author instanceof User && Option::get('comments.notify_posts', true) ? (string) $author->email : '';
+        }
+
+        if ($email === '' || ! in_array($this->status, [self::STATUS_PENDING, self::STATUS_APPROVED], true)) {
+            return;
+        }
+
+        $body = View::create('mails/wrapper', [
+            'body_template' => 'mails/new-comment',
+            'postTitle'     => $post->title,
+            'author'        => $this->getAuthorName(),
+            'content'       => $this->content,
+            'link'          => url('dashboard/comment?id=' . $this->id),
+            'pending'       => $pending,
+        ])->render();
+
+        $subject = $pending ? t('Comment awaiting moderation on «:title»', $post->title) : t('New comment on «:title»', $post->title);
+        $message = Mail::to($email)->subject($subject)->message($body);
+        if (! $message->send()) {
+            Log::error('New comment: the email was not sent.', ['comment' => $this->id, 'error' => $message->error]);
+        }
     }
 
     /**
@@ -289,13 +443,52 @@ class Comment extends Model
     }
 
     /**
-     * Whether the comment takes replies: the discussion of its post is open; a comment without a post takes none.
+     * Whether the comment takes replies: the discussion of its post is open and its thread is not
+     * at the depth of the settings yet; a comment without a post takes none.
      *
      * @return bool
      */
     public function canReply(): bool
     {
-        return $this->getPost()?->isDiscussionOpen() ?? false;
+        return $this->depth() < self::maxDepth() && ($this->getPost()?->isDiscussionOpen() ?? false);
+    }
+
+    /**
+     * Get the deepest level of a thread from the Discussions settings: 1 when threaded comments are off,
+     * so no comment takes replies, else the levels deep, from 2 to 10.
+     *
+     * @return int
+     */
+    public static function maxDepth(): int
+    {
+        if (! Option::get('comments.thread_comments', true)) {
+            return 1;
+        }
+
+        return max(2, min(10, (int) Option::get('comments.thread_comments_depth', 5)));
+    }
+
+    /**
+     * Get the level of the comment in its thread: 1 for a top-level one; the walk up the parents stops
+     * at the deepest level of the settings, which is all that replying needs to know.
+     *
+     * @return int
+     */
+    public function depth(): int
+    {
+        $depth    = 1;
+        $parentId = $this->parentId;
+        $max      = self::maxDepth();
+        while ($parentId > 0 && $depth < $max) {
+            $parent = self::find($parentId);
+            if (! $parent instanceof self) {
+                break;
+            }
+            $parentId = $parent->parentId;
+            $depth++;
+        }
+
+        return $depth;
     }
 
     /**

@@ -4,11 +4,11 @@ use Expansa\Facades\I18n;
 
 /**
  * Activity tab of an editor: the card with the timeline of an entity, newest first;
- * the lines come from App\Support\Activity::timeline().
+ * the lines come from App\Support\Activity::timeline(), an edit with what its fields were and became.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/activity.blade.php
  *
- * @var array<int, array{icon: string, user: string, text: string, note: string, at: string}> $lines
+ * @var array<int, array{icon: string, user: string, text: string, note: string, changes?: array<int, array{field: string, from: string, to: string}>, at: string}> $lines
  *
  * @package Expansa\Templates
  */
@@ -34,8 +34,18 @@ $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDat
                             @endif
                             {{ $line['text'] }}
                             @if ($line['note'] !== '')
-                                <q>{{ $line['note'] }}</q>
+                                <span class="post-activity-note">{{ $line['note'] }}</span>
                             @endif
+                            @foreach ($line['changes'] ?? [] as $change)
+                                <span class="post-activity-note post-activity-change">
+                                    @if (count($line['changes']) > 1)
+                                        <em>{{ $change['field'] }}</em>
+                                    @endif
+                                    <del>{{ $change['from'] !== '' ? $change['from'] : '—' }}</del>
+                                    <i class="ph ph-arrow-right"></i>
+                                    <ins>{{ $change['to'] !== '' ? $change['to'] : '—' }}</ins>
+                                </span>
+                            @endforeach
                         </span>
                         @if ($line['at'] !== '')
                             <time datetime="{{ date('c', strtotime($line['at'])) }}">{{ $date->format(strtotime($line['at'])) }}</time>

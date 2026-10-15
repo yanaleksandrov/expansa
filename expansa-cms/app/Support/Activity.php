@@ -28,12 +28,36 @@ final class Activity
     private const int MERGE = 600;
 
     /**
+     * Columns of short text whose values `updated` keeps as `changes`, to show what they were and became;
+     * the content keeps its length in characters, a password only whether it is set.
+     */
+    private const array DIFF = [
+        'title'        => true,
+        'slug'         => true,
+        'discussion'   => true,
+        'parent_id'    => true,
+        'password'     => true,
+        'content'      => true,
+        'name'         => true,
+        'description'  => true,
+        'rating'       => true,
+        'author_name'  => true,
+        'author_email' => true,
+    ];
+
+    /**
+     * Characters of a value kept in `changes`, the rest is cut with an ellipsis.
+     */
+    private const int LENGTH = 120;
+
+    /**
      * Record an event of an entity by the current user.
      *
      * @param string               $table   Table of the entity without the prefix: `pages`, `comments`.
      * @param int                  $id
      * @param string               $event   Snake case name: `updated`, `status_changed`, `trashed`...
-     * @param array<string, mixed> $details Short facts shown with the event, e.g. `['fields' => ['title']]`.
+     * @param array<string, mixed> $details Short facts shown with the event, e.g. `['fields' => ['title']]`;
+     *                                      `changes` of `updated` are `[column => [from, to]]`.
      * @return void
      */
     public static function record(string $table, int $id, string $event, array $details = []): void
@@ -56,9 +80,19 @@ final class Activity
                 && $last['user_id'] === $userId
                 && strtotime($last['created_at']) > time() - self::MERGE
             ) {
-                $fields = (array) (json_decode($last['details'], true)['fields'] ?? []);
+                $merged  = (array) json_decode($last['details'], true);
+                $changes = (array) ($merged['changes'] ?? []);
+                foreach ($details['changes'] ?? [] as $column => [$from, $to]) {
+                    $changes[$column] = [$changes[$column][0] ?? $from, $to];
+                }
+                // a new password is masked the same as the old one, a new content may be as long: they stay changes
+                $changes = array_filter($changes, fn (array $change, string $column) => $column === 'password' || $column === 'content' || $change[0] !== $change[1], ARRAY_FILTER_USE_BOTH);
+
                 Db::update('activity', [
-                    'details'    => json_encode(['fields' => array_values(array_unique([...$fields, ...$details['fields'] ?? []]))]),
+                    'details'    => json_encode([
+                        'fields'  => array_values(array_unique([...$merged['fields'] ?? [], ...$details['fields'] ?? []])),
+                        'changes' => $changes,
+                    ], JSON_UNESCAPED_UNICODE),
                     'created_at' => date('Y-m-d H:i:s'),
                 ], ['id' => $last['id']]);
 
@@ -77,8 +111,8 @@ final class Activity
 
     /**
      * Record the changes of an entity on saving: `status_changed` with both statuses, `updated`
-     * with the names of the other changed columns. Values are compared as strings, so a number
-     * read from the database as a string is not a change.
+     * with the names of the other changed columns and the values of the short ones. Values are compared
+     * as strings, so a number read from the database as a string is not a change.
      *
      * @param string               $table
      * @param int                  $id
@@ -101,9 +135,28 @@ final class Activity
         }
 
         $fields = array_values(array_diff($changed, ['status', 'updated_at']));
-        if ($fields !== []) {
-            self::record($table, $id, 'updated', ['fields' => $fields]);
+        if ($fields === []) {
+            return;
         }
+
+        $changes = [];
+        foreach ($fields as $field) {
+            if ($field === 'password') {
+                $changes[$field] = [$string($before[$field] ?? '') === '' ? '' : '******', $string($after[$field]) === '' ? '' : '******'];
+            } elseif ($field === 'content') {
+                $changes[$field] = [mb_strlen(strip_tags($string($before[$field] ?? ''))), mb_strlen(strip_tags($string($after[$field])))];
+            } elseif (isset(self::DIFF[$field])) {
+                $changes[$field] = [
+                    mb_strimwidth($string($before[$field] ?? ''), 0, self::LENGTH, '…'),
+                    mb_strimwidth($string($after[$field]), 0, self::LENGTH, '…'),
+                ];
+            }
+        }
+
+        self::record($table, $id, 'updated', [
+            'fields'  => $fields,
+            'changes' => $changes,
+        ]);
     }
 
     /**
@@ -120,13 +173,14 @@ final class Activity
 
     /**
      * Get the timeline of an entity for its Activity tab, newest first: the recorded events
-     * and the lines the editor adds, such as its creation or the comments of a post.
+     * and the lines the editor adds, such as its creation or the comments of a post; an edit has
+     * the `changes` of its short columns: the name, what the value was and what it became.
      *
      * @param string                                                                    $table
      * @param int                                                                       $id
      * @param array<int, array{icon: string, user: string, text: string, note: string, at: string}> $lines
      * @param int                                                                       $limit Events read from the log.
-     * @return array<int, array{icon: string, user: string, text: string, note: string, at: string}>
+     * @return array<int, array{icon: string, user: string, text: string, note: string, changes?: array<int, array{field: string, from: string, to: string}>, at: string}>
      */
     public static function timeline(string $table, int $id, array $lines = [], int $limit = 50): array
     {
@@ -137,15 +191,37 @@ final class Activity
             'LIMIT'        => $limit,
         ]) ?: []);
 
-        $names = self::names(array_column($rows, 'user_id'));
+        $names    = self::names(array_column($rows, 'user_id'));
+        $statuses = self::statuses($table);
+        $parents  = self::parents($table, $rows);
         foreach ($rows as $row) {
             $details = (array) json_decode((string) $row['details'], true);
+            $changes = [];
+            if ($row['event'] === 'status_changed') {
+                $from      = (string) ($details['from'] ?? '');
+                $to        = (string) ($details['to'] ?? '');
+                $changes[] = [
+                    'field' => t('Status'),
+                    'from'  => $statuses[$from] ?? $from,
+                    'to'    => $statuses[$to] ?? $to,
+                ];
+            }
+
+            foreach ((array) ($details['changes'] ?? []) as $column => [$from, $to]) {
+                $changes[] = [
+                    'field' => self::field($column),
+                    'from'  => self::value($column, (string) $from, $parents),
+                    'to'    => self::value($column, (string) $to, $parents),
+                ];
+            }
+
             $lines[] = [
-                'icon' => self::icon($row['event']),
-                'user' => $names[$row['user_id']] ?? '',
-                'text' => self::label($table, $row['event'], $details),
-                'note' => '',
-                'at'   => $row['created_at'],
+                'icon'    => self::icon($row['event']),
+                'user'    => $names[$row['user_id']] ?? '',
+                'text'    => self::label($table, $row['event'], $details),
+                'note'    => '',
+                'changes' => $changes,
+                'at'      => $row['created_at'],
             ];
         }
 
@@ -185,12 +261,9 @@ final class Activity
      */
     public static function label(string $table, string $event, array $details = []): string
     {
-        $statuses = self::statuses($table);
-        $status   = fn (string $key) => $statuses[(string) ($details[$key] ?? '')] ?? (string) ($details[$key] ?? '');
-
         return match ($event) {
             'updated'        => t('Edited: :fields', mb_strtolower(implode(', ', array_map(self::field(...), (array) ($details['fields'] ?? []))))),
-            'status_changed' => t('Status: :from → :to', $status('from'), $status('to')),
+            'status_changed' => t('Changed the status'),
             'trashed'        => t('Moved to the trash'),
             'restored'       => t('Restored from the trash'),
             'duplicated'     => t('Copied to «:title»', (string) ($details['title'] ?? '')),
@@ -238,6 +311,61 @@ final class Activity
             'description'  => t('Description'),
             default        => str_replace('_', ' ', $column),
         };
+    }
+
+    /**
+     * Human value of a changed column in `changes`: the name of a choice, e.g. of the discussion,
+     * the title of a parent post, its ID when the post is gone, empty for none, the length of the content.
+     *
+     * @param string             $column
+     * @param string             $value
+     * @param array<int, string> $parents Titles of the parent posts by ID, see parents().
+     * @return string
+     */
+    private static function value(string $column, string $value, array $parents = []): string
+    {
+        return match ($column) {
+            'parent_id'  => (int) $value === 0 ? '' : ($parents[(int) $value] ?? '#' . $value),
+            'content'    => t(':count characters', (int) $value),
+            'discussion' => match ($value) {
+                'open'   => t('Open'),
+                'closed' => t('Closed'),
+                default  => $value,
+            },
+            default      => $value,
+        };
+    }
+
+    /**
+     * Get the titles of the parents named in the `changes` of the events of a post in one query;
+     * an entity that is not a post has none.
+     *
+     * @param string                           $table
+     * @param array<int, array<string, mixed>> $rows  Events from the log.
+     * @return array<int, string> Titles by ID, `#ID` for a post without a title.
+     */
+    private static function parents(string $table, array $rows): array
+    {
+        $ids = [];
+        foreach ($rows as $row) {
+            if ($row['event'] === 'updated' && str_contains((string) $row['details'], '"parent_id"')) {
+                foreach ((array) (json_decode((string) $row['details'], true)['changes']['parent_id'] ?? []) as $id) {
+                    $ids[] = (int) $id;
+                }
+            }
+        }
+
+        $ids = array_values(array_filter(array_unique($ids)));
+        if ($ids === [] || Type::get($table) === null) {
+            return [];
+        }
+
+        $titles = [];
+        foreach (Db::select($table, ['id [Int]', 'title'], ['id' => $ids]) ?: [] as $post) {
+            $titles[$post['id']] = $post['title'] !== '' ? $post['title'] : '#' . $post['id'];
+        }
+
+        return $titles;
     }
 
     /**

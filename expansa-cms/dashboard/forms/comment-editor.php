@@ -306,7 +306,7 @@ return Form::enqueue(
                     'callback' => function () use ($comment, $from) {
                         ?>
                         <div class="post-editor-actions">
-                            <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(<?php echo htmlspecialchars(json_encode(t('Delete this comment? Its replies stay.'))); ?>) && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>, from: '<?php echo $from; ?>'})">
+                            <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(texts.deleteComment) && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>, from: '<?php echo $from; ?>'})">
                                 <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
                             </button>
                         </div>

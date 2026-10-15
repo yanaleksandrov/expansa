@@ -13,8 +13,16 @@ $post = Page::post((string) filter_input(INPUT_GET, 'type') ?: 'pages', filter_i
 $type = Type::get($post->type);
 $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
 
+// the parents to choose in the details and the URL of each, the base of the slug
+$parents = $type->hierarchical ? Page::parents($post) : [];
+$paths   = $post::paths($post->type, array_keys($parents));
+$bases   = [];
+foreach ($parents as $id => $title) {
+    $bases[$id] = rtrim(url($paths[$id] ?? ''), '/') . '/';
+}
+
 /**
- * Post editor: the bar with the way back and saving over the tabs, the title, slug and content
+ * Post editor: the bar with the way back and the public page over the tabs, the title, slug and content
  * in the main tab, the discussion in its own one, the publishing options and details aside.
  *
  * @since 2027.1
@@ -42,7 +50,9 @@ return Form::enqueue(
             'name'     => 'header',
             'type'     => 'custom',
             'callback' => function () use ($post, $type) {
-                $back = url('dashboard/edit?table=' . $type->key);
+                $back  = url('dashboard/edit?table=' . $type->key);
+                $path  = $post->path();
+                $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? htmlspecialchars($post->title) : $type->labelEdit);
                 ?>
                 <div class="post-editor-head">
                     <a class="btn btn--icon btn--sm" href="<?php echo $back; ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
@@ -51,17 +61,15 @@ return Form::enqueue(
                     <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
                         <a href="<?php echo $back; ?>"><?php echo $type->labelNamePlural; ?></a>
                         <i class="ph ph-caret-right"></i>
-                        <span aria-current="page"><?php echo $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? htmlspecialchars($post->title) : $type->labelEdit); ?></span>
+                        <?php if ($path !== '') : ?>
+                            <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
+                        <?php else : ?>
+                            <span aria-current="page"><?php echo $title; ?></span>
+                        <?php endif; ?>
                     </nav>
                     <?php if ($post->isTrashed()) : ?>
                         <span class="badge t-red"><?php echo t('In the trash'); ?></span>
                     <?php endif; ?>
-                    <?php if ($type->public && $post->slug !== '') : ?>
-                        <a class="btn btn--sm btn--outline" href="<?php echo url($post->slug); ?>" target="_blank">
-                            <i class="ph ph-arrow-square-out"></i> <?php echo $type->labelView; ?>
-                        </a>
-                    <?php endif; ?>
-                    <button class="btn btn--sm btn--primary" type="submit"><?php echo $type->labelSave; ?></button>
                 </div>
                 <?php
             },
@@ -121,9 +129,11 @@ return Form::enqueue(
                                 'tooltip'     => t('The address of the page: letters, numbers and hyphens. Leave it empty to make it from the title.'),
                                 'conditions'  => [],
                                 'options'     => [
-                                    'from' => 'title',
-                                    'base' => rtrim(url(), '/') . '/',
-                                    'link' => $post->slug !== '' ? url($post->slug) : '',
+                                    'from'   => 'title',
+                                    'base'   => $bases[$post->parentId] ?? rtrim(url(), '/') . '/',
+                                    'parent' => 'parent_id',
+                                    'bases'  => $bases,
+                                    'link'   => $post->slug !== '' ? url($post->path()) : '',
                                 ],
                                 'attributes'  => [
                                     'value'       => $post->slug,
@@ -174,7 +184,7 @@ return Form::enqueue(
                         $canComment = $user?->can('manage_comments') ?? false;
                         ?>
                         <div class="post-editor-main">
-                            <div class="post-editor-card post-comments">
+                            <div class="post-editor-card post-comments" u-data="{replying: 0}" @comment-reply.window="replying = $event.detail">
                                 <div class="post-editor-section-head">
                                     <h3><?php echo t('Comments'); ?></h3>
                                 </div>
@@ -194,7 +204,7 @@ return Form::enqueue(
                                         <i class="ph ph-lock-simple"></i> <?php echo t('The discussion is closed: new comments and replies are not accepted.'); ?>
                                     </p>
                                 <?php elseif ($post->id > 0 && $canComment) : ?>
-                                    <div class="post-comment">
+                                    <div class="post-comment" u-show="!replying">
                                         <span class="avatar avatar--rounded avatar--sm bg-blue-lt t-blue"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($name, 0, 1))); ?></span>
                                         <div class="post-comment-box">
                                             <textarea id="post-comment-text" name="content" form="post-comment" rows="2" required placeholder="<?php echo t_attr('Leave a comment…'); ?>" aria-label="<?php echo t_attr('Comment'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
@@ -265,10 +275,9 @@ return Form::enqueue(
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',
-                    'callback' => function () use ($post, $type, $date) {
+                    'callback' => function () use ($post, $type, $date, $parents) {
                         $author   = Page::author($post);
                         $statuses = Status::getStatuses();
-                        $parents  = $type->hierarchical ? Page::parents($post) : [];
                         $options  = function (array $options, int|string $value): void {
                             foreach ($options as $key => $label) {
                                 printf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $key), (string) $key === (string) $value ? ' selected' : '', htmlspecialchars($label));
@@ -334,14 +343,13 @@ return Form::enqueue(
                         'callback' => function () use ($post) {
                             $item    = htmlspecialchars(json_encode(['post-type' => $post->type, 'id' => $post->id]));
                             $copy    = htmlspecialchars(json_encode(['post-type' => $post->type, 'id' => $post->id, 'open' => 1]));
-                            $confirm = htmlspecialchars(json_encode(t('Delete this item permanently?')));
                             ?>
                             <div class="post-editor-actions">
                                 <?php if ($post->isTrashed()) : ?>
                                     <button class="btn btn--sm btn--outline" type="button" @click="$ajax.post('post/restore', <?php echo $item; ?>)">
                                         <i class="ph ph-arrow-counter-clockwise"></i> <?php echo t('Restore'); ?>
                                     </button>
-                                    <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(<?php echo $confirm; ?>) && $ajax.post('post/delete', <?php echo $item; ?>)">
+                                    <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(texts.deleteItem) && $ajax.post('post/delete', <?php echo $item; ?>)">
                                         <i class="ph ph-trash"></i> <?php echo t('Delete Permanently'); ?>
                                     </button>
                                 <?php else : ?>
@@ -353,7 +361,7 @@ return Form::enqueue(
                                             <i class="ph ph-trash"></i> <?php echo t('Move to Trash'); ?>
                                         </button>
                                     <?php else : ?>
-                                        <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(<?php echo $confirm; ?>) && $ajax.post('post/delete', <?php echo $item; ?>)">
+                                        <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(texts.deleteItem) && $ajax.post('post/delete', <?php echo $item; ?>)">
                                             <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
                                         </button>
                                     <?php endif; ?>

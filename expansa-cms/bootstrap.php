@@ -525,7 +525,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         labelSearch: t('Search Pages'),
         labelSave: t('Save Page'),
         public: true,
-        hierarchical: false,
+        hierarchical: true,
         searchable: true,
         showInMenu: true,
         showInBar: true,
