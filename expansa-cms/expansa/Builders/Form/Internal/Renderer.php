@@ -50,6 +50,13 @@ final class Renderer
     {
         $html       = '';
         $hasTabMenu = false;
+        $active     = $this->activeTab($fields);
+
+        foreach ($fields as $i => $field) {
+            if (($field['type'] ?? '') === 'tab') {
+                $fields[$i]['active'] = $field['active'] = Sanitizer::prop($field['name'] ?? '') === $active;
+            }
+        }
 
         foreach ($fields as $field) {
             $type = Sanitizer::id($field['type'] ?? '');
@@ -78,6 +85,27 @@ final class Renderer
         }
 
         return $html;
+    }
+
+    /**
+     * Get the tab of a level shown when the page opens: the one of the `tab` query parameter,
+     * else the first one; the server renders it visible, so the page does not flicker.
+     *
+     * @param array $fields
+     * @return string Prop of the tab, empty for a level without tabs.
+     */
+    private function activeTab(array $fields): string
+    {
+        $tabs = [];
+        foreach ($fields as $field) {
+            if (($field['type'] ?? '') === 'tab') {
+                $tabs[] = Sanitizer::prop($field['name'] ?? '');
+            }
+        }
+
+        $query = is_string($_GET['tab'] ?? null) ? $_GET['tab'] : '';
+
+        return in_array($query, $tabs, true) ? $query : ($tabs[0] ?? '');
     }
 
     /**

@@ -70,7 +70,10 @@ final class Comments extends Table
                 'email'     => $comment['author_email'],
                 'comment'   => mb_strimwidth(trim(strip_tags($comment['content'])), 0, 120, '…'),
                 'url'       => $url,
-                'status'    => $statuses[$comment['status']] ?? $comment['status'],
+                'status'      => [
+                    'class' => '',
+                    'value' => $statuses[$comment['status']] ?? $comment['status'],
+                ],
                 'actions'   => [['title' => t('Edit'), 'href' => $url]],
                 'post'      => $titles[$comment['post_type']][$comment['post_id']] ?? '',
                 'date'      => date('Y-m-d H:i', (int) strtotime($comment['created_at'])),
@@ -93,6 +96,10 @@ final class Comments extends Table
                 ->title(t('Comment'))
                 ->flexibleWidth('16rem')
                 ->view('title'),
+            $this->cell('status')
+                ->title(t('Status'))
+                ->fixedWidth('6rem')
+                ->view('badge'),
             $this->cell('post')
                 ->title(t('In Response To'))
                 ->fixedWidth('12rem'),

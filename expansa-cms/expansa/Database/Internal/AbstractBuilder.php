@@ -94,6 +94,13 @@ abstract class AbstractBuilder
     public array $schema = [];
 
     /**
+     * Whether each column takes NULL, by table and column; filled with the schema.
+     *
+     * @var array<string, array<string, bool>>
+     */
+    protected array $nullable = [];
+
+    /**
      * Determine should log the query or not.
      *
      * @var bool

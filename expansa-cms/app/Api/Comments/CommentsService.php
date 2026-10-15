@@ -163,6 +163,10 @@ final class CommentsService
             return $response->notify(t('Comment not found'));
         }
 
+        if (! $parent->canReply()) {
+            return $response->notify(t('The discussion is closed.'));
+        }
+
         $user = User::current();
         if (! $user instanceof User) {
             return $response->notify(t('You are not allowed to do this.'));

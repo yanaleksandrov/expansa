@@ -501,6 +501,11 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
     // roles changed or added in the Settings replace the defaults above
     App\Support\RoleSettings::apply();
 
+    // the columns are loaded once per request anyway, so the check costs no query
+    if (Db::isNullable(EX_DB['prefix'] . 'comments', 'deleted_at') === false) {
+        Hook::run('repairSoftDeletes', 'comments');
+    }
+
     // post types
     App\Post\Type::register(
         key: 'pages',

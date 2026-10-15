@@ -46,7 +46,7 @@ final class Core
             $data['isSelf'] => t('Settings'),
             default         => $data['user']->showname ?: $data['user']->login,
         });
-        Dashboard::page('comment', can: 'manage_comments', title: fn () => t('Edit Comment'));
+        Dashboard::page('comment', can: 'manage_comments', title: fn () => t('Edit Comment'), surface: Surface::Muted);
         Dashboard::page(
             'post',
             can: 'types_edit',

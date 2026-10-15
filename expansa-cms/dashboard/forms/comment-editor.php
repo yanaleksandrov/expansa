@@ -2,21 +2,26 @@
 
 use App\Dashboard\Pages\Comment as Page;
 use App\Models\Comment;
+use App\Post\Type;
 use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 
 $comment = Page::comment(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
 $from    = filter_input(INPUT_GET, 'from') === 'post' ? 'post' : '';
+$type    = Type::get($comment->postType);
+$date    = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
+$postUrl = $type !== null && $comment->postId > 0 ? url('dashboard/post?type=' . $type->key . '&id=' . $comment->postId . '&tab=comments') : '';
 
 /**
- * Comment page: the text, status and author of a comment, the facts of where it came from.
+ * Comment page, laid out as the post editor: the text and the author in the main card, a reply in its tab,
+ * the status, the rating and the facts of where the comment came from aside.
  *
  * @since 2027.1
  */
 return Form::enqueue(
     'comment-editor',
     [
-        'class'           => 'tab',
+        'class'           => 'post-editor',
         'u-data'          => 'tab',
         '@load'           => '$dirty.watch($el)',
         '@submit.prevent' => '$ajax.post("comments/update", "", () => $dirty.remove($el))',
@@ -36,128 +41,112 @@ return Form::enqueue(
             'icon'          => 'ph ph-chat-text',
             'class_menu'    => '',
             'class_button'  => '',
-            'class_content' => 'p-7 sm:p-5',
+            'class_content' => '',
             'fields'        => [
                 [
                     'type'          => 'group',
-                    'name'          => 'text',
-                    'label'         => t('Comment'),
-                    'class'         => '',
+                    'name'          => 'main',
+                    'label'         => '',
+                    'class'         => 'post-editor-main',
                     'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
+                    'content_class' => 'dg',
                     'fields'        => [
                         [
-                            'type'        => 'textarea',
-                            'name'        => 'content',
-                            'error'       => 'content',
-                            'label'       => t('Text'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '',
-                            'after'       => '',
-                            'instruction' => '',
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop'   => 'content',
-                                'rows'     => max(3, count(explode("\n", $comment->content))),
-                                'value'    => $comment->content,
-                                'required' => true,
-                            ],
+                            'name'     => 'header',
+                            'type'     => 'custom',
+                            'callback' => function () use ($from, $postUrl) {
+                                $back = $from === 'post' && $postUrl !== '' ? $postUrl : url('dashboard/edit?table=comments');
+                                ?>
+                                <h5 class="post-editor-title">
+                                    <a class="btn btn--icon btn--sm" href="<?php echo $back; ?>" title="<?php echo t_attr('Back'); ?>">
+                                        <i class="ph ph-arrow-left"></i>
+                                    </a>
+                                    <span class="fw-600 mr-auto"><?php echo t('Edit Comment'); ?></span>
+                                    <button class="btn btn--sm btn--primary" type="submit"><?php echo t('Save'); ?></button>
+                                </h5>
+                                <?php
+                            },
                         ],
                         [
-                            'type'        => 'select',
-                            'name'        => 'status',
-                            'error'       => 'status',
-                            'label'       => t('Status'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '',
-                            'after'       => '',
-                            'instruction' => t('Only approved comments are shown on the site.'),
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop' => 'status',
-                                'value'  => $comment->status,
-                            ],
-                            'options'     => Comment::statuses(),
-                        ],
-                        [
-                            'type'        => 'number',
-                            'name'        => 'rating',
-                            'error'       => 'rating',
-                            'label'       => t('Rating'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '',
-                            'after'       => '',
-                            'instruction' => t('For reviews; leave it empty for a usual comment.'),
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop' => 'rating',
-                                'min'    => 0,
-                                'value'  => $comment->rating ?? '',
-                            ],
-                        ],
-                    ],
-                ],
-                [
-                    'type'          => 'group',
-                    'name'          => 'author',
-                    'label'         => t('Author'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
-                        [
-                            'type'        => 'text',
-                            'name'        => 'author_name',
-                            'error'       => 'author_name',
-                            'label'       => t('Name'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '<i class="ph ph-user"></i>',
-                            'after'       => '',
-                            'instruction' => '',
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop' => 'author_name',
-                                'value'  => $comment->authorName,
-                            ],
-                        ],
-                        [
-                            'type'        => 'email',
-                            'name'        => 'author_email',
-                            'error'       => 'author_email',
-                            'label'       => t('Email'),
-                            'class'       => '',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '<i class="ph ph-at"></i>',
-                            'after'       => '',
-                            'instruction' => t('Not displayed publicly.'),
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop' => 'author_email',
-                                'value'  => $comment->authorEmail,
+                            'type'          => 'group',
+                            'name'          => 'text',
+                            'label'         => '',
+                            'class'         => 'post-editor-card',
+                            'label_class'   => '',
+                            'content_class' => 'dg g-5',
+                            'fields'        => [
+                                [
+                                    'type'        => 'textarea',
+                                    'name'        => 'content',
+                                    'error'       => 'content',
+                                    'label'       => t('Text'),
+                                    'class'       => '',
+                                    'label_class' => '',
+                                    'reset'       => 0,
+                                    'before'      => '',
+                                    'after'       => '',
+                                    'instruction' => '',
+                                    'tooltip'     => '',
+                                    'copy'        => 0,
+                                    'validator'   => '',
+                                    'conditions'  => [],
+                                    'attributes'  => [
+                                        'u-prop'   => 'content',
+                                        'rows'     => max(4, count(explode("\n", $comment->content))),
+                                        'value'    => $comment->content,
+                                        'required' => true,
+                                    ],
+                                ],
+                                [
+                                    'type'          => 'group',
+                                    'name'          => 'author',
+                                    'label'         => '',
+                                    'class'         => 'dg',
+                                    'label_class'   => '',
+                                    'content_class' => 'dg g-5 gtc-2 sm:gtc-1',
+                                    'fields'        => [
+                                        [
+                                            'type'        => 'text',
+                                            'name'        => 'author_name',
+                                            'error'       => 'author_name',
+                                            'label'       => t('Author'),
+                                            'class'       => '',
+                                            'label_class' => '',
+                                            'reset'       => 0,
+                                            'before'      => '<i class="ph ph-user"></i>',
+                                            'after'       => '',
+                                            'instruction' => '',
+                                            'tooltip'     => '',
+                                            'copy'        => 0,
+                                            'validator'   => '',
+                                            'conditions'  => [],
+                                            'attributes'  => [
+                                                'u-prop' => 'author_name',
+                                                'value'  => $comment->authorName,
+                                            ],
+                                        ],
+                                        [
+                                            'type'        => 'email',
+                                            'name'        => 'author_email',
+                                            'error'       => 'author_email',
+                                            'label'       => t('Email'),
+                                            'class'       => '',
+                                            'label_class' => '',
+                                            'reset'       => 0,
+                                            'before'      => '<i class="ph ph-at"></i>',
+                                            'after'       => '',
+                                            'instruction' => t('Not displayed publicly.'),
+                                            'tooltip'     => '',
+                                            'copy'        => 0,
+                                            'validator'   => '',
+                                            'conditions'  => [],
+                                            'attributes'  => [
+                                                'u-prop' => 'author_email',
+                                                'value'  => $comment->authorEmail,
+                                            ],
+                                        ],
+                                    ],
+                                ],
                             ],
                         ],
                     ],
@@ -173,114 +162,114 @@ return Form::enqueue(
             'icon'          => 'ph ph-arrow-bend-up-left',
             'class_menu'    => '',
             'class_button'  => '',
-            'class_content' => 'p-7 sm:p-5',
+            'class_content' => '',
             'fields'        => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'reply',
-                    'label'         => t('Reply'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
-                        [
-                            'name'     => 'reply',
-                            'type'     => 'custom',
-                            'callback' => function () {
-                                ?>
-                                <div class="dg g-2 ga-4">
-                                    <div><?php echo t('The reply is published at once under your name, on the same post.'); ?></div>
-                                    <div class="field">
-                                        <div class="field-item">
-                                            <textarea id="comment-reply-text" name="reply" form="comment-reply" rows="4" required placeholder="<?php echo t_attr('Write a reply'); ?>"></textarea>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <button class="btn btn--primary" type="submit" form="comment-reply">
-                                            <i class="ph ph-paper-plane-tilt"></i> <?php echo t('Send Reply'); ?>
-                                        </button>
-                                    </div>
+                    'name'     => 'reply',
+                    'type'     => 'custom',
+                    'callback' => function () use ($comment) {
+                        ?>
+                        <div class="post-editor-main post-comments">
+                            <div class="post-comment">
+                                <span class="avatar avatar--rounded avatar--sm bg-<?php echo $comment->getColor(); ?>-lt t-<?php echo $comment->getColor(); ?>"><?php echo htmlspecialchars($comment->getInitials()); ?></span>
+                                <div class="post-comment-body">
+                                    <div class="post-comment-who"><b><?php echo htmlspecialchars($comment->getAuthorName()); ?></b></div>
+                                    <div class="post-comment-text"><?php echo htmlspecialchars($comment->content); ?></div>
                                 </div>
-                                <?php
-                            },
-                        ],
-                    ],
+                            </div>
+                            <?php if (! $comment->canReply()) : ?>
+                                <p class="post-comments-closed">
+                                    <i class="ph ph-lock-simple"></i> <?php echo t('The discussion is closed: new comments and replies are not accepted.'); ?>
+                                </p>
+                            <?php else : ?>
+                            <div class="post-comment-box">
+                                <textarea id="comment-reply-text" name="reply" form="comment-reply" rows="3" required placeholder="<?php echo t_attr('Reply to :name…', $comment->getAuthorName()); ?>" aria-label="<?php echo t_attr('Reply'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
+                                <div class="post-comment-tools">
+                                    <span class="t-muted fs-12 mr-auto"><?php echo t('The reply is published at once under your name, on the same post.'); ?></span>
+                                    <button class="btn btn--sm btn--primary" type="submit" form="comment-reply"><?php echo t('Send Reply'); ?></button>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php
+                    },
                 ],
             ],
         ],
         [
-            'type'          => 'tab',
-            'label'         => t('Details'),
-            'name'          => 'details',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-info',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => 'p-7 sm:p-5',
+            'type'          => 'group',
+            'name'          => 'side',
+            'label'         => '',
+            'class'         => 'post-editor-side',
+            'label_class'   => '',
+            'content_class' => 'post-editor-card',
             'fields'        => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'origin',
-                    'label'         => t('Details'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
-                        [
-                            'name'     => 'origin',
-                            'type'     => 'custom',
-                            'callback' => function () use ($comment) {
-                                $date  = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
-                                $title = Page::postTitle($comment);
-                                $facts = [
-                                    t('In Response To') => $title !== '' ? $title : t('Post #:id', $comment->postId),
-                                    t('Reply To')       => $comment->parentId > 0 ? t('Comment #:id', $comment->parentId) : '—',
-                                    t('Submitted')      => $comment->createdAt ? $date->format($comment->createdAt) : '—',
-                                    t('Updated')        => $comment->updatedAt ? $date->format($comment->updatedAt) : '—',
-                                    t('Likes')          => $comment->likes . ' / ' . $comment->dislikes,
-                                    t('IP Address')     => $comment->authorIp ?: '—',
-                                    t('Browser')        => $comment->authorAgent ?: '—',
-                                ];
-                                ?>
-                                <dl class="dg g-2 ga-4 fs-13">
-                                    <?php foreach ($facts as $label => $fact) : ?>
-                                        <div class="df g-2">
-                                            <dt class="t-muted"><?php echo $label; ?>:</dt>
-                                            <dd><?php echo htmlspecialchars((string) $fact); ?></dd>
-                                        </div>
-                                    <?php endforeach; ?>
-                                </dl>
-                                <?php
-                            },
-                        ],
-                    ],
+                    'name'     => 'properties',
+                    'type'     => 'custom',
+                    'callback' => function () use ($comment, $date, $postUrl, $from) {
+                        $title   = Page::postTitle($comment);
+                        $options = function (array $options, string $value): void {
+                            foreach ($options as $key => $label) {
+                                printf('<option value="%s"%s>%s</option>', htmlspecialchars((string) $key), (string) $key === $value ? ' selected' : '', htmlspecialchars($label));
+                            }
+                        };
+                        $facts   = [
+                            ['ph ph-calendar-plus', t('Submitted'), $comment->createdAt ? $date->format($comment->createdAt) : ''],
+                            ['ph ph-clock-clockwise', t('Updated'), $comment->updatedAt ? $date->format($comment->updatedAt) : ''],
+                            ['ph ph-thumbs-up', t('Likes'), $comment->likes . ' / ' . $comment->dislikes],
+                            ['ph ph-globe-simple', t('IP Address'), (string) $comment->authorIp],
+                            ['ph ph-browser', t('Browser'), (string) $comment->authorAgent],
+                            ['ph ph-hash', t('ID'), (string) $comment->id],
+                        ];
+                        ?>
+                        <dl class="post-editor-props">
+                            <dt><i class="ph ph-circle-dashed"></i><?php echo t('Status'); ?></dt>
+                            <dd>
+                                <select class="post-editor-pill" name="status" aria-label="<?php echo t_attr('Status'); ?>">
+                                    <?php $options(Comment::statuses(), (string) $comment->status); ?>
+                                </select>
+                            </dd>
+                            <dt><i class="ph ph-star"></i><?php echo t('Rating'); ?></dt>
+                            <dd>
+                                <input class="post-editor-pill" type="number" min="0" name="rating" value="<?php echo htmlspecialchars((string) ($comment->rating ?? '')); ?>" placeholder="<?php echo t_attr('No rating'); ?>" aria-label="<?php echo t_attr('Rating'); ?>">
+                            </dd>
+                            <dt><i class="ph ph-article"></i><?php echo t('In Response To'); ?></dt>
+                            <dd>
+                                <?php if ($postUrl !== '') : ?>
+                                    <a class="post-editor-pill" href="<?php echo $postUrl; ?>"><?php echo htmlspecialchars($title !== '' ? $title : t('Post #:id', $comment->postId)); ?></a>
+                                <?php else : ?>
+                                    <span class="post-editor-pill is-empty"><?php echo t('Post #:id', $comment->postId); ?></span>
+                                <?php endif; ?>
+                            </dd>
+                            <dt><i class="ph ph-arrow-bend-up-left"></i><?php echo t('Reply To'); ?></dt>
+                            <dd>
+                                <?php if ($comment->parentId > 0) : ?>
+                                    <a class="post-editor-pill" href="<?php echo url('dashboard/comment?id=' . $comment->parentId . ($from !== '' ? '&from=' . $from : '')); ?>"><?php echo t('Comment #:id', $comment->parentId); ?></a>
+                                <?php else : ?>
+                                    <span class="post-editor-pill is-empty">—</span>
+                                <?php endif; ?>
+                            </dd>
+                            <?php foreach ($facts as [$icon, $label, $fact]) : ?>
+                                <dt><i class="<?php echo $icon; ?>"></i><?php echo $label; ?></dt>
+                                <dd><span class="post-editor-pill<?php echo $fact === '' ? ' is-empty' : ''; ?>" title="<?php echo htmlspecialchars($fact); ?>"><?php echo $fact !== '' ? htmlspecialchars($fact) : '—'; ?></span></dd>
+                            <?php endforeach; ?>
+                        </dl>
+                        <?php
+                    },
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'removal',
-                    'label'         => t('Delete Comment'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
-                        [
-                            'name'     => 'removal',
-                            'type'     => 'custom',
-                            'callback' => function () use ($comment, $from) {
-                                ?>
-                                <div class="dg g-2 ga-4">
-                                    <div><?php echo t('The comment disappears from the site and the list. Its replies stay.'); ?></div>
-                                    <div>
-                                        <button class="btn btn--outline t-red" type="button" @click="confirm('<?php echo t_attr('Delete this comment?'); ?>') && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>, from: '<?php echo $from; ?>'})">
-                                            <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
-                                        </button>
-                                    </div>
-                                </div>
-                                <?php
-                            },
-                        ],
-                    ],
+                    'name'     => 'manage',
+                    'type'     => 'custom',
+                    'callback' => function () use ($comment, $from) {
+                        ?>
+                        <div class="post-editor-actions">
+                            <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(<?php echo htmlspecialchars(json_encode(t('Delete this comment? Its replies stay.'))); ?>) && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>, from: '<?php echo $from; ?>'})">
+                                <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
+                            </button>
+                        </div>
+                        <?php
+                    },
                 ],
             ],
         ],

@@ -27,7 +27,7 @@ foreach ($field->fields as $tab) {
         'prop'  => Safe::prop($tab['name'] ?? '') ?: 'tab',
         'label' => Safe::trim($tab['label'] ?? ''),
         'icon'  => Safe::attribute($tab['icon'] ?? ''),
-        'class' => Safe::class($tab['class_button'] ?? ''),
+        'class' => Safe::class(trim(($tab['class_button'] ?? '') . (empty($tab['active']) ? '' : ' is-active'))),
     ];
 }
 

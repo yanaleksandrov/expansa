@@ -44,6 +44,7 @@ use PDOStatement;
  * @method static string            version()
  * @method static bool              hasTable(string $tableName)
  * @method static array             schema(?string $col = null)
+ * @method static bool|null         isNullable(string $table, string $column)
  * @method static array             updateSchema()
  */
 class Db extends Facade

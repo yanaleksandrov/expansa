@@ -177,6 +177,13 @@ final class Data
     }
 
     /**
+     * Whether a tab is the one shown when the page opens, see Internal\Renderer::activeTab().
+     */
+    public bool $active = false {
+        set(mixed $value) => Sanitizer::bool($value);
+    }
+
+    /**
      * Whether a password field shows the strength indicator.
      */
     public bool $indicator = false {

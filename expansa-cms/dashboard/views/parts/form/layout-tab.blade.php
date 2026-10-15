@@ -1,6 +1,7 @@
 <?php
 
 use Expansa\Builders\Form\Data;
+use Expansa\Facades\Safe;
 
 /**
  * Form tab markup
@@ -17,7 +18,8 @@ if ($field->content === '') {
 }
 ?>
 <!-- tab "{{ $field->name }}" start -->
-<div class="tab__content {{ $field->class_content }}" u-bind="tabContent('{{ $field->name }}')" hidden>
+<?php $tab = Safe::prop($field->name); ?>
+<div class="tab__content {{ $field->class_content }}" data-tab="{{ $tab }}" u-bind="tabContent('{{ $tab }}')"@if(! $field->active) hidden @endif>
 	@if($field->caption || $field->description)
 		<div class="dg mb-8">
 			@if($field->caption)

@@ -1065,30 +1065,36 @@ document.addEventListener('youla:init', ()=> {
      *
      * @since 1.0
      */
-    Youla.data('tab', (root) => ({
-        tab: new URLSearchParams(window.location.search).get('tab') || root.dataset.tab || null,
-        tabButton(id) {
-            return {
-                ':class'() {
-                    return this.tab === id ? 'is-active' : '';
-                },
-                '@click'() {
-                    this.tab = id;
+    Youla.data('tab', (root) => {
+        // the server renders the tab of the `tab` parameter, or the first one, visible: the state starts from it
+        const query = new URLSearchParams(window.location.search).get('tab');
+        const tabs  = [...root.querySelectorAll('[data-tab]')].map(el => el.dataset.tab);
 
-                    const url = new URL(window.location.href);
-                    url.searchParams.set('tab', id);
-                    window.history.pushState({}, '', url);
-                },
-            };
-        },
-        tabContent(id) {
-            return {
-                'u-show'() {
-                    return this.tab === id;
-                },
-            };
-        },
-    }));
+        return {
+            tab: tabs.includes(query) ? query : root.querySelector('[data-tab]:not([hidden])')?.dataset.tab || root.dataset.tab || tabs[0] || null,
+            tabButton(id) {
+                return {
+                    ':class'() {
+                        return { 'is-active': this.tab === id };
+                    },
+                    '@click'() {
+                        this.tab = id;
+
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('tab', id);
+                        window.history.pushState({}, '', url);
+                    },
+                };
+            },
+            tabContent(id) {
+                return {
+                    'u-show'() {
+                        return this.tab === id;
+                    },
+                };
+            },
+        };
+    });
 
     /**
      * `$dirty` — warns about unsaved form changes. Call `$dirty.watch($el)` once per form (e.g.

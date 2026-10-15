@@ -76,6 +76,20 @@ final class Migrations
         Db::updateSchema();
     }
 
+    /**
+     * Make the `deleted_at` column of a table created NOT NULL take NULL: the database stamped every new row
+     * with a zero date there, so soft-deleting models took the rows for deleted. The zero dates become NULL.
+     *
+     * @param string $table Table name without the prefix.
+     * @return void
+     */
+    public function repairSoftDeletes(string $table): void
+    {
+        Db::query("ALTER TABLE <$table> MODIFY deleted_at TIMESTAMP NULL DEFAULT NULL");
+        Db::query("UPDATE <$table> SET deleted_at = NULL WHERE deleted_at < '1971-01-01'");
+        Db::updateSchema();
+    }
+
     private function createFieldsTable(string $name, ?string $idColumnName = null): void
     {
         Schema::create($name . '_fields', function (Table $table) use ($name, $idColumnName) {

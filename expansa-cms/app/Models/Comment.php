@@ -278,6 +278,26 @@ class Comment extends Model
     }
 
     /**
+     * Get the post the comment answers, null when its type or the post is gone.
+     *
+     * @return Post|null
+     */
+    public function getPost(): ?Post
+    {
+        return $this->postId > 0 ? Post::get((string) $this->postType, (int) $this->postId) : null;
+    }
+
+    /**
+     * Whether the comment takes replies: the discussion of its post is open; a comment without a post takes none.
+     *
+     * @return bool
+     */
+    public function canReply(): bool
+    {
+        return $this->getPost()?->isDiscussionOpen() ?? false;
+    }
+
+    /**
      * Get the name of the author, "Anonymous" for a comment without one.
      *
      * @return string
