@@ -70,6 +70,11 @@ final class PostService
             return $response->notify(t('Failed to save the item.'), Notice::Error);
         }
 
+        // the slug the editor shows becomes the saved one: made from the title or with a suffix of a taken one
+        if (isset($request->post['slug']) && (string) $request->post['slug'] !== $post->slug) {
+            $response->value('[name="slug"]', $post->slug);
+        }
+
         return $response->notify(t('%s updated', Type::get($post->type)->labelName), Notice::Success);
     }
 

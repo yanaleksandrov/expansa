@@ -21,8 +21,8 @@ defined('EX_PATH') || exit;
                 <button class="table-filter-chip-edit" type="button" popovertarget="{{ $popover }}-values" @click="editing = i">
                     <i :class="fields[row.field]?.icon"></i>
                     <strong u-text="fields[row.field]?.label"></strong>
-                    <span u-text="row.operator === 'not' ? {{ json_encode(t('is not')) }} : {{ json_encode(t('is')) }}"></span>
-                    <span u-text="filterLabels(row, {{ json_encode(t(':count selected')) }})"></span>
+                    <span u-text="row.operator === 'not' ? texts.isNot : texts.is"></span>
+                    <span u-text="filterLabels(row, texts.selected)"></span>
                 </button>
                 <button class="table-filter-chip-remove" type="button" title="{{ t('Remove filter') }}" @click="removeFilter(i)"><i class="ph ph-x"></i></button>
             </span>

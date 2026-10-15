@@ -33,6 +33,7 @@ final class Migrations
         $this->createMediaTable();
         $this->createApiKeysTable();
         $this->createFieldGroupsTable();
+        $this->createActivityTable();
     }
 
     public function createPostsTable(string $postType): void
@@ -62,6 +63,28 @@ final class Migrations
         });
 
         $this->createFieldsTable($postType, 'posts');
+    }
+
+    /**
+     * Create the activity log of the entities, see App\Support\Activity; also on the sites
+     * installed before the log.
+     *
+     * @return void
+     */
+    public function createActivityTable(): void
+    {
+        Schema::create('activity', function (Table $table) {
+            $table->id();
+            $table->string('entity_table', 64);
+            $table->bigInt('entity_id')->unsigned();
+            $table->bigInt('user_id')->unsigned()->default(0);
+            $table->string('event', 40);
+            $table->text('details');
+            $table->timestamps();
+
+            $table->index(['entity_table', 'entity_id']);
+        });
+        Db::updateSchema();
     }
 
     /**

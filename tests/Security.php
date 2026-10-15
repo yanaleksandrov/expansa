@@ -91,6 +91,8 @@ $validator = new Validator(['email' => 'nope', 'age' => '7', 'name' => ''], ['em
 check('invalid fields get errors', ! $validator->isValid() && array_keys($validator->errors) === ['email', 'age', 'name']);
 check('messages get the comparison value', $validator->errors['age'] === ['Must be at least 18.']);
 check('valid data has no errors', new Validator(['age' => '20'], ['age' => 'numeric|min:18'])->apply()->errors === []);
+check('slug rule takes what slug() makes', new Validator(['a' => 'привет-мир', 'b' => '你好-世界', 'c' => 'foo_bar-2'], ['a' => 'slug', 'b' => 'slug', 'c' => 'slug'])->apply()->errors === []);
+check('slug rule refuses separators', count(new Validator(['a' => 'a/b', 'b' => 'a b', 'c' => ''], ['a' => 'slug', 'b' => 'slug', 'c' => 'slug'])->apply()->errors) === 3);
 
 $custom = new Validator(['code' => 'abc'], ['code' => 'even'])
     ->extend('even', 'Must be even.', fn (Validator $validator, mixed $value) => is_numeric($value) && $value % 2 === 0)

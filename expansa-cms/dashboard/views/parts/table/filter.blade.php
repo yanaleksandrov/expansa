@@ -44,7 +44,7 @@ $select = "{ contentLocation: \$root.querySelector('.table-filter-content') }";
     <div class="table-filter-empty" u-show="!rows.length">{{ t('No filters applied. Combine filters to narrow the list, e.g. Status is Draft and Author is you.') }}</div>
     <div class="table-filter-rows">
         <div class="table-filter-row" u-each="(row, i) in rows">
-            <span class="table-filter-conjunction" u-text="i ? {{ json_encode(t('and')) }} : {{ json_encode(t('Where')) }}"></span>
+            <span class="table-filter-conjunction" u-text="i ? texts.and : texts.where"></span>
             <select class="field field--xs" :value="row.field" @change="setFilterField(i, $el.value)" u-select="{{ $select }}">
                 @foreach ($filters as $key => $field)
                     <option value="{{ $key }}">{{ $field['label'] }}</option>

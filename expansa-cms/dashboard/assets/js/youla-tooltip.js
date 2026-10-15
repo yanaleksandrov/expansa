@@ -132,7 +132,7 @@
         };
     }
     class TooltipInstance {
-        constructor(el, content, placement, trigger, delay = 250, variant = null) {
+        constructor(el, content, placement, trigger, delay = 250, variant = null, {prevent = false, stop = false} = {}) {
             Object.assign(this, {
                 el,
                 content,
@@ -140,6 +140,8 @@
                 trigger,
                 delay,
                 variant,
+                prevent,
+                stop,
                 visible: false
             });
             this.tooltip = Object.assign(document.createElement('div'), {
@@ -190,13 +192,30 @@
             this.trigger = trigger;
             this.attachTriggers();
         }
+        updateEventModifiers({prevent = false, stop = false} = {}) {
+            if (this.prevent === prevent && this.stop === stop) {
+                return;
+            }
+            this.detachTriggers();
+            Object.assign(this, {
+                prevent,
+                stop
+            });
+            this.attachTriggers();
+        }
         updateDelay(delay) {
             this.delay = delay;
         }
         attachTriggers() {
             const el = this.el;
             if (this.trigger === 'click') {
-                this.detach = bind([ [ el, 'click', () => this.toggle() ] ]);
+                this.detach = bind([ [ el, 'click', e => {
+                    this.prevent && e.preventDefault();
+                    this.stop && e.stopPropagation();
+                    this.labelControl = e.defaultPrevented ? null : el.closest('label')?.control;
+                    setTimeout(() => this.labelControl = null);
+                    this.toggle();
+                } ] ]);
                 return;
             }
             const listeners = [ [ el, 'focus', () => this.activate() ], [ el, 'blur', () => this.deactivate() ] ];
@@ -269,6 +288,10 @@
             visibleTooltips.add(this);
             ensureGlobalListeners();
             this.detachDocListeners = bind([ [ document, 'click', e => {
+                if (e.target === this.labelControl) {
+                    this.labelControl = null;
+                    return;
+                }
                 if (!this.el.contains(e.target) && !this.tooltip.contains(e.target)) {
                     this.deactivate();
                 }
@@ -324,16 +347,21 @@
         const placement = modifiers.find(m => PLACEMENTS.includes(m)) || 'auto';
         const trigger = modifiers.find(m => TRIGGERS.includes(m)) || 'hover';
         const variant = modifiers.find(m => m.startsWith(VARIANT_PREFIX))?.slice(VARIANT_PREFIX.length) || null;
+        const eventModifiers = {
+            prevent: modifiers.includes('prevent'),
+            stop: modifiers.includes('stop')
+        };
         const delay = duration?.unit === 'ms' ? duration.value : 250;
         const content = output == null ? '' : String(output);
         const instance = el._x_tooltip;
         if (!instance) {
-            el._x_tooltip = new TooltipInstance(el, content, placement, trigger, delay, variant);
+            el._x_tooltip = new TooltipInstance(el, content, placement, trigger, delay, variant, eventModifiers);
             return;
         }
         instance.updateContent(content);
         instance.updatePlacement(placement);
         instance.updateTrigger(trigger);
+        instance.updateEventModifiers(eventModifiers);
         instance.updateDelay(delay);
         instance.updateVariant(variant);
     }

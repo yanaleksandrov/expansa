@@ -43,6 +43,9 @@ final class Users extends Table
                 ->title('<input type="checkbox" u-bind="trigger">')
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
+            $this->cell('image')
+                ->fixedWidth('2.5rem')
+                ->view('image'),
             $this->cell('name')
                 ->title(t('Name'))
                 ->flexibleWidth('16rem')

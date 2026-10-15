@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
+use App\Models\Post;
 use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
@@ -48,7 +49,7 @@ final class Posts extends Table
             'LIMIT' => 500,
         ]) ?? [];
 
-        $slugs    = $this->slugs(array_column($posts, 'id'));
+        $slugs    = Post::paths($this->type->key, array_column($posts, 'id'));
         $authors  = User::options();
         $statuses = Status::getStatuses();
 
@@ -137,11 +138,7 @@ final class Posts extends Table
         if ($trash > 0 && $this->isTrash) {
             $views[] = [
                 'title' => t('Empty Trash'),
-                'click' => sprintf(
-                    "confirm(%s) && \$ajax.post('post/empty-trash', %s)",
-                    json_encode(t('Delete all items in the trash permanently?')),
-                    json_encode(['post-type' => $this->type->key]),
-                ),
+                'click' => sprintf("confirm(texts.emptyTrash) && \$ajax.post('post/empty-trash', %s)", json_encode(['post-type' => $this->type->key])),
             ];
         }
 
@@ -214,13 +211,12 @@ final class Posts extends Table
      * delete to the trash when the type has one, permanently otherwise.
      *
      * @param int    $id
-     * @param string $slug Slug of the item, empty when it has none.
+     * @param string $slug Path of the item in its URL, empty when it has none.
      * @return array<int, array<string, mixed>>
      */
     private function actions(int $id, string $slug): array
     {
         $item    = json_encode(['post-type' => $this->type->key, 'id' => $id]);
-        $confirm = json_encode(t('Delete this item permanently?'));
         $actions = [];
 
         if ($this->type->public && $slug !== '') {
@@ -247,7 +243,7 @@ final class Posts extends Table
             'href'       => '#',
             'class'      => 't-red',
             'title'      => t('Delete'),
-            'attributes' => ['@click.prevent' => "confirm($confirm) && \$ajax.post('post/delete', $item)"],
+            'attributes' => ['@click.prevent' => "confirm(texts.deleteItem) && \$ajax.post('post/delete', $item)"],
         ];
 
         return $actions;
@@ -262,7 +258,6 @@ final class Posts extends Table
     private function trashActions(int $id): array
     {
         $item    = json_encode(['post-type' => $this->type->key, 'id' => $id]);
-        $confirm = json_encode(t('Delete this item permanently?'));
 
         return [
             [
@@ -275,28 +270,9 @@ final class Posts extends Table
                 'href'       => '#',
                 'class'      => 't-red',
                 'title'      => t('Delete Permanently'),
-                'attributes' => ['@click.prevent' => "confirm($confirm) && \$ajax.post('post/delete', $item)"],
+                'attributes' => ['@click.prevent' => "confirm(texts.deleteItem) && \$ajax.post('post/delete', $item)"],
             ],
         ];
     }
 
-    /**
-     * Get the slugs of the items by their IDs.
-     *
-     * @param int[] $ids
-     * @return array<int, string>
-     */
-    private function slugs(array $ids): array
-    {
-        if (! $this->type->public || $ids === []) {
-            return [];
-        }
-
-        $rows = Db::select('slugs', ['entity_id [Int]', 'slug'], [
-            'entity_table' => $this->type->table,
-            'entity_id'    => $ids,
-        ]) ?? [];
-
-        return array_column($rows, 'slug', 'entity_id');
-    }
 }

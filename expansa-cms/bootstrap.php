@@ -394,6 +394,7 @@ Lifecycle::phase('configure', true, function () {
             'progress'        => Expansa\Builders\Form\Fields\Progress::class,
             'radio'           => Expansa\Builders\Form\Fields\Radio::class,
             'select'          => Expansa\Builders\Form\Fields\Select::class,
+            'slug'            => Expansa\Builders\Form\Fields\Slug::class,
             'submit'          => Expansa\Builders\Form\Fields\Submit::class,
             'textarea'        => Expansa\Builders\Form\Fields\Textarea::class,
             'uploader'        => Expansa\Builders\Form\Fields\Uploader::class,
@@ -506,6 +507,11 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         Hook::run('repairSoftDeletes', 'comments');
     }
 
+    // the sites installed before the activity log get its table, the check costs no query either
+    if (! Db::hasTable(EX_DB['prefix'] . 'activity')) {
+        Hook::run('createActivityTable');
+    }
+
     // post types
     App\Post\Type::register(
         key: 'pages',
@@ -519,7 +525,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         labelSearch: t('Search Pages'),
         labelSave: t('Save Page'),
         public: true,
-        hierarchical: false,
+        hierarchical: true,
         searchable: true,
         showInMenu: true,
         showInBar: true,

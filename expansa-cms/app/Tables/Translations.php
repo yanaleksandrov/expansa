@@ -49,8 +49,12 @@ final class Translations extends Table
     public function cells(): array
     {
         return [
-            $this->cell('source')->title(t('Source Text'))->view('raw'),
-            $this->cell('value')->title(t('Translations'))->view('text'),
+            $this->cell('source')
+                ->title(t('Source Text'))
+                ->view('raw'),
+            $this->cell('value')
+                ->title(t('Translations'))
+                ->view('text'),
         ];
     }
 

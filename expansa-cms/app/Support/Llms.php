@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Models\Option;
+use App\Models\Post;
 use App\Post\Type;
 use Expansa\Facades\Db;
 use Expansa\Facades\Hook;
@@ -146,11 +147,7 @@ final class Llms
             return [];
         }
 
-        $slugs = array_column(
-            Db::select('slugs', ['entity_id [Int]', 'slug'], ['entity_table' => $table, 'entity_id' => array_column($rows, 'id')]) ?? [],
-            'slug',
-            'entity_id'
-        );
+        $slugs = Post::paths($table, array_column($rows, 'id'));
 
         $links = [];
         foreach ($rows as $row) {

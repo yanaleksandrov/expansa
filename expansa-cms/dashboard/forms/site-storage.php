@@ -44,7 +44,7 @@ return Form::enqueue(
         [
             'name'    => 'storage',
             'type'    => 'tab',
-            'label'   => t('Uploads & Storage'),
+            'label'   => t('Files Storage'),
             'caption' => t('Upload limits and file organization'),
             'icon'    => 'ph ph-tree-structure',
             'fields'  => [

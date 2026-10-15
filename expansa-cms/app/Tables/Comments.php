@@ -102,10 +102,10 @@ final class Comments extends Table
                 ->view('badge'),
             $this->cell('post')
                 ->title(t('In Response To'))
-                ->fixedWidth('12rem'),
+                ->fixedWidth('8rem'),
             $this->cell('date')
                 ->title(t('Date'))
-                ->fixedWidth('9rem')
+                ->fixedWidth('8rem')
                 ->sortable(),
         ];
     }

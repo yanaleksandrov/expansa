@@ -883,35 +883,153 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
-    Youla.data('tab', root => {
-        const query = new URLSearchParams(window.location.search).get('tab');
-        const tabs = [ ...root.querySelectorAll('[data-tab]') ].map(el => el.dataset.tab);
+    Youla.data('slug', root => {
+        const slugify = (text, final = true) => {
+            const slug = String(text).replace(/<[^>]*>/g, '').replace(/&[a-z0-9#]+;/gi, '').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
+            return final ? slug.replace(/^-+|-+$/g, '') : slug.replace(/^-+/, '');
+        };
+        const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;
         return {
-            tab: tabs.includes(query) ? query : root.querySelector('[data-tab]:not([hidden])')?.dataset.tab || root.dataset.tab || tabs[0] || null,
-            tabButton(id) {
-                return {
-                    ':class'() {
-                        return {
-                            'is-active': this.tab === id
-                        };
-                    },
-                    '@click'() {
-                        this.tab = id;
-                        const url = new URL(window.location.href);
-                        url.searchParams.set('tab', id);
-                        window.history.pushState({}, '', url);
-                    }
-                };
+            value: root.querySelector?.('.slug-line input')?.value || '',
+            base: root.dataset?.base || '',
+            bases: JSON.parse(root.dataset?.bases || '{}'),
+            source: from?.value || '',
+            synced: root.dataset?.synced === '1',
+            before: null,
+            generated() {
+                return slugify(this.source);
             },
-            tabContent(id) {
-                return {
-                    'u-show'() {
-                        return this.tab === id;
+            touch() {
+                setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', {
+                    bubbles: true
+                })));
+            },
+            line: {
+                '@load'() {
+                    if (this.synced) {
+                        this.value = this.generated();
                     }
-                };
+                },
+                '@input.document'(e) {
+                    if (from && e.target === from) {
+                        this.source = from.value;
+                        if (this.synced) {
+                            this.value = this.generated();
+                        }
+                    }
+                },
+                ':data-url'() {
+                    const url = this.base + this.value;
+                    root.dispatchEvent(new CustomEvent('slug-url', {
+                        detail: url,
+                        bubbles: true
+                    }));
+                    return url;
+                },
+                '@change.document'(e) {
+                    if (root.dataset?.parent && e.target.name === root.dataset.parent && e.target.form === root.closest('form')) {
+                        this.base = this.bases[e.target.value] ?? this.base;
+                    }
+                }
+            },
+            input: {
+                'u-ref': 'slug',
+                ':value'() {
+                    return this.value;
+                },
+                '@focus'() {
+                    this.before = {
+                        value: this.value,
+                        synced: this.synced
+                    };
+                },
+                '@input'(e) {
+                    const el = e.target;
+                    if (!e.isTrusted) {
+                        this.value = el.value;
+                        if (el.form?.dataset.initialState !== undefined) {
+                            el.form.dataset.initialState = JSON.stringify(Object.fromEntries(new FormData(el.form).entries()));
+                        }
+                        return;
+                    }
+                    const next = slugify(el.value, false);
+                    if (next !== el.value) {
+                        const caret = Math.max(0, el.selectionStart - (el.value.length - next.length));
+                        el.value = next;
+                        el.setSelectionRange(caret, caret);
+                    }
+                    this.value = next;
+                    this.synced = false;
+                },
+                '@keydown.enter.prevent'() {
+                    this.$el.blur();
+                },
+                '@keydown.escape'() {
+                    if (this.before) {
+                        this.value = this.before.value;
+                        this.synced = this.before.synced;
+                        this.touch();
+                    }
+                    this.$el.blur();
+                },
+                '@blur'() {
+                    const slug = slugify(this.value);
+                    const typed = this.value;
+                    this.synced = this.synced || slug === '';
+                    this.value = slug || this.generated();
+                    this.before = null;
+                    if (this.value !== typed) {
+                        this.touch();
+                    }
+                }
+            },
+            auto: {
+                'u-show'() {
+                    return this.synced;
+                }
+            },
+            regenerate: {
+                'u-show'() {
+                    return !this.synced && this.generated() !== '' && this.value !== this.generated();
+                },
+                '@click'() {
+                    this.value = this.generated();
+                    this.synced = true;
+                    this.touch();
+                }
+            },
+            copy: {
+                '@click': '$copy(base + value)'
             }
         };
     });
+    Youla.data('tab', () => ({
+        tab: null,
+        tabButton(id) {
+            return {
+                ':class'() {
+                    this.tab ??= this.$el.classList.contains('is-active') ? id : null;
+                    return {
+                        'is-active': this.tab === id
+                    };
+                },
+                '@click'() {
+                    this.tab = id;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tab', id);
+                    window.history.pushState({}, '', url);
+                }
+            };
+        },
+        tabContent(id) {
+            return {
+                'u-show'() {
+                    this.tab ??= this.$el.hidden ? null : id;
+                    return this.tab === id;
+                }
+            };
+        }
+    }));
     Youla.variable('dirty', () => {
         const serialize = form => JSON.stringify(Object.fromEntries(new FormData(form).entries()));
         const sync = () => {

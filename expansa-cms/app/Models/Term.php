@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Support\Activity;
 use Expansa\Database\Attribute;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
@@ -151,6 +152,7 @@ class Term extends Model implements Fieldable
      */
     public function update(array $data): Term|Error
     {
+        $before = $this->attributes;
         $this->fill($data);
 
         if (! $this->isValid()) {
@@ -160,6 +162,8 @@ class Term extends Model implements Fieldable
         if (! $this->save() instanceof self) {
             return error('term-update', t('Failed to save the term to the database.'));
         }
+
+        Activity::changes($this->table, (int) $this->id, $before, array_intersect_key($this->attributes, $data));
 
         return $this;
     }
