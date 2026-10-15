@@ -7,14 +7,16 @@ namespace App\Dashboard\Pages;
 use App\Tables\Comments;
 use App\Tables\Emails;
 use App\Tables\Media;
-use App\Tables\Pages;
+use App\Post\Type;
+use App\Tables\Posts;
 use App\Tables\Translations;
 use App\Tables\Users;
 use Expansa\Builders\Table;
+use Expansa\Http\Exceptions\NotFound;
 use Expansa\Http\Request;
 
 /**
- * The `edit` page: a table of the post type or the list named by `table`, posts of a type by default.
+ * The `edit` page: a table of the list or the post type named by `table`, pages by default.
  *
  * @package App\Dashboard
  */
@@ -32,10 +34,11 @@ final class Tables
     }
 
     /**
-     * Data of the `edit` page: the table of the list named by `table`, posts by default.
+     * Data of the `edit` page: the table of the list named by `table`, else of the post type, pages by default.
      *
      * @param Request $request
      * @return array{table: Table}
+     * @throws NotFound When `table` is neither a list nor a post type.
      */
     public static function data(Request $request): array
     {
@@ -49,7 +52,10 @@ final class Tables
             'emails'      => new Emails(),
             'users'       => new Users(),
             'files'       => new Media(),
-            default       => new Pages(),
+            default       => new Posts(
+                Type::get($request->getString('table') ?: 'pages') ?? throw new NotFound(),
+                $request->getString('view') === 'trash',
+            ),
         };
 
         return ['table' => $table];

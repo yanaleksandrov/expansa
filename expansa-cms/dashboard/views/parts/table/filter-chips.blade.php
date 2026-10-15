@@ -29,6 +29,6 @@ defined('EX_PATH') || exit;
         </span>
     </span>
     <button class="btn btn--xs" type="button" popovertarget="{{ $popover }}"><i class="ph ph-plus"></i> {{ t('Add') }}</button>
-    <button class="btn btn--xs t-red ml-auto" type="button" @click="clearFilters()">{{ t('Clear all') }}</button>
+    <button class="btn btn--xs t-red" type="button" @click="clearFilters()">{{ t('Clear all') }}</button>
     <div class="table-filter-values" id="{{ $popover }}-values" popover u-html="filterChoices(editing)" @change="toggleFilterValue($event.target)"></div>
 </div>

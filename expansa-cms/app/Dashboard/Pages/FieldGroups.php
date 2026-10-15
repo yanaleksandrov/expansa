@@ -127,7 +127,6 @@ final class FieldGroups
                 'protected' => t('Password Protected'),
                 'private'   => t('Private'),
                 'future'    => t('Scheduled'),
-                'trash'     => t('Trash'),
             ]],
             'user_role'   => ['label' => t('User Role'), 'options' => array_map(static fn ($role) => $role['name'], Role::all())],
         ];

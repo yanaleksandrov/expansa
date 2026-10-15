@@ -591,7 +591,8 @@ document.addEventListener('youla:init', () => {
             applyFilters() {
                 const url = new URL(window.location.href);
                 const payload = {
-                    table: url.searchParams.get('table') || ''
+                    table: url.searchParams.get('table') || '',
+                    view: url.searchParams.get('view') || ''
                 };
                 [ ...url.searchParams.keys() ].filter(key => key.startsWith('filter[')).forEach(key => url.searchParams.delete(key));
                 this.activeFilters().forEach((row, i) => {

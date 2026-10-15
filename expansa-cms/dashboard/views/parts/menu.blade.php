@@ -25,9 +25,9 @@ defined('EX_PATH') || exit;
                         @endisset
                     </a>
                     @isset($item->create)
-                        <button class="nav__action" type="button" title="{{ $item->create }}" @click="$ajax.post('post/create', {'post-type': '{{ $item->id }}'})">
+                        <a class="nav__action" href="{{ url('dashboard/post?type=' . $item->id) }}" title="{{ $item->create }}">
                             <i class="ph ph-plus"></i>
-                        </button>
+                        </a>
                     @endisset
                     <?php tree($item->children, function (array $children) use ($item) { ?>
                         <ul class="nav__list" u-collapse="open === '{{ $item->id }}'"{{ $item->active ? '' : ' hidden' }}>

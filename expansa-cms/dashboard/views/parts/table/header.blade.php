@@ -10,7 +10,8 @@ use Expansa\Facades\Safe;
 /**
  * Header above a table: the title with a badge, the tools and the bulk actions shown while rows are selected.
  * `create` is the label of the button leading to the `link` URL, e.g. of the page of a new item;
- * `actions` is the ID of the form of the bulk actions.
+ * `actions` is the ID of the form of the bulk actions; `views` are links to the parts of the list after the title,
+ * a list of `['title' => ..., 'href' => ..., 'active' => bool]`, with an optional `click` button after them.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/header.blade.php
  *
@@ -18,7 +19,7 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $content, $uploader, $filter, $filters, $actions, $search, $translation, $project, $create, $link] = Safe::data($__data ?? [], [
+[$title, $badge, $content, $uploader, $filter, $filters, $actions, $search, $translation, $project, $create, $link, $views] = Safe::data($__data ?? [], [
     'title'       => 'trim',
     'badge'       => 'trim',
     'content'     => 'trim',
@@ -31,6 +32,7 @@ defined('EX_PATH') || exit;
     'project'     => 'trim',
     'create'      => 'trim',
     'link'        => 'trim',
+    'views'       => 'array',
 ])->values();
 
 $progress = static fn (string $name) => [
@@ -46,6 +48,18 @@ $progress = static fn (string $name) => [
                 <span class="badge">{!! $badge !!}</span>
             @endif
         </h4>
+    @endif
+
+    @if ($views)
+        <div class="df aic g-3 fs-13">
+            @foreach ($views as $part)
+                @if (! empty($part['click']))
+                    <button class="btn btn--xs btn--outline t-red" type="button" @click="{{ $part['click'] }}">{{ $part['title'] ?? '' }}</button>
+                @else
+                    <a class="badge {{ empty($part['active']) ? 't-muted' : 't-dark' }}" href="{{ $part['href'] ?? '#' }}">{{ $part['title'] ?? '' }}</a>
+                @endif
+            @endforeach
+        </div>
     @endif
 
     <div class="table-header-terminal">

@@ -67,7 +67,6 @@ class Status
             'draft'     => t('Draft'),
             'protected' => t('Protected'),
             'private'   => t('Private'),
-            'trash'     => t('Trash'),
             'future'    => t('Scheduled'),
         ];
     }

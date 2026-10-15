@@ -16,11 +16,6 @@ Hook::add('renderDashboardFooter', function () {
 }, 0);
 ?>
 <div class="storage" u-data="{items: [], selected: []}" u-dragselect="selected = [...new Set([...selected, ...$event.detail.ids])]">
-    <div class="storage__head">
-        <h4>{{ t('Media Library') }}</h4>
-        <button class="btn btn--sm btn--outline" @click="$dialog.open('files-uploader')"><i class="ph ph-upload-simple"></i> {{ t('Add New File') }}</button>
-    </div>
-
     <div class="df aic g-3" u-show="selected.length" hidden>
         <span class="fs-13"><span u-text="selected.length"></span> <?php echo t('selected'); ?></span>
         <button type="button" class="btn btn--sm btn--outline" @click="selected = []"><?php echo t('Cancel'); ?></button>

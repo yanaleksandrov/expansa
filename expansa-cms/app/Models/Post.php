@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Post\Status;
 use App\Post\Type;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
+use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use Expansa\Support\Str;
@@ -14,9 +16,15 @@ use LogicException;
 
 /**
  * Class representing an entry entity.
+ *
+ * Deleting goes through the trash like in other models with HasSoftDeletes: delete() stamps `deleted_at`,
+ * restore() clears it. A type registered with `canTrash: false` turns soft deletes off, so delete()
+ * removes its entries at once.
  */
 class Post
 {
+    use HasSoftDeletes;
+
     public function __construct(
 
         /**
@@ -60,7 +68,7 @@ class Post
         public int $position = 0,
 
         /**
-         * Visibility status: publish, pending, draft, protected, private, trash or future.
+         * Visibility status: publish, pending, draft, protected, private or future.
          */
         public string $status = 'pending',
 
@@ -113,8 +121,14 @@ class Post
          * Custom fields of the entry.
          */
         public ?Field $field = null,
+
+        /**
+         * Date and time the entry was moved to the trash, null outside the trash.
+         */
+        public ?string $deletedAt = null,
     ) {
-        $this->table = Safe::tablename($this->type);
+        $this->table      = Safe::tablename($this->type);
+        $this->softDelete = Type::get($this->type)?->canTrash ?? false;
     }
 
     /**
@@ -137,14 +151,14 @@ class Post
             $args,
             [
                 'title'      => 'text',
-                'content'    => 'text',
+                'content'    => 'markup',
                 'author_id'  => 'absint:' . ($user->id ?? '0'),
                 'parent_id'  => 'absint:0',
                 'comments'   => 'absint:0',
                 'views'      => 'absint:0',
                 'position'   => 'absint:0',
                 'status'     => 'text:draft',
-                'discussion' => 'bool:open',
+                'discussion' => 'text:open',
                 'password'   => 'text',
             ]
         )->apply();
@@ -164,7 +178,7 @@ class Post
                 $slug = Slug::create([
                     'entity_id'    => $post->id,
                     'entity_table' => $type->table,
-                    'slug'         => Safe::slug($args['slug'] ?? $data['title']),
+                    'slug'         => Safe::slug(($args['slug'] ?? '') ?: $data['title']),
                 ]);
 
                 if ($slug instanceof Slug) {
@@ -185,10 +199,9 @@ class Post
     public static function getBySlug(string $value): ?Post
     {
         $slug = Slug::find($value, 'slug');
-        if ($slug instanceof Slug) {
-            return self::get(Safe::tablename($slug->entityTable), $slug->entityId);
-        }
-        return null;
+        $post = $slug instanceof Slug ? self::get(Safe::tablename($slug->entityTable), $slug->entityId) : null;
+
+        return $post?->isTrashed() ? null : $post;
     }
 
     /**
@@ -214,7 +227,9 @@ class Post
                 $data[ Safe::camelcase($key) ] = $value;
             }
 
-            $data['slug'] = $type->public === true ? Slug::get($data['id'], $type->table) : '';
+            $slug         = $type->public === true ? Slug::findByEntity((int) $data['id'], $type->table) : null;
+            $data['slug'] = $slug instanceof Slug ? $slug->slug : '';
+            $data['type'] = $type->key;
 
             return new Post(...$data);
         }
@@ -223,15 +238,164 @@ class Post
     }
 
     /**
-     * Remove post by field.
+     * Update the given columns of the post and, for a public type, its slug; other columns keep their values.
      *
-     * @param string $type
-     * @param mixed $value
-     * @param string $by
+     * @param array<string, mixed> $args `title`, `content`, `parent_id`, `status`, `discussion`, `password`, `slug`.
+     * @return bool False when nothing was saved, e.g. the slug is taken.
+     */
+    public function update(array $args): bool
+    {
+        $type = Type::get($this->type);
+        if (! $type instanceof Type || $this->id === 0) {
+            return false;
+        }
+
+        $rules = [
+            'title'      => 'text',
+            'content'    => 'markup',
+            'parent_id'  => 'absint:0',
+            'status'     => 'text:draft',
+            'discussion' => 'text:open',
+            'password'   => 'text',
+        ];
+
+        $data = Safe::data(array_intersect_key($args, $rules), array_intersect_key($rules, $args))->apply();
+
+        // a post can not be the parent of itself
+        if (($data['parent_id'] ?? 0) === $this->id) {
+            $data['parent_id'] = 0;
+        }
+
+        if (isset($data['status']) && ! array_key_exists($data['status'], Status::getStatuses())) {
+            unset($data['status']);
+        }
+
+        if (isset($data['discussion']) && ! in_array($data['discussion'], ['open', 'closed'], true)) {
+            unset($data['discussion']);
+        }
+
+        if ($type->public === true && isset($args['slug'])) {
+            $value = Safe::slug((string) $args['slug'] ?: ($data['title'] ?? $this->title));
+            $slug  = Slug::findByEntity($this->id, $type->table);
+            $slug  = $slug instanceof Slug
+                ? $slug->update(['slug' => $value])
+                : Slug::create(['entity_id' => $this->id, 'entity_table' => $type->table, 'slug' => $value]);
+
+            if (! $slug instanceof Slug) {
+                return false;
+            }
+            $this->slug = $slug->slug;
+        }
+
+        Db::update($type->table, [...$data, 'updated_at' => date('Y-m-d H:i:s')], ['id' => $this->id]);
+
+        foreach ($data as $key => $value) {
+            $this->{Safe::camelcase($key)} = $value;
+        }
+
+        return true;
+    }
+
+    /**
+     * Create a draft copy of the post: the same content, parent, discussion and fields,
+     * the title with "(copy)" and a new slug made from it.
+     *
+     * @return Post|null Null when the copy was not saved.
+     */
+    public function duplicate(): ?Post
+    {
+        $copy = self::add($this->type, [
+            'title'      => t(':title (copy)', $this->title),
+            'content'    => $this->content,
+            'parent_id'  => $this->parentId,
+            'position'   => $this->position,
+            'status'     => 'draft',
+            'discussion' => $this->discussion,
+            'password'   => $this->password,
+        ]);
+        if (! $copy instanceof Post) {
+            return null;
+        }
+
+        $fields = Db::select("{$this->table}_fields", ['key', 'value'], ['post_id' => $this->id]) ?: [];
+        if ($fields) {
+            Db::insert("{$this->table}_fields", array_map(fn (array $field) => ['post_id' => $copy->id, ...$field], $fields));
+        }
+
+        return $copy;
+    }
+
+    /**
+     * Whether the post is in the trash.
+     *
      * @return bool
      */
-    public static function delete(string $type, mixed $value, string $by = 'id'): bool
+    public function isTrashed(): bool
     {
-        return Db::delete($type, [ $by => $value ])->rowCount() > 0;
+        return $this->deletedAt !== null;
+    }
+
+    /**
+     * Whether delete() moves the post to the trash: its type has one and the post is not in it yet.
+     *
+     * @return bool
+     */
+    public function canTrash(): bool
+    {
+        return $this->softDelete && ! $this->isTrashed();
+    }
+
+    /**
+     * Delete the post: move it to the trash when canTrash(), otherwise delete it permanently.
+     *
+     * @return bool False when there was no such row.
+     */
+    public function delete(): bool
+    {
+        if (! $this->canTrash()) {
+            return $this->forceDelete();
+        }
+
+        $deletedAt = date('Y-m-d H:i:s');
+        $updated   = Db::update($this->table, [$this->deletedAtColumn => $deletedAt], ['id' => $this->id])?->rowCount() > 0;
+        if ($updated) {
+            $this->deletedAt = $deletedAt;
+        }
+
+        return $updated;
+    }
+
+    /**
+     * Take the post out of the trash.
+     *
+     * @return bool False when the post is not in the trash.
+     */
+    public function restore(): bool
+    {
+        if (! $this->isTrashed()) {
+            return false;
+        }
+
+        $restored = Db::update($this->table, [$this->deletedAtColumn => null], ['id' => $this->id])?->rowCount() > 0;
+        if ($restored) {
+            $this->deletedAt = null;
+        }
+
+        return $restored;
+    }
+
+    /**
+     * Delete the post permanently with its slug, bypassing the trash; its fields go with it by the foreign key.
+     *
+     * @return bool False when there was no such row.
+     */
+    public function forceDelete(): bool
+    {
+        $deleted = Db::delete($this->table, ['id' => $this->id])?->rowCount() > 0;
+        if ($deleted) {
+            Db::delete('slugs', ['entity_id' => $this->id, 'entity_table' => $this->table]);
+        }
+
+        return $deleted;
     }
 }

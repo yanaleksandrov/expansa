@@ -544,6 +544,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         showInBar: false,
         canExport: true,
         canImport: true,
+        canTrash: false,
         capabilities: ['types_edit'],
         menuIcon: 'ph ph-dropbox-logo',
         menuPosition: 30,

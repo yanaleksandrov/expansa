@@ -36,7 +36,7 @@ final class Media extends Table
             'description' => t('Either nothing has been uploaded yet or no files match the current filters.'),
             'buttons'     => [
                 [
-                    'label' => '<i class="ph ph-plus"></i> ' . t('Add new'),
+                    'label' => '<i class="ph ph-plus"></i> ' . t('Add new files'),
                     'url'   => url('/dashboard/import'),
                 ],
             ],
