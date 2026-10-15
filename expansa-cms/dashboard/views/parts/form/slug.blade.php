@@ -26,12 +26,12 @@ $synced = $from !== '' && (string) ($field->attributes['value'] ?? '') === '';
 	<label class="slug-line" u-bind="line">
 		<i class="ph ph-link-simple"></i>
 		<span class="slug-base">{{ $base }}</span>
-		<input{!! $field->htmlAttributes !!} u-prop="value" u-bind="input" spellcheck="false" autocomplete="off">
-		<span class="slug-auto" u-show="synced"@if(! $synced) hidden @endif>{{ t('from the title') }}</span>
-		<button class="slug-action" type="button" u-show="! synced && generated() !== '' && value !== generated()" u-bind="regenerate" hidden title="{{ t('Make from the title') }}" aria-label="{{ t('Make from the title') }}">
+		<input{!! $field->htmlAttributes !!} u-bind="input" spellcheck="false" autocomplete="off">
+		<span class="slug-auto" u-bind="auto"@if(! $synced) hidden @endif>{{ t('from the title') }}</span>
+		<button class="slug-action" type="button" u-bind="regenerate" hidden title="{{ t('Make from the title') }}" aria-label="{{ t('Make from the title') }}">
 			<i class="ph ph-arrows-clockwise"></i>
 		</button>
-		<button class="slug-action ph ph-copy" type="button" @click="$copy(base + value)" title="{{ t('Copy link') }}" aria-label="{{ t('Copy link') }}"></button>
+		<button class="slug-action ph ph-copy" type="button" u-bind="copy" title="{{ t('Copy link') }}" aria-label="{{ t('Copy link') }}"></button>
 		@if($link)
 			<a class="slug-action" href="{{ $link }}" target="_blank" title="{{ t('Open') }}" aria-label="{{ t('Open') }}"><i class="ph ph-arrow-square-out"></i></a>
 		@endif

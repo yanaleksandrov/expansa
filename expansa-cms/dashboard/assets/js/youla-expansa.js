@@ -890,7 +890,7 @@ document.addEventListener('youla:init', () => {
         };
         const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;
         return {
-            value: '',
+            value: root.querySelector?.('.slug-line input')?.value || '',
             base: root.dataset?.base || '',
             source: from?.value || '',
             synced: root.dataset?.synced === '1',
@@ -920,6 +920,9 @@ document.addEventListener('youla:init', () => {
             },
             input: {
                 'u-ref': 'slug',
+                ':value'() {
+                    return this.value;
+                },
                 '@focus'() {
                     this.before = {
                         value: this.value,
@@ -929,6 +932,7 @@ document.addEventListener('youla:init', () => {
                 '@input'(e) {
                     const el = e.target;
                     if (!e.isTrusted) {
+                        this.value = el.value;
                         if (el.form?.dataset.initialState !== undefined) {
                             el.form.dataset.initialState = JSON.stringify(Object.fromEntries(new FormData(el.form).entries()));
                         }
@@ -965,44 +969,52 @@ document.addEventListener('youla:init', () => {
                     }
                 }
             },
+            auto: {
+                'u-show'() {
+                    return this.synced;
+                }
+            },
             regenerate: {
+                'u-show'() {
+                    return !this.synced && this.generated() !== '' && this.value !== this.generated();
+                },
                 '@click'() {
                     this.value = this.generated();
                     this.synced = true;
                     this.touch();
                 }
-            }
-        };
-    });
-    Youla.data('tab', root => {
-        const query = new URLSearchParams(window.location.search).get('tab');
-        const tabs = [ ...root.querySelectorAll('[data-tab]') ].map(el => el.dataset.tab);
-        return {
-            tab: tabs.includes(query) ? query : root.querySelector('[data-tab]:not([hidden])')?.dataset.tab || root.dataset.tab || tabs[0] || null,
-            tabButton(id) {
-                return {
-                    ':class'() {
-                        return {
-                            'is-active': this.tab === id
-                        };
-                    },
-                    '@click'() {
-                        this.tab = id;
-                        const url = new URL(window.location.href);
-                        url.searchParams.set('tab', id);
-                        window.history.pushState({}, '', url);
-                    }
-                };
             },
-            tabContent(id) {
-                return {
-                    'u-show'() {
-                        return this.tab === id;
-                    }
-                };
+            copy: {
+                '@click': '$copy(base + value)'
             }
         };
     });
+    Youla.data('tab', () => ({
+        tab: null,
+        tabButton(id) {
+            return {
+                ':class'() {
+                    return {
+                        'is-active': this.tab === id
+                    };
+                },
+                '@click'() {
+                    this.tab = id;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tab', id);
+                    window.history.pushState({}, '', url);
+                }
+            };
+        },
+        tabContent(id) {
+            return {
+                'u-show'() {
+                    this.tab ??= this.$el.hidden ? null : id;
+                    return this.tab === id;
+                }
+            };
+        }
+    }));
     Youla.variable('dirty', () => {
         const serialize = form => JSON.stringify(Object.fromEntries(new FormData(form).entries()));
         const sync = () => {

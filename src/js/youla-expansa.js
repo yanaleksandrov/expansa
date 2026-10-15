@@ -1081,7 +1081,7 @@ document.addEventListener('youla:init', ()=> {
         const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;
 
         return {
-            value: '',
+            value: root.querySelector?.('.slug-line input')?.value || '',
             base: root.dataset?.base || '',
             source: from?.value || '',
             synced: root.dataset?.synced === '1',
@@ -1113,12 +1113,17 @@ document.addEventListener('youla:init', ()=> {
             },
             input: {
                 'u-ref': 'slug',
+                ':value'() {
+                    return this.value;
+                },
                 '@focus'() {
                     this.before = { value: this.value, synced: this.synced };
                 },
                 '@input'(e) {
                     const el = e.target;
                     if (!e.isTrusted) {
+                        this.value = el.value;
+
                         // a value from the server is the saved one: the form watched by $dirty stays clean
                         if (el.form?.dataset.initialState !== undefined) {
                             el.form.dataset.initialState = JSON.stringify(Object.fromEntries(new FormData(el.form).entries()));
@@ -1157,53 +1162,60 @@ document.addEventListener('youla:init', ()=> {
                     }
                 },
             },
+            auto: {
+                'u-show'() {
+                    return this.synced;
+                },
+            },
             regenerate: {
+                'u-show'() {
+                    return !this.synced && this.generated() !== '' && this.value !== this.generated();
+                },
                 '@click'() {
                     this.value  = this.generated();
                     this.synced = true;
                     this.touch();
                 },
             },
+            copy: {
+                '@click': '$copy(base + value)',
+            },
         };
     });
 
     /**
-     * Tabs, synced with the page URL:`u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
-     * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab is read from the
-     * `?tab=` query param if present, else `data-tab` on the `u-data` element itself.
+     * Tabs, synced with the page URL: `u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
+     * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab starts from the first
+     * panel that is not `hidden`: the server leaves the tab of `?tab=` open, plain markup opens the first.
      *
      * @since 1.0
      */
-    Youla.data('tab', (root) => {
-        // the server renders the tab of the `tab` parameter, or the first one, visible: the state starts from it
-        const query = new URLSearchParams(window.location.search).get('tab');
-        const tabs  = [...root.querySelectorAll('[data-tab]')].map(el => el.dataset.tab);
+    Youla.data('tab', () => ({
+        tab: null,
+        tabButton(id) {
+            return {
+                ':class'() {
+                    return { 'is-active': this.tab === id };
+                },
+                '@click'() {
+                    this.tab = id;
 
-        return {
-            tab: tabs.includes(query) ? query : root.querySelector('[data-tab]:not([hidden])')?.dataset.tab || root.dataset.tab || tabs[0] || null,
-            tabButton(id) {
-                return {
-                    ':class'() {
-                        return { 'is-active': this.tab === id };
-                    },
-                    '@click'() {
-                        this.tab = id;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('tab', id);
+                    window.history.pushState({}, '', url);
+                },
+            };
+        },
+        tabContent(id) {
+            return {
+                'u-show'() {
+                    this.tab ??= this.$el.hidden ? null : id;
 
-                        const url = new URL(window.location.href);
-                        url.searchParams.set('tab', id);
-                        window.history.pushState({}, '', url);
-                    },
-                };
-            },
-            tabContent(id) {
-                return {
-                    'u-show'() {
-                        return this.tab === id;
-                    },
-                };
-            },
-        };
-    });
+                    return this.tab === id;
+                },
+            };
+        },
+    }));
 
     /**
      * `$dirty` — warns about unsaved form changes. Call `$dirty.watch($el)` once per form (e.g.

@@ -19,7 +19,7 @@ if ($field->content === '') {
 ?>
 <!-- tab "{{ $field->name }}" start -->
 <?php $tab = Safe::prop($field->name); ?>
-<div class="tab__content {{ $field->class_content }}" data-tab="{{ $tab }}" u-bind="tabContent('{{ $tab }}')"@if(! $field->active) hidden @endif>
+<div class="tab__content {{ $field->class_content }}" u-bind="tabContent('{{ $tab }}')"@if(! $field->active) hidden @endif>
 	@if($field->caption || $field->description)
 		<div class="dg">
 			@if($field->caption)
