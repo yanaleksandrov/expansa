@@ -1,4 +1,6 @@
 <?php
+use Expansa\Builders\Form;
+
 /**
  * Filter of a table: the button with the number of active filters and the popover with rows
  * "field is/is not values"; the state and the instant apply are in the `table` component.
@@ -16,10 +18,24 @@ defined('EX_PATH') || exit;
 // rows are initialized before they are attached, so the popover is found from the component root
 $select = "{ contentLocation: \$root.querySelector('.table-filter-content') }";
 ?>
-<button class="btn btn--sm table-filter-toggle" type="button" popovertarget="{{ $popover }}">
-    <i class="ph ph-funnel"></i> {{ t('Filter') }}
-    <span class="badge" u-show="activeFilters().length" u-text="activeFilters().length" hidden></span>
-</button>
+<div class="df fww g-1">
+    <div>
+        <?php
+        echo Form::view('input', [
+            'type'       => 'search',
+            'name'       => 's',
+            'before'     => '<i class="ph ph-magnifying-glass"></i>',
+            'class'      => 'field field--sm field--raised',
+            'attributes' => ['type' => 'search', 'name' => 's', 'placeholder' => t('Search...')],
+        ]);
+        ?>
+    </div>
+    <button class="btn btn--sm table-filter-toggle" type="button" popovertarget="{{ $popover }}">
+        <i class="ph ph-funnel"></i> {{ t('Filter') }}
+        <span class="badge" u-show="activeFilters().length" u-text="activeFilters().length" hidden></span>
+    </button>
+</div>
+
 <div class="table-filter-content" id="{{ $popover }}" popover>
     <div class="table-filter-head">
         <strong>{{ t('Filters') }}</strong>

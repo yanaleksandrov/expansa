@@ -19,7 +19,7 @@
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   text-decoration: none;
-  transition: background-color 0.15s;
+  transition: background-color 0.2s, transform 0.2s;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -28,6 +28,10 @@
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
+
+  &:active:not(:disabled) {
+    transform: scale(.97);
+  }
 
   > * {
     font-size: inherit;

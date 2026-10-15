@@ -1393,7 +1393,7 @@ option[data-html*="<i "]) {
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   text-decoration: none;
-  transition: background-color 0.15s;
+  transition: background-color 0.2s, transform 0.2s;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -1401,6 +1401,9 @@ option[data-html*="<i "]) {
   background-color: transparent;
   background-repeat: no-repeat;
   background-position: center;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 .btn > * {
   font-size: inherit;

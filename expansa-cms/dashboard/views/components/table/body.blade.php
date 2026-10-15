@@ -33,9 +33,11 @@ $items = $table->getData();
             </div>
         @endforeach
     </div>
-    <div class="table-row-data">
-        Additional data
-    </div>
+    @if(0)
+        <div class="table-row-data">
+            Additional data
+        </div>
+    @endif
 @endforeach
 @if (! $items)
     <div class="table-filter-empty">{{ t('No items match the filter.') }}</div>
