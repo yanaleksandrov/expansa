@@ -8,7 +8,7 @@ defined('EX_PATH') || exit;
 ?>
 <div class="mw-400 df fdc jcc">
     <?php
-    echo view('components/state', [
+    echo view('parts/state', [
         'icon'        => 'success',
         'title'       => t('Woo-hoo, Expansa has been successfully installed.'),
         'description' => t('We hope the installation process was easy. Thank you, and enjoy.'),

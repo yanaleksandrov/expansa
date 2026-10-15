@@ -10,7 +10,7 @@
 
 ?>
 <?php
-echo view('components/table/header', [
+echo view('parts/table/header', [
     'title' => t('Orders'),
 ]);
 ?>

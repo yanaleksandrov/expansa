@@ -8,7 +8,7 @@
  */
 defined('EX_PATH') || exit;
 
-echo view('components/table/header', $table->headData());
+echo view('parts/table/header', $table->headData());
 ?>
 
 @if ($table->getData())
@@ -31,5 +31,5 @@ echo view('components/table/header', $table->headData());
         @endforeach
     </form>
 @else
-    <?php echo view('components/state', $table->notFoundData()); ?>
+    <?php echo view('parts/state', $table->notFoundData()); ?>
 @endif

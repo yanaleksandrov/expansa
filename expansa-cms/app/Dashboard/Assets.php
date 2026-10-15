@@ -129,7 +129,7 @@ final class Assets
             self::$notifications = true;
 
             Hook::add('renderDashboardFooter', static function () {
-                echo view('components/notifications');
+                echo view('parts/notifications');
             });
         }
     }
@@ -167,7 +167,7 @@ final class Assets
      */
     private static function structure(string $file, array $context = []): array
     {
-        if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/components/form/')) {
+        if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/parts/form/')) {
             return AssetManager::defaultStructure($file);
         }
 

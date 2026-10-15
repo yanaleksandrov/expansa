@@ -321,10 +321,10 @@ Lifecycle::phase('configure', true, function () {
         },
     );
 
-    // every dashboard table renders the items filter form, its cells use components/table/cell-<kind> views
+    // every dashboard table renders the items filter form, its cells use parts/table/cell-<kind> views
     Expansa\Builders\Table::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php',
-        cellView: 'components/table/cell',
+        cellView: 'parts/table/cell',
     );
 
     // validation error messages in the site language
@@ -403,9 +403,9 @@ Lifecycle::phase('configure', true, function () {
             'repeater'        => Expansa\Builders\Form\Fields\Repeater::class,
             'message'         => Expansa\Builders\Form\Fields\Message::class,
         ],
-        view: fn (string $template, array $data) => (string) View::create("components/form/$template", $data),
+        view: fn (string $template, array $data) => (string) View::create("parts/form/$template", $data),
         assets: fn (string $template, string $uid) => Asset::discover(
-            View::create("components/form/$template")->path,
+            View::create("parts/form/$template")->path,
             $uid,
             ['type' => $uid],
         ),

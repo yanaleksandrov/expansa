@@ -33,14 +33,14 @@ echo Form::render('profile');
 ```php
 Form::configure(
     types: ['text' => Fields\Input::class, 'select' => Fields\Select::class /* ... */],
-    view: fn (string $template, array $data) => (string) View::create("components/form/$template", $data),
-    assets: fn (string $template, string $uid) => Asset::discover(View::create("components/form/$template")->path, $uid, ['type' => $uid]),
+    view: fn (string $template, array $data) => (string) View::create("parts/form/$template", $data),
+    assets: fn (string $template, string $uid) => Asset::discover(View::create("parts/form/$template")->path, $uid, ['type' => $uid]),
     directory: EX_DASHBOARD . 'forms',
 );
 
 Table::configure(
     filter: EX_DASHBOARD . 'forms/items-filter.php',
-    cellView: 'components/table/cell',
+    cellView: 'parts/table/cell',
 );
 
 Tree::configure(
@@ -209,7 +209,7 @@ Tree::attach('dashboard-main-menu', fn (Tree $tree) => $tree->append([
 вместо функции — `Tree::walk()`. Тело — функция, переменные шаблона передаются в него через `use`:
 `function (array $comments, int $depth) use ($user)`.
 
-Так выводятся меню дашборда: `components/menu`, `components/user-account`.
+Так выводятся меню дашборда: `parts/menu`, `parts/user-account`.
 
 - `attach()` с тем же именем дополняет дерево — так плагин добавляет пункты в меню ядра.
 - Элементы, у которых не прошла проверка `capabilities`, не выводятся вместе с их детьми, а

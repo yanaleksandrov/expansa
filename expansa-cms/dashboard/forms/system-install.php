@@ -469,7 +469,7 @@ return \Expansa\Builders\Form::enqueue(
             'fields'     => [
                 [
                     'type'     => 'custom',
-                    'callback' => view('components/state', [
+                    'callback' => view('parts/state', [
                         'icon'        => 'success',
                         'title'       => t('Woo-hoo, Expansa has been successfully installed.'),
                         'description' => t('We hope the installation process was easy. Thank you, and enjoy.'),

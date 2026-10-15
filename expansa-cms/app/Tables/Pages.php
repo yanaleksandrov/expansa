@@ -12,6 +12,7 @@ final class Pages extends Table
 {
     public function data(): array
     {
+        return [];
         return [
             [
                 'id'         => 1,
@@ -22,6 +23,23 @@ final class Pages extends Table
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
                 'date'       => '24 august 2024',
+                'actions'    => [
+                    [
+                        'href'  => '#',
+                        'class' => '#',
+                        'title' => t('View'),
+                    ],
+                    [
+                        'href'  => '#',
+                        'class' => '#',
+                        'title' => t('Duplicate'),
+                    ],
+                    [
+                        'href'  => '#',
+                        'class' => '#',
+                        'title' => t('Delete'),
+                    ],
+                ],
             ],
         ];
     }
@@ -88,7 +106,11 @@ final class Pages extends Table
             'description' => t("You don't have any pages yet. Add them manually or import them from a CSV file."),
             'buttons'     => [
                 [
-                    'label' => t('Import'),
+                    'label' => '<i class="ph ph-plus"></i> ' . t('Add new'),
+                    'url'   => url('/dashboard/import'),
+                ],
+                [
+                    'label' => '<i class="ph ph-download-simple"></i> ' . t('Import from file'),
                     'url'   => url('/dashboard/import'),
                 ],
             ],

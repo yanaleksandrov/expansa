@@ -11,7 +11,7 @@ use Expansa\Facades\Hook;
  */
 
 Hook::add('renderDashboardFooter', function () {
-    echo view('components/dialogs/emails-editor');
+    echo view('parts/dialogs/emails-editor');
 });
 
-echo view('components/table/table', ['table' => $table]);
+echo view('parts/table/table', ['table' => $table]);

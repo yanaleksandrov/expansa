@@ -11,7 +11,7 @@ use Expansa\Facades\Hook;
  */
 
 Hook::add('renderDashboardFooter', function () {
-    echo view('components/dialogs/media-editor');
+    echo view('parts/dialogs/media-editor');
 }, 0);
 ?>
 <div class="storage" u-data="{items: [], selected: []}" u-dragselect="selected = [...new Set([...selected, ...$event.detail.ids])]">
@@ -21,7 +21,7 @@ Hook::add('renderDashboardFooter', function () {
     </div>
 
     <div class="storage__uploader" hidden>
-        <?php echo view('components/dialogs/media-uploader'); ?>
+        <?php echo view('parts/dialogs/media-uploader'); ?>
     </div>
 
     <div class="df aic g-3" u-show="selected.length" hidden>
@@ -54,7 +54,7 @@ Hook::add('renderDashboardFooter', function () {
     </div>
 
     <div u-show="items.length === 0" @load="console.log(items.length)">
-        <?php echo view('components/state', $table->notFoundData()); ?>
+        <?php echo view('parts/state', $table->notFoundData()); ?>
     </div>
 
     <div @intersect="$ajax.post('media/get', '', ({posts}) => items = posts)"></div>

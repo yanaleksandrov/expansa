@@ -35,7 +35,7 @@ use Expansa\Facades\Hook;
     ?>
 </head>
 <body u-data="youla" @keydown.window.prevent.ctrl.s="$notice.add(notifications.ctrlS)">
-    <?php echo view('components/impersonation'); ?>
+    <?php echo view('parts/impersonation'); ?>
     <div class="expansa" :class="showMenu && 'is-active'">
         <div class="expansa-bar">
             <div class="expansa-bar-burger" :class="showMenu && 'is-active'" @click="showMenu = !showMenu">
@@ -43,15 +43,15 @@ use Expansa\Facades\Hook;
             </div>
 
             <div class="expansa-bar-menu">
-                <?php echo view('components/menu-bar'); ?>
+                <?php echo view('parts/menu-bar'); ?>
             </div>
 
             <div class="expansa-bar-search">
-                <?php echo view('components/search'); ?>
+                <?php echo view('parts/search'); ?>
             </div>
 
             <div class="expansa-bar-account">
-                <?php echo view('components/menu-user'); ?>
+                <?php echo view('parts/menu-user'); ?>
             </div>
         </div>
 
@@ -59,11 +59,11 @@ use Expansa\Facades\Hook;
             <a href="{{ $site->url }}" target="_blank">
                 <img src="<?php echo url( '/dashboard/assets/images/logo.svg' ); ?>" width="34" height="34" alt="Expansa Logo">
             </a>
-            <?php echo view('components/menu-panel'); ?>
+            <?php echo view('parts/menu-panel'); ?>
         </div>
 
         <div class="expansa-side">
-            <?php echo view('components/menu'); ?>
+            <?php echo view('parts/menu'); ?>
         </div>
 
         <div class="expansa-main expansa-main--{{ $surface->value }}">
@@ -96,7 +96,7 @@ use Expansa\Facades\Hook;
      *
      * @since 2027.1
      */
-    echo view('components/dialogs/media-library');
+    echo view('parts/dialogs/media-library');
 
     /**
      * Prints scripts or data before the closing body tag on the dashboard.

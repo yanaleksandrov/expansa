@@ -55,7 +55,7 @@ abstract class Table
      * Set the file included before every table and the default view of the cells.
      *
      * @param string $filter   File that enqueues the items filter form.
-     * @param string $cellView Prefix of the cell views, e.g. `components/table/cell`.
+     * @param string $cellView Prefix of the cell views, e.g. `parts/table/cell`.
      * @return void
      */
     public static function configure(string $filter = '', string $cellView = ''): void

@@ -22,6 +22,6 @@ final class TablesService
         $filter = $request->get('filter', []);
         $table  = Tables::data($request)['table']->filterBy(is_array($filter) ? $filter : []);
 
-        return $response->update('.table-body', view('components/table/body', ['table' => $table])->render());
+        return $response->update('.table-body', view('parts/table/body', ['table' => $table])->render());
     }
 }
