@@ -3694,6 +3694,7 @@ body.is-unsaved .expansa-search-btn {
 
 .post-comments {
   display: grid;
+  container: post-comments/inline-size;
 }
 .post-comments-empty {
   display: none;
@@ -3720,12 +3721,24 @@ body.is-unsaved .expansa-search-btn {
   gap: 0.5rem;
   font-size: 0.8125rem;
 }
+@container post-comments (max-width: 30rem) {
+  .post-comment-who {
+    flex-wrap: wrap;
+    row-gap: 0;
+  }
+}
 .post-comment-who b {
   font-weight: 600;
 }
 .post-comment-who time {
   font-size: 0.75rem;
   color: var(--expansa-text-muted);
+}
+@container post-comments (max-width: 30rem) {
+  .post-comment-who time {
+    order: 1;
+    flex-basis: 100%;
+  }
 }
 .post-comment-text {
   margin-top: 0.1875rem;
@@ -3770,7 +3783,7 @@ body.is-unsaved .expansa-search-btn {
 
 .post-comments-list {
   display: grid;
-  gap: 0.6rem;
+  gap: 1rem;
 }
 
 .post-comment-actions {
@@ -3790,7 +3803,7 @@ body.is-unsaved .expansa-search-btn {
 .post-comment-replies {
   padding-left: 0.75rem;
   border-left: 1px solid var(--expansa-border);
-  margin-top: 0.5rem;
+  margin-top: 1rem;
 }
 .post-comment-replies:not(:has(.post-comment)) {
   display: none;

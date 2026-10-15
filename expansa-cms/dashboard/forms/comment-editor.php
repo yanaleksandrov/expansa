@@ -14,15 +14,15 @@ $date    = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, Intl
 $postUrl = $type !== null && $comment->postId > 0 ? url('dashboard/post?type=' . $type->key . '&id=' . $comment->postId . '&tab=comments') : '';
 
 /**
- * Comment page, laid out as the post editor: the text and the author in the main card, a reply in its tab,
- * the status, the rating and the facts of where the comment came from aside.
+ * Comment page, laid out as the post editor: the bar with the way back over the tabs, the text and the author
+ * in the main card, a reply in its tab, the status, the rating and the facts of where the comment came from aside.
  *
  * @since 2027.1
  */
 return Form::enqueue(
     'comment-editor',
     [
-        'class'           => 'post-editor',
+        'class'           => 'tab post-editor',
         'u-data'          => 'tab',
         '@load'           => '$dirty.watch($el)',
         '@submit.prevent' => '$ajax.post("comments/update", "", () => $dirty.remove($el))',
@@ -32,6 +32,33 @@ return Form::enqueue(
             'type'       => 'hidden',
             'name'       => 'id',
             'attributes' => ['type' => 'hidden', 'name' => 'id', 'value' => $comment->id],
+        ],
+        [
+            'name'     => 'header',
+            'type'     => 'custom',
+            'callback' => function () use ($comment, $from, $postUrl, $type) {
+                $list  = url('dashboard/edit?table=comments');
+                $title = Page::postTitle($comment);
+                $back  = $from === 'post' && $postUrl !== '' ? $postUrl : $list;
+                ?>
+                <div class="post-editor-head">
+                    <a class="btn btn--icon btn--sm" href="<?php echo $back; ?>" title="<?php echo t_attr('Back'); ?>">
+                        <i class="ph ph-arrow-left"></i>
+                    </a>
+                    <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
+                        <?php if ($from === 'post' && $postUrl !== '') : ?>
+                            <a href="<?php echo url('dashboard/edit?table=' . $type->key); ?>"><?php echo $type->labelNamePlural; ?></a>
+                            <i class="ph ph-caret-right"></i>
+                            <a href="<?php echo $postUrl; ?>"><?php echo htmlspecialchars($title !== '' ? $title : t('Post #:id', $comment->postId)); ?></a>
+                        <?php else : ?>
+                            <a href="<?php echo $list; ?>"><?php echo t('Comments'); ?></a>
+                        <?php endif; ?>
+                        <i class="ph ph-caret-right"></i>
+                        <span aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></span>
+                    </nav>
+                </div>
+                <?php
+            },
         ],
         [
             'type'          => 'tab',
@@ -50,41 +77,47 @@ return Form::enqueue(
                     'label'         => '',
                     'class'         => 'post-editor-main',
                     'label_class'   => '',
-                    'content_class' => 'dg',
+                    'content_class' => 'post-editor-card',
                     'fields'        => [
                         [
-                            'name'     => 'header',
-                            'type'     => 'custom',
-                            'callback' => function () use ($from, $postUrl) {
-                                $back = $from === 'post' && $postUrl !== '' ? $postUrl : url('dashboard/edit?table=comments');
-                                ?>
-                                <h5 class="post-editor-title">
-                                    <a class="btn btn--icon btn--sm" href="<?php echo $back; ?>" title="<?php echo t_attr('Back'); ?>">
-                                        <i class="ph ph-arrow-left"></i>
-                                    </a>
-                                    <span class="fw-600 mr-auto"><?php echo t('Edit Comment'); ?></span>
-                                    <button class="btn btn--sm btn--primary" type="submit"><?php echo t('Save'); ?></button>
-                                </h5>
-                                <?php
-                            },
+                            'type'        => 'textarea',
+                            'name'        => 'content',
+                            'error'       => 'content',
+                            'label'       => t('Text'),
+                            'class'       => '',
+                            'label_class' => '',
+                            'reset'       => 0,
+                            'before'      => '',
+                            'after'       => '',
+                            'instruction' => '',
+                            'tooltip'     => '',
+                            'copy'        => 0,
+                            'validator'   => '',
+                            'conditions'  => [],
+                            'attributes'  => [
+                                'u-prop'   => 'content',
+                                'rows'     => max(4, count(explode("\n", $comment->content))),
+                                'value'    => $comment->content,
+                                'required' => true,
+                            ],
                         ],
                         [
                             'type'          => 'group',
-                            'name'          => 'text',
+                            'name'          => 'author',
                             'label'         => '',
-                            'class'         => 'post-editor-card',
+                            'class'         => 'dg',
                             'label_class'   => '',
-                            'content_class' => 'dg g-5',
+                            'content_class' => 'dg g-5 gtc-2 sm:gtc-1',
                             'fields'        => [
                                 [
-                                    'type'        => 'textarea',
-                                    'name'        => 'content',
-                                    'error'       => 'content',
-                                    'label'       => t('Text'),
+                                    'type'        => 'text',
+                                    'name'        => 'author_name',
+                                    'error'       => 'author_name',
+                                    'label'       => t('Author'),
                                     'class'       => '',
                                     'label_class' => '',
                                     'reset'       => 0,
-                                    'before'      => '',
+                                    'before'      => '<i class="ph ph-user"></i>',
                                     'after'       => '',
                                     'instruction' => '',
                                     'tooltip'     => '',
@@ -92,60 +125,28 @@ return Form::enqueue(
                                     'validator'   => '',
                                     'conditions'  => [],
                                     'attributes'  => [
-                                        'u-prop'   => 'content',
-                                        'rows'     => max(4, count(explode("\n", $comment->content))),
-                                        'value'    => $comment->content,
-                                        'required' => true,
+                                        'u-prop' => 'author_name',
+                                        'value'  => $comment->authorName,
                                     ],
                                 ],
                                 [
-                                    'type'          => 'group',
-                                    'name'          => 'author',
-                                    'label'         => '',
-                                    'class'         => 'dg',
-                                    'label_class'   => '',
-                                    'content_class' => 'dg g-5 gtc-2 sm:gtc-1',
-                                    'fields'        => [
-                                        [
-                                            'type'        => 'text',
-                                            'name'        => 'author_name',
-                                            'error'       => 'author_name',
-                                            'label'       => t('Author'),
-                                            'class'       => '',
-                                            'label_class' => '',
-                                            'reset'       => 0,
-                                            'before'      => '<i class="ph ph-user"></i>',
-                                            'after'       => '',
-                                            'instruction' => '',
-                                            'tooltip'     => '',
-                                            'copy'        => 0,
-                                            'validator'   => '',
-                                            'conditions'  => [],
-                                            'attributes'  => [
-                                                'u-prop' => 'author_name',
-                                                'value'  => $comment->authorName,
-                                            ],
-                                        ],
-                                        [
-                                            'type'        => 'email',
-                                            'name'        => 'author_email',
-                                            'error'       => 'author_email',
-                                            'label'       => t('Email'),
-                                            'class'       => '',
-                                            'label_class' => '',
-                                            'reset'       => 0,
-                                            'before'      => '<i class="ph ph-at"></i>',
-                                            'after'       => '',
-                                            'instruction' => t('Not displayed publicly.'),
-                                            'tooltip'     => '',
-                                            'copy'        => 0,
-                                            'validator'   => '',
-                                            'conditions'  => [],
-                                            'attributes'  => [
-                                                'u-prop' => 'author_email',
-                                                'value'  => $comment->authorEmail,
-                                            ],
-                                        ],
+                                    'type'        => 'email',
+                                    'name'        => 'author_email',
+                                    'error'       => 'author_email',
+                                    'label'       => t('Email'),
+                                    'class'       => '',
+                                    'label_class' => '',
+                                    'reset'       => 0,
+                                    'before'      => '<i class="ph ph-at"></i>',
+                                    'after'       => '',
+                                    'instruction' => t('Not displayed publicly.'),
+                                    'tooltip'     => '',
+                                    'copy'        => 0,
+                                    'validator'   => '',
+                                    'conditions'  => [],
+                                    'attributes'  => [
+                                        'u-prop' => 'author_email',
+                                        'value'  => $comment->authorEmail,
                                     ],
                                 ],
                             ],
@@ -170,27 +171,32 @@ return Form::enqueue(
                     'type'     => 'custom',
                     'callback' => function () use ($comment) {
                         ?>
-                        <div class="post-editor-main post-comments">
-                            <div class="post-comment">
-                                <span class="avatar avatar--rounded avatar--sm bg-<?php echo $comment->getColor(); ?>-lt t-<?php echo $comment->getColor(); ?>"><?php echo htmlspecialchars($comment->getInitials()); ?></span>
-                                <div class="post-comment-body">
-                                    <div class="post-comment-who"><b><?php echo htmlspecialchars($comment->getAuthorName()); ?></b></div>
-                                    <div class="post-comment-text"><?php echo htmlspecialchars($comment->content); ?></div>
+                        <div class="post-editor-main">
+                            <div class="post-editor-card post-comments">
+                                <div class="post-editor-section-head">
+                                    <h3><?php echo t('Reply'); ?></h3>
                                 </div>
-                            </div>
-                            <?php if (! $comment->canReply()) : ?>
-                                <p class="post-comments-closed">
-                                    <i class="ph ph-lock-simple"></i> <?php echo t('The discussion is closed: new comments and replies are not accepted.'); ?>
-                                </p>
-                            <?php else : ?>
-                            <div class="post-comment-box">
-                                <textarea id="comment-reply-text" name="reply" form="comment-reply" rows="3" required placeholder="<?php echo t_attr('Reply to :name…', $comment->getAuthorName()); ?>" aria-label="<?php echo t_attr('Reply'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
-                                <div class="post-comment-tools">
-                                    <span class="t-muted fs-12 mr-auto"><?php echo t('The reply is published at once under your name, on the same post.'); ?></span>
-                                    <button class="btn btn--sm btn--primary" type="submit" form="comment-reply"><?php echo t('Send Reply'); ?></button>
+                                <div class="post-comment">
+                                    <span class="avatar avatar--rounded avatar--sm bg-<?php echo $comment->getColor(); ?>-lt t-<?php echo $comment->getColor(); ?>"><?php echo htmlspecialchars($comment->getInitials()); ?></span>
+                                    <div class="post-comment-body">
+                                        <div class="post-comment-who"><b><?php echo htmlspecialchars($comment->getAuthorName()); ?></b></div>
+                                        <div class="post-comment-text"><?php echo htmlspecialchars($comment->content); ?></div>
+                                    </div>
                                 </div>
+                                <?php if (! $comment->canReply()) : ?>
+                                    <p class="post-comments-closed">
+                                        <i class="ph ph-lock-simple"></i> <?php echo t('The discussion is closed: new comments and replies are not accepted.'); ?>
+                                    </p>
+                                <?php else : ?>
+                                <div class="post-comment-box">
+                                    <textarea id="comment-reply-text" name="reply" form="comment-reply" rows="3" required placeholder="<?php echo t_attr('Reply to :name…', $comment->getAuthorName()); ?>" aria-label="<?php echo t_attr('Reply'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
+                                    <div class="post-comment-tools">
+                                        <span class="t-muted fs-12 mr-auto"><?php echo t('The reply is published at once under your name, on the same post.'); ?></span>
+                                        <button class="btn btn--sm btn--primary" type="submit" form="comment-reply"><?php echo t('Send Reply'); ?></button>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                             </div>
-                            <?php endif; ?>
                         </div>
                         <?php
                     },
@@ -244,7 +250,7 @@ return Form::enqueue(
             'label'         => '',
             'class'         => 'post-editor-side',
             'label_class'   => '',
-            'content_class' => 'post-editor-card',
+            'content_class' => 'dg g-5',
             'fields'        => [
                 [
                     'name'     => 'properties',
@@ -265,6 +271,7 @@ return Form::enqueue(
                             ['ph ph-hash', t('ID'), (string) $comment->id],
                         ];
                         ?>
+                        <h4 class="post-editor-eyebrow"><?php echo t('Details'); ?></h4>
                         <dl class="post-editor-props">
                             <dt><i class="ph ph-circle-dashed"></i><?php echo t('Status'); ?></dt>
                             <dd>
