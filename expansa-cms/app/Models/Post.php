@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Post\Status;
 use App\Post\Type;
+use App\Support\Activity;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSoftDeletes;
@@ -274,6 +275,11 @@ class Post
             unset($data['discussion']);
         }
 
+        $before = ['slug' => $this->slug];
+        foreach ($data as $key => $value) {
+            $before[$key] = $this->{Safe::camelcase($key)};
+        }
+
         if ($type->public === true && isset($args['slug'])) {
             $value = Safe::slug((string) $args['slug'] ?: ($data['title'] ?? $this->title));
             $slug  = Slug::findByEntity($this->id, $type->table);
@@ -292,6 +298,8 @@ class Post
         foreach ($data as $key => $value) {
             $this->{Safe::camelcase($key)} = $value;
         }
+
+        Activity::changes($this->table, $this->id, $before, [...$data, 'slug' => $this->slug]);
 
         return true;
     }
@@ -321,6 +329,8 @@ class Post
         if ($fields) {
             Db::insert("{$this->table}_fields", array_map(fn (array $field) => ['post_id' => $copy->id, ...$field], $fields));
         }
+
+        Activity::record($this->table, $this->id, 'duplicated', ['id' => $copy->id, 'title' => $copy->title]);
 
         return $copy;
     }
@@ -370,6 +380,7 @@ class Post
         $updated   = Db::update($this->table, [$this->deletedAtColumn => $deletedAt], ['id' => $this->id])?->rowCount() > 0;
         if ($updated) {
             $this->deletedAt = $deletedAt;
+            Activity::record($this->table, $this->id, 'trashed');
         }
 
         return $updated;
@@ -389,6 +400,7 @@ class Post
         $restored = Db::update($this->table, [$this->deletedAtColumn => null], ['id' => $this->id])?->rowCount() > 0;
         if ($restored) {
             $this->deletedAt = null;
+            Activity::record($this->table, $this->id, 'restored');
         }
 
         return $restored;
@@ -404,6 +416,7 @@ class Post
         $deleted = Db::delete($this->table, ['id' => $this->id])?->rowCount() > 0;
         if ($deleted) {
             Db::delete('slugs', ['entity_id' => $this->id, 'entity_table' => $this->table]);
+            Activity::forget($this->table, $this->id);
         }
 
         return $deleted;

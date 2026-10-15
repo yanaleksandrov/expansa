@@ -394,6 +394,7 @@ Lifecycle::phase('configure', true, function () {
             'progress'        => Expansa\Builders\Form\Fields\Progress::class,
             'radio'           => Expansa\Builders\Form\Fields\Radio::class,
             'select'          => Expansa\Builders\Form\Fields\Select::class,
+            'slug'            => Expansa\Builders\Form\Fields\Slug::class,
             'submit'          => Expansa\Builders\Form\Fields\Submit::class,
             'textarea'        => Expansa\Builders\Form\Fields\Textarea::class,
             'uploader'        => Expansa\Builders\Form\Fields\Uploader::class,
@@ -504,6 +505,11 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
     // the columns are loaded once per request anyway, so the check costs no query
     if (Db::isNullable(EX_DB['prefix'] . 'comments', 'deleted_at') === false) {
         Hook::run('repairSoftDeletes', 'comments');
+    }
+
+    // the sites installed before the activity log get its table, the check costs no query either
+    if (! Db::hasTable(EX_DB['prefix'] . 'activity')) {
+        Hook::run('createActivityTable');
     }
 
     // post types

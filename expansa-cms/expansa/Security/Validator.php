@@ -579,7 +579,8 @@ final class Validator
 
         $value = (string) $value;
 
-        return ! str_contains($value, '/') && preg_match('/^([-a-z0-9_-])+$/i', $value) === 1;
+        // the letters of any script, as the slug sanitizer keeps them
+        return preg_match('/^[\p{L}\p{M}\p{N}_-]+$/u', $value) === 1;
     }
 
     /**

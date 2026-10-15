@@ -8,6 +8,7 @@ use Expansa\Database\Attribute;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasValidation;
+use Expansa\Facades\Db;
 use Expansa\Support\Error;
 
 /**
@@ -183,7 +184,8 @@ class Slug extends Model
     {
         $suffix = 1;
 
-        while ($this->exists(['slug' => $value . ( $suffix > 1 ? "-$suffix" : '' )])) {
+        // the own row is not a collision: saving a slug unchanged keeps it
+        while (Db::has($this->table, ['slug' => $value . ( $suffix > 1 ? "-$suffix" : '' ), 'id[!]' => (int) ($this->attributes['id'] ?? 0)])) {
             $suffix++;
         }
 

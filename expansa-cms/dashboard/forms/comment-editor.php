@@ -3,6 +3,7 @@
 use App\Dashboard\Pages\Comment as Page;
 use App\Models\Comment;
 use App\Post\Type;
+use App\Support\Activity;
 use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 
@@ -192,6 +193,47 @@ return Form::enqueue(
                             <?php endif; ?>
                         </div>
                         <?php
+                    },
+                ],
+            ],
+        ],
+        [
+            'type'          => 'tab',
+            'label'         => t('Activity'),
+            'name'          => 'activity',
+            'caption'       => '',
+            'description'   => '',
+            'icon'          => 'ph ph-clock-counter-clockwise',
+            'class_menu'    => '',
+            'class_button'  => '',
+            'class_content' => '',
+            'fields'        => [
+                [
+                    'name'     => 'activity',
+                    'type'     => 'custom',
+                    'callback' => function () use ($comment) {
+                        $lines = [
+                            [
+                                'icon' => 'ph ph-paper-plane-tilt',
+                                'user' => $comment->getAuthorName(),
+                                'text' => t('Submitted'),
+                                'note' => '',
+                                'at'   => $comment->createdAt?->format('Y-m-d H:i:s') ?? '',
+                            ],
+                        ];
+                        foreach (Comment::getByPost($comment->postType, (int) $comment->postId) as $reply) {
+                            if ((int) $reply->parentId !== (int) $comment->id) {
+                                continue;
+                            }
+                            $lines[] = [
+                                'icon' => 'ph ph-arrow-bend-up-left',
+                                'user' => $reply->getAuthorName(),
+                                'text' => t('Replied'),
+                                'note' => mb_strimwidth(trim(strip_tags($reply->content)), 0, 80, '…'),
+                                'at'   => $reply->createdAt?->format('Y-m-d H:i:s') ?? '',
+                            ];
+                        }
+                        echo view('parts/activity', ['lines' => Activity::timeline($comment->table, (int) $comment->id, $lines)]);
                     },
                 ],
             ],

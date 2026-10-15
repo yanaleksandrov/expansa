@@ -883,6 +883,97 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
+    Youla.data('slug', root => {
+        const slugify = (text, final = true) => {
+            const slug = String(text).replace(/<[^>]*>/g, '').replace(/&[a-z0-9#]+;/gi, '').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
+            return final ? slug.replace(/^-+|-+$/g, '') : slug.replace(/^-+/, '');
+        };
+        const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;
+        return {
+            value: '',
+            base: root.dataset?.base || '',
+            source: from?.value || '',
+            synced: root.dataset?.synced === '1',
+            before: null,
+            generated() {
+                return slugify(this.source);
+            },
+            touch() {
+                setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', {
+                    bubbles: true
+                })));
+            },
+            line: {
+                '@load'() {
+                    if (this.synced) {
+                        this.value = this.generated();
+                    }
+                },
+                '@input.document'(e) {
+                    if (from && e.target === from) {
+                        this.source = from.value;
+                        if (this.synced) {
+                            this.value = this.generated();
+                        }
+                    }
+                }
+            },
+            input: {
+                'u-ref': 'slug',
+                '@focus'() {
+                    this.before = {
+                        value: this.value,
+                        synced: this.synced
+                    };
+                },
+                '@input'(e) {
+                    const el = e.target;
+                    if (!e.isTrusted) {
+                        if (el.form?.dataset.initialState !== undefined) {
+                            el.form.dataset.initialState = JSON.stringify(Object.fromEntries(new FormData(el.form).entries()));
+                        }
+                        return;
+                    }
+                    const next = slugify(el.value, false);
+                    if (next !== el.value) {
+                        const caret = Math.max(0, el.selectionStart - (el.value.length - next.length));
+                        el.value = next;
+                        el.setSelectionRange(caret, caret);
+                    }
+                    this.value = next;
+                    this.synced = false;
+                },
+                '@keydown.enter.prevent'() {
+                    this.$el.blur();
+                },
+                '@keydown.escape'() {
+                    if (this.before) {
+                        this.value = this.before.value;
+                        this.synced = this.before.synced;
+                        this.touch();
+                    }
+                    this.$el.blur();
+                },
+                '@blur'() {
+                    const slug = slugify(this.value);
+                    const typed = this.value;
+                    this.synced = this.synced || slug === '';
+                    this.value = slug || this.generated();
+                    this.before = null;
+                    if (this.value !== typed) {
+                        this.touch();
+                    }
+                }
+            },
+            regenerate: {
+                '@click'() {
+                    this.value = this.generated();
+                    this.synced = true;
+                    this.touch();
+                }
+            }
+        };
+    });
     Youla.data('tab', root => {
         const query = new URLSearchParams(window.location.search).get('tab');
         const tabs = [ ...root.querySelectorAll('[data-tab]') ].map(el => el.dataset.tab);

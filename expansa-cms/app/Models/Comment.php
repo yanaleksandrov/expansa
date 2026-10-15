@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Post\Type;
+use App\Support\Activity;
 use DateTime;
 use Expansa\Database\Model;
 use Expansa\Database\Query;
@@ -341,6 +342,7 @@ class Comment extends Model
     {
         [$postType, $postId] = [$this->postType, $this->postId];
 
+        $before = $this->attributes;
         $this->fill($data);
 
         if (! $this->isValid()) {
@@ -356,6 +358,8 @@ class Comment extends Model
             self::recount($postType, $postId);
         }
 
+        Activity::changes($this->table, (int) $this->id, $before, array_intersect_key($this->attributes, $data));
+
         return $this;
     }
 
@@ -369,6 +373,9 @@ class Comment extends Model
         $count = new Query($this)->delete();
 
         self::recount($this->postType, $this->postId);
+        if ($count > 0) {
+            Activity::record($this->table, (int) $this->id, 'trashed');
+        }
 
         return $count;
     }
@@ -383,6 +390,9 @@ class Comment extends Model
         $count = new Query($this)->restore();
 
         self::recount($this->postType, $this->postId);
+        if ($count > 0) {
+            Activity::record($this->table, (int) $this->id, 'restored');
+        }
 
         return $count;
     }
