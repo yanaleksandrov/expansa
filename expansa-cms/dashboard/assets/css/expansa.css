@@ -357,7 +357,7 @@ textarea {
   background-color: var(--expansa-bg-white);
   transition: color, box-shadow 0.2s ease;
   overflow: auto;
-  height: 1.875rem;
+  height: calc(2rem - 2px);
   padding: 0.325rem 0.875em;
   white-space: nowrap;
   display: block;
@@ -418,7 +418,7 @@ select[u-select] {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 select[multiple][u-select] {
-  max-height: 1.875rem;
+  max-height: calc(2rem - 2px);
   line-height: 1.2;
 }
 select:focus {

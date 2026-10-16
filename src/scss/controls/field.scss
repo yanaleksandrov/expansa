@@ -540,7 +540,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
       .field-buttons-item {
         white-space: nowrap;
-        height: calc(2rem - 4px);
+        height: calc(#{constants.rem(constants.$height-md)} - 4px);
         padding: 0.375em 0.75em;
         border-radius: calc(var(--expansa-border-radius) - 2px);
         corner-shape: superellipse(var(--expansa-corner-shape-superellipse));

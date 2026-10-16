@@ -204,48 +204,6 @@ $sections = [
         'examples'    => $sizeFields,
     ],
     [
-        'id'          => 'variants',
-        'title'       => t('Variants'),
-        'description' => t('Background of a field: default on gray, raised on white cards, plain without a box.'),
-        'examples'    => [
-            [
-                'caption' => 'field',
-                'fields'  => [
-                    [
-                        'type'       => 'text',
-                        'name'       => 'ds_variant_default',
-                        'label'      => t('Default'),
-                        'attributes' => ['placeholder' => t('Text')],
-                    ],
-                ],
-            ],
-            [
-                'caption' => 'field field--raised',
-                'fields'  => [
-                    [
-                        'type'       => 'text',
-                        'name'       => 'ds_variant_raised',
-                        'label'      => t('Raised'),
-                        'class'      => 'field field--raised',
-                        'attributes' => ['placeholder' => t('Text')],
-                    ],
-                ],
-            ],
-            [
-                'caption' => 'field field--plain',
-                'fields'  => [
-                    [
-                        'type'       => 'text',
-                        'name'       => 'ds_variant_plain',
-                        'label'      => t('Plain'),
-                        'class'      => 'field field--plain',
-                        'attributes' => ['placeholder' => t('Text')],
-                    ],
-                ],
-            ],
-        ],
-    ],
-    [
         'id'          => 'addons',
         'title'       => t('Input addons'),
         'description' => t('Prefixes, suffixes, icons and actions: the before, after, copy and tooltip keys.'),

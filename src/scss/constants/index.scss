@@ -1,25 +1,38 @@
 @use 'sass:map';
 @use 'sass:math';
 
+// pixels to rem of the 16px root, e.g. rem(32px) is 2rem
+@function rem($px) {
+	@return math.div($px, 16px) * 1rem;
+}
+
+// heights of buttons and fields by size
+$height-xs: 26px;
+$height-sm: 28px;
+$height-md: 32px;
+$height-lg: 34px;
+$height-xl: 40px;
+
+// font sizes in px
 $sizes: (
 	'': (
-		height: 32,
+		height: $height-md,
 		font: 13,
 	),
 	'xl': (
-		height: 40,
+		height: $height-xl,
 		font: 15,
 	),
 	'lg': (
-		height: 34,
+		height: $height-lg,
 		font: 14,
 	),
 	'sm': (
-		height: 28,
+		height: $height-sm,
 		font: 12,
 	),
 	'xs': (
-		height: 26,
+		height: $height-xs,
 		font: 11,
 	),
 );
@@ -32,7 +45,7 @@ $btnSizes: ();
 	$btnSizes: map.merge($btnSizes, (
 		#{$suffix}: (
 			'font-size': #{math.div(map.get($value, 'font'), 16)}rem,
-			'height': #{math.div(map.get($value, 'height'), 16)}rem,
+			'height': rem(map.get($value, 'height')),
 			'border-radius': var(--expansa-border-radius#{$suffix}),
 			'corner-shape': superellipse(var(--expansa-corner-shape-superellipse)),
 		)
@@ -48,7 +61,7 @@ $fieldSizes: ();
 	$fieldSizes: map.merge($fieldSizes, (
 		#{$suffix}: (
 			'font-size': #{math.div(map.get($value, 'font'), 16)}rem,
-			'height': #{math.div(map.get($value, 'height'), 16)}rem,
+			'height': rem(map.get($value, 'height')),
 			'border-radius': var(--expansa-border-radius#{$suffix}),
 			'corner-shape': superellipse(var(--expansa-corner-shape-superellipse)),
 		)
