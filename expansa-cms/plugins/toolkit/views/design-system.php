@@ -128,6 +128,40 @@ foreach (['xs', 'sm', '', 'lg', 'xl'] as $size) {
     ];
 }
 
+// a button group of each size beside a button of the same size, to compare their heights
+$groupSizes = [];
+foreach (['xs', 'sm', '', 'lg', 'xl'] as $size) {
+    $class = $size ? "field field--$size" : 'field';
+
+    $groupSizes[] = [
+        'caption' => $class,
+        'fields'  => [
+            [
+                'type'       => 'button-group',
+                'name'       => 'ds_group_size_' . ($size ?: 'md'),
+                'label'      => $size ?: 'md',
+                'class'      => $class,
+                'attributes' => ['value' => 'day'],
+                'options'    => [
+                    'day'   => t('Day'),
+                    'week'  => t('Week'),
+                    'month' => t('Month'),
+                ],
+            ],
+            [
+                'type'    => 'buttons',
+                'name'    => 'ds_group_size_button_' . ($size ?: 'md'),
+                'options' => [
+                    [
+                        'content' => t('Button'),
+                        'class'   => 'btn btn--outline' . ($size ? " btn--$size" : ''),
+                    ],
+                ],
+            ],
+        ],
+    ];
+}
+
 $states = ['Alabama', 'Alaska', 'Arizona', 'California', 'Colorado', 'Florida', 'Georgia', 'Texas'];
 $states = array_combine(array_map('strtolower', $states), $states);
 
@@ -1058,6 +1092,12 @@ $sections = [
                 ],
             ],
         ],
+    ],
+    [
+        'id'          => 'button-group-sizes',
+        'title'       => t('Button group sizes'),
+        'description' => t('The size modifiers of the field, a button of the same size below for the height.'),
+        'examples'    => $groupSizes,
     ],
     [
         'id'          => 'buttons',

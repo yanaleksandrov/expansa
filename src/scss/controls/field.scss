@@ -1,7 +1,7 @@
 @use 'sass:map';
 @use '../constants/index' as constants;
 
-$danger-soft: rgb(252.13, 241.14, 241.14);
+$danger-soft: rgb(255 224 224);
 
 .field {
   --field-bg: var(--expansa-bg);
@@ -425,8 +425,6 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       }
 
       &:hover {
-        background-color: var(--expansa-bg-universal);
-        border-radius: calc(1em + 1px);
         color: var(--expansa-text);
 
         .field-icon {
@@ -562,7 +560,6 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
       .field-buttons-item {
         white-space: nowrap;
-        height: calc(#{constants.rem(constants.$height-md)} - 4px);
         padding: 0.25em 0.75em;
         border-radius: calc(1em - 2px);
         corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -583,6 +580,17 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
           box-shadow: var(--expansa-box-shadow);
           background-color: var(--expansa-bg-white);
         }
+      }
+    }
+  }
+
+  // a button group is as tall as a button of the size: the item, 2px of padding and 1px of border on each side
+  @each $suffix, $properties in constants.$fieldSizes {
+    &#{$suffix}:has(.field-buttons) .field-buttons {
+      font-size: map.get($properties, 'font-size');
+
+      .field-buttons-item {
+        height: calc(#{map.get($properties, 'height')} - 6px);
       }
     }
   }

@@ -1176,11 +1176,6 @@ document.addEventListener('youla:init', ()=> {
                     }
                 },
             },
-            auto: {
-                'u-show'() {
-                    return this.synced;
-                },
-            },
             regenerate: {
                 'u-show'() {
                     return !this.synced && this.generated() !== '' && this.value !== this.generated();

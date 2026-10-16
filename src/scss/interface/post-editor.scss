@@ -122,33 +122,7 @@
 
   // the URL right under the title, as one block with it
   .post-editor-slug {
-    margin-top: -0.75rem;
-  }
-
-  .post-editor-section {
-    display: grid;
-    gap: 0.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--expansa-border);
-  }
-
-  .post-editor-section-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.25rem 0.75rem;
-
-    > h3 {
-      margin: 0;
-      font-size: 0.875rem;
-      font-weight: 600;
-    }
-
-    > span {
-      margin-left: auto;
-      font-size: 0.75rem;
-      color: var(--expansa-text-muted);
-    }
+    margin-top: -1.5rem;
   }
 
   .post-editor-eyebrow {
@@ -288,16 +262,6 @@
     gap: 0.5rem;
     padding-top: 0.75rem;
     border-top: 1px solid var(--expansa-border);
-  }
-
-  .post-editor-text {
-    flex: 1;
-    min-height: 20rem;
-    padding-block: 0.625rem;
-    line-height: 1.6;
-    resize: vertical;
-    font-family: var(--expansa-font-code);
-    font-size: 0.8125rem;
   }
 }
 

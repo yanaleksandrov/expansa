@@ -152,7 +152,7 @@ final class Menus
                 ],
                 [
                     'id'           => 'dialogs',
-                    'url'          => 'comments',
+                    'url'          => 'edit?table=comments',
                     'title'        => t('Discussions'),
                     'capabilities' => ['manage_comments'],
                     'icon'         => 'ph ph-chats',
