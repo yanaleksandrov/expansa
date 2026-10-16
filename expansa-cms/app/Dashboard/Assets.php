@@ -21,6 +21,12 @@ use Expansa\Support\Is;
 final class Assets
 {
     /**
+     * Stylesheets of the vendor scripts of form fields, from dashboard/assets/css; the others style
+     * themselves (youla-filler.js) or are styled by controls.css (youla-select.js).
+     */
+    private const array VENDOR_STYLES = ['youla-pickadate' => 'air-datepicker'];
+
+    /**
      * Whether the notifications markup is already hooked into the page footer.
      */
     private static bool $notifications = false;
@@ -157,9 +163,9 @@ final class Assets
     }
 
     /**
-     * Assets of a template for Assets\Manager::discover(): a form field gets the vendor JS of its type,
-     * the rest the co-located files. date/range/color share form/input.blade.php, so Renderer::render()
-     * passes the original subtype as `$context['type']` to tell them apart.
+     * Assets of a template for Assets\Manager::discover(): a form field gets the vendor JS of its type
+     * and its stylesheet from VENDOR_STYLES, the rest the co-located files. date/range/color share
+     * form/input.blade.php, so Renderer::render() passes the original subtype as `$context['type']`.
      *
      * @param string               $file
      * @param array<string, mixed> $context
@@ -183,9 +189,16 @@ final class Assets
             default                                          => null,
         };
 
-        return $vendor === null
-            ? AssetManager::defaultStructure($file)
-            : ['js' => EX_PATH . "dashboard/assets/js/$vendor" . self::suffix() . '.js'];
+        if ($vendor === null) {
+            return AssetManager::defaultStructure($file);
+        }
+
+        $style = self::VENDOR_STYLES[$vendor] ?? null;
+
+        return [
+            'js' => EX_PATH . "dashboard/assets/js/$vendor" . self::suffix() . '.js',
+            ...($style ? ['css' => EX_PATH . "dashboard/assets/css/$style" . self::suffix() . '.css'] : []),
+        ];
     }
 
     /**

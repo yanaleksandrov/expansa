@@ -15,11 +15,10 @@ defined('EX_PATH') || exit;
 $attributes = $field->attributes;
 $value      = Safe::textarea($attributes['value'] ?? '');
 
-$attributes['rows'] ??= 1;
 
 unset($attributes['value']);
 ?>
-<div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+<div class="{{ $field->class ?: 'field' }}@if($field->invalid) is-invalid@endif"{!! Arr::toHtmlAttributes($field->conditions) !!}>
 	@if($field->label)
 		<span class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>{!! $field->label !!}</span>
 	@endif
@@ -28,12 +27,15 @@ unset($attributes['value']);
 		<textarea{!! Arr::toHtmlAttributes($attributes) !!}>{!! $value !!}</textarea>
 		{!! $field->after !!}
 		@if($field->copy)
-			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{ $field->prop }})"></i>
+			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy($el.parentElement.querySelector('textarea').value)"></i>
 		@endif
 		@if($field->tooltip)
 			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif
 	</label>
+	@if($field->invalid)
+		<div class="field-error">{!! $field->invalid !!}</div>
+	@endif
 	@if($field->instruction)
 		<div class="field-instruction">{!! $field->instruction !!}</div>
 	@endif

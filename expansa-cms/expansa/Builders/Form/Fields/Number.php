@@ -20,7 +20,7 @@ final class Number extends AbstractField
             defaults: [
                 'name'       => '',
                 'label'      => '',
-                'attributes' => [],
+                'attributes' => ['type' => 'number'],
             ],
         );
     }

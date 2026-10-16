@@ -884,8 +884,24 @@ document.addEventListener('youla:init', () => {
         }
     }));
     Youla.data('slug', root => {
+        const rules = JSON.parse(root.dataset?.transliteration || 'null');
+        const own = Object.keys(rules?.custom || {}).sort((a, b) => b.length - a.length).map(from => from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+        const pattern = own ? new RegExp(own, 'g') : null;
+        const transliterate = text => {
+            if (pattern) {
+                text = text.replace(pattern, from => rules.custom[from]);
+            }
+            if (!rules?.initials || !/[^\x00-\x7F]/.test(text)) {
+                return text;
+            }
+            text = text.replace(/[\uAC00-\uD7A3]/g, syllable => {
+                const index = syllable.charCodeAt(0) - 44032;
+                return rules.initials[Math.floor(index / 588)] + rules.vowels[Math.floor(index % 588 / 28)] + rules.finals[index % 28];
+            });
+            return Array.from(text, char => rules.map[char] ?? char).join('');
+        };
         const slugify = (text, final = true) => {
-            const slug = String(text).replace(/<[^>]*>/g, '').replace(/&[a-z0-9#]+;/gi, '').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
+            const slug = transliterate(String(text).replace(/<[^>]*>/g, '').replace(/&[a-z0-9#]+;/gi, '').normalize('NFC').toLowerCase()).replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
             return final ? slug.replace(/^-+|-+$/g, '') : slug.replace(/^-+/, '');
         };
         const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;
@@ -983,21 +999,6 @@ document.addEventListener('youla:init', () => {
                     }
                 }
             },
-            auto: {
-                'u-show'() {
-                    return this.synced;
-                }
-            },
-            regenerate: {
-                'u-show'() {
-                    return !this.synced && this.generated() !== '' && this.value !== this.generated();
-                },
-                '@click'() {
-                    this.value = this.generated();
-                    this.synced = true;
-                    this.touch();
-                }
-            },
             copy: {
                 '@click': '$copy(base + value)'
             }
@@ -1073,8 +1074,8 @@ document.addEventListener('youla:init', () => {
     });
     Youla.method('copy', (e, el) => (subject, classes) => {
         window.navigator.clipboard.writeText(subject).then(() => {
-            const classes = classes || [ 'ph-copy', 'ph-check' ];
-            const classesToggle = () => classes.forEach(s => el.classList.toggle(s));
+            const toggled = classes || [ 'ph-copy', 'ph-check' ];
+            const classesToggle = () => toggled.forEach(s => el.classList.toggle(s));
             classesToggle();
             setTimeout(classesToggle, 1e3);
         });
@@ -1192,21 +1193,6 @@ document.addEventListener('youla:init', () => {
         }
         requestAnimationFrame(step);
     });
-    Youla.directive('textarea', (el, output) => {
-        if (el.tagName !== 'TEXTAREA' || el._x_textarea) {
-            return;
-        }
-        el._x_textarea = true;
-        el.addEventListener('input', () => {
-            const maxRows = parseInt(output) || 99;
-            if (el.value.split(/\r\n|\r|\n/).length > maxRows) {
-                return;
-            }
-            const border = parseInt(getComputedStyle(el).borderWidth) * 4;
-            el.style.height = 'auto';
-            el.style.height = `${el.scrollHeight + border + 4}px`;
-        });
-    });
     Youla.directive('progress', (el, output, {modifiers, duration, expression}) => {
         const [rawFrom = 0, rawTo = 100] = modifiers;
         const from = parseInt(rawFrom);
@@ -1222,9 +1208,9 @@ document.addEventListener('youla:init', () => {
         const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         const apply = (percent, animate) => {
             if (animate && !reducedMotion()) {
-                el.style.setProperty('--youla-progress-transition', `width ${transitionDuration}`);
+                el.style.setProperty('--expansa-progress-transition', `width ${transitionDuration}`);
             }
-            el.style.setProperty('--youla-progress', `${percent}%`);
+            el.style.setProperty('--expansa-progress', `${percent}%`);
         };
         if (el._x_progress?.revealed) {
             el._x_progress.end = end;
@@ -1245,7 +1231,7 @@ document.addEventListener('youla:init', () => {
             }
             observer.unobserve(el);
             el._x_progress.revealed = true;
-            el.style.setProperty('--youla-progress', `${start}%`);
+            el.style.setProperty('--expansa-progress', `${start}%`);
             if (reducedMotion()) {
                 apply(el._x_progress.end, false);
                 return;

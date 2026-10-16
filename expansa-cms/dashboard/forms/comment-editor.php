@@ -40,9 +40,10 @@ return Form::enqueue(
                 $list  = url('dashboard/edit?table=comments');
                 $title = Page::postTitle($comment);
                 $back  = $from === 'post' && $postUrl !== '' ? $postUrl : $list;
+                $url   = $comment->getUrl();
                 ?>
                 <div class="post-editor-head">
-                    <a class="btn btn--icon btn--sm" href="<?php echo $back; ?>" title="<?php echo t_attr('Back'); ?>">
+                    <a class="btn btn--icon btn--xs" href="<?php echo $back; ?>" title="<?php echo t_attr('Back'); ?>">
                         <i class="ph ph-arrow-left"></i>
                     </a>
                     <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
@@ -54,7 +55,11 @@ return Form::enqueue(
                             <a href="<?php echo $list; ?>"><?php echo t('Comments'); ?></a>
                         <?php endif; ?>
                         <i class="ph ph-caret-right"></i>
-                        <span aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></span>
+                        <?php if ($url !== '') : ?>
+                            <a href="<?php echo $url; ?>" target="_blank" title="<?php echo t_attr('View comment'); ?>" aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></a>
+                        <?php else : ?>
+                            <span aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></span>
+                        <?php endif; ?>
                     </nav>
                 </div>
                 <?php
@@ -95,10 +100,10 @@ return Form::enqueue(
                             'validator'   => '',
                             'conditions'  => [],
                             'attributes'  => [
-                                'u-prop'   => 'content',
-                                'rows'     => max(4, count(explode("\n", $comment->content))),
-                                'value'    => $comment->content,
-                                'required' => true,
+                                'u-prop'      => 'content',
+                                'placeholder' => t('Text of the comment'),
+                                'value'       => $comment->content,
+                                'required'    => true,
                             ],
                         ],
                         [
@@ -264,7 +269,7 @@ return Form::enqueue(
                         };
                         $facts   = [
                             ['ph ph-calendar-plus', t('Submitted'), $comment->createdAt ? $date->format($comment->createdAt) : ''],
-                            ['ph ph-clock-clockwise', t('Updated'), $comment->updatedAt ? $date->format($comment->updatedAt) : ''],
+                            ['ph ph-clock-clockwise', t('Updated'), $comment->updatedAt ? $date->format($comment->updatedAt) : '', 'comment-updated'],
                             ['ph ph-thumbs-up', t('Likes'), $comment->likes . ' / ' . $comment->dislikes],
                             ['ph ph-globe-simple', t('IP Address'), (string) $comment->authorIp],
                             ['ph ph-browser', t('Browser'), (string) $comment->authorAgent],
@@ -283,7 +288,7 @@ return Form::enqueue(
                             <dd>
                                 <input class="post-editor-pill" type="number" min="0" name="rating" value="<?php echo htmlspecialchars((string) ($comment->rating ?? '')); ?>" placeholder="<?php echo t_attr('No rating'); ?>" aria-label="<?php echo t_attr('Rating'); ?>">
                             </dd>
-                            <dt><i class="ph ph-article"></i><?php echo t('In Response To'); ?></dt>
+                            <dt><i class="ph ph-article"></i><?php echo t('In reply to'); ?></dt>
                             <dd>
                                 <?php if ($postUrl !== '') : ?>
                                     <a class="post-editor-pill" href="<?php echo $postUrl; ?>"><?php echo htmlspecialchars($title !== '' ? $title : t('Post #:id', $comment->postId)); ?></a>
@@ -299,9 +304,10 @@ return Form::enqueue(
                                     <span class="post-editor-pill is-empty">—</span>
                                 <?php endif; ?>
                             </dd>
-                            <?php foreach ($facts as [$icon, $label, $fact]) : ?>
+                            <?php foreach ($facts as $row) : ?>
+                                <?php [$icon, $label, $fact, $id] = $row + [3 => '']; ?>
                                 <dt><i class="<?php echo $icon; ?>"></i><?php echo $label; ?></dt>
-                                <dd><span class="post-editor-pill<?php echo $fact === '' ? ' is-empty' : ''; ?>" title="<?php echo htmlspecialchars($fact); ?>"><?php echo $fact !== '' ? htmlspecialchars($fact) : '—'; ?></span></dd>
+                                <dd<?php echo $id !== '' ? ' id="' . $id . '"' : ''; ?>><span class="post-editor-pill<?php echo $fact === '' ? ' is-empty' : ''; ?>" title="<?php echo htmlspecialchars($fact); ?>"><?php echo $fact !== '' ? htmlspecialchars($fact) : '—'; ?></span></dd>
                             <?php endforeach; ?>
                         </dl>
                         <?php

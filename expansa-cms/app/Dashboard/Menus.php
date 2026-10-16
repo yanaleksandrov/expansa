@@ -152,7 +152,7 @@ final class Menus
                 ],
                 [
                     'id'           => 'dialogs',
-                    'url'          => 'comments',
+                    'url'          => 'edit?table=comments',
                     'title'        => t('Discussions'),
                     'capabilities' => ['manage_comments'],
                     'icon'         => 'ph ph-chats',
@@ -326,6 +326,15 @@ final class Menus
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 40,
+                    'parent_id'    => 'settings',
+                ],
+                [
+                    'id'           => 'permalinks',
+                    'url'          => 'permalinks',
+                    'title'        => t('Permalinks'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 50,
                     'parent_id'    => 'settings',
                 ],
             ]

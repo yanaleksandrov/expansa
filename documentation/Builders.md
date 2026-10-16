@@ -92,8 +92,8 @@ echo form('order-editor', EX_PLUGINS . 'ecommerce/core/order.php');
 | `conditions`  | Условия показа по значениям других полей того же уровня                           |
 | `fields`      | Вложенные поля у `tab`, `step`, `group`                                           |
 
-Атрибуты дополняются по типу: `type` и `name`, виджет youla.js (`u-select`, `u-textarea`,
-`u-datepicker`), у `select` нет `type`, у `date` он `text`.
+Атрибуты дополняются по типу: `type` и `name`, виджет youla.js (`u-select`,
+`u-pickadate` с опциями по типу), у `select` и `textarea` нет `type`, у `date`, `datetime-local`, `time` и `month` он `text`; `week` остаётся нативным.
 
 `tab`, `step` и `group` — обёртки: их поля выводятся внутрь, шаблон — `layout-<type>`. Перед первой
 вкладкой уровня выводится общее меню вкладок `layout-tab-menu`, шаги нумеруются по порядку.

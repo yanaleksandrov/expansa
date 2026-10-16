@@ -13,5 +13,5 @@
 defined('EX_PATH') || exit;
 ?>
 <label class="db">
-    <textarea name="{{ $cell->key }}[{{ $item['id'] ?? '' }}]" rows="1" u-textarea="7">{{ is_scalar($value) ? $value : '' }}</textarea>
+    <textarea name="{{ $cell->key }}[{{ $item['id'] ?? '' }}]" rows="7">{{ is_scalar($value) ? $value : '' }}</textarea>
 </label>

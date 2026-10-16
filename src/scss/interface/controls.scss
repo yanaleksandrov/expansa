@@ -119,6 +119,7 @@
   flex-wrap: wrap;
   width: 100%;
   text-align: start;
+  align-items: flex-start;
 
   &__nav {
     z-index: 2;
@@ -473,7 +474,7 @@
     content: '';
     display: block;
     height: 100%;
-    transition: width 0.3s linear;
+    transition: var(--expansa-progress-transition, width 0.3s linear);
     width: var(--expansa-progress, 0);
     background-color: var(--expansa-primary);
   }

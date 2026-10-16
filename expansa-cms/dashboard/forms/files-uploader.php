@@ -59,7 +59,7 @@ return Expansa\Builders\Form::enqueue(
 				'u-prop'      => 'urls',
 				'placeholder' => t( 'Enter one URL per line' ),
 				'@change'     => '$ajax.post("media/grab", {urls}).then(({uploaded}) => uploaded && window.location.reload())',
-				'u-textarea'  => 19,
+				'rows'        => 19,
 			],
 		],
 	]

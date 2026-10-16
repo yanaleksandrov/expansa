@@ -134,7 +134,7 @@ return \Expansa\Builders\Form::enqueue(
 					'attributes'  => [
 						'u-prop'      => 'content',
 						'value'       => '',
-						'rows'        => 1,
+						'rows'        => 12,
 						'required'    => true,
 						'placeholder' => t( 'N/A' ),
 					],
@@ -157,7 +157,7 @@ return \Expansa\Builders\Form::enqueue(
 					'attributes'  => [
 						'u-prop'      => 'recipients',
 						'value'       => '',
-						'rows'        => 1,
+						'rows'        => 6,
 						'required'    => true,
 						'placeholder' => t( 'N/A' ),
 					],

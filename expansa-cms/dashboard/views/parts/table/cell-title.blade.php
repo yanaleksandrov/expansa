@@ -18,7 +18,7 @@ defined('EX_PATH') || exit;
 ?>
 <a href="{{ $item['url'] ?? '#' }}" class="fw-500 t-dark">{{ is_scalar($value) ? $value : '' }}</a>
 @if (! empty($item['actions']))
-    <div class="df aic g-2 fs-12 table-hidden">
+    <div class="df aic g-2 fs-12 mt-1 table-hidden">
         @foreach ($item['actions'] as $action)
             <a href="{{ $action['href'] ?? '#' }}" class="{{ $action['class'] ?? '' }}"{!! Arr::toHtmlAttributes($action['attributes'] ?? []) !!}>{{ $action['title'] ?? '' }}</a>
         @endforeach

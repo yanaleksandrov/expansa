@@ -1,3 +1,5 @@
+@use '../constants/index' as constants;
+
 .ss-main,
 .ss-content {
   --ss-font-color: #4d4d4d;
@@ -6,9 +8,9 @@
   --ss-success-color: #00b755;
   --ss-error-color: #dc3545;
   --ss-content-height: 300px;
-  --ss-spacing-l: 7px;
-  --ss-spacing-m: 5px;
-  --ss-spacing-s: 3px;
+  --ss-spacing-l: 0.5em;
+  --ss-spacing-m: 0.4675em;
+  --ss-spacing-s: 0.425em;
   --ss-animation-timing: 0.2s;
 }
 
@@ -23,7 +25,7 @@
   position: relative;
   box-sizing: border-box;
   width: 100%;
-  height: 1.875rem;
+  height: calc(#{constants.rem(constants.$height-md)} - 2px);
   margin: 0;
   padding-inline: 0.85em 2.25em;
   overflow: hidden;
@@ -139,9 +141,9 @@
     display: flex;
     align-items: center;
     width: fit-content;
-    height: 25px;
-    background-color: rgba(32, 107, 196, 0.1);
-    border-radius: var(--expansa-border-radius);
+    height: calc(100% - 4px);
+    background-color: var(--expansa-bg-universal);
+    border-radius: 0.5em;
     user-select: none;
     animation: ss-valueIn var(--ss-animation-timing) ease-out both;
 
@@ -152,7 +154,7 @@
 
   .ss-value-text {
     padding: var(--ss-spacing-s) 0 var(--ss-spacing-s) var(--ss-spacing-m);
-    font-size: 12px;
+    font-size: inherit;
     line-height: 1;
   }
 
@@ -162,12 +164,10 @@
     box-sizing: content-box;
     width: var(--ss-spacing-l);
     height: var(--ss-spacing-l);
-    margin: 0 3px 0 6px;
+    margin: 0 0.25em;
     padding: var(--ss-spacing-s) var(--ss-spacing-m);
     color: var(--expansa-primary);
     font-size: 13px;
-    border: 0;
-    border-left: 1px solid var(--expansa-bg);
     border-radius: 3px;
     transition: background-color 0.3s;
     cursor: pointer;
@@ -276,8 +276,8 @@
       box-sizing: border-box;
       width: 100%;
       min-width: 0;
-      height: 1.875rem;
-      min-height: 1.875rem;
+      height: calc(#{constants.rem(constants.$height-md)} - 2px);
+      min-height: calc(#{constants.rem(constants.$height-md)} - 2px);
       margin: 0;
       padding: 0.2rem 0.7rem;
       color: inherit;

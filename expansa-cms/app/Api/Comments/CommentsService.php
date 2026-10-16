@@ -9,10 +9,12 @@ use App\Models\Post;
 use App\Models\User;
 use App\Post\Type;
 use Expansa\Facades\Auth;
+use Expansa\Facades\I18n;
 use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Error;
+use IntlDateFormatter;
 
 final class CommentsService
 {
@@ -26,7 +28,7 @@ final class CommentsService
      *
      * @param Request  $request  `id`, `content`, `status`, `rating` (empty for none), `author_name`, `author_email`.
      * @param Response $response
-     * @return Response Notice.
+     * @return Response Notice and the new update time on the comment page.
      * @throws ValidationFailed With the fields that are refused.
      */
     public function update(Request $request, Response $response): Response
@@ -46,7 +48,13 @@ final class CommentsService
             throw ValidationFailed::from($updated, t('Could not update the comment. Check the fields.'));
         }
 
-        return $response->notify(t('Comment updated'));
+        // the "Updated" fact of the comment page, in the format it is rendered with
+        $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
+        $time = htmlspecialchars((string) $date->format($updated->updatedAt));
+
+        return $response
+            ->notify(t('Comment updated'))
+            ->update('#comment-updated', sprintf('<span class="post-editor-pill" title="%1$s">%1$s</span>', $time));
     }
 
     /**

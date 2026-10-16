@@ -46,9 +46,14 @@ final class Core
             $data['isSelf'] => t('Settings'),
             default         => $data['user']->showname ?: $data['user']->login,
         });
-        Dashboard::page('comment', can: 'manage_comments', title: fn () => t('Edit Comment'), surface: Surface::Muted);
         Dashboard::page(
-            'post',
+            slug: 'comment',
+            can: 'manage_comments',
+            title: fn () => t('Edit Comment'),
+            surface: Surface::Muted
+        );
+        Dashboard::page(
+            slug: 'post',
             can: 'types_edit',
             title: fn (array $data) => match (true) {
                 $data['post']->id === 0     => $data['type']->labelAdd,
@@ -60,6 +65,7 @@ final class Core
         Dashboard::page('edit', view: Tables::view(...));
         Dashboard::page('users', view: 'screens/edit');
         Dashboard::page('plugins-install', surface: Surface::Muted);
+        Dashboard::page('site-health', surface: Surface::Muted);
 
         Dashboard::data('sign-in', SignIn::data(...));
         Dashboard::data('profile', Profile::data(...));

@@ -1060,19 +1060,48 @@ document.addEventListener('youla:init', ()=> {
 
     /**
      * Slug of an entry, the `slug` form template: follows the source field named by `data-from` while
-     * `synced`, normalized as Sanitizer::slug() does while typed. Enter keeps it without submitting,
-     * Escape brings back the value it had, an empty one is made from the source again. Values set
-     * by the server come with an untrusted `input` event, so they do not stop the following.
+     * `synced`, normalized as Sanitizer::slug() does while typed, in Latin letters by `data-transliteration`.
+     * Enter keeps it without submitting, Escape brings back the value it had, an empty one is made from
+     * the source again. Values set by the server come with an untrusted `input` event, so they do not
+     * stop the following.
      *
      * @since 2027.1
      */
     Youla.data('slug', (root) => {
+        const rules = JSON.parse(root.dataset?.transliteration || 'null');
+
+        // own rules of the site as one pattern, the longer text first as strtr() takes it
+        const own = Object.keys(rules?.custom || {})
+            .sort((a, b) => b.length - a.length)
+            .map((from) => from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+            .join('|');
+        const pattern = own ? new RegExp(own, 'g') : null;
+
+        // Latin letters of a lowercased slug, as App\Support\Transliteration::apply() makes them
+        const transliterate = (text) => {
+            if (pattern) {
+                text = text.replace(pattern, (from) => rules.custom[from]);
+            }
+
+            // the Hangul tables come only with the letters of the scripts
+            if (!rules?.initials || !/[^\x00-\x7F]/.test(text)) {
+                return text;
+            }
+
+            text = text.replace(/[\uAC00-\uD7A3]/g, (syllable) => {
+                const index = syllable.charCodeAt(0) - 0xAC00;
+
+                return rules.initials[Math.floor(index / 588)] + rules.vowels[Math.floor(index % 588 / 28)] + rules.finals[index % 28];
+            });
+
+            return Array.from(text, (char) => rules.map[char] ?? char).join('');
+        };
         const slugify = (text, final = true) => {
-            const slug = String(text)
+            const slug = transliterate(String(text)
                 .replace(/<[^>]*>/g, '')
                 .replace(/&[a-z0-9#]+;/gi, '')
                 .normalize('NFC')
-                .toLowerCase()
+                .toLowerCase())
                 .replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
 
             // a hyphen being typed at the end stays until the field is left
@@ -1174,21 +1203,6 @@ document.addEventListener('youla:init', ()=> {
                     if (this.value !== typed) {
                         this.touch();
                     }
-                },
-            },
-            auto: {
-                'u-show'() {
-                    return this.synced;
-                },
-            },
-            regenerate: {
-                'u-show'() {
-                    return !this.synced && this.generated() !== '' && this.value !== this.generated();
-                },
-                '@click'() {
-                    this.value  = this.generated();
-                    this.synced = true;
-                    this.touch();
                 },
             },
             copy: {
@@ -1302,8 +1316,8 @@ document.addEventListener('youla:init', ()=> {
      */
     Youla.method('copy', (e, el) => (subject, classes) => {
         window.navigator.clipboard.writeText(subject).then(() => {
-            const classes       = classes || ['ph-copy', 'ph-check'];
-            const classesToggle = () => classes.forEach(s => el.classList.toggle(s));
+            const toggled       = classes || ['ph-copy', 'ph-check'];
+            const classesToggle = () => toggled.forEach(s => el.classList.toggle(s));
 
             classesToggle();
             setTimeout(classesToggle, 1000);
@@ -1506,34 +1520,7 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
-     * Grows a <textarea> to fit its content as the user types, up to a
-     * maximum number of rows (`u-textarea="6"`) — past that, it stops
-     * growing and scrolls internally instead.
-     *
-     * @since 1.0
-     */
-    Youla.directive('textarea', (el, output) => {
-        // Attaches its input listener exactly once — a later call would otherwise stack another, resizing the textarea redundantly on every keystroke.
-        if (el.tagName !== 'TEXTAREA' || el._x_textarea) {
-            return;
-        }
-        el._x_textarea = true;
-
-        el.addEventListener('input', () => {
-            const maxRows = parseInt(output) || 99;
-            if (el.value.split(/\r\n|\r|\n/).length > maxRows) {
-                return;
-            }
-
-            const border = parseInt(getComputedStyle(el).borderWidth) * 4;
-
-            el.style.height = 'auto';
-            el.style.height = `${el.scrollHeight + border + 4}px`;
-        });
-    });
-
-    /**
-     * Animates `--youla-progress` into view once the element enters the viewport, from/to
+     * Animates `--expansa-progress` into view once the element enters the viewport, from/to
      * modifiers as percentages (`u-progress.20.80.600ms`). `to` can also be a reactive bound
      * value, e.g. `u-progress.0.600ms="percent"`. Skips the transition on reduced motion.
      *
@@ -1560,9 +1547,9 @@ document.addEventListener('youla:init', ()=> {
 
         const apply = (percent, animate) => {
             if (animate && !reducedMotion()) {
-                el.style.setProperty('--youla-progress-transition', `width ${transitionDuration}`);
+                el.style.setProperty('--expansa-progress-transition', `width ${transitionDuration}`);
             }
-            el.style.setProperty('--youla-progress', `${percent}%`);
+            el.style.setProperty('--expansa-progress', `${percent}%`);
         };
 
         // Already revealed — this call is a reactive update to the bound value, not the initial mount.
@@ -1587,7 +1574,7 @@ document.addEventListener('youla:init', ()=> {
 
             el._x_progress.revealed = true;
 
-            el.style.setProperty('--youla-progress', `${start}%`);
+            el.style.setProperty('--expansa-progress', `${start}%`);
 
             if (reducedMotion()) {
                 apply(el._x_progress.end, false);

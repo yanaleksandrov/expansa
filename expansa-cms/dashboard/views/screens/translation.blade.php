@@ -25,7 +25,7 @@ echo view('parts/table/header', $table->headData());
             <div class="translation-grid">
                 <div class="translation-source">{{ $item['source'] }}</div>
                 <label class="translation-value">
-                    <textarea name="translations[{{ $item['source'] }}]" rows="1" u-textarea="7">{{ $item['value'] }}</textarea>
+                    <textarea name="translations[{{ $item['source'] }}]" rows="7">{{ $item['value'] }}</textarea>
                 </label>
             </div>
         @endforeach

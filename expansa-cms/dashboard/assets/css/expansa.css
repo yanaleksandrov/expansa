@@ -357,7 +357,7 @@ textarea {
   background-color: var(--expansa-bg-white);
   transition: color, box-shadow 0.2s ease;
   overflow: auto;
-  height: 1.875rem;
+  height: calc(1.875rem - 2px);
   padding: 0.325rem 0.875em;
   white-space: nowrap;
   display: block;
@@ -407,7 +407,7 @@ select {
   appearance: none;
   cursor: pointer;
   width: auto;
-  line-height: 1.65;
+  line-height: 1.5;
 }
 select:not([multiple]) {
   background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 55%;
@@ -418,7 +418,7 @@ select[u-select] {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 select[multiple][u-select] {
-  max-height: 1.875rem;
+  max-height: calc(1.875rem - 2px);
   line-height: 1.2;
 }
 select:focus {
@@ -602,6 +602,7 @@ img:after {
   flex-wrap: wrap;
   width: 100%;
   text-align: start;
+  align-items: flex-start;
 }
 .tab__nav {
   z-index: 2;
@@ -921,14 +922,6 @@ img:after {
   background-color: rgb(233.7, 234.6, 235.8) !important;
   color: #71777F;
 }
-.badge--gray {
-  background-color: #8E8E8E !important;
-  color: #fff;
-}
-.badge--gray-lt {
-  background-color: rgb(238.05, 238.05, 238.05) !important;
-  color: #8E8E8E;
-}
 .badge--white {
   background-color: #ffffff !important;
 }
@@ -967,21 +960,13 @@ img:after {
   background-color: rgb(223.8, 243.6, 226.95) !important;
   color: #2fb344;
 }
-.badge--royal {
-  background-color: #4299e1 !important;
-  color: #fff;
-}
-.badge--royal-lt {
-  background-color: rgb(226.65, 239.7, 250.5) !important;
-  color: #4299e1;
-}
 .badge--blue {
-  background-color: #206bc4 !important;
+  background-color: #005cf4 !important;
   color: #fff;
 }
 .badge--blue-lt {
-  background-color: rgb(221.55, 232.8, 246.15) !important;
-  color: #206bc4;
+  background-color: rgb(216.75, 230.55, 253.35) !important;
+  color: #005cf4;
 }
 .badge--purple {
   background-color: #6a20c5 !important;
@@ -1007,7 +992,7 @@ img:after {
   content: "";
   display: block;
   height: 100%;
-  transition: width 0.3s linear;
+  transition: var(--expansa-progress-transition, width 0.3s linear);
   width: var(--expansa-progress, 0);
   background-color: var(--expansa-primary);
 }
@@ -2725,7 +2710,7 @@ body.is-unsaved .expansa-search-btn {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem;
@@ -3472,7 +3457,7 @@ body.is-unsaved .expansa-search-btn {
 .post-editor .post-editor-crumbs {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 2px;
   flex: 1;
   min-width: 0;
   font-size: 0.8125rem;
@@ -3528,29 +3513,7 @@ body.is-unsaved .expansa-search-btn {
   line-height: 1.3;
 }
 .post-editor .post-editor-slug {
-  margin-top: -0.75rem;
-}
-.post-editor .post-editor-section {
-  display: grid;
-  gap: 0.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--expansa-border);
-}
-.post-editor .post-editor-section-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.25rem 0.75rem;
-}
-.post-editor .post-editor-section-head > h3 {
-  margin: 0;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-.post-editor .post-editor-section-head > span {
-  margin-left: auto;
-  font-size: 0.75rem;
-  color: var(--expansa-text-muted);
+  margin-top: -1.5rem;
 }
 .post-editor .post-editor-eyebrow {
   margin: 0;
@@ -3681,15 +3644,6 @@ body.is-unsaved .expansa-search-btn {
   gap: 0.5rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--expansa-border);
-}
-.post-editor .post-editor-text {
-  flex: 1;
-  min-height: 20rem;
-  padding-block: 0.625rem;
-  line-height: 1.6;
-  resize: vertical;
-  font-family: var(--expansa-font-code);
-  font-size: 0.8125rem;
 }
 
 .post-comments {
@@ -3831,7 +3785,7 @@ body.is-unsaved .expansa-search-btn {
   padding: 0;
   list-style: none;
   font-size: 0.8125rem;
-  gap: 0.65rem;
+  gap: 0.75rem;
   position: relative;
   container: post-activity/inline-size;
 }
@@ -3843,7 +3797,6 @@ body.is-unsaved .expansa-search-btn {
 }
 .post-activity > li {
   display: flex;
-  align-items: baseline;
   gap: 0.5625rem;
   position: relative;
 }
@@ -3863,7 +3816,6 @@ body.is-unsaved .expansa-search-btn {
   flex-shrink: 0;
   width: 1.375rem;
   height: 1.375rem;
-  align-self: center;
   color: var(--expansa-text-muted);
   background-color: var(--expansa-bg);
   border-radius: 50%;

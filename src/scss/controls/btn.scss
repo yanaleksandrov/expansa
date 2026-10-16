@@ -16,7 +16,7 @@
   white-space: nowrap;
   min-width: fit-content;
   width: fit-content;
-  border-radius: var(--expansa-border-radius);
+  border-radius: 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   text-decoration: none;
   transition: background-color 0.2s, transform 0.2s;
@@ -30,7 +30,7 @@
   background-position: center;
 
   &:active:not(:disabled) {
-    transform: scale(.97);
+    transform: scale(0.98);
   }
 
   > i {
@@ -162,6 +162,7 @@
 
   &--rounded {
     border-radius: 3rem;
+    corner-shape: initial;
   }
 
   &.is-loading {

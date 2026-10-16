@@ -17,6 +17,10 @@ $value      = Safe::attribute($attributes['value'] ?? '');
 
 unset($attributes['value']);
 
+// the reset link writes the value through u-prop; u-select does not see that, so it is set there too
+$prop  = $attributes['u-prop'] ??= $field->prop;
+$reset = "$prop = '$value'; \$el.closest('.field').querySelector('select')._x_slimSelect?.setSelected('$value')";
+
 // an option is a label or an array with `content` and data attributes
 $toOption = function (int|string $key, mixed $option) use ($value): array {
     $attributes = [
@@ -47,12 +51,12 @@ foreach ($field->options as $key => $option) {
     ];
 }
 ?>
-<div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+<div class="{{ $field->class ?: 'field' }}@if($field->invalid) is-invalid@endif"{!! Arr::toHtmlAttributes($field->conditions) !!}>
 	@if($field->label)
 		<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>
 			{!! $field->label !!}
 			@if($field->reset)
-				<span class="ml-auto t-red" @click="{{ $field->prop }} = '{!! $value !!}'" u-show="{{ $field->prop }} !== '{!! $value !!}'" hidden>{!! t('Reset') !!}</span>
+				<span class="ml-auto t-red" @click="{{ $reset }}" u-show="{{ $prop }} !== '{!! $value !!}'" hidden>{!! t('Reset') !!}</span>
 			@endif
 			@if($field->tooltip)
 				<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
@@ -76,6 +80,9 @@ foreach ($field->options as $key => $option) {
 		</select>
 		{!! $field->after !!}
 	</label>
+	@if($field->invalid)
+		<div class="field-error">{!! $field->invalid !!}</div>
+	@endif
 	@if($field->instruction)
 		<div class="field-instruction">{!! $field->instruction !!}</div>
 	@endif

@@ -29,7 +29,7 @@ return \Expansa\Builders\Form::enqueue(
             'conditions'  => [],
             'attributes'  => [
                 'u-prop'      => 'title',
-                'rows'        => 1,
+                'rows'        => 3,
                 'required'    => true,
                 'placeholder' => t('Add title'),
             ],
@@ -71,7 +71,7 @@ return \Expansa\Builders\Form::enqueue(
             'conditions'  => [],
             'attributes'  => [
                 'u-prop'      => 'excerpt',
-                'rows'        => 1,
+                'rows'        => 4,
                 'value'       => '',
                 'placeholder' => t('Write an excerpt (optional)'),
             ],

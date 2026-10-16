@@ -261,7 +261,7 @@ $uid = Form::enqueue(
                             'conditions'  => [],
                             'attributes'  => [
                                 'u-prop'      => 'bio',
-                                'rows'        => count(explode("\n", $user->field->find('bio') ?? '')),
+                                'rows'        => 8,
                                 'value'       => $user->field->find('bio'),
                                 'placeholder' => $isSelf
                                     ? t('A few words about yourself')

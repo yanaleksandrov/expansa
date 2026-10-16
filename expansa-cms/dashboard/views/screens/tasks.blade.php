@@ -30,7 +30,7 @@ echo view(
                     <img src="{{ url('dashboard/assets/images/placeholder.svg') }}" width="300" height="150" alt="Post image">
                 </div>
                 <div class="kanban__progress">
-                    <div class="progress" u-progress.100.0.25.1000ms></div>
+                    <div class="progress" u-progress.0.25.1000ms></div>
                     <div class="fs-12 t-muted mt-1 df aic">Progress <span class="ml-auto">25%</span></div>
                 </div>
                 <div class="kanban__status">
@@ -40,7 +40,7 @@ echo view(
             <div class="kanban__item">
                 <div class="kanban__name">Translate backend</div>
                 <div class="kanban__progress">
-                    <div class="progress" u-progress.100.0.75.1000ms></div>
+                    <div class="progress" u-progress.0.75.1000ms></div>
                     <div class="fs-12 t-muted mt-1 df aic">Progress <span class="ml-auto">75%</span></div>
                 </div>
                 <div class="kanban__status">
@@ -50,7 +50,7 @@ echo view(
             <div class="kanban__item">
                 <div class="kanban__name">Make design</div>
                 <div class="kanban__progress">
-                    <div class="progress" u-progress.100.0.96.1000ms></div>
+                    <div class="progress" u-progress.0.96.1000ms></div>
                     <div class="fs-12 t-muted mt-1 df aic">Progress <span class="ml-auto">96%</span></div>
                 </div>
                 <div class="kanban__status">
@@ -63,7 +63,7 @@ echo view(
             <div class="kanban__item">
                 <div class="kanban__name">Translate backend</div>
                 <div class="kanban__progress">
-                    <div class="progress" u-progress.100.20.80.1000ms></div>
+                    <div class="progress" u-progress.20.80.1000ms></div>
                     <div class="fs-12 t-muted mt-1 df aic">Progress <span class="ml-auto">75%</span></div>
                 </div>
                 <div class="kanban__status">
@@ -79,7 +79,7 @@ echo view(
             <div class="kanban__item">
                 <div class="kanban__name">Make design</div>
                 <div class="kanban__progress">
-                    <div class="progress" u-progress.100.0.96.1000ms></div>
+                    <div class="progress" u-progress.0.96.1000ms></div>
                     <div class="fs-12 t-muted mt-1 df aic">Progress <span class="ml-auto">96%</span></div>
                 </div>
                 <div class="kanban__status">

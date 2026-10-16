@@ -140,7 +140,8 @@ Asset::discover($path, 'page');
 ```
 
 Повторные вызовы `discover()` для одного и того же файла безопасны: ресурсы дедуплицируются по
-`id`, так что нет риска подключить один и тот же файл дважды.
+`id` и по источнику — один файл под разными uid (шаблон `input` у `date`, `time`, `month`) тоже
+выводится один раз.
 
 #### Метод configure(): где лежат CSS/JS и как называются
 
@@ -254,9 +255,17 @@ Manager::configure(resolver: function (string $file, array $context = []) use ($
         default                                    => null,
     };
 
-    return $vendor === null
-        ? Manager::defaultStructure($file)
-        : ['js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js"];
+    if ($vendor === null) {
+        return Manager::defaultStructure($file);
+    }
+
+    // стили виджета, если он не стилизует себя сам
+    $style = ['youla-pickadate' => 'air-datepicker'][$vendor] ?? null;
+
+    return [
+        'js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js",
+        ...($style ? ['css' => EX_PATH . "dashboard/assets/css/$style$suffix.css"] : []),
+    ];
 });
 ```
 
@@ -450,6 +459,15 @@ Asset::script('main', '/assets/js/main.js', ['dependencies' => ['vendor']]);
 ```php
 Asset::render(['toFooter' => false]); // всё, что должно быть в <head>
 Asset::render(['toFooter' => true]);  // всё, что должно быть перед </body>
+```
+
+Каждый ресурс выводится один раз за запрос: повторный вызов выводит только то, что добавили после
+предыдущего. Так подвал дашборда досылает стили, которые шаблоны полей нашли через `discover()`
+уже после того, как `<head>` был выведен:
+
+```php
+Asset::render(['toFooter' => false]); // в подвале: стили, добавленные после <head>
+Asset::render(['toFooter' => true]);
 ```
 
 Первый аргумент — произвольный фильтр: ассоциативный массив, где ключ — это имя свойства ресурса

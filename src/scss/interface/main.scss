@@ -1,3 +1,5 @@
+@use '../constants/index' as constants;
+
 *::-webkit-scrollbar {
   background-color: transparent;
   width: 0.5rem;
@@ -233,7 +235,7 @@ textarea {
   background-color: var(--expansa-bg-white);
   transition: color, box-shadow 0.2s ease;
   overflow: auto;
-  height: 1.875rem;
+  height: calc(#{constants.rem(constants.$height-md)} - 2px);
   padding: 0.325rem 0.875em;
   white-space: nowrap;
   display: block;
@@ -275,7 +277,7 @@ select {
   appearance: none;
   cursor: pointer;
   width: auto;
-  line-height: 1.65;
+  line-height: 1.5;
 
   &:not([multiple]) {
     background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 55%;
@@ -288,7 +290,7 @@ select {
   }
 
   &[multiple][u-select] {
-    max-height: 1.875rem;
+    max-height: calc(#{constants.rem(constants.$height-md)} - 2px);
     line-height: 1.2;
   }
 

@@ -1,11 +1,17 @@
+@use '../constants/index' as constants;
+
 textarea {
   resize: vertical;
   white-space: pre-wrap;
-  min-height: 1.875rem;
+  min-height: calc(#{constants.rem(constants.$height-md)} - 2px);
   padding-block: 0.325rem;
   line-height: 1.5;
+  // the height follows the content, `rows` caps it
+  field-sizing: content;
 
-  &[u-textarea] {
-    overflow: hidden;
+  @for $rows from 1 through 20 {
+    &[rows="#{$rows}"] {
+      max-height: calc(#{$rows} * 1lh + 0.65rem + 2px);
+    }
   }
 }

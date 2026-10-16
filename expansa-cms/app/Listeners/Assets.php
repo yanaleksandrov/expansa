@@ -16,6 +16,8 @@ final class Assets
 
     public function renderDashboardFooter(): void
     {
+        // the styles field templates discover while the page renders, after the head is out
+        Asset::render(['toFooter' => false], combine: false, minify: false, inline: false);
         Asset::render(['toFooter' => true], combine: false, minify: false, inline: false);
     }
 

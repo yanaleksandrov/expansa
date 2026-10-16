@@ -103,7 +103,7 @@ defined('EX_PATH') || exit;
 				]]>
 			</script>
 		</svg>
-		{{ $field->after }}
+		{!! $field->after !!}
 	</div>
 
 	<div class="field-bottom">

@@ -55,14 +55,14 @@ return Form::enqueue(
                 $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? htmlspecialchars($post->title) : $type->labelEdit);
                 ?>
                 <div class="post-editor-head">
-                    <a class="btn btn--icon btn--sm" href="<?php echo $back; ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
+                    <a class="btn btn--icon btn--xs" href="<?php echo $back; ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
                         <i class="ph ph-arrow-left"></i>
                     </a>
                     <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
                         <a href="<?php echo $back; ?>"><?php echo $type->labelNamePlural; ?></a>
                         <i class="ph ph-caret-right"></i>
                         <?php if ($path !== '') : ?>
-	                        <?php echo $type->labelEdit; ?>: <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
+	                        <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
                         <?php else : ?>
                             <span aria-current="page"><?php echo $title; ?></span>
                         <?php endif; ?>
@@ -85,6 +85,54 @@ return Form::enqueue(
             'class_button'  => '',
             'class_content' => '',
             'fields'        => [
+	            [
+		            'type'        => 'textarea',
+		            'name'        => 'title',
+		            'error'       => 'title',
+		            'label'       => '',
+		            'class'       => 'field field--raised field--xl',
+		            'label_class' => '',
+		            'reset'       => 0,
+		            'before'      => '',
+		            'after'       => '',
+		            'instruction' => '',
+		            'tooltip'     => '',
+		            'copy'        => 0,
+		            'validator'   => '',
+		            'conditions'  => [],
+		            'attributes'  => [
+			            'u-prop'      => 'title',
+			            'value'       => $post->title,
+			            'placeholder' => t('Add title...'),
+			            'autofocus'   => $post->id === 0,
+			            'required'    => true,
+		            ],
+	            ],
+	            ...($type->public ? [
+	                [
+			            'type'        => 'slug',
+			            'name'        => 'slug',
+			            'error'       => 'slug',
+			            'label'       => '',
+			            'class'       => 'field post-editor-slug',
+			            'label_class' => '',
+			            'instruction' => '',
+			            'tooltip'     => t('The address of the page: letters, numbers and hyphens. Leave it empty to make it from the title.'),
+			            'conditions'  => [],
+			            'options'     => [
+				            'from'   => 'title',
+				            'base'   => $bases[$post->parentId] ?? rtrim(url(), '/') . '/',
+				            'parent' => 'parent_id',
+				            'bases'  => $bases,
+				            'link'   => $post->slug !== '' ? url($post->path()) : '',
+			            ],
+			            'attributes'  => [
+				            'value'       => $post->slug,
+				            'placeholder' => t('slug'),
+				            'aria-label'  => t('Slug'),
+			            ],
+		            ],
+	            ] : []),
                 [
                     'type'          => 'group',
                     'name'          => 'main',
@@ -93,72 +141,49 @@ return Form::enqueue(
                     'label_class'   => '',
                     'content_class' => 'post-editor-card',
                     'fields'        => [
-                        [
-                            'type'        => 'text',
-                            'name'        => 'title',
-                            'error'       => 'title',
-                            'label'       => '',
-                            'class'       => 'field field--plain post-editor-heading',
-                            'label_class' => '',
-                            'reset'       => 0,
-                            'before'      => '',
-                            'after'       => '',
-                            'instruction' => '',
-                            'tooltip'     => '',
-                            'copy'        => 0,
-                            'validator'   => '',
-                            'conditions'  => [],
-                            'attributes'  => [
-                                'u-prop'      => 'title',
-                                'value'       => $post->title,
-                                'placeholder' => t('Title'),
-                                'aria-label'  => t('Title'),
-                                'autofocus'   => $post->id === 0,
-                                'required'    => true,
-                            ],
-                        ],
-                        ...($type->public ? [
-                            [
-                                'type'        => 'slug',
-                                'name'        => 'slug',
-                                'error'       => 'slug',
-                                'label'       => '',
-                                'class'       => 'field post-editor-slug',
-                                'label_class' => '',
-                                'instruction' => '',
-                                'tooltip'     => t('The address of the page: letters, numbers and hyphens. Leave it empty to make it from the title.'),
-                                'conditions'  => [],
-                                'options'     => [
-                                    'from'   => 'title',
-                                    'base'   => $bases[$post->parentId] ?? rtrim(url(), '/') . '/',
-                                    'parent' => 'parent_id',
-                                    'bases'  => $bases,
-                                    'link'   => $post->slug !== '' ? url($post->path()) : '',
-                                ],
-                                'attributes'  => [
-                                    'value'       => $post->slug,
-                                    'placeholder' => t('Slug'),
-                                    'aria-label'  => t('Slug'),
-                                ],
-                            ],
-                        ] : []),
-                        [
-                            'name'     => 'content',
-                            'type'     => 'custom',
-                            'callback' => function () use ($post) {
-                                ?>
-                                <section class="post-editor-section">
-                                    <div class="post-editor-section-head">
-                                        <h3 id="post-editor-content"><?php echo t('Content'); ?></h3>
-                                        <span><?php echo t('HTML is allowed: unsafe tags and attributes are removed on saving.'); ?></span>
-                                    </div>
-                                    <label class="field-item">
-                                        <textarea class="post-editor-text" name="content" u-prop="content" rows="16" aria-labelledby="post-editor-content"><?php echo htmlspecialchars($post->content); ?></textarea>
-                                    </label>
-                                </section>
-                                <?php
-                            },
-                        ],
+	                    [
+		                    'type'        => 'textarea',
+		                    'name'        => 'excerpt',
+		                    'error'       => 'excerpt',
+		                    'label'       => '',
+		                    'class'       => 'field field--plain',
+		                    'label_class' => '',
+		                    'reset'       => 0,
+		                    'before'      => '',
+		                    'after'       => '',
+		                    'instruction' => t('An excerpt is an optional summary of your text that can be used in theme templates.'),
+		                    'tooltip'     => '',
+		                    'copy'        => 0,
+		                    'validator'   => '',
+		                    'conditions'  => [],
+		                    'attributes'  => [
+			                    'u-prop'      => 'excerpt',
+			                    'value'       => $post->content,
+			                    'placeholder' => t('Page excerpt...'),
+		                    ],
+	                    ],
+	                    [
+		                    'type'        => 'textarea',
+		                    'name'        => 'content',
+		                    'error'       => 'content',
+		                    'label'       => t('Content'),
+		                    'class'       => '',
+		                    'label_class' => '',
+		                    'reset'       => 0,
+		                    'before'      => '',
+		                    'after'       => '',
+		                    'instruction' => t('HTML is allowed: unsafe tags and attributes are removed on saving.'),
+		                    'tooltip'     => '',
+		                    'copy'        => 0,
+		                    'validator'   => '',
+		                    'conditions'  => [],
+		                    'attributes'  => [
+			                    'rows'        => '20',
+			                    'u-prop'      => 'content',
+			                    'value'       => htmlspecialchars($post->content),
+			                    'placeholder' => t('Content of the page...'),
+		                    ],
+	                    ],
                     ],
                 ],
             ],
@@ -222,6 +247,39 @@ return Form::enqueue(
                 ],
             ],
         ],
+	    [
+		    'type'          => 'tab',
+		    'label'         => t('Custom Code'),
+		    'name'          => 'code',
+		    'caption'       => '',
+		    'description'   => '',
+		    'icon'          => 'ph ph-brackets-curly',
+		    'class_menu'    => '',
+		    'class_button'  => '',
+		    'class_content' => 'post-editor-card',
+		    'fields'        => [
+				[
+					'type'        => 'textarea',
+					'name'        => 'css',
+					'error'       => 'css',
+					'label'       => t('CSS code'),
+					'class'       => '',
+					'label_class' => '',
+					'reset'       => 0,
+					'before'      => '',
+					'after'       => '',
+					'instruction' => t('CSS code'),
+					'tooltip'     => '',
+					'copy'        => 0,
+					'validator'   => '',
+					'conditions'  => [],
+					'attributes'  => [
+						'u-prop'      => 'css',
+						'placeholder' => t('CSS code'),
+					],
+				],
+		    ],
+	    ],
         [
             'type'          => 'tab',
             'label'         => t('Activity'),
@@ -326,7 +384,9 @@ return Form::enqueue(
                             </dd>
                             <?php if ($post->id > 0) : ?>
                                 <dt><i class="ph ph-chat-circle-text"></i><?php echo t('Comments'); ?></dt>
-                                <dd id="post-comments-count"><?php echo view('parts/post-comments-count', ['counts' => Comment::countByStatus($post->type, $post->id)]); ?></dd>
+                                <dd id="post-comments-count">
+	                                <?php echo view('parts/post-comments-count', ['counts' => Comment::countByStatus($post->type, $post->id)]); ?>
+                                </dd>
                             <?php endif; ?>
                             <?php foreach ($facts as [$icon, $label, $fact]) : ?>
                                 <dt><i class="<?php echo $icon; ?>"></i><?php echo $label; ?></dt>

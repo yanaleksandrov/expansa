@@ -40,18 +40,18 @@ foreach ($field->options ?: ['' => []] as $key => $option) {
 	@endif
 	<div class="{{ $field->class ?: 'field' }}">
 		@foreach($checkboxes as $checkbox)
-			<div class="field-item">
+			<label class="field-item">
 				@if($checkbox['icon'])
 					<span class="field-icon"><i class="{!! $checkbox['icon'] !!}"></i></span>
 				@endif
 				<input{!! Arr::toHtmlAttributes($checkbox['attributes']) !!}>
-				<div class="{{ $field->label_class ?: 'field-label' }}"@if($checkbox['required']) data-required="*"@endif>
+				<span class="{{ $field->label_class ?: 'field-label' }}"@if($checkbox['required']) data-required="*"@endif>
 					{!! $checkbox['label'] !!}
 					@if($checkbox['instruction'])
 						<span class="field-instruction">{!! $checkbox['instruction'] !!}</span>
 					@endif
-				</div>
-			</div>
+				</span>
+			</label>
 		@endforeach
 	</div>
 </div>

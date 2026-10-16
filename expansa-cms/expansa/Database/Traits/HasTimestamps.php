@@ -9,6 +9,7 @@ use Expansa\Database\Attribute;
 
 /**
  * Reads `created_at` and `updated_at` as DateTime; a model method of the same name overrides the trait one.
+ * The database stamps both on insert, Query::save() stamps `updated_at` on an update that changes something.
  *
  * @package Expansa\Database\Traits
  */
@@ -17,17 +18,17 @@ trait HasTimestamps
     /**
      * Column the creation time is stamped in.
      */
-    protected string $createdAtColumn = 'created_at';
+    public protected(set) string $createdAtColumn = 'created_at';
 
     /**
      * Column the last update time is stamped in.
      */
-    protected string $updatedAtColumn = 'updated_at';
+    public protected(set) string $updatedAtColumn = 'updated_at';
 
     /**
-     * Whether the model tracks timestamps; not read yet, an override point for an opt-out.
+     * Whether Query::save() stamps the update time; false for a model that sets it itself.
      */
-    protected bool $timestamps = true;
+    public protected(set) bool $timestamps = true;
 
     protected function createdAt(): Attribute
     {

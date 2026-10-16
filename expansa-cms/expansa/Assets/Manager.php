@@ -29,6 +29,22 @@ final class Manager
     private static array $assets = [];
 
     /**
+     * Ids of the enqueued assets by provider and source, so one file registered under several
+     * uids (a field template shared by the date, time and month types) renders once.
+     *
+     * @var array<string, string>
+     */
+    private static array $sources = [];
+
+    /**
+     * Ids of the assets already output by render(): a later call outputs only the ones enqueued
+     * since, e.g. the styles a template discovers after the head is rendered.
+     *
+     * @var array<string, true>
+     */
+    private static array $rendered = [];
+
+    /**
      * Provider registry: file extension (or arbitrary provider key) => provider class.
      * Register your own with {@see self::provider()} to support new asset kinds
      * (fonts, preloads, importmaps, ...) without touching this class.
@@ -126,10 +142,17 @@ final class Manager
             return;
         }
 
+        // the same file under another uid is already on the page
+        $source = "$provider $src";
+        if (isset(self::$sources[$source])) {
+            return;
+        }
+
         $asset = new (self::$providers[$provider])($uid, $src, ...$data);
 
         if (! isset(self::$assets[$asset->id])) {
             self::$assets[$asset->id] = $asset;
+            self::$sources[$source]   = $asset->id;
             self::$assetsRevision++;
         }
     }
@@ -208,6 +231,8 @@ final class Manager
         );
 
         if (self::$assets !== $before) {
+            self::$sources  = array_filter(self::$sources, fn (string $id) => isset(self::$assets[$id]));
+            self::$rendered = array_intersect_key(self::$rendered, self::$assets);
             self::$assetsRevision++;
         }
     }
@@ -234,8 +259,8 @@ final class Manager
      * live is up to {@see self::configure()}; by default it's $file's own directory, under its
      * own basename (`card.blade.php` -> `card.css` + `card.js`).
      *
-     * Safe to call repeatedly: assets are deduplicated by id, so one file contributes its
-     * CSS/JS only once no matter how many times it's discovered.
+     * Safe to call repeatedly: assets are deduplicated by id and by source, so one file contributes
+     * its CSS/JS only once no matter how many times or under how many uids it's discovered.
      *
      * @param string      $file    Absolute path of the file being rendered.
      * @param string|null $uid     Uid to register discovered assets under. Defaults to the
@@ -326,8 +351,8 @@ final class Manager
     }
 
     /**
-     * Render HTML tags for the enqueued assets. See documentation/Asset.md for the full
-     * combine/minify/inline write-up and examples.
+     * Render HTML tags for the enqueued assets, each one once per request. See documentation/Asset.md
+     * for the full combine/minify/inline write-up and examples.
      *
      * @param array $filter  Property name => expected value or `*`-pattern, e.g.
      *                       ['uid' => 'notifications', 'path' => '*.js', 'toFooter' => true].
@@ -343,7 +368,9 @@ final class Manager
      */
     public function render(array $filter = [], bool $combine = false, bool $minify = false, bool $inline = false): void
     {
-        $assets = $this->filter($filter);
+        $assets = array_diff_key($this->filter($filter), self::$rendered);
+
+        self::$rendered += array_fill_keys(array_keys($assets), true);
 
         if (! $combine) {
             foreach ($assets as $asset) {

@@ -10,6 +10,7 @@ use App\Support\Llms;
 use App\Support\Mailer;
 use App\Support\RoleSettings;
 use App\Support\Secrets;
+use App\Support\Transliteration;
 use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Mail;
@@ -41,6 +42,10 @@ final class OptionsService
 
             if ($option === 'seo' && is_array($value)) {
                 $value = $this->normalizeSeo($value);
+            }
+
+            if ($option === 'permalinks' && is_array($value)) {
+                $value = Transliteration::normalize($value);
             }
 
             if ($option === 'comments' && is_array($value)) {

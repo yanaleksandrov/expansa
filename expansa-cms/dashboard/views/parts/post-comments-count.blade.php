@@ -14,18 +14,6 @@ use App\Models\Comment;
  */
 defined('EX_PATH') || exit;
 
-$total    = array_sum($counts);
-$statuses = Comment::statuses();
-$colors   = [
-    Comment::STATUS_APPROVED => 't-green',
-    Comment::STATUS_PENDING  => 't-amber',
-    Comment::STATUS_SPAM     => 't-red',
-    Comment::STATUS_REJECTED => 't-muted',
-];
+$total = array_sum($counts);
 ?>
 <span class="post-editor-pill{{ $total === 0 ? ' is-empty' : '' }}">{{ $total }}</span>
-@foreach ($statuses as $status => $label)
-    @if (! empty($counts[$status]))
-        <span class="badge {{ $colors[$status] ?? '' }}" title="{{ $label }}">{{ $label }} {{ $counts[$status] }}</span>
-    @endif
-@endforeach
