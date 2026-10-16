@@ -128,7 +128,7 @@ return Form::enqueue(
 			            ],
 			            'attributes'  => [
 				            'value'       => $post->slug,
-				            'placeholder' => t('Slug'),
+				            'placeholder' => t('slug'),
 				            'aria-label'  => t('Slug'),
 			            ],
 		            ],

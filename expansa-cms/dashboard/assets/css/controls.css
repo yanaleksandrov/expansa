@@ -786,17 +786,6 @@ select[multiple] + .ss-main {
   font-size: 0.8125rem;
   color: var(--expansa-text-muted);
 }
-.slug-line > .ph-link-simple {
-  flex-shrink: 0;
-  margin-right: 0.125rem;
-  opacity: 0.7;
-}
-.slug-line > .ph-info {
-  flex-shrink: 0;
-  margin-left: auto;
-  cursor: pointer;
-  opacity: 0.6;
-}
 .slug-line input {
   field-sizing: content;
   min-width: 3ch;
