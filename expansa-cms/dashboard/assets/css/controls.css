@@ -1350,6 +1350,10 @@ option[data-html*="<i "]) {
 .field-item > * + select:not([u-select]) {
   margin-inline-start: -0.85em;
 }
+.field-item > * + select[u-select]:not([multiple]) {
+  margin-inline-start: -0.5em;
+  padding-inline-start: 0.5em;
+}
 .field-item select {
   padding-inline: 0.85em 2em;
 }
@@ -1405,6 +1409,7 @@ option[data-html*="<i "]) {
 }
 .field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) > select {
   grid-area: 1/select;
+  margin-inline-start: 0;
   display: block !important;
   visibility: hidden;
 }

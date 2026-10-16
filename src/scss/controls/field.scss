@@ -255,6 +255,12 @@ $item-padding: 0.8em;
       &:not([u-select]) {
         margin-inline-start: -0.85em;
       }
+
+      // the text is as far from before as in .ss-values, so it does not jump when u-select starts
+      &[u-select]:not([multiple]) {
+        margin-inline-start: -0.5em;
+        padding-inline-start: 0.5em;
+      }
     }
 
     select {
@@ -331,6 +337,7 @@ $item-padding: 0.8em;
 
       > select {
         grid-area: 1 / select;
+        margin-inline-start: 0;
         display: block !important;
         visibility: hidden;
       }
