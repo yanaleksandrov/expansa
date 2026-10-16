@@ -11,7 +11,8 @@ use Expansa\Facades\Safe;
  * Header above a table: the title with a badge, the tools and the bulk actions shown while rows are selected.
  * `create` is the label of the button leading to the `link` URL, e.g. of the page of a new item;
  * `actions` is the ID of the form of the bulk actions; `views` are links to the parts of the list after the title,
- * a list of `['title' => ..., 'href' => ..., 'active' => bool]`, with an optional `click` button after them.
+ * a list of `['title' => ..., 'query' => [...], 'active' => bool]`, where `query` overrides the current GET parameters
+ * and null removes one; an item with `click` is a button instead.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/header.blade.php
  *
@@ -51,39 +52,18 @@ $progress = static fn (string $name) => [
     @endif
 
     @if ($views)
-        <div>
-            <div class="field field--sm g-1">
-                <div class="field-buttons">
-                    @foreach ($views as $part)
-                        @if (empty($part['click']))
-                            <a class="field-buttons-item {{ empty($part['active']) ? '' : 'is-active' }}" href="{{ $part['href'] ?? '#' }}">{{ $part['title'] ?? '' }}</a>
-                        @endif
-                    @endforeach
-                </div>
-                @foreach ($views as $part)
-                    @if (! empty($part['click']))
-                        <button class="field-buttons-item btn btn--sm t-red" type="button" @click="{{ $part['click'] }}">{{ $part['title'] ?? '' }}</button>
-                    @endif
-                @endforeach
-            </div>
+        <div class="table-header-views">
+            @foreach ($views as $part)
+                @if (empty($part['click']))
+                    <a class="{{ empty($part['active']) ? '' : 'is-active' }}" href="?{{ $part['link'] ?? '' }}">
+                        {{ $part['title'] ?? '' }}
+                    </a>
+                @else
+                    <button class="btn btn--xs t-red" type="button" @click="{{ $part['click'] }}">{{ $part['title'] ?? '' }}</button>
+                @endif
+            @endforeach
         </div>
     @endif
-
-    <div class="table-header-terminal">
-        <?php
-        echo Form::view('input', [
-            'type'       => 'input',
-            'name'       => 'terminal',
-            'class'      => 'field field--plain',
-            'before'     => '<i class="ph ph-terminal"></i>',
-            'attributes' => [
-                'name'         => 's',
-                'placeholder'  => t('Describe what you want...'),
-                'u-noautofill' => 'terminal',
-            ],
-        ]);
-        ?>
-    </div>
 
     <div class="table-header-group" u-show="!bulk">
         @if ($filter)
@@ -176,11 +156,7 @@ $progress = static fn (string $name) => [
 </div>
 
 @if ($filters)
-    <?php $popover = 'table-filter-' . bin2hex(random_bytes(4)); ?>
-    <div class="table-header">
-        <?php echo view('parts/table/filter', ['filters' => $filters, 'popover' => $popover]); ?>
-        <?php echo view('parts/table/filter-chips', ['popover' => $popover]); ?>
-    </div>
+    <?php echo view('parts/table/filter', ['filters' => $filters]); ?>
 @endif
 
 {!! $content !!}

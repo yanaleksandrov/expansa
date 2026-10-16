@@ -55,6 +55,7 @@ final class Tables
             default       => new Posts(
                 Type::get($request->getString('table') ?: 'pages') ?? throw new NotFound(),
                 $request->getString('view') === 'trash',
+                $request->getString('status'),
             ),
         };
 

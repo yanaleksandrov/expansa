@@ -2548,17 +2548,6 @@ body.is-unsaved .expansa-search-btn {
   timeline-scope: --table-scroll-x;
   height: 100%;
 }
-.table form.table-filter {
-  display: flex;
-  gap: 0.25rem;
-  padding-inline: 1.5rem;
-  padding-bottom: 1rem;
-}
-@media (max-width: 1024px) {
-  .table form.table-filter {
-    padding-inline: 1rem;
-  }
-}
 .table .table-head {
   max-width: 100%;
   position: sticky;
@@ -2638,7 +2627,7 @@ body.is-unsaved .expansa-search-btn {
   display: grid;
   gap: 1.25rem;
   position: relative;
-  padding: 0.5rem 1.5rem;
+  padding: 0.625rem 1.5rem;
   grid-template-columns: var(--expansa-grid-template-columns);
   min-width: -moz-min-content;
   min-width: min-content;
@@ -2710,10 +2699,9 @@ body.is-unsaved .expansa-search-btn {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  align-items: baseline;
   gap: 0.75rem;
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem 1.5rem 1rem;
 }
 @media (max-width: 1024px) {
   .table-header {
@@ -2728,20 +2716,44 @@ body.is-unsaved .expansa-search-btn {
   gap: 0.25rem;
 }
 
-.table-header-terminal {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  flex: 1;
-  min-width: 10rem;
-}
-
 .table-header-translation {
   gap: 0.5rem;
 }
 
-.table-filter-content,
-.table-filter-values {
+.table-header-views {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+.table-header-views a {
+  color: var(--expansa-text-muted);
+  text-decoration: none;
+}
+.table-header-views a:hover, .table-header-views a.is-active {
+  color: var(--expansa-primary);
+}
+.table-header-views a.is-active {
+  font-weight: 500;
+}
+
+.table-filter {
+  display: grid;
+  width: 100%;
+  gap: 0.25rem;
+  padding-inline: 1.5rem;
+  padding-bottom: 0.75rem;
+}
+@media (max-width: 1024px) {
+  .table-filter {
+    padding-inline: 1rem;
+  }
+}
+.table-filter .table-filter-actions {
+  min-width: 100%;
+}
+.table-filter .table-filter-content,
+.table-filter .table-filter-values {
   inset: auto;
   margin: 0.125rem 0 0;
   color: inherit;
@@ -2756,34 +2768,31 @@ body.is-unsaved .expansa-search-btn {
   position-area: bottom span-left;
   position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
 }
-.table-filter-content:popover-open,
-.table-filter-values:popover-open {
+.table-filter .table-filter-content:popover-open,
+.table-filter .table-filter-values:popover-open {
   display: grid;
   animation: contextMenu 0.3s cubic-bezier(0, 0.1, 0.1, 1) backwards;
 }
 @supports not (position-area: bottom) {
-  .table-filter-content,
-  .table-filter-values {
+  .table-filter .table-filter-content,
+  .table-filter .table-filter-values {
     inset: 0;
     margin: auto;
   }
 }
-
-.table-filter-content {
+.table-filter .table-filter-content {
   gap: 0.75rem;
   width: min(36rem, 100vw - 2rem);
   padding: 0.75rem;
 }
-
-.table-filter-values {
+.table-filter .table-filter-values {
   min-width: 12rem;
   max-height: 18rem;
   padding: 0.25rem;
   overflow: auto;
   position-area: bottom span-right;
 }
-
-.table-filter-choice {
+.table-filter .table-filter-choice {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -2791,76 +2800,67 @@ body.is-unsaved .expansa-search-btn {
   border-radius: var(--expansa-border-radius);
   cursor: pointer;
 }
-.table-filter-choice:hover {
+.table-filter .table-filter-choice:hover {
   background-color: var(--expansa-bg);
 }
-
-.table-filter-head,
-.table-filter-add {
+.table-filter .table-filter-head,
+.table-filter .table-filter-add {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
 }
-
-.table-filter-head {
+.table-filter .table-filter-head {
   justify-content: space-between;
 }
-
-.table-filter-add .badge {
+.table-filter .table-filter-add .badge {
   cursor: pointer;
 }
-
-.table-filter-rows {
+.table-filter .table-filter-rows {
   display: grid;
   gap: 0.5rem;
 }
-
-.table-filter-row {
+.table-filter .table-filter-row {
   display: grid;
-  grid-template-columns: 3rem 8rem 6rem 1fr auto;
-  align-items: center;
+  grid-template-columns: 3rem 8rem 5rem 1fr auto;
+  align-items: baseline;
   gap: 0.25rem;
 }
 @media (max-width: 640px) {
-  .table-filter-row {
+  .table-filter .table-filter-row {
     grid-template-columns: 1fr 1fr;
   }
 }
-
-.table-filter-conjunction {
+.table-filter .table-filter-conjunction {
   color: var(--expansa-text-muted);
   font-size: 0.85em;
 }
-
-.table-filter-empty {
+.table-filter .table-filter-empty {
   padding: 0.75rem 0;
   color: var(--expansa-text-muted);
   font-size: 0.85em;
 }
-.table-body > .table-filter-empty {
+.table-body > .table-filter .table-filter-empty {
   padding: 1.5rem;
   text-align: center;
 }
-
-.table-filter-chips {
+.table-filter .table-filter-chips {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
   width: 100%;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0 0 0;
   color: var(--expansa-text-muted);
   font-size: 0.85em;
-  border-top: 1px solid var(--expansa-border);
+  border-top: 3px solid transparent;
+  background: repeating-linear-gradient(to right, var(--expansa-border) 0 1px, transparent 1px 3px) top/100% 3px no-repeat;
 }
-
-.table-filter-chip-list,
-.table-filter-chip-wrap {
+.table-filter .table-filter-chip-list,
+.table-filter .table-filter-chip-wrap {
   display: contents;
 }
-
-.table-filter-chip {
+.table-filter .table-filter-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
@@ -2873,14 +2873,14 @@ body.is-unsaved .expansa-search-btn {
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   transition: background-color 0.25s;
 }
-.table-filter-chip:hover {
+.table-filter .table-filter-chip:hover {
   background-color: var(--expansa-bg-dark);
 }
-.table-filter-chip strong {
+.table-filter .table-filter-chip strong {
   color: var(--expansa-primary);
   font-weight: 500;
 }
-.table-filter-chip-edit, .table-filter-chip-remove {
+.table-filter .table-filter-chip-edit, .table-filter .table-filter-chip-remove {
   display: inline-flex;
   padding: 0.25rem;
   color: inherit;
@@ -2891,13 +2891,13 @@ body.is-unsaved .expansa-search-btn {
   cursor: pointer;
   height: auto;
 }
-.table-filter-chip-edit {
+.table-filter .table-filter-chip-edit {
   gap: 0.25rem;
   align-items: center;
   padding-inline: 0;
   background-color: transparent !important;
 }
-.table-filter-chip-remove:hover {
+.table-filter .table-filter-chip-remove:hover {
   color: var(--expansa-danger);
 }
 

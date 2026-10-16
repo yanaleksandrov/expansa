@@ -10,6 +10,7 @@ use App\Post\Status;
 use App\Post\Type;
 use Expansa\Builders\Table;
 use Expansa\Facades\Db;
+use PDO;
 
 /**
  * Items of a post type, the newest first: the title with the view, duplicate and delete actions,
@@ -31,6 +32,13 @@ final class Posts extends Table
          * Whether the list shows the items in the trash instead of the others.
          */
         public readonly bool $isTrash = false,
+
+        /**
+         * Status the items are filtered by, empty for all.
+         */
+        public private(set) string $status = '' {
+            set => isset(Status::getStatuses()[$value]) ? $value : '';
+        },
     ) {
         parent::__construct();
     }
@@ -43,6 +51,10 @@ final class Posts extends Table
     public function data(): array
     {
         $where = $this->type->canTrash ? [$this->isTrash ? 'deleted_at[!]' : 'deleted_at' => null] : [];
+        if ($this->status !== '') {
+            $where['status'] = $this->status;
+        }
+
         $posts = Db::select($this->type->table, ['id [Int]', 'title', 'author_id [Int]', 'status', 'created_at'], [
             ...$where,
             'ORDER' => ['id' => 'DESC'],
@@ -64,13 +76,10 @@ final class Posts extends Table
                 'actions'     => $this->isTrash
                     ? $this->trashActions($post['id'])
                     : $this->actions($post['id'], $slugs[$post['id']] ?? ''),
-                'author'      => $author !== '' ? [
-                    [
-                        'title' => $author,
-                        'href'  => url('dashboard/profile?id=' . $post['author_id']),
-                    ],
-                ] : [],
+                'author'      => $author,
                 'author_id'   => $post['author_id'],
+                'initials'    => User::initials($author),
+                'color'       => User::color($author),
                 'status'      => [
                     'class' => $post['status'] === 'publish' ? 'badge t-green' : 'badge',
                     'value' => $statuses[$post['status']] ?? $post['status'],
@@ -96,7 +105,7 @@ final class Posts extends Table
             $this->cell('author')
                 ->title(t('Author'))
                 ->fixedWidth('10rem')
-                ->view('links'),
+                ->view('author'),
             $this->cell('status')
                 ->title(t('Status'))
                 ->fixedWidth('6rem')
@@ -114,23 +123,39 @@ final class Posts extends Table
             'title'   => $this->type->labelNamePlural,
             'actions' => 'post-bulk',
         ];
-        if (! $this->type->canTrash) {
-            return $head;
-        }
-
-        $trash = (int) Db::count($this->type->table, ['deleted_at[!]' => null]);
-        $views = [
+        $counts = $this->counts();
+        $views  = [
             [
-                'title'  => t('All (:count)', (int) Db::count($this->type->table, ['deleted_at' => null])),
-                'href'   => self::url($this->type),
-                'active' => ! $this->isTrash,
+                'title'  => t('All [:count]', array_sum($counts)),
+                'query'  => ['view' => null, 'status' => null],
+                'active' => ! $this->isTrash && $this->status === '',
             ],
         ];
 
+        foreach (Status::getStatuses() as $key => $label) {
+            if (isset($counts[$key]) || (! $this->isTrash && $this->status === $key)) {
+                $count = ($counts[$key] ?? 0);
+                $query = ['view' => null, 'status' => $key];
+
+                $views[] = [
+                    'link'   => http_build_query([...$_GET, ...$query]),
+                    'count'  => $count,
+                    'title'  => "$label [$count]",
+                    'query'  => $query,
+                    'active' => ! $this->isTrash && $this->status === $key,
+                ];
+            }
+        }
+
+        if (! $this->type->canTrash) {
+            return [...$head, 'views' => $views];
+        }
+
+        $trash = (int) Db::count($this->type->table, ['deleted_at[!]' => null]);
         if ($trash > 0 || $this->isTrash) {
             $views[] = [
-                'title'  => t('Trash (:count)', $trash),
-                'href'   => self::url($this->type, true),
+                'title'  => t('Trash [:count]', $trash),
+                'query'  => ['view' => 'trash', 'status' => null],
                 'active' => $this->isTrash,
             ];
         }
@@ -157,6 +182,20 @@ final class Posts extends Table
         return url('dashboard/edit?table=' . $type->key . ($trash ? '&view=trash' : ''));
     }
 
+    /**
+     * Count the items out of the trash by status, one query.
+     *
+     * @return array<string, int>
+     */
+    private function counts(): array
+    {
+        $where  = $this->type->canTrash ? ' WHERE deleted_at IS NULL' : '';
+        $counts = Db::query("SELECT status, COUNT(*) FROM <{$this->type->table}>$where GROUP BY status")
+            ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
+
+        return array_map(intval(...), $counts);
+    }
+
     public function filters(): array
     {
         return [
@@ -169,6 +208,11 @@ final class Posts extends Table
                 'label'   => t('Author'),
                 'icon'    => 'ph ph-user',
                 'options' => User::options(),
+            ],
+            'months'   => [
+                'label'   => t('Months'),
+                'icon'    => 'ph ph-timer',
+                'options' => Status::getStatuses(),
             ],
         ];
     }

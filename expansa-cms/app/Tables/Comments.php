@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use App\Models\Comment;
+use App\Models\User;
 use App\Post\Type;
 use Expansa\Builders\Table;
 use Expansa\Facades\Db;
@@ -61,11 +62,14 @@ final class Comments extends Table
         $statuses = Comment::statuses();
 
         return array_map(function (array $comment) use ($titles, $statuses) {
-            $url = url('dashboard/comment?id=' . $comment['id']);
+            $url    = url('dashboard/comment?id=' . $comment['id']);
+            $author = $comment['author_name'] ?: t('Anonymous');
 
             return [
                 'id'        => $comment['id'],
-                'author'    => $comment['author_name'] ?: t('Anonymous'),
+                'author'    => $author,
+                'initials'  => User::initials($author),
+                'color'     => User::color($author),
                 'author_id' => $comment['author_id'],
                 'email'     => $comment['author_email'],
                 'comment'   => mb_strimwidth(trim(strip_tags($comment['content'])), 0, 120, '…'),

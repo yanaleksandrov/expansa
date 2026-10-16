@@ -43,6 +43,8 @@
 
   select[multiple] + & {
     padding-inline-start: 0.25em;
+    padding-block: 2px;
+    height: auto;
   }
 
   &.ss-open-above,

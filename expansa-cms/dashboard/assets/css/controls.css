@@ -339,6 +339,8 @@ textarea[rows="20"] {
 }
 select[multiple] + .ss-main {
   padding-inline-start: 0.25em;
+  padding-block: 2px;
+  height: auto;
 }
 .ss-main.ss-open-above, .ss-main.ss-open-below {
   background-color: #fff;

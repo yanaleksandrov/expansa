@@ -1,6 +1,7 @@
 <?php
 /**
- * Author of a comment: the name, linking to the profile of a registered author, with the email below.
+ * Author of an item: a small avatar with the initials, the name, linking to the profile of a registered author,
+ * with the email below when there is one; nothing for an empty name.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-author.blade.php
  *
@@ -11,10 +12,22 @@
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
+
+$name  = is_scalar($value) ? (string) $value : '';
+$color = $item['color'] ?? 'blue';
 ?>
-@if (! empty($item['author_id']))
-    <a href="{{ url('dashboard/profile?id=' . $item['author_id']) }}" class="fw-500 t-dark">{{ is_scalar($value) ? $value : '' }}</a>
-@else
-    <strong>{{ is_scalar($value) ? $value : '' }}</strong>
+@if ($name !== '')
+    <div class="df aic g-2">
+        <span class="avatar avatar--xs bg-{{ $color }}-lt t-{{ $color }}">{{ $item['initials'] ?? '' }}</span>
+        <div>
+            @if (! empty($item['author_id']))
+                <a href="{{ url('dashboard/profile?id=' . $item['author_id']) }}" class="fw-500 t-dark">{{ $name }}</a>
+            @else
+                <strong>{{ $name }}</strong>
+            @endif
+            @if (! empty($item['email']))
+                <div class="fs-12 t-muted mt-1">{{ $item['email'] }}</div>
+            @endif
+        </div>
+    </div>
 @endif
-<div class="fs-12 t-muted mt-1">{{ $item['email'] ?? '' }}</div>

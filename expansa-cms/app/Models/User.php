@@ -410,6 +410,32 @@ class User extends Model implements Fieldable, Identity, Subject
     }
 
     /**
+     * Get the initials of a name for an avatar: the first letters of up to two words.
+     *
+     * @param string $name
+     * @return string
+     */
+    public static function initials(string $name): string
+    {
+        $words = array_slice(preg_split('/\s+/u', trim($name)) ?: [], 0, 2);
+
+        return mb_strtoupper(implode('', array_map(fn (string $word) => mb_substr($word, 0, 1), $words)));
+    }
+
+    /**
+     * Get the color of an avatar, the same for every use of the name.
+     *
+     * @param string $name
+     * @return string A name of the dashboard palette, e.g. `blue`.
+     */
+    public static function color(string $name): string
+    {
+        $colors = ['blue', 'green', 'amber', 'purple', 'royal', 'red'];
+
+        return $colors[crc32($name) % count($colors)];
+    }
+
+    /**
      * Returns whether this user has the specified capability, through Access permissions.
      *
      * @param string $capability Capability name.
