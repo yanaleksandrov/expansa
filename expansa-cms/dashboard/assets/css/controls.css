@@ -1130,7 +1130,7 @@ input[type=radio]:checked {
   padding: 1.25rem 0.6875rem 0.5rem;
   z-index: -1;
   background-color: rgb(252.13, 241.14, 241.14);
-  border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+  border-radius: 0 0 1em 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field.is-invalid:has(:user-valid) > .field-error {
@@ -1151,7 +1151,7 @@ input[type=radio]:checked {
   gap: 0.5em;
   white-space: nowrap;
   border: 1px solid var(--field-border);
-  border-radius: var(--expansa-border-radius);
+  border-radius: 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   background-color: var(--field-bg);
   transition: background-color 0.2s;
@@ -1160,7 +1160,6 @@ input[type=radio]:checked {
 .field .field-item {
   font-size: 0.8125rem;
   height: 2rem;
-  border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field .field-item .ss-content {
@@ -1176,7 +1175,6 @@ input[type=radio]:checked {
 .field--xl .field-item {
   font-size: 0.9375rem;
   height: 2.5rem;
-  border-radius: var(--expansa-border-radius--xl);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field--xl .field-item .ss-content {
@@ -1192,7 +1190,6 @@ input[type=radio]:checked {
 .field--lg .field-item {
   font-size: 0.875rem;
   height: 2.125rem;
-  border-radius: var(--expansa-border-radius--lg);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field--lg .field-item .ss-content {
@@ -1208,7 +1205,6 @@ input[type=radio]:checked {
 .field--sm .field-item {
   font-size: 0.75rem;
   height: 1.75rem;
-  border-radius: var(--expansa-border-radius--sm);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field--sm .field-item .ss-content {
@@ -1224,7 +1220,6 @@ input[type=radio]:checked {
 .field--xs .field-item {
   font-size: 0.6875rem;
   height: 1.625rem;
-  border-radius: var(--expansa-border-radius--xs);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field--xs .field-item .ss-content {
@@ -1325,7 +1320,7 @@ option[data-html*="<i "]) {
 }
 .field-item input[type=checkbox] {
   border: 1px solid var(--expansa-border);
-  border-radius: calc(var(--expansa-border-radius) / 1.5);
+  border-radius: 0.6666666667em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   margin: 0 0 auto;
   height: auto;
@@ -1414,7 +1409,7 @@ option[data-html*="<i "]) {
   width: 100%;
 }
 .field--ui .field-item:has([type=radio]):focus-within, .field--ui .field-item:has([type=checkbox]):focus-within {
-  border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+  border-radius: 0 0 1em 1em;
   border-color: var(--expansa-border) !important;
   box-shadow: none !important;
   background-color: var(--expansa-bg) !important;
@@ -1425,10 +1420,10 @@ option[data-html*="<i "]) {
   margin-top: -0.25rem;
 }
 .field--ui .field-item:has([type=radio]):not(:only-child):first-child, .field--ui .field-item:has([type=checkbox]):not(:only-child):first-child {
-  border-radius: var(--expansa-border-radius) var(--expansa-border-radius) 0 0;
+  border-radius: 1em 1em 0 0;
 }
 .field--ui .field-item:has([type=radio]):not(:only-child):last-child, .field--ui .field-item:has([type=checkbox]):not(:only-child):last-child {
-  border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+  border-radius: 0 0 1em 1em;
 }
 .field--ui .field-item:has([type=radio]):hover:not(:has([disabled])), .field--ui .field-item:has([type=checkbox]):hover:not(:has([disabled])) {
   background-color: rgba(241, 241, 241, 0.8392156863);
@@ -1482,7 +1477,7 @@ option[data-html*="<i "]) {
   background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   box-shadow: var(--expansa-box-shadow) !important;
-  border-radius: calc(var(--expansa-border-radius) + 2px);
+  border-radius: calc(1em + 1px);
 }
 .field--button .field-item:hover .field-icon, .field--button .field-item:has([type=radio]:checked) .field-icon {
   background-color: var(--expansa-bg);
@@ -1568,7 +1563,7 @@ option[data-html*="<i "]) {
   height: fit-content;
   background-color: var(--expansa-bg-universal);
   border: 1px solid var(--expansa-border);
-  border-radius: var(--expansa-border-radius);
+  border-radius: 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field:has(.field-buttons) .field-buttons input[type=radio] {
@@ -1580,7 +1575,7 @@ option[data-html*="<i "]) {
   white-space: nowrap;
   height: calc(2rem - 4px);
   padding: 0.375em 0.75em;
-  border-radius: calc(var(--expansa-border-radius) - 2px);
+  border-radius: calc(1em - 2px);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   -webkit-user-select: none;
      -moz-user-select: none;
@@ -1600,8 +1595,9 @@ option[data-html*="<i "]) {
   display: flex;
   flex-wrap: wrap;
   padding: 2px;
+  gap: 2px;
   background-color: var(--expansa-bg);
-  border-radius: var(--expansa-border-radius--xl);
+  border-radius: calc(1em + 4px);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .field--timezone {
@@ -1669,7 +1665,7 @@ option[data-html*="<i "]) {
   min-width: fit-content;
   width: -moz-fit-content;
   width: fit-content;
-  border-radius: var(--expansa-border-radius);
+  border-radius: 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   text-decoration: none;
   transition: background-color 0.2s, transform 0.2s;
@@ -1690,31 +1686,26 @@ option[data-html*="<i "]) {
 .btn {
   font-size: 0.8125rem;
   height: 2rem;
-  border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .btn--xl {
   font-size: 0.9375rem;
   height: 2.5rem;
-  border-radius: var(--expansa-border-radius--xl);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .btn--lg {
   font-size: 0.875rem;
   height: 2.125rem;
-  border-radius: var(--expansa-border-radius--lg);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .btn--sm {
   font-size: 0.75rem;
   height: 1.75rem;
-  border-radius: var(--expansa-border-radius--sm);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .btn--xs {
   font-size: 0.6875rem;
   height: 1.625rem;
-  border-radius: var(--expansa-border-radius--xs);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 .btn--primary, .btn--secondary, .btn--success, .btn--danger {

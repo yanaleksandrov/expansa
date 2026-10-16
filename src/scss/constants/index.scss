@@ -46,7 +46,6 @@ $btnSizes: ();
 		#{$suffix}: (
 			'font-size': #{math.div(map.get($value, 'font'), 16)}rem,
 			'height': rem(map.get($value, 'height')),
-			'border-radius': var(--expansa-border-radius#{$suffix}),
 			'corner-shape': superellipse(var(--expansa-corner-shape-superellipse)),
 		)
 	));
@@ -62,7 +61,6 @@ $fieldSizes: ();
 		#{$suffix}: (
 			'font-size': #{math.div(map.get($value, 'font'), 16)}rem,
 			'height': rem(map.get($value, 'height')),
-			'border-radius': var(--expansa-border-radius#{$suffix}),
 			'corner-shape': superellipse(var(--expansa-corner-shape-superellipse)),
 		)
 	));

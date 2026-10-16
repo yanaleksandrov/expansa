@@ -66,7 +66,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     padding: 1.25rem 0.6875rem 0.5rem;
     z-index: -1;
     background-color: $danger-soft;
-    border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+    border-radius: 0 0 1em 1em;
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
@@ -98,7 +98,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     // before and after stay on the line, the input shrinks instead
     white-space: nowrap;
     border: 1px solid var(--field-border);
-    border-radius: var(--expansa-border-radius);
+    border-radius: 1em;
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     background-color: var(--field-bg);
     transition: background-color 0.2s;
@@ -229,7 +229,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
 
     input[type="checkbox"] {
       border: 1px solid var(--expansa-border);
-      border-radius: calc(var(--expansa-border-radius) / 1.5);
+      border-radius: calc(1em / 1.5);
       corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
       margin: 0 0 auto;
       height: auto;
@@ -338,7 +338,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
         width: 100%;
 
         &:focus-within {
-          border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+          border-radius: 0 0 1em 1em;
           border-color: var(--expansa-border) !important;
           box-shadow: none !important;
           background-color: var(--expansa-bg) !important;
@@ -351,11 +351,11 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
         }
 
         &:not(:only-child):first-child {
-          border-radius: var(--expansa-border-radius) var(--expansa-border-radius) 0 0;
+          border-radius: 1em 1em 0 0;
         }
 
         &:not(:only-child):last-child {
-          border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
+          border-radius: 0 0 1em 1em;
         }
 
         &:hover:not(:has([disabled])) {
@@ -422,7 +422,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
         background-color: var(--expansa-bg-white);
         border: 1px solid var(--expansa-border);
         box-shadow: var(--expansa-box-shadow) !important;
-        border-radius: calc(var(--expansa-border-radius) + 2px);
+        border-radius: calc(1em + 1px);
 
         .field-icon {
           background-color: var(--expansa-bg);
@@ -529,7 +529,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
       height: fit-content;
       background-color: var(--expansa-bg-universal);
       border: 1px solid var(--expansa-border);
-      border-radius: var(--expansa-border-radius);
+      border-radius: 1em;
       corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 
       input[type="radio"] {
@@ -542,7 +542,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
         white-space: nowrap;
         height: calc(#{constants.rem(constants.$height-md)} - 4px);
         padding: 0.375em 0.75em;
-        border-radius: calc(var(--expansa-border-radius) - 2px);
+        border-radius: calc(1em - 2px);
         corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
         user-select: none;
         color: var(--expansa-text-muted);
@@ -566,8 +566,9 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     display: flex;
     flex-wrap: wrap;
     padding: 2px;
+    gap: 2px;
     background-color: var(--expansa-bg);
-    border-radius: var(--expansa-border-radius--xl);
+    border-radius: calc(1em + 4px);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   }
 
