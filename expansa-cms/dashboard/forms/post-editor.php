@@ -86,7 +86,7 @@ return Form::enqueue(
             'class_content' => '',
             'fields'        => [
 	            [
-		            'type'        => 'textarea',
+		            'type'        => 'text',
 		            'name'        => 'title',
 		            'error'       => 'title',
 		            'label'       => '',

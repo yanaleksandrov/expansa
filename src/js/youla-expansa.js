@@ -587,6 +587,8 @@ document.addEventListener('youla:init', ()=> {
             editing: null,
             anchor: null,
             bulk: 0,
+            // $ajax of the table, set by its `@load`: the methods called from the listeners don't get it
+            ajax: null,
             trigger: {
                 '@change': 'selectAll($el, $root)',
             },
@@ -723,7 +725,7 @@ document.addEventListener('youla:init', ()=> {
                 window.history.replaceState(null, '', url);
 
                 // the API replaces the rows: their bindings to this component are initialized again
-                this.$ajax.post('tables/filter', payload).then(() => {
+                this.ajax.post('tables/filter', payload).then(() => {
                     this.resetAll(root);
                     root.__x.initialize(root.querySelector('.table-body'));
                 });
@@ -1061,7 +1063,7 @@ document.addEventListener('youla:init', ()=> {
     /**
      * Slug of an entry, the `slug` form template, configured in `u-data="{ ...slug, base, from, parent, bases, synced }"`.
      * The server makes it from the source field named by `from` while `synced` and from the typed text,
-     * 250ms after the last input. Enter keeps it without submitting, Escape brings back the value it had,
+     * 500ms after the last input. Enter keeps it without submitting, Escape brings back the value it had,
      * an empty one is made from the source again. Values set by the server come with an untrusted
      * `input` event, so they do not stop the following.
      *
@@ -1075,6 +1077,7 @@ document.addEventListener('youla:init', ()=> {
         bases: {},
         synced: false,
         before: null,
+        ajax: null,
         source() {
             return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
         },
@@ -1086,7 +1089,7 @@ document.addEventListener('youla:init', ()=> {
          * @returns {Promise<string>}
          */
         generate(text) {
-            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', { text }, null, { clearErrors: false });
+            return String(text).trim() === '' ? Promise.resolve('') : this.ajax.post('slugs/generate', { text }, null, { clearErrors: false });
         },
         follow() {
             const text = this.source()?.value || '';
@@ -1106,12 +1109,9 @@ document.addEventListener('youla:init', ()=> {
             setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', { bubbles: true })));
         },
         line: {
-            '@load'() {
-                if (this.synced) {
-                    this.follow();
-                }
-            },
-            '@input.document.delay.250ms'(e) {
+            // $ajax reaches only string expressions, not the listener functions
+            '@load': 'ajax = $ajax; synced && follow()',
+            '@input.document.delay.500ms'(e) {
                 if (this.synced && e.target === this.source()) {
                     this.follow();
                 }
@@ -1138,7 +1138,7 @@ document.addEventListener('youla:init', ()=> {
             '@focus'() {
                 this.before = { value: this.value, synced: this.synced };
             },
-            '@input.delay.250ms'(e) {
+            '@input.delay.500ms'(e) {
                 const el = e.target;
                 if (!e.isTrusted) {
                     this.value = el.value;

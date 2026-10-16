@@ -480,6 +480,7 @@ document.addEventListener('youla:init', () => {
             editing: null,
             anchor: null,
             bulk: 0,
+            ajax: null,
             trigger: {
                 '@change': 'selectAll($el, $root)'
             },
@@ -606,7 +607,7 @@ document.addEventListener('youla:init', () => {
                     });
                 });
                 window.history.replaceState(null, '', url);
-                this.$ajax.post('tables/filter', payload).then(() => {
+                this.ajax.post('tables/filter', payload).then(() => {
                     this.resetAll(root);
                     root.__x.initialize(root.querySelector('.table-body'));
                 });
@@ -891,11 +892,12 @@ document.addEventListener('youla:init', () => {
         bases: {},
         synced: false,
         before: null,
+        ajax: null,
         source() {
             return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
         },
         generate(text) {
-            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', {
+            return String(text).trim() === '' ? Promise.resolve('') : this.ajax.post('slugs/generate', {
                 text
             }, null, {
                 clearErrors: false
@@ -915,12 +917,8 @@ document.addEventListener('youla:init', () => {
             })));
         },
         line: {
-            '@load'() {
-                if (this.synced) {
-                    this.follow();
-                }
-            },
-            '@input.document.delay.250ms'(e) {
+            '@load': 'ajax = $ajax; synced && follow()',
+            '@input.document.delay.500ms'(e) {
                 if (this.synced && e.target === this.source()) {
                     this.follow();
                 }
@@ -950,7 +948,7 @@ document.addEventListener('youla:init', () => {
                     synced: this.synced
                 };
             },
-            '@input.delay.250ms'(e) {
+            '@input.delay.500ms'(e) {
                 const el = e.target;
                 if (!e.isTrusted) {
                     this.value = el.value;
