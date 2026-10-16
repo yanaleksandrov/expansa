@@ -304,7 +304,7 @@ textarea[rows="20"] {
   --ss-content-height: 300px;
   --ss-spacing-l: 0.5em;
   --ss-spacing-m: 0.4675em;
-  --ss-spacing-s: 0.425em;
+  --ss-spacing-s: 0.4275em;
   --ss-animation-timing: 0.2s;
 }
 
@@ -339,6 +339,8 @@ textarea[rows="20"] {
 }
 select[multiple] + .ss-main {
   padding-inline-start: 0.25em;
+  padding-block: 2px;
+  height: auto;
 }
 .ss-main.ss-open-above, .ss-main.ss-open-below {
   background-color: #fff;
@@ -437,7 +439,7 @@ select[multiple] + .ss-main {
 .ss-main .ss-value-text {
   padding: var(--ss-spacing-s) 0 var(--ss-spacing-s) var(--ss-spacing-m);
   font-size: inherit;
-  line-height: 1;
+  line-height: 0.9;
 }
 .ss-main .ss-value-delete {
   display: flex;
@@ -1084,7 +1086,6 @@ input[type=radio]:checked {
   display: grid;
   gap: 0.25em;
   align-content: start;
-  width: 100%;
 }
 .field--raised {
   --field-bg: var(--expansa-bg-white);
@@ -1152,7 +1153,7 @@ input[type=radio]:checked {
   border-radius: 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   background-color: var(--field-bg);
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
   position: relative;
 }
 .field .field-item {
@@ -1346,8 +1347,15 @@ option[data-html*="<i "]) {
   pointer-events: initial;
   cursor: pointer;
 }
+.field-item > * + select:not([u-select]) {
+  margin-inline-start: -0.85em;
+}
+.field-item > * + select[u-select]:not([multiple]) {
+  margin-inline-start: -0.5em;
+  padding-inline-start: 0.5em;
+}
 .field-item select {
-  padding-inline: 0.85em 1.65em;
+  padding-inline: 0.85em 2em;
 }
 .field-item select + .ss-main {
   background-color: transparent;
@@ -1378,6 +1386,71 @@ option[data-html*="<i "]) {
   line-height: 1.6;
   background-position: right 0.85em top 55%;
 }
+.field-item > .field-before {
+  padding-inline-start: 0.8em;
+}
+.field-item > .field-after {
+  padding-inline-end: 0.8em;
+}
+.field-item > .field-before,
+.field-item > .field-after {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) {
+  display: grid;
+  grid-template-columns: [before] auto [select] minmax(0, 1fr) [after] auto [end];
+  -moz-column-gap: 0;
+       column-gap: 0;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) > .field-before {
+  grid-area: 1/before;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) > select {
+  grid-area: 1/select;
+  margin-inline-start: 0;
+  display: block !important;
+  visibility: hidden;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) > .field-after {
+  grid-area: 1/after;
+  margin-inline-start: 0.5em;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) > .field-before,
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) > .field-after {
+  pointer-events: none;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) > .ss-main {
+  grid-area: 1/before/auto/end;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-self: stretch;
+  align-items: center;
+  height: auto;
+  padding-inline: 0;
+  background-size: 0 0;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) .ss-values {
+  grid-area: 1/select;
+  height: auto;
+  padding-inline: 0.85em 2.25em;
+  background-image: inherit;
+  background-repeat: no-repeat;
+  background-position: right 0.85em top 55%;
+  background-size: 0.8em;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) .ss-values .ss-text {
+  padding-inline-end: 0;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after):has(> .field-before) .ss-values {
+  padding-inline-start: 0.5em;
+}
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) .ss-deselect {
+  grid-area: 1/select;
+  justify-self: end;
+  margin-inline-end: 2em;
+}
 .field-item textarea:hover {
   background-color: inherit;
   color: inherit;
@@ -1399,6 +1472,9 @@ option[data-html*="<i "]) {
   order: 1;
   flex-wrap: wrap;
   flex: 1;
+}
+.field-item:has([type=radio]) .field-instruction, .field-item:has([type=checkbox]) .field-instruction {
+  min-width: 100%;
 }
 .field-item:has([type=radio]) .field-icon, .field-item:has([type=checkbox]) .field-icon {
   background-color: var(--expansa-bg);
@@ -1681,16 +1757,24 @@ option[data-html*="<i "]) {
   padding-top: 0.4em;
   gap: 0.8em;
 }
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) {
+.field--plain .field-item:not(:has([type=checkbox], [type=radio], select)) {
   padding-inline: 0;
-  border-width: 0 0 1px;
+  border-width: 0;
   border-radius: 0;
   corner-shape: initial;
   transition: border-color 0.2s;
 }
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) select,
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) select + .ss-main {
+.field--plain .field-item:not(:has([type=checkbox], [type=radio], select)) > .field-before {
   padding-inline-start: 0;
+}
+.field--plain .field-item:not(:has([type=checkbox], [type=radio], select)) > .field-after {
+  padding-inline-end: 0;
+}
+.field--plain .field-item:has(select):hover {
+  background-color: var(--expansa-bg-universal);
+}
+.field--plain .field-item:has(select):focus-within {
+  border-color: var(--field-border);
 }
 .field--plain.is-invalid:not(:has(:user-valid)) .field-item, .field--plain .field-item:has(:user-invalid):not(:has([type=checkbox], [type=radio])) {
   border-color: var(--expansa-danger) !important;
@@ -1747,7 +1831,7 @@ option[data-html*="<i "]) {
   border-radius: 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   text-decoration: none;
-  transition: background-color 0.2s, transform 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -1757,7 +1841,7 @@ option[data-html*="<i "]) {
   background-position: center;
 }
 .btn:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 .btn > i {
   font-size: inherit;
@@ -1787,7 +1871,7 @@ option[data-html*="<i "]) {
   height: 1.625rem;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
-.btn--primary, .btn--secondary, .btn--success, .btn--danger {
+.btn--primary, .btn--secondary, .btn--success, .btn--danger, .btn--warning {
   color: var(--expansa-text-white);
   box-shadow: 0 1px 1px rgba(255, 255, 255, 0.2) inset, 0 -1px 1px rgba(0, 0, 0, 0.2) inset;
 }
@@ -1817,6 +1901,15 @@ option[data-html*="<i "]) {
 }
 .btn--success:active {
   background-color: var(--expansa-success-active);
+}
+.btn--warning {
+  background-color: var(--expansa-warning);
+}
+.btn--warning:hover {
+  background-color: var(--expansa-warning-hover);
+}
+.btn--warning:active {
+  background-color: var(--expansa-warning-active);
 }
 .btn--danger {
   background-color: var(--expansa-danger);
@@ -1862,7 +1955,7 @@ option[data-html*="<i "]) {
   transform: scale(1);
   transition: color 0.2s, transform 0.4s, opacity 0.5s, background-color 0.15s;
 }
-.btn--animated[class*=primary]:hover:before, .btn--animated[class*=secondary]:hover:before, .btn--animated[class*=success]:hover:before, .btn--animated[class*=danger]:hover:before {
+.btn--animated[class*=primary]:hover:before, .btn--animated[class*=secondary]:hover:before, .btn--animated[class*=success]:hover:before, .btn--animated[class*=warning]:hover:before, .btn--animated[class*=danger]:hover:before {
   color: var(--expansa-text-white);
 }
 .btn--full {
@@ -1883,6 +1976,9 @@ option[data-html*="<i "]) {
   text-shadow: none !important;
   pointer-events: none;
 }
+.btn.is-loading > * {
+  visibility: hidden;
+}
 .btn.is-loading:after {
   content: "";
   display: inline-block;
@@ -1898,7 +1994,7 @@ option[data-html*="<i "]) {
   margin: auto;
   animation: spinner-border 0.5s linear infinite;
 }
-.btn.is-loading[class*=primary]:after, .btn.is-loading[class*=secondary]:after, .btn.is-loading[class*=success]:after, .btn.is-loading[class*=danger]:after {
+.btn.is-loading[class*=primary]:after, .btn.is-loading[class*=secondary]:after, .btn.is-loading[class*=success]:after, .btn.is-loading[class*=warning]:after, .btn.is-loading[class*=danger]:after {
   color: var(--expansa-text-white);
 }
 

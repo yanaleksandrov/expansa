@@ -14,7 +14,6 @@ use App\Models\Option;
  *
  * Alphabets replace letter by letter. Hangul syllables are split into the initial, the vowel
  * and the final, each with its own table.
- * youla-expansa.js repeats the same rules for slugs made while typed, see rules().
  */
 final class Transliteration
 {
@@ -469,13 +468,13 @@ final class Transliteration
     }
 
     /**
-     * Rules for apply() and youla-expansa.js: the own rules of the site in `custom`, the letters of all
+     * Rules for apply(): the own rules of the site in `custom`, the letters of all
      * scripts in `map`, empty when slugs keep their letters; with them the Latin values of Hangul
      * `initials`, `vowels` and `finals` by their index in a syllable, the first final empty.
      *
      * @return array<string, array<int|string, string>>|null Null when there is nothing to replace.
      */
-    public static function rules(): ?array
+    private static function rules(): ?array
     {
         if (self::$rules === null) {
             $custom = (array) Option::get('permalinks.rules', []);

@@ -1,14 +1,13 @@
 <?php
 
-use App\Support\Transliteration;
 use Expansa\Builders\Form\Data;
 use Expansa\Support\Arr;
 
 /**
  * Slug field: the URL of an entry in one line, the slug edited in place; the `slug` provider
- * of youla-expansa.js makes it from the source field and normalizes it while typed, in Latin letters
- * by the Permalinks settings. With the `parent` option, the name of a field, and `bases`, the URLs
- * by its values, the base follows that field.
+ * of youla-expansa.js gets it from the server for the source field and for the typed text.
+ * With the `parent` option, the name of a field, and `bases`, the URLs by its values,
+ * the base follows that field.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/slug.php
  *
@@ -17,22 +16,23 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 
-$base   = (string) ($field->options['base'] ?? rtrim(url(), '/') . '/');
 $from   = (string) ($field->options['from'] ?? '');
-$parent = (string) ($field->options['parent'] ?? '');
-$bases  = (array) ($field->options['bases'] ?? []);
-$synced = $from !== '' && (string) ($field->attributes['value'] ?? '') === '';
-$rules  = Transliteration::rules();
+$config = [
+    'base'   => (string) ($field->options['base'] ?? rtrim(url(), '/') . '/'),
+    'from'   => $from,
+    'parent' => (string) ($field->options['parent'] ?? ''),
+    'bases'  => (object) ($field->options['bases'] ?? []),
+    'synced' => $from !== '' && (string) ($field->attributes['value'] ?? '') === '',
+];
 ?>
-<div class="{{ trim(($field->class ?: 'field') . ' slug') }}" u-data="slug" data-from="{{ $from }}" data-base="{{ $base }}" data-synced="{{ $synced ? '1' : '' }}"@if($rules) data-transliteration="{{ json_encode($rules, JSON_UNESCAPED_UNICODE) }}"@endif@if($parent) data-parent="{{ $parent }}" data-bases="{{ json_encode($bases, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }}"@endif{!! Arr::toHtmlAttributes($field->conditions) !!}>
+<div class="{{ trim(($field->class ?: 'field') . ' slug') }}" u-data="{ ...slug, ...{{ json_encode($config, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) }} }"{!! Arr::toHtmlAttributes($field->conditions) !!}>
 	@if($field->label)
 		<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>{!! $field->label !!}</div>
 	@endif
 	<label class="slug-line" u-bind="line">
 		<i class="ph ph-link-simple"></i>
-		<span class="slug-base" u-text="base">{{ $base }}</span>
+		<span class="slug-base" u-text="base">{{ $config['base'] }}</span>
 		<input{!! $field->htmlAttributes !!} u-bind="input" spellcheck="false" autocomplete="off">
-		<button class="slug-action ph ph-copy" type="button" u-bind="copy" title="{{ t('Copy link') }}" aria-label="{{ t('Copy link') }}"></button>
 		@if($field->tooltip)
 			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif

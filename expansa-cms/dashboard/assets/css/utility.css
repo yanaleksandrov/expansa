@@ -285,11 +285,11 @@
 }
 
 .t-dark {
-  color: #151d26 !important;
+  color: #3a3a3a !important;
 }
 
 .t-dark-lt {
-  color: #151d2611 !important;
+  color: #3a3a3a11 !important;
 }
 
 .t-muted {
@@ -309,43 +309,43 @@
 }
 
 .t-red {
-  color: #d63939 !important;
+  color: #e32323 !important;
 }
 
 .t-red-lt {
-  color: #d6393911 !important;
+  color: #e3232311 !important;
 }
 
 .t-amber {
-  color: #f76707 !important;
+  color: #ff4810 !important;
 }
 
 .t-amber-lt {
-  color: #f7670711 !important;
+  color: #ff481011 !important;
 }
 
 .t-orange {
-  color: #f59f00 !important;
+  color: #ff7b24 !important;
 }
 
 .t-orange-lt {
-  color: #f59f0011 !important;
+  color: #ff7b2411 !important;
 }
 
 .t-green {
-  color: #2fb344 !important;
+  color: #51c263 !important;
 }
 
 .t-green-lt {
-  color: #2fb34411 !important;
+  color: #51c26311 !important;
 }
 
 .t-blue {
-  color: #005cf4 !important;
+  color: #1867ea !important;
 }
 
 .t-blue-lt {
-  color: #005cf411 !important;
+  color: #1867ea11 !important;
 }
 
 .t-purple {
@@ -357,11 +357,11 @@
 }
 
 .bg-dark {
-  background-color: #151d26 !important;
+  background-color: #3a3a3a !important;
 }
 
 .bg-dark-lt {
-  background-color: rgb(238.62, 239.18, 239.81) !important;
+  background-color: rgb(241.21, 241.21, 241.21) !important;
 }
 
 .bg-muted {
@@ -381,43 +381,43 @@
 }
 
 .bg-red {
-  background-color: #d63939 !important;
+  background-color: #e32323 !important;
 }
 
 .bg-red-lt {
-  background-color: rgb(252.13, 241.14, 241.14) !important;
+  background-color: rgb(253.04, 239.6, 239.6) !important;
 }
 
 .bg-amber {
-  background-color: #f76707 !important;
+  background-color: #ff4810 !important;
 }
 
 .bg-amber-lt {
-  background-color: rgb(254.44, 244.36, 237.64) !important;
+  background-color: rgb(255, 242.19, 238.27) !important;
 }
 
 .bg-orange {
-  background-color: #f59f00 !important;
+  background-color: #ff7b24 !important;
 }
 
 .bg-orange-lt {
-  background-color: rgb(254.3, 248.28, 237.15) !important;
+  background-color: rgb(255, 245.76, 239.67) !important;
 }
 
 .bg-green {
-  background-color: #2fb344 !important;
+  background-color: #51c263 !important;
 }
 
 .bg-green-lt {
-  background-color: rgb(240.44, 249.68, 241.91) !important;
+  background-color: rgb(242.82, 250.73, 244.08) !important;
 }
 
 .bg-blue {
-  background-color: #005cf4 !important;
+  background-color: #1867ea !important;
 }
 
 .bg-blue-lt {
-  background-color: rgb(237.15, 243.59, 254.23) !important;
+  background-color: rgb(238.83, 244.36, 253.53) !important;
 }
 
 .bg-purple {

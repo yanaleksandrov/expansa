@@ -2,6 +2,7 @@
 @use '../constants/index' as constants;
 
 $danger-soft: rgb(255 224 224);
+$item-padding: 0.8em;
 
 .field {
   --field-bg: var(--expansa-bg);
@@ -11,7 +12,6 @@ $danger-soft: rgb(255 224 224);
   display: grid;
   gap: 0.25em;
   align-content: start;
-  width: 100%;
 
   &--raised {
     --field-bg: var(--expansa-bg-white);
@@ -91,7 +91,7 @@ $danger-soft: rgb(255 224 224);
   }
 
   &-item {
-    padding-inline: 0.8em;
+    padding-inline: $item-padding;
     display: flex;
     align-items: center;
     gap: 0.5em;
@@ -101,7 +101,7 @@ $danger-soft: rgb(255 224 224);
     border-radius: 1em;
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     background-color: var(--field-bg);
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, color 0.2s;
     position: relative;
 
     @each $suffix, $properties in constants.$fieldSizes {
@@ -250,8 +250,21 @@ $danger-soft: rgb(255 224 224);
       cursor: pointer;
     }
 
+    > * + select {
+
+      &:not([u-select]) {
+        margin-inline-start: -0.85em;
+      }
+
+      // the text is as far from before as in .ss-values, so it does not jump when u-select starts
+      &[u-select]:not([multiple]) {
+        margin-inline-start: -0.5em;
+        padding-inline-start: 0.5em;
+      }
+    }
+
     select {
-      padding-inline: 0.85em 1.65em;
+      padding-inline: 0.85em 2em;
 
       + .ss-main {
         background-color: transparent;
@@ -295,6 +308,90 @@ $danger-soft: rgb(255 224 224);
       }
     }
 
+    // a field with a select has no padding, before and after keep it at the edges
+    > .field-before {
+      padding-inline-start: $item-padding;
+    }
+
+    > .field-after {
+      padding-inline-end: $item-padding;
+    }
+
+    > .field-before,
+    > .field-after {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+
+    // the box of a single u-select spans before and after, so the list is as wide as the field;
+    // its subgrid puts the text in the column of the select whatever is around it
+    &:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) {
+      display: grid;
+      grid-template-columns: [before] auto [select] minmax(0, 1fr) [after] auto [end];
+      column-gap: 0;
+
+      > .field-before {
+        grid-area: 1 / before;
+      }
+
+      > select {
+        grid-area: 1 / select;
+        margin-inline-start: 0;
+        display: block !important;
+        visibility: hidden;
+      }
+
+      > .field-after {
+        grid-area: 1 / after;
+        margin-inline-start: 0.5em;
+      }
+
+      // the box covers them, clicks go through to it
+      > .field-before,
+      > .field-after {
+        pointer-events: none;
+      }
+
+      > .ss-main {
+        grid-area: 1 / before / auto / end;
+        display: grid;
+        grid-template-columns: subgrid;
+        align-self: stretch;
+        align-items: center;
+        height: auto;
+        padding-inline: 0;
+        background-size: 0 0;
+      }
+
+      // the arrow of the box moves to the end of the select column
+      .ss-values {
+        grid-area: 1 / select;
+        height: auto;
+        padding-inline: 0.85em 2.25em;
+        background-image: inherit;
+        background-repeat: no-repeat;
+        background-position: right 0.85em top 55%;
+        background-size: 0.8em;
+
+        // the arrow is in the padding of .ss-values, so the field is as wide as before u-select starts
+        .ss-text {
+          padding-inline-end: 0;
+        }
+      }
+
+      // the text is as far from before as from the gap of the field
+      &:has(> .field-before) .ss-values {
+        padding-inline-start: 0.5em;
+      }
+
+      .ss-deselect {
+        grid-area: 1 / select;
+        justify-self: end;
+        margin-inline-end: 2em;
+      }
+    }
+
     textarea:hover {
       background-color: inherit;
       color: inherit;
@@ -318,6 +415,11 @@ $danger-soft: rgb(255 224 224);
         order: 1;
         flex-wrap: wrap;
         flex: 1;
+      }
+
+      // the description is a line under the title
+      .field-instruction {
+        min-width: 100%;
       }
 
       .field-icon {
@@ -635,16 +737,31 @@ $danger-soft: rgb(255 224 224);
   }
 
   // plain is text in line with the label: no box, a bottom line for the focus and the error
-  &--plain &-item:not(:has([type="checkbox"], [type="radio"])) {
+  &--plain &-item:not(:has([type="checkbox"], [type="radio"], select)) {
     padding-inline: 0;
-    border-width: 0 0 1px;
+    border-width: 0;
     border-radius: 0;
     corner-shape: initial;
     transition: border-color 0.2s;
 
-    select,
-    select + .ss-main {
+    > .field-before {
       padding-inline-start: 0;
+    }
+
+    > .field-after {
+      padding-inline-end: 0;
+    }
+  }
+
+  // a plain select keeps the box of a field and is shaded on hover, as a button
+  &--plain &-item:has(select) {
+
+    &:hover {
+      background-color: var(--expansa-bg-universal);
+    }
+
+    &:focus-within {
+      border-color: var(--field-border);
     }
   }
 

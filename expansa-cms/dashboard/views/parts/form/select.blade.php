@@ -64,7 +64,9 @@ foreach ($field->options as $key => $option) {
 		</div>
 	@endif
 	<label class="field-item">
-		{!! $field->before !!}
+		@if($field->before)
+			<span class="field-before">{!! $field->before !!}</span>
+		@endif
 		<select{!! Arr::toHtmlAttributes($attributes) !!}>
 			@foreach($choices as $choice)
 				@if(isset($choice['options']))
@@ -78,7 +80,9 @@ foreach ($field->options as $key => $option) {
 				@endif
 			@endforeach
 		</select>
-		{!! $field->after !!}
+		@if($field->after)
+			<span class="field-after">{!! $field->after !!}</span>
+		@endif
 	</label>
 	@if($field->invalid)
 		<div class="field-error">{!! $field->invalid !!}</div>

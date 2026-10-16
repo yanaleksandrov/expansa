@@ -525,9 +525,7 @@ class Comment extends Model
      */
     public function getInitials(): string
     {
-        $words = array_slice(preg_split('/\s+/u', trim($this->getAuthorName())) ?: [], 0, 2);
-
-        return mb_strtoupper(implode('', array_map(fn (string $word) => mb_substr($word, 0, 1), $words)));
+        return User::initials($this->getAuthorName());
     }
 
     /**
@@ -537,9 +535,7 @@ class Comment extends Model
      */
     public function getColor(): string
     {
-        $colors = ['blue', 'green', 'amber', 'purple', 'royal', 'red'];
-
-        return $colors[crc32($this->getAuthorName()) % count($colors)];
+        return User::color($this->getAuthorName());
     }
 
     /**

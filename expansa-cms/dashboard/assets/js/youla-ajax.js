@@ -32,7 +32,9 @@
             const ajax = (method, route, payload, onProgress, options = {}) => {
                 const config = settings();
                 abortPrevious(el);
-                clearErrors(scopeOf(el));
+                if (options.clearErrors ?? true) {
+                    clearErrors(scopeOf(el));
+                }
                 const xhr = el.__ajax = new XMLHttpRequest;
                 const body = buildRequestBody(el, payload);
                 const safe = SAFE.includes(method);
@@ -191,6 +193,7 @@
             const wrapper = options.wrapper && input.closest(options.wrapper) || input;
             const anchor = options.anchor && input.closest(options.anchor) || input;
             const error = document.createElement('div');
+            input.__ajaxClear?.();
             error.className = options.messageClass;
             error.id = `ajax-error-${++errorId}`;
             error.textContent = texts.join(' ');

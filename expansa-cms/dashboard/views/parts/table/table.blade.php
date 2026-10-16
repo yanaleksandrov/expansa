@@ -18,21 +18,21 @@ $active  = $table->activeFilters();
 $filters = $table->filters();
 ?>
 @if ($items || $active)
-<div class="table" u-data="table" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
-    <div class="table-head">
-        @if ($header ?? true)
-            <?php echo view('parts/table/header', [...$table->headData(), 'filters' => $filters]); ?>
-        @endif
-        <div class="table-head-data">
-            @foreach ($table->cells as $cell)
-                <?php echo view('parts/table/cell-head', ['cell' => $cell]); ?>
-            @endforeach
+    <div class="table" u-data="table" @load="ajax = $ajax" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
+        <div class="table-head">
+            @if ($header ?? true)
+                <?php echo view('parts/table/header', [...$table->headData(), 'filters' => $filters]); ?>
+            @endif
+            <div class="table-head-data">
+                @foreach ($table->cells as $cell)
+                    <?php echo view('parts/table/cell-head', ['cell' => $cell]); ?>
+                @endforeach
+            </div>
+        </div>
+        <div class="table-body">
+            <?php echo view('parts/table/table-row', ['table' => $table]); ?>
         </div>
     </div>
-    <div class="table-body">
-        <?php echo view('parts/table/table-row', ['table' => $table]); ?>
-    </div>
-</div>
 @else
-<?php echo view('parts/state', $table->notFoundData()); ?>
+    <?php echo view('parts/state', $table->notFoundData()); ?>
 @endif
