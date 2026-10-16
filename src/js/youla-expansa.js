@@ -1059,157 +1059,153 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Slug of an entry, the `slug` form template: follows the source field named by `data-from` while
-     * `synced`, normalized as Sanitizer::slug() does while typed, in Latin letters by `data-transliteration`.
-     * Enter keeps it without submitting, Escape brings back the value it had, an empty one is made from
-     * the source again. Values set by the server come with an untrusted `input` event, so they do not
-     * stop the following.
+     * Slug of an entry, the `slug` form template, configured in `u-data="{ ...slug, base, from, parent, bases, synced }"`.
+     * The server makes it from the source field named by `from` while `synced` and from the typed text,
+     * 250ms after the last input. Enter keeps it without submitting, Escape brings back the value it had,
+     * an empty one is made from the source again. Values set by the server come with an untrusted
+     * `input` event, so they do not stop the following.
      *
      * @since 2027.1
      */
-    Youla.data('slug', (root) => {
-        const rules = JSON.parse(root.dataset?.transliteration || 'null');
+    Youla.data('slug', (root) => ({
+        value: root.querySelector?.('.slug-line input')?.value || '',
+        base: '',
+        from: '',
+        parent: '',
+        bases: {},
+        synced: false,
+        before: null,
+        source() {
+            return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
+        },
+        /**
+         * Slug of the text by Sanitizer::slug() on the server, with the transliteration
+         * of the Permalinks settings.
+         *
+         * @param {string} text
+         * @returns {Promise<string>}
+         */
+        generate(text) {
+            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', { text }, null, { clearErrors: false });
+        },
+        follow() {
+            const text = this.source()?.value || '';
 
-        // own rules of the site as one pattern, the longer text first as strtr() takes it
-        const own = Object.keys(rules?.custom || {})
-            .sort((a, b) => b.length - a.length)
-            .map((from) => from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-            .join('|');
-        const pattern = own ? new RegExp(own, 'g') : null;
-
-        // Latin letters of a lowercased slug, as App\Support\Transliteration::apply() makes them
-        const transliterate = (text) => {
-            if (pattern) {
-                text = text.replace(pattern, (from) => rules.custom[from]);
-            }
-
-            // the Hangul tables come only with the letters of the scripts
-            if (!rules?.initials || !/[^\x00-\x7F]/.test(text)) {
-                return text;
-            }
-
-            text = text.replace(/[\uAC00-\uD7A3]/g, (syllable) => {
-                const index = syllable.charCodeAt(0) - 0xAC00;
-
-                return rules.initials[Math.floor(index / 588)] + rules.vowels[Math.floor(index % 588 / 28)] + rules.finals[index % 28];
+            return this.generate(text).then((slug) => {
+                // typing in the slug while the request went stops the following
+                if (this.synced && document.activeElement !== this.$refs.slug) {
+                    this.value = slug;
+                }
             });
-
-            return Array.from(text, (char) => rules.map[char] ?? char).join('');
-        };
-        const slugify = (text, final = true) => {
-            const slug = transliterate(String(text)
-                .replace(/<[^>]*>/g, '')
-                .replace(/&[a-z0-9#]+;/gi, '')
-                .normalize('NFC')
-                .toLowerCase())
-                .replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
-
-            // a hyphen being typed at the end stays until the field is left
-            return final ? slug.replace(/^-+|-+$/g, '') : slug.replace(/^-+/, '');
-        };
-        const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;
-
-        return {
-            value: root.querySelector?.('.slug-line input')?.value || '',
-            base: root.dataset?.base || '',
-            bases: JSON.parse(root.dataset?.bases || '{}'),
-            source: from?.value || '',
-            synced: root.dataset?.synced === '1',
-            before: null,
-            generated() {
-                return slugify(this.source);
+        },
+        /**
+         * Tell $dirty about a value set here: it comes without an `input` event,
+         * so `change` is sent once the field shows it.
+         */
+        touch() {
+            setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', { bubbles: true })));
+        },
+        line: {
+            '@load'() {
+                if (this.synced) {
+                    this.follow();
+                }
             },
-            /**
-             * Tell $dirty about a value set here: it comes without an `input` event,
-             * so `change` is sent once the field shows it.
-             */
-            touch() {
-                setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', { bubbles: true })));
+            '@input.document.delay.250ms'(e) {
+                if (this.synced && e.target === this.source()) {
+                    this.follow();
+                }
             },
-            line: {
-                '@load'() {
-                    if (this.synced) {
-                        this.value = this.generated();
-                    }
-                },
-                '@input.document'(e) {
-                    if (from && e.target === from) {
-                        this.source = from.value;
-                        if (this.synced) {
-                            this.value = this.generated();
-                        }
-                    }
-                },
-                // the URL as shown, for the links to the page outside the field, e.g. in the breadcrumbs
-                ':data-url'() {
-                    const url = this.base + this.value;
-                    root.dispatchEvent(new CustomEvent('slug-url', { detail: url, bubbles: true }));
+            // the URL as shown, for the links to the page outside the field, e.g. in the breadcrumbs
+            ':data-url'() {
+                const url = this.base + this.value;
+                root.dispatchEvent(new CustomEvent('slug-url', { detail: url, bubbles: true }));
 
-                    return url;
-                },
-                // the URL of the chosen parent, before saving
-                '@change.document'(e) {
-                    if (root.dataset?.parent && e.target.name === root.dataset.parent && e.target.form === root.closest('form')) {
-                        this.base = this.bases[e.target.value] ?? this.base;
-                    }
-                },
+                return url;
             },
-            input: {
-                'u-ref': 'slug',
-                ':value'() {
-                    return this.value;
-                },
-                '@focus'() {
-                    this.before = { value: this.value, synced: this.synced };
-                },
-                '@input'(e) {
-                    const el = e.target;
-                    if (!e.isTrusted) {
-                        this.value = el.value;
+            // the URL of the chosen parent, before saving
+            '@change.document'(e) {
+                if (this.parent && e.target.name === this.parent && e.target.form === root.closest('form')) {
+                    this.base = this.bases[e.target.value] ?? this.base;
+                }
+            },
+        },
+        input: {
+            'u-ref': 'slug',
+            ':value'() {
+                return this.value;
+            },
+            '@focus'() {
+                this.before = { value: this.value, synced: this.synced };
+            },
+            '@input.delay.250ms'(e) {
+                const el = e.target;
+                if (!e.isTrusted) {
+                    this.value = el.value;
 
-                        // a value from the server is the saved one: the form watched by $dirty stays clean
-                        if (el.form?.dataset.initialState !== undefined) {
-                            el.form.dataset.initialState = JSON.stringify(Object.fromEntries(new FormData(el.form).entries()));
-                        }
+                    // a value from the server is the saved one: the form watched by $dirty stays clean
+                    this.$dirty.remove(el.form);
+                    return;
+                }
+
+                // the field is left before the delay ended: blur takes the text
+                if (document.activeElement !== el) {
+                    return;
+                }
+
+                const text  = el.value;
+                this.value  = text;
+                this.synced = false;
+                this.generate(text).then((slug) => {
+                    // the text changed while the request went: the next input sends it again
+                    if (el.value !== text) {
                         return;
                     }
 
-                    const next = slugify(el.value, false);
-                    if (next !== el.value) {
-                        const caret = Math.max(0, el.selectionStart - (el.value.length - next.length));
-                        el.value    = next;
-                        el.setSelectionRange(caret, caret);
+                    // a separator being typed at the end stays until the field is left
+                    const next = slug && document.activeElement === el && /[^\p{L}\p{M}\p{N}_]$/u.test(text) ? `${slug}-` : slug;
+                    if (next !== text) {
+                        const tail = text.length - el.selectionEnd;
+                        el.value   = next;
+                        el.setSelectionRange(Math.max(0, next.length - tail), Math.max(0, next.length - tail));
                     }
-                    this.value  = next;
+                    this.value = next;
+                });
+            },
+            '@keydown.enter.prevent'() {
+                this.$el.blur();
+            },
+            '@keydown.escape'() {
+                if (this.before) {
+                    this.$el.value = this.before.value;
+                    this.value     = this.before.value;
+                    this.synced    = this.before.synced;
+                    this.touch();
+                }
+                this.$el.blur();
+            },
+            '@blur'() {
+                // the field holds the text typed during the delay of `input`
+                const typed = this.$el.value;
+                if (typed !== this.value) {
+                    this.value  = typed;
                     this.synced = false;
-                },
-                '@keydown.enter.prevent'() {
-                    this.$el.blur();
-                },
-                '@keydown.escape'() {
-                    if (this.before) {
-                        this.value  = this.before.value;
-                        this.synced = this.before.synced;
-                        this.touch();
-                    }
-                    this.$el.blur();
-                },
-                '@blur'() {
-                    const slug  = slugify(this.value);
-                    const typed = this.value;
+                }
+                this.before = null;
+                this.generate(typed).then((slug) => {
                     this.synced = this.synced || slug === '';
-                    this.value  = slug || this.generated();
-                    this.before = null;
+                    if (slug === '') {
+                        return this.follow();
+                    }
+                    this.value = slug;
+                }).then(() => {
                     if (this.value !== typed) {
                         this.touch();
                     }
-                },
+                });
             },
-            copy: {
-                '@click': '$copy(base + value)',
-            },
-        };
-    });
+        },
+    }));
 
     /**
      * Tabs, synced with the page URL: `u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
@@ -1248,62 +1244,72 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
+     * Saved state of the forms watched by `$dirty`, by form; null until the first snapshot.
+     * Kept here, not in the factory: it re-runs on every expression evaluation page-wide.
+     *
+     * @type {Map<HTMLFormElement, string|null>}
+     */
+    const dirtyStates = new Map();
+
+    // Shakes the page instead of following the link, while any watched form is still dirty.
+    window.addEventListener('click', e => {
+        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]')) {
+            e.preventDefault();
+
+            document.body.classList.add('is-shake');
+            setTimeout(() => document.body.classList.remove('is-shake'), 500);
+        }
+    }, true);
+
+    /**
      * `$dirty` — warns about unsaved form changes. Call `$dirty.watch($el)` once per form (e.g.
      * `<form @load="$dirty.watch($el)">`) and `$dirty.remove($el)` after a successful save.
      *
      * @since 1.0
      */
     Youla.variable('dirty', () => {
-        // This factory re-runs on every expression evaluation page-wide, so state lives on form/body attributes, not JS variables.
         const serialize = form => JSON.stringify(Object.fromEntries(new FormData(form).entries()));
 
         const sync = () => {
-            const isDirty = [...document.querySelectorAll('form[data-dirty-watch]')]
-                .some(form => form.dataset.initialState !== serialize(form));
+            let isDirty = false;
+            dirtyStates.forEach((state, form) => {
+                if (!form.isConnected) {
+                    dirtyStates.delete(form);
+                } else if (state !== null && state !== serialize(form)) {
+                    isDirty = true;
+                }
+            });
 
             document.body.classList.toggle('is-unsaved', isDirty);
         };
 
         return {
             watch(form) {
-                if (!(form instanceof HTMLFormElement) || form.dataset.dirtyWatch !== undefined) {
+                if (!(form instanceof HTMLFormElement) || dirtyStates.has(form)) {
                     return;
                 }
-                form.dataset.dirtyWatch = '';
-
-                // Only ever bound once, page-wide, regardless of how many forms call watch().
-                if (document.body.dataset.dirtyBound === undefined) {
-                    document.body.dataset.dirtyBound = '';
-
-                    // Shakes the page instead of following the link, while any watched form is still dirty.
-                    window.addEventListener('click', e => {
-                        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]')) {
-                            e.preventDefault();
-
-                            document.body.classList.add('is-shake');
-                            setTimeout(() => document.body.classList.remove('is-shake'), 500);
-                        }
-                    }, true);
-                }
+                dirtyStates.set(form, null);
 
                 // Deferred so the form's own reactive hydration settles first, or that fill-in would register as a "dirty" change.
                 setTimeout(() => {
-                    form.dataset.initialState = serialize(form);
+                    dirtyStates.set(form, serialize(form));
 
                     form.addEventListener('input', sync);
                     form.addEventListener('change', sync);
-                    form.addEventListener('reset', () => setTimeout(() => {
-                        form.dataset.initialState = serialize(form);
-                        sync();
-                    }, 0));
+                    form.addEventListener('reset', () => setTimeout(() => this.remove(form), 0));
                 }, 50);
             },
+            /**
+             * Take the current values of a watched form as the saved ones.
+             *
+             * @param {HTMLFormElement} form
+             */
             remove(form) {
-                if (!(form instanceof HTMLFormElement)) {
+                if (!dirtyStates.has(form)) {
                     return;
                 }
 
-                form.dataset.initialState = serialize(form);
+                dirtyStates.set(form, serialize(form));
                 sync();
             },
         };

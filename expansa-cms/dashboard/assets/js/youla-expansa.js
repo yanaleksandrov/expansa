@@ -883,127 +883,132 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
-    Youla.data('slug', root => {
-        const rules = JSON.parse(root.dataset?.transliteration || 'null');
-        const own = Object.keys(rules?.custom || {}).sort((a, b) => b.length - a.length).map(from => from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-        const pattern = own ? new RegExp(own, 'g') : null;
-        const transliterate = text => {
-            if (pattern) {
-                text = text.replace(pattern, from => rules.custom[from]);
-            }
-            if (!rules?.initials || !/[^\x00-\x7F]/.test(text)) {
-                return text;
-            }
-            text = text.replace(/[\uAC00-\uD7A3]/g, syllable => {
-                const index = syllable.charCodeAt(0) - 44032;
-                return rules.initials[Math.floor(index / 588)] + rules.vowels[Math.floor(index % 588 / 28)] + rules.finals[index % 28];
+    Youla.data('slug', root => ({
+        value: root.querySelector?.('.slug-line input')?.value || '',
+        base: '',
+        from: '',
+        parent: '',
+        bases: {},
+        synced: false,
+        before: null,
+        source() {
+            return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
+        },
+        generate(text) {
+            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', {
+                text
+            }, null, {
+                clearErrors: false
             });
-            return Array.from(text, char => rules.map[char] ?? char).join('');
-        };
-        const slugify = (text, final = true) => {
-            const slug = transliterate(String(text).replace(/<[^>]*>/g, '').replace(/&[a-z0-9#]+;/gi, '').normalize('NFC').toLowerCase()).replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
-            return final ? slug.replace(/^-+|-+$/g, '') : slug.replace(/^-+/, '');
-        };
-        const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;
-        return {
-            value: root.querySelector?.('.slug-line input')?.value || '',
-            base: root.dataset?.base || '',
-            bases: JSON.parse(root.dataset?.bases || '{}'),
-            source: from?.value || '',
-            synced: root.dataset?.synced === '1',
-            before: null,
-            generated() {
-                return slugify(this.source);
-            },
-            touch() {
-                setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', {
-                    bubbles: true
-                })));
-            },
-            line: {
-                '@load'() {
-                    if (this.synced) {
-                        this.value = this.generated();
-                    }
-                },
-                '@input.document'(e) {
-                    if (from && e.target === from) {
-                        this.source = from.value;
-                        if (this.synced) {
-                            this.value = this.generated();
-                        }
-                    }
-                },
-                ':data-url'() {
-                    const url = this.base + this.value;
-                    root.dispatchEvent(new CustomEvent('slug-url', {
-                        detail: url,
-                        bubbles: true
-                    }));
-                    return url;
-                },
-                '@change.document'(e) {
-                    if (root.dataset?.parent && e.target.name === root.dataset.parent && e.target.form === root.closest('form')) {
-                        this.base = this.bases[e.target.value] ?? this.base;
-                    }
+        },
+        follow() {
+            const text = this.source()?.value || '';
+            return this.generate(text).then(slug => {
+                if (this.synced && document.activeElement !== this.$refs.slug) {
+                    this.value = slug;
+                }
+            });
+        },
+        touch() {
+            setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', {
+                bubbles: true
+            })));
+        },
+        line: {
+            '@load'() {
+                if (this.synced) {
+                    this.follow();
                 }
             },
-            input: {
-                'u-ref': 'slug',
-                ':value'() {
-                    return this.value;
-                },
-                '@focus'() {
-                    this.before = {
-                        value: this.value,
-                        synced: this.synced
-                    };
-                },
-                '@input'(e) {
-                    const el = e.target;
-                    if (!e.isTrusted) {
-                        this.value = el.value;
-                        if (el.form?.dataset.initialState !== undefined) {
-                            el.form.dataset.initialState = JSON.stringify(Object.fromEntries(new FormData(el.form).entries()));
-                        }
+            '@input.document.delay.250ms'(e) {
+                if (this.synced && e.target === this.source()) {
+                    this.follow();
+                }
+            },
+            ':data-url'() {
+                const url = this.base + this.value;
+                root.dispatchEvent(new CustomEvent('slug-url', {
+                    detail: url,
+                    bubbles: true
+                }));
+                return url;
+            },
+            '@change.document'(e) {
+                if (this.parent && e.target.name === this.parent && e.target.form === root.closest('form')) {
+                    this.base = this.bases[e.target.value] ?? this.base;
+                }
+            }
+        },
+        input: {
+            'u-ref': 'slug',
+            ':value'() {
+                return this.value;
+            },
+            '@focus'() {
+                this.before = {
+                    value: this.value,
+                    synced: this.synced
+                };
+            },
+            '@input.delay.250ms'(e) {
+                const el = e.target;
+                if (!e.isTrusted) {
+                    this.value = el.value;
+                    this.$dirty.remove(el.form);
+                    return;
+                }
+                if (document.activeElement !== el) {
+                    return;
+                }
+                const text = el.value;
+                this.value = text;
+                this.synced = false;
+                this.generate(text).then(slug => {
+                    if (el.value !== text) {
                         return;
                     }
-                    const next = slugify(el.value, false);
-                    if (next !== el.value) {
-                        const caret = Math.max(0, el.selectionStart - (el.value.length - next.length));
+                    const next = slug && document.activeElement === el && /[^\p{L}\p{M}\p{N}_]$/u.test(text) ? `${slug}-` : slug;
+                    if (next !== text) {
+                        const tail = text.length - el.selectionEnd;
                         el.value = next;
-                        el.setSelectionRange(caret, caret);
+                        el.setSelectionRange(Math.max(0, next.length - tail), Math.max(0, next.length - tail));
                     }
                     this.value = next;
+                });
+            },
+            '@keydown.enter.prevent'() {
+                this.$el.blur();
+            },
+            '@keydown.escape'() {
+                if (this.before) {
+                    this.$el.value = this.before.value;
+                    this.value = this.before.value;
+                    this.synced = this.before.synced;
+                    this.touch();
+                }
+                this.$el.blur();
+            },
+            '@blur'() {
+                const typed = this.$el.value;
+                if (typed !== this.value) {
+                    this.value = typed;
                     this.synced = false;
-                },
-                '@keydown.enter.prevent'() {
-                    this.$el.blur();
-                },
-                '@keydown.escape'() {
-                    if (this.before) {
-                        this.value = this.before.value;
-                        this.synced = this.before.synced;
-                        this.touch();
-                    }
-                    this.$el.blur();
-                },
-                '@blur'() {
-                    const slug = slugify(this.value);
-                    const typed = this.value;
+                }
+                this.before = null;
+                this.generate(typed).then(slug => {
                     this.synced = this.synced || slug === '';
-                    this.value = slug || this.generated();
-                    this.before = null;
+                    if (slug === '') {
+                        return this.follow();
+                    }
+                    this.value = slug;
+                }).then(() => {
                     if (this.value !== typed) {
                         this.touch();
                     }
-                }
-            },
-            copy: {
-                '@click': '$copy(base + value)'
+                });
             }
-        };
-    });
+        }
+    }));
     Youla.data('tab', () => ({
         tab: null,
         tabButton(id) {
@@ -1031,43 +1036,45 @@ document.addEventListener('youla:init', () => {
             };
         }
     }));
+    const dirtyStates = new Map;
+    window.addEventListener('click', e => {
+        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]')) {
+            e.preventDefault();
+            document.body.classList.add('is-shake');
+            setTimeout(() => document.body.classList.remove('is-shake'), 500);
+        }
+    }, true);
     Youla.variable('dirty', () => {
         const serialize = form => JSON.stringify(Object.fromEntries(new FormData(form).entries()));
         const sync = () => {
-            const isDirty = [ ...document.querySelectorAll('form[data-dirty-watch]') ].some(form => form.dataset.initialState !== serialize(form));
+            let isDirty = false;
+            dirtyStates.forEach((state, form) => {
+                if (!form.isConnected) {
+                    dirtyStates.delete(form);
+                } else if (state !== null && state !== serialize(form)) {
+                    isDirty = true;
+                }
+            });
             document.body.classList.toggle('is-unsaved', isDirty);
         };
         return {
             watch(form) {
-                if (!(form instanceof HTMLFormElement) || form.dataset.dirtyWatch !== undefined) {
+                if (!(form instanceof HTMLFormElement) || dirtyStates.has(form)) {
                     return;
                 }
-                form.dataset.dirtyWatch = '';
-                if (document.body.dataset.dirtyBound === undefined) {
-                    document.body.dataset.dirtyBound = '';
-                    window.addEventListener('click', e => {
-                        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]')) {
-                            e.preventDefault();
-                            document.body.classList.add('is-shake');
-                            setTimeout(() => document.body.classList.remove('is-shake'), 500);
-                        }
-                    }, true);
-                }
+                dirtyStates.set(form, null);
                 setTimeout(() => {
-                    form.dataset.initialState = serialize(form);
+                    dirtyStates.set(form, serialize(form));
                     form.addEventListener('input', sync);
                     form.addEventListener('change', sync);
-                    form.addEventListener('reset', () => setTimeout(() => {
-                        form.dataset.initialState = serialize(form);
-                        sync();
-                    }, 0));
+                    form.addEventListener('reset', () => setTimeout(() => this.remove(form), 0));
                 }, 50);
             },
             remove(form) {
-                if (!(form instanceof HTMLFormElement)) {
+                if (!dirtyStates.has(form)) {
                     return;
                 }
-                form.dataset.initialState = serialize(form);
+                dirtyStates.set(form, serialize(form));
                 sync();
             }
         };

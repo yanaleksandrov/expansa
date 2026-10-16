@@ -3515,6 +3515,11 @@ body.is-unsaved .expansa-search-btn {
 .post-editor .post-editor-slug {
   margin-top: -1.5rem;
 }
+@media (max-width: 1024px) {
+  .post-editor .post-editor-slug {
+    margin-top: -1rem;
+  }
+}
 .post-editor .post-editor-eyebrow {
   margin: 0;
   font-size: 0.6875rem;

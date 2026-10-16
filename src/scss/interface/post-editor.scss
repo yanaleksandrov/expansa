@@ -123,6 +123,10 @@
   // the URL right under the title, as one block with it
   .post-editor-slug {
     margin-top: -1.5rem;
+
+    @media (max-width: 1024px) {
+      margin-top: -1rem;
+    }
   }
 
   .post-editor-eyebrow {

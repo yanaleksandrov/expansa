@@ -1683,7 +1683,7 @@ option[data-html*="<i "]) {
 }
 .field--plain .field-item:not(:has([type=checkbox], [type=radio])) {
   padding-inline: 0;
-  border-width: 0 0 1px;
+  border-width: 0;
   border-radius: 0;
   corner-shape: initial;
   transition: border-color 0.2s;

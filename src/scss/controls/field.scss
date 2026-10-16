@@ -637,7 +637,7 @@ $danger-soft: rgb(255 224 224);
   // plain is text in line with the label: no box, a bottom line for the focus and the error
   &--plain &-item:not(:has([type="checkbox"], [type="radio"])) {
     padding-inline: 0;
-    border-width: 0 0 1px;
+    border-width: 0;
     border-radius: 0;
     corner-shape: initial;
     transition: border-color 0.2s;
