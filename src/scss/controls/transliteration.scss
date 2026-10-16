@@ -1,0 +1,23 @@
+// letters of a script, each with its Latin value
+.transliteration {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+
+  .field-item {
+    gap: 1em;
+  }
+
+  input {
+    min-width: 0;
+    width: 100%;
+  }
+
+  &-letter {
+    font-size: 1rem;
+    font-weight: 500;
+    flex-shrink: 0;
+    min-width: 1.75rem;
+    text-align: center;
+    color: var(--expansa-text);
+  }
+}

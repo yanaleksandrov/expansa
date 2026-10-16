@@ -884,8 +884,24 @@ document.addEventListener('youla:init', () => {
         }
     }));
     Youla.data('slug', root => {
+        const rules = JSON.parse(root.dataset?.transliteration || 'null');
+        const own = Object.keys(rules?.custom || {}).sort((a, b) => b.length - a.length).map(from => from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+        const pattern = own ? new RegExp(own, 'g') : null;
+        const transliterate = text => {
+            if (pattern) {
+                text = text.replace(pattern, from => rules.custom[from]);
+            }
+            if (!rules?.initials || !/[^\x00-\x7F]/.test(text)) {
+                return text;
+            }
+            text = text.replace(/[\uAC00-\uD7A3]/g, syllable => {
+                const index = syllable.charCodeAt(0) - 44032;
+                return rules.initials[Math.floor(index / 588)] + rules.vowels[Math.floor(index % 588 / 28)] + rules.finals[index % 28];
+            });
+            return Array.from(text, char => rules.map[char] ?? char).join('');
+        };
         const slugify = (text, final = true) => {
-            const slug = String(text).replace(/<[^>]*>/g, '').replace(/&[a-z0-9#]+;/gi, '').normalize('NFC').toLowerCase().replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
+            const slug = transliterate(String(text).replace(/<[^>]*>/g, '').replace(/&[a-z0-9#]+;/gi, '').normalize('NFC').toLowerCase()).replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
             return final ? slug.replace(/^-+|-+$/g, '') : slug.replace(/^-+/, '');
         };
         const from = root.dataset?.from ? root.closest('form')?.elements.namedItem(root.dataset.from) : null;

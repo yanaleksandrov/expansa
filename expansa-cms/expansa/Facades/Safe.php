@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Expansa\Facades;
 
+use Closure;
 use Expansa\Patterns\Facade;
 use Expansa\Security\Sanitizer;
 
 /**
  * Static access to the sanitizer: `Safe::html($value)`, `Safe::data($fields, $rules)->apply()`.
  *
+ * @method static void      configure(?Closure $transliterate = null)
  * @method static Sanitizer data(array $fields, array $rules, array $extensions = [])
  * @method static Sanitizer extend(string $rule, callable $callback)
  * @method static mixed     apply(string $return = '')

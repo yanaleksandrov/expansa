@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Expansa\Security;
 
+use Closure;
 use DateTime;
 use Expansa\Codecs\Json;
 use InvalidArgumentException;
@@ -31,6 +32,13 @@ final class Sanitizer
     ];
 
     /**
+     * Replaces the letters of a lowercased slug, e.g. with Latin ones.
+     *
+     * @var null|Closure(string): string
+     */
+    private static ?Closure $transliterate = null;
+
+    /**
      * Sanitized data.
      *
      * @var array
@@ -54,6 +62,17 @@ final class Sanitizer
          */
         protected array $extensions = [],
     ) {}
+
+    /**
+     * Set the transliteration of slugs; without it slugs keep the letters of any script.
+     *
+     * @param Closure|null $transliterate Gets a lowercased slug, returns it with the letters replaced.
+     * @return void
+     */
+    public static function configure(?Closure $transliterate = null): void
+    {
+        self::$transliterate = $transliterate;
+    }
 
     /**
      * Setup sanitizer rules via `data` method.
@@ -913,6 +932,9 @@ final class Sanitizer
         }
 
         $value = mb_strtolower($value, 'UTF-8');
+        if (self::$transliterate !== null) {
+            $value = (self::$transliterate)($value);
+        }
 
         // letters, marks and digits of any script stay, everything else separates the words
         $value = preg_replace('/[^\p{L}\p{M}\p{N}_]+/u', '-', $value);

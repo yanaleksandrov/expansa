@@ -332,6 +332,11 @@ Lifecycle::phase('configure', true, function () {
         translate: fn (string $message, string ...$args) => t($message, ...$args)
     );
 
+    // slugs in Latin letters by the tables of the Permalinks settings
+    Expansa\Security\Sanitizer::configure(
+        transliterate: defined('EX_DB') ? fn (string $slug) => App\Support\Transliteration::apply($slug) : null
+    );
+
     // translations lookup priority, the rest of the installation (app/, compiled views) uses the dashboard ones;
     // the languages with their plural rules, extended by the "languages" hook; the language of the user's profile
     I18n::configure(

@@ -839,6 +839,26 @@ select[multiple] + .ss-main {
   background-color: var(--expansa-bg);
 }
 
+.transliteration {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+}
+.transliteration .field-item {
+  gap: 1em;
+}
+.transliteration input {
+  min-width: 0;
+  width: 100%;
+}
+.transliteration-letter {
+  font-size: 1rem;
+  font-weight: 500;
+  flex-shrink: 0;
+  min-width: 1.75rem;
+  text-align: center;
+  color: var(--expansa-text);
+}
+
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
   -webkit-transition: background-color 5000s ease-in-out;
   transition: background-color 5000s ease-in-out;

@@ -328,6 +328,15 @@ final class Menus
                     'position'     => 40,
                     'parent_id'    => 'settings',
                 ],
+                [
+                    'id'           => 'permalinks',
+                    'url'          => 'permalinks',
+                    'title'        => t('Permalinks'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 50,
+                    'parent_id'    => 'settings',
+                ],
             ]
         ));
     }

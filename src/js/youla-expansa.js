@@ -1060,19 +1060,48 @@ document.addEventListener('youla:init', ()=> {
 
     /**
      * Slug of an entry, the `slug` form template: follows the source field named by `data-from` while
-     * `synced`, normalized as Sanitizer::slug() does while typed. Enter keeps it without submitting,
-     * Escape brings back the value it had, an empty one is made from the source again. Values set
-     * by the server come with an untrusted `input` event, so they do not stop the following.
+     * `synced`, normalized as Sanitizer::slug() does while typed, in Latin letters by `data-transliteration`.
+     * Enter keeps it without submitting, Escape brings back the value it had, an empty one is made from
+     * the source again. Values set by the server come with an untrusted `input` event, so they do not
+     * stop the following.
      *
      * @since 2027.1
      */
     Youla.data('slug', (root) => {
+        const rules = JSON.parse(root.dataset?.transliteration || 'null');
+
+        // own rules of the site as one pattern, the longer text first as strtr() takes it
+        const own = Object.keys(rules?.custom || {})
+            .sort((a, b) => b.length - a.length)
+            .map((from) => from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+            .join('|');
+        const pattern = own ? new RegExp(own, 'g') : null;
+
+        // Latin letters of a lowercased slug, as App\Support\Transliteration::apply() makes them
+        const transliterate = (text) => {
+            if (pattern) {
+                text = text.replace(pattern, (from) => rules.custom[from]);
+            }
+
+            // the Hangul tables come only with the letters of the scripts
+            if (!rules?.initials || !/[^\x00-\x7F]/.test(text)) {
+                return text;
+            }
+
+            text = text.replace(/[\uAC00-\uD7A3]/g, (syllable) => {
+                const index = syllable.charCodeAt(0) - 0xAC00;
+
+                return rules.initials[Math.floor(index / 588)] + rules.vowels[Math.floor(index % 588 / 28)] + rules.finals[index % 28];
+            });
+
+            return Array.from(text, (char) => rules.map[char] ?? char).join('');
+        };
         const slugify = (text, final = true) => {
-            const slug = String(text)
+            const slug = transliterate(String(text)
                 .replace(/<[^>]*>/g, '')
                 .replace(/&[a-z0-9#]+;/gi, '')
                 .normalize('NFC')
-                .toLowerCase()
+                .toLowerCase())
                 .replace(/[^\p{L}\p{M}\p{N}_]+/gu, '-');
 
             // a hyphen being typed at the end stays until the field is left
