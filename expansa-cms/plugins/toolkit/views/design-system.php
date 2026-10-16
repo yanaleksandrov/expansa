@@ -95,6 +95,39 @@ foreach (['xs', 'sm', '', 'lg', 'xl'] as $size) {
     ];
 }
 
+// a single and a multiple select of each size
+$selectSizes = [];
+foreach (['xs', 'sm', '', 'lg', 'xl'] as $size) {
+    $class = $size ? "field field--$size" : 'field';
+
+    $selectSizes[] = [
+        'caption' => $class,
+        'fields'  => [
+            [
+                'type'    => 'select',
+                'name'    => 'ds_select_size_' . ($size ?: 'md'),
+                'label'   => $size ?: 'md',
+                'class'   => $class,
+                'options' => [
+                    'one' => t('One'),
+                    'two' => t('Two'),
+                ],
+            ],
+            [
+                'type'       => 'select',
+                'name'       => 'ds_select_size_multiple_' . ($size ?: 'md'),
+                'class'      => $class,
+                'attributes' => ['multiple' => true, 'value' => 'html'],
+                'options'    => [
+                    'html' => 'HTML',
+                    'css'  => 'CSS',
+                    'php'  => 'PHP',
+                ],
+            ],
+        ],
+    ];
+}
+
 $states = ['Alabama', 'Alaska', 'Arizona', 'California', 'Colorado', 'Florida', 'Georgia', 'Texas'];
 $states = array_combine(array_map('strtolower', $states), $states);
 
@@ -105,18 +138,6 @@ $sections = [
         'title'       => t('Basic states'),
         'description' => t('Text inputs: value, placeholder, password, disabled, readonly and required.'),
         'examples'    => [
-            [
-                'caption' => 'field--plain + readonly',
-                'fields'  => [
-                    [
-                        'type'       => 'text',
-                        'name'       => 'ds_static',
-                        'label'      => t('Static'),
-                        'class'      => 'field field--plain',
-                        'attributes' => ['value' => 'Input value', 'readonly' => true],
-                    ],
-                ],
-            ],
             [
                 'caption' => 'value',
                 'fields'  => [
@@ -564,6 +585,12 @@ $sections = [
                 ],
             ],
         ],
+    ],
+    [
+        'id'          => 'select-sizes',
+        'title'       => t('Select sizes'),
+        'description' => t('A single and a multiple select with the size modifiers of the field.'),
+        'examples'    => $selectSizes,
     ],
     [
         'id'          => 'pickers',

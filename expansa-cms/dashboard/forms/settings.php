@@ -402,13 +402,13 @@ return Expansa\Builders\Form::enqueue(
 									'checked'     => Option::get( 'comments.registration' ),
 								],
 								'comments[close_comments_for_old_posts]' => [
-									'content'     => t( 'Automatically close comments on posts older than %s days', sprintf( '<label class="field--xs field--raised"><samp class="field-item"><input type="number" name="comments[close_comments_days_old]" value="%d" min="1"></samp></label>', max( 1, (int) Option::get( 'comments.close_comments_days_old', 14 ) ) ) ),
+									'content'     => t( 'Automatically close comments on posts older than %s days', sprintf( '<span class="field--xs field--raised"><samp class="field-item"><input type="number" name="comments[close_comments_days_old]" value="%d" min="1"></samp></span>', max( 1, (int) Option::get( 'comments.close_comments_days_old', 14 ) ) ) ),
 									'icon'        => 'ph ph-hourglass-medium',
 									'description' => '',
 									'checked'     => Option::get( 'comments.close_comments_for_old_posts' ),
 								],
 								'comments[thread_comments]' => [
-									'content'     => t( 'Enable threaded (nested) comments %s levels deep', sprintf( '<label class="field--xs field--raised"><samp class="field-item"><input type="number" name="comments[thread_comments_depth]" value="%d" min="2" max="10"></samp></label>', max( 2, min( 10, (int) Option::get( 'comments.thread_comments_depth', 5 ) ) ) ) ),
+									'content'     => t( 'Enable threaded (nested) comments %s levels deep', sprintf( '<span class="field--xs field--raised"><samp class="field-item"><input type="number" name="comments[thread_comments_depth]" value="%d" min="2" max="10"></samp></span>', max( 2, min( 10, (int) Option::get( 'comments.thread_comments_depth', 5 ) ) ) ) ),
 									'icon'        => 'ph ph-stack',
 									'description' => t( 'Replies stop at the last level: its comments have no Reply.' ),
 									'checked'     => Option::get( 'comments.thread_comments', true ),

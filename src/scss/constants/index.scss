@@ -9,9 +9,9 @@
 // heights of buttons and fields by size
 $height-xs: 26px;
 $height-sm: 28px;
-$height-md: 32px;
-$height-lg: 34px;
-$height-xl: 40px;
+$height-md: 30px;
+$height-lg: 32px;
+$height-xl: 34px;
 
 // font sizes in px
 $sizes: (
@@ -33,7 +33,7 @@ $sizes: (
 	),
 	'xs': (
 		height: $height-xs,
-		font: 11,
+		font: 11.5,
 	),
 );
 
