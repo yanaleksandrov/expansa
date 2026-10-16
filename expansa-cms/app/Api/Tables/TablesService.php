@@ -13,7 +13,7 @@ final class TablesService
     /**
      * Render the rows of a table of the `edit` page filtered by the request.
      *
-     * @param Request  $request  `table` and `view` as on the page, `filter` items with `field`, `operator` and `values`.
+     * @param Request  $request  The query of the page: `table`, `view`, `status`, `s`; `filter` items with `field`, `operator` and `values`.
      * @param Response $response
      * @return Response The rows in place of the current ones.
      */

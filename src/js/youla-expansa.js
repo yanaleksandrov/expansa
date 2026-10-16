@@ -704,12 +704,14 @@ document.addEventListener('youla:init', ()=> {
                     : row.values.map(value => options[value] ?? value).join(', ');
             },
             applyFilters() {
-                const url     = new URL(window.location.href);
-                const payload = { table: url.searchParams.get('table') || '', view: url.searchParams.get('view') || '' };
+                const url = new URL(window.location.href);
 
                 [ ...url.searchParams.keys() ]
                     .filter(key => key.startsWith('filter['))
                     .forEach(key => url.searchParams.delete(key));
+
+                // the table is built by the API from the same query as the page: the part, the search and the order
+                const payload = Object.fromEntries(url.searchParams);
 
                 this.activeFilters().forEach((row, i) => {
                     url.searchParams.set(`filter[${i}][field]`, row.field);

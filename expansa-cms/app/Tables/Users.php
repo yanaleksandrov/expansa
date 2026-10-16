@@ -8,12 +8,30 @@ use App\Models\User;
 use Expansa\Builders\Table;
 use Expansa\Facades\Access;
 use Expansa\Facades\Db;
+use Expansa\Facades\Role;
 use PDO;
 
 final class Users extends Table
 {
+    public function __construct(
+
+        /**
+         * Status the users are filtered by, empty for all.
+         */
+        public private(set) string $status = '' {
+            set => isset(self::statuses()[$value]) ? $value : '';
+        },
+
+        /**
+         * Text searched in the login, the shown name and the email.
+         */
+        public readonly string $search = '',
+    ) {
+        parent::__construct();
+    }
+
     /**
-     * Users with the time of their last sign-in, the first 500 by ID.
+     * Users by the filter with the time of their last sign-in, the first 500 by ID.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -23,14 +41,27 @@ final class Users extends Table
             ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
 
         $columns = ['id [Int]', 'login', 'showname', 'email', 'status', 'roles'];
-        $users   = Db::select('users', $columns, ['ORDER' => ['id' => 'ASC'], 'LIMIT' => 500]) ?? [];
+        $where   = $this->status !== '' ? ['status' => $this->status] : [];
+        if ($this->search !== '') {
+            $where['OR'] = [
+                'login[~]'    => $this->search,
+                'showname[~]' => $this->search,
+                'email[~]'    => $this->search,
+            ];
+        }
+
+        $users = Db::select('users', $columns, [
+            ...$where,
+            'ORDER' => ['id' => 'ASC'],
+            'LIMIT' => 500,
+        ]) ?? [];
 
         return array_map(fn (array $user) => [
             'id'     => $user['id'],
             'name'   => $user['showname'] ?: $user['login'],
             'login'  => $user['login'],
             'email'  => $user['email'],
-            'status' => $user['status'] === User::STATUS_ACTIVE ? t('Active') : t('Disabled'),
+            'status' => self::statuses()[$user['status']] ?? $user['status'],
             'role'   => ((array) json_decode((string) $user['roles'], true))[0] ?? '',
             'visit'  => isset($visits[$user['id']]) ? date('Y-m-d H:i', (int) strtotime($visits[$user['id']])) : t('Never'),
         ], $users);
@@ -69,18 +100,64 @@ final class Users extends Table
     public function headData(): array
     {
         $canCreate = Access::allows(User::current(), 'users_edit');
+        $counts    = Db::query('SELECT status, COUNT(*) FROM <users> GROUP BY status')
+            ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
+        $statuses  = ['' => t('All') . ' (' . array_sum($counts) . ')'];
+
+        foreach (self::statuses() as $key => $label) {
+            $statuses[$key] = $label . ' (' . (int) ($counts[$key] ?? 0) . ')';
+        }
 
         return [
-            'title'   => t('Users'),
-            'actions' => 'posts-actions',
-            'filter'  => true,
-            'create'  => $canCreate ? t('Add New User') : '',
-            'link'    => $canCreate ? url('dashboard/profile?new') : '',
+            'title'    => t('Users'),
+            'actions'  => 'posts-actions',
+            'statuses' => $statuses,
+            'status'   => $this->status,
+            'find'     => t('Search by name, login or email'),
+            'create'   => $canCreate ? t('Add New User') : '',
+            'link'     => $canCreate ? url('dashboard/profile?new') : '',
+        ];
+    }
+
+    public function filters(): array
+    {
+        return [
+            'role' => [
+                'label'   => t('Role'),
+                'icon'    => 'ph ph-person-simple-run',
+                'options' => array_map(static fn (array $role) => $role['name'], Role::all()),
+            ],
+        ];
+    }
+
+    /**
+     * Get the labels of the user statuses by value.
+     *
+     * @return array<string, string>
+     */
+    private static function statuses(): array
+    {
+        return [
+            User::STATUS_ACTIVE   => t('Active'),
+            User::STATUS_INACTIVE => t('Disabled'),
         ];
     }
 
     public function notFoundData(): array
     {
+        if ($this->status !== '' || $this->search !== '') {
+            return [
+                'title'       => t('No users found'),
+                'description' => t('Nothing matches the filter.'),
+                'buttons'     => [
+                    [
+                        'label' => t('Show All Users'),
+                        'url'   => url('dashboard/edit?table=users'),
+                    ],
+                ],
+            ];
+        }
+
         $create = Access::allows(User::current(), 'users_edit')
             ? [
                 [

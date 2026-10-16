@@ -116,10 +116,30 @@ final class Comments extends Table
 
     public function headData(): array
     {
+        $counts   = $this->counts();
+        $statuses = ['' => t('All') . ' (' . array_sum($counts) . ')'];
+
+        foreach (Comment::statuses() as $key => $label) {
+            $statuses[$key] = $label . ' (' . ($counts[$key] ?? 0) . ')';
+        }
+
         return [
-            'title'   => t('Comments'),
-            'actions' => 'comments-actions',
-            'content' => form('comments-filter'),
+            'title'    => t('Comments'),
+            'actions'  => 'comments-actions',
+            'statuses' => $statuses,
+            'status'   => $this->status,
+            'find'     => t('Search comments'),
+        ];
+    }
+
+    public function filters(): array
+    {
+        return [
+            'author_id' => [
+                'label'   => t('Author'),
+                'icon'    => 'ph ph-user',
+                'options' => User::options(),
+            ],
         ];
     }
 
@@ -149,7 +169,7 @@ final class Comments extends Table
      *
      * @return array<string, int>
      */
-    public static function counts(): array
+    private function counts(): array
     {
         $counts = Db::query('SELECT status, COUNT(*) FROM <comments> WHERE deleted_at IS NULL GROUP BY status')
             ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];

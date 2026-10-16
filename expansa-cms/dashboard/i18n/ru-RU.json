@@ -1203,7 +1203,7 @@
     "Without HTTPS, passwords and cookies travel unencrypted. Install a certificate.": "Без HTTPS пароли и cookie передаются в незашифрованном виде. Установите сертификат.",
     "Without SMTP, mail goes through PHP mail() and often lands in spam. Set it on the Mail tab of the settings.": "Без SMTP почта отправляется через PHP mail() и часто попадает в спам. Настройте SMTP на вкладке «Почта» в настройках.",
     "Woo-hoo, Expansa has been successfully installed.": "Ура, Expansa успешно установлена",
-    "Workspace": "Рабочее пространство",
+    "Workspace": "Рабочая среда",
     "Writable": "Доступно для записи",
     "Writable: %s": "Доступны для записи: %s",
     "Write an answer to the questions.": "Напишите ответ на вопросы.",

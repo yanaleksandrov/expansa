@@ -119,67 +119,35 @@ final class Posts extends Table
 
     public function headData(): array
     {
-        $head = [
-            'title'   => $this->type->labelNamePlural,
-            'actions' => 'post-bulk',
-        ];
-        $counts = $this->counts();
-        $views  = [
-            [
-                'title'  => t('All [:count]', array_sum($counts)),
-                'query'  => ['view' => null, 'status' => null],
-                'active' => ! $this->isTrash && $this->status === '',
-            ],
-        ];
+        $counts   = $this->counts();
+        $empty    = '';
+        $statuses = ['' => t('All') . ' (' . array_sum($counts) . ')'];
 
         foreach (Status::getStatuses() as $key => $label) {
-            if (isset($counts[$key]) || (! $this->isTrash && $this->status === $key)) {
-                $count = ($counts[$key] ?? 0);
-                $query = ['view' => null, 'status' => $key];
-
-                $views[] = [
-                    'link'   => http_build_query([...$_GET, ...$query]),
-                    'count'  => $count,
-                    'title'  => "$label [$count]",
-                    'query'  => $query,
-                    'active' => ! $this->isTrash && $this->status === $key,
-                ];
+            if (isset($counts[$key]) || $this->status === $key) {
+                $statuses[$key] = $label . ' (' . ($counts[$key] ?? 0) . ')';
             }
         }
 
-        if (! $this->type->canTrash) {
-            return [...$head, 'views' => $views];
+        if ($this->type->canTrash) {
+            $trash = (int) Db::count($this->type->table, ['deleted_at[!]' => null]);
+            if ($trash > 0 || $this->isTrash) {
+                $statuses['trash'] = t('Trash') . " ($trash)";
+            }
+
+            if ($trash > 0 && $this->isTrash) {
+                $empty = sprintf("confirm(texts.emptyTrash) && \$ajax.post('post/empty-trash', %s)", json_encode(['post-type' => $this->type->key]));
+            }
         }
 
-        $trash = (int) Db::count($this->type->table, ['deleted_at[!]' => null]);
-        if ($trash > 0 || $this->isTrash) {
-            $views[] = [
-                'title'  => t('Trash [:count]', $trash),
-                'query'  => ['view' => 'trash', 'status' => null],
-                'active' => $this->isTrash,
-            ];
-        }
-
-        if ($trash > 0 && $this->isTrash) {
-            $views[] = [
-                'title' => t('Empty Trash'),
-                'click' => sprintf("confirm(texts.emptyTrash) && \$ajax.post('post/empty-trash', %s)", json_encode(['post-type' => $this->type->key])),
-            ];
-        }
-
-        return [...$head, 'views' => $views];
-    }
-
-    /**
-     * Get the URL of the list of a post type, or of its trash.
-     *
-     * @param Type $type
-     * @param bool $trash
-     * @return string
-     */
-    public static function url(Type $type, bool $trash = false): string
-    {
-        return url('dashboard/edit?table=' . $type->key . ($trash ? '&view=trash' : ''));
+        return [
+            'title'    => $this->type->labelNamePlural,
+            'actions'  => 'post-bulk',
+            'statuses' => $statuses,
+            'status'   => $this->isTrash ? 'trash' : $this->status,
+            'find'     => t('Search in title and content'),
+            'empty'    => $empty,
+        ];
     }
 
     /**
@@ -196,14 +164,21 @@ final class Posts extends Table
         return array_map(intval(...), $counts);
     }
 
+    /**
+     * Get the URL of the list of a post type, or of its trash.
+     *
+     * @param Type $type
+     * @param bool $trash
+     * @return string
+     */
+    public static function url(Type $type, bool $trash = false): string
+    {
+        return url('dashboard/edit?table=' . $type->key . ($trash ? '&view=trash' : ''));
+    }
+
     public function filters(): array
     {
         return [
-            'post_status' => [
-                'label'   => t('Status'),
-                'icon'    => 'ph ph-circle-dashed',
-                'options' => Status::getStatuses(),
-            ],
             'author_id'   => [
                 'label'   => t('Author'),
                 'icon'    => 'ph ph-user',

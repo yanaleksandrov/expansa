@@ -10,7 +10,7 @@
   --ss-content-height: 300px;
   --ss-spacing-l: 0.5em;
   --ss-spacing-m: 0.4675em;
-  --ss-spacing-s: 0.425em;
+  --ss-spacing-s: 0.4275em;
   --ss-animation-timing: 0.2s;
 }
 
@@ -157,7 +157,7 @@
   .ss-value-text {
     padding: var(--ss-spacing-s) 0 var(--ss-spacing-s) var(--ss-spacing-m);
     font-size: inherit;
-    line-height: 1;
+    line-height: 0.9;
   }
 
   .ss-value-delete {

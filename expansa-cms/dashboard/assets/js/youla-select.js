@@ -1974,6 +1974,11 @@
                 settings.closeOnSelect = false;
             }
             Object.assign(settings, output && typeof output === 'object' ? output : {});
+            const settingsKey = JSON.stringify(settings);
+            if (el._x_slimSelect && el._x_slimSelectSettings === settingsKey) {
+                return;
+            }
+            el._x_slimSelectSettings = settingsKey;
             el._x_slimSelect?.destroy();
             const data = Array.from(el.options).reduce((acc, option) => {
                 const image = option.getAttribute('data-image');
@@ -2012,11 +2017,19 @@
                 return acc;
             }, []);
             try {
-                const slim = el._x_slimSelect = new SlimSelect({
-                    settings,
-                    select: el,
-                    data
-                });
+                const selectedValues = () => [ ...el.selectedOptions ].map(o => o.value).join('\n');
+                const initialValue = selectedValues();
+                el.dispatchEvent = event => event.type === 'change' && selectedValues() === initialValue || EventTarget.prototype.dispatchEvent.call(el, event);
+                let slim;
+                try {
+                    slim = el._x_slimSelect = new SlimSelect({
+                        settings,
+                        select: el,
+                        data
+                    });
+                } finally {
+                    delete el.dispatchEvent;
+                }
                 const form = el.form;
                 if (form) {
                     const onReset = () => setTimeout(() => slim.setSelected([ ...el.selectedOptions ].map(o => o.value), false));

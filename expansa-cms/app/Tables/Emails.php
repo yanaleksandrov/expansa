@@ -51,6 +51,7 @@ final class Emails extends Table
         return [
             'title'   => t('Emails'),
             'actions' => 'posts-actions',
+            'find'    => t('Search emails'),
         ];
     }
 

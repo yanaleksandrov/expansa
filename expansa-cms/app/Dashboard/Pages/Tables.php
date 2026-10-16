@@ -50,7 +50,10 @@ final class Tables
             ),
             'translation' => new Translations($request->getString('project')),
             'emails'      => new Emails(),
-            'users'       => new Users(),
+            'users'       => new Users(
+                $request->getString('status'),
+                $request->getString('s'),
+            ),
             'files'       => new Media(),
             default       => new Posts(
                 Type::get($request->getString('table') ?: 'pages') ?? throw new NotFound(),

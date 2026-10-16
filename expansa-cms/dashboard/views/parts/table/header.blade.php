@@ -10,9 +10,9 @@ use Expansa\Facades\Safe;
 /**
  * Header above a table: the title with a badge, the tools and the bulk actions shown while rows are selected.
  * `create` is the label of the button leading to the `link` URL, e.g. of the page of a new item;
- * `actions` is the ID of the form of the bulk actions; `views` are links to the parts of the list after the title,
- * a list of `['title' => ..., 'query' => [...], 'active' => bool]`, where `query` overrides the current GET parameters
- * and null removes one; an item with `click` is a button instead.
+ * `actions` is the ID of the form of the bulk actions; `statuses` are labels of the parts of the list
+ * for the filter by status, `trash` for the trash, and `status` is the current one; `find` is the placeholder
+ * of the search of the filter; `empty` is the click expression of the button emptying the trash.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/header.blade.php
  *
@@ -20,7 +20,7 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $content, $uploader, $filter, $filters, $actions, $search, $translation, $project, $create, $link, $views] = Safe::data($__data ?? [], [
+[$title, $badge, $content, $uploader, $filter, $filters, $actions, $search, $translation, $project, $create, $link, $statuses, $status, $find, $empty] = Safe::data($__data ?? [], [
     'title'       => 'trim',
     'badge'       => 'trim',
     'content'     => 'trim',
@@ -33,7 +33,10 @@ defined('EX_PATH') || exit;
     'project'     => 'trim',
     'create'      => 'trim',
     'link'        => 'trim',
-    'views'       => 'array',
+    'statuses'    => 'array',
+    'status'      => 'trim',
+    'find'        => 'trim',
+    'empty'       => 'trim',
 ])->values();
 
 $progress = static fn (string $name) => [
@@ -49,20 +52,6 @@ $progress = static fn (string $name) => [
                 <span class="badge">{!! $badge !!}</span>
             @endif
         </h5>
-    @endif
-
-    @if ($views)
-        <div class="table-header-views">
-            @foreach ($views as $part)
-                @if (empty($part['click']))
-                    <a class="{{ empty($part['active']) ? '' : 'is-active' }}" href="?{{ $part['link'] ?? '' }}">
-                        {{ $part['title'] ?? '' }}
-                    </a>
-                @else
-                    <button class="btn btn--xs t-red" type="button" @click="{{ $part['click'] }}">{{ $part['title'] ?? '' }}</button>
-                @endif
-            @endforeach
-        </div>
     @endif
 
     <div class="table-header-group" u-show="!bulk">
@@ -89,8 +78,14 @@ $progress = static fn (string $name) => [
         @endif
 
         @if ($uploader)
-            <button class="btn btn--outline" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
+            <button class="btn btn--outline btn--xs" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
                 <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}
+            </button>
+        @endif
+
+        @if ($empty)
+            <button class="btn btn--outline btn--xs t-red" type="button" @click="{{ $empty }}">
+                <i class="ph ph-trash"></i> {{ t('Empty Trash') }}
             </button>
         @endif
 
@@ -155,8 +150,13 @@ $progress = static fn (string $name) => [
     @endif
 </div>
 
-@if ($filters)
-    <?php echo view('parts/table/filter', ['filters' => $filters]); ?>
+@if ($filters || $statuses || $find)
+    <?php echo view('parts/table/filter', [
+        'filters'  => $filters,
+        'statuses' => $statuses,
+        'status'   => $status,
+        'find'     => $find,
+    ]); ?>
 @endif
 
 {!! $content !!}
