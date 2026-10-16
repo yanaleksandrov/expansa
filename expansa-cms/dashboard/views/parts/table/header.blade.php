@@ -43,12 +43,12 @@ $progress = static fn (string $name) => [
 ?>
 <div class="table-header">
     @if ($title)
-        <h4>
+        <h5>
             {!! $title !!}
             @if ($badge)
                 <span class="badge">{!! $badge !!}</span>
             @endif
-        </h4>
+        </h5>
     @endif
 
     @if ($views)

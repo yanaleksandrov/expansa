@@ -26,7 +26,7 @@ Hook::add('renderDashboardFooter', function () {
 			</span>
 			<div class="image__container">
 				<label for="image-{{ $field->name }}">
-					<span class="avatar avatar--xl" u-bind="picture">
+					<span class="avatar avatar--xxl" u-bind="picture">
 						<span u-bind="initials"></span>
 					</span>
 				</label>

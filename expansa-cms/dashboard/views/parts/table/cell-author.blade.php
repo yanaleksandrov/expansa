@@ -13,20 +13,23 @@
  */
 defined('EX_PATH') || exit;
 
-$name  = is_scalar($value) ? (string) $value : '';
-$color = $item['color'] ?? 'blue';
+$name      = is_scalar($value) ? (string) $value : '';
+$color     = $item['color'] ?? 'blue';
+$initials  = $item['initials'] ?? '';
+$author_id = $item['author_id'] ?? 0;
+$email     = $item['email'] ?? '';
 ?>
 @if ($name !== '')
     <div class="df aic g-2">
-        <span class="avatar avatar--xs bg-{{ $color }}-lt t-{{ $color }}">{{ $item['initials'] ?? '' }}</span>
+        <span class="avatar avatar--rounded avatar--xs bg-{{ $color }}-lt t-{{ $color }}">{{ $initials }}</span>
         <div>
-            @if (! empty($item['author_id']))
-                <a href="{{ url('dashboard/profile?id=' . $item['author_id']) }}" class="fw-500 t-dark">{{ $name }}</a>
+            @if ($author_id)
+                <a href="{{ url("dashboard/profile?id=$author_id") }}" class="fw-500 t-dark">{{ $name }}</a>
             @else
                 <strong>{{ $name }}</strong>
             @endif
-            @if (! empty($item['email']))
-                <div class="fs-12 t-muted mt-1">{{ $item['email'] }}</div>
+            @if ($email)
+                <div class="fs-12 t-muted mt-1">{{ $email }}</div>
             @endif
         </div>
     </div>

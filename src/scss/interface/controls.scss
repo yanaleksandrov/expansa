@@ -263,7 +263,6 @@
 }
 
 .avatar {
-  --expansa-avatar-size: 2.5rem;
   position: relative;
   width: var(--expansa-avatar-size);
   min-width: var(--expansa-avatar-size);
@@ -321,16 +320,14 @@
     background-color: var(--expansa-text-muted);
   }
 
-  @each $size, $value in (
-    'xs': 1.6,
-    'sm': 2,
-    'md': 2.5,
-    'lg': 3.25,
-    'xl': 5,
-  ) {
-    &--#{$size} {
-      --expansa-avatar-size: #{$value}rem;
+  @each $suffix, $properties in constants.$btnSizes {
+    &#{$suffix} {
+      --expansa-avatar-size: #{map.get($properties, 'height')};
     }
+  }
+
+  &--xxl {
+    --expansa-avatar-size: 5rem;
   }
 
   &--rounded {
