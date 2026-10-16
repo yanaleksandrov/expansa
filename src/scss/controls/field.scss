@@ -737,21 +737,31 @@ $item-padding: 0.8em;
   }
 
   // plain is text in line with the label: no box, a bottom line for the focus and the error
-  &--plain &-item:not(:has([type="checkbox"], [type="radio"])) {
+  &--plain &-item:not(:has([type="checkbox"], [type="radio"], select)) {
     padding-inline: 0;
     border-width: 0;
     border-radius: 0;
     corner-shape: initial;
     transition: border-color 0.2s;
 
-    select,
-    select + .ss-main,
     > .field-before {
       padding-inline-start: 0;
     }
 
     > .field-after {
       padding-inline-end: 0;
+    }
+  }
+
+  // a plain select keeps the box of a field and is shaded on hover, as a button
+  &--plain &-item:has(select) {
+
+    &:hover {
+      background-color: var(--expansa-bg-universal);
+    }
+
+    &:focus-within {
+      border-color: var(--field-border);
     }
   }
 

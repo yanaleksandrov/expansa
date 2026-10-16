@@ -32,7 +32,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
             'type'       => 'select',
             'name'       => 's',
             'before'     => '<i class="ph ph-circle-dashed"></i>' . t('Status:'),
-            'class'      => 'field field--sm field--raised',
+            'class'      => 'field field--sm field--plain',
             'attributes' => [
                 'u-select' => true,
             ],

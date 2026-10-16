@@ -3499,7 +3499,6 @@ body.is-unsaved .expansa-search-btn {
   flex-shrink: 1;
   min-width: 0;
   padding-inline: 0.375rem;
-  font-weight: 500;
   color: var(--expansa-text);
   white-space: nowrap;
   text-overflow: ellipsis;

@@ -1757,20 +1757,24 @@ option[data-html*="<i "]) {
   padding-top: 0.4em;
   gap: 0.8em;
 }
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) {
+.field--plain .field-item:not(:has([type=checkbox], [type=radio], select)) {
   padding-inline: 0;
   border-width: 0;
   border-radius: 0;
   corner-shape: initial;
   transition: border-color 0.2s;
 }
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) select,
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) select + .ss-main,
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) > .field-before {
+.field--plain .field-item:not(:has([type=checkbox], [type=radio], select)) > .field-before {
   padding-inline-start: 0;
 }
-.field--plain .field-item:not(:has([type=checkbox], [type=radio])) > .field-after {
+.field--plain .field-item:not(:has([type=checkbox], [type=radio], select)) > .field-after {
   padding-inline-end: 0;
+}
+.field--plain .field-item:has(select):hover {
+  background-color: var(--expansa-bg-universal);
+}
+.field--plain .field-item:has(select):focus-within {
+  border-color: var(--field-border);
 }
 .field--plain.is-invalid:not(:has(:user-valid)) .field-item, .field--plain .field-item:has(:user-invalid):not(:has([type=checkbox], [type=radio])) {
   border-color: var(--expansa-danger) !important;
