@@ -430,7 +430,7 @@ class User extends Model implements Fieldable, Identity, Subject
      */
     public static function color(string $name): string
     {
-        $colors = ['blue', 'green', 'amber', 'purple', 'royal', 'red'];
+        $colors = ['red', 'orange', 'blue', 'green', 'purple'];
 
         return $colors[crc32($name) % count($colors)];
     }

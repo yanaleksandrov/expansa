@@ -488,6 +488,90 @@ $sections = [
                 ],
             ],
             [
+                'caption' => 'u-select: false',
+                'fields'  => [
+                    [
+                        'type'       => 'select',
+                        'name'       => 'ds_select_native',
+                        'label'      => t('Native select'),
+                        'attributes' => ['u-select' => false],
+                        'options'    => [
+                            'one'   => t('One'),
+                            'two'   => t('Two'),
+                            'three' => t('Three'),
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'caption' => 'u-select: false, multiple',
+                'fields'  => [
+                    [
+                        'type'       => 'select',
+                        'name'       => 'ds_select_native_multiple',
+                        'label'      => t('Native select multiple'),
+                        'attributes' => [
+                            'u-select' => false,
+                            'multiple' => true,
+                        ],
+                        'options'    => [
+                            'html' => 'HTML',
+                            'css'  => 'CSS',
+                            'php'  => 'PHP',
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'caption' => 'before: icon',
+                'fields'  => [
+                    [
+                        'type'    => 'select',
+                        'name'    => 'ds_select_before',
+                        'label'   => t('Select with an icon before'),
+                        'before'  => '<i class="ph ph-globe t-muted"></i>',
+                        'options' => [
+                            'en' => t('English'),
+                            'ru' => t('Russian'),
+                            'de' => t('German'),
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'caption' => 'after: icon',
+                'fields'  => [
+                    [
+                        'type'    => 'select',
+                        'name'    => 'ds_select_after',
+                        'label'   => t('Select with an icon after'),
+                        'after'   => '<i class="ph ph-info t-muted"></i>',
+                        'options' => [
+                            'one'   => t('One'),
+                            'two'   => t('Two'),
+                            'three' => t('Three'),
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'caption' => 'before & after: text',
+                'fields'  => [
+                    [
+                        'type'    => 'select',
+                        'name'    => 'ds_select_url',
+                        'label'   => t('Select with text around'),
+                        'before'  => '<samp class="t-muted">https://</samp>',
+                        'after'   => '<samp class="t-muted">.expansa.io</samp>',
+                        'options' => [
+                            'www'  => 'www',
+                            'shop' => 'shop',
+                            'docs' => 'docs',
+                        ],
+                    ],
+                ],
+            ],
+            [
                 'caption' => 'u-select: showSearch',
                 'fields'  => [
                     [
@@ -1161,6 +1245,39 @@ $sections = [
                 ],
             ],
             [
+                'caption' => 'is-loading + badge, icon',
+                'fields'  => [
+                    [
+                        'type'    => 'buttons',
+                        'name'    => 'ds_buttons_loading',
+                        'label'   => t('Loading'),
+                        'options' => [
+                            [
+                                'content' => t('Inbox') . ' <span class="badge badge--round badge--red">12</span>',
+                                'class'   => 'btn btn--outline is-loading',
+                            ],
+                            [
+                                'content' => t('Save'),
+                                'icon'    => 'ph ph-floppy-disk',
+                                'class'   => 'btn btn--primary is-loading',
+                            ],
+                            [
+                                'content' => sprintf(
+                                    '%s <span class="badge badge--white"><i class="ph ph-check"></i> v2.4</span>',
+                                    t('Deploy'),
+                                ),
+                                'icon'    => 'ph ph-rocket-launch',
+                                'class'   => 'btn btn--success is-loading',
+                            ],
+                            [
+                                'icon'  => 'ph ph-gear',
+                                'class' => 'btn btn--outline btn--icon is-loading',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
                 'caption' => 'btn + badge: counters',
                 'fields'  => [
                     [
@@ -1177,17 +1294,31 @@ $sections = [
                                 'class'   => 'btn',
                             ],
                             [
-                                'content' => t('Messages') . ' <span class="badge badge--round badge--white">4</span>',
+                                'content' => t('Messages') . ' <span class="badge badge--blue">4</span>',
                                 'class'   => 'btn btn--primary',
                             ],
                             [
-                                'content' => t('Tasks') . ' <span class="badge badge--round badge--green-lt">27</span>',
+                                'content' => t('Tasks') . ' <span class="badge badge--dark">27</span>',
                                 'class'   => 'btn btn--secondary',
                             ],
                             [
-                                'content' => t('Errors') . ' <span class="badge badge--round badge--white">99+</span>',
+                                'content' => t('Errors') . ' <span class="badge badge--red">99+</span>',
                                 'class'   => 'btn btn--danger',
                             ],
+	                        [
+		                        'content' => sprintf(
+			                        '%s <span class="badge badge--green"><i class="ph ph-check"></i> v2.4</span>',
+			                        t('Deploy'),
+		                        ),
+		                        'class'   => 'btn btn--success',
+	                        ],
+	                        [
+		                        'content' => sprintf(
+			                        '%s <span class="badge badge--orange">v2026.4</span>',
+			                        t('Deploy'),
+		                        ),
+		                        'class'   => 'btn btn--warning',
+	                        ],
                         ],
                     ],
                 ],
@@ -1206,7 +1337,7 @@ $sections = [
                             ],
                             [
                                 'content' => sprintf(
-                                    '%s <span class="badge badge--orange badge--xs">%s</span>',
+                                    '%s <span class="badge badge--orange-lt">%s</span>',
                                     t('Reports'),
                                     t('Beta'),
                                 ),
@@ -1220,13 +1351,6 @@ $sections = [
                                 'content' => t('Updates') . ' <span class="badge badge--red"></span>',
                                 'icon'    => 'ph ph-bell',
                                 'class'   => 'btn btn--outline',
-                            ],
-                            [
-                                'content' => sprintf(
-                                    '%s <span class="badge badge--white"><i class="ph ph-check"></i> v2.4</span>',
-                                    t('Deploy'),
-                                ),
-                                'class'   => 'btn btn--success',
                             ],
                         ],
                     ],

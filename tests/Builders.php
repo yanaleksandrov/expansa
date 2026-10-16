@@ -171,6 +171,7 @@ Form::configure(view: function (string $template, array $view) use (&$data) {
 Form::renderFields([
     ['type' => 'text', 'name' => 'code', 'attributes' => ['value' => '42']],
     ['type' => 'select', 'name' => 'country', 'attributes' => ['required' => true]],
+    ['type' => 'select', 'name' => 'native', 'attributes' => ['u-select' => false]],
     ['type' => 'text', 'name' => 'digits', 'conditions' => [['field' => 'code', 'operator' => 'pattern', 'value' => '^\d+$']]],
     ['type' => 'text', 'name' => 'letters', 'conditions' => [['field' => 'code', 'operator' => 'pattern', 'value' => ['^[a-z]+$']]]],
     ['type' => 'text', 'name' => 'big', 'conditions' => [['field' => 'code', 'operator' => '>', 'value' => 100]]],
@@ -181,6 +182,7 @@ Form::renderFields([
     ['type' => 'week', 'name' => 'sprint'],
 ]);
 check('a select gets its widget and no type', $data['country']->attributes === ['name' => 'country', 'required' => true, 'u-select' => '']);
+check('a select with u-select false stays native', $data['native']->attributes === ['name' => 'native']);
 check('an invalid field gets its error text and aria-invalid', $data['email']->invalid === 'Enter an <b>email</b>' && $data['email']->attributes['aria-invalid'] === 'true');
 check('a valid field has no aria-invalid', ! isset($data['code']->attributes['aria-invalid']));
 check('a textarea gets no type', $data['bio']->attributes === ['name' => 'bio']);

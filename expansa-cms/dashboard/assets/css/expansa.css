@@ -24,18 +24,18 @@
   --expansa-primary: #005cf4;
   --expansa-primary-hover: #1867ea;
   --expansa-primary-active: #004fd1;
-  --expansa-secondary: #1e1e1e;
+  --expansa-secondary: #1c1c1c;
   --expansa-secondary-hover: #3a3a3a;
   --expansa-secondary-active: #000000;
   --expansa-success: #39b64d;
   --expansa-success-hover: #51c263;
   --expansa-success-active: #2eae43;
-  --expansa-warning: #f76707;
-  --expansa-warning-hover: #ff761d;
-  --expansa-warning-active: #dc5901;
-  --expansa-danger: #cb2c2c;
-  --expansa-danger-hover: #d32828;
-  --expansa-danger-active: #b52020;
+  --expansa-warning: #f36d11;
+  --expansa-warning-hover: #ff7b24;
+  --expansa-warning-active: #ea6407;
+  --expansa-danger: #d22323;
+  --expansa-danger-hover: #e32323;
+  --expansa-danger-active: #be1a1a;
   --expansa-font-text: system-ui;
   --expansa-font-code: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Ubuntu Mono", "Roboto Mono", Menlo, Monaco, Consolas, monospace;
 }
@@ -909,12 +909,12 @@ img:after {
   animation: spinner-border 0.5s linear infinite;
 }
 .badge--dark {
-  background-color: #151d26 !important;
+  background-color: #3a3a3a !important;
   color: #fff;
 }
 .badge--dark-lt {
-  background-color: rgb(246.81, 247.09, 247.405) !important;
-  color: #151d26;
+  background-color: rgb(248.105, 248.105, 248.105) !important;
+  color: #3a3a3a;
 }
 .badge--muted {
   background-color: #71777F !important;
@@ -931,44 +931,44 @@ img:after {
   background-color: white !important;
 }
 .badge--red {
-  background-color: #d63939 !important;
+  background-color: #e32323 !important;
   color: #fff;
 }
 .badge--red-lt {
-  background-color: rgb(248.85, 225.3, 225.3) !important;
-  color: #d63939;
+  background-color: rgb(250.8, 222, 222) !important;
+  color: #e32323;
 }
 .badge--amber {
-  background-color: #f76707 !important;
+  background-color: #ff4810 !important;
   color: #fff;
 }
 .badge--amber-lt {
-  background-color: rgb(253.8, 232.2, 217.8) !important;
-  color: #f76707;
+  background-color: rgb(255, 227.55, 219.15) !important;
+  color: #ff4810;
 }
 .badge--orange {
-  background-color: #f59f00 !important;
+  background-color: #ff7b24 !important;
   color: #fff;
 }
 .badge--orange-lt {
-  background-color: rgb(253.5, 240.6, 216.75) !important;
-  color: #f59f00;
+  background-color: rgb(255, 235.2, 222.15) !important;
+  color: #ff7b24;
 }
 .badge--green {
-  background-color: #2fb344 !important;
+  background-color: #51c263 !important;
   color: #fff;
 }
 .badge--green-lt {
-  background-color: rgb(223.8, 243.6, 226.95) !important;
-  color: #2fb344;
+  background-color: rgb(228.9, 245.85, 231.6) !important;
+  color: #51c263;
 }
 .badge--blue {
-  background-color: #005cf4 !important;
+  background-color: #1867ea !important;
   color: #fff;
 }
 .badge--blue-lt {
-  background-color: rgb(216.75, 230.55, 253.35) !important;
-  color: #005cf4;
+  background-color: rgb(220.35, 232.2, 251.85) !important;
+  color: #1867ea;
 }
 .badge--purple {
   background-color: #6a20c5 !important;
@@ -3272,7 +3272,7 @@ body.is-unsaved .expansa-search-btn {
   border-inline-start: 1px dashed var(--expansa-border);
 }
 .storage-tree .ph-folder-open {
-  color: var(--expansa-warning);
+  color: var(--expansa-blue);
 }
 .storage-tree .ph-file-image {
   color: var(--expansa-text-muted);

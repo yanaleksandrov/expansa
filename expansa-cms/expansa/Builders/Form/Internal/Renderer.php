@@ -140,7 +140,7 @@ final class Renderer
 
     /**
      * Get the HTML attributes of a field: its own ones plus `type`, `name`,
-     * the youla.js widget of the type and the error key.
+     * the youla.js widget of the type (`false` in its attribute turns it off) and the error key.
      *
      * @param string $type
      * @param array  $field
@@ -162,7 +162,12 @@ final class Renderer
         }
 
         if (isset(self::WIDGETS[$type])) {
-            $attributes[self::WIDGETS[$type]] ??= '';
+            $widget = self::WIDGETS[$type];
+            if (($attributes[$widget] ?? '') === false) {
+                unset($attributes[$widget]);
+            } else {
+                $attributes[$widget] ??= '';
+            }
         }
 
         // a select and a textarea have no type, the datepicker works on a text input

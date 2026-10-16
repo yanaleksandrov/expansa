@@ -19,7 +19,7 @@
   border-radius: 1em;
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   text-decoration: none;
-  transition: background-color 0.2s, transform 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -30,7 +30,7 @@
   background-position: center;
 
   &:active:not(:disabled) {
-    transform: scale(0.98);
+    transform: scale(0.99);
   }
 
   > i {
@@ -48,7 +48,8 @@
   &--primary,
   &--secondary,
   &--success,
-  &--danger {
+  &--danger,
+  &--warning {
     color: var(--expansa-text-white);
     box-shadow: 0 1px 1px #fff3 inset, 0 -1px 1px #0003 inset;
   }
@@ -86,6 +87,18 @@
 
     &:active {
       background-color: var(--expansa-success-active);
+    }
+  }
+
+  &--warning {
+    background-color: var(--expansa-warning);
+
+    &:hover {
+      background-color: var(--expansa-warning-hover);
+    }
+
+    &:active {
+      background-color: var(--expansa-warning-active);
     }
   }
 
@@ -145,6 +158,7 @@
     &[class*="primary"]:hover:before,
     &[class*="secondary"]:hover:before,
     &[class*="success"]:hover:before,
+    &[class*="warning"]:hover:before,
     &[class*="danger"]:hover:before {
       color: var(--expansa-text-white);
     }
@@ -171,6 +185,11 @@
     text-shadow: none !important;
     pointer-events: none;
 
+    // badges and icons have their own colors, they keep the room of the button
+    > * {
+      visibility: hidden;
+    }
+
     &:after {
       content: '';
       display: inline-block;
@@ -190,6 +209,7 @@
     &[class*="primary"]:after,
     &[class*="secondary"]:after,
     &[class*="success"]:after,
+    &[class*="warning"]:after,
     &[class*="danger"]:after {
       color: var(--expansa-text-white);
     }
