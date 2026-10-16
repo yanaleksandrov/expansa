@@ -443,6 +443,23 @@ class Comment extends Model
     }
 
     /**
+     * Get the public URL of the comment: the page of its post with the `#comment-{id}` anchor,
+     * empty when the comment is not approved, the post is gone or its type is not public.
+     *
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        if ($this->status !== self::STATUS_APPROVED) {
+            return '';
+        }
+
+        $path = $this->getPost()?->path() ?? '';
+
+        return $path === '' ? '' : url($path) . '#comment-' . $this->id;
+    }
+
+    /**
      * Whether the comment takes replies: the discussion of its post is open and its thread is not
      * at the depth of the settings yet; a comment without a post takes none.
      *

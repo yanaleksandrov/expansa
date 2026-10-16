@@ -55,14 +55,14 @@ return Form::enqueue(
                 $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? htmlspecialchars($post->title) : $type->labelEdit);
                 ?>
                 <div class="post-editor-head">
-                    <a class="btn btn--icon btn--sm" href="<?php echo $back; ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
+                    <a class="btn btn--icon btn--xs" href="<?php echo $back; ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
                         <i class="ph ph-arrow-left"></i>
                     </a>
                     <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
                         <a href="<?php echo $back; ?>"><?php echo $type->labelNamePlural; ?></a>
                         <i class="ph ph-caret-right"></i>
                         <?php if ($path !== '') : ?>
-	                        <?php echo t('Editing'); ?>: <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
+	                        <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
                         <?php else : ?>
                             <span aria-current="page"><?php echo $title; ?></span>
                         <?php endif; ?>

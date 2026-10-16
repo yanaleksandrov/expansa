@@ -88,20 +88,20 @@ final class Comments extends Table
                 ->title('<input type="checkbox" u-bind="trigger">')
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
-            $this->cell('author')
-                ->title(t('Author'))
-                ->fixedWidth('12rem')
-                ->view('author'),
             $this->cell('comment')
                 ->title(t('Comment'))
                 ->flexibleWidth('16rem')
                 ->view('title'),
+            $this->cell('author')
+                ->title(t('Author'))
+                ->fixedWidth('12rem')
+                ->view('author'),
             $this->cell('status')
                 ->title(t('Status'))
                 ->fixedWidth('6rem')
                 ->view('badge'),
             $this->cell('post')
-                ->title(t('In Response To'))
+                ->title(t('In reply to'))
                 ->fixedWidth('8rem'),
             $this->cell('date')
                 ->title(t('Date'))

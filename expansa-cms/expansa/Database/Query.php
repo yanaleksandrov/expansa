@@ -6,6 +6,7 @@ namespace Expansa\Database;
 
 use Expansa\Database\Internal\Cache;
 use Expansa\Database\Traits\HasSoftDeletes;
+use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasUuid;
 use Expansa\Facades\Db;
 use Expansa\Support\Str;
@@ -206,6 +207,12 @@ final class Query
         if ($id) {
             $changes = $this->model->getChanges();
             if ($changes) {
+                if ($this->model->usesTrait(HasTimestamps::class) && $this->model->timestamps) {
+                    $this->model->setAttribute($this->model->updatedAtColumn, date('Y-m-d H:i:s'));
+
+                    $changes = $this->model->getChanges();
+                }
+
                 if (! Db::update($this->model->table, $changes, ['id' => $id])) {
                     return null;
                 }

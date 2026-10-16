@@ -16,7 +16,6 @@ use Expansa\Support\Arr;
 defined('EX_PATH') || exit;
 
 $base   = (string) ($field->options['base'] ?? rtrim(url(), '/') . '/');
-$link   = (string) ($field->options['link'] ?? '');
 $from   = (string) ($field->options['from'] ?? '');
 $parent = (string) ($field->options['parent'] ?? '');
 $bases  = (array) ($field->options['bases'] ?? []);
@@ -35,9 +34,6 @@ $synced = $from !== '' && (string) ($field->attributes['value'] ?? '') === '';
 			<i class="ph ph-arrows-clockwise"></i>
 		</button>
 		<button class="slug-action ph ph-copy" type="button" u-bind="copy" title="{{ t('Copy link') }}" aria-label="{{ t('Copy link') }}"></button>
-		@if($link)
-			<a class="slug-action" href="{{ $link }}" :href="base + value" target="_blank" title="{{ t('Open') }}" aria-label="{{ t('Open') }}"><i class="ph ph-arrow-square-out"></i></a>
-		@endif
 		@if($field->tooltip)
 			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif

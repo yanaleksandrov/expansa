@@ -1730,7 +1730,7 @@ option[data-html*="<i "]) {
   background-position: center;
 }
 .btn:active:not(:disabled) {
-  transform: scale(0.97);
+  transform: scale(0.98);
 }
 .btn > i {
   font-size: inherit;

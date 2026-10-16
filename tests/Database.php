@@ -8,6 +8,7 @@ use Expansa\Database\Model;
 use Expansa\Database\Query\Builder;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
+use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasUuid;
 use Expansa\Facades\Db;
 use Expansa\Support\Str;
@@ -77,6 +78,15 @@ final class Member extends Model
     public protected(set) array $fillable = ['name', 'uuid'];
 }
 
+final class Note extends Model
+{
+    use HasTimestamps;
+
+    public protected(set) string $table = 'notes';
+
+    public protected(set) array $fillable = ['text'];
+}
+
 Db::configure(driver: 'mysql', database: 'x', username: '', password: '', host: '', testMode: true);
 
 check('a sanitizer rule without a sanitizer throws', throws(fn () => new Post(['title' => ' x ']), LogicException::class));
@@ -119,5 +129,18 @@ check('save() of a new model with HasUuid fills the UUID', (bool) preg_match('/^
 
 new Member(['name' => 'b', 'uuid' => 'kept'])->save();
 check('save() keeps a UUID that is set', str_contains(Db::instance()->queryString, "'kept'"));
+
+$note = new Note(['text' => 'a']);
+$note->setAttribute('id', 3)->setAttribute('updated_at', '2020-01-01 00:00:00')->syncOriginals();
+$note->text = 'b';
+$note->save();
+check('save() of a changed model with HasTimestamps stamps the update time', (bool) preg_match(
+    '/^UPDATE "notes" SET "text" = \'b\', "updated_at" = \'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\' WHERE "id" = 3$/',
+    Db::instance()->queryString
+));
+
+$query = Db::instance()->queryString;
+$note->save();
+check('save() without changes does not stamp it', Db::instance()->queryString === $query);
 
 exit($failures > 0 ? 1 : 0);
