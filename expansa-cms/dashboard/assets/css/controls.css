@@ -1377,15 +1377,15 @@ option[data-html*="<i "]) {
 .field-item:has([type=radio]):has(.field-icon) [type=radio] {
   order: 2;
 }
-.field:has(.field-box) {
+.field:has(.field-buttons) {
   display: flex;
   gap: 1rem;
 }
-.field:has(.field-box) .field-box {
+.field:has(.field-buttons) .field-box {
   display: grid;
   gap: 0.25em;
 }
-.field:has(.field-box) .field-buttons {
+.field:has(.field-buttons) .field-buttons {
   display: flex;
   gap: 2px;
   padding: 2px;
@@ -1396,12 +1396,12 @@ option[data-html*="<i "]) {
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
-.field:has(.field-box) .field-buttons input[type=radio] {
+.field:has(.field-buttons) .field-buttons input[type=radio] {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
-.field:has(.field-box) .field-buttons .field-buttons-item {
+.field:has(.field-buttons) .field-buttons .field-buttons-item {
   white-space: nowrap;
   height: calc(2rem - 4px);
   padding: 0.375em 0.75em;
@@ -1413,10 +1413,10 @@ option[data-html*="<i "]) {
   color: var(--expansa-text-muted);
   transition: all 0.25s;
 }
-.field:has(.field-box) .field-buttons .field-buttons-item:hover {
+.field:has(.field-buttons) .field-buttons .field-buttons-item:hover {
   color: var(--expansa-text);
 }
-.field:has(.field-box) .field-buttons .field-buttons-item:has(> input:checked) {
+.field:has(.field-buttons) .field-buttons .field-buttons-item.is-active, .field:has(.field-buttons) .field-buttons .field-buttons-item:has(> input:checked) {
   color: var(--expansa-text);
   box-shadow: var(--expansa-box-shadow);
   background-color: var(--expansa-bg-white);

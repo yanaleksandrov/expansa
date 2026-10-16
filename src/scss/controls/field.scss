@@ -477,7 +477,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
     }
   }
 
-  &:has(.field-box) {
+  &:has(.field-buttons) {
     display: flex;
     gap: 1rem;
 
@@ -516,6 +516,7 @@ $danger-soft: rgb(252.13, 241.14, 241.14);
           color: var(--expansa-text);
         }
 
+        &.is-active,
         &:has(> input:checked) {
           color: var(--expansa-text);
           box-shadow: var(--expansa-box-shadow);

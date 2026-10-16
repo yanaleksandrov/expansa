@@ -62,7 +62,7 @@ return Form::enqueue(
                         <a href="<?php echo $back; ?>"><?php echo $type->labelNamePlural; ?></a>
                         <i class="ph ph-caret-right"></i>
                         <?php if ($path !== '') : ?>
-	                        <?php echo $type->labelEdit; ?>: <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
+	                        <?php echo t('Editing'); ?>: <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
                         <?php else : ?>
                             <span aria-current="page"><?php echo $title; ?></span>
                         <?php endif; ?>
@@ -326,7 +326,9 @@ return Form::enqueue(
                             </dd>
                             <?php if ($post->id > 0) : ?>
                                 <dt><i class="ph ph-chat-circle-text"></i><?php echo t('Comments'); ?></dt>
-                                <dd id="post-comments-count"><?php echo view('parts/post-comments-count', ['counts' => Comment::countByStatus($post->type, $post->id)]); ?></dd>
+                                <dd id="post-comments-count">
+	                                <?php echo view('parts/post-comments-count', ['counts' => Comment::countByStatus($post->type, $post->id)]); ?>
+                                </dd>
                             <?php endif; ?>
                             <?php foreach ($facts as [$icon, $label, $fact]) : ?>
                                 <dt><i class="<?php echo $icon; ?>"></i><?php echo $label; ?></dt>

@@ -51,14 +51,18 @@ $progress = static fn (string $name) => [
     @endif
 
     @if ($views)
-        <div class="df aic g-3 fs-13">
-            @foreach ($views as $part)
-                @if (! empty($part['click']))
-                    <button class="btn btn--xs btn--outline t-red" type="button" @click="{{ $part['click'] }}">{{ $part['title'] ?? '' }}</button>
-                @else
-                    <a class="badge {{ empty($part['active']) ? 't-muted' : 't-dark' }}" href="{{ $part['href'] ?? '#' }}">{{ $part['title'] ?? '' }}</a>
-                @endif
-            @endforeach
+        <div>
+            <div class="field">
+                <div class="field-buttons">
+                    @foreach ($views as $part)
+                        @if (! empty($part['click']))
+                            <button class="field-buttons-item btn btn--xs btn--outline t-red" type="button" @click="{{ $part['click'] }}">{{ $part['title'] ?? '' }}</button>
+                        @else
+                            <a class="field-buttons-item {{ empty($part['active']) ? '' : 'is-active' }}" href="{{ $part['href'] ?? '#' }}">{{ $part['title'] ?? '' }}</a>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
         </div>
     @endif
 

@@ -3831,7 +3831,7 @@ body.is-unsaved .expansa-search-btn {
   padding: 0;
   list-style: none;
   font-size: 0.8125rem;
-  gap: 0.65rem;
+  gap: 0.75rem;
   position: relative;
   container: post-activity/inline-size;
 }
@@ -3843,7 +3843,6 @@ body.is-unsaved .expansa-search-btn {
 }
 .post-activity > li {
   display: flex;
-  align-items: baseline;
   gap: 0.5625rem;
   position: relative;
 }
@@ -3863,7 +3862,6 @@ body.is-unsaved .expansa-search-btn {
   flex-shrink: 0;
   width: 1.375rem;
   height: 1.375rem;
-  align-self: center;
   color: var(--expansa-text-muted);
   background-color: var(--expansa-bg);
   border-radius: 50%;
