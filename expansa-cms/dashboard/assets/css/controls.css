@@ -1440,6 +1440,9 @@ option[data-html*="<i "]) {
   background-position: right 0.85em top 55%;
   background-size: 0.8em;
 }
+.field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after) .ss-values .ss-text {
+  padding-inline-end: 0;
+}
 .field-item:has(> select:not([multiple]) + .ss-main):has(> .field-before, > .field-after):has(> .field-before) .ss-values {
   padding-inline-start: 0.5em;
 }

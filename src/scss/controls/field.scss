@@ -373,6 +373,11 @@ $item-padding: 0.8em;
         background-repeat: no-repeat;
         background-position: right 0.85em top 55%;
         background-size: 0.8em;
+
+        // the arrow is in the padding of .ss-values, so the field is as wide as before u-select starts
+        .ss-text {
+          padding-inline-end: 0;
+        }
       }
 
       // the text is as far from before as from the gap of the field

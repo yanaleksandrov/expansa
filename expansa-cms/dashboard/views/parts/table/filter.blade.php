@@ -21,25 +21,25 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
 <div class="table-filter">
     <div class="table-filter-actions df g-1">
         <?php
-        echo Form::view('select', [
-            'type'       => 'select',
-            'name'       => 's',
-            'before'     => '<i class="ph ph-circle-dashed"></i>',
-            'class'      => 'field field--sm field--raised',
-            'attributes' => [
-                'u-select' => true,
-            ],
-            'options'    => [
-                '' => t('All Statuses'),
-                ...App\Post\Status::getStatuses(),
-            ],
-        ]);
         echo Form::view('input', [
             'type'       => 'search',
             'name'       => 's',
             'before'     => '<i class="ph ph-magnifying-glass"></i>',
             'class'      => 'field field--sm field--raised',
-            'attributes' => ['type' => 'search', 'name' => 's', 'placeholder' => t('Search in title, excerpt and content...')],
+            'attributes' => ['type' => 'search', 'name' => 's', 'placeholder' => t('Search in title and content')],
+        ]);
+        echo Form::view('select', [
+            'type'       => 'select',
+            'name'       => 's',
+            'before'     => '<i class="ph ph-circle-dashed"></i>' . t('Status:'),
+            'class'      => 'field field--sm field--raised',
+            'attributes' => [
+                'u-select' => true,
+            ],
+            'options'    => [
+                '' => t('All'),
+                ...App\Post\Status::getStatuses(),
+            ],
         ]);
         ?>
         <button class="btn btn--sm" type="button" popovertarget="{{ $popover }}">
