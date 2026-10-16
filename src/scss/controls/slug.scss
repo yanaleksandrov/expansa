@@ -1,5 +1,6 @@
 // the URL of an entry in one line: the base muted, the slug plain text until hovered or focused
 .slug {
+
   &-line {
     display: flex;
     align-items: center;
@@ -8,19 +9,6 @@
     min-height: 1.75rem;
     font-size: 0.8125rem;
     color: var(--expansa-text-muted);
-
-    > .ph-link-simple {
-      flex-shrink: 0;
-      margin-right: 0.125rem;
-      opacity: 0.7;
-    }
-
-    > .ph-info {
-      flex-shrink: 0;
-      margin-left: auto;
-      cursor: pointer;
-      opacity: 0.6;
-    }
 
     input {
       field-sizing: content;
@@ -57,16 +45,6 @@
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-  }
-
-  &-auto {
-    flex-shrink: 0;
-    padding: 0 0.375rem;
-    font-size: 0.6875rem;
-    line-height: 1.125rem;
-    color: var(--expansa-primary);
-    background-color: color-mix(in srgb, var(--expansa-primary) 10%, transparent);
-    border-radius: 999px;
   }
 
   &-action {

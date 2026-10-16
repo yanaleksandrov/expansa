@@ -983,21 +983,6 @@ document.addEventListener('youla:init', () => {
                     }
                 }
             },
-            auto: {
-                'u-show'() {
-                    return this.synced;
-                }
-            },
-            regenerate: {
-                'u-show'() {
-                    return !this.synced && this.generated() !== '' && this.value !== this.generated();
-                },
-                '@click'() {
-                    this.value = this.generated();
-                    this.synced = true;
-                    this.touch();
-                }
-            },
             copy: {
                 '@click': '$copy(base + value)'
             }

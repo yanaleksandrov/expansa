@@ -29,10 +29,6 @@ $synced = $from !== '' && (string) ($field->attributes['value'] ?? '') === '';
 		<i class="ph ph-link-simple"></i>
 		<span class="slug-base" u-text="base">{{ $base }}</span>
 		<input{!! $field->htmlAttributes !!} u-bind="input" spellcheck="false" autocomplete="off">
-		<span class="slug-auto" u-bind="auto"@if(! $synced) hidden @endif>{{ t('from the title') }}</span>
-		<button class="slug-action" type="button" u-bind="regenerate" hidden title="{{ t('Make from the title') }}" aria-label="{{ t('Make from the title') }}">
-			<i class="ph ph-arrows-clockwise"></i>
-		</button>
 		<button class="slug-action ph ph-copy" type="button" u-bind="copy" title="{{ t('Copy link') }}" aria-label="{{ t('Copy link') }}"></button>
 		@if($field->tooltip)
 			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
