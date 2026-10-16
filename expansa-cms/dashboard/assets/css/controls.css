@@ -87,9 +87,67 @@ textarea {
   min-height: 1.875rem;
   padding-block: 0.325rem;
   line-height: 1.5;
+  field-sizing: content;
 }
-textarea[u-textarea] {
-  overflow: hidden;
+textarea[rows="1"] {
+  max-height: calc(1 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="2"] {
+  max-height: calc(2 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="3"] {
+  max-height: calc(3 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="4"] {
+  max-height: calc(4 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="5"] {
+  max-height: calc(5 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="6"] {
+  max-height: calc(6 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="7"] {
+  max-height: calc(7 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="8"] {
+  max-height: calc(8 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="9"] {
+  max-height: calc(9 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="10"] {
+  max-height: calc(10 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="11"] {
+  max-height: calc(11 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="12"] {
+  max-height: calc(12 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="13"] {
+  max-height: calc(13 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="14"] {
+  max-height: calc(14 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="15"] {
+  max-height: calc(15 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="16"] {
+  max-height: calc(16 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="17"] {
+  max-height: calc(17 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="18"] {
+  max-height: calc(18 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="19"] {
+  max-height: calc(19 * 1lh + 0.65rem + 2px);
+}
+textarea[rows="20"] {
+  max-height: calc(20 * 1lh + 0.65rem + 2px);
 }
 
 .builder {
@@ -943,6 +1001,84 @@ input[type=radio]:checked {
   margin: 0 !important;
 }
 
+.filler {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  flex: 1;
+  min-width: 0;
+  height: inherit;
+}
+.filler-swatch {
+  position: relative;
+  flex: none;
+  width: 1.25em;
+  height: 1.25em;
+  padding: 0;
+  border: none;
+  border-radius: calc(var(--expansa-border-radius) / 1.5);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  overflow: hidden;
+  cursor: pointer;
+  background-color: transparent;
+}
+.filler-swatch.has-alpha {
+  background-image: conic-gradient(#d8d8d8 90deg, #fff 90deg 180deg, #d8d8d8 180deg 270deg, #fff 270deg);
+  background-size: 0.5em 0.5em;
+}
+.filler-swatch:disabled {
+  cursor: not-allowed;
+}
+.filler-swatch-color, .filler-swatch-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+}
+.filler-swatch-color-opaque {
+  position: absolute;
+  inset: 0 0 0 50%;
+  display: none;
+}
+.has-alpha > .filler-swatch-color-opaque {
+  display: block;
+}
+.field-item .filler input.filler-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  font-family: var(--expansa-font-code);
+  font-size: 0.925em;
+  text-transform: uppercase;
+}
+.field-item .filler input.filler-input.is-image-value {
+  text-transform: none;
+  cursor: pointer;
+}
+.filler-alpha {
+  display: flex;
+  align-items: center;
+  flex: none;
+  padding-inline-start: 0.5em;
+  border-inline-start: 1px solid var(--field-border, var(--expansa-border));
+  color: var(--expansa-text-muted);
+  height: 1.25em;
+}
+.field-item .filler-alpha input.filler-alpha-input {
+  width: 3ch;
+  text-align: end;
+  font-family: var(--expansa-font-code);
+  font-size: 0.925em;
+}
+.filler-alpha-suffix {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  font-size: 0.925em;
+}
+
 .field {
   --field-bg: var(--expansa-bg);
   --field-bg-focus: var(--expansa-bg-white);
@@ -997,15 +1133,23 @@ input[type=radio]:checked {
   border-radius: 0 0 var(--expansa-border-radius) var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
-.field.is-invalid .field-item, .field.is-invalid .field-item:focus-within {
+.field.is-invalid:has(:user-valid) > .field-error {
+  display: none;
+}
+.field.is-invalid:not(:has(:user-valid)) .field-item, .field.is-invalid:not(:has(:user-valid)) .field-item:focus-within, .field-item:has(:user-invalid):not(:has([type=checkbox], [type=radio])), .field-item:has(:user-invalid):not(:has([type=checkbox], [type=radio])):focus-within {
   border-color: var(--expansa-danger) !important;
   box-shadow: 0 0 0 2px rgb(252.13, 241.14, 241.14) !important;
+}
+.field-item [type=checkbox]:user-invalid, .field-item [type=radio]:user-invalid {
+  border-color: var(--expansa-danger) !important;
+  outline-color: var(--expansa-danger) !important;
 }
 .field-item {
   padding-inline: 0.8em;
   display: flex;
   align-items: center;
   gap: 0.5em;
+  white-space: nowrap;
   border: 1px solid var(--field-border);
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -1025,6 +1169,10 @@ input[type=radio]:checked {
   max-height: inherit;
   line-height: 1.2;
 }
+.field .field-item:has(select[multiple], textarea) {
+  height: auto;
+  min-height: 2rem;
+}
 .field--xl .field-item {
   font-size: 0.9375rem;
   height: 2.5rem;
@@ -1036,6 +1184,10 @@ input[type=radio]:checked {
   height: inherit;
   max-height: inherit;
   line-height: 1.2;
+}
+.field--xl .field-item:has(select[multiple], textarea) {
+  height: auto;
+  min-height: 2.5rem;
 }
 .field--lg .field-item {
   font-size: 0.875rem;
@@ -1049,6 +1201,10 @@ input[type=radio]:checked {
   max-height: inherit;
   line-height: 1.2;
 }
+.field--lg .field-item:has(select[multiple], textarea) {
+  height: auto;
+  min-height: 2.125rem;
+}
 .field--sm .field-item {
   font-size: 0.75rem;
   height: 1.75rem;
@@ -1061,6 +1217,10 @@ input[type=radio]:checked {
   max-height: inherit;
   line-height: 1.2;
 }
+.field--sm .field-item:has(select[multiple], textarea) {
+  height: auto;
+  min-height: 1.75rem;
+}
 .field--xs .field-item {
   font-size: 0.6875rem;
   height: 1.625rem;
@@ -1072,6 +1232,10 @@ input[type=radio]:checked {
   height: inherit;
   max-height: inherit;
   line-height: 1.2;
+}
+.field--xs .field-item:has(select[multiple], textarea) {
+  height: auto;
+  min-height: 1.625rem;
 }
 .field-item:has([type=number]) {
   width: -moz-fit-content;
@@ -1145,6 +1309,11 @@ option[data-html*="<i "]) {
 .field-item input[type=search] {
   background-image: none;
 }
+.field-item input:not([type=number], [type=checkbox], [type=radio]),
+.field-item textarea {
+  flex: 1;
+  min-width: 0;
+}
 .field-item input[type=number] {
   -moz-appearance: textfield;
   text-align: center;
@@ -1164,7 +1333,7 @@ option[data-html*="<i "]) {
 .field-item input[type=checkbox]:checked {
   border-color: var(--expansa-primary);
 }
-.field-item input[u-datepicker][readonly] {
+.field-item input[u-pickadate][readonly] {
   color: inherit !important;
   pointer-events: initial;
   cursor: pointer;
@@ -1180,6 +1349,11 @@ option[data-html*="<i "]) {
 }
 .field-item select[multiple] + .ss-main {
   padding-inline-start: 0.25em;
+  padding-block: 2px;
+  height: auto;
+}
+.field-item select[multiple] + .ss-main .ss-values {
+  height: auto;
 }
 .field-item select[u-select]:not([multiple]) {
   padding-inline-end: 2.25em;
@@ -1201,6 +1375,7 @@ option[data-html*="<i "]) {
   color: inherit;
 }
 .field-item:has([type=radio]), .field-item:has([type=checkbox]) {
+  white-space: normal;
   background-color: transparent;
   border: none;
   box-shadow: none !important;
@@ -1307,6 +1482,7 @@ option[data-html*="<i "]) {
   background-color: var(--expansa-bg-white);
   border: 1px solid var(--expansa-border);
   box-shadow: var(--expansa-box-shadow) !important;
+  border-radius: calc(var(--expansa-border-radius) + 2px);
 }
 .field--button .field-item:hover .field-icon, .field--button .field-item:has([type=radio]:checked) .field-icon {
   background-color: var(--expansa-bg);
@@ -1331,7 +1507,6 @@ option[data-html*="<i "]) {
   z-index: 1;
 }
 .field--plain .field-item:not(:has([readonly])):focus-within {
-  border-color: transparent;
   box-shadow: none;
 }
 .field-item:has(.ss-main:not(.ss-open-below)):focus-within {
@@ -1424,7 +1599,7 @@ option[data-html*="<i "]) {
 .field--button {
   display: flex;
   flex-wrap: wrap;
-  padding: 0.25rem;
+  padding: 2px;
   background-color: var(--expansa-bg);
   border-radius: var(--expansa-border-radius--xl);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -1452,6 +1627,28 @@ option[data-html*="<i "]) {
   display: flex;
   padding-top: 0.4em;
   gap: 0.8em;
+}
+.field--plain .field-item:not(:has([type=checkbox], [type=radio])) {
+  padding-inline: 0;
+  border-width: 0 0 1px;
+  border-radius: 0;
+  corner-shape: initial;
+  transition: border-color 0.2s;
+}
+.field--plain .field-item:not(:has([type=checkbox], [type=radio])) select,
+.field--plain .field-item:not(:has([type=checkbox], [type=radio])) select + .ss-main {
+  padding-inline-start: 0;
+}
+.field--plain.is-invalid:not(:has(:user-valid)) .field-item, .field--plain .field-item:has(:user-invalid):not(:has([type=checkbox], [type=radio])) {
+  border-color: var(--expansa-danger) !important;
+  box-shadow: none !important;
+}
+.field--plain > .field-error {
+  margin-top: 0;
+  padding: 0;
+  z-index: auto;
+  background-color: transparent;
+  border-radius: 0;
 }
 
 .btn {
@@ -1608,6 +1805,7 @@ option[data-html*="<i "]) {
 }
 .btn--rounded {
   border-radius: 3rem;
+  corner-shape: initial;
 }
 .btn.is-loading {
   position: relative;

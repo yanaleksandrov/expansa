@@ -13,21 +13,24 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
+<div class="{{ $field->class ?: 'field' }}@if($field->invalid) is-invalid@endif"{!! Arr::toHtmlAttributes($field->conditions) !!}>
 	@if($field->label)
 		<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>{!! $field->label !!}</div>
 	@endif
 	<label class="field-item">
 		{!! $field->before !!}
 		<input{!! $field->htmlAttributes !!}>
-		{{ $field->after }}
+		{!! $field->after !!}
 		@if($field->copy)
-			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy({{ $field->prop }})"></i>
+			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy($el.parentElement.querySelector('input').value)"></i>
 		@endif
 		@if($field->tooltip)
 			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif
 	</label>
+	@if($field->invalid)
+		<div class="field-error">{!! $field->invalid !!}</div>
+	@endif
 	@if($field->instruction)
 		<div class="field-instruction">{!! $field->instruction !!}</div>
 	@endif

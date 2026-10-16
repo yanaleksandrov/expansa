@@ -174,8 +174,19 @@ Form::renderFields([
     ['type' => 'text', 'name' => 'digits', 'conditions' => [['field' => 'code', 'operator' => 'pattern', 'value' => '^\d+$']]],
     ['type' => 'text', 'name' => 'letters', 'conditions' => [['field' => 'code', 'operator' => 'pattern', 'value' => ['^[a-z]+$']]]],
     ['type' => 'text', 'name' => 'big', 'conditions' => [['field' => 'code', 'operator' => '>', 'value' => 100]]],
+    ['type' => 'email', 'name' => 'email', 'invalid' => ' Enter an <b>email</b> '],
+    ['type' => 'textarea', 'name' => 'bio'],
+    ['type' => 'time', 'name' => 'opens'],
+    ['type' => 'month', 'name' => 'period', 'attributes' => ['u-pickadate' => '{"inline": true}']],
+    ['type' => 'week', 'name' => 'sprint'],
 ]);
 check('a select gets its widget and no type', $data['country']->attributes === ['name' => 'country', 'required' => true, 'u-select' => '']);
+check('an invalid field gets its error text and aria-invalid', $data['email']->invalid === 'Enter an <b>email</b>' && $data['email']->attributes['aria-invalid'] === 'true');
+check('a valid field has no aria-invalid', ! isset($data['code']->attributes['aria-invalid']));
+check('a textarea gets no type', $data['bio']->attributes === ['name' => 'bio']);
+check('a time field gets the time-only datepicker on a text input', $data['opens']->attributes === ['type' => 'text', 'name' => 'opens', 'u-pickadate' => '{"timepicker": true, "onlyTimepicker": true}']);
+check('datepicker options of the field win', $data['period']->attributes['u-pickadate'] === '{"inline": true}');
+check('a week field stays native', $data['sprint']->attributes === ['type' => 'week', 'name' => 'sprint']);
 check('a matching pattern leaves the field shown', $data['digits']->conditions['hidden'] === false);
 check('no matching pattern hides the field', $data['letters']->conditions['hidden'] === true);
 check('a pattern condition is checked in the browser by RegExp', str_contains($data['digits']->conditions['u-show'], "new RegExp(pattern, 'u').test(code)"));

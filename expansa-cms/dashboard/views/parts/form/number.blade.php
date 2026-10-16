@@ -15,9 +15,11 @@ defined('EX_PATH') || exit;
 		<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>{!! $field->label !!}</div>
 	@endif
 	<div class="field-item">
+		{!! $field->before !!}
 		<i class="ph ph-minus" @click="$spin(-1)"></i>
-		<input type="number"{!! $field->htmlAttributes !!} @keydown.e.prevent>
 		<i class="ph ph-plus" @click="$spin(1)"></i>
+		<input{!! $field->htmlAttributes !!} @keydown.e.prevent>
+		{!! $field->after !!}
 	</div>
 	@if($field->instruction)
 		<div class="field-instruction">{!! $field->instruction !!}</div>

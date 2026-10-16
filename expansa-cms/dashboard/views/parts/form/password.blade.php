@@ -11,11 +11,15 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 
+// the generator and the strength check write and read the value through u-prop
+$prop = $field->attributes['u-prop'] ?? $field->prop;
+
 $attributes = [
 	...$field->attributes,
 	'name'   => $field->name,
+	'u-prop' => $prop,
 	':type'  => "visible ? 'text' : 'password'",
-	'@input' => $field->generator ? 'check(' . $field->prop . ')' : '',
+	'@input' => $field->generator ? "check($prop)" : '',
 ];
 
 $messages = [
@@ -37,16 +41,18 @@ $characters = array_filter(
 	<div class="{{ $field->label_class ?: 'field-label' }}"@if($field->required) data-required="*"@endif>
 		{!! $field->label !!}
 		@if($field->generator)
-			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $field->prop }} = generate()">{{ t('Generate') }}</div>
+			<div class="ml-auto fw-400 fs-13 t-muted" @click="{{ $prop }} = generate()">{{ t('Generate') }}</div>
 		@endif
 	</div>
 	<div class="field-item">
+		{!! $field->before !!}
 		<input{!! Arr::toHtmlAttributes($attributes) !!}>
+		{!! $field->after !!}
 		@if($field->switcher)
 			<i class="ph" :class="visible ? 'ph-eye-closed' : 'ph-eye'" @click="visible = !visible"></i>
 		@endif
 		@if($field->copy)
-			<i class="ph ph-copy" title="{{ t('Copy') }}" u-copy="{{ $field->prop }}"></i>
+			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy($el.parentElement.querySelector('input').value)"></i>
 		@endif
 	</div>
 	@if($field->instruction)

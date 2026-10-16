@@ -34,9 +34,18 @@ final class Renderer
      * Attributes of the youla.js widgets that fields of the type turn into.
      */
     private const array WIDGETS = [
-        'date'     => 'u-datepicker',
-        'select'   => 'u-select',
-        'textarea' => 'u-textarea',
+        'select' => 'u-select',
+    ];
+
+    /**
+     * Options of the `u-pickadate` datepicker by input type; the formats come from the dashboard locale.
+     * `week` stays native: air-datepicker has no week view.
+     */
+    private const array DATE_PICKERS = [
+        'date'           => '',
+        'datetime-local' => '{"timepicker": true}',
+        'time'           => '{"timepicker": true, "onlyTimepicker": true}',
+        'month'          => '{"view": "months", "minView": "months", "dateFormat": "MMMM yyyy"}',
     ];
 
     /**
@@ -156,11 +165,16 @@ final class Renderer
             $attributes[self::WIDGETS[$type]] ??= '';
         }
 
-        // a select has no type, the datepicker works on a text input
-        if ($type === 'select') {
+        // a select and a textarea have no type, the datepicker works on a text input
+        if ($type === 'select' || $type === 'textarea') {
             unset($attributes['type']);
-        } elseif ($type === 'date') {
-            $attributes['type'] = 'text';
+        } elseif (isset(self::DATE_PICKERS[$type])) {
+            $attributes['type']          = 'text';
+            $attributes['u-pickadate'] ??= self::DATE_PICKERS[$type];
+        }
+
+        if (! empty($field['invalid'])) {
+            $attributes['aria-invalid'] = 'true';
         }
 
         // youla-ajax.js shows the response errors of this key at the field

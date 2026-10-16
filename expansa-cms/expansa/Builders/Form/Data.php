@@ -93,6 +93,14 @@ final class Data
     }
 
     /**
+     * Error text under the field, may contain markup; the field gets `is-invalid`.
+     * Not `error`: that key names the field in the errors of an API response.
+     */
+    public string $invalid = '' {
+        set(mixed $value) => Sanitizer::trim($value);
+    }
+
+    /**
      * Description of a tab or a media field.
      */
     public string $description = '' {

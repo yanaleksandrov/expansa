@@ -27,7 +27,7 @@ return new class extends Plugin
 
         Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
 
-        foreach (['fields-builder', 'forms-builder'] as $page) {
+        foreach (['fields-builder', 'forms-builder', 'design-system'] as $page) {
             Dashboard::page($page, view: __DIR__ . "/views/$page");
         }
 
@@ -54,6 +54,15 @@ return new class extends Plugin
                     'id'           => 'forms-builder',
                     'url'          => 'forms-builder',
                     'title'        => t('Forms builder'),
+                    'capabilities' => ['manage_options'],
+                    'icon'         => '',
+                    'position'     => 0,
+                    'parent_id'    => 'toolkit',
+                ],
+                [
+                    'id'           => 'design-system',
+                    'url'          => 'design-system',
+                    'title'        => t('Design system'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,

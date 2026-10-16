@@ -254,9 +254,17 @@ Manager::configure(resolver: function (string $file, array $context = []) use ($
         default                                    => null,
     };
 
-    return $vendor === null
-        ? Manager::defaultStructure($file)
-        : ['js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js"];
+    if ($vendor === null) {
+        return Manager::defaultStructure($file);
+    }
+
+    // стили виджета, если он не стилизует себя сам
+    $style = ['youla-pickadate' => 'air-datepicker'][$vendor] ?? null;
+
+    return [
+        'js' => EX_PATH . "dashboard/assets/js/$vendor$suffix.js",
+        ...($style ? ['css' => EX_PATH . "dashboard/assets/css/$style$suffix.css"] : []),
+    ];
 });
 ```
 

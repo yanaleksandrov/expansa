@@ -473,7 +473,7 @@
     content: '';
     display: block;
     height: 100%;
-    transition: width 0.3s linear;
+    transition: var(--expansa-progress-transition, width 0.3s linear);
     width: var(--expansa-progress, 0);
     background-color: var(--expansa-primary);
   }

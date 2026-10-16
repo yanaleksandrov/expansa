@@ -47,7 +47,7 @@ defined('EX_PATH') || exit;
                 </div>
             </div>
             <div class="fields-builder__title">
-                Code Preview <i class="ph ph-copy" title="<?php echo t('Copy to clipboard'); ?>" u-copy="$refs.code.innerText"></i>
+                Code Preview <i class="ph ph-copy" title="<?php echo t('Copy to clipboard'); ?>" @click="$copy($refs.code.innerText)"></i>
             </div>
             <pre u-ref="code" u-highlight.php>
 echo view(
