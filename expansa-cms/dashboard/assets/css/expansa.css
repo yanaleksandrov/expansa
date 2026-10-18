@@ -598,6 +598,9 @@ img:after {
   display: grid;
   gap: 1.5rem;
 }
+.form-group .form-group-label {
+  font-weight: 500;
+}
 .form-group .form-group-content {
   display: grid;
   gap: 1.5rem;
@@ -605,9 +608,6 @@ img:after {
 }
 .form-group--row {
   grid-template-columns: repeat(5, 1fr);
-}
-.form-group--row > .form-group-label {
-  font-weight: 500;
 }
 .form-group--row > .form-group-content {
   grid-column: 2/-1;
@@ -634,15 +634,6 @@ img:after {
 }
 .form-group--stack {
   gap: 0.5rem;
-}
-.form-group--stack > .form-group-label {
-  font-weight: 500;
-}
-.form-group--plain {
-  gap: 1.25rem;
-}
-.form-group--plain > .form-group-content {
-  gap: 1.25rem;
 }
 .form-group--cols-2 > .form-group-content {
   grid-template-columns: repeat(2, 1fr);
@@ -3331,7 +3322,7 @@ body.is-unsaved .expansa-search-btn {
   border-inline-start: 1px dashed var(--expansa-border);
 }
 .storage-tree .ph-folder-open {
-  color: var(--expansa-blue);
+  color: var(--expansa-primary);
 }
 .storage-tree .ph-file-image {
   color: var(--expansa-text-muted);

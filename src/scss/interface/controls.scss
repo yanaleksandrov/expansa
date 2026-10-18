@@ -115,6 +115,10 @@
   display: grid;
   gap: 1.5rem;
 
+  .form-group-label {
+    font-weight: 500;
+  }
+
   .form-group-content {
     display: grid;
     gap: 1.5rem;
@@ -124,10 +128,6 @@
   // the content keeps the columns after the label even without one, so the groups line up
   &--row {
     grid-template-columns: repeat(5, 1fr);
-
-    > .form-group-label {
-      font-weight: 500;
-    }
 
     > .form-group-content {
       grid-column: 2 / -1;
@@ -159,18 +159,6 @@
 
   &--stack {
     gap: 0.5rem;
-
-    > .form-group-label {
-      font-weight: 500;
-    }
-  }
-
-  &--plain {
-    gap: 1.25rem;
-
-    > .form-group-content {
-      gap: 1.25rem;
-    }
   }
 
   @for $i from 2 through 4 {
