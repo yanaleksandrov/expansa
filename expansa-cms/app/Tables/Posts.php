@@ -256,7 +256,7 @@ final class Posts extends Table
         $actions[] = $this->type->canTrash ? [
             'href'       => '#',
             'class'      => 't-red',
-            'title'      => t('Trash'),
+            'title'      => t('Trash', context: 'action'),
             'attributes' => ['@click.prevent' => "\$ajax.post('post/delete', $item)"],
         ] : [
             'href'       => '#',

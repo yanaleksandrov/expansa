@@ -6,9 +6,6 @@ namespace App\Tables;
 
 use App\Api\Translations\TranslationsService;
 use Expansa\Builders\Table;
-use Expansa\Facades\Disk;
-use Expansa\Facades\I18n;
-use Expansa\Facades\Json;
 
 /**
  * Strings of the dashboard with their translations to the current language; with a project,
@@ -29,20 +26,30 @@ final class Translations extends Table
     }
 
     /**
-     * Rows of `source` and `value`, the value is empty for an untranslated string.
+     * Rows of a string: `source` without its context, `context`, and `value` empty for an untranslated string;
+     * a translation with plural forms shows its first one and is marked by `forms`, it is edited in the file.
      *
-     * @return array<int, array{source: string, value: string}>
+     * @return array<int, array{source: string, context: string, value: string, forms: bool}>
      */
     public function data(): array
     {
-        $text   = Disk::file(EX_DASHBOARD . sprintf('i18n/%s.json', I18n::locale()))->read();
-        $values = $text ? (array) Json::decode($text, true) : [];
-
-        $sources = $this->project !== '' ? new TranslationsService()->scan($this->project) : array_keys($values);
+        $service = new TranslationsService();
+        $project = $this->project ?: 'core';
+        $values  = $service->translations($project);
+        $keys    = $this->project !== '' ? $service->scan($project) : TranslationsService::sort(array_keys($values));
 
         return array_map(
-            fn (int|string $source) => ['source' => (string) $source, 'value' => (string) ($values[$source] ?? '')],
-            $sources,
+            function (int|string $key) use ($values): array {
+                $value = $values[$key] ?? '';
+
+                return [
+                    'source'  => TranslationsService::text((string) $key),
+                    'context' => TranslationsService::context((string) $key),
+                    'value'   => (string) (is_array($value) ? reset($value) : $value),
+                    'forms'   => is_array($value),
+                ];
+            },
+            $keys,
         );
     }
 

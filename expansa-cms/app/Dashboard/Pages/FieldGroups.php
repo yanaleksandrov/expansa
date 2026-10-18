@@ -71,7 +71,7 @@ final class FieldGroups
             'choice'   => [
                 'label'   => t('Choice'),
                 'options' => [
-                    'select'   => ['label' => t('Select'), 'icon' => 'ph ph-list'],
+                    'select'   => ['label' => t('Select', context: 'field type'), 'icon' => 'ph ph-list'],
                     'checkbox' => ['label' => t('Checkbox'), 'icon' => 'ph ph-check-square'],
                     'radio'    => ['label' => t('Radio'), 'icon' => 'ph ph-radio-button'],
                 ],

@@ -78,7 +78,7 @@ final class Users extends Table
                 ->fixedWidth('2.5rem')
                 ->view('image'),
             $this->cell('name')
-                ->title(t('Name'))
+                ->title(t('Name', context: 'person'))
                 ->flexibleWidth('16rem')
                 ->sortable()
                 ->view('user'),
@@ -138,8 +138,8 @@ final class Users extends Table
     private static function statuses(): array
     {
         return [
-            User::STATUS_ACTIVE   => t('Active'),
-            User::STATUS_INACTIVE => t('Disabled'),
+            User::STATUS_ACTIVE   => t('Active', context: 'user'),
+            User::STATUS_INACTIVE => t('Disabled', context: 'user'),
         ];
     }
 

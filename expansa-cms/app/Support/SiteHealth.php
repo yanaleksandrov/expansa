@@ -591,7 +591,7 @@ final class SiteHealth
             ),
             self::check(
                 t('Task Directory'),
-                is_dir(EX_STORAGE . 'ai') ? t('Created') : t('Created on the First Task'),
+                is_dir(EX_STORAGE . 'ai') ? t('Created', context: 'directory') : t('Created on the First Task'),
                 ! is_dir(EX_STORAGE . 'ai') || is_writable(EX_STORAGE . 'ai'),
                 t('The background worker saves the tasks to %s.', 'storage/ai/'),
             ),

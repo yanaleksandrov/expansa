@@ -549,7 +549,7 @@ return Expansa\Builders\Form::enqueue(
 								],
 								'generated' => [
 									'image'   => url( 'dashboard/assets/images/dashboard-dark.svg' ),
-									'title'   => t( 'Generated' ),
+									'title'   => t( 'Generated', context: 'avatar' ),
 									'content' => t( 'An avatar generated from the user’s name' ),
 								],
 							],

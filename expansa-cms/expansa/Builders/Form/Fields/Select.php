@@ -13,7 +13,7 @@ final class Select extends AbstractField
     {
         parent::__construct(
             type: 'select',
-            label: t('Select'),
+            label: t('Select', context: 'field type'),
             category: 'choice',
             icon: 'ph ph-list',
             description: t('A dropdown list for selecting one value.'),

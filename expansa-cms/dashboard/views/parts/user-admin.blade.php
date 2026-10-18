@@ -20,7 +20,7 @@ defined('EX_PATH') || exit;
 <div class="dg g-6 ga-4" u-data>
 	<div class="t-muted">
 		{{ $user->login }} · {{ $user->email }} · {{ implode(', ', $roles) ?: t('No role') }} ·
-		{{ $isActive ? t('Active') : t('Disabled') }}
+		{{ $isActive ? t('Active', context: 'user') : t('Disabled', context: 'user') }}
 		@if($hasTwoFactor)
 			· {{ t('Two-factor authentication on') }}
 		@endif

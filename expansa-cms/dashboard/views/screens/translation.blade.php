@@ -21,11 +21,18 @@ echo view('parts/table/header', $table->headData());
                 </div>
             @endforeach
         </div>
-        @foreach ($table->getData() as $item)
+        @foreach ($table->getData() as $i => $item)
             <div class="translation-grid">
-                <div class="translation-source">{{ $item['source'] }}</div>
+                <div class="translation-source">
+                    {{ $item['source'] }}
+                    @if ($item['context'])
+                        <span class="badge ml-2" title="{{ t('Context') }}">{{ $item['context'] }}</span>
+                    @endif
+                </div>
                 <label class="translation-value">
-                    <textarea name="translations[{{ $item['source'] }}]" rows="7">{{ $item['value'] }}</textarea>
+                    <input type="hidden" name="translations[{{ $i }}][source]" value="{{ $item['source'] }}">
+                    <input type="hidden" name="translations[{{ $i }}][context]" value="{{ $item['context'] }}">
+                    <textarea name="translations[{{ $i }}][value]" rows="7"@if ($item['forms']) disabled title="{{ t('Plural forms are edited in the translation file.') }}"@endif>{{ $item['value'] }}</textarea>
                 </label>
             </div>
         @endforeach

@@ -217,7 +217,7 @@ final class Menus
                 [
                     'id'           => 'installed',
                     'url'          => 'plugins',
-                    'title'        => t('Installed'),
+                    'title'        => t('Installed', context: 'plugins'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
                     'position'     => 0,

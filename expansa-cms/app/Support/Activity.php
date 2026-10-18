@@ -305,7 +305,7 @@ final class Activity
             'discussion'   => t('Discussion'),
             'password'     => t('Password'),
             'rating'       => t('Rating'),
-            'author_name'  => t('Name'),
+            'author_name'  => t('Name', context: 'person'),
             'author_email' => t('Email'),
             'name'         => t('Name'),
             'description'  => t('Description'),

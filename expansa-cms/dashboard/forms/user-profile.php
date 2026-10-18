@@ -104,7 +104,7 @@ $uid = Form::enqueue(
                 [
                     'type'    => 'group',
                     'name'    => 'name',
-                    'label'   => t('Name'),
+                    'label'   => t('Name', context: 'person'),
                     'columns' => 2,
                     'fields'  => [
                         [

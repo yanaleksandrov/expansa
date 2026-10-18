@@ -46,7 +46,7 @@ final class LayoutTab extends AbstractField
             [
                 'type'  => 'text',
                 'name'  => 'caption',
-                'label' => t('Caption'),
+                'label' => t('Caption', context: 'tab'),
             ],
             [
                 'type'  => 'text',

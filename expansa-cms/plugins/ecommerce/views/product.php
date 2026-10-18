@@ -31,18 +31,18 @@
                                 class="subtitle"
                                 :name="`<?php echo esc_attr($section_title_attr); ?>`"
                                 u-model="group.name"
-                                placeholder="<?php t('Subtitle'); ?>"
+                                placeholder="<?php echo t_attr('Subtitle'); ?>"
                             >
                             <button type="button" class="button button-small" @click="removeGroup(i)">
-                                <?php t('Remove Subgroup'); ?>
+                                <?php echo t('Remove Subgroup'); ?>
                             </button>
                         </div>
 
                         <template u-for="(item, key) in group.items">
-                            <div class="product-repeater-row" data-condition="<?php t('AND'); ?>">
+                            <div class="product-repeater-row" data-condition="<?php echo t_attr('AND'); ?>">
                                 <template u-for="(product, productIdx) in item.products">
-                                    <div class="product-repeater-item" data-condition="<?php t('OR'); ?>">
-                                        <span class="mix" u-show="product.mix.length !== 0"><?php t('MIX'); ?>:</span>
+                                    <div class="product-repeater-item" data-condition="<?php echo t_attr('OR'); ?>">
+                                        <span class="mix" u-show="product.mix.length !== 0"><?php echo t('MIX'); ?>:</span>
                                         <input
                                             type="hidden"
                                             :value="product.id"
@@ -53,7 +53,7 @@
                                             type="text"
                                             u-model="product.shortTitle"
                                             :name="`<?php echo esc_attr($section_name_attr); ?>[shortTitle]`"
-                                            placeholder="<?php t('Product Short Title'); ?>"
+                                            placeholder="<?php echo t_attr('Product Short Title'); ?>"
                                         >
                                         <a class="product-repeater-item-name" target="_blank" u-text="product.title" :href="product.permalink" u-show="product.mix.length === 0"></a>
                                         <input
@@ -64,7 +64,7 @@
                                             u-model="product.qty"
                                             u-show="product.mix.length === 0"
                                             :name="`<?php echo esc_attr($section_name_attr); ?>[qty]`"
-                                            title="<?php t('Default Quantity'); ?>"
+                                            title="<?php echo t_attr('Default Quantity'); ?>"
                                             required
                                         >
                                         <span
@@ -73,24 +73,24 @@
                                             u-show="product.mix.length === 0"
                                         ></span>
                                         <span class="button" @click="joinProduct(product)" u-show="product.mix.length === 0">
-                                            <?php t('MIX'); ?>
+                                            <?php echo t('MIX'); ?>
                                         </span>
                                         <span
                                             class="button"
                                             @click="removeProduct(i, key, productIdx)"
-                                            title="<?php t('Remove Product'); ?>"
+                                            title="<?php echo t_attr('Remove Product'); ?>"
                                         >×</span>
                                         <span
                                             class="button"
                                             u-show="productIdx > 0"
                                             @click="moveUp(item.products, productIdx)"
-                                            title="<?php t('Move Product Up'); ?>"
+                                            title="<?php echo t_attr('Move Product Up'); ?>"
                                         >&#8963;</span>
                                         <span
                                             class="button"
                                             u-show="productIdx === 0 && key > 0"
                                             @click="moveUp(group.items, key)"
-                                            title="<?php t('Move Group Up'); ?>"
+                                            title="<?php echo t_attr('Move Group Up'); ?>"
                                         >&#708;</span>
 
                                         <template u-if="product.mix.length > 0">
@@ -107,7 +107,7 @@
                                                             type="text"
                                                             u-model="mixedProduct.shortTitle"
                                                             :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][shortTitle]`"
-                                                            placeholder="<?php t('Product Short Title'); ?>"
+                                                            placeholder="<?php echo t_attr('Product Short Title'); ?>"
                                                         >
                                                         <a class="product-repeater-item-name" target="_blank" u-text="mixedProduct.title" :href="mixedProduct.permalink"></a>
                                                         <input
@@ -117,11 +117,11 @@
                                                             type="number"
                                                             u-model="mixedProduct.qty"
                                                             :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][qty]`"
-                                                            title="<?php t('Default Quantity'); ?>"
+                                                            title="<?php echo t_attr('Default Quantity'); ?>"
                                                             required
                                                         >
                                                         <span class="product-repeater-item-price" u-html="` × ${mixedProduct.price}`"></span>
-                                                        <span class="button" @click="removeMixedProduct(product, mixedProductIdx)" title="<?php t('Remove Product'); ?>">×</span>
+                                                        <span class="button" @click="removeMixedProduct(product, mixedProductIdx)" title="<?php echo t_attr('Remove Product'); ?>">×</span>
                                                     </div>
                                                 </template>
                                                 <div class="product-repeater-search" @click.outside="product.search = []">
@@ -131,7 +131,7 @@
                                                         @focus="searchProduct($event, $el, product)"
                                                         @input.debounce.250ms="searchProduct($event, $el, product)"
                                                         data-include="<?php echo esc_attr(implode(',', $section_products_ids)); ?>"
-                                                        placeholder="<?php t('Type to add a product to the mix&hellip;'); ?>"
+                                                        placeholder="<?php echo t_attr('Type to add a product to the mix&hellip;'); ?>"
                                                     >
                                                     <template u-if="product.search.length > 0">
                                                         <div class="product-repeater-search-box">
@@ -157,7 +157,7 @@
                                         @focus="searchProduct($event, $el, item)"
                                         @input.debounce.250ms="searchProduct($event, $el, item)"
                                         data-include="<?php echo esc_attr(implode(',', $section_products_ids)); ?>"
-                                        placeholder="<?php t('Type to add a new product&hellip;'); ?>"
+                                        placeholder="<?php echo t_attr('Type to add a new product&hellip;'); ?>"
                                     >
                                     <template u-if="item.search.length > 0">
                                         <div class="product-repeater-search-box">
@@ -173,11 +173,11 @@
                                 </div>
                             </div>
                         </template>
-                        <div class="button button-small" @click="addItem(group)"><?php t('AND'); ?></div>
+                        <div class="button button-small" @click="addItem(group)"><?php echo t('AND'); ?></div>
                     </div>
                 </template>
                 <button type="button" class="product-repeater-add button button-small" @click="addGroup">
-                    <?php t('Add New Subgroup'); ?>
+                    <?php echo t('Add New Subgroup'); ?>
                 </button>
             </div>
 

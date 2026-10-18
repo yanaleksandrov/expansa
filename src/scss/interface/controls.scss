@@ -216,11 +216,12 @@
     align-items: center;
     gap: 0.65em;
     font-weight: 500;
-    line-height: 1.1;
-    padding: 0.5rem 0.8rem;
+    line-height: 1.2;
+    padding: 0.45rem 0.8rem;
     color: var(--expansa-text-muted);
     background-color: transparent;
     cursor: pointer;
+    word-break: keep-all;
     transition: color .3s, background-color .3s;
     height: auto;
     width: 100%;
