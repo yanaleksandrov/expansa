@@ -18,7 +18,7 @@ return Expansa\Builders\Form::enqueue(
 	'settings',
 	[
 		'class'           => 'tab',
-		'u-data'          => 'tab',
+		'u-data'          => 'tab as tab',
 		'@load'           => '$dirty.watch($el)',
 		'@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
 	],
@@ -31,13 +31,11 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-tree-structure',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'website',
-					'label'         => t( 'Website' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => '',
-					'fields'        => [
+					'type'    => 'group',
+					'name'    => 'website',
+					'label'   => t( 'Website' ),
+					'columns' => 2,
+					'fields'  => [
 						[
 							'type'        => 'text',
 							'name'        => 'site[name]',
@@ -128,13 +126,11 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'administrator',
-					'label'         => t( 'Administrator' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => '',
-					'fields'        => [
+					'type'    => 'group',
+					'name'    => 'administrator',
+					'label'   => t( 'Administrator' ),
+					'columns' => 2,
+					'fields'  => [
 						[
 							'type'        => 'text',
 							'name'        => 'owner[email]',
@@ -159,13 +155,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'users',
-					'label'         => t( 'Memberships' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'users',
+					'label'  => t( 'Memberships' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => '',
@@ -229,13 +222,11 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'dates',
-					'label'         => t( 'Date and Time' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => '',
-					'fields'        => [
+					'type'    => 'group',
+					'name'    => 'dates',
+					'label'   => t( 'Date and Time' ),
+					'columns' => 2,
+					'fields'  => [
 						[
 							'name'     => 'date-format',
 							'type'     => 'custom',
@@ -357,13 +348,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-chats-circle',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'comments',
-					'label'         => t( 'Post Comments' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'comments',
+					'label'  => t( 'Post Comments' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments',
@@ -418,13 +406,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'comments',
-					'label'         => t( 'Email Me Whenever' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'comments',
+					'label'  => t( 'Email Me Whenever' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments[notify_posts]',
@@ -461,13 +446,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'appears',
-					'label'         => t( 'Before a Comment Appears' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'appears',
+					'label'  => t( 'Before a Comment Appears' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments',
@@ -504,13 +486,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'avatars',
-					'label'         => t( 'Avatar Display' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'avatars',
+					'label'  => t( 'Avatar Display' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'avatars[show]',
@@ -587,13 +566,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-shield-check',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'sign-in-limits',
-					'label'         => t( 'Password Guessing' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'sign-in-limits',
+					'label'  => t( 'Password Guessing' ),
+					'fields' => [
 						[
 							'type'        => 'number',
 							'name'        => 'security[attempts]',
@@ -750,13 +726,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'two-factor',
-					'label'         => t( 'Two-Factor Authentication' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'two-factor',
+					'label'  => t( 'Two-Factor Authentication' ),
+					'fields' => [
 						[
 							'type'        => 'hidden',
 							'name'        => 'security[two_factor_roles][_]',
@@ -810,13 +783,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'oauth',
-					'label'         => t( 'Sign-In Providers' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'oauth',
+					'label'  => t( 'Sign-In Providers' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'oauth[google][client_id]',
@@ -981,13 +951,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-mailbox',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'smtp',
-					'label'         => t( 'SMTP Server' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'smtp',
+					'label'  => t( 'SMTP Server' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'mail[host]',
@@ -1145,13 +1112,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'dkim',
-					'label'         => t( 'DKIM Signature' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'dkim',
+					'label'  => t( 'DKIM Signature' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'mail[dkim][domain]',
@@ -1240,13 +1204,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-sparkle',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'ai-service',
-					'label'         => t( 'AI Service' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'ai-service',
+					'label'  => t( 'AI Service' ),
+					'fields' => [
 						[
 							'type'        => 'url',
 							'name'        => 'ai[url]',
@@ -1365,13 +1326,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-users-three',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'roles',
-					'label'         => t( 'Roles and Permissions' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'roles',
+					'label'  => t( 'Roles and Permissions' ),
+					'fields' => [
 						[
 							'name'     => 'roles',
 							'type'     => 'custom',

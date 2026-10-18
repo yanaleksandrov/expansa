@@ -84,12 +84,10 @@ return new class extends Plugin
             ],
             [
                 [
-                    'name'    => 'manage',
-                    'type'    => 'group',
-                    'label'   => t('Managing fields'),
-                    'class'   => '',
-                    'columns' => '',
-                    'fields'  => [
+                    'name'   => 'manage',
+                    'type'   => 'group',
+                    'label'  => t('Managing fields'),
+                    'fields' => [
                         [
                             'name'        => 'general',
                             'type'        => 'tab',

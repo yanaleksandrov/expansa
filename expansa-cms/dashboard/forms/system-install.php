@@ -168,13 +168,12 @@ return \Expansa\Builders\Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'system',
-                    'label'         => '',
-                    'class'         => 'dg g-6 gtc-4 sm:gtc-1',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'system',
+                    'label'   => '',
+                    'layout'  => 'plain',
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'type'        => 'text',
                             'name'        => 'db[host]',

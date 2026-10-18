@@ -1005,28 +1005,28 @@ document.addEventListener('youla:init', () => {
         }
     }));
     Youla.data('tab', () => ({
-        tab: null,
-        tabButton(id) {
+        active: null,
+        button(id) {
             return {
                 ':class'() {
-                    this.tab ??= this.$el.classList.contains('is-active') ? id : null;
+                    this.active ??= this.$el.classList.contains('is-active') ? id : null;
                     return {
-                        'is-active': this.tab === id
+                        'is-active': this.active === id
                     };
                 },
                 '@click'() {
-                    this.tab = id;
+                    this.active = id;
                     const url = new URL(window.location.href);
                     url.searchParams.set('tab', id);
                     window.history.pushState({}, '', url);
                 }
             };
         },
-        tabContent(id) {
+        content(id) {
             return {
                 'u-show'() {
-                    this.tab ??= this.$el.hidden ? null : id;
-                    return this.tab === id;
+                    this.active ??= this.$el.hidden ? null : id;
+                    return this.active === id;
                 }
             };
         }

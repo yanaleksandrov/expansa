@@ -12,27 +12,27 @@ use App\Support\Transliteration;
 $mode    = Option::get( 'permalinks.transliterate', false ) ? 'latin' : 'keep';
 $scripts = [
 	'latin'    => [
-		'label'  => t( 'Latin' ),
-		'lang'   => '',
-		'dir'    => 'ltr',
-		'groups' => [
+		'label'       => t( 'Latin' ),
+		'lang'        => '',
+		'dir'         => 'ltr',
+		'groups'      => [
 			'letters' => t( 'Letters with diacritics' ),
 		],
 	],
 	'cyrillic' => [
-		'label'  => t( 'Cyrillic' ),
-		'lang'   => 'ru',
-		'dir'    => 'ltr',
-		'groups' => [
+		'label'       => t( 'Cyrillic' ),
+		'lang'        => 'ru',
+		'dir'         => 'ltr',
+		'groups'      => [
 			'letters'  => t( 'Letters' ),
 			'extended' => t( 'Letters of other languages' ),
 		],
 	],
 	'arabic'   => [
-		'label'  => t( 'Arabic' ),
-		'lang'   => 'ar',
-		'dir'    => 'rtl',
-		'groups' => [
+		'label'       => t( 'Arabic' ),
+		'lang'        => 'ar',
+		'dir'         => 'rtl',
+		'groups'      => [
 			'letters'  => t( 'Letters' ),
 			'extended' => t( 'Letters of other languages' ),
 			'marks'    => t( 'Diacritics' ),
@@ -40,10 +40,10 @@ $scripts = [
 		],
 	],
 	'hebrew'   => [
-		'label'  => t( 'Hebrew' ),
-		'lang'   => 'he',
-		'dir'    => 'rtl',
-		'groups' => [
+		'label'       => t( 'Hebrew' ),
+		'lang'        => 'he',
+		'dir'         => 'rtl',
+		'groups'      => [
 			'letters'  => t( 'Letters' ),
 			'finals'   => t( 'Final forms' ),
 			'extended' => t( 'Yiddish ligatures' ),
@@ -51,10 +51,10 @@ $scripts = [
 		],
 	],
 	'hangul'   => [
-		'label'  => t( 'Hangul' ),
-		'lang'   => 'ko',
-		'dir'    => 'ltr',
-		'groups' => [
+		'label'       => t( 'Hangul' ),
+		'lang'        => 'ko',
+		'dir'         => 'ltr',
+		'groups'      => [
 			'initials' => t( 'Initial consonants' ),
 			'vowels'   => t( 'Vowels' ),
 			'finals'   => t( 'Final consonants' ),
@@ -101,20 +101,17 @@ $letters = static fn ( string $name, array $config ): Closure => static function
 $groups = [];
 foreach ( $scripts as $name => $config ) {
 	$groups[] = [
-		'type'          => 'group',
-		'name'          => "transliteration-$name",
-		'label'         => $config['label'],
-		'class'         => '',
-		'label_class'   => '',
-		'content_class' => 'dg ga-4 g-6 gtc-1',
-		'conditions'    => [
+		'type'        => 'group',
+		'name'        => "transliteration-$name",
+		'label'       => $config['label'],
+		'conditions'  => [
 			[
 				'field'    => 'permalinks[mode]',
 				'operator' => '==',
 				'value'    => 'latin',
 			],
 		],
-		'fields'        => [
+		'fields'      => [
 			[
 				'name'     => "permalinks-$name",
 				'type'     => 'custom',
@@ -128,7 +125,7 @@ return Expansa\Builders\Form::enqueue(
 	'permalinks',
 	[
 		'class'           => 'tab',
-		'u-data'          => 'tab',
+		'u-data'          => 'tab as tab',
 		'@load'           => '$dirty.watch($el)',
 		'@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
 	],
@@ -142,13 +139,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'        => 'ph ph-link',
 			'fields'      => [
 				[
-					'type'          => 'group',
-					'name'          => 'dates',
-					'label'         => t( 'Pages' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'dates',
+					'label'  => t( 'Pages' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'permalinks[pages][single]',
@@ -204,13 +198,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'        => 'ph ph-link-simple',
 			'fields'      => [
 				[
-					'type'          => 'group',
-					'name'          => 'mode',
-					'label'         => t( 'Mode' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'mode',
+					'label'  => t( 'Mode' ),
+					'fields' => [
 						[
 							'type'        => 'radio',
 							'name'        => 'permalinks[mode]',
@@ -234,13 +225,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'rules',
-					'label'         => t( 'Own Rules' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'rules',
+					'label'  => t( 'Own Rules' ),
+					'fields' => [
 						[
 							'name'     => 'permalinks-rules',
 							'type'     => 'custom',

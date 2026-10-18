@@ -23,7 +23,7 @@ return Form::enqueue(
     'comment-editor',
     [
         'class'           => 'tab post-editor',
-        'u-data'          => 'tab',
+        'u-data'          => 'tab as tab',
         '@load'           => '$dirty.watch($el)',
         '@submit.prevent' => '$ajax.post("comments/update", "", () => $dirty.remove($el))',
     ],
@@ -66,24 +66,20 @@ return Form::enqueue(
             },
         ],
         [
-            'type'          => 'tab',
-            'label'         => t('Comment'),
-            'name'          => 'comment',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-chat-text',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => '',
-            'fields'        => [
+            'type'        => 'tab',
+            'label'       => t('Comment'),
+            'name'        => 'comment',
+            'caption'     => '',
+            'description' => '',
+            'icon'        => 'ph ph-chat-text',
+            'fields'      => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'main',
-                    'label'         => '',
-                    'class'         => 'post-editor-main',
-                    'label_class'   => '',
-                    'content_class' => 'post-editor-card',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'main',
+                    'label'  => '',
+                    'layout' => 'plain',
+                    'class'  => 'post-editor-main',
+                    'fields' => [
                         [
                             'type'        => 'textarea',
                             'name'        => 'content',
@@ -107,13 +103,12 @@ return Form::enqueue(
                             ],
                         ],
                         [
-                            'type'          => 'group',
-                            'name'          => 'author',
-                            'label'         => '',
-                            'class'         => 'dg',
-                            'label_class'   => '',
-                            'content_class' => 'dg g-5 gtc-2 sm:gtc-1',
-                            'fields'        => [
+                            'type'    => 'group',
+                            'name'    => 'author',
+                            'label'   => '',
+                            'layout'  => 'plain',
+                            'columns' => 2,
+                            'fields'  => [
                                 [
                                     'type'        => 'text',
                                     'name'        => 'author_name',
@@ -161,16 +156,13 @@ return Form::enqueue(
             ],
         ],
         [
-            'type'          => 'tab',
-            'label'         => t('Reply'),
-            'name'          => 'reply',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-arrow-bend-up-left',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => '',
-            'fields'        => [
+            'type'        => 'tab',
+            'label'       => t('Reply'),
+            'name'        => 'reply',
+            'caption'     => '',
+            'description' => '',
+            'icon'        => 'ph ph-arrow-bend-up-left',
+            'fields'      => [
                 [
                     'name'     => 'reply',
                     'type'     => 'custom',
@@ -209,16 +201,13 @@ return Form::enqueue(
             ],
         ],
         [
-            'type'          => 'tab',
-            'label'         => t('Activity'),
-            'name'          => 'activity',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-clock-counter-clockwise',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => '',
-            'fields'        => [
+            'type'        => 'tab',
+            'label'       => t('Activity'),
+            'name'        => 'activity',
+            'caption'     => '',
+            'description' => '',
+            'icon'        => 'ph ph-clock-counter-clockwise',
+            'fields'      => [
                 [
                     'name'     => 'activity',
                     'type'     => 'custom',
@@ -250,13 +239,12 @@ return Form::enqueue(
             ],
         ],
         [
-            'type'          => 'group',
-            'name'          => 'side',
-            'label'         => '',
-            'class'         => 'post-editor-side',
-            'label_class'   => '',
-            'content_class' => 'dg g-5',
-            'fields'        => [
+            'type'   => 'group',
+            'name'   => 'side',
+            'label'  => '',
+            'layout' => 'plain',
+            'class'  => 'post-editor-side',
+            'fields' => [
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',

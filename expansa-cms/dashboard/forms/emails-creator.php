@@ -1,7 +1,5 @@
 <?php
 
-use Expansa\Facades\Safe;
-
 /**
  * Form for create & edit emails.
  *
@@ -11,20 +9,17 @@ return \Expansa\Builders\Form::enqueue(
 	'emails-creator',
 	[
 		'@submit.window' => '$ajax.post("import-email")',
-		'u-data'         => sprintf( "tab('%s')", Safe::prop( $_GET['tab'] ?? 'general' ) ),
+		'u-data'         => 'tab as tab',
 	],
 	[
 		[
-			'type'          => 'tab',
-			'label'         => t( 'General' ),
-			'name'          => 'general',
-			'class_menu'    => '',
-			'class_button'  => '',
-			'class_content' => 'p-7',
-			'instruction'   => '',
-			'caption'       => '',
-			'icon'          => 'ph ph-envelope-simple-open',
-			'fields'        => [
+			'type'        => 'tab',
+			'label'       => t( 'General' ),
+			'name'        => 'general',
+			'instruction' => '',
+			'caption'     => '',
+			'icon'        => 'ph ph-envelope-simple-open',
+			'fields'      => [
 				[
 					'type'        => 'select',
 					'name'        => 'event',
@@ -165,16 +160,13 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'tab',
-			'label'         => t( 'Global' ),
-			'name'          => 'global',
-			'class_menu'    => '',
-			'class_button'  => '',
-			'class_content' => '',
-			'instruction'   => '',
-			'caption'       => '',
-			'icon'          => 'ph ph-faders',
-			'fields'        => [
+			'type'        => 'tab',
+			'label'       => t( 'Global' ),
+			'name'        => 'global',
+			'instruction' => '',
+			'caption'     => '',
+			'icon'        => 'ph ph-faders',
+			'fields'      => [
 				[
 					'type'        => 'textarea',
 					'name'        => 'bottom',
@@ -220,16 +212,13 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'tab',
-			'label'         => t( 'Test' ),
-			'name'          => 'test',
-			'class_menu'    => '',
-			'class_button'  => '',
-			'class_content' => '',
-			'instruction'   => '',
-			'caption'       => '',
-			'icon'          => 'ph ph-test-tube',
-			'fields'        => [
+			'type'        => 'tab',
+			'label'       => t( 'Test' ),
+			'name'        => 'test',
+			'instruction' => '',
+			'caption'     => '',
+			'icon'        => 'ph ph-test-tube',
+			'fields'      => [
 				[
 					'type'        => 'email',
 					'name'        => 'email',
@@ -271,16 +260,13 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'tab',
-			'label'         => t( 'Placeholders' ),
-			'name'          => 'placeholders',
-			'class_menu'    => '',
-			'class_button'  => '',
-			'class_content' => '',
-			'instruction'   => '',
-			'caption'       => '',
-			'icon'          => 'ph ph-brackets-curly',
-			'fields'        => [
+			'type'        => 'tab',
+			'label'       => t( 'Placeholders' ),
+			'name'        => 'placeholders',
+			'instruction' => '',
+			'caption'     => '',
+			'icon'        => 'ph ph-brackets-curly',
+			'fields'      => [
 				[
 					'name'     => 'instructions',
 					'type'     => 'custom',

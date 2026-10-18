@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Expansa\Builders\Form\Fields;
 
 /**
- * Renders the `layout-tab` template - a single tab panel of a tabbed form,
- * paired with {@see LayoutTabMenu} for its navigation.
+ * A single tab of a tabbed form: all tabs of a level render together through the `layout-tabs`
+ * template, the menu and their panels.
  */
 final class LayoutTab extends AbstractField
 {
@@ -21,7 +21,9 @@ final class LayoutTab extends AbstractField
             defaults: [
                 'name'        => '',
                 'label'       => '',
-                'instruction' => '',
+                'icon'        => '',
+                'caption'     => '',
+                'description' => '',
                 'fields'      => [],
             ],
         );
@@ -43,7 +45,12 @@ final class LayoutTab extends AbstractField
             ],
             [
                 'type'  => 'text',
-                'name'  => 'instruction',
+                'name'  => 'caption',
+                'label' => t('Caption'),
+            ],
+            [
+                'type'  => 'text',
+                'name'  => 'description',
                 'label' => t('Description'),
             ],
         ];

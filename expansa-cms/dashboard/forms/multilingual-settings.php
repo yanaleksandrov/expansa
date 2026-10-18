@@ -28,7 +28,7 @@ return Expansa\Builders\Form::enqueue(
     'multilingual-settings',
     [
         'class'   => 'tab',
-        'u-data'  => 'tab',
+        'u-data'  => 'tab as tab',
         '@change' => '$ajax.post("user/update")',
     ],
     [
@@ -40,13 +40,10 @@ return Expansa\Builders\Form::enqueue(
             'icon'    => 'ph ph-translate',
             'fields'  => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'comments',
-                    'label'         => t( 'URL Modifications' ),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'comments',
+                    'label'  => t( 'URL Modifications' ),
+                    'fields' => [
                         [
                             'type'        => 'radio',
                             'name'        => 'site[language]',
@@ -84,13 +81,10 @@ return Expansa\Builders\Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'comments',
-                    'label'         => t( 'Allow Access For' ),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'comments',
+                    'label'  => t( 'Allow Access For' ),
+                    'fields' => [
                         [
                             'type'        => 'checkbox',
                             'name'        => 'comments',
@@ -172,13 +166,10 @@ return Expansa\Builders\Form::enqueue(
             'icon'        => 'ph ph-key',
             'fields'      => [
 				[
-                    'type'          => 'group',
-                    'name'          => 'comments',
-                    'label'         => t( 'Allow Access For' ),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'comments',
+                    'label'  => t( 'Allow Access For' ),
+                    'fields' => [
                         [
                             'type'        => 'text',
                             'name'        => 'site[tagline]',

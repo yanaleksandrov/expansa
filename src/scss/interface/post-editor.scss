@@ -8,7 +8,7 @@
 
   // the columns do not depend on the content: otherwise the side wraps or comes back
   // when a scrollbar appears on load, and the content jumps between two widths
-  &.tab > .tab__content,
+  &.tab > .tab-content,
   &.tab .post-editor-main {
     min-width: 0;
   }
@@ -144,7 +144,9 @@
     padding-inline: 1rem;
   }
 
-  .post-editor-card {
+  // a plain group with the class shows its fields as the card
+  .post-editor-card,
+  .post-editor-main > .form-group-content {
     display: grid;
     align-content: flex-start;
     gap: 1rem;

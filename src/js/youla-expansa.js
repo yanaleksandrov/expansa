@@ -1210,23 +1210,23 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Tabs, synced with the page URL: `u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
-     * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab starts from the button
-     * the server marks `is-active` or the first panel that is not `hidden`: the tab of `?tab=`, else the first.
+     * Tabs, synced with the page URL: `u-data="tab as tab"` on the wrapper, `u-bind="tab.button('id')"`
+     * on each tab button, `u-show="tab.active === 'id'"` or `u-bind="tab.content('id')"` on each panel.
+     * The active tab starts from the button the server marks `is-active`: the tab of `?tab=`, else the first.
      *
      * @since 1.0
      */
     Youla.data('tab', () => ({
-        tab: null,
-        tabButton(id) {
+        active: null,
+        button(id) {
             return {
                 ':class'() {
-                    this.tab ??= this.$el.classList.contains('is-active') ? id : null;
+                    this.active ??= this.$el.classList.contains('is-active') ? id : null;
 
-                    return { 'is-active': this.tab === id };
+                    return { 'is-active': this.active === id };
                 },
                 '@click'() {
-                    this.tab = id;
+                    this.active = id;
 
                     const url = new URL(window.location.href);
                     url.searchParams.set('tab', id);
@@ -1234,12 +1234,12 @@ document.addEventListener('youla:init', ()=> {
                 },
             };
         },
-        tabContent(id) {
+        content(id) {
             return {
                 'u-show'() {
-                    this.tab ??= this.$el.hidden ? null : id;
+                    this.active ??= this.$el.hidden ? null : id;
 
-                    return this.tab === id;
+                    return this.active === id;
                 },
             };
         },

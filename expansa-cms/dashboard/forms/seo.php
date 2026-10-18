@@ -81,7 +81,7 @@ return Expansa\Builders\Form::enqueue(
 	'seo',
 	[
 		'class'           => 'tab',
-		'u-data'          => 'tab',
+		'u-data'          => 'tab as tab',
 		'@load'           => '$dirty.watch($el)',
 		'@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
 	],
@@ -95,13 +95,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'        => 'ph ph-app-window',
 			'fields'      => [
 				[
-					'type'          => 'group',
-					'name'          => 'site-info',
-					'label'         => t( 'Site Info' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'site-info',
+					'label'  => t( 'Site Info' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'site[name]',
@@ -255,13 +252,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'        => 'ph ph-buildings',
 			'fields'      => [
 				[
-					'type'          => 'group',
-					'name'          => 'represents',
-					'label'         => t( 'Organization/Person' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'represents',
+					'label'  => t( 'Organization/Person' ),
+					'fields' => [
 						[
 							'type'        => 'button-group',
 							'name'        => 'seo[represents]',
@@ -284,20 +278,17 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'organization',
-					'label'         => t( 'Organization' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'conditions'    => [
+					'type'       => 'group',
+					'name'       => 'organization',
+					'label'      => t( 'Organization' ),
+					'conditions' => [
 						[
 							'field'    => 'seo[represents]',
 							'operator' => '==',
 							'value'    => 'organization',
 						],
 					],
-					'fields'        => [
+					'fields'     => [
 						[
 							'type'        => 'text',
 							'name'        => 'seo[organization][name]',
@@ -344,20 +335,17 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'person',
-					'label'         => t( 'Person' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'conditions'    => [
+					'type'       => 'group',
+					'name'       => 'person',
+					'label'      => t( 'Person' ),
+					'conditions' => [
 						[
 							'field'    => 'seo[represents]',
 							'operator' => '==',
 							'value'    => 'person',
 						],
 					],
-					'fields'        => [
+					'fields'     => [
 						[
 							'type'        => 'select',
 							'name'        => 'seo[person][user]',
@@ -387,20 +375,17 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'profiles',
-					'label'         => t( 'Other Profiles' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'conditions'    => [
+					'type'       => 'group',
+					'name'       => 'profiles',
+					'label'      => t( 'Other Profiles' ),
+					'conditions' => [
 						[
 							'field'    => 'seo[represents]',
 							'operator' => '==',
 							'value'    => 'organization',
 						],
 					],
-					'fields'        => [
+					'fields'     => [
 						[
 							'type'        => 'url',
 							'name'        => 'seo[organization][facebook]',
@@ -487,20 +472,18 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'organization-info',
-					'label'         => t( 'Additional Organization Info' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-2 sm:gtc-1',
-					'conditions'    => [
+					'type'       => 'group',
+					'name'       => 'organization-info',
+					'label'      => t( 'Additional Organization Info' ),
+					'conditions' => [
 						[
 							'field'    => 'seo[represents]',
 							'operator' => '==',
 							'value'    => 'organization',
 						],
 					],
-					'fields'        => [
+					'columns'    => 2,
+					'fields'     => [
 						[
 							'type'        => 'textarea',
 							'name'        => 'seo[organization][description]',
@@ -629,20 +612,18 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'organization-identifiers',
-					'label'         => t( 'Organization Identifiers' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-2 sm:gtc-1',
-					'conditions'    => [
+					'type'       => 'group',
+					'name'       => 'organization-identifiers',
+					'label'      => t( 'Organization Identifiers' ),
+					'conditions' => [
 						[
 							'field'    => 'seo[represents]',
 							'operator' => '==',
 							'value'    => 'organization',
 						],
 					],
-					'fields'        => array_map(
+					'columns'    => 2,
+					'fields'     => array_map(
 						static fn ( string $key, string $label ) => [
 							'type'        => 'text',
 							'name'        => "seo[organization][identifiers][$key]",
@@ -677,13 +658,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'        => 'ph ph-bug',
 			'fields'      => [
 				[
-					'type'          => 'group',
-					'name'          => 'robots',
-					'label'         => t( 'robots.txt File' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'robots',
+					'label'  => t( 'robots.txt File' ),
+					'fields' => [
 						...array_map(
 							static fn ( string $name ) => [
 								'type'        => 'hidden',
@@ -770,13 +748,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'sitemap',
-					'label'         => t( 'XML Sitemap' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'sitemap',
+					'label'  => t( 'XML Sitemap' ),
+					'fields' => [
 						...array_map(
 							static fn ( string $name ) => [
 								'type'        => 'hidden',
@@ -866,13 +841,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'        => 'ph ph-robot',
 			'fields'      => [
 				[
-					'type'          => 'group',
-					'name'          => 'llms-file',
-					'label'         => t( 'llms.txt File' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'llms-file',
+					'label'  => t( 'llms.txt File' ),
+					'fields' => [
 						[
 							'type'        => 'hidden',
 							'name'        => 'seo[llms][enabled]',

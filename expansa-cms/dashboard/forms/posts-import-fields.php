@@ -14,13 +14,11 @@ return \Expansa\Builders\Form::enqueue(
 	'import-fields',
 	fields: [
 		[
-			'type'          => 'group',
-			'name'          => 'data',
-			'label'         => t( 'Required Data' ),
-			'class'         => '',
-			'label_class'   => '',
-			'content_class' => '',
-			'fields'        => [
+			'type'    => 'group',
+			'name'    => 'data',
+			'label'   => t( 'Required Data' ),
+			'columns' => 2,
+			'fields'  => [
 				[
 					'type'        => 'select',
 					'name'        => 'type',
@@ -80,13 +78,11 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'group',
-			'name'          => 'map-data',
-			'label'         => t( 'Map Data' ),
-			'class'         => '',
-			'label_class'   => '',
-			'content_class' => '',
-			'fields'        => array_map(fn($index, $sample) => [
+			'type'    => 'group',
+			'name'    => 'map-data',
+			'label'   => t( 'Map Data' ),
+			'columns' => 2,
+			'fields'  => array_map(fn($index, $sample) => [
 				'type'        => 'select',
 				'label'       => '',
 				'name'        => 'map[' . $index . ']',
