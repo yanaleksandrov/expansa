@@ -705,6 +705,44 @@ final class UserService
     }
 
     /**
+     * Administrator: apply a bulk action of the users table to the selected accounts, then reload the table;
+     * the accounts of the owner and the own one where it would lock the administrator out are skipped.
+     *
+     * @param Request  $request  `action`: `activate`, `disable`, `sign-out`, `password-reset` or `role:<role>`;
+     *                           `ids`: comma-separated user IDs; may carry the current `password`.
+     * @param Response $response
+     * @return Response Notice and reload.
+     */
+    public function bulk(Request $request, Response $response): Response
+    {
+        $admin  = User::current();
+        $action = (string) ($request->post['action'] ?? '');
+        $role   = str_starts_with($action, 'role:') ? substr($action, 5) : '';
+        $ids    = array_unique(array_filter(array_map(intval(...), explode(',', (string) ($request->post['ids'] ?? '')))));
+        if ($ids === [] || ($role === '' && ! in_array($action, ['activate', 'disable', 'sign-out', 'password-reset'], true))) {
+            return $response->notify(t('Select users and an action first.'));
+        }
+
+        if (in_array($action, ['activate', 'disable', 'sign-out'], true) && ! Confirmation::check($admin, $request->post)) {
+            return $response->notify(t('Confirm it is you: enter your current password.'));
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $user = Admin::find($id);
+            if ($user === null || Admin::isProtected($admin, $user) || ($action === 'sign-out' && $user->id === $admin->id)) {
+                continue;
+            }
+
+            $count += (int) self::administerOne($admin, $user, $action, $role);
+        }
+
+        return $response
+            ->notify(t('Users changed: :count', $count))
+            ->reload(1200);
+    }
+
+    /**
      * Administrator: sign in as the user, after a confirmation.
      *
      * @param Request  $request  `id`, may carry the current `password`.
@@ -914,6 +952,40 @@ final class UserService
         return $response
             ->notify($action($admin, $user))
             ->reload(1200);
+    }
+
+    /**
+     * Apply a bulk action of the users table to one account.
+     *
+     * @param User   $admin
+     * @param User   $user
+     * @param string $action See bulk().
+     * @param string $role   Role of a `role:<role>` action.
+     * @return bool False when the account is refused, e.g. the own one to disable.
+     */
+    private static function administerOne(User $admin, User $user, string $action, string $role): bool
+    {
+        switch ($action) {
+            case 'activate':
+            case 'disable':
+                return Admin::setActive($admin, $user, $action === 'activate') === null;
+            case 'sign-out':
+                Admin::signOut($admin, $user);
+
+                return true;
+            case 'password-reset':
+                Admin::sendPasswordReset($admin, $user);
+
+                return true;
+        }
+
+        if (Admin::refuseRole($admin, $role, $user) !== null) {
+            return false;
+        }
+
+        Admin::setRole($admin, $user, $role);
+
+        return true;
     }
 
     /**

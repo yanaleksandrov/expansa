@@ -149,6 +149,12 @@ final readonly class UserController
     }
 
     #[Can('users_edit')]
+    public function bulk(Request $request, Response $response): Response
+    {
+        return $this->service->bulk($request, $response);
+    }
+
+    #[Can('users_edit')]
     public function impersonate(Request $request, Response $response): Response
     {
         return $this->service->impersonate($request, $response);

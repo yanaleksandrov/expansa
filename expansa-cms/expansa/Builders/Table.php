@@ -195,6 +195,24 @@ abstract class Table
     }
 
     /**
+     * Get the bulk actions of the selected rows, none by default: `endpoint` of the API they are posted to,
+     * `actions` labels by value or groups of a select, `confirm` the values that ask first, `password`
+     * the values that need the current password, `data` the fields sent with the IDs.
+     *
+     * @return array{
+     *     endpoint?: string,
+     *     actions?: array<string, mixed>,
+     *     confirm?: string[],
+     *     password?: string[],
+     *     data?: array<string, scalar>,
+     * }
+     */
+    public function bulk(): array
+    {
+        return [];
+    }
+
+    /**
      * Get the data of the state shown instead of the rows when there are none: icon, title, description.
      *
      * @return array<string, mixed>

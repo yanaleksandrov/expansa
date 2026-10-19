@@ -24,7 +24,7 @@ $search = trim((string) ($_GET['s'] ?? ''));
     <div class="table" u-data="table" @load="ajax = $ajax" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
         <div class="table-head">
             @if ($header ?? true)
-                <?php echo view('parts/table/header', [...$table->headData(), 'filters' => $filters]); ?>
+                <?php echo view('parts/table/header', [...$table->headData(), 'filters' => $filters, 'bulk' => $table->bulk()]); ?>
             @endif
             <div class="table-head-data">
                 @foreach ($table->cells as $cell)

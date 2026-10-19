@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tables;
 
+use App\Api\User\Admin;
+use App\Api\User\Confirmation;
 use App\Models\User;
 use App\Support\Dates;
 use Expansa\Builders\Table;
@@ -111,12 +113,46 @@ final class Users extends Table
 
         return [
             'title'    => t('Users'),
-            'actions'  => 'posts-actions',
             'statuses' => $statuses,
             'status'   => $this->status,
             'find'     => t('Search by name, login or email'),
             'create'   => $canCreate ? t('Add New User') : '',
             'link'     => $canCreate ? url('dashboard/profile?new') : '',
+        ];
+    }
+
+    /**
+     * Turn the accounts on or off, sign them out, send a password reset link or give a role, for those
+     * who manage the users; the current password is asked unless the session is confirmed.
+     *
+     * @return array<string, mixed>
+     */
+    public function bulk(): array
+    {
+        $admin = User::current();
+        if (! Access::allows($admin, 'users_edit')) {
+            return [];
+        }
+
+        $roles = [];
+        foreach (Admin::assignableRoles($admin) as $role => $name) {
+            $roles["role:$role"] = $name;
+        }
+
+        return [
+            'endpoint' => 'user/bulk',
+            'actions'  => [
+                'activate'       => t('Turn On'),
+                'disable'        => t('Disable'),
+                'sign-out'       => t('Sign Out Everywhere'),
+                'password-reset' => t('Send Password Reset'),
+                'role'           => [
+                    'label'   => t('Change Role To'),
+                    'options' => $roles,
+                ],
+            ],
+            'confirm'  => ['disable', 'sign-out'],
+            'password' => Confirmation::isConfirmed($admin) ? [] : ['activate', 'disable', 'sign-out'],
         ];
     }
 

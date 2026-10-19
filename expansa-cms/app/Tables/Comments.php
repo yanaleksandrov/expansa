@@ -211,11 +211,34 @@ final class Comments extends Table
 
         return [
             'title'    => t('Comments'),
-            'actions'  => 'comments-actions',
             'statuses' => $statuses,
             'status'   => $this->isTrash ? 'trash' : $this->status,
             'find'     => t('Search comments'),
             'empty'    => $empty,
+        ];
+    }
+
+    /**
+     * Set a status or move to the trash, or restore and delete permanently in the trash.
+     *
+     * @return array<string, mixed>
+     */
+    public function bulk(): array
+    {
+        $actions = $this->isTrash
+            ? [
+                'restore'      => t('Restore'),
+                'force-delete' => t('Delete Permanently'),
+            ]
+            : [
+                ...array_map(fn (string $label) => t('Mark as :status', $label), Comment::statuses()),
+                'delete' => t('Delete'),
+            ];
+
+        return [
+            'endpoint' => 'comments/bulk',
+            'actions'  => $actions,
+            'confirm'  => ['force-delete'],
         ];
     }
 

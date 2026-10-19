@@ -156,11 +156,41 @@ final class Posts extends Table
 
         return [
             'title'    => $this->type->labelNamePlural,
-            'actions'  => 'post-bulk',
             'statuses' => $statuses,
             'status'   => $this->isTrash ? 'trash' : $this->status,
             'find'     => t('Search in title and content'),
             'empty'    => $empty,
+        ];
+    }
+
+    /**
+     * Duplicate and move to the trash, or restore and delete permanently in the trash; a type without
+     * a trash deletes at once.
+     *
+     * @return array<string, mixed>
+     */
+    public function bulk(): array
+    {
+        $actions = match (true) {
+            $this->isTrash        => [
+                'restore' => t('Restore'),
+                'delete'  => t('Delete Permanently'),
+            ],
+            $this->type->canTrash => [
+                'duplicate' => t('Duplicate'),
+                'trash'     => t('Move to Trash'),
+            ],
+            default               => [
+                'duplicate' => t('Duplicate'),
+                'delete'    => t('Delete Permanently'),
+            ],
+        };
+
+        return [
+            'endpoint' => 'post/bulk',
+            'actions'  => $actions,
+            'confirm'  => ['delete'],
+            'data'     => ['post-type' => $this->type->key],
         ];
     }
 

@@ -10,7 +10,7 @@ use Expansa\Facades\Safe;
 /**
  * Header above a table: the title with a badge, the tools and the bulk actions shown while rows are selected.
  * `create` is the label of the button leading to the `link` URL, e.g. of the page of a new item;
- * `actions` is the ID of the form of the bulk actions; `statuses` are labels of the parts of the list
+ * `bulk` are the bulk actions of Table::bulk(); `statuses` are labels of the parts of the list
  * for the filter by status, `trash` for the trash, and `status` is the current one; `find` is the placeholder
  * of the search of the filter; `empty` is the click expression of the button emptying the trash.
  *
@@ -20,14 +20,14 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $content, $uploader, $filter, $filters, $actions, $search, $translation, $project, $create, $link, $statuses, $status, $find, $empty] = Safe::data($__data ?? [], [
+[$title, $badge, $content, $uploader, $filter, $filters, $bulk, $search, $translation, $project, $create, $link, $statuses, $status, $find, $empty] = Safe::data($__data ?? [], [
     'title'       => 'trim',
     'badge'       => 'trim',
     'content'     => 'trim',
     'uploader'    => 'bool:false',
     'filter'      => 'bool:false',
     'filters'     => 'array',
-    'actions'     => 'trim',
+    'bulk'        => 'array',
     'search'      => 'trim',
     'translation' => 'bool:false',
     'project'     => 'trim',
@@ -79,7 +79,7 @@ $progress = static fn (string $name) => [
         @endif
 
         @if ($create && $link)
-            <a class="btn btn--primary" href="{{ $link }}">
+            <a class="btn btn--secondary btn--xs" href="{{ $link }}">
                 <i class="ph ph-plus"></i> {{ $create }}
             </a>
         @endif
@@ -132,9 +132,9 @@ $progress = static fn (string $name) => [
         @endif
     </div>
 
-    @if ($actions)
+    @if (! empty($bulk['actions']))
         <div class="table-header-group" u-show="bulk" hidden>
-            <?php echo form($actions); ?>
+            <?php echo view('parts/table/bulk', $bulk); ?>
         </div>
     @endif
 </div>

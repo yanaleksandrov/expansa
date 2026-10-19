@@ -55,9 +55,8 @@ final class Terms extends Table
     public function headData(): array
     {
         return [
-            'title'   => t('Terms'),
-            'actions' => 'posts-actions',
-            'filter'  => true,
+            'title'  => t('Terms'),
+            'filter' => true,
         ];
     }
 

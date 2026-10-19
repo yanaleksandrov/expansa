@@ -80,8 +80,7 @@ final class Plugins extends Table
     public function headData(): array
     {
         return [
-            'title'   => t('Plugins'),
-            'actions' => 'posts-actions',
+            'title' => t('Plugins'),
         ];
     }
 
