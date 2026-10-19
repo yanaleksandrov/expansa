@@ -1680,5 +1680,6 @@
     "The site needs an owner: give the owner role to another user first.": "У сайта должен быть владелец: сначала выдайте роль владельца другому пользователю.",
     "Role changed": "Роль изменена",
     "Only the owner can change your role.": "Вашу роль может изменить только владелец.",
-    "What the user can do on the site, see the Roles tab of the settings.": "Что пользователь может делать на сайте — см. вкладку «Роли» в настройках."
+    "What the user can do on the site, see the Roles tab of the settings.": "Что пользователь может делать на сайте — см. вкладку «Роли» в настройках.",
+    "Clear search": "Очистить поиск"
 }

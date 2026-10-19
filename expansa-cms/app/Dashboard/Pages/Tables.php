@@ -59,6 +59,7 @@ final class Tables
                 Type::get($request->getString('table') ?: 'pages') ?? throw new NotFound(),
                 $request->getString('view') === 'trash',
                 $request->getString('status'),
+                $request->getString('s'),
             ),
         };
 

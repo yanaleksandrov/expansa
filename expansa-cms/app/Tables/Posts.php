@@ -16,7 +16,7 @@ use PDO;
 
 /**
  * Items of a post type, the newest first: the title with the view, duplicate and delete actions,
- * the author, the status and the date; filtered by the status and the author. A type with a trash
+ * the author, the status and the date; filtered by the status, the author and the search. A type with a trash
  * shows it as a separate list, see Models\Post::delete().
  *
  * @package App\Tables
@@ -41,6 +41,11 @@ final class Posts extends Table
         public private(set) string $status = '' {
             set => isset(Status::getStatuses()[$value]) ? $value : '';
         },
+
+        /**
+         * Text searched in the title and the content.
+         */
+        public readonly string $search = '',
     ) {
         parent::__construct();
     }
@@ -55,6 +60,13 @@ final class Posts extends Table
         $where = $this->type->canTrash ? [$this->isTrash ? 'deleted_at[!]' : 'deleted_at' => null] : [];
         if ($this->status !== '') {
             $where['status'] = $this->status;
+        }
+
+        if ($this->search !== '') {
+            $where['OR'] = [
+                'title[~]'   => $this->search,
+                'content[~]' => $this->search,
+            ];
         }
 
         $posts = Db::select($this->type->table, ['id [Int]', 'title', 'author_id [Int]', 'status', 'created_at'], [

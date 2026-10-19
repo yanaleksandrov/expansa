@@ -583,6 +583,8 @@ document.addEventListener('youla:init', ()=> {
         return {
             fields: parse(root.dataset.fields, {}),
             rows: parse(root.dataset.rows, []),
+            // the text of the search field, applied with the filters and shown as a chip
+            search: new URLSearchParams(window.location.search).get('s') || '',
             // index of the filter whose chip opened the values popover
             editing: null,
             anchor: null,
@@ -638,11 +640,16 @@ document.addEventListener('youla:init', ()=> {
                 }
             },
             clearFilters() {
-                const applied = this.activeFilters().length;
+                const applied = this.activeFilters().length || this.search;
                 this.rows     = [];
+                this.search   = '';
                 if (applied) {
                     this.applyFilters();
                 }
+            },
+            clearSearch() {
+                this.search = '';
+                this.applyFilters();
             },
             // The values of the previous field are not options of the new one.
             setFilterField(index, field) {
@@ -709,6 +716,9 @@ document.addEventListener('youla:init', ()=> {
                 [ ...url.searchParams.keys() ]
                     .filter(key => key.startsWith('filter['))
                     .forEach(key => url.searchParams.delete(key));
+
+                const search = this.search.trim();
+                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
 
                 // the table is built by the API from the same query as the page: the part, the search and the order
                 const payload = Object.fromEntries(url.searchParams);

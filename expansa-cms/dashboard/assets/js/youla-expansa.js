@@ -477,6 +477,7 @@ document.addEventListener('youla:init', () => {
         return {
             fields: parse(root.dataset.fields, {}),
             rows: parse(root.dataset.rows, []),
+            search: new URLSearchParams(window.location.search).get('s') || '',
             editing: null,
             anchor: null,
             bulk: 0,
@@ -533,11 +534,16 @@ document.addEventListener('youla:init', () => {
                 }
             },
             clearFilters() {
-                const applied = this.activeFilters().length;
+                const applied = this.activeFilters().length || this.search;
                 this.rows = [];
+                this.search = '';
                 if (applied) {
                     this.applyFilters();
                 }
+            },
+            clearSearch() {
+                this.search = '';
+                this.applyFilters();
             },
             setFilterField(index, field) {
                 const row = this.rows[index];
@@ -592,6 +598,8 @@ document.addEventListener('youla:init', () => {
             applyFilters() {
                 const url = new URL(window.location.href);
                 [ ...url.searchParams.keys() ].filter(key => key.startsWith('filter[')).forEach(key => url.searchParams.delete(key));
+                const search = this.search.trim();
+                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
                 const payload = Object.fromEntries(url.searchParams);
                 this.activeFilters().forEach((row, i) => {
                     url.searchParams.set(`filter[${i}][field]`, row.field);
