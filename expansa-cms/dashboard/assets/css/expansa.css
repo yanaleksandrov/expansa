@@ -3658,7 +3658,7 @@ body.is-unsaved .expansa-search-btn {
 }
 .post-editor .post-editor-props {
   display: grid;
-  grid-template-columns: 6rem minmax(0, 1fr);
+  grid-template-columns: 8rem minmax(0, 1fr);
   row-gap: 2px;
   align-items: center;
   margin: 0;
