@@ -26,6 +26,13 @@ return \Expansa\Builders\Form::enqueue(
                     'attributes'  => [ 'u-prop' => 'title' ],
                 ],
                 [
+                    'type'        => 'message',
+                    'name'        => 'browser',
+                    'class'       => 'card-message card-message--browser',
+                    'label'       => t('Your browser is out of date'),
+                    'instruction' => t('The dashboard may not work correctly. Update to the latest version: Chrome or Edge 117, Safari 17, Firefox 125 or newer.'),
+                ],
+                [
                     'name'  => 'website-data',
                     'type'  => 'divider',
                     'label' => t('Website Data'),

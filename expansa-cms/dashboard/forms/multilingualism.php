@@ -123,25 +123,31 @@ return Expansa\Builders\Form::enqueue(
                                         <template u-each="(language, i) in languages">
                                             <div class="df aic g-2">
                                                 <input type="hidden" name="multilingual[languages][locale][]" u-prop="language.locale">
-                                                <label class="field field-item">
-                                                    <i class="ph ph-globe-hemisphere-west"></i>
-                                                    <input type="text" :value="language.name" readonly tabindex="-1">
-                                                </label>
-                                                <label class="field field-item mw-80">
-                                                    <input type="text" name="multilingual[languages][code][]" u-prop="language.code" placeholder="en" pattern="[a-z0-9\-]+" autocomplete="off" spellcheck="false" required>
-                                                    <i class="ph ph-trash-simple t-red" @click="remove(i, $refs.picker)" title="<?php echo t_attr( 'Remove' ); ?>"></i>
-                                                </label>
+                                                <div class="field">
+                                                    <label class="field-item">
+                                                        <i class="ph ph-globe-hemisphere-west"></i>
+                                                        <input type="text" :value="language.name" readonly tabindex="-1">
+                                                    </label>
+                                                </div>
+                                                <div class="field mw-80">
+                                                    <label class="field-item">
+                                                        <input type="text" name="multilingual[languages][code][]" u-prop="language.code" placeholder="en" pattern="[a-z0-9\-]+" autocomplete="off" spellcheck="false" required>
+                                                        <i class="ph ph-trash-simple t-red" @click="remove(i, $refs.picker)" title="<?php echo t_attr( 'Remove' ); ?>"></i>
+                                                    </label>
+                                                </div>
                                             </div>
                                         </template>
                                     </div>
-                                    <label class="field field-item">
-                                        <select u-ref="picker" u-select='{"showSearch": 1}' @load="setTimeout(() => sync($el))" @change="setTimeout(() => add($el))">
-                                            <option value=""><?php echo t( 'Add a language' ); ?></option>
-                                            <?php foreach ( $catalog as $locale => $language ) : ?>
-                                                <option value="<?php echo htmlspecialchars( $locale ); ?>"><?php echo htmlspecialchars( $language['name'] ); ?></option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                    </label>
+                                    <div class="field">
+                                        <label class="field-item">
+                                            <select u-ref="picker" u-select='{"showSearch": 1}' @load="setTimeout(() => sync($el))" @change="setTimeout(() => add($el))">
+                                                <option value=""><?php echo t( 'Add a language' ); ?></option>
+                                                <?php foreach ( $catalog as $locale => $language ) : ?>
+                                                    <option value="<?php echo htmlspecialchars( $locale ); ?>"><?php echo htmlspecialchars( $language['name'] ); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </label>
+                                    </div>
                                     <div class="field-instruction"><?php echo t( 'Languages the content is translated to. The code selects the language in the URLs, e.g. `:example`: Latin letters, digits and hyphens.', url( '/en/my-post/' ) ); ?></div>
                                 </div>
                                 <?php
