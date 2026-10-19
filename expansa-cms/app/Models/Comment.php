@@ -6,18 +6,23 @@ namespace App\Models;
 
 use App\Post\Type;
 use App\Support\Activity;
+use App\Support\Secrets;
 use DateTime;
+use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Database\Model;
 use Expansa\Database\Query;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
+use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
+use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Facades\Log;
 use Expansa\Facades\Mail;
 use Expansa\Facades\View;
+use Expansa\Security\Sanitizer;
 use Expansa\Support\Error;
 use PDO;
 
@@ -75,6 +80,18 @@ class Comment extends Model
     public const string STATUS_REJECTED = 'rejected';
 
     /**
+     * Name of the field of the comment form hidden from people, see parts/comment-trap: a bot that fills it
+     * is answered as if its comment were held, nothing is saved.
+     */
+    public const string TRAP = 'website';
+
+    /**
+     * Name of the field with the signed time the comment form was rendered, see stamp(): a form sent sooner
+     * than `comments.fill_time` seconds after it is answered as if its comment were held, nothing is saved.
+     */
+    public const string STAMP = 'comment_stamp';
+
+    /**
      * The database table associated with the model.
      *
      * @var string
@@ -102,6 +119,16 @@ class Comment extends Model
         'dislikes',
         'rating',
     ];
+
+    /**
+     * Post the comment answers, read once by getPost(); false when it is gone.
+     */
+    private Post|false|null $post = null;
+
+    /**
+     * Level of the comment in its thread, found once by depth(): the parents of a comment do not change.
+     */
+    private ?int $depth = null;
 
     /**
      * Array of rules for sanitize properties.
@@ -171,6 +198,25 @@ class Comment extends Model
             self::STATUS_APPROVED => t('Approved'),
             self::STATUS_SPAM     => t('Spam'),
             self::STATUS_REJECTED => t('Rejected'),
+        ];
+    }
+
+    /**
+     * Get the quick moderation actions of a status: an approved comment is rejected or marked as spam,
+     * any other one is approved.
+     *
+     * @param string $status Current status.
+     * @return array<string, array{label: string, icon: string}> Actions by the status they set.
+     */
+    public static function moderationActions(string $status): array
+    {
+        if ($status !== self::STATUS_APPROVED) {
+            return [self::STATUS_APPROVED => ['label' => t('Approve'), 'icon' => 'ph ph-check']];
+        }
+
+        return [
+            self::STATUS_REJECTED => ['label' => t('Reject'), 'icon' => 'ph ph-prohibit'],
+            self::STATUS_SPAM     => ['label' => t('Spam', context: 'action'), 'icon' => 'ph ph-warning-octagon'],
         ];
     }
 
@@ -250,8 +296,9 @@ class Comment extends Model
 
     /**
      * Submit a comment of a visitor from the site by the Discussions settings: signing in, the name
-     * and the email, the depth of a reply; the comment is approved or held for moderation, then
-     * the post author or the site owner gets an email.
+     * and the email, the depth of a reply; the same text twice and comments more often than the flood
+     * interval are refused. The comment is approved or held for moderation, the `commentSubmit` filter
+     * may change it or refuse it, then the post author or the site owner gets an email.
      *
      * @param array     $data `post_id`, `post_type`, `content`, optional `parent_id`, `author_name`, `author_email`.
      * @param User|null $user Signed-in author, null for a guest.
@@ -298,7 +345,22 @@ class Comment extends Model
             return error('comment-submit', ['author_email' => t('Enter a valid email.')]);
         }
 
-        $comment = self::create([
+        // an empty text is refused before the flood check, which would count the attempt
+        $content = (string) ($data['content'] ?? '');
+        if (trim($content) === '') {
+            return error('comment-submit', ['content' => t('Enter your comment.')]);
+        }
+
+        if (self::isDuplicate($post, $user, $email, $content)) {
+            return error('comment-submit', ['content' => t('You have already said that.')]);
+        }
+
+        if (! $user?->can('manage_comments') && self::isFlood($user, $email)) {
+            return error('comment-submit', t('You are posting comments too quickly. Slow down.'));
+        }
+
+        // listeners get the fields with the status, the post and the author; they may set `spam` or return an Error
+        $fields = Hook::call('commentSubmit', [
             'post_id'      => $post->id,
             'post_type'    => $post->type,
             'parent_id'    => $parentId,
@@ -309,14 +371,109 @@ class Comment extends Model
             'author_agent' => mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255),
             'locale'       => $user->locale ?? I18n::locale(),
             'status'       => self::moderate($user, $email),
-            'content'      => (string) ($data['content'] ?? ''),
-        ]);
+            'content'      => $content,
+        ], $post, $user);
+        if ($fields instanceof Error) {
+            return $fields;
+        }
+
+        $comment = self::create((array) $fields);
 
         if ($comment instanceof self) {
             $comment->notify();
         }
 
         return $comment;
+    }
+
+    /**
+     * Get the value of the STAMP field of a comment form: the current time and its signature.
+     *
+     * @return string
+     */
+    public static function stamp(): string
+    {
+        $time = (string) time();
+
+        return $time . '.' . hash_hmac('sha256', $time, Secrets::key('comment-stamp'));
+    }
+
+    /**
+     * Get the seconds since the comment form of a stamp() value was rendered.
+     *
+     * @param string $stamp
+     * @return int|null Null when the value is missing or forged.
+     */
+    public static function stampAge(string $stamp): ?int
+    {
+        [$time, $signature] = explode('.', $stamp, 2) + ['', ''];
+        if (! ctype_digit($time) || ! hash_equals(hash_hmac('sha256', $time, Secrets::key('comment-stamp')), $signature)) {
+            return null;
+        }
+
+        return time() - (int) $time;
+    }
+
+    /**
+     * Check whether the author already left the same text on the post, a comment in the trash aside:
+     * a user by the account, a guest by the email or the IP address.
+     *
+     * @param Post      $post
+     * @param User|null $user
+     * @param string    $email
+     * @param string    $content Text as submitted, compared as it is saved.
+     * @return bool
+     */
+    private static function isDuplicate(Post $post, ?User $user, string $email, string $content): bool
+    {
+        $ip     = $_SERVER['REMOTE_ADDR'] ?? '';
+        $author = match (true) {
+            $user !== null => ['author_id' => $user->id],
+            $email !== ''  => [
+                'OR' => [
+                    'author_email' => $email,
+                    'author_ip'    => $ip,
+                ],
+            ],
+            default        => ['author_ip' => $ip],
+        };
+
+        return Db::has('comments', [
+            ...$author,
+            'post_id'    => $post->id,
+            'post_type'  => $post->type,
+            'content'    => Sanitizer::textarea($content),
+            'deleted_at' => null,
+        ]);
+    }
+
+    /**
+     * Check whether the IP address or the author commented less than `comments.flood_interval` seconds ago,
+     * and start the interval again otherwise; 0 turns the check off.
+     *
+     * @param User|null $user
+     * @param string    $email
+     * @return bool
+     */
+    private static function isFlood(?User $user, string $email): bool
+    {
+        $interval = max(0, (int) Option::get('comments.flood_interval', 15));
+        if ($interval === 0) {
+            return false;
+        }
+
+        $author = $user !== null ? "user:$user->id" : ($email !== '' ? 'email:' . mb_strtolower($email) : '');
+        $keys   = array_filter(['ip:' . ($_SERVER['REMOTE_ADDR'] ?? ''), $author]);
+
+        try {
+            foreach ($keys as $key) {
+                Auth::limit("comment-flood:$key", 1, $interval);
+            }
+        } catch (TooManyAttempts) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -433,13 +590,15 @@ class Comment extends Model
     }
 
     /**
-     * Get the post the comment answers, null when its type or the post is gone.
+     * Get the post the comment answers, null when its type or the post is gone; it is read once.
      *
      * @return Post|null
      */
     public function getPost(): ?Post
     {
-        return $this->postId > 0 ? Post::get((string) $this->postType, (int) $this->postId) : null;
+        $this->post ??= ($this->postId > 0 ? Post::get((string) $this->postType, (int) $this->postId) : null) ?? false;
+
+        return $this->post ?: null;
     }
 
     /**
@@ -493,6 +652,10 @@ class Comment extends Model
      */
     public function depth(): int
     {
+        if ($this->depth !== null) {
+            return $this->depth;
+        }
+
         $depth    = 1;
         $parentId = $this->parentId;
         $max      = self::maxDepth();
@@ -505,7 +668,7 @@ class Comment extends Model
             $depth++;
         }
 
-        return $depth;
+        return $this->depth = $depth;
     }
 
     /**
@@ -601,6 +764,36 @@ class Comment extends Model
         }
 
         return $count;
+    }
+
+    /**
+     * Delete this comment permanently with its log; its replies move up to its parent.
+     *
+     * @return int The number of rows affected.
+     */
+    public function forceDelete(): int
+    {
+        $count = new Query($this)->forceDelete();
+        if ($count > 0) {
+            Db::update($this->table, ['parent_id' => (int) $this->parentId], ['parent_id' => $this->id]);
+            Activity::forget($this->table, (int) $this->id);
+            self::recount($this->postType, $this->postId);
+        }
+
+        return $count;
+    }
+
+    /**
+     * Find a comment in the trash, bypassing the cache of the model, which holds the comments out of it.
+     *
+     * @param int $id
+     * @return Comment|null
+     */
+    public static function findTrashed(int $id): ?Comment
+    {
+        $comment = self::onlyTrashed()->where(['id' => $id])->first();
+
+        return $comment instanceof Comment ? $comment : null;
     }
 
     /**

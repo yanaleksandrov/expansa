@@ -66,6 +66,16 @@ final class Themes extends Table
         ];
     }
 
+    /**
+     * All themes on one page: the screen has no pagination.
+     *
+     * @return int
+     */
+    public function perPage(): int
+    {
+        return 0;
+    }
+
     public function headData(): array
     {
         return [

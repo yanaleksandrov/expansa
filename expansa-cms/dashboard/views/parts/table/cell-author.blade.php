@@ -20,8 +20,8 @@ $author_id = $item['author_id'] ?? 0;
 $email     = $item['email'] ?? '';
 ?>
 @if ($name !== '')
-    <div class="df aic g-2">
-        <span class="avatar avatar--rounded avatar--xs bg-{{ $color }}-lt t-{{ $color }}">{{ $initials }}</span>
+    <div class="df aic g-3">
+        <span class="avatar avatar--rounded bg-{{ $color }}-lt t-{{ $color }}">{{ $initials }}</span>
         <div>
             @if ($author_id)
                 <a href="{{ url("dashboard/profile?id=$author_id") }}" class="fw-500 t-dark">{{ $name }}</a>
@@ -29,7 +29,7 @@ $email     = $item['email'] ?? '';
                 <strong>{{ $name }}</strong>
             @endif
             @if ($email)
-                <div class="fs-12 t-muted">{{ $email }}</div>
+                <div class="fs-12 t-muted mt-1">{{ $email }}</div>
             @endif
         </div>
     </div>

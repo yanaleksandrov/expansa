@@ -31,6 +31,18 @@ final readonly class PostController
     }
 
     #[Can('types_edit')]
+    public function authors(Request $request, Response $response): Response
+    {
+        return $this->service->authors($request, $response);
+    }
+
+    #[Can('types_edit')]
+    public function parents(Request $request, Response $response): Response
+    {
+        return $this->service->parents($request, $response);
+    }
+
+    #[Can('types_edit')]
     public function duplicate(Request $request, Response $response): Response
     {
         return $this->service->duplicate($request, $response);

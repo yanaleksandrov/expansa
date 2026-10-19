@@ -221,6 +221,8 @@ final class OptionsService
 
         $comments['close_comments_days_old'] = max(1, (int) ($comments['close_comments_days_old'] ?? 14));
         $comments['thread_comments_depth']   = max(2, min(10, (int) ($comments['thread_comments_depth'] ?? 5)));
+        $comments['flood_interval']          = max(0, (int) ($comments['flood_interval'] ?? 15));
+        $comments['fill_time']               = max(0, (int) ($comments['fill_time'] ?? 3));
 
         return $comments;
     }

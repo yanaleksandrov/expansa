@@ -1,0 +1,13 @@
+// only old CSS here: the message is for the browsers that do not have the new one
+.card-message--browser {
+  display: none;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--expansa-warning);
+  border-radius: var(--expansa-border-radius);
+
+  // the features the dashboard needs to work: Chrome and Edge 117, Safari 17, Firefox 125
+  @supports not (selector(:has(*)) and selector(:popover-open) and (container-type: inline-size) and (grid-template-columns: subgrid) and (color: color-mix(in srgb, red, blue))) {
+    display: grid;
+  }
+}

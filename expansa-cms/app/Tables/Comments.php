@@ -5,14 +5,23 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use App\Models\Comment;
+use App\Models\Post;
 use App\Models\User;
 use App\Post\Type;
 use App\Support\Dates;
+use App\Support\Permalinks;
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Queried;
 use Expansa\Facades\Db;
 use PDO;
 
-final class Comments extends Table
+/**
+ * Comments, the newest first, with the posts they answer: filtered by the status, the author and the search,
+ * sorted and read by pages in the database; the trash is a separate list.
+ *
+ * @package App\Tables
+ */
+final class Comments extends Table implements Queried
 {
     public function __construct(
 
@@ -24,20 +33,20 @@ final class Comments extends Table
         },
 
         /**
+         * Whether the list shows the comments in the trash instead of the others.
+         */
+        public readonly bool $isTrash = false,
+
+        /**
          * Text searched in the comment, the name and the email of the author.
          */
         public readonly string $search = '',
-
-        /**
-         * Whether the oldest rows go first, the newest by default.
-         */
-        public readonly bool $isAscending = false,
     ) {
         parent::__construct();
     }
 
     /**
-     * Comments that are not deleted, by the filter and the order, the first 500, with the titles of their posts.
+     * Comments of the current page, of the trash or out of it, with the posts they answer.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -54,17 +63,17 @@ final class Comments extends Table
             'content',
             'created_at',
         ];
-        $comments = Db::select('comments', $columns, [
-            ...$this->where(),
-            'ORDER' => ['id' => $this->isAscending ? 'ASC' : 'DESC'],
-            'LIMIT' => 500,
-        ]) ?? [];
-        $titles   = $this->titles($comments);
+        $comments = Db::select('comments', $columns, $this->paged($this->where(), ['created_at' => 'DESC', 'id' => 'DESC'])) ?? [];
+        $posts    = $this->posts($comments);
         $statuses = Comment::statuses();
 
-        return array_map(function (array $comment) use ($titles, $statuses) {
+        return array_map(function (array $comment) use ($posts, $statuses) {
             $url    = url('dashboard/comment?id=' . $comment['id']);
             $author = $comment['author_name'] ?: t('Anonymous');
+            $post   = $posts[$comment['post_type']][$comment['post_id']] ?? null;
+            if ($post !== null && $post['view'] !== '' && $comment['status'] === Comment::STATUS_APPROVED) {
+                $post['view'] .= '#comment-' . $comment['id'];
+            }
 
             return [
                 'id'        => $comment['id'],
@@ -74,16 +83,79 @@ final class Comments extends Table
                 'author_id' => $comment['author_id'],
                 'email'     => $comment['author_email'],
                 'comment'   => mb_strimwidth(trim(strip_tags($comment['content'])), 0, 120, '…'),
-                'url'       => $url,
+                'url'       => $this->isTrash ? '#' : $url,
                 'status'      => [
                     'class' => '',
                     'value' => $statuses[$comment['status']] ?? $comment['status'],
                 ],
-                'actions'   => [['title' => t('Edit'), 'href' => $url]],
-                'post'      => $titles[$comment['post_type']][$comment['post_id']] ?? '',
+                'actions'   => $this->actions($comment['id'], $comment['status']),
+                'post'      => $post,
                 'date'      => Dates::format((string) $comment['created_at']),
             ];
         }, $comments);
+    }
+
+    public function count(): int
+    {
+        return (int) Db::count('comments', $this->filtered($this->where()));
+    }
+
+    /**
+     * Quick links of a row: moderation and deletion, or those of the trash. They work in the background,
+     * then the rows are filtered again, so a comment leaves a list of another status or disappears.
+     *
+     * @param int    $id
+     * @param string $status Current status.
+     * @return array<int, array<string, mixed>>
+     */
+    private function actions(int $id, string $status): array
+    {
+        if ($this->isTrash) {
+            return $this->trashActions($id);
+        }
+
+        $actions = [];
+        foreach (Comment::moderationActions($status) as $value => $action) {
+            $actions[] = [
+                'title'      => $action['label'],
+                'href'       => '#',
+                'class'      => $value === Comment::STATUS_APPROVED ? 't-green' : 't-muted',
+                'attributes' => self::action('comments/status', ['id' => $id, 'status' => $value], refresh: true),
+            ];
+        }
+
+        $actions[] = [
+            'title'      => t('Delete'),
+            'href'       => '#',
+            'class'      => 't-red',
+            'attributes' => self::action('comments/delete', ['id' => $id, 'from' => 'list'], refresh: true),
+        ];
+
+        return $actions;
+    }
+
+    /**
+     * Quick links of a row in the trash: restore and delete permanently, then the rows are filtered again.
+     *
+     * @param int $id
+     * @return array<int, array<string, mixed>>
+     */
+    private function trashActions(int $id): array
+    {
+        return [
+            [
+                'title'      => t('Restore'),
+                'href'       => '#',
+                'class'      => 't-muted',
+                'attributes' => self::action('comments/restore', ['id' => $id], refresh: true),
+            ],
+            [
+                'title'      => t('Delete Permanently'),
+                'href'       => '#',
+                'class'      => 't-red',
+                'attributes' => self::action('comments/force-delete', ['id' => $id], 'deleteItem', true),
+            ],
+        ];
     }
 
     public function cells(): array
@@ -93,43 +165,89 @@ final class Comments extends Table
                 ->title('<input type="checkbox" u-bind="trigger">')
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
+            $this->cell('author')
+                ->title(t('Author'))
+                ->fixedWidth('14rem')
+                ->view('author'),
             $this->cell('comment')
                 ->title(t('Comment'))
                 ->flexibleWidth('16rem')
                 ->view('title'),
-            $this->cell('author')
-                ->title(t('Author'))
-                ->fixedWidth('12rem')
-                ->view('author'),
             $this->cell('status')
                 ->title(t('Status'))
                 ->fixedWidth('7rem')
                 ->view('badge'),
             $this->cell('post')
                 ->title(t('In reply to'))
-                ->fixedWidth('7rem'),
+                ->fixedWidth('12rem')
+                ->view('post'),
             $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('7rem')
-                ->sortable(),
+                ->sortable('created_at'),
         ];
     }
 
     public function headData(): array
     {
-        $counts   = $this->counts();
-        $statuses = ['' => t('All') . ' (' . array_sum($counts) . ')'];
+        $counts = $this->counts();
+        $parts  = [
+            '' => [
+                'label' => t('All') . ' (' . array_sum($counts) . ')',
+                'query' => [],
+            ],
+        ];
 
         foreach (Comment::statuses() as $key => $label) {
-            $statuses[$key] = $label . ' (' . ($counts[$key] ?? 0) . ')';
+            $parts[$key] = [
+                'label' => $label . ' (' . ($counts[$key] ?? 0) . ')',
+                'query' => ['status' => $key],
+            ];
+        }
+
+        $empty = [];
+        $trash = (int) Db::count('comments', ['deleted_at[!]' => null]);
+        if ($trash > 0 || $this->isTrash) {
+            $parts['trash'] = [
+                'label' => t('Trash') . " ($trash)",
+                'query' => ['view' => 'trash'],
+            ];
+        }
+
+        if ($trash > 0 && $this->isTrash) {
+            $empty = ['endpoint' => 'comments/empty-trash'];
         }
 
         return [
-            'title'    => t('Comments'),
-            'actions'  => 'comments-actions',
-            'statuses' => $statuses,
-            'status'   => $this->status,
-            'find'     => t('Search comments'),
+            'title' => t('Comments'),
+            'parts' => $parts,
+            'part'  => $this->isTrash ? 'trash' : $this->status,
+            'find'  => t('Search comments'),
+            'empty' => $empty,
+        ];
+    }
+
+    /**
+     * Set a status or move to the trash, or restore and delete permanently in the trash.
+     *
+     * @return array<string, mixed>
+     */
+    public function bulk(): array
+    {
+        $actions = $this->isTrash
+            ? [
+                'restore'      => t('Restore'),
+                'force-delete' => t('Delete Permanently'),
+            ]
+            : [
+                ...array_map(fn (string $label) => t('Mark as :status', $label), Comment::statuses()),
+                'delete' => t('Delete'),
+            ];
+
+        return [
+            'endpoint' => 'comments/bulk',
+            'actions'  => $actions,
+            'confirm'  => ['force-delete'],
         ];
     }
 
@@ -139,6 +257,7 @@ final class Comments extends Table
             'author_id' => [
                 'label'   => t('Author'),
                 'icon'    => 'ph ph-user',
+                'param'   => 'author',
                 'options' => User::options(),
             ],
         ];
@@ -146,6 +265,19 @@ final class Comments extends Table
 
     public function notFoundData(): array
     {
+        if ($this->isTrash) {
+            return [
+                'title'       => t('The trash is empty'),
+                'description' => t('Deleted comments stay here until you delete them permanently.'),
+                'buttons'     => [
+                    [
+                        'label' => t('Show All Comments'),
+                        'url'   => url('dashboard/edit?table=comments'),
+                    ],
+                ],
+            ];
+        }
+
         if ($this->status !== '' || $this->search !== '') {
             return [
                 'title'       => t('No comments found'),
@@ -185,7 +317,7 @@ final class Comments extends Table
      */
     private function where(): array
     {
-        $where = ['deleted_at' => null];
+        $where = [$this->isTrash ? 'deleted_at[!]' : 'deleted_at' => null];
         if ($this->status !== '') {
             $where['status'] = $this->status;
         }
@@ -202,27 +334,39 @@ final class Comments extends Table
     }
 
     /**
-     * Titles of the posts the comments answer, one query per post type.
+     * Posts the comments answer: the title, the links to the editor and to the page, the number of the
+     * approved comments kept in the post; per post type one query besides the ones of Post::paths().
      *
      * @param array<int, array<string, mixed>> $comments
-     * @return array<string, array<int, string>> Titles by post type and post ID.
+     * @return array<string, array<int, array{title: string, edit: string, view: string, count: int}>> By post type and post ID.
      */
-    private function titles(array $comments): array
+    private function posts(array $comments): array
     {
         $ids = [];
         foreach ($comments as $comment) {
-            $ids[$comment['post_type']][] = $comment['post_id'];
+            $ids[$comment['post_type']][$comment['post_id']] = (int) $comment['post_id'];
         }
 
-        $titles = [];
+        $result = [];
         foreach ($ids as $key => $postIds) {
             $type = Type::get((string) $key);
-            if ($type !== null) {
-                $posts        = Db::select($type->table, ['id [Int]', 'title'], ['id' => array_unique($postIds)]) ?? [];
-                $titles[$key] = array_column($posts, 'title', 'id');
+            if ($type === null) {
+                continue;
+            }
+
+            $paths = Post::paths($type->key, $postIds);
+            foreach (Db::select($type->table, ['id [Int]', 'title', 'comments [Int]'], ['id' => array_values($postIds)]) ?? [] as $post) {
+                $path = isset($paths[$post['id']]) ? Permalinks::post($paths[$post['id']], $post['id'], $type->key) : '';
+
+                $result[$key][$post['id']] = [
+                    'title' => $post['title'] !== '' ? $post['title'] : t('(no title)'),
+                    'edit'  => url('dashboard/post?type=' . $type->key . '&id=' . $post['id'] . '&tab=comments'),
+                    'view'  => $path === '' ? '' : url($path),
+                    'count' => $post['comments'],
+                ];
             }
         }
 
-        return $titles;
+        return $result;
     }
 }

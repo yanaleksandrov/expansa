@@ -325,6 +325,8 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
     Expansa\Builders\Table::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php',
         cellView: 'parts/table/cell',
+        perPage: fn () => (int) App\Models\Option::get('table-per-page', 20),
+        reserved: ['table', 'view', 'status', 's', 'orderby', 'order', 'project'],
     );
 
     // validation error messages in the site language
@@ -644,6 +646,11 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
             App\Api\User\Events::prune();
             App\Api\User\Sessions::prune();
         }, id: 'security-cleanup')->daily(3);
+    });
+
+    // the scheduled posts are published once their date has come
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->call(fn () => App\Models\Post::publishScheduled(), id: 'posts-publish')->everyMinute()->onlyOne();
     });
 
     // llms.txt of the SEO settings lists the latest content, so it is rebuilt weekly

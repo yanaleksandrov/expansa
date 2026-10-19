@@ -56,7 +56,8 @@ final class Dates
     private static array $formatters = [];
 
     /**
-     * Format a date by the date and time formats of the settings.
+     * Format a date by the date and time formats of the settings, the time joined by the translated
+     * ":date at :time".
      *
      * @param DateTimeInterface|int|string|null $time     Date, timestamp or a string strtotime() reads, e.g. a database datetime.
      * @param bool                             $withTime Add the time after the date.
@@ -74,9 +75,24 @@ final class Dates
             return '';
         }
 
-        $format = (string) Option::get('date-format', 'F j, Y') . ($withTime ? ' ' . Option::get('time-format', 'g:i a') : '');
-        $locale = I18n::locale();
+        $date = self::write($timestamp, (string) Option::get('date-format', 'F j, Y'));
+        if (! $withTime) {
+            return $date;
+        }
 
+        return t(':date at :time', $date, self::write($timestamp, (string) Option::get('time-format', 'g:i a')));
+    }
+
+    /**
+     * Write a timestamp by a PHP date format in the language of the dashboard.
+     *
+     * @param int    $timestamp
+     * @param string $format
+     * @return string
+     */
+    private static function write(int $timestamp, string $format): string
+    {
+        $locale    = I18n::locale();
         $formatter = self::$formatters["$locale|$format"] ??= new IntlDateFormatter($locale, IntlDateFormatter::NONE, IntlDateFormatter::NONE, pattern: self::toPattern($format));
 
         return (string) $formatter->format($timestamp);

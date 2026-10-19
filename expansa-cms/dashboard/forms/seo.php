@@ -1249,14 +1249,18 @@ return Expansa\Builders\Form::enqueue(
 									<div class="dg g-2">
 										<template u-each="(rule, i) in rules">
 											<div class="df aic g-2">
-												<label class="field field-item">
-													<input type="text" name="permalinks[rules][from][]" u-prop="rule.from" placeholder="<?php echo t_attr( 'Text' ); ?>" autocomplete="off" spellcheck="false">
-												</label>
+												<div class="field">
+													<label class="field-item">
+														<input type="text" name="permalinks[rules][from][]" u-prop="rule.from" placeholder="<?php echo t_attr( 'Text' ); ?>" autocomplete="off" spellcheck="false">
+													</label>
+												</div>
 												<i class="ph ph-arrow-right t-muted"></i>
-												<label class="field field-item">
-													<input type="text" name="permalinks[rules][to][]" u-prop="rule.to" placeholder="<?php echo t_attr( 'Replacement' ); ?>" pattern="[a-z0-9\-]*" autocomplete="off" spellcheck="false">
-													<i class="ph ph-trash-simple t-red" @click="rules = rules.filter((removed, index) => index !== i)" title="<?php echo t_attr( 'Remove' ); ?>"></i>
-												</label>
+												<div class="field">
+													<label class="field-item">
+														<input type="text" name="permalinks[rules][to][]" u-prop="rule.to" placeholder="<?php echo t_attr( 'Replacement' ); ?>" pattern="[a-z0-9\-]*" autocomplete="off" spellcheck="false">
+														<i class="ph ph-trash-simple t-red" @click="rules = rules.filter((removed, index) => index !== i)" title="<?php echo t_attr( 'Remove' ); ?>"></i>
+													</label>
+												</div>
 											</div>
 										</template>
 									</div>

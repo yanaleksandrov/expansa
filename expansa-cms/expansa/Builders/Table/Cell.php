@@ -44,6 +44,13 @@ final class Cell
         public bool $sortable = false,
 
         /**
+         * Key of the row value the column is sorted by, e.g. a raw date of a formatted one; the column key by default.
+         */
+        public string $sortBy = '' {
+            get => $this->sortBy !== '' ? $this->sortBy : $this->key;
+        },
+
+        /**
          * Column width, a CSS length; the minimum one for a flexible column.
          */
         public string $width = '',
@@ -106,11 +113,13 @@ final class Cell
     /**
      * Make the column sortable.
      *
+     * @param string $by Key of the row value it is sorted by, the column key by default.
      * @return static
      */
-    public function sortable(): static
+    public function sortable(string $by = ''): static
     {
         $this->sortable = true;
+        $this->sortBy   = $by;
 
         return $this;
     }

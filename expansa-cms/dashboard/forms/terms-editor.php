@@ -40,7 +40,6 @@ return \Expansa\Builders\Form::enqueue(
 			'instruction' => t( 'The name is how it appears on your site.' ),
 			'attributes'  => [
 				'u-prop' => 'title',
-				'@input' => 'slug = $safe.slug(title)',
 			],
 			'conditions'  => [],
 		],

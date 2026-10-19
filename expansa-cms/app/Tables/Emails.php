@@ -49,9 +49,8 @@ final class Emails extends Table
     public function headData(): array
     {
         return [
-            'title'   => t('Emails'),
-            'actions' => 'posts-actions',
-            'find'    => t('Search emails'),
+            'title' => t('Emails'),
+            'find'  => t('Search emails'),
         ];
     }
 

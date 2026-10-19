@@ -31,6 +31,24 @@ final readonly class CommentsController
     }
 
     #[Can('manage_comments')]
+    public function restore(Request $request, Response $response): Response
+    {
+        return $this->service->restore($request, $response);
+    }
+
+    #[Can('manage_comments')]
+    public function forceDelete(Request $request, Response $response): Response
+    {
+        return $this->service->forceDelete($request, $response);
+    }
+
+    #[Can('manage_comments')]
+    public function emptyTrash(Request $request, Response $response): Response
+    {
+        return $this->service->emptyTrash($request, $response);
+    }
+
+    #[Can('manage_comments')]
     public function add(Request $request, Response $response): Response
     {
         return $this->service->add($request, $response);
@@ -45,6 +63,12 @@ final readonly class CommentsController
     public function submit(Request $request, Response $response): Response
     {
         return $this->service->submit($request, $response);
+    }
+
+    #[Can('manage_comments')]
+    public function status(Request $request, Response $response): Response
+    {
+        return $this->service->status($request, $response);
     }
 
     #[Can('manage_comments')]

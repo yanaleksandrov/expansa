@@ -3,7 +3,8 @@
 use Expansa\Support\Arr;
 
 /**
- * Rows of a table, each cell rendered by the view of its column; the message when the filter left out every row.
+ * Rows of a table, each cell rendered by the view of its column; without rows the message of the filter
+ * when it left out every row, else the state of Table::notFoundData(), e.g. of the empty trash.
  * Rendered by the table and by the API that applies the filter.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/table-row.blade.php
@@ -39,6 +40,8 @@ $items = $table->getData();
         </div>
     @endif
 @endforeach
-@if (! $items)
+@if (! $items && $table->activeFilters())
     <div class="table-filter-empty">{{ t('No items match the filter.') }}</div>
+@elseif (! $items)
+    <?php echo view('parts/state', $table->notFoundData()); ?>
 @endif

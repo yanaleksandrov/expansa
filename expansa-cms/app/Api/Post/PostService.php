@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Api\Post;
 
+use App\Dashboard\Pages\Post as Page;
 use App\Models\Post;
 use App\Post\Status;
 use App\Post\Type;
+use App\Support\Permalinks;
 use App\Tables\Posts;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
@@ -19,7 +21,7 @@ final class PostService
     /**
      * Columns the editor of a post sends.
      */
-    private const array FIELDS = ['title', 'content', 'slug', 'parent_id', 'status', 'discussion', 'password'];
+    private const array FIELDS = ['title', 'content', 'slug', 'parent_id', 'author_id', 'status', 'discussion', 'password', 'created_at'];
 
     /**
      * Create a post from the editor of a new one and open its editor.
@@ -53,7 +55,62 @@ final class PostService
     }
 
     /**
-     * Save a post from its editor: the title, content, slug, parent, status, discussion and password.
+     * Find the users for the author select of the editor, see Page::authors().
+     *
+     * @param Request  $request  POST: `s`, the text of the search.
+     * @param Response $response
+     * @return Response JSON `options`: `value` is the user ID, `text` the name.
+     */
+    public function authors(Request $request, Response $response): Response
+    {
+        $options = [];
+        foreach (array_slice(Page::authors($request->getString('s')), 0, Page::OPTIONS_LIMIT, true) as $id => $name) {
+            $options[] = [
+                'value' => (string) $id,
+                'text'  => $name,
+            ];
+        }
+
+        return $response->json(['options' => $options]);
+    }
+
+    /**
+     * Find the posts for the parent select of the editor, see Page::parents(); "No parent" first
+     * without a search. Each one has the URL up to the slug for the slug field, `data.base`.
+     *
+     * @param Request  $request  POST: `post-type`, `id`, 0 for a new post, and `s`, the text of the search.
+     * @param Response $response
+     * @return Response JSON `options`: `value` is the post ID, `text` the title.
+     */
+    public function parents(Request $request, Response $response): Response
+    {
+        $type = Type::get((string) ($request->post['post-type'] ?? ''));
+        $id   = (int) ($request->post['id'] ?? 0);
+        $post = $type instanceof Type && $type->hierarchical
+            ? ($id > 0 ? Post::get($type->key, $id) : new Post(type: $type->key))
+            : null;
+        if (! $post instanceof Post) {
+            return $response->json(['options' => []]);
+        }
+
+        $parents = array_slice(Page::parents($post, $request->getString('s')), 0, Page::OPTIONS_LIMIT + 1, true);
+        $paths   = Post::paths($post->type, array_keys($parents));
+
+        $options = [];
+        foreach ($parents as $parentId => $title) {
+            $options[] = [
+                'value' => (string) $parentId,
+                'text'  => $title,
+                'data'  => ['base' => Permalinks::around($paths[$parentId] ?? '', $post->id, $post->type)[0]],
+            ];
+        }
+
+        return $response->json(['options' => $options]);
+    }
+
+    /**
+     * Save a post from its editor: the title, content, slug, parent, author, status, discussion, password
+     * and the date of creation.
      *
      * @param Request  $request  POST: `post-type`, `id` and the changed columns.
      * @param Response $response
@@ -72,7 +129,12 @@ final class PostService
 
         // the slug the editor shows becomes the saved one: made from the title or with a suffix of a taken one
         if (isset($request->post['slug']) && (string) $request->post['slug'] !== $post->slug) {
-            $response->value('[name="slug"]', $post->slug);
+            $response = $response->value('[name="slug"]', $post->slug);
+        }
+
+        // the date may schedule or publish the post, see Status::byDate()
+        if ((string) ($request->post['status'] ?? $post->status) !== $post->status) {
+            $response = $response->value('[name="status"]', $post->status);
         }
 
         return $response->notify(t('%s updated', Type::get($post->type)->labelName), Notice::Success);
@@ -97,7 +159,7 @@ final class PostService
             return $response->notify(t('Failed to duplicate the item.'), Notice::Error);
         }
 
-        $response->notify(t('%s duplicated', Type::get($post->type)->labelName), Notice::Success);
+        $response = $response->notify(t('%s duplicated', Type::get($post->type)->labelName), Notice::Success);
 
         return empty($request->post['open'])
             ? $response->reload(600)

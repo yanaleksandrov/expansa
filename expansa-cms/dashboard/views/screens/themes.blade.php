@@ -9,7 +9,7 @@
 
 $cell = $table->cells[0];
 ?>
-<?php echo view('parts/table/header', $table->headData()); ?>
+<?php echo view('parts/table/table-header', $table->headData()); ?>
 
 @if ($table->getData())
     <div class="themes">

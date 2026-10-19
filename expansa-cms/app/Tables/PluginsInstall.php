@@ -311,6 +311,16 @@ final class PluginsInstall extends Table
         ];
     }
 
+    /**
+     * All plugins on one page: the screen has no pagination.
+     *
+     * @return int
+     */
+    public function perPage(): int
+    {
+        return 0;
+    }
+
     public function headData(): array
     {
         return [

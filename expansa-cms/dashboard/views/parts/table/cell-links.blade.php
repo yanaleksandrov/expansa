@@ -20,10 +20,10 @@ $links = match (true) {
 };
 $more = count($links) - 3;
 ?>
-<div u-data="{show: false}">
+<div>
     @foreach ($links as $i => $link)
         @if ($i === 3)
-            <span class="table-more" u-show="show" hidden>
+            <span class="table-more" hidden>
         @endif
         <span class="table-link">
             @if (! empty($link['href']))
@@ -35,6 +35,6 @@ $more = count($links) - 3;
     @endforeach
     @if ($more > 0)
         </span>
-        <span class="badge" u-show="!show" @click="show = true">{{ t('+:count more', $more) }}</span>
+        <span class="badge" u-bind="moreLinks">{{ t('+:count more', $more) }}</span>
     @endif
 </div>

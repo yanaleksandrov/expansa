@@ -242,9 +242,10 @@
   border: 1px solid var(--expansa-border);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(0.5rem);
+  // the opening of the popovers, from 4px off the field the list stands at
+  transform: translateY(calc(4px + #{constants.$dropdown-shift})) scale(constants.$dropdown-scale);
   transform-origin: center top;
-  transition: transform 0.3s, opacity 0.15s;
+  transition: constants.$dropdown-transition, visibility constants.$dropdown-duration;
 
   &.ss-relative {
     position: relative;
@@ -269,7 +270,6 @@
   .ss-search {
     display: flex;
     flex: 0 1 auto;
-    padding: 3px;
 
     input {
       -webkit-appearance: textfield;
@@ -288,8 +288,7 @@
       text-align: left;
       background-color: var(--expansa-bg-white);
       background-position: calc(100% - 0.65rem);
-      border: 1px solid var(--expansa-border);
-      border-radius: 0.3rem;
+      border-bottom: 1px solid var(--expansa-border);
       outline: 0;
 
       &::placeholder {

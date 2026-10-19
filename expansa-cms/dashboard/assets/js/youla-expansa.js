@@ -459,7 +459,7 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
-    Youla.data('table', root => {
+    Youla.data('table', root => ({fields = {}, rows = [], parts = {}} = {}) => {
         const parse = (json, fallback) => {
             try {
                 return JSON.parse(json || '') ?? fallback;
@@ -475,18 +475,236 @@ document.addEventListener('youla:init', () => {
             '\'': '&#39;'
         }[char]));
         return {
-            fields: parse(root.dataset.fields, {}),
-            rows: parse(root.dataset.rows, []),
+            fields,
+            rows,
+            parts,
             search: new URLSearchParams(window.location.search).get('s') || '',
             editing: null,
             anchor: null,
             bulk: 0,
-            ajax: null,
+            action: '',
             trigger: {
                 '@change': 'selectAll($el, $root)'
             },
             item: {
                 '@click': 'selectItem($el, $root, $event)'
+            },
+            tools: {
+                'u-show'() {
+                    return !this.bulk;
+                }
+            },
+            bulkGroup: {
+                'u-show'() {
+                    return this.bulk > 0;
+                }
+            },
+            bulkForm: {
+                '@submit.prevent'() {
+                    const form = this.$el;
+                    if (parse(form.dataset.confirm, []).includes(this.action) && !confirm(this.texts.deleteItems)) {
+                        return;
+                    }
+                    const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
+                    this.$ajax.post(form.getAttribute('action'), {
+                        ids
+                    });
+                }
+            },
+            bulkPassword: {
+                'u-show'() {
+                    return parse(this.$el.closest('form')?.dataset.password, []).includes(this.action);
+                }
+            },
+            bulkApply: {
+                ':disabled'() {
+                    return !this.action;
+                }
+            },
+            uploader: {
+                '@click'() {
+                    this.$dialog.open('tmpl-media-uploader', this.uploaderDialog);
+                }
+            },
+            emptyTrash: {
+                '@click'() {
+                    const {endpoint, payload} = this.$el.dataset;
+                    if (confirm(this.texts.emptyTrash)) {
+                        this.$ajax.post(endpoint, parse(payload, {}));
+                    }
+                }
+            },
+            rowAction: {
+                '@click.prevent'() {
+                    const {endpoint, payload, confirm: question, refresh} = this.$el.dataset;
+                    if (question && !confirm(this.texts[question] ?? question)) {
+                        return;
+                    }
+                    this.$ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
+                }
+            },
+            moreLinks: {
+                '@click'() {
+                    this.$el.previousElementSibling?.removeAttribute('hidden');
+                    this.$el.hidden = true;
+                }
+            },
+            queryField: {
+                '@change'() {
+                    this.setQuery({
+                        [this.$el.name]: this.$el.value
+                    });
+                }
+            },
+            sortLink: {
+                '@click.prevent'() {
+                    const {orderby, order} = this.$el.dataset;
+                    this.setQuery({
+                        orderby,
+                        order
+                    });
+                }
+            },
+            pageLink: {
+                '@click.prevent'() {
+                    this.goToPage(Number(this.$el.dataset.page));
+                }
+            },
+            pageField: {
+                '@change'() {
+                    const field = this.$el;
+                    if (field.value) {
+                        this.goToPage(Math.min(Number(field.max), Math.max(1, Math.trunc(field.value))));
+                    }
+                }
+            },
+            searchField: {
+                '@input.delay.500ms'() {
+                    this.applyFilters();
+                },
+                '@keydown.enter.prevent'() {
+                    this.applyFilters();
+                }
+            },
+            partSelect: {
+                '@change'() {
+                    this.setPart(this.$el.value);
+                }
+            },
+            filterCount: {
+                'u-show'() {
+                    return this.activeFilters().length > 0;
+                },
+                'u-text'() {
+                    return this.activeFilters().length;
+                }
+            },
+            filterAdd: {
+                '@click'() {
+                    this.addFilter(this.$el.dataset.field);
+                }
+            },
+            filterClear: {
+                'u-show'() {
+                    return this.rows.length > 0;
+                },
+                '@click'() {
+                    this.clearFilters();
+                }
+            },
+            filterEmpty: {
+                'u-show'() {
+                    return !this.rows.length;
+                }
+            },
+            filterConjunction: {
+                'u-text': 'i ? texts.and : texts.where'
+            },
+            filterField: {
+                ':value': 'row.field',
+                '@change': 'setFilterField(i, $el.value)',
+                'u-select': 'selectOptions()'
+            },
+            filterOperator: {
+                ':value': 'row.operator',
+                '@change': 'setFilterOperator(i, $el.value)',
+                'u-select': 'selectOptions()'
+            },
+            filterValues: {
+                'u-html': 'filterOptions(row)',
+                ':value': 'row.values',
+                '@change': 'setFilterValues(i, $el)',
+                'u-select': 'selectOptions()'
+            },
+            filterRemove: {
+                '@click': 'removeFilter(i)'
+            },
+            chips: {
+                'u-show'() {
+                    return this.activeFilters().length > 0 || this.search.trim() !== '';
+                }
+            },
+            searchChip: {
+                'u-show'() {
+                    return this.search.trim() !== '';
+                }
+            },
+            searchChipEdit: {
+                '@click'() {
+                    root.querySelector('.table-filter [name=s]')?.focus();
+                }
+            },
+            searchChipText: {
+                'u-text'() {
+                    return this.search.trim();
+                }
+            },
+            searchChipRemove: {
+                '@click'() {
+                    this.clearSearch();
+                }
+            },
+            filterChip: {
+                'u-show': 'row.values.length'
+            },
+            filterChipAnd: {
+                'u-show': 'search.trim() || !isFirstActive(i)'
+            },
+            filterChipEdit: {
+                '@click': 'editing = i'
+            },
+            filterChipIcon: {
+                ':class': 'fields[row.field]?.icon'
+            },
+            filterChipLabel: {
+                'u-text': 'fields[row.field]?.label'
+            },
+            filterChipOperator: {
+                'u-text': 'row.operator === \'not\' ? texts.isNot : texts.is'
+            },
+            filterChipValues: {
+                'u-text': 'filterLabels(row, texts.selected)'
+            },
+            filterChipRemove: {
+                '@click': 'removeFilter(i)'
+            },
+            clearAll: {
+                '@click'() {
+                    this.clearFilters();
+                }
+            },
+            valuesPopover: {
+                'u-html'() {
+                    return this.filterChoices(this.editing);
+                },
+                '@change'(e) {
+                    this.toggleFilterValue(e.target);
+                }
+            },
+            selectOptions() {
+                return {
+                    contentLocation: root.querySelector('.table-filter-content')
+                };
             },
             items(root) {
                 return [ ...root.querySelectorAll('[u-bind~="item"]') ];
@@ -513,6 +731,7 @@ document.addEventListener('youla:init', () => {
                 root.querySelectorAll('[u-bind~="trigger"], [u-bind~="item"]').forEach(input => input.checked = false);
                 this.anchor = null;
                 this.bulk = 0;
+                this.action = '';
             },
             activeFilters() {
                 return this.rows.filter(row => row.values.length);
@@ -595,26 +814,45 @@ document.addEventListener('youla:init', () => {
                 const options = this.fields[row.field]?.options || {};
                 return row.values.length > 2 ? selected.replace(':count', row.values.length) : row.values.map(value => options[value] ?? value).join(', ');
             },
+            setPart(key) {
+                const names = new Set(Object.values(this.parts).flatMap(Object.keys));
+                this.setQuery(Object.fromEntries([ ...names ].map(name => [ name, this.parts[key]?.[name] ?? '' ])));
+            },
+            setQuery(values) {
+                const params = new URLSearchParams(window.location.search);
+                Object.entries(values).forEach(([name, value]) => value === '' || value == null ? params.delete(name) : params.set(name, value));
+                window.history.replaceState(null, '', '?' + this.query(params));
+                this.goToPage(1);
+            },
             applyFilters() {
-                const url = new URL(window.location.href);
-                [ ...url.searchParams.keys() ].filter(key => key.startsWith('filter[')).forEach(key => url.searchParams.delete(key));
-                const search = this.search.trim();
-                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
-                const payload = Object.fromEntries(url.searchParams);
-                this.activeFilters().forEach((row, i) => {
-                    url.searchParams.set(`filter[${i}][field]`, row.field);
-                    url.searchParams.set(`filter[${i}][operator]`, row.operator);
-                    payload[`filter[${i}][field]`] = row.field;
-                    payload[`filter[${i}][operator]`] = row.operator;
-                    row.values.forEach((value, j) => {
-                        url.searchParams.append(`filter[${i}][values][]`, value);
-                        payload[`filter[${i}][values][${j}]`] = value;
-                    });
+                this.goToPage(1);
+            },
+            query(params) {
+                return params.toString().replace(/%2C/gi, ',').replace(/%21/g, '!');
+            },
+            param(field) {
+                return this.fields[field]?.param || field;
+            },
+            goToPage(page) {
+                const params = new URLSearchParams(window.location.search);
+                Object.keys(this.fields).forEach(field => {
+                    params.delete(this.param(field));
+                    params.delete(`${this.param(field)}!`);
                 });
-                window.history.replaceState(null, '', url);
-                this.ajax.post('tables/filter', payload).then(() => {
+                page > 1 ? params.set('page', page) : params.delete('page');
+                const search = this.search.trim();
+                search ? params.set('s', search) : params.delete('s');
+                this.activeFilters().forEach(row => {
+                    const name = this.param(row.field) + (row.operator === 'not' ? '!' : '');
+                    const values = new Set([ ...params.get(name)?.split(',') || [], ...row.values ]);
+                    params.set(name, [ ...values ].join(','));
+                });
+                window.history.replaceState(null, '', '?' + this.query(params));
+                this.$ajax.post('tables/filter', Object.fromEntries(params), null, {
+                    el: root
+                }).then(() => {
                     this.resetAll(root);
-                    root.__x.initialize(root.querySelector('.table-body'));
+                    [ '.table-body', '.table-header', '.table-head-data' ].map(selector => root.querySelector(selector)).forEach(el => el && root.__x.initialize(el));
                 });
             }
         };
@@ -898,12 +1136,11 @@ document.addEventListener('youla:init', () => {
         bases: {},
         synced: false,
         before: null,
-        ajax: null,
         source() {
             return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
         },
         generate(text) {
-            return String(text).trim() === '' ? Promise.resolve('') : this.ajax.post('slugs/generate', {
+            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', {
                 text
             }, null, {
                 clearErrors: false
@@ -923,7 +1160,7 @@ document.addEventListener('youla:init', () => {
             })));
         },
         line: {
-            '@load': 'ajax = $ajax; synced && follow()',
+            '@load': 'synced && follow()',
             '@input.document.delay.500ms'(e) {
                 if (this.synced && e.target === this.source()) {
                     this.follow();
@@ -939,7 +1176,7 @@ document.addEventListener('youla:init', () => {
             },
             '@change.document'(e) {
                 if (this.parent && e.target.name === this.parent && e.target.form === root.closest('form')) {
-                    this.base = this.bases[e.target.value] ?? this.base;
+                    this.base = this.bases[e.target.value] ?? e.target.selectedOptions?.[0]?.dataset.base ?? this.base;
                 }
             }
         },
@@ -1010,6 +1247,25 @@ document.addEventListener('youla:init', () => {
                         this.touch();
                     }
                 });
+            }
+        }
+    }));
+    Youla.data('postDetails', root => ({
+        status: root.dataset.status || '',
+        schedule(input) {
+            if (input.name !== 'created_at' || !input.value) {
+                return;
+            }
+            const ahead = new Date(input.value) > new Date;
+            if (this.status === 'publish' && ahead) {
+                this.status = 'future';
+            } else if (this.status === 'future' && !ahead) {
+                this.status = 'publish';
+            }
+        },
+        restore(form) {
+            if (form === root.closest('form')) {
+                this.status = root.dataset.status || '';
             }
         }
     }));
@@ -1116,11 +1372,6 @@ document.addEventListener('youla:init', () => {
         }));
         input.focus();
     });
-    Youla.method('safe', () => ({
-        slug(value) {
-            return value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').toLowerCase();
-        }
-    }));
     Youla.directive('highlight', (el, output, {modifiers}) => {
         if (el._x_highlighted) {
             return;

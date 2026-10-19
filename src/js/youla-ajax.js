@@ -31,15 +31,16 @@
         Youla.method("ajax", (e, el) => {
             const ajax = (method, route, payload, onProgress, options = {}) => {
                 const config = settings();
-                abortPrevious(el);
+                const target = requestElement(el, options.el);
+                abortPrevious(target);
                 if (options.clearErrors ?? true) {
-                    clearErrors(scopeOf(el));
+                    clearErrors(scopeOf(target));
                 }
-                const xhr = el.__ajax = new XMLHttpRequest;
-                const body = buildRequestBody(el, payload);
+                const xhr = target.__ajax = new XMLHttpRequest;
+                const body = buildRequestBody(target, payload);
                 const safe = SAFE.includes(method);
                 const url = resolveURL(route, config.baseURL, safe ? body : null);
-                const done = xhr.__done = toggleLoading(el, config.loadingClass);
+                const done = xhr.__done = toggleLoading(target, config.loadingClass);
                 xhr.open(method, url);
                 xhr.withCredentials = options.credentials ?? config.credentials;
                 xhr.timeout = options.timeout ?? config.timeout;
@@ -70,7 +71,7 @@
                     xhr.onload = () => {
                         const parsed = parseJSON(xhr.responseText);
                         if (xhr.status < 200 || xhr.status >= 300) {
-                            showErrors(el, parsed, config);
+                            showErrors(target, parsed, config);
                             reject(handled(Object.assign(new Error(`Youla.js: "$ajax" failed with status ${xhr.status}.`), {
                                 status: xhr.status,
                                 data: parsed ?? xhr.responseText
@@ -87,7 +88,7 @@
                             document.dispatchEvent(new CustomEvent(`ajax:${route}`, {
                                 detail: {
                                     data: data,
-                                    el: el,
+                                    el: target,
                                     resolve: override
                                 },
                                 bubbles: true,
@@ -130,6 +131,16 @@
                 errors: merge("errors"),
                 messages: merge("messages")
             };
+        }
+        function requestElement(el, override) {
+            if (override === undefined || override === null) {
+                return el;
+            }
+            if (override instanceof Element) {
+                return override;
+            }
+            console.warn('Youla.js: "$ajax" option "el" must be an Element; the request runs on the calling element instead.', override);
+            return el;
         }
         function notify(message, type, duration) {
             document.querySelector('[u-data="notice"]')?.__x?.data?.add(message, type, duration);
@@ -314,13 +325,18 @@
                     if (!element && !GLOBAL_ACTIONS.includes(action)) {
                         return;
                     }
-                    setTimeout(() => {
+                    const run = () => {
                         try {
                             runFragmentAction(action, element, value, config);
                         } catch (error) {
                             console.error(`Youla.js: "$ajax" fragment action "${action}" failed.`, error);
                         }
-                    }, Number(delay) || 0);
+                    };
+                    if (delay === undefined) {
+                        run();
+                    } else {
+                        setTimeout(run, Number(delay) || 0);
+                    }
                 });
             });
         }

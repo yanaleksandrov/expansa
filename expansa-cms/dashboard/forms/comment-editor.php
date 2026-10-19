@@ -45,21 +45,37 @@ return Form::enqueue(
                     <a class="btn btn--icon btn--xs" href="<?php echo $back; ?>" title="<?php echo t_attr('Back'); ?>">
                         <i class="ph ph-arrow-left"></i>
                     </a>
-                    <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
-                        <?php if ($from === 'post' && $postUrl !== '') : ?>
-                            <a href="<?php echo url('dashboard/edit?table=' . $type->key); ?>"><?php echo $type->labelNamePlural; ?></a>
-                            <i class="ph ph-caret-right"></i>
-                            <a href="<?php echo $postUrl; ?>"><?php echo htmlspecialchars($title !== '' ? $title : t('Post #:id', $comment->postId)); ?></a>
-                        <?php else : ?>
-                            <a href="<?php echo $list; ?>"><?php echo t('Comments'); ?></a>
-                        <?php endif; ?>
-                        <i class="ph ph-caret-right"></i>
-                        <?php if ($url !== '') : ?>
-                            <a href="<?php echo $url; ?>" target="_blank" title="<?php echo t_attr('View comment'); ?>" aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></a>
-                        <?php else : ?>
-                            <span aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></span>
-                        <?php endif; ?>
-                    </nav>
+                    <?php
+                    $parents = $from === 'post' && $postUrl !== '' ? [
+                        [
+                            'label' => $type->labelNamePlural,
+                            'url'   => url('dashboard/edit?table=' . $type->key),
+                        ],
+                        [
+                            'label' => $title !== '' ? $title : t('Post #:id', $comment->postId),
+                            'url'   => $postUrl,
+                        ],
+                    ] : [
+                        [
+                            'label' => t('Comments'),
+                            'url'   => $list,
+                        ],
+                    ];
+
+                    echo view('parts/breadcrumbs', [
+                        'items' => [
+                            ...$parents,
+                            [
+                                'label'      => t('Comment #:id', $comment->id),
+                                'url'        => $url,
+                                'attributes' => $url !== '' ? [
+                                    'target' => '_blank',
+                                    'title'  => t('View comment'),
+                                ] : [],
+                            ],
+                        ],
+                    ]);
+                    ?>
                 </div>
                 <?php
             },
@@ -186,8 +202,8 @@ return Form::enqueue(
                                 <?php else : ?>
                                 <div class="post-comment-box">
                                     <textarea id="comment-reply-text" name="reply" form="comment-reply" rows="3" required placeholder="<?php echo t_attr('Reply to :name…', $comment->getAuthorName()); ?>" aria-label="<?php echo t_attr('Reply'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
-                                    <div class="post-comment-tools">
-                                        <span class="t-muted fs-12 mr-auto"><?php echo t('The reply is published at once under your name, on the same post.'); ?></span>
+                                    <div class="post-comment-submit">
+                                        <span class="t-muted fs-12"><?php echo t('The reply is published at once under your name, on the same post.'); ?></span>
                                         <button class="btn btn--sm btn--primary" type="submit" form="comment-reply"><?php echo t('Send Reply'); ?></button>
                                     </div>
                                 </div>

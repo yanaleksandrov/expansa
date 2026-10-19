@@ -7,7 +7,7 @@
  * @package Expansa\Templates
  */
 ?>
-<?php echo view('parts/table/header', $table->headData()); ?>
+<?php echo view('parts/table/table-header', $table->headData()); ?>
 
 <div class="terms">
     <div class="terms-side">

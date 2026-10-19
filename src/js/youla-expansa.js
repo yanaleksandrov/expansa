@@ -7,7 +7,7 @@ document.addEventListener('youla:init', ()=> {
      * `u-step.required` also requires every required field's native `checkValidity()`.
      * `u-step:action="expr"` runs once each time that panel becomes the current one.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     (() => {
         // Local, not dom.js's closestDirective() — this plugin only reaches into the public "u-data"/".__x" contract.
@@ -201,7 +201,7 @@ document.addEventListener('youla:init', ()=> {
      * Notifications system: a single `u-data="notice"` container (parts/footer.html) holds the
      * queue. `$notice` resolves to that container's data, so `$notice.info('Saved')` works anywhere.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     (() => {
         Youla.variable('notice', () => document.querySelector('[u-data="notice"]')?.__x?.data);
@@ -304,7 +304,7 @@ document.addEventListener('youla:init', ()=> {
      * current one, so a template can raise its own (e.g. a confirm) from within another. Only
      * the outermost dialog syncs to "?dialog=" in the URL — nested ones are transient.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     (() => {
         Youla.variable('dialog', () => document.querySelector('[u-data="dialog"]')?.__x?.data);
@@ -424,7 +424,7 @@ document.addEventListener('youla:init', ()=> {
      * Password policy: checks a string against a fixed policy (minimum count per character
      * class, minimum length) and can generate a password satisfying it.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.data('password', () => ({
         value: '',
@@ -521,7 +521,7 @@ document.addEventListener('youla:init', ()=> {
     /**
      * Avatar uploader.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.data('avatar', () => ({
         name: '',
@@ -562,12 +562,15 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Table checkboxes and filter: rows "field is/is not values" from `data-fields` (key => {label, icon, options})
-     * and `data-rows`; every change of a filter with values reloads the rows through the API and the page URL.
+     * Table: the checkboxes of the rows, the bulk actions, the filter, the parts of the list and the pagination.
+     * `u-data="table(options)"`: `fields` of Table::filters(), key => {label, icon, options, param}, `rows`
+     * of Table::activeFilters() and `parts`, the query parameters of the parts of the list by key, see Table::headData().
+     * The markup of parts/table/table-header binds to it by `u-bind`, the values the handlers need are in `data-*`;
+     * every change of a filter, a part or the page reloads the rows and the bar of the header through the API.
      *
-     * @since 1.0
+     * @since 2027.1
      */
-    Youla.data('table', (root) => {
+    Youla.data('table', (root) => ({ fields = {}, rows = [], parts = {} } = {}) => {
         const parse = (json, fallback) => {
             try {
                 return JSON.parse(json || '') ?? fallback;
@@ -581,21 +584,241 @@ document.addEventListener('youla:init', ()=> {
         })[char]);
 
         return {
-            fields: parse(root.dataset.fields, {}),
-            rows: parse(root.dataset.rows, []),
+            fields,
+            rows,
+            parts,
             // the text of the search field, applied with the filters and shown as a chip
             search: new URLSearchParams(window.location.search).get('s') || '',
             // index of the filter whose chip opened the values popover
             editing: null,
             anchor: null,
             bulk: 0,
-            // $ajax of the table, set by its `@load`: the methods called from the listeners don't get it
-            ajax: null,
+            // the bulk action chosen in the bar of the header
+            action: '',
             trigger: {
                 '@change': 'selectAll($el, $root)',
             },
             item: {
                 '@click': 'selectItem($el, $root, $event)',
+            },
+            tools: {
+                'u-show'() {
+                    return !this.bulk;
+                },
+            },
+            bulkGroup: {
+                'u-show'() {
+                    return this.bulk > 0;
+                },
+            },
+            // the API route of `action` gets the IDs of the checked rows, the `data-confirm` actions ask first
+            bulkForm: {
+                '@submit.prevent'() {
+                    const form = this.$el;
+                    if (parse(form.dataset.confirm, []).includes(this.action) && !confirm(this.texts.deleteItems)) {
+                        return;
+                    }
+
+                    const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
+                    this.$ajax.post(form.getAttribute('action'), { ids });
+                },
+            },
+            // the `data-password` actions of the form need the current password
+            bulkPassword: {
+                'u-show'() {
+                    return parse(this.$el.closest('form')?.dataset.password, []).includes(this.action);
+                },
+            },
+            bulkApply: {
+                ':disabled'() {
+                    return !this.action;
+                },
+            },
+            uploader: {
+                '@click'() {
+                    this.$dialog.open('tmpl-media-uploader', this.uploaderDialog);
+                },
+            },
+            emptyTrash: {
+                '@click'() {
+                    const { endpoint, payload } = this.$el.dataset;
+                    if (confirm(this.texts.emptyTrash)) {
+                        this.$ajax.post(endpoint, parse(payload, {}));
+                    }
+                },
+            },
+            // a link of a row, see Table::action(): `data-confirm` is the key of the text asking first,
+            // `data-refresh` shows the rows again after the response
+            rowAction: {
+                '@click.prevent'() {
+                    const { endpoint, payload, confirm: question, refresh } = this.$el.dataset;
+                    if (question && !confirm(this.texts[question] ?? question)) {
+                        return;
+                    }
+
+                    this.$ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
+                },
+            },
+            // the badge "+N more" of a cell shows the links hidden before it
+            moreLinks: {
+                '@click'() {
+                    this.$el.previousElementSibling?.removeAttribute('hidden');
+                    this.$el.hidden = true;
+                },
+            },
+            // a field of the list sets the query parameter of its name, an empty value drops it
+            queryField: {
+                '@change'() {
+                    this.setQuery({ [this.$el.name]: this.$el.value });
+                },
+            },
+            sortLink: {
+                '@click.prevent'() {
+                    const { orderby, order } = this.$el.dataset;
+                    this.setQuery({ orderby, order });
+                },
+            },
+            pageLink: {
+                '@click.prevent'() {
+                    this.goToPage(Number(this.$el.dataset.page));
+                },
+            },
+            pageField: {
+                '@change'() {
+                    const field = this.$el;
+                    if (field.value) {
+                        this.goToPage(Math.min(Number(field.max), Math.max(1, Math.trunc(field.value))));
+                    }
+                },
+            },
+            searchField: {
+                '@input.delay.500ms'() {
+                    this.applyFilters();
+                },
+                '@keydown.enter.prevent'() {
+                    this.applyFilters();
+                },
+            },
+            partSelect: {
+                '@change'() {
+                    this.setPart(this.$el.value);
+                },
+            },
+            filterCount: {
+                'u-show'() {
+                    return this.activeFilters().length > 0;
+                },
+                'u-text'() {
+                    return this.activeFilters().length;
+                },
+            },
+            filterAdd: {
+                '@click'() {
+                    this.addFilter(this.$el.dataset.field);
+                },
+            },
+            filterClear: {
+                'u-show'() {
+                    return this.rows.length > 0;
+                },
+                '@click'() {
+                    this.clearFilters();
+                },
+            },
+            filterEmpty: {
+                'u-show'() {
+                    return !this.rows.length;
+                },
+            },
+            // in the rows of `u-each` the expressions are strings: only they get `row` and `i`
+            filterConjunction: {
+                'u-text': 'i ? texts.and : texts.where',
+            },
+            filterField: {
+                ':value': 'row.field',
+                '@change': 'setFilterField(i, $el.value)',
+                'u-select': 'selectOptions()',
+            },
+            filterOperator: {
+                ':value': 'row.operator',
+                '@change': 'setFilterOperator(i, $el.value)',
+                'u-select': 'selectOptions()',
+            },
+            // u-html before :value, as in `builder`: options must exist before the value is selected
+            filterValues: {
+                'u-html': 'filterOptions(row)',
+                ':value': 'row.values',
+                '@change': 'setFilterValues(i, $el)',
+                'u-select': 'selectOptions()',
+            },
+            filterRemove: {
+                '@click': 'removeFilter(i)',
+            },
+            chips: {
+                'u-show'() {
+                    return this.activeFilters().length > 0 || this.search.trim() !== '';
+                },
+            },
+            searchChip: {
+                'u-show'() {
+                    return this.search.trim() !== '';
+                },
+            },
+            searchChipEdit: {
+                '@click'() {
+                    root.querySelector('.table-filter [name=s]')?.focus();
+                },
+            },
+            searchChipText: {
+                'u-text'() {
+                    return this.search.trim();
+                },
+            },
+            searchChipRemove: {
+                '@click'() {
+                    this.clearSearch();
+                },
+            },
+            filterChip: {
+                'u-show': 'row.values.length',
+            },
+            filterChipAnd: {
+                'u-show': 'search.trim() || !isFirstActive(i)',
+            },
+            filterChipEdit: {
+                '@click': 'editing = i',
+            },
+            filterChipIcon: {
+                ':class': 'fields[row.field]?.icon',
+            },
+            filterChipLabel: {
+                'u-text': 'fields[row.field]?.label',
+            },
+            filterChipOperator: {
+                'u-text': "row.operator === 'not' ? texts.isNot : texts.is",
+            },
+            filterChipValues: {
+                'u-text': 'filterLabels(row, texts.selected)',
+            },
+            filterChipRemove: {
+                '@click': 'removeFilter(i)',
+            },
+            clearAll: {
+                '@click'() {
+                    this.clearFilters();
+                },
+            },
+            valuesPopover: {
+                'u-html'() {
+                    return this.filterChoices(this.editing);
+                },
+                '@change'(e) {
+                    this.toggleFilterValue(e.target);
+                },
+            },
+            // the selects of the filter rows open inside the popover, so a click on them does not close it
+            selectOptions() {
+                return { contentLocation: root.querySelector('.table-filter-content') };
             },
             items(root) {
                 return [...root.querySelectorAll('[u-bind~="item"]')];
@@ -623,6 +846,7 @@ document.addEventListener('youla:init', ()=> {
                 root.querySelectorAll('[u-bind~="trigger"], [u-bind~="item"]').forEach(input => input.checked = false);
                 this.anchor = null;
                 this.bulk   = 0;
+                this.action = '';
             },
             activeFilters() {
                 return this.rows.filter(row => row.values.length);
@@ -710,36 +934,67 @@ document.addEventListener('youla:init', ()=> {
                     ? selected.replace(':count', row.values.length)
                     : row.values.map(value => options[value] ?? value).join(', ');
             },
-            applyFilters() {
-                const url = new URL(window.location.href);
+            /**
+             * Open a part of the list, see Table::headData(): its query parameters are set, those of the other parts dropped.
+             *
+             * @param {string} key
+             */
+            setPart(key) {
+                const names = new Set(Object.values(this.parts).flatMap(Object.keys));
 
-                [ ...url.searchParams.keys() ]
-                    .filter(key => key.startsWith('filter['))
-                    .forEach(key => url.searchParams.delete(key));
+                this.setQuery(Object.fromEntries([ ...names ].map(name => [ name, this.parts[key]?.[name] ?? '' ])));
+            },
+            /**
+             * Set query parameters of the page, an empty value drops one, and show the list from the first page.
+             *
+             * @param {Object<string, string>} values
+             */
+            setQuery(values) {
+                const params = new URLSearchParams(window.location.search);
+                Object.entries(values).forEach(([ name, value ]) => value === '' || value == null ? params.delete(name) : params.set(name, value));
+
+                window.history.replaceState(null, '', '?' + this.query(params));
+                this.goToPage(1);
+            },
+            // The rows are fewer or other after a change of the filters, so the list starts from the first page.
+            applyFilters() {
+                this.goToPage(1);
+            },
+            // URLSearchParams escapes the separators of the filters: `,` of the values and `!` of "is not".
+            query(params) {
+                return params.toString().replace(/%2C/gi, ',').replace(/%21/g, '!');
+            },
+            param(field) {
+                return this.fields[field]?.param || field;
+            },
+            // A filter is the parameter of its field, `author=1,3`, or with `!` for "is not", `role!=editor`.
+            goToPage(page) {
+                const params = new URLSearchParams(window.location.search);
+                Object.keys(this.fields).forEach(field => {
+                    params.delete(this.param(field));
+                    params.delete(`${this.param(field)}!`);
+                });
+                page > 1 ? params.set('page', page) : params.delete('page');
 
                 const search = this.search.trim();
-                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
+                search ? params.set('s', search) : params.delete('s');
 
-                // the table is built by the API from the same query as the page: the part, the search and the order
-                const payload = Object.fromEntries(url.searchParams);
-
-                this.activeFilters().forEach((row, i) => {
-                    url.searchParams.set(`filter[${i}][field]`, row.field);
-                    url.searchParams.set(`filter[${i}][operator]`, row.operator);
-                    payload[`filter[${i}][field]`]    = row.field;
-                    payload[`filter[${i}][operator]`] = row.operator;
-                    row.values.forEach((value, j) => {
-                        url.searchParams.append(`filter[${i}][values][]`, value);
-                        payload[`filter[${i}][values][${j}]`] = value;
-                    });
+                // rows of the same field and operator are one parameter, their values are joined
+                this.activeFilters().forEach(row => {
+                    const name   = this.param(row.field) + (row.operator === 'not' ? '!' : '');
+                    const values = new Set([ ...(params.get(name)?.split(',') || []), ...row.values ]);
+                    params.set(name, [ ...values ].join(','));
                 });
 
-                window.history.replaceState(null, '', url);
+                window.history.replaceState(null, '', '?' + this.query(params));
 
-                // the API replaces the rows: their bindings to this component are initialized again
-                this.ajax.post('tables/filter', payload).then(() => {
+                // the API builds the table from the same query as the page; the rows and the bar of the header are replaced,
+                // their bindings to this component are initialized again; from the root a new request aborts the previous one
+                this.$ajax.post('tables/filter', Object.fromEntries(params), null, { el: root }).then(() => {
                     this.resetAll(root);
-                    root.__x.initialize(root.querySelector('.table-body'));
+                    [ '.table-body', '.table-header', '.table-head-data' ]
+                        .map(selector => root.querySelector(selector))
+                        .forEach(el => el && root.__x.initialize(el));
                 });
             },
         };
@@ -751,7 +1006,7 @@ document.addEventListener('youla:init', ()=> {
      * (ORed together, rules within a group ANDed - see `form/builder.blade.php`, embedded
      * as a plain markup partial rather than its own component) and its field rows.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.data('builder', (root) => {
         let state;
@@ -875,7 +1130,7 @@ document.addEventListener('youla:init', ()=> {
      * Selfie: `u-data="stream"` (one instance per root) wraps `getUserMedia` into a
      * preview -> snapshot -> canvas -> image flow.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.data('stream', (root) => ({
         error: null,
@@ -1030,7 +1285,7 @@ document.addEventListener('youla:init', ()=> {
      * Search box: `wrapper`/`button`/`input` are ready-made `u-bind` sets. `button`/`input` carry
      * their own `u-ref`, so the wrapper's Ctrl+K shortcut reaches the input via `$refs`.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.data('search', () => ({
         currentIdx: -1,
@@ -1090,7 +1345,6 @@ document.addEventListener('youla:init', ()=> {
         bases: {},
         synced: false,
         before: null,
-        ajax: null,
         source() {
             return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
         },
@@ -1102,7 +1356,7 @@ document.addEventListener('youla:init', ()=> {
          * @returns {Promise<string>}
          */
         generate(text) {
-            return String(text).trim() === '' ? Promise.resolve('') : this.ajax.post('slugs/generate', { text }, null, { clearErrors: false });
+            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', { text }, null, { clearErrors: false });
         },
         follow() {
             const text = this.source()?.value || '';
@@ -1122,8 +1376,7 @@ document.addEventListener('youla:init', ()=> {
             setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', { bubbles: true })));
         },
         line: {
-            // $ajax reaches only string expressions, not the listener functions
-            '@load': 'ajax = $ajax; synced && follow()',
+            '@load': 'synced && follow()',
             '@input.document.delay.500ms'(e) {
                 if (this.synced && e.target === this.source()) {
                     this.follow();
@@ -1136,10 +1389,10 @@ document.addEventListener('youla:init', ()=> {
 
                 return url;
             },
-            // the URL of the chosen parent, before saving
+            // the URL of the chosen parent, before saving; a parent found by the search brings it in `data-base`
             '@change.document'(e) {
                 if (this.parent && e.target.name === this.parent && e.target.form === root.closest('form')) {
-                    this.base = this.bases[e.target.value] ?? this.base;
+                    this.base = this.bases[e.target.value] ?? e.target.selectedOptions?.[0]?.dataset.base ?? this.base;
                 }
             },
         },
@@ -1221,11 +1474,40 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
+     * Details aside the post editor: the status follows the date as Status::byDate() on the server does,
+     * a published post dated ahead is scheduled, a scheduled one dated now or before is published.
+     *
+     * @since 2027.1
+     */
+    Youla.data('postDetails', (root) => ({
+        status: root.dataset.status || '',
+        // the hidden field of the datepicker sends `change` with the ISO value
+        schedule(input) {
+            if (input.name !== 'created_at' || !input.value) {
+                return;
+            }
+
+            const ahead = new Date(input.value) > new Date();
+            if (this.status === 'publish' && ahead) {
+                this.status = 'future';
+            } else if (this.status === 'future' && !ahead) {
+                this.status = 'publish';
+            }
+        },
+        // a reset of the form brings the select back, the data of the status follows it
+        restore(form) {
+            if (form === root.closest('form')) {
+                this.status = root.dataset.status || '';
+            }
+        },
+    }));
+
+    /**
      * Tabs, synced with the page URL: `u-data="tab as tab"` on the wrapper, `u-bind="tab.button('id')"`
      * on each tab button, `u-show="tab.active === 'id'"` or `u-bind="tab.content('id')"` on each panel.
      * The active tab starts from the button the server marks `is-active`: the tab of `?tab=`, else the first.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.data('tab', () => ({
         active: null,
@@ -1278,7 +1560,7 @@ document.addEventListener('youla:init', ()=> {
      * `$dirty` — warns about unsaved form changes. Call `$dirty.watch($el)` once per form (e.g.
      * `<form @load="$dirty.watch($el)">`) and `$dirty.remove($el)` after a successful save.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.variable('dirty', () => {
         const serialize = form => JSON.stringify(Object.fromEntries(new FormData(form).entries()));
@@ -1331,7 +1613,7 @@ document.addEventListener('youla:init', ()=> {
     /**
      * Copies a string to the clipboard, e.g. `@click="$copy('Some text', ['is-copied'])"`.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.method('copy', (e, el) => (subject, classes) => {
         window.navigator.clipboard.writeText(subject).then(() => {
@@ -1347,7 +1629,7 @@ document.addEventListener('youla:init', ()=> {
      * Steps the sibling number input up or down, e.g. `@click="$spin(-1)"`.
      * Respects its min, max and step, then fires `input` so listeners see the change.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.method('spin', (e, el) => (direction) => {
         const input = el.parentElement.querySelector('input[type="number"]');
@@ -1365,7 +1647,7 @@ document.addEventListener('youla:init', ()=> {
      * Puts a value into the input of the field the element is in, e.g. `@click="$fill('Y-m-d')"`.
      * Fires `input` and `change`, so unsaved changes and field conditions see it.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.method('fill', (e, el) => (value) => {
         const input = el.closest('.field')?.querySelector('input, textarea');
@@ -1380,29 +1662,9 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
-     * Data sanitizing.
-     *
-     * @since 1.0
-     */
-    Youla.method('safe', () => ({
-        slug(value) {
-            // NFD-decomposes accented characters (e.g. "\u00e9" -> "e" + accent), then drops the accents and anything but letters/numbers/spaces/hyphens.
-            return value
-                .toString()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .replace(/[^\p{L}\p{N}\s-]/gu, '')
-                .trim()
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-                .toLowerCase();
-        },
-    }));
-
-    /**
      * Code syntax highlight
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.directive('highlight', (el, output, { modifiers }) => {
         // Wraps el's children in <code> exactly once — a later call would otherwise nest another wrapper around it each time.
@@ -1427,7 +1689,7 @@ document.addEventListener('youla:init', ()=> {
      * autofill from prefilling the field before the user interacts with it,
      * even when the browser ignores `autocomplete="off"`.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.directive('noautofill', (el) => {
         // Attaches focus/blur listeners exactly once — a later call would otherwise stack another pair, each fighting over el.readOnly.
@@ -1448,7 +1710,7 @@ document.addEventListener('youla:init', ()=> {
      * Pins a sidebar within its `position: relative` parent's bounds as it scrolls, instead
      * of sticking to the viewport — a taller-than-viewport sidebar scrolls internally.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.directive('sticky', el => {
         // Attaches its window listeners exactly once — a later call would otherwise stack another "reposition" closure that runs forever.
@@ -1507,7 +1769,7 @@ document.addEventListener('youla:init', ()=> {
      * Expands or collapses an element with a smooth slide animation, driven by the
      * directive's truthiness (`u-collapse="open"`) rather than a CSS class.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.directive('collapse', (el, output) => {
         const isOpen   = !!output;
@@ -1561,7 +1823,7 @@ document.addEventListener('youla:init', ()=> {
      * modifiers as percentages (`u-progress.20.80.600ms`). `to` can also be a reactive bound
      * value, e.g. `u-progress.0.600ms="percent"`. Skips the transition on reduced motion.
      *
-     * @since 1.0
+     * @since 2027.1
      */
     Youla.directive('progress', (el, output, { modifiers, duration, expression }) => {
         const [rawFrom = 0, rawTo = 100] = modifiers;

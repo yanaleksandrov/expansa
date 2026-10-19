@@ -595,9 +595,6 @@ final value.
 - **`$copy`** (`Youla.method('copy')`) — `$copy(subject, classes?)` writes `subject` to the
   clipboard and toggles `classes` (default `['ph-copy', 'ph-check']`) on the triggering element
   for one second as feedback.
-- **`$safe.slug(value)`** (`Youla.method('safe')`) — normalizes a string into a URL slug: strips
-  accents, drops anything but letters/numbers/spaces/hyphens, and collapses whitespace into single
-  hyphens.
 
 ## Full source (as it was immediately before removal)
 

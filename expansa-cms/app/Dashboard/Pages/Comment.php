@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Dashboard\Pages;
 
 use App\Models\Comment as Entry;
-use App\Post\Type;
-use Expansa\Facades\Db;
 use Expansa\Http\Exceptions\NotFound;
 use Expansa\Http\Request;
 
@@ -17,6 +15,13 @@ use Expansa\Http\Request;
  */
 final class Comment
 {
+    /**
+     * Comments read in the request by ID: the page data and the `comment-editor` form ask for the same one.
+     *
+     * @var array<int, Entry>
+     */
+    private static array $comments = [];
+
     /**
      * Data of the `comment` page: the comment of `id`.
      *
@@ -38,12 +43,16 @@ final class Comment
      */
     public static function comment(int $id): Entry
     {
+        if (isset(self::$comments[$id])) {
+            return self::$comments[$id];
+        }
+
         $comment = Entry::find($id);
         if (! $comment instanceof Entry) {
             throw new NotFound(t('Comment not found'));
         }
 
-        return $comment;
+        return self::$comments[$id] = $comment;
     }
 
     /**
@@ -54,11 +63,6 @@ final class Comment
      */
     public static function postTitle(Entry $comment): string
     {
-        $type = Type::get($comment->postType);
-        if ($type === null || $comment->postId === 0) {
-            return '';
-        }
-
-        return (string) Db::get($type->table, 'title', ['id' => $comment->postId]);
+        return $comment->getPost()?->title ?? '';
     }
 }

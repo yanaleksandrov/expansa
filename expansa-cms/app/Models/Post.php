@@ -8,6 +8,7 @@ use App\Post\Status;
 use App\Post\Type;
 use App\Support\Activity;
 use App\Support\Permalinks;
+use DateTimeImmutable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSoftDeletes;
@@ -26,6 +27,11 @@ use LogicException;
 class Post
 {
     use HasSoftDeletes;
+
+    /**
+     * Permission a user needs to be the author of an entry.
+     */
+    public const string AUTHOR_PERMISSION = 'types_edit';
 
     public function __construct(
 
@@ -170,6 +176,12 @@ class Post
             $data['parent_id'] = 0;
         }
 
+        $created = self::date((string) ($args['created_at'] ?? ''));
+        if ($created !== null) {
+            $data['created_at'] = $created;
+        }
+        $data['status'] = Status::byDate($data['status'], $created ?? date('Y-m-d H:i:s'));
+
         // insert to DB
         Db::insert($type->table, ['uuid' => Str::uuid7()] + array_diff_key($data, array_flip([ 'slug', 'fields' ])));
 
@@ -220,6 +232,38 @@ class Post
     }
 
     /**
+     * Publish the scheduled posts of every type whose date has come, see Status::byDate(); run by the scheduler.
+     *
+     * @return int Number of the published posts.
+     */
+    public static function publishScheduled(): int
+    {
+        $count = 0;
+        foreach (Type::fetch() as $type) {
+            $where = [
+                'status'         => 'future',
+                'created_at[<=]' => date('Y-m-d H:i:s'),
+            ];
+            if ($type->canTrash) {
+                $where['deleted_at'] = null;
+            }
+
+            $ids = Db::select($type->table, 'id [Int]', $where) ?: [];
+            if ($ids === []) {
+                continue;
+            }
+
+            Db::update($type->table, ['status' => 'publish'], ['id' => $ids]);
+            foreach ($ids as $id) {
+                Activity::changes($type->table, $id, ['status' => 'future'], ['status' => 'publish']);
+            }
+            $count += count($ids);
+        }
+
+        return $count;
+    }
+
+    /**
      * Get the path of the post in its URL: the slug, under the slugs of the parents for a hierarchical type.
      *
      * @return string `parent/child`, empty for a post without a slug.
@@ -232,11 +276,12 @@ class Post
     /**
      * Get the URL of the post by the permalink structure, see Permalinks::post().
      *
+     * @param string|null $path Path of the post by paths(), read when null.
      * @return string Empty for a post without a slug.
      */
-    public function url(): string
+    public function url(?string $path = null): string
     {
-        $path = Permalinks::post($this->path(), $this->id, $this->type);
+        $path = Permalinks::post($path ?? $this->path(), $this->id, $this->type);
 
         return $path === '' ? '' : url($path);
     }
@@ -332,7 +377,8 @@ class Post
     /**
      * Update the given columns of the post and, for a public type, its slug; other columns keep their values.
      *
-     * @param array<string, mixed> $args `title`, `content`, `parent_id`, `status`, `discussion`, `password`, `slug`.
+     * @param array<string, mixed> $args `title`, `content`, `parent_id`, `author_id`, `status`, `discussion`, `password`, `slug`,
+     *                                   `created_at` as `Y-m-d\TH:i`.
      * @return bool False when nothing was saved, e.g. the slug is taken.
      */
     public function update(array $args): bool
@@ -346,12 +392,27 @@ class Post
             'title'      => 'text',
             'content'    => 'markup',
             'parent_id'  => 'absint:0',
+            'author_id'  => 'absint:0',
             'status'     => 'text:draft',
             'discussion' => 'text:open',
             'password'   => 'text',
         ];
 
         $data = Safe::data(array_intersect_key($args, $rules), array_intersect_key($rules, $args))->apply();
+
+        // the same minute keeps the seconds: the datepicker sends none
+        $created = self::date((string) ($args['created_at'] ?? ''));
+        if ($created !== null && substr($created, 0, 16) !== substr($this->createdAt, 0, 16)) {
+            $data['created_at'] = $created;
+        }
+
+        // an author who is not a user any more or may not edit entries keeps the saved one
+        if (isset($data['author_id'])) {
+            $author = $data['author_id'] > 0 ? User::find($data['author_id']) : null;
+            if (! $author instanceof User || ! $author->can(self::AUTHOR_PERMISSION)) {
+                unset($data['author_id']);
+            }
+        }
 
         // a parent that would make a loop or is not allowed for the type keeps the saved one
         if (isset($data['parent_id']) && ! $this->canHaveParent($data['parent_id'])) {
@@ -364,6 +425,12 @@ class Post
 
         if (isset($data['discussion']) && ! in_array($data['discussion'], ['open', 'closed'], true)) {
             unset($data['discussion']);
+        }
+
+        // a date ahead schedules a published post, a date that has come publishes a scheduled one
+        $status = Status::byDate($data['status'] ?? $this->status, $data['created_at'] ?? $this->createdAt);
+        if ($status !== $this->status || isset($data['status'])) {
+            $data['status'] = $status;
         }
 
         $before = ['slug' => $this->slug];
@@ -507,8 +574,9 @@ class Post
     }
 
     /**
-     * Delete the post permanently with its slug, bypassing the trash; its fields go with it by the foreign key,
-     * its children move up to its parent.
+     * Delete the post permanently with its slug and comments, bypassing the trash; its fields go with it by
+     * the foreign key, its children move up to its parent. Comments point at a post of any type, so no foreign
+     * key can delete them.
      *
      * @return bool False when there was no such row.
      */
@@ -517,11 +585,29 @@ class Post
         $deleted = Db::delete($this->table, ['id' => $this->id])?->rowCount() > 0;
         if ($deleted) {
             Db::delete('slugs', ['entity_id' => $this->id, 'entity_table' => $this->table]);
+            $comments = Db::select('comments', 'id [Int]', ['post_type' => $this->type, 'post_id' => $this->id]) ?? [];
+            if ($comments !== []) {
+                Db::delete('comments', ['id' => $comments]);
+                Db::delete('activity', ['entity_table' => 'comments', 'entity_id' => $comments]);
+            }
             Db::update($this->table, ['parent_id' => $this->parentId], ['parent_id' => $this->id]);
             Activity::forget($this->table, $this->id);
         }
 
         return $deleted;
+    }
+
+    /**
+     * Get the date and time of a post from the datepicker: it sends the local time as `2026-10-19T14:30`.
+     *
+     * @param string $value
+     * @return string|null `Y-m-d H:i:s`, null for an empty or invalid value.
+     */
+    private static function date(string $value): ?string
+    {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $value);
+
+        return $date !== false && $date->format('Y-m-d\TH:i') === $value ? $date->format('Y-m-d H:i:s') : null;
     }
 
     /**

@@ -11,6 +11,7 @@
 @use 'interface/updates';
 @use 'interface/site-health';
 @use 'interface/site-storage';
+@use 'interface/breadcrumbs';
 @use 'interface/post-editor';
 
 @keyframes shake {

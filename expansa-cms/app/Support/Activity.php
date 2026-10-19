@@ -36,6 +36,7 @@ final class Activity
         'slug'         => true,
         'discussion'   => true,
         'parent_id'    => true,
+        'created_at'   => true,
         'password'     => true,
         'content'      => true,
         'name'         => true,
@@ -302,6 +303,8 @@ final class Activity
             'content'      => t('Content'),
             'slug'         => t('Slug'),
             'parent_id'    => t('Parent'),
+            'author_id'    => t('Author'),
+            'created_at'   => t('Created'),
             'discussion'   => t('Discussion'),
             'password'     => t('Password'),
             'rating'       => t('Rating'),
@@ -327,6 +330,7 @@ final class Activity
         return match ($column) {
             'parent_id'  => (int) $value === 0 ? '' : ($parents[(int) $value] ?? '#' . $value),
             'content'    => t(':count characters', (int) $value),
+            'created_at' => Dates::format($value),
             'discussion' => match ($value) {
                 'open'   => t('Open'),
                 'closed' => t('Closed'),

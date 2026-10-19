@@ -20,6 +20,16 @@ final class Media extends Table
         ];
     }
 
+    /**
+     * The library loads the files itself, see MediaService.
+     *
+     * @return int
+     */
+    public function perPage(): int
+    {
+        return 0;
+    }
+
     public function headData(): array
     {
         return [

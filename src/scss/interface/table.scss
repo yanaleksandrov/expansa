@@ -1,3 +1,5 @@
+@use '../constants/index' as constants;
+
 .table {
   width: 100%;
   container-type: inline-size;
@@ -123,6 +125,24 @@
       }
     }
 
+    // a quick action of the row while its request runs
+    a.is-loading {
+      pointer-events: none;
+
+      &::after {
+        content: '';
+        display: inline-block;
+        width: 0.75em;
+        height: 0.75em;
+        margin-inline-start: 0.25rem;
+        vertical-align: middle;
+        border: 1px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.5s linear infinite;
+      }
+    }
+
     @media (max-width: 1024px) {
       padding-inline: 1rem;
     }
@@ -162,18 +182,49 @@
       padding-inline-end: 0.25rem;
     }
   }
+
+  .table-pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85em;
+  }
+
+  .table-pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+
+    [aria-disabled] {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+  }
+
+  .table-pagination-field {
+    width: 3.5rem;
+
+    input {
+      text-align: center;
+      appearance: textfield;
+    }
+  }
 }
 
 .table-header {
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem 1rem;
 
   @media (max-width: 1024px) {
     padding: 1rem;
+  }
+
+  h5 {
+    line-height: 1.625rem;
   }
 }
 
@@ -186,6 +237,14 @@
 
 .table-header-translation {
   gap: 0.5rem;
+}
+
+.table-header-pagination {
+  margin-inline-start: auto;
+
+  &:empty {
+    display: none;
+  }
 }
 
 .table-filter {
@@ -201,6 +260,8 @@
 
   .table-filter-actions {
     min-width: 100%;
+    gap: 0.25rem;
+    display: flex;
 
     .btn {
       font-weight: 400;
@@ -219,13 +280,12 @@
     border-radius: var(--expansa-border-radius--lg);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     box-shadow: var(--expansa-box-shadow);
-    overflow: visible;
     position-area: bottom span-left;
     position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    @include constants.popover-motion;
 
     &:popover-open {
       display: grid;
-      animation: contextMenu 0.3s cubic-bezier(0, 0.1, 0.1, 1) backwards;
     }
 
     // without anchor positioning the popover is centered on the screen
@@ -235,10 +295,25 @@
     }
   }
 
+  // under the button, in the middle of the page
   .table-filter-content {
     gap: 0.75rem;
-    width: min(36rem, calc(100vw - 2rem));
+    width: min(42rem, calc(100vw - 2rem));
     padding: 0.75rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 80vh;
+
+    // centered by the margins, not by translate: it would shift the fixed dropdowns of the selects inside
+    @supports (position-area: bottom) {
+      position-area: none;
+      position-try-fallbacks: none;
+      // without position-area anchor() takes the invoker of the popover only by this
+      position-anchor: auto;
+      top: anchor(bottom);
+      inset-inline: 0;
+      margin-inline: auto;
+    }
   }
 
   .table-filter-values {
@@ -270,8 +345,13 @@
     gap: 0.25rem;
   }
 
+  .table-filter-add {
+    margin-inline-end: auto;
+  }
+
   .table-filter-head {
     justify-content: space-between;
+    min-height: 1.625rem;
   }
 
   .table-filter-add .badge {
@@ -297,17 +377,6 @@
   .table-filter-conjunction {
     color: var(--expansa-text-muted);
     font-size: 0.85em;
-  }
-
-  .table-filter-empty {
-    padding: 0.75rem 0;
-    color: var(--expansa-text-muted);
-    font-size: 0.85em;
-
-    .table-body > & {
-      padding: 1.5rem;
-      text-align: center;
-    }
   }
 
   .table-filter-chips {
@@ -374,6 +443,18 @@
     &-remove:hover {
       color: var(--expansa-danger);
     }
+  }
+}
+
+// in the filter popover and in the table body, where the filter left out every row
+.table-filter-empty {
+  padding: 0.125rem 0;
+  color: var(--expansa-text-muted);
+  font-size: 0.85em;
+  text-align: center;
+
+  .table-body > & {
+    padding: 1.5rem;
   }
 }
 

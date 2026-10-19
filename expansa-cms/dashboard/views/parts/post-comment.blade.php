@@ -5,7 +5,7 @@ use App\Models\User;
 
 /**
  * Comment of the post editor: the avatar with the initials, the author, the date, the status
- * when it is not approved, the text and its replies below; shared by the Comments tab and the API
+ * when it is not approved, the quick moderation actions, the text and its replies below; shared by the Comments tab and the API
  * that adds a comment. Reply opens a field under the comment that sends to `comments/add`, closing the
  * other fields of a reply and the new comment one until it is cancelled or sent.
  *
@@ -45,7 +45,12 @@ $payload  = json_encode([
                 <span class="badge">{{ $statuses[$comment->status] ?? $comment->status }}</span>
             @endif
             @if ($canEdit)
-                <span class="post-comment-tools ml-auto">
+                <span class="post-comment-tools">
+                    @foreach (Comment::moderationActions($comment->status) as $status => $action)
+                        <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ $action['label'] }}" @click="$ajax.post('comments/status', {id: {{ $comment->id }}, status: '{{ $status }}', stay: 1})">
+                            <i class="{{ $action['icon'] }}"></i>
+                        </button>
+                    @endforeach
                     <a class="btn btn--xs btn--icon t-muted" href="{{ url('dashboard/comment?id=' . $comment->id . '&from=post') }}" title="{{ t('Edit Comment') }}" target="_blank">
                         <i class="ph ph-pencil-simple"></i>
                     </a>
@@ -63,8 +68,8 @@ $payload  = json_encode([
                 </button>
             </div>
             <div class="post-comment-box" u-show="replying" hidden>
-                <textarea id="post-comment-reply-{{ $comment->id }}" u-ref="reply" rows="2" placeholder="{{ t('Reply to :name…', $comment->getAuthorName()) }}" aria-label="{{ t('Reply') }}" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $refs.send.click()" @keydown.esc="$dispatch('comment-reply', 0)"></textarea>
-                <div class="post-comment-tools">
+                <textarea id="post-comment-reply-{{ $comment->id }}" u-ref="reply" rows="1" placeholder="{{ t('Reply to :name…', $comment->getAuthorName()) }}" aria-label="{{ t('Reply') }}" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $refs.send.click()" @keydown.esc="$dispatch('comment-reply', 0)"></textarea>
+                <div class="post-comment-submit">
                     <button class="btn btn--sm" type="button" @click="$dispatch('comment-reply', 0)">{{ t('Cancel') }}</button>
                     <button class="btn btn--sm btn--primary" type="button" u-ref="send" @click="$refs.reply.value.trim() && $ajax.post('comments/add', {...{{ $payload }}, content: $refs.reply.value}).then(() => $dispatch('comment-reply', 0))">{{ t('Reply', context: 'action') }}</button>
                 </div>

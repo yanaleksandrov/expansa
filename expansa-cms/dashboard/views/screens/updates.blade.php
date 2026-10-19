@@ -21,7 +21,7 @@ $types = [
     'patch' => ['class' => 'badge--green-lt', 'label' => t('Patch')],
 ];
 
-echo view('parts/table/header', ['title' => t('Updates'), 'badge' => (string) $count]);
+echo view('parts/table/table-header', ['title' => t('Updates'), 'badge' => (string) $count]);
 ?>
 <div class="updates mw py-5 px-6 md:p-5">
     <div class="updates-main">

@@ -285,11 +285,11 @@
 }
 
 .t-dark {
-  color: #1c1c1c !important;
+  color: #101010 !important;
 }
 
 .t-dark-lt {
-  color: #1c1c1c11 !important;
+  color: #10101011 !important;
 }
 
 .t-muted {
@@ -357,11 +357,11 @@
 }
 
 .bg-dark {
-  background-color: #1c1c1c !important;
+  background-color: #101010 !important;
 }
 
 .bg-dark-lt {
-  background-color: rgb(239.11, 239.11, 239.11) !important;
+  background-color: rgb(238.27, 238.27, 238.27) !important;
 }
 
 .bg-muted {
