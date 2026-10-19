@@ -793,6 +793,17 @@ $sections = [
                 ],
             ],
             [
+                'caption' => 'type: range',
+                'fields'  => [
+                    [
+                        'type'       => 'range',
+                        'name'       => 'ds_range_native',
+                        'label'      => t('Native range input'),
+                        'attributes' => ['value' => 40, 'min' => 0, 'max' => 100],
+                    ],
+                ],
+            ],
+            [
                 'caption' => 'type: range, u-ranger',
                 'fields'  => [
                     [

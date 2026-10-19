@@ -397,6 +397,16 @@ $item-padding: 0.8em;
       color: inherit;
     }
 
+    // the native range and u-ranger draw their own track
+    &:has(> [type="range"]:not(.ranger-input)),
+    &:has(> .ranger) {
+      padding: 0;
+      background-color: transparent;
+      border: none;
+      box-shadow: none !important;
+      height: auto;
+    }
+
     &:has([type="radio"]),
     &:has([type="checkbox"]) {
       white-space: normal;
@@ -646,6 +656,7 @@ $item-padding: 0.8em;
 
     .field-buttons {
       display: flex;
+      flex-wrap: wrap;
       gap: 2px;
       padding: 2px;
       height: fit-content;
