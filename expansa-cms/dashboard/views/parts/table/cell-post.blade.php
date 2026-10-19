@@ -1,7 +1,8 @@
 <?php
 /**
- * Post a comment answers: the title leading to its editor, the link to its page and the number of
- * its approved comments; `title`, `edit`, `view` and `count` of the value, nothing without a post.
+ * Post a comment answers: the title leading to its editor, the link to its page, at the comment when it
+ * is approved, and the number of its approved comments; `title`, `edit`, `view` and `count` of the value,
+ * nothing without a post.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-post.blade.php
  *

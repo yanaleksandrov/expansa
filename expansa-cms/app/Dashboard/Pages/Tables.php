@@ -45,6 +45,7 @@ final class Tables
         $table = match ($request->getString('table')) {
             'comments'    => new Comments(
                 $request->getString('status'),
+                $request->getString('view') === 'trash',
                 $request->getString('s'),
                 $request->getString('order') === 'asc',
             ),

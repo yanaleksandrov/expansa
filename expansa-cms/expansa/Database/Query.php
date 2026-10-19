@@ -269,6 +269,20 @@ final class Query
     }
 
     /**
+     * Delete the current record from the table, also of a model using {@see HasSoftDeletes}.
+     *
+     * @return int The number of rows affected.
+     */
+    public function forceDelete(): int
+    {
+        $results = Db::delete($this->model->table, ['id' => $this->model->id ?? 0]);
+
+        Cache::forget("{$this->model->id}", $this->model->table);
+
+        return $results ? $results->rowCount() : 0;
+    }
+
+    /**
      * Restore a soft-deleted record (clears the "deleted at" column). No-op for
      * models that don't use {@see HasSoftDeletes}.
      *

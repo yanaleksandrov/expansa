@@ -26,6 +26,11 @@ final class Comments extends Table
         },
 
         /**
+         * Whether the list shows the comments in the trash instead of the others.
+         */
+        public readonly bool $isTrash = false,
+
+        /**
          * Text searched in the comment, the name and the email of the author.
          */
         public readonly string $search = '',
@@ -39,7 +44,7 @@ final class Comments extends Table
     }
 
     /**
-     * Comments that are not deleted, by the filter and the order, the first 500, with the posts they answer.
+     * Comments of the trash or out of it, by the filter and the order, the first 500, with the posts they answer.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -67,6 +72,10 @@ final class Comments extends Table
         return array_map(function (array $comment) use ($posts, $statuses) {
             $url    = url('dashboard/comment?id=' . $comment['id']);
             $author = $comment['author_name'] ?: t('Anonymous');
+            $post   = $posts[$comment['post_type']][$comment['post_id']] ?? null;
+            if ($post !== null && $post['view'] !== '' && $comment['status'] === Comment::STATUS_APPROVED) {
+                $post['view'] .= '#comment-' . $comment['id'];
+            }
 
             return [
                 'id'        => $comment['id'],
@@ -76,28 +85,32 @@ final class Comments extends Table
                 'author_id' => $comment['author_id'],
                 'email'     => $comment['author_email'],
                 'comment'   => mb_strimwidth(trim(strip_tags($comment['content'])), 0, 120, '…'),
-                'url'       => $url,
+                'url'       => $this->isTrash ? '#' : $url,
                 'status'      => [
                     'class' => '',
                     'value' => $statuses[$comment['status']] ?? $comment['status'],
                 ],
-                'actions'   => [['title' => t('Edit'), 'href' => $url], ...$this->moderationActions($comment['id'], $comment['status'])],
-                'post'      => $posts[$comment['post_type']][$comment['post_id']] ?? null,
+                'actions'   => $this->actions($comment['id'], $comment['status']),
+                'post'      => $post,
                 'date'      => Dates::format((string) $comment['created_at']),
             ];
         }, $comments);
     }
 
     /**
-     * Quick moderation links of a row: they change the status in the background, then the rows are
-     * filtered again, so a comment leaves a list of another status.
+     * Quick links of a row: moderation and deletion, or those of the trash. They work in the background,
+     * then the rows are filtered again, so a comment leaves a list of another status or disappears.
      *
      * @param int    $id
      * @param string $status Current status.
      * @return array<int, array<string, mixed>>
      */
-    private function moderationActions(int $id, string $status): array
+    private function actions(int $id, string $status): array
     {
+        if ($this->isTrash) {
+            return $this->trashActions($id);
+        }
+
         $actions = [];
         foreach (Comment::moderationActions($status) as $value => $action) {
             $payload   = json_encode(['id' => $id, 'status' => $value]);
@@ -109,7 +122,42 @@ final class Comments extends Table
             ];
         }
 
+        $payload   = json_encode(['id' => $id, 'from' => 'list']);
+        $actions[] = [
+            'title'      => t('Delete'),
+            'href'       => '#',
+            'class'      => 't-red',
+            'attributes' => ['@click.prevent' => "\$ajax.post('comments/delete', $payload).then(() => applyFilters())"],
+        ];
+
         return $actions;
+    }
+
+    /**
+     * Quick links of a row in the trash: restore and delete permanently, then the rows are filtered again.
+     *
+     * @param int $id
+     * @return array<int, array<string, mixed>>
+     */
+    private function trashActions(int $id): array
+    {
+        $payload = json_encode(['id' => $id]);
+        $delete  = "confirm(texts.deleteItem) && \$ajax.post('comments/force-delete', $payload).then(() => applyFilters())";
+
+        return [
+            [
+                'title'      => t('Restore'),
+                'href'       => '#',
+                'class'      => 't-muted',
+                'attributes' => ['@click.prevent' => "\$ajax.post('comments/restore', $payload).then(() => applyFilters())"],
+            ],
+            [
+                'title'      => t('Delete Permanently'),
+                'href'       => '#',
+                'class'      => 't-red',
+                'attributes' => ['@click.prevent' => $delete],
+            ],
+        ];
     }
 
     public function cells(): array
@@ -151,12 +199,23 @@ final class Comments extends Table
             $statuses[$key] = $label . ' (' . ($counts[$key] ?? 0) . ')';
         }
 
+        $empty = '';
+        $trash = (int) Db::count('comments', ['deleted_at[!]' => null]);
+        if ($trash > 0 || $this->isTrash) {
+            $statuses['trash'] = t('Trash') . " ($trash)";
+        }
+
+        if ($trash > 0 && $this->isTrash) {
+            $empty = "confirm(texts.emptyTrash) && \$ajax.post('comments/empty-trash', {})";
+        }
+
         return [
             'title'    => t('Comments'),
             'actions'  => 'comments-actions',
             'statuses' => $statuses,
-            'status'   => $this->status,
+            'status'   => $this->isTrash ? 'trash' : $this->status,
             'find'     => t('Search comments'),
+            'empty'    => $empty,
         ];
     }
 
@@ -173,6 +232,19 @@ final class Comments extends Table
 
     public function notFoundData(): array
     {
+        if ($this->isTrash) {
+            return [
+                'title'       => t('The trash is empty'),
+                'description' => t('Deleted comments stay here until you delete them permanently.'),
+                'buttons'     => [
+                    [
+                        'label' => t('Show All Comments'),
+                        'url'   => url('dashboard/edit?table=comments'),
+                    ],
+                ],
+            ];
+        }
+
         if ($this->status !== '' || $this->search !== '') {
             return [
                 'title'       => t('No comments found'),
@@ -212,7 +284,7 @@ final class Comments extends Table
      */
     private function where(): array
     {
-        $where = ['deleted_at' => null];
+        $where = [$this->isTrash ? 'deleted_at[!]' : 'deleted_at' => null];
         if ($this->status !== '') {
             $where['status'] = $this->status;
         }

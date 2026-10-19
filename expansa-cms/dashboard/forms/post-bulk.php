@@ -45,7 +45,7 @@ return Form::enqueue(
             'name'        => 'action',
             'error'       => 'action',
             'label'       => '',
-            'class'       => 'field field--raised',
+            'class'       => 'field field--xs field--raised',
             'label_class' => '',
             'reset'       => 0,
             'before'      => '',
@@ -64,7 +64,7 @@ return Form::enqueue(
             'type'     => 'custom',
             'callback' => function () {
                 ?>
-                <button class="btn btn--secondary" type="submit" :disabled="!action">
+                <button class="btn btn--xs btn--secondary" type="submit" :disabled="!action">
                     <i class="ph ph-paper-plane-tilt"></i> <?php echo t('Apply'); ?>
                 </button>
                 <?php

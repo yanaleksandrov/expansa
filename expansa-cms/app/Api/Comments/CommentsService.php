@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Post\Type;
 use App\Support\Dates;
 use Expansa\Facades\Auth;
+use Expansa\Facades\Db;
+use Expansa\Http\Enums\Notice;
 use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
@@ -57,12 +59,12 @@ final class CommentsService
 
     /**
      * Delete a comment, kept as soft-deleted, and go back to the list, or with `from` = `post` to the Comments
-     * tab of the editor of its post. With `stay`, e.g. from the post editor, the page stays: the comment leaves its thread
-     * and its replies take its place.
+     * tab of the editor of its post; with `from` = `list` only the notice, the list filters its rows again. With `stay`,
+     * e.g. from the post editor, the page stays: the comment leaves its thread and its replies take its place.
      *
      * @param Request  $request  `id`, optional `stay` and `from`.
      * @param Response $response
-     * @return Response Notice and redirect, or the comment replaced by its replies.
+     * @return Response Notice, with a redirect or the comment replaced by its replies.
      */
     public function delete(Request $request, Response $response): Response
     {
@@ -73,9 +75,13 @@ final class CommentsService
 
         $comment->delete();
         $response = $response->notify(t('Comment deleted'));
+        $from     = $request->post['from'] ?? '';
+        if ($from === 'list') {
+            return $response;
+        }
 
         if (empty($request->post['stay'])) {
-            $toPost = ($request->post['from'] ?? '') === 'post' && Type::get($comment->postType) !== null;
+            $toPost = $from === 'post' && Type::get($comment->postType) !== null;
             $url    = $toPost
                 ? 'dashboard/post?type=' . $comment->postType . '&id=' . $comment->postId . '&tab=comments'
                 : 'dashboard/edit?table=comments';
@@ -270,28 +276,92 @@ final class CommentsService
     }
 
     /**
-     * Apply a bulk action of the comments table to the selected comments, then reload the table.
+     * Take a comment out of the trash; the table filters its rows again by itself.
      *
-     * @param Request  $request  `action`: a status or `delete`; `ids`: comma-separated comment IDs.
+     * @param Request  $request  `id`.
+     * @param Response $response
+     * @return Response Notice.
+     */
+    public function restore(Request $request, Response $response): Response
+    {
+        $comment = Comment::findTrashed((int) ($request->post['id'] ?? 0));
+        if (! $comment instanceof Comment) {
+            return $response->notify(t('Comment not found'));
+        }
+
+        $comment->restore();
+
+        return $response->notify(t('Comment restored'), Notice::Success);
+    }
+
+    /**
+     * Delete a comment in the trash permanently; the table filters its rows again by itself.
+     *
+     * @param Request  $request  `id`.
+     * @param Response $response
+     * @return Response Notice.
+     */
+    public function forceDelete(Request $request, Response $response): Response
+    {
+        $comment = Comment::findTrashed((int) ($request->post['id'] ?? 0));
+        if (! $comment instanceof Comment) {
+            return $response->notify(t('Comment not found'));
+        }
+
+        $comment->forceDelete();
+
+        return $response->notify(t('Comment deleted permanently'), Notice::Success);
+    }
+
+    /**
+     * Delete every comment in the trash permanently and open the list.
+     *
+     * @param Request  $request
+     * @param Response $response
+     * @return Response Notice and redirect.
+     */
+    public function emptyTrash(Request $request, Response $response): Response
+    {
+        $count = 0;
+        foreach (Db::select('comments', 'id [Int]', ['deleted_at[!]' => null]) ?? [] as $id) {
+            $count += (int) Comment::findTrashed($id)?->forceDelete();
+        }
+
+        return $response
+            ->notify(t(':count items deleted permanently', $count), Notice::Success)
+            ->redirect(url('dashboard/edit?table=comments'), 600);
+    }
+
+    /**
+     * Apply a bulk action of the comments table to the selected comments, then reload the table:
+     * a status or `delete` to the trash, `restore` or `force-delete` of the comments in the trash.
+     *
+     * @param Request  $request  `action`; `ids`: comma-separated comment IDs.
      * @param Response $response
      * @return Response Notice and reload.
      */
     public function bulk(Request $request, Response $response): Response
     {
-        $action = (string) ($request->post['action'] ?? '');
-        $ids    = array_filter(array_map(intval(...), explode(',', (string) ($request->post['ids'] ?? ''))));
-        if ($ids === [] || ($action !== 'delete' && ! isset(Comment::statuses()[$action]))) {
+        $action  = (string) ($request->post['action'] ?? '');
+        $ids     = array_filter(array_map(intval(...), explode(',', (string) ($request->post['ids'] ?? ''))));
+        $isTrash = in_array($action, ['restore', 'force-delete'], true);
+        if ($ids === [] || (! $isTrash && $action !== 'delete' && ! isset(Comment::statuses()[$action]))) {
             return $response->notify(t('Select comments and an action first.'));
         }
 
         $count = 0;
         foreach (array_unique($ids) as $id) {
-            $comment = Comment::find($id);
+            $comment = $isTrash ? Comment::findTrashed($id) : Comment::find($id);
             if (! $comment instanceof Comment) {
                 continue;
             }
 
-            $isDone = $action === 'delete' ? $comment->delete() > 0 : $comment->update(['status' => $action]) instanceof Comment;
+            $isDone = match ($action) {
+                'delete'       => $comment->delete() > 0,
+                'restore'      => $comment->restore() > 0,
+                'force-delete' => $comment->forceDelete() > 0,
+                default        => $comment->update(['status' => $action]) instanceof Comment,
+            };
             $count += (int) $isDone;
         }
 

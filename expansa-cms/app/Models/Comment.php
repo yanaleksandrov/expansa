@@ -623,6 +623,36 @@ class Comment extends Model
     }
 
     /**
+     * Delete this comment permanently with its log; its replies move up to its parent.
+     *
+     * @return int The number of rows affected.
+     */
+    public function forceDelete(): int
+    {
+        $count = new Query($this)->forceDelete();
+        if ($count > 0) {
+            Db::update($this->table, ['parent_id' => (int) $this->parentId], ['parent_id' => $this->id]);
+            Activity::forget($this->table, (int) $this->id);
+            self::recount($this->postType, $this->postId);
+        }
+
+        return $count;
+    }
+
+    /**
+     * Find a comment in the trash, bypassing the cache of the model, which holds the comments out of it.
+     *
+     * @param int $id
+     * @return Comment|null
+     */
+    public static function findTrashed(int $id): ?Comment
+    {
+        $comment = self::onlyTrashed()->where(['id' => $id])->first();
+
+        return $comment instanceof Comment ? $comment : null;
+    }
+
+    /**
      * Count the approved comments of a post that are not deleted, as kept in its `comments` column.
      *
      * @param string $postType

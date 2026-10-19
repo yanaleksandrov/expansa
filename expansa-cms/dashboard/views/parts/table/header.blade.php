@@ -66,17 +66,6 @@ $progress = static fn (string $name) => [
             ?>
         @endif
 
-        @if ($search)
-            <?php
-            echo Form::view('input', [
-                'type'       => 'search',
-                'name'       => 's',
-                'class'      => 'field field--raised',
-                'attributes' => ['type' => 'search', 'name' => 's', 'placeholder' => $search],
-            ]);
-            ?>
-        @endif
-
         @if ($uploader)
             <button class="btn btn--outline btn--xs" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
                 <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}

@@ -1105,7 +1105,7 @@
                         let propExpression;
                         if (directive === 'u-prop') {
                             propExpression = generateExpressionForProp(el, self.scope, attribute, splitMagicVariables(additionalHelperVariables).otherVariables);
-                            event = [ 'select-multiple', 'select', 'checkbox', 'radio' ].includes(el.type) || modifiers.includes('lazy') ? 'change' : 'input';
+                            event = el.tagName === 'SELECT' || [ 'checkbox', 'radio' ].includes(el.type) || modifiers.includes('lazy') ? 'change' : 'input';
                         }
                         if (event) {
                             self.attachListener(el, event, directive === 'u-prop' ? [] : modifiers, propExpression || expression);

@@ -186,12 +186,16 @@
   width: 100%;
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.75rem;
   padding: 1.25rem 1.5rem 1rem;
 
   @media (max-width: 1024px) {
     padding: 1rem;
+  }
+
+  h5 {
+    line-height: 1.625rem;
   }
 }
 

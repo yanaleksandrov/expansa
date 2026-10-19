@@ -507,8 +507,9 @@ class Post
     }
 
     /**
-     * Delete the post permanently with its slug, bypassing the trash; its fields go with it by the foreign key,
-     * its children move up to its parent.
+     * Delete the post permanently with its slug and comments, bypassing the trash; its fields go with it by
+     * the foreign key, its children move up to its parent. Comments point at a post of any type, so no foreign
+     * key can delete them.
      *
      * @return bool False when there was no such row.
      */
@@ -517,6 +518,11 @@ class Post
         $deleted = Db::delete($this->table, ['id' => $this->id])?->rowCount() > 0;
         if ($deleted) {
             Db::delete('slugs', ['entity_id' => $this->id, 'entity_table' => $this->table]);
+            $comments = Db::select('comments', 'id [Int]', ['post_type' => $this->type, 'post_id' => $this->id]) ?? [];
+            if ($comments !== []) {
+                Db::delete('comments', ['id' => $comments]);
+                Db::delete('activity', ['entity_table' => 'comments', 'entity_id' => $comments]);
+            }
             Db::update($this->table, ['parent_id' => $this->parentId], ['parent_id' => $this->id]);
             Activity::forget($this->table, $this->id);
         }
