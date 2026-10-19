@@ -302,6 +302,8 @@
     @supports (position-area: bottom) {
       position-area: none;
       position-try-fallbacks: none;
+      // without position-area anchor() takes the invoker of the popover only by this
+      position-anchor: auto;
       top: anchor(bottom);
       inset-inline: 0;
       margin-inline: auto;

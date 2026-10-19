@@ -2917,6 +2917,7 @@ body.is-unsaved .expansa-search-btn {
   .table-filter .table-filter-content {
     position-area: none;
     position-try-fallbacks: none;
+    position-anchor: auto;
     top: anchor(bottom);
     inset-inline: 0;
     margin-inline: auto;
