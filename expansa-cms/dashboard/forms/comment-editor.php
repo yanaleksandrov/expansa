@@ -203,7 +203,7 @@ return Form::enqueue(
                                 <div class="post-comment-box">
                                     <textarea id="comment-reply-text" name="reply" form="comment-reply" rows="3" required placeholder="<?php echo t_attr('Reply to :name…', $comment->getAuthorName()); ?>" aria-label="<?php echo t_attr('Reply'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
                                     <div class="post-comment-submit">
-                                        <span class="t-muted fs-12 mr-auto"><?php echo t('The reply is published at once under your name, on the same post.'); ?></span>
+                                        <span class="t-muted fs-12"><?php echo t('The reply is published at once under your name, on the same post.'); ?></span>
                                         <button class="btn btn--sm btn--primary" type="submit" form="comment-reply"><?php echo t('Send Reply'); ?></button>
                                     </div>
                                 </div>

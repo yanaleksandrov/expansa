@@ -23,15 +23,18 @@
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   opacity: 0;
-  transition: transform 0.3s, opacity 0.15s;
+  // the opening of the popovers; above the field it comes down to it
+  transition: constants.$dropdown-transition;
   user-select: none;
 
   &[data-placement='bottom'] {
-    transform: translateY(0.5rem);
+    transform: constants.$dropdown-hidden;
+    transform-origin: top;
   }
 
   &[data-placement='top'] {
-    transform: translateY(-0.5rem);
+    transform: translateY(-1 * constants.$dropdown-shift) scale(constants.$dropdown-scale);
+    transform-origin: bottom;
   }
 
   &.-active-,
@@ -52,7 +55,7 @@
 
     position: fixed;
     font-size: 1rem;
-    transform: translate(-50%, calc(-50% + 0.5rem));
+    transform: translate(-50%, -50%) scale(constants.$dropdown-scale);
     -webkit-tap-highlight-color: transparent;
 
     &.-active- {

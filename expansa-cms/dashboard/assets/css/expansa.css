@@ -2896,11 +2896,26 @@ body.is-unsaved .expansa-search-btn {
   box-shadow: var(--expansa-box-shadow);
   position-area: bottom span-left;
   position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+  opacity: 0;
+  transform: translateY(0.25rem) scale(0.98);
+  transform-origin: top;
+  transition: opacity 0.2s cubic-bezier(0, 0.1, 0.1, 1), transform 0.3s cubic-bezier(0, 0.1, 0.1, 1), display 0.3s allow-discrete, overlay 0.3s allow-discrete;
+}
+.table-filter .table-filter-content:popover-open,
+.table-filter .table-filter-values:popover-open {
+  opacity: 1;
+  transform: none;
+}
+@starting-style {
+  .table-filter .table-filter-content:popover-open,
+  .table-filter .table-filter-values:popover-open {
+    opacity: 0;
+    transform: translateY(0.25rem) scale(0.98);
+  }
 }
 .table-filter .table-filter-content:popover-open,
 .table-filter .table-filter-values:popover-open {
   display: grid;
-  animation: contextMenu 0.3s cubic-bezier(0, 0.1, 0.1, 1) backwards;
 }
 @supports not (position-area: bottom) {
   .table-filter .table-filter-content,
@@ -3887,7 +3902,7 @@ body.is-unsaved .expansa-search-btn {
   flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
+  gap: 1rem;
 }
 .post-comment-tools {
   display: flex;

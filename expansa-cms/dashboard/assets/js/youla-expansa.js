@@ -549,6 +549,13 @@ document.addEventListener('youla:init', () => {
                     this.$el.hidden = true;
                 }
             },
+            queryField: {
+                '@change'() {
+                    this.setQuery({
+                        [this.$el.name]: this.$el.value
+                    });
+                }
+            },
             sortLink: {
                 '@click.prevent'() {
                     const {orderby, order} = this.$el.dataset;

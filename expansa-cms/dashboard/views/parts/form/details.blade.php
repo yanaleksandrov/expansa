@@ -3,7 +3,7 @@
 use Expansa\Builders\Form\Data;
 
 /**
- * Details html tag: button with dropdown menu
+ * Button with a dropdown menu: the popover is anchored to the button, the browser closes it on a click outside and on Esc.
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/fields/details.php
  *
  * @var Data $field
@@ -14,10 +14,12 @@ defined('EX_PATH') || exit;
 if ($field->label === '') {
 	return;
 }
+
+$popover = 'details-' . bin2hex(random_bytes(4));
 ?>
-<details class="details" @click.outside="$el.removeAttribute('open')">
-	<summary class="{{ trim('details-summary ' . $field->class) }}">{!! $field->label !!}</summary>
-	<div class="details-content">
+<div class="details">
+	<button class="{{ trim('details-summary ' . $field->class) }}" type="button" popovertarget="{{ $popover }}">{!! $field->label !!}</button>
+	<div class="details-content" id="{{ $popover }}" popover>
 		@if($field->instruction)
 			<div class="details-head">
 				{!! $field->instruction !!}
@@ -25,4 +27,4 @@ if ($field->label === '') {
 		@endif
 		{!! $field->content !!}
 	</div>
-</details>
+</div>

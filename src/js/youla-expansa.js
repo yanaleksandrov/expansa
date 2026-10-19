@@ -666,6 +666,12 @@ document.addEventListener('youla:init', ()=> {
                     this.$el.hidden = true;
                 },
             },
+            // a field of the list sets the query parameter of its name, an empty value drops it
+            queryField: {
+                '@change'() {
+                    this.setQuery({ [this.$el.name]: this.$el.value });
+                },
+            },
             sortLink: {
                 '@click.prevent'() {
                     const { orderby, order } = this.$el.dataset;

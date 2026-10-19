@@ -169,6 +169,171 @@ final class Emails extends Table
 поэтому создание таблицы не выполняет запросов. Ширины колонок собираются в `$table->style` — переменную `--expansa-grid-template-columns`,
 одинаковые ширины подряд сворачиваются в `repeat()`.
 
+### Фильтры, сортировка и страницы
+
+Состояние таблицы — параметры адреса: фильтр — параметр своего поля со значениями через запятую, `!` после имени
+значит «не равно» (`?author=1,3&role!=editor`), сортировка — `orderby` (ключ колонки) и `order` (`asc` или `desc`),
+страница — `page`. Неизвестные поля, значения и колонки отбрасываются. Параметры, которые занимает страница
+(`status`, `s`, `orderby` и другие), перечислены в `reserved` у `Table::configure()`: поле фильтра с таким
+параметром бросает `LogicException`.
+
+| Метод                     | Что описывает                                                                                         |
+|---------------------------|-------------------------------------------------------------------------------------------------------|
+| `filters()`               | Поля фильтра по ключу: `label`, `icon`, `options` (значение => подпись), `param` — параметр адреса, `column` — колонка запроса; без полей фильтра нет |
+| `->sortable($by)`         | Колонку можно сортировать; `$by` — ключ строки или колонка запроса, по которой сравнивать, по умолчанию ключ колонки |
+| `headData()` `parts`      | Части списка для select фильтра: подпись и параметры адреса каждой, `part` — текущая                  |
+| `Table::action()`         | Атрибуты ссылки действия строки: API-маршрут, данные, подтверждение, обновление строк после ответа    |
+
+```php
+public function filters(): array
+{
+    return [
+        'author_id' => ['label' => t('Author'), 'icon' => 'ph ph-user', 'param' => 'author', 'options' => User::options()],
+    ];
+}
+
+public function cells(): array
+{
+    return [
+        // в строке — отформатированная дата, сравнивается сырая
+        $this->cell('date')->title(t('Date'))->sortable('created_at')->view('date'),
+    ];
+}
+
+public function headData(): array
+{
+    return [
+        'parts' => [
+            ''      => ['label' => t('All'), 'query' => []],
+            'trash' => ['label' => t('Trash'), 'query' => ['view' => 'trash']],
+        ],
+        'part'  => $this->isTrash ? 'trash' : '',
+    ];
+}
+```
+
+Таблица работает одним из двух способов:
+
+- **В PHP** (по умолчанию). `data()` отдаёт все строки, `Table` сам отбирает их по фильтрам, сортирует и режет
+  на страницы. Подходит для небольших списков: письма, плагины, темы.
+- **В базе** — таблица реализует `Table\Queried`. `data()` читает только текущую страницу через `paged()`,
+  `count()` считает строки по фильтрам через `filtered()`. Фильтры и сортировка работают по всей таблице:
+  посты, комментарии, пользователи.
+
+```php
+final class Comments extends Table implements Queried
+{
+    public function data(): array
+    {
+        $rows = Db::select('comments', '*', $this->paged($this->where(), ['created_at' => 'DESC', 'id' => 'DESC'])) ?? [];
+
+        return array_map(fn (array $row) => [/* значения ячеек */], $rows);
+    }
+
+    public function count(): int
+    {
+        return (int) Db::count('comments', $this->filtered($this->where()));
+    }
+}
+```
+
+`filtered($where)` добавляет к условиям таблицы условия фильтров, каждый фильтр — своей группой в скобках.
+`paged($where, $order)` добавляет ещё порядок и `LIMIT` страницы; `$order` — порядок по умолчанию, он же
+досортировывает строки, равные по выбранной колонке.
+
+### Расширение
+
+Поле фильтра или колонка, которые нельзя сравнить «как есть», описываются переопределением метода таблицы.
+Свой метод обрабатывает только своё поле, остальные отдаёт родителю.
+
+| Способ таблицы | Фильтр                                         | Сортировка                                  |
+|----------------|------------------------------------------------|---------------------------------------------|
+| В PHP          | `matchesFilter($row, $field, $operator, $values)` — подходит ли строка | `sortValue($row, $cell)` — значение для сравнения |
+| В базе         | `filterWhere($field, $operator, $values)` — условие запроса | `orderBy($cell, $direction, $order)` — порядок запроса |
+
+`$operator` — `is` или `not`, `$values` — уже проверенные значения из `options`. Без переопределения
+фильтр сравнивает значение строки или колонку (`column`, по умолчанию ключ поля) со списком значений,
+а сортировка — значение `Cell::$sortBy`.
+
+Значение внутри JSON-списка — роль пользователя в колонке `roles`:
+
+```php
+protected function filterWhere(string $field, string $operator, array $values): array
+{
+    if ($field !== 'role') {
+        return parent::filterWhere($field, $operator, $values);
+    }
+
+    // проценты ставятся явно: с `_` в имени LIKE не добавит их сам
+    $roles = array_map(fn (string $role) => '%"' . $role . '"%', $values);
+
+    return $operator === 'not' ? ['roles[!~]' => ['AND' => $roles]] : ['roles[~]' => $roles];
+}
+```
+
+Диапазон дат — месяц создания поста, значения вида `2026-10`:
+
+```php
+protected function filterWhere(string $field, string $operator, array $values): array
+{
+    if ($field !== 'months') {
+        return parent::filterWhere($field, $operator, $values);
+    }
+
+    $ranges = [];
+    foreach ($values as $index => $month) {
+        $start                       = $month . '-01 00:00:00';
+        $ranges["AND #month $index"] = ['created_at[' . ($operator === 'not' ? '><' : '<>') . ']' => [$start, date('Y-m-t 23:59:59', strtotime($start))]];
+    }
+
+    return $operator === 'not' ? $ranges : ['OR' => $ranges];
+}
+```
+
+Сортировка по выражению — имя или, без него, логин. Ключ массива `ORDER` всегда колонка, поэтому выражение
+возвращается целиком через `Db::raw()`, вместе с порядком по умолчанию:
+
+```php
+protected function orderBy(Cell $cell, string $direction, array $order): array|Raw
+{
+    if ($cell->key !== 'name') {
+        return parent::orderBy($cell, $direction, $order);
+    }
+
+    return Db::raw("COALESCE(NULLIF(<showname>, ''), <login>) $direction, <id> ASC");
+}
+```
+
+То же в таблице в PHP:
+
+```php
+protected function sortValue(array $row, Cell $cell): int|float|string
+{
+    return $cell->key === 'name' ? mb_strtolower($row['showname'] ?: $row['login']) : parent::sortValue($row, $cell);
+}
+```
+
+### В браузере
+
+Разметка таблицы (`parts/table/table` и `parts/table/table-header`) связана с компонентом `table` из
+`youla-expansa.js` через `u-bind`, нужные обработчикам значения лежат в `data-*`. Компонент получает поля
+фильтра, активные фильтры и части списка параметрами: `u-data="table({fields, rows, parts})"`. Любое изменение
+фильтра, поиска, части списка, сортировки или страницы меняет адрес и запрашивает `tables/filter`: API
+отдаёт строки, панель шапки с пагинацией и заголовки колонок, фильтр остаётся на странице.
+
+Новый параметр списка не требует JS. Поле с `name` и `u-bind="queryField"` при изменении ставит в адрес
+параметр своего имени (пустое значение его убирает) и обновляет таблицу, а таблица читает параметр
+на сервере, например в `data()`. Параметр добавляется в `reserved`, чтобы его не заняло поле фильтра.
+
+```blade
+<select name="language" u-bind="queryField">
+    <option value="">{{ t('All languages') }}</option>
+    <option value="ru">Русский</option>
+</select>
+```
+
+Из своего обработчика компонента то же делает `setQuery({language: 'ru'})`.
+
 ## Деревья
 
 Элементы добавляются плоским списком с `id` и `parent_id`. `Tree::get($name)` отдаёт

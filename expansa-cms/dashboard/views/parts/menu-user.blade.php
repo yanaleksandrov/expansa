@@ -10,15 +10,15 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<details class="details" @click.outside="$el.removeAttribute('open')">
-    <summary class="details-summary" title="{{ t('Online') }}">
+<div class="details">
+    <button class="details-summary" type="button" popovertarget="user-menu" title="{{ t('Online') }}">
         <strong>{{ t('Hi, :Username', $viewer->showname ?? '') }}</strong>
         <span class="avatar avatar--xs" style="background-image: url({{ url('dashboard/assets/images/avatar.svg') }})">
             <i class="badge badge--green"></i>
         </span>
-    </summary>
+    </button>
 
-    <div class="details-content">
+    <div class="details-content" id="user-menu" popover>
         <?php tree('dashboard-user-menu', function (array $items) { ?>
             <ul class="dropdown-menu">
                 @foreach($items as $item)
@@ -47,4 +47,4 @@ defined('EX_PATH') || exit;
             </ul>
         <?php }); ?>
     </div>
-</details>
+</div>

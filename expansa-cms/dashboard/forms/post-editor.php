@@ -262,7 +262,7 @@ return Form::enqueue(
                                         <div class="post-comment-box">
                                             <textarea id="post-comment-text" name="content" form="post-comment" rows="2" required placeholder="<?php echo t_attr('Leave a comment…'); ?>" aria-label="<?php echo t_attr('Comment'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
                                             <div class="post-comment-submit">
-                                                <span class="t-muted fs-12 mr-auto"><?php echo t('Ctrl+Enter to send'); ?></span>
+                                                <span class="t-muted fs-12"><?php echo t('Ctrl+Enter to send'); ?></span>
                                                 <button class="btn btn--sm btn--primary" type="submit" form="post-comment"><?php echo t('Comment', context: 'action'); ?></button>
                                             </div>
                                         </div>

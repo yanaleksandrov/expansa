@@ -1,3 +1,5 @@
+@use '../constants/index' as constants;
+
 .table {
   width: 100%;
   container-type: inline-size;
@@ -280,10 +282,10 @@
     box-shadow: var(--expansa-box-shadow);
     position-area: bottom span-left;
     position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    @include constants.popover-motion;
 
     &:popover-open {
       display: grid;
-      animation: contextMenu 0.3s cubic-bezier(0, 0.1, 0.1, 1) backwards;
     }
 
     // without anchor positioning the popover is centered on the screen

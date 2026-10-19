@@ -81,3 +81,41 @@ $colors: (
 $badge-lt-weights: (
 	dark: 96.5%,
 );
+
+// opening of the dropdowns: the menus, the popovers and the lists of selects move up from below and fade in the same way
+$dropdown-duration: 0.3s;
+$dropdown-easing: cubic-bezier(0, 0.1, 0.1, 1);
+$dropdown-shift: 0.25rem;
+$dropdown-scale: 0.98;
+$dropdown-hidden: translateY($dropdown-shift) scale($dropdown-scale);
+$dropdown-transition: opacity 0.2s $dropdown-easing, transform 0.3s $dropdown-easing;
+
+// a popover shows from its starting style and hides back; `display` and `overlay` keep it in the top layer till the end
+@mixin popover-motion {
+	opacity: 0;
+	transform: $dropdown-hidden;
+	transform-origin: top;
+	transition: $dropdown-transition, display $dropdown-duration allow-discrete, overlay $dropdown-duration allow-discrete;
+
+	&:popover-open {
+		opacity: 1;
+		transform: none;
+
+		@starting-style {
+			opacity: 0;
+			transform: $dropdown-hidden;
+		}
+	}
+}
+
+// an element shown by its parent, e.g. the content of an open `<details>`, plays the same opening once
+@mixin dropdown-appear {
+	animation: dropdown-appear $dropdown-duration $dropdown-easing backwards;
+
+	@keyframes dropdown-appear {
+		from {
+			opacity: 0;
+			transform: $dropdown-hidden;
+		}
+	}
+}
