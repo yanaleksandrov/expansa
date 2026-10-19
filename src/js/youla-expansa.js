@@ -589,8 +589,6 @@ document.addEventListener('youla:init', ()=> {
             editing: null,
             anchor: null,
             bulk: 0,
-            // $ajax of the table, set by its `@load`: the methods called from the listeners don't get it
-            ajax: null,
             trigger: {
                 '@change': 'selectAll($el, $root)',
             },
@@ -743,8 +741,8 @@ document.addEventListener('youla:init', ()=> {
                 window.history.replaceState(null, '', '?' + this.query(params));
 
                 // the API builds the table from the same query as the page; the rows and the pagination are replaced,
-                // their bindings to this component are initialized again
-                this.ajax.post('tables/filter', Object.fromEntries(params)).then(() => {
+                // their bindings to this component are initialized again; from the root a new request aborts the previous one
+                this.$ajax.post('tables/filter', Object.fromEntries(params), null, { el: root }).then(() => {
                     this.resetAll(root);
                     [ '.table-body', '.table-header-pagination' ]
                         .map(selector => root.querySelector(selector))
@@ -1099,7 +1097,6 @@ document.addEventListener('youla:init', ()=> {
         bases: {},
         synced: false,
         before: null,
-        ajax: null,
         source() {
             return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
         },
@@ -1111,7 +1108,7 @@ document.addEventListener('youla:init', ()=> {
          * @returns {Promise<string>}
          */
         generate(text) {
-            return String(text).trim() === '' ? Promise.resolve('') : this.ajax.post('slugs/generate', { text }, null, { clearErrors: false });
+            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', { text }, null, { clearErrors: false });
         },
         follow() {
             const text = this.source()?.value || '';
@@ -1131,8 +1128,7 @@ document.addEventListener('youla:init', ()=> {
             setTimeout(() => this.$refs.slug?.dispatchEvent(new Event('change', { bubbles: true })));
         },
         line: {
-            // $ajax reaches only string expressions, not the listener functions
-            '@load': 'ajax = $ajax; synced && follow()',
+            '@load': 'synced && follow()',
             '@input.document.delay.500ms'(e) {
                 if (this.synced && e.target === this.source()) {
                     this.follow();
@@ -1145,10 +1141,10 @@ document.addEventListener('youla:init', ()=> {
 
                 return url;
             },
-            // the URL of the chosen parent, before saving
+            // the URL of the chosen parent, before saving; a parent found by the search brings it in `data-base`
             '@change.document'(e) {
                 if (this.parent && e.target.name === this.parent && e.target.form === root.closest('form')) {
-                    this.base = this.bases[e.target.value] ?? this.base;
+                    this.base = this.bases[e.target.value] ?? e.target.selectedOptions?.[0]?.dataset.base ?? this.base;
                 }
             },
         },

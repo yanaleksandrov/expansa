@@ -21,7 +21,7 @@ $filters = $table->filters();
 $search = trim((string) ($_GET['s'] ?? ''));
 ?>
 @if ($items || $active || $search !== '')
-    <div class="table" u-data="table" @load="ajax = $ajax" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
+    <div class="table" u-data="table" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
         <div class="table-head">
             @if ($header ?? true)
                 <?php echo view('parts/table/header', [

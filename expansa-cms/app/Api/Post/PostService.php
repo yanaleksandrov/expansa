@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Api\Post;
 
+use App\Dashboard\Pages\Post as Page;
 use App\Models\Post;
 use App\Post\Status;
 use App\Post\Type;
+use App\Support\Permalinks;
 use App\Tables\Posts;
 use Expansa\Facades\Db;
-use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 use Expansa\Http\Enums\Notice;
 use Expansa\Http\Request;
@@ -20,12 +21,7 @@ final class PostService
     /**
      * Columns the editor of a post sends.
      */
-    private const array FIELDS = ['title', 'content', 'slug', 'parent_id', 'author_id', 'status', 'discussion', 'password'];
-
-    /**
-     * Number of users the author select of the editor gets per search.
-     */
-    private const int AUTHORS_LIMIT = 20;
+    private const array FIELDS = ['title', 'content', 'slug', 'parent_id', 'author_id', 'status', 'discussion', 'password', 'created_at'];
 
     /**
      * Create a post from the editor of a new one and open its editor.
@@ -59,8 +55,7 @@ final class PostService
     }
 
     /**
-     * Find the users for the author select of the editor, the ones whose roles have Post::AUTHOR_PERMISSION,
-     * by the login or the display name, sorted by the name; the first ones for an empty search.
+     * Find the users for the author select of the editor, see Page::authors().
      *
      * @param Request  $request  POST: `s`, the text of the search.
      * @param Response $response
@@ -68,40 +63,54 @@ final class PostService
      */
     public function authors(Request $request, Response $response): Response
     {
-        $roles = Role::withPermission(Post::AUTHOR_PERMISSION);
-        if ($roles === []) {
-            return $response->json(['options' => []]);
-        }
-
-        // the `roles` column is a JSON list, a role is matched with its quotes
-        $where = [
-            'deleted_at' => null,
-            'roles[~]'   => array_map(fn (string $role) => '"' . $role . '"', $roles),
-            'ORDER'      => ['showname' => 'ASC'],
-            'LIMIT'      => self::AUTHORS_LIMIT,
-        ];
-
-        $search = $request->getString('s');
-        if ($search !== '') {
-            $where['OR'] = [
-                'login[~]'    => $search,
-                'showname[~]' => $search,
+        $options = [];
+        foreach (array_slice(Page::authors($request->getString('s')), 0, Page::OPTIONS_LIMIT, true) as $id => $name) {
+            $options[] = [
+                'value' => (string) $id,
+                'text'  => $name,
             ];
         }
-
-        $options = array_map(
-            fn (array $user) => [
-                'value' => (string) $user['id'],
-                'text'  => $user['showname'] ?: $user['login'],
-            ],
-            Db::select('users', ['id [Int]', 'login', 'showname'], $where) ?: []
-        );
 
         return $response->json(['options' => $options]);
     }
 
     /**
-     * Save a post from its editor: the title, content, slug, parent, author, status, discussion and password.
+     * Find the posts for the parent select of the editor, see Page::parents(); "No parent" first
+     * without a search. Each one has the URL up to the slug for the slug field, `data.base`.
+     *
+     * @param Request  $request  POST: `post-type`, `id`, 0 for a new post, and `s`, the text of the search.
+     * @param Response $response
+     * @return Response JSON `options`: `value` is the post ID, `text` the title.
+     */
+    public function parents(Request $request, Response $response): Response
+    {
+        $type = Type::get((string) ($request->post['post-type'] ?? ''));
+        $id   = (int) ($request->post['id'] ?? 0);
+        $post = $type instanceof Type && $type->hierarchical
+            ? ($id > 0 ? Post::get($type->key, $id) : new Post(type: $type->key))
+            : null;
+        if (! $post instanceof Post) {
+            return $response->json(['options' => []]);
+        }
+
+        $parents = array_slice(Page::parents($post, $request->getString('s')), 0, Page::OPTIONS_LIMIT + 1, true);
+        $paths   = Post::paths($post->type, array_keys($parents));
+
+        $options = [];
+        foreach ($parents as $parentId => $title) {
+            $options[] = [
+                'value' => (string) $parentId,
+                'text'  => $title,
+                'data'  => ['base' => Permalinks::around($paths[$parentId] ?? '', $post->id, $post->type)[0]],
+            ];
+        }
+
+        return $response->json(['options' => $options]);
+    }
+
+    /**
+     * Save a post from its editor: the title, content, slug, parent, author, status, discussion, password
+     * and the date of creation.
      *
      * @param Request  $request  POST: `post-type`, `id` and the changed columns.
      * @param Response $response

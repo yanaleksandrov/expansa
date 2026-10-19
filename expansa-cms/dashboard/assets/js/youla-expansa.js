@@ -481,7 +481,6 @@ document.addEventListener('youla:init', () => {
             editing: null,
             anchor: null,
             bulk: 0,
-            ajax: null,
             trigger: {
                 '@change': 'selectAll($el, $root)'
             },
@@ -619,7 +618,9 @@ document.addEventListener('youla:init', () => {
                     params.set(name, [ ...values ].join(','));
                 });
                 window.history.replaceState(null, '', '?' + this.query(params));
-                this.ajax.post('tables/filter', Object.fromEntries(params)).then(() => {
+                this.$ajax.post('tables/filter', Object.fromEntries(params), null, {
+                    el: root
+                }).then(() => {
                     this.resetAll(root);
                     [ '.table-body', '.table-header-pagination' ].map(selector => root.querySelector(selector)).forEach(el => el && root.__x.initialize(el));
                 });
@@ -905,12 +906,11 @@ document.addEventListener('youla:init', () => {
         bases: {},
         synced: false,
         before: null,
-        ajax: null,
         source() {
             return this.from ? root.closest('form')?.elements.namedItem(this.from) : null;
         },
         generate(text) {
-            return String(text).trim() === '' ? Promise.resolve('') : this.ajax.post('slugs/generate', {
+            return String(text).trim() === '' ? Promise.resolve('') : this.$ajax.post('slugs/generate', {
                 text
             }, null, {
                 clearErrors: false
@@ -930,7 +930,7 @@ document.addEventListener('youla:init', () => {
             })));
         },
         line: {
-            '@load': 'ajax = $ajax; synced && follow()',
+            '@load': 'synced && follow()',
             '@input.document.delay.500ms'(e) {
                 if (this.synced && e.target === this.source()) {
                     this.follow();
@@ -946,7 +946,7 @@ document.addEventListener('youla:init', () => {
             },
             '@change.document'(e) {
                 if (this.parent && e.target.name === this.parent && e.target.form === root.closest('form')) {
-                    this.base = this.bases[e.target.value] ?? this.base;
+                    this.base = this.bases[e.target.value] ?? e.target.selectedOptions?.[0]?.dataset.base ?? this.base;
                 }
             }
         },

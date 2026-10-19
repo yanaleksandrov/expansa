@@ -8,6 +8,7 @@ use App\Post\Status;
 use App\Post\Type;
 use App\Support\Activity;
 use App\Support\Permalinks;
+use DateTimeImmutable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSoftDeletes;
@@ -338,7 +339,8 @@ class Post
     /**
      * Update the given columns of the post and, for a public type, its slug; other columns keep their values.
      *
-     * @param array<string, mixed> $args `title`, `content`, `parent_id`, `author_id`, `status`, `discussion`, `password`, `slug`.
+     * @param array<string, mixed> $args `title`, `content`, `parent_id`, `author_id`, `status`, `discussion`, `password`, `slug`,
+     *                                   `created_at` as `Y-m-d\TH:i`.
      * @return bool False when nothing was saved, e.g. the slug is taken.
      */
     public function update(array $args): bool
@@ -359,6 +361,13 @@ class Post
         ];
 
         $data = Safe::data(array_intersect_key($args, $rules), array_intersect_key($rules, $args))->apply();
+
+        // the datepicker sends the local date and time as `2026-10-19T14:30`; the same minute keeps the seconds
+        $value   = (string) ($args['created_at'] ?? '');
+        $created = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $value);
+        if ($created !== false && $created->format('Y-m-d\TH:i') === $value && $created->format('Y-m-d H:i') !== substr($this->createdAt, 0, 16)) {
+            $data['created_at'] = $created->format('Y-m-d H:i:s');
+        }
 
         // an author who is not a user any more or may not edit entries keeps the saved one
         if (isset($data['author_id'])) {

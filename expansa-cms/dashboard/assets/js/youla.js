@@ -104,11 +104,13 @@
             $root: root
         };
     }
-    function withMagicVariables(dataContext, magicVariables) {
+    function withMagicVariables(dataContext, magicVariables, methods) {
+        const isMethod = prop => methods !== undefined && typeof prop === 'string' && prop[0] === '$' && methods.has(prop);
+        const isMagic = prop => prop in magicVariables || isMethod(prop);
         return new Proxy(dataContext, {
-            get: (target, prop) => prop in magicVariables ? magicVariables[prop] : target[prop],
-            has: (target, prop) => prop in magicVariables || prop in target,
-            set: (target, prop, value) => prop in magicVariables ? true : Reflect.set(target, prop, value)
+            get: (target, prop) => prop in magicVariables ? magicVariables[prop] : isMethod(prop) ? methods.get(prop) : target[prop],
+            has: (target, prop) => isMagic(prop) || prop in target,
+            set: (target, prop, value) => isMagic(prop) ? true : Reflect.set(target, prop, value)
         });
     }
     function splitMagicVariables(helperVariables = {}) {
@@ -120,6 +122,34 @@
             magicVariables,
             otherVariables
         };
+    }
+    let methods = {};
+    function method(name, callback) {
+        register('method', methods, `$${name}`, callback);
+    }
+    function getListenerMethods(e, el, component) {
+        const resolved = {};
+        return {
+            has: name => Object.hasOwn(methods, name),
+            get: name => {
+                if (!Object.hasOwn(resolved, name)) {
+                    resolved[name] = methods[name](e, el, component);
+                }
+                return resolved[name];
+            }
+        };
+    }
+    const elementMethods = new WeakMap;
+    function getElementMethods(el, component) {
+        let cached = elementMethods.get(el);
+        if (cached?.component !== component) {
+            cached = {
+                component,
+                ...getListenerMethods(undefined, el, component)
+            };
+            elementMethods.set(el, cached);
+        }
+        return cached;
     }
     const EACH_EXPRESSION = /^\(?([\w]+)(?:,\s*(\w+))?\)?\s+in\s+(.*?)(?:\s+join\s+'([^']+)')?$/;
     function parseEachExpression(expression) {
@@ -145,7 +175,7 @@
             }, (_, i) => i + 1);
         } else {
             try {
-                dataItems = saferEval(`${items}`, withMagicVariables(component.scope, magicVariables), otherVariables);
+                dataItems = saferEval(`${items}`, withMagicVariables(component.scope, magicVariables, getElementMethods(el, component)), otherVariables);
             } catch (error) {
                 return;
             }
@@ -660,17 +690,6 @@
         el._x_text = output;
         el.textContent = output;
     });
-    let methods = {};
-    function method(name, callback) {
-        register('method', methods, `$${name}`, callback);
-    }
-    function resolveMethods(e, el, component) {
-        const resolved = {};
-        Object.keys(methods).forEach(key => {
-            resolved[key] = methods[key](e, el, component);
-        });
-        return resolved;
-    }
     method('dispatch', (e, el) => (name, detail = {}) => {
         el.dispatchEvent(createEvent(name, detail));
     });
@@ -988,7 +1007,8 @@
             const proxiedData = makeProxy(this.scope);
             const {magicVariables, otherVariables} = splitMagicVariables(additionalHelperVariables);
             const trackedHelperVariables = Object.fromEntries(Object.entries(otherVariables).map(([key, value]) => [ key, typeof value === 'object' && value !== null && !isNode(value) ? makeProxy(value) : value ]));
-            const contextData = withMagicVariables(proxiedData, magicVariables);
+            const methods = magicVariables.$el ? getElementMethods(magicVariables.$el, this) : undefined;
+            const contextData = withMagicVariables(proxiedData, magicVariables, methods);
             const output = typeof expressionOrFn === 'function' ? expressionOrFn.call(contextData) : saferEval(expressionOrFn, contextData, trackedHelperVariables);
             return {
                 output,
@@ -1278,18 +1298,14 @@
             }
         }
         invokeListener(expressionOrFn, e, target) {
-            const contextData = withMagicVariables(this.scope, this.getMagicVariables(target, e));
+            const contextData = withMagicVariables(this.scope, this.getMagicVariables(target, e), getListenerMethods(e, target, this));
             if (typeof expressionOrFn === 'function') {
                 expressionOrFn.call(contextData, e);
                 return;
             }
-            const expression = expressionOrFn;
-            const methods = resolveMethods(e, target, this);
-            const data = getForData(target);
-            saferEval(expression, contextData, {
+            saferEval(expressionOrFn, contextData, {
                 ...this.getAliasVariables(),
-                ...methods,
-                ...data
+                ...getForData(target)
             }, true);
         }
         getAliasVariables() {

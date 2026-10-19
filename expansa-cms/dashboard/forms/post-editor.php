@@ -13,9 +13,25 @@ use Expansa\Builders\Form;
 $post = Page::post((string) filter_input(INPUT_GET, 'type') ?: 'pages', filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
 $type = Type::get($post->type);
 
-// the parents to choose in the details and the URL of each, the base of the slug by the permalink structure;
+// the parents and the authors to choose aside; when there are more than the select shows, it searches on the server
+$parents      = $type->hierarchical ? Page::parents($post) : [];
+$parentSearch = count($parents) - 1 > Page::OPTIONS_LIMIT;
+$parents      = array_slice($parents, 0, Page::OPTIONS_LIMIT + 1, true);
+$authors      = Page::authors();
+$authorSearch = count($authors) > Page::OPTIONS_LIMIT;
+$authors      = array_slice($authors, 0, Page::OPTIONS_LIMIT, true);
+if (! isset($authors[$post->authorId])) {
+    $name    = Page::author($post);
+    $authors = ($name !== '' ? [$post->authorId => $name] : ['' => t('No author')]) + $authors;
+}
+
+// the expression of `u-select`: the search with the payload of the route, none for a short list
+$select = static fn (bool $search, string $route, array $payload = []): string => $search
+    ? sprintf("{showSearch: true, events: {search: (text) => \$ajax.post('%s', {...%s, s: text}, null, {clearErrors: false})}}", $route, json_encode((object) $payload))
+    : '{}';
+
+// the URL of the post and of each parent, the base of the slug by the permalink structure;
 // the paths of the post and the parents are read together
-$parents = $type->hierarchical ? Page::parents($post) : [];
 $paths   = $post::paths($post->type, [$post->id, ...array_keys($parents)]);
 $url     = $post->url($paths[$post->id] ?? '');
 $around  = Permalinks::around($paths[$post->parentId] ?? '', $post->id, $post->type);
@@ -27,8 +43,9 @@ foreach ($parents as $id => $title) {
 // the discussion and the activity tabs show the same comments
 $comments = Comment::getByPost($post->type, $post->id);
 
-// the author select is written by hand, not by Form::view(): its script is connected here
+// the selects and the datepicker aside are written by hand, not by Form::view(): their scripts are connected here
 Form::assets('select', 'select');
+Form::assets('input', 'datetime-local');
 
 /**
  * Post editor: the bar with the way back and the public page over the tabs, the title, slug and content
@@ -346,8 +363,7 @@ return Form::enqueue(
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',
-                    'callback' => function () use ($post, $type, $parents) {
-                        $author   = Page::author($post);
+                    'callback' => function () use ($post, $type, $parents, $parentSearch, $authors, $authorSearch, $select) {
                         $statuses = Status::getStatuses();
                         $options  = function (array $options, int|string $value): void {
                             foreach ($options as $key => $label) {
@@ -355,14 +371,13 @@ return Form::enqueue(
                             }
                         };
                         $facts    = $post->id === 0 ? [] : [
-                            ['ph ph-calendar-blank', t('Created'), Dates::format($post->createdAt)],
                             ['ph ph-clock-clockwise', t('Updated'), Dates::format($post->updatedAt)],
                             ['ph ph-eye', t('Views'), (string) $post->views],
                             ['ph ph-hash', t('ID'), (string) $post->id],
                         ];
                         ?>
                         <h4 class="post-editor-eyebrow"><?php echo t('Details'); ?></h4>
-                        <dl class="post-editor-props" u-data="{status: <?php echo htmlspecialchars(json_encode($post->status)); ?>, ajax: null}" @load="ajax = $ajax">
+                        <dl class="post-editor-props" u-data="{status: <?php echo htmlspecialchars(json_encode($post->status)); ?>}">
                             <dt><i class="ph ph-circle-dashed"></i><?php echo t('Status'); ?></dt>
                             <dd>
                                 <select class="post-editor-pill" name="status" u-prop="status" aria-label="<?php echo t_attr('Status'); ?>">
@@ -376,7 +391,7 @@ return Form::enqueue(
                             <?php if ($parents) : ?>
                                 <dt><i class="ph ph-tree-structure"></i><?php echo t('Parent'); ?></dt>
                                 <dd>
-                                    <select class="post-editor-pill<?php echo $post->parentId === 0 ? ' is-empty' : ''; ?>" name="parent_id" aria-label="<?php echo t_attr('Parent'); ?>">
+                                    <select class="field field--xs" name="parent_id" aria-label="<?php echo t_attr('Parent'); ?>" u-select="<?php echo htmlspecialchars($select($parentSearch, 'post/parents', ['post-type' => $post->type, 'id' => $post->id])); ?>">
                                         <?php $options($parents, $post->parentId); ?>
                                     </select>
                                 </dd>
@@ -389,18 +404,20 @@ return Form::enqueue(
                             </dd>
                             <dt><i class="ph ph-user"></i><?php echo t('Author'); ?></dt>
                             <dd>
-                                <select class="field field--xs" name="author_id" aria-label="<?php echo t_attr('Author'); ?>" u-select="{showSearch: true, events: {search: (text) => ajax.post('post/authors', {s: text}, null, {clearErrors: false})}}">
-                                    <?php if ($author) : ?>
-                                        <option value="<?php echo $post->authorId; ?>" selected><?php echo htmlspecialchars($author); ?></option>
-                                    <?php else : ?>
-                                        <option value="" selected><?php echo t('No author'); ?></option>
-                                    <?php endif; ?>
+                                <select class="field field--xs" name="author_id" aria-label="<?php echo t_attr('Author'); ?>" u-select="<?php echo htmlspecialchars($select($authorSearch, 'post/authors')); ?>">
+                                    <?php $options($authors, $post->authorId ?: ''); ?>
                                 </select>
                             </dd>
                             <?php if ($post->id > 0) : ?>
                                 <dt><i class="ph ph-chat-circle-text"></i><?php echo t('Comments'); ?></dt>
                                 <dd id="post-comments-count">
 	                                <?php echo view('parts/post-comments-count', ['counts' => Comment::countByStatus($post->type, $post->id)]); ?>
+                                </dd>
+                            <?php endif; ?>
+                            <?php if ($post->id > 0) : ?>
+                                <dt><i class="ph ph-calendar-blank"></i><?php echo t('Created'); ?></dt>
+                                <dd>
+                                    <input class="post-editor-pill" type="text" name="created_at" value="<?php echo htmlspecialchars(str_replace(' ', 'T', substr($post->createdAt, 0, 16))); ?>" u-pickadate="{timepicker: true}" autocomplete="off" aria-label="<?php echo t_attr('Created'); ?>">
                                 </dd>
                             <?php endif; ?>
                             <?php foreach ($facts as [$icon, $label, $fact]) : ?>
