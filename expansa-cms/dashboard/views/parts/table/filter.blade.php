@@ -10,7 +10,7 @@ use Expansa\Builders\Form;
  *
  * @var array<string, array{label: string, icon?: string, options: array}> $filters Fields of Table::filters().
  * @var array<string, string> $statuses Labels of the parts of the list by status, `trash` for the trash;
- *                                      the select opens the chosen one.
+ *                                      the select shows the chosen one without a reload, the trash with one.
  * @var string                $status   Current part.
  * @var string                $find     Placeholder of the search, applied with the filters 500ms after the typing
  *                                      as the `s` parameter and shown as a chip; no search when empty.
@@ -27,8 +27,6 @@ if ($filters) {
 // rows are initialized before they are attached, so the popover is found from the component root
 $select  ="{ contentLocation: \$root.querySelector('.table-filter-content') }";
 $popover = 'table-filter-' . bin2hex(random_bytes(4));
-$change  = "const q = new URLSearchParams(location.search); q.delete('status'); q.delete('view'); q.delete('page');"
-    . " \$el.value === 'trash' ? q.set('view', 'trash') : \$el.value && q.set('status', \$el.value); location.search = query(q)";
 ?>
 <div class="table-filter">
     <div class="table-filter-actions df g-1">
@@ -58,7 +56,7 @@ $change  = "const q = new URLSearchParams(location.search); q.delete('status'); 
                 'attributes' => [
                     'u-select' => true,
                     'value'    => $status,
-                    '@change'  => $change,
+                    '@change'  => 'setStatus($el.value)',
                 ],
                 'options'    => $statuses,
             ]);

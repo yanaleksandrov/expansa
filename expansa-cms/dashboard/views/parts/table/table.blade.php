@@ -17,10 +17,11 @@ $items   = $table->getData();
 $active  = $table->activeFilters();
 $filters = $table->filters();
 
-// a search without results keeps the table, so that its field and chip stay to change it
+// a search or a status without results keeps the table, so that their fields stay to change them
 $search = trim((string) ($_GET['s'] ?? ''));
+$status = trim((string) ($_GET['status'] ?? ''));
 ?>
-@if ($items || $active || $search !== '')
+@if ($items || $active || $search !== '' || $status !== '')
     <div class="table" u-data="table" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
         <div class="table-head">
             @if ($header ?? true)

@@ -594,6 +594,24 @@ document.addEventListener('youla:init', () => {
                 const options = this.fields[row.field]?.options || {};
                 return row.values.length > 2 ? selected.replace(':count', row.values.length) : row.values.map(value => options[value] ?? value).join(', ');
             },
+            setStatus(value) {
+                const params = new URLSearchParams(window.location.search);
+                const reload = value === 'trash' || params.get('view') === 'trash';
+                params.delete('view');
+                params.delete('status');
+                params.delete('page');
+                if (value === 'trash') {
+                    params.set('view', 'trash');
+                } else if (value) {
+                    params.set('status', value);
+                }
+                if (reload) {
+                    window.location.search = this.query(params);
+                    return;
+                }
+                window.history.replaceState(null, '', '?' + this.query(params));
+                this.goToPage(1);
+            },
             applyFilters() {
                 this.goToPage(1);
             },

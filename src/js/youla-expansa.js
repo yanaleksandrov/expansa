@@ -708,6 +708,28 @@ document.addEventListener('youla:init', ()=> {
                     ? selected.replace(':count', row.values.length)
                     : row.values.map(value => options[value] ?? value).join(', ');
             },
+            // The trash has its own actions and tools in the header, so going in or out of it loads the page.
+            setStatus(value) {
+                const params = new URLSearchParams(window.location.search);
+                const reload = value === 'trash' || params.get('view') === 'trash';
+
+                params.delete('view');
+                params.delete('status');
+                params.delete('page');
+                if (value === 'trash') {
+                    params.set('view', 'trash');
+                } else if (value) {
+                    params.set('status', value);
+                }
+
+                if (reload) {
+                    window.location.search = this.query(params);
+                    return;
+                }
+
+                window.history.replaceState(null, '', '?' + this.query(params));
+                this.goToPage(1);
+            },
             // The rows are fewer or other after a change of the filters, so the list starts from the first page.
             applyFilters() {
                 this.goToPage(1);

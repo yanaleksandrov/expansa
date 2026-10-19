@@ -76,11 +76,11 @@
     margin-bottom: auto;
     overflow: auto;
     scroll-timeline: --table-scroll-x x;
-    transform: scaleY(-1);
+    transform: scaleY(-0.5);
     min-height: 70vh;
 
     > * {
-      transform: scaleY(-1);
+      transform: scaleY(-0.5);
     }
   }
 
@@ -375,18 +375,6 @@
     font-size: 0.85em;
   }
 
-  .table-filter-empty {
-    padding: 0.125rem 0;
-    color: var(--expansa-text-muted);
-    font-size: 0.85em;
-    text-align: center;
-
-    .table-body > & {
-      padding: 1.5rem;
-      text-align: center;
-    }
-  }
-
   .table-filter-chips {
     display: flex;
     flex-wrap: wrap;
@@ -451,6 +439,18 @@
     &-remove:hover {
       color: var(--expansa-danger);
     }
+  }
+}
+
+// in the filter popover and in the table body, where the filter left out every row
+.table-filter-empty {
+  padding: 0.125rem 0;
+  color: var(--expansa-text-muted);
+  font-size: 0.85em;
+  text-align: center;
+
+  .table-body > & {
+    padding: 1.5rem;
   }
 }
 
