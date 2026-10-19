@@ -366,7 +366,7 @@ class Comment extends Model
 
         $pending = $this->status === self::STATUS_PENDING;
         if ($pending) {
-            $email = Option::get('comments.notify_moderation', true) ? (string) Option::get('site.owner.email', '') : '';
+            $email = Option::get('comments.notify_moderation', true) ? (string) User::owner()?->email : '';
         } else {
             $author = $post->authorId > 0 && $post->authorId !== (int) $this->authorId ? User::find($post->authorId) : null;
             $email  = $author instanceof User && Option::get('comments.notify_posts', true) ? (string) $author->email : '';

@@ -3,7 +3,7 @@
 use Expansa\Facades\Role;
 
 /**
- * Name of the user role in a badge, the green one for administrators.
+ * Name of the user role in a badge, the green one for the owner and administrators.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-role.blade.php
  *
@@ -17,6 +17,6 @@ defined('EX_PATH') || exit;
 
 $role = is_string($value) ? $value : '';
 ?>
-<span class="badge{{ $role === 'admin' ? ' badge--green-lt' : '' }}">
+<span class="badge{{ in_array($role, [App\Models\User::ROLE_OWNER, 'admin'], true) ? ' badge--green-lt' : '' }}">
     <i class="ph ph-person-simple-run"></i> {{ Role::get($role)['name'] ?? '' }}
 </span>

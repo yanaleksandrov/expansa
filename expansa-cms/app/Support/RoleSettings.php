@@ -5,20 +5,21 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Models\Option;
+use App\Models\User;
 use Expansa\Facades\Role;
 
 /**
  * Roles edited in the Settings: the `roles` option keeps the permissions of every role and the roles
  * added there; they replace the defaults of the code on every request. Built-in roles can't be deleted,
  * and the administrator always keeps the permissions that open the settings and the users, so nobody
- * locks themselves out.
+ * locks themselves out. The owner has every permission and is not edited.
  */
 final class RoleSettings
 {
     /**
      * Roles registered by the code, they can be changed but not deleted.
      */
-    public const array BUILT_IN = ['admin', 'editor', 'author', 'subscriber'];
+    public const array BUILT_IN = [User::ROLE_OWNER, 'admin', 'editor', 'author', 'subscriber'];
 
     /**
      * Permissions the administrator always keeps.
@@ -42,7 +43,7 @@ final class RoleSettings
         self::$known = self::collect();
 
         foreach ((array) Option::get('roles', []) as $key => $role) {
-            if (! is_array($role) || ! preg_match('/^[a-z0-9_-]+$/', (string) $key)) {
+            if (! is_array($role) || $key === User::ROLE_OWNER || ! preg_match('/^[a-z0-9_-]+$/', (string) $key)) {
                 continue;
             }
 
@@ -56,6 +57,19 @@ final class RoleSettings
 
             Role::add($key, $name, $permissions);
         }
+
+        self::grantOwner();
+    }
+
+    /**
+     * Give the owner every permission of the registered roles; call again after the extensions
+     * registered theirs.
+     *
+     * @return void
+     */
+    public static function grantOwner(): void
+    {
+        Role::grant(User::ROLE_OWNER, self::collect());
     }
 
     /**
@@ -79,7 +93,7 @@ final class RoleSettings
         $result = [];
         foreach ($roles as $roleKey => $role) {
             $isDeleted = ! empty($role['delete']) && ! in_array($roleKey, self::BUILT_IN, true);
-            if (! is_array($role) || $isDeleted) {
+            if (! is_array($role) || $isDeleted || $roleKey === User::ROLE_OWNER) {
                 continue;
             }
 

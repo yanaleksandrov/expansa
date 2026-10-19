@@ -388,9 +388,6 @@ class Option extends Model
                 'tagline'  => '',
                 'language' => '',
             ],
-            'owner'          => [
-                'email' => '',
-            ],
             'users'          => [
                 'default-role' => 'subscriber',
                 'membership'   => 0,

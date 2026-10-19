@@ -41,6 +41,36 @@ return Expansa\Builders\Form::enqueue(
             'fields'  => [
                 [
                     'type'   => 'group',
+                    'name'   => 'site-language',
+                    'label'  => t( 'Site Language' ),
+                    'fields' => [
+                        [
+                            'type'        => 'select',
+                            'name'        => 'site[language]',
+                            'error'       => 'site.language',
+                            'label'       => t( 'Site Language' ),
+                            'class'       => '',
+                            'label_class' => '',
+                            'reset'       => 0,
+                            'before'      => '',
+                            'after'       => '',
+                            'instruction' => t( 'Main language of the site. The dashboard of each user follows the language of their profile.' ),
+                            'tooltip'     => '',
+                            'copy'        => 0,
+                            'validator'   => '',
+                            'conditions'  => [],
+                            'attributes'  => [
+                                'u-prop'       => 'site.language',
+                                'value'        => Option::get( 'site.language' ),
+                                'u-select'     => '{"showSearch": 1}',
+                                '@change.stop' => '$ajax.post("options/update")',
+                            ],
+                            'options' => Expansa\Facades\I18n::languageOptions(),
+                        ],
+                    ],
+                ],
+                [
+                    'type'   => 'group',
                     'name'   => 'comments',
                     'label'  => t( 'URL Modifications' ),
                     'fields' => [

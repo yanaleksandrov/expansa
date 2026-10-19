@@ -1253,9 +1253,9 @@ document.addEventListener('youla:init', ()=> {
      */
     const dirtyStates = new Map();
 
-    // Shakes the page instead of following the link, while any watched form is still dirty.
+    // Shakes the page instead of following the link, while any watched form is still dirty; a new tab keeps the changes.
     window.addEventListener('click', e => {
-        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]')) {
+        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]:not([target="_blank" i])')) {
             e.preventDefault();
 
             document.body.classList.add('is-shake');

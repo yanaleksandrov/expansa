@@ -14,7 +14,8 @@ use Expansa\Facades\Session;
  * What an administrator does with the account of another user: disable it, change its email, sign it
  * out everywhere, send a password reset, turn its two-factor authentication off, and sign in as the user to see the
  * site with their eyes. Every action is logged on the account; signing in as somebody keeps the
- * administrator's own account in the browser, one click brings it back.
+ * administrator's own account in the browser, one click brings it back. Only the owner manages the
+ * owner's account.
  */
 final class Admin
 {
@@ -34,6 +35,18 @@ final class Admin
         $user = User::find($id);
 
         return $user instanceof User ? $user : null;
+    }
+
+    /**
+     * Whether the account belongs to the owner and somebody else acts on it.
+     *
+     * @param User $admin
+     * @param User $user
+     * @return bool
+     */
+    public static function isProtected(User $admin, User $user): bool
+    {
+        return $user->id !== $admin->id && $user->hasRole(User::ROLE_OWNER);
     }
 
     /**

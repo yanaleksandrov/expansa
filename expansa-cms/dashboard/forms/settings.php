@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Option;
-use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 
@@ -64,73 +63,8 @@ return Expansa\Builders\Form::enqueue(
 					'type'    => 'group',
 					'name'    => 'website',
 					'label'   => t( 'Website' ),
-					'columns' => 2,
+					'columns' => 1,
 					'fields'  => [
-						[
-							'type'        => 'text',
-							'name'        => 'site[name]',
-							'error'       => 'site.name',
-							'label'       => t( 'Name' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => t( 'A quick snapshot of your website' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'      => 'site.name',
-								'value'       => Option::get( 'site.name' ),
-								'required'    => true,
-								'placeholder' => t( 'e.g. Google' ),
-							],
-						],
-						[
-							'type'        => 'text',
-							'name'        => 'site[tagline]',
-							'error'       => 'site.tagline',
-							'label'       => t( 'Tagline' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => t( 'In a few words, explain what this site is about.' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'      => 'site.tagline',
-								'value'       => Option::get( 'site.tagline' ),
-								'placeholder' => t( 'e.g. Just another Expansa site' ),
-							],
-						],
-						[
-							'type'        => 'select',
-							'name'        => 'site[language]',
-							'error'       => 'site.language',
-							'label'       => t( 'Site Language' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => t( 'Main language of the site. The dashboard of each user follows the language of their profile.' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'   => 'site.language',
-								'value'    => Option::get( 'site.language' ),
-								'u-select' => '{"showSearch": 1}',
-							],
-							'options' => I18n::languageOptions(),
-						],
 						[
 							'type'        => 'text',
 							'name'        => 'site[url]',
@@ -141,7 +75,7 @@ return Expansa\Builders\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'A quick snapshot of your website' ),
+							'instruction' => t( 'Links, emails and redirects use it. Requests to other domains are moved to this address, so check it opens the site before saving.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -149,37 +83,9 @@ return Expansa\Builders\Form::enqueue(
 							'attributes'  => [
 								'u-prop'      => 'site.url',
 								'value'       => Option::get( 'site.url' ),
-								'placeholder' => t( 'e.g. Google' ),
+								'placeholder' => t( 'e.g. https://example.com' ),
+								'type'        => 'url',
 								'required'    => true,
-							],
-						],
-					],
-				],
-				[
-					'type'    => 'group',
-					'name'    => 'administrator',
-					'label'   => t( 'Administrator' ),
-					'columns' => 2,
-					'fields'  => [
-						[
-							'type'        => 'text',
-							'name'        => 'owner[email]',
-							'error'       => 'owner.email',
-							'label'       => t( 'Owner Email Address' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '<i class="ph ph-at"></i>',
-							'after'       => '',
-							'instruction' => t( 'This address is used for admin purposes. If you change it, we\'ll send an email to the new address to confirm it. The new address won\'t become active until it\'s confirmed.' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'   => 'owner.email',
-								'value'    => Option::get( 'owner.email' ),
-								'required' => true,
 							],
 						],
 					],
@@ -204,9 +110,7 @@ return Expansa\Builders\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [
-								'u-prop' => '',
-							],
+							'attributes'  => [],
 							'options'     => [
 								'users[membership]' => [
 									'content'     => t( 'Anyone can register' ),
@@ -1311,8 +1215,8 @@ return Expansa\Builders\Form::enqueue(
 								$permissions = App\Support\RoleSettings::getPermissions();
 								?>
 								<div class="dg g-4">
-									<div class="t-muted fs-13"><?php echo t( 'A user gets the permissions of all their roles. The administrator always keeps manage_options and users_edit. Built-in roles can be changed but not deleted.' ); ?></div>
-									<?php foreach ( Role::all() as $key => $role ) : ?>
+									<div class="t-muted fs-13"><?php echo t( 'A user gets the permissions of all their roles. The owner has every permission, the administrator always keeps manage_options and users_edit. Built-in roles can be changed but not deleted.' ); ?></div>
+									<?php foreach ( array_diff_key( Role::all(), [ App\Models\User::ROLE_OWNER => true ] ) as $key => $role ) : ?>
 										<div class="dg g-2 p-4 card card-border">
 											<div class="df aic fw g-2">
 												<div class="field">

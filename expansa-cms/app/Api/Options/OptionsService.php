@@ -14,6 +14,7 @@ use App\Support\Transliteration;
 use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Mail;
+use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Arr;
@@ -38,6 +39,7 @@ final class OptionsService
             // the SEO form sends only the name and the tagline of the site
             if ($option === 'site' && is_array($value)) {
                 $value = [...(array) Option::get('site', []), ...$value];
+                $value['url'] = $this->normalizeSiteUrl((string) ($value['url'] ?? ''));
             }
 
             if ($option === 'seo' && is_array($value)) {
@@ -72,6 +74,31 @@ final class OptionsService
         }
 
         return $response->notify(t('Options updated successfully'));
+    }
+
+    /**
+     * Check the site address: an http(s) URL with a host and no query, without the trailing slash.
+     * The installation is complete while it is set, and requests to other hosts are moved to it.
+     *
+     * @param string $url Form value.
+     * @return string
+     * @throws ValidationFailed When it is not such an URL.
+     */
+    private function normalizeSiteUrl(string $url): string
+    {
+        $url   = rtrim(trim($url), '/');
+        $parts = parse_url($url);
+
+        $isValid = is_array($parts)
+            && in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)
+            && ($parts['host'] ?? '') !== ''
+            && ! isset($parts['user']) && ! isset($parts['query']) && ! isset($parts['fragment'])
+            && filter_var($url, FILTER_VALIDATE_URL) !== false;
+        if (! $isValid) {
+            throw ValidationFailed::field('site.url', t('Enter the full address of the site, e.g. https://example.com'));
+        }
+
+        return $url;
     }
 
     /**

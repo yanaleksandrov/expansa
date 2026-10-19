@@ -421,11 +421,20 @@ Lifecycle::phase('configure', true, function () {
 /**
  * 3. register · installed only: needs env.php and the database.
  *
- * Registers the default roles (admin, editor, author, subscriber) and post types
- * (pages, files); post types create their missing tables.
+ * Sends requests to other hosts to the site address, then registers the default roles
+ * (owner, admin, editor, author, subscriber) and post types (pages, files); post types create
+ * their missing tables.
  */
 Lifecycle::phase('register', fn () => Is::installed(), function () {
-    // roles
+    // a foreign Host header must not get into the links of the site
+    App\Http\CanonicalHost::handle();
+
+    // roles; the owner gets every permission from RoleSettings::grantOwner()
+    Role::add(
+        role: App\Models\User::ROLE_OWNER,
+        name: t('Owner'),
+    );
+
     Role::add(
         role: 'admin',
         name: t('Administrator'),
@@ -578,6 +587,9 @@ Lifecycle::phase('extensions', fn () => Is::installed(), function () {
     );
     Extensions::register('plugin');
     Extensions::register('theme');
+
+    // the owner also gets the permissions of the roles the extensions registered
+    App\Support\RoleSettings::grantOwner();
 });
 
 /**

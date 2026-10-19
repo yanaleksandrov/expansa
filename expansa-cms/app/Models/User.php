@@ -84,6 +84,17 @@ class User extends Model implements Fieldable, Identity, Subject
     private const string DEFAULT_ROLE = 'subscriber';
 
     /**
+     * Role of the site owner: the installer gives it to the first account, it has every permission
+     * and only its holder manages that account.
+     */
+    public const string ROLE_OWNER = 'owner';
+
+    /**
+     * The owner found by owner(), false until it is looked up.
+     */
+    private static self|false|null $owner = false;
+
+    /**
      * Role names assigned to the user, the `roles` column through roles(); Access permissions come from them.
      *
      * @var string[]
@@ -394,6 +405,25 @@ class User extends Model implements Fieldable, Identity, Subject
         $user = Auth::user();
 
         return $user instanceof self ? $user : null;
+    }
+
+    /**
+     * Get the site owner: the account with the owner role, the oldest one if there are several.
+     * Looked up once per request.
+     *
+     * @return User|null Null when no account has the role.
+     */
+    public static function owner(): ?User
+    {
+        if (self::$owner === false) {
+            // roles are stored as a JSON list, e.g. ["owner"]
+            $id    = (int) Db::get('users', 'id', ['roles[~]' => '"' . self::ROLE_OWNER . '"', 'ORDER' => ['id' => 'ASC']]);
+            $owner = $id > 0 ? self::find($id) : null;
+
+            self::$owner = $owner instanceof self ? $owner : null;
+        }
+
+        return self::$owner;
     }
 
     /**

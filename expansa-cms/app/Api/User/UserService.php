@@ -59,6 +59,10 @@ final class UserService
             if ($user === null) {
                 return $response->notify(t('User not found'));
             }
+
+            if (Admin::isProtected($current, $user)) {
+                return $response->notify(t('Only the owner can change the owner account.'));
+            }
         }
 
         $data  = array_intersect_key($request->post, array_flip(self::PROFILE_FIELDS));
@@ -877,6 +881,10 @@ final class UserService
         $user  = Admin::find((int) ($request->post['id'] ?? 0));
         if ($user === null) {
             return $response->notify(t('User not found'));
+        }
+
+        if (Admin::isProtected($admin, $user)) {
+            return $response->notify(t('Only the owner can change the owner account.'));
         }
 
         if ($needsConfirmation && ! Confirmation::check($admin, $request->post)) {

@@ -11,13 +11,13 @@ use Expansa\Filesystem\Exceptions\OperationFailed;
 use Expansa\Http\Exceptions\ValidationFailed;
 
 /**
- * Installation state: env.php with the settings, and the owner in the "site" option, which the installer writes last.
- * env.php without the owner, e.g. copied to a server with an empty database, opens the installer with its settings.
+ * Installation state: env.php with the settings, and the "site" option, which the installer writes last.
+ * env.php without the site, e.g. copied to a server with an empty database, opens the installer with its settings.
  */
 final class Installation
 {
     /**
-     * Whether the installation finished: env.php is loaded and the database has the site owner.
+     * Whether the installation finished: env.php is loaded and the database has the site address.
      * An unreachable database throws instead of returning false, so a database failure never opens the installer.
      *
      * @param string $root Directory of env.php
@@ -27,7 +27,7 @@ final class Installation
         return self::hasEnvironment($root)
             && defined('EX_DB')
             && Db::hasTable(EX_DB['prefix'] . 'options')
-            && Option::get('site.owner.email', '') !== '';
+            && Option::get('site.url', '') !== '';
     }
 
     /**

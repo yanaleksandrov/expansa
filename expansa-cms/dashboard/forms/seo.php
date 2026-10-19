@@ -148,13 +148,14 @@ return Expansa\Builders\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'This field updates the tagline in the general settings.' ),
+							'instruction' => t( 'In a few words, explain what this site is about.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'value' => (string) Option::get( 'site.tagline' ),
+								'value'       => (string) Option::get( 'site.tagline' ),
+								'placeholder' => t( 'e.g. Just another Expansa site' ),
 							],
 						],
 						[

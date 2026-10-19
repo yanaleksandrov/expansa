@@ -98,8 +98,8 @@ final class SystemService
         $hasEnvironment = Installation::hasEnvironment();
         $this->validateInstallInput($request->post, $hasEnvironment);
 
-        $protocol = (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') ? 'https://' : 'http://';
-        $siteUrl  = $protocol . $_SERVER['SERVER_NAME'];
+        // the host with its port, as CanonicalHost compares it; SERVER_NAME may differ from it
+        $siteUrl = $request->root;
 
         [$site, $userdata, $database, $smtp] = Safe::data($request->post, [
             'site.name'        => 'text',
@@ -154,11 +154,11 @@ final class SystemService
             }
 
             // roles are not mass-assignable; the "register" phase that adds them does not run before install
-            $user->roles = ['admin'];
+            $user->roles = [User::ROLE_OWNER];
             $user->save();
 
-            // the owner marks the installation as complete, see Installation::isComplete()
-            Option::update('site', $site + ['owner' => ['email' => $user->email]]);
+            // the site marks the installation as complete, see Installation::isComplete()
+            Option::update('site', $site);
 
             // the Mail tab of the settings edits it later
             Option::update('mail', Mailer::normalize($smtp + ['encryption' => (int) $smtp['port'] === 587 ? 'tls' : 'ssl']));
