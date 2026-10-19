@@ -9,6 +9,7 @@ use App\Post\Status;
 use App\Post\Type;
 use App\Tables\Posts;
 use Expansa\Facades\Db;
+use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 use Expansa\Http\Enums\Notice;
 use Expansa\Http\Request;
@@ -19,7 +20,12 @@ final class PostService
     /**
      * Columns the editor of a post sends.
      */
-    private const array FIELDS = ['title', 'content', 'slug', 'parent_id', 'status', 'discussion', 'password'];
+    private const array FIELDS = ['title', 'content', 'slug', 'parent_id', 'author_id', 'status', 'discussion', 'password'];
+
+    /**
+     * Number of users the author select of the editor gets per search.
+     */
+    private const int AUTHORS_LIMIT = 20;
 
     /**
      * Create a post from the editor of a new one and open its editor.
@@ -53,7 +59,49 @@ final class PostService
     }
 
     /**
-     * Save a post from its editor: the title, content, slug, parent, status, discussion and password.
+     * Find the users for the author select of the editor, the ones whose roles have Post::AUTHOR_PERMISSION,
+     * by the login or the display name, sorted by the name; the first ones for an empty search.
+     *
+     * @param Request  $request  POST: `s`, the text of the search.
+     * @param Response $response
+     * @return Response JSON `options`: `value` is the user ID, `text` the name.
+     */
+    public function authors(Request $request, Response $response): Response
+    {
+        $roles = Role::withPermission(Post::AUTHOR_PERMISSION);
+        if ($roles === []) {
+            return $response->json(['options' => []]);
+        }
+
+        // the `roles` column is a JSON list, a role is matched with its quotes
+        $where = [
+            'deleted_at' => null,
+            'roles[~]'   => array_map(fn (string $role) => '"' . $role . '"', $roles),
+            'ORDER'      => ['showname' => 'ASC'],
+            'LIMIT'      => self::AUTHORS_LIMIT,
+        ];
+
+        $search = $request->getString('s');
+        if ($search !== '') {
+            $where['OR'] = [
+                'login[~]'    => $search,
+                'showname[~]' => $search,
+            ];
+        }
+
+        $options = array_map(
+            fn (array $user) => [
+                'value' => (string) $user['id'],
+                'text'  => $user['showname'] ?: $user['login'],
+            ],
+            Db::select('users', ['id [Int]', 'login', 'showname'], $where) ?: []
+        );
+
+        return $response->json(['options' => $options]);
+    }
+
+    /**
+     * Save a post from its editor: the title, content, slug, parent, author, status, discussion and password.
      *
      * @param Request  $request  POST: `post-type`, `id` and the changed columns.
      * @param Response $response

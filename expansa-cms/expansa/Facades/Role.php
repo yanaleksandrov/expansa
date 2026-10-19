@@ -17,6 +17,7 @@ use Expansa\Patterns\Facade;
  * @method static \Expansa\Access\Roles grant(string $role, array|string $permissions)
  * @method static \Expansa\Access\Roles revoke(string $role, array|string $permissions)
  * @method static bool  hasPermission(string $role, string $permission)
+ * @method static string[] withPermission(string $permission)
  * @method static bool  has(?object $subject, string $permission)
  */
 class Role extends Facade

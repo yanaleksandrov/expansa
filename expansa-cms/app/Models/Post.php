@@ -27,6 +27,11 @@ class Post
 {
     use HasSoftDeletes;
 
+    /**
+     * Permission a user needs to be the author of an entry.
+     */
+    public const string AUTHOR_PERMISSION = 'types_edit';
+
     public function __construct(
 
         /**
@@ -333,7 +338,7 @@ class Post
     /**
      * Update the given columns of the post and, for a public type, its slug; other columns keep their values.
      *
-     * @param array<string, mixed> $args `title`, `content`, `parent_id`, `status`, `discussion`, `password`, `slug`.
+     * @param array<string, mixed> $args `title`, `content`, `parent_id`, `author_id`, `status`, `discussion`, `password`, `slug`.
      * @return bool False when nothing was saved, e.g. the slug is taken.
      */
     public function update(array $args): bool
@@ -347,12 +352,21 @@ class Post
             'title'      => 'text',
             'content'    => 'markup',
             'parent_id'  => 'absint:0',
+            'author_id'  => 'absint:0',
             'status'     => 'text:draft',
             'discussion' => 'text:open',
             'password'   => 'text',
         ];
 
         $data = Safe::data(array_intersect_key($args, $rules), array_intersect_key($rules, $args))->apply();
+
+        // an author who is not a user any more or may not edit entries keeps the saved one
+        if (isset($data['author_id'])) {
+            $author = $data['author_id'] > 0 ? User::find($data['author_id']) : null;
+            if (! $author instanceof User || ! $author->can(self::AUTHOR_PERMISSION)) {
+                unset($data['author_id']);
+            }
+        }
 
         // a parent that would make a loop or is not allowed for the type keeps the saved one
         if (isset($data['parent_id']) && ! $this->canHaveParent($data['parent_id'])) {

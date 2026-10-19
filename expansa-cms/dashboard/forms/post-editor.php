@@ -27,6 +27,9 @@ foreach ($parents as $id => $title) {
 // the discussion and the activity tabs show the same comments
 $comments = Comment::getByPost($post->type, $post->id);
 
+// the author select is written by hand, not by Form::view(): its script is connected here
+Form::assets('select', 'select');
+
 /**
  * Post editor: the bar with the way back and the public page over the tabs, the title, slug and content
  * in the main tab, the discussion in its own one, the publishing options and details aside.
@@ -359,7 +362,7 @@ return Form::enqueue(
                         ];
                         ?>
                         <h4 class="post-editor-eyebrow"><?php echo t('Details'); ?></h4>
-                        <dl class="post-editor-props" u-data="{status: <?php echo htmlspecialchars(json_encode($post->status)); ?>}">
+                        <dl class="post-editor-props" u-data="{status: <?php echo htmlspecialchars(json_encode($post->status)); ?>, ajax: null}" @load="ajax = $ajax">
                             <dt><i class="ph ph-circle-dashed"></i><?php echo t('Status'); ?></dt>
                             <dd>
                                 <select class="post-editor-pill" name="status" u-prop="status" aria-label="<?php echo t_attr('Status'); ?>">
@@ -386,11 +389,13 @@ return Form::enqueue(
                             </dd>
                             <dt><i class="ph ph-user"></i><?php echo t('Author'); ?></dt>
                             <dd>
-                                <?php if ($author) : ?>
-                                    <a class="post-editor-pill" href="<?php echo url('dashboard/profile?id=' . $post->authorId); ?>"><?php echo htmlspecialchars($author); ?></a>
-                                <?php else : ?>
-                                    <span class="post-editor-pill is-empty"><?php echo t('No author'); ?></span>
-                                <?php endif; ?>
+                                <select class="field field--xs" name="author_id" aria-label="<?php echo t_attr('Author'); ?>" u-select="{showSearch: true, events: {search: (text) => ajax.post('post/authors', {s: text}, null, {clearErrors: false})}}">
+                                    <?php if ($author) : ?>
+                                        <option value="<?php echo $post->authorId; ?>" selected><?php echo htmlspecialchars($author); ?></option>
+                                    <?php else : ?>
+                                        <option value="" selected><?php echo t('No author'); ?></option>
+                                    <?php endif; ?>
+                                </select>
                             </dd>
                             <?php if ($post->id > 0) : ?>
                                 <dt><i class="ph ph-chat-circle-text"></i><?php echo t('Comments'); ?></dt>

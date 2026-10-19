@@ -145,6 +145,17 @@ final class Roles implements Permissions
     }
 
     /**
+     * Get the names of the roles that have a permission, e.g. to find the users who have it.
+     *
+     * @param string $permission
+     * @return string[]
+     */
+    public function withPermission(string $permission): array
+    {
+        return array_keys(array_filter($this->roles, fn (array $role) => in_array($permission, $role['permissions'], true)));
+    }
+
+    /**
      * Check if any role of the subject has the permission; other subjects and guests have none.
      *
      * @param object|null $subject

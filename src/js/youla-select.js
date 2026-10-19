@@ -1973,9 +1973,18 @@
                 settings.hideSelected = true;
                 settings.closeOnSelect = false;
             }
-            Object.assign(settings, output && typeof output === "object" ? output : {});
+            const {events: userEvents = {}, ...options} = output && typeof output === "object" ? output : {};
+            const events = {
+                ...userEvents
+            };
+            Object.assign(settings, options);
+            if (typeof events.search === "function") {
+                const search = events.search;
+                events.search = (...args) => Promise.resolve(search(...args)).then(response => Array.isArray(response) ? response : response?.options ?? [], error => error?.name === "AbortError" ? new Promise(() => {}) : Promise.reject(error));
+            }
             const settingsKey = JSON.stringify(settings);
             if (el._x_slimSelect && el._x_slimSelectSettings === settingsKey) {
+                Object.assign(el._x_slimSelect.events, events);
                 return;
             }
             el._x_slimSelectSettings = settingsKey;
@@ -2025,7 +2034,8 @@
                     slim = el._x_slimSelect = new SlimSelect({
                         settings: settings,
                         select: el,
-                        data: data
+                        data: data,
+                        events: events
                     });
                 } finally {
                     delete el.dispatchEvent;
