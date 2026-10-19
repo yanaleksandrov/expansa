@@ -276,15 +276,6 @@ final class Menus
                     'parent_id'    => 'translation',
                 ],
                 [
-                    'id'           => 'translations-settings',
-                    'url'          => 'multilingual-settings',
-                    'title'        => t('Settings'),
-                    'capabilities' => ['manage_options'],
-                    'icon'         => '',
-                    'position'     => 30,
-                    'parent_id'    => 'translation',
-                ],
-                [
                     'id'           => 'settings',
                     'url'          => 'settings',
                     'title'        => t('Settings'),
@@ -329,12 +320,12 @@ final class Menus
                     'parent_id'    => 'settings',
                 ],
                 [
-                    'id'           => 'permalinks',
-                    'url'          => 'permalinks',
-                    'title'        => t('Permalinks'),
+                    'id'           => 'multilingualism',
+                    'url'          => 'multilingualism',
+                    'title'        => t('Multilingual'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',
-                    'position'     => 50,
+                    'position'     => 60,
                     'parent_id'    => 'settings',
                 ],
             ]

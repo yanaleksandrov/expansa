@@ -1063,7 +1063,7 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Slug of an entry, the `slug` form template, configured in `u-data="{ ...slug, base, from, parent, bases, synced }"`.
+     * Slug of an entry, the `slug` form template, configured in `u-data="{ ...slug, base, suffix, from, parent, bases, synced }"`.
      * The server makes it from the source field named by `from` while `synced` and from the typed text,
      * 500ms after the last input. Enter keeps it without submitting, Escape brings back the value it had,
      * an empty one is made from the source again. Values set by the server come with an untrusted
@@ -1074,6 +1074,7 @@ document.addEventListener('youla:init', ()=> {
     Youla.data('slug', (root) => ({
         value: root.querySelector?.('.slug-line input')?.value || '',
         base: '',
+        suffix: '',
         from: '',
         parent: '',
         bases: {},
@@ -1120,7 +1121,7 @@ document.addEventListener('youla:init', ()=> {
             },
             // the URL as shown, for the links to the page outside the field, e.g. in the breadcrumbs
             ':data-url'() {
-                const url = this.base + this.value;
+                const url = this.base + this.value + this.suffix;
                 root.dispatchEvent(new CustomEvent('slug-url', { detail: url, bubbles: true }));
 
                 return url;

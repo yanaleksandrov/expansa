@@ -884,6 +884,7 @@ document.addEventListener('youla:init', () => {
     Youla.data('slug', root => ({
         value: root.querySelector?.('.slug-line input')?.value || '',
         base: '',
+        suffix: '',
         from: '',
         parent: '',
         bases: {},
@@ -921,7 +922,7 @@ document.addEventListener('youla:init', () => {
                 }
             },
             ':data-url'() {
-                const url = this.base + this.value;
+                const url = this.base + this.value + this.suffix;
                 root.dispatchEvent(new CustomEvent('slug-url', {
                     detail: url,
                     bubbles: true

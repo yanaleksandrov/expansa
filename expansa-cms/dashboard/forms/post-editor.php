@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
 use App\Support\Activity;
+use App\Support\Permalinks;
 use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
 
@@ -13,12 +14,13 @@ $post = Page::post((string) filter_input(INPUT_GET, 'type') ?: 'pages', filter_i
 $type = Type::get($post->type);
 $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
 
-// the parents to choose in the details and the URL of each, the base of the slug
+// the parents to choose in the details and the URL of each, the base of the slug by the permalink structure
 $parents = $type->hierarchical ? Page::parents($post) : [];
 $paths   = $post::paths($post->type, array_keys($parents));
+$around  = Permalinks::around($paths[$post->parentId] ?? '', $post->id, $post->type);
 $bases   = [];
 foreach ($parents as $id => $title) {
-    $bases[$id] = rtrim(url($paths[$id] ?? ''), '/') . '/';
+    $bases[$id] = Permalinks::around($paths[$id] ?? '', $post->id, $post->type)[0];
 }
 
 /**
@@ -51,7 +53,7 @@ return Form::enqueue(
             'type'     => 'custom',
             'callback' => function () use ($post, $type) {
                 $back  = url('dashboard/edit?table=' . $type->key);
-                $path  = $post->path();
+                $url   = $post->url();
                 $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? htmlspecialchars($post->title) : $type->labelEdit);
                 ?>
                 <div class="post-editor-head">
@@ -61,8 +63,8 @@ return Form::enqueue(
                     <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
                         <a href="<?php echo $back; ?>"><?php echo $type->labelNamePlural; ?></a>
                         <i class="ph ph-caret-right"></i>
-                        <?php if ($path !== '') : ?>
-	                        <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
+                        <?php if ($url !== '') : ?>
+	                        <a href="<?php echo $url; ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
                         <?php else : ?>
                             <span aria-current="page"><?php echo $title; ?></span>
                         <?php endif; ?>
@@ -118,10 +120,11 @@ return Form::enqueue(
 			            'conditions'  => [],
 			            'options'     => [
 				            'from'   => 'title',
-				            'base'   => $bases[$post->parentId] ?? rtrim(url(), '/') . '/',
+				            'base'   => $around[0],
+				            'suffix' => $around[1],
 				            'parent' => 'parent_id',
 				            'bases'  => $bases,
-				            'link'   => $post->slug !== '' ? url($post->path()) : '',
+				            'link'   => $post->slug !== '' ? $post->url() : '',
 			            ],
 			            'attributes'  => [
 				            'value'       => $post->slug,

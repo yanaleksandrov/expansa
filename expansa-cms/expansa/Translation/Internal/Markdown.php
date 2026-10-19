@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Expansa\Translation\Internal;
 
 /**
- * Regex-based subset of Markdown for translations: headers, quotes, bold, italic, images and links.
+ * Regex-based subset of Markdown for translations: headers, quotes, bold, italic, code, images and links.
  * Links allow only URL schemes without scripts.
  *
  * @internal
@@ -23,12 +23,24 @@ final class Markdown
     public static function render(string $text): string
     {
         // most translations are plain text: skip the regular expressions
-        if (strpbrk($text, '#>*_[') === false && ! str_contains($text, '&gt;')) {
+        if (strpbrk($text, '#>*_[`') === false && ! str_contains($text, '&gt;')) {
             return trim($text);
         }
 
         // each expression runs only when its marker is in the text
         $text = "\n" . $text . "\n";
+
+        // code is set aside so that the expressions below leave its text as is
+        $codes = [];
+        if (str_contains($text, '`')) {
+            $text = preg_replace_callback('/`([^`\n]+)`/', static function (array $matches) use (&$codes): string {
+                $key = "\x1A" . count($codes) . "\x1A";
+
+                $codes[$key] = '<code>' . $matches[1] . '</code>';
+
+                return $key;
+            }, $text);
+        }
 
         if (str_contains($text, '#')) {
             $text = self::headers($text);
@@ -58,7 +70,7 @@ final class Markdown
             );
         }
 
-        return trim($text);
+        return trim(strtr($text, $codes));
     }
 
     /**

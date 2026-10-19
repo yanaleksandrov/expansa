@@ -397,6 +397,11 @@ class Option extends Model
                 'model'   => \App\Support\Ai::MODEL,
                 'schemas' => 1,
             ],
+            'multilingual'   => [
+                'languages' => [],
+                'deepl'     => ['key' => ''],
+                'google'    => ['key' => ''],
+            ],
             'mail'           => [
                 'host'       => '',
                 'port'       => 465,

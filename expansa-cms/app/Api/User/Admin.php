@@ -8,6 +8,7 @@ use App\Models\User;
 use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Db;
+use Expansa\Facades\Role;
 use Expansa\Facades\Session;
 
 /**
@@ -47,6 +48,60 @@ final class Admin
     public static function isProtected(User $admin, User $user): bool
     {
         return $user->id !== $admin->id && $user->hasRole(User::ROLE_OWNER);
+    }
+
+    /**
+     * Roles an administrator may give: every registered one, the owner role only by an owner.
+     *
+     * @param User $admin
+     * @return array<string, string> Names by role.
+     */
+    public static function assignableRoles(User $admin): array
+    {
+        $roles = array_map(static fn (array $role) => $role['name'], Role::all());
+
+        return $admin->hasRole(User::ROLE_OWNER) ? $roles : array_diff_key($roles, [User::ROLE_OWNER => true]);
+    }
+
+    /**
+     * Check a role an administrator gives to an account, a new one or a saved one.
+     *
+     * @param User      $admin
+     * @param string    $role
+     * @param User|null $user  Saved account, null for a new one.
+     * @return string|null Why it is refused, null when it may be given.
+     */
+    public static function refuseRole(User $admin, string $role, ?User $user = null): ?string
+    {
+        if (! isset(self::assignableRoles($admin)[$role])) {
+            return Role::hasRole($role) ? t('Only the owner can give the owner role.') : t('That role is not registered.');
+        }
+
+        // an administrator who takes away their own role may lose the way back to this page
+        if ($user?->id === $admin->id && ! $admin->hasRole(User::ROLE_OWNER)) {
+            return t('You cannot change your own role.');
+        }
+
+        $isLastOwner = $user?->hasRole(User::ROLE_OWNER) && $role !== User::ROLE_OWNER
+            && Db::count('users', ['roles[~]' => '"' . User::ROLE_OWNER . '"']) <= 1;
+
+        return $isLastOwner ? t('The site needs an owner: give the owner role to another user first.') : null;
+    }
+
+    /**
+     * Give an account one role instead of its roles, after refuseRole().
+     *
+     * @param User   $admin
+     * @param User   $user
+     * @param string $role
+     * @return void
+     */
+    public static function setRole(User $admin, User $user, string $role): void
+    {
+        $user->roles = [$role];
+        $user->save();
+
+        Events::record($user, 'role_changed', ['role' => $role, 'by' => $admin->login]);
     }
 
     /**

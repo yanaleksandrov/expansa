@@ -114,6 +114,7 @@ final class Events
             'recovery_codes_new'    => t('New recovery codes'),
             'recovery_code_used'    => t('Recovery code used'),
             'account_created'       => t('Account created'),
+            'role_changed'          => t('Role changed'),
             'account_enabled'       => t('Account turned on'),
             'account_disabled'      => t('Account disabled'),
             'impersonation_started' => t('Signed in as another user'),

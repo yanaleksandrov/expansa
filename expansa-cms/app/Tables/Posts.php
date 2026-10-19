@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
+use App\Support\Permalinks;
 use Expansa\Builders\Table;
 use Expansa\Facades\Db;
 use PDO;
@@ -240,7 +241,7 @@ final class Posts extends Table
 
         if ($this->type->public && $slug !== '') {
             $actions[] = [
-                'href'       => url($slug),
+                'href'       => url(Permalinks::post($slug, $id, $this->type->key)),
                 'class'      => 't-muted',
                 'title'      => t('View'),
                 'attributes' => ['target' => '_blank'],

@@ -454,9 +454,9 @@ class Comment extends Model
             return '';
         }
 
-        $path = $this->getPost()?->path() ?? '';
+        $url = $this->getPost()?->url() ?? '';
 
-        return $path === '' ? '' : url($path) . '#comment-' . $this->id;
+        return $url === '' ? '' : $url . '#comment-' . $this->id;
     }
 
     /**

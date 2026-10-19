@@ -453,6 +453,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_edit',
             'private_types_delete',
             'manage_comments',
+            'translate',
             'manage_options',
             'manage_update',
             'manage_import',
@@ -487,6 +488,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_edit',
             'private_types_delete',
             'manage_comments',
+            'translate',
         ],
     );
 

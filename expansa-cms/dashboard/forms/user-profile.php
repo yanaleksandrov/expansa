@@ -1,5 +1,6 @@
 <?php
 
+use App\Api\User\Admin;
 use App\Api\User\Confirmation;
 use App\Api\User\Events;
 use App\Api\User\Identities;
@@ -11,6 +12,7 @@ use App\Dashboard\Pages\Profile;
 use App\Models\Option;
 use App\Models\User;
 use App\Support\Passwords;
+use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
@@ -19,6 +21,43 @@ use Expansa\Facades\Role;
 $isNew  = isset($_GET['new']);
 $user   = Profile::user(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0, $isNew);
 $isSelf = ! $isNew && $user->id === User::current()?->id;
+
+// the role is given by those who manage the users; their own one only by an owner, see Admin::refuseRole()
+$roles     = Admin::assignableRoles(User::current());
+$canManage = Access::allows(User::current(), 'users_edit');
+$roleGroup = $isNew || ! $canManage ? [] : [
+    [
+        'type'   => 'group',
+        'name'   => 'role',
+        'label'  => t('Role'),
+        'fields' => [
+            [
+                'type'        => 'select',
+                'name'        => 'role',
+                'error'       => 'role',
+                'label'       => t('Role'),
+                'class'       => '',
+                'label_class' => '',
+                'reset'       => 0,
+                'before'      => '',
+                'after'       => '',
+                'instruction' => $isSelf && ! User::current()->hasRole(User::ROLE_OWNER)
+                    ? t('Only the owner can change your role.')
+                    : t('What the user can do on the site, see the Roles tab of the settings.'),
+                'tooltip'     => '',
+                'copy'        => 0,
+                'validator'   => '',
+                'conditions'  => [],
+                'attributes'  => [
+                    'value'    => $user->roles[0] ?? '',
+                    'disabled' => $isSelf && ! User::current()->hasRole(User::ROLE_OWNER),
+                ],
+                // a role the administrator can't give stays shown on the account that has it
+                'options'     => $roles + array_map(static fn (string $role) => Role::get($role)['name'] ?? $role, array_combine($user->roles, $user->roles)),
+            ],
+        ],
+    ],
+];
 
 /**
  * Profile page: the account of the current user, or of another one by `id` for an administrator,
@@ -101,6 +140,7 @@ $uid = Form::enqueue(
                         ],
                     ],
                 ],
+                ...$roleGroup,
                 [
                     'type'    => 'group',
                     'name'    => 'name',
@@ -785,7 +825,7 @@ if ($isNew) {
                                     'u-prop' => 'role',
                                     'value'  => Option::get('users.role'),
                                 ],
-                                'options'     => array_map(static fn (array $role) => $role['name'], Role::all()),
+                                'options'     => $roles,
                             ],
                             [
                                 'type'        => 'password',

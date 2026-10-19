@@ -151,7 +151,7 @@ return Expansa\Builders\Form::enqueue(
 								'u-prop' => 'users.role',
 								'value'  => Option::get( 'users.role' ),
 							],
-							'options'     => array_map( static fn ( array $role ) => $role['name'], Role::all() ),
+							'options'     => array_map( static fn ( array $role ) => $role['name'], array_diff_key( Role::all(), [ App\Models\User::ROLE_OWNER => true ] ) ),
 						],
 					],
 				],
