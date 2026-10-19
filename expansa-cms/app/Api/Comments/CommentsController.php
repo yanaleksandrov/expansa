@@ -48,6 +48,12 @@ final readonly class CommentsController
     }
 
     #[Can('manage_comments')]
+    public function status(Request $request, Response $response): Response
+    {
+        return $this->service->status($request, $response);
+    }
+
+    #[Can('manage_comments')]
     public function bulk(Request $request, Response $response): Response
     {
         return $this->service->bulk($request, $response);

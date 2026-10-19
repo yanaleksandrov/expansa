@@ -1681,5 +1681,10 @@
     "Role changed": "Роль изменена",
     "Only the owner can change your role.": "Вашу роль может изменить только владелец.",
     "What the user can do on the site, see the Roles tab of the settings.": "Что пользователь может делать на сайте — см. вкладку «Роли» в настройках.",
-    "Clear search": "Очистить поиск"
+    "Clear search": "Очистить поиск",
+    "Approve": "Одобрить",
+    "Reject": "Отклонить",
+    "Comment status: :status": "Статус комментария: :status",
+    "action\u0004Spam": "В спам",
+    "Approved comments": "Одобренные комментарии"
 }

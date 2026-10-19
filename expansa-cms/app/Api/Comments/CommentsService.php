@@ -72,7 +72,7 @@ final class CommentsService
         }
 
         $comment->delete();
-        $response->notify(t('Comment deleted'));
+        $response = $response->notify(t('Comment deleted'));
 
         if (empty($request->post['stay'])) {
             $toPost = ($request->post['from'] ?? '') === 'post' && Type::get($comment->postType) !== null;
@@ -147,7 +147,7 @@ final class CommentsService
         }
 
         $html = view('parts/post-comment', ['comment' => $comment, 'depth' => $parent instanceof Comment ? $parent->depth() + 1 : 1])->render();
-        $response->update('#post-comments-count', self::count($post->type, $post->id));
+        $response = $response->update('#post-comments-count', self::count($post->type, $post->id));
         if ($parent !== null) {
             return $response
                 ->append("#post-comment-replies-$parent->id", $html)
@@ -228,6 +228,45 @@ final class CommentsService
         return $response
             ->notify(t('Reply sent'))
             ->value('#comment-reply-text', '');
+    }
+
+    /**
+     * Change the status of a comment by a quick action. With `stay`, from the post editor, the comment is
+     * rendered again in its place with the counts of the post; the table reloads its rows by itself.
+     *
+     * @param Request  $request  `id`, `status` and optional `stay`.
+     * @param Response $response
+     * @return Response Notice, and the comment in the post editor.
+     */
+    public function status(Request $request, Response $response): Response
+    {
+        $comment  = Comment::find((int) ($request->post['id'] ?? 0));
+        $status   = (string) ($request->post['status'] ?? '');
+        $statuses = Comment::statuses();
+        if (! $comment instanceof Comment || ! isset($statuses[$status])) {
+            return $response->notify(t('Comment not found'));
+        }
+
+        $updated = $comment->update(['status' => $status]);
+        if (! $updated instanceof Comment) {
+            return $response->notify(t('Could not update the comment. Check the fields.'));
+        }
+
+        $response = $response->notify(t('Comment status: :status', $statuses[$status]));
+        if (empty($request->post['stay'])) {
+            return $response;
+        }
+
+        $html = view('parts/post-comment', [
+            'comment' => $updated,
+            'replies' => Comment::groupByParent(Comment::getByPost($updated->postType, (int) $updated->postId)),
+            'isOpen'  => Post::get($updated->postType, (int) $updated->postId)?->isDiscussionOpen() ?? false,
+            'depth'   => $updated->depth(),
+        ])->render();
+
+        return $response
+            ->replace("#post-comment-$updated->id", $html)
+            ->update('#post-comments-count', self::count($updated->postType, (int) $updated->postId));
     }
 
     /**

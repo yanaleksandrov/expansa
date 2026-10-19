@@ -175,6 +175,25 @@ class Comment extends Model
     }
 
     /**
+     * Get the quick moderation actions of a status: an approved comment is rejected or marked as spam,
+     * any other one is approved.
+     *
+     * @param string $status Current status.
+     * @return array<string, array{label: string, icon: string}> Actions by the status they set.
+     */
+    public static function moderationActions(string $status): array
+    {
+        if ($status !== self::STATUS_APPROVED) {
+            return [self::STATUS_APPROVED => ['label' => t('Approve'), 'icon' => 'ph ph-check']];
+        }
+
+        return [
+            self::STATUS_REJECTED => ['label' => t('Reject'), 'icon' => 'ph ph-prohibit'],
+            self::STATUS_SPAM     => ['label' => t('Spam', context: 'action'), 'icon' => 'ph ph-warning-octagon'],
+        ];
+    }
+
+    /**
      * Retrieves a comment by a given field.
      *
      * @param int|string $value A value for $by field. A comment ID.

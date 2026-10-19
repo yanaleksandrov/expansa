@@ -123,6 +123,24 @@
       }
     }
 
+    // a quick action of the row while its request runs
+    a.is-loading {
+      pointer-events: none;
+
+      &::after {
+        content: '';
+        display: inline-block;
+        width: 0.75em;
+        height: 0.75em;
+        margin-inline-start: 0.25rem;
+        vertical-align: middle;
+        border: 1px solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.5s linear infinite;
+      }
+    }
+
     @media (max-width: 1024px) {
       padding-inline: 1rem;
     }

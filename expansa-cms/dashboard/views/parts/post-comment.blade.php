@@ -5,7 +5,7 @@ use App\Models\User;
 
 /**
  * Comment of the post editor: the avatar with the initials, the author, the date, the status
- * when it is not approved, the text and its replies below; shared by the Comments tab and the API
+ * when it is not approved, the quick moderation actions, the text and its replies below; shared by the Comments tab and the API
  * that adds a comment. Reply opens a field under the comment that sends to `comments/add`, closing the
  * other fields of a reply and the new comment one until it is cancelled or sent.
  *
@@ -46,6 +46,11 @@ $payload  = json_encode([
             @endif
             @if ($canEdit)
                 <span class="post-comment-tools ml-auto">
+                    @foreach (Comment::moderationActions($comment->status) as $status => $action)
+                        <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ $action['label'] }}" @click="$ajax.post('comments/status', {id: {{ $comment->id }}, status: '{{ $status }}', stay: 1})">
+                            <i class="{{ $action['icon'] }}"></i>
+                        </button>
+                    @endforeach
                     <a class="btn btn--xs btn--icon t-muted" href="{{ url('dashboard/comment?id=' . $comment->id . '&from=post') }}" title="{{ t('Edit Comment') }}" target="_blank">
                         <i class="ph ph-pencil-simple"></i>
                     </a>

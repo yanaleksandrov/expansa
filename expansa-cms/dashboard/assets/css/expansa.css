@@ -2750,6 +2750,21 @@ body.is-unsaved .expansa-search-btn {
   opacity: 1;
   visibility: visible;
 }
+.table .table-row a.is-loading {
+  pointer-events: none;
+}
+.table .table-row a.is-loading::after {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  height: 0.75em;
+  margin-inline-start: 0.25rem;
+  vertical-align: middle;
+  border: 1px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border 0.5s linear infinite;
+}
 @media (max-width: 1024px) {
   .table .table-row {
     padding-inline: 1rem;

@@ -314,13 +314,18 @@
                     if (!element && !GLOBAL_ACTIONS.includes(action)) {
                         return;
                     }
-                    setTimeout(() => {
+                    const run = () => {
                         try {
                             runFragmentAction(action, element, value, config);
                         } catch (error) {
                             console.error(`Youla.js: "$ajax" fragment action "${action}" failed.`, error);
                         }
-                    }, Number(delay) || 0);
+                    };
+                    if (delay === undefined) {
+                        run();
+                    } else {
+                        setTimeout(run, Number(delay) || 0);
+                    }
                 });
             });
         }
