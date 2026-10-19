@@ -192,17 +192,28 @@ final class Comments extends Table
 
     public function headData(): array
     {
-        $counts   = $this->counts();
-        $statuses = ['' => t('All') . ' (' . array_sum($counts) . ')'];
+        $counts = $this->counts();
+        $parts  = [
+            '' => [
+                'label' => t('All') . ' (' . array_sum($counts) . ')',
+                'query' => [],
+            ],
+        ];
 
         foreach (Comment::statuses() as $key => $label) {
-            $statuses[$key] = $label . ' (' . ($counts[$key] ?? 0) . ')';
+            $parts[$key] = [
+                'label' => $label . ' (' . ($counts[$key] ?? 0) . ')',
+                'query' => ['status' => $key],
+            ];
         }
 
         $empty = '';
         $trash = (int) Db::count('comments', ['deleted_at[!]' => null]);
         if ($trash > 0 || $this->isTrash) {
-            $statuses['trash'] = t('Trash') . " ($trash)";
+            $parts['trash'] = [
+                'label' => t('Trash') . " ($trash)",
+                'query' => ['view' => 'trash'],
+            ];
         }
 
         if ($trash > 0 && $this->isTrash) {
@@ -210,11 +221,11 @@ final class Comments extends Table
         }
 
         return [
-            'title'    => t('Comments'),
-            'statuses' => $statuses,
-            'status'   => $this->isTrash ? 'trash' : $this->status,
-            'find'     => t('Search comments'),
-            'empty'    => $empty,
+            'title' => t('Comments'),
+            'parts' => $parts,
+            'part'  => $this->isTrash ? 'trash' : $this->status,
+            'find'  => t('Search comments'),
+            'empty' => $empty,
         ];
     }
 

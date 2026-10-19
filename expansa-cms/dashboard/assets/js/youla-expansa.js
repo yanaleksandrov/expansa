@@ -594,21 +594,13 @@ document.addEventListener('youla:init', () => {
                 const options = this.fields[row.field]?.options || {};
                 return row.values.length > 2 ? selected.replace(':count', row.values.length) : row.values.map(value => options[value] ?? value).join(', ');
             },
-            setStatus(value) {
+            setPart(key, parts) {
+                const names = new Set(Object.values(parts).flatMap(Object.keys));
+                this.setQuery(Object.fromEntries([ ...names ].map(name => [ name, parts[key]?.[name] ?? '' ])));
+            },
+            setQuery(values) {
                 const params = new URLSearchParams(window.location.search);
-                const reload = value === 'trash' || params.get('view') === 'trash';
-                params.delete('view');
-                params.delete('status');
-                params.delete('page');
-                if (value === 'trash') {
-                    params.set('view', 'trash');
-                } else if (value) {
-                    params.set('status', value);
-                }
-                if (reload) {
-                    window.location.search = this.query(params);
-                    return;
-                }
+                Object.entries(values).forEach(([name, value]) => value === '' || value == null ? params.delete(name) : params.set(name, value));
                 window.history.replaceState(null, '', '?' + this.query(params));
                 this.goToPage(1);
             },
@@ -640,7 +632,7 @@ document.addEventListener('youla:init', () => {
                     el: root
                 }).then(() => {
                     this.resetAll(root);
-                    [ '.table-body', '.table-header-pagination' ].map(selector => root.querySelector(selector)).forEach(el => el && root.__x.initialize(el));
+                    [ '.table-body', '.table-header' ].map(selector => root.querySelector(selector)).forEach(el => el && root.__x.initialize(el));
                 });
             }
         };

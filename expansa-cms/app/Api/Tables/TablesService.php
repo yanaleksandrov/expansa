@@ -12,11 +12,13 @@ use Expansa\Support\Arr;
 final class TablesService
 {
     /**
-     * Render the rows of a page of a table of the `edit` page filtered by the request, and its pagination.
+     * Render the rows of a page of a table of the `edit` page filtered by the request, and the bar of its header:
+     * the tools and the bulk actions follow the part of the list, e.g. the trash, the pagination the rows.
      *
-     * @param Request  $request  The query of the page: `table`, `view`, `status`, `s`, `page` and the filters, see Table::activeFilters().
+     * @param Request  $request  The query of the page: `table`, the parameters of the parts of the list, `s`, `page`
+     *                           and the filters, see Table::headData() and Table::activeFilters().
      * @param Response $response
-     * @return Response The rows and the pagination in place of the current ones.
+     * @return Response The rows and the bar in place of the current ones.
      */
     public function filter(Request $request, Response $response): Response
     {
@@ -24,8 +26,14 @@ final class TablesService
             ->filterBy($request->post)
             ->paginate($request->getInt('page', 1));
 
+        $bar = view('parts/table/header-bar', [
+            ...$table->headData(),
+            'bulk'       => $table->bulk(),
+            'pagination' => view('parts/table/pagination', ['table' => $table, 'query' => Arr::exclude($request->post, ['nonce'])])->render(),
+        ]);
+
         return $response
             ->update('.table-body', view('parts/table/table-row', ['table' => $table])->render())
-            ->update('.table-header-pagination', view('parts/table/pagination', ['table' => $table, 'query' => Arr::exclude($request->post, ['nonce'])])->render());
+            ->replace('.table-header', $bar->render());
     }
 }

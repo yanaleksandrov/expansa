@@ -105,19 +105,27 @@ final class Users extends Table
         $canCreate = Access::allows(User::current(), 'users_edit');
         $counts    = Db::query('SELECT status, COUNT(*) FROM <users> GROUP BY status')
             ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
-        $statuses  = ['' => t('All') . ' (' . array_sum($counts) . ')'];
+        $parts     = [
+            '' => [
+                'label' => t('All') . ' (' . array_sum($counts) . ')',
+                'query' => [],
+            ],
+        ];
 
         foreach (self::statuses() as $key => $label) {
-            $statuses[$key] = $label . ' (' . (int) ($counts[$key] ?? 0) . ')';
+            $parts[$key] = [
+                'label' => $label . ' (' . (int) ($counts[$key] ?? 0) . ')',
+                'query' => ['status' => $key],
+            ];
         }
 
         return [
-            'title'    => t('Users'),
-            'statuses' => $statuses,
-            'status'   => $this->status,
-            'find'     => t('Search by name, login or email'),
-            'create'   => $canCreate ? t('Add New User') : '',
-            'link'     => $canCreate ? url('dashboard/profile?new') : '',
+            'title'  => t('Users'),
+            'parts'  => $parts,
+            'part'   => $this->status,
+            'find'   => t('Search by name, login or email'),
+            'create' => $canCreate ? t('Add New User') : '',
+            'link'   => $canCreate ? url('dashboard/profile?new') : '',
         ];
     }
 

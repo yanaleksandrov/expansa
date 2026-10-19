@@ -9,9 +9,9 @@ use Expansa\Builders\Form;
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/filter.blade.php
  *
  * @var array<string, array{label: string, icon?: string, options: array}> $filters Fields of Table::filters().
- * @var array<string, string> $statuses Labels of the parts of the list by status, `trash` for the trash;
- *                                      the select shows the chosen one without a reload, the trash with one.
- * @var string                $status   Current part.
+ * @var array<string, array{label: string, query: array<string, string>}> $parts Parts of the list, see Table::headData();
+ *                                      the select opens the chosen one by its query without a reload.
+ * @var string                $part     Key of the current part.
  * @var string                $find     Placeholder of the search, applied with the filters 500ms after the typing
  *                                      as the `s` parameter and shown as a chip; no search when empty.
  *
@@ -47,18 +47,18 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                 ],
             ]);
         }
-        if ($statuses) {
+        if ($parts) {
             echo Form::view('select', [
                 'type'       => 'select',
-                'name'       => 'status',
+                'name'       => 'part',
                 'before'     => '<i class="ph ph-circle-dashed"></i>' . t('Status:'),
                 'class'      => 'field field--sm field--plain',
                 'attributes' => [
                     'u-select' => true,
-                    'value'    => $status,
-                    '@change'  => 'setStatus($el.value)',
+                    'value'    => $part,
+                    '@change'  => sprintf('setPart($el.value, %s)', json_encode(array_map(fn (array $item) => (object) ($item['query'] ?? []), $parts))),
                 ],
-                'options'    => $statuses,
+                'options'    => array_map(fn (array $item) => (string) ($item['label'] ?? ''), $parts),
             ]);
         }
         ?>

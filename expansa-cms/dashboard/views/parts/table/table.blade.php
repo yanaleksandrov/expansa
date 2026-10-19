@@ -17,16 +17,16 @@ $items   = $table->getData();
 $active  = $table->activeFilters();
 $filters = $table->filters();
 
-// a search or a status without results keeps the table, so that their fields stay to change them
+// a search or a part of the list without results keeps the table, so that their fields stay to change them
 $search = trim((string) ($_GET['s'] ?? ''));
-$status = trim((string) ($_GET['status'] ?? ''));
+$head   = $table->headData();
 ?>
-@if ($items || $active || $search !== '' || $status !== '')
+@if ($items || $active || $search !== '' || ($head['part'] ?? '') !== '')
     <div class="table" u-data="table" style="{{ $table->style }}"@if ($filters) data-fields="{{ json_encode($filters) }}" data-rows="{{ json_encode($active) }}"@endif>
         <div class="table-head">
             @if ($header ?? true)
                 <?php echo view('parts/table/header', [
-                    ...$table->headData(),
+                    ...$head,
                     'filters'    => $filters,
                     'bulk'       => $table->bulk(),
                     'pagination' => view('parts/table/pagination', ['table' => $table])->render(),

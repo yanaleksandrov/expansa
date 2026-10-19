@@ -708,24 +708,25 @@ document.addEventListener('youla:init', ()=> {
                     ? selected.replace(':count', row.values.length)
                     : row.values.map(value => options[value] ?? value).join(', ');
             },
-            // The trash has its own actions and tools in the header, so going in or out of it loads the page.
-            setStatus(value) {
+            /**
+             * Open a part of the list, see Table::headData(): its query parameters are set, those of the other parts dropped.
+             *
+             * @param {string} key
+             * @param {Object<string, Object<string, string>>} parts Query parameters of the parts by key.
+             */
+            setPart(key, parts) {
+                const names = new Set(Object.values(parts).flatMap(Object.keys));
+
+                this.setQuery(Object.fromEntries([ ...names ].map(name => [ name, parts[key]?.[name] ?? '' ])));
+            },
+            /**
+             * Set query parameters of the page, an empty value drops one, and show the list from the first page.
+             *
+             * @param {Object<string, string>} values
+             */
+            setQuery(values) {
                 const params = new URLSearchParams(window.location.search);
-                const reload = value === 'trash' || params.get('view') === 'trash';
-
-                params.delete('view');
-                params.delete('status');
-                params.delete('page');
-                if (value === 'trash') {
-                    params.set('view', 'trash');
-                } else if (value) {
-                    params.set('status', value);
-                }
-
-                if (reload) {
-                    window.location.search = this.query(params);
-                    return;
-                }
+                Object.entries(values).forEach(([ name, value ]) => value === '' || value == null ? params.delete(name) : params.set(name, value));
 
                 window.history.replaceState(null, '', '?' + this.query(params));
                 this.goToPage(1);
@@ -762,11 +763,11 @@ document.addEventListener('youla:init', ()=> {
 
                 window.history.replaceState(null, '', '?' + this.query(params));
 
-                // the API builds the table from the same query as the page; the rows and the pagination are replaced,
+                // the API builds the table from the same query as the page; the rows and the bar of the header are replaced,
                 // their bindings to this component are initialized again; from the root a new request aborts the previous one
                 this.$ajax.post('tables/filter', Object.fromEntries(params), null, { el: root }).then(() => {
                     this.resetAll(root);
-                    [ '.table-body', '.table-header-pagination' ]
+                    [ '.table-body', '.table-header' ]
                         .map(selector => root.querySelector(selector))
                         .forEach(el => el && root.__x.initialize(el));
                 });

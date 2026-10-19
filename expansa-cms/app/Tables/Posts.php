@@ -133,20 +133,31 @@ final class Posts extends Table
 
     public function headData(): array
     {
-        $counts   = $this->counts();
-        $empty    = '';
-        $statuses = ['' => t('All') . ' (' . array_sum($counts) . ')'];
+        $counts = $this->counts();
+        $empty  = '';
+        $parts  = [
+            '' => [
+                'label' => t('All') . ' (' . array_sum($counts) . ')',
+                'query' => [],
+            ],
+        ];
 
         foreach (Status::getStatuses() as $key => $label) {
             if (isset($counts[$key]) || $this->status === $key) {
-                $statuses[$key] = $label . ' (' . ($counts[$key] ?? 0) . ')';
+                $parts[$key] = [
+                    'label' => $label . ' (' . ($counts[$key] ?? 0) . ')',
+                    'query' => ['status' => $key],
+                ];
             }
         }
 
         if ($this->type->canTrash) {
             $trash = (int) Db::count($this->type->table, ['deleted_at[!]' => null]);
             if ($trash > 0 || $this->isTrash) {
-                $statuses['trash'] = t('Trash') . " ($trash)";
+                $parts['trash'] = [
+                    'label' => t('Trash') . " ($trash)",
+                    'query' => ['view' => 'trash'],
+                ];
             }
 
             if ($trash > 0 && $this->isTrash) {
@@ -155,11 +166,11 @@ final class Posts extends Table
         }
 
         return [
-            'title'    => $this->type->labelNamePlural,
-            'statuses' => $statuses,
-            'status'   => $this->isTrash ? 'trash' : $this->status,
-            'find'     => t('Search in title and content'),
-            'empty'    => $empty,
+            'title' => $this->type->labelNamePlural,
+            'parts' => $parts,
+            'part'  => $this->isTrash ? 'trash' : $this->status,
+            'find'  => t('Search in title and content'),
+            'empty' => $empty,
         ];
     }
 
@@ -249,6 +260,13 @@ final class Posts extends Table
                         'url'   => self::url($this->type),
                     ],
                 ],
+            ];
+        }
+
+        if ($this->status !== '' || $this->search !== '') {
+            return [
+                'title'       => t('No :items found', $this->type->labelNamePlural),
+                'description' => t('Nothing matches the filter.'),
             ];
         }
 

@@ -293,7 +293,9 @@ abstract class Table
     abstract public function cells(): array;
 
     /**
-     * Get the data of the header above the table: title, badge and the tools to show.
+     * Get the data of the header above the table: title, badge and the tools to show; `parts` are the parts
+     * of the list for the select of the filter by key, each a `label` and the `query` parameters that open it,
+     * the parameters of the other parts are dropped; `part` is the key of the current one.
      *
      * @return array<string, mixed>
      */
