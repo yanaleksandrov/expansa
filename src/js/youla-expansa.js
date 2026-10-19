@@ -565,7 +565,7 @@ document.addEventListener('youla:init', ()=> {
      * Table: the checkboxes of the rows, the bulk actions, the filter, the parts of the list and the pagination.
      * `u-data="table(options)"`: `fields` of Table::filters(), key => {label, icon, options, param}, `rows`
      * of Table::activeFilters() and `parts`, the query parameters of the parts of the list by key, see Table::headData().
-     * The markup of parts/table/header binds to it by `u-bind`, the values the handlers need are in `data-*`;
+     * The markup of parts/table/table-header binds to it by `u-bind`, the values the handlers need are in `data-*`;
      * every change of a filter, a part or the page reloads the rows and the bar of the header through the API.
      *
      * @since 2027.1
@@ -611,7 +611,7 @@ document.addEventListener('youla:init', ()=> {
                     return this.bulk > 0;
                 },
             },
-            // `data-endpoint` gets the IDs of the checked rows, the `data-confirm` actions ask first
+            // the API route of `action` gets the IDs of the checked rows, the `data-confirm` actions ask first
             bulkForm: {
                 '@submit.prevent'() {
                     const form = this.$el;
@@ -620,7 +620,7 @@ document.addEventListener('youla:init', ()=> {
                     }
 
                     const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
-                    this.$ajax.post(form.dataset.endpoint, { ids });
+                    this.$ajax.post(form.getAttribute('action'), { ids });
                 },
             },
             // the `data-password` actions of the form need the current password
@@ -664,6 +664,12 @@ document.addEventListener('youla:init', ()=> {
                 '@click'() {
                     this.$el.previousElementSibling?.removeAttribute('hidden');
                     this.$el.hidden = true;
+                },
+            },
+            sortLink: {
+                '@click.prevent'() {
+                    const { orderby, order } = this.$el.dataset;
+                    this.setQuery({ orderby, order });
                 },
             },
             pageLink: {
@@ -980,7 +986,7 @@ document.addEventListener('youla:init', ()=> {
                 // their bindings to this component are initialized again; from the root a new request aborts the previous one
                 this.$ajax.post('tables/filter', Object.fromEntries(params), null, { el: root }).then(() => {
                     this.resetAll(root);
-                    [ '.table-body', '.table-header' ]
+                    [ '.table-body', '.table-header', '.table-head-data' ]
                         .map(selector => root.querySelector(selector))
                         .forEach(el => el && root.__x.initialize(el));
                 });

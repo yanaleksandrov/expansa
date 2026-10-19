@@ -76,11 +76,11 @@
     margin-bottom: auto;
     overflow: auto;
     scroll-timeline: --table-scroll-x x;
-    transform: scaleY(-0.5);
+    transform: scaleY(-1);
     min-height: 70vh;
 
     > * {
-      transform: scaleY(-0.5);
+      transform: scaleY(-1);
     }
   }
 
@@ -258,6 +258,8 @@
 
   .table-filter-actions {
     min-width: 100%;
+    gap: 0.25rem;
+    display: flex;
 
     .btn {
       font-weight: 400;
@@ -276,7 +278,6 @@
     border-radius: var(--expansa-border-radius--lg);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
     box-shadow: var(--expansa-box-shadow);
-    overflow: visible;
     position-area: bottom span-left;
     position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
 
@@ -298,6 +299,7 @@
     width: min(42rem, calc(100vw - 2rem));
     padding: 0.75rem;
     overflow-y: auto;
+    overflow-x: hidden;
     max-height: 80vh;
 
     // centered by the margins, not by translate: it would shift the fixed dropdowns of the selects inside

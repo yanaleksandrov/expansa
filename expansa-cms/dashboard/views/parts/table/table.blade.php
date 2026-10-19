@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Table: the header of parts/table/header with the tools, the pagination and the filter,
+ * Table: the header of parts/table/table-header with the tools, the pagination and the filter,
  * the column titles and a row per item of the page, each cell rendered by the view of its column;
  * the not found state without items, unless the filter, the search or a part of the list left them out.
  *
@@ -33,11 +33,11 @@ $options = [
     <div class="table" u-data="table({{ json_encode($options) }})" style="{{ $table->style }}">
         <div class="table-head">
             @if ($header ?? true)
-                <?php echo view('parts/table/header', [...$head, 'table' => $table]); ?>
+                <?php echo view('parts/table/table-header', [...$head, 'table' => $table]); ?>
             @endif
             <div class="table-head-data">
                 @foreach ($table->cells as $cell)
-                    <?php echo view('parts/table/cell-head', ['cell' => $cell]); ?>
+                    <?php echo view('parts/table/cell-head', ['cell' => $cell, 'sorting' => $table->sorting()]); ?>
                 @endforeach
             </div>
         </div>

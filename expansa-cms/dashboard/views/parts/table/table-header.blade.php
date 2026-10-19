@@ -30,7 +30,7 @@ use Expansa\Facades\Safe;
  * The state and the instant apply are in the `table` component; the popover is anchored to the button by CSS,
  * its selects open inside it, so a click on them does not close it.
  *
- * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/header.blade.php
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/table-header.blade.php
  *
  * @package Expansa\Templates
  */
@@ -116,77 +116,78 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
             @endif
         </h5>
     @endif
-
-    <div class="table-header-group" u-bind="tools">
-        @if ($uploader)
-            <button class="btn btn--outline btn--xs" type="button" u-bind="uploader">
-                <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}
-            </button>
-        @endif
-
-        @if (! empty($empty['endpoint']))
-            <button class="btn btn--outline btn--xs t-red" type="button" u-bind="emptyTrash" data-endpoint="{{ $empty['endpoint'] }}" data-payload="{{ json_encode((object) ($empty['data'] ?? [])) }}">
-                <i class="ph ph-trash"></i> {{ t('Empty Trash') }}
-            </button>
-        @endif
-
-        @if ($create && $link)
-            <a class="btn btn--secondary btn--xs" href="{{ $link }}">
-                <i class="ph ph-plus"></i> {{ $create }}
-            </a>
-        @endif
-
-        @if ($translation)
-            <form class="table-header-translation" method="GET">
-                <input type="hidden" name="table" value="translation">
-                <div class="table-header-group">
-                    <svg width="16" height="16">
-                        <use xlink:href="{{ url('/dashboard/assets/sprites/flags.svg#us') }}"></use>
-                    </svg>
-                    English
-                </div>
-                <span class="badge badge--round badge--icon badge--lg"><i class="ph ph-arrows-left-right"></i></span>
-                <?php
-                echo Form::view('select', [
-                    'type'       => 'select',
-                    'name'       => 'language',
-                    'class'      => 'field field--raised',
-                    'attributes' => ['u-select' => '', 'name' => 'language'],
-                    'options'    => I18n::languageOptions(),
-                ]);
-
-                echo Form::view('select', [
-                    'type'       => 'select',
-                    'name'       => 'project',
-                    'class'      => 'field field--raised',
-                    'attributes' => ['u-select' => '', 'name' => 'project', 'value' => $project],
-                    // an empty group would render as an option
-                    'options'    => array_filter([
-                        'core'    => [
-                            'label'   => t('Core'),
-                            'options' => ['core' => $progress(t('Expansa Core'))],
-                        ],
-                        'plugins' => [
-                            'label'   => t('Plugins'),
-                            'options' => array_map(fn (Plugin $plugin) => $progress($plugin->name), array_column(Extensions::get('plugin'), null, 'id')),
-                        ],
-                        'themes'  => [
-                            'label'   => t('Themes'),
-                            'options' => array_map(fn (Theme $theme) => $progress($theme->name), array_column(Extensions::get('theme'), null, 'id')),
-                        ],
-                    ], fn (array $group) => $group['options'] !== []),
-                ]);
-                ?>
-                <button type="submit" class="btn btn--outline">
-                    <i class="ph ph-scan"></i> {{ t('Scan') }}
+    @if ($uploader || ! empty($empty['endpoint']) || ($create && $link) || $translation)
+        <div class="table-header-group" u-bind="tools">
+            @if ($uploader)
+                <button class="btn btn--outline btn--xs" type="button" u-bind="uploader">
+                    <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}
                 </button>
-            </form>
-        @endif
-    </div>
+            @endif
+
+            @if (! empty($empty['endpoint']))
+                <button class="btn btn--outline btn--xs t-red" type="button" u-bind="emptyTrash" data-endpoint="{{ $empty['endpoint'] }}" data-payload="{{ json_encode((object) ($empty['data'] ?? [])) }}">
+                    <i class="ph ph-trash"></i> {{ t('Empty Trash') }}
+                </button>
+            @endif
+
+            @if ($create && $link)
+                <a class="btn btn--secondary btn--xs" href="{{ $link }}">
+                    <i class="ph ph-plus"></i> {{ $create }}
+                </a>
+            @endif
+
+            @if ($translation)
+                <form class="table-header-translation" method="GET">
+                    <input type="hidden" name="table" value="translation">
+                    <div class="table-header-group">
+                        <svg width="16" height="16">
+                            <use xlink:href="{{ url('/dashboard/assets/sprites/flags.svg#us') }}"></use>
+                        </svg>
+                        English
+                    </div>
+                    <span class="badge badge--round badge--icon badge--lg"><i class="ph ph-arrows-left-right"></i></span>
+                    <?php
+                    echo Form::view('select', [
+                        'type'       => 'select',
+                        'name'       => 'language',
+                        'class'      => 'field field--raised',
+                        'attributes' => ['u-select' => '', 'name' => 'language'],
+                        'options'    => I18n::languageOptions(),
+                    ]);
+
+                    echo Form::view('select', [
+                        'type'       => 'select',
+                        'name'       => 'project',
+                        'class'      => 'field field--raised',
+                        'attributes' => ['u-select' => '', 'name' => 'project', 'value' => $project],
+                        // an empty group would render as an option
+                        'options'    => array_filter([
+                            'core'    => [
+                                'label'   => t('Core'),
+                                'options' => ['core' => $progress(t('Expansa Core'))],
+                            ],
+                            'plugins' => [
+                                'label'   => t('Plugins'),
+                                'options' => array_map(fn (Plugin $plugin) => $progress($plugin->name), array_column(Extensions::get('plugin'), null, 'id')),
+                            ],
+                            'themes'  => [
+                                'label'   => t('Themes'),
+                                'options' => array_map(fn (Theme $theme) => $progress($theme->name), array_column(Extensions::get('theme'), null, 'id')),
+                            ],
+                        ], fn (array $group) => $group['options'] !== []),
+                    ]);
+                    ?>
+                    <button type="submit" class="btn btn--outline">
+                        <i class="ph ph-scan"></i> {{ t('Scan') }}
+                    </button>
+                </form>
+            @endif
+        </div>
+    @endif
 
     @if ($actions)
         <div class="table-header-group" u-bind="bulkGroup" hidden>
-            <form class="df g-1" method="POST" u-bind="bulkForm" data-endpoint="{{ $endpoint }}" data-confirm="{{ json_encode(array_values($confirm)) }}" data-password="{{ json_encode(array_values($password)) }}">
+            <form class="df g-1" method="POST" action="{{ $endpoint }}" u-bind="bulkForm"@if ($confirm) data-confirm="{{ json_encode(array_values($confirm)) }}"@endif@if ($password) data-password="{{ json_encode(array_values($password)) }}"@endif>
                 @foreach ($data as $name => $value)
                     <input type="hidden" name="{{ $name }}" value="{{ $value }}">
                 @endforeach
@@ -210,9 +211,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                         </div>
                     </div>
                 @endif
-                <button class="btn btn--xs btn--secondary" type="submit" u-bind="bulkApply">
-                    <i class="ph ph-paper-plane-tilt"></i> {{ t('Apply') }}
-                </button>
+                <button class="btn btn--xs btn--secondary" type="submit" u-bind="bulkApply"><i class="ph ph-paper-plane-tilt"></i> {{ t('Apply') }}</button>
             </form>
         </div>
     @endif
@@ -250,7 +249,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
 
 @if ($filter)
 <div class="table-filter">
-    <div class="table-filter-actions df g-1">
+    <div class="table-filter-actions">
         <?php
         if ($find) {
             echo Form::view('input', [
@@ -271,7 +270,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
             echo Form::view('select', [
                 'type'       => 'select',
                 'name'       => 'part',
-                'before'     => '<i class="ph ph-circle-dashed"></i>' . t('Status:'),
+                'before'     => '<i class="ph ph-circle-dashed"></i> ' . t('Status:'),
                 'class'      => 'field field--sm field--plain',
                 'attributes' => [
                     'u-select' => true,
@@ -296,9 +295,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                 <strong>{{ t('Filters') }}:</strong>
                 <div class="table-filter-add">
                     @foreach ($filters as $key => $field)
-                        <button class="badge" type="button" u-bind="filterAdd" data-field="{{ $key }}">
-                            <i class="{{ $field['icon'] ?: 'ph ph-circle-half-tilt' }}"></i> {{ $field['label'] }}
-                        </button>
+                        <button class="badge" type="button" u-bind="filterAdd" data-field="{{ $key }}"><i class="{{ $field['icon'] ?: 'ph ph-circle-half-tilt' }}"></i> {{ $field['label'] }}</button>
                     @endforeach
                 </div>
                 <button class="btn btn--xs t-red" type="button" u-bind="filterClear">{{ t('Clear all') }}</button>

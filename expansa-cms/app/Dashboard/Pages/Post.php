@@ -159,10 +159,10 @@ final class Post
             return [];
         }
 
-        // the `roles` column is a JSON list, a role is matched with its quotes
+        // a role is a quoted name in the JSON list; an underscore in it would stop LIKE from adding the percents
         $where = [
             'deleted_at' => null,
-            'roles[~]'   => array_map(fn (string $role) => '"' . $role . '"', $roles),
+            'roles[~]'   => array_map(fn (string $role) => '%"' . $role . '"%', $roles),
             'ORDER'      => ['showname' => 'ASC'],
             'LIMIT'      => $limit + 1,
         ];

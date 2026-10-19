@@ -506,7 +506,7 @@ document.addEventListener('youla:init', () => {
                         return;
                     }
                     const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
-                    this.$ajax.post(form.dataset.endpoint, {
+                    this.$ajax.post(form.getAttribute('action'), {
                         ids
                     });
                 }
@@ -547,6 +547,15 @@ document.addEventListener('youla:init', () => {
                 '@click'() {
                     this.$el.previousElementSibling?.removeAttribute('hidden');
                     this.$el.hidden = true;
+                }
+            },
+            sortLink: {
+                '@click.prevent'() {
+                    const {orderby, order} = this.$el.dataset;
+                    this.setQuery({
+                        orderby,
+                        order
+                    });
                 }
             },
             pageLink: {
@@ -836,7 +845,7 @@ document.addEventListener('youla:init', () => {
                     el: root
                 }).then(() => {
                     this.resetAll(root);
-                    [ '.table-body', '.table-header' ].map(selector => root.querySelector(selector)).forEach(el => el && root.__x.initialize(el));
+                    [ '.table-body', '.table-header', '.table-head-data' ].map(selector => root.querySelector(selector)).forEach(el => el && root.__x.initialize(el));
                 });
             }
         };

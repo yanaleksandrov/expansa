@@ -2709,11 +2709,11 @@ body.is-unsaved .expansa-search-btn {
   margin-bottom: auto;
   overflow: auto;
   scroll-timeline: --table-scroll-x x;
-  transform: scaleY(-0.5);
+  transform: scaleY(-1);
   min-height: 70vh;
 }
 .table .table-body > * {
-  transform: scaleY(-0.5);
+  transform: scaleY(-1);
 }
 .table .table-row {
   width: 100%;
@@ -2876,6 +2876,8 @@ body.is-unsaved .expansa-search-btn {
 }
 .table-filter .table-filter-actions {
   min-width: 100%;
+  gap: 0.25rem;
+  display: flex;
 }
 .table-filter .table-filter-actions .btn {
   font-weight: 400;
@@ -2892,7 +2894,6 @@ body.is-unsaved .expansa-search-btn {
   border-radius: var(--expansa-border-radius--lg);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
   box-shadow: var(--expansa-box-shadow);
-  overflow: visible;
   position-area: bottom span-left;
   position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
 }
@@ -2913,6 +2914,7 @@ body.is-unsaved .expansa-search-btn {
   width: min(42rem, 100vw - 2rem);
   padding: 0.75rem;
   overflow-y: auto;
+  overflow-x: hidden;
   max-height: 80vh;
 }
 @supports (position-area: bottom) {

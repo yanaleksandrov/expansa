@@ -47,7 +47,6 @@ final class Tables
                 $request->getString('status'),
                 $request->getString('view') === 'trash',
                 $request->getString('s'),
-                $request->getString('order') === 'asc',
             ),
             'translation' => new Translations($request->getString('project')),
             'emails'      => new Emails(),

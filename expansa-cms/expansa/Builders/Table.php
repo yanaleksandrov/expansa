@@ -6,6 +6,8 @@ namespace Expansa\Builders;
 
 use Closure;
 use Expansa\Builders\Table\Cell;
+use Expansa\Builders\Table\Queried;
+use Expansa\Database\Query\Raw;
 use LogicException;
 
 /**
@@ -14,6 +16,9 @@ use LogicException;
  * see Table\Cell for the variables of the view. The rows that match the filters are shown by pages
  * of perPage(), the page is the `page` query parameter or set by paginate(). A filter is a query parameter
  * of its field with comma-separated values, `!` after the name for "is not": `?author=1,3&role!=editor`.
+ * The rows are sorted by a sortable column of `orderby`, `order` is `asc` or `desc`, see sorting().
+ * The filters and the sorting work on the rows of data() in PHP; a table of Table\Queried does them in its query
+ * and reads only the rows of the page, so that they cover the whole table.
  *
  * @package Expansa\Builders
  */
@@ -49,6 +54,18 @@ abstract class Table
      * @var array<int, array{field: string, operator: string, values: string[]}>|null
      */
     private ?array $active = null;
+
+    /**
+     * Number of the rows of a Table\Queried table that match the filters, null until total() is called.
+     */
+    private ?int $count = null;
+
+    /**
+     * Fields of filters(), read once: they may come from the database, e.g. the options of the authors.
+     *
+     * @var array<string, array<string, mixed>>|null
+     */
+    private ?array $fields = null;
 
     /**
      * Query parameters set by filterBy(), null reads `$_GET`.
@@ -106,7 +123,8 @@ abstract class Table
     }
 
     /**
-     * Get the rows of the table; templates read them through getData().
+     * Get the rows of the table; templates read them through getData(). A table of Table\Queried
+     * returns only the rows of the current page, read with paged().
      *
      * @return array<int, array<string, mixed>>
      */
@@ -120,6 +138,10 @@ abstract class Table
      */
     public function getData(): array
     {
+        if ($this instanceof Queried) {
+            return $this->rows ??= $this->data();
+        }
+
         $perPage = $this->perPage();
 
         return $perPage > 0 ? array_slice($this->rows(), ($this->page() - 1) * $perPage, $perPage) : $this->rows();
@@ -132,7 +154,90 @@ abstract class Table
      */
     public function total(): int
     {
+        if ($this instanceof Queried) {
+            return $this->count ??= $this->count();
+        }
+
         return count($this->rows());
+    }
+
+    /**
+     * Add the conditions of the active filters to the conditions of a query of a Table\Queried table,
+     * e.g. for its count(); a filter is a group of its own, see filterWhere().
+     *
+     * @param array<string, mixed> $where Conditions of the table, e.g. of the status and the search.
+     * @return array<string, mixed>
+     */
+    protected function filtered(array $where): array
+    {
+        $groups = [];
+        foreach ($this->activeFilters() as $index => ['field' => $field, 'operator' => $operator, 'values' => $values]) {
+            $groups["AND #filter $index"] = $this->filterWhere($field, $operator, $values);
+        }
+
+        return $groups === [] ? $where : [...$where, 'AND #filters' => $groups];
+    }
+
+    /**
+     * Get the query of the rows of the current page of a Table\Queried table: the conditions of filtered(),
+     * the order of orderBy() for the column of sorting() or the default one, and the limit of the page.
+     *
+     * @param array<string, mixed>  $where Conditions of the table.
+     * @param array<string, string> $order Default order, e.g. `['id' => 'DESC']`, also for the rows equal by the sorting.
+     * @return array<string, mixed>
+     */
+    protected function paged(array $where, array $order): array
+    {
+        $cell    = $this->sortedCell();
+        $perPage = $this->perPage();
+
+        return [
+            ...$this->filtered($where),
+            'ORDER' => $cell === null ? $order : $this->orderBy($cell, strtoupper($this->sorting()['order']), $order),
+            ...($perPage > 0 ? ['LIMIT' => [($this->page() - 1) * $perPage, $perPage]] : []),
+        ];
+    }
+
+    /**
+     * Get the order of a query of a Table\Queried table sorted by a column: the column of Cell::$sortBy, then
+     * the default order for the rows equal by it. A table overrides it to sort by an expression, returning
+     * `Db::raw()` with the whole order, e.g. `COALESCE(NULLIF(<showname>, ''), <login>) ASC, <id> ASC`.
+     *
+     * @param Cell                  $cell      Sorted column.
+     * @param string                $direction `ASC` or `DESC`.
+     * @param array<string, string> $order     Default order of paged().
+     * @return array<string, string>|Raw
+     */
+    protected function orderBy(Cell $cell, string $direction, array $order): array|Raw
+    {
+        return [$cell->sortBy => $direction] + $order;
+    }
+
+    /**
+     * Get the condition of a filter in a query of a Table\Queried table: the column of the field, its `column`
+     * in filters() or the field, is one of the values or none of them. A table overrides it for a field that is
+     * not a column, e.g. a value in a JSON list.
+     *
+     * @param string   $field    Key of the field in filters().
+     * @param string   $operator `is` or `not`.
+     * @param string[] $values   Known values of the field.
+     * @return array<string, mixed>
+     */
+    protected function filterWhere(string $field, string $operator, array $values): array
+    {
+        $column = (string) ($this->fields()[$field]['column'] ?? $field);
+
+        return [$column . ($operator === 'not' ? '[!]' : '') => $values];
+    }
+
+    /**
+     * Get the fields of filters(), read once.
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    private function fields(): array
+    {
+        return $this->fields ??= $this->filters();
     }
 
     /**
@@ -187,7 +292,7 @@ abstract class Table
     }
 
     /**
-     * Get the rows that match the filters, data() runs on the first call.
+     * Get the rows that match the filters in the order of sorting(), data() runs on the first call.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -195,17 +300,102 @@ abstract class Table
     {
         if ($this->rows === null) {
             $filters    = $this->activeFilters();
-            $this->rows = $filters ? array_values(array_filter($this->data(), fn (array $row) => self::matches($row, $filters))) : $this->data();
+            $rows       = $filters ? array_values(array_filter($this->data(), fn (array $row) => $this->matches($row, $filters))) : $this->data();
+            $this->rows = $this->sort($rows);
         }
 
         return $this->rows;
     }
 
     /**
-     * Describe the fields the rows can be filtered by, keyed by the row key: `label`, `icon`, `options`
-     * as value => label and `param`, the query parameter, the key by default. Without fields the table has no filter.
+     * Get the sorting of the query: `orderby`, the key of a sortable column, and `order`, `asc` or `desc` by default;
+     * without a known column the rows keep the order of data().
      *
-     * @return array<string, array{label: string, icon?: string, param?: string, options: array<string|int, string>}>
+     * @return array{by: string, order: string}
+     */
+    public function sorting(): array
+    {
+        $query = $this->input ?? $_GET;
+        $by    = is_string($query['orderby'] ?? null) ? $query['orderby'] : '';
+
+        return [
+            'by'    => array_any($this->cells, fn (Cell $cell) => $cell->sortable && $cell->key === $by) ? $by : '',
+            'order' => ($query['order'] ?? '') === 'asc' ? 'asc' : 'desc',
+        ];
+    }
+
+    /**
+     * Sort the rows by the values of sortValue() for the column of sorting(): numbers as numbers,
+     * the rest as text. Equal rows keep their order.
+     *
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private function sort(array $rows): array
+    {
+        $cell  = $this->sortedCell();
+        $order = $this->sorting()['order'];
+        if ($cell === null) {
+            return $rows;
+        }
+
+        // every value is prepared once, not on each comparison
+        $values = [];
+        foreach ($rows as $index => $row) {
+            $values[$index] = $this->sortValue($row, $cell);
+        }
+
+        $direction = $order === 'asc' ? 1 : -1;
+        $indexes   = array_keys($rows);
+        usort($indexes, function (int|string $a, int|string $b) use ($values, $direction): int {
+            [$left, $right] = [$values[$a], $values[$b]];
+
+            return $direction * (is_string($left) || is_string($right) ? strnatcmp((string) $left, (string) $right) : $left <=> $right);
+        });
+
+        return array_map(fn (int|string $index) => $rows[$index], $indexes);
+    }
+
+    /**
+     * Get the value a row is sorted by in PHP: the value of Cell::$sortBy, of a cell array its `value`;
+     * a number stays a number, text is compared without case. A table overrides it to sort by something else,
+     * e.g. a name made of several values of the row.
+     *
+     * @param array<string, mixed> $row
+     * @param Cell                 $cell Sorted column.
+     * @return int|float|string
+     */
+    protected function sortValue(array $row, Cell $cell): int|float|string
+    {
+        $value = $row[$cell->sortBy] ?? '';
+        $value = is_array($value) ? ($value['value'] ?? '') : $value;
+
+        return is_int($value) || is_float($value) ? $value : mb_strtolower((string) $value);
+    }
+
+    /**
+     * Get the column of sorting(), null without one.
+     *
+     * @return Cell|null
+     */
+    private function sortedCell(): ?Cell
+    {
+        $by = $this->sorting()['by'];
+        foreach ($this->cells as $cell) {
+            if ($by !== '' && $cell->key === $by) {
+                return $cell;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Describe the fields the rows can be filtered by, keyed by the row key: `label`, `icon`, `options`
+     * as value => label, `param`, the query parameter, the key by default, and `column` of the query
+     * of a Table\Queried table, the key by default. Without fields the table has no filter.
+     *
+     * @return array<string, array{label: string, icon?: string, param?: string, column?: string, options: array<string|int, string>}>
      */
     public function filters(): array
     {
@@ -223,6 +413,7 @@ abstract class Table
         $this->input  = $query;
         $this->active = null;
         $this->rows   = null;
+        $this->count  = null;
 
         return $this;
     }
@@ -243,7 +434,7 @@ abstract class Table
         $query = $this->input ?? $_GET;
 
         $this->active = [];
-        foreach ($this->filters() as $field => $filter) {
+        foreach ($this->fields() as $field => $filter) {
             $param = (string) ($filter['param'] ?? $field);
             if (in_array($param, self::$reserved, true)) {
                 throw new LogicException(sprintf('The filter "%s" of %s takes the reserved query parameter "%s".', $field, static::class, $param));
@@ -267,22 +458,39 @@ abstract class Table
     }
 
     /**
-     * Check a row against all filters: a scalar value is one of the values, a list has one of them.
+     * Check a row against all filters in PHP, see matchesFilter().
      *
      * @param array<string, mixed> $row
      * @param array<int, array{field: string, operator: string, values: string[]}> $filters
      * @return bool
      */
-    private static function matches(array $row, array $filters): bool
+    private function matches(array $row, array $filters): bool
     {
         foreach ($filters as ['field' => $field, 'operator' => $operator, 'values' => $values]) {
-            $found = array_intersect(array_map('strval', (array) ($row[$field] ?? [])), $values) !== [];
-            if ($found === ($operator === 'not')) {
+            if (! $this->matchesFilter($row, $field, $operator, $values)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    /**
+     * Check a row against a filter in PHP: the value of the field in the row, a scalar or a list, is one
+     * of the values for `is` and none of them for `not`. A table overrides it for a field that is not a value
+     * of the row, e.g. a date range or a part of a text.
+     *
+     * @param array<string, mixed> $row
+     * @param string               $field    Key of the field in filters().
+     * @param string               $operator `is` or `not`.
+     * @param string[]             $values   Known values of the field.
+     * @return bool
+     */
+    protected function matchesFilter(array $row, string $field, string $operator, array $values): bool
+    {
+        $found = array_intersect(array_map('strval', (array) ($row[$field] ?? [])), $values) !== [];
+
+        return $found !== ($operator === 'not');
     }
 
     /**

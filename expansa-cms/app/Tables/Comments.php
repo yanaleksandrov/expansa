@@ -11,10 +11,17 @@ use App\Post\Type;
 use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Queried;
 use Expansa\Facades\Db;
 use PDO;
 
-final class Comments extends Table
+/**
+ * Comments, the newest first, with the posts they answer: filtered by the status, the author and the search,
+ * sorted and read by pages in the database; the trash is a separate list.
+ *
+ * @package App\Tables
+ */
+final class Comments extends Table implements Queried
 {
     public function __construct(
 
@@ -34,17 +41,12 @@ final class Comments extends Table
          * Text searched in the comment, the name and the email of the author.
          */
         public readonly string $search = '',
-
-        /**
-         * Whether the oldest rows go first, the newest by default.
-         */
-        public readonly bool $isAscending = false,
     ) {
         parent::__construct();
     }
 
     /**
-     * Comments of the trash or out of it, by the filter and the order, the first 500, with the posts they answer.
+     * Comments of the current page, of the trash or out of it, with the posts they answer.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -61,11 +63,7 @@ final class Comments extends Table
             'content',
             'created_at',
         ];
-        $comments = Db::select('comments', $columns, [
-            ...$this->where(),
-            'ORDER' => ['id' => $this->isAscending ? 'ASC' : 'DESC'],
-            'LIMIT' => 500,
-        ]) ?? [];
+        $comments = Db::select('comments', $columns, $this->paged($this->where(), ['created_at' => 'DESC', 'id' => 'DESC'])) ?? [];
         $posts    = $this->posts($comments);
         $statuses = Comment::statuses();
 
@@ -95,6 +93,11 @@ final class Comments extends Table
                 'date'      => Dates::format((string) $comment['created_at']),
             ];
         }, $comments);
+    }
+
+    public function count(): int
+    {
+        return (int) Db::count('comments', $this->filtered($this->where()));
     }
 
     /**
@@ -181,7 +184,7 @@ final class Comments extends Table
             $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('7rem')
-                ->sortable(),
+                ->sortable('created_at'),
         ];
     }
 

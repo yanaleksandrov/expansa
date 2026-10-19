@@ -9,7 +9,7 @@
 defined('EX_PATH') || exit;
 
 echo view(
-    'parts/table/header',
+    'parts/table/table-header',
     [
         'title' => t( 'Tasks' ),
     ]

@@ -11,17 +11,20 @@ use App\Post\Type;
 use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Queried;
 use Expansa\Facades\Db;
+use Expansa\Facades\I18n;
+use IntlDateFormatter;
 use PDO;
 
 /**
  * Items of a post type, the newest first: the title with the view, duplicate and delete actions,
- * the author, the status and the date; filtered by the status, the author and the search. A type with a trash
- * shows it as a separate list, see Models\Post::delete().
+ * the author, the status and the date; filtered by the status, the author, the month and the search,
+ * sorted and read by pages in the database. A type with a trash shows it as a separate list, see Models\Post::delete().
  *
  * @package App\Tables
  */
-final class Posts extends Table
+final class Posts extends Table implements Queried
 {
     public function __construct(
 
@@ -51,29 +54,14 @@ final class Posts extends Table
     }
 
     /**
-     * The latest 500 items of the type, of the trash or out of it, with their authors and, for a public type, links.
+     * Items of the current page, of the trash or out of it, with their authors and, for a public type, links.
      *
      * @return array<int, array<string, mixed>>
      */
     public function data(): array
     {
-        $where = $this->type->canTrash ? [$this->isTrash ? 'deleted_at[!]' : 'deleted_at' => null] : [];
-        if ($this->status !== '') {
-            $where['status'] = $this->status;
-        }
-
-        if ($this->search !== '') {
-            $where['OR'] = [
-                'title[~]'   => $this->search,
-                'content[~]' => $this->search,
-            ];
-        }
-
-        $posts = Db::select($this->type->table, ['id [Int]', 'title', 'author_id [Int]', 'status', 'created_at'], [
-            ...$where,
-            'ORDER' => ['id' => 'DESC'],
-            'LIMIT' => 500,
-        ]) ?? [];
+        $columns = ['id [Int]', 'title', 'author_id [Int]', 'status', 'created_at'];
+        $posts   = Db::select($this->type->table, $columns, $this->paged($this->where(), ['created_at' => 'DESC', 'id' => 'DESC'])) ?? [];
 
         $slugs    = Post::paths($this->type->key, array_column($posts, 'id'));
         $authors  = User::options();
@@ -104,6 +92,33 @@ final class Posts extends Table
         }, $posts);
     }
 
+    public function count(): int
+    {
+        return (int) Db::count($this->type->table, $this->filtered($this->where()));
+    }
+
+    /**
+     * Conditions of the list: the trash or out of it, the status and the search in the title and the content.
+     *
+     * @return array<string, mixed>
+     */
+    private function where(): array
+    {
+        $where = $this->type->canTrash ? [$this->isTrash ? 'deleted_at[!]' : 'deleted_at' => null] : [];
+        if ($this->status !== '') {
+            $where['status'] = $this->status;
+        }
+
+        if ($this->search !== '') {
+            $where['OR'] = [
+                'title[~]'   => $this->search,
+                'content[~]' => $this->search,
+            ];
+        }
+
+        return $where;
+    }
+
     public function cells(): array
     {
         return [
@@ -127,7 +142,7 @@ final class Posts extends Table
             $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('7rem')
-                ->sortable(),
+                ->sortable('created_at'),
         ];
     }
 
@@ -243,12 +258,59 @@ final class Posts extends Table
                 'param'   => 'author',
                 'options' => User::options(),
             ],
-            'months'   => [
+            'months'    => [
                 'label'   => t('Months'),
                 'icon'    => 'ph ph-timer',
-                'options' => Status::getStatuses(),
+                'options' => $this->months(),
             ],
         ];
+    }
+
+    /**
+     * A month is the range of the creation date, from its first to its last second; the months of "is" are any of them,
+     * those of "is not" none of them.
+     *
+     * @param string   $field
+     * @param string   $operator
+     * @param string[] $values
+     * @return array<string, mixed>
+     */
+    protected function filterWhere(string $field, string $operator, array $values): array
+    {
+        if ($field !== 'months') {
+            return parent::filterWhere($field, $operator, $values);
+        }
+
+        $ranges = [];
+        foreach ($values as $index => $month) {
+            $start                       = $month . '-01 00:00:00';
+            $ranges["AND #month $index"] = ['created_at[' . ($operator === 'not' ? '><' : '<>') . ']' => [$start, date('Y-m-t 23:59:59', (int) strtotime($start))]];
+        }
+
+        return $operator === 'not' ? $ranges : ['OR' => $ranges];
+    }
+
+    /**
+     * Get the months the items of the type were created in, the latest first, for the filter.
+     *
+     * @return array<string, string> Names like "October 2026" by `Y-m`.
+     */
+    private function months(): array
+    {
+        $where = $this->type->canTrash ? ' WHERE deleted_at IS NULL' : '';
+        $rows  = Db::query("SELECT DISTINCT SUBSTR(created_at, 1, 7) FROM <{$this->type->table}>$where ORDER BY 1 DESC")
+            ?->fetchAll(PDO::FETCH_COLUMN) ?? [];
+
+        $formatter = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::NONE, IntlDateFormatter::NONE, pattern: 'LLLL y');
+        $months    = [];
+        foreach ($rows as $month) {
+            $time = strtotime($month . '-01');
+            if ($time !== false) {
+                $months[(string) $month] = mb_convert_case((string) $formatter->format($time), MB_CASE_TITLE);
+            }
+        }
+
+        return $months;
     }
 
     public function notFoundData(): array

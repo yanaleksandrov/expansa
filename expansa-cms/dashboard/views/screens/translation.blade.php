@@ -8,7 +8,7 @@
  */
 defined('EX_PATH') || exit;
 
-echo view('parts/table/header', $table->headData());
+echo view('parts/table/table-header', $table->headData());
 ?>
 
 @if ($table->getData())
