@@ -318,9 +318,19 @@
       background: transparent;
       border: 0;
       outline: 0;
+      box-shadow: none;
       resize: none;
       field-sizing: content;
     }
+  }
+
+  // under the field: the hint and the buttons sending it
+  &-submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
   }
 
   &-tools {

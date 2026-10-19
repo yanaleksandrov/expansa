@@ -13,14 +13,19 @@ use Expansa\Builders\Form;
 $post = Page::post((string) filter_input(INPUT_GET, 'type') ?: 'pages', filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
 $type = Type::get($post->type);
 
-// the parents to choose in the details and the URL of each, the base of the slug by the permalink structure
+// the parents to choose in the details and the URL of each, the base of the slug by the permalink structure;
+// the paths of the post and the parents are read together
 $parents = $type->hierarchical ? Page::parents($post) : [];
-$paths   = $post::paths($post->type, array_keys($parents));
+$paths   = $post::paths($post->type, [$post->id, ...array_keys($parents)]);
+$url     = $post->url($paths[$post->id] ?? '');
 $around  = Permalinks::around($paths[$post->parentId] ?? '', $post->id, $post->type);
 $bases   = [];
 foreach ($parents as $id => $title) {
     $bases[$id] = Permalinks::around($paths[$id] ?? '', $post->id, $post->type)[0];
 }
+
+// the discussion and the activity tabs show the same comments
+$comments = Comment::getByPost($post->type, $post->id);
 
 /**
  * Post editor: the bar with the way back and the public page over the tabs, the title, slug and content
@@ -50,9 +55,8 @@ return Form::enqueue(
         [
             'name'     => 'header',
             'type'     => 'custom',
-            'callback' => function () use ($post, $type) {
+            'callback' => function () use ($post, $type, $url) {
                 $back  = url('dashboard/edit?table=' . $type->key);
-                $url   = $post->url();
                 $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? $post->title : $type->labelEdit);
                 ?>
                 <div class="post-editor-head">
@@ -133,7 +137,7 @@ return Form::enqueue(
 				            'suffix' => $around[1],
 				            'parent' => 'parent_id',
 				            'bases'  => $bases,
-				            'link'   => $post->slug !== '' ? $post->url() : '',
+				            'link'   => $url,
 			            ],
 			            'attributes'  => [
 				            'value'       => $post->slug,
@@ -207,9 +211,8 @@ return Form::enqueue(
                 [
                     'name'     => 'comments',
                     'type'     => 'custom',
-                    'callback' => function () use ($post) {
-                        $comments   = Comment::getByPost($post->type, $post->id);
-                        $user       = User::current();
+                    'callback' => function () use ($post, $comments) {
+                        $user      = User::current();
                         $name       = $user === null ? '' : ($user->showname ?: $user->login);
                         $canComment = $user?->can('manage_comments') ?? false;
                         ?>
@@ -238,8 +241,8 @@ return Form::enqueue(
                                         <span class="avatar avatar--rounded avatar--sm bg-blue-lt t-blue"><?php echo htmlspecialchars(mb_strtoupper(mb_substr($name, 0, 1))); ?></span>
                                         <div class="post-comment-box">
                                             <textarea id="post-comment-text" name="content" form="post-comment" rows="2" required placeholder="<?php echo t_attr('Leave a comment…'); ?>" aria-label="<?php echo t_attr('Comment'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
-                                            <div class="post-comment-tools">
-                                                <span class="t-muted fs-12"><?php echo t('Ctrl+Enter to send'); ?></span>
+                                            <div class="post-comment-submit">
+                                                <span class="t-muted fs-12 mr-auto"><?php echo t('Ctrl+Enter to send'); ?></span>
                                                 <button class="btn btn--sm btn--primary" type="submit" form="post-comment"><?php echo t('Comment', context: 'action'); ?></button>
                                             </div>
                                         </div>
@@ -302,9 +305,9 @@ return Form::enqueue(
                 [
                     'name'     => 'activity',
                     'type'     => 'custom',
-                    'callback' => function () use ($post) {
+                    'callback' => function () use ($post, $comments) {
                         $lines = [];
-                        foreach (Comment::getByPost($post->type, $post->id) as $comment) {
+                        foreach ($comments as $comment) {
                             if ($comment->deletedAt !== null) {
                                 continue;
                             }

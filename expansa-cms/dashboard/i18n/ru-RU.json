@@ -41,6 +41,7 @@
     ":count items deleted permanently": "Удалено навсегда записей: :count",
     ":count selected": "Выбрано: :count",
     ":counts posts were imported successfully. Do you want to [start another import](:link)?": "Импортировано записей: :counts. Хотите [начать новый импорт](:link)?",
+    ":date at :time": ":date в :time",
     ":from–:to of :total": ":from–:to из :total",
     ":percent% complete": ":percent% выполнено",
     ":percent\\% complete": ":percent\\% выполнено",

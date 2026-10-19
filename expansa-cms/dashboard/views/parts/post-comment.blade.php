@@ -68,8 +68,8 @@ $payload  = json_encode([
                 </button>
             </div>
             <div class="post-comment-box" u-show="replying" hidden>
-                <textarea id="post-comment-reply-{{ $comment->id }}" u-ref="reply" rows="2" placeholder="{{ t('Reply to :name…', $comment->getAuthorName()) }}" aria-label="{{ t('Reply') }}" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $refs.send.click()" @keydown.esc="$dispatch('comment-reply', 0)"></textarea>
-                <div class="post-comment-tools">
+                <textarea id="post-comment-reply-{{ $comment->id }}" u-ref="reply" rows="1" placeholder="{{ t('Reply to :name…', $comment->getAuthorName()) }}" aria-label="{{ t('Reply') }}" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $refs.send.click()" @keydown.esc="$dispatch('comment-reply', 0)"></textarea>
+                <div class="post-comment-submit">
                     <button class="btn btn--sm" type="button" @click="$dispatch('comment-reply', 0)">{{ t('Cancel') }}</button>
                     <button class="btn btn--sm btn--primary" type="button" u-ref="send" @click="$refs.reply.value.trim() && $ajax.post('comments/add', {...{{ $payload }}, content: $refs.reply.value}).then(() => $dispatch('comment-reply', 0))">{{ t('Reply', context: 'action') }}</button>
                 </div>

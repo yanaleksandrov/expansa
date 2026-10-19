@@ -121,6 +121,16 @@ class Comment extends Model
     ];
 
     /**
+     * Post the comment answers, read once by getPost(); false when it is gone.
+     */
+    private Post|false|null $post = null;
+
+    /**
+     * Level of the comment in its thread, found once by depth(): the parents of a comment do not change.
+     */
+    private ?int $depth = null;
+
+    /**
      * Array of rules for sanitize properties.
      *
      * @return array<string, string>
@@ -580,13 +590,15 @@ class Comment extends Model
     }
 
     /**
-     * Get the post the comment answers, null when its type or the post is gone.
+     * Get the post the comment answers, null when its type or the post is gone; it is read once.
      *
      * @return Post|null
      */
     public function getPost(): ?Post
     {
-        return $this->postId > 0 ? Post::get((string) $this->postType, (int) $this->postId) : null;
+        $this->post ??= ($this->postId > 0 ? Post::get((string) $this->postType, (int) $this->postId) : null) ?? false;
+
+        return $this->post ?: null;
     }
 
     /**
@@ -640,6 +652,10 @@ class Comment extends Model
      */
     public function depth(): int
     {
+        if ($this->depth !== null) {
+            return $this->depth;
+        }
+
         $depth    = 1;
         $parentId = $this->parentId;
         $max      = self::maxDepth();
@@ -652,7 +668,7 @@ class Comment extends Model
             $depth++;
         }
 
-        return $depth;
+        return $this->depth = $depth;
     }
 
     /**

@@ -19,6 +19,13 @@ use Expansa\Http\Request;
 final class Post
 {
     /**
+     * Posts read in the request by `type:id`: the page data and the `post-editor` form ask for the same one.
+     *
+     * @var array<string, Entry>
+     */
+    private static array $posts = [];
+
+    /**
      * Data of the `post` page: the post of `id` and its type from `type`, pages by default;
      * without `id` a new post, saved on the first submit.
      *
@@ -46,6 +53,11 @@ final class Post
      */
     public static function post(string $type, int $id): Entry
     {
+        $key = $type . ':' . $id;
+        if (isset(self::$posts[$key])) {
+            return self::$posts[$key];
+        }
+
         $post = match (true) {
             $id > 0                   => Entry::get($type, $id),
             Type::get($type) !== null => new Entry(authorId: User::current()->id ?? 0, status: 'draft', type: $type),
@@ -55,7 +67,7 @@ final class Post
             throw new NotFound(t('Item not found'));
         }
 
-        return $post;
+        return self::$posts[$key] = $post;
     }
 
     /**

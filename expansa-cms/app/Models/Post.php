@@ -232,11 +232,12 @@ class Post
     /**
      * Get the URL of the post by the permalink structure, see Permalinks::post().
      *
+     * @param string|null $path Path of the post by paths(), read when null.
      * @return string Empty for a post without a slug.
      */
-    public function url(): string
+    public function url(?string $path = null): string
     {
-        $path = Permalinks::post($this->path(), $this->id, $this->type);
+        $path = Permalinks::post($path ?? $this->path(), $this->id, $this->type);
 
         return $path === '' ? '' : url($path);
     }
