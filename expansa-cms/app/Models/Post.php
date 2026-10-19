@@ -176,6 +176,12 @@ class Post
             $data['parent_id'] = 0;
         }
 
+        $created = self::date((string) ($args['created_at'] ?? ''));
+        if ($created !== null) {
+            $data['created_at'] = $created;
+        }
+        $data['status'] = Status::byDate($data['status'], $created ?? date('Y-m-d H:i:s'));
+
         // insert to DB
         Db::insert($type->table, ['uuid' => Str::uuid7()] + array_diff_key($data, array_flip([ 'slug', 'fields' ])));
 
@@ -223,6 +229,38 @@ class Post
 
         // a page of a hierarchical type opens only under the slugs of its parents
         return $post === null || $post->isTrashed() || $post->path() !== $path ? null : $post;
+    }
+
+    /**
+     * Publish the scheduled posts of every type whose date has come, see Status::byDate(); run by the scheduler.
+     *
+     * @return int Number of the published posts.
+     */
+    public static function publishScheduled(): int
+    {
+        $count = 0;
+        foreach (Type::fetch() as $type) {
+            $where = [
+                'status'         => 'future',
+                'created_at[<=]' => date('Y-m-d H:i:s'),
+            ];
+            if ($type->canTrash) {
+                $where['deleted_at'] = null;
+            }
+
+            $ids = Db::select($type->table, 'id [Int]', $where) ?: [];
+            if ($ids === []) {
+                continue;
+            }
+
+            Db::update($type->table, ['status' => 'publish'], ['id' => $ids]);
+            foreach ($ids as $id) {
+                Activity::changes($type->table, $id, ['status' => 'future'], ['status' => 'publish']);
+            }
+            $count += count($ids);
+        }
+
+        return $count;
     }
 
     /**
@@ -362,11 +400,10 @@ class Post
 
         $data = Safe::data(array_intersect_key($args, $rules), array_intersect_key($rules, $args))->apply();
 
-        // the datepicker sends the local date and time as `2026-10-19T14:30`; the same minute keeps the seconds
-        $value   = (string) ($args['created_at'] ?? '');
-        $created = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $value);
-        if ($created !== false && $created->format('Y-m-d\TH:i') === $value && $created->format('Y-m-d H:i') !== substr($this->createdAt, 0, 16)) {
-            $data['created_at'] = $created->format('Y-m-d H:i:s');
+        // the same minute keeps the seconds: the datepicker sends none
+        $created = self::date((string) ($args['created_at'] ?? ''));
+        if ($created !== null && substr($created, 0, 16) !== substr($this->createdAt, 0, 16)) {
+            $data['created_at'] = $created;
         }
 
         // an author who is not a user any more or may not edit entries keeps the saved one
@@ -388,6 +425,12 @@ class Post
 
         if (isset($data['discussion']) && ! in_array($data['discussion'], ['open', 'closed'], true)) {
             unset($data['discussion']);
+        }
+
+        // a date ahead schedules a published post, a date that has come publishes a scheduled one
+        $status = Status::byDate($data['status'] ?? $this->status, $data['created_at'] ?? $this->createdAt);
+        if ($status !== $this->status || isset($data['status'])) {
+            $data['status'] = $status;
         }
 
         $before = ['slug' => $this->slug];
@@ -552,6 +595,19 @@ class Post
         }
 
         return $deleted;
+    }
+
+    /**
+     * Get the date and time of a post from the datepicker: it sends the local time as `2026-10-19T14:30`.
+     *
+     * @param string $value
+     * @return string|null `Y-m-d H:i:s`, null for an empty or invalid value.
+     */
+    private static function date(string $value): ?string
+    {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $value);
+
+        return $date !== false && $date->format('Y-m-d\TH:i') === $value ? $date->format('Y-m-d H:i:s') : null;
     }
 
     /**

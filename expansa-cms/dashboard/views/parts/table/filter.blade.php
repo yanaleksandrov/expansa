@@ -75,18 +75,17 @@ $change  = "const q = new URLSearchParams(location.search); q.delete('status'); 
     @if ($filters)
         <div class="table-filter-content" id="{{ $popover }}" popover>
             <div class="table-filter-head">
-                <strong>{{ t('Filters') }}</strong>
+                <strong>{{ t('Filters') }}:</strong>
+                <div class="table-filter-add">
+                    @foreach ($filters as $key => $field)
+                        <button class="badge" type="button" @click="addFilter({{ json_encode($key) }})">
+                            <i class="{{ $field['icon'] ?: 'ph ph-circle-half-tilt' }}"></i> {{ $field['label'] }}
+                        </button>
+                    @endforeach
+                </div>
                 <button class="btn btn--xs t-red" type="button" u-show="rows.length" @click="clearFilters()">{{ t('Clear all') }}</button>
             </div>
             <div class="table-filter-empty" u-show="!rows.length">{{ t('No filters applied. Combine filters to narrow the list, e.g. Status is Draft and Author is you.') }}</div>
-            <div class="table-filter-add">
-                <span class="t-muted">{{ t('Add filter:') }}</span>
-                @foreach ($filters as $key => $field)
-                    <button class="badge" type="button" @click="addFilter({{ json_encode($key) }})">
-                        <i class="{{ $field['icon'] ?: 'ph ph-circle-half-tilt' }}"></i> {{ $field['label'] }}
-                    </button>
-                @endforeach
-            </div>
             <div class="table-filter-rows">
                 <div class="table-filter-row" u-each="(row, i) in rows">
                     <span class="table-filter-conjunction" u-text="i ? texts.and : texts.where"></span>

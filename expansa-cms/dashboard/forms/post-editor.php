@@ -377,7 +377,7 @@ return Form::enqueue(
                         ];
                         ?>
                         <h4 class="post-editor-eyebrow"><?php echo t('Details'); ?></h4>
-                        <dl class="post-editor-props" u-data="{status: <?php echo htmlspecialchars(json_encode($post->status)); ?>}">
+                        <dl class="post-editor-props" u-data="postDetails" data-status="<?php echo htmlspecialchars($post->status); ?>" @change="schedule($event.target)" @reset.document="restore($event.target)">
                             <dt><i class="ph ph-circle-dashed"></i><?php echo t('Status'); ?></dt>
                             <dd>
                                 <select class="post-editor-pill" name="status" u-prop="status" aria-label="<?php echo t_attr('Status'); ?>">
@@ -414,12 +414,10 @@ return Form::enqueue(
 	                                <?php echo view('parts/post-comments-count', ['counts' => Comment::countByStatus($post->type, $post->id)]); ?>
                                 </dd>
                             <?php endif; ?>
-                            <?php if ($post->id > 0) : ?>
-                                <dt><i class="ph ph-calendar-blank"></i><?php echo t('Created'); ?></dt>
-                                <dd>
-                                    <input class="post-editor-pill" type="text" name="created_at" value="<?php echo htmlspecialchars(str_replace(' ', 'T', substr($post->createdAt, 0, 16))); ?>" u-pickadate="{timepicker: true}" autocomplete="off" aria-label="<?php echo t_attr('Created'); ?>">
-                                </dd>
-                            <?php endif; ?>
+                            <dt><i class="ph ph-calendar-blank"></i><?php echo t('Created'); ?></dt>
+                            <dd>
+                                <input class="post-editor-pill" type="text" name="created_at" value="<?php echo htmlspecialchars(str_replace(' ', 'T', substr($post->createdAt, 0, 16))); ?>" placeholder="<?php echo t_attr('Now'); ?>" u-pickadate="{timepicker: true}" autocomplete="off" aria-label="<?php echo t_attr('Created'); ?>">
+                            </dd>
                             <?php foreach ($facts as [$icon, $label, $fact]) : ?>
                                 <dt><i class="<?php echo $icon; ?>"></i><?php echo $label; ?></dt>
                                 <dd><span class="post-editor-pill<?php echo $fact === '' ? ' is-empty' : ''; ?>"><?php echo $fact !== '' ? htmlspecialchars($fact) : '—'; ?></span></dd>

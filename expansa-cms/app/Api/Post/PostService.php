@@ -132,6 +132,11 @@ final class PostService
             $response = $response->value('[name="slug"]', $post->slug);
         }
 
+        // the date may schedule or publish the post, see Status::byDate()
+        if ((string) ($request->post['status'] ?? $post->status) !== $post->status) {
+            $response = $response->value('[name="status"]', $post->status);
+        }
+
         return $response->notify(t('%s updated', Type::get($post->type)->labelName), Notice::Success);
     }
 

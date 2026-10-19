@@ -1836,7 +1836,11 @@
                     hidden.value = initial;
                 }
                 let synced = hidden.value;
+                let resetting = false;
+                const initialDates = [ ...dp.selectedDates ];
+                const initialHidden = hidden.value;
                 const sync = () => {
+                    if (resetting) return;
                     if (!el.value && hidden.value) {
                         dp.clear();
                         return;
@@ -1852,6 +1856,29 @@
                 };
                 el.addEventListener('input', sync);
                 el.addEventListener('change', sync);
+                const resetForm = el.form;
+                const onReset = () => setTimeout(() => {
+                    if (dp.isDestroyed) return;
+                    resetting = true;
+                    dp.selectedDates.length && dp.clear({
+                        silent: true
+                    });
+                    initialDates.length && dp.selectDate(initialDates.map(date => new Date(date)), {
+                        silent: true
+                    });
+                    setTimeout(() => {
+                        if (dp.isDestroyed) return;
+                        if (initialDates.length) {
+                            dp._setInputValue();
+                        } else {
+                            el.value = initial;
+                            hidden.value = initialHidden;
+                        }
+                        synced = hidden.value;
+                        resetting = false;
+                    });
+                });
+                resetForm?.addEventListener('reset', onReset);
                 const destroy = dp.destroy;
                 dp.destroy = () => {
                     if (dp.isDestroyed) return;
@@ -1859,6 +1886,7 @@
                     listen(false);
                     el.removeEventListener('input', sync);
                     el.removeEventListener('change', sync);
+                    resetForm?.removeEventListener('reset', onReset);
                     destroy();
                     name !== null && el.setAttribute('name', name);
                     form !== null && el.setAttribute('form', form);

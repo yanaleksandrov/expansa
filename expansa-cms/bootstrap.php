@@ -648,6 +648,11 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
         }, id: 'security-cleanup')->daily(3);
     });
 
+    // the scheduled posts are published once their date has come
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->call(fn () => App\Models\Post::publishScheduled(), id: 'posts-publish')->everyMinute()->onlyOne();
+    });
+
     // llms.txt of the SEO settings lists the latest content, so it is rebuilt weekly
     Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
         $scheduler->call(fn () => App\Support\Llms::generate(), id: 'llms')->weekly(1, 4);

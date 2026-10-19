@@ -1232,6 +1232,35 @@ document.addEventListener('youla:init', ()=> {
      *
      * @since 1.0
      */
+    /**
+     * Details aside the post editor: the status follows the date as Status::byDate() on the server does,
+     * a published post dated ahead is scheduled, a scheduled one dated now or before is published.
+     *
+     * @since 2027.1
+     */
+    Youla.data('postDetails', (root) => ({
+        status: root.dataset.status || '',
+        // the hidden field of the datepicker sends `change` with the ISO value
+        schedule(input) {
+            if (input.name !== 'created_at' || !input.value) {
+                return;
+            }
+
+            const ahead = new Date(input.value) > new Date();
+            if (this.status === 'publish' && ahead) {
+                this.status = 'future';
+            } else if (this.status === 'future' && !ahead) {
+                this.status = 'publish';
+            }
+        },
+        // a reset of the form brings the select back, the data of the status follows it
+        restore(form) {
+            if (form === root.closest('form')) {
+                this.status = root.dataset.status || '';
+            }
+        },
+    }));
+
     Youla.data('tab', () => ({
         active: null,
         button(id) {

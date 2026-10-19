@@ -1020,6 +1020,25 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
+    Youla.data('postDetails', root => ({
+        status: root.dataset.status || '',
+        schedule(input) {
+            if (input.name !== 'created_at' || !input.value) {
+                return;
+            }
+            const ahead = new Date(input.value) > new Date;
+            if (this.status === 'publish' && ahead) {
+                this.status = 'future';
+            } else if (this.status === 'future' && !ahead) {
+                this.status = 'publish';
+            }
+        },
+        restore(form) {
+            if (form === root.closest('form')) {
+                this.status = root.dataset.status || '';
+            }
+        }
+    }));
     Youla.data('tab', () => ({
         active: null,
         button(id) {
