@@ -113,21 +113,19 @@ final class Comments extends Table
 
         $actions = [];
         foreach (Comment::moderationActions($status) as $value => $action) {
-            $payload   = json_encode(['id' => $id, 'status' => $value]);
             $actions[] = [
                 'title'      => $action['label'],
                 'href'       => '#',
                 'class'      => $value === Comment::STATUS_APPROVED ? 't-green' : 't-muted',
-                'attributes' => ['@click.prevent' => "\$ajax.post('comments/status', $payload).then(() => applyFilters())"],
+                'attributes' => self::action('comments/status', ['id' => $id, 'status' => $value], refresh: true),
             ];
         }
 
-        $payload   = json_encode(['id' => $id, 'from' => 'list']);
         $actions[] = [
             'title'      => t('Delete'),
             'href'       => '#',
             'class'      => 't-red',
-            'attributes' => ['@click.prevent' => "\$ajax.post('comments/delete', $payload).then(() => applyFilters())"],
+            'attributes' => self::action('comments/delete', ['id' => $id, 'from' => 'list'], refresh: true),
         ];
 
         return $actions;
@@ -141,21 +139,18 @@ final class Comments extends Table
      */
     private function trashActions(int $id): array
     {
-        $payload = json_encode(['id' => $id]);
-        $delete  = "confirm(texts.deleteItem) && \$ajax.post('comments/force-delete', $payload).then(() => applyFilters())";
-
         return [
             [
                 'title'      => t('Restore'),
                 'href'       => '#',
                 'class'      => 't-muted',
-                'attributes' => ['@click.prevent' => "\$ajax.post('comments/restore', $payload).then(() => applyFilters())"],
+                'attributes' => self::action('comments/restore', ['id' => $id], refresh: true),
             ],
             [
                 'title'      => t('Delete Permanently'),
                 'href'       => '#',
                 'class'      => 't-red',
-                'attributes' => ['@click.prevent' => $delete],
+                'attributes' => self::action('comments/force-delete', ['id' => $id], 'deleteItem', true),
             ],
         ];
     }
@@ -207,7 +202,7 @@ final class Comments extends Table
             ];
         }
 
-        $empty = '';
+        $empty = [];
         $trash = (int) Db::count('comments', ['deleted_at[!]' => null]);
         if ($trash > 0 || $this->isTrash) {
             $parts['trash'] = [
@@ -217,7 +212,7 @@ final class Comments extends Table
         }
 
         if ($trash > 0 && $this->isTrash) {
-            $empty = "confirm(texts.emptyTrash) && \$ajax.post('comments/empty-trash', {})";
+            $empty = ['endpoint' => 'comments/empty-trash'];
         }
 
         return [

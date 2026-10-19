@@ -26,14 +26,16 @@ final class TablesService
             ->filterBy($request->post)
             ->paginate($request->getInt('page', 1));
 
-        $bar = view('parts/table/header-bar', [
+        // the filter stays on the page: the search being typed and the open popover are kept
+        $header = view('parts/table/header', [
             ...$table->headData(),
-            'bulk'       => $table->bulk(),
-            'pagination' => view('parts/table/pagination', ['table' => $table, 'query' => Arr::exclude($request->post, ['nonce'])])->render(),
+            'table'  => $table,
+            'query'  => Arr::exclude($request->post, ['nonce']),
+            'filter' => false,
         ]);
 
         return $response
             ->update('.table-body', view('parts/table/table-row', ['table' => $table])->render())
-            ->replace('.table-header', $bar->render());
+            ->replace('.table-header', $header->render());
     }
 }

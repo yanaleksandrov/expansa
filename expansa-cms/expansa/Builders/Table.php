@@ -293,7 +293,8 @@ abstract class Table
     abstract public function cells(): array;
 
     /**
-     * Get the data of the header above the table: title, badge and the tools to show; `parts` are the parts
+     * Get the data of the header above the table: title, badge and the tools to show, e.g. `empty`, the `endpoint`
+     * and the `data` of the button emptying the trash; `parts` are the parts
      * of the list for the select of the filter by key, each a `label` and the `query` parameters that open it,
      * the parameters of the other parts are dropped; `part` is the key of the current one.
      *
@@ -330,6 +331,27 @@ abstract class Table
     public function notFoundData(): array
     {
         return [];
+    }
+
+    /**
+     * Get the attributes of a link that posts to the API from a row, for the `rowAction` binding of the `table`
+     * component: the data goes to the endpoint, a confirmation asks first, a refresh shows the rows again after it.
+     *
+     * @param string               $endpoint API route, e.g. `post/delete`.
+     * @param array<string, mixed> $data     Fields posted with the request.
+     * @param string               $confirm  Key of the text that asks first, e.g. `deleteItem`; empty asks nothing.
+     * @param bool                 $refresh  Show the rows again after the response.
+     * @return array<string, string>
+     */
+    protected static function action(string $endpoint, array $data = [], string $confirm = '', bool $refresh = false): array
+    {
+        return [
+            'u-bind'        => 'rowAction',
+            'data-endpoint' => $endpoint,
+            'data-payload'  => (string) json_encode((object) $data),
+            ...($confirm !== '' ? ['data-confirm' => $confirm] : []),
+            ...($refresh ? ['data-refresh' => '1'] : []),
+        ];
     }
 
     /**

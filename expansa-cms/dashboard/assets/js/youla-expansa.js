@@ -459,7 +459,7 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
-    Youla.data('table', root => {
+    Youla.data('table', root => ({fields = {}, rows = [], parts = {}} = {}) => {
         const parse = (json, fallback) => {
             try {
                 return JSON.parse(json || '') ?? fallback;
@@ -475,17 +475,220 @@ document.addEventListener('youla:init', () => {
             '\'': '&#39;'
         }[char]));
         return {
-            fields: parse(root.dataset.fields, {}),
-            rows: parse(root.dataset.rows, []),
+            fields,
+            rows,
+            parts,
             search: new URLSearchParams(window.location.search).get('s') || '',
             editing: null,
             anchor: null,
             bulk: 0,
+            action: '',
             trigger: {
                 '@change': 'selectAll($el, $root)'
             },
             item: {
                 '@click': 'selectItem($el, $root, $event)'
+            },
+            tools: {
+                'u-show'() {
+                    return !this.bulk;
+                }
+            },
+            bulkGroup: {
+                'u-show'() {
+                    return this.bulk > 0;
+                }
+            },
+            bulkForm: {
+                '@submit.prevent'() {
+                    const form = this.$el;
+                    if (parse(form.dataset.confirm, []).includes(this.action) && !confirm(this.texts.deleteItems)) {
+                        return;
+                    }
+                    const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
+                    this.$ajax.post(form.dataset.endpoint, {
+                        ids
+                    });
+                }
+            },
+            bulkPassword: {
+                'u-show'() {
+                    return parse(this.$el.closest('form')?.dataset.password, []).includes(this.action);
+                }
+            },
+            bulkApply: {
+                ':disabled'() {
+                    return !this.action;
+                }
+            },
+            uploader: {
+                '@click'() {
+                    this.$dialog.open('tmpl-media-uploader', this.uploaderDialog);
+                }
+            },
+            emptyTrash: {
+                '@click'() {
+                    const {endpoint, payload} = this.$el.dataset;
+                    if (confirm(this.texts.emptyTrash)) {
+                        this.$ajax.post(endpoint, parse(payload, {}));
+                    }
+                }
+            },
+            rowAction: {
+                '@click.prevent'() {
+                    const {endpoint, payload, confirm: question, refresh} = this.$el.dataset;
+                    if (question && !confirm(this.texts[question] ?? question)) {
+                        return;
+                    }
+                    this.$ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
+                }
+            },
+            moreLinks: {
+                '@click'() {
+                    this.$el.previousElementSibling?.removeAttribute('hidden');
+                    this.$el.hidden = true;
+                }
+            },
+            pageLink: {
+                '@click.prevent'() {
+                    this.goToPage(Number(this.$el.dataset.page));
+                }
+            },
+            pageField: {
+                '@change'() {
+                    const field = this.$el;
+                    if (field.value) {
+                        this.goToPage(Math.min(Number(field.max), Math.max(1, Math.trunc(field.value))));
+                    }
+                }
+            },
+            searchField: {
+                '@input.delay.500ms'() {
+                    this.applyFilters();
+                },
+                '@keydown.enter.prevent'() {
+                    this.applyFilters();
+                }
+            },
+            partSelect: {
+                '@change'() {
+                    this.setPart(this.$el.value);
+                }
+            },
+            filterCount: {
+                'u-show'() {
+                    return this.activeFilters().length > 0;
+                },
+                'u-text'() {
+                    return this.activeFilters().length;
+                }
+            },
+            filterAdd: {
+                '@click'() {
+                    this.addFilter(this.$el.dataset.field);
+                }
+            },
+            filterClear: {
+                'u-show'() {
+                    return this.rows.length > 0;
+                },
+                '@click'() {
+                    this.clearFilters();
+                }
+            },
+            filterEmpty: {
+                'u-show'() {
+                    return !this.rows.length;
+                }
+            },
+            filterConjunction: {
+                'u-text': 'i ? texts.and : texts.where'
+            },
+            filterField: {
+                ':value': 'row.field',
+                '@change': 'setFilterField(i, $el.value)',
+                'u-select': 'selectOptions()'
+            },
+            filterOperator: {
+                ':value': 'row.operator',
+                '@change': 'setFilterOperator(i, $el.value)',
+                'u-select': 'selectOptions()'
+            },
+            filterValues: {
+                'u-html': 'filterOptions(row)',
+                ':value': 'row.values',
+                '@change': 'setFilterValues(i, $el)',
+                'u-select': 'selectOptions()'
+            },
+            filterRemove: {
+                '@click': 'removeFilter(i)'
+            },
+            chips: {
+                'u-show'() {
+                    return this.activeFilters().length > 0 || this.search.trim() !== '';
+                }
+            },
+            searchChip: {
+                'u-show'() {
+                    return this.search.trim() !== '';
+                }
+            },
+            searchChipEdit: {
+                '@click'() {
+                    root.querySelector('.table-filter [name=s]')?.focus();
+                }
+            },
+            searchChipText: {
+                'u-text'() {
+                    return this.search.trim();
+                }
+            },
+            searchChipRemove: {
+                '@click'() {
+                    this.clearSearch();
+                }
+            },
+            filterChip: {
+                'u-show': 'row.values.length'
+            },
+            filterChipAnd: {
+                'u-show': 'search.trim() || !isFirstActive(i)'
+            },
+            filterChipEdit: {
+                '@click': 'editing = i'
+            },
+            filterChipIcon: {
+                ':class': 'fields[row.field]?.icon'
+            },
+            filterChipLabel: {
+                'u-text': 'fields[row.field]?.label'
+            },
+            filterChipOperator: {
+                'u-text': 'row.operator === \'not\' ? texts.isNot : texts.is'
+            },
+            filterChipValues: {
+                'u-text': 'filterLabels(row, texts.selected)'
+            },
+            filterChipRemove: {
+                '@click': 'removeFilter(i)'
+            },
+            clearAll: {
+                '@click'() {
+                    this.clearFilters();
+                }
+            },
+            valuesPopover: {
+                'u-html'() {
+                    return this.filterChoices(this.editing);
+                },
+                '@change'(e) {
+                    this.toggleFilterValue(e.target);
+                }
+            },
+            selectOptions() {
+                return {
+                    contentLocation: root.querySelector('.table-filter-content')
+                };
             },
             items(root) {
                 return [ ...root.querySelectorAll('[u-bind~="item"]') ];
@@ -512,6 +715,7 @@ document.addEventListener('youla:init', () => {
                 root.querySelectorAll('[u-bind~="trigger"], [u-bind~="item"]').forEach(input => input.checked = false);
                 this.anchor = null;
                 this.bulk = 0;
+                this.action = '';
             },
             activeFilters() {
                 return this.rows.filter(row => row.values.length);
@@ -594,9 +798,9 @@ document.addEventListener('youla:init', () => {
                 const options = this.fields[row.field]?.options || {};
                 return row.values.length > 2 ? selected.replace(':count', row.values.length) : row.values.map(value => options[value] ?? value).join(', ');
             },
-            setPart(key, parts) {
-                const names = new Set(Object.values(parts).flatMap(Object.keys));
-                this.setQuery(Object.fromEntries([ ...names ].map(name => [ name, parts[key]?.[name] ?? '' ])));
+            setPart(key) {
+                const names = new Set(Object.values(this.parts).flatMap(Object.keys));
+                this.setQuery(Object.fromEntries([ ...names ].map(name => [ name, this.parts[key]?.[name] ?? '' ])));
             },
             setQuery(values) {
                 const params = new URLSearchParams(window.location.search);
@@ -1152,11 +1356,6 @@ document.addEventListener('youla:init', () => {
         }));
         input.focus();
     });
-    Youla.method('safe', () => ({
-        slug(value) {
-            return value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').toLowerCase();
-        }
-    }));
     Youla.directive('highlight', (el, output, {modifiers}) => {
         if (el._x_highlighted) {
             return;

@@ -871,11 +871,20 @@
     function data(name, callback) {
         register('data', datas, name, callback);
     }
-    function injectDataProviders(root, obj = {}) {
-        Object.entries(datas).forEach(([name, callback]) => {
-            obj[name] = callback(root);
+    function createDataProviderContext(root) {
+        const resolved = {};
+        return new Proxy({}, {
+            has: (target, name) => typeof name === 'string' && isDataProvider(name),
+            get: (target, name) => {
+                if (typeof name !== 'string' || !isDataProvider(name)) {
+                    return undefined;
+                }
+                if (!Object.hasOwn(resolved, name)) {
+                    resolved[name] = datas[name](root);
+                }
+                return resolved[name];
+            }
         });
-        return obj;
     }
     function isDataProvider(name) {
         return !!name && Object.prototype.hasOwnProperty.call(datas, name);
@@ -921,7 +930,6 @@
     class Component {
         constructor(el) {
             el.__x = this;
-            let dataProviderContext = injectDataProviders(el);
             const {expression, modifiers} = getAttributes(el).find(({directive}) => directive === 'u-data') || {
                 expression: '{}',
                 modifiers: []
@@ -937,7 +945,7 @@
             this.alias = alias || null;
             this.storageType = isStorageModifier(modifiers) ? getStorageType(modifiers) : null;
             this.storageExpire = this.storageType ? getNextModifier(modifiers, this.storageType) : null;
-            this.rawData = saferEval(this.name || '{}', dataProviderContext);
+            this.rawData = saferEval(this.name || '{}', createDataProviderContext(el));
             this.rawData = hydrateProps(el, this.rawData, this.parent, isDataProvider(this.name) ? this.name : null);
             if (this.storageType) {
                 const saved = storage.get(`u-data:${this.name}`, this.storageType);

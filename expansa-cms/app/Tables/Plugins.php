@@ -39,9 +39,7 @@ final class Plugins extends Table
                     'class'      => 'badge' . ($is_active ? ' badge--green-lt' : ''),
                     'icon'       => 'ph' . ($is_active ? ' ph-check' : ' ph-circle-half'),
                     'value'      => $is_active ? t('Active', context: 'plugin') : t('Inactive', context: 'plugin'),
-                    'attributes' => [
-                        '@click' => $is_active ? "\$ajax.post('extensions/deactivate',{id: '$id'})" : "\$ajax.post('extensions/activate',{id: '$id'})",
-                    ],
+                    'attributes' => self::action($is_active ? 'extensions/deactivate' : 'extensions/activate', ['id' => $id]),
                 ],
             ];
         }

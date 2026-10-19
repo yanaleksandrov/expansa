@@ -134,7 +134,7 @@ final class Posts extends Table
     public function headData(): array
     {
         $counts = $this->counts();
-        $empty  = '';
+        $empty  = [];
         $parts  = [
             '' => [
                 'label' => t('All') . ' (' . array_sum($counts) . ')',
@@ -161,7 +161,10 @@ final class Posts extends Table
             }
 
             if ($trash > 0 && $this->isTrash) {
-                $empty = sprintf("confirm(texts.emptyTrash) && \$ajax.post('post/empty-trash', %s)", json_encode(['post-type' => $this->type->key]));
+                $empty = [
+                    'endpoint' => 'post/empty-trash',
+                    'data'     => ['post-type' => $this->type->key],
+                ];
             }
         }
 
@@ -298,7 +301,7 @@ final class Posts extends Table
      */
     private function actions(int $id, string $slug): array
     {
-        $item    = json_encode(['post-type' => $this->type->key, 'id' => $id]);
+        $item    = ['post-type' => $this->type->key, 'id' => $id];
         $actions = [];
 
         if ($this->type->public && $slug !== '') {
@@ -314,18 +317,18 @@ final class Posts extends Table
             'href'       => '#',
             'class'      => 't-muted',
             'title'      => t('Duplicate'),
-            'attributes' => ['@click.prevent' => "\$ajax.post('post/duplicate', $item)"],
+            'attributes' => self::action('post/duplicate', $item),
         ];
         $actions[] = $this->type->canTrash ? [
             'href'       => '#',
             'class'      => 't-red',
             'title'      => t('Trash', context: 'action'),
-            'attributes' => ['@click.prevent' => "\$ajax.post('post/delete', $item)"],
+            'attributes' => self::action('post/delete', $item),
         ] : [
             'href'       => '#',
             'class'      => 't-red',
             'title'      => t('Delete'),
-            'attributes' => ['@click.prevent' => "confirm(texts.deleteItem) && \$ajax.post('post/delete', $item)"],
+            'attributes' => self::action('post/delete', $item, 'deleteItem'),
         ];
 
         return $actions;
@@ -339,20 +342,20 @@ final class Posts extends Table
      */
     private function trashActions(int $id): array
     {
-        $item    = json_encode(['post-type' => $this->type->key, 'id' => $id]);
+        $item = ['post-type' => $this->type->key, 'id' => $id];
 
         return [
             [
                 'href'       => '#',
                 'class'      => 't-muted',
                 'title'      => t('Restore'),
-                'attributes' => ['@click.prevent' => "\$ajax.post('post/restore', $item)"],
+                'attributes' => self::action('post/restore', $item),
             ],
             [
                 'href'       => '#',
                 'class'      => 't-red',
                 'title'      => t('Delete Permanently'),
-                'attributes' => ['@click.prevent' => "confirm(texts.deleteItem) && \$ajax.post('post/delete', $item)"],
+                'attributes' => self::action('post/delete', $item, 'deleteItem'),
             ],
         ];
     }

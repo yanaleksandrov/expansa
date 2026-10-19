@@ -4,7 +4,7 @@ use Expansa\Support\Arr;
 
 /**
  * Title linking to `url` with the `actions` links shown on hover,
- * a list of `['title' => ..., 'href' => ..., 'class' => ...]` with optional `attributes`, e.g. `@click`.
+ * a list of `['title' => ..., 'href' => ..., 'class' => ...]` with optional `attributes`, e.g. of Table::action().
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-title.blade.php
  *
