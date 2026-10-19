@@ -94,15 +94,11 @@ $change  = "const q = new URLSearchParams(location.search); q.delete('status'); 
                 <span class="t-muted">{{ t('Add filter:') }}</span>
                 @foreach ($filters as $key => $field)
                     <button class="badge" type="button" @click="addFilter({{ json_encode($key) }})">
-                        @if (! empty($field['icon']))
-                            <i class="{{ $field['icon'] }}"></i>
-                        @endif
-                        {{ $field['label'] }}
+                        <i class="{{ $field['icon'] ?: 'ph ph-circle-half-tilt' }}"></i> {{ $field['label'] }}
                     </button>
                 @endforeach
             </div>
         </div>
-
     @endif
 
     @if ($filters || $find)
