@@ -8,6 +8,7 @@ use App\Models\Post;
 use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
+use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Table;
 use Expansa\Facades\Db;
@@ -86,7 +87,7 @@ final class Posts extends Table
                     'value' => $statuses[$post['status']] ?? $post['status'],
                 ],
                 'post_status' => $post['status'],
-                'date'        => date('Y-m-d H:i', (int) strtotime($post['created_at'])),
+                'date'        => Dates::format((string) $post['created_at']),
             ];
         }, $posts);
     }
@@ -109,11 +110,11 @@ final class Posts extends Table
                 ->view('author'),
             $this->cell('status')
                 ->title(t('Status'))
-                ->fixedWidth('6rem')
+                ->fixedWidth('7rem')
                 ->view('badge'),
             $this->cell('date')
                 ->title(t('Date'))
-                ->fixedWidth('8rem')
+                ->fixedWidth('7rem')
                 ->sortable(),
         ];
     }

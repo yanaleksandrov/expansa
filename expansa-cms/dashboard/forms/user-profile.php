@@ -11,6 +11,7 @@ use App\Api\User\TwoFactor;
 use App\Dashboard\Pages\Profile;
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Dates;
 use App\Support\Passwords;
 use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
@@ -649,34 +650,6 @@ $uid = Form::enqueue(
                 ],
                 [
                     'type'    => 'group',
-                    'name'    => 'activity',
-                    'label'   => t('Recent Activity'),
-                    'columns' => 2,
-                    'fields'  => [
-                        [
-                            'name'     => 'activity',
-                            'type'     => 'custom',
-                            'callback' => function () use ($user) {
-                                $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
-                                ?>
-                                <div class="dg g-2 ga-4">
-                                    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>
-                                    <div class="dg g-1 fs-13">
-                                        <?php foreach (Events::all($user) as $event) : ?>
-                                            <div class="df aic g-2">
-                                                <span><?php echo Events::label($event['event']); ?></span>
-                                                <span class="t-muted"><?php echo htmlspecialchars($event['device'] . ' · ' . $event['ip'] . ' · ' . $date->format(strtotime($event['created_at']))); ?></span>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </div>
-                                <?php
-                            },
-                        ],
-                    ],
-                ],
-                [
-                    'type'    => 'group',
                     'name'    => 'passwords',
                     'label'   => t('Change Password'),
                     'columns' => 2,
@@ -770,6 +743,35 @@ $uid = Form::enqueue(
                 ],
             ],
         ],
+	    [
+		    'type'        => 'tab',
+		    'label'       => t('Activity'),
+		    'name'        => 'activity',
+		    'caption'     => '',
+		    'description' => '',
+		    'icon'        => 'ph ph-clock-counter-clockwise',
+		    'fields'      => [
+			    [
+				    'name'     => 'activity',
+				    'type'     => 'custom',
+				    'callback' => function () use ($user) {
+					    ?>
+					    <div class="dg g-2 ga-4">
+						    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>
+						    <div class="dg g-1 fs-13">
+							    <?php foreach (Events::all($user) as $event) : ?>
+								    <div class="df aic g-2">
+									    <span><?php echo Events::label($event['event']); ?></span>
+									    <span class="t-muted"><?php echo htmlspecialchars($event['device'] . ' · ' . $event['ip'] . ' · ' . Dates::format($event['created_at'])); ?></span>
+								    </div>
+							    <?php endforeach; ?>
+						    </div>
+					    </div>
+					    <?php
+				    },
+			    ],
+		    ],
+	    ],
         [
             'type'     => 'custom',
             'callback' => function () {

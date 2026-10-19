@@ -2,7 +2,6 @@
 
 use App\Models\Comment;
 use App\Models\User;
-use Expansa\Facades\I18n;
 
 /**
  * Comment of the post editor: the avatar with the initials, the author, the date, the status
@@ -25,7 +24,7 @@ $replies  ??= [];
 $isOpen   ??= true;
 $depth    ??= 1;
 $color    = $comment->getColor();
-$date     = $comment->createdAt ? new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT)->format($comment->createdAt) : '';
+$date     = App\Support\Dates::format($comment->createdAt);
 $statuses = Comment::statuses();
 $canEdit  = User::current()?->can('manage_comments') ?? false;
 $payload  = json_encode([

@@ -29,7 +29,7 @@ $email     = $item['email'] ?? '';
                 <strong>{{ $name }}</strong>
             @endif
             @if ($email)
-                <div class="fs-12 t-muted mt-1">{{ $email }}</div>
+                <div class="fs-12 t-muted">{{ $email }}</div>
             @endif
         </div>
     </div>

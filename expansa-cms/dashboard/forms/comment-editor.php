@@ -4,13 +4,12 @@ use App\Dashboard\Pages\Comment as Page;
 use App\Models\Comment;
 use App\Post\Type;
 use App\Support\Activity;
+use App\Support\Dates;
 use Expansa\Builders\Form;
-use Expansa\Facades\I18n;
 
 $comment = Page::comment(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
 $from    = filter_input(INPUT_GET, 'from') === 'post' ? 'post' : '';
 $type    = Type::get($comment->postType);
-$date    = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
 $postUrl = $type !== null && $comment->postId > 0 ? url('dashboard/post?type=' . $type->key . '&id=' . $comment->postId . '&tab=comments') : '';
 
 /**
@@ -248,7 +247,7 @@ return Form::enqueue(
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',
-                    'callback' => function () use ($comment, $date, $postUrl, $from) {
+                    'callback' => function () use ($comment, $postUrl, $from) {
                         $title   = Page::postTitle($comment);
                         $options = function (array $options, string $value): void {
                             foreach ($options as $key => $label) {
@@ -256,8 +255,8 @@ return Form::enqueue(
                             }
                         };
                         $facts   = [
-                            ['ph ph-calendar-plus', t('Submitted'), $comment->createdAt ? $date->format($comment->createdAt) : ''],
-                            ['ph ph-clock-clockwise', t('Updated'), $comment->updatedAt ? $date->format($comment->updatedAt) : '', 'comment-updated'],
+                            ['ph ph-calendar-plus', t('Submitted'), Dates::format($comment->createdAt)],
+                            ['ph ph-clock-clockwise', t('Updated'), Dates::format($comment->updatedAt), 'comment-updated'],
                             ['ph ph-thumbs-up', t('Likes'), $comment->likes . ' / ' . $comment->dislikes],
                             ['ph ph-globe-simple', t('IP Address'), (string) $comment->authorIp],
                             ['ph ph-browser', t('Browser'), (string) $comment->authorAgent],

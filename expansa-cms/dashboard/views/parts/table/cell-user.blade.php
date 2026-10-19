@@ -15,4 +15,4 @@ defined('EX_PATH') || exit;
 <div class="fs-14 lh-sm">
     <a href="{{ url('dashboard/profile?id=' . ($item['id'] ?? 0)) }}" class="fw-500 t-dark">{{ is_scalar($value) ? $value : '' }}</a>
 </div>
-<div class="fs-12 t-muted mt-1">{{ $item['login'] ?? '' }} · {{ $item['email'] ?? '' }}</div>
+<div class="fs-12 t-muted">{{ $item['login'] ?? '' }} · {{ $item['email'] ?? '' }}</div>

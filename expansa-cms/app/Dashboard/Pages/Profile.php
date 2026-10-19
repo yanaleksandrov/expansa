@@ -9,13 +9,12 @@ use App\Api\User\Events;
 use App\Api\User\Sessions;
 use App\Api\User\TwoFactor;
 use App\Models\User;
+use App\Support\Dates;
 use Expansa\Access\Exceptions\AccessDenied;
 use Expansa\Facades\Access;
-use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 use Expansa\Http\Exceptions\NotFound;
 use Expansa\Http\Request;
-use IntlDateFormatter;
 
 /**
  * Profile page: the current user edits their own account, an administrator opens the account
@@ -79,7 +78,6 @@ final class Profile
     public static function admin(User $user): array
     {
         $admin    = User::current();
-        $date     = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
         $isActive = $user->status === User::STATUS_ACTIVE;
 
         return [
@@ -90,12 +88,12 @@ final class Profile
             'canImpersonate' => $user->id !== $admin?->id && $isActive && ! Access::allows($user, 'users_edit'),
             'sessions'       => array_map(fn (array $session) => [
                 ...$session,
-                'active' => $date->format(strtotime($session['used_at'] ?: $session['created_at'])),
+                'active' => Dates::format($session['used_at'] ?: $session['created_at']),
             ], Sessions::all($user)),
             'events'         => array_map(fn (array $event) => [
                 ...$event,
                 'label' => Events::label($event['event']),
-                'date'  => $date->format(strtotime($event['created_at'])),
+                'date'  => Dates::format($event['created_at']),
             ], Events::all($user, 50)),
         ];
     }

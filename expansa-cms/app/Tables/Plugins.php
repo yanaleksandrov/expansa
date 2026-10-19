@@ -72,7 +72,7 @@ final class Plugins extends Table
                 ->view('badge'),
             $this->cell('status')
                 ->title(t('Status'))
-                ->fixedWidth('5rem')
+                ->fixedWidth('7rem')
                 ->view('badge'),
         ];
     }

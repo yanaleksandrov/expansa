@@ -6,13 +6,12 @@ use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
 use App\Support\Activity;
+use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Form;
-use Expansa\Facades\I18n;
 
 $post = Page::post((string) filter_input(INPUT_GET, 'type') ?: 'pages', filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
 $type = Type::get($post->type);
-$date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
 
 // the parents to choose in the details and the URL of each, the base of the slug by the permalink structure
 $parents = $type->hierarchical ? Page::parents($post) : [];
@@ -331,7 +330,7 @@ return Form::enqueue(
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',
-                    'callback' => function () use ($post, $type, $date, $parents) {
+                    'callback' => function () use ($post, $type, $parents) {
                         $author   = Page::author($post);
                         $statuses = Status::getStatuses();
                         $options  = function (array $options, int|string $value): void {
@@ -340,8 +339,8 @@ return Form::enqueue(
                             }
                         };
                         $facts    = $post->id === 0 ? [] : [
-                            ['ph ph-calendar-blank', t('Created'), $post->createdAt ? $date->format(strtotime($post->createdAt)) : ''],
-                            ['ph ph-clock-clockwise', t('Updated'), $post->updatedAt ? $date->format(strtotime($post->updatedAt)) : ''],
+                            ['ph ph-calendar-blank', t('Created'), Dates::format($post->createdAt)],
+                            ['ph ph-clock-clockwise', t('Updated'), Dates::format($post->updatedAt)],
                             ['ph ph-eye', t('Views'), (string) $post->views],
                             ['ph ph-hash', t('ID'), (string) $post->id],
                         ];

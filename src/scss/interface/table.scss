@@ -109,12 +109,10 @@
       }
     }
 
-    // own layer from the start: made only for the fade, it snaps to other pixels in the flipped body and the row jumps
     .table-hidden {
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.25s;
-      will-change: opacity;
     }
 
     &:hover {

@@ -417,7 +417,6 @@ class Option extends Model
             'week-starts-on' => 1,
             'date-format'    => 'F j, Y',
             'time-format'    => 'g:i a',
-            'timezone'       => 'UTC',
             'comments'       => [
                 'status'                => 'open',
                 'requires_registration' => 0,

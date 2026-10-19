@@ -7,6 +7,7 @@ namespace App\Tables;
 use App\Models\Comment;
 use App\Models\User;
 use App\Post\Type;
+use App\Support\Dates;
 use Expansa\Builders\Table;
 use Expansa\Facades\Db;
 use PDO;
@@ -80,7 +81,7 @@ final class Comments extends Table
                 ],
                 'actions'   => [['title' => t('Edit'), 'href' => $url]],
                 'post'      => $titles[$comment['post_type']][$comment['post_id']] ?? '',
-                'date'      => date('Y-m-d H:i', (int) strtotime($comment['created_at'])),
+                'date'      => Dates::format((string) $comment['created_at']),
             ];
         }, $comments);
     }
@@ -102,14 +103,14 @@ final class Comments extends Table
                 ->view('author'),
             $this->cell('status')
                 ->title(t('Status'))
-                ->fixedWidth('6rem')
+                ->fixedWidth('7rem')
                 ->view('badge'),
             $this->cell('post')
                 ->title(t('In reply to'))
-                ->fixedWidth('8rem'),
+                ->fixedWidth('7rem'),
             $this->cell('date')
                 ->title(t('Date'))
-                ->fixedWidth('8rem')
+                ->fixedWidth('7rem')
                 ->sortable(),
         ];
     }

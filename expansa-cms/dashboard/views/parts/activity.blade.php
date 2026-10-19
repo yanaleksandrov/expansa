@@ -1,6 +1,5 @@
 <?php
 
-use Expansa\Facades\I18n;
 
 /**
  * Activity tab of an editor: the card with the timeline of an entity, newest first;
@@ -14,7 +13,6 @@ use Expansa\Facades\I18n;
  */
 defined('EX_PATH') || exit;
 
-$date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
 ?>
 <div class="post-editor-main">
     <div class="post-editor-card">
@@ -48,7 +46,7 @@ $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDat
                             @endforeach
                         </span>
                         @if ($line['at'] !== '')
-                            <time datetime="{{ date('c', strtotime($line['at'])) }}">{{ $date->format(strtotime($line['at'])) }}</time>
+                            <time datetime="{{ date('c', strtotime($line['at'])) }}">{{ App\Support\Dates::format($line['at']) }}</time>
                         @endif
                     </li>
                 @endforeach
