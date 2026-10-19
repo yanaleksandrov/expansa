@@ -389,8 +389,8 @@ class Option extends Model
                 'language' => '',
             ],
             'users'          => [
-                'default-role' => 'subscriber',
-                'membership'   => 0,
+                'role'       => 'subscriber',
+                'membership' => 0,
             ],
             'ai'             => [
                 'url'     => \App\Support\Ai::URL,

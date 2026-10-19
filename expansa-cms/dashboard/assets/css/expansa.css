@@ -2735,6 +2735,7 @@ body.is-unsaved .expansa-search-btn {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s;
+  will-change: opacity;
 }
 .table .table-row:hover .table-hidden {
   opacity: 1;
