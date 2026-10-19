@@ -14,6 +14,44 @@ use Expansa\Facades\Safe;
 // instruction of a secret field: the saved value is never shown back, see App\Support\Secrets
 $saved = static fn ( string $option, string $instruction = '' ): string => Option::get( $option ) ? t( 'Saved. Leave empty to keep it.' ) : $instruction;
 
+// radio buttons of a date or time format, the "custom" one has a text field for its own format
+$format = static function ( string $name, string $label, string $default, array $presets ): array {
+	$saved   = (string) Option::get( $name, $default );
+	$options = [];
+	foreach ( $presets as $preset ) {
+		$options[ $preset ] = [
+			'content'     => date( $preset ),
+			'description' => '<code>' . $preset . '</code>',
+			'checked'     => $saved === $preset,
+		];
+	}
+
+	$isCustom = ! isset( $options[ $saved ] );
+	$value    = htmlspecialchars( $isCustom ? $saved : '', ENT_QUOTES );
+
+	// the label does not check its radio by a click on the text field
+	$options['custom'] = [
+		'content'     => t( 'Custom' ),
+		'description' => '<span class="field-item mt-1 mb-1"><input type="text" name="' . $name . '-custom" value="' . $value . '" placeholder="' . $default . '" @focus="$el.closest(\'label\').querySelector(\'[type=radio]\').click()"></span>'
+			. t( 'Format tokens: [php.net](:link)', 'https://www.php.net/manual/en/datetime.format.php' ),
+		'checked'     => $isCustom,
+	];
+
+	return [
+		'type'        => 'radio',
+		'name'        => $name,
+		'error'       => $name,
+		'label'       => $label,
+		'class'       => 'field field--ui',
+		'instruction' => '',
+		'conditions'  => [],
+		'attributes'  => [
+			'value' => $isCustom ? 'custom' : $saved,
+		],
+		'options'     => $options,
+	];
+};
+
 return Expansa\Builders\Form::enqueue(
 	'settings',
 	[
@@ -225,66 +263,10 @@ return Expansa\Builders\Form::enqueue(
 					'type'    => 'group',
 					'name'    => 'dates',
 					'label'   => t( 'Date and Time' ),
-					'columns' => 2,
+					'columns' => 1,
 					'fields'  => [
-						[
-							'name'     => 'date-format',
-							'type'     => 'custom',
-							'callback' => function () {
-								?>
-								<div class="dg g-2">
-									<label class="dg">
-										<span class="df aic jcsb fw-500"><?php echo t( 'Date Format' ); ?></span>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">April 3, 2021</span> <code class="badge badge--sm badge--dark-lt">F j, Y</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">2021-04-03</span> <code class="badge badge--sm badge--dark-lt">Y-m-d</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">04/03/2021</span> <code class="badge badge--sm badge--dark-lt">m/d/Y</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
-									</label>
-									<div class="fs-13 t-muted"><a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">Get formats list</a> on php.net</div>
-								</div>
-								<?php
-							},
-							'attributes'  => [
-								'u-prop' => 'dateFormat',
-							],
-						],
-						[
-							'name'     => 'time-format',
-							'type'     => 'custom',
-							'callback' => function () {
-								?>
-								<div class="dg g-2">
-									<label class="dg">
-										<span class="df aic jcsb fw-500"><?php echo t( 'Time Format' ); ?></span>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">17:22</span> <code class="badge badge--sm badge--dark-lt">H:i</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">5:22 PM</span> <code class="badge badge--sm badge--dark-lt">g:i A</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">12:50am</span> <code class="badge badge--sm badge--dark-lt">g:ia</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
-									</label>
-									<div class="fs-13 t-muted"><a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">Get full time formats list</a> on php.net</div>
-								</div>
-								<?php
-							},
-							'attributes'  => [
-								'u-prop' => 'timeFormat',
-							],
-						],
+						$format( 'date-format', t( 'Date Format' ), 'F j, Y', [ 'F j, Y', 'Y-m-d', 'm/d/Y', 'd.m.Y' ] ),
+						$format( 'time-format', t( 'Time Format' ), 'g:i a', [ 'H:i', 'g:i a', 'g:i A' ] ),
 						[
 							'type'        => 'select',
 							'name'        => 'week-starts-on',
@@ -295,14 +277,14 @@ return Expansa\Builders\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => '<a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">Get full time formats list</a> on php.net',
+							'instruction' => '',
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'weekStartsOn',
-								'value' => Option::get( 'week-starts-on' ),
+								'value'  => Option::get( 'week-starts-on', 1 ),
 							],
 							'options' => [
 								'0' => t( 'Sunday' ),

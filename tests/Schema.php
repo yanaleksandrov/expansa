@@ -27,7 +27,7 @@ $seed([
             'x'             => '@amfAR',
             'mastodon'      => '',
             'profiles'      => ['https://www.youtube.com/c/amFAR', 'not a url', 'https://www.facebook.com/amfar/'],
-            'founding_date' => '23/09/1985',
+            'founding_date' => '1985-09-23',
             'employees'     => '51-200',
             'identifiers'   => ['vat' => 'US123', 'tax' => ''],
             'email'         => '',
@@ -42,7 +42,7 @@ check('the website takes the name, the alternate name and the tagline of the sit
 check('the website is published by the organization', $website['publisher'] === ['@id' => $url . '#organization'] && $organization['@id'] === $url . '#organization');
 check('the logo is an ImageObject, the image refers to it', $organization['logo']['@type'] === 'ImageObject' && $organization['image'] === ['@id' => $url . '#logo']);
 check('profiles get X from a username, drop invalid and repeated addresses', $organization['sameAs'] === ['https://www.facebook.com/amfar/', 'https://x.com/amfAR', 'https://www.youtube.com/c/amFAR']);
-check('the founding date becomes ISO 8601', $organization['foundingDate'] === '1985-09-23');
+check('the founding date stays ISO 8601', $organization['foundingDate'] === '1985-09-23');
 check('a range of employees becomes a QuantitativeValue', $organization['numberOfEmployees'] === ['@type' => 'QuantitativeValue', 'minValue' => 51, 'maxValue' => 200]);
 check('identifiers become properties of schema.org', $organization['vatID'] === 'US123' && ! isset($organization['taxID']));
 check('empty values are dropped', ! isset($organization['email']) && ! array_key_exists('description', $organization));

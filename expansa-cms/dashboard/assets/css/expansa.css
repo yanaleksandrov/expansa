@@ -1809,72 +1809,74 @@ body.is-unsaved .expansa-search-btn {
      -moz-user-select: none;
           user-select: none;
 }
-.nav__item {
+.nav .nav-item {
   position: relative;
 }
-.nav__item ul {
+.nav .nav-item ul {
   display: flex;
   flex-direction: column;
   font-weight: normal;
   margin-left: 1.325rem;
 }
-.nav__item ul li {
+.nav .nav-item ul li {
   padding: 0;
   line-height: inherit;
 }
-.nav__item ul li:last-of-type {
+.nav .nav-item ul li:last-of-type {
   margin-bottom: 0.75rem;
 }
-.nav__item ul li a {
+.nav .nav-item ul li a {
   display: flex;
   align-items: center;
   padding: 0.25rem 0.775rem;
-  border: none !important;
-  color: var(--expansa-text-muted) !important;
-  background-color: transparent !important;
+  border: none;
+  color: var(--expansa-text-muted);
+  background-color: transparent;
   height: auto;
 }
-.nav__item ul li a:hover {
+.nav .nav-item ul li a:hover {
   color: var(--expansa-primary);
   background-color: transparent;
 }
-.nav__item ul li.is-active > a {
-  color: var(--expansa-secondary) !important;
+.nav .nav-item ul li.is-active > a {
+  color: var(--expansa-primary);
 }
-.nav__item.is-active > .nav__link {
+.nav .nav-item:has(.nav-action):hover > .nav-link, .nav .nav-item:has(.nav-list).is-active > .nav-link {
   background-color: var(--expansa-bg-active);
 }
-.nav__item:has(> .nav__action) > .nav__link {
+.nav .nav-item:has(> .nav-action) > .nav-link {
   padding-right: 2.25rem;
 }
-.nav__item--divider {
+.nav .nav-item--divider {
   padding: 0.4rem 0.75rem;
   text-transform: uppercase;
   font-size: 0.625rem;
   letter-spacing: 0.04em;
   color: var(--expansa-text-muted);
 }
-.nav__item + .nav__item--divider {
+.nav-item + .nav .nav-item--divider {
   padding: 1.25rem 0.75rem 0.4rem;
 }
-.nav__link {
+.nav .nav-link {
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-  color: inherit !important;
+  color: inherit;
   padding: 0.375rem 0.375rem 0.375rem 0.625rem;
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.65rem;
-  transition: background-color 0.3s !important;
+  transition: background-color 0.3s;
   border: 1px solid transparent;
-  height: 1.875rem;
 }
-.nav__link:hover {
+.nav .nav-link:hover {
   background-color: var(--expansa-bg-active);
   color: inherit;
 }
-.nav__action {
+.nav .nav-link i {
+  transform: translateY(1px);
+}
+.nav .nav-action {
   position: absolute;
   top: 3px;
   right: 3px;
@@ -1891,7 +1893,7 @@ body.is-unsaved .expansa-search-btn {
   cursor: pointer;
   transition: color 0.2s, background-color 0.2s;
 }
-.nav__action:hover {
+.nav .nav-action:hover {
   color: var(--expansa-secondary);
   background-color: var(--expansa-bg);
 }

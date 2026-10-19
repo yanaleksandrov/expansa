@@ -22,7 +22,7 @@ final class OptionsService
 {
     public function update(Request $request, Response $response): Response
     {
-        $options = Arr::exclude($request->post, ['nonce']);
+        $options = $this->normalizeFormats(Arr::exclude($request->post, ['nonce']));
 
         foreach ($options as $option => $value) {
             // the roles keep the administrator's permissions and take the new role, see RoleSettings
@@ -72,6 +72,33 @@ final class OptionsService
         }
 
         return $response->notify(t('Options updated successfully'));
+    }
+
+    /**
+     * Take the own date and time formats: "custom" of a format is replaced with the text of its
+     * `-custom` field, an empty text keeps the saved format; the `-custom` fields are not saved.
+     *
+     * @param array<string, mixed> $options Form values.
+     * @return array<string, mixed>
+     */
+    private function normalizeFormats(array $options): array
+    {
+        foreach (['date-format', 'time-format'] as $format) {
+            $custom = trim((string) ($options["$format-custom"] ?? ''));
+            unset($options["$format-custom"]);
+
+            if (($options[$format] ?? '') !== 'custom') {
+                continue;
+            }
+
+            if ($custom === '') {
+                unset($options[$format]);
+            } else {
+                $options[$format] = $custom;
+            }
+        }
+
+        return $options;
     }
 
     /**

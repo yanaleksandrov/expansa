@@ -75,7 +75,7 @@ final class Users extends Table
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('image')
-                ->fixedWidth('2.5rem')
+                ->fixedWidth('2rem')
                 ->view('image'),
             $this->cell('name')
                 ->title(t('Name', context: 'person'))

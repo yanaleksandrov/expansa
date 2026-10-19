@@ -942,6 +942,7 @@ input[type=checkbox]:checked {
 input[type=radio] {
   border-radius: 100% !important;
   transition: all 0.1s linear;
+  corner-shape: initial;
 }
 input[type=radio]:checked {
   border: 4px solid var(--expansa-primary);

@@ -1676,13 +1676,121 @@
         var air_datepicker = __nested_webpack_require_101121__(327);
         var air_datepicker_default = __nested_webpack_require_101121__.n(air_datepicker);
         var index_es = air_datepicker_default();
+        const VIEWPORT_GAP = 8;
+        const ISO_DATE = /^(\d{4})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?)?)?)?$/;
+        const ISO_TIME = /^(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/;
+        const pad = (value, length = 2) => String(value).padStart(length, '0');
+        const toIso = (date, {onlyTimepicker, timepicker, minView}) => {
+            const time = `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            const year = pad(date.getFullYear(), 4);
+            const month = `${year}-${pad(date.getMonth() + 1)}`;
+            const day = `${month}-${pad(date.getDate())}`;
+            if (onlyTimepicker) return time;
+            if (timepicker) return `${day}T${time}`;
+            if (minView === 'years') return year;
+            if (minView === 'months') return month;
+            return day;
+        };
+        const parseIso = value => {
+            const dates = [];
+            for (const part of value.split(',').map(item => item.trim()).filter(Boolean)) {
+                const time = part.match(ISO_TIME);
+                let date;
+                if (time) {
+                    date = new Date;
+                    date.setHours(+time[1], +time[2], 0, 0);
+                } else {
+                    const [, year, month = 1, day = 1, hours = 0, minutes = 0] = part.match(ISO_DATE) ?? [];
+                    if (!year) return null;
+                    date = new Date(+year, month - 1, +day, +hours, +minutes);
+                    if (date.getMonth() !== month - 1 || date.getDate() !== +day) return null;
+                }
+                if (isNaN(date)) return null;
+                dates.push(date);
+            }
+            return dates;
+        };
         document.addEventListener('youla:init', () => {
             Youla.directive('pickadate', (el, output) => {
                 const options = output && typeof output === 'object' ? output : {};
                 if (el._x_pickadate) {
                     el._x_pickadate.destroy();
                 }
-                el._x_pickadate = new index_es(el, {
+                const hidden = document.createElement('input');
+                const name = el.getAttribute('name');
+                const form = el.getAttribute('form');
+                const initial = el.value.trim();
+                const parsed = parseIso(initial);
+                hidden.type = 'hidden';
+                name !== null && hidden.setAttribute('name', name);
+                form !== null && hidden.setAttribute('form', form);
+                el.removeAttribute('name');
+                el.after(hidden);
+                if (!parsed) {
+                    console.warn(`u-pickadate: "${initial}" is not an ISO value, it is submitted as is.`);
+                }
+                let dp;
+                let listening = false;
+                const reposition = () => dp?.visible && dp.setPosition();
+                const listen = on => {
+                    if (listening === on) return;
+                    listening = on;
+                    const method = on ? 'addEventListener' : 'removeEventListener';
+                    window[method]('resize', reposition);
+                    window[method]('scroll', reposition, {
+                        capture: true,
+                        passive: true
+                    });
+                };
+                const position = ({$datepicker, $target, isViewChange}) => {
+                    const opts = dp?.opts ?? options;
+                    if (opts.isMobile) {
+                        listen(false);
+                        $datepicker.style.left = '50%';
+                        $datepicker.style.top = '50%';
+                        $datepicker.style.removeProperty('width');
+                        delete $datepicker.dataset.placement;
+                        return;
+                    }
+                    listen(true);
+                    if (isViewChange) {
+                        requestAnimationFrame(reposition);
+                        return;
+                    }
+                    const anchor = ($target.closest('label') ?? $target).getBoundingClientRect();
+                    const offset = opts.positionOffset ?? 4;
+                    const viewportWidth = document.documentElement.clientWidth;
+                    const viewportHeight = document.documentElement.clientHeight;
+                    $datepicker.style.width = `${anchor.width}px`;
+                    const width = $datepicker.offsetWidth;
+                    const height = $datepicker.offsetHeight;
+                    let left = anchor.left;
+                    if (width > anchor.width && left + width > viewportWidth) {
+                        left = anchor.right - width;
+                    }
+                    if (left < 0 || left + width > viewportWidth) {
+                        left = Math.max(VIEWPORT_GAP, Math.min(left, viewportWidth - width - VIEWPORT_GAP));
+                    }
+                    let placement = 'bottom';
+                    let top = anchor.bottom + offset;
+                    if (top + height > viewportHeight && anchor.top - offset - height >= 0) {
+                        placement = 'top';
+                        top = anchor.top - offset - height;
+                    }
+                    const parent = $datepicker.offsetParent;
+                    if (!parent || parent === document.body) {
+                        left += window.scrollX;
+                        top += window.scrollY;
+                    } else {
+                        const rect = parent.getBoundingClientRect();
+                        left += parent.scrollLeft - rect.left;
+                        top += parent.scrollTop - rect.top;
+                    }
+                    $datepicker.style.left = `${left}px`;
+                    $datepicker.style.top = `${top}px`;
+                    $datepicker.dataset.placement = placement;
+                };
+                dp = el._x_pickadate = new index_es(el, {
                     range: false,
                     inline: false,
                     multipleDatesSeparator: ' — ',
@@ -1693,8 +1801,70 @@
                     dateFormat: window.youla?.dateFormat || 'yyyy-MM-dd',
                     container: el.closest('div'),
                     view: 'days',
-                    ...options
+                    position,
+                    positionOffset: 4,
+                    ...parsed?.length && options.selectedDates === undefined ? {
+                        selectedDates: parsed
+                    } : {},
+                    ...options,
+                    altField: hidden,
+                    altFieldDateFormat: dates => (dp?.selectedDates ?? [].concat(dates)).map(date => toIso(date, dp?.opts ?? options)).join(','),
+                    onHide(isFinished) {
+                        listen(false);
+                        options.onHide?.(isFinished);
+                    }
                 });
+                const monthsGenitive = window.youla?.datepicker?.monthsGenitive;
+                if (monthsGenitive?.length === 12) {
+                    const formatDate = dp.formatDate.bind(dp);
+                    dp.formatDate = (date, format) => {
+                        if (typeof format !== 'string' || !/(^|[^M])MMMM([^M]|$)/.test(format) || !/(^|[^d])dd?([^d]|$)/.test(format)) {
+                            return formatDate(date, format);
+                        }
+                        const months = dp.locale.months;
+                        dp.locale.months = monthsGenitive;
+                        try {
+                            return formatDate(date, format);
+                        } finally {
+                            dp.locale.months = months;
+                        }
+                    };
+                }
+                if (dp.selectedDates.length) {
+                    dp._setInputValue();
+                } else if (!parsed) {
+                    hidden.value = initial;
+                }
+                let synced = hidden.value;
+                const sync = () => {
+                    if (!el.value && hidden.value) {
+                        dp.clear();
+                        return;
+                    }
+                    if (hidden.value === synced) return;
+                    synced = hidden.value;
+                    hidden.dispatchEvent(new Event('input', {
+                        bubbles: true
+                    }));
+                    hidden.dispatchEvent(new Event('change', {
+                        bubbles: true
+                    }));
+                };
+                el.addEventListener('input', sync);
+                el.addEventListener('change', sync);
+                const destroy = dp.destroy;
+                dp.destroy = () => {
+                    if (dp.isDestroyed) return;
+                    const value = hidden.value;
+                    listen(false);
+                    el.removeEventListener('input', sync);
+                    el.removeEventListener('change', sync);
+                    destroy();
+                    name !== null && el.setAttribute('name', name);
+                    form !== null && el.setAttribute('form', form);
+                    el.value = value;
+                    hidden.remove();
+                };
             });
         });
     }();

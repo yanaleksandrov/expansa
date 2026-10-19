@@ -37,7 +37,7 @@ final class Terms extends Table
                 ->view('cb'),
             $this->cell('image')
                 ->title(t('Image'))
-                ->fixedWidth('2.5rem')
+                ->fixedWidth('2rem')
                 ->view('image'),
             $this->cell('title')
                 ->title(t('Title'))
