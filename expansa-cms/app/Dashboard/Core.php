@@ -14,11 +14,13 @@ use App\Dashboard\Pages\SiteHealth;
 use App\Dashboard\Pages\Tables;
 use App\Dashboard\Pages\Updates;
 use App\Facades\Dashboard;
+use App\Models\User;
 use App\Tables\Plugins;
 use App\Tables\PluginsInstall;
 use App\Tables\Terms;
 use App\Tables\Themes;
 use App\Tables\Users;
+use Expansa\Http\Request;
 
 /**
  * Pages of the dashboard itself, registered with the API of plugins before they boot, so a plugin
@@ -41,16 +43,22 @@ final class Core
         Dashboard::page('sign-up', title: fn () => t('Sign Up'));
         Dashboard::page('reset-password', title: fn () => t('Reset Password'));
         Dashboard::page('installed', title: fn () => t('Installed'));
-        Dashboard::page('profile', title: fn (array $data) => match (true) {
-            $data['isNew']  => t('Add New User'),
-            $data['isSelf'] => t('Settings'),
-            default         => $data['user']->showname ?: $data['user']->login,
-        });
+        Dashboard::page(
+            slug: 'profile',
+            title: fn (array $data) => match (true) {
+                $data['isNew']  => t('Add New User'),
+                $data['isSelf'] => t('Settings'),
+                default         => $data['user']->showname ?: $data['user']->login,
+            },
+            // the account of another user is one of the users
+            menu: fn (Request $request) => isset($request->query['new']) || ($request->getInt('id') > 0 && $request->getInt('id') !== User::current()?->id) ? 'users' : 'profile',
+        );
         Dashboard::page(
             slug: 'comment',
             can: 'manage_comments',
             title: fn () => t('Edit Comment'),
-            surface: Surface::Muted
+            surface: Surface::Muted,
+            menu: 'edit?table=comments',
         );
         Dashboard::page(
             slug: 'post',
@@ -61,6 +69,7 @@ final class Core
                 default                     => $data['type']->labelEdit,
             },
             surface: Surface::Muted,
+            menu: fn (Request $request) => 'edit?table=' . ($request->getString('type') ?: 'pages'),
         );
         Dashboard::page('edit', view: Tables::view(...));
         Dashboard::page('users', view: 'screens/edit');

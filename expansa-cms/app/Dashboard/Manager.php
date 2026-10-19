@@ -55,6 +55,8 @@ final class Manager
      * @param string|null                                       $can     Permission to open the page.
      * @param string|Closure(array<string, mixed>): string|null $title   Title, a closure gets the page data; the menu item label by default.
      * @param Surface|null                                      $surface Background of the page area, Surface::Plain by default.
+     * @param string|Closure(Request): string|null              $menu    URL of the menu item the page belongs to, e.g. `edit?table=pages`
+     *                                                                   for an editor; the page itself by default.
      * @return void
      */
     public function page(
@@ -63,8 +65,15 @@ final class Manager
         ?string $can = null,
         string|Closure|null $title = null,
         ?Surface $surface = null,
+        string|Closure|null $menu = null,
     ): void {
-        $options = ['view' => $view, 'can' => $can, 'title' => $title, 'surface' => $surface];
+        $options = [
+            'view'    => $view,
+            'can'     => $can,
+            'title'   => $title,
+            'surface' => $surface,
+            'menu'    => $menu,
+        ];
 
         $this->pages[$slug] = array_filter($options, fn ($option) => $option !== null)
             + ($this->pages[$slug] ?? []);
@@ -135,7 +144,15 @@ final class Manager
             http_response_code((int) $slug);
         }
 
-        Tree::setCurrent($slug, $request->query);
+        // a page under a menu item, e.g. an editor under its list, keeps that item active and its group open
+        $menu = $page['menu'] ?? null;
+        $menu = $menu instanceof Closure ? $menu($request) : $menu;
+        if (is_string($menu)) {
+            parse_str((string) parse_url($menu, PHP_URL_QUERY), $query);
+            Tree::setCurrent((string) parse_url($menu, PHP_URL_PATH), $query);
+        } else {
+            Tree::setCurrent($slug, $request->query);
+        }
 
         // the layout keys win: `page` is the template the layout includes
         $content = view($layout, [...$data, 'page' => $view, 'title' => $title, 'surface' => $page['surface'] ?? Surface::Plain]);
