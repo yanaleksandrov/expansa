@@ -53,21 +53,31 @@ return Form::enqueue(
             'callback' => function () use ($post, $type) {
                 $back  = url('dashboard/edit?table=' . $type->key);
                 $url   = $post->url();
-                $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? htmlspecialchars($post->title) : $type->labelEdit);
+                $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? $post->title : $type->labelEdit);
                 ?>
                 <div class="post-editor-head">
                     <a class="btn btn--icon btn--xs" href="<?php echo $back; ?>" title="<?php echo t_attr('Back to :items', $type->labelNamePlural); ?>">
                         <i class="ph ph-arrow-left"></i>
                     </a>
-                    <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
-                        <a href="<?php echo $back; ?>"><?php echo $type->labelNamePlural; ?></a>
-                        <i class="ph ph-caret-right"></i>
-                        <?php if ($url !== '') : ?>
-	                        <a href="<?php echo $url; ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
-                        <?php else : ?>
-                            <span aria-current="page"><?php echo $title; ?></span>
-                        <?php endif; ?>
-                    </nav>
+                    <?php
+                    echo view('parts/breadcrumbs', [
+                        'items' => [
+                            [
+                                'label' => $type->labelNamePlural,
+                                'url'   => $back,
+                            ],
+                            [
+                                'label'      => $title,
+                                'url'        => $url,
+                                'attributes' => $url !== '' ? [
+                                    'target'             => '_blank',
+                                    'title'              => $type->labelView,
+                                    '@slug-url.document' => '$el.href = $event.detail',
+                                ] : [],
+                            ],
+                        ],
+                    ]);
+                    ?>
                     <?php if ($post->isTrashed()) : ?>
                         <span class="badge t-red"><?php echo t('In the trash'); ?></span>
                     <?php endif; ?>

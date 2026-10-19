@@ -45,7 +45,7 @@ $payload  = json_encode([
                 <span class="badge">{{ $statuses[$comment->status] ?? $comment->status }}</span>
             @endif
             @if ($canEdit)
-                <span class="post-comment-tools ml-auto">
+                <span class="post-comment-tools">
                     @foreach (Comment::moderationActions($comment->status) as $status => $action)
                         <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ $action['label'] }}" @click="$ajax.post('comments/status', {id: {{ $comment->id }}, status: '{{ $status }}', stay: 1})">
                             <i class="{{ $action['icon'] }}"></i>

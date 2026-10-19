@@ -2214,6 +2214,9 @@ option[data-html*="<i "]) {
   background-repeat: no-repeat;
   background-position: center;
 }
+.btn:hover {
+  background-color: var(--expansa-bg-universal);
+}
 .btn:active:not(:disabled) {
   transform: scale(0.99);
 }

@@ -29,6 +29,10 @@
   background-repeat: no-repeat;
   background-position: center;
 
+  &:hover {
+    background-color: var(--expansa-bg-universal);
+  }
+
   &:active:not(:disabled) {
     transform: scale(0.99);
   }

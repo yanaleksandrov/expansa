@@ -65,6 +65,16 @@ final class Translations extends Table
         ];
     }
 
+    /**
+     * All strings on one page: the form saves the strings it shows.
+     *
+     * @return int
+     */
+    public function perPage(): int
+    {
+        return 0;
+    }
+
     public function headData(): array
     {
         return [

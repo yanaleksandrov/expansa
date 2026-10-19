@@ -215,16 +215,22 @@ final class Form
     }
 
     /**
-     * Render a template with the configured renderer, an empty string without configure().
-     * The template gets the cleaned data as `$field`, see Form\Data.
+     * Render a template with the configured renderer and connect its CSS and JS, as a field of a form does;
+     * an empty string without configure(). The template gets the cleaned data as `$field`, see Form\Data.
      *
      * @param string $template Template name, e.g. `input`.
-     * @param array  $data
+     * @param array  $data     Field data; its `type` is the asset uid, the template by default.
      * @return string
      */
     public static function view(string $template, array $data = []): string
     {
-        return self::$view !== null ? (self::$view)($template, ['field' => new Data($data)]) : '';
+        if (self::$view === null) {
+            return '';
+        }
+
+        self::assets($template, (string) ($data['type'] ?? $template));
+
+        return (self::$view)($template, ['field' => new Data($data)]);
     }
 
     /**

@@ -596,25 +596,32 @@ document.addEventListener('youla:init', () => {
                 return row.values.length > 2 ? selected.replace(':count', row.values.length) : row.values.map(value => options[value] ?? value).join(', ');
             },
             applyFilters() {
-                const url = new URL(window.location.href);
-                [ ...url.searchParams.keys() ].filter(key => key.startsWith('filter[')).forEach(key => url.searchParams.delete(key));
-                const search = this.search.trim();
-                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
-                const payload = Object.fromEntries(url.searchParams);
-                this.activeFilters().forEach((row, i) => {
-                    url.searchParams.set(`filter[${i}][field]`, row.field);
-                    url.searchParams.set(`filter[${i}][operator]`, row.operator);
-                    payload[`filter[${i}][field]`] = row.field;
-                    payload[`filter[${i}][operator]`] = row.operator;
-                    row.values.forEach((value, j) => {
-                        url.searchParams.append(`filter[${i}][values][]`, value);
-                        payload[`filter[${i}][values][${j}]`] = value;
-                    });
+                this.goToPage(1);
+            },
+            query(params) {
+                return params.toString().replace(/%2C/gi, ',').replace(/%21/g, '!');
+            },
+            param(field) {
+                return this.fields[field]?.param || field;
+            },
+            goToPage(page) {
+                const params = new URLSearchParams(window.location.search);
+                Object.keys(this.fields).forEach(field => {
+                    params.delete(this.param(field));
+                    params.delete(`${this.param(field)}!`);
                 });
-                window.history.replaceState(null, '', url);
-                this.ajax.post('tables/filter', payload).then(() => {
+                page > 1 ? params.set('page', page) : params.delete('page');
+                const search = this.search.trim();
+                search ? params.set('s', search) : params.delete('s');
+                this.activeFilters().forEach(row => {
+                    const name = this.param(row.field) + (row.operator === 'not' ? '!' : '');
+                    const values = new Set([ ...params.get(name)?.split(',') || [], ...row.values ]);
+                    params.set(name, [ ...values ].join(','));
+                });
+                window.history.replaceState(null, '', '?' + this.query(params));
+                this.ajax.post('tables/filter', Object.fromEntries(params)).then(() => {
                     this.resetAll(root);
-                    root.__x.initialize(root.querySelector('.table-body'));
+                    [ '.table-body', '.table-header-pagination' ].map(selector => root.querySelector(selector)).forEach(el => el && root.__x.initialize(el));
                 });
             }
         };

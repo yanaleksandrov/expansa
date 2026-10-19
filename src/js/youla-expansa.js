@@ -562,8 +562,8 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Table checkboxes and filter: rows "field is/is not values" from `data-fields` (key => {label, icon, options})
-     * and `data-rows`; every change of a filter with values reloads the rows through the API and the page URL.
+     * Table checkboxes, filter and pagination: rows "field is/is not values" from `data-fields` (key => {label, icon, options})
+     * and `data-rows`; every change of a filter with values or of the page reloads the rows through the API and the page URL.
      *
      * @since 1.0
      */
@@ -710,36 +710,45 @@ document.addEventListener('youla:init', ()=> {
                     ? selected.replace(':count', row.values.length)
                     : row.values.map(value => options[value] ?? value).join(', ');
             },
+            // The rows are fewer or other after a change of the filters, so the list starts from the first page.
             applyFilters() {
-                const url = new URL(window.location.href);
-
-                [ ...url.searchParams.keys() ]
-                    .filter(key => key.startsWith('filter['))
-                    .forEach(key => url.searchParams.delete(key));
+                this.goToPage(1);
+            },
+            // URLSearchParams escapes the separators of the filters: `,` of the values and `!` of "is not".
+            query(params) {
+                return params.toString().replace(/%2C/gi, ',').replace(/%21/g, '!');
+            },
+            param(field) {
+                return this.fields[field]?.param || field;
+            },
+            // A filter is the parameter of its field, `author=1,3`, or with `!` for "is not", `role!=editor`.
+            goToPage(page) {
+                const params = new URLSearchParams(window.location.search);
+                Object.keys(this.fields).forEach(field => {
+                    params.delete(this.param(field));
+                    params.delete(`${this.param(field)}!`);
+                });
+                page > 1 ? params.set('page', page) : params.delete('page');
 
                 const search = this.search.trim();
-                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
+                search ? params.set('s', search) : params.delete('s');
 
-                // the table is built by the API from the same query as the page: the part, the search and the order
-                const payload = Object.fromEntries(url.searchParams);
-
-                this.activeFilters().forEach((row, i) => {
-                    url.searchParams.set(`filter[${i}][field]`, row.field);
-                    url.searchParams.set(`filter[${i}][operator]`, row.operator);
-                    payload[`filter[${i}][field]`]    = row.field;
-                    payload[`filter[${i}][operator]`] = row.operator;
-                    row.values.forEach((value, j) => {
-                        url.searchParams.append(`filter[${i}][values][]`, value);
-                        payload[`filter[${i}][values][${j}]`] = value;
-                    });
+                // rows of the same field and operator are one parameter, their values are joined
+                this.activeFilters().forEach(row => {
+                    const name   = this.param(row.field) + (row.operator === 'not' ? '!' : '');
+                    const values = new Set([ ...(params.get(name)?.split(',') || []), ...row.values ]);
+                    params.set(name, [ ...values ].join(','));
                 });
 
-                window.history.replaceState(null, '', url);
+                window.history.replaceState(null, '', '?' + this.query(params));
 
-                // the API replaces the rows: their bindings to this component are initialized again
-                this.ajax.post('tables/filter', payload).then(() => {
+                // the API builds the table from the same query as the page; the rows and the pagination are replaced,
+                // their bindings to this component are initialized again
+                this.ajax.post('tables/filter', Object.fromEntries(params)).then(() => {
                     this.resetAll(root);
-                    root.__x.initialize(root.querySelector('.table-body'));
+                    [ '.table-body', '.table-header-pagination' ]
+                        .map(selector => root.querySelector(selector))
+                        .forEach(el => el && root.__x.initialize(el));
                 });
             },
         };

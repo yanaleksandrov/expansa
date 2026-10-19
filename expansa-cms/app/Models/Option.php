@@ -417,6 +417,7 @@ class Option extends Model
             'week-starts-on' => 1,
             'date-format'    => 'F j, Y',
             'time-format'    => 'g:i a',
+            'table-per-page' => 20,
             'comments'       => [
                 'status'                => 'open',
                 'requires_registration' => 0,
@@ -428,6 +429,8 @@ class Option extends Model
                 'cookies_enabled'       => 1,
                 'previously_approved'   => 1,
                 'moderation'            => 0,
+                'flood_interval'        => 15,
+                'fill_time'             => 3,
             ],
         ];
     }

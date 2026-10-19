@@ -8,7 +8,8 @@ use Expansa\Facades\I18n;
 use Expansa\Facades\Safe;
 
 /**
- * Header above a table: the title with a badge, the tools and the bulk actions shown while rows are selected.
+ * Header above a table: the title with a badge, the tools, the bulk actions shown while rows are selected
+ * and the `pagination` on the right, HTML of parts/table/pagination.
  * `create` is the label of the button leading to the `link` URL, e.g. of the page of a new item;
  * `bulk` are the bulk actions of Table::bulk(); `statuses` are labels of the parts of the list
  * for the filter by status, `trash` for the trash, and `status` is the current one; `find` is the placeholder
@@ -20,12 +21,12 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $content, $uploader, $filter, $filters, $bulk, $search, $translation, $project, $create, $link, $statuses, $status, $find, $empty] = Safe::data($__data ?? [], [
+[$title, $badge, $content, $pagination, $uploader, $filters, $bulk, $search, $translation, $project, $create, $link, $statuses, $status, $find, $empty] = Safe::data($__data ?? [], [
     'title'       => 'trim',
     'badge'       => 'trim',
     'content'     => 'trim',
+    'pagination'  => 'trim',
     'uploader'    => 'bool:false',
-    'filter'      => 'bool:false',
     'filters'     => 'array',
     'bulk'        => 'array',
     'search'      => 'trim',
@@ -55,17 +56,6 @@ $progress = static fn (string $name) => [
     @endif
 
     <div class="table-header-group" u-show="!bulk">
-        @if ($filter)
-            <?php
-            echo Form::view('number', [
-                'type'       => 'number',
-                'name'       => 'page',
-                'class'      => 'field field--raised',
-                'attributes' => ['min' => 0, 'value' => 3],
-            ]);
-            ?>
-        @endif
-
         @if ($uploader)
             <button class="btn btn--outline btn--xs" type="button" @click="$dialog.open('tmpl-media-uploader', uploaderDialog)">
                 <i class="ph ph-upload-simple"></i> {{ t('Add New File') }}
@@ -137,6 +127,8 @@ $progress = static fn (string $name) => [
             <?php echo view('parts/table/bulk', $bulk); ?>
         </div>
     @endif
+
+    <div class="table-header-pagination">{!! $pagination !!}</div>
 </div>
 
 @if ($filters || $statuses || $find)

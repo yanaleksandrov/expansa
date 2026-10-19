@@ -19,11 +19,16 @@ use Expansa\Builders\Form;
  */
 defined('EX_PATH') || exit;
 
+// the selects of the rows are written here, not by Form::view(): their script is connected by hand
+if ($filters) {
+    Form::assets('select', 'select');
+}
+
 // rows are initialized before they are attached, so the popover is found from the component root
-$select  = "{ contentLocation: \$root.querySelector('.table-filter-content') }";
+$select  ="{ contentLocation: \$root.querySelector('.table-filter-content') }";
 $popover = 'table-filter-' . bin2hex(random_bytes(4));
-$change  = "const q = new URLSearchParams(location.search); q.delete('status'); q.delete('view');"
-    . " \$el.value === 'trash' ? q.set('view', 'trash') : \$el.value && q.set('status', \$el.value); location.search = q";
+$change  = "const q = new URLSearchParams(location.search); q.delete('status'); q.delete('view'); q.delete('page');"
+    . " \$el.value === 'trash' ? q.set('view', 'trash') : \$el.value && q.set('status', \$el.value); location.search = query(q)";
 ?>
 <div class="table-filter">
     <div class="table-filter-actions df g-1">

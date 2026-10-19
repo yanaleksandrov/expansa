@@ -169,7 +169,7 @@ final class Comments extends Table
                 ->view('cb'),
             $this->cell('author')
                 ->title(t('Author'))
-                ->fixedWidth('12rem')
+                ->fixedWidth('14rem')
                 ->view('author'),
             $this->cell('comment')
                 ->title(t('Comment'))
@@ -248,6 +248,7 @@ final class Comments extends Table
             'author_id' => [
                 'label'   => t('Author'),
                 'icon'    => 'ph ph-user',
+                'param'   => 'author',
                 'options' => User::options(),
             ],
         ];

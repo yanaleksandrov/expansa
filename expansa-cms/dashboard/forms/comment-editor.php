@@ -45,21 +45,37 @@ return Form::enqueue(
                     <a class="btn btn--icon btn--xs" href="<?php echo $back; ?>" title="<?php echo t_attr('Back'); ?>">
                         <i class="ph ph-arrow-left"></i>
                     </a>
-                    <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
-                        <?php if ($from === 'post' && $postUrl !== '') : ?>
-                            <a href="<?php echo url('dashboard/edit?table=' . $type->key); ?>"><?php echo $type->labelNamePlural; ?></a>
-                            <i class="ph ph-caret-right"></i>
-                            <a href="<?php echo $postUrl; ?>"><?php echo htmlspecialchars($title !== '' ? $title : t('Post #:id', $comment->postId)); ?></a>
-                        <?php else : ?>
-                            <a href="<?php echo $list; ?>"><?php echo t('Comments'); ?></a>
-                        <?php endif; ?>
-                        <i class="ph ph-caret-right"></i>
-                        <?php if ($url !== '') : ?>
-                            <a href="<?php echo $url; ?>" target="_blank" title="<?php echo t_attr('View comment'); ?>" aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></a>
-                        <?php else : ?>
-                            <span aria-current="page"><?php echo t('Comment #:id', $comment->id); ?></span>
-                        <?php endif; ?>
-                    </nav>
+                    <?php
+                    $parents = $from === 'post' && $postUrl !== '' ? [
+                        [
+                            'label' => $type->labelNamePlural,
+                            'url'   => url('dashboard/edit?table=' . $type->key),
+                        ],
+                        [
+                            'label' => $title !== '' ? $title : t('Post #:id', $comment->postId),
+                            'url'   => $postUrl,
+                        ],
+                    ] : [
+                        [
+                            'label' => t('Comments'),
+                            'url'   => $list,
+                        ],
+                    ];
+
+                    echo view('parts/breadcrumbs', [
+                        'items' => [
+                            ...$parents,
+                            [
+                                'label'      => t('Comment #:id', $comment->id),
+                                'url'        => $url,
+                                'attributes' => $url !== '' ? [
+                                    'target' => '_blank',
+                                    'title'  => t('View comment'),
+                                ] : [],
+                            ],
+                        ],
+                    ]);
+                    ?>
                 </div>
                 <?php
             },

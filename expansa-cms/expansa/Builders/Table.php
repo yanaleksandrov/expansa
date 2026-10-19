@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Expansa\Builders;
 
+use Closure;
 use Expansa\Builders\Table\Cell;
+use LogicException;
 
 /**
  * Base of a dashboard table: a subclass returns the rows in data() and describes the columns
  * in cells() with cell(). The template renders a row cell by cell, each with the view of its column,
- * see Table\Cell for the variables of the view.
+ * see Table\Cell for the variables of the view. The rows that match the filters are shown by pages
+ * of perPage(), the page is the `page` query parameter or set by paginate(). A filter is a query parameter
+ * of its field with comma-separated values, `!` after the name for "is not": `?author=1,3&role!=editor`.
  *
  * @package Expansa\Builders
  */
@@ -21,7 +25,19 @@ abstract class Table
     private static string $filter = '';
 
     /**
-     * Rows from data(), null until getData() is called.
+     * Rows on a page, or the function that gets them on the first call; 0 shows all rows on one page.
+     */
+    private static Closure|int $perPage = 20;
+
+    /**
+     * Query parameters of the page the filters must not take, `page` among them.
+     *
+     * @var string[]
+     */
+    private static array $reserved = ['page'];
+
+    /**
+     * Rows from data() that match the filters, null until rows() is called.
      *
      * @var array<int, array<string, mixed>>|null
      */
@@ -35,9 +51,14 @@ abstract class Table
     private ?array $active = null;
 
     /**
-     * Raw `filter` input set by filterBy(), null reads the query parameter.
+     * Query parameters set by filterBy(), null reads `$_GET`.
      */
     private ?array $input = null;
+
+    /**
+     * Requested page from 1, set by paginate(), null reads the `page` query parameter.
+     */
+    private ?int $page = null;
 
     /**
      * Columns, from cells().
@@ -52,15 +73,24 @@ abstract class Table
     public readonly string $style;
 
     /**
-     * Set the file included before every table and the default view of the cells.
+     * Set the file included before every table, the default view of the cells, the rows on a page
+     * and the query parameters of the page the filters must not take.
      *
-     * @param string $filter   File that enqueues the items filter form.
-     * @param string $cellView Prefix of the cell views, e.g. `parts/table/cell`.
+     * @param string      $filter   File that enqueues the items filter form.
+     * @param string      $cellView Prefix of the cell views, e.g. `parts/table/cell`.
+     * @param Closure|int $perPage  Rows on a page or the function returning them, e.g. from the settings.
+     * @param string[]    $reserved Parameters of the page, e.g. `status` and `s`; `page` is always reserved.
      * @return void
      */
-    public static function configure(string $filter = '', string $cellView = ''): void
-    {
-        self::$filter = $filter;
+    public static function configure(
+        string $filter = '',
+        string $cellView = '',
+        Closure|int $perPage = 20,
+        array $reserved = [],
+    ): void {
+        self::$filter   = $filter;
+        self::$perPage  = $perPage;
+        self::$reserved = array_values(array_unique(['page', ...$reserved]));
 
         Cell::configure($cellView);
     }
@@ -83,12 +113,85 @@ abstract class Table
     abstract public function data(): array;
 
     /**
-     * Get the rows to render: data() runs on the first call, so creating a table runs no queries.
+     * Get the rows of the current page: data() runs on the first call, so creating a table runs no queries.
      * Rows that do not match the active filters are left out.
      *
      * @return array<int, array<string, mixed>>
      */
     public function getData(): array
+    {
+        $perPage = $this->perPage();
+
+        return $perPage > 0 ? array_slice($this->rows(), ($this->page() - 1) * $perPage, $perPage) : $this->rows();
+    }
+
+    /**
+     * Get the number of rows that match the filters on all pages.
+     *
+     * @return int
+     */
+    public function total(): int
+    {
+        return count($this->rows());
+    }
+
+    /**
+     * Get the number of pages, 1 without rows.
+     *
+     * @return int
+     */
+    public function pages(): int
+    {
+        $perPage = $this->perPage();
+
+        return $perPage > 0 ? max(1, (int) ceil($this->total() / $perPage)) : 1;
+    }
+
+    /**
+     * Get the current page: the requested one within 1 and pages().
+     *
+     * @return int
+     */
+    public function page(): int
+    {
+        $page = $this->page ?? (int) ($_GET['page'] ?? 1);
+
+        return min(max(1, $page), $this->pages());
+    }
+
+    /**
+     * Show the given page instead of the `page` query parameter, e.g. of an API request.
+     *
+     * @param int $page From 1; out of the range shows the nearest page.
+     * @return static
+     */
+    public function paginate(int $page): static
+    {
+        $this->page = $page;
+
+        return $this;
+    }
+
+    /**
+     * Get the rows on a page, those of configure() by default; 0 shows all rows on one page.
+     *
+     * @return int
+     */
+    public function perPage(): int
+    {
+        if (self::$perPage instanceof Closure) {
+            self::$perPage = (int) (self::$perPage)();
+        }
+
+        return max(0, self::$perPage);
+    }
+
+    /**
+     * Get the rows that match the filters, data() runs on the first call.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function rows(): array
     {
         if ($this->rows === null) {
             $filters    = $this->activeFilters();
@@ -99,10 +202,10 @@ abstract class Table
     }
 
     /**
-     * Describe the fields the rows can be filtered by, keyed by the row key:
-     * `label`, `icon` and `options` as value => label. Without fields the table has no filter.
+     * Describe the fields the rows can be filtered by, keyed by the row key: `label`, `icon`, `options`
+     * as value => label and `param`, the query parameter, the key by default. Without fields the table has no filter.
      *
-     * @return array<string, array{label: string, icon?: string, options: array<string|int, string>}>
+     * @return array<string, array{label: string, icon?: string, param?: string, options: array<string|int, string>}>
      */
     public function filters(): array
     {
@@ -110,14 +213,14 @@ abstract class Table
     }
 
     /**
-     * Filter the rows by the given input instead of the `filter` query parameter, e.g. of an API request.
+     * Filter the rows by the given query parameters instead of `$_GET`, e.g. of an API request.
      *
-     * @param array $filter Items with `field`, `operator` and `values`.
+     * @param array $query Parameters as `author => '1,3'` and `role! => 'editor'`.
      * @return static
      */
-    public function filterBy(array $filter): static
+    public function filterBy(array $query): static
     {
-        $this->input  = $filter;
+        $this->input  = $query;
         $this->active = null;
         $this->rows   = null;
 
@@ -125,10 +228,11 @@ abstract class Table
     }
 
     /**
-     * Get the filters of the `filter` query parameter, each a field of filters(), the operator
-     * `is` or `not` and the known values of the field; a filter without values is skipped.
+     * Get the filters of the query, a field of filters() each: its parameter gives the `is` values,
+     * the parameter with `!` the `not` ones; only the known values of the field count, a filter without them is skipped.
      *
      * @return array<int, array{field: string, operator: string, values: string[]}>
+     * @throws LogicException When the parameter of a field is reserved by configure().
      */
     public function activeFilters(): array
     {
@@ -136,23 +240,27 @@ abstract class Table
             return $this->active;
         }
 
-        $fields = $this->filters();
-        $query  = $this->input ?? (is_array($_GET['filter'] ?? null) ? $_GET['filter'] : []);
+        $query = $this->input ?? $_GET;
 
         $this->active = [];
-        foreach ($query as $filter) {
-            $field   = is_array($filter) ? (string) ($filter['field'] ?? '') : '';
-            $options = $fields[$field]['options'] ?? [];
-            $values  = array_values(array_intersect(array_map('strval', (array) ($filter['values'] ?? [])), array_map('strval', array_keys($options))));
-            if ($values === []) {
-                continue;
+        foreach ($this->filters() as $field => $filter) {
+            $param = (string) ($filter['param'] ?? $field);
+            if (in_array($param, self::$reserved, true)) {
+                throw new LogicException(sprintf('The filter "%s" of %s takes the reserved query parameter "%s".', $field, static::class, $param));
             }
 
-            $this->active[] = [
-                'field'    => $field,
-                'operator' => ($filter['operator'] ?? '') === 'not' ? 'not' : 'is',
-                'values'   => $values,
-            ];
+            $options = array_map('strval', array_keys($filter['options'] ?? []));
+            foreach (['is' => $param, 'not' => "$param!"] as $operator => $name) {
+                $raw    = $query[$name] ?? '';
+                $values = is_string($raw) ? array_values(array_intersect(explode(',', $raw), $options)) : [];
+                if ($values !== []) {
+                    $this->active[] = [
+                        'field'    => $field,
+                        'operator' => $operator,
+                        'values'   => $values,
+                    ];
+                }
+            }
         }
 
         return $this->active;

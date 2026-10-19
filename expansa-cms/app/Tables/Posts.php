@@ -118,7 +118,7 @@ final class Posts extends Table
                 ->view('title'),
             $this->cell('author')
                 ->title(t('Author'))
-                ->fixedWidth('10rem')
+                ->fixedWidth('14rem')
                 ->view('author'),
             $this->cell('status')
                 ->title(t('Status'))
@@ -226,6 +226,7 @@ final class Posts extends Table
             'author_id'   => [
                 'label'   => t('Author'),
                 'icon'    => 'ph ph-user',
+                'param'   => 'author',
                 'options' => User::options(),
             ],
             'months'   => [

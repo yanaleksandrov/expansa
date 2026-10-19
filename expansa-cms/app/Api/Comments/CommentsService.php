@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\Comments;
 
 use App\Models\Comment;
+use App\Models\Option;
 use App\Models\Post;
 use App\Models\User;
 use App\Post\Type;
@@ -167,10 +168,11 @@ final class CommentsService
 
     /**
      * Comment a post from the site as a visitor or a signed-in user, see Comment::submit(); ten in ten minutes
-     * from one address.
+     * from one address. A filled Comment::TRAP field or a form sent sooner than `comments.fill_time` seconds
+     * by its Comment::STAMP gets the notice of a held comment, nothing is saved.
      *
      * @param Request  $request  `post-type` and `id` of the post, `content`, optional `parent_id`,
-     *                           `author_name` and `author_email` of a guest.
+     *                           `author_name` and `author_email` of a guest, the empty Comment::TRAP and Comment::STAMP.
      * @param Response $response
      * @return Response Notice whether the comment is published or waits for moderation.
      * @throws ValidationFailed When the comment is refused, e.g. without a name.
@@ -178,6 +180,17 @@ final class CommentsService
     public function submit(Request $request, Response $response): Response
     {
         Auth::limit('comment-submit:' . ($_SERVER['REMOTE_ADDR'] ?? ''), 10, 600);
+
+        $fillTime = max(0, (int) Option::get('comments.fill_time', 3));
+        $age      = $fillTime > 0 ? Comment::stampAge((string) ($request->post[Comment::STAMP] ?? '')) : 0;
+        if ($age === null) {
+            return $response->notify(t('The form is out of date. Reload the page and try again.'), Notice::Error);
+        }
+
+        // the bot must not learn that it was caught
+        if (($request->post[Comment::TRAP] ?? '') !== '' || $age < $fillTime) {
+            return $response->notify(t('Your comment is awaiting moderation.'));
+        }
 
         $comment = Comment::submit([
             'post_type'    => (string) ($request->post['post-type'] ?? ''),

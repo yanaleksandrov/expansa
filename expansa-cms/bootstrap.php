@@ -325,6 +325,8 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
     Expansa\Builders\Table::configure(
         filter: EX_DASHBOARD . 'forms/items-filter.php',
         cellView: 'parts/table/cell',
+        perPage: fn () => (int) App\Models\Option::get('table-per-page', 20),
+        reserved: ['table', 'view', 'status', 's', 'order', 'project'],
     );
 
     // validation error messages in the site language
