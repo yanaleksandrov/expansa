@@ -6,7 +6,12 @@ use App\Facades\Dashboard;
 use Expansa\Builders\Tree;
 use Expansa\Extensions\Plugin;
 use Expansa\Facades\Asset;
+use Expansa\Facades\Db;
+use Expansa\Facades\Debug;
+use Expansa\Facades\Hook;
+use Expansa\Facades\Lifecycle;
 use Expansa\Support\Is;
+use Plugins\Toolkit\Panel;
 
 return new class extends Plugin
 {
@@ -23,6 +28,16 @@ return new class extends Plugin
     {
         if (! Is::dashboard()) {
             return;
+        }
+
+        spl_autoload_register(static function (string $class): void {
+            if (str_starts_with($class, 'Plugins\\Toolkit\\')) {
+                require __DIR__ . '/src/' . substr($class, 16) . '.php';
+            }
+        });
+
+        if (Is::debug()) {
+            Hook::add('dashboardLoaded', fn (string $content) => $this->renderPanel($content));
         }
 
         Asset::style('toolkit-main', '/plugins/toolkit/assets/css/main.css');
@@ -466,5 +481,41 @@ return new class extends Plugin
 
     public function uninstall(): void
     {
+    }
+
+    /**
+     * Put the debug panel before the closing body tag: metrics, the lifecycle timeline, the queries
+     * and the request, then the sections of other plugins added with the `toolkitPanel` hook.
+     *
+     * @param string $content HTML of the dashboard page.
+     * @return string
+     */
+    private function renderPanel(string $content): string
+    {
+        $position = strripos($content, '</body>');
+        if ($position === false) {
+            return $content;
+        }
+
+        $panel = new Panel()
+            ->add('Metrics', static fn () => [
+                'time'         => metrics()->time(),
+                'memory peak'  => metrics()->memory(),
+                'memory limit' => metrics()->memoryPercent() === null ? 'unlimited' : metrics()->memoryPercent() . '%',
+            ])
+            ->add('Timeline', static fn () => array_map(fn (array $step) => [
+                'type'   => $step['type'],
+                'name'   => $step['name'],
+                'time'   => $step['time'] . 'ms',
+                'memory' => round($step['memory'] / 1024, 1) . 'KB',
+            ], Lifecycle::timeline()))
+            ->add('Queries', static fn () => array_map(fn (string $query) => ['query' => $query], Db::log()))
+            ->add('Request', static fn () => Debug::getContext());
+
+        Hook::run('toolkitPanel', $panel);
+
+        $html = sprintf('<link rel="stylesheet" id="toolkit-debug-css" href="%s">', url('plugins/toolkit/assets/css/debug.css')) . $panel->render();
+
+        return substr_replace($content, $html, $position, 0);
     }
 };

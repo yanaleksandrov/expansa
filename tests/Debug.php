@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Expansa\Debug\Dumper;
 use Expansa\Debug\Manager;
 use Expansa\Debug\Metric;
-use Expansa\Debug\Panel;
 use Expansa\Log\Enums\Level;
 
 // run: php tests/Debug.php
@@ -232,26 +231,6 @@ $failing->configure(view: $view, details: true);
 $html = debugOutput(fn () => $failing->send($error, 'abc123'));
 check('in details mode the fallback has the error and the template failure', str_contains($html, 'LogicException: &lt;script&gt;') && str_contains($html, 'template broke') && ! str_contains($html, 'partial'));
 unlink($view);
-
-// panel
-$panel = new Panel()
-    ->add('Queries', fn () => [['query' => 'SELECT <1>']])
-    ->add('Metrics', fn () => ['time' => '1ms', 'count' => 3])
-    ->add('Broken', fn () => throw new RuntimeException('no data'));
-$sections = $panel->getSections();
-check('a list of rows stays as it is', $sections['Queries'] === [['query' => 'SELECT <1>']]);
-check('pairs become name and value rows', $sections['Metrics'] === [['name' => 'time', 'value' => '1ms'], ['name' => 'count', 'value' => '3']]);
-check('a failing section shows its error', $sections['Broken'] === [['error' => 'no data']]);
-check('the panel escapes values', str_contains($panel->render(), 'SELECT &lt;1&gt;'));
-check('an empty panel renders nothing', new Panel()->render() === '');
-
-$panel->add('Queries', fn () => [['query' => 'replaced']]);
-check('add() keeps a section with the same title', $panel->getSections()['Queries'] === [['query' => 'SELECT <1>']]);
-$panel->forget('Queries')->add('Queries', fn () => [['query' => 'replaced']]);
-check('forget() lets another section take the title', $panel->getSections()['Queries'] === [['query' => 'replaced']]);
-
-Expansa\Facades\Panel::add('Facade', fn () => ['shared' => true]);
-check('the Panel facade keeps one panel for the request', isset(Expansa\Facades\Panel::getSections()['Facade']));
 
 // dumper
 $dumper = new Dumper(console: true);

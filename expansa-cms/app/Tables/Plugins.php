@@ -57,7 +57,7 @@ final class Plugins extends Table
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('image')
-                ->fixedWidth('2.5rem')
+                ->fixedWidth('2rem')
                 ->view('image'),
             $this->cell('plugin')
                 ->title(t('Plugin'))
@@ -82,7 +82,6 @@ final class Plugins extends Table
         return [
             'title'   => t('Plugins'),
             'actions' => 'posts-actions',
-            'filter'  => true,
         ];
     }
 

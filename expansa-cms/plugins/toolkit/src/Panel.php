@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace Expansa\Debug;
+namespace Plugins\Toolkit;
 
 use Closure;
+use Expansa\Debug\Dumper;
 use Throwable;
 
 /**
- * Debug panel at the bottom of a page: sections like the timeline, queries and the request,
- * each a table of rows. A section collects its rows only when the panel is rendered, so it
- * sees the whole request. One instance per request behind the Panel facade; styles are in `css/debug.css`.
+ * Debug panel at the bottom of the dashboard pages in debug mode: sections like the timeline, queries
+ * and the request, each a table of rows. A section collects its rows only when the panel is rendered,
+ * so it sees the whole request. Styles are in `assets/css/debug.css` of the plugin. Another plugin
+ * adds its section with the `toolkitPanel` hook:
  *
  * ```php
- * Panel::add('Queries', fn () => array_map(fn (string $sql) => ['query' => $sql], Db::log()));
+ * Hook::add('toolkitPanel', fn (Panel $panel) => $panel->add('Cache', fn () => ['hits' => 12]));
  * ```
- *
- * @package Expansa\Debug
  */
 final class Panel
 {

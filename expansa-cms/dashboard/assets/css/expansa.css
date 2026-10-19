@@ -501,6 +501,16 @@ img:after {
   transition: opacity 0.3s;
 }
 
+.debug-dump {
+  margin: 0.5rem 0;
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+  background-color: #1e1e1e;
+  color: #e6e6e6;
+  font: 0.75rem/1.5 ui-monospace, monospace;
+  white-space: pre;
+}
+
 .card {
   position: relative;
   background-color: var(--expansa-bg-white);

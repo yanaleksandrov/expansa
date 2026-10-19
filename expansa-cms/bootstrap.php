@@ -150,11 +150,11 @@ Lifecycle::phase('boot', true, function () {
  * Passes the database, site URL, views, extensions root, console version, mail and scheduler, redirect filters and table filter
  * to the framework, then the translations priority, the hook listener classes and the form field types.
  */
-Lifecycle::phase('configure', true, function () {
+Lifecycle::phase('configure', true, function () use ($isLogged) {
     // the connection from env.php; nothing to connect to before install
     if (defined('EX_DB')) {
-        // every query is kept for the debug panel in debug mode; not in the console, where a long process would pile them up
-        $logging = (EX_DB['logging'] ?? false) || (Is::debug() && PHP_SAPI !== 'cli');
+        // every query is kept for the debug panel of the toolkit plugin with EX_DEBUG "log"; not in the console, where a long process would pile them up
+        $logging = (EX_DB['logging'] ?? false) || ($isLogged && PHP_SAPI !== 'cli');
         Db::configure(...array_merge(EX_DB, ['logging' => $logging]));
     }
 
@@ -357,7 +357,6 @@ Lifecycle::phase('configure', true, function () {
     Hook::configure(
         listeners: [
             App\Listeners\Assets::class,
-            App\Listeners\Debug::class,
             App\Listeners\Migrations::class,
             App\Listeners\Seo::class,
         ],
