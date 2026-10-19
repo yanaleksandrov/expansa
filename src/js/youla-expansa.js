@@ -1351,6 +1351,24 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
+     * Puts a value into the input of the field the element is in, e.g. `@click="$fill('Y-m-d')"`.
+     * Fires `input` and `change`, so unsaved changes and field conditions see it.
+     *
+     * @since 1.0
+     */
+    Youla.method('fill', (e, el) => (value) => {
+        const input = el.closest('.field')?.querySelector('input, textarea');
+        if (!input) {
+            return;
+        }
+
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.focus();
+    });
+
+    /**
      * Data sanitizing.
      *
      * @since 1.0

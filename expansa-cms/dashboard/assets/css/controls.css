@@ -1023,7 +1023,7 @@ input[type=radio]:checked {
   --ranger-thumb-bg: transparent;
   --ranger-thumb-hover-bg: transparent;
   --ranger-thumb-border: transparent;
-  --ranger-thumb-icon-size: 4px 18px;
+  --ranger-thumb-icon-size: 2px 16px;
   --ranger-thumb-icon: initial;
   --ranger-thumb-shadow: none;
   --ranger-tick-color: #bdbdbd;
@@ -1824,7 +1824,7 @@ option[data-html*="<i "]) {
   height: auto;
   margin: 0.125rem 0;
   padding: 0;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 .field-item:has([type=radio]) .field-label, .field-item:has([type=checkbox]) .field-label {
   font-weight: 400;
@@ -1921,6 +1921,15 @@ option[data-html*="<i "]) {
   padding: 0.65rem;
   color: var(--expansa-text-muted);
 }
+.field--button .field-item:has(.field-icon) {
+  flex-wrap: wrap;
+  container-type: inline-size;
+}
+@container (max-width: 10rem) {
+  .field--button .field-item:has(.field-icon) .field-label {
+    flex-basis: 100%;
+  }
+}
 .field--button .field-item .field-label {
   font-weight: 500;
 }
@@ -1997,6 +2006,7 @@ option[data-html*="<i "]) {
 .field-item:has([type=radio]) [type=radio] {
   max-width: 1.35rem;
   height: 1.35rem;
+  max-height: 1.35rem;
   border-width: 6px;
   corner-shape: initial;
 }
@@ -2015,6 +2025,7 @@ option[data-html*="<i "]) {
 .field:has(.field-buttons) .field-box {
   display: grid;
   gap: 0.25em;
+  margin-bottom: auto;
 }
 .field:has(.field-buttons) .field-buttons {
   display: flex;
@@ -2046,6 +2057,8 @@ option[data-html*="<i "]) {
   display: flex;
   align-items: center;
   gap: 0.375em;
+  flex: 1;
+  justify-content: center;
 }
 .field:has(.field-buttons) .field-buttons .field-buttons-item:hover {
   color: var(--expansa-text);

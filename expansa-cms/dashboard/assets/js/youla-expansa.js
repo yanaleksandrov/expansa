@@ -1093,6 +1093,20 @@ document.addEventListener('youla:init', () => {
             bubbles: true
         }));
     });
+    Youla.method('fill', (e, el) => value => {
+        const input = el.closest('.field')?.querySelector('input, textarea');
+        if (!input) {
+            return;
+        }
+        input.value = value;
+        input.dispatchEvent(new Event('input', {
+            bubbles: true
+        }));
+        input.dispatchEvent(new Event('change', {
+            bubbles: true
+        }));
+        input.focus();
+    });
     Youla.method('safe', () => ({
         slug(value) {
             return value.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\p{L}\p{N}\s-]/gu, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-').toLowerCase();

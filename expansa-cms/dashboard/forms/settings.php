@@ -14,41 +14,33 @@ use Expansa\Facades\Safe;
 // instruction of a secret field: the saved value is never shown back, see App\Support\Secrets
 $saved = static fn ( string $option, string $instruction = '' ): string => Option::get( $option ) ? t( 'Saved. Leave empty to keep it.' ) : $instruction;
 
-// radio buttons of a date or time format, the "custom" one has a text field for its own format
+// text field of a date or time format, a click on an example below puts its format into the field
 $format = static function ( string $name, string $label, string $default, array $presets ): array {
-	$saved   = (string) Option::get( $name, $default );
-	$options = [];
+	$examples = '';
 	foreach ( $presets as $preset ) {
-		$options[ $preset ] = [
-			'content'     => date( $preset ),
-			'description' => '<code>' . $preset . '</code>',
-			'checked'     => $saved === $preset,
-		];
+		$examples .= sprintf(
+			'<button type="button" class="badge badge--sm badge--dark-lt" title="%s" @click="$fill(%s)">%s</button>',
+			htmlspecialchars( $preset, ENT_QUOTES ),
+			htmlspecialchars( json_encode( $preset, JSON_UNESCAPED_SLASHES ), ENT_QUOTES ),
+			date( $preset )
+		);
 	}
 
-	$isCustom = ! isset( $options[ $saved ] );
-	$value    = htmlspecialchars( $isCustom ? $saved : '', ENT_QUOTES );
-
-	// the label does not check its radio by a click on the text field
-	$options['custom'] = [
-		'content'     => t( 'Custom' ),
-		'description' => '<span class="field-item mt-1 mb-1"><input type="text" name="' . $name . '-custom" value="' . $value . '" placeholder="' . $default . '" @focus="$el.closest(\'label\').querySelector(\'[type=radio]\').click()"></span>'
-			. t( 'Format tokens: [php.net](:link)', 'https://www.php.net/manual/en/datetime.format.php' ),
-		'checked'     => $isCustom,
-	];
-
 	return [
-		'type'        => 'radio',
+		'type'        => 'text',
 		'name'        => $name,
 		'error'       => $name,
 		'label'       => $label,
-		'class'       => 'field field--ui',
-		'instruction' => '',
+		'instruction' => '<span class="df fww g-1 mb-1">' . $examples . '</span>'
+			. t( 'Format tokens: [php.net](:link)', 'https://www.php.net/manual/en/datetime.format.php' ),
 		'conditions'  => [],
 		'attributes'  => [
-			'value' => $isCustom ? 'custom' : $saved,
+			'value'        => (string) Option::get( $name, $default ),
+			'placeholder'  => $default,
+			'required'     => true,
+			'spellcheck'   => 'false',
+			'autocomplete' => 'off',
 		],
-		'options'     => $options,
 	];
 };
 
