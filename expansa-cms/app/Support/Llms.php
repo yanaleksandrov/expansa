@@ -158,7 +158,9 @@ final class Llms
             $title   = str_replace(['[', ']'], ['\[', '\]'], self::line((string) $row['title'])) ?: $slugs[$row['id']];
             $summary = self::summary((string) $row['content']);
 
-            $links[$row['id']] = "- [$title](" . url($slugs[$row['id']]) . ')' . ($summary === '' ? '' : ": $summary");
+            $url = url(Permalinks::post($slugs[$row['id']], $row['id'], $table));
+
+            $links[$row['id']] = "- [$title]($url)" . ($summary === '' ? '' : ": $summary");
         }
 
         return $links;

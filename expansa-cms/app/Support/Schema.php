@@ -36,11 +36,6 @@ final class Schema
     ];
 
     /**
-     * Formats of the founding date the datepicker may give, by the order of preference.
-     */
-    private const array DATE_FORMATS = ['Y-m-d', 'd.m.Y', 'd/m/Y', 'm/d/Y'];
-
-    /**
      * Get the `<script type="application/ld+json">` tag of the graph, empty without nodes.
      *
      * @return string
@@ -215,21 +210,16 @@ final class Schema
     }
 
     /**
-     * Get a date as ISO 8601, empty when no known format fits it.
+     * Get the date of the datepicker, it submits ISO 8601; empty for an invalid one.
      *
      * @param string $date
      * @return string
      */
     private static function date(string $date): string
     {
-        foreach (self::DATE_FORMATS as $format) {
-            $parsed = DateTimeImmutable::createFromFormat('!' . $format, $date);
-            if ($parsed !== false && $parsed->format($format) === $date) {
-                return $parsed->format('Y-m-d');
-            }
-        }
+        $parsed = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
 
-        return '';
+        return $parsed !== false && $parsed->format('Y-m-d') === $date ? $date : '';
     }
 
     /**

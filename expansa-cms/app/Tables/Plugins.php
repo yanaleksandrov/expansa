@@ -38,7 +38,7 @@ final class Plugins extends Table
                 'status'      => [
                     'class'      => 'badge' . ($is_active ? ' badge--green-lt' : ''),
                     'icon'       => 'ph' . ($is_active ? ' ph-check' : ' ph-circle-half'),
-                    'value'      => $is_active ? t('Active') : t('Inactive'),
+                    'value'      => $is_active ? t('Active', context: 'plugin') : t('Inactive', context: 'plugin'),
                     'attributes' => [
                         '@click' => $is_active ? "\$ajax.post('extensions/deactivate',{id: '$id'})" : "\$ajax.post('extensions/activate',{id: '$id'})",
                     ],
@@ -57,7 +57,7 @@ final class Plugins extends Table
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('image')
-                ->fixedWidth('2.5rem')
+                ->fixedWidth('2rem')
                 ->view('image'),
             $this->cell('plugin')
                 ->title(t('Plugin'))
@@ -72,7 +72,7 @@ final class Plugins extends Table
                 ->view('badge'),
             $this->cell('status')
                 ->title(t('Status'))
-                ->fixedWidth('5rem')
+                ->fixedWidth('7rem')
                 ->view('badge'),
         ];
     }
@@ -82,7 +82,6 @@ final class Plugins extends Table
         return [
             'title'   => t('Plugins'),
             'actions' => 'posts-actions',
-            'filter'  => true,
         ];
     }
 

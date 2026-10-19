@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Option;
-use Expansa\Facades\I18n;
 use Expansa\Facades\Role;
 use Expansa\Facades\Safe;
 
@@ -14,11 +13,41 @@ use Expansa\Facades\Safe;
 // instruction of a secret field: the saved value is never shown back, see App\Support\Secrets
 $saved = static fn ( string $option, string $instruction = '' ): string => Option::get( $option ) ? t( 'Saved. Leave empty to keep it.' ) : $instruction;
 
+// text field of a date or time format, a click on an example below puts its format into the field
+$format = static function ( string $name, string $label, string $default, array $presets ): array {
+	$examples = '';
+	foreach ( $presets as $preset ) {
+		$examples .= sprintf(
+			'<button type="button" class="badge badge--sm badge--dark-lt" title="%s" @click="$fill(%s)">%s</button>',
+			htmlspecialchars( $preset, ENT_QUOTES ),
+			htmlspecialchars( json_encode( $preset, JSON_UNESCAPED_SLASHES ), ENT_QUOTES ),
+			date( $preset )
+		);
+	}
+
+	return [
+		'type'        => 'text',
+		'name'        => $name,
+		'error'       => $name,
+		'label'       => $label,
+		'instruction' => '<span class="df fww g-1 mb-1">' . $examples . '</span>'
+			. t( 'Format tokens: [php.net](:link)', 'https://www.php.net/manual/en/datetime.format.php' ),
+		'conditions'  => [],
+		'attributes'  => [
+			'value'        => (string) Option::get( $name, $default ),
+			'placeholder'  => $default,
+			'required'     => true,
+			'spellcheck'   => 'false',
+			'autocomplete' => 'off',
+		],
+	];
+};
+
 return Expansa\Builders\Form::enqueue(
 	'settings',
 	[
 		'class'           => 'tab',
-		'u-data'          => 'tab',
+		'u-data'          => 'tab as tab',
 		'@load'           => '$dirty.watch($el)',
 		'@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
 	],
@@ -31,78 +60,11 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-tree-structure',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'website',
-					'label'         => t( 'Website' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => '',
-					'fields'        => [
-						[
-							'type'        => 'text',
-							'name'        => 'site[name]',
-							'error'       => 'site.name',
-							'label'       => t( 'Name' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => t( 'A quick snapshot of your website' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'      => 'site.name',
-								'value'       => Option::get( 'site.name' ),
-								'required'    => true,
-								'placeholder' => t( 'e.g. Google' ),
-							],
-						],
-						[
-							'type'        => 'text',
-							'name'        => 'site[tagline]',
-							'error'       => 'site.tagline',
-							'label'       => t( 'Tagline' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => t( 'In a few words, explain what this site is about.' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'      => 'site.tagline',
-								'value'       => Option::get( 'site.tagline' ),
-								'placeholder' => t( 'e.g. Just another Expansa site' ),
-							],
-						],
-						[
-							'type'        => 'select',
-							'name'        => 'site[language]',
-							'error'       => 'site.language',
-							'label'       => t( 'Site Language' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => t( 'Main language of the site. The dashboard of each user follows the language of their profile.' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'   => 'site.language',
-								'value'    => Option::get( 'site.language' ),
-								'u-select' => '{"showSearch": 1}',
-							],
-							'options' => I18n::languageOptions(),
-						],
+					'type'    => 'group',
+					'name'    => 'website',
+					'label'   => t( 'Website' ),
+					'columns' => 1,
+					'fields'  => [
 						[
 							'type'        => 'text',
 							'name'        => 'site[url]',
@@ -113,7 +75,7 @@ return Expansa\Builders\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'A quick snapshot of your website' ),
+							'instruction' => t( 'Links, emails and redirects use it. Requests to other domains are moved to this address, so check it opens the site before saving.' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
@@ -121,51 +83,58 @@ return Expansa\Builders\Form::enqueue(
 							'attributes'  => [
 								'u-prop'      => 'site.url',
 								'value'       => Option::get( 'site.url' ),
-								'placeholder' => t( 'e.g. Google' ),
+								'placeholder' => t( 'e.g. https://example.com' ),
+								'type'        => 'url',
 								'required'    => true,
 							],
 						],
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'administrator',
-					'label'         => t( 'Administrator' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => '',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'users',
+					'label'  => t( 'Memberships' ),
+					'fields' => [
 						[
-							'type'        => 'text',
-							'name'        => 'owner[email]',
-							'error'       => 'owner.email',
-							'label'       => t( 'Owner Email Address' ),
+							'type'        => 'hidden',
+							'name'        => 'users[membership]',
+							'error'       => '',
+							'label'       => '',
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
-							'before'      => '<i class="ph ph-at"></i>',
+							'before'      => '',
 							'after'       => '',
-							'instruction' => t( 'This address is used for admin purposes. If you change it, we\'ll send an email to the new address to confirm it. The new address won\'t become active until it\'s confirmed.' ),
+							'instruction' => '',
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
-								'u-prop'   => 'owner.email',
-								'value'    => Option::get( 'owner.email' ),
-								'required' => true,
+								'type'  => 'hidden',
+								'value' => 0,
 							],
 						],
-					],
-				],
-				[
-					'type'          => 'group',
-					'name'          => 'users',
-					'label'         => t( 'Memberships' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+						[
+							'type'        => 'hidden',
+							'name'        => 'users[moderate]',
+							'error'       => '',
+							'label'       => '',
+							'class'       => '',
+							'label_class' => '',
+							'reset'       => 0,
+							'before'      => '',
+							'after'       => '',
+							'instruction' => '',
+							'tooltip'     => '',
+							'copy'        => 0,
+							'validator'   => '',
+							'conditions'  => [],
+							'attributes'  => [
+								'type'  => 'hidden',
+								'value' => 0,
+							],
+						],
 						[
 							'type'        => 'checkbox',
 							'name'        => '',
@@ -181,21 +150,19 @@ return Expansa\Builders\Form::enqueue(
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
-							'attributes'  => [
-								'u-prop' => '',
-							],
+							'attributes'  => [],
 							'options'     => [
 								'users[membership]' => [
 									'content'     => t( 'Anyone can register' ),
 									'icon'        => 'ph ph-user-list',
 									'description' => t( 'Allow visitors to create an account on the site.' ),
-									'checked'     => Option::get( 'users.membership', true ),
+									'checked'     => (bool) Option::get( 'users.membership', false ),
 								],
 								'users[moderate]' => [
 									'content'     => t( 'Must confirm' ),
 									'icon'        => 'ph ph-police-car',
 									'description' => t( 'Choose how new accounts are verified.' ),
-									'checked'     => Option::get( 'users.moderate', false ),
+									'checked'     => (bool) Option::get( 'users.moderate', false ),
 								],
 							],
 						],
@@ -224,76 +191,18 @@ return Expansa\Builders\Form::enqueue(
 								'u-prop' => 'users.role',
 								'value'  => Option::get( 'users.role' ),
 							],
-							'options'     => array_map( static fn ( array $role ) => $role['name'], Role::all() ),
+							'options'     => array_map( static fn ( array $role ) => $role['name'], array_diff_key( Role::all(), [ App\Models\User::ROLE_OWNER => true ] ) ),
 						],
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'dates',
-					'label'         => t( 'Date and Time' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => '',
-					'fields'        => [
-						[
-							'name'     => 'date-format',
-							'type'     => 'custom',
-							'callback' => function () {
-								?>
-								<div class="dg g-2">
-									<label class="dg">
-										<span class="df aic jcsb fw-500"><?php echo t( 'Date Format' ); ?></span>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">April 3, 2021</span> <code class="badge badge--sm badge--dark-lt">F j, Y</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">2021-04-03</span> <code class="badge badge--sm badge--dark-lt">Y-m-d</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">04/03/2021</span> <code class="badge badge--sm badge--dark-lt">m/d/Y</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
-									</label>
-									<div class="fs-13 t-muted"><a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">Get formats list</a> on php.net</div>
-								</div>
-								<?php
-							},
-							'attributes'  => [
-								'u-prop' => 'dateFormat',
-							],
-						],
-						[
-							'name'     => 'time-format',
-							'type'     => 'custom',
-							'callback' => function () {
-								?>
-								<div class="dg g-2">
-									<label class="dg">
-										<span class="df aic jcsb fw-500"><?php echo t( 'Time Format' ); ?></span>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">17:22</span> <code class="badge badge--sm badge--dark-lt">H:i</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">5:22 PM</span> <code class="badge badge--sm badge--dark-lt">g:i A</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">12:50am</span> <code class="badge badge--sm badge--dark-lt">g:ia</code>
-									</label>
-									<label class="df aic jcsb">
-										<span><input class="mr-2" type="radio" name="item">Custom</span> <input class="mw-80" type="text" name="item">
-									</label>
-									<div class="fs-13 t-muted"><a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">Get full time formats list</a> on php.net</div>
-								</div>
-								<?php
-							},
-							'attributes'  => [
-								'u-prop' => 'timeFormat',
-							],
-						],
+					'type'    => 'group',
+					'name'    => 'dates',
+					'label'   => t( 'Date and Time' ),
+					'columns' => 1,
+					'fields'  => [
+						$format( 'date-format', t( 'Date Format' ), 'F j, Y', [ 'F j, Y', 'Y-m-d', 'm/d/Y', 'd.m.Y' ] ),
+						$format( 'time-format', t( 'Time Format' ), 'g:i a', [ 'H:i', 'g:i a', 'g:i A' ] ),
 						[
 							'type'        => 'select',
 							'name'        => 'week-starts-on',
@@ -304,14 +213,14 @@ return Expansa\Builders\Form::enqueue(
 							'reset'       => 0,
 							'before'      => '',
 							'after'       => '',
-							'instruction' => '<a href="https://www.php.net/manual/en/datetime.format.php" target="_blank">Get full time formats list</a> on php.net',
+							'instruction' => '',
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',
 							'conditions'  => [],
 							'attributes'  => [
 								'u-prop' => 'weekStartsOn',
-								'value' => Option::get( 'week-starts-on' ),
+								'value'  => Option::get( 'week-starts-on', 1 ),
 							],
 							'options' => [
 								'0' => t( 'Sunday' ),
@@ -322,28 +231,6 @@ return Expansa\Builders\Form::enqueue(
 								'5' => t( 'Friday' ),
 								'6' => t( 'Saturday' ),
 							],
-						],
-						[
-							'type'        => 'select',
-							'name'        => 'timezone',
-							'error'       => 'timezone',
-							'label'       => t( 'Timezone' ),
-							'class'       => '',
-							'label_class' => '',
-							'reset'       => 0,
-							'before'      => '',
-							'after'       => '',
-							'instruction' => t( 'Choose either a city in the same timezone as you or a UTC (Coordinated Universal Time) time offset.' ),
-							'tooltip'     => '',
-							'copy'        => 0,
-							'validator'   => '',
-							'conditions'  => [],
-							'attributes'  => [
-								'u-prop'   => 'timezone',
-								'u-select' => '{"showSearch": 1}',
-								'value'    => Option::get( 'timezone', 'UTC' ),
-							],
-							'options'     => App\Support\Timezones::all(),
 						],
 					],
 				],
@@ -357,13 +244,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-chats-circle',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'comments',
-					'label'         => t( 'Post Comments' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'comments',
+					'label'  => t( 'Post Comments' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments',
@@ -418,13 +302,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'comments',
-					'label'         => t( 'Email Me Whenever' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'comments',
+					'label'  => t( 'Email Me Whenever' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments[notify_posts]',
@@ -461,13 +342,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'appears',
-					'label'         => t( 'Before a Comment Appears' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'appears',
+					'label'  => t( 'Before a Comment Appears' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'comments',
@@ -504,13 +382,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'avatars',
-					'label'         => t( 'Avatar Display' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'avatars',
+					'label'  => t( 'Avatar Display' ),
+					'fields' => [
 						[
 							'type'        => 'checkbox',
 							'name'        => 'avatars[show]',
@@ -570,7 +445,7 @@ return Expansa\Builders\Form::enqueue(
 								],
 								'generated' => [
 									'image'   => url( 'dashboard/assets/images/dashboard-dark.svg' ),
-									'title'   => t( 'Generated' ),
+									'title'   => t( 'Generated', context: 'avatar' ),
 									'content' => t( 'An avatar generated from the user’s name' ),
 								],
 							],
@@ -587,13 +462,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-shield-check',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'sign-in-limits',
-					'label'         => t( 'Password Guessing' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'sign-in-limits',
+					'label'  => t( 'Password Guessing' ),
+					'fields' => [
 						[
 							'type'        => 'number',
 							'name'        => 'security[attempts]',
@@ -750,13 +622,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'two-factor',
-					'label'         => t( 'Two-Factor Authentication' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'two-factor',
+					'label'  => t( 'Two-Factor Authentication' ),
+					'fields' => [
 						[
 							'type'        => 'hidden',
 							'name'        => 'security[two_factor_roles][_]',
@@ -810,13 +679,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'oauth',
-					'label'         => t( 'Sign-In Providers' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'oauth',
+					'label'  => t( 'Sign-In Providers' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'oauth[google][client_id]',
@@ -981,13 +847,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-mailbox',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'smtp',
-					'label'         => t( 'SMTP Server' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'smtp',
+					'label'  => t( 'SMTP Server' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'mail[host]',
@@ -1145,13 +1008,10 @@ return Expansa\Builders\Form::enqueue(
 					],
 				],
 				[
-					'type'          => 'group',
-					'name'          => 'dkim',
-					'label'         => t( 'DKIM Signature' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'dkim',
+					'label'  => t( 'DKIM Signature' ),
+					'fields' => [
 						[
 							'type'        => 'text',
 							'name'        => 'mail[dkim][domain]',
@@ -1240,13 +1100,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-sparkle',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'ai-service',
-					'label'         => t( 'AI Service' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'ai-service',
+					'label'  => t( 'AI Service' ),
+					'fields' => [
 						[
 							'type'        => 'url',
 							'name'        => 'ai[url]',
@@ -1365,13 +1222,10 @@ return Expansa\Builders\Form::enqueue(
 			'icon'    => 'ph ph-users-three',
 			'fields'  => [
 				[
-					'type'          => 'group',
-					'name'          => 'roles',
-					'label'         => t( 'Roles and Permissions' ),
-					'class'         => '',
-					'label_class'   => '',
-					'content_class' => 'dg ga-4 g-6 gtc-1',
-					'fields'        => [
+					'type'   => 'group',
+					'name'   => 'roles',
+					'label'  => t( 'Roles and Permissions' ),
+					'fields' => [
 						[
 							'name'     => 'roles',
 							'type'     => 'custom',
@@ -1379,8 +1233,8 @@ return Expansa\Builders\Form::enqueue(
 								$permissions = App\Support\RoleSettings::getPermissions();
 								?>
 								<div class="dg g-4">
-									<div class="t-muted fs-13"><?php echo t( 'A user gets the permissions of all their roles. The administrator always keeps manage_options and users_edit. Built-in roles can be changed but not deleted.' ); ?></div>
-									<?php foreach ( Role::all() as $key => $role ) : ?>
+									<div class="t-muted fs-13"><?php echo t( 'A user gets the permissions of all their roles. The owner has every permission, the administrator always keeps manage_options and users_edit. Built-in roles can be changed but not deleted.' ); ?></div>
+									<?php foreach ( array_diff_key( Role::all(), [ App\Models\User::ROLE_OWNER => true ] ) as $key => $role ) : ?>
 										<div class="dg g-2 p-4 card card-border">
 											<div class="df aic fw g-2">
 												<div class="field">

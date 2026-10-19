@@ -111,7 +111,67 @@
   }
 }
 
-/** TABS **/
+.form-group {
+  display: grid;
+  gap: 1.5rem;
+
+  .form-group-label {
+    font-weight: 500;
+  }
+
+  .form-group-content {
+    display: grid;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+
+  // the content keeps the columns after the label even without one, so the groups line up
+  &--row {
+    grid-template-columns: repeat(5, 1fr);
+
+    > .form-group-content {
+      grid-column: 2 / -1;
+    }
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+
+      > .form-group-content {
+        grid-column: auto;
+      }
+    }
+  }
+
+  &--compact {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+
+    > .form-group-label {
+      font-size: 0.75rem;
+      color: var(--expansa-text-muted);
+    }
+
+    > .form-group-content {
+      grid-column: 2 / -1;
+      gap: 0.5rem;
+    }
+  }
+
+  &--stack {
+    gap: 0.5rem;
+  }
+
+  @for $i from 2 through 4 {
+    &--cols-#{$i} > .form-group-content {
+      grid-template-columns: repeat($i, 1fr);
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+      }
+    }
+  }
+}
+
 .tab {
   container: tab / inline-size;
   position: relative;
@@ -121,7 +181,7 @@
   text-align: start;
   align-items: flex-start;
 
-  &__nav {
+  .tab-nav {
     z-index: 2;
     display: flex;
     background-color: inherit;
@@ -150,19 +210,20 @@
     }
   }
 
-  &__title {
+  .tab-title {
     position: relative;
     display: inline-flex;
     align-items: center;
     gap: 0.65em;
     font-weight: 500;
-    white-space: nowrap;
+    line-height: 1.2;
+    padding: 0.45rem 0.8rem;
     color: var(--expansa-text-muted);
     background-color: transparent;
     cursor: pointer;
+    word-break: keep-all;
     transition: color .3s, background-color .3s;
     height: auto;
-    padding: 0.4rem 0.8rem;
     width: 100%;
     border-radius: var(--expansa-border-radius);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -181,7 +242,24 @@
     }
   }
 
-  .tab__content {
+  .tab-caption {
+
+  }
+
+  .tab-description {
+    color: var(--expansa-text-muted);
+    font-size: 0.8125rem;
+    padding-top: 0.25rem;
+    max-width: 50rem;
+    width: 100%;
+    margin-top: -1.5rem;
+
+    @media (max-width: 1024px) {
+      margin-top: -1rem;
+    }
+  }
+
+  .tab-content {
     flex: 1;
     width: 100%;
     max-width: 54rem;

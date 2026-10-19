@@ -14,7 +14,8 @@ if (! function_exists('t')) {
      * Returns the string as is while the translation package is not loaded, e.g. on the requirements page.
      *
      * @param string $string
-     * @param mixed  ...$args Values of the placeholders, in order of appearance.
+     * @param mixed  ...$args Values of the placeholders, in order of appearance;
+     *                        `context: 'name'` for the translation of the string in that context.
      * @return string HTML.
      */
     function t(string $string, mixed ...$args): string
@@ -32,7 +33,8 @@ if (! function_exists('t_attr')) {
      * Translate a string for an HTML attribute value: plain text, escaped once; see I18n::translateAttribute().
      *
      * @param string $string
-     * @param mixed  ...$args Values of the placeholders, in order of appearance.
+     * @param mixed  ...$args Values of the placeholders, in order of appearance;
+     *                        `context: 'name'` for the translation of the string in that context.
      * @return string
      */
     function t_attr(string $string, mixed ...$args): string

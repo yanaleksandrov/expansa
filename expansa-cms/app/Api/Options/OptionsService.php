@@ -8,12 +8,14 @@ use App\Models\Option;
 use App\Models\User;
 use App\Support\Llms;
 use App\Support\Mailer;
+use App\Support\Permalinks;
 use App\Support\RoleSettings;
 use App\Support\Secrets;
 use App\Support\Transliteration;
 use Expansa\Auth\Exceptions\TooManyAttempts;
 use Expansa\Facades\Auth;
 use Expansa\Facades\Mail;
+use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Arr;
@@ -38,6 +40,7 @@ final class OptionsService
             // the SEO form sends only the name and the tagline of the site
             if ($option === 'site' && is_array($value)) {
                 $value = [...(array) Option::get('site', []), ...$value];
+                $value['url'] = $this->normalizeSiteUrl((string) ($value['url'] ?? ''));
             }
 
             if ($option === 'seo' && is_array($value)) {
@@ -45,11 +48,15 @@ final class OptionsService
             }
 
             if ($option === 'permalinks' && is_array($value)) {
-                $value = Transliteration::normalize($value);
+                $value = $this->normalizePermalinks($value);
             }
 
             if ($option === 'comments' && is_array($value)) {
                 $value = $this->normalizeComments($value);
+            }
+
+            if ($option === 'multilingual' && is_array($value)) {
+                $value = $this->normalizeMultilingual($value);
             }
 
             if ($option === 'oauth' && is_array($value)) {
@@ -72,6 +79,92 @@ final class OptionsService
         }
 
         return $response->notify(t('Options updated successfully'));
+    }
+
+    /**
+     * Check the site address: an http(s) URL with a host and no query, without the trailing slash.
+     * The installation is complete while it is set, and requests to other hosts are moved to it.
+     *
+     * @param string $url Form value.
+     * @return string
+     * @throws ValidationFailed When it is not such an URL.
+     */
+    private function normalizeSiteUrl(string $url): string
+    {
+        $url   = rtrim(trim($url), '/');
+        $parts = parse_url($url);
+
+        $isValid = is_array($parts)
+            && in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true)
+            && ($parts['host'] ?? '') !== ''
+            && ! isset($parts['user']) && ! isset($parts['query']) && ! isset($parts['fragment'])
+            && filter_var($url, FILTER_VALIDATE_URL) !== false;
+        if (! $isValid) {
+            throw ValidationFailed::field('site.url', t('Enter the full address of the site, e.g. https://example.com'));
+        }
+
+        return $url;
+    }
+
+    /**
+     * Merge the parts of the permalinks the form sent into the saved ones: the structures, the language
+     * in the URLs (shown only with translations) and the transliteration, each checked on its own.
+     *
+     * @param array<string, mixed> $permalinks Form values.
+     * @return array<string, mixed>
+     * @throws ValidationFailed When a structure is wrong, see Permalinks::normalize().
+     */
+    private function normalizePermalinks(array $permalinks): array
+    {
+        $value = (array) Option::get('permalinks', []);
+        if (isset($permalinks['pages'])) {
+            $value['pages'] = Permalinks::normalize((array) $permalinks['pages']);
+        }
+
+        if (isset($permalinks['language'])) {
+            $value['language'] = $permalinks['language'] === 'subdomain' ? 'subdomain' : 'directory';
+        }
+
+        // the mode is a radio, it is always sent with the transliteration
+        if (isset($permalinks['mode'])) {
+            $value = [...$value, ...Transliteration::normalize($permalinks)];
+        }
+
+        return $value;
+    }
+
+    /**
+     * Bring the multilingual settings to their types: the languages as `locale => code`, the keys
+     * of the services encrypted.
+     *
+     * @param array<string, mixed> $multilingual Form values, the languages as `locale[]` and `code[]`.
+     * @return array<string, mixed>
+     * @throws ValidationFailed When two languages have one code.
+     */
+    private function normalizeMultilingual(array $multilingual): array
+    {
+        $locales   = (array) ($multilingual['languages']['locale'] ?? []);
+        $codes     = (array) ($multilingual['languages']['code'] ?? []);
+        $languages = [];
+        foreach ($locales as $index => $locale) {
+            $locale = trim((string) $locale);
+            $code   = (string) preg_replace('/[^a-z0-9-]/', '', strtolower((string) ($codes[$index] ?? '')));
+            if ($locale !== '' && $code !== '') {
+                $languages[$locale] = $code;
+            }
+        }
+
+        if (count(array_unique($languages)) !== count($languages)) {
+            throw ValidationFailed::field('multilingual.languages', t('Each language needs its own code.'));
+        }
+
+        $values = [
+            'languages' => $languages,
+            'deepl'     => ['key' => (string) ($multilingual['deepl']['key'] ?? '')],
+            'google'    => ['key' => (string) ($multilingual['google']['key'] ?? '')],
+        ];
+
+        return Secrets::keep($values, (array) Option::get('multilingual', []), ['deepl.key', 'google.key']);
     }
 
     /**

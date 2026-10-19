@@ -9,7 +9,7 @@ use Expansa\Patterns\Facade;
 use Throwable;
 
 /**
- * Uncaught errors, see Expansa\Debug\Manager; the debug panel is the Panel facade.
+ * Uncaught errors, see Expansa\Debug\Manager; the debug panel of the dashboard is in the toolkit plugin.
  *
  * @method static void   configure(string $view = '', bool $details = false, bool $strict = false, ?Closure $report = null, ?Closure $warning = null, ?Closure $context = null, ?Closure $json = null, array $collapse = [])
  * @method static bool   hasDetails()

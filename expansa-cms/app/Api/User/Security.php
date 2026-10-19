@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\User;
 
 use App\Models\User;
+use App\Support\Dates;
 use Expansa\Facades\Db;
 use Expansa\Facades\Log;
 use Expansa\Facades\Mail;
@@ -39,7 +40,7 @@ final class Security
                 'name'          => $user->showname ?: $user->login,
                 'device'        => Sessions::describe((string) ($_SERVER['HTTP_USER_AGENT'] ?? '')),
                 'ip'            => (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
-                'time'          => date('Y-m-d H:i T'),
+                'time'          => Dates::format(time()),
                 'method'        => $method,
                 'secureUrl'     => url('secure-account?' . http_build_query([
                     'user'      => $user->id,

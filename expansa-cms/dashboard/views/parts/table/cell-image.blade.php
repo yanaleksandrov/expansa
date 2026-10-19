@@ -12,4 +12,4 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<span class="avatar avatar--rounded" style="background-image: url({{ is_string($value) ? $value : '' }})"></span>
+<span class="avatar avatar--rounded avatar--lg" style="background-image: url({{ is_string($value) ? $value : '' }})"></span>

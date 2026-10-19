@@ -6,8 +6,6 @@
  * @var App\Support\Site $site Settings of the site: name, language, charset, addresses, version; shared with every view.
  */
 defined('EX_PATH') || exit;
-
-$date = new IntlDateFormatter( $site->locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::NONE );
 ?>
 <div class="p-4 df fdr aic g-4 card card-border" id="identity-{{ $identity['id'] }}">
 	<i class="ph ph-{{ $identity['provider'] }}-logo fs-24"></i>
@@ -17,7 +15,7 @@ $date = new IntlDateFormatter( $site->locale, IntlDateFormatter::MEDIUM, IntlDat
 			@if($identity['email'])
 				{{ $identity['email'] }} ·
 			@endif
-			{!! t( 'Connected :date', $date->format( strtotime( $identity['created_at'] ) ) ) !!}
+			{!! t( 'Connected :date', App\Support\Dates::format( $identity['created_at'], false ) ) !!}
 		</div>
 	</div>
 	<div class="ml-auto">

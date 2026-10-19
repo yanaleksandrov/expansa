@@ -36,7 +36,7 @@ return Form::enqueue(
     'site-storage',
     [
         'class'           => 'tab',
-        'u-data'          => 'tab',
+        'u-data'          => 'tab as tab',
         '@load'           => '$dirty.watch($el)',
         '@submit.prevent' => '$ajax.post("options/update", "", () => $dirty.remove($el))',
     ],
@@ -49,13 +49,10 @@ return Form::enqueue(
             'icon'    => 'ph ph-tree-structure',
             'fields'  => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('Upload Limits'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'images',
+                    'label'  => t('Upload Limits'),
+                    'fields' => [
                         [
                             'type'        => 'number',
                             'name'        => 'images[max_file_size]',
@@ -83,13 +80,10 @@ return Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('Folder Structure'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'images',
+                    'label'  => t('Folder Structure'),
+                    'fields' => [
                         [
                             'type'        => 'select',
                             'name'        => 'images[organization]',
@@ -156,13 +150,10 @@ return Form::enqueue(
             'icon'    => 'ph ph-image',
             'fields'  => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('Generated Images'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'images',
+                    'label'  => t('Generated Images'),
+                    'fields' => [
                         [
                             'type'        => 'select',
                             'name'        => 'images[convert_to]',
@@ -244,13 +235,11 @@ return Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('Thumbnails'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-2',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'images',
+                    'label'   => t('Thumbnails'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'type'        => 'number',
                             'name'        => 'images[thumbnail_width]',
@@ -298,13 +287,11 @@ return Form::enqueue(
                     ]
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('Variant Limits'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-2',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'images',
+                    'label'   => t('Variant Limits'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'type'        => 'number',
                             'name'        => 'images[max_width]',
@@ -388,13 +375,10 @@ return Form::enqueue(
             'icon'    => 'ph ph-wrench',
             'fields'  => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('File Cleanup'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'images',
+                    'label'  => t('File Cleanup'),
+                    'fields' => [
                         [
                             'type'        => 'select',
                             'name'        => 'images[cleanup_type]',
@@ -548,13 +532,10 @@ return Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('Integrity Check'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'images',
+                    'label'  => t('Integrity Check'),
+                    'fields' => [
                         [
                             'type'        => 'buttons',
                             'name'        => 'images[check_actions]',
@@ -585,13 +566,10 @@ return Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'images',
-                    'label'         => t('Duplicate Files'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'images',
+                    'label'  => t('Duplicate Files'),
+                    'fields' => [
                         [
                             'type'        => 'buttons',
                             'name'        => 'images[merge_duplicates]',

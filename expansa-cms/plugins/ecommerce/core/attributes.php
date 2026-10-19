@@ -13,13 +13,13 @@ return \Expansa\Builders\Form::enqueue(
     ],
     [
         [
-            'type'          => 'group',
-            'name'          => 'values-group',
-            'label'         => '',
-            'class'         => 'dg attributes-form',
-            'label_class'   => '',
-            'content_class' => 'dg g-3 gtc-4',
-            'fields'        => [
+            'type'    => 'group',
+            'name'    => 'values-group',
+            'label'   => '',
+            'layout'  => 'plain',
+            'columns' => 4,
+            'class'   => 'attributes-form',
+            'fields'  => [
                 [
                     'type'        => 'text',
                     'name'        => 'name',
@@ -125,13 +125,12 @@ return \Expansa\Builders\Form::enqueue(
             ],
         ],
         [
-            'type'          => 'group',
-            'name'          => 'values-group',
-            'label'         => '',
-            'class'         => 'dg attributes-form',
-            'label_class'   => '',
-            'content_class' => 'dg g-3 gtc-1',
-            'fields'        => [
+            'type'   => 'group',
+            'name'   => 'values-group',
+            'label'  => '',
+            'layout' => 'plain',
+            'class'  => 'attributes-form',
+            'fields' => [
                 [
                     'type'        => 'select',
                     'name'        => 'assignments',

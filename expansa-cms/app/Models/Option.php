@@ -388,17 +388,19 @@ class Option extends Model
                 'tagline'  => '',
                 'language' => '',
             ],
-            'owner'          => [
-                'email' => '',
-            ],
             'users'          => [
-                'default-role' => 'subscriber',
-                'membership'   => 0,
+                'role'       => 'subscriber',
+                'membership' => 0,
             ],
             'ai'             => [
                 'url'     => \App\Support\Ai::URL,
                 'model'   => \App\Support\Ai::MODEL,
                 'schemas' => 1,
+            ],
+            'multilingual'   => [
+                'languages' => [],
+                'deepl'     => ['key' => ''],
+                'google'    => ['key' => ''],
             ],
             'mail'           => [
                 'host'       => '',
@@ -415,7 +417,6 @@ class Option extends Model
             'week-starts-on' => 1,
             'date-format'    => 'F j, Y',
             'time-format'    => 'g:i a',
-            'timezone'       => 'UTC',
             'comments'       => [
                 'status'                => 'open',
                 'requires_registration' => 0,

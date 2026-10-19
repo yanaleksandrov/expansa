@@ -25,6 +25,8 @@ check('underscores inside words stay', $render('Set upload_max_filesize and EX_A
 check('underscores at word edges emphasize', $render('_курсив_ и __жирный__, «_важно_»') === '<em>курсив</em> и <strong>жирный</strong>, «<em>важно</em>»');
 check('a lone underscore stays', $render('a _ b _ c') === 'a _ b _ c');
 check('a script link is not rendered', ! str_contains($render('[x](javascript://alert(1))'), '<a'));
+check('code keeps its text as is', $render('Set `*_max_*` and `[a](https://b.c)`') === 'Set <code>*_max_*</code> and <code>[a](https://b.c)</code>');
+check('a value in code is escaped', $translator->translate('e.g. `:example`', '<b>&</b>') === 'e.g. <code>&lt;b&gt;&amp;&lt;/b&gt;</code>');
 
 // placeholders
 check('placeholders take the values in order, with case and suffix', $translator->translate('Hi, ::Firstname, you have :count\st none closed "::TASKNAME" task.', 'john', 1, 'test')

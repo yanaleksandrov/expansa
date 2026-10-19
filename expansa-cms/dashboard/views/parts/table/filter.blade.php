@@ -12,7 +12,8 @@ use Expansa\Builders\Form;
  * @var array<string, string> $statuses Labels of the parts of the list by status, `trash` for the trash;
  *                                      the select opens the chosen one.
  * @var string                $status   Current part.
- * @var string                $find     Placeholder of the search, sent as the `s` query parameter; no search when empty.
+ * @var string                $find     Placeholder of the search, applied with the filters 500ms after the typing
+ *                                      as the `s` parameter and shown as a chip; no search when empty.
  *
  * @package Expansa\Templates
  */
@@ -21,7 +22,6 @@ defined('EX_PATH') || exit;
 // rows are initialized before they are attached, so the popover is found from the component root
 $select  = "{ contentLocation: \$root.querySelector('.table-filter-content') }";
 $popover = 'table-filter-' . bin2hex(random_bytes(4));
-$search  = "const q = new URLSearchParams(location.search); \$el.value ? q.set('s', \$el.value) : q.delete('s'); location.search = q";
 $change  = "const q = new URLSearchParams(location.search); q.delete('status'); q.delete('view');"
     . " \$el.value === 'trash' ? q.set('view', 'trash') : \$el.value && q.set('status', \$el.value); location.search = q";
 ?>
@@ -35,11 +35,12 @@ $change  = "const q = new URLSearchParams(location.search); q.delete('status'); 
                 'before'     => '<i class="ph ph-magnifying-glass"></i>',
                 'class'      => 'field field--sm field--raised',
                 'attributes' => [
-                    'type'        => 'search',
-                    'name'        => 's',
-                    'value'       => $_GET['s'] ?? '',
-                    'placeholder' => $find,
-                    '@search'     => $search,
+                    'type'                   => 'search',
+                    'name'                   => 's',
+                    'placeholder'            => $find,
+                    'u-prop'                 => 'search',
+                    '@input.delay.500ms'     => 'applyFilters()',
+                    '@keydown.enter.prevent' => 'applyFilters()',
                 ],
             ]);
         }
@@ -102,11 +103,28 @@ $change  = "const q = new URLSearchParams(location.search); q.delete('status'); 
             </div>
         </div>
 
-        <div class="table-filter-chips" u-show="activeFilters().length" hidden>
+    @endif
+
+    @if ($filters || $find)
+        <div class="table-filter-chips" u-show="activeFilters().length || search.trim()" hidden>
             <i class="ph ph-funnel"></i>
             <span class="table-filter-chip-list">
+                @if ($find)
+                    <span class="table-filter-chip-wrap" u-show="search.trim()">
+                        <span class="table-filter-chip">
+                            <button class="table-filter-chip-edit" type="button" @click="$root.querySelector('.table-filter [name=s]')?.focus()">
+                                <i class="ph ph-magnifying-glass"></i>
+                                <strong>{{ t('Search') }}</strong>
+                                <span u-text="search.trim()"></span>
+                            </button>
+                            <button class="table-filter-chip-remove" type="button" title="{{ t('Clear search') }}" @click="clearSearch()">
+                                <i class="ph ph-x"></i>
+                            </button>
+                        </span>
+                    </span>
+                @endif
                 <span class="table-filter-chip-wrap" u-each="(row, i) in rows" u-show="row.values.length">
-                    <span u-show="!isFirstActive(i)">{{ t('and') }}</span>
+                    <span u-show="search.trim() || !isFirstActive(i)">{{ t('and') }}</span>
                     <span class="table-filter-chip">
                         <button class="table-filter-chip-edit" type="button" popovertarget="{{ $popover }}-values" @click="editing = i">
                             <i :class="fields[row.field]?.icon"></i>
@@ -120,9 +138,13 @@ $change  = "const q = new URLSearchParams(location.search); q.delete('status'); 
                     </span>
                 </span>
             </span>
-            <button class="btn btn--xs" type="button" popovertarget="{{ $popover }}"><i class="ph ph-plus"></i> {{ t('Add') }}</button>
+            @if ($filters)
+                <button class="btn btn--xs" type="button" popovertarget="{{ $popover }}"><i class="ph ph-plus"></i> {{ t('Add') }}</button>
+            @endif
             <button class="btn btn--xs t-red" type="button" @click="clearFilters()">{{ t('Clear all') }}</button>
-            <div class="table-filter-values" id="{{ $popover }}-values" popover u-html="filterChoices(editing)" @change="toggleFilterValue($event.target)"></div>
+            @if ($filters)
+                <div class="table-filter-values" id="{{ $popover }}-values" popover u-html="filterChoices(editing)" @change="toggleFilterValue($event.target)"></div>
+            @endif
         </div>
     @endif
 </div>

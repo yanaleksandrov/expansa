@@ -30,6 +30,8 @@ Dashboard::page('users', view: 'screens/edit');                   // тот же
 Dashboard::page('orders', view: __DIR__ . '/views/orders');      // шаблон плагина: абсолютный путь без расширения
 Dashboard::page('edit', view: fn (Request $request) => $request->getString('table') === 'files' ? 'screens/media' : 'screens/edit');
 Dashboard::page('orders', title: fn (array $data) => $data['order']->number);
+Dashboard::page('order', menu: 'orders');                           // редактор под пунктом списка
+Dashboard::page('post', menu: fn (Request $request) => 'edit?table=' . $request->getString('type'));
 ```
 
 | Опция   | По умолчанию                       | Что делает                                                  |
@@ -37,6 +39,7 @@ Dashboard::page('orders', title: fn (array $data) => $data['order']->number);
 | `view`  | `screens/<slug>`                   | Шаблон: имя, абсолютный путь или замыкание от запроса       |
 | `can`   | право пункта меню на эту страницу   | Без права — страница 403                                    |
 | `title` | подпись пункта меню, иначе slug    | Строка или замыкание от данных страницы; к нему добавляется имя сайта |
+| `menu`  | сама страница                      | Адрес пункта меню, к которому относится страница, или замыкание от запроса: пункт подсвечен, его группа раскрыта |
 
 Повторный `page()` меняет только переданные опции, остальные остаются: плагин может сменить заголовок
 страницы ядра, не зная её шаблона и права.

@@ -583,6 +583,8 @@ document.addEventListener('youla:init', ()=> {
         return {
             fields: parse(root.dataset.fields, {}),
             rows: parse(root.dataset.rows, []),
+            // the text of the search field, applied with the filters and shown as a chip
+            search: new URLSearchParams(window.location.search).get('s') || '',
             // index of the filter whose chip opened the values popover
             editing: null,
             anchor: null,
@@ -638,11 +640,16 @@ document.addEventListener('youla:init', ()=> {
                 }
             },
             clearFilters() {
-                const applied = this.activeFilters().length;
+                const applied = this.activeFilters().length || this.search;
                 this.rows     = [];
+                this.search   = '';
                 if (applied) {
                     this.applyFilters();
                 }
+            },
+            clearSearch() {
+                this.search = '';
+                this.applyFilters();
             },
             // The values of the previous field are not options of the new one.
             setFilterField(index, field) {
@@ -709,6 +716,9 @@ document.addEventListener('youla:init', ()=> {
                 [ ...url.searchParams.keys() ]
                     .filter(key => key.startsWith('filter['))
                     .forEach(key => url.searchParams.delete(key));
+
+                const search = this.search.trim();
+                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
 
                 // the table is built by the API from the same query as the page: the part, the search and the order
                 const payload = Object.fromEntries(url.searchParams);
@@ -1063,7 +1073,7 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Slug of an entry, the `slug` form template, configured in `u-data="{ ...slug, base, from, parent, bases, synced }"`.
+     * Slug of an entry, the `slug` form template, configured in `u-data="{ ...slug, base, suffix, from, parent, bases, synced }"`.
      * The server makes it from the source field named by `from` while `synced` and from the typed text,
      * 500ms after the last input. Enter keeps it without submitting, Escape brings back the value it had,
      * an empty one is made from the source again. Values set by the server come with an untrusted
@@ -1074,6 +1084,7 @@ document.addEventListener('youla:init', ()=> {
     Youla.data('slug', (root) => ({
         value: root.querySelector?.('.slug-line input')?.value || '',
         base: '',
+        suffix: '',
         from: '',
         parent: '',
         bases: {},
@@ -1120,7 +1131,7 @@ document.addEventListener('youla:init', ()=> {
             },
             // the URL as shown, for the links to the page outside the field, e.g. in the breadcrumbs
             ':data-url'() {
-                const url = this.base + this.value;
+                const url = this.base + this.value + this.suffix;
                 root.dispatchEvent(new CustomEvent('slug-url', { detail: url, bubbles: true }));
 
                 return url;
@@ -1210,23 +1221,23 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Tabs, synced with the page URL: `u-data="tab"` on the wrapper, `u-bind="tabButton('id')"` on
-     * each tab button, `u-bind="tabContent('id')"` on each panel. The active tab starts from the button
-     * the server marks `is-active` or the first panel that is not `hidden`: the tab of `?tab=`, else the first.
+     * Tabs, synced with the page URL: `u-data="tab as tab"` on the wrapper, `u-bind="tab.button('id')"`
+     * on each tab button, `u-show="tab.active === 'id'"` or `u-bind="tab.content('id')"` on each panel.
+     * The active tab starts from the button the server marks `is-active`: the tab of `?tab=`, else the first.
      *
      * @since 1.0
      */
     Youla.data('tab', () => ({
-        tab: null,
-        tabButton(id) {
+        active: null,
+        button(id) {
             return {
                 ':class'() {
-                    this.tab ??= this.$el.classList.contains('is-active') ? id : null;
+                    this.active ??= this.$el.classList.contains('is-active') ? id : null;
 
-                    return { 'is-active': this.tab === id };
+                    return { 'is-active': this.active === id };
                 },
                 '@click'() {
-                    this.tab = id;
+                    this.active = id;
 
                     const url = new URL(window.location.href);
                     url.searchParams.set('tab', id);
@@ -1234,12 +1245,12 @@ document.addEventListener('youla:init', ()=> {
                 },
             };
         },
-        tabContent(id) {
+        content(id) {
             return {
                 'u-show'() {
-                    this.tab ??= this.$el.hidden ? null : id;
+                    this.active ??= this.$el.hidden ? null : id;
 
-                    return this.tab === id;
+                    return this.active === id;
                 },
             };
         },
@@ -1253,9 +1264,9 @@ document.addEventListener('youla:init', ()=> {
      */
     const dirtyStates = new Map();
 
-    // Shakes the page instead of following the link, while any watched form is still dirty.
+    // Shakes the page instead of following the link, while any watched form is still dirty; a new tab keeps the changes.
     window.addEventListener('click', e => {
-        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]')) {
+        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]:not([target="_blank" i])')) {
             e.preventDefault();
 
             document.body.classList.add('is-shake');
@@ -1348,6 +1359,24 @@ document.addEventListener('youla:init', ()=> {
         }
 
         input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    /**
+     * Puts a value into the input of the field the element is in, e.g. `@click="$fill('Y-m-d')"`.
+     * Fires `input` and `change`, so unsaved changes and field conditions see it.
+     *
+     * @since 1.0
+     */
+    Youla.method('fill', (e, el) => (value) => {
+        const input = el.closest('.field')?.querySelector('input, textarea');
+        if (!input) {
+            return;
+        }
+
+        input.value = value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        input.focus();
     });
 
     /**

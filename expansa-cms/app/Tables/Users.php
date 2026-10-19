@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use App\Models\User;
+use App\Support\Dates;
 use Expansa\Builders\Table;
 use Expansa\Facades\Access;
 use Expansa\Facades\Db;
@@ -63,7 +64,7 @@ final class Users extends Table
             'email'  => $user['email'],
             'status' => self::statuses()[$user['status']] ?? $user['status'],
             'role'   => ((array) json_decode((string) $user['roles'], true))[0] ?? '',
-            'visit'  => isset($visits[$user['id']]) ? date('Y-m-d H:i', (int) strtotime($visits[$user['id']])) : t('Never'),
+            'visit'  => isset($visits[$user['id']]) ? Dates::format((string) $visits[$user['id']]) : t('Never'),
         ], $users);
     }
 
@@ -75,24 +76,24 @@ final class Users extends Table
                 ->fixedWidth('1.125rem')
                 ->view('cb'),
             $this->cell('image')
-                ->fixedWidth('2.5rem')
+                ->fixedWidth('2rem')
                 ->view('image'),
             $this->cell('name')
-                ->title(t('Name'))
+                ->title(t('Name', context: 'person'))
                 ->flexibleWidth('16rem')
                 ->sortable()
                 ->view('user'),
             $this->cell('status')
                 ->title(t('Status'))
-                ->fixedWidth('6rem')
+                ->fixedWidth('7rem')
                 ->view('raw'),
             $this->cell('visit')
                 ->title(t('Last Visit'))
-                ->fixedWidth('8rem')
+                ->fixedWidth('7rem')
                 ->view('raw'),
             $this->cell('role')
                 ->title(t('Role'))
-                ->fixedWidth('8rem')
+                ->fixedWidth('7rem')
                 ->view('role'),
         ];
     }
@@ -138,8 +139,8 @@ final class Users extends Table
     private static function statuses(): array
     {
         return [
-            User::STATUS_ACTIVE   => t('Active'),
-            User::STATUS_INACTIVE => t('Disabled'),
+            User::STATUS_ACTIVE   => t('Active', context: 'user'),
+            User::STATUS_INACTIVE => t('Disabled', context: 'user'),
         ];
     }
 

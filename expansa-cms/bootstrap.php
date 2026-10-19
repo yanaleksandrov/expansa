@@ -150,11 +150,11 @@ Lifecycle::phase('boot', true, function () {
  * Passes the database, site URL, views, extensions root, console version, mail and scheduler, redirect filters and table filter
  * to the framework, then the translations priority, the hook listener classes and the form field types.
  */
-Lifecycle::phase('configure', true, function () {
+Lifecycle::phase('configure', true, function () use ($isLogged) {
     // the connection from env.php; nothing to connect to before install
     if (defined('EX_DB')) {
-        // every query is kept for the debug panel in debug mode; not in the console, where a long process would pile them up
-        $logging = (EX_DB['logging'] ?? false) || (Is::debug() && PHP_SAPI !== 'cli');
+        // every query is kept for the debug panel of the toolkit plugin with EX_DEBUG "log"; not in the console, where a long process would pile them up
+        $logging = (EX_DB['logging'] ?? false) || ($isLogged && PHP_SAPI !== 'cli');
         Db::configure(...array_merge(EX_DB, ['logging' => $logging]));
     }
 
@@ -357,7 +357,6 @@ Lifecycle::phase('configure', true, function () {
     Hook::configure(
         listeners: [
             App\Listeners\Assets::class,
-            App\Listeners\Debug::class,
             App\Listeners\Migrations::class,
             App\Listeners\Seo::class,
         ],
@@ -366,45 +365,44 @@ Lifecycle::phase('configure', true, function () {
     // form fields: input types, basic fields, composite fields
     Form::configure(
         types: [
-            'text'            => Expansa\Builders\Form\Fields\Input::class,
-            'color'           => Expansa\Builders\Form\Fields\Input::class,
-            'date'            => Expansa\Builders\Form\Fields\Input::class,
-            'datetime-local'  => Expansa\Builders\Form\Fields\Input::class,
-            'email'           => Expansa\Builders\Form\Fields\Input::class,
-            'month'           => Expansa\Builders\Form\Fields\Input::class,
-            'range'           => Expansa\Builders\Form\Fields\Input::class,
-            'search'          => Expansa\Builders\Form\Fields\Input::class,
-            'tel'             => Expansa\Builders\Form\Fields\Input::class,
-            'time'            => Expansa\Builders\Form\Fields\Input::class,
-            'url'             => Expansa\Builders\Form\Fields\Input::class,
-            'week'            => Expansa\Builders\Form\Fields\Input::class,
+            'text'           => Expansa\Builders\Form\Fields\Input::class,
+            'color'          => Expansa\Builders\Form\Fields\Input::class,
+            'date'           => Expansa\Builders\Form\Fields\Input::class,
+            'datetime-local' => Expansa\Builders\Form\Fields\Input::class,
+            'email'          => Expansa\Builders\Form\Fields\Input::class,
+            'month'          => Expansa\Builders\Form\Fields\Input::class,
+            'range'          => Expansa\Builders\Form\Fields\Input::class,
+            'search'         => Expansa\Builders\Form\Fields\Input::class,
+            'tel'            => Expansa\Builders\Form\Fields\Input::class,
+            'time'           => Expansa\Builders\Form\Fields\Input::class,
+            'url'            => Expansa\Builders\Form\Fields\Input::class,
+            'week'           => Expansa\Builders\Form\Fields\Input::class,
 
-            'builder'         => Expansa\Builders\Form\Fields\Builder::class,
-            'checkbox'        => Expansa\Builders\Form\Fields\Checkbox::class,
-            'custom'          => Expansa\Builders\Form\Fields\Custom::class,
-            'details'         => Expansa\Builders\Form\Fields\Details::class,
-            'divider'         => Expansa\Builders\Form\Fields\Divider::class,
-            'file'            => Expansa\Builders\Form\Fields\File::class,
-            'header'          => Expansa\Builders\Form\Fields\Header::class,
-            'hidden'          => Expansa\Builders\Form\Fields\Hidden::class,
-            'image'           => Expansa\Builders\Form\Fields\Image::class,
-            'input'           => Expansa\Builders\Form\Fields\Input::class,
-            'layout-group'    => Expansa\Builders\Form\Fields\LayoutGroup::class,
-            'layout-step'     => Expansa\Builders\Form\Fields\LayoutStep::class,
-            'layout-tab'      => Expansa\Builders\Form\Fields\LayoutTab::class,
-            'layout-tab-menu' => Expansa\Builders\Form\Fields\LayoutTabMenu::class,
-            'media'           => Expansa\Builders\Form\Fields\Media::class,
-            'number'          => Expansa\Builders\Form\Fields\Number::class,
-            'password'        => Expansa\Builders\Form\Fields\Password::class,
-            'progress'        => Expansa\Builders\Form\Fields\Progress::class,
-            'radio'           => Expansa\Builders\Form\Fields\Radio::class,
-            'select'          => Expansa\Builders\Form\Fields\Select::class,
-            'slug'            => Expansa\Builders\Form\Fields\Slug::class,
-            'submit'          => Expansa\Builders\Form\Fields\Submit::class,
-            'textarea'        => Expansa\Builders\Form\Fields\Textarea::class,
-            'uploader'        => Expansa\Builders\Form\Fields\Uploader::class,
+            'builder'        => Expansa\Builders\Form\Fields\Builder::class,
+            'checkbox'       => Expansa\Builders\Form\Fields\Checkbox::class,
+            'custom'         => Expansa\Builders\Form\Fields\Custom::class,
+            'details'        => Expansa\Builders\Form\Fields\Details::class,
+            'divider'        => Expansa\Builders\Form\Fields\Divider::class,
+            'file'           => Expansa\Builders\Form\Fields\File::class,
+            'header'         => Expansa\Builders\Form\Fields\Header::class,
+            'hidden'         => Expansa\Builders\Form\Fields\Hidden::class,
+            'image'          => Expansa\Builders\Form\Fields\Image::class,
+            'input'          => Expansa\Builders\Form\Fields\Input::class,
+            'layout-group'   => Expansa\Builders\Form\Fields\LayoutGroup::class,
+            'layout-step'    => Expansa\Builders\Form\Fields\LayoutStep::class,
+            'layout-tab'     => Expansa\Builders\Form\Fields\LayoutTab::class,
+            'media'          => Expansa\Builders\Form\Fields\Media::class,
+            'number'         => Expansa\Builders\Form\Fields\Number::class,
+            'password'       => Expansa\Builders\Form\Fields\Password::class,
+            'progress'       => Expansa\Builders\Form\Fields\Progress::class,
+            'radio'          => Expansa\Builders\Form\Fields\Radio::class,
+            'select'         => Expansa\Builders\Form\Fields\Select::class,
+            'slug'           => Expansa\Builders\Form\Fields\Slug::class,
+            'submit'         => Expansa\Builders\Form\Fields\Submit::class,
+            'textarea'       => Expansa\Builders\Form\Fields\Textarea::class,
+            'uploader'       => Expansa\Builders\Form\Fields\Uploader::class,
 
-            'editor'          => Expansa\Builders\Form\Fields\Editor::class,
+            'editor'         => Expansa\Builders\Form\Fields\Editor::class,
             'gallery'         => Expansa\Builders\Form\Fields\Gallery::class,
             'repeater'        => Expansa\Builders\Form\Fields\Repeater::class,
             'message'         => Expansa\Builders\Form\Fields\Message::class,
@@ -422,11 +420,20 @@ Lifecycle::phase('configure', true, function () {
 /**
  * 3. register · installed only: needs env.php and the database.
  *
- * Registers the default roles (admin, editor, author, subscriber) and post types
- * (pages, files); post types create their missing tables.
+ * Sends requests to other hosts to the site address, then registers the default roles
+ * (owner, admin, editor, author, subscriber) and post types (pages, files); post types create
+ * their missing tables.
  */
 Lifecycle::phase('register', fn () => Is::installed(), function () {
-    // roles
+    // a foreign Host header must not get into the links of the site
+    App\Http\CanonicalHost::handle();
+
+    // roles; the owner gets every permission from RoleSettings::grantOwner()
+    Role::add(
+        role: App\Models\User::ROLE_OWNER,
+        name: t('Owner'),
+    );
+
     Role::add(
         role: 'admin',
         name: t('Administrator'),
@@ -445,6 +452,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_edit',
             'private_types_delete',
             'manage_comments',
+            'translate',
             'manage_options',
             'manage_update',
             'manage_import',
@@ -479,6 +487,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_edit',
             'private_types_delete',
             'manage_comments',
+            'translate',
         ],
     );
 
@@ -579,6 +588,9 @@ Lifecycle::phase('extensions', fn () => Is::installed(), function () {
     );
     Extensions::register('plugin');
     Extensions::register('theme');
+
+    // the owner also gets the permissions of the roles the extensions registered
+    App\Support\RoleSettings::grantOwner();
 });
 
 /**

@@ -40,10 +40,10 @@ final class UserService
      * must not take the account over by its email) and replaces the old one only after its link is
      * opened, see Verification::changeEmail(); an administrator changes the email of another account at once.
      *
-     * @param Request  $request  `id`, profile fields and the custom fields `bio`, `toolbar`, `format`.
+     * @param Request  $request  `id`, profile fields, `role` and the custom fields `bio`, `toolbar`, `format`.
      * @param Response $response
      * @return Response Notice.
-     * @throws ValidationFailed When the new email is taken.
+     * @throws ValidationFailed When the new email is taken or the role is refused, see Admin::refuseRole().
      */
     public function update(Request $request, Response $response): Response
     {
@@ -58,6 +58,10 @@ final class UserService
             $user = Admin::find($id);
             if ($user === null) {
                 return $response->notify(t('User not found'));
+            }
+
+            if (Admin::isProtected($current, $user)) {
+                return $response->notify(t('Only the owner can change the owner account.'));
             }
         }
 
@@ -75,6 +79,16 @@ final class UserService
             throw ValidationFailed::field('email', t('Sorry, that email address is already in use.'));
         }
 
+        // the role field is shown only to those who manage the users
+        $role      = (string) ($request->post['role'] ?? '');
+        $isNewRole = $role !== '' && $user->roles !== [$role];
+        if ($isNewRole) {
+            $refusal = Access::allows($current, 'users_edit') ? Admin::refuseRole($current, $role, $user) : t('Sorry, you are not allowed to edit this user.');
+            if ($refusal !== null) {
+                throw ValidationFailed::field('role', $refusal);
+            }
+        }
+
         $fields  = $this->customFields($request);
         $updated = $user->update($data);
         if (! $updated instanceof User) {
@@ -83,6 +97,10 @@ final class UserService
 
         foreach ($fields as $key => $value) {
             $updated->field->update($key, $value);
+        }
+
+        if ($isNewRole) {
+            Admin::setRole($current, $updated, $role);
         }
 
         if ($isNewEmail && ! $isSelf) {
@@ -592,6 +610,12 @@ final class UserService
     {
         $data     = array_intersect_key($request->post, array_flip(['login', 'role', ...self::PROFILE_FIELDS]));
         $password = trim((string) ($request->post['password'] ?? ''));
+
+        $refusal = isset($data['role']) ? Admin::refuseRole(User::current(), (string) $data['role']) : null;
+        if ($refusal !== null) {
+            throw ValidationFailed::field('role', $refusal);
+        }
+
         if ($password !== '') {
             $refusal = Passwords::check($password, [(string) ($data['login'] ?? ''), (string) ($data['email'] ?? '')]);
             if ($refusal !== null) {
@@ -877,6 +901,10 @@ final class UserService
         $user  = Admin::find((int) ($request->post['id'] ?? 0));
         if ($user === null) {
             return $response->notify(t('User not found'));
+        }
+
+        if (Admin::isProtected($admin, $user)) {
+            return $response->notify(t('Only the owner can change the owner account.'));
         }
 
         if ($needsConfirmation && ! Confirmation::check($admin, $request->post)) {

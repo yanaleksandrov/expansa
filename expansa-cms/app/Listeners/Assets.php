@@ -25,7 +25,8 @@ final class Assets
     {
         return str_replace(
             '0Q 0.001s 999kb',
-            sprintf('%dQ %s %s', count(Db::log()), metrics()->time(), metrics()->memory()),
+            // always in seconds, like the placeholder
+            sprintf('%dQ %.3fs %s', count(Db::log()), metrics()->time(true), metrics()->memory()),
             $content
         );
     }

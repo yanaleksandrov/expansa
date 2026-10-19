@@ -13,7 +13,7 @@ final class Hidden extends AbstractField
     {
         parent::__construct(
             type: 'hidden',
-            label: t('Hidden'),
+            label: t('Hidden', context: 'field type'),
             category: 'advanced',
             icon: 'ph ph-eye-slash',
             description: t('Stores a fixed or computed value without displaying an input to the user.'),
@@ -30,7 +30,7 @@ final class Hidden extends AbstractField
             [
                 'type'       => 'text',
                 'name'       => 'name',
-                'label'      => t('Name'),
+                'label'      => t('Name', context: 'field'),
                 'attributes' => ['required' => true],
             ],
             [

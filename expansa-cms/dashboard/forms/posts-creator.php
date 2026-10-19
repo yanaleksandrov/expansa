@@ -219,7 +219,7 @@ return \Expansa\Builders\Form::enqueue(
             'attributes'  => [ 'u-prop' => 'discussion' ],
             'options'     => [
                 'open'        => t('Open'),
-                'close'       => t('Close'),
+                'close'       => t('Closed'),
                 'temporarily' => t('Temporarily'),
             ],
         ],

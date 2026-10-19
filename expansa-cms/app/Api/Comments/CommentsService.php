@@ -8,13 +8,12 @@ use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use App\Post\Type;
+use App\Support\Dates;
 use Expansa\Facades\Auth;
-use Expansa\Facades\I18n;
 use Expansa\Http\Exceptions\ValidationFailed;
 use Expansa\Http\Request;
 use Expansa\Http\Response;
 use Expansa\Support\Error;
-use IntlDateFormatter;
 
 final class CommentsService
 {
@@ -49,8 +48,7 @@ final class CommentsService
         }
 
         // the "Updated" fact of the comment page, in the format it is rendered with
-        $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
-        $time = htmlspecialchars((string) $date->format($updated->updatedAt));
+        $time = htmlspecialchars(Dates::format($updated->updatedAt));
 
         return $response
             ->notify(t('Comment updated'))

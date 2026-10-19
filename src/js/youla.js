@@ -155,6 +155,14 @@
             el.removeAttribute(attribute.name);
             return;
         }
+        if (el.tagName === "TEMPLATE") {
+            renderTemplate(el, dataItems, {
+                item: item,
+                index: index,
+                join: join
+            }, component, otherVariables);
+            return;
+        }
         while (el.nextSibling) {
             let next = el.nextSibling;
             if (next.nodeType === Node.ELEMENT_NODE && next.hasAttribute("u-each")) {
@@ -166,11 +174,10 @@
             const clone = el.cloneNode(true);
             clone.removeAttribute("u-each");
             (async () => {
-                const numericKey = +key;
                 clone.__x_for_data = {
                     ...otherVariables,
                     [item]: dataItem,
-                    [index]: Number.isNaN(numericKey) ? key : numericKey
+                    [index]: toLoopKey(key)
                 };
                 await component.initialize(clone);
                 el.parentNode.appendChild(clone);
@@ -180,6 +187,36 @@
             })();
         });
     });
+    function toLoopKey(key) {
+        const numericKey = +key;
+        return Number.isNaN(numericKey) ? key : numericKey;
+    }
+    function renderTemplate(el, dataItems, {item: item, index: index, join: join}, component, otherVariables) {
+        el.__x_each_nodes?.forEach(node => node.remove());
+        const rendered = el.__x_each_nodes = [];
+        Object.entries(dataItems ?? []).forEach(([key, dataItem], idx, array) => {
+            const nodes = [ ...el.content.cloneNode(true).childNodes ];
+            const elements = nodes.filter(node => node.nodeType === Node.ELEMENT_NODE);
+            elements.forEach(node => {
+                node.__x_for_data = {
+                    ...otherVariables,
+                    [item]: dataItem,
+                    [index]: toLoopKey(key)
+                };
+            });
+            (async () => {
+                await Promise.all(elements.map(node => component.initialize(node)));
+                if (el.__x_each_nodes !== rendered || !el.parentNode) {
+                    return;
+                }
+                if (array[idx + 1] && join) {
+                    nodes.push(document.createTextNode(join));
+                }
+                (rendered.at(-1) ?? el).after(...nodes);
+                rendered.push(...nodes);
+            })();
+        });
+    }
     directive("html", (el, output, attribute, component) => {
         output = output ?? "";
         if (el._x_html === output) {

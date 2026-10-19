@@ -6,19 +6,20 @@ use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
 use App\Support\Activity;
+use App\Support\Dates;
+use App\Support\Permalinks;
 use Expansa\Builders\Form;
-use Expansa\Facades\I18n;
 
 $post = Page::post((string) filter_input(INPUT_GET, 'type') ?: 'pages', filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
 $type = Type::get($post->type);
-$date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
 
-// the parents to choose in the details and the URL of each, the base of the slug
+// the parents to choose in the details and the URL of each, the base of the slug by the permalink structure
 $parents = $type->hierarchical ? Page::parents($post) : [];
 $paths   = $post::paths($post->type, array_keys($parents));
+$around  = Permalinks::around($paths[$post->parentId] ?? '', $post->id, $post->type);
 $bases   = [];
 foreach ($parents as $id => $title) {
-    $bases[$id] = rtrim(url($paths[$id] ?? ''), '/') . '/';
+    $bases[$id] = Permalinks::around($paths[$id] ?? '', $post->id, $post->type)[0];
 }
 
 /**
@@ -31,7 +32,7 @@ return Form::enqueue(
     'post-editor',
     [
         'class'           => 'tab post-editor',
-        'u-data'          => 'tab',
+        'u-data'          => 'tab as tab',
         '@load'           => '$dirty.watch($el)',
         '@submit.prevent' => sprintf('$ajax.post("%s", "", () => $dirty.remove($el))', $post->id === 0 ? 'post/create' : 'post/update'),
     ],
@@ -51,7 +52,7 @@ return Form::enqueue(
             'type'     => 'custom',
             'callback' => function () use ($post, $type) {
                 $back  = url('dashboard/edit?table=' . $type->key);
-                $path  = $post->path();
+                $url   = $post->url();
                 $title = $post->id === 0 ? $type->labelAdd : ($post->title !== '' ? htmlspecialchars($post->title) : $type->labelEdit);
                 ?>
                 <div class="post-editor-head">
@@ -61,8 +62,8 @@ return Form::enqueue(
                     <nav class="post-editor-crumbs" aria-label="<?php echo t_attr('Breadcrumbs'); ?>">
                         <a href="<?php echo $back; ?>"><?php echo $type->labelNamePlural; ?></a>
                         <i class="ph ph-caret-right"></i>
-                        <?php if ($path !== '') : ?>
-	                        <a href="<?php echo url($path); ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
+                        <?php if ($url !== '') : ?>
+	                        <a href="<?php echo $url; ?>" target="_blank" title="<?php echo htmlspecialchars($type->labelView); ?>" aria-current="page" @slug-url.document="$el.href = $event.detail"><?php echo $title; ?></a>
                         <?php else : ?>
                             <span aria-current="page"><?php echo $title; ?></span>
                         <?php endif; ?>
@@ -75,16 +76,13 @@ return Form::enqueue(
             },
         ],
         [
-            'type'          => 'tab',
-            'label'         => t('Main'),
-            'name'          => 'main',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-article',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => '',
-            'fields'        => [
+            'type'        => 'tab',
+            'label'       => t('Main'),
+            'name'        => 'main',
+            'caption'     => '',
+            'description' => '',
+            'icon'        => 'ph ph-article',
+            'fields'      => [
 	            [
 		            'type'        => 'text',
 		            'name'        => 'title',
@@ -121,10 +119,11 @@ return Form::enqueue(
 			            'conditions'  => [],
 			            'options'     => [
 				            'from'   => 'title',
-				            'base'   => $bases[$post->parentId] ?? rtrim(url(), '/') . '/',
+				            'base'   => $around[0],
+				            'suffix' => $around[1],
 				            'parent' => 'parent_id',
 				            'bases'  => $bases,
-				            'link'   => $post->slug !== '' ? url($post->path()) : '',
+				            'link'   => $post->slug !== '' ? $post->url() : '',
 			            ],
 			            'attributes'  => [
 				            'value'       => $post->slug,
@@ -134,13 +133,12 @@ return Form::enqueue(
 		            ],
 	            ] : []),
                 [
-                    'type'          => 'group',
-                    'name'          => 'main',
-                    'label'         => '',
-                    'class'         => 'post-editor-main',
-                    'label_class'   => '',
-                    'content_class' => 'post-editor-card',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'main',
+                    'label'  => '',
+                    'layout' => 'plain',
+                    'class'  => 'post-editor-main',
+                    'fields' => [
 	                    [
 		                    'type'        => 'textarea',
 		                    'name'        => 'excerpt',
@@ -189,16 +187,13 @@ return Form::enqueue(
             ],
         ],
         [
-            'type'          => 'tab',
-            'label'         => t('Comments'),
-            'name'          => 'comments',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-chat-circle',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => '',
-            'fields'        => [
+            'type'        => 'tab',
+            'label'       => t('Comments'),
+            'name'        => 'comments',
+            'caption'     => '',
+            'description' => '',
+            'icon'        => 'ph ph-chat-circle',
+            'fields'      => [
                 [
                     'name'     => 'comments',
                     'type'     => 'custom',
@@ -235,7 +230,7 @@ return Form::enqueue(
                                             <textarea id="post-comment-text" name="content" form="post-comment" rows="2" required placeholder="<?php echo t_attr('Leave a comment…'); ?>" aria-label="<?php echo t_attr('Comment'); ?>" @keydown="($event.ctrlKey || $event.metaKey) && $event.key === 'Enter' && $el.form.requestSubmit()"></textarea>
                                             <div class="post-comment-tools">
                                                 <span class="t-muted fs-12"><?php echo t('Ctrl+Enter to send'); ?></span>
-                                                <button class="btn btn--sm btn--primary" type="submit" form="post-comment"><?php echo t('Comment'); ?></button>
+                                                <button class="btn btn--sm btn--primary" type="submit" form="post-comment"><?php echo t('Comment', context: 'action'); ?></button>
                                             </div>
                                         </div>
                                     </div>
@@ -248,49 +243,52 @@ return Form::enqueue(
             ],
         ],
 	    [
-		    'type'          => 'tab',
-		    'label'         => t('Custom Code'),
-		    'name'          => 'code',
-		    'caption'       => '',
-		    'description'   => '',
-		    'icon'          => 'ph ph-brackets-curly',
-		    'class_menu'    => '',
-		    'class_button'  => '',
-		    'class_content' => 'post-editor-card',
-		    'fields'        => [
+		    'type'        => 'tab',
+		    'label'       => t('Custom Code'),
+		    'name'        => 'code',
+		    'caption'     => '',
+		    'description' => '',
+		    'icon'        => 'ph ph-brackets-curly',
+		    'fields'      => [
 				[
-					'type'        => 'textarea',
-					'name'        => 'css',
-					'error'       => 'css',
-					'label'       => t('CSS code'),
-					'class'       => '',
-					'label_class' => '',
-					'reset'       => 0,
-					'before'      => '',
-					'after'       => '',
-					'instruction' => t('CSS code'),
-					'tooltip'     => '',
-					'copy'        => 0,
-					'validator'   => '',
-					'conditions'  => [],
-					'attributes'  => [
-						'u-prop'      => 'css',
-						'placeholder' => t('CSS code'),
+					'type'   => 'group',
+					'name'   => 'code',
+					'label'  => '',
+					'layout' => 'plain',
+					'class'  => 'post-editor-main',
+					'fields' => [
+						[
+							'type'        => 'textarea',
+							'name'        => 'css',
+							'error'       => 'css',
+							'label'       => t('CSS code'),
+							'class'       => '',
+							'label_class' => '',
+							'reset'       => 0,
+							'before'      => '',
+							'after'       => '',
+							'instruction' => t('CSS code'),
+							'tooltip'     => '',
+							'copy'        => 0,
+							'validator'   => '',
+							'conditions'  => [],
+							'attributes'  => [
+								'u-prop'      => 'css',
+								'placeholder' => t('CSS code'),
+							],
+						],
 					],
 				],
 		    ],
 	    ],
         [
-            'type'          => 'tab',
-            'label'         => t('Activity'),
-            'name'          => 'activity',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-clock-counter-clockwise',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => '',
-            'fields'        => [
+            'type'        => 'tab',
+            'label'       => t('Activity'),
+            'name'        => 'activity',
+            'caption'     => '',
+            'description' => '',
+            'icon'        => 'ph ph-clock-counter-clockwise',
+            'fields'      => [
                 [
                     'name'     => 'activity',
                     'type'     => 'custom',
@@ -323,17 +321,16 @@ return Form::enqueue(
             ],
         ],
         [
-            'type'          => 'group',
-            'name'          => 'side',
-            'label'         => '',
-            'class'         => 'post-editor-side',
-            'label_class'   => '',
-            'content_class' => 'dg g-5',
-            'fields'        => [
+            'type'   => 'group',
+            'name'   => 'side',
+            'label'  => '',
+            'layout' => 'plain',
+            'class'  => 'post-editor-side',
+            'fields' => [
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',
-                    'callback' => function () use ($post, $type, $date, $parents) {
+                    'callback' => function () use ($post, $type, $parents) {
                         $author   = Page::author($post);
                         $statuses = Status::getStatuses();
                         $options  = function (array $options, int|string $value): void {
@@ -342,8 +339,8 @@ return Form::enqueue(
                             }
                         };
                         $facts    = $post->id === 0 ? [] : [
-                            ['ph ph-calendar-blank', t('Created'), $post->createdAt ? $date->format(strtotime($post->createdAt)) : ''],
-                            ['ph ph-clock-clockwise', t('Updated'), $post->updatedAt ? $date->format(strtotime($post->updatedAt)) : ''],
+                            ['ph ph-calendar-blank', t('Created'), Dates::format($post->createdAt)],
+                            ['ph ph-clock-clockwise', t('Updated'), Dates::format($post->updatedAt)],
                             ['ph ph-eye', t('Views'), (string) $post->views],
                             ['ph ph-hash', t('ID'), (string) $post->id],
                         ];

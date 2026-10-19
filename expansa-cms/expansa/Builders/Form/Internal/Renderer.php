@@ -9,7 +9,7 @@ use Expansa\Security\Sanitizer;
 
 /**
  * Renders a fields array to HTML: each field goes to the template of its type with ready attributes
- * and visibility conditions. Templates are named by type (`input`, `layout-tab`), the `view` callback
+ * and visibility conditions. Templates are named by type (`input`, `layout-group`), the `view` callback
  * of Form::configure() finds their files.
  *
  * @internal
@@ -18,7 +18,7 @@ use Expansa\Security\Sanitizer;
 final class Renderer
 {
     /**
-     * Types that wrap nested fields and render through the `layout-<type>` template.
+     * Types that wrap nested fields and render through the `layout-<type>` template, tabs through `layout-tabs`.
      */
     private const array LAYOUT_TYPES = ['tab', 'step', 'group'];
 
@@ -57,23 +57,19 @@ final class Renderer
      */
     public function render(array $fields, int $step = 1): string
     {
-        $html       = '';
-        $hasTabMenu = false;
-        $active     = $this->activeTab($fields);
-
-        foreach ($fields as $i => $field) {
-            if (($field['type'] ?? '') === 'tab') {
-                $fields[$i]['active'] = $field['active'] = Sanitizer::prop($field['name'] ?? '') === $active;
-            }
-        }
+        $html    = '';
+        $hasTabs = false;
 
         foreach ($fields as $field) {
             $type = Sanitizer::id($field['type'] ?? '');
 
-            // all tabs of a level share one menu, it goes before the first tab
-            if ($type === 'tab' && ! $hasTabMenu) {
-                $hasTabMenu = true;
-                $html      .= Form::view('layout-tab-menu', ['fields' => $fields]);
+            // all tabs of a level render together in place of the first one: the menu, then the panels
+            if ($type === 'tab') {
+                if (! $hasTabs) {
+                    $hasTabs = true;
+                    $html   .= $this->renderTemplate($type, ['tabs' => $this->tabs($fields, $step)]);
+                }
+                continue;
             }
 
             if ($this->isLayout($type)) {
@@ -97,24 +93,53 @@ final class Renderer
     }
 
     /**
-     * Get the tab of a level shown when the page opens: the one of the `tab` query parameter,
-     * else the first one; the server renders it visible, so the page does not flicker.
+     * Get the tabs of a level with their nested fields rendered, visibility conditions
+     * and the one shown when the page opens marked.
      *
      * @param array $fields
-     * @return string Prop of the tab, empty for a level without tabs.
+     * @param int   $step   Number of the step that holds the tabs.
+     * @return array
      */
-    private function activeTab(array $fields): string
+    private function tabs(array $fields, int $step): array
     {
         $tabs = [];
         foreach ($fields as $field) {
             if (($field['type'] ?? '') === 'tab') {
-                $tabs[] = Sanitizer::prop($field['name'] ?? '');
+                $tabs[] = [
+                    ...$field,
+                    'content'    => $this->render($field['fields'] ?? [], $step + 1),
+                    'conditions' => empty($field['conditions']) ? [] : $this->visibility($field['conditions'], $fields),
+                ];
+            }
+        }
+
+        $active = $this->activeTab($tabs);
+        foreach ($tabs as $i => $tab) {
+            $tabs[$i]['active'] = Sanitizer::prop($tab['name'] ?? '') === $active;
+        }
+
+        return $tabs;
+    }
+
+    /**
+     * Get the tab shown when the page opens: the one of the `tab` query parameter, else the first one;
+     * a tab its conditions hide is skipped. The server renders it visible, so the page does not flicker.
+     *
+     * @param array $tabs
+     * @return string Prop of the tab, empty when all tabs are hidden.
+     */
+    private function activeTab(array $tabs): string
+    {
+        $props = [];
+        foreach ($tabs as $tab) {
+            if (empty($tab['conditions']['hidden'])) {
+                $props[] = Sanitizer::prop($tab['name'] ?? '');
             }
         }
 
         $query = is_string($_GET['tab'] ?? null) ? $_GET['tab'] : '';
 
-        return in_array($query, $tabs, true) ? $query : ($tabs[0] ?? '');
+        return in_array($query, $props, true) ? $query : ($props[0] ?? '');
     }
 
     /**
@@ -127,6 +152,7 @@ final class Renderer
     private function renderTemplate(string $type, array $field): string
     {
         $template = match (true) {
+            $type === 'tab'                          => 'layout-tabs',
             $this->isLayout($type)                   => "layout-$type",
             in_array($type, self::INPUT_TYPES, true) => 'input',
             default                                  => $type,
@@ -226,7 +252,7 @@ final class Renderer
     }
 
     /**
-     * Get the current values of fields by name, with the fields of nested groups;
+     * Get the current values of fields by name, with the fields of nested groups and tabs;
      * each option of a checkbox is a separate value.
      *
      * @param array $fields
@@ -236,8 +262,8 @@ final class Renderer
     {
         $values = [];
         foreach ($fields as $field) {
-            // a group is shown by a field of a sibling group, e.g. a radio choosing between them
-            if (($field['type'] ?? '') === 'group') {
+            // a group or a tab is shown by a field of a sibling one, e.g. a radio choosing between them
+            if (in_array($field['type'] ?? '', ['group', 'tab'], true)) {
                 $values += $this->values($field['fields'] ?? []);
                 continue;
             }

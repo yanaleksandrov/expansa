@@ -56,6 +56,10 @@
     margin-bottom: 0.75rem;
 }
 
+.attributes-form > .form-group-content {
+    gap: 0.75rem;
+}
+
 .attributes-side {
     width: 20rem;
     height: max-content;

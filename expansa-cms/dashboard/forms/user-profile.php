@@ -1,5 +1,6 @@
 <?php
 
+use App\Api\User\Admin;
 use App\Api\User\Confirmation;
 use App\Api\User\Events;
 use App\Api\User\Identities;
@@ -10,7 +11,9 @@ use App\Api\User\TwoFactor;
 use App\Dashboard\Pages\Profile;
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Dates;
 use App\Support\Passwords;
+use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Builders\Form;
 use Expansa\Facades\I18n;
@@ -19,6 +22,43 @@ use Expansa\Facades\Role;
 $isNew  = isset($_GET['new']);
 $user   = Profile::user(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0, $isNew);
 $isSelf = ! $isNew && $user->id === User::current()?->id;
+
+// the role is given by those who manage the users; their own one only by an owner, see Admin::refuseRole()
+$roles     = Admin::assignableRoles(User::current());
+$canManage = Access::allows(User::current(), 'users_edit');
+$roleGroup = $isNew || ! $canManage ? [] : [
+    [
+        'type'   => 'group',
+        'name'   => 'role',
+        'label'  => t('Role'),
+        'fields' => [
+            [
+                'type'        => 'select',
+                'name'        => 'role',
+                'error'       => 'role',
+                'label'       => t('Role'),
+                'class'       => '',
+                'label_class' => '',
+                'reset'       => 0,
+                'before'      => '',
+                'after'       => '',
+                'instruction' => $isSelf && ! User::current()->hasRole(User::ROLE_OWNER)
+                    ? t('Only the owner can change your role.')
+                    : t('What the user can do on the site, see the Roles tab of the settings.'),
+                'tooltip'     => '',
+                'copy'        => 0,
+                'validator'   => '',
+                'conditions'  => [],
+                'attributes'  => [
+                    'value'    => $user->roles[0] ?? '',
+                    'disabled' => $isSelf && ! User::current()->hasRole(User::ROLE_OWNER),
+                ],
+                // a role the administrator can't give stays shown on the account that has it
+                'options'     => $roles + array_map(static fn (string $role) => Role::get($role)['name'] ?? $role, array_combine($user->roles, $user->roles)),
+            ],
+        ],
+    ],
+];
 
 /**
  * Profile page: the account of the current user, or of another one by `id` for an administrator,
@@ -30,22 +70,19 @@ $uid = Form::enqueue(
     'user-profile',
     [
         'class'           => 'tab',
-        'u-data'          => 'tab',
+        'u-data'          => 'tab as tab',
 		'@load'           => '$dirty.watch($el)',
 	    '@submit.prevent' => '$ajax.post("user/update", "", () => $dirty.remove($el))',
     ],
     [
         [
-            'type'          => 'tab',
-            'label'         => t('Overview'),
-            'name'          => 'profile',
-            'caption'       => '',
-            'description'   => '',
-            'icon'          => 'ph ph-user',
-            'class_menu'    => '',
-            'class_button'  => '',
-            'class_content' => '',
-            'fields'        => [
+            'type'        => 'tab',
+            'label'       => t('Overview'),
+            'name'        => 'profile',
+            'caption'     => '',
+            'description' => '',
+            'icon'        => 'ph ph-user',
+            'fields'      => [
 	            [
 		            'type'        => 'image',
 		            'name'        => 'avatar',
@@ -70,13 +107,10 @@ $uid = Form::enqueue(
 		            ],
 	            ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'contacts',
-                    'label'         => t('Contact Info'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'contacts',
+                    'label'  => t('Contact Info'),
+                    'fields' => [
                         [
                             'type'        => 'email',
                             'name'        => 'email',
@@ -107,14 +141,13 @@ $uid = Form::enqueue(
                         ],
                     ],
                 ],
+                ...$roleGroup,
                 [
-                    'type'          => 'group',
-                    'name'          => 'name',
-                    'label'         => t('Name'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'name',
+                    'label'   => t('Name', context: 'person'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'type'        => 'text',
                             'name'        => 'login',
@@ -233,15 +266,12 @@ $uid = Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'about-yourself',
-                    'label'         => $isSelf
+                    'type'   => 'group',
+                    'name'   => 'about-yourself',
+                    'label'  => $isSelf
                         ? t('About Yourself')
                         : t('About the User'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'fields' => [
                         [
                             'type'        => 'textarea',
                             'name'        => 'bio',
@@ -273,22 +303,17 @@ $uid = Form::enqueue(
             ],
         ],
         [
-            'name'          => 'appearance',
-            'type'          => 'tab',
-            'label'         => t('Appearance'),
-            'description'   => '',
-            'icon'          => 'ph ph-paint-brush-broad',
-            'class_button'  => '',
-            'class_content' => 'p-7 sm:p-5',
-            'fields'        => [
+            'name'        => 'appearance',
+            'type'        => 'tab',
+            'label'       => t('Appearance'),
+            'description' => '',
+            'icon'        => 'ph ph-paint-brush-broad',
+            'fields'      => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'theme',
-                    'label'         => t('Theme Preferences'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => 'dg ga-4 g-6 gtc-1',
-                    'fields'        => [
+                    'type'   => 'group',
+                    'name'   => 'theme',
+                    'label'  => t('Theme Preferences'),
+                    'fields' => [
                         [
                             'type'        => 'radio',
                             'name'        => 'format',
@@ -340,13 +365,11 @@ $uid = Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'toolbar',
-                    'label'         => t('Toolbar'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'toolbar',
+                    'label'   => t('Toolbar'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'type'        => 'checkbox',
                             'name'        => 'toolbar',
@@ -371,13 +394,11 @@ $uid = Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'translations',
-                    'label'         => t('Translations'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'translations',
+                    'label'   => t('Translations'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'type'        => 'select',
                             'name'        => 'locale',
@@ -407,22 +428,18 @@ $uid = Form::enqueue(
             ],
         ],
         [
-            'name'          => 'password',
-            'type'          => 'tab',
-            'label'         => t('Security'),
-            'caption'       => '',
-            'icon'          => 'ph ph-password',
-            'class_button'  => '',
-            'class_content' => 'p-7 sm:p-5',
-            'fields'        => [
+            'name'    => 'password',
+            'type'    => 'tab',
+            'label'   => t('Security'),
+            'caption' => '',
+            'icon'    => 'ph ph-password',
+            'fields'  => [
                 [
-                    'type'          => 'group',
-                    'name'          => 'confirmation',
-                    'label'         => t('Confirm It Is You'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'confirmation',
+                    'label'   => t('Confirm It Is You'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'name'     => 'confirmation',
                             'type'     => 'custom',
@@ -453,13 +470,11 @@ $uid = Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'two-factor',
-                    'label'         => t('Two-Factor Authentication'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'two-factor',
+                    'label'   => t('Two-Factor Authentication'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'name'     => 'two-factor',
                             'type'     => 'custom',
@@ -475,13 +490,11 @@ $uid = Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'passkeys',
-                    'label'         => t('Passkeys'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'passkeys',
+                    'label'   => t('Passkeys'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'name'     => 'passkeys',
                             'type'     => 'custom',
@@ -508,13 +521,11 @@ $uid = Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'sessions',
-                    'label'         => t('Devices'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'sessions',
+                    'label'   => t('Devices'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'name'     => 'sessions',
                             'type'     => 'custom',
@@ -544,13 +555,11 @@ $uid = Form::enqueue(
                     ],
                 ],
                 ...(Auth::getProviders() === [] ? [] : [[
-                    'type'          => 'group',
-                    'name'          => 'identities',
-                    'label'         => t('Connected Accounts'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'identities',
+                    'label'   => t('Connected Accounts'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'name'     => 'identities',
                             'type'     => 'custom',
@@ -589,13 +598,11 @@ $uid = Form::enqueue(
                     ],
                 ]]),
                 [
-                    'type'          => 'group',
-                    'name'          => 'tokens',
-                    'label'         => t('API Tokens'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'tokens',
+                    'label'   => t('API Tokens'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'name'     => 'tokens',
                             'type'     => 'custom',
@@ -642,43 +649,11 @@ $uid = Form::enqueue(
                     ],
                 ],
                 [
-                    'type'          => 'group',
-                    'name'          => 'activity',
-                    'label'         => t('Recent Activity'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
-                        [
-                            'name'     => 'activity',
-                            'type'     => 'custom',
-                            'callback' => function () use ($user) {
-                                $date = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT);
-                                ?>
-                                <div class="dg g-2 ga-4">
-                                    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>
-                                    <div class="dg g-1 fs-13">
-                                        <?php foreach (Events::all($user) as $event) : ?>
-                                            <div class="df aic g-2">
-                                                <span><?php echo Events::label($event['event']); ?></span>
-                                                <span class="t-muted"><?php echo htmlspecialchars($event['device'] . ' · ' . $event['ip'] . ' · ' . $date->format(strtotime($event['created_at']))); ?></span>
-                                            </div>
-                                        <?php endforeach; ?>
-                                    </div>
-                                </div>
-                                <?php
-                            },
-                        ],
-                    ],
-                ],
-                [
-                    'type'          => 'group',
-                    'name'          => 'passwords',
-                    'label'         => t('Change Password'),
-                    'class'         => '',
-                    'label_class'   => '',
-                    'content_class' => '',
-                    'fields'        => [
+                    'type'    => 'group',
+                    'name'    => 'passwords',
+                    'label'   => t('Change Password'),
+                    'columns' => 2,
+                    'fields'  => [
                         [
                             'type'        => 'password',
                             'name'        => 'password-new',
@@ -768,6 +743,35 @@ $uid = Form::enqueue(
                 ],
             ],
         ],
+	    [
+		    'type'        => 'tab',
+		    'label'       => t('Activity'),
+		    'name'        => 'activity',
+		    'caption'     => '',
+		    'description' => '',
+		    'icon'        => 'ph ph-clock-counter-clockwise',
+		    'fields'      => [
+			    [
+				    'name'     => 'activity',
+				    'type'     => 'custom',
+				    'callback' => function () use ($user) {
+					    ?>
+					    <div class="dg g-2 ga-4">
+						    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>
+						    <div class="dg g-1 fs-13">
+							    <?php foreach (Events::all($user) as $event) : ?>
+								    <div class="df aic g-2">
+									    <span><?php echo Events::label($event['event']); ?></span>
+									    <span class="t-muted"><?php echo htmlspecialchars($event['device'] . ' · ' . $event['ip'] . ' · ' . Dates::format($event['created_at'])); ?></span>
+								    </div>
+							    <?php endforeach; ?>
+						    </div>
+					    </div>
+					    <?php
+				    },
+			    ],
+		    ],
+	    ],
         [
             'type'     => 'custom',
             'callback' => function () {
@@ -792,22 +796,18 @@ if ($isNew) {
         ->attributes(['@submit.prevent' => '$ajax.post("user/create", "", () => $dirty.remove($el))'])
         ->replace('password', [
             [
-                'name'          => 'access',
-                'type'          => 'tab',
-                'label'         => t('Access'),
-                'caption'       => '',
-                'icon'          => 'ph ph-key',
-                'class_button'  => '',
-                'class_content' => 'p-7 sm:p-5',
-                'fields'        => [
+                'name'    => 'access',
+                'type'    => 'tab',
+                'label'   => t('Access'),
+                'caption' => '',
+                'icon'    => 'ph ph-key',
+                'fields'  => [
                     [
-                        'type'          => 'group',
-                        'name'          => 'access',
-                        'label'         => t('Access'),
-                        'class'         => '',
-                        'label_class'   => '',
-                        'content_class' => '',
-                        'fields'        => [
+                        'type'    => 'group',
+                        'name'    => 'access',
+                        'label'   => t('Access'),
+                        'columns' => 2,
+                        'fields'  => [
                             [
                                 'type'        => 'select',
                                 'name'        => 'role',
@@ -827,7 +827,7 @@ if ($isNew) {
                                     'u-prop' => 'role',
                                     'value'  => Option::get('users.role'),
                                 ],
-                                'options'     => array_map(static fn (array $role) => $role['name'], Role::all()),
+                                'options'     => $roles,
                             ],
                             [
                                 'type'        => 'password',
@@ -876,22 +876,18 @@ if ($isNew) {
         ])
         ->replace('password', [
             [
-                'name'          => 'administration',
-                'type'          => 'tab',
-                'label'         => t('Administration'),
-                'caption'       => '',
-                'icon'          => 'ph ph-shield-check',
-                'class_button'  => '',
-                'class_content' => 'p-7 sm:p-5',
-                'fields'        => [
+                'name'    => 'administration',
+                'type'    => 'tab',
+                'label'   => t('Administration'),
+                'caption' => '',
+                'icon'    => 'ph ph-shield-check',
+                'fields'  => [
                     [
-                        'type'          => 'group',
-                        'name'          => 'account',
-                        'label'         => $user->showname ?: $user->login,
-                        'class'         => '',
-                        'label_class'   => '',
-                        'content_class' => '',
-                        'fields'        => [
+                        'type'    => 'group',
+                        'name'    => 'account',
+                        'label'   => $user->showname ?: $user->login,
+                        'columns' => 2,
+                        'fields'  => [
                             [
                                 'name'     => 'account',
                                 'type'     => 'custom',

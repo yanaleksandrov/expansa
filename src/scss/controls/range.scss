@@ -1,0 +1,435 @@
+// Mixin, not @extend — Firefox/Chrome drop a selector list containing an unrecognized pseudo-element.
+@mixin ranger-thumb {
+  cursor: pointer;
+  pointer-events: all;
+  // --ranger-thumb-icon-size lets a skin paint a smaller visible mark inside a larger tappable box.
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--ranger-thumb-bg);
+  background-image: var(--ranger-thumb-icon);
+  background-size: var(--ranger-thumb-icon-size, auto);
+  border: 1px solid var(--ranger-thumb-border);
+  border-radius: var(--ranger-thumb-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  box-shadow: var(--ranger-thumb-shadow);
+  width: var(--ranger-thumb-width);
+  height: var(--ranger-thumb-height);
+}
+
+// A typed length turns a unitless 0 into 0px, so calc() with the inset stays valid here and in youla-ranger.js.
+@property --ranger-inset {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+// Default "Coral" skin tokens; declared on :root so they reach both the pre-init input and the post-init .ranger tree.
+:root {
+  --ranger-height: 1.5rem;
+  --ranger-radius: 11px;
+  --ranger-gap-top: 2.5rem;
+  --ranger-gap-bottom: 4rem;
+  // Keeps handles off the track ends; 0 works without a unit, see @property above.
+  --ranger-inset: 8px;
+  --ranger-bg: #f7f7f7;
+  --ranger-fill-color: #dce8fc;
+  --ranger-fill-radius: 11px;
+  --ranger-thumb-color: #005cf4;
+  --ranger-thumb-width: 1.25rem;
+  --ranger-thumb-height: 2rem;
+  --ranger-thumb-radius: 0;
+  --ranger-thumb-bg: transparent;
+  --ranger-thumb-hover-bg: transparent;
+  --ranger-thumb-border: transparent;
+  --ranger-thumb-icon-size: 2px 16px;
+  --ranger-thumb-icon: initial;
+  --ranger-thumb-shadow: none;
+  --ranger-tick-color: #bdbdbd;
+  --ranger-tick-label-color: #888;
+  --ranger-mark-color: #ffd794;
+
+  // Element selector, not a class, so this reaches the raw input before Ranger runs.
+  input[type="range"]:not(.quality-chart-range, .air-datepicker *) {
+    // Must apply from first paint or the native control briefly renders unstyled.
+    accent-color: var(--ranger-fill-color);
+    appearance: none;
+    border-radius: var(--ranger-radius);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+    box-sizing: border-box;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: initial;
+
+    // Pre-init track matches .ranger below so nothing shifts once JS swaps in the overlay.
+    background-color: var(--ranger-bg);
+    display: block;
+
+    // main.scss and input.scss give every input a text-clipped background, an overflow and a hover ring
+    background-clip: border-box;
+    border: 1px solid var(--ranger-border);
+    box-shadow: none;
+    overflow: visible;
+    height: var(--ranger-height);
+
+    // The native range has no scale or label to make room for; u-ranger keeps the gaps of .ranger from first paint.
+    &[u-ranger]:not(.ranger-input) {
+      margin-block: var(--ranger-gap-top) var(--ranger-gap-bottom);
+    }
+
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      @include ranger-thumb;
+    }
+
+    &::-moz-range-thumb {
+      -moz-appearance: none;
+      appearance: none;
+      @include ranger-thumb;
+    }
+
+    &:focus-visible {
+      outline: none;
+    }
+
+    // Custom thumbs don't reliably show the native focus ring, so draw one explicitly.
+    &:focus-visible::-webkit-slider-thumb {
+      outline: 2px solid var(--ranger-thumb-color);
+      outline-offset: 2px;
+    }
+
+    &:focus-visible::-moz-range-thumb {
+      outline: 2px solid var(--ranger-thumb-color);
+      outline-offset: 2px;
+    }
+
+    // Firefox renders track/progress as separate pseudo-elements — neutralize both so only .ranger-fill shows.
+    &::-moz-range-track {
+      background: transparent;
+      border: none;
+      height: 100%;
+    }
+
+    &::-moz-range-progress {
+      background: transparent;
+    }
+
+    &::-webkit-slider-runnable-track {
+      margin-inline: calc(var(--ranger-inset) - var(--ranger-thumb-width) / 2);
+    }
+
+    &::-moz-range-track {
+      margin-inline: calc(var(--ranger-inset) - var(--ranger-thumb-width) / 2);
+    }
+
+    &::-webkit-slider-thumb,
+    &::-webkit-slider-thumb:hover {
+      color: var(--ranger-thumb-color);
+      mask: url("data:image/svg+xml,%3Csvg width='3' height='16' viewBox='0 0 3 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='3' height='16' fill='white'/%3E%3C/svg%3E") center / 3px 16px no-repeat;
+      background-color: currentColor;
+    }
+
+    &::-moz-range-thumb,
+    &::-moz-range-thumb:hover {
+      color: var(--ranger-thumb-color);
+      mask: url("data:image/svg+xml,%3Csvg width='3' height='16' viewBox='0 0 3 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='3' height='16' fill='white'/%3E%3C/svg%3E") center / 3px 16px no-repeat;
+      background-color: currentColor;
+    }
+  }
+}
+
+// Fill of the native range like .ranger: a fill-colored thumb with its shadow before it, in Firefox the progress.
+:root input[type="range"]:not(.ranger-input, .quality-chart-range, .air-datepicker *) {
+  --ranger-native-thumb: max(2 * var(--ranger-inset), 3px);
+  --ranger-native-bar: linear-gradient(var(--ranger-thumb-color), var(--ranger-thumb-color)) center / 3px 16px no-repeat;
+  // the end radius is at most half the thumb, the shadow stops before it to keep the corners rounded
+  --ranger-native-radius: min(var(--ranger-fill-radius, var(--ranger-radius)), var(--ranger-native-thumb) / 2);
+  --ranger-native-shadow: calc(-100vw - var(--ranger-native-radius));
+  --ranger-native-thumb-radius: 0 var(--ranger-native-radius) var(--ranger-native-radius) 0;
+
+  overflow: hidden;
+
+  &:dir(rtl) {
+    --ranger-native-shadow: calc(100vw + var(--ranger-native-radius));
+    --ranger-native-thumb-radius: var(--ranger-native-radius) 0 0 var(--ranger-native-radius);
+  }
+
+  // The thumb ring would be clipped with the shadow, so the input draws it.
+  &:focus-visible {
+    outline: 2px solid var(--ranger-thumb-color);
+    outline-offset: 2px;
+  }
+
+  &::-webkit-slider-runnable-track {
+    margin-inline: 0;
+  }
+
+  &::-moz-range-track {
+    margin-inline: 0;
+  }
+
+  &::-webkit-slider-thumb,
+  &::-webkit-slider-thumb:hover,
+  &:focus-visible::-webkit-slider-thumb {
+    width: var(--ranger-native-thumb);
+    height: var(--ranger-height);
+    background: var(--ranger-native-bar), var(--ranger-fill-color);
+    border: 0;
+    border-radius: var(--ranger-native-thumb-radius);
+    box-shadow: var(--ranger-native-shadow) 0 0 100vw var(--ranger-fill-color);
+    outline: 0;
+    mask: none;
+  }
+
+  &::-moz-range-thumb,
+  &::-moz-range-thumb:hover,
+  &:focus-visible::-moz-range-thumb {
+    width: var(--ranger-native-thumb);
+    height: var(--ranger-height);
+    background: var(--ranger-native-bar), var(--ranger-fill-color);
+    border: 0;
+    border-radius: var(--ranger-native-thumb-radius);
+    box-shadow: none;
+    outline: 0;
+    mask: none;
+  }
+
+  &::-moz-range-progress {
+    height: 100%;
+    background: var(--ranger-fill-color);
+  }
+}
+
+.ranger {
+  background-color: var(--ranger-bg);
+  border-radius: var(--ranger-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  cursor: pointer;
+  height: var(--ranger-height);
+  margin-block: var(--ranger-gap-top) var(--ranger-gap-bottom);
+  box-sizing: border-box;
+  // youla-ranger.js reads the inset back from this padding; absolute layers ignore it and position via --ranger-inset.
+  padding-inline: var(--ranger-inset);
+  position: relative;
+  // Horizontal touch drags from the track move the handle instead of scrolling the page.
+  touch-action: pan-y;
+  width: 100%;
+
+  &:has(input[type="range"]:disabled) {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  // Splits the shared hit area when both handles land on the same value, so neither swallows all clicks.
+  &.is-overlapping {
+    input[type="range"]:not(.ranger-input--to)::-webkit-slider-thumb {
+      clip-path: inset(0 50% 0 0);
+    }
+
+    input[type="range"]:not(.ranger-input--to)::-moz-range-thumb {
+      clip-path: inset(0 50% 0 0);
+    }
+
+    .ranger-input--to::-webkit-slider-thumb {
+      clip-path: inset(0 0 0 50%);
+    }
+
+    .ranger-input--to::-moz-range-thumb {
+      clip-path: inset(0 0 0 50%);
+    }
+  }
+
+  // Dedicated fill layer, kept below marks/handles by DOM order (see reorderLayers in youla-ranger.js).
+  &-fill {
+    background-color: var(--ranger-fill-color);
+    // Set via the fillGradient option; defaults to 'none'.
+    background-image: var(--ranger-fill-gradient, none);
+    // Falls back to the track radius so a rounded track keeps a matching fill by default.
+    border-radius: var(--ranger-fill-radius, var(--ranger-radius));
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+    height: 100%;
+    inset-inline-start: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    touch-action: none;
+
+    // Range mode only — grabbing the fill slides both handles together.
+    &.is-draggable {
+      cursor: grab;
+      pointer-events: auto;
+    }
+  }
+
+  // Invisible overlay on .ranger's track; needs a real z-index since updateHandleStackOrder (youla-ranger.js) reorders it mid-drag without cancelling pointer capture.
+  // The class outweighs the pre-init input rule above, which also styles the thumbs of these inputs.
+  & > input[type="range"].ranger-input {
+    background-color: transparent;
+    height: 100%;
+    width: 100%;
+    inset-inline-start: 0;
+    margin: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    z-index: 3;
+  }
+
+  &-label {
+    position: absolute;
+    inset-inline: var(--ranger-inset);
+    top: calc(-1 * var(--ranger-gap-top));
+    transition: opacity 0.2s ease-out;
+    min-height: 1.25rem;
+
+    // Fades via opacity, not display/visibility, since labelTo's own visibility toggle would override those.
+    &.is-idle {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &-item {
+      position: absolute;
+      white-space: nowrap;
+      font-size: 11px;
+      background-color: #fff;
+      border-radius: 5px;
+      padding: 4px 6px;
+      border: 1px solid #dfe2e3;
+
+      &:after {
+        content: '';
+        height: 10px;
+        position: absolute;
+        width: 10px;
+        background-color: #fff;
+        border-right: 1px solid #dfe2e3;
+        border-bottom: 1px solid #dfe2e3;
+        border-bottom-right-radius: 3px;
+        border-top-left-radius: 8px;
+        bottom: -6px;
+        left: calc(50% - 5px);
+        transform: rotate(45deg);
+      }
+    }
+  }
+
+  // Appended first among .ranger's children (see reorderLayers in youla-ranger.js) so it paints below other layers without z-index.
+  &-scale {
+    display: flex;
+    justify-content: space-between;
+    inset-inline-start: var(--ranger-inset);
+    position: absolute;
+    top: calc(var(--ranger-height, 8px) - 2px);
+    white-space: nowrap;
+    width: calc(100% - 2 * var(--ranger-inset) - 1px);
+    box-sizing: border-box;
+    padding: 0;
+    cursor: initial;
+
+    &-tick {
+      position: relative;
+      width: 1px;
+      display: flex;
+      justify-content: center;
+
+      &::before {
+        background-color: var(--ranger-tick-color);
+        content: '';
+        height: 8px;
+        left: 0;
+        position: absolute;
+        top: 10px;
+        width: 1px;
+      }
+
+      // Minor ticks are shorter than major ticks, same baseline.
+      &--minor::before {
+        height: 4px;
+      }
+
+      // Opt-in via the classes option; grows with the live --ranger-scale property set by youla-ranger.js as a handle passes.
+      &--animated::before {
+        background-color: var(--ranger-tick-color);
+        height: calc(4px + var(--ranger-scale, 0) * 12px);
+        transition: height 0.15s ease-out, opacity 0.15s ease-out;
+      }
+
+      // Minor ticks animate too, with a shorter peak to preserve the hierarchy.
+      &--minor.ranger-scale-tick--animated::before {
+        height: calc(2px + var(--ranger-scale, 0) * 12px);
+      }
+
+      // Applied automatically (createScale in youla-ranger.js) to the ticks at minValue/maxValue.
+      &--limit {
+        &::before {
+          background-color: var(--ranger-fill-color);
+        }
+
+        ins {
+          color: var(--ranger-fill-color);
+          font-weight: 600;
+        }
+      }
+
+      &:last-child {
+        margin-left: -1px;
+        width: 0;
+      }
+
+      ins {
+        color: var(--ranger-tick-label-color);
+        display: inline-block;
+        font-size: 11px;
+        margin-top: 28px;
+        text-decoration: none;
+      }
+    }
+  }
+
+  // Separate from &-scale since marks are arbitrary positions, not an evenly spaced grid.
+  &-marks {
+    inset-inline: var(--ranger-inset);
+    height: 100%;
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+  }
+
+  &-mark {
+    background-color: var(--ranger-mark-color, var(--ranger-tick-color));
+    height: 100%;
+    position: absolute;
+    top: 0;
+    width: 2px;
+
+    // Point marks are re-centered on their value in JS (positionMarks); zone marks keep this edge anchor.
+    ins {
+      color: var(--ranger-tick-label-color);
+      font-size: 11px;
+      position: absolute;
+      white-space: nowrap;
+      bottom: 100%;
+      text-decoration: none;
+      margin-bottom: 4px;
+    }
+
+    // classes.markRange default; width/inset are set inline per-mark in JS.
+    &--range {
+      opacity: 0.25;
+    }
+
+    // Opt-in via a mark's own className — wider, fill-colored highlight variant.
+    &--highlight {
+      background-color: var(--ranger-fill-color);
+      width: 4px;
+
+      ins {
+        color: var(--ranger-fill-color);
+        font-weight: 600;
+      }
+    }
+  }
+}

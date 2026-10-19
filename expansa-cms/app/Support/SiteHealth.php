@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Models\Option;
+use App\Models\User;
 use Expansa\Ai\Enums\Status;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
@@ -234,7 +235,7 @@ final class SiteHealth
 
         try {
             // roles are stored as a JSON list, e.g. ["admin"]
-            $admins = Db::count('users', ['roles[~]' => '"admin"']);
+            $admins = Db::count('users', ['roles[~]' => ['"' . User::ROLE_OWNER . '"', '"admin"']]);
         } catch (Throwable) {
             $admins = null;
         }
@@ -250,7 +251,7 @@ final class SiteHealth
                 t('Administrators'),
                 $admins === null ? t('Unknown') : (string) $admins,
                 $admins === null || $admins > 0,
-                t('No user has the admin role: settings, plugins and users cannot be managed. Assign the role in the database.'),
+                t('No user has the owner or admin role: settings, plugins and users cannot be managed. Assign the role in the database.'),
             ),
             self::check(
                 t('Debug Mode'),
@@ -591,7 +592,7 @@ final class SiteHealth
             ),
             self::check(
                 t('Task Directory'),
-                is_dir(EX_STORAGE . 'ai') ? t('Created') : t('Created on the First Task'),
+                is_dir(EX_STORAGE . 'ai') ? t('Created', context: 'directory') : t('Created on the First Task'),
                 ! is_dir(EX_STORAGE . 'ai') || is_writable(EX_STORAGE . 'ai'),
                 t('The background worker saves the tasks to %s.', 'storage/ai/'),
             ),

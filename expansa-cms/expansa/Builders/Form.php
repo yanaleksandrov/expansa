@@ -27,7 +27,7 @@ use InvalidArgumentException;
  * echo Form::render('profile');
  * ```
  *
- * Templates are named by field type (`input`, `layout-tab`): the `view` and `assets` callbacks
+ * Templates are named by field type (`input`, `layout-group`): the `view` and `assets` callbacks
  * of configure() find their files, so the builder knows neither the template directory nor the View
  * and Asset facades.
  *

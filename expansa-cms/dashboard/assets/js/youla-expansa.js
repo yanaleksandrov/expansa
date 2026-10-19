@@ -477,6 +477,7 @@ document.addEventListener('youla:init', () => {
         return {
             fields: parse(root.dataset.fields, {}),
             rows: parse(root.dataset.rows, []),
+            search: new URLSearchParams(window.location.search).get('s') || '',
             editing: null,
             anchor: null,
             bulk: 0,
@@ -533,11 +534,16 @@ document.addEventListener('youla:init', () => {
                 }
             },
             clearFilters() {
-                const applied = this.activeFilters().length;
+                const applied = this.activeFilters().length || this.search;
                 this.rows = [];
+                this.search = '';
                 if (applied) {
                     this.applyFilters();
                 }
+            },
+            clearSearch() {
+                this.search = '';
+                this.applyFilters();
             },
             setFilterField(index, field) {
                 const row = this.rows[index];
@@ -592,6 +598,8 @@ document.addEventListener('youla:init', () => {
             applyFilters() {
                 const url = new URL(window.location.href);
                 [ ...url.searchParams.keys() ].filter(key => key.startsWith('filter[')).forEach(key => url.searchParams.delete(key));
+                const search = this.search.trim();
+                search ? url.searchParams.set('s', search) : url.searchParams.delete('s');
                 const payload = Object.fromEntries(url.searchParams);
                 this.activeFilters().forEach((row, i) => {
                     url.searchParams.set(`filter[${i}][field]`, row.field);
@@ -884,6 +892,7 @@ document.addEventListener('youla:init', () => {
     Youla.data('slug', root => ({
         value: root.querySelector?.('.slug-line input')?.value || '',
         base: '',
+        suffix: '',
         from: '',
         parent: '',
         bases: {},
@@ -921,7 +930,7 @@ document.addEventListener('youla:init', () => {
                 }
             },
             ':data-url'() {
-                const url = this.base + this.value;
+                const url = this.base + this.value + this.suffix;
                 root.dispatchEvent(new CustomEvent('slug-url', {
                     detail: url,
                     bubbles: true
@@ -1005,35 +1014,35 @@ document.addEventListener('youla:init', () => {
         }
     }));
     Youla.data('tab', () => ({
-        tab: null,
-        tabButton(id) {
+        active: null,
+        button(id) {
             return {
                 ':class'() {
-                    this.tab ??= this.$el.classList.contains('is-active') ? id : null;
+                    this.active ??= this.$el.classList.contains('is-active') ? id : null;
                     return {
-                        'is-active': this.tab === id
+                        'is-active': this.active === id
                     };
                 },
                 '@click'() {
-                    this.tab = id;
+                    this.active = id;
                     const url = new URL(window.location.href);
                     url.searchParams.set('tab', id);
                     window.history.pushState({}, '', url);
                 }
             };
         },
-        tabContent(id) {
+        content(id) {
             return {
                 'u-show'() {
-                    this.tab ??= this.$el.hidden ? null : id;
-                    return this.tab === id;
+                    this.active ??= this.$el.hidden ? null : id;
+                    return this.active === id;
                 }
             };
         }
     }));
     const dirtyStates = new Map;
     window.addEventListener('click', e => {
-        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]')) {
+        if (document.body.classList.contains('is-unsaved') && e.target.closest('a[href]:not([target="_blank" i])')) {
             e.preventDefault();
             document.body.classList.add('is-shake');
             setTimeout(() => document.body.classList.remove('is-shake'), 500);
@@ -1092,6 +1101,20 @@ document.addEventListener('youla:init', () => {
         input.dispatchEvent(new Event('input', {
             bubbles: true
         }));
+    });
+    Youla.method('fill', (e, el) => value => {
+        const input = el.closest('.field')?.querySelector('input, textarea');
+        if (!input) {
+            return;
+        }
+        input.value = value;
+        input.dispatchEvent(new Event('input', {
+            bubbles: true
+        }));
+        input.dispatchEvent(new Event('change', {
+            bubbles: true
+        }));
+        input.focus();
     });
     Youla.method('safe', () => ({
         slug(value) {

@@ -24,6 +24,7 @@
             scaleTicksCount: 10,
             scaleMinorTicksCount: 0,
             scaleAnimatedTicksCount: 1,
+            scaleVar: "--ranger-scale",
             labelIsVisible: true,
             labelPrefix: "",
             labelSuffix: "",
@@ -247,9 +248,7 @@
             this.defaultToValue = this.toSlider ? this.toSlider.value : null;
             this.fillSlider();
             this.addListeners();
-            if (this.fillGradient) {
-                new ResizeObserver(() => this.fillSlider()).observe(this.wrapper);
-            }
+            new ResizeObserver(() => this.fillSlider()).observe(this.wrapper);
             if (this.labelIsVisible) {
                 this.label = this.createLabel();
             }
@@ -283,7 +282,7 @@
                 this.toSlider.addEventListener("dblclick", () => this.resetSlider(this.toSlider, this.defaultToValue));
                 this.fill.addEventListener("pointerdown", event => this.handleFillDragStart(event));
             }
-            this.wrapper.addEventListener("click", event => this.handleTrackClick(event));
+            this.wrapper.addEventListener("pointerdown", event => this.handleTrackPress(event));
             [ [ "fromInput", "fromSlider" ], [ "toInput", "toSlider" ] ].forEach(([inputKey, sliderKey]) => {
                 const input = this[inputKey];
                 if (input) {
@@ -404,11 +403,18 @@
             }
             return value;
         }
+        trackInset() {
+            return parseFloat(getComputedStyle(this.wrapper).paddingInlineStart) || 0;
+        }
+        static trackSpan(percent, inset) {
+            return `(100% - ${inset * 2}px) * ${percent / 100}`;
+        }
         positionToValue(clientX) {
             const {left: left, width: width} = this.wrapper.getBoundingClientRect();
+            const inset = this.trackInset();
             const min = Number(this.fromSlider.min);
             const max = Number(this.fromSlider.max);
-            const ratio = (clientX - left) / width;
+            const ratio = Math.min(1, Math.max(0, (clientX - left - inset) / (width - inset * 2)));
             return min + (this.isRTL ? 1 - ratio : ratio) * (max - min);
         }
         resetSlider(slider, defaultValue) {
@@ -431,14 +437,32 @@
             this.activeSlider = null;
             this.activeStep = null;
         }
-        handleTrackClick(event) {
-            if (event.target !== this.wrapper) {
+        handleTrackPress(event) {
+            if (event.target !== this.wrapper || event.button !== 0) {
                 return;
             }
+            event.preventDefault();
             const value = this.positionToValue(event.clientX);
             const target = this.isRange && Math.abs(value - this.toSlider.value) < Math.abs(value - this.fromSlider.value) ? this.toSlider : this.fromSlider;
-            target.value = this.resolveValue(value, this.step);
-            target.dispatchEvent(new Event("input"));
+            const moveTo = clientX => {
+                target.value = this.resolveValue(this.positionToValue(clientX), this.step);
+                target.dispatchEvent(new Event("input"));
+            };
+            this.startDrag(target);
+            target.focus({
+                preventScroll: true
+            });
+            moveTo(event.clientX);
+            const onMove = moveEvent => moveTo(moveEvent.clientX);
+            const onUp = () => {
+                this.wrapper.removeEventListener("pointermove", onMove);
+                this.wrapper.removeEventListener("pointerup", onUp);
+                this.wrapper.removeEventListener("pointercancel", onUp);
+            };
+            this.wrapper.setPointerCapture(event.pointerId);
+            this.wrapper.addEventListener("pointermove", onMove);
+            this.wrapper.addEventListener("pointerup", onUp);
+            this.wrapper.addEventListener("pointercancel", onUp);
         }
         handleFillDragStart(event) {
             if (this.disabled) {
@@ -450,7 +474,7 @@
             const startTo = Number(this.toSlider.value);
             const min = Number(this.fromSlider.min);
             const max = Number(this.fromSlider.max);
-            const trackWidth = this.wrapper.getBoundingClientRect().width;
+            const trackWidth = this.wrapper.getBoundingClientRect().width - this.trackInset() * 2;
             this.fill.setPointerCapture(event.pointerId);
             this.onStart?.([ startFrom, startTo ], this.fill);
             const onMove = moveEvent => {
@@ -479,18 +503,24 @@
             const percent = value => Math.round((value - min) / (max - min) * 1e3) / 10;
             const fromPercent = toSlider ? percent(fromSlider.value) : 0;
             const toPercent = percent(toSlider ? toSlider.value : fromSlider.value);
-            fill.style.backgroundColor = getComputedStyle(fromSlider).accentColor;
-            fill.style.setProperty("--ranger-fill-gradient", this.fillGradient || "none");
-            fill.style.insetInlineStart = `${fromPercent}%`;
-            fill.style.width = `${toPercent - fromPercent}%`;
+            const inset = this.trackInset();
+            fill.style.insetInlineStart = `calc(${Ranger.trackSpan(fromPercent, inset)})`;
+            fill.style.width = `calc(${Ranger.trackSpan(toPercent - fromPercent, inset)} + ${inset * 2}px)`;
+            this.wrapper.classList.toggle("has-gradient", Boolean(this.fillGradient));
             if (this.fillGradient) {
                 const trackWidth = this.wrapper.getBoundingClientRect().width;
-                const offset = fromPercent / 100 * trackWidth;
-                fill.style.backgroundSize = `${trackWidth}px 100%`;
-                fill.style.backgroundPosition = this.isRTL ? `right -${offset}px top 0` : `left -${offset}px top 0`;
+                const travel = trackWidth - inset * 2;
+                const offset = fromPercent / 100 * travel;
+                const side = this.isRTL ? "right" : "left";
+                fill.style.backgroundImage = `${this.fillGradient}, ${this.fillGradient}`;
+                fill.style.backgroundSize = `${travel}px 100%, ${trackWidth}px 100%`;
+                fill.style.backgroundPosition = `${side} ${inset - offset}px top 0, ${side} ${-offset}px top 0`;
+                fill.style.backgroundRepeat = "no-repeat";
             } else {
+                fill.style.backgroundImage = "";
                 fill.style.backgroundSize = "";
                 fill.style.backgroundPosition = "";
+                fill.style.backgroundRepeat = "";
             }
             if (toSlider) {
                 this.wrapper.classList.toggle("is-overlapping", Number(fromSlider.value) === Number(toSlider.value));
@@ -553,6 +583,7 @@
                 slider.addEventListener("keydown", event => Ranger.NAVIGATION_KEYS.includes(event.key) && show());
                 slider.addEventListener("keyup", event => Ranger.NAVIGATION_KEYS.includes(event.key) && hide());
             });
+            this.wrapper.addEventListener("pointerdown", event => event.target === this.wrapper && show());
             document.addEventListener("pointerup", hide);
         }
         calcPositions() {
@@ -636,7 +667,7 @@
             scaleTicks.forEach(({value: value, tick: tick}) => {
                 const distance = Math.min(...handleValues.map(handleValue => Math.abs(handleValue - value)));
                 const scale = maxDistance > 0 && distance < maxDistance ? ((Math.cos(distance / maxDistance * Math.PI) + 1) / 2) ** Ranger.ARC_SHARPNESS : 0;
-                tick.style.setProperty("--ranger-scale", scale.toFixed(2));
+                tick.style.setProperty(this.scaleVar, scale.toFixed(2));
             });
         }
         arrangeScale() {

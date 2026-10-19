@@ -942,6 +942,7 @@ input[type=checkbox]:checked {
 input[type=radio] {
   border-radius: 100% !important;
   transition: all 0.1s linear;
+  corner-shape: initial;
 }
 input[type=radio]:checked {
   border: 4px solid var(--expansa-primary);
@@ -999,6 +1000,358 @@ input[type=radio]:checked {
   font-size: 0.8125rem;
   color: var(--expansa-text-muted);
   margin: 0 !important;
+}
+
+@property --ranger-inset {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+:root {
+  --ranger-height: 1.5rem;
+  --ranger-radius: 11px;
+  --ranger-gap-top: 2.5rem;
+  --ranger-gap-bottom: 4rem;
+  --ranger-inset: 8px;
+  --ranger-bg: #f7f7f7;
+  --ranger-fill-color: #dce8fc;
+  --ranger-fill-radius: 11px;
+  --ranger-thumb-color: #005cf4;
+  --ranger-thumb-width: 1.25rem;
+  --ranger-thumb-height: 2rem;
+  --ranger-thumb-radius: 0;
+  --ranger-thumb-bg: transparent;
+  --ranger-thumb-hover-bg: transparent;
+  --ranger-thumb-border: transparent;
+  --ranger-thumb-icon-size: 2px 16px;
+  --ranger-thumb-icon: initial;
+  --ranger-thumb-shadow: none;
+  --ranger-tick-color: #bdbdbd;
+  --ranger-tick-label-color: #888;
+  --ranger-mark-color: #ffd794;
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *) {
+  accent-color: var(--ranger-fill-color);
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border-radius: var(--ranger-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  box-sizing: border-box;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: initial;
+  background-color: var(--ranger-bg);
+  display: block;
+  background-clip: border-box;
+  border: 1px solid var(--ranger-border);
+  box-shadow: none;
+  overflow: visible;
+  height: var(--ranger-height);
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)[u-ranger]:not(.ranger-input) {
+  margin-block: var(--ranger-gap-top) var(--ranger-gap-bottom);
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  pointer-events: all;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--ranger-thumb-bg);
+  background-image: var(--ranger-thumb-icon);
+  background-size: var(--ranger-thumb-icon-size, auto);
+  border: 1px solid var(--ranger-thumb-border);
+  border-radius: var(--ranger-thumb-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  box-shadow: var(--ranger-thumb-shadow);
+  width: var(--ranger-thumb-width);
+  height: var(--ranger-thumb-height);
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-moz-range-thumb {
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  pointer-events: all;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--ranger-thumb-bg);
+  background-image: var(--ranger-thumb-icon);
+  background-size: var(--ranger-thumb-icon-size, auto);
+  border: 1px solid var(--ranger-thumb-border);
+  border-radius: var(--ranger-thumb-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  box-shadow: var(--ranger-thumb-shadow);
+  width: var(--ranger-thumb-width);
+  height: var(--ranger-thumb-height);
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *):focus-visible {
+  outline: none;
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *):focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--ranger-thumb-color);
+  outline-offset: 2px;
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *):focus-visible::-moz-range-thumb {
+  outline: 2px solid var(--ranger-thumb-color);
+  outline-offset: 2px;
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-moz-range-track {
+  background: transparent;
+  border: none;
+  height: 100%;
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-moz-range-progress {
+  background: transparent;
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-webkit-slider-runnable-track {
+  margin-inline: calc(var(--ranger-inset) - var(--ranger-thumb-width) / 2);
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-moz-range-track {
+  margin-inline: calc(var(--ranger-inset) - var(--ranger-thumb-width) / 2);
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-webkit-slider-thumb, :root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-webkit-slider-thumb:hover {
+  color: var(--ranger-thumb-color);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg width='3' height='16' viewBox='0 0 3 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='3' height='16' fill='white'/%3E%3C/svg%3E") center/3px 16px no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg width='3' height='16' viewBox='0 0 3 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='3' height='16' fill='white'/%3E%3C/svg%3E") center/3px 16px no-repeat;
+  background-color: currentColor;
+}
+:root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-moz-range-thumb, :root input[type=range]:not(.quality-chart-range, .air-datepicker *)::-moz-range-thumb:hover {
+  color: var(--ranger-thumb-color);
+  mask: url("data:image/svg+xml,%3Csvg width='3' height='16' viewBox='0 0 3 16' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='3' height='16' fill='white'/%3E%3C/svg%3E") center/3px 16px no-repeat;
+  background-color: currentColor;
+}
+
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *) {
+  --ranger-native-thumb: max(2 * var(--ranger-inset), 3px);
+  --ranger-native-bar: linear-gradient(var(--ranger-thumb-color), var(--ranger-thumb-color)) center / 3px 16px no-repeat;
+  --ranger-native-radius: min(var(--ranger-fill-radius, var(--ranger-radius)), var(--ranger-native-thumb) / 2);
+  --ranger-native-shadow: calc(-100vw - var(--ranger-native-radius));
+  --ranger-native-thumb-radius: 0 var(--ranger-native-radius) var(--ranger-native-radius) 0;
+  overflow: hidden;
+}
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *):dir(rtl) {
+  --ranger-native-shadow: calc(100vw + var(--ranger-native-radius));
+  --ranger-native-thumb-radius: var(--ranger-native-radius) 0 0 var(--ranger-native-radius);
+}
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *):focus-visible {
+  outline: 2px solid var(--ranger-thumb-color);
+  outline-offset: 2px;
+}
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *)::-webkit-slider-runnable-track {
+  margin-inline: 0;
+}
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *)::-moz-range-track {
+  margin-inline: 0;
+}
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *)::-webkit-slider-thumb, :root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *)::-webkit-slider-thumb:hover, :root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *):focus-visible::-webkit-slider-thumb {
+  width: var(--ranger-native-thumb);
+  height: var(--ranger-height);
+  background: var(--ranger-native-bar), var(--ranger-fill-color);
+  border: 0;
+  border-radius: var(--ranger-native-thumb-radius);
+  box-shadow: var(--ranger-native-shadow) 0 0 100vw var(--ranger-fill-color);
+  outline: 0;
+  -webkit-mask: none;
+          mask: none;
+}
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *)::-moz-range-thumb, :root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *)::-moz-range-thumb:hover, :root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *):focus-visible::-moz-range-thumb {
+  width: var(--ranger-native-thumb);
+  height: var(--ranger-height);
+  background: var(--ranger-native-bar), var(--ranger-fill-color);
+  border: 0;
+  border-radius: var(--ranger-native-thumb-radius);
+  box-shadow: none;
+  outline: 0;
+  mask: none;
+}
+:root input[type=range]:not(.ranger-input, .quality-chart-range, .air-datepicker *)::-moz-range-progress {
+  height: 100%;
+  background: var(--ranger-fill-color);
+}
+
+.ranger {
+  background-color: var(--ranger-bg);
+  border-radius: var(--ranger-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  cursor: pointer;
+  height: var(--ranger-height);
+  margin-block: var(--ranger-gap-top) var(--ranger-gap-bottom);
+  box-sizing: border-box;
+  padding-inline: var(--ranger-inset);
+  position: relative;
+  touch-action: pan-y;
+  width: 100%;
+}
+.ranger:has(input[type=range]:disabled) {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.ranger.is-overlapping input[type=range]:not(.ranger-input--to)::-webkit-slider-thumb {
+  clip-path: inset(0 50% 0 0);
+}
+.ranger.is-overlapping input[type=range]:not(.ranger-input--to)::-moz-range-thumb {
+  clip-path: inset(0 50% 0 0);
+}
+.ranger.is-overlapping .ranger-input--to::-webkit-slider-thumb {
+  clip-path: inset(0 0 0 50%);
+}
+.ranger.is-overlapping .ranger-input--to::-moz-range-thumb {
+  clip-path: inset(0 0 0 50%);
+}
+.ranger-fill {
+  background-color: var(--ranger-fill-color);
+  background-image: var(--ranger-fill-gradient, none);
+  border-radius: var(--ranger-fill-radius, var(--ranger-radius));
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  height: 100%;
+  inset-inline-start: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  touch-action: none;
+}
+.ranger-fill.is-draggable {
+  cursor: grab;
+  pointer-events: auto;
+}
+.ranger > input[type=range].ranger-input {
+  background-color: transparent;
+  height: 100%;
+  width: 100%;
+  inset-inline-start: 0;
+  margin: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  z-index: 3;
+}
+.ranger-label {
+  position: absolute;
+  inset-inline: var(--ranger-inset);
+  top: calc(-1 * var(--ranger-gap-top));
+  transition: opacity 0.2s ease-out;
+  min-height: 1.25rem;
+}
+.ranger-label.is-idle {
+  opacity: 0;
+  pointer-events: none;
+}
+.ranger-label-item {
+  position: absolute;
+  white-space: nowrap;
+  font-size: 11px;
+  background-color: #fff;
+  border-radius: 5px;
+  padding: 4px 6px;
+  border: 1px solid #dfe2e3;
+}
+.ranger-label-item:after {
+  content: "";
+  height: 10px;
+  position: absolute;
+  width: 10px;
+  background-color: #fff;
+  border-right: 1px solid #dfe2e3;
+  border-bottom: 1px solid #dfe2e3;
+  border-bottom-right-radius: 3px;
+  border-top-left-radius: 8px;
+  bottom: -6px;
+  left: calc(50% - 5px);
+  transform: rotate(45deg);
+}
+.ranger-scale {
+  display: flex;
+  justify-content: space-between;
+  inset-inline-start: var(--ranger-inset);
+  position: absolute;
+  top: calc(var(--ranger-height, 8px) - 2px);
+  white-space: nowrap;
+  width: calc(100% - 2 * var(--ranger-inset) - 1px);
+  box-sizing: border-box;
+  padding: 0;
+  cursor: initial;
+}
+.ranger-scale-tick {
+  position: relative;
+  width: 1px;
+  display: flex;
+  justify-content: center;
+}
+.ranger-scale-tick::before {
+  background-color: var(--ranger-tick-color);
+  content: "";
+  height: 8px;
+  left: 0;
+  position: absolute;
+  top: 10px;
+  width: 1px;
+}
+.ranger-scale-tick--minor::before {
+  height: 4px;
+}
+.ranger-scale-tick--animated::before {
+  background-color: var(--ranger-tick-color);
+  height: calc(4px + var(--ranger-scale, 0) * 12px);
+  transition: height 0.15s ease-out, opacity 0.15s ease-out;
+}
+.ranger-scale-tick--minor.ranger-scale-tick--animated::before {
+  height: calc(2px + var(--ranger-scale, 0) * 12px);
+}
+.ranger-scale-tick--limit::before {
+  background-color: var(--ranger-fill-color);
+}
+.ranger-scale-tick--limit ins {
+  color: var(--ranger-fill-color);
+  font-weight: 600;
+}
+.ranger-scale-tick:last-child {
+  margin-left: -1px;
+  width: 0;
+}
+.ranger-scale-tick ins {
+  color: var(--ranger-tick-label-color);
+  display: inline-block;
+  font-size: 11px;
+  margin-top: 28px;
+  text-decoration: none;
+}
+.ranger-marks {
+  inset-inline: var(--ranger-inset);
+  height: 100%;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+}
+.ranger-mark {
+  background-color: var(--ranger-mark-color, var(--ranger-tick-color));
+  height: 100%;
+  position: absolute;
+  top: 0;
+  width: 2px;
+}
+.ranger-mark ins {
+  color: var(--ranger-tick-label-color);
+  font-size: 11px;
+  position: absolute;
+  white-space: nowrap;
+  bottom: 100%;
+  text-decoration: none;
+  margin-bottom: 4px;
+}
+.ranger-mark--range {
+  opacity: 0.25;
+}
+.ranger-mark--highlight {
+  background-color: var(--ranger-fill-color);
+  width: 4px;
+}
+.ranger-mark--highlight ins {
+  color: var(--ranger-fill-color);
+  font-weight: 600;
 }
 
 .filler {
@@ -1455,6 +1808,13 @@ option[data-html*="<i "]) {
   background-color: inherit;
   color: inherit;
 }
+.field-item:has(> [type=range]:not(.ranger-input)), .field-item:has(> .ranger) {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  box-shadow: none !important;
+  height: auto;
+}
 .field-item:has([type=radio]), .field-item:has([type=checkbox]) {
   white-space: normal;
   background-color: transparent;
@@ -1464,7 +1824,7 @@ option[data-html*="<i "]) {
   height: auto;
   margin: 0.125rem 0;
   padding: 0;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 .field-item:has([type=radio]) .field-label, .field-item:has([type=checkbox]) .field-label {
   font-weight: 400;
@@ -1561,6 +1921,15 @@ option[data-html*="<i "]) {
   padding: 0.65rem;
   color: var(--expansa-text-muted);
 }
+.field--button .field-item:has(.field-icon) {
+  flex-wrap: wrap;
+  container-type: inline-size;
+}
+@container (max-width: 10rem) {
+  .field--button .field-item:has(.field-icon) .field-label {
+    flex-basis: 100%;
+  }
+}
 .field--button .field-item .field-label {
   font-weight: 500;
 }
@@ -1637,6 +2006,7 @@ option[data-html*="<i "]) {
 .field-item:has([type=radio]) [type=radio] {
   max-width: 1.35rem;
   height: 1.35rem;
+  max-height: 1.35rem;
   border-width: 6px;
   corner-shape: initial;
 }
@@ -1655,9 +2025,11 @@ option[data-html*="<i "]) {
 .field:has(.field-buttons) .field-box {
   display: grid;
   gap: 0.25em;
+  margin-bottom: auto;
 }
 .field:has(.field-buttons) .field-buttons {
   display: flex;
+  flex-wrap: wrap;
   gap: 2px;
   padding: 2px;
   height: -moz-fit-content;
@@ -1685,6 +2057,8 @@ option[data-html*="<i "]) {
   display: flex;
   align-items: center;
   gap: 0.375em;
+  flex: 1;
+  justify-content: center;
 }
 .field:has(.field-buttons) .field-buttons .field-buttons-item:hover {
   color: var(--expansa-text);

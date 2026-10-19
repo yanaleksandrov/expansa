@@ -35,7 +35,7 @@ check('env.php alone is not an installation while its settings are not loaded', 
 // env.php with an empty database opens the installer; queries are built, not run, so no table exists
 define('EX_DB', ['prefix' => 'expansa_']);
 Expansa\Facades\Db::configure('mysql', 'expansa', 'user', 'secret', 'localhost', 'expansa_', testMode: true);
-check('env.php with a database without the owner is not an installation', ! Installation::isComplete($root));
+check('env.php with a database without the site is not an installation', ! Installation::isComplete($root));
 
 array_map('unlink', glob($root . '*.php'));
 rmdir($root);

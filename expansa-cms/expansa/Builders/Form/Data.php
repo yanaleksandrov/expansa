@@ -11,7 +11,8 @@ use Expansa\Support\Arr;
  * Data of a field template, `$field` in it: Form::view() fills it from the field array, each property
  * cleans its value in a set hook. A key means the same in every template, so one class serves them all;
  * default classes differ by template and stay in its markup (`$field->class ?: 'field'`).
- * Keys without a property (`type`, `error`) are dropped; `prop`, `required` and `htmlAttributes` are computed.
+ * Keys without a property (`type`, `error`) are dropped; `prop`, `required`
+ * and `htmlAttributes` are computed.
  *
  * @package Expansa\Builders
  */
@@ -20,7 +21,11 @@ final class Data
     /**
      * Properties computed from the others, a field key cannot set them.
      */
-    private const array COMPUTED = ['prop' => true, 'required' => true, 'htmlAttributes' => true];
+    private const array COMPUTED = [
+        'prop'           => true,
+        'required'       => true,
+        'htmlAttributes' => true,
+    ];
 
     /**
      * Name attribute of the field.
@@ -51,17 +56,18 @@ final class Data
     }
 
     /**
-     * Classes of the group content.
+     * Layout of a group: `row` puts the label in the left fifth, `compact` in a muted left third,
+     * `stack` above the fields, `plain` is a container without the label column.
      */
-    public string $content_class = '' {
-        set(mixed $value) => Sanitizer::class($value);
+    public string $layout = 'row' {
+        set(mixed $value) => in_array($value, ['row', 'compact', 'stack', 'plain'], true) ? $value : 'row';
     }
 
     /**
-     * Classes of the tab content.
+     * Number of columns of the fields in a group, 1 to 4.
      */
-    public string $class_content = '' {
-        set(mixed $value) => Sanitizer::class($value);
+    public int $columns = 1 {
+        set(mixed $value) => min(max(Sanitizer::absint($value), 1), 4);
     }
 
     /**
@@ -101,21 +107,14 @@ final class Data
     }
 
     /**
-     * Description of a tab or a media field.
+     * Description of a media field.
      */
     public string $description = '' {
         set(mixed $value) => Sanitizer::trim($value);
     }
 
     /**
-     * Title of a tab.
-     */
-    public string $caption = '' {
-        set(mixed $value) => Sanitizer::ucfirst($value);
-    }
-
-    /**
-     * Rendered nested fields of a tab, step or group.
+     * Rendered nested fields of a step or group.
      */
     public string $content = '' {
         set(mixed $value) => Sanitizer::trim($value);
@@ -157,10 +156,27 @@ final class Data
     }
 
     /**
-     * Fields of the level, the tab menu lists its tabs.
+     * Tabs of a level, rendered together: the menu buttons and the panels with rendered nested fields.
+     * `active` marks the tab shown when the page opens, `condition` and `visible` come from its conditions.
+     *
+     * @var array<int, array{prop: string, label: string, icon: string, caption: string, description: string,
+     *     content: string, condition: string, visible: bool, active: bool}>
      */
-    public array $fields = [] {
-        set(mixed $value) => Sanitizer::array($value);
+    public array $tabs = [] {
+        set(mixed $value) => array_map(
+            fn (array $tab) => [
+                'prop'        => Sanitizer::prop($tab['name'] ?? '') ?: 'tab',
+                'label'       => Sanitizer::trim($tab['label'] ?? ''),
+                'icon'        => Sanitizer::attribute($tab['icon'] ?? ''),
+                'caption'     => Sanitizer::ucfirst($tab['caption'] ?? ''),
+                'description' => Sanitizer::trim($tab['description'] ?? ''),
+                'content'     => Sanitizer::trim($tab['content'] ?? ''),
+                'condition'   => (string) ($tab['conditions']['u-show'] ?? ''),
+                'visible'     => empty($tab['conditions']['hidden']),
+                'active'      => ! empty($tab['active']),
+            ],
+            array_values(Sanitizer::array($value)),
+        );
     }
 
     /**
@@ -182,13 +198,6 @@ final class Data
      */
     public bool $switcher = true {
         set(mixed $value) => ($value ?? '') === '' || Sanitizer::bool($value);
-    }
-
-    /**
-     * Whether a tab is the one shown when the page opens, see Internal\Renderer::activeTab().
-     */
-    public bool $active = false {
-        set(mixed $value) => Sanitizer::bool($value);
     }
 
     /**

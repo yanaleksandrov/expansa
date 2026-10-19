@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Dashboard;
 
 use App\Http\VerifyCsrfToken;
+use App\Models\Option;
 use Expansa\Assets\Manager as AssetManager;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
 use Expansa\Support\Is;
+use IntlDateFormatter;
 
 /**
  * Styles and scripts of the dashboard pages, from dashboard/assets, minified outside debug mode.
@@ -25,6 +27,30 @@ final class Assets
      * themselves (youla-filler.js) or are styled by controls.css (youla-select.js).
      */
     private const array VENDOR_STYLES = ['youla-pickadate' => 'air-datepicker'];
+
+    /**
+     * Tokens of the PHP date format and their air-datepicker equivalents; the other letters have none
+     * and are dropped.
+     */
+    private const array DATE_TOKENS = [
+        'd' => 'dd',
+        'j' => 'd',
+        'D' => 'E',
+        'l' => 'EEEE',
+        'm' => 'MM',
+        'n' => 'M',
+        'M' => 'MMM',
+        'F' => 'MMMM',
+        'y' => 'yy',
+        'Y' => 'yyyy',
+        'H' => 'HH',
+        'G' => 'H',
+        'h' => 'hh',
+        'g' => 'h',
+        'i' => 'mm',
+        'a' => 'aa',
+        'A' => 'AA',
+    ];
 
     /**
      * Whether the notifications markup is already hooked into the page footer.
@@ -212,70 +238,9 @@ final class Assets
         return Hook::call('dashboardData', [
             'items'               => [],
             'locale'              => I18n::locale(),
-            'dateFormat'          => 'd MMMM, yyyy',
-            'datepicker'          => [
-                'days'        => [
-                    t('Sunday'),
-                    t('Monday'),
-                    t('Tuesday'),
-                    t('Wednesday'),
-                    t('Thursday'),
-                    t('Friday'),
-                    t('Saturday')
-                ],
-                'daysShort'   => [
-                    t('Sun'),
-                    t('Mon'),
-                    t('Tue'),
-                    t('Wed'),
-                    t('Thu'),
-                    t('Fri'),
-                    t('Sat')
-                ],
-                'daysMin'     => [
-                    t('Su'),
-                    t('Mo'),
-                    t('Tu'),
-                    t('We'),
-                    t('Th'),
-                    t('Fr'),
-                    t('Sa')
-                ],
-                'months'      => [
-                    t('January'),
-                    t('February'),
-                    t('March'),
-                    t('April'),
-                    t('May'),
-                    t('June'),
-                    t('July'),
-                    t('August'),
-                    t('September'),
-                    t('October'),
-                    t('November'),
-                    t('December')
-                ],
-                'monthsShort' => [
-                    t('Jan'),
-                    t('Feb'),
-                    t('Mar'),
-                    t('Apr'),
-                    t('May'),
-                    t('Jun'),
-                    t('Jul'),
-                    t('Aug'),
-                    t('Sep'),
-                    t('Oct'),
-                    t('Nov'),
-                    t('Dec')
-                ],
-                'today'       => t('Today'),
-                'clear'       => t('Clear'),
-                'dateFormat'  => 'MM/dd/yyyy',
-                'timeFormat'  => 'hh:mm aa',
-                'firstDay'    => 0,
-            ],
-            'weekStart'           => 1,
+            'dateFormat'          => self::dateFormat((string) Option::get('date-format', 'F j, Y')),
+            'datepicker'          => self::datepicker(),
+            'weekStart'           => (int) Option::get('week-starts-on', 1),
             'loadingText'         => t('Loading...'),
             'noResultsText'       => t('No results found'),
             'noChoicesText'       => t('No choices to choose from'),
@@ -345,6 +310,74 @@ final class Assets
                 'network' => t('No connection. Check the internet and try again.'),
             ],
         ];
+    }
+
+    /**
+     * Texts of the datepicker: the names of days and months come from ICU in the dashboard locale,
+     * months in the standalone form for titles and the month view, `monthsGenitive` in the form
+     * used next to a day number ("19 октября").
+     *
+     * @return array<string, mixed>
+     */
+    private static function datepicker(): array
+    {
+        $names    = [];
+        $patterns = [
+            'days'           => 'cccc',
+            'daysShort'      => 'ccc',
+            'daysMin'        => 'cccccc',
+            'months'         => 'LLLL',
+            'monthsShort'    => 'LLL',
+            'monthsGenitive' => 'MMMM',
+        ];
+
+        foreach ($patterns as $key => $pattern) {
+            $formatter = new IntlDateFormatter(I18n::locale(), IntlDateFormatter::NONE, IntlDateFormatter::NONE, 'UTC', null, $pattern);
+            $isMonth   = str_starts_with($key, 'months');
+
+            // days from 4 January 1970, a Sunday, the first day of the locale arrays
+            for ($i = 0; $i < ($isMonth ? 12 : 7); $i++) {
+                $name          = $formatter->format($isMonth ? gmmktime(0, 0, 0, $i + 1, 1, 2000) : ($i + 3) * 86400);
+                $names[$key][] = $key === 'months' || $key === 'monthsShort' ? mb_ucfirst($name) : $name;
+            }
+        }
+
+        return [
+            ...$names,
+            'today'      => t('Today'),
+            'clear'      => t('Clear'),
+            'timeFormat' => self::dateFormat((string) Option::get('time-format', 'g:i a')),
+        ];
+    }
+
+    /**
+     * Convert a PHP date format of the settings to the air-datepicker one: "F j, Y" to "MMMM d, yyyy".
+     * Its tokens match only between separators, so adjacent tokens get a space: "g:ia" to "h:mm aa".
+     *
+     * @param string $format PHP date format, a backslash escapes a letter.
+     * @return string
+     */
+    private static function dateFormat(string $format): string
+    {
+        $result  = '';
+        $isToken = false;
+        $escaped = false;
+
+        foreach (mb_str_split($format) as $char) {
+            if ($escaped || $char === '\\') {
+                $result .= $escaped ? $char : '';
+                $escaped = ! $escaped;
+                $isToken = false;
+            } elseif (isset(self::DATE_TOKENS[$char])) {
+                $result .= ($isToken ? ' ' : '') . self::DATE_TOKENS[$char];
+                $isToken = true;
+            } elseif (! ctype_alpha($char)) {
+                $result .= $char;
+                $isToken = false;
+            }
+        }
+
+        return trim(preg_replace('/\s+/', ' ', $result));
     }
 
     /**

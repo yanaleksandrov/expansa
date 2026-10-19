@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Post\Status;
 use App\Post\Type;
 use App\Support\Activity;
+use App\Support\Permalinks;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSoftDeletes;
@@ -226,6 +227,18 @@ class Post
     public function path(): string
     {
         return self::paths($this->type, [$this->id])[$this->id] ?? '';
+    }
+
+    /**
+     * Get the URL of the post by the permalink structure, see Permalinks::post().
+     *
+     * @return string Empty for a post without a slug.
+     */
+    public function url(): string
+    {
+        $path = Permalinks::post($this->path(), $this->id, $this->type);
+
+        return $path === '' ? '' : url($path);
     }
 
     /**

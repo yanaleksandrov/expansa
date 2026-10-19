@@ -8,13 +8,15 @@ use App\Models\Post;
 use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
+use App\Support\Dates;
+use App\Support\Permalinks;
 use Expansa\Builders\Table;
 use Expansa\Facades\Db;
 use PDO;
 
 /**
  * Items of a post type, the newest first: the title with the view, duplicate and delete actions,
- * the author, the status and the date; filtered by the status and the author. A type with a trash
+ * the author, the status and the date; filtered by the status, the author and the search. A type with a trash
  * shows it as a separate list, see Models\Post::delete().
  *
  * @package App\Tables
@@ -39,6 +41,11 @@ final class Posts extends Table
         public private(set) string $status = '' {
             set => isset(Status::getStatuses()[$value]) ? $value : '';
         },
+
+        /**
+         * Text searched in the title and the content.
+         */
+        public readonly string $search = '',
     ) {
         parent::__construct();
     }
@@ -53,6 +60,13 @@ final class Posts extends Table
         $where = $this->type->canTrash ? [$this->isTrash ? 'deleted_at[!]' : 'deleted_at' => null] : [];
         if ($this->status !== '') {
             $where['status'] = $this->status;
+        }
+
+        if ($this->search !== '') {
+            $where['OR'] = [
+                'title[~]'   => $this->search,
+                'content[~]' => $this->search,
+            ];
         }
 
         $posts = Db::select($this->type->table, ['id [Int]', 'title', 'author_id [Int]', 'status', 'created_at'], [
@@ -85,7 +99,7 @@ final class Posts extends Table
                     'value' => $statuses[$post['status']] ?? $post['status'],
                 ],
                 'post_status' => $post['status'],
-                'date'        => date('Y-m-d H:i', (int) strtotime($post['created_at'])),
+                'date'        => Dates::format((string) $post['created_at']),
             ];
         }, $posts);
     }
@@ -108,11 +122,11 @@ final class Posts extends Table
                 ->view('author'),
             $this->cell('status')
                 ->title(t('Status'))
-                ->fixedWidth('6rem')
+                ->fixedWidth('7rem')
                 ->view('badge'),
             $this->cell('date')
                 ->title(t('Date'))
-                ->fixedWidth('8rem')
+                ->fixedWidth('7rem')
                 ->sortable(),
         ];
     }
@@ -240,7 +254,7 @@ final class Posts extends Table
 
         if ($this->type->public && $slug !== '') {
             $actions[] = [
-                'href'       => url($slug),
+                'href'       => url(Permalinks::post($slug, $id, $this->type->key)),
                 'class'      => 't-muted',
                 'title'      => t('View'),
                 'attributes' => ['target' => '_blank'],
@@ -256,7 +270,7 @@ final class Posts extends Table
         $actions[] = $this->type->canTrash ? [
             'href'       => '#',
             'class'      => 't-red',
-            'title'      => t('Trash'),
+            'title'      => t('Trash', context: 'action'),
             'attributes' => ['@click.prevent' => "\$ajax.post('post/delete', $item)"],
         ] : [
             'href'       => '#',

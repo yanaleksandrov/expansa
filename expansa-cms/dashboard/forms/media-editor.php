@@ -11,13 +11,11 @@ return \Expansa\Builders\Form::enqueue(
 	],
 	[
 		[
-			'type'          => 'group',
-			'name'          => 'manage',
-			'label'         => t( 'Alternative Text' ),
-			'class'         => 'dg g-2 gtc-3',
-			'label_class'   => 'ga-1 fs-12 t-muted',
-			'content_class' => 'ga-2',
-			'fields'        => [
+			'type'   => 'group',
+			'name'   => 'manage',
+			'label'  => t( 'Alternative Text' ),
+			'layout' => 'compact',
+			'fields' => [
 				[
 					'type'        => 'text',
 					'name'        => 'alt',
@@ -41,13 +39,11 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'group',
-			'name'          => 'manage',
-			'label'         => t( 'Title' ),
-			'class'         => 'dg g-2 gtc-3',
-			'label_class'   => 'ga-1 fs-12 t-muted',
-			'content_class' => 'ga-2',
-			'fields'        => [
+			'type'   => 'group',
+			'name'   => 'manage',
+			'label'  => t( 'Title' ),
+			'layout' => 'compact',
+			'fields' => [
 				[
 					'type'        => 'text',
 					'name'        => 'title',
@@ -71,13 +67,11 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'group',
-			'name'          => 'manage',
-			'label'         => t( 'Caption' ),
-			'class'         => 'dg g-2 gtc-3',
-			'label_class'   => 'ga-1 fs-12 t-muted',
-			'content_class' => 'ga-2',
-			'fields'        => [
+			'type'   => 'group',
+			'name'   => 'manage',
+			'label'  => t( 'Caption' ),
+			'layout' => 'compact',
+			'fields' => [
 				[
 					'type'        => 'text',
 					'name'        => 'caption',
@@ -98,13 +92,11 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'group',
-			'name'          => 'manage',
-			'label'         => t( 'Description' ),
-			'class'         => 'dg g-2 gtc-3',
-			'label_class'   => 'ga-1 fs-12 t-muted',
-			'content_class' => 'ga-2',
-			'fields'        => [
+			'type'   => 'group',
+			'name'   => 'manage',
+			'label'  => t( 'Description' ),
+			'layout' => 'compact',
+			'fields' => [
 				[
 					'type'        => 'text',
 					'name'        => 'description',
@@ -128,13 +120,11 @@ return \Expansa\Builders\Form::enqueue(
 			],
 		],
 		[
-			'type'          => 'group',
-			'name'          => 'manage',
-			'label'         => t( 'File URL' ),
-			'class'         => 'dg g-2 gtc-3',
-			'label_class'   => 'ga-1 fs-12 t-muted',
-			'content_class' => 'ga-2',
-			'fields'        => [
+			'type'   => 'group',
+			'name'   => 'manage',
+			'label'  => t( 'File URL' ),
+			'layout' => 'compact',
+			'fields' => [
 				[
 					'type'        => 'text',
 					'name'        => 'url',

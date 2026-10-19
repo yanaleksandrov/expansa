@@ -30,6 +30,11 @@ final class Manager
     private const string DEFAULT_PLURAL = 'n != 1';
 
     /**
+     * Separator of a context and a string in a translation key, the one of gettext: `"discussion\u0004Closed"`.
+     */
+    private const string CONTEXT = "\x04";
+
+    /**
      * Source directories and the translation directories they map to.
      *
      * @var array<string, string>
@@ -157,7 +162,9 @@ final class Manager
      * - `:name\suffix` — the value followed by a suffix: `:count\st` → `1st`;
      * - `%s`, `%d` — the next value as is, for markup around the text like `<a href="...">` and `</a>`.
      *
-     * Placeholders without a value stay unchanged. HTML of the string itself is escaped;
+     * Placeholders without a value stay unchanged. The named argument `context` tells apart the translations
+     * of one string: `t('Closed', context: 'discussion')` looks for `"discussion\u0004Closed"` first,
+     * then for the string without a context. HTML of the string itself is escaped;
      * Markdown gives bold, italic, headers, quotes, images and links. Blocks of plural forms take the count
      * as the first value: `{file|files}` in the order of the plural rule, `=0 No files` for an exact count,
      * `#` and `:count` for the number in the format of the locale; `\{` is a literal brace.
@@ -170,16 +177,23 @@ final class Manager
      * ```
      *
      * @param string $string
-     * @param mixed  ...$args Values of the placeholders, in order of appearance; the count first for plural forms.
+     * @param mixed  ...$args Values of the placeholders, in order of appearance; the count first for plural forms;
+     *                         `context: 'name'` for the translation of the string in that context.
      * @return string
      */
     public function translate(string $string, mixed ...$args): string
     {
-        if ($args !== [] && Forms::has($string) && is_numeric($args[0])) {
-            return $this->translateForms($string, (int) array_shift($args), $args);
+        $context = '';
+        if (isset($args['context'])) {
+            $context = (string) $args['context'];
+            unset($args['context']);
         }
 
-        return Markdown::render($this->fill($this->get($string), $args));
+        if ($args !== [] && Forms::has($string) && is_numeric($args[0])) {
+            return $this->translateForms($string, (int) array_shift($args), $args, $context);
+        }
+
+        return Markdown::render($this->fill($this->get($string, context: $context), $args));
     }
 
     /**
@@ -316,10 +330,11 @@ final class Manager
      * uses its own directory, the rest the directory of its route. The override file wins.
      *
      * @param string $string
-     * @param bool   $forms  Keep a list of whole sentences of a string with forms instead of its first one.
+     * @param bool   $forms   Keep a list of whole sentences of a string with forms instead of its first one.
+     * @param string $context Context of the translation, the one without a context is the fallback.
      * @return ($forms is true ? string|string[] : string) The translation, or the string itself if there is none.
      */
-    private function get(string $string, bool $forms = false): string|array
+    private function get(string $string, bool $forms = false, string $context = ''): string|array
     {
         if ($this->routes === []) {
             return $string;
@@ -332,7 +347,9 @@ final class Manager
 
         [$file, $override] = $this->sources[$source] ??= $this->resolve($source);
 
-        $translation = $this->lookup($string, $file, $override);
+        $translation = ($context === '' ? null : $this->lookup($context . self::CONTEXT . $string, $file, $override))
+            ?? $this->lookup($string, $file, $override)
+            ?? $string;
 
         return $forms || ! is_array($translation) ? $translation : (string) reset($translation);
     }
@@ -466,14 +483,15 @@ final class Manager
      *
      * @param string $string
      * @param int    $count
-     * @param array  $args   Values of the other placeholders.
+     * @param array  $args    Values of the other placeholders.
+     * @param string $context
      * @return string
      */
-    private function translateForms(string $string, int $count, array $args): string
+    private function translateForms(string $string, int $count, array $args, string $context = ''): string
     {
         $rule        = $this->pluralRules[$this->locale()] ??= $this->compilePluralRule();
         $number      = $this->numbers[$count] ??= $this->number($count);
-        $translation = $this->get($string, forms: true);
+        $translation = $this->get($string, true, $context);
 
         if (is_array($translation)) {
             $translation = str_replace('#', $number, (string) ($translation[$rule(abs($count))] ?? end($translation)));
@@ -545,9 +563,9 @@ final class Manager
      * @param string $string
      * @param string $path
      * @param string $overridePath
-     * @return string|string[]
+     * @return string|string[]|null Null when neither file has the string.
      */
-    private function lookup(string $string, string $path, string $overridePath = ''): string|array
+    private function lookup(string $string, string $path, string $overridePath = ''): string|array|null
     {
         foreach ([$overridePath, $path] as $file) {
             if ($file === '') {
@@ -561,6 +579,6 @@ final class Manager
             }
         }
 
-        return $string;
+        return null;
     }
 }

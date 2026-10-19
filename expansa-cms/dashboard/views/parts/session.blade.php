@@ -6,8 +6,6 @@
  * @var App\Support\Site $site Settings of the site: name, language, charset, addresses, version; shared with every view.
  */
 defined('EX_PATH') || exit;
-
-$date = new IntlDateFormatter( $site->locale, IntlDateFormatter::MEDIUM, IntlDateFormatter::SHORT );
 ?>
 <div class="p-4 df fdr aic g-4 card card-border" id="session-{{ $session['id'] }}" @if(!$session['current']) data-session-other @endif>
 	<i class="ph ph-{{ preg_match('/iPhone|Android/', $session['device']) ? 'device-mobile' : 'desktop' }} fs-24"></i>
@@ -19,7 +17,7 @@ $date = new IntlDateFormatter( $site->locale, IntlDateFormatter::MEDIUM, IntlDat
 			@endif
 		</h6>
 		<div class="fs-12 t-muted lh-xs">
-			{{ $session['ip'] }} · {!! t( 'Last active :date', $date->format( strtotime( $session['used_at'] ?: $session['created_at'] ) ) ) !!}
+			{{ $session['ip'] }} · {!! t( 'Last active :date', App\Support\Dates::format( $session['used_at'] ?: $session['created_at'] ) ) !!}
 		</div>
 	</div>
 	@if(!$session['current'])

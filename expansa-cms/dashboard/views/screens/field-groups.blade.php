@@ -62,8 +62,8 @@ use Expansa\Facades\Safe;
                 <div class="field-label"><?php echo t('Status'); ?></div>
                 <label class="field-item">
                     <select name="status" u-prop="status" u-select>
-                        <option value="active"><?php echo t('Active'); ?></option>
-                        <option value="inactive"><?php echo t('Inactive'); ?></option>
+                        <option value="active"><?php echo t('Active', context: 'field group'); ?></option>
+                        <option value="inactive"><?php echo t('Inactive', context: 'field group'); ?></option>
                     </select>
                 </label>
             </div>
