@@ -19,22 +19,57 @@
  */
 
 $meta = [
-    'good'        => ['icon' => 'ph ph-check-circle', 'text' => t('Everything is up to date')],
-    'recommended' => ['icon' => 'ph ph-arrow-circle-up', 'text' => t('Updates are available')],
-    'critical'    => ['icon' => 'ph ph-shield-warning', 'text' => t('A security fix is available')],
+    'good'        => [
+        'icon' => 'ph ph-check-circle',
+        'text' => t('Everything is up to date'),
+    ],
+    'recommended' => [
+        'icon' => 'ph ph-arrow-circle-up',
+        'text' => t('Updates are available'),
+    ],
+    'critical'    => [
+        'icon' => 'ph ph-shield-warning',
+        'text' => t('A security fix is available'),
+    ],
 ];
 
 $kinds = [
-    'major' => ['class' => 'badge--red-lt', 'label' => t('Major')],
-    'minor' => ['class' => 'badge--royal-lt', 'label' => t('Minor')],
-    'patch' => ['class' => 'badge--green-lt', 'label' => t('Patch')],
+    'major' => [
+        'class' => 'badge--red-lt',
+        'label' => t('Major'),
+    ],
+    'minor' => [
+        'class' => 'badge--royal-lt',
+        'label' => t('Minor'),
+    ],
+    'patch' => [
+        'class' => 'badge--green-lt',
+        'label' => t('Patch'),
+    ],
+];
+
+$coreSection = [
+    'id'    => 'core',
+    'title' => t('Expansa Core'),
+    'icon'  => 'ph ph-rocket-launch',
+    'badge' => $core['latest'] ?? '',
 ];
 
 $sections = [
-    ...($core === null ? [] : [['id' => 'core', 'title' => t('Expansa Core'), 'icon' => 'ph ph-rocket-launch', 'badge' => $core['latest']]]),
+    ...($core === null ? [] : [$coreSection]),
     ...array_map(fn (array $group) => [...$group, 'badge' => (string) count($group['items'])], $groups),
-    ['id' => 'history', 'title' => t('History'), 'icon' => 'ph ph-clock-counter-clockwise', 'badge' => ''],
-    ['id' => 'environment', 'title' => t('Environment'), 'icon' => 'ph ph-hard-drives', 'badge' => ''],
+    [
+        'id'    => 'history',
+        'title' => t('History'),
+        'icon'  => 'ph ph-clock-counter-clockwise',
+        'badge' => '',
+    ],
+    [
+        'id'    => 'environment',
+        'title' => t('Environment'),
+        'icon'  => 'ph ph-hard-drives',
+        'badge' => '',
+    ],
 ];
 ?>
 <div class="overview">

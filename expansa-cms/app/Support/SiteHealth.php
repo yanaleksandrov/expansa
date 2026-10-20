@@ -88,14 +88,54 @@ final class SiteHealth
     public static function groups(array $probes): array
     {
         return [
-            ['id' => 'server', 'title' => t('Server'), 'icon' => 'ph ph-hard-drives', 'checks' => self::server()],
-            ['id' => 'security', 'title' => t('Security'), 'icon' => 'ph ph-shield-check', 'checks' => self::security($probes)],
-            ['id' => 'database', 'title' => t('Database'), 'icon' => 'ph ph-database', 'checks' => self::database()],
-            ['id' => 'storage', 'title' => t('Storage'), 'icon' => 'ph ph-folder-simple', 'checks' => self::storage()],
-            ['id' => 'tasks', 'title' => t('Background Tasks'), 'icon' => 'ph ph-clock-countdown', 'checks' => self::tasks()],
-            ['id' => 'mail', 'title' => t('Mail'), 'icon' => 'ph ph-envelope-simple', 'checks' => self::mail()],
-            ['id' => 'extensions', 'title' => t('Plugins and Themes'), 'icon' => 'ph ph-plug', 'checks' => self::extensions()],
-            ['id' => 'ai', 'title' => t('AI Assistant'), 'icon' => 'ph ph-sparkle', 'checks' => self::ai()],
+            [
+                'id'     => 'server',
+                'title'  => t('Server'),
+                'icon'   => 'ph ph-hard-drives',
+                'checks' => self::server(),
+            ],
+            [
+                'id'     => 'security',
+                'title'  => t('Security'),
+                'icon'   => 'ph ph-shield-check',
+                'checks' => self::security($probes),
+            ],
+            [
+                'id'     => 'database',
+                'title'  => t('Database'),
+                'icon'   => 'ph ph-database',
+                'checks' => self::database(),
+            ],
+            [
+                'id'     => 'storage',
+                'title'  => t('Storage'),
+                'icon'   => 'ph ph-folder-simple',
+                'checks' => self::storage(),
+            ],
+            [
+                'id'     => 'tasks',
+                'title'  => t('Background Tasks'),
+                'icon'   => 'ph ph-clock-countdown',
+                'checks' => self::tasks(),
+            ],
+            [
+                'id'     => 'mail',
+                'title'  => t('Mail'),
+                'icon'   => 'ph ph-envelope-simple',
+                'checks' => self::mail(),
+            ],
+            [
+                'id'     => 'extensions',
+                'title'  => t('Plugins and Themes'),
+                'icon'   => 'ph ph-plug',
+                'checks' => self::extensions(),
+            ],
+            [
+                'id'     => 'ai',
+                'title'  => t('AI Assistant'),
+                'icon'   => 'ph ph-sparkle',
+                'checks' => self::ai(),
+            ],
         ];
     }
 
@@ -689,7 +729,10 @@ final class SiteHealth
     private static function fetch(array $urls): array
     {
         if (! function_exists('curl_multi_init')) {
-            return array_map(fn () => ['status' => 0, 'body' => ''], $urls);
+            return array_map(fn () => [
+                'status' => 0,
+                'body'   => '',
+            ], $urls);
         }
 
         $multi   = curl_multi_init();
@@ -714,7 +757,10 @@ final class SiteHealth
 
         $responses = [];
         foreach ($handles as $name => $handle) {
-            $responses[$name] = ['status' => (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE), 'body' => (string) curl_multi_getcontent($handle)];
+            $responses[$name] = [
+                'status' => (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE),
+                'body'   => (string) curl_multi_getcontent($handle),
+            ];
             curl_multi_remove_handle($multi, $handle);
         }
         curl_multi_close($multi);
@@ -758,7 +804,12 @@ final class SiteHealth
      */
     private static function check(string $label, string $value, bool $passes, string $hint, string $fail = self::CRITICAL): array
     {
-        return ['label' => $label, 'value' => $value, 'status' => $passes ? self::GOOD : $fail, 'hint' => $passes ? '' : $hint];
+        return [
+            'label'  => $label,
+            'value'  => $value,
+            'status' => $passes ? self::GOOD : $fail,
+            'hint'   => $passes ? '' : $hint,
+        ];
     }
 
     /**

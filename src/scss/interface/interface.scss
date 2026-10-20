@@ -1,3 +1,5 @@
+@use '../constants/index' as constants;
+
 .expansa {
   $bar-height: 42px;
   $side-width: 196px;
@@ -230,11 +232,9 @@
   }
 }
 
-.expansa-search {
+.search {
   width: 100%;
-  cursor: pointer;
   margin: 0 auto;
-  position: relative;
 
   @media (max-width: 640px) {
     display: none;
@@ -244,7 +244,11 @@
     white-space: nowrap;
   }
 
-  &-btn {
+  .search-btn {
+    width: 100%;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
     background-color: var(--expansa-bg-dark);
     border-radius: var(--expansa-border-radius--lg);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -275,34 +279,38 @@
     }
   }
 
-  &-box {
-    display: none;
-    box-shadow: 0 0 0 9999px rgba(0,0,0,.15), 0 10px 32px rgba(0,0,0,.1);
+  // a popover in the top layer: the browser closes it on Esc and on a click outside
+  .search-box {
+    box-shadow: 0 10px 32px rgba(0,0,0,.1);
     padding: 4px;
+    border: 0;
+    color: inherit;
     background-color: var(--expansa-bg-white);
     border-radius: var(--expansa-border-radius--xl);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-    position: fixed;
     width: calc(100vw - 1.5rem);
     max-width: 40rem;
-    top: 0.5rem;
-    z-index: 20;
-    inset-inline: 0;
-    margin-inline: auto;
+    inset: 0.5rem 0 auto;
+    margin: 0 auto;
+    @include constants.popover-motion;
+
+    &::backdrop {
+      background-color: rgba(0,0,0,.15);
+    }
   }
 
-  &-input {
+  .search-input {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 256 256'%3E%3Cpath fill='%23ccced3' d='m232 216-47-48a92 92 0 1 0-17 17l48 48a12 12 0 0 0 17-17ZM44 112a68 68 0 1 1 68 68 68 68 0 0 1-68-68Z'/%3E%3C/svg%3E");
   }
 
-  &-results {
+  .search-results {
     padding: 0.25rem 0;
     display: grid;
     gap: 0.125rem;
     place-items: center;
   }
 
-  &-help {
+  .search-help {
     padding: 0.45rem;
     background-color: var(--expansa-bg);
     display: flex;
@@ -328,11 +336,7 @@
     }
   }
 
-  &[open] .expansa-search-box {
-    display: block;
-  }
-
-  &-item {
+  .search-item {
     transition: background-color 0.25s;
     color: var(--expansa-secondary);
     width: 100%;
@@ -342,7 +346,7 @@
     }
   }
 
-  &-link {
+  .search-link {
     padding: 0.3rem 0.65rem;
     display: flex;
     align-items: center;
@@ -356,7 +360,7 @@
     }
   }
 
-  &-header {
+  .search-header {
     padding: 0.375rem 0.65rem 0.25rem;
     display: block;
     font-weight: 500;

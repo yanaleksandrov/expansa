@@ -178,6 +178,14 @@ document.addEventListener('youla:init', () => {
             items: [],
             duration: 7e3,
             hovering: false,
+            self: {
+                '@mouseenter'() {
+                    this.pause();
+                },
+                '@mouseleave'() {
+                    this.resume();
+                }
+            },
             info(message, duration) {
                 this.add(message, 'info', duration);
             },
@@ -297,6 +305,14 @@ document.addEventListener('youla:init', () => {
         }
         Youla.data('dialog', root => ({
             stack: [],
+            self: {
+                ':class'() {
+                    return this.stack.length ? [ 'is-active', this.stack.at(-1)?.class ].filter(Boolean).join(' ') : '';
+                },
+                '@keydown.esc.window'() {
+                    this.close();
+                }
+            },
             open(templateID, data = {}) {
                 setTimeout(() => {
                     let template = document.getElementById(templateID);
@@ -1091,25 +1107,33 @@ document.addEventListener('youla:init', () => {
     Youla.data('search', () => ({
         currentIdx: -1,
         links: [],
-        wrapper: {
-            '@click.outside'() {
-                this.$el.removeAttribute('open');
-            },
-            '@keydown.escape'() {
-                this.$el.removeAttribute('open');
-            },
-            '@keydown.prevent.window.ctrl.k'() {
-                this.$refs.searchButton.click();
+        query: '',
+        find() {
+            const query = this.query.trim();
+            if (query.length < 2) {
+                this.links = [];
+                return;
             }
-        },
-        button: {
-            'u-ref': 'searchButton',
-            '@click'() {
-                setTimeout(() => this.$refs.searchInput.focus());
-            }
+            this.$ajax.post('search/find', {
+                query
+            }).then(result => {
+                if (query === this.query.trim()) {
+                    this.links = Array.isArray(result?.links) ? result.links : [];
+                    this.currentIdx = -1;
+                }
+            }).catch(() => {
+                this.links = [];
+            });
         },
         input: {
-            'u-ref': 'searchInput',
+            '@keydown.prevent.window.ctrl.k'() {
+                const box = this.$el.closest('[popover]');
+                box.matches(':popover-open') ? this.$el.focus() : box.showPopover();
+            },
+            '@input.debounce.250ms'() {
+                this.query = this.$el.value;
+                this.find();
+            },
             '@keydown.up'() {
                 this.currentIdx = this.currentIdx <= 0 ? this.links.length - 1 : this.currentIdx - 1;
                 if (!this.links[this.currentIdx]?.url && this.currentIdx === 0) {
@@ -1252,6 +1276,14 @@ document.addEventListener('youla:init', () => {
     }));
     Youla.data('postDetails', root => ({
         status: root.dataset.status || '',
+        self: {
+            '@change'() {
+                this.schedule(this.$event.target);
+            },
+            '@reset.document'() {
+                this.restore(this.$event.target);
+            }
+        },
         schedule(input) {
             if (input.name !== 'created_at' || !input.value) {
                 return;

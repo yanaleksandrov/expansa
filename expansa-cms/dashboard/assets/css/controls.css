@@ -290,7 +290,7 @@ textarea[rows="20"] {
   position-area: bottom span-left;
   position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
   opacity: 0;
-  transform: translateY(0.25rem) scale(0.98);
+  transform: translateY(0.25rem) scale(1);
   transform-origin: top;
   transition: opacity 0.2s cubic-bezier(0, 0.1, 0.1, 1), transform 0.3s cubic-bezier(0, 0.1, 0.1, 1), display 0.3s allow-discrete, overlay 0.3s allow-discrete;
 }
@@ -301,7 +301,7 @@ textarea[rows="20"] {
 @starting-style {
   .details-content[popover]:popover-open {
     opacity: 0;
-    transform: translateY(0.25rem) scale(0.98);
+    transform: translateY(0.25rem) scale(1);
   }
 }
 @supports not (position-area: bottom) {
@@ -319,7 +319,7 @@ details > .details-content {
 @keyframes dropdown-appear {
   from {
     opacity: 0;
-    transform: translateY(0.25rem) scale(0.98);
+    transform: translateY(0.25rem) scale(1);
   }
 }
 .details-head {
@@ -555,7 +555,7 @@ select[multiple] + .ss-main {
   border: 1px solid var(--expansa-border);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(calc(4px + 0.25rem)) scale(0.98);
+  transform: translateY(calc(4px + 0.25rem)) scale(1);
   transform-origin: center top;
   transition: opacity 0.2s cubic-bezier(0, 0.1, 0.1, 1), transform 0.3s cubic-bezier(0, 0.1, 0.1, 1), visibility 0.3s;
 }

@@ -86,7 +86,7 @@ $badge-lt-weights: (
 $dropdown-duration: 0.3s;
 $dropdown-easing: cubic-bezier(0, 0.1, 0.1, 1);
 $dropdown-shift: 0.25rem;
-$dropdown-scale: 0.98;
+$dropdown-scale: 1;
 $dropdown-hidden: translateY($dropdown-shift) scale($dropdown-scale);
 $dropdown-transition: opacity 0.2s $dropdown-easing, transform 0.3s $dropdown-easing;
 

@@ -10,7 +10,7 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="media-library" u-data="storage" @load="configure(typeof entry === 'undefined' ? null : entry); $ajax.post('media/get', {page: 1}).then(({posts}) => setItems(posts, true))">
+<div class="media-library" u-data="storage">
     <div class="media-library-toolbar df aic jcsb g-3 fw p-4">
         <div class="df aic g-2 fw">
             <input type="search" class="field field--raised fs-13" placeholder="<?php echo t('Search media'); ?>"

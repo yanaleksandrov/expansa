@@ -210,6 +210,15 @@ document.addEventListener('youla:init', ()=> {
             items: [],
             duration: 7000,
             hovering: false,
+            // the hovered container holds every countdown
+            self: {
+                '@mouseenter'() {
+                    this.pause();
+                },
+                '@mouseleave'() {
+                    this.resume();
+                },
+            },
             info( message, duration ) {
                 this.add( message, 'info', duration );
             },
@@ -225,7 +234,7 @@ document.addEventListener('youla:init', ()=> {
             loading( message, duration ) {
                 this.add( message, 'loading', duration );
             },
-            // @mouseenter on the container: freezes every item's countdown where it stood.
+            // freezes every item's countdown where it stood
             pause() {
                 this.hovering = true;
 
@@ -237,7 +246,7 @@ document.addEventListener('youla:init', ()=> {
                     }
                 });
             },
-            // @mouseleave: picks every countdown back up from where pause() froze it.
+            // picks every countdown back up from where pause() froze it
             resume() {
                 this.hovering = false;
 
@@ -359,6 +368,15 @@ document.addEventListener('youla:init', ()=> {
         // injectDataProviders() reruns this factory per u-data element; "root" only matters for this one's own component.
         Youla.data('dialog', (root) => ({
             stack: [],
+            // the class of the top dialog shows on the container, Esc closes the top one
+            self: {
+                ':class'() {
+                    return this.stack.length ? ['is-active', this.stack.at(-1)?.class].filter(Boolean).join(' ') : '';
+                },
+                '@keydown.esc.window'() {
+                    this.close();
+                },
+            },
 
             open(templateID, data = {}) {
                 setTimeout(() => {
@@ -1282,33 +1300,46 @@ document.addEventListener('youla:init', ()=> {
     }));
 
     /**
-     * Search box: `wrapper`/`button`/`input` are ready-made `u-bind` sets. `button`/`input` carry
-     * their own `u-ref`, so the wrapper's Ctrl+K shortcut reaches the input via `$refs`.
+     * Search box, a popover: the browser opens it by the button, closes it on Esc and a click outside
+     * and focuses the `autofocus` input; `input` is the `u-bind` set of the input with Ctrl+K and the keys
+     * of the results. The typed text goes to the `search/find` endpoint, which answers with
+     * `{links: [{url, text}]}`; a link without a URL is a section header. A plain array would be taken
+     * by $ajax for fragments.
      *
      * @since 2027.1
      */
     Youla.data('search', () => ({
         currentIdx: -1,
         links: [],
-        wrapper: {
-            '@click.outside'() {
-                this.$el.removeAttribute('open');
-            },
-            '@keydown.escape'() {
-                this.$el.removeAttribute('open');
-            },
-            '@keydown.prevent.window.ctrl.k'() {
-                this.$refs.searchButton.click();
-            },
-        },
-        button: {
-            'u-ref': 'searchButton',
-            '@click'() {
-                setTimeout(() => this.$refs.searchInput.focus());
-            },
+        query: '',
+        find() {
+            // the server searches from 2 characters, see App\Api\Search\SearchService
+            const query = this.query.trim();
+            if (query.length < 2) {
+                this.links = [];
+                return;
+            }
+
+            this.$ajax.post('search/find', { query }).then((result) => {
+                // an answer to an older text that came late is dropped
+                if (query === this.query.trim()) {
+                    this.links = Array.isArray(result?.links) ? result.links : [];
+                    this.currentIdx = -1;
+                }
+            }).catch(() => {
+                this.links = [];
+            });
         },
         input: {
-            'u-ref': 'searchInput',
+            '@keydown.prevent.window.ctrl.k'() {
+                // showPopover() throws on an open popover, then only the focus is back
+                const box = this.$el.closest('[popover]');
+                box.matches(':popover-open') ? this.$el.focus() : box.showPopover();
+            },
+            '@input.debounce.250ms'() {
+                this.query = this.$el.value;
+                this.find();
+            },
             '@keydown.up'() {
                 this.currentIdx = this.currentIdx <= 0 ? this.links.length - 1 : this.currentIdx - 1;
                 if (!this.links[this.currentIdx]?.url && this.currentIdx === 0) {
@@ -1481,6 +1512,15 @@ document.addEventListener('youla:init', ()=> {
      */
     Youla.data('postDetails', (root) => ({
         status: root.dataset.status || '',
+        // a field changed or reset by the form goes through the status rule
+        self: {
+            '@change'() {
+                this.schedule(this.$event.target);
+            },
+            '@reset.document'() {
+                this.restore(this.$event.target);
+            },
+        },
         // the hidden field of the datepicker sends `change` with the ISO value
         schedule(input) {
             if (input.name !== 'created_at' || !input.value) {

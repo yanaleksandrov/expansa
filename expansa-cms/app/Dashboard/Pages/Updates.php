@@ -130,9 +130,27 @@ final class Updates
             },
             'open'        => $isCore ? 'core' : ($groups[0]['id'] ?? ''),
             'history'     => [
-                ['name' => 'Expansa', 'from' => '2027.5', 'to' => '2027.6', 'date' => '14.08.2026', 'ok' => true],
-                ['name' => 'SEO Toolkit', 'from' => '1.3.4', 'to' => '1.3.5', 'date' => '02.08.2026', 'ok' => true],
-                ['name' => 'Forms', 'from' => '0.9.1', 'to' => '0.9.2', 'date' => '19.07.2026', 'ok' => false],
+                [
+                    'name' => 'Expansa',
+                    'from' => '2027.5',
+                    'to'   => '2027.6',
+                    'date' => '14.08.2026',
+                    'ok'   => true,
+                ],
+                [
+                    'name' => 'SEO Toolkit',
+                    'from' => '1.3.4',
+                    'to'   => '1.3.5',
+                    'date' => '02.08.2026',
+                    'ok'   => true,
+                ],
+                [
+                    'name' => 'Forms',
+                    'from' => '0.9.1',
+                    'to'   => '0.9.2',
+                    'date' => '19.07.2026',
+                    'ok'   => false,
+                ],
             ],
             'environment' => [
                 'PHP'         => PHP_VERSION,

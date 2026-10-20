@@ -15,9 +15,21 @@
  */
 
 $meta = [
-    'good'        => ['icon' => 'ph ph-check-circle', 'badge' => 'badge--green-lt', 'label' => t('Good')],
-    'recommended' => ['icon' => 'ph ph-warning-circle', 'badge' => 'badge--orange-lt', 'label' => t('Recommended')],
-    'critical'    => ['icon' => 'ph ph-x-circle', 'badge' => 'badge--red-lt', 'label' => t('Critical')],
+    'good'        => [
+        'icon'  => 'ph ph-check-circle',
+        'badge' => 'badge--green-lt',
+        'label' => t('Good'),
+    ],
+    'recommended' => [
+        'icon'  => 'ph ph-warning-circle',
+        'badge' => 'badge--orange-lt',
+        'label' => t('Recommended'),
+    ],
+    'critical'    => [
+        'icon'  => 'ph ph-x-circle',
+        'badge' => 'badge--red-lt',
+        'label' => t('Critical'),
+    ],
 ];
 
 $summary = [

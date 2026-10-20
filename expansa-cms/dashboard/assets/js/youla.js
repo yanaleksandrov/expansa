@@ -947,6 +947,17 @@
             this.storageExpire = this.storageType ? getNextModifier(modifiers, this.storageType) : null;
             this.rawData = saferEval(this.name || '{}', createDataProviderContext(el));
             this.rawData = hydrateProps(el, this.rawData, this.parent, isDataProvider(this.name) ? this.name : null);
+            this.selfBindings = null;
+            if (this.rawData && typeof this.rawData === 'object' && Object.hasOwn(this.rawData, 'self')) {
+                const selfBindings = this.rawData.self;
+                delete this.rawData.self;
+                if (selfBindings && typeof selfBindings === 'object' && !Array.isArray(selfBindings)) {
+                    this.selfBindings = selfBindings;
+                    this.rootAttributeNames = new Set([ ...el.attributes ].map(({name}) => name));
+                } else {
+                    console.warn(`Youla.js: "self" in u-data="${this.name}" must be an object of root bindings — ignored.`);
+                }
+            }
             if (this.storageType) {
                 const saved = storage.get(`u-data:${this.name}`, this.storageType);
                 if (saved) {
@@ -1024,40 +1035,48 @@
             };
         }
         resolveAttributes(el) {
-            const self = this;
             let additionalHelperVariables;
-            return getAttributes(el).flatMap(attribute => {
+            const attributes = getAttributes(el).flatMap(attribute => {
                 if (attribute.directive !== 'u-bind') {
                     return [ attribute ];
                 }
                 additionalHelperVariables ??= this.getHelperVariables(el);
                 let bindings;
                 try {
-                    ({output: bindings} = self.evaluate(attribute.expression, additionalHelperVariables));
+                    ({output: bindings} = this.evaluate(attribute.expression, additionalHelperVariables));
                 } catch (error) {
                     return [];
                 }
                 if (!bindings || typeof bindings !== 'object') {
                     return [];
                 }
-                return Object.entries(bindings).flatMap(([name, value]) => {
-                    const isFn = typeof value === 'function';
-                    const parsed = parseAttribute(name, value);
-                    if (isFn && isArrowFunction(value)) {
-                        console.warn(`Youla.js: u-bind key "${name}" is an arrow function — arrow functions don't bind "this" to the component's data. Use a regular function or method shorthand instead: "${name}"() { ... }.`);
-                    }
-                    const isPlainAttribute = !parsed.directive && !parsed.event && !parsed.bind;
-                    if (parsed.directive && !getDirective(parsed.directive)) {
-                        el.setAttribute(name, isFn ? value.call(self.scope) : value);
-                        return [];
-                    }
-                    return [ {
-                        ...parsed,
-                        expression: value,
-                        bind: parsed.bind || isPlainAttribute,
-                        literal: !isFn && (isPlainAttribute || typeof value !== 'string')
-                    } ];
-                });
+                return this.expandBindings(el, Object.entries(bindings));
+            });
+            if (el !== this.root || !this.selfBindings) {
+                return attributes;
+            }
+            const explicitNames = new Set(attributes.map(({name}) => name));
+            const selfEntries = Object.entries(this.selfBindings).filter(([name]) => name.startsWith('@') || !this.rootAttributeNames.has(name) && !explicitNames.has(name));
+            return [ ...this.expandBindings(el, selfEntries), ...attributes ];
+        }
+        expandBindings(el, entries) {
+            return entries.flatMap(([name, value]) => {
+                const isFn = typeof value === 'function';
+                const parsed = parseAttribute(name, value);
+                if (isFn && isArrowFunction(value)) {
+                    console.warn(`Youla.js: u-bind key "${name}" is an arrow function — arrow functions don't bind "this" to the component's data. Use a regular function or method shorthand instead: "${name}"() { ... }.`);
+                }
+                const isPlainAttribute = !parsed.directive && !parsed.event && !parsed.bind;
+                if (parsed.directive && !getDirective(parsed.directive)) {
+                    el.setAttribute(name, isFn ? value.call(this.scope) : value);
+                    return [];
+                }
+                return [ {
+                    ...parsed,
+                    expression: value,
+                    bind: parsed.bind || isPlainAttribute,
+                    literal: !isFn && (isPlainAttribute || typeof value !== 'string')
+                } ];
             });
         }
         observeData(data) {
