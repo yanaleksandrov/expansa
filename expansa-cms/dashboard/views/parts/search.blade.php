@@ -13,16 +13,13 @@ defined('EX_PATH') || exit;
 ?>
 <div class="search" u-data="search">
     <button class="search-btn" type="button" popovertarget="expansa-search">
-        <i class="ph ph-magnifying-glass"></i> {!! t('Search') !!} <code>Ctrl+K</code>
+        <i class="ph ph-magnifying-glass"></i> {!! t('Search') !!} <kbd>Ctrl+K</kbd>
     </button>
     <div class="search-box" id="expansa-search" popover>
         <input class="search-input" type="search" name="search" placeholder="{{ t_attr('Search') }}" autocomplete="off" autofocus u-bind="input">
         <ul class="search-results" u-bind="results" hidden>
             <li class="search-item" u-bind="row">
-                <a class="search-link" u-bind="anchor">
-                    <span class="search-text" u-bind="label"></span>
-                    <span class="t-muted">{!! t('Jump to') !!}</span>
-                </a>
+                <a class="search-link" data-hint="{{ t_attr('Jump to') }}" u-bind="anchor"></a>
                 <span class="search-header" u-bind="heading"></span>
             </li>
         </ul>
@@ -45,9 +42,9 @@ defined('EX_PATH') || exit;
             ?>
         </div>
         <div class="search-help">
-            <div class="df aic g-1"><i class="ph ph-arrow-up"></i><i class="ph ph-arrow-down"></i> {!! t('Move') !!}</div>
-            <div class="df aic g-1"><code>Esc</code> {!! t('Close') !!}</div>
-            <div class="df aic g-1"><i class="ph ph-arrow-elbow-down-left"></i> {!! t('Select') !!}</div>
+            <span><i class="ph ph-arrow-up"></i><i class="ph ph-arrow-down"></i> {{ t('Move') }}</span>
+            <span><i>Esc</i> {{ t('Close') }}</span>
+            <span><i class="ph ph-arrow-elbow-down-left"></i> {{ t('Select') }}</span>
         </div>
     </div>
 </div>

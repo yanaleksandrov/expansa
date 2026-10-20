@@ -1161,9 +1161,7 @@ document.addEventListener('youla:init', () => {
         },
         anchor: {
             ':href': 'link.url',
-            'u-show': 'link.url'
-        },
-        label: {
+            'u-show': 'link.url',
             'u-text': 'link.text'
         },
         heading: {
