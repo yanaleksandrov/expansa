@@ -6,6 +6,8 @@ namespace App\Support;
 
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Values\Check;
+use App\Support\Values\Section;
 use Expansa\Ai\Enums\Status;
 use Expansa\Cache\Providers\Database as DatabaseCache;
 use Expansa\Facades\Db;
@@ -83,59 +85,59 @@ final class SiteHealth
      * Runs the checks, grouped by section.
      *
      * @param array{exposed: string[]|null, breach: string|null, time: int} $probes Results of probes().
-     * @return array<int, array{id: string, title: string, icon: string, checks: array<int, array{label: string, value: string, status: string, hint: string}>}>
+     * @return Section[]
      */
     public static function groups(array $probes): array
     {
         return [
-            [
-                'id'     => 'server',
-                'title'  => t('Server'),
-                'icon'   => 'ph ph-hard-drives',
-                'checks' => self::server(),
-            ],
-            [
-                'id'     => 'security',
-                'title'  => t('Security'),
-                'icon'   => 'ph ph-shield-check',
-                'checks' => self::security($probes),
-            ],
-            [
-                'id'     => 'database',
-                'title'  => t('Database'),
-                'icon'   => 'ph ph-database',
-                'checks' => self::database(),
-            ],
-            [
-                'id'     => 'storage',
-                'title'  => t('Storage'),
-                'icon'   => 'ph ph-folder-simple',
-                'checks' => self::storage(),
-            ],
-            [
-                'id'     => 'tasks',
-                'title'  => t('Background Tasks'),
-                'icon'   => 'ph ph-clock-countdown',
-                'checks' => self::tasks(),
-            ],
-            [
-                'id'     => 'mail',
-                'title'  => t('Mail'),
-                'icon'   => 'ph ph-envelope-simple',
-                'checks' => self::mail(),
-            ],
-            [
-                'id'     => 'extensions',
-                'title'  => t('Plugins and Themes'),
-                'icon'   => 'ph ph-plug',
-                'checks' => self::extensions(),
-            ],
-            [
-                'id'     => 'ai',
-                'title'  => t('AI Assistant'),
-                'icon'   => 'ph ph-sparkle',
-                'checks' => self::ai(),
-            ],
+            new Section(
+                id: 'server',
+                title: t('Server'),
+                icon: 'ph ph-hard-drives',
+                checks: self::server(),
+            ),
+            new Section(
+                id: 'security',
+                title: t('Security'),
+                icon: 'ph ph-shield-check',
+                checks: self::security($probes),
+            ),
+            new Section(
+                id: 'database',
+                title: t('Database'),
+                icon: 'ph ph-database',
+                checks: self::database(),
+            ),
+            new Section(
+                id: 'storage',
+                title: t('Storage'),
+                icon: 'ph ph-folder-simple',
+                checks: self::storage(),
+            ),
+            new Section(
+                id: 'tasks',
+                title: t('Background Tasks'),
+                icon: 'ph ph-clock-countdown',
+                checks: self::tasks(),
+            ),
+            new Section(
+                id: 'mail',
+                title: t('Mail'),
+                icon: 'ph ph-envelope-simple',
+                checks: self::mail(),
+            ),
+            new Section(
+                id: 'extensions',
+                title: t('Plugins and Themes'),
+                icon: 'ph ph-plug',
+                checks: self::extensions(),
+            ),
+            new Section(
+                id: 'ai',
+                title: t('AI Assistant'),
+                icon: 'ph ph-sparkle',
+                checks: self::ai(),
+            ),
         ];
     }
 
@@ -150,15 +152,15 @@ final class SiteHealth
     /**
      * Counts the checks of every status, worst status of a group first.
      *
-     * @param array<int, array{checks: array<int, array{status: string}>}> $groups
+     * @param Section[] $groups
      * @return array<string, int>
      */
     public static function count(array $groups): array
     {
         $count = [self::CRITICAL => 0, self::RECOMMENDED => 0, self::GOOD => 0];
         foreach ($groups as $group) {
-            foreach ($group['checks'] as $check) {
-                $count[$check['status']]++;
+            foreach ($group->checks as $check) {
+                $count[$check->status]++;
             }
         }
 
@@ -168,11 +170,11 @@ final class SiteHealth
     /**
      * The worst status of the checks.
      *
-     * @param array<int, array{status: string}> $checks
+     * @param Check[] $checks
      */
     public static function status(array $checks): string
     {
-        $statuses = array_column($checks, 'status');
+        $statuses = array_map(static fn (Check $check) => $check->status, $checks);
 
         return match (true) {
             in_array(self::CRITICAL, $statuses, true)    => self::CRITICAL,
@@ -212,7 +214,7 @@ final class SiteHealth
     /**
      * PHP version, extensions, limits and disabled functions.
      *
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function server(): array
     {
@@ -295,7 +297,7 @@ final class SiteHealth
      * HTTPS, debug output, secret keys, administrators and protected files.
      *
      * @param array{exposed: string[]|null, breach: string|null, time: int} $probes
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function security(array $probes): array
     {
@@ -410,7 +412,7 @@ final class SiteHealth
     /**
      * Connection, server version, table prefix, encoding and size; a failed connection is the only check then.
      *
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function database(): array
     {
@@ -460,7 +462,7 @@ final class SiteHealth
     /**
      * Writable directories, free disk space and the size of the logs.
      *
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function storage(): array
     {
@@ -517,7 +519,7 @@ final class SiteHealth
     /**
      * Cron runs of the scheduler, background workers and stuck AI tasks.
      *
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function tasks(): array
     {
@@ -581,7 +583,7 @@ final class SiteHealth
     /**
      * SMTP server, sender address and DKIM signing.
      *
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function mail(): array
     {
@@ -620,7 +622,7 @@ final class SiteHealth
     /**
      * Active plugins and themes, and the plugins in quarantine.
      *
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function extensions(): array
     {
@@ -653,7 +655,7 @@ final class SiteHealth
     /**
      * Service key and the task directory of the background worker.
      *
-     * @return array<int, array{label: string, value: string, status: string, hint: string}>
+     * @return Check[]
      */
     private static function ai(): array
     {
@@ -800,16 +802,11 @@ final class SiteHealth
      * @param bool   $passes Whether the value is fine
      * @param string $hint   What to do when it is not
      * @param string $fail   Status of a failed check
-     * @return array{label: string, value: string, status: string, hint: string}
+     * @return Check
      */
-    private static function check(string $label, string $value, bool $passes, string $hint, string $fail = self::CRITICAL): array
+    private static function check(string $label, string $value, bool $passes, string $hint, string $fail = self::CRITICAL): Check
     {
-        return [
-            'label'  => $label,
-            'value'  => $value,
-            'status' => $passes ? self::GOOD : $fail,
-            'hint'   => $passes ? '' : $hint,
-        ];
+        return new Check($label, $value, $passes ? self::GOOD : $fail, $passes ? '' : $hint);
     }
 
     /**

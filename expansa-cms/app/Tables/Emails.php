@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Title;
 
 final class Emails extends Table
 {
@@ -14,7 +15,8 @@ final class Emails extends Table
             [
                 'id'         => 1,
                 'image'      => url('dashboard/assets/images/placeholder.svg'),
-                'title'      => 'Post title',
+                'title'      => new Title('Post title'),
+                'recipients' => new Title(''),
                 'status'     => t('Draft'),
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],

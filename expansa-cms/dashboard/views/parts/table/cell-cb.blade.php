@@ -5,8 +5,7 @@
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-cb.blade.php
  *
  * @var Expansa\Builders\Table\Cell $cell
- * @var array<string, mixed>        $item
- * @var mixed                       $value
+ * @var int|string                  $value
  *
  * @package Expansa\Templates
  */

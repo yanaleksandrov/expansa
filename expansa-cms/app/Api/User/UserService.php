@@ -270,7 +270,7 @@ final class UserService
             return $this->unconfirmed($response);
         }
 
-        return $response->update('#two-factor', view('parts/two-factor', ['user' => $user, 'setup' => TwoFactor::setup($user)])->render());
+        return $response->update('#two-factor', view('parts/two-factor', [...TwoFactor::status($user), 'setup' => TwoFactor::setup($user)])->render());
     }
 
     /**
@@ -290,7 +290,7 @@ final class UserService
 
         return $response
             ->notify(t('Two-factor authentication is on.'))
-            ->update('#two-factor', view('parts/two-factor', ['user' => $user, 'codes' => $codes])->render());
+            ->update('#two-factor', view('parts/two-factor', [...TwoFactor::status($user), 'codes' => $codes])->render());
     }
 
     /**
@@ -315,7 +315,7 @@ final class UserService
 
         return $response
             ->notify(t('Two-factor authentication is off.'))
-            ->update('#two-factor', view('parts/two-factor', ['user' => $user])->render());
+            ->update('#two-factor', view('parts/two-factor', TwoFactor::status($user))->render());
     }
 
     /**
@@ -334,7 +334,7 @@ final class UserService
 
         $codes = TwoFactor::regenerateCodes($user);
 
-        return $response->update('#two-factor', view('parts/two-factor', ['user' => $user, 'codes' => $codes])->render());
+        return $response->update('#two-factor', view('parts/two-factor', [...TwoFactor::status($user), 'codes' => $codes])->render());
     }
 
     /**
@@ -372,7 +372,7 @@ final class UserService
             return $response->notify(t('Could not add the passkey. Please try again.'));
         }
 
-        Events::record($user, 'passkey_added', ['name' => $passkey['name']]);
+        Events::record($user, 'passkey_added', ['name' => $passkey->name]);
 
         return $response
             ->notify(t('Passkey added to your account'))

@@ -10,6 +10,7 @@ use Expansa\Assets\Manager as AssetManager;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
+use Expansa\Hooks\Attributes\Priority;
 use Expansa\Support\Is;
 use IntlDateFormatter;
 
@@ -160,7 +161,7 @@ final class Assets
         if (! self::$notifications) {
             self::$notifications = true;
 
-            Hook::add('renderDashboardFooter', static function () {
+            Hook::add('renderDashboardAfter', static function () {
                 echo view('parts/notifications');
             });
         }

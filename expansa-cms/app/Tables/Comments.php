@@ -12,6 +12,11 @@ use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Table;
 use Expansa\Builders\Table\Queried;
+use Expansa\Builders\Table\Values\Badge;
+use Expansa\Builders\Table\Values\Link;
+use Expansa\Builders\Table\Values\Person;
+use Expansa\Builders\Table\Values\Post as PostValue;
+use Expansa\Builders\Table\Values\Title;
 use Expansa\Facades\Db;
 use PDO;
 
@@ -68,29 +73,29 @@ final class Comments extends Table implements Queried
         $statuses = Comment::statuses();
 
         return array_map(function (array $comment) use ($posts, $statuses) {
-            $url    = url('dashboard/comment?id=' . $comment['id']);
             $author = $comment['author_name'] ?: t('Anonymous');
             $post   = $posts[$comment['post_type']][$comment['post_id']] ?? null;
-            if ($post !== null && $post['view'] !== '' && $comment['status'] === Comment::STATUS_APPROVED) {
-                $post['view'] .= '#comment-' . $comment['id'];
+            if ($post !== null && $post->view !== '' && $comment['status'] === Comment::STATUS_APPROVED) {
+                $post = new PostValue($post->title, $post->edit, $post->view . '#comment-' . $comment['id'], $post->comments);
             }
 
             return [
-                'id'        => $comment['id'],
-                'author'    => $author,
-                'initials'  => User::initials($author),
-                'color'     => User::color($author),
-                'author_id' => $comment['author_id'],
-                'email'     => $comment['author_email'],
-                'comment'   => mb_strimwidth(trim(strip_tags($comment['content'])), 0, 120, '…'),
-                'url'       => $this->isTrash ? '#' : $url,
-                'status'      => [
-                    'class' => '',
-                    'value' => $statuses[$comment['status']] ?? $comment['status'],
-                ],
-                'actions'   => $this->actions($comment['id'], $comment['status']),
-                'post'      => $post,
-                'date'      => Dates::format((string) $comment['created_at']),
+                'id'      => $comment['id'],
+                'author'  => new Person(
+                    name: $author,
+                    url: $comment['author_id'] ? url('dashboard/profile?id=' . $comment['author_id']) : '',
+                    email: $comment['author_email'],
+                    initials: User::initials($author),
+                    color: User::color($author),
+                ),
+                'comment' => new Title(
+                    text: mb_strimwidth(trim(strip_tags($comment['content'])), 0, 120, '…'),
+                    url: $this->isTrash ? '#' : url('dashboard/comment?id=' . $comment['id']),
+                    actions: $this->actions($comment['id'], $comment['status']),
+                ),
+                'status'  => new Badge($statuses[$comment['status']] ?? $comment['status']),
+                'post'    => $post,
+                'date'    => Dates::format((string) $comment['created_at']),
             ];
         }, $comments);
     }
@@ -106,7 +111,7 @@ final class Comments extends Table implements Queried
      *
      * @param int    $id
      * @param string $status Current status.
-     * @return array<int, array<string, mixed>>
+     * @return Link[]
      */
     private function actions(int $id, string $status): array
     {
@@ -116,20 +121,18 @@ final class Comments extends Table implements Queried
 
         $actions = [];
         foreach (Comment::moderationActions($status) as $value => $action) {
-            $actions[] = [
-                'title'      => $action['label'],
-                'href'       => '#',
-                'class'      => $value === Comment::STATUS_APPROVED ? 't-green' : 't-muted',
-                'attributes' => self::action('comments/status', ['id' => $id, 'status' => $value], refresh: true),
-            ];
+            $actions[] = new Link(
+                title: $action['label'],
+                class: $value === Comment::STATUS_APPROVED ? 't-green' : 't-muted',
+                attributes: self::action('comments/status', ['id' => $id, 'status' => $value], refresh: true),
+            );
         }
 
-        $actions[] = [
-            'title'      => t('Delete'),
-            'href'       => '#',
-            'class'      => 't-red',
-            'attributes' => self::action('comments/delete', ['id' => $id, 'from' => 'list'], refresh: true),
-        ];
+        $actions[] = new Link(
+            title: t('Delete'),
+            class: 't-red',
+            attributes: self::action('comments/delete', ['id' => $id, 'from' => 'list'], refresh: true),
+        );
 
         return $actions;
     }
@@ -138,23 +141,21 @@ final class Comments extends Table implements Queried
      * Quick links of a row in the trash: restore and delete permanently, then the rows are filtered again.
      *
      * @param int $id
-     * @return array<int, array<string, mixed>>
+     * @return Link[]
      */
     private function trashActions(int $id): array
     {
         return [
-            [
-                'title'      => t('Restore'),
-                'href'       => '#',
-                'class'      => 't-muted',
-                'attributes' => self::action('comments/restore', ['id' => $id], refresh: true),
-            ],
-            [
-                'title'      => t('Delete Permanently'),
-                'href'       => '#',
-                'class'      => 't-red',
-                'attributes' => self::action('comments/force-delete', ['id' => $id], 'deleteItem', true),
-            ],
+            new Link(
+                title: t('Restore'),
+                class: 't-muted',
+                attributes: self::action('comments/restore', ['id' => $id], refresh: true),
+            ),
+            new Link(
+                title: t('Delete Permanently'),
+                class: 't-red',
+                attributes: self::action('comments/force-delete', ['id' => $id], 'deleteItem', true),
+            ),
         ];
     }
 
@@ -338,7 +339,7 @@ final class Comments extends Table implements Queried
      * approved comments kept in the post; per post type one query besides the ones of Post::paths().
      *
      * @param array<int, array<string, mixed>> $comments
-     * @return array<string, array<int, array{title: string, edit: string, view: string, count: int}>> By post type and post ID.
+     * @return array<string, array<int, PostValue>> By post type and post ID.
      */
     private function posts(array $comments): array
     {
@@ -358,12 +359,12 @@ final class Comments extends Table implements Queried
             foreach (Db::select($type->table, ['id [Int]', 'title', 'comments [Int]'], ['id' => array_values($postIds)]) ?? [] as $post) {
                 $path = isset($paths[$post['id']]) ? Permalinks::post($paths[$post['id']], $post['id'], $type->key) : '';
 
-                $result[$key][$post['id']] = [
-                    'title' => $post['title'] !== '' ? $post['title'] : t('(no title)'),
-                    'edit'  => url('dashboard/post?type=' . $type->key . '&id=' . $post['id'] . '&tab=comments'),
-                    'view'  => $path === '' ? '' : url($path),
-                    'count' => $post['comments'],
-                ];
+                $result[$key][$post['id']] = new PostValue(
+                    title: $post['title'] !== '' ? $post['title'] : t('(no title)'),
+                    edit: url('dashboard/post?type=' . $type->key . '&id=' . $post['id'] . '&tab=comments'),
+                    view: $path === '' ? '' : url($path),
+                    comments: $post['comments'],
+                );
             }
         }
 

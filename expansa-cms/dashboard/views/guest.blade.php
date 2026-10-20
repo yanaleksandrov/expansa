@@ -34,7 +34,21 @@ use Expansa\Facades\Hook;
 </head>
 <body class="df jcc p-6">
     <?php
+	/**
+	 * Prints before body on the dashboard.
+	 *
+	 * @since 2027.1
+	 */
+	Hook::run( 'renderDashboardBody' );
+
 	echo view($page, $__data);
+
+	/**
+	 * Prints before scripts on the dashboard.
+	 *
+	 * @since 2027.1
+	 */
+	Hook::run( 'renderDashboardAfter' );
 
 	/**
 	 * Prints scripts or data before the closing body tag on the dashboard.

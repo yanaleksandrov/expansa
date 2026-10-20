@@ -9,7 +9,6 @@ use App\Api\User\Events;
 use App\Api\User\Sessions;
 use App\Api\User\TwoFactor;
 use App\Models\User;
-use App\Support\Dates;
 use Expansa\Access\Exceptions\AccessDenied;
 use Expansa\Facades\Access;
 use Expansa\Facades\Role;
@@ -86,15 +85,8 @@ final class Profile
             'isActive'       => $isActive,
             'hasTwoFactor'   => TwoFactor::isEnabled($user),
             'canImpersonate' => $user->id !== $admin?->id && $isActive && ! Access::allows($user, 'users_edit'),
-            'sessions'       => array_map(fn (array $session) => [
-                ...$session,
-                'active' => Dates::format($session['used_at'] ?: $session['created_at']),
-            ], Sessions::all($user)),
-            'events'         => array_map(fn (array $event) => [
-                ...$event,
-                'label' => Events::label($event['event']),
-                'date'  => Dates::format($event['created_at']),
-            ], Events::all($user, 50)),
+            'sessions'       => Sessions::all($user),
+            'events'         => Events::all($user, 50),
         ];
     }
 }

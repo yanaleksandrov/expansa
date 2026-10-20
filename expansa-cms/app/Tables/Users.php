@@ -11,6 +11,8 @@ use App\Support\Dates;
 use Expansa\Builders\Table;
 use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Queried;
+use Expansa\Builders\Table\Values\Badge;
+use Expansa\Builders\Table\Values\Person;
 use Expansa\Database\Query\Raw;
 use Expansa\Facades\Access;
 use Expansa\Facades\Db;
@@ -61,15 +63,26 @@ final class Users extends Table implements Queried
             )?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
         }
 
-        return array_map(fn (array $user) => [
-            'id'     => $user['id'],
-            'name'   => $user['showname'] ?: $user['login'],
-            'login'  => $user['login'],
-            'email'  => $user['email'],
-            'status' => self::statuses()[$user['status']] ?? $user['status'],
-            'role'   => ((array) json_decode((string) $user['roles'], true))[0] ?? '',
-            'visit'  => isset($visits[$user['id']]) ? Dates::format((string) $visits[$user['id']]) : t('Never'),
-        ], $users);
+        return array_map(function (array $user) use ($visits) {
+            $role = ((array) json_decode((string) $user['roles'], true))[0] ?? '';
+
+            return [
+                'id'     => $user['id'],
+                'name'   => new Person(
+                    name: $user['showname'] ?: $user['login'],
+                    url: url('dashboard/profile?id=' . $user['id']),
+                    email: $user['email'],
+                    login: $user['login'],
+                ),
+                'status' => self::statuses()[$user['status']] ?? $user['status'],
+                'role'   => new Badge(
+                    text: Role::get($role)['name'] ?? '',
+                    class: in_array($role, [User::ROLE_OWNER, 'admin'], true) ? 'badge badge--green-lt' : 'badge',
+                    icon: 'ph ph-person-simple-run',
+                ),
+                'visit'  => isset($visits[$user['id']]) ? Dates::format((string) $visits[$user['id']]) : t('Never'),
+            ];
+        }, $users);
     }
 
     public function count(): int
@@ -159,7 +172,7 @@ final class Users extends Table implements Queried
             $this->cell('role')
                 ->title(t('Role'))
                 ->fixedWidth('7rem')
-                ->view('role'),
+                ->view('badge'),
         ];
     }
 

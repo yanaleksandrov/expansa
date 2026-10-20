@@ -1,35 +1,29 @@
 <?php
 /**
- * Comma-separated links: a list of `['title' => ..., 'href' => ...]`, a string is a single title.
+ * Comma-separated links, a link without a URL is plain text.
  * The first three are shown, the rest behind the "+N more" badge.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-links.blade.php
  *
  * @var Expansa\Builders\Table\Cell $cell
- * @var array<string, mixed>        $item
- * @var mixed                       $value
+ * @var Expansa\Builders\Table\Values\Link[] $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-$links = match (true) {
-    is_array($value)                   => array_values($value),
-    is_string($value) && $value !== '' => [['title' => $value]],
-    default                            => [],
-};
-$more = count($links) - 3;
+$more = count($value) - 3;
 ?>
 <div>
-    @foreach ($links as $i => $link)
+    @foreach ($value as $i => $link)
         @if ($i === 3)
             <span class="table-more" hidden>
         @endif
         <span class="table-link">
-            @if (! empty($link['href']))
-                <a href="{{ $link['href'] }}">{{ $link['title'] ?? '' }}</a>
+            @if ($link->url)
+                <a href="{{ $link->url }}">{{ $link->title }}</a>
             @else
-                {{ $link['title'] ?? '' }}
+                {{ $link->title }}
             @endif
         </span>
     @endforeach

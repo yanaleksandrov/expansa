@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
+use App\Api\User\Values\Identity;
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Dates;
 use Expansa\Auth\OAuth\Profile;
 use Expansa\Auth\OAuth\State;
 use Expansa\Facades\Auth;
@@ -123,14 +125,22 @@ final class Identities
      * Get the connected accounts of a user for the profile.
      *
      * @param User $user
-     * @return array<int, array{id: int, provider: string, email: string, created_at: string}>
+     * @return Identity[]
      */
     public static function all(User $user): array
     {
-        return Db::select('users_identities', ['id [Int]', 'provider', 'email', 'created_at'], [
+        $rows = Db::select('users_identities', ['id [Int]', 'provider', 'email', 'created_at'], [
             'user_id' => $user->id,
             'ORDER'   => ['provider' => 'ASC'],
         ]) ?? [];
+
+        return array_map(fn (array $row) => new Identity(
+            id: $row['id'],
+            provider: $row['provider'],
+            label: self::label($row['provider']),
+            email: (string) $row['email'],
+            connected: Dates::format($row['created_at'], false),
+        ), $rows);
     }
 
     /**

@@ -85,10 +85,10 @@ $labels = [
 
 		<div class="chat-composer">
 			<textarea class="chat-composer-input" rows="1" u-bind="composerInput"></textarea>
-			<button type="button" class="btn btn--primary chat-composer-send" u-bind="sendButton">
+			<button type="button" class="btn btn--primary btn--sm" u-bind="sendButton" disabled>
 				<i class="ph ph-paper-plane-tilt"></i>
 			</button>
-			<button type="button" class="btn btn--outline chat-composer-stop" u-bind="stopButton">
+			<button type="button" class="btn btn--outline btn--sm" u-bind="stopButton" hidden>
 				<i class="ph ph-stop"></i>
 			</button>
 		</div>

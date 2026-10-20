@@ -35,7 +35,16 @@ use Expansa\Facades\Hook;
     ?>
 </head>
 <body u-data="youla" @keydown.window.prevent.ctrl.s="$notice.add(notifications.ctrlS)">
-    <?php echo view('parts/impersonation'); ?>
+    <?php
+    /**
+     * Prints before body on the dashboard.
+     *
+     * @since 2027.1
+     */
+    Hook::run( 'renderDashboardBody' );
+
+    echo view('parts/impersonation');
+    ?>
     <div class="expansa" :class="showMenu && 'is-active'">
         <div class="expansa-bar">
             <div class="expansa-bar-burger" :class="showMenu && 'is-active'" @click="showMenu = !showMenu">
@@ -95,6 +104,13 @@ use Expansa\Facades\Hook;
      * @since 2027.1
      */
     echo view('parts/dialogs/media-library');
+
+    /**
+     * Prints before scripts on the dashboard.
+     *
+     * @since 2027.1
+     */
+    Hook::run( 'renderDashboardAfter' );
 
     /**
      * Prints scripts or data before the closing body tag on the dashboard.

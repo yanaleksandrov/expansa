@@ -8,7 +8,8 @@ namespace Expansa\Builders\Table;
  * Column of a dashboard table, described with fluent setters:
  * `$this->cell('date')->title(t('Date'))->fixedWidth('9rem')->view('date')`.
  *
- * The view of a cell gets the column as `$cell`, the row as `$item` and its value by the key as `$value`.
+ * The view of a cell gets the column as `$cell`, the row id as `$id` and its value by the key as `$value`,
+ * a scalar or a value object of `Table\Values`; `$item`, the whole row, is for the views of other packages.
  *
  * @package Expansa\Builders\Table
  */

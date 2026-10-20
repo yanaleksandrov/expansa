@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Title;
 
 final class Terms extends Table
 {
@@ -14,14 +15,14 @@ final class Terms extends Table
             [
                 'id'    => 1,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
-                'title' => 'Hello World',
+                'title' => new Title('Hello World'),
                 'slug'  => 'hello-world',
                 'count' => 23,
             ],
             [
                 'id'    => 2,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
-                'title' => 'Uncategorized',
+                'title' => new Title('Uncategorized'),
                 'slug'  => 'uncategorized',
                 'count' => 5,
             ],

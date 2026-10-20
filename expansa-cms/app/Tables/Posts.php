@@ -12,6 +12,10 @@ use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Table;
 use Expansa\Builders\Table\Queried;
+use Expansa\Builders\Table\Values\Badge;
+use Expansa\Builders\Table\Values\Link;
+use Expansa\Builders\Table\Values\Person;
+use Expansa\Builders\Table\Values\Title;
 use Expansa\Facades\Db;
 use Expansa\Facades\I18n;
 use IntlDateFormatter;
@@ -73,19 +77,21 @@ final class Posts extends Table implements Queried
 
             return [
                 'id'          => $post['id'],
-                'title'       => $post['title'] !== '' ? $post['title'] : t('(no title)'),
-                'url'         => $url,
-                'actions'     => $this->isTrash
-                    ? $this->trashActions($post['id'])
-                    : $this->actions($post['id'], $slugs[$post['id']] ?? ''),
-                'author'      => $author,
-                'author_id'   => $post['author_id'],
-                'initials'    => User::initials($author),
-                'color'       => User::color($author),
-                'status'      => [
-                    'class' => $post['status'] === 'publish' ? 'badge t-green' : 'badge',
-                    'value' => $statuses[$post['status']] ?? $post['status'],
-                ],
+                'title'       => new Title(
+                    text: $post['title'] !== '' ? $post['title'] : t('(no title)'),
+                    url: $url,
+                    actions: $this->isTrash ? $this->trashActions($post['id']) : $this->actions($post['id'], $slugs[$post['id']] ?? ''),
+                ),
+                'author'      => new Person(
+                    name: $author,
+                    url: $post['author_id'] ? url('dashboard/profile?id=' . $post['author_id']) : '',
+                    initials: User::initials($author),
+                    color: User::color($author),
+                ),
+                'status'      => new Badge(
+                    text: $statuses[$post['status']] ?? $post['status'],
+                    class: $post['status'] === 'publish' ? 'badge t-green' : 'badge',
+                ),
                 'post_status' => $post['status'],
                 'date'        => Dates::format((string) $post['created_at']),
             ];
@@ -359,7 +365,7 @@ final class Posts extends Table implements Queried
      *
      * @param int    $id
      * @param string $slug Path of the item in its URL, empty when it has none.
-     * @return array<int, array<string, mixed>>
+     * @return Link[]
      */
     private function actions(int $id, string $slug): array
     {
@@ -367,31 +373,28 @@ final class Posts extends Table implements Queried
         $actions = [];
 
         if ($this->type->public && $slug !== '') {
-            $actions[] = [
-                'href'       => url(Permalinks::post($slug, $id, $this->type->key)),
-                'class'      => 't-muted',
-                'title'      => t('View'),
-                'attributes' => ['target' => '_blank'],
-            ];
+            $actions[] = new Link(
+                title: t('View'),
+                url: url(Permalinks::post($slug, $id, $this->type->key)),
+                class: 't-muted',
+                attributes: ['target' => '_blank'],
+            );
         }
 
-        $actions[] = [
-            'href'       => '#',
-            'class'      => 't-muted',
-            'title'      => t('Duplicate'),
-            'attributes' => self::action('post/duplicate', $item),
-        ];
-        $actions[] = $this->type->canTrash ? [
-            'href'       => '#',
-            'class'      => 't-red',
-            'title'      => t('Trash', context: 'action'),
-            'attributes' => self::action('post/delete', $item),
-        ] : [
-            'href'       => '#',
-            'class'      => 't-red',
-            'title'      => t('Delete'),
-            'attributes' => self::action('post/delete', $item, 'deleteItem'),
-        ];
+        $actions[] = new Link(
+            title: t('Duplicate'),
+            class: 't-muted',
+            attributes: self::action('post/duplicate', $item),
+        );
+        $actions[] = $this->type->canTrash ? new Link(
+            title: t('Trash', context: 'action'),
+            class: 't-red',
+            attributes: self::action('post/delete', $item),
+        ) : new Link(
+            title: t('Delete'),
+            class: 't-red',
+            attributes: self::action('post/delete', $item, 'deleteItem'),
+        );
 
         return $actions;
     }
@@ -400,25 +403,23 @@ final class Posts extends Table implements Queried
      * Get the links of the actions under the title of an item in the trash: restore and delete permanently.
      *
      * @param int $id
-     * @return array<int, array<string, mixed>>
+     * @return Link[]
      */
     private function trashActions(int $id): array
     {
         $item = ['post-type' => $this->type->key, 'id' => $id];
 
         return [
-            [
-                'href'       => '#',
-                'class'      => 't-muted',
-                'title'      => t('Restore'),
-                'attributes' => self::action('post/restore', $item),
-            ],
-            [
-                'href'       => '#',
-                'class'      => 't-red',
-                'title'      => t('Delete Permanently'),
-                'attributes' => self::action('post/delete', $item, 'deleteItem'),
-            ],
+            new Link(
+                title: t('Restore'),
+                class: 't-muted',
+                attributes: self::action('post/restore', $item),
+            ),
+            new Link(
+                title: t('Delete Permanently'),
+                class: 't-red',
+                attributes: self::action('post/delete', $item, 'deleteItem'),
+            ),
         ];
     }
 
