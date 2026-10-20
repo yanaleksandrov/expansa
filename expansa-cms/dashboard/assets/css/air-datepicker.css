@@ -26,11 +26,11 @@
           user-select: none;
 }
 .air-datepicker[data-placement=bottom] {
-  transform: translateY(0.25rem) scale(0.98);
+  transform: translateY(0.25rem) scale(1);
   transform-origin: top;
 }
 .air-datepicker[data-placement=top] {
-  transform: translateY(-0.25rem) scale(0.98);
+  transform: translateY(-0.25rem) scale(1);
   transform-origin: bottom;
 }
 .air-datepicker.-active-, .air-datepicker.-inline- {
@@ -47,7 +47,7 @@
   --adp-year-cell-height: 4rem;
   position: fixed;
   font-size: 1rem;
-  transform: translate(-50%, -50%) scale(0.98);
+  transform: translate(-50%, -50%) scale(1);
   -webkit-tap-highlight-color: transparent;
 }
 .air-datepicker.-is-mobile-.-active- {

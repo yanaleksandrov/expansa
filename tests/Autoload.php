@@ -48,6 +48,14 @@ try {
     // a class added after the dump loads by its prefix
     ClassMap::dump($classmap, array_diff_key($classes, ['Expansa\\Support\\Arr' => true]));
     check('a class missing from the map loads by its namespace', isolated('echo json_encode(class_exists("Expansa\\\\Support\\\\Arr"));') === 'true');
+
+    // a stale map: a moved class loads by its namespace without warnings, the map is removed
+    ClassMap::dump($classmap, ['Expansa\\Support\\Arr' => 'expansa/Support/Moved.php'] + $classes);
+    check('a class of a missing mapped file loads by its namespace', isolated('error_reporting(E_ALL); echo json_encode(class_exists("Expansa\\\\Support\\\\Arr"));') === 'true');
+    check('a stale map is removed', ! is_file($classmap));
+
+    ClassMap::dump($classmap, ['Expansa\\Support\\Arr' => 'expansa/Support/Str.php'] + $classes);
+    check('a class no longer declared in its mapped file loads by its namespace', isolated('echo json_encode([class_exists("Expansa\\\\Support\\\\Arr"), class_exists("Expansa\\\\Support\\\\Str", false)]);') === '[true,true]');
 } finally {
     $saved === null ? @unlink($classmap) : file_put_contents($classmap, $saved);
 }

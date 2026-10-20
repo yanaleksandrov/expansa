@@ -257,15 +257,16 @@ document.addEventListener('youla:init', () => {
      * the `tmpl-media-library` dialog (see `dialogs/media-library.blade.php`) - a caller opens
      * it with `$dialog.open('tmpl-media-library', { multiple, type, onSelect(items) {...} })`
      * and this component reads that config off `entry` (the dialog stack entry it was mounted
-     * inside of) via `@load="configure(entry)"`.
+     * inside of) in the `@load` of `self`, which also loads the first page.
      *
      * Two things every method here has to respect:
      *
      * - `$ajax`/`$notice`/`$dialog` never appear in a method body. Those magic helpers only
      *   resolve inside a template expression's own evaluation, not inside a plain method here
      *   (see e.g. `files-uploader.php`'s inline `$ajax.post(...).then(...)`). So every network
-     *   call lives in the markup (`parts/media-library.blade.php`), which calls back into
-     *   these plain state-mutating methods with the response.
+     *   call lives in an expression - the markup (`parts/media-library.blade.php`) or the
+     *   string `@load` of `self` - which calls back into these plain state-mutating methods
+     *   with the response.
      * - `u-each` tracks its list dependency by taking the *literal leading identifier* of its
      *   expression (a regex over the source text, not real dependency tracking - see
      *   `Component.computeOutput()`'s `directive === "u-each"` branch in youla.js). A method
@@ -301,6 +302,11 @@ document.addEventListener('youla:init', () => {
         // never calls this, so `multiple`/`onSelect` simply keep their page-mode defaults.
         multiple: true,
         onSelect: null,
+
+        // a string, not a method: `entry` is a loop variable of the dialog, seen only by an expression
+        self: {
+            '@load': "configure(typeof entry === 'undefined' ? null : entry); $ajax.post('media/get', {page: 1}).then(({posts}) => setItems(posts, true))",
+        },
 
         configure(entry) {
             if (!entry) {

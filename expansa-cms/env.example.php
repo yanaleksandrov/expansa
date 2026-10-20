@@ -92,7 +92,7 @@ define('EX_KEYS', [
  */
 define('EX_DEBUG', [
     // EX_DEBUG=1, true or on enables it
-    'enabled' => filter_var(getenv('EX_DEBUG'), FILTER_VALIDATE_BOOL),
+    'enabled' => filter_var(getenv('EX_DEBUG') ?: 'off', FILTER_VALIDATE_BOOL),
     // uncaught errors and warnings go to storage/logs, the queries to the debug panel; EX_DEBUG_LOG=0 turns it off
     'log'     => filter_var(getenv('EX_DEBUG_LOG') ?: 'on', FILTER_VALIDATE_BOOL),
     // the error message, place and trace on the page and in API responses; EX_DEBUG_DISPLAY=0 turns it off

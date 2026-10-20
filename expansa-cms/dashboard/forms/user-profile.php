@@ -11,7 +11,6 @@ use App\Api\User\TwoFactor;
 use App\Dashboard\Pages\Profile;
 use App\Models\Option;
 use App\Models\User;
-use App\Support\Dates;
 use App\Support\Passwords;
 use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
@@ -755,17 +754,23 @@ $uid = Form::enqueue(
 				    'name'     => 'activity',
 				    'type'     => 'custom',
 				    'callback' => function () use ($user) {
+					    $lines = array_map(fn (array $event) => [
+						    'icon' => Events::icon($event['event']),
+						    'user' => '',
+						    'text' => Events::label($event['event']),
+						    'note' => $event['device'] . ' · ' . $event['ip'],
+						    'at'   => $event['created_at'],
+					    ], Events::all($user));
 					    ?>
-					    <div class="dg g-2 ga-4">
+					    <div class="dg g-4 ga-4">
 						    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>
-						    <div class="dg g-1 fs-13">
-							    <?php foreach (Events::all($user) as $event) : ?>
-								    <div class="df aic g-2">
-									    <span><?php echo Events::label($event['event']); ?></span>
-									    <span class="t-muted"><?php echo htmlspecialchars($event['device'] . ' · ' . $event['ip'] . ' · ' . Dates::format($event['created_at'])); ?></span>
-								    </div>
-							    <?php endforeach; ?>
-						    </div>
+						    <?php
+						    echo view('parts/activity', [
+							    'lines' => $lines,
+							    'card'  => false,
+							    'empty' => t('No sign-ins or security changes yet.'),
+						    ]);
+						    ?>
 					    </div>
 					    <?php
 				    },

@@ -49,17 +49,16 @@
     }
     function domWalk(el, callback) {
         callback(el);
+        if (el.hasAttribute("u-each")) {
+            return;
+        }
         const iframeBody = el.tagName === "IFRAME" ? el.contentDocument?.body : null;
         const children = Array.from(iframeBody ? iframeBody.children : el.children);
         for (const node of children) {
             if (hasDirective(node, "u-data")) {
                 continue;
             }
-            if (node.hasAttribute("u-each")) {
-                callback(node);
-            } else {
-                domWalk(node, callback);
-            }
+            domWalk(node, callback);
         }
     }
     const RESERVED = [ "$el", "$event", "$refs", "$root" ];
@@ -166,6 +165,9 @@
         if (typeof expression !== "string") {
             return;
         }
+        if (el.tagName !== "TEMPLATE" && attribute.name === "u-each") {
+            el.setAttribute("u-each", expression);
+        }
         const {item: item, index: index, items: items, join: join} = parseEachExpression(expression);
         const {magicVariables: magicVariables, otherVariables: otherVariables} = splitMagicVariables(additionalHelperVariables);
         let dataItems;
@@ -203,6 +205,7 @@
         Object.entries(dataItems ?? []).forEach(([key, dataItem], idx, array) => {
             const clone = el.cloneNode(true);
             clone.removeAttribute("u-each");
+            clone.__x_each_clone = true;
             (async () => {
                 clone.__x_for_data = {
                     ...otherVariables,
@@ -233,6 +236,7 @@
                     [item]: dataItem,
                     [index]: toLoopKey(key)
                 };
+                node.__x_each_clone = true;
             });
             (async () => {
                 await Promise.all(elements.map(node => component.initialize(node)));
@@ -920,6 +924,10 @@
         const arrowIndex = source.indexOf("=>");
         return arrowIndex !== -1 && (braceIndex === -1 || arrowIndex < braceIndex);
     }
+    function onlyLoop(attributes) {
+        const loop = attributes.find(({directive: directive}) => directive === "u-each");
+        return loop ? [ loop ] : attributes;
+    }
     function serialize(value) {
         try {
             return JSON.stringify(value);
@@ -947,6 +955,17 @@
             this.storageExpire = this.storageType ? getNextModifier(modifiers, this.storageType) : null;
             this.rawData = saferEval(this.name || "{}", createDataProviderContext(el));
             this.rawData = hydrateProps(el, this.rawData, this.parent, isDataProvider(this.name) ? this.name : null);
+            this.selfBindings = null;
+            if (this.rawData && typeof this.rawData === "object" && Object.hasOwn(this.rawData, "self")) {
+                const selfBindings = this.rawData.self;
+                delete this.rawData.self;
+                if (selfBindings && typeof selfBindings === "object" && !Array.isArray(selfBindings)) {
+                    this.selfBindings = selfBindings;
+                    this.rootAttributeNames = new Set([ ...el.attributes ].map(({name: name}) => name));
+                } else {
+                    console.warn(`Youla.js: "self" in u-data="${this.name}" must be an object of root bindings — ignored.`);
+                }
+            }
             if (this.storageType) {
                 const saved = storage.get(`u-data:${this.name}`, this.storageType);
                 if (saved) {
@@ -1024,40 +1043,51 @@
             };
         }
         resolveAttributes(el) {
-            const self = this;
             let additionalHelperVariables;
-            return getAttributes(el).flatMap(attribute => {
+            const attributes = getAttributes(el).flatMap(attribute => {
                 if (attribute.directive !== "u-bind") {
                     return [ attribute ];
                 }
                 additionalHelperVariables ??= this.getHelperVariables(el);
                 let bindings;
                 try {
-                    ({output: bindings} = self.evaluate(attribute.expression, additionalHelperVariables));
+                    ({output: bindings} = this.evaluate(attribute.expression, additionalHelperVariables));
                 } catch (error) {
                     return [];
                 }
                 if (!bindings || typeof bindings !== "object") {
                     return [];
                 }
-                return Object.entries(bindings).flatMap(([name, value]) => {
-                    const isFn = typeof value === "function";
-                    const parsed = parseAttribute(name, value);
-                    if (isFn && isArrowFunction(value)) {
-                        console.warn(`Youla.js: u-bind key "${name}" is an arrow function — arrow functions don't bind "this" to the component's data. Use a regular function or method shorthand instead: "${name}"() { ... }.`);
-                    }
-                    const isPlainAttribute = !parsed.directive && !parsed.event && !parsed.bind;
-                    if (parsed.directive && !getDirective(parsed.directive)) {
-                        el.setAttribute(name, isFn ? value.call(self.scope) : value);
-                        return [];
-                    }
-                    return [ {
-                        ...parsed,
-                        expression: value,
-                        bind: parsed.bind || isPlainAttribute,
-                        literal: !isFn && (isPlainAttribute || typeof value !== "string")
-                    } ];
-                });
+                return this.withoutCloneLoop(el, this.expandBindings(el, Object.entries(bindings)));
+            });
+            if (el !== this.root || !this.selfBindings) {
+                return onlyLoop(attributes);
+            }
+            const explicitNames = new Set(attributes.map(({name: name}) => name));
+            const selfEntries = Object.entries(this.selfBindings).filter(([name]) => name.startsWith("@") || !this.rootAttributeNames.has(name) && !explicitNames.has(name));
+            return onlyLoop([ ...this.withoutCloneLoop(el, this.expandBindings(el, selfEntries)), ...attributes ]);
+        }
+        withoutCloneLoop(el, attributes) {
+            return el.__x_each_clone ? attributes.filter(({directive: directive}) => directive !== "u-each") : attributes;
+        }
+        expandBindings(el, entries) {
+            return entries.flatMap(([name, value]) => {
+                const isFn = typeof value === "function";
+                const parsed = parseAttribute(name, value);
+                if (isFn && isArrowFunction(value)) {
+                    console.warn(`Youla.js: u-bind key "${name}" is an arrow function — arrow functions don't bind "this" to the component's data. Use a regular function or method shorthand instead: "${name}"() { ... }.`);
+                }
+                const isPlainAttribute = !parsed.directive && !parsed.event && !parsed.bind;
+                if (parsed.directive && !getDirective(parsed.directive)) {
+                    el.setAttribute(name, isFn ? value.call(this.scope) : value);
+                    return [];
+                }
+                return [ {
+                    ...parsed,
+                    expression: value,
+                    bind: parsed.bind || isPlainAttribute,
+                    literal: !isFn && (isPlainAttribute || typeof value !== "string")
+                } ];
             });
         }
         observeData(data) {

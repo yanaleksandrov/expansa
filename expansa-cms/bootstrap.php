@@ -364,6 +364,15 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
         ],
     );
 
+    // the class map spares a file check per class; a new copy or a changed core has none, see autoload.php
+    if (! is_file($classmap = EX_PATH . 'cache/classmap.php')) {
+        Hook::add('terminate', function () use ($classmap) {
+            if (is_writable(dirname($classmap))) {
+                Expansa\Support\ClassMap::dump($classmap, Expansa\Support\ClassMap::scan(EX_PATH));
+            }
+        });
+    }
+
     // form fields: input types, basic fields, composite fields
     Form::configure(
         types: [
@@ -696,6 +705,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
                 App\Api\Options\OptionsController::class,
                 App\Api\Post\PostController::class,
                 App\Api\Posts\PostsController::class,
+                App\Api\Search\SearchController::class,
                 App\Api\Slugs\SlugsController::class,
                 App\Api\Tables\TablesController::class,
                 App\Api\Translations\TranslationsController::class,

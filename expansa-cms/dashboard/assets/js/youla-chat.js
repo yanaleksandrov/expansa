@@ -54,6 +54,11 @@ document.addEventListener('youla:init', () => {
         pollTimer: null,
         tickTimer: null,
         snapshot: '',
+        self: {
+            '@load'() {
+                this.init(this.$el);
+            }
+        },
         get isRunning() {
             return Boolean(this.task?.isPending);
         },

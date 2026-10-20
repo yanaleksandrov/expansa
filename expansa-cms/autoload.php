@@ -20,9 +20,14 @@ spl_autoload_register(static function (string $class): void {
 
     // the autoloader runs only for a class not declared yet, so its file was not included yet
     if (isset($classes[$class])) {
-        require EX_PATH . $classes[$class];
+        // the code changed after the dump: the class loads by its namespace and the map is rebuilt after the response
+        $isLoaded = (@include EX_PATH . $classes[$class]) !== false;
+        if ($isLoaded && (class_exists($class, false) || interface_exists($class, false) || trait_exists($class, false))) {
+            return;
+        }
 
-        return;
+        $classes = [];
+        @unlink(EX_PATH . 'cache/classmap.php');
     }
 
     // classes found missing in this request, so a repeated class_exists() checks no file again

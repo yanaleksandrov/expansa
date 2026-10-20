@@ -208,6 +208,9 @@ document.addEventListener('youla:init', () => {
         errors: [],
         multiple: true,
         onSelect: null,
+        self: {
+            '@load': 'configure(typeof entry === \'undefined\' ? null : entry); $ajax.post(\'media/get\', {page: 1}).then(({posts}) => setItems(posts, true))'
+        },
         configure(entry) {
             if (!entry) {
                 return;

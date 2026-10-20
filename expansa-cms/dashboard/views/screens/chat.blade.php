@@ -17,7 +17,7 @@ $labels = [
 	'notConfigured' => t_attr( 'The AI service is not configured: set it on the AI tab of the settings.' ),
 ];
 ?>
-<div class="chat" u-data="chat" data-labels="{{ json_encode( $labels, JSON_UNESCAPED_UNICODE ) }}" @load="init($el)">
+<div class="chat" u-data="chat" data-labels="{{ json_encode( $labels, JSON_UNESCAPED_UNICODE ) }}">
 	<section class="chat-main">
 		<div class="chat-progress" u-bind="progressBar">
 			<div class="chat-progress-bar"></div>

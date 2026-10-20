@@ -8,7 +8,7 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="notifications" u-data="notice" @mouseenter="pause()" @mouseleave="resume()">
+<div class="notifications" u-data="notice">
 	<div u-each="(item, index) in items" class="notifications-item" :class="item.classes()" :style="`--notice-scale: ${1 - (items.length - index - 1) * 0.005}`">
 		<div class="notifications-wrapper">
 			<i class="ph" :class="`ph-${item.type === 'info' ? 'bell-ringing' : item.type === 'error' ? 'siren' : item.type === 'success' ? 'check' : 'shield-warning'} t-${item.type === 'info' ? 'gray' : item.type === 'error' ? 'red' : item.type === 'success' ? 'green' : 'orange'}`"></i>

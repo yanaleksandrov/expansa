@@ -77,12 +77,10 @@ use Expansa\Facades\Hook;
     </div>
 
     <!-- dialog windows start -->
-    <div class="dialog" u-data="dialog" :class="stack.length ? ['is-active', stack.at(-1)?.class].filter(Boolean).join(' ') : ''" @keydown.esc.window="close()" id="expansa-dialog">
+    <div class="dialog" u-data="dialog" id="expansa-dialog">
         <div u-each="entry in stack" class="dialog-wrapper" @click.outside="close(entry.id)">
             <div class="dialog-header">
-                <template u-if="entry.title">
-                    <h6 class="dialog-title" u-text="entry.title"></h6>
-                </template>
+                <h6 class="dialog-title" u-show="entry.title" u-text="entry.title ?? ''" hidden></h6>
                 <button class="dialog-close" type="button" @click="close(entry.id)"></button>
             </div>
             <div class="dialog-content" u-html="entry.content"></div>

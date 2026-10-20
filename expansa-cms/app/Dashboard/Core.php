@@ -75,6 +75,7 @@ final class Core
         Dashboard::page('users', view: 'screens/edit');
         Dashboard::page('plugins-install', surface: Surface::Muted);
         Dashboard::page('site-health', surface: Surface::Muted);
+        Dashboard::page('updates', surface: Surface::Muted);
 
         Dashboard::data('sign-in', SignIn::data(...));
         Dashboard::data('profile', Profile::data(...));

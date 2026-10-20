@@ -22,6 +22,40 @@ final class Events
     private const int RETENTION = 90;
 
     /**
+     * Icons of the events in the activity of the profile, see icon().
+     */
+    private const array ICONS = [
+        'sign_in'               => 'ph ph-sign-in',
+        'sign_in_failed'        => 'ph ph-warning',
+        'sign_in_locked'        => 'ph ph-lock',
+        'sign_out'              => 'ph ph-sign-out',
+        'session_revoked'       => 'ph ph-sign-out',
+        'sessions_revoked'      => 'ph ph-sign-out',
+        'password_changed'      => 'ph ph-password',
+        'password_reset'        => 'ph ph-password',
+        'email_changed'         => 'ph ph-envelope-simple',
+        'email_verified'        => 'ph ph-envelope-simple',
+        'passkey_added'         => 'ph ph-fingerprint',
+        'passkey_removed'       => 'ph ph-fingerprint',
+        'provider_connected'    => 'ph ph-link',
+        'provider_disconnected' => 'ph ph-link-break',
+        'account_secured'       => 'ph ph-shield-warning',
+        'two_factor_enabled'    => 'ph ph-shield-check',
+        'two_factor_disabled'   => 'ph ph-shield-slash',
+        'two_factor_failed'     => 'ph ph-warning',
+        'recovery_codes_new'    => 'ph ph-list-numbers',
+        'recovery_code_used'    => 'ph ph-list-numbers',
+        'account_created'       => 'ph ph-user-plus',
+        'role_changed'          => 'ph ph-identification-badge',
+        'account_enabled'       => 'ph ph-user-check',
+        'account_disabled'      => 'ph ph-user-minus',
+        'impersonation_started' => 'ph ph-user-switch',
+        'impersonation_stopped' => 'ph ph-user-switch',
+        'token_created'         => 'ph ph-key',
+        'token_revoked'         => 'ph ph-key',
+    ];
+
+    /**
      * Record an event of a user.
      *
      * @param User                 $user
@@ -123,5 +157,17 @@ final class Events
             'token_revoked'         => t('API token revoked'),
             default                 => (string) Hook::call('userEventLabel', $event, $event),
         };
+    }
+
+    /**
+     * Phosphor icon of an event for the activity of the profile, by its kind;
+     * plugins choose the icons of their events with the `userEventIcon` filter.
+     *
+     * @param string $event
+     * @return string
+     */
+    public static function icon(string $event): string
+    {
+        return self::ICONS[$event] ?? (string) Hook::call('userEventIcon', 'ph ph-clock-counter-clockwise', $event);
     }
 }
