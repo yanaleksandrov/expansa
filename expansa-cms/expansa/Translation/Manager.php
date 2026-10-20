@@ -112,6 +112,13 @@ final class Manager
     private array $sources = [];
 
     /**
+     * Files of the call stack seen by source(): the path with forward slashes and whether it is in the core.
+     *
+     * @var array<string, array{string, bool}>
+     */
+    private array $callers = [];
+
+    /**
      * Decoded translation files by path, false for a missing or invalid file.
      *
      * @var array<string, array<string, string>|false>
@@ -362,7 +369,6 @@ final class Manager
      */
     private function source(): string
     {
-        $core   = self::slashes(dirname(__DIR__)) . '/';
         $source = '';
 
         foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 12) as $frame) {
@@ -370,8 +376,12 @@ final class Manager
                 continue;
             }
 
-            $source = self::slashes($frame['file']);
-            if (! str_starts_with($source, $core)) {
+            // a page calls t() from a few files hundreds of times: each file is normalized once
+            [$source, $isCore] = $this->callers[$frame['file']] ??= [
+                $path = self::slashes($frame['file']),
+                str_starts_with($path, self::slashes(dirname(__DIR__)) . '/'),
+            ];
+            if (! $isCore) {
                 break;
             }
         }

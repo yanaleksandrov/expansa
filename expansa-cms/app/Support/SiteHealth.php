@@ -7,6 +7,7 @@ namespace App\Support;
 use App\Models\Option;
 use App\Models\User;
 use Expansa\Ai\Enums\Status;
+use Expansa\Cache\Providers\Database as DatabaseCache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Debug;
 use Expansa\Facades\Extensions;
@@ -16,8 +17,9 @@ use Throwable;
 
 /**
  * Checks of the server, security, database, storage, background tasks, mail, extensions and the AI service
- * for the site-health page. Nothing is requested from other servers: only "Private files" requests the site itself.
- * Labels, values and hints are HTML: translations as t() returns them, other values escaped.
+ * for the site-health page. Only two checks go over the network, see probes(): "Private files" requests the site
+ * itself, "Breached Passwords Check" the breach service. Labels, values and hints are HTML: translations as t()
+ * returns them, other values escaped.
  */
 final class SiteHealth
 {
@@ -73,15 +75,21 @@ final class SiteHealth
     private const int PROBE_TIMEOUT = 3;
 
     /**
+     * Seconds the results of probes() are kept.
+     */
+    private const int PROBES_LIFETIME = 3600;
+
+    /**
      * Runs the checks, grouped by section.
      *
+     * @param array{exposed: string[]|null, breach: string|null, time: int} $probes Results of probes().
      * @return array<int, array{id: string, title: string, icon: string, checks: array<int, array{label: string, value: string, status: string, hint: string}>}>
      */
-    public static function groups(): array
+    public static function groups(array $probes): array
     {
         return [
             ['id' => 'server', 'title' => t('Server'), 'icon' => 'ph ph-hard-drives', 'checks' => self::server()],
-            ['id' => 'security', 'title' => t('Security'), 'icon' => 'ph ph-shield-check', 'checks' => self::security()],
+            ['id' => 'security', 'title' => t('Security'), 'icon' => 'ph ph-shield-check', 'checks' => self::security($probes)],
             ['id' => 'database', 'title' => t('Database'), 'icon' => 'ph ph-database', 'checks' => self::database()],
             ['id' => 'storage', 'title' => t('Storage'), 'icon' => 'ph ph-folder-simple', 'checks' => self::storage()],
             ['id' => 'tasks', 'title' => t('Background Tasks'), 'icon' => 'ph ph-clock-countdown', 'checks' => self::tasks()],
@@ -131,6 +139,34 @@ final class SiteHealth
             in_array(self::RECOMMENDED, $statuses, true) => self::RECOMMENDED,
             default                                      => self::GOOD,
         };
+    }
+
+    /**
+     * Results of the network checks, kept for an hour in the "cache" table: they take up to seconds, and the
+     * default store may be the request memory. A change of the breach check setting gets its own result.
+     *
+     * @param bool $fresh Run the checks again instead of taking the kept result.
+     * @return array{exposed: string[]|null, breach: string|null, time: int} Open paths, breach service error, time.
+     */
+    public static function probes(bool $fresh = false): array
+    {
+        $isBreachCheck = Passwords::isCheckEnabled();
+        $cache         = new DatabaseCache(Db::instance());
+        $key           = 'probes-' . (int) $isBreachCheck;
+
+        $probes = $fresh ? null : $cache->get($key, 'site-health');
+        if (! is_array($probes)) {
+            $probes = [
+                'exposed' => self::exposed(),
+                'breach'  => $isBreachCheck ? Passwords::checkService() : null,
+                'time'    => time(),
+            ];
+
+            $cache->forget($key, 'site-health');
+            $cache->add($key, $probes, 'site-health', '+' . self::PROBES_LIFETIME . ' seconds');
+        }
+
+        return $probes;
     }
 
     /**
@@ -218,20 +254,21 @@ final class SiteHealth
     /**
      * HTTPS, debug output, secret keys, administrators and protected files.
      *
+     * @param array{exposed: string[]|null, breach: string|null, time: int} $probes
      * @return array<int, array{label: string, value: string, status: string, hint: string}>
      */
-    private static function security(): array
+    private static function security(array $probes): array
     {
         $keys = defined('EX_KEYS') ? EX_KEYS : [];
         // the installer replaces the placeholders of env.example.php with random keys
         $isGenerated = $keys !== [] && array_all($keys, fn (string $key, string $name) => strlen($key) >= 32 && $key !== "$name.key");
         $isDisplayed = Debug::hasDetails();
         $isExposed   = filter_var(ini_get('expose_php'), FILTER_VALIDATE_BOOL);
-        $exposed     = self::exposed();
+        $exposed     = $probes['exposed'];
         $writable    = array_values(array_filter(self::CODE, fn (string $path) => is_writable(EX_PATH . $path)));
         [$siteUrl, $requestUrl] = self::urls();
         $isBreachCheck = Passwords::isCheckEnabled();
-        $breachFailure = $isBreachCheck ? Passwords::checkService() : null;
+        $breachFailure = $probes['breach'];
 
         try {
             // roles are stored as a JSON list, e.g. ["admin"]

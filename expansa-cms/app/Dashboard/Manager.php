@@ -15,6 +15,7 @@ use Expansa\Facades\Asset;
 use Expansa\Facades\View;
 use Expansa\Http\Exceptions\NotFound;
 use Expansa\Http\Request;
+use Expansa\Support\Is;
 
 /**
  * Pages of the dashboard by slug: a slug opens the template `screens/{slug}`, and the data providers
@@ -160,7 +161,8 @@ final class Manager
         // co-located CSS/JS of the page template, see Assets\Manager::discover()
         Asset::discover($content->path);
 
-        return $content->beautify()->render();
+        // indenting the whole page costs up to a third of the response, so only to read the source in debug
+        return (Is::debug() ? $content->beautify() : $content)->render();
     }
 
     /**

@@ -13,6 +13,7 @@ use Expansa\Facades\Hook;
 use Expansa\Facades\Lifecycle;
 use Expansa\Facades\View;
 use Expansa\Http\Request;
+use Expansa\Support\Is;
 
 final class Web
 {
@@ -29,7 +30,7 @@ final class Web
 
         Asset::discover($welcome->path);
 
-        echo $welcome->beautify()->render();
+        echo (Is::debug() ? $welcome->beautify() : $welcome)->render();
     }
 
     /**

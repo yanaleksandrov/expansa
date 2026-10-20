@@ -2419,8 +2419,12 @@ option[data-html*="<i "]) {
   display: none;
   gap: 0.25rem;
   padding: 0.75rem 1rem;
+  color: var(--expansa-danger);
+  background-color: rgb(255, 224, 224);
   border: 1px solid var(--expansa-warning);
-  border-radius: var(--expansa-border-radius);
+  border-radius: var(--expansa-border-radius-lg);
+  line-height: 1.3;
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
 }
 @supports not (selector(:has(*)) and selector(:popover-open) and (container-type: inline-size) and (grid-template-columns: subgrid) and (color: color-mix(in srgb, red, blue))) {
   .card-message--browser {

@@ -10,13 +10,7 @@ defined('EX_PATH') || exit;
     <ul id="dashboard-menu-bar" class="menu">
         @foreach($items as $item)
             <li class="menu__item">
-                <a class="menu__link" href="{{ $item->url }}">
-                    @if($item->icon)
-                        <i class="{{ $item->icon }}"></i>
-                    @endif
-
-                    {{ $item->title }}
-                </a>
+                <a class="menu__link" href="{{ $item->url }}"><i class="{{ $item->icon ?: 'ph ph-circle' }}"></i> {{ $item->title }}</a>
             </li>
         @endforeach
     </ul>
