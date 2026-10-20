@@ -1,5 +1,7 @@
 <?php
 
+use Expansa\Builders\Table\Values\Part;
+
 /**
  * Table: the header of parts/table/table-header with the tools, the pagination and the filter,
  * the column titles and a row per item of the page, each cell rendered by the view of its column;
@@ -26,7 +28,7 @@ $head   = $table->headData();
 $options = [
     'fields' => (object) $filters,
     'rows'   => $active,
-    'parts'  => (object) array_map(fn (array $part) => (object) ($part['query'] ?? []), $head['parts'] ?? []),
+    'parts'  => (object) array_map(fn (Part $part) => (object) $part->query, $head['parts'] ?? []),
 ];
 ?>
 @if ($items || $active || $search !== '' || ($head['part'] ?? '') !== '')

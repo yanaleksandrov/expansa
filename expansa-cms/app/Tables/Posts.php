@@ -12,8 +12,12 @@ use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Table;
 use Expansa\Builders\Table\Queried;
+use Expansa\Builders\Table\Values\Action;
 use Expansa\Builders\Table\Values\Badge;
+use Expansa\Builders\Table\Values\Bulk;
+use Expansa\Builders\Table\Values\Filter;
 use Expansa\Builders\Table\Values\Link;
+use Expansa\Builders\Table\Values\Part;
 use Expansa\Builders\Table\Values\Person;
 use Expansa\Builders\Table\Values\Title;
 use Expansa\Facades\Db;
@@ -155,37 +159,34 @@ final class Posts extends Table implements Queried
     public function headData(): array
     {
         $counts = $this->counts();
-        $empty  = [];
+        $empty  = null;
         $parts  = [
-            '' => [
-                'label' => t('All') . ' (' . array_sum($counts) . ')',
-                'query' => [],
-            ],
+            '' => new Part(
+                label: t('All') . ' (' . array_sum($counts) . ')',
+                query: [],
+            ),
         ];
 
         foreach (Status::getStatuses() as $key => $label) {
             if (isset($counts[$key]) || $this->status === $key) {
-                $parts[$key] = [
-                    'label' => $label . ' (' . ($counts[$key] ?? 0) . ')',
-                    'query' => ['status' => $key],
-                ];
+                $parts[$key] = new Part(
+                    label: $label . ' (' . ($counts[$key] ?? 0) . ')',
+                    query: ['status' => $key],
+                );
             }
         }
 
         if ($this->type->canTrash) {
             $trash = (int) Db::count($this->type->table, ['deleted_at[!]' => null]);
             if ($trash > 0 || $this->isTrash) {
-                $parts['trash'] = [
-                    'label' => t('Trash') . " ($trash)",
-                    'query' => ['view' => 'trash'],
-                ];
+                $parts['trash'] = new Part(
+                    label: t('Trash') . " ($trash)",
+                    query: ['view' => 'trash'],
+                );
             }
 
             if ($trash > 0 && $this->isTrash) {
-                $empty = [
-                    'endpoint' => 'post/empty-trash',
-                    'data'     => ['post-type' => $this->type->key],
-                ];
+                $empty = new Action('post/empty-trash', ['post-type' => $this->type->key]);
             }
         }
 
@@ -204,7 +205,7 @@ final class Posts extends Table implements Queried
      *
      * @return array<string, mixed>
      */
-    public function bulk(): array
+    public function bulk(): Bulk
     {
         $actions = match (true) {
             $this->isTrash        => [
@@ -221,12 +222,12 @@ final class Posts extends Table implements Queried
             ],
         };
 
-        return [
-            'endpoint' => 'post/bulk',
-            'actions'  => $actions,
-            'confirm'  => ['delete'],
-            'data'     => ['post-type' => $this->type->key],
-        ];
+        return new Bulk(
+            endpoint: 'post/bulk',
+            actions: $actions,
+            confirm: ['delete'],
+            data: ['post-type' => $this->type->key],
+        );
     }
 
     /**
@@ -258,17 +259,17 @@ final class Posts extends Table implements Queried
     public function filters(): array
     {
         return [
-            'author_id'   => [
-                'label'   => t('Author'),
-                'icon'    => 'ph ph-user',
-                'param'   => 'author',
-                'options' => User::options(),
-            ],
-            'months'    => [
-                'label'   => t('Months'),
-                'icon'    => 'ph ph-timer',
-                'options' => $this->months(),
-            ],
+            'author_id' => new Filter(
+                label: t('Author'),
+                options: User::options(),
+                icon: 'ph ph-user',
+                param: 'author',
+            ),
+            'months'    => new Filter(
+                label: t('Months'),
+                options: $this->months(),
+                icon: 'ph ph-timer',
+            ),
         ];
     }
 
@@ -326,10 +327,10 @@ final class Posts extends Table implements Queried
                 'title'       => t('The trash is empty'),
                 'description' => t('Deleted items stay here until you delete them permanently.'),
                 'buttons'     => [
-                    [
-                        'label' => t('Show All :items', $this->type->labelNamePlural),
-                        'url'   => self::url($this->type),
-                    ],
+                    new Link(
+                        title: t('Show All :items', $this->type->labelNamePlural),
+                        url: self::url($this->type),
+                    ),
                 ],
             ];
         }
@@ -346,15 +347,17 @@ final class Posts extends Table implements Queried
             'description' => t("You don't have any items yet. Add them manually or import them from a CSV file."),
             'buttons'     => [
                 ...($this->type->canCreate ? [
-                    [
-                        'label' => '<i class="ph ph-plus"></i> ' . $this->type->labelAdd,
-                        'url'   => url('dashboard/post?type=' . $this->type->key),
-                    ],
+                    new Link(
+                        title: $this->type->labelAdd,
+                        url: url('dashboard/post?type=' . $this->type->key),
+                        icon: 'ph ph-plus',
+                    ),
                 ] : []),
-                [
-                    'label' => '<i class="ph ph-download-simple"></i> ' . t('Import from file'),
-                    'url'   => url('dashboard/import'),
-                ],
+                new Link(
+                    title: t('Import from file'),
+                    url: url('dashboard/import'),
+                    icon: 'ph ph-download-simple',
+                ),
             ],
         ];
     }

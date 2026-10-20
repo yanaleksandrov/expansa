@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Builders\Form\Data;
-use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -13,9 +12,9 @@ use Expansa\Support\Arr;
 defined('EX_PATH') || exit;
 
 // the name is also the variable of u-data
-$name       = Safe::id($field->name);
+$name       = $field->name;
 $attributes = $field->attributes;
-$multiple   = Safe::bool($attributes['multiple'] ?? false);
+$multiple   = ! empty($attributes['multiple']);
 
 $attributes['type'] = 'file';
 unset($attributes['multiple']);

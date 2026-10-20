@@ -92,10 +92,11 @@ final class Plugins extends Table
             'title'       => t('No plugins installed yet'),
             'description' => t('You can upload them manually or install them from the repository.'),
             'buttons'     => [
-                [
-                    'label' => '<i class="ph ph-plus"></i> ' . t('Add New Plugin'),
-                    'url'   => url('/dashboard/plugins-install'),
-                ],
+                new Link(
+                    title: t('Add New Plugin'),
+                    url: url('/dashboard/plugins-install'),
+                    icon: 'ph ph-plus',
+                ),
             ],
         ];
     }

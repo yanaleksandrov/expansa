@@ -7,8 +7,8 @@ namespace Expansa\Builders\Table\Values;
 use Stringable;
 
 /**
- * Link in a cell: an author of an extension, an item of a `links` cell, a quick action of a row;
- * without a URL the title is plain text.
+ * Link: an author of an extension, an item of a `links` cell, a quick action of a row, a button of parts/state;
+ * without a URL the title is plain text, or a button with `@click` in the attributes.
  *
  * @package Expansa\Builders\Table
  */
@@ -37,6 +37,11 @@ final readonly class Link implements Stringable
          * @var array<string, mixed>
          */
         public array $attributes = [],
+
+        /**
+         * Classes of the icon before the title.
+         */
+        public string $icon = '',
     ) {}
 
     /**

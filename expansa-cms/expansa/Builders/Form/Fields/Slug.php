@@ -9,8 +9,8 @@ namespace Expansa\Builders\Form\Fields;
  * A new entry takes the slug from its source field while the title is typed, a saved one keeps it
  * until it is emptied; the slug is normalized as Sanitizer::slug() does.
  *
- * Options: `from` is the name of the source field, `base` the URL before the slug,
- * `link` the address of the saved entry for the Open button.
+ * Keys: `from` is the name of the source field, `base` the URL before the slug, `suffix` the part after it;
+ * with `parent`, the name of a field, and `bases`, the URLs by its values, the base follows that field.
  */
 final class Slug extends AbstractField
 {
@@ -25,7 +25,7 @@ final class Slug extends AbstractField
             defaults: [
                 'name'       => 'slug',
                 'label'      => '',
-                'options'    => ['from' => 'title'],
+                'from'       => 'title',
                 'attributes' => ['type' => 'text'],
             ],
         );
@@ -37,8 +37,8 @@ final class Slug extends AbstractField
             ...$this->baseSettings(false),
             [
                 'type'  => 'text',
-                'name'  => 'options.from',
-                'error' => 'options.from',
+                'name'  => 'from',
+                'error' => 'from',
                 'label' => t('Source field'),
             ],
         ];

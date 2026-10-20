@@ -2,27 +2,27 @@
 /**
  * Passkey card of the profile, also returned by the "user/passkey-create" API.
  *
- * @var array{id: int, name: string, backed_up: bool, created_at: string, used_at: ?string} $passkey
+ * @var App\Api\User\Values\Passkey $passkey
  * @var App\Support\Site $site Settings of the site: name, language, charset, addresses, version; shared with every view.
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="p-4 df fdr aic g-4 card card-border" id="passkey-{{ $passkey['id'] }}">
+<div class="p-4 df fdr aic g-4 card card-border" id="passkey-{{ $passkey->id }}">
 	<i class="ph ph-fingerprint fs-24"></i>
 	<div class="dg g-1">
-		<h6 class="fs-15">{{ $passkey['name'] }}</h6>
+		<h6 class="fs-15">{{ $passkey->name }}</h6>
 		<div class="fs-12 t-muted lh-xs">
-			{!! t( 'Added :date', App\Support\Dates::format( $passkey['created_at'] ) ) !!}
-			@if($passkey['used_at'])
-				· {!! t( 'Last used :date', App\Support\Dates::format( $passkey['used_at'] ) ) !!}
+			{!! t( 'Added :date', $passkey->added ) !!}
+			@if($passkey->used)
+				· {!! t( 'Last used :date', $passkey->used ) !!}
 			@endif
-			@if($passkey['backed_up'])
+			@if($passkey->synced)
 				· {!! t( 'Synced' ) !!}
 			@endif
 		</div>
 	</div>
 	<div class="ml-auto">
-		<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Remove') !!}" @click="$ajax.post('user/passkey-delete', {id: {{ $passkey['id'] }}, password: confirmPassword})">
+		<button class="btn btn--sm btn--icon t-red" type="button" title="{!! t_attr('Remove') !!}" @click="$ajax.post('user/passkey-delete', {id: {{ $passkey->id }}, password: confirmPassword})">
 			<i class="ph ph-trash"></i>
 		</button>
 	</div>

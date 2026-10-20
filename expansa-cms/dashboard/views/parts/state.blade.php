@@ -1,11 +1,17 @@
 <?php
 
+use Expansa\Support\Arr;
+
 /**
  * State instead of content, e.g. an empty table: an icon, the title and the description, both HTML of t(),
- * and up to two buttons below: `['label' => t('Add'), 'url' => ...]` or with a `click` expression instead
- * of the URL; the first one is the primary.
+ * and up to two buttons below: a link with a URL, otherwise a button with `@click` in its attributes.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/state.php
+ *
+ * @var string                                  $title
+ * @var string                                  $description
+ * @var string                                  $icon        Symbol of the states sprite, `empty-page` by default.
+ * @var Expansa\Builders\Table\Values\Link[]    $buttons
  *
  * @package Expansa\Templates
  */
@@ -26,11 +32,11 @@ $buttons     = array_slice($buttons ?? [], 0, 2);
 	@endif
 	@if($buttons)
 		<div class="state-buttons">
-			@foreach($buttons as $i => $button)
-				@if(! empty($button['url']))
-					<a class="btn btn--outline" href="{{ $button['url'] }}">{!! $button['label'] ?? '' !!}</a>
+			@foreach($buttons as $button)
+				@if($button->url)
+					<a class="btn btn--outline" href="{{ $button->url }}"{!! Arr::toHtmlAttributes($button->attributes) !!}>@if($button->icon)<i class="{{ $button->icon }}"></i> @endif{{ $button->title }}</a>
 				@else
-					<button class="btn btn--outline" type="button" @click="{{ $button['click'] ?? '' }}">{!! $button['label'] ?? '' !!}</button>
+					<button class="btn btn--outline" type="button"{!! Arr::toHtmlAttributes($button->attributes) !!}>@if($button->icon)<i class="{{ $button->icon }}"></i> @endif{{ $button->title }}</button>
 				@endif
 			@endforeach
 		</div>

@@ -8,17 +8,16 @@
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-head.blade.php
  *
  * @var Expansa\Builders\Table\Cell $cell
- * @var array{by: string, order: string} $sorting Sorting of the table, see Table::sorting().
+ * @var Expansa\Builders\Table\Values\Sorting $sorting
  * @var array                       $query   Query of the page the link keeps, `$_GET` by default.
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-$sorting     = $sorting ?? ['by' => '', 'order' => 'desc'];
 $query       = $query ?? $_GET;
-$isSorted    = $cell->sortable && $sorting['by'] === $cell->key;
-$isAscending = $isSorted && $sorting['order'] === 'asc';
+$isSorted    = $cell->sortable && $sorting->by === $cell->key;
+$isAscending = $isSorted && $sorting->order === 'asc';
 $next        = $isAscending ? 'desc' : 'asc';
 // the separators of the filters stay readable, see Table::activeFilters()
 $href        = '?' . str_replace(['%2C', '%21'], [',', '!'], http_build_query([...$query, 'orderby' => $cell->key, 'order' => $next, 'page' => null]));

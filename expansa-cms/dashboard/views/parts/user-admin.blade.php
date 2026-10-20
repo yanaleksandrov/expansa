@@ -10,8 +10,8 @@
  * @var bool            $isActive
  * @var bool            $hasTwoFactor
  * @var bool            $canImpersonate
- * @var array[]         $sessions
- * @var array[]         $events
+ * @var App\Api\User\Values\Session[] $sessions
+ * @var App\Api\User\Values\Event[]   $events
  *
  * @package Expansa\Templates
  */
@@ -60,7 +60,7 @@ defined('EX_PATH') || exit;
 	<div class="dg g-2">
 		<h5>{{ t('Devices') }}</h5>
 		@foreach($sessions as $session)
-			<div class="fs-13">{{ $session['device'] }} · {{ $session['ip'] }} · {{ t('Last active :date', $session['active']) }}</div>
+			<div class="fs-13">{{ $session->device }} · {{ $session->ip }} · {{ t('Last active :date', $session->active) }}</div>
 		@endforeach
 	</div>
 
@@ -68,11 +68,11 @@ defined('EX_PATH') || exit;
 		<h5>{{ t('Recent Activity') }}</h5>
 		@foreach($events as $event)
 			<div class="fs-13">
-				{{ $event['label'] }}
-				@if(isset($event['details']['by']))
-					({{ t('by :login', $event['details']['by']) }})
+				{{ $event->label }}
+				@if($event->by)
+					({{ t('by :login', $event->by) }})
 				@endif
-				<span class="t-muted">{{ $event['device'] }} · {{ $event['ip'] }} · {{ $event['date'] }}</span>
+				<span class="t-muted">{{ $event->device }} · {{ $event->ip }} · {{ $event->date }}</span>
 			</div>
 		@endforeach
 	</div>

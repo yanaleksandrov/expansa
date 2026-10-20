@@ -1,7 +1,7 @@
 <?php
 
 use Expansa\Builders\Form\Data;
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Values\Option;
 use Expansa\Support\Arr;
 
 /**
@@ -13,39 +13,23 @@ use Expansa\Support\Arr;
 defined('EX_PATH') || exit;
 
 // a single radio is an option without a key
-$radios = [];
-foreach ($field->options ?: ['' => []] as $key => $option) {
-    $radios[] = [
-        'label'       => Safe::trim($option['content'] ?? '') ?: $field->label,
-        'icon'        => Safe::attribute($option['icon'] ?? ''),
-        'instruction' => Safe::trim($option['description'] ?? ''),
-        'required'    => ! $key && $field->required,
-        'attributes'  => [
-            ...$field->attributes,
-            'type'    => 'radio',
-            'value'   => Safe::attribute($key ?: $field->name),
-            'name'    => $field->name,
-            'u-prop'  => Safe::prop($field->name),
-            'checked' => Safe::bool($option['checked'] ?? $field->attributes['checked'] ?? false),
-        ],
-    ];
-}
+$options = $field->options ?: [new Option()];
 ?>
 <div class="dg g-2"{!! Arr::toHtmlAttributes($field->conditions) !!}>
 	@if($field->options && $field->label)
 		<div class="{{ $field->label_class ?: 'field-label' }}">{!! $field->label !!}</div>
 	@endif
 	<div class="{{ $field->class ?: 'field' }}">
-		@foreach($radios as $radio)
+		@foreach($options as $option)
 			<label class="field-item">
-				@if($radio['icon'])
-					<span class="field-icon"><i class="{!! $radio['icon'] !!}"></i></span>
+				@if($option->icon)
+					<span class="field-icon"><i class="{{ $option->icon }}"></i></span>
 				@endif
-				<input{!! Arr::toHtmlAttributes($radio['attributes']) !!}>
-				<span class="{{ $field->label_class ?: 'field-label' }}"@if($radio['required']) data-required="*"@endif>
-					{!! $radio['label'] !!}
-					@if($radio['instruction'])
-						<span class="field-instruction">{!! $radio['instruction'] !!}</span>
+				<input{!! Arr::toHtmlAttributes([...$field->attributes, 'type' => 'radio', 'value' => $option->value ?: $field->name, 'name' => $field->name, 'u-prop' => $field->prop, 'checked' => $option->checked ?? $field->checked]) !!}>
+				<span class="{{ $field->label_class ?: 'field-label' }}"@if(! $option->value && $field->required) data-required="*"@endif>
+					{!! $option->content ?: $field->label !!}
+					@if($option->description)
+						<span class="field-instruction">{!! $option->description !!}</span>
 					@endif
 				</span>
 			</label>

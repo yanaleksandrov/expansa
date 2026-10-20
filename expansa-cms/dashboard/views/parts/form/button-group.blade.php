@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Builders\Form\Data;
-use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -12,21 +11,7 @@ use Expansa\Support\Arr;
  */
 defined('EX_PATH') || exit;
 
-// an option is `value => label`, the radio of the current value is checked
-$radios = [];
-foreach ($field->options as $value => $label) {
-    $radios[] = [
-        'label'      => Safe::trim($label),
-        'attributes' => [
-            ...$field->attributes,
-            'type'    => 'radio',
-            'value'   => Safe::attribute($value),
-            'name'    => $field->name,
-            'u-prop'  => Safe::prop($field->name),
-            'checked' => (string) $value === (string) ($field->attributes['value'] ?? ''),
-        ],
-    ];
-}
+$value = (string) ($field->attributes['value'] ?? '');
 ?>
 <div class="{{ $field->class ?: 'field' }}"{!! Arr::toHtmlAttributes($field->conditions) !!}>
 	<div class="field-box">
@@ -43,10 +28,10 @@ foreach ($field->options as $value => $label) {
 		@endif
 	</div>
 	<div class="field-buttons">
-		@foreach($radios as $radio)
+		@foreach($field->options as $option)
 			<label class="field-buttons-item">
-				<input{!! Arr::toHtmlAttributes($radio['attributes']) !!}>
-				{!! $radio['label'] !!}
+				<input{!! Arr::toHtmlAttributes([...$field->attributes, 'type' => 'radio', 'value' => $option->value, 'name' => $field->name, 'u-prop' => $field->prop, 'checked' => $option->value === $value]) !!}>
+				{!! $option->content !!}
 			</label>
 		@endforeach
 	</div>

@@ -12,8 +12,12 @@ use App\Support\Dates;
 use App\Support\Permalinks;
 use Expansa\Builders\Table;
 use Expansa\Builders\Table\Queried;
+use Expansa\Builders\Table\Values\Action;
 use Expansa\Builders\Table\Values\Badge;
+use Expansa\Builders\Table\Values\Bulk;
+use Expansa\Builders\Table\Values\Filter;
 use Expansa\Builders\Table\Values\Link;
+use Expansa\Builders\Table\Values\Part;
 use Expansa\Builders\Table\Values\Person;
 use Expansa\Builders\Table\Values\Post as PostValue;
 use Expansa\Builders\Table\Values\Title;
@@ -193,30 +197,30 @@ final class Comments extends Table implements Queried
     {
         $counts = $this->counts();
         $parts  = [
-            '' => [
-                'label' => t('All') . ' (' . array_sum($counts) . ')',
-                'query' => [],
-            ],
+            '' => new Part(
+                label: t('All') . ' (' . array_sum($counts) . ')',
+                query: [],
+            ),
         ];
 
         foreach (Comment::statuses() as $key => $label) {
-            $parts[$key] = [
-                'label' => $label . ' (' . ($counts[$key] ?? 0) . ')',
-                'query' => ['status' => $key],
-            ];
+            $parts[$key] = new Part(
+                label: $label . ' (' . ($counts[$key] ?? 0) . ')',
+                query: ['status' => $key],
+            );
         }
 
-        $empty = [];
+        $empty = null;
         $trash = (int) Db::count('comments', ['deleted_at[!]' => null]);
         if ($trash > 0 || $this->isTrash) {
-            $parts['trash'] = [
-                'label' => t('Trash') . " ($trash)",
-                'query' => ['view' => 'trash'],
-            ];
+            $parts['trash'] = new Part(
+                label: t('Trash') . " ($trash)",
+                query: ['view' => 'trash'],
+            );
         }
 
         if ($trash > 0 && $this->isTrash) {
-            $empty = ['endpoint' => 'comments/empty-trash'];
+            $empty = new Action('comments/empty-trash');
         }
 
         return [
@@ -233,7 +237,7 @@ final class Comments extends Table implements Queried
      *
      * @return array<string, mixed>
      */
-    public function bulk(): array
+    public function bulk(): Bulk
     {
         $actions = $this->isTrash
             ? [
@@ -245,22 +249,22 @@ final class Comments extends Table implements Queried
                 'delete' => t('Delete'),
             ];
 
-        return [
-            'endpoint' => 'comments/bulk',
-            'actions'  => $actions,
-            'confirm'  => ['force-delete'],
-        ];
+        return new Bulk(
+            endpoint: 'comments/bulk',
+            actions: $actions,
+            confirm: ['force-delete'],
+        );
     }
 
     public function filters(): array
     {
         return [
-            'author_id' => [
-                'label'   => t('Author'),
-                'icon'    => 'ph ph-user',
-                'param'   => 'author',
-                'options' => User::options(),
-            ],
+            'author_id' => new Filter(
+                label: t('Author'),
+                options: User::options(),
+                icon: 'ph ph-user',
+                param: 'author',
+            ),
         ];
     }
 
@@ -271,10 +275,10 @@ final class Comments extends Table implements Queried
                 'title'       => t('The trash is empty'),
                 'description' => t('Deleted comments stay here until you delete them permanently.'),
                 'buttons'     => [
-                    [
-                        'label' => t('Show All Comments'),
-                        'url'   => url('dashboard/edit?table=comments'),
-                    ],
+                    new Link(
+                        title: t('Show All Comments'),
+                        url: url('dashboard/edit?table=comments'),
+                    ),
                 ],
             ];
         }
@@ -284,10 +288,10 @@ final class Comments extends Table implements Queried
                 'title'       => t('No comments found'),
                 'description' => t('Nothing matches the filter.'),
                 'buttons'     => [
-                    [
-                        'label' => t('Show All Comments'),
-                        'url'   => url('dashboard/edit?table=comments'),
-                    ],
+                    new Link(
+                        title: t('Show All Comments'),
+                        url: url('dashboard/edit?table=comments'),
+                    ),
                 ],
             ];
         }

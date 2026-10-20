@@ -8,7 +8,7 @@
  * @var App\Models\FieldGroup[]      $groups
  * @var int                          $groupId
  * @var App\Models\FieldGroup|null   $current
- * @var array<string, array>         $fieldTypes
+ * @var App\Dashboard\Pages\Values\Choices[] $fieldTypes Field types by group.
  * @var array<string, array>         $locations
  * @var array<string, array>         $valueOptions
  * @var array<string, mixed>         $state
@@ -18,11 +18,10 @@
 
 use Expansa\Builders\Form;
 use Expansa\Facades\Json;
-use Expansa\Facades\Safe;
 ?>
 <div class="field-groups" u-data="builder"
-     data-state="<?php echo Safe::attribute(Json::encode($state)); ?>"
-     data-value-options="<?php echo Safe::attribute(Json::encode($valueOptions)); ?>">
+     data-state="<?php echo escape(Json::encode($state)); ?>"
+     data-value-options="<?php echo escape(Json::encode($valueOptions)); ?>">
     <div class="field-groups__side">
         <div class="field-groups__header">
             <h4><?php echo t('Custom Fields'); ?></h4>
@@ -35,7 +34,7 @@ use Expansa\Facades\Safe;
                 <?php foreach ($groups as $group) : ?>
                     <a class="field-groups__item <?php echo $group->id === $groupId ? 'is-active' : ''; ?>"
                        href="<?php echo url('/dashboard/field-groups?group=' . $group->id); ?>">
-                        <span><?php echo Safe::html($group->title); ?></span>
+                        <span><?php echo escape($group->title); ?></span>
                         <span class="badge badge--<?php echo $group->status === 'active' ? 'green' : 'muted'; ?>">
                             <?php echo count($group->fields); ?> <?php echo t('fields'); ?>
                         </span>
@@ -74,10 +73,10 @@ use Expansa\Facades\Safe;
                 <div class="field-groups__field card p-4 dg g-3" u-each="(field, i) in fields">
                     <div class="df g-2 aic">
                         <select class="field" u-prop="field.type" u-select>
-                            <?php foreach ($fieldTypes as $group) : ?>
-                                <optgroup label="<?php echo $group['label']; ?>">
-                                    <?php foreach ($group['options'] as $type => $option) : ?>
-                                        <option value="<?php echo $type; ?>"><?php echo $option['label']; ?></option>
+                            <?php foreach ($fieldTypes as $choices) : ?>
+                                <optgroup label="<?php echo escape($choices->label); ?>">
+                                    <?php foreach ($choices->options as $type => $label) : ?>
+                                        <option value="<?php echo $type; ?>"><?php echo escape($label); ?></option>
                                     <?php endforeach; ?>
                                 </optgroup>
                             <?php endforeach; ?>

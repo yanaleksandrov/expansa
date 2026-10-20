@@ -85,17 +85,17 @@ $labels = [
 
 		<div class="chat-composer">
 			<textarea class="chat-composer-input" rows="1" u-bind="composerInput"></textarea>
-			<button type="button" class="btn btn--primary btn--sm" u-bind="sendButton" disabled>
+			<button type="button" class="btn btn--primary btn--icon btn--sm" u-bind="sendButton" disabled>
 				<i class="ph ph-paper-plane-tilt"></i>
 			</button>
-			<button type="button" class="btn btn--outline btn--sm" u-bind="stopButton" hidden>
+			<button type="button" class="btn btn--outline btn--icon btn--sm" u-bind="stopButton" hidden>
 				<i class="ph ph-stop"></i>
 			</button>
 		</div>
 	</section>
 
 	<aside class="chat-sidebar">
-		<button type="button" class="btn btn--primary chat-sidebar-new" u-bind="newProcessButton">
+		<button type="button" class="btn btn--primary" u-bind="newProcessButton">
 			<i class="ph ph-plus"></i> <?php echo t( 'New Process' ); ?>
 		</button>
 

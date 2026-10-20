@@ -5,7 +5,7 @@
  *
  * @var string           $error      Message of a failed sign-in by a provider.
  * @var string           $notice     Message of an account link: email confirmed, devices signed out.
- * @var array[]          $providers  OAuth sign-in buttons: `id`, `label`, `url`.
+ * @var App\Dashboard\Pages\Values\Provider[] $providers OAuth sign-in buttons.
  * @var bool             $add        Signing in to one more account.
  * @var bool             $challenged The password is right, the second factor is asked.
  * @var bool             $emailLink  Signing in by an emailed link is on.
@@ -51,8 +51,8 @@
 	@if($providers)
 		<div class="dg g-2 mt-2">
 			@foreach($providers as $provider)
-				<a href="{{ $provider['url'] }}" class="btn btn--lg btn--outline btn--full">
-					<i class="ph ph-{{ $provider['id'] }}-logo"></i> {{ t('Continue with :provider', $provider['label']) }}
+				<a href="{{ $provider->url }}" class="btn btn--lg btn--outline btn--full">
+					<i class="ph ph-{{ $provider->id }}-logo"></i> {{ t('Continue with :provider', $provider->label) }}
 				</a>
 			@endforeach
 		</div>

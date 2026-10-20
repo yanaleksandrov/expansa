@@ -16,16 +16,10 @@
   padding: 1rem;
 }
 
-.chat-sidebar-new {
-  width: 100%;
-  flex: 0 0 auto;
-  margin-bottom: 0.5rem;
-  justify-content: flex-start !important;
-}
-
 .chat-sidebar-title {
   flex: 0 0 auto;
   padding: 0.5rem 0.25rem 0.5rem;
+  margin-top: 0.5rem;
   font-size: 0.6875rem;
   font-weight: 600;
   text-transform: uppercase;

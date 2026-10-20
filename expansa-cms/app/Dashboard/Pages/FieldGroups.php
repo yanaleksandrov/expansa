@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Dashboard\Pages;
 
+use App\Dashboard\Pages\Values\Choices;
 use App\Models\FieldGroup;
 use App\Post\Type;
 use Expansa\Facades\Role;
@@ -54,55 +55,55 @@ final class FieldGroups
      * full `Expansa\Builders\Form\Fields\*` registry: structural/internal types (layout-group,
      * layout-tab, submit, hidden, custom, builder) aren't things an editor picks ad hoc here.
      *
-     * @return array<string, array{label: string, options: array<string, array{label: string, icon: string}>}>
+     * @return Choices[]
      */
     private static function fieldTypes(): array
     {
         return [
-            'basic'    => [
-                'label'   => t('Basic'),
-                'options' => [
-                    'text'     => ['label' => t('Text'), 'icon' => 'ph ph-text-t'],
-                    'number'   => ['label' => t('Number'), 'icon' => 'ph ph-hash'],
-                    'password' => ['label' => t('Password'), 'icon' => 'ph ph-lock-key'],
-                    'textarea' => ['label' => t('Textarea'), 'icon' => 'ph ph-text-align-left'],
+            'basic'    => new Choices(
+                label: t('Basic'),
+                options: [
+                    'text'     => t('Text'),
+                    'number'   => t('Number'),
+                    'password' => t('Password'),
+                    'textarea' => t('Textarea'),
                 ],
-            ],
-            'choice'   => [
-                'label'   => t('Choice'),
-                'options' => [
-                    'select'   => ['label' => t('Select', context: 'field type'), 'icon' => 'ph ph-list'],
-                    'checkbox' => ['label' => t('Checkbox'), 'icon' => 'ph ph-check-square'],
-                    'radio'    => ['label' => t('Radio'), 'icon' => 'ph ph-radio-button'],
+            ),
+            'choice'   => new Choices(
+                label: t('Choice'),
+                options: [
+                    'select'   => t('Select', context: 'field type'),
+                    'checkbox' => t('Checkbox'),
+                    'radio'    => t('Radio'),
                 ],
-            ],
-            'media'    => [
-                'label'   => t('Media'),
-                'options' => [
-                    'image'    => ['label' => t('Image'), 'icon' => 'ph ph-user-circle'],
-                    'media'    => ['label' => t('Media'), 'icon' => 'ph ph-image-square'],
-                    'uploader' => ['label' => t('File Uploader'), 'icon' => 'ph ph-upload-simple'],
-                    'file'     => ['label' => t('File'), 'icon' => 'ph ph-file'],
-                    'gallery'  => ['label' => t('Gallery'), 'icon' => 'ph ph-images'],
+            ),
+            'media'    => new Choices(
+                label: t('Media'),
+                options: [
+                    'image'    => t('Image'),
+                    'media'    => t('Media'),
+                    'uploader' => t('File Uploader'),
+                    'file'     => t('File'),
+                    'gallery'  => t('Gallery'),
                 ],
-            ],
-            'advanced' => [
-                'label'   => t('Advanced'),
-                'options' => [
-                    'editor'   => ['label' => t('Rich Text Editor'), 'icon' => 'ph ph-text-aa'],
-                    'repeater' => ['label' => t('Repeater'), 'icon' => 'ph ph-rows'],
+            ),
+            'advanced' => new Choices(
+                label: t('Advanced'),
+                options: [
+                    'editor'   => t('Rich Text Editor'),
+                    'repeater' => t('Repeater'),
                 ],
-            ],
-            'layout'   => [
-                'label'   => t('Layout'),
-                'options' => [
-                    'header'   => ['label' => t('Heading'), 'icon' => 'ph ph-text-h'],
-                    'divider'  => ['label' => t('Divider'), 'icon' => 'ph ph-minus'],
-                    'details'  => ['label' => t('Details'), 'icon' => 'ph ph-caret-circle-down'],
-                    'message'  => ['label' => t('Message'), 'icon' => 'ph ph-info'],
-                    'progress' => ['label' => t('Progress'), 'icon' => 'ph ph-gauge'],
+            ),
+            'layout'   => new Choices(
+                label: t('Layout'),
+                options: [
+                    'header'   => t('Heading'),
+                    'divider'  => t('Divider'),
+                    'details'  => t('Details'),
+                    'message'  => t('Message'),
+                    'progress' => t('Progress'),
                 ],
-            ],
+            ),
         ];
     }
 

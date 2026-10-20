@@ -1,7 +1,7 @@
 <?php
 
 use Expansa\Builders\Form\Data;
-use Expansa\Facades\Safe;
+use Expansa\Builders\Form\Values\Option;
 use Expansa\Support\Arr;
 
 /**
@@ -15,40 +15,23 @@ use Expansa\Support\Arr;
 defined('EX_PATH') || exit;
 
 // a single checkbox is an option without a key
-$checkboxes = [];
-foreach ($field->options ?: ['' => []] as $key => $option) {
-    $name = $key ?: $field->name;
-
-    $checkboxes[] = [
-        'label'       => Safe::trim($option['content'] ?? '') ?: $field->label,
-        'icon'        => Safe::attribute($option['icon'] ?? ''),
-        'instruction' => Safe::trim($option['description'] ?? '') ?: $field->instruction,
-        'required'    => ! $key && $field->required,
-        'attributes'  => [
-            ...$field->attributes,
-            'type'    => 'checkbox',
-            'name'    => $name,
-            'u-prop'  => Safe::prop($name),
-            'checked' => Safe::bool($option['checked'] ?? $field->attributes['checked'] ?? false),
-        ],
-    ];
-}
+$options = $field->options ?: [new Option()];
 ?>
 <div class="dg g-2"{!! Arr::toHtmlAttributes($field->conditions) !!}>
 	@if($field->options && $field->label)
 		<div class="{{ $field->label_class ?: 'field-label' }}">{!! $field->label !!}</div>
 	@endif
 	<div class="{{ $field->class ?: 'field' }}">
-		@foreach($checkboxes as $checkbox)
+		@foreach($options as $option)
 			<label class="field-item">
-				@if($checkbox['icon'])
-					<span class="field-icon"><i class="{!! $checkbox['icon'] !!}"></i></span>
+				@if($option->icon)
+					<span class="field-icon"><i class="{{ $option->icon }}"></i></span>
 				@endif
-				<input{!! Arr::toHtmlAttributes($checkbox['attributes']) !!}>
-				<span class="{{ $field->label_class ?: 'field-label' }}"@if($checkbox['required']) data-required="*"@endif>
-					{!! $checkbox['label'] !!}
-					@if($checkbox['instruction'])
-						<span class="field-instruction">{!! $checkbox['instruction'] !!}</span>
+				<input{!! Arr::toHtmlAttributes([...$field->attributes, 'type' => 'checkbox', 'name' => $option->value ?: $field->name, 'u-prop' => $option->value ? $option->prop : $field->prop, 'checked' => $option->checked ?? $field->checked]) !!}>
+				<span class="{{ $field->label_class ?: 'field-label' }}"@if(! $option->value && $field->required) data-required="*"@endif>
+					{!! $option->content ?: $field->label !!}
+					@if($option->description ?: $field->instruction)
+						<span class="field-instruction">{!! $option->description ?: $field->instruction !!}</span>
 					@endif
 				</span>
 			</label>

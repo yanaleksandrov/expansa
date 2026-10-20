@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Builders\Form\Data;
-use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -13,8 +12,7 @@ use Expansa\Support\Arr;
 defined('EX_PATH') || exit;
 
 $attributes = $field->attributes;
-$value      = Safe::textarea($attributes['value'] ?? '');
-
+$value      = (string) ($attributes['value'] ?? '');
 
 unset($attributes['value']);
 ?>
@@ -24,7 +22,7 @@ unset($attributes['value']);
 	@endif
 	<label class="field-item">
 		{!! $field->before !!}
-		<textarea{!! Arr::toHtmlAttributes($attributes) !!}>{!! $value !!}</textarea>
+		<textarea{!! Arr::toHtmlAttributes($attributes) !!}>{{ $value }}</textarea>
 		{!! $field->after !!}
 		@if($field->copy)
 			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy($el.parentElement.querySelector('textarea').value)"></i>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Dashboard\Pages\Post as Page;
+use App\Dashboard\Values\Crumb;
 use App\Models\Comment;
 use App\Models\User;
 use App\Post\Status;
@@ -8,6 +9,7 @@ use App\Post\Type;
 use App\Support\Activity;
 use App\Support\Dates;
 use App\Support\Permalinks;
+use App\Support\Values\Line;
 use Expansa\Builders\Form;
 
 $post = Page::post((string) filter_input(INPUT_GET, 'type') ?: 'pages', filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
@@ -86,19 +88,16 @@ return Form::enqueue(
                     <?php
                     echo view('parts/breadcrumbs', [
                         'items' => [
-                            [
-                                'label' => $type->labelNamePlural,
-                                'url'   => $back,
-                            ],
-                            [
-                                'label'      => $title,
-                                'url'        => $url,
-                                'attributes' => $url !== '' ? [
+                            new Crumb($type->labelNamePlural, $back),
+                            new Crumb(
+                                label: $title,
+                                url: $url,
+                                attributes: $url !== '' ? [
                                     'target'             => '_blank',
                                     'title'              => $type->labelView,
                                     '@slug-url.document' => '$el.href = $event.detail',
                                 ] : [],
-                            ],
+                            ),
                         ],
                     ]);
                     ?>
@@ -151,14 +150,11 @@ return Form::enqueue(
 			            'instruction' => '',
 			            'tooltip'     => t('The address of the page: letters, numbers and hyphens. Leave it empty to make it from the title.'),
 			            'conditions'  => [],
-			            'options'     => [
-				            'from'   => 'title',
-				            'base'   => $around[0],
-				            'suffix' => $around[1],
-				            'parent' => 'parent_id',
-				            'bases'  => $bases,
-				            'link'   => $url,
-			            ],
+			            'from'        => 'title',
+			            'base'        => $around[0],
+			            'suffix'      => $around[1],
+			            'parent'      => 'parent_id',
+			            'bases'       => $bases,
 			            'attributes'  => [
 				            'value'       => $post->slug,
 				            'placeholder' => t('slug'),
@@ -242,10 +238,19 @@ return Form::enqueue(
                                     <h3><?php echo t('Comments'); ?></h3>
                                 </div>
                                 <div class="post-comments-list">
-                                    <?php $threads = Comment::groupByParent($comments); ?>
-                                    <?php foreach ($threads[0] ?? [] as $comment) : ?>
-                                        <?php echo view('parts/post-comment', ['comment' => $comment, 'replies' => $threads, 'isOpen' => $post->isDiscussionOpen()]); ?>
-                                    <?php endforeach; ?>
+                                    <?php
+                                    $threads  = Comment::groupByParent($comments);
+                                    $maxDepth = Comment::maxDepth();
+                                    foreach ($threads[0] ?? [] as $comment) {
+                                        echo view('parts/post-comment', [
+                                            'comment'  => $comment,
+                                            'replies'  => $threads,
+                                            'isOpen'   => $post->isDiscussionOpen(),
+                                            'canEdit'  => $canComment,
+                                            'maxDepth' => $maxDepth,
+                                        ]);
+                                    }
+                                    ?>
                                 </div>
                                 <?php if ($post->id === 0) : ?>
                                     <p class="post-comments-empty"><?php echo t('Save the item to start the conversation.'); ?></p>
@@ -331,22 +336,21 @@ return Form::enqueue(
                             if ($comment->deletedAt !== null) {
                                 continue;
                             }
-                            $lines[] = [
-                                'icon' => 'ph ph-chat-circle-text',
-                                'user' => $comment->getAuthorName(),
-                                'text' => t('Left a comment'),
-                                'note' => mb_strimwidth(trim(strip_tags($comment->content)), 0, 80, '…'),
-                                'at'   => $comment->createdAt?->format('Y-m-d H:i:s') ?? '',
-                            ];
+                            $lines[] = new Line(
+                                icon: 'ph ph-chat-circle-text',
+                                text: t('Left a comment'),
+                                user: $comment->getAuthorName(),
+                                note: mb_strimwidth(trim(strip_tags($comment->content)), 0, 80, '…'),
+                                at: $comment->createdAt?->format('Y-m-d H:i:s') ?? '',
+                            );
                         }
                         if ($post->id > 0) {
-                            $lines[] = [
-                                'icon' => 'ph ph-plus',
-                                'user' => Page::author($post),
-                                'text' => t('Created'),
-                                'note' => '',
-                                'at'   => $post->createdAt,
-                            ];
+                            $lines[] = new Line(
+                                icon: 'ph ph-plus',
+                                text: t('Created'),
+                                user: Page::author($post),
+                                at: $post->createdAt,
+                            );
                         }
                         echo view('parts/activity', ['lines' => Activity::timeline($post->table, $post->id, $lines)]);
                     },

@@ -13,6 +13,7 @@ use App\Dashboard\Pages\Profile;
 use App\Models\Option;
 use App\Models\User;
 use App\Support\Passwords;
+use App\Support\Values\Line;
 use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Builders\Form;
@@ -755,13 +756,12 @@ $uid = Form::enqueue(
 				    'name'     => 'activity',
 				    'type'     => 'custom',
 				    'callback' => function () use ($user) {
-					    $lines = array_map(fn (Event $event) => [
-						    'icon' => $event->icon,
-						    'user' => '',
-						    'text' => $event->label,
-						    'note' => $event->device . ' · ' . $event->ip,
-						    'at'   => $event->at,
-					    ], Events::all($user));
+					    $lines = array_map(fn (Event $event) => new Line(
+						    icon: $event->icon,
+						    text: $event->label,
+						    note: $event->device . ' · ' . $event->ip,
+						    at: $event->at,
+					    ), Events::all($user));
 					    ?>
 					    <div class="dg g-4 ga-4">
 						    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>

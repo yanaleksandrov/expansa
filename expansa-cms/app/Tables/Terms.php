@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Link;
 use Expansa\Builders\Table\Values\Title;
 
 final class Terms extends Table
@@ -66,10 +67,10 @@ final class Terms extends Table
             'title'       => t('No pages found'),
             'description' => t("You don't have any pages yet. Add them manually or import them from a CSV file."),
             'buttons'     => [
-                [
-                    'label' => t('Import'),
-                    'url'   => url('/dashboard/import'),
-                ],
+                new Link(
+                    title: t('Import'),
+                    url: url('/dashboard/import'),
+                ),
             ],
         ];
     }
