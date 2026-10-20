@@ -1,6 +1,4 @@
 <?php
-use Expansa\Facades\Safe;
-
 /**
  * Plugin name with the description and the author.
  *
@@ -14,15 +12,9 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[ $title, $author ] = Safe::data(
-    $item,
-    [
-        'title'  => 'trim',
-        'author' => 'trim',
-    ]
-)->values();
+$author = $item['author'] ?? '';
 ?>
-<strong>{{ $title }}</strong>
+<strong>{{ $item['title'] ?? '' }}</strong>
 <div class="df g-1 mt-1 t-muted">
     @if ($author)
         <span class="dib">{{ t('by :author', $author) }}</span>

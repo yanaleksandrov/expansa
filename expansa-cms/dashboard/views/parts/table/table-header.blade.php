@@ -6,7 +6,6 @@ use Expansa\Extensions\Plugin;
 use Expansa\Extensions\Theme;
 use Expansa\Facades\Extensions;
 use Expansa\Facades\I18n;
-use Expansa\Facades\Safe;
 
 /**
  * Header of a table: the bar with the title and a badge, the tools, the bulk actions shown while rows are selected
@@ -36,32 +35,28 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $uploader, $translation, $project, $create, $link, $empty, $parts, $part, $find, $filter] = Safe::data($__data ?? [], [
-    'title'       => 'trim',
-    'badge'       => 'trim',
-    'uploader'    => 'bool:false',
-    'translation' => 'bool:false',
-    'project'     => 'trim',
-    'create'      => 'trim',
-    'link'        => 'trim',
-    'empty'       => 'array',
-    'parts'       => 'array',
-    'part'        => 'trim',
-    'find'        => 'trim',
-    'filter'      => 'bool:true',
-])->values();
+/** @var Table|null $table */
+$table       ??= null;
+$title       ??= '';
+$badge       ??= '';
+$uploader    ??= false;
+$translation ??= false;
+$project     ??= '';
+$create      ??= '';
+$link        ??= '';
+$empty       ??= [];
+$parts       ??= [];
+$part        ??= '';
+$find        ??= '';
+$filters     = $table?->filters() ?? [];
+$filter      = ($filter ?? true) && ($filters || $parts || $find);
 
-$table   = ($__data['table'] ?? null) instanceof Table ? $__data['table'] : null;
-$filters = $table?->filters() ?? [];
-$filter  = $filter && ($filters || $parts || $find);
-
-[$endpoint, $actions, $confirm, $password, $data] = Safe::data($table?->bulk() ?? [], [
-    'endpoint' => 'trim',
-    'actions'  => 'array',
-    'confirm'  => 'array',
-    'password' => 'array',
-    'data'     => 'array',
-])->values();
+$bulk     = $table?->bulk() ?? [];
+$endpoint = $bulk['endpoint'] ?? '';
+$actions  = $bulk['actions'] ?? [];
+$confirm  = $bulk['confirm'] ?? [];
+$password = $bulk['password'] ?? [];
+$data     = $bulk['data'] ?? [];
 
 $progress = static fn (string $name) => [
     'content'     => $name,
@@ -72,7 +67,7 @@ $pages   = $table?->pages() ?? 1;
 $page    = $table?->page() ?? 1;
 $perPage = $table?->perPage() ?? 0;
 $total   = $table?->total() ?? 0;
-$query   = is_array($__data['query'] ?? null) ? $__data['query'] : $_GET;
+$query   ??= $_GET;
 // the separators of the filters stay readable, see Table::activeFilters()
 $href    = static fn (int $number) => '?' . str_replace(['%2C', '%21'], [',', '!'], http_build_query([...$query, 'page' => $number]));
 $before  = [

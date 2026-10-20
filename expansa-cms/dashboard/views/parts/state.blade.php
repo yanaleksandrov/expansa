@@ -1,7 +1,5 @@
 <?php
 
-use Expansa\Facades\Safe;
-
 /**
  * State instead of content, e.g. an empty table: an icon, the title and the description, both HTML of t(),
  * and up to two buttons below: `['label' => t('Add'), 'url' => ...]` or with a `click` expression instead
@@ -13,22 +11,13 @@ use Expansa\Facades\Safe;
  */
 defined('EX_PATH') || exit;
 
-[$title, $description, $icon, $buttons] = Safe::data(
-    $__data ?? [],
-	[
-		'title'       => 'trim',
-		'description' => 'trim',
-		'icon'        => 'id:empty-page',
-		'buttons'     => 'array',
-	]
-)->values();
-
-$buttons = array_slice(array_filter($buttons, is_array(...)), 0, 2);
+$title       ??= '';
+$description ??= '';
+$icon        = ($icon ?? '') ?: 'empty-page';
+$buttons     = array_slice($buttons ?? [], 0, 2);
 ?>
 <div class="state">
-	@if($icon)
-		<svg><use xlink:href="{{ url('/dashboard/assets/sprites/states.svg#' . $icon) }}"></use></svg>
-	@endif
+	<svg><use xlink:href="{{ url('/dashboard/assets/sprites/states.svg#' . $icon) }}"></use></svg>
 	@if($title)
 		<h6 class="state-title">{!! $title !!}</h6>
 	@endif

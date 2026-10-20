@@ -1,30 +1,23 @@
 <?php
 use Expansa\Support\Arr;
-use Expansa\Facades\Safe;
 
 /**
- * Value in a badge, nothing for an empty one.
+ * Value in a badge, nothing for an empty one; the icon before the text is a dot by default.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-badge.blade.php
  *
  * @var Expansa\Builders\Table\Cell $cell
  * @var array<string, mixed>        $item
- * @var mixed                       $value
+ * @var array{value?: string, class?: string, icon?: string, attributes?: array<string, mixed>} $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[ $class, $icon, $text, $attributes ] = Safe::data(
-    (array) ($value ?? []),
-    [
-        'class'      => 'class:badge',
-        'icon'       => 'class:badge badge--dark',
-        'value'      => 'trim',
-        'attributes' => 'array',
-    ]
-)->values();
+$text  = $value['value'] ?? '';
+$class = ($value['class'] ?? '') ?: 'badge';
+$icon  = ($value['icon'] ?? '') ?: 'badge badge--dark';
 ?>
-@if ($icon || $value)
-    <span class="{{ $class }}"{!! Arr::toHtmlAttributes($attributes) !!}>@if($icon)<i class="{{ $icon }}"></i>@endif{{ $text }}</span>
+@if ($text !== '')
+    <span class="{{ $class }}"{!! Arr::toHtmlAttributes($value['attributes'] ?? []) !!}><i class="{{ $icon }}"></i>{{ $text }}</span>
 @endif
