@@ -43,9 +43,7 @@ $appendSelected = $multiple
     <div class="storage storage--field" u-show="{!! $name !!}.length">
         <div class="storage__item" u-each.lazy="(item, i) in {!! $name !!}">
             <input type="hidden" name="{!! $name !!}[]" :value="item.id">
-            <template u-if="item.url || item.icon">
-                <img class="storage__image" :src="item.sizes?.thumbnail?.url || item.url || item.icon" width="200" height="200" alt>
-            </template>
+            <img class="storage__image" u-show="item.url || item.icon" :src="item.sizes?.thumbnail?.url || item.url || item.icon || ''" width="200" height="200" alt>
             <span class="storage__remove" @click.stop.prevent="{!! $name !!} = {!! $name !!}.filter((removed, index) => index !== i)" title="{!! t('Remove') !!}">
                 <i class="ph ph-x"></i>
             </span>

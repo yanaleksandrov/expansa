@@ -23,14 +23,14 @@
             </div>
 
             <div class="product-repeater" u-data="repeater(expansa?.bundle ?? [])">
-                <template u-for="(group, i) in groups">
+                <template u-each="(group, i) in groups">
                     <div class="product-repeater-group">
                         <div class="product-repeater-title">
                             <input
                                 type="text"
                                 class="subtitle"
                                 :name="`<?php echo esc_attr($section_title_attr); ?>`"
-                                u-model="group.name"
+                                u-prop="group.name"
                                 placeholder="<?php echo t_attr('Subtitle'); ?>"
                             >
                             <button type="button" class="button button-small" @click="removeGroup(i)">
@@ -38,9 +38,9 @@
                             </button>
                         </div>
 
-                        <template u-for="(item, key) in group.items">
+                        <template u-each="(item, key) in group.items">
                             <div class="product-repeater-row" data-condition="<?php echo t_attr('AND'); ?>">
-                                <template u-for="(product, productIdx) in item.products">
+                                <template u-each="(product, productIdx) in item.products">
                                     <div class="product-repeater-item" data-condition="<?php echo t_attr('OR'); ?>">
                                         <span class="mix" u-show="product.mix.length !== 0"><?php echo t('MIX'); ?>:</span>
                                         <input
@@ -51,7 +51,7 @@
                                         <img class="product-repeater-item-image" :src="product.image" :alt="product.title" u-show="product.mix.length === 0">
                                         <input
                                             type="text"
-                                            u-model="product.shortTitle"
+                                            u-prop="product.shortTitle"
                                             :name="`<?php echo esc_attr($section_name_attr); ?>[shortTitle]`"
                                             placeholder="<?php echo t_attr('Product Short Title'); ?>"
                                         >
@@ -61,7 +61,7 @@
                                             max="99"
                                             step="1"
                                             type="number"
-                                            u-model="product.qty"
+                                            u-prop="product.qty"
                                             u-show="product.mix.length === 0"
                                             :name="`<?php echo esc_attr($section_name_attr); ?>[qty]`"
                                             title="<?php echo t_attr('Default Quantity'); ?>"
@@ -93,60 +93,56 @@
                                             title="<?php echo t_attr('Move Group Up'); ?>"
                                         >&#708;</span>
 
-                                        <template u-if="product.mix.length > 0">
-                                            <div class="product-repeater-item-joined">
-                                                <template u-for="(mixedProduct, mixedProductIdx) in product.mix">
-                                                    <div class="product-repeater-item">
-                                                        <input
-                                                            type="hidden"
-                                                            :value="mixedProduct.id"
-                                                            :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][id]`"
-                                                        >
-                                                        <img class="product-repeater-item-image" :src="mixedProduct.image" :alt="mixedProduct.title">
-                                                        <input
-                                                            type="text"
-                                                            u-model="mixedProduct.shortTitle"
-                                                            :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][shortTitle]`"
-                                                            placeholder="<?php echo t_attr('Product Short Title'); ?>"
-                                                        >
-                                                        <a class="product-repeater-item-name" target="_blank" u-text="mixedProduct.title" :href="mixedProduct.permalink"></a>
-                                                        <input
-                                                            min="1"
-                                                            max="99"
-                                                            step="1"
-                                                            type="number"
-                                                            u-model="mixedProduct.qty"
-                                                            :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][qty]`"
-                                                            title="<?php echo t_attr('Default Quantity'); ?>"
-                                                            required
-                                                        >
-                                                        <span class="product-repeater-item-price" u-html="` × ${mixedProduct.price}`"></span>
-                                                        <span class="button" @click="removeMixedProduct(product, mixedProductIdx)" title="<?php echo t_attr('Remove Product'); ?>">×</span>
-                                                    </div>
-                                                </template>
-                                                <div class="product-repeater-search" @click.outside="product.search = []">
+                                        <div class="product-repeater-item-joined" u-show="product.mix.length > 0">
+                                            <template u-each="(mixedProduct, mixedProductIdx) in product.mix">
+                                                <div class="product-repeater-item">
                                                     <input
-                                                        type="search"
-                                                        @blur="$el.value = ''"
-                                                        @focus="searchProduct($event, $el, product)"
-                                                        @input.debounce.250ms="searchProduct($event, $el, product)"
-                                                        data-include="<?php echo esc_attr(implode(',', $section_products_ids)); ?>"
-                                                        placeholder="<?php echo t_attr('Type to add a product to the mix&hellip;'); ?>"
+                                                        type="hidden"
+                                                        :value="mixedProduct.id"
+                                                        :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][id]`"
                                                     >
-                                                    <template u-if="product.search.length > 0">
-                                                        <div class="product-repeater-search-box">
-                                                            <template u-for="data in product.search">
-                                                                <div class="product-repeater-search-item" @click="addMixedProduct(product, data)">
-                                                                    <img class="product-repeater-image" :src="data.image" :alt="data.title">
-                                                                    <span class="product-repeater-name" u-text="data.title"></span>
-                                                                    <span class="product-repeater-price" u-html="data.price"></span>
-                                                                </div>
-                                                            </template>
+                                                    <img class="product-repeater-item-image" :src="mixedProduct.image" :alt="mixedProduct.title">
+                                                    <input
+                                                        type="text"
+                                                        u-prop="mixedProduct.shortTitle"
+                                                        :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][shortTitle]`"
+                                                        placeholder="<?php echo t_attr('Product Short Title'); ?>"
+                                                    >
+                                                    <a class="product-repeater-item-name" target="_blank" u-text="mixedProduct.title" :href="mixedProduct.permalink"></a>
+                                                    <input
+                                                        min="1"
+                                                        max="99"
+                                                        step="1"
+                                                        type="number"
+                                                        u-prop="mixedProduct.qty"
+                                                        :name="`<?php echo esc_attr($section_name_attr); ?>[mix][${mixedProductIdx}][qty]`"
+                                                        title="<?php echo t_attr('Default Quantity'); ?>"
+                                                        required
+                                                    >
+                                                    <span class="product-repeater-item-price" u-html="` × ${mixedProduct.price}`"></span>
+                                                    <span class="button" @click="removeMixedProduct(product, mixedProductIdx)" title="<?php echo t_attr('Remove Product'); ?>">×</span>
+                                                </div>
+                                            </template>
+                                            <div class="product-repeater-search" @click.outside="product.search = []">
+                                                <input
+                                                    type="search"
+                                                    @blur="$el.value = ''"
+                                                    @focus="searchProduct($event, $el, product)"
+                                                    @input.delay.250ms="searchProduct($event, $el, product)"
+                                                    data-include="<?php echo esc_attr(implode(',', $section_products_ids)); ?>"
+                                                    placeholder="<?php echo t_attr('Type to add a product to the mix&hellip;'); ?>"
+                                                >
+                                                <div class="product-repeater-search-box" u-show="product.search.length > 0">
+                                                    <template u-each="data in product.search">
+                                                        <div class="product-repeater-search-item" @click="addMixedProduct(product, data)">
+                                                            <img class="product-repeater-image" :src="data.image" :alt="data.title">
+                                                            <span class="product-repeater-name" u-text="data.title"></span>
+                                                            <span class="product-repeater-price" u-html="data.price"></span>
                                                         </div>
                                                     </template>
                                                 </div>
                                             </div>
-                                        </template>
+                                        </div>
                                     </div>
                                 </template>
 
@@ -155,21 +151,19 @@
                                         type="search"
                                         @blur="$el.value = ''"
                                         @focus="searchProduct($event, $el, item)"
-                                        @input.debounce.250ms="searchProduct($event, $el, item)"
+                                        @input.delay.250ms="searchProduct($event, $el, item)"
                                         data-include="<?php echo esc_attr(implode(',', $section_products_ids)); ?>"
                                         placeholder="<?php echo t_attr('Type to add a new product&hellip;'); ?>"
                                     >
-                                    <template u-if="item.search.length > 0">
-                                        <div class="product-repeater-search-box">
-                                            <template u-for="data in item.search">
-                                                <div class="product-repeater-search-item" @click="addProduct(item, data)">
-                                                    <img class="product-repeater-image" :src="data.image" :alt="data.title">
-                                                    <span class="product-repeater-name" u-text="data.title"></span>
-                                                    <span class="product-repeater-price" u-html="data.price"></span>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </template>
+                                    <div class="product-repeater-search-box" u-show="item.search.length > 0">
+                                        <template u-each="data in item.search">
+                                            <div class="product-repeater-search-item" @click="addProduct(item, data)">
+                                                <img class="product-repeater-image" :src="data.image" :alt="data.title">
+                                                <span class="product-repeater-name" u-text="data.title"></span>
+                                                <span class="product-repeater-price" u-html="data.price"></span>
+                                            </div>
+                                        </template>
+                                    </div>
                                 </div>
                             </div>
                         </template>

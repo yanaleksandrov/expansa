@@ -27,16 +27,14 @@
             <div u-text="`<?php echo t_attr(':valuesCount items', '${values.length}'); ?>`">0 items</div>
             <div class="attributes-list">
                 <div class="attributes-values">
-                    <template u-if="values.length">
-                        <template u-for="(value, i) in values" :key="i">
-                            <a class="attributes-value">
-                                <span class="attributes-value-title" u-text="`values.${i}.title`"></span>
-                                <span class="attributes-value-slug" u-text="`values.${i}.slug`"></span>
-                                <div class="btn btn--icon" @click="values.splice(i, 1)"><i class="ph ph-pen"></i></div>
-                            </a>
-                        </template>
+                    <template u-each="(value, i) in values">
+                        <a class="attributes-value">
+                            <span class="attributes-value-title" u-text="value.title"></span>
+                            <span class="attributes-value-slug" u-text="value.slug"></span>
+                            <div class="btn btn--icon" @click="values.splice(i, 1)"><i class="ph ph-pen"></i></div>
+                        </a>
                     </template>
-                    <template u-if="!values.length">
+                    <div u-show="!values.length">
                         <?php
                         echo view(
                             'parts/state',
@@ -47,7 +45,7 @@
                             ]
                         );
                         ?>
-                    </template>
+                    </div>
                 </div>
             </div>
         </div>

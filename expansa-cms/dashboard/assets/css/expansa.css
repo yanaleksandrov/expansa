@@ -1756,13 +1756,24 @@ body.is-unsaved .search .search-btn {
   background-color: rgba(0, 0, 0, 0.15);
 }
 .search .search-input {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 256 256'%3E%3Cpath fill='%23ccced3' d='m232 216-47-48a92 92 0 1 0-17 17l48 48a12 12 0 0 0 17-17ZM44 112a68 68 0 1 1 68 68 68 68 0 0 1-68-68Z'/%3E%3C/svg%3E");
+  font-size: 0.875rem;
+  height: auto;
+  line-height: 1.6;
+  border-radius: var(--expansa-border-radius--lg);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+}
+.search .search-input:focus {
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary) !important;
 }
 .search .search-results {
   padding: 0.25rem 0;
   display: grid;
   gap: 0.125rem;
   place-items: center;
+}
+.search .search-results .state {
+  transform: initial;
 }
 .search .search-help {
   padding: 0.45rem;

@@ -46,12 +46,10 @@ defined('EX_PATH') || exit;
             <div class="storage__item" :class="isSelected(item.id) && 'is-active'" :data-id="item.id"
                  u-each.lazy="(item, i) in visible"
                  @click="toggle(item, $event)" @dblclick="confirm(); $dialog.close()">
-                <template u-if="item.url || item.icon">
-                    <img class="storage__image" :src="item.sizes?.thumbnail?.url || item.url || item.icon" width="200" height="200" alt loading="lazy">
-                    <div class="storage__meta">
-                        <div class="storage__data" u-text="item.filename"></div>
-                    </div>
-                </template>
+                <img class="storage__image" u-show="item.url || item.icon" :src="item.sizes?.thumbnail?.url || item.url || item.icon || ''" width="200" height="200" alt loading="lazy">
+                <div class="storage__meta" u-show="item.url || item.icon">
+                    <div class="storage__data" u-text="item.filename"></div>
+                </div>
             </div>
 
             <div u-show="!items.length" class="p-6">
@@ -62,27 +60,25 @@ defined('EX_PATH') || exit;
         </div>
 
         <div class="media-editor-side media-library-side" u-show="editing()">
-            <template u-if="editing()">
-                <img class="media-editor-image" :src="editing().url" :alt="editing().filename" width="100%">
+            <img class="media-editor-image" :src="editing()?.url ?? ''" :alt="editing()?.filename ?? ''" width="100%">
 
-                <div class="dg g-1 fs-12">
-                    <div><strong><?php echo t('File Name'); ?>:</strong> <span u-text="editing().filename"></span></div>
-                    <div><strong><?php echo t('File Type'); ?>:</strong> <span u-text="editing().mime"></span></div>
-                    <div><strong><?php echo t('File Size'); ?>:</strong> <span u-text="editing().sizeHumanize"></span></div>
+            <div class="dg g-1 fs-12">
+                <div><strong><?php echo t('File Name'); ?>:</strong> <span u-text="editing()?.filename ?? ''"></span></div>
+                <div><strong><?php echo t('File Type'); ?>:</strong> <span u-text="editing()?.mime ?? ''"></span></div>
+                <div><strong><?php echo t('File Size'); ?>:</strong> <span u-text="editing()?.sizeHumanize ?? ''"></span></div>
+            </div>
+
+            <div class="dg g-1">
+                <span class="fs-12 t-muted"><?php echo t('File URL'); ?></span>
+                <div class="df g-2">
+                    <input type="text" class="field field--raised fs-13" readonly :value="editing()?.url ?? ''" u-ref="fileUrl">
+                    <button type="button" class="btn btn--outline" @click="$copy(editing().url)" title="<?php echo t('Copy URL to clipboard'); ?>"><i class="ph ph-copy"></i></button>
                 </div>
+            </div>
 
-                <div class="dg g-1">
-                    <span class="fs-12 t-muted"><?php echo t('File URL'); ?></span>
-                    <div class="df g-2">
-                        <input type="text" class="field field--raised fs-13" readonly :value="editing().url" u-ref="fileUrl">
-                        <button type="button" class="btn btn--outline" @click="$copy(editing().url)" title="<?php echo t('Copy URL to clipboard'); ?>"><i class="ph ph-copy"></i></button>
-                    </div>
-                </div>
-
-                <button type="button" class="btn btn--outline t-red" @click="$ajax.post('media/delete', {ids: selected}).then(({deleted}) => removeDeleted(deleted))">
-                    <i class="ph ph-trash"></i> <?php echo t('Delete Permanently'); ?>
-                </button>
-            </template>
+            <button type="button" class="btn btn--outline t-red" @click="$ajax.post('media/delete', {ids: selected}).then(({deleted}) => removeDeleted(deleted))">
+                <i class="ph ph-trash"></i> <?php echo t('Delete Permanently'); ?>
+            </button>
         </div>
     </div>
 

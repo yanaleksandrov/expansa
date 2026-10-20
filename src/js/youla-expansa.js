@@ -1312,23 +1312,29 @@ document.addEventListener('youla:init', ()=> {
         currentIdx: -1,
         links: [],
         query: '',
+        // the text of the last finished search: the states of the box change only when the answer comes
+        searched: '',
         find() {
             // the server searches from 2 characters, see App\Api\Search\SearchService
             const query = this.query.trim();
             if (query.length < 2) {
-                this.links = [];
+                this.links    = [];
+                this.searched = '';
                 return;
             }
 
-            this.$ajax.post('search/find', { query }).then((result) => {
-                // an answer to an older text that came late is dropped
+            // an answer to an older text that came late is dropped
+            const show = (links) => {
                 if (query === this.query.trim()) {
-                    this.links = Array.isArray(result?.links) ? result.links : [];
+                    this.links      = links;
+                    this.searched   = query;
                     this.currentIdx = -1;
                 }
-            }).catch(() => {
-                this.links = [];
-            });
+            };
+
+            this.$ajax.post('search/find', { query })
+                .then((result) => show(Array.isArray(result?.links) ? result.links : []))
+                .catch(() => show([]));
         },
         input: {
             '@keydown.prevent.window.ctrl.k'() {
@@ -1336,7 +1342,7 @@ document.addEventListener('youla:init', ()=> {
                 const box = this.$el.closest('[popover]');
                 box.matches(':popover-open') ? this.$el.focus() : box.showPopover();
             },
-            '@input.debounce.250ms'() {
+            '@input.delay.250ms'() {
                 this.query = this.$el.value;
                 this.find();
             },
@@ -1355,6 +1361,30 @@ document.addEventListener('youla:init', ()=> {
             '@keydown.enter'() {
                 this.links[this.currentIdx] && (window.location.href = this.links[this.currentIdx].url);
             },
+        },
+        results: {
+            'u-show': 'links.length > 0',
+        },
+        row: {
+            'u-each': '(link, i) in links',
+            ':class': "link.url && i === currentIdx && 'is-active'",
+        },
+        anchor: {
+            ':href': 'link.url',
+            'u-show': 'link.url',
+        },
+        label: {
+            'u-text': 'link.text',
+        },
+        heading: {
+            'u-show': '!link.url',
+            'u-text': 'link.text',
+        },
+        idle: {
+            'u-show': '!links.length && !searched.trim()',
+        },
+        empty: {
+            'u-show': "!links.length && searched.trim() !== ''",
         },
     }));
 

@@ -2,7 +2,8 @@
 /**
  * Search of the dashboard in the top bar, a popover opened by the button or Ctrl+K: the browser closes it
  * on Esc and on a click outside and focuses the input. The `search` component of youla-expansa.js gets
- * the results from App\Api\Search: links and section headers, the ones without a URL.
+ * the results from App\Api\Search: links and section headers, the ones without a URL; every binding
+ * of the markup is its `u-bind` set.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/search.blade.php
  *
@@ -15,21 +16,17 @@ defined('EX_PATH') || exit;
         <i class="ph ph-magnifying-glass"></i> {!! t('Search') !!} <code>Ctrl+K</code>
     </button>
     <div class="search-box" id="expansa-search" popover>
-        <div class="field field--lg field--raised">
-            <label class="field-item">
-                <input class="search-input" type="search" name="search" placeholder="{{ t_attr('Search') }}" autocomplete="off" autofocus u-bind="input">
-            </label>
-        </div>
-        <ul class="search-results" u-show="links.length" hidden>
-            <li class="search-item" u-each="(link, i) in links" :class="link.url && i === currentIdx && 'is-active'">
-                <a class="search-link" :href="link.url" u-show="link.url">
-                    <span class="search-text" u-text="link.text"></span>
+        <input class="search-input" type="search" name="search" placeholder="{{ t_attr('Search') }}" autocomplete="off" autofocus u-bind="input">
+        <ul class="search-results" u-bind="results" hidden>
+            <li class="search-item" u-bind="row">
+                <a class="search-link" u-bind="anchor">
+                    <span class="search-text" u-bind="label"></span>
                     <span class="t-muted">{!! t('Jump to') !!}</span>
                 </a>
-                <span class="search-header" u-show="!link.url" u-text="link.text"></span>
+                <span class="search-header" u-bind="heading"></span>
             </li>
         </ul>
-        <div class="search-results" u-show="!links.length && query.trim().length < 2">
+        <div class="search-results" u-bind="idle">
             <?php
             echo view('parts/state', [
                 'icon'        => 'ufo',
@@ -38,7 +35,7 @@ defined('EX_PATH') || exit;
             ]);
             ?>
         </div>
-        <div class="search-results" u-show="!links.length && query.trim().length >= 2" hidden>
+        <div class="search-results" u-bind="empty" hidden>
             <?php
             echo view('parts/state', [
                 'icon'        => 'ufo',

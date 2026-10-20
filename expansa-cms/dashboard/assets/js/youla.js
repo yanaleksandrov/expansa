@@ -49,17 +49,16 @@
     }
     function domWalk(el, callback) {
         callback(el);
+        if (el.hasAttribute('u-each')) {
+            return;
+        }
         const iframeBody = el.tagName === 'IFRAME' ? el.contentDocument?.body : null;
         const children = Array.from(iframeBody ? iframeBody.children : el.children);
         for (const node of children) {
             if (hasDirective(node, 'u-data')) {
                 continue;
             }
-            if (node.hasAttribute('u-each')) {
-                callback(node);
-            } else {
-                domWalk(node, callback);
-            }
+            domWalk(node, callback);
         }
     }
     const RESERVED = [ '$el', '$event', '$refs', '$root' ];
@@ -166,6 +165,9 @@
         if (typeof expression !== 'string') {
             return;
         }
+        if (el.tagName !== 'TEMPLATE' && attribute.name === 'u-each') {
+            el.setAttribute('u-each', expression);
+        }
         const {item, index, items, join} = parseEachExpression(expression);
         const {magicVariables, otherVariables} = splitMagicVariables(additionalHelperVariables);
         let dataItems;
@@ -203,6 +205,7 @@
         Object.entries(dataItems ?? []).forEach(([key, dataItem], idx, array) => {
             const clone = el.cloneNode(true);
             clone.removeAttribute('u-each');
+            clone.__x_each_clone = true;
             (async () => {
                 clone.__x_for_data = {
                     ...otherVariables,
@@ -233,6 +236,7 @@
                     [item]: dataItem,
                     [index]: toLoopKey(key)
                 };
+                node.__x_each_clone = true;
             });
             (async () => {
                 await Promise.all(elements.map(node => component.initialize(node)));
@@ -920,6 +924,10 @@
         const arrowIndex = source.indexOf('=>');
         return arrowIndex !== -1 && (braceIndex === -1 || arrowIndex < braceIndex);
     }
+    function onlyLoop(attributes) {
+        const loop = attributes.find(({directive}) => directive === 'u-each');
+        return loop ? [ loop ] : attributes;
+    }
     function serialize(value) {
         try {
             return JSON.stringify(value);
@@ -1050,14 +1058,17 @@
                 if (!bindings || typeof bindings !== 'object') {
                     return [];
                 }
-                return this.expandBindings(el, Object.entries(bindings));
+                return this.withoutCloneLoop(el, this.expandBindings(el, Object.entries(bindings)));
             });
             if (el !== this.root || !this.selfBindings) {
-                return attributes;
+                return onlyLoop(attributes);
             }
             const explicitNames = new Set(attributes.map(({name}) => name));
             const selfEntries = Object.entries(this.selfBindings).filter(([name]) => name.startsWith('@') || !this.rootAttributeNames.has(name) && !explicitNames.has(name));
-            return [ ...this.expandBindings(el, selfEntries), ...attributes ];
+            return onlyLoop([ ...this.withoutCloneLoop(el, this.expandBindings(el, selfEntries)), ...attributes ]);
+        }
+        withoutCloneLoop(el, attributes) {
+            return el.__x_each_clone ? attributes.filter(({directive}) => directive !== 'u-each') : attributes;
         }
         expandBindings(el, entries) {
             return entries.flatMap(([name, value]) => {

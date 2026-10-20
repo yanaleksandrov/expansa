@@ -200,33 +200,6 @@ defined('EX_PATH') || exit;
         </ul>
     </div>
     <div class="nav-editor-tools">
-        <!--			<template u-ref="treeTemplate">-->
-        <!--				<ul class="nav-editor-list" u-data="{items: [{title: 'Test 1', children:[{title: 'Test 2'}, {title: 'Test 3'}]}]}">-->
-        <!--					<template u-for="item in items.children">-->
-        <!--						<li class="nav-editor-item">-->
-        <!--							<span class="nav-editor-item-text"><i class="ph ph-dots-six-vertical"></i> <span u-text="item.title"></span></span>-->
-        <!--						</li>-->
-        <!--						<template u-html="$refs.treeTemplate.innerHTML" u-data="{items: item.children}"></template>-->
-        <!--					</template>-->
-        <!--				</ul>-->
-        <!--			</template>-->
-
-        <!--			<template u-if="elements.length" u-data="{items:[], elements: [{title: 'Test 1', children:[]},{title: 'Test 2', children:[{title: 'Test 2.1'}, {title: 'Test 2.2'}]}]}">-->
-        <!--				<ul class="nav-editor-list" u-init="items = elements.slice()">-->
-        <!--					<template u-ref="treeTemplate" u-for="item in items" :key="item.title">-->
-        <!--						<li class="nav-editor-item">-->
-        <!--							<span class="nav-editor-item-text">-->
-        <!--								<i class="ph ph-dots-six-vertical"></i>-->
-        <!--								<span u-text="item.title"></span>-->
-        <!--							</span>-->
-        <!--							<template u-if="item.children">-->
-        <!--								<ul class="nav-editor-list" u-html="$refs.treeTemplate.innerHTML" u-data="{items: item.children}"></ul>-->
-        <!--							</template>-->
-        <!--						</li>-->
-        <!--					</template>-->
-        <!--				</ul>-->
-        <!--			</template>-->
-
         <?php echo form('menu-item-editor'); ?>
     </div>
 </div>

@@ -55,20 +55,18 @@ use Expansa\Builders\Form;
                 );
                 ?>
                 <div class="attributes-values">
-                    <template u-if="values.length">
-                        <template u-for="(value, i) in values" :key="i">
-                            <div class="attributes-value">
-                                <div class="attributes-value-title">
-                                    <input type="text" :name="`values.${i}.title`" u-model="value.title" placeholder="<?php echo t('Title'); ?>" required>
-                                </div>
-                                <div class="attributes-value-slug">
-                                    <input type="text" :name="`values.${i}.slug`" u-model="value.slug" placeholder="<?php echo t('Slug'); ?>" required>
-                                </div>
-                                <div class="btn btn--icon t-red" @click="values.splice(i, 1)"><i class="ph ph-trash"></i></div>
+                    <template u-each="(value, i) in values">
+                        <div class="attributes-value">
+                            <div class="attributes-value-title">
+                                <input type="text" :name="`values.${i}.title`" u-prop="value.title" placeholder="<?php echo t('Title'); ?>" required>
                             </div>
-                        </template>
+                            <div class="attributes-value-slug">
+                                <input type="text" :name="`values.${i}.slug`" u-prop="value.slug" placeholder="<?php echo t('Slug'); ?>" required>
+                            </div>
+                            <div class="btn btn--icon t-red" @click="values.splice(i, 1)"><i class="ph ph-trash"></i></div>
+                        </div>
                     </template>
-                    <template u-if="!values.length">
+                    <div u-show="!values.length">
                         <?php
                         echo view(
                             'parts/state',
@@ -79,7 +77,7 @@ use Expansa\Builders\Form;
                             ]
                         );
                         ?>
-                    </template>
+                    </div>
                 </div>
             </div>
         </div>

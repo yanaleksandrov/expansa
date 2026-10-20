@@ -12,7 +12,7 @@ echo view('parts/table/table-header', $table->headData());
 ?>
 
 @if ($table->getData())
-    <form class="translation" method="POST" @input.debounce.500ms="$ajax.post('translations/update')">
+    <form class="translation" method="POST" @input.delay.500ms="$ajax.post('translations/update')">
         <input type="hidden" name="project" value="{{ $table->project }}">
         <div class="translation-head">
             @foreach ($table->cells as $i => $cell)
