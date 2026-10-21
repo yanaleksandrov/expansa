@@ -199,7 +199,7 @@ final class Menus
                 ],
                 [
                     'id'           => 'menus',
-                    'url'          => 'nav-menu',
+                    'url'          => 'nav-editor',
                     'title'        => t('Menus'),
                     'capabilities' => ['manage_options'],
                     'icon'         => '',

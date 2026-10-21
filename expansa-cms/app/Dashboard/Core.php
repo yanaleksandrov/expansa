@@ -61,6 +61,12 @@ final class Core
             menu: 'edit?table=comments',
         );
         Dashboard::page(
+            slug: 'nav-editor',
+            can: 'manage_comments',
+            title: fn () => t('Edit Comment'),
+            surface: Surface::Muted,
+        );
+        Dashboard::page(
             slug: 'post',
             can: 'types_edit',
             title: fn (array $data) => match (true) {

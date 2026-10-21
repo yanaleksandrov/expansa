@@ -13,6 +13,7 @@
 @use 'interface/site-storage';
 @use 'interface/breadcrumbs';
 @use 'interface/post-editor';
+@use 'interface/description-list';
 
 @keyframes shake {
   0%    { transform: translateX(0); }

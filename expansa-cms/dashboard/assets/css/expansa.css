@@ -355,7 +355,7 @@ textarea {
   position: relative;
   outline: 0;
   background-color: var(--expansa-bg-white);
-  transition: color, box-shadow 0.2s ease;
+  transition: color, background-color, box-shadow 0.2s ease;
   overflow: auto;
   height: calc(1.875rem - 2px);
   padding: 0.325rem 0.875em;
@@ -408,6 +408,7 @@ select {
   cursor: pointer;
   width: auto;
   line-height: 1.5;
+  padding-inline-end: 2.25em;
 }
 select:not([multiple]) {
   background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 55%;
@@ -3616,7 +3617,7 @@ body.is-unsaved .search .search-btn {
 }
 .post-editor .post-editor-eyebrow {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3995,6 +3996,86 @@ body.is-unsaved .search .search-btn {
   margin: 0.625rem 0;
   font-size: 0.8125rem;
   color: var(--expansa-text-muted);
+}
+
+.description-list {
+  display: grid;
+  gap: 1.5rem;
+}
+.description-list .description-title {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--expansa-text-muted);
+}
+.description-list .description-items {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  align-items: baseline;
+  margin: 0;
+  font-size: 0.8125rem;
+}
+.description-list .description-items dt {
+  display: flex;
+  align-items: center;
+  gap: 0.4375rem;
+  height: 1.75rem;
+  margin: 0;
+  color: var(--expansa-text-muted);
+}
+.description-list .description-items dt i {
+  font-size: 0.8125rem;
+  opacity: 0.7;
+}
+.description-list .description-items dd {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-width: 0;
+  min-height: 1.75rem;
+  margin: 0;
+}
+.description-list .description-items dd input,
+.description-list .description-items dd select,
+.description-list .description-items dd textarea {
+  border: 1px solid transparent;
+  cursor: pointer;
+  field-sizing: content;
+  max-width: 100%;
+  width: auto;
+  border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+}
+.description-list .description-items dd input:hover,
+.description-list .description-items dd select:hover,
+.description-list .description-items dd textarea:hover {
+  background-color: var(--expansa-bg-universal);
+  -webkit-background-clip: initial;
+}
+.description-list .description-items dd input:focus,
+.description-list .description-items dd select:focus,
+.description-list .description-items dd textarea:focus {
+  background-color: var(--expansa-bg-white);
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary) !important;
+}
+.description-list .description-items dd select + .ss-main {
+  border: 0;
+  min-height: 1.675rem;
+}
+.description-list .description-items dd select + .ss-main .ss-value {
+  height: 1.675rem;
+}
+.description-list .description-items dd select + .ss-main:hover {
+  background-color: var(--expansa-bg-universal);
+  -webkit-background-clip: initial;
+}
+.description-list .description-items dd select[multiple] + .ss-main {
+  padding-block: 0;
+  margin-inline-start: 2px;
 }
 
 @keyframes shake {
