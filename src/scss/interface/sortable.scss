@@ -1,0 +1,27 @@
+// u-sortable of youla-expansa.js: the items make room for the dragged one, see its LANDING time
+[u-sortable].is-sorting {
+  user-select: none;
+
+  > * {
+    transition: transform 0.15s ease;
+  }
+
+  > .is-dragging {
+    position: relative;
+    z-index: 1;
+    transition: none;
+    cursor: grabbing;
+    box-shadow: var(--expansa-box-shadow);
+  }
+}
+
+.sortable-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [u-sortable].is-sorting > * {
+    transition: none;
+  }
+}

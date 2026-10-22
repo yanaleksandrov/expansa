@@ -38,6 +38,12 @@ $db = new class {
     {
         return true;
     }
+
+    // the post tables have the column of the trash, Type does not add it
+    public function schema(string $table): array
+    {
+        return ['deleted_at' => []];
+    }
 };
 Db::swap($db);
 

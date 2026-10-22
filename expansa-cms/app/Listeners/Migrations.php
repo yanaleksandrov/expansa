@@ -34,6 +34,7 @@ final class Migrations
         $this->createApiKeysTable();
         $this->createFieldGroupsTable();
         $this->createActivityTable();
+        $this->createMenusTable();
     }
 
     public function createPostsTable(string $postType): void
@@ -83,6 +84,24 @@ final class Migrations
             $table->timestamps();
 
             $table->index(['entity_table', 'entity_id']);
+        });
+        Db::updateSchema();
+    }
+
+    /**
+     * Create the navigation menus of the site, see App\Models\Menu; also on the sites installed before
+     * the menus.
+     *
+     * @return void
+     */
+    public function createMenusTable(): void
+    {
+        Schema::create('menus', function (Table $table) {
+            $table->id();
+            $table->string('title', 255);
+            $table->json('locations')->nullable();
+            $table->json('items')->nullable();
+            $table->timestamps();
         });
         Db::updateSchema();
     }

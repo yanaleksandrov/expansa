@@ -4078,6 +4078,32 @@ body.is-unsaved .search .search-btn {
   margin-inline-start: 2px;
 }
 
+[u-sortable].is-sorting {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+[u-sortable].is-sorting > * {
+  transition: transform 0.15s ease;
+}
+[u-sortable].is-sorting > .is-dragging {
+  position: relative;
+  z-index: 1;
+  transition: none;
+  cursor: grabbing;
+  box-shadow: var(--expansa-box-shadow);
+}
+
+.sortable-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [u-sortable].is-sorting > * {
+    transition: none;
+  }
+}
 @keyframes shake {
   0% {
     transform: translateX(0);

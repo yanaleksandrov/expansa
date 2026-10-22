@@ -537,6 +537,11 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         Hook::run('createActivityTable');
     }
 
+    // the sites installed before the navigation menus get their table
+    if (! Db::hasTable(EX_DB['prefix'] . 'menus')) {
+        Hook::run('createMenusTable');
+    }
+
     // post types
     App\Post\Type::register(
         key: 'pages',
@@ -554,6 +559,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         searchable: true,
         showInMenu: true,
         showInBar: true,
+        showInNavMenus: true,
         canExport: true,
         canImport: true,
         canCreate: true,
@@ -578,6 +584,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         searchable: false,
         showInMenu: true,
         showInBar: false,
+        showInNavMenus: false,
         canExport: true,
         canImport: true,
         canTrash: false,
@@ -702,6 +709,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
                 App\Api\FieldGroups\FieldGroupsController::class,
                 App\Api\Files\FilesController::class,
                 App\Api\Media\MediaController::class,
+                App\Api\Menus\MenusController::class,
                 App\Api\Options\OptionsController::class,
                 App\Api\Post\PostController::class,
                 App\Api\Posts\PostsController::class,
@@ -820,6 +828,10 @@ Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '
  * The public site: the home page and /installed through Web::index(), otherwise 404.
  */
 Lifecycle::context('web', true, function () {
+    // the menus of the theme locations are the `menu-<location>` trees, their items linking to this page are active
+    Expansa\Builders\Tree::setCurrent((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), $_GET);
+    App\Models\Menu::register();
+
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
 

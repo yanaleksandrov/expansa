@@ -30,6 +30,15 @@ final class Assets
     private const array VENDOR_STYLES = ['youla-pickadate' => 'air-datepicker'];
 
     /**
+     * Vendor scripts of the page templates that bind form controls themselves instead of rendering
+     * the field templates, e.g. `u-select` on a plain `<select>`.
+     */
+    private const array SCREEN_SCRIPTS = [
+        'field-groups' => 'youla-select',
+        'nav-editor'   => 'youla-select',
+    ];
+
+    /**
      * Tokens of the PHP date format and their air-datepicker equivalents; the other letters have none
      * and are dropped.
      */
@@ -191,8 +200,9 @@ final class Assets
 
     /**
      * Assets of a template for Assets\Manager::discover(): a form field gets the vendor JS of its type
-     * and its stylesheet from VENDOR_STYLES, the rest the co-located files. date/range/color share
-     * form/input.blade.php, so Renderer::render() passes the original subtype as `$context['type']`.
+     * and its stylesheet from VENDOR_STYLES, a page template its SCREEN_SCRIPTS, the rest the co-located
+     * files. date/range/color share form/input.blade.php, so Renderer::render() passes the original
+     * subtype as `$context['type']`.
      *
      * @param string               $file
      * @param array<string, mixed> $context
@@ -200,11 +210,17 @@ final class Assets
      */
     private static function structure(string $file, array $context = []): array
     {
-        if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/parts/form/')) {
+        $file     = str_replace('\\', '/', $file);
+        $template = basename($file, '.blade.php');
+
+        if (str_contains($file, '/dashboard/views/screens/') && isset(self::SCREEN_SCRIPTS[$template])) {
+            return ['js' => EX_PATH . 'dashboard/assets/js/' . self::SCREEN_SCRIPTS[$template] . self::suffix() . '.js'];
+        }
+
+        if (! str_contains($file, '/dashboard/views/parts/form/')) {
             return AssetManager::defaultStructure($file);
         }
 
-        $template      = basename($file, '.blade.php');
         $inputType     = $context['type'] ?? '';
         $dateTimeTypes = ['date', 'datetime-local', 'time', 'month', 'week'];
 

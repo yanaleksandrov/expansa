@@ -40,10 +40,38 @@ check('env.php with a database without the site is not an installation', ! Insta
 array_map('unlink', glob($root . '*.php'));
 rmdir($root);
 
-// extensions load by id from the configured root
-Extensions::configure(root: EX_PATH);
-Extensions::load(ids: ['plugins/query-monitor', '../etc', 'plugins/../../etc', 42]);
+// extensions load by id from the configured root, a plugin of its own keeps the check apart from the shipped ones
+$root = sys_get_temp_dir() . '/expansa-install-plugins-' . getmypid() . '/';
+@mkdir($root . 'plugins/demo', 0777, true);
+file_put_contents($root . 'plugins/demo/index.php', <<<'PHP'
+    <?php
+    return new class extends Expansa\Extensions\Plugin
+    {
+        public function __construct()
+        {
+            $this->setName('Demo')->setVersion('1.0')->setDescription('Demo plugin');
+        }
+
+        public function boot(): void {}
+
+        public function activate(): void {}
+
+        public function deactivate(): void {}
+
+        public function install(): void {}
+
+        public function uninstall(): void {}
+    };
+    PHP);
+
+Extensions::configure(root: $root);
+Extensions::load(ids: ['plugins/demo', '../etc', 'plugins/../../etc', 42]);
 $plugins = array_map(fn ($extension) => $extension->id, Extensions::get('plugin'));
-check('only valid extension ids are loaded', $plugins === ['plugins/query-monitor']);
+check('only valid extension ids are loaded', $plugins === ['plugins/demo']);
+
+unlink($root . 'plugins/demo/index.php');
+rmdir($root . 'plugins/demo');
+rmdir($root . 'plugins');
+rmdir($root);
 
 exit($failures > 0 ? 1 : 0);

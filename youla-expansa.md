@@ -543,6 +543,46 @@ examples of what a custom directive can look like:
   scrolling past it, instead of sticking to the viewport; a sidebar taller than the viewport
   scrolls internally rather than running off-screen.
 
+## `u-sortable` (sorting by dragging)
+
+Sorts the direct children of a list by dragging with a mouse, pen or finger: the dragged item
+follows the pointer, the others slide apart to make room, on drop it lands in its slot. The
+directive moves the items in the page itself and dispatches `sort` on the list, so a list rendered
+by `u-each` updates its data from the event and a static one simply stays sorted.
+
+```html
+<ul u-sortable="{ handle: '.sortable-handle' }" @sort="reorder($event.detail)">
+  <li u-each="(page, i) in pages">
+    <i class="ph ph-dots-six-vertical sortable-handle"></i> <span u-text="page.title"></span>
+  </li>
+</ul>
+```
+
+```js
+reorder({ from, count, to }) {
+    const pages = [ ...this.pages ];
+    pages.splice(to, 0, ...pages.splice(from, count));
+    this.pages = pages;
+    this.$ajax.post('posts/reorder', { ids: pages.map(page => page.id).join(',') });
+},
+```
+
+| Option | Meaning | Default |
+| --- | --- | --- |
+| `handle` | Selector of the part that starts dragging. Without it the whole item does, except fields; touch then can't scroll the list | none |
+| `nested` | Items have depths in `--depth` of their style (`:style="'--depth: ' + item.depth"`); an item moves with the deeper items after it, a horizontal offset changes its depth | `false` |
+| `indent` | Pixels of the horizontal offset per level of a nested list | `24` |
+| `maxDepth` | Deepest level of a nested list, 0 for the top one | none |
+
+`sort` detail: `from` — index of the first moved item, `count` — number of moved items (more than
+one in a nested list), `to` — their index in the list without them, `depth` — the new depth of the
+first one (the others shift by the same amount). The event comes only when the order or the depth
+changed; the click after dragging is swallowed.
+
+While dragging the list has `is-sorting`, the moved items `is-dragging`; `.sortable-handle` gets
+`cursor: grab` and `touch-action: none` from `interface/sortable.scss`. The scrolling parent of the
+list scrolls by itself near its edges; with `prefers-reduced-motion` nothing is animated.
+
 ## `u-progress` (progress-bar animation directive)
 
 Animates a progress bar into view the first time the element enters the viewport, and sets two

@@ -1244,11 +1244,12 @@
             self.watchers.forEach(watcher => watcher.check());
         }
         watch(path, callback) {
-            let value = getNestedObjectValue(this.scope, path);
+            const read = typeof path === "function" ? path : () => getNestedObjectValue(this.scope, path);
+            let value = read();
             let snapshot = serialize(value);
             const watcher = {
                 check: () => {
-                    const next = getNestedObjectValue(this.scope, path);
+                    const next = read();
                     const nextSnapshot = serialize(next);
                     if (nextSnapshot !== snapshot) {
                         const oldValue = value;

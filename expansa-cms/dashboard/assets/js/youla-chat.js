@@ -38,8 +38,8 @@ document.addEventListener('youla:init', () => {
         const match = document.cookie.match('(?:^|; )' + name + '=([^;]*)');
         return match ? decodeURIComponent(match[1]) : null;
     };
-    Youla.data('chat', () => ({
-        labels: {},
+    Youla.data('chat', () => (labels = {}) => ({
+        labels,
         tasks: [],
         task: null,
         messages: [],
@@ -56,7 +56,7 @@ document.addEventListener('youla:init', () => {
         snapshot: '',
         self: {
             '@load'() {
-                this.init(this.$el);
+                this.init();
             }
         },
         get isRunning() {
@@ -65,12 +65,7 @@ document.addEventListener('youla:init', () => {
         get isAsking() {
             return this.task?.status === 'questions';
         },
-        init(root) {
-            try {
-                this.labels = JSON.parse(root.dataset.labels || '{}');
-            } catch {
-                this.labels = {};
-            }
+        init() {
             this.tickTimer = setInterval(() => {
                 if (this.isRunning) {
                     this.now = Date.now() / 1e3;

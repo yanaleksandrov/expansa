@@ -381,7 +381,7 @@ return Form::enqueue(
                         ];
                         ?>
                         <h4 class="post-editor-eyebrow"><?php echo t('Details'); ?></h4>
-                        <dl class="post-editor-props" u-data="postDetails" data-status="<?php echo htmlspecialchars($post->status); ?>">
+                        <dl class="post-editor-props" u-data="postDetails(<?php echo htmlspecialchars(json_encode($post->status)); ?>)">
                             <dt><i class="ph ph-circle-dashed"></i><?php echo t('Status'); ?></dt>
                             <dd>
                                 <select class="post-editor-pill" name="status" u-prop="status" aria-label="<?php echo t_attr('Status'); ?>">

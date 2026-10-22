@@ -873,19 +873,7 @@ document.addEventListener('youla:init', () => {
             }
         };
     });
-    Youla.data('builder', root => {
-        let state;
-        try {
-            state = JSON.parse(root.dataset.state || '{}');
-        } catch {
-            state = {};
-        }
-        let valueOptions = {};
-        try {
-            valueOptions = JSON.parse(root.dataset.valueOptions || '{}');
-        } catch {
-            valueOptions = {};
-        }
+    Youla.data('builder', () => (state = {}, valueOptions = {}) => {
         const defaultRule = () => ({
             location: Object.keys(valueOptions)[0] || 'post_type',
             operator: '==',
@@ -974,6 +962,365 @@ document.addEventListener('youla:init', () => {
                 return CHOICE_TYPES.includes(type);
             }
         };
+    });
+    Youla.data('navEditor', root => (state = {}) => {
+        const maxDepth = state.maxDepth ?? 5;
+        const fields = state.fields && typeof state.fields === 'object' ? state.fields : {};
+        let lastKey = 0;
+        const item = values => ({
+            type: 'link',
+            object: '',
+            objectId: 0,
+            ...Object.fromEntries(Object.entries(fields).map(([name, field]) => [ name, structuredClone(field.default ?? '') ])),
+            original: '',
+            depth: 0,
+            ...values,
+            key: ++lastKey
+        });
+        const serialize = items => JSON.stringify(items.map(({key, original, ...values}) => values));
+        const blank = item(Object.fromEntries(Object.keys(fields).map(name => [ name, Array.isArray(fields[name].default) ? [] : '' ])));
+        let saved = serialize(state.items || []);
+        const data = {
+            id: state.id || 0,
+            title: state.title || '',
+            locations: Array.isArray(state.locations) ? state.locations : [],
+            items: (Array.isArray(state.items) ? state.items : []).map(values => item(values)),
+            types: state.types || {},
+            maxDepth,
+            source: '',
+            query: '',
+            found: null,
+            posts: {},
+            link: {
+                url: '',
+                title: ''
+            },
+            active: blank,
+            activeKey: 0,
+            label(entry) {
+                return entry.title || entry.original || entry.url;
+            },
+            select(index) {
+                this.active = this.items[index] || blank;
+                this.activeKey = this.active.key === blank.key ? 0 : this.active.key;
+            },
+            isFor(name) {
+                const types = fields[name]?.types || [];
+                return !this.activeKey || types.length === 0 || types.includes(this.active.type);
+            },
+            focusActive() {
+                setTimeout(() => root.querySelector('.nav-editor-item.is-active .nav-editor-item-head')?.focus(), 50);
+            },
+            end(index) {
+                let end = index + 1;
+                while (end < this.items.length && this.items[end].depth > this.items[index].depth) {
+                    end++;
+                }
+                return end;
+            },
+            previous(index) {
+                const depth = this.items[index]?.depth;
+                for (let i = index - 1; i >= 0; i--) {
+                    if (this.items[i].depth <= depth) {
+                        return this.items[i].depth === depth ? i : -1;
+                    }
+                }
+                return -1;
+            },
+            normalize(items) {
+                items.forEach((entry, i) => {
+                    entry.depth = Math.max(0, Math.min(entry.depth, i === 0 ? 0 : items[i - 1].depth + 1, maxDepth));
+                });
+                this.items = items;
+            },
+            canMoveDown(index) {
+                const next = this.end(index);
+                return index >= 0 && next < this.items.length && this.items[next].depth === this.items[index].depth;
+            },
+            canIndent(index) {
+                return this.previous(index) !== -1 && this.items[index].depth < maxDepth;
+            },
+            move(index, direction) {
+                const items = [ ...this.items ];
+                const end = this.end(index);
+                if (direction < 0) {
+                    const previous = this.previous(index);
+                    if (previous === -1) {
+                        return;
+                    }
+                    items.splice(previous, 0, ...items.splice(index, end - index));
+                } else {
+                    if (!this.canMoveDown(index)) {
+                        return;
+                    }
+                    const next = this.end(end);
+                    items.splice(index, 0, ...items.splice(end, next - end));
+                }
+                this.normalize(items);
+            },
+            indent(index, direction) {
+                if (index < 0 || (direction > 0 ? !this.canIndent(index) : this.items[index].depth === 0)) {
+                    return;
+                }
+                const items = [ ...this.items ];
+                const end = this.end(index);
+                for (let i = index; i < end; i++) {
+                    items[i].depth += direction;
+                }
+                this.normalize(items);
+            },
+            remove(index) {
+                const items = [ ...this.items ];
+                const end = this.end(index);
+                for (let i = index + 1; i < end; i++) {
+                    items[i].depth--;
+                }
+                items.splice(index, 1);
+                this.normalize(items);
+                this.select(-1);
+            },
+            sort({from, count, to, depth}) {
+                const items = [ ...this.items ];
+                const block = items.splice(from, count);
+                const shift = depth - block[0].depth;
+                block.forEach(entry => entry.depth += shift);
+                items.splice(to, 0, ...block);
+                this.normalize(items);
+            },
+            openSource(key, el) {
+                this.source = this.source === key ? '' : key;
+                if (this.source === key && !this.posts[key]) {
+                    this.$ajax.post('menus/posts', {
+                        type: key
+                    }, null, {
+                        el
+                    }).then(result => {
+                        this.posts = {
+                            ...this.posts,
+                            [key]: Array.isArray(result?.posts) ? result.posts : []
+                        };
+                    }).catch(() => {});
+                }
+            },
+            search(query) {
+                this.query = query.trim();
+                this.found = null;
+                if (this.query === '') {
+                    return;
+                }
+                this.$ajax.post('menus/posts', {
+                    query: this.query
+                }, null, {
+                    el: this.$el?.closest('.field')
+                }).then(result => {
+                    this.found = Array.isArray(result?.posts) ? result.posts : [];
+                }).catch(() => {});
+            },
+            add(values) {
+                this.items = [ ...this.items, item(values) ];
+                this.select(this.items.length - 1);
+            },
+            addPost(key, post) {
+                this.add({
+                    type: 'post',
+                    object: key,
+                    objectId: post.id,
+                    original: post.title
+                });
+            },
+            addLink() {
+                const url = this.link.url.trim();
+                if (url === '') {
+                    return;
+                }
+                this.add({
+                    url,
+                    title: this.link.title.trim()
+                });
+                this.link = {
+                    url: '',
+                    title: ''
+                };
+            },
+            save() {
+                const items = serialize(this.items);
+                this.$ajax.post(this.id ? 'menus/update' : 'menus/create', {
+                    id: this.id,
+                    title: this.title,
+                    locations: JSON.stringify(this.locations),
+                    items
+                }).then(() => {
+                    saved = items;
+                }).catch(() => {});
+            },
+            searchInput: {
+                '@input.delay.250ms'() {
+                    this.search(this.$el.value);
+                }
+            },
+            linkForm: {
+                '@submit.prevent'() {
+                    this.addLink();
+                    this.$el.reset();
+                }
+            },
+            linkUrl: {
+                'u-prop': 'link.url'
+            },
+            linkTitle: {
+                'u-prop': 'link.title'
+            },
+            results: {
+                'u-show': 'query'
+            },
+            result: {
+                'u-each': 'post in found || []',
+                '@click': 'addPost(post.type, post)'
+            },
+            postTitle: {
+                'u-text': 'post.title'
+            },
+            postType: {
+                'u-text': 'types[post.type] || post.type'
+            },
+            noResults: {
+                'u-show': 'found && found.length === 0'
+            },
+            sources: {
+                'u-show': '! query || (found && found.length === 0)'
+            },
+            sourceTitle(key) {
+                return {
+                    '@click'() {
+                        this.openSource(key, this.$el.closest('.accordion-item'));
+                    },
+                    ':class'() {
+                        return this.source === key && 'is-active';
+                    }
+                };
+            },
+            sourcePanel(key) {
+                return {
+                    'u-collapse'() {
+                        return this.source === key;
+                    }
+                };
+            },
+            sourcePost(key) {
+                return {
+                    'u-each': `post in posts[${JSON.stringify(key)}]`,
+                    '@click': `addPost(${JSON.stringify(key)}, post)`
+                };
+            },
+            sourceEmpty(key) {
+                return {
+                    'u-show'() {
+                        return this.posts[key]?.length === 0;
+                    }
+                };
+            },
+            editor: {
+                '@submit.prevent'() {
+                    this.save();
+                }
+            },
+            titleInput: {
+                'u-prop': 'title'
+            },
+            list: {
+                'u-sortable': '{ handle: \'.sortable-handle\', nested: true, indent: 24, maxDepth }',
+                '@sort'(event) {
+                    this.sort(event.detail);
+                }
+            },
+            row: {
+                'u-each': '(item, i) in items',
+                ':hidden': 'false',
+                ':style': '\'--depth: \' + item.depth',
+                ':class': '{ \'is-active\': item.key === activeKey }'
+            },
+            rowHead: {
+                '@click': 'select(i)',
+                '@keydown.alt.up.prevent': 'select(i), move(i, -1), focusActive()',
+                '@keydown.alt.down.prevent': 'select(i), move(i, 1), focusActive()',
+                '@keydown.alt.left.prevent': 'select(i), indent(i, -1), focusActive()',
+                '@keydown.alt.right.prevent': 'select(i), indent(i, 1), focusActive()'
+            },
+            rowIcon: {
+                ':class': 'item.icon',
+                'u-show': 'item.icon'
+            },
+            rowLabel: {
+                'u-text': 'label(item)'
+            },
+            rowType: {
+                'u-show': 'item.type === \'post\'',
+                'u-text': 'types[item.object] || item.object'
+            },
+            rowLink: {
+                'u-show': 'item.type === \'link\''
+            },
+            rowRemove: {
+                '@click': 'remove(i)'
+            },
+            empty: {
+                'u-show': 'items.length === 0'
+            },
+            panel: {
+                ':class': 'activeKey && \'is-active\''
+            },
+            closer: {
+                '@click'() {
+                    this.select(-1);
+                }
+            },
+            hint: {
+                'u-show': '! activeKey'
+            },
+            field(name) {
+                return {
+                    'u-show'() {
+                        return this.isFor(name);
+                    }
+                };
+            },
+            control(name) {
+                const bindings = {
+                    'u-prop': `active.${name}`,
+                    ':disabled': '! activeKey'
+                };
+                if (this.$el.tagName === 'SELECT') {
+                    bindings['u-select'] = function() {
+                        return {
+                            placeholderText: fields[name]?.placeholder || ''
+                        };
+                    };
+                }
+                if (name === 'title') {
+                    bindings[':placeholder'] = function() {
+                        return this.active.original || fields[name]?.placeholder || '';
+                    };
+                }
+                return bindings;
+            },
+            location: {
+                'u-prop': 'locations'
+            },
+            deleter: {
+                '@click'() {
+                    this.$dialog.open('tmpl-menu-delete', {
+                        id: this.id,
+                        title: this.$el.textContent.trim()
+                    });
+                }
+            }
+        };
+        window.addEventListener('beforeunload', event => {
+            if (serialize(data.items) !== saved) {
+                event.preventDefault();
+            }
+        });
+        return data;
     });
     Youla.data('stream', root => ({
         error: null,
@@ -1298,8 +1645,8 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
-    Youla.data('postDetails', root => ({
-        status: root.dataset.status || '',
+    Youla.data('postDetails', root => (saved = '') => ({
+        status: saved,
         self: {
             '@change'() {
                 this.schedule(this.$event.target);
@@ -1321,7 +1668,7 @@ document.addEventListener('youla:init', () => {
         },
         restore(form) {
             if (form === root.closest('form')) {
-                this.status = root.dataset.status || '';
+                this.status = saved;
             }
         }
     }));
@@ -1489,6 +1836,207 @@ document.addEventListener('youla:init', () => {
             reposition();
         });
     });
+    (() => {
+        const THRESHOLD = 4;
+        const EDGE = 48;
+        const SPEED = 16;
+        const LANDING = 150;
+        const itemsOf = list => [ ...list.children ].filter(el => !el.hasAttribute('u-each') && !el.hidden && el.tagName !== 'TEMPLATE');
+        const depthOf = el => +(el.style.getPropertyValue('--depth') || 0);
+        function scrollerOf(el) {
+            for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+                const {overflowY} = getComputedStyle(node);
+                if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+                    return node;
+                }
+            }
+            return document.scrollingElement;
+        }
+        function start(list, event) {
+            const options = list._x_sortable;
+            const row = itemsOf(list).find(item => item.contains(event.target));
+            if (!row || event.button !== 0 || (options.handle ? !event.target.closest(options.handle) : event.target.closest('input, textarea, select, [contenteditable]'))) {
+                return;
+            }
+            const startX = event.clientX;
+            const startY = event.clientY;
+            let drag = null;
+            const move = event => {
+                if (!drag) {
+                    if (Math.hypot(event.clientX - startX, event.clientY - startY) < THRESHOLD) {
+                        return;
+                    }
+                    drag = begin(list, row, startX, startY);
+                }
+                event.preventDefault();
+                drag.pointer = event;
+                update(drag);
+            };
+            const stop = () => {
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup', stop);
+                document.removeEventListener('pointercancel', stop);
+                if (drag) {
+                    const swallow = event => event.stopPropagation();
+                    window.addEventListener('click', swallow, {
+                        capture: true,
+                        once: true
+                    });
+                    setTimeout(() => window.removeEventListener('click', swallow, {
+                        capture: true
+                    }), 0);
+                    finish(drag);
+                }
+            };
+            document.addEventListener('pointermove', move, {
+                passive: false
+            });
+            document.addEventListener('pointerup', stop);
+            document.addEventListener('pointercancel', stop);
+        }
+        function begin(list, row, startX, startY) {
+            const options = list._x_sortable;
+            const rows = itemsOf(list);
+            const from = rows.indexOf(row);
+            let count = 1;
+            while (options.nested && from + count < rows.length && depthOf(rows[from + count]) > depthOf(row)) {
+                count++;
+            }
+            const scroller = scrollerOf(list);
+            const offset = scroller.scrollTop;
+            const rects = rows.map(el => {
+                const rect = el.getBoundingClientRect();
+                return {
+                    top: rect.top + offset,
+                    bottom: rect.bottom + offset
+                };
+            });
+            const block = rows.slice(from, from + count);
+            const others = rows.filter(el => !block.includes(el)).map(el => ({
+                el,
+                rect: rects[rows.indexOf(el)]
+            }));
+            const gap = rows.length > 1 ? Math.max(0, rects[1].top - rects[0].bottom) : 0;
+            const top = rects[from].top;
+            const bottom = rects[from + count - 1].bottom;
+            const deepest = Math.max(...block.map(depthOf)) - depthOf(row);
+            list.classList.add('is-sorting');
+            block.forEach(el => el.classList.add('is-dragging'));
+            const drag = {
+                list,
+                rows,
+                block,
+                others,
+                from,
+                count,
+                top,
+                bottom,
+                scroller,
+                startX,
+                startY,
+                offset,
+                shift: bottom - top + gap,
+                depth: depthOf(row),
+                maxDepth: Math.max(depthOf(row), (options.maxDepth ?? Infinity) - deepest),
+                to: from,
+                pointer: null
+            };
+            autoscroll(drag);
+            return drag;
+        }
+        function update(drag) {
+            const {list, block, others, top, bottom, scroller, pointer} = drag;
+            const options = list._x_sortable;
+            const dx = pointer.clientX - drag.startX;
+            const dy = pointer.clientY - drag.startY + scroller.scrollTop - drag.offset;
+            const center = (top + bottom) / 2 + dy;
+            const to = others.filter(({rect}) => (rect.top + rect.bottom) / 2 < center).length;
+            others.forEach(({el}, index) => {
+                const before = drag.rows.indexOf(el) < drag.from;
+                const y = before && index >= to ? drag.shift : !before && index < to ? -drag.shift : 0;
+                el.style.transform = y ? `translateY(${y}px)` : '';
+            });
+            let depth = depthOf(drag.rows[drag.from]);
+            if (options.nested) {
+                const above = others[to - 1]?.el;
+                const below = others[to]?.el;
+                const limit = Math.min(above ? depthOf(above) + 1 : 0, drag.maxDepth);
+                const lower = below ? Math.min(depthOf(below), limit) : 0;
+                depth = Math.max(lower, Math.min(depth + Math.round(dx / (options.indent || 24)), limit));
+            }
+            drag.to = to;
+            drag.depth = depth;
+            drag.x = (depth - depthOf(drag.rows[drag.from])) * (options.indent || 24);
+            block.forEach(el => el.style.transform = `translate(${drag.x}px, ${dy}px)`);
+        }
+        function autoscroll(drag) {
+            const step = () => {
+                if (drag.done) {
+                    return;
+                }
+                if (drag.pointer) {
+                    const area = drag.scroller === document.scrollingElement ? {
+                        top: 0,
+                        bottom: window.innerHeight
+                    } : drag.scroller.getBoundingClientRect();
+                    const {clientY} = drag.pointer;
+                    const speed = clientY < area.top + EDGE ? -SPEED * (1 - (clientY - area.top) / EDGE) : clientY > area.bottom - EDGE ? SPEED * (1 - (area.bottom - clientY) / EDGE) : 0;
+                    if (speed) {
+                        drag.scroller.scrollTop += Math.round(speed);
+                        update(drag);
+                    }
+                }
+                requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        }
+        function finish(drag) {
+            const {list, rows, block, others, from, count, to, top, bottom} = drag;
+            drag.done = true;
+            const landing = to < from ? others[to].rect.top - top : to > from ? others[to - 1].rect.bottom - bottom : 0;
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            block.forEach(el => {
+                el.style.transition = reduced ? '' : `transform ${LANDING}ms ease`;
+                el.style.transform = `translate(${drag.x || 0}px, ${landing}px)`;
+            });
+            setTimeout(() => {
+                const depth = drag.depth;
+                const shift = depth - depthOf(rows[from]);
+                const changed = to !== from || shift !== 0;
+                if (to !== from) {
+                    const anchor = to < others.length ? others[to].el : others[others.length - 1].el.nextSibling;
+                    block.forEach(el => list.insertBefore(el, anchor));
+                }
+                if (list._x_sortable.nested && shift !== 0) {
+                    block.forEach(el => el.style.setProperty('--depth', depthOf(el) + shift));
+                }
+                list.classList.remove('is-sorting');
+                rows.forEach(el => {
+                    el.classList.remove('is-dragging');
+                    el.style.transform = '';
+                    el.style.transition = '';
+                });
+                if (changed) {
+                    list.dispatchEvent(new CustomEvent('sort', {
+                        detail: {
+                            from,
+                            count,
+                            to,
+                            depth
+                        },
+                        bubbles: true
+                    }));
+                }
+            }, reduced ? 0 : LANDING);
+        }
+        Youla.directive('sortable', (el, output) => {
+            el._x_sortable = output && typeof output === 'object' ? output : {};
+            if (!el._x_sortableBound) {
+                el._x_sortableBound = true;
+                el.addEventListener('pointerdown', event => start(el, event));
+            }
+        });
+    })();
     Youla.directive('collapse', (el, output) => {
         const isOpen = !!output;
         const duration = 200;
@@ -1517,9 +2065,7 @@ document.addEventListener('youla:init', () => {
             if (elapsed < duration) {
                 requestAnimationFrame(step);
             } else {
-                if (!isOpen) {
-                    el.style.display = 'none';
-                }
+                el.style.display = isOpen ? '' : 'none';
                 [ ...props, 'overflow' ].forEach(prop => el.style[prop] = '');
             }
         }

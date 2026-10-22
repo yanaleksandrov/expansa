@@ -19,9 +19,7 @@
 use Expansa\Builders\Form;
 use Expansa\Facades\Json;
 ?>
-<div class="field-groups" u-data="builder"
-     data-state="<?php echo escape(Json::encode($state)); ?>"
-     data-value-options="<?php echo escape(Json::encode($valueOptions)); ?>">
+<div class="field-groups" u-data="builder(<?php echo escape(Json::encode($state)); ?>, <?php echo escape(Json::encode($valueOptions)); ?>)">
     <div class="field-groups__side">
         <div class="field-groups__header">
             <h4><?php echo t('Custom Fields'); ?></h4>
