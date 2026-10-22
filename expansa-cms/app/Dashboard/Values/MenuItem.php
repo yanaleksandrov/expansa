@@ -33,5 +33,17 @@ final readonly class MenuItem
          * Label of the post type of the item, empty for a custom link.
          */
         public string $type = '',
+
+        /**
+         * Why the site leaves the item out: `deleted` or `hidden` (an unpublished post), empty if shown.
+         */
+        public string $problem = '',
+
+        /**
+         * Settings of the item that differ from their defaults.
+         *
+         * @var Flag[]
+         */
+        public array $flags = [],
     ) {}
 }

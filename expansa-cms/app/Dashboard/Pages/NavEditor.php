@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Dashboard\Pages;
 
 use App\Api\Menus\MenusService;
+use App\Dashboard\Values\Flag;
 use App\Dashboard\Values\MenuItem;
 use App\Models\Menu;
 use App\Models\Values\Field;
@@ -44,14 +45,17 @@ final class NavEditor
 
         $locations = Menu::themeLocations();
         $owners    = [];
+        $places    = [];
         foreach ($menus as $menu) {
-            foreach (array_intersect($menu->locations, array_keys($locations)) as $location) {
+            $shown = array_intersect($menu->locations, array_keys($locations));
+            foreach ($shown as $location) {
                 $owners[$location] = $menu->title;
             }
+            $places[$menu->id] = implode(', ', array_map(fn (string $location) => $locations[$location], $shown));
         }
 
         $fields = Menu::itemFields();
-        $items  = $current ? self::flatten($current->items, self::titles($current)) : [];
+        $items  = $current ? self::flatten($current->items, self::posts($current)) : [];
         $source = (string) array_key_first($types);
         $posts  = $source !== '' ? new MenusService()->posts($source, '') : [];
 
@@ -60,15 +64,19 @@ final class NavEditor
             'current'   => $current,
             'locations' => $locations,
             'owners'    => $owners,
+            'places'    => $places,
+            'orphans'   => $current ? array_values(array_diff($current->locations, array_keys($locations))) : [],
             'types'     => $types,
             'fields'    => $fields,
             'source'    => $source,
             'posts'     => array_column($posts, 'title'),
             'rows'      => array_map(fn (array $item) => new MenuItem(
-                label: (string) ($item['title'] ?: $item['original'] ?: $item['url']),
+                label: (string) ($item['title'] ?: $item['original'] ?: $item['url'] ?: '—'),
                 depth: $item['depth'],
                 icon: (string) ($item['icon'] ?? ''),
                 type: $item['type'] === 'post' ? $types[$item['object']] ?? (string) $item['object'] : '',
+                problem: $item['problem'],
+                flags: self::flags($item, $fields),
             ), $items),
             'state'     => [
                 'id'        => $current->id ?? 0,
@@ -79,6 +87,10 @@ final class NavEditor
                 'source'    => $source,
                 'posts'     => $source !== '' ? [$source => $posts] : [],
                 'fields'    => array_map(fn (Field $field) => [
+                    'label'       => $field->label,
+                    'type'        => $field->type,
+                    'icon'        => $field->icon,
+                    'options'     => $field->options,
                     'default'     => $field->default,
                     'types'       => $field->types,
                     'placeholder' => $field->placeholder,
@@ -95,24 +107,33 @@ final class NavEditor
 
     /**
      * Get the items of the editor: each with its `depth` instead of `id` and `parent_id`, a post item
-     * with the title of its post as `original`, or an empty one for a deleted post.
+     * with the title of its post as `original` and `problem` when the site leaves it out, as Menu::links()
+     * does: `deleted` for a missing post, `hidden` for an unpublished one.
      *
-     * @param array                             $items  Items of the menu, a parent before its subitems.
-     * @param array<string, array<int, string>> $titles Titles of the posts by type and ID.
+     * @param array                                                     $items Items of the menu, a parent before its subitems.
+     * @param array<string, array<int, array{title: string, status: string}>> $posts Posts of the items by type and ID.
      * @return array<int, array<string, mixed>>
      */
-    private static function flatten(array $items, array $titles): array
+    private static function flatten(array $items, array $posts): array
     {
         $list   = [];
         $depths = [];
         foreach ($items as $item) {
             $depth = $depths[$item['id']] = isset($depths[$item['parent_id']]) ? $depths[$item['parent_id']] + 1 : 0;
 
+            $post = $item['type'] === 'post' ? $posts[$item['object']][$item['objectId']] ?? null : null;
+
             unset($item['id'], $item['parent_id'], $item['position']);
             $list[] = [
                 ...$item,
                 'depth'    => $depth,
-                'original' => $item['type'] === 'post' ? $titles[$item['object']][$item['objectId']] ?? '' : '',
+                'original' => $post['title'] ?? '',
+                'problem'  => match (true) {
+                    $item['type'] !== 'post'      => '',
+                    $post === null                => 'deleted',
+                    $post['status'] !== 'publish' => 'hidden',
+                    default                       => '',
+                },
             ];
         }
 
@@ -120,22 +141,52 @@ final class NavEditor
     }
 
     /**
-     * Read the titles of the posts of the items, a query per post type.
+     * Get the settings of an item that differ from their defaults: the choices of a field for its type,
+     * as the icon of the field with its name and value; the editor finds them the same way.
+     *
+     * @param array<string, mixed> $item
+     * @param array<string, Field> $fields
+     * @return Flag[]
+     */
+    private static function flags(array $item, array $fields): array
+    {
+        $flags = [];
+        foreach ($fields as $name => $field) {
+            $value = $item[$name] ?? $field->default;
+            if (
+                ! in_array($field->type, ['select', 'multiselect'], true)
+                || ($field->types && ! in_array($item['type'], $field->types, true))
+                || $value === $field->default
+                || $value === []
+            ) {
+                continue;
+            }
+
+            $texts   = array_map(fn (mixed $key) => (string) ($field->options[$key] ?? $key), (array) $value);
+            $flags[] = new Flag($field->icon, $field->label . ': ' . implode(', ', $texts));
+        }
+
+        return $flags;
+    }
+
+    /**
+     * Read the titles and the statuses of the posts of the items, a query per post type.
      *
      * @param Menu $menu
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, array{title: string, status: string}>>
      */
-    private static function titles(Menu $menu): array
+    private static function posts(Menu $menu): array
     {
-        $titles = [];
+        $posts = [];
         foreach ($menu->posts() as $key => $ids) {
             $type = Type::get($key);
             if ($type instanceof Type) {
-                $rows         = Db::select($type->table, ['id [Int]', 'title'], ['id' => $ids]) ?: [];
-                $titles[$key] = array_column($rows, 'title', 'id');
+                foreach (Db::select($type->table, ['id [Int]', 'title', 'status'], ['id' => $ids]) ?: [] as $row) {
+                    $posts[$key][$row['id']] = ['title' => (string) $row['title'], 'status' => (string) $row['status']];
+                }
             }
         }
 
-        return $titles;
+        return $posts;
     }
 }

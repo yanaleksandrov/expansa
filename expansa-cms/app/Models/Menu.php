@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Models\Values\Field;
 use App\Post\Type;
 use App\Support\Permalinks;
+use Closure;
 use Expansa\Builders\Tree;
 use Expansa\Database\Attribute;
 use Expansa\Database\Model;
@@ -29,14 +30,20 @@ use Expansa\Support\Error;
  * the target, the relations and so on, with the fields plugins add by the `menuItemFields` filter.
  * A link has its own URL, a post item gets the URL and, with an empty title, the title of its post when shown.
  *
- * register() attaches the menu of each location as the `menu-<location>` tree; a theme declares its
- * locations and outputs a menu like the dashboard outputs its own, `active` marks the current page:
+ * register() attaches the menu of each location as the `menu-<location>` tree. The active theme declares
+ * its locations with Theme::setMenus(), bootstrap.php passes them to setThemeLocations(); a plugin adds its own
+ * by the `menuLocations` filter. A theme outputs a menu like the dashboard outputs its own, `active` marks
+ * the current page:
  *
  * ```php
+ * $this->setMenus(['primary' => t('Header'), 'footer' => t('Footer')]);
  * Hook::add('menuLocations', fn (array $locations) => [...$locations, 'sidebar' => t('Sidebar')]);
  *
  * tree('menu-primary', function (array $items) { ... $item->title, $item->url, $item->rel, $item->active ... });
  * ```
+ *
+ * A location the theme no longer declares stays with its menu until it is unchecked: switching back
+ * to the theme shows the menu there again.
  *
  * @property int    $id
  * @property string $title
@@ -66,6 +73,11 @@ class Menu extends Model
     ];
 
     public protected(set) string $table = 'menus';
+
+    /**
+     * Locations of the active theme, null without a theme; see setThemeLocations().
+     */
+    private static ?Closure $declared = null;
 
     /**
      * Fields allowed for mass assignment.
@@ -117,14 +129,28 @@ class Menu extends Model
     }
 
     /**
-     * Get the locations a theme can show a menu in, by key; themes and plugins change them with
-     * the `menuLocations` filter.
+     * Set where the locations of the active theme come from: the callback is called when they are read,
+     * after the theme is loaded, and returns null without an active theme.
+     *
+     * @param Closure(): (array<string, string>|null) $locations Labels by key.
+     * @return void
+     */
+    public static function setThemeLocations(Closure $locations): void
+    {
+        self::$declared = $locations;
+    }
+
+    /**
+     * Get the locations a menu can be shown in, by key: those of the active theme, `primary` and `footer`
+     * without a theme; plugins change them with the `menuLocations` filter.
      *
      * @return array<string, string> Labels by key.
      */
     public static function themeLocations(): array
     {
-        return (array) Hook::call('menuLocations', [
+        $declared = self::$declared ? (self::$declared)() : null;
+
+        return (array) Hook::call('menuLocations', $declared ?? [
             'primary' => t('Primary'),
             'footer'  => t('Footer'),
         ]);

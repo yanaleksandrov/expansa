@@ -1156,12 +1156,18 @@ document.addEventListener('youla:init', ()=> {
             objectId: 0,
             ...Object.fromEntries(Object.entries(fields).map(([name, field]) => [ name, structuredClone(field.default ?? '') ])),
             original: '',
+            problem: '',
             depth: 0,
             ...values,
             key: ++lastKey,
         });
 
-        const serialize = (items) => JSON.stringify(items.map(({ key, original, ...values }) => values));
+        // the title of the post and why the site leaves the item out come from the server, they are not saved
+        const serialize = (items) => JSON.stringify(items.map(({ key, original, problem, ...values }) => values));
+
+        // a removed item can be brought back for a while
+        const UNDO_TIME = 7000;
+        let undoTimer   = 0;
 
         // what is saved: the order of the checked locations does not matter
         const snapshot = ({ title, locations, items }) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
@@ -1188,9 +1194,27 @@ document.addEventListener('youla:init', ()=> {
             activeKey: 0,
             // the snapshot of the last save, taken after the items get their defaults
             saved: '',
+            // the label of the removed item and the items before it was removed
+            removed: null,
 
             label(entry) {
-                return entry.title || entry.original || entry.url;
+                return entry.title || entry.original || entry.url || '—';
+            },
+            // the choices of an item that differ from their defaults, the server finds them the same way
+            flags(entry) {
+                return Object.entries(fields).flatMap(([name, field]) => {
+                    const value = entry[name] ?? field.default;
+                    if (
+                        ![ 'select', 'multiselect' ].includes(field.type)
+                        || (field.types?.length && !field.types.includes(entry.type))
+                        || JSON.stringify(value) === JSON.stringify(field.default)
+                        || (Array.isArray(value) && value.length === 0)
+                    ) {
+                        return [];
+                    }
+                    const texts = [ value ].flat().map(key => field.options?.[key] ?? key);
+                    return [ { icon: field.icon, title: `${field.label}: ${texts.join(', ')}` } ];
+                });
             },
             isChanged() {
                 return snapshot(this) !== this.saved;
@@ -1277,6 +1301,10 @@ document.addEventListener('youla:init', ()=> {
             },
             // the subitems take the place of the removed item
             remove(index) {
+                this.removed = { label: this.label(this.items[index]), items: this.items.map(entry => ({ ...entry })) };
+                clearTimeout(undoTimer);
+                undoTimer = setTimeout(() => this.removed = null, UNDO_TIME);
+
                 const items = [ ...this.items ];
                 const end   = this.end(index);
                 for (let i = index + 1; i < end; i++) {
@@ -1285,6 +1313,13 @@ document.addEventListener('youla:init', ()=> {
                 items.splice(index, 1);
                 this.normalize(items);
                 this.select(-1);
+            },
+            undo() {
+                clearTimeout(undoTimer);
+                if (this.removed) {
+                    this.items   = this.removed.items;
+                    this.removed = null;
+                }
             },
             // the block moved by u-sortable: its first item, its size, its place in the list without it, its depth
             sort({ from, count, to, depth }) {
@@ -1489,6 +1524,19 @@ document.addEventListener('youla:init', ()=> {
             },
             rowLink: {
                 'u-show': "item.type === 'link'",
+            },
+            rowDeleted: {
+                'u-show': "item.problem === 'deleted'",
+            },
+            rowHidden: {
+                'u-show': "item.problem === 'hidden'",
+            },
+            // the copies of the icon in the markup are shown
+            rowFlag: {
+                'u-each': 'flag in flags(item)',
+                ':hidden': 'false',
+                ':class': 'flag.icon',
+                ':title': 'flag.title',
             },
 
             // the settings of the selected item and of the menu

@@ -44,7 +44,7 @@ final class MenusService
             return $response->notify($this->flatten($menu), Notice::Error);
         }
 
-        $menu = $menu->update($this->prepare($request->post));
+        $menu = $menu->update($this->prepare($request->post, $menu->locations));
         if ($menu instanceof Error) {
             return $response->notify($this->flatten($menu), Notice::Error);
         }
@@ -107,16 +107,18 @@ final class MenusService
     }
 
     /**
-     * Take the title, the locations and the items of the request.
+     * Take the title, the locations and the items of the request: a location of the theme, or one
+     * the menu already has, though the theme no longer declares it.
      *
      * @param array<string, mixed> $input
+     * @param string[]             $kept  Locations of the menu before the update.
      * @return array{title: string, locations: string[], items: array}
      */
-    private function prepare(array $input): array
+    private function prepare(array $input, array $kept = []): array
     {
         $locations = Json::decode((string) ($input['locations'] ?? '[]'), true);
         $items     = Json::decode((string) ($input['items'] ?? '[]'), true);
-        $known     = array_keys(Menu::themeLocations());
+        $known     = [...array_keys(Menu::themeLocations()), ...$kept];
 
         return [
             'title'     => (string) ($input['title'] ?? ''),

@@ -974,11 +974,14 @@ document.addEventListener('youla:init', () => {
             objectId: 0,
             ...Object.fromEntries(Object.entries(fields).map(([name, field]) => [ name, structuredClone(field.default ?? '') ])),
             original: '',
+            problem: '',
             depth: 0,
             ...values,
             key: ++lastKey
         });
-        const serialize = items => JSON.stringify(items.map(({key, original, ...values}) => values));
+        const serialize = items => JSON.stringify(items.map(({key, original, problem, ...values}) => values));
+        const UNDO_TIME = 7e3;
+        let undoTimer = 0;
         const snapshot = ({title, locations, items}) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
         const blank = item(Object.fromEntries(Object.keys(fields).map(name => [ name, Array.isArray(fields[name].default) ? [] : '' ])));
         const data = {
@@ -999,8 +1002,22 @@ document.addEventListener('youla:init', () => {
             active: blank,
             activeKey: 0,
             saved: '',
+            removed: null,
             label(entry) {
-                return entry.title || entry.original || entry.url;
+                return entry.title || entry.original || entry.url || '—';
+            },
+            flags(entry) {
+                return Object.entries(fields).flatMap(([name, field]) => {
+                    const value = entry[name] ?? field.default;
+                    if (![ 'select', 'multiselect' ].includes(field.type) || field.types?.length && !field.types.includes(entry.type) || JSON.stringify(value) === JSON.stringify(field.default) || Array.isArray(value) && value.length === 0) {
+                        return [];
+                    }
+                    const texts = [ value ].flat().map(key => field.options?.[key] ?? key);
+                    return [ {
+                        icon: field.icon,
+                        title: `${field.label}: ${texts.join(', ')}`
+                    } ];
+                });
             },
             isChanged() {
                 return snapshot(this) !== this.saved;
@@ -1081,6 +1098,14 @@ document.addEventListener('youla:init', () => {
                 this.normalize(items);
             },
             remove(index) {
+                this.removed = {
+                    label: this.label(this.items[index]),
+                    items: this.items.map(entry => ({
+                        ...entry
+                    }))
+                };
+                clearTimeout(undoTimer);
+                undoTimer = setTimeout(() => this.removed = null, UNDO_TIME);
                 const items = [ ...this.items ];
                 const end = this.end(index);
                 for (let i = index + 1; i < end; i++) {
@@ -1089,6 +1114,13 @@ document.addEventListener('youla:init', () => {
                 items.splice(index, 1);
                 this.normalize(items);
                 this.select(-1);
+            },
+            undo() {
+                clearTimeout(undoTimer);
+                if (this.removed) {
+                    this.items = this.removed.items;
+                    this.removed = null;
+                }
             },
             sort({from, count, to, depth}) {
                 const items = [ ...this.items ];
@@ -1297,6 +1329,18 @@ document.addEventListener('youla:init', () => {
             },
             rowLink: {
                 'u-show': 'item.type === \'link\''
+            },
+            rowDeleted: {
+                'u-show': 'item.problem === \'deleted\''
+            },
+            rowHidden: {
+                'u-show': 'item.problem === \'hidden\''
+            },
+            rowFlag: {
+                'u-each': 'flag in flags(item)',
+                ':hidden': 'false',
+                ':class': 'flag.icon',
+                ':title': 'flag.title'
             },
             panel: {
                 ':class': 'activeKey && \'is-active\''

@@ -12,6 +12,8 @@
  * @var App\Models\Menu|null                   $current
  * @var array<string, string>                  $locations Labels of the theme locations by key.
  * @var array<string, string>                  $owners    Titles of the menus shown in the locations, by location.
+ * @var array<int, string>                     $places    Labels of the locations of each menu, by menu ID.
+ * @var string[]                               $orphans   Locations of the menu the theme no longer declares.
  * @var array<string, string>                  $types     Labels of the public post types by key.
  * @var array<string, App\Models\Values\Field> $fields    Fields of an item by key.
  * @var App\Dashboard\Values\MenuItem[]        $rows      Rows of the items until u-each of the editor replaces them.
@@ -38,7 +40,7 @@ defined('EX_PATH') || exit;
                             <option value="" selected>{{ t('Create a New Menu') }}</option>
                         @endif
                         @foreach($menus as $menu)
-                            <option value="{{ url('/dashboard/nav-editor?menu=' . $menu->id) }}" @selected($menu->id === $current?->id)>{{ $menu->title }}</option>
+                            <option value="{{ url('/dashboard/nav-editor?menu=' . $menu->id) }}" data-description="{{ $places[$menu->id] ?? '' }}" @selected($menu->id === $current?->id)>{{ $menu->title }}</option>
                         @endforeach
                     </select>
                 </label>
@@ -110,12 +112,20 @@ defined('EX_PATH') || exit;
 
         <div class="nav-editor-box">
             <h6 class="nav-editor-eyebrow">{{ t('Menu Structure') }} <span class="badge badge--xs" u-bind="count"@if(! $rows) hidden@endif>{{ count($rows) }}</span></h6>
+            <div class="nav-editor-undo" u-show="removed" hidden>
+                <i class="ph ph-trash"></i>
+                <span>{{ t('Menu item removed') }} <strong u-text="removed?.label"></strong></span>
+                <button type="button" class="btn btn--xs btn--outline" @click="undo()">{{ t('Undo') }}</button>
+            </div>
             <ul class="nav-editor-list" u-bind="list">
                 <li class="nav-editor-item" u-bind="row" hidden>
                     <i class="ph ph-dots-six-vertical sortable-handle"></i>
                     <button type="button" class="nav-editor-item-head" u-bind="rowHead">
                         <i u-bind="rowIcon"></i>
                         <span u-text="label(item)"></span>
+                        <span class="nav-editor-item-flags"><i u-bind="rowFlag" hidden></i></span>
+                        <small class="badge badge--xs badge--red-lt" title="{{ t_attr('The post was deleted, the item is not shown on the site.') }}" u-bind="rowDeleted">{{ t('Deleted') }}</small>
+                        <small class="badge badge--xs badge--orange-lt" title="{{ t_attr('The post is not published, the item is not shown on the site.') }}" u-bind="rowHidden">{{ t('Not Published') }}</small>
                         <small class="badge badge--xs" u-bind="rowType"></small>
                         <small class="badge badge--xs badge--blue-lt" u-bind="rowLink">{{ t('Custom Link') }}</small>
                     </button>
@@ -129,6 +139,18 @@ defined('EX_PATH') || exit;
                         <button type="button" class="nav-editor-item-head">
                             @if($row->icon)<i class="{{ $row->icon }}"></i>@endif
                             <span>{{ $row->label }}</span>
+                            @if($row->flags)
+                                <span class="nav-editor-item-flags">
+                                    @foreach($row->flags as $flag)
+                                        <i class="{{ $flag->icon }}" title="{{ $flag->title }}"></i>
+                                    @endforeach
+                                </span>
+                            @endif
+                            @if($row->problem === 'deleted')
+                                <small class="badge badge--xs badge--red-lt" title="{{ t_attr('The post was deleted, the item is not shown on the site.') }}">{{ t('Deleted') }}</small>
+                            @elseif($row->problem === 'hidden')
+                                <small class="badge badge--xs badge--orange-lt" title="{{ t_attr('The post is not published, the item is not shown on the site.') }}">{{ t('Not Published') }}</small>
+                            @endif
                             @if($row->type !== '')
                                 <small class="badge badge--xs">{{ $row->type }}</small>
                             @else
@@ -189,7 +211,16 @@ defined('EX_PATH') || exit;
                     </span>
                 </label>
             @endforeach
-            @if(! $locations)
+            @foreach($orphans as $key)
+                <label class="field-item nav-editor-orphan">
+                    <input type="checkbox" value="{{ $key }}" u-prop="locations" checked>
+                    <span class="field-label">
+                        {{ $key }}
+                        <span class="field-instruction">{{ t('The current theme has no such location, the menu is not shown there.') }}</span>
+                    </span>
+                </label>
+            @endforeach
+            @if(! $locations && ! $orphans)
                 <p class="nav-editor-note">{{ t('The theme has no menu locations.') }}</p>
             @endif
         </section>

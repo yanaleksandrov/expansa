@@ -296,6 +296,45 @@
     }
   }
 
+  .nav-editor-item-flags {
+    display: flex;
+    gap: 0.25rem;
+    color: var(--expansa-text-muted);
+
+    &:not(:has(> :not([hidden]))) {
+      display: none;
+    }
+  }
+
+  // the removed item can be brought back until the bar hides
+  .nav-editor-undo {
+    padding: 0.375rem 0.375rem 0.375rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    background-color: var(--expansa-bg);
+    border: 1px solid var(--expansa-border);
+    border-radius: var(--expansa-border-radius--lg);
+    corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+
+    &[hidden] {
+      display: none;
+    }
+
+    > i {
+      color: var(--expansa-text-muted);
+    }
+
+    > span {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
   // shown on hover and focus of the item, always on touch screens
   .nav-editor-item-actions {
     margin-inline-end: 0.25rem;
@@ -360,6 +399,11 @@
 
   .nav-editor-locations {
     gap: 0.5rem;
+  }
+
+  // a location of another theme: kept with the menu until unchecked
+  .nav-editor-orphan > .field-label {
+    color: var(--expansa-text-muted);
   }
 
   .nav-editor-changed {

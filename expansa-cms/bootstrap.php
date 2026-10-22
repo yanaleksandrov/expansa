@@ -277,6 +277,11 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
         policies: [App\Models\Post::class => App\Post\Policy::class],
     );
 
+    // the menu locations are those of the active theme, read after the extensions are loaded
+    App\Models\Menu::setThemeLocations(
+        fn () => array_find(Extensions::get('theme'), fn (object $theme) => $theme instanceof Expansa\Extensions\Theme)?->menus,
+    );
+
     // menu items and their pages need every capability of the item
     Expansa\Builders\Tree::configure(
         allows: fn (array $capabilities) => array_all($capabilities, fn (string $capability) => Access::allows(App\Models\User::current(), $capability)),

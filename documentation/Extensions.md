@@ -33,6 +33,26 @@ Extensions::configure(
 
 `root` — каталог с папками `plugins` и `themes`; id вида `plugins/<slug>` отсчитываются от него, другие id игнорируются. `quarantine` — JSON-файл карантина, без него сбои изолируются только в текущем запросе. `failed` получает id и ошибку каждого сбоя.
 
+## Области меню темы
+
+Тема объявляет области, в которых выводятся меню сайта, в конструкторе вместе с метаданными:
+
+```php
+return new class extends Expansa\Extensions\Theme {
+    public function __construct()
+    {
+        $this->setName('Aurora')
+            ->setDescription('Clean theme for blogs')
+            ->setVersion('1.0')
+            ->setMenus(['primary' => t('Header'), 'footer' => t('Footer')]);
+    }
+
+    // boot(), activate() и другие методы Contracts\Extension
+};
+```
+
+Ключ — строчные латинские буквы, цифры, `-` и `_`, иначе `setMenus()` бросает `InvalidArgumentException`. Пакет только хранит области в `$theme->menus`. Меню к ним привязывает приложение: `bootstrap.php` передаёт области активной темы в `App\Models\Menu::setThemeLocations()`, а меню области выводится деревом `menu-<ключ>`: `tree('menu-primary', ...)`. Без активной темы есть области `primary` и `footer`. Плагин добавляет свои фильтром `menuLocations`.
+
 ## Установленные и активные
 
 Пакет не хранит, какие расширения активны: список id передаёт приложение. В Expansa это опция `extensions.active`, её читает `bootstrap.php` и меняет `App\Api\Extensions\ExtensionsService` (эндпоинты `extensions/activate` и `extensions/deactivate` с `id` в теле, право `plugins_activate`).
