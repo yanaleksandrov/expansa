@@ -1134,8 +1134,8 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
-     * Navigation menu editor (dashboard/views/screens/nav-editor.blade.php), the markup binds to it only
-     * by its `u-bind` sets. The items are a flat list in the order of the page, each with its `depth`;
+     * Navigation menu editor (dashboard/views/screens/nav-editor.blade.php), the markup binds to it by
+     * its `u-bind` sets and short single directives. The items are a flat list in the order of the page, each with its `depth`;
      * an item moves together with its subitems and is sorted by `u-sortable`. The fields of an item come
      * from the server with their defaults and the types of items they are for, see App\Models\Menu::itemFields();
      * a field added there needs nothing here. The server turns the depths into parents, see App\Api\Menus\MenusService.
@@ -1146,6 +1146,7 @@ document.addEventListener('youla:init', ()=> {
     Youla.data('navEditor', (root) => (state = {}) => {
         const maxDepth = state.maxDepth ?? 5;
         const fields   = state.fields && typeof state.fields === 'object' ? state.fields : {};
+        const texts    = state.texts && typeof state.texts === 'object' ? state.texts : {};
 
         // a key tells the items apart in the page only, the proxies of the same item are not equal
         let lastKey = 0;
@@ -1162,10 +1163,11 @@ document.addEventListener('youla:init', ()=> {
 
         const serialize = (items) => JSON.stringify(items.map(({ key, original, ...values }) => values));
 
+        // what is saved: the order of the checked locations does not matter
+        const snapshot = ({ title, locations, items }) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
+
         // stands in for the selected item while there is none: the fields of the panel are disabled and empty
         const blank = item(Object.fromEntries(Object.keys(fields).map(name => [ name, Array.isArray(fields[name].default) ? [] : '' ])));
-
-        let saved = serialize(state.items || []);
 
         const data = {
             id: state.id || 0,
@@ -1174,18 +1176,24 @@ document.addEventListener('youla:init', ()=> {
             items: (Array.isArray(state.items) ? state.items : []).map(values => item(values)),
             types: state.types || {},
             maxDepth,
-            source: '',
+            // the first post type is open on load, its posts come with the state
+            source: state.source || '',
             query: '',
             // null while the search is running
             found: null,
-            posts: {},
+            posts: state.posts && typeof state.posts === 'object' ? state.posts : {},
             link: { url: '', title: '' },
             // the selected item and its key; methods, not getters: only what a method reads is tracked
             active: blank,
             activeKey: 0,
+            // the snapshot of the last save, taken after the items get their defaults
+            saved: '',
 
             label(entry) {
                 return entry.title || entry.original || entry.url;
+            },
+            isChanged() {
+                return snapshot(this) !== this.saved;
             },
             select(index) {
                 this.active    = this.items[index] || blank;
@@ -1199,6 +1207,10 @@ document.addEventListener('youla:init', ()=> {
             // the list is rendered again after a move, the focus goes back to the selected item
             focusActive() {
                 setTimeout(() => root.querySelector('.nav-editor-item.is-active .nav-editor-item-head')?.focus(), 50);
+            },
+            // an added item is shown without taking the focus from the source it came from
+            revealActive() {
+                setTimeout(() => root.querySelector('.nav-editor-item.is-active')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 50);
             },
 
             // index after the last subitem of the item
@@ -1311,6 +1323,7 @@ document.addEventListener('youla:init', ()=> {
             add(values) {
                 this.items = [ ...this.items, item(values) ];
                 this.select(this.items.length - 1);
+                this.revealActive();
             },
             addPost(key, post) {
                 this.add({ type: 'post', object: key, objectId: post.id, original: post.title });
@@ -1324,16 +1337,51 @@ document.addEventListener('youla:init', ()=> {
                 this.link = { url: '', title: '' };
             },
 
+            // a menu named in the select is created at once, the server opens it
+            create(name) {
+                if (name.trim() === '') {
+                    return;
+                }
+                this.$ajax.post('menus/create', {
+                    title: name.trim(),
+                    locations: '[]',
+                    items: '[]',
+                }, null, { el: root.querySelector('.nav-editor-menus') }).catch(() => {});
+            },
+
             save() {
-                const items = serialize(this.items);
+                const current = snapshot(this);
                 this.$ajax.post(this.id ? 'menus/update' : 'menus/create', {
                     id: this.id,
                     title: this.title,
                     locations: JSON.stringify(this.locations),
-                    items,
-                }).then(() => {
-                    saved = items;
+                    items: serialize(this.items),
+                }, null, { el: root.querySelector('.nav-editor-save') }).then(() => {
+                    this.saved = current;
                 }).catch(() => {});
+            },
+
+            // the menus: choosing one opens it, a name that is not in the list creates a new one
+            menuSelect: {
+                'u-select'() {
+                    return {
+                        showSearch: true,
+                        ...texts,
+                        // the text comes with `:name` of t(), the select puts the typed name in place of `{value}`
+                        addableText: (texts.addableText || '').replace(':name', '{value}'),
+                        events: {
+                            addable: name => {
+                                this.create(name);
+                                return false;
+                            },
+                        },
+                    };
+                },
+                '@change'() {
+                    if (this.$el.value) {
+                        window.location.href = this.$el.value;
+                    }
+                },
             },
 
             // the sources of the items: the search, a custom link, the posts by type
@@ -1349,21 +1397,9 @@ document.addEventListener('youla:init', ()=> {
                     this.$el.reset();
                 },
             },
-            linkUrl: {
-                'u-prop': 'link.url',
-            },
-            linkTitle: {
-                'u-prop': 'link.title',
-            },
-            results: {
-                'u-show': 'query',
-            },
             result: {
                 'u-each': 'post in found || []',
                 '@click': 'addPost(post.type, post)',
-            },
-            postTitle: {
-                'u-text': 'post.title',
             },
             postType: {
                 'u-text': 'types[post.type] || post.type',
@@ -1411,9 +1447,17 @@ document.addEventListener('youla:init', ()=> {
                 '@submit.prevent'() {
                     this.save();
                 },
+                // the shortcut of saving in editors, the form is checked as on submit
+                '@keydown.window.ctrl.s.prevent'() {
+                    this.$el.requestSubmit();
+                },
+                '@keydown.window.meta.s.prevent'() {
+                    this.$el.requestSubmit();
+                },
             },
-            titleInput: {
-                'u-prop': 'title',
+            count: {
+                'u-text': 'items.length',
+                'u-show': 'items.length',
             },
             list: {
                 'u-sortable': "{ handle: '.sortable-handle', nested: true, indent: 24, maxDepth }",
@@ -1439,9 +1483,6 @@ document.addEventListener('youla:init', ()=> {
                 ':class': 'item.icon',
                 'u-show': 'item.icon',
             },
-            rowLabel: {
-                'u-text': 'label(item)',
-            },
             rowType: {
                 'u-show': "item.type === 'post'",
                 'u-text': 'types[item.object] || item.object',
@@ -1449,24 +1490,10 @@ document.addEventListener('youla:init', ()=> {
             rowLink: {
                 'u-show': "item.type === 'link'",
             },
-            rowRemove: {
-                '@click': 'remove(i)',
-            },
-            empty: {
-                'u-show': 'items.length === 0',
-            },
 
             // the settings of the selected item and of the menu
             panel: {
                 ':class': "activeKey && 'is-active'",
-            },
-            closer: {
-                '@click'() {
-                    this.select(-1);
-                },
-            },
-            hint: {
-                'u-show': '! activeKey',
             },
             field(name) {
                 return {
@@ -1493,9 +1520,6 @@ document.addEventListener('youla:init', ()=> {
                 }
                 return bindings;
             },
-            location: {
-                'u-prop': 'locations',
-            },
             deleter: {
                 '@click'() {
                     // the label of the button is the title of the dialog
@@ -1504,9 +1528,11 @@ document.addEventListener('youla:init', ()=> {
             },
         };
 
+        data.saved = snapshot(data);
+
         // the raw data: the component writes through its proxy into this object
         window.addEventListener('beforeunload', event => {
-            if (serialize(data.items) !== saved) {
+            if (snapshot(data) !== data.saved) {
                 event.preventDefault();
             }
         });

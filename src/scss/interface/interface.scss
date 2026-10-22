@@ -152,7 +152,7 @@
       background-color: var(--expansa-bg-universal);
     }
 
-    &:has(.state) {
+    &:has(> .state) {
       place-content: center;
     }
   }

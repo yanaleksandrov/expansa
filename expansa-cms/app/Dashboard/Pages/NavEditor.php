@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Dashboard\Pages;
 
+use App\Api\Menus\MenusService;
+use App\Dashboard\Values\MenuItem;
 use App\Models\Menu;
 use App\Models\Values\Field;
 use App\Post\Type;
@@ -22,7 +24,8 @@ final class NavEditor
      * Data of the `nav-editor` page: the menus, the one of `menu` being edited (the first one by
      * default, none with `?menu=new`), the theme locations, the public post types to add items of
      * (with `showInNavMenus`) and the fields of an item; the editor gets their defaults and the types
-     * of items they are for.
+     * of items they are for. The rows of the items and the posts of the first type, open in the sources,
+     * are rendered before the editor starts.
      *
      * @param Request $request
      * @return array<string, mixed>
@@ -48,6 +51,9 @@ final class NavEditor
         }
 
         $fields = Menu::itemFields();
+        $items  = $current ? self::flatten($current->items, self::titles($current)) : [];
+        $source = (string) array_key_first($types);
+        $posts  = $source !== '' ? new MenusService()->posts($source, '') : [];
 
         return [
             'menus'     => $menus,
@@ -56,18 +62,33 @@ final class NavEditor
             'owners'    => $owners,
             'types'     => $types,
             'fields'    => $fields,
+            'source'    => $source,
+            'posts'     => array_column($posts, 'title'),
+            'rows'      => array_map(fn (array $item) => new MenuItem(
+                label: (string) ($item['title'] ?: $item['original'] ?: $item['url']),
+                depth: $item['depth'],
+                icon: (string) ($item['icon'] ?? ''),
+                type: $item['type'] === 'post' ? $types[$item['object']] ?? (string) $item['object'] : '',
+            ), $items),
             'state'     => [
                 'id'        => $current->id ?? 0,
                 'title'     => $current->title ?? '',
                 'locations' => $current?->locations ?? [],
-                'items'     => $current ? self::flatten($current->items, self::titles($current)) : [],
+                'items'     => $items,
                 'types'     => $types,
+                'source'    => $source,
+                'posts'     => $source !== '' ? [$source => $posts] : [],
                 'fields'    => array_map(fn (Field $field) => [
                     'default'     => $field->default,
                     'types'       => $field->types,
                     'placeholder' => $field->placeholder,
                 ], $fields),
                 'maxDepth'  => Menu::MAX_DEPTH,
+                'texts'     => [
+                    'searchPlaceholder' => t('Search'),
+                    'searchText'        => t('Nothing found'),
+                    'addableText'       => t('Press Enter to create the :name menu.'),
+                ],
             ],
         ];
     }

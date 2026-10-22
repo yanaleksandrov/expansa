@@ -1757,5 +1757,6 @@
     "Logged-In Users": "Авторизованные",
     "Link Relations": "Отношения ссылки",
     "Empty": "Пусто",
-    "menu\u0004Label": "Подпись"
+    "menu\u0004Label": "Подпись",
+    "Press Enter to create the :name menu.": "Нажмите Enter, чтобы создать меню :name."
 }

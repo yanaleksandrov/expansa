@@ -1608,7 +1608,7 @@ img:after {
 .expansa-main--canvas {
   background-color: var(--expansa-bg-universal);
 }
-.expansa-main:has(.state) {
+.expansa-main:has(> .state) {
   place-content: center;
 }
 .expansa-board {
@@ -3112,7 +3112,6 @@ body.is-unsaved .search .search-btn {
   margin: auto;
   padding: 1.5rem;
   text-align: center;
-  transform: translateY(-42px);
 }
 @media (max-width: 1024px) {
   .state {

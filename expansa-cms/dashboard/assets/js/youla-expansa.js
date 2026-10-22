@@ -966,6 +966,7 @@ document.addEventListener('youla:init', () => {
     Youla.data('navEditor', root => (state = {}) => {
         const maxDepth = state.maxDepth ?? 5;
         const fields = state.fields && typeof state.fields === 'object' ? state.fields : {};
+        const texts = state.texts && typeof state.texts === 'object' ? state.texts : {};
         let lastKey = 0;
         const item = values => ({
             type: 'link',
@@ -978,8 +979,8 @@ document.addEventListener('youla:init', () => {
             key: ++lastKey
         });
         const serialize = items => JSON.stringify(items.map(({key, original, ...values}) => values));
+        const snapshot = ({title, locations, items}) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
         const blank = item(Object.fromEntries(Object.keys(fields).map(name => [ name, Array.isArray(fields[name].default) ? [] : '' ])));
-        let saved = serialize(state.items || []);
         const data = {
             id: state.id || 0,
             title: state.title || '',
@@ -987,18 +988,22 @@ document.addEventListener('youla:init', () => {
             items: (Array.isArray(state.items) ? state.items : []).map(values => item(values)),
             types: state.types || {},
             maxDepth,
-            source: '',
+            source: state.source || '',
             query: '',
             found: null,
-            posts: {},
+            posts: state.posts && typeof state.posts === 'object' ? state.posts : {},
             link: {
                 url: '',
                 title: ''
             },
             active: blank,
             activeKey: 0,
+            saved: '',
             label(entry) {
                 return entry.title || entry.original || entry.url;
+            },
+            isChanged() {
+                return snapshot(this) !== this.saved;
             },
             select(index) {
                 this.active = this.items[index] || blank;
@@ -1010,6 +1015,12 @@ document.addEventListener('youla:init', () => {
             },
             focusActive() {
                 setTimeout(() => root.querySelector('.nav-editor-item.is-active .nav-editor-item-head')?.focus(), 50);
+            },
+            revealActive() {
+                setTimeout(() => root.querySelector('.nav-editor-item.is-active')?.scrollIntoView({
+                    block: 'nearest',
+                    behavior: 'smooth'
+                }), 50);
             },
             end(index) {
                 let end = index + 1;
@@ -1119,6 +1130,7 @@ document.addEventListener('youla:init', () => {
             add(values) {
                 this.items = [ ...this.items, item(values) ];
                 this.select(this.items.length - 1);
+                this.revealActive();
             },
             addPost(key, post) {
                 this.add({
@@ -1142,16 +1154,50 @@ document.addEventListener('youla:init', () => {
                     title: ''
                 };
             },
+            create(name) {
+                if (name.trim() === '') {
+                    return;
+                }
+                this.$ajax.post('menus/create', {
+                    title: name.trim(),
+                    locations: '[]',
+                    items: '[]'
+                }, null, {
+                    el: root.querySelector('.nav-editor-menus')
+                }).catch(() => {});
+            },
             save() {
-                const items = serialize(this.items);
+                const current = snapshot(this);
                 this.$ajax.post(this.id ? 'menus/update' : 'menus/create', {
                     id: this.id,
                     title: this.title,
                     locations: JSON.stringify(this.locations),
-                    items
+                    items: serialize(this.items)
+                }, null, {
+                    el: root.querySelector('.nav-editor-save')
                 }).then(() => {
-                    saved = items;
+                    this.saved = current;
                 }).catch(() => {});
+            },
+            menuSelect: {
+                'u-select'() {
+                    return {
+                        showSearch: true,
+                        ...texts,
+                        addableText: (texts.addableText || '').replace(':name', '{value}'),
+                        events: {
+                            addable: name => {
+                                this.create(name);
+                                return false;
+                            }
+                        }
+                    };
+                },
+                '@change'() {
+                    if (this.$el.value) {
+                        window.location.href = this.$el.value;
+                    }
+                }
             },
             searchInput: {
                 '@input.delay.250ms'() {
@@ -1164,21 +1210,9 @@ document.addEventListener('youla:init', () => {
                     this.$el.reset();
                 }
             },
-            linkUrl: {
-                'u-prop': 'link.url'
-            },
-            linkTitle: {
-                'u-prop': 'link.title'
-            },
-            results: {
-                'u-show': 'query'
-            },
             result: {
                 'u-each': 'post in found || []',
                 '@click': 'addPost(post.type, post)'
-            },
-            postTitle: {
-                'u-text': 'post.title'
             },
             postType: {
                 'u-text': 'types[post.type] || post.type'
@@ -1222,10 +1256,17 @@ document.addEventListener('youla:init', () => {
             editor: {
                 '@submit.prevent'() {
                     this.save();
+                },
+                '@keydown.window.ctrl.s.prevent'() {
+                    this.$el.requestSubmit();
+                },
+                '@keydown.window.meta.s.prevent'() {
+                    this.$el.requestSubmit();
                 }
             },
-            titleInput: {
-                'u-prop': 'title'
+            count: {
+                'u-text': 'items.length',
+                'u-show': 'items.length'
             },
             list: {
                 'u-sortable': '{ handle: \'.sortable-handle\', nested: true, indent: 24, maxDepth }',
@@ -1250,9 +1291,6 @@ document.addEventListener('youla:init', () => {
                 ':class': 'item.icon',
                 'u-show': 'item.icon'
             },
-            rowLabel: {
-                'u-text': 'label(item)'
-            },
             rowType: {
                 'u-show': 'item.type === \'post\'',
                 'u-text': 'types[item.object] || item.object'
@@ -1260,22 +1298,8 @@ document.addEventListener('youla:init', () => {
             rowLink: {
                 'u-show': 'item.type === \'link\''
             },
-            rowRemove: {
-                '@click': 'remove(i)'
-            },
-            empty: {
-                'u-show': 'items.length === 0'
-            },
             panel: {
                 ':class': 'activeKey && \'is-active\''
-            },
-            closer: {
-                '@click'() {
-                    this.select(-1);
-                }
-            },
-            hint: {
-                'u-show': '! activeKey'
             },
             field(name) {
                 return {
@@ -1303,9 +1327,6 @@ document.addEventListener('youla:init', () => {
                 }
                 return bindings;
             },
-            location: {
-                'u-prop': 'locations'
-            },
             deleter: {
                 '@click'() {
                     this.$dialog.open('tmpl-menu-delete', {
@@ -1315,8 +1336,9 @@ document.addEventListener('youla:init', () => {
                 }
             }
         };
+        data.saved = snapshot(data);
         window.addEventListener('beforeunload', event => {
-            if (serialize(data.items) !== saved) {
+            if (snapshot(data) !== data.saved) {
                 event.preventDefault();
             }
         });
