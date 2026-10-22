@@ -13,6 +13,7 @@ use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Queried;
 use Expansa\Builders\Table\Values\Badge;
 use Expansa\Builders\Table\Values\Bulk;
+use Expansa\Builders\Table\Values\Date;
 use Expansa\Builders\Table\Values\Filter;
 use Expansa\Builders\Table\Values\Part;
 use Expansa\Builders\Table\Values\Person;
@@ -68,7 +69,8 @@ final class Users extends Table implements Queried
         }
 
         return array_map(function (array $user) use ($visits) {
-            $role = ((array) json_decode((string) $user['roles'], true))[0] ?? '';
+            $role  = ((array) json_decode((string) $user['roles'], true))[0] ?? '';
+            $visit = (string) ($visits[$user['id']] ?? '');
 
             return [
                 'id'     => $user['id'],
@@ -84,7 +86,7 @@ final class Users extends Table implements Queried
                     class: in_array($role, [User::ROLE_OWNER, 'admin'], true) ? 'badge badge--green-lt' : 'badge',
                     icon: 'ph ph-person-simple-run',
                 ),
-                'visit'  => isset($visits[$user['id']]) ? Dates::format((string) $visits[$user['id']]) : t('Never'),
+                'visit'  => new Date($visit !== '' ? Dates::format($visit) : t('Never'), $visit),
             ];
         }, $users);
     }
@@ -172,7 +174,7 @@ final class Users extends Table implements Queried
             $this->cell('visit')
                 ->title(t('Last Visit'))
                 ->fixedWidth('7rem')
-                ->view('raw'),
+                ->view('date'),
             $this->cell('role')
                 ->title(t('Role'))
                 ->fixedWidth('7rem')

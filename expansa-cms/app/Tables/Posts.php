@@ -15,6 +15,7 @@ use Expansa\Builders\Table\Queried;
 use Expansa\Builders\Table\Values\Action;
 use Expansa\Builders\Table\Values\Badge;
 use Expansa\Builders\Table\Values\Bulk;
+use Expansa\Builders\Table\Values\Date;
 use Expansa\Builders\Table\Values\Filter;
 use Expansa\Builders\Table\Values\Link;
 use Expansa\Builders\Table\Values\Part;
@@ -97,7 +98,7 @@ final class Posts extends Table implements Queried
                     class: $post['status'] === 'publish' ? 'badge t-green' : 'badge',
                 ),
                 'post_status' => $post['status'],
-                'date'        => Dates::format((string) $post['created_at']),
+                'date'        => new Date(Dates::format((string) $post['created_at']), (string) $post['created_at']),
             ];
         }, $posts);
     }
@@ -152,7 +153,8 @@ final class Posts extends Table implements Queried
             $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('7rem')
-                ->sortable('created_at'),
+                ->sortable('created_at')
+                ->view('date'),
         ];
     }
 

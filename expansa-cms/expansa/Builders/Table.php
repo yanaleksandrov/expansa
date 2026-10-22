@@ -362,8 +362,8 @@ abstract class Table
 
     /**
      * Get the value a row is sorted by in PHP: the value of Cell::$sortBy, a value object of Table\Values as its text;
-     * a number stays a number, text is compared without case. A table overrides it to sort by something else,
-     * e.g. a name made of several values of the row.
+     * a number or a numeric text, e.g. of Values\Money, is compared as a number, other text without case.
+     * A table overrides it to sort by something else, e.g. a name made of several values of the row.
      *
      * @param array<string, mixed> $row
      * @param Cell                 $cell Sorted column.
@@ -372,8 +372,13 @@ abstract class Table
     protected function sortValue(array $row, Cell $cell): int|float|string
     {
         $value = $row[$cell->sortBy] ?? '';
+        if (is_int($value) || is_float($value)) {
+            return $value;
+        }
 
-        return is_int($value) || is_float($value) ? $value : mb_strtolower((string) $value);
+        $value = (string) $value;
+
+        return is_numeric($value) ? +$value : mb_strtolower($value);
     }
 
     /**

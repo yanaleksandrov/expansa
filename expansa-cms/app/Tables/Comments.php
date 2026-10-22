@@ -15,6 +15,7 @@ use Expansa\Builders\Table\Queried;
 use Expansa\Builders\Table\Values\Action;
 use Expansa\Builders\Table\Values\Badge;
 use Expansa\Builders\Table\Values\Bulk;
+use Expansa\Builders\Table\Values\Date;
 use Expansa\Builders\Table\Values\Filter;
 use Expansa\Builders\Table\Values\Link;
 use Expansa\Builders\Table\Values\Part;
@@ -99,7 +100,7 @@ final class Comments extends Table implements Queried
                 ),
                 'status'  => new Badge($statuses[$comment['status']] ?? $comment['status']),
                 'post'    => $post,
-                'date'    => Dates::format((string) $comment['created_at']),
+                'date'    => new Date(Dates::format((string) $comment['created_at']), (string) $comment['created_at']),
             ];
         }, $comments);
     }
@@ -126,7 +127,7 @@ final class Comments extends Table implements Queried
         $actions = [];
         foreach (Comment::moderationActions($status) as $value => $action) {
             $actions[] = new Link(
-                title: $action['label'],
+                title: $action->label,
                 class: $value === Comment::STATUS_APPROVED ? 't-green' : 't-muted',
                 attributes: self::action('comments/status', ['id' => $id, 'status' => $value], refresh: true),
             );
@@ -189,7 +190,8 @@ final class Comments extends Table implements Queried
             $this->cell('date')
                 ->title(t('Date'))
                 ->fixedWidth('7rem')
-                ->sortable('created_at'),
+                ->sortable('created_at')
+                ->view('date'),
         ];
     }
 

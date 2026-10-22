@@ -12,10 +12,12 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<a href="{{ $value->edit }}" class="fw-500 t-dark">{{ $value->title }}</a>
-<div class="df aic g-2 fs-12 mt-1 t-muted">
-    @if ($value->view)
-        <a href="{{ $value->view }}" class="t-muted" target="_blank">{{ t('View') }}</a>
-    @endif
-    <span class="df aic g-1" title="{{ t('Approved comments') }}"><i class="ph ph-chat-circle"></i> {{ $value->comments }}</span>
-</div>
+@if ($value)
+    <a href="{{ $value->edit }}" class="fw-500 t-dark">{{ $value->title }}</a>
+    <div class="df aic g-2 fs-12 mt-1 t-muted">
+        @if ($value->view)
+            <a href="{{ $value->view }}" class="t-muted" target="_blank">{{ t('View') }}</a>
+        @endif
+        <span class="df aic g-1" title="{{ t('Approved comments') }}"><i class="ph ph-chat-circle"></i> {{ $value->comments }}</span>
+    </div>
+@endif

@@ -45,7 +45,7 @@ final class Emails extends Table
             $this->cell('event')
                 ->title(t('Event'))
                 ->fixedWidth('9rem')
-                ->view('date'),
+                ->view('raw'),
         ];
     }
 
