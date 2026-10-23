@@ -255,7 +255,7 @@ document.addEventListener('youla:init', () => {
      *
      * Works both as the standalone `/dashboard/media` page and, unmodified, as the content of
      * the `tmpl-media-library` dialog (see `dialogs/media-library.blade.php`) - a caller opens
-     * it with `$dialog.open('tmpl-media-library', { multiple, type, onSelect(items) {...} })`
+     * it with `$dialog.xl.open('tmpl-media-library', { multiple, type, onSelect(items) {...} })`
      * and this component reads that config off `entry` (the dialog stack entry it was mounted
      * inside of) in the `@load` of `self`, which also loads the first page.
      *

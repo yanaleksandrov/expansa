@@ -314,7 +314,7 @@ h4,
 h5,
 h6 {
   --expansa-multiplier: 1.05;
-  font-size: calc(var(--expansa-font-ratio) * 1rem);
+  font-size: calc(var(--expansa-font-ratio) * 0.875rem);
   line-height: 1.2em;
   font-weight: 600;
   margin: 0;

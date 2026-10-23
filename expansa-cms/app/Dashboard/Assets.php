@@ -289,23 +289,18 @@ final class Assets
             ],
             'uploaderDialog'      => [
                 'title' => t('Upload Files'),
-                'class' => 'dialog--md',
             ],
             'emailDialog'         => [
                 'title' => t('Email Settings'),
-                'class' => 'dialog--xl dialog--right',
             ],
             'postEditorDialog'    => [
                 'title' => t('Post Editor'),
-                'class' => 'dialog--lg dialog--right',
             ],
             'takeSelfieDialog'    => [
                 'title' => t('Take a Selfie'),
-                'class' => 'dialog--sm',
             ],
             'mediaLibraryDialog'  => [
                 'title' => t('Media Library'),
-                'class' => 'dialog--xl',
             ],
         ]);
     }

@@ -87,7 +87,7 @@ use Expansa\Facades\Hook;
 
     <!-- dialog windows start -->
     <div class="dialog" u-data="dialog" id="expansa-dialog">
-        <div u-each="entry in stack" class="dialog-wrapper" @click.outside="close(entry.id)">
+        <div class="dialog-wrapper" u-bind="wrapper">
             <div class="dialog-header">
                 <h6 class="dialog-title" u-show="entry.title" u-text="entry.title ?? ''" hidden></h6>
                 <button class="dialog-close" type="button" @click="close(entry.id)"></button>

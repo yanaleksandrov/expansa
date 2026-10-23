@@ -267,7 +267,33 @@ document.addEventListener('youla:init', () => {
         }));
     })();
     (() => {
-        Youla.variable('dialog', () => document.querySelector('[u-data="dialog"]')?.__x?.data);
+        const SIZES = [ 'xs', 'sm', 'md', 'lg', 'xl' ];
+        const POSITIONS = [ 'center', 'left', 'right' ];
+        const chain = (dialog, options = {}) => new Proxy(dialog, {
+            get(target, name) {
+                if (SIZES.includes(name)) {
+                    return chain(target, {
+                        ...options,
+                        size: name
+                    });
+                }
+                if (POSITIONS.includes(name)) {
+                    return chain(target, {
+                        ...options,
+                        position: name
+                    });
+                }
+                if (name === 'open' || name === 'init') {
+                    return (templateID, data) => target[name](templateID, data, options);
+                }
+                const value = target[name];
+                return typeof value === 'function' ? value.bind(target) : value;
+            }
+        });
+        Youla.variable('dialog', () => {
+            const dialog = document.querySelector('[u-data="dialog"]')?.__x?.data;
+            return dialog && chain(dialog);
+        });
         const searchParamsHandler = (param, value, isRemove) => {
             const url = new URL(window.location.href);
             const params = new URLSearchParams(url.search);
@@ -307,23 +333,33 @@ document.addEventListener('youla:init', () => {
             stack: [],
             self: {
                 ':class'() {
-                    return this.stack.length ? [ 'is-active', this.stack.at(-1)?.class ].filter(Boolean).join(' ') : '';
+                    return this.stack.length ? 'is-active' : '';
                 },
                 '@keydown.esc.window'() {
                     this.close();
                 }
             },
-            open(templateID, data = {}) {
+            wrapper: {
+                'u-each': 'entry in stack',
+                ':class': 'entry.modifiers',
+                '@click.outside': 'close(entry.id)'
+            },
+            open(templateID, data = {}, {size = 'md', position = 'center'} = {}) {
+                if (!SIZES.includes(size) || !POSITIONS.includes(position)) {
+                    console.warn(`Youla.js: unknown dialog size '${size}' or position '${position}'.`);
+                }
                 setTimeout(() => {
                     let template = document.getElementById(templateID);
                     if (!template) {
                         return;
                     }
                     const isBase = this.stack.length === 0;
+                    const modifiers = `dialog-wrapper--${size} dialog-wrapper--${position}`;
                     this.stack.push({
                         ...data,
                         id: ++uid,
-                        content: template.innerHTML
+                        content: template.innerHTML,
+                        modifiers
                     });
                     if (isBase) {
                         lockScroll();
@@ -350,12 +386,12 @@ document.addEventListener('youla:init', () => {
             clear() {
                 [ ...this.stack ].forEach(entry => this.close(entry.id));
             },
-            async init(templateID, callback) {
+            async init(templateID, callback, options = {}) {
                 const params = new URLSearchParams(window.location.search);
                 if (templateID && params.get('dialog') === templateID && callback) {
                     const data = await callback();
                     if (data) {
-                        this.open(templateID, data);
+                        this.open(templateID, data, options);
                     }
                 }
             }
@@ -539,7 +575,7 @@ document.addEventListener('youla:init', () => {
             },
             uploader: {
                 '@click'() {
-                    this.$dialog.open('tmpl-media-uploader', this.uploaderDialog);
+                    this.$dialog.md.open('tmpl-media-uploader', this.uploaderDialog);
                 }
             },
             emptyTrash: {

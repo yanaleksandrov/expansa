@@ -148,7 +148,7 @@ work, not just one window at a time.
 
 ```html
 <div u-data>
-  <button type="button" @click="$dialog.open('dialog-window-content')">Open dialog</button>
+  <button type="button" @click="$dialog.sm.open('dialog-window-content')">Open dialog</button>
 
   <template id="dialog-window-content">
     <h3>Window title</h3>
@@ -176,17 +176,36 @@ backdrop is ever actually clickable.
 
 | Method | When to call it |
 | --- | --- |
-| `$dialog.open(templateID, data?)` | Opens a window on top of anything already open: copies `<template id="templateID">` into a new stack entry |
+| `$dialog.open(templateID, data?, options?)` | Opens a window on top of anything already open: copies `<template id="templateID">` into a new stack entry |
 | `$dialog.close()` | Closes the top dialog of the stack — same call already wired to the Close button, Escape, and backdrop click |
 | `$dialog.clear()` | Closes the whole stack at once (e.g. on navigation or logout) |
-| `$dialog.init(templateID, callback)` | Re-opens the outer dialog if it was left open in a reloaded/shared `?dialog=` URL |
+| `$dialog.init(templateID, callback, options?)` | Re-opens the outer dialog if it was left open in a reloaded/shared `?dialog=` URL |
+
+### Size and position
+
+Modifiers before `open()` or `init()` set the size and position of that dialog; their order does not
+matter, the last one of a kind wins. Each dialog of the stack keeps its own, so a small confirm opened
+over a wide panel does not resize it.
+
+```html
+<button type="button" @click="$dialog.sm.open('confirm-delete', { order: 'Order #42' })">Delete</button>
+<button type="button" @click="$dialog.xl.right.open('tmpl-email-editor', emailDialog)">Edit</button>
+```
+
+| Option     | Modifiers                    | Default  |
+| ---------- | ---------------------------- | -------- |
+| `size`     | `xs`, `sm`, `md`, `lg`, `xl` | `md`     |
+| `position` | `center`, `left`, `right`    | `center` |
+
+When the size comes as data, pass it as the third argument: `$dialog.open(id, data, { size: 'lg', position: 'right' })`.
+`left` and `right` dock the dialog to that edge at full height.
 
 The second argument to `open()` is merged straight into the stack entry and is readable inside the
 `<template>` as `entry` (the same loop variable `u-each="entry in stack"` provides):
 `open('confirm-delete', { order })` reads as `entry.order`.
 
 ```html
-<button type="button" @click="$dialog.open('confirm-delete', { order: 'Order #42' })">
+<button type="button" @click="$dialog.sm.open('confirm-delete', { order: 'Order #42' })">
   Delete order #42
 </button>
 

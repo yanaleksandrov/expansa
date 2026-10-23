@@ -448,7 +448,7 @@
 
 .nav-editor-confirm {
   margin: 0;
-  padding: 1.25rem 1.75rem 0.5rem;
+  padding: 1rem;
   font-size: 0.875rem;
   color: var(--expansa-text-muted);
 }

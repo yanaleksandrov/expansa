@@ -26,45 +26,16 @@
       top: -1rem;
       animation: openTop 0.25s forwards;
     }
-  }
 
+    .dialog-wrapper--left {
+      top: 0;
+      animation: openLeft 0.25s forwards;
+    }
 
-  &--xs .dialog-wrapper {
-    max-width: 360px;
-  }
-
-  &--sm .dialog-wrapper {
-    max-width: 480px;
-  }
-
-  &--md .dialog-wrapper {
-    max-width: 768px;
-  }
-
-  &--lg .dialog-wrapper {
-    max-width: 1024px;
-  }
-
-  &--xl .dialog-wrapper {
-    max-width: 1200px;
-  }
-
-  &--left .dialog-wrapper {
-    animation: openLeft 0.25s forwards;
-  }
-
-  &--right .dialog-wrapper {
-    animation: openRight 0.25s forwards;
-  }
-
-  &--left,
-  &--right {
-    border-radius: 0;
-    border: 0;
-    height: 100dvh;
-    overflow-y: auto;
-    top: 0 !important;
-    padding: 0;
+    .dialog-wrapper--right {
+      top: 0;
+      animation: openRight 0.25s forwards;
+    }
   }
 
   &-wrapper {
@@ -84,6 +55,42 @@
     grid-template-rows: 3.5rem 1fr;
     position: relative;
     top: 0;
+
+    // the size and position of each dialog, see open() of the `dialog` component in youla-expansa.js
+    &--xs {
+      max-width: 360px;
+    }
+
+    &--sm {
+      max-width: 480px;
+    }
+
+    &--md {
+      max-width: 768px;
+    }
+
+    &--lg {
+      max-width: 1024px;
+    }
+
+    &--xl {
+      max-width: 1200px;
+    }
+
+    // a side panel: the full height at the edge
+    &--left,
+    &--right {
+      min-height: 100dvh;
+      border-radius: 0;
+    }
+
+    &--left {
+      margin: 0 auto 0 0;
+    }
+
+    &--right {
+      margin: 0 0 0 auto;
+    }
 
     @media (max-width: 640px) {
       min-height: 100%;

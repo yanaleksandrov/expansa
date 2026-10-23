@@ -430,7 +430,7 @@ document.addEventListener('youla:init', () => {
             },
             deleter: {
                 '@click'() {
-                    this.$dialog.open('tmpl-menu-delete', {
+                    this.$dialog.sm.open('tmpl-menu-delete', {
                         id: this.id,
                         title: this.$el.textContent.trim()
                     });

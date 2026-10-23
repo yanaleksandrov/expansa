@@ -316,7 +316,33 @@ document.addEventListener('youla:init', ()=> {
      * @since 2027.1
      */
     (() => {
-        Youla.variable('dialog', () => document.querySelector('[u-data="dialog"]')?.__x?.data);
+        const SIZES     = ['xs', 'sm', 'md', 'lg', 'xl'];
+        const POSITIONS = ['center', 'left', 'right'];
+
+        /**
+         * The size and position of the next dialog as modifiers: `$dialog.lg.right.open(...)`, the last
+         * one of a kind wins. open() and init() get them as their options, the rest of `$dialog` is as is.
+         */
+        const chain = (dialog, options = {}) => new Proxy(dialog, {
+            get(target, name) {
+                if (SIZES.includes(name)) {
+                    return chain(target, { ...options, size: name });
+                }
+                if (POSITIONS.includes(name)) {
+                    return chain(target, { ...options, position: name });
+                }
+                if (name === 'open' || name === 'init') {
+                    return (templateID, data) => target[name](templateID, data, options);
+                }
+                const value = target[name];
+                return typeof value === 'function' ? value.bind(target) : value;
+            },
+        });
+
+        Youla.variable('dialog', () => {
+            const dialog = document.querySelector('[u-data="dialog"]')?.__x?.data;
+            return dialog && chain(dialog);
+        });
 
         const searchParamsHandler = (param, value, isRemove) => {
             const url    = new URL(window.location.href);
@@ -368,32 +394,43 @@ document.addEventListener('youla:init', ()=> {
         // injectDataProviders() reruns this factory per u-data element; "root" only matters for this one's own component.
         Youla.data('dialog', (root) => ({
             stack: [],
-            // the class of the top dialog shows on the container, Esc closes the top one
+            // each dialog of the stack has its own size and position, Esc closes the top one
             self: {
                 ':class'() {
-                    return this.stack.length ? ['is-active', this.stack.at(-1)?.class].filter(Boolean).join(' ') : '';
+                    return this.stack.length ? 'is-active' : '';
                 },
                 '@keydown.esc.window'() {
                     this.close();
                 },
             },
+            wrapper: {
+                'u-each': 'entry in stack',
+                ':class': 'entry.modifiers',
+                '@click.outside': 'close(entry.id)',
+            },
 
-            open(templateID, data = {}) {
+            // options: `size` xs|sm|md|lg|xl and `position` center|left|right, usually set by the modifiers of `$dialog`
+            open(templateID, data = {}, { size = 'md', position = 'center' } = {}) {
+                if (!SIZES.includes(size) || !POSITIONS.includes(position)) {
+                    console.warn(`Youla.js: unknown dialog size '${size}' or position '${position}'.`);
+                }
+
                 setTimeout(() => {
                     let template = document.getElementById(templateID);
                     if (!template) {
                         return;
                     }
 
-                    const isBase = this.stack.length === 0;
+                    const isBase    = this.stack.length === 0;
+                    const modifiers = `dialog-wrapper--${size} dialog-wrapper--${position}`;
 
-                    // "id"/"content" go last so they always win: a caller's own data can freely
+                    // "id"/"content"/"modifiers" go last so they always win: a caller's own data can freely
                     // include a same-named field (e.g. opening with a Post - which always has its
                     // own "id" and "content" - would otherwise silently clobber this entry's real
                     // id and, worse, wipe out the dialog's actual markup with the post's own,
                     // usually-empty "content" field).
                     // u-each (parts/footer.html) initializes each entry itself, wiring up the template's own "@click".
-                    this.stack.push({ ...data, id: ++uid, content: template.innerHTML });
+                    this.stack.push({ ...data, id: ++uid, content: template.innerHTML, modifiers });
 
                     // Only the base dialog locks scroll — a nested call would read scrollY as 0 (already frozen).
                     if (isBase) {
@@ -424,14 +461,14 @@ document.addEventListener('youla:init', ()=> {
                 [...this.stack].forEach(entry => this.close(entry.id));
             },
             // Reopens the base dialog from a shared URL, e.g. via "@load" on the element matching templateID.
-            async init(templateID, callback) {
+            async init(templateID, callback, options = {}) {
                 const params = new URLSearchParams(window.location.search);
 
                 if (templateID && params.get('dialog') === templateID && callback) {
                     const data = await callback();
 
                     if (data) {
-                        this.open(templateID, data);
+                        this.open(templateID, data, options);
                     }
                 }
             },
@@ -654,7 +691,7 @@ document.addEventListener('youla:init', ()=> {
             },
             uploader: {
                 '@click'() {
-                    this.$dialog.open('tmpl-media-uploader', this.uploaderDialog);
+                    this.$dialog.md.open('tmpl-media-uploader', this.uploaderDialog);
                 },
             },
             emptyTrash: {

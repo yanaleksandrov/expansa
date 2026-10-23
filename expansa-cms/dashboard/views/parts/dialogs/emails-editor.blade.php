@@ -9,7 +9,7 @@
 defined('EX_PATH') || exit;
 ?>
 <!-- email editor template start -->
-<template id="tmpl-email-editor" @load="$dialog.init('tmpl-email-editor', () => emailDialog)">
+<template id="tmpl-email-editor" @load="$dialog.xl.right.init('tmpl-email-editor', () => emailDialog)">
     <div class="email">
         <div class="email-form">
             <?php echo form('emails-creator'); ?>

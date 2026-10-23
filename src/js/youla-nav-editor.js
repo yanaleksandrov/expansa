@@ -461,7 +461,7 @@ document.addEventListener('youla:init', () => {
             deleter: {
                 '@click'() {
                     // the label of the button is the title of the dialog
-                    this.$dialog.open('tmpl-menu-delete', { id: this.id, title: this.$el.textContent.trim() });
+                    this.$dialog.sm.open('tmpl-menu-delete', { id: this.id, title: this.$el.textContent.trim() });
                 },
             },
         };

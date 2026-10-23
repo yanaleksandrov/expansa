@@ -22,16 +22,16 @@ $list = static fn (string $path, string $then = 'show(data)'): string => "\$ajax
 
 $details = "\$ajax.post('file-manager/details', {path, name: selected[0]}).then(data => describe(data))";
 
-$ask = static fn (string $title, string $label, string $value, string $request, string $then = 'show(data)'): string => "\$dialog.open('tmpl-file-manager-name', {"
-    . "class: 'dialog--sm', title: {$js($title)}, label: {$js($label)}, action: {$js($title)}, value: $value, "
+$ask = static fn (string $title, string $label, string $value, string $request, string $then = 'show(data)'): string => "\$dialog.sm.open('tmpl-file-manager-name', {"
+    . "title: {$js($title)}, label: {$js($label)}, action: {$js($title)}, value: $value, "
     . "submit: name => $request.then(data => { $then; })})";
 
-$confirm = static fn (string $title, string $message, string $names, string $request, string $then = 'show(data)'): string => "\$dialog.open('tmpl-file-manager-confirm', {"
-    . "class: 'dialog--sm', title: {$js($title)}, message: {$js($message)}, names: $names, action: {$js($title)}, "
+$confirm = static fn (string $title, string $message, string $names, string $request, string $then = 'show(data)'): string => "\$dialog.sm.open('tmpl-file-manager-confirm', {"
+    . "title: {$js($title)}, message: {$js($message)}, names: $names, action: {$js($title)}, "
     . "submit: () => $request.then(data => { $then; })})";
 
-$conflict = static fn (string $run): string => "(run => taken.length ? \$dialog.open('tmpl-file-manager-conflict', {"
-    . "class: 'dialog--sm', title: {$js('Some names are taken')}, names: taken, submit: run}) : run('keep'))($run)";
+$conflict = static fn (string $run): string => "(run => taken.length ? \$dialog.sm.open('tmpl-file-manager-conflict', {"
+    . "title: {$js('Some names are taken')}, names: taken, submit: run}) : run('keep'))($run)";
 
 $upload = static fn (string $files, string $to): string => "(files => \$ajax.post('file-manager/conflicts', {to: $to, names: fileNames(files)}).then(({names: taken}) => "
     . $conflict("conflict => \$ajax.post('file-manager/upload', {path, to: $to, conflict, ...uploadPayload(files)}, event => progress(event)).then(data => show(data)).finally(() => progress(null))")
@@ -46,8 +46,8 @@ $drop = static fn (string $to): string => "editable() && (\$event.dataTransfer.f
     . " : dragging.length && " . $transfer('path', 'JSON.stringify(dragging)', $to, '1') . ")";
 
 $preview = "kind(item.name) === 'text' "
-    . "? \$ajax.post('file-manager/read', {path, name: item.name}).then(({text}) => \$dialog.open('tmpl-file-manager-preview', {class: 'dialog--lg', title: item.name, kind: 'text', text})) "
-    . ": \$dialog.open('tmpl-file-manager-preview', {class: 'dialog--lg', title: item.name, kind: kind(item.name), url: previewUrl(item.name)})";
+    . "? \$ajax.post('file-manager/read', {path, name: item.name}).then(({text}) => \$dialog.lg.open('tmpl-file-manager-preview', {title: item.name, kind: 'text', text})) "
+    . ": \$dialog.lg.open('tmpl-file-manager-preview', {title: item.name, kind: kind(item.name), url: previewUrl(item.name)})";
 
 $open = "mode === 'trash' ? null : (searching "
     . "? (item.folder ? " . $list('join(item.dir, item.name)') . " : " . $list('item.dir', 'show(data), setSelected([item.name])') . ") "
@@ -195,11 +195,11 @@ $config = ['readonly' => $settings->readonly, 'trash' => $settings->trash];
                 <i class="ph ph-sidebar-simple"></i>
             </button>
             <button class="btn btn--icon btn--outline btn--xs" type="button" title="<?php echo t_attr('Activity'); ?>"
-                    @click="$ajax.post('file-manager/log').then(({items}) => $dialog.open('tmpl-file-manager-log', {class: 'dialog--lg', title: <?php echo $js('Activity'); ?>, items}))">
+                    @click="$ajax.post('file-manager/log').then(({items}) => $dialog.lg.open('tmpl-file-manager-log', {title: <?php echo $js('Activity'); ?>, items}))">
                 <i class="ph ph-clock-counter-clockwise"></i>
             </button>
             <button class="btn btn--icon btn--outline btn--xs" type="button" title="<?php echo t_attr('Settings'); ?>"
-                    @click="$dialog.open('tmpl-file-manager-settings', {class: 'dialog--md', title: <?php echo $js('File manager settings'); ?>})">
+                    @click="$dialog.md.open('tmpl-file-manager-settings', {title: <?php echo $js('File manager settings'); ?>})">
                 <i class="ph ph-gear-six"></i>
             </button>
         </div>
