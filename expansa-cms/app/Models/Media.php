@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Query\Query;
-use Expansa\Facades\Disk;
+use App\Post\Type;
+use Expansa\Facades\Db;
 use Expansa\Facades\Image;
 use Expansa\Facades\Safe;
 use Expansa\Filesystem\MimeType;
@@ -19,86 +19,202 @@ use Expansa\Support\Url;
 class Media
 {
     /**
-     * Get media files.
-     *
-     * @param array $args
-     * @return string|array
+     * Folder of the uploaded originals; resized copies are in `i/{width}x{height}/`.
      */
-    public static function get(array $args = []): string|array
+    private const string DIRECTORY = EX_STORAGE . 'i/original/';
+
+    /**
+     * Fields of a file post: the name on disk and what upload() learned about the file.
+     */
+    private const array FIELDS = ['file', 'mime', 'bytes', 'width', 'height', 'sizes'];
+
+    /**
+     * Columns of a file post the library shows.
+     */
+    private const array COLUMNS = ['id [Int]', 'title', 'author_id [Int]', 'created_at'];
+
+    /**
+     * Get a page of the library, the newest first. A search finds the titles that have every
+     * word of it, or a word starting with it, through the FULLTEXT index of the posts table.
+     *
+     * @param int    $page
+     * @param string $search
+     * @param int    $perPage
+     * @return array<int, array<string, mixed>> Items for the library, see item().
+     */
+    public static function get(int $page = 1, string $search = '', int $perPage = 30): array
     {
-        $args = [ 'type' => 'files', 'page' => 1, 'per_page' => 30, ...$args ];
+        $type = Type::get('files');
+        if (! $type instanceof Type) {
+            return [];
+        }
 
-        return Query::apply($args, function ($posts) {
-            if (! is_array($posts)) {
-                return $posts;
-            }
+        $where = [
+            'ORDER' => ['id' => 'DESC'],
+            'LIMIT' => [(max(1, $page) - 1) * $perPage, $perPage],
+        ];
 
-            $sizes = Patterns\Registry::get('images');
-            foreach ($posts as $i => $post) {
-                if (! is_array($post) || ! is_array($sizes)) {
-                    continue;
-                }
+        $words = preg_split('/[^\p{L}\p{N}]+/u', $search, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        if ($words !== []) {
+            $where['MATCH'] = [
+                'columns' => ['title', 'content'],
+                'keyword' => implode(' ', array_map(fn (string $word) => "+$word*", $words)),
+                'mode'    => 'boolean',
+            ];
+        }
 
-                $filepath = sprintf('%si/original/%s', EX_STORAGE, $post['slug'] ?? '');
-                if (file_exists($filepath)) {
-                    $file      = Disk::file($filepath);
-                    $image     = getimagesize($filepath) ?: [null, null];
-                    $iconPath  = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?: 'default');
-                    $posts[$i] = [
-                        ...$post,
-                        ...[
-                            'url'          => Url::toUrl($filepath),
-                            'icon'         => Url::toUrl($iconPath),
-                            'height'       => $image[1],
-                            'width'        => $image[0],
-                            'path'         => $file->path,
-                            'extension'    => $file->extension,
-                            'basename'     => $file->basename,
-                            'filename'     => $file->filename,
-                            'mime'         => $file->mime,
-                            'type'         => $file->type,
-                            'size'         => $file->size,
-                            'sizeKb'       => $file->sizeKb,
-                            'sizeMb'       => $file->sizeMb,
-                            'sizeHumanize' => $file->size,
-                        ],
+        return self::items($type, Db::select($type->table, self::COLUMNS, $where) ?? []);
+    }
+
+    /**
+     * Get one item of the library, e.g. a file just uploaded.
+     *
+     * @param int $id
+     * @return array<string, mixed>|null
+     */
+    public static function find(int $id): ?array
+    {
+        $type = Type::get('files');
+        $row  = $type instanceof Type ? Db::get($type->table, self::COLUMNS, ['id' => $id]) : null;
+
+        return is_array($row) ? self::items($type, [$row])[0] ?? null : null;
+    }
+
+    /**
+     * Turn rows of file posts into items of the library: two queries for the fields and the authors,
+     * no access to the disk.
+     *
+     * @param Type                              $type
+     * @param array<int, array<string, mixed>> $rows
+     * @return array<int, array<string, mixed>>
+     */
+    private static function items(Type $type, array $rows): array
+    {
+        if ($rows === []) {
+            return [];
+        }
+
+        $fields  = self::fields($type, array_column($rows, 'id'));
+        $authors = [];
+        $ids     = array_unique(array_column($rows, 'author_id'));
+        foreach (Db::select('users', ['id [Int]', 'showname', 'login'], ['id' => $ids]) ?: [] as $user) {
+            $authors[$user['id']] = $user['showname'] ?: $user['login'];
+        }
+
+        return array_map(function (array $row) use ($fields, $authors) {
+            $field     = $fields[$row['id']] ?? [];
+            $basename  = $field['file'] ?? '';
+            $extension = strtolower(pathinfo($basename, PATHINFO_EXTENSION));
+            $mime      = $field['mime'] ?? '';
+            $bytes     = (int) ($field['bytes'] ?? 0);
+            $icon      = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, self::icon($mime, $extension));
+
+            $sizes = [];
+            foreach (array_filter(explode(',', $field['sizes'] ?? '')) as $key) {
+                $size = self::sizes()[$key] ?? null;
+                if ($size !== null) {
+                    $sizes[$key] = [
+                        'url'    => Url::toUrl(sprintf('%si/%dx%d/%s', EX_STORAGE, $size['width'], $size['height'], $basename)),
+                        'width'  => $size['width'],
+                        'height' => $size['height'],
                     ];
                 }
-
-                foreach ($sizes as $key => $size) {
-                    $width  = Safe::absint($size['width'] ?? 0);
-                    $height = Safe::absint($size['height'] ?? 0);
-                    if (! $width || ! $height) {
-                        continue;
-                    }
-
-                    $filepath = sprintf('%si/%sx%s/%s', EX_STORAGE, $width, $height, $post['slug'] ?? '');
-                    if (file_exists($filepath)) {
-                        $file     = Disk::file($filepath);
-                        $iconPath = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?: 'default');
-
-                        $posts[$i]['sizes'][$key] = [
-                            'url'          => Url::toUrl($filepath),
-                            'icon'         => Url::toUrl($iconPath),
-                            'width'        => $width,
-                            'height'       => $height,
-                            'path'         => $file->path,
-                            'extension'    => $file->extension,
-                            'basename'     => $file->basename,
-                            'filename'     => $file->filename,
-                            'mime'         => $file->mime,
-                            'type'         => $file->type,
-                            'size'         => $file->size,
-                            'sizeKb'       => $file->sizeKb,
-                            'sizeMb'       => $file->sizeMb,
-                            'sizeHumanize' => $file->size,
-                        ];
-                    }
-                }
             }
 
-            return $posts;
-        });
+            return [
+                'id'           => $row['id'],
+                'title'        => (string) $row['title'],
+                'filename'     => $basename,
+                'extension'    => $extension,
+                'mime'         => $mime,
+                'url'          => $basename !== '' ? Url::toUrl(self::DIRECTORY . $basename) : '',
+                'icon'         => Url::toUrl($icon),
+                'width'        => isset($field['width']) ? (int) $field['width'] : null,
+                'height'       => isset($field['height']) ? (int) $field['height'] : null,
+                'size'         => $bytes,
+                'sizeHumanize' => self::humanize($bytes),
+                'created'      => (string) $row['created_at'],
+                'author'       => $authors[$row['author_id']] ?? '',
+                'sizes'        => $sizes,
+            ];
+        }, $rows);
+    }
+
+    /**
+     * Get the fields of file posts by post ID.
+     *
+     * @param Type  $type
+     * @param int[] $ids
+     * @return array<int, array<string, string>>
+     */
+    private static function fields(Type $type, array $ids): array
+    {
+        $fields = [];
+        $where  = ['post_id' => $ids, 'key' => self::FIELDS];
+        foreach (Db::select("{$type->table}_fields", ['post_id [Int]', 'key', 'value'], $where) ?: [] as $row) {
+            $fields[$row['post_id']][$row['key']] = (string) $row['value'];
+        }
+
+        return $fields;
+    }
+
+    /**
+     * Get the image sizes of the site by key, the ones with both dimensions.
+     *
+     * @return array<string, array{width: int, height: int}>
+     */
+    private static function sizes(): array
+    {
+        $sizes = [];
+        foreach ((array) Patterns\Registry::get('images') as $key => $size) {
+            $width  = Safe::absint($size['width'] ?? 0);
+            $height = Safe::absint($size['height'] ?? 0);
+            if ($width && $height) {
+                $sizes[(string) $key] = ['width' => $width, 'height' => $height];
+            }
+        }
+
+        return $sizes;
+    }
+
+    /**
+     * Get the name of the icon of a file kind, see the icons in `assets/images/files/`.
+     *
+     * @param string $mime
+     * @param string $extension
+     * @return string
+     */
+    private static function icon(string $mime, string $extension): string
+    {
+        return match (true) {
+            $extension === 'svg'                                 => 'svg',
+            str_starts_with($mime, 'image/')                     => 'image',
+            str_starts_with($mime, 'video/')                     => 'video',
+            str_starts_with($mime, 'audio/')                     => 'audio',
+            in_array($extension, ['csv', 'txt', 'zip'], true)    => $extension,
+            in_array($extension, ['doc', 'docx', 'odt'], true)   => 'doc',
+            in_array($extension, ['xls', 'xlsx', 'ods'], true)   => 'xls',
+            default                                              => 'default',
+        };
+    }
+
+    /**
+     * Human-readable size, as Filesystem shows it: `512 b`, `1.25 Mb`.
+     *
+     * @param int $bytes
+     * @return string
+     */
+    private static function humanize(int $bytes): string
+    {
+        $units = ['b', 'Kb', 'Mb', 'Gb'];
+        $unit  = 0;
+        $value = (float) $bytes;
+        while ($value >= 1024 && $unit < 3) {
+            $value /= 1024;
+            $unit++;
+        }
+
+        return round($value, $unit === 0 ? 0 : 2) . ' ' . $units[$unit];
     }
 
     /**
@@ -122,7 +238,7 @@ class Media
             return new Error('media_upload', t('Sorry, you are not allowed to upload this file type.'));
         }
 
-        $directory = EX_STORAGE . 'i/original/';
+        $directory = self::DIRECTORY;
         if (! is_dir($directory) && ! mkdir($directory, 0755, true)) {
             return new Error('media_upload', t('Failed to create the uploads directory.'));
         }
@@ -158,7 +274,7 @@ class Media
             return new Error('media_grab', t('Can\'t fetch the file because it doesn\'t have a valid extension.'));
         }
 
-        $directory = EX_STORAGE . 'i/original/';
+        $directory = self::DIRECTORY;
         if (! is_dir($directory) && ! mkdir($directory, 0755, true)) {
             return new Error('media_grab', t('Failed to create the uploads directory.'));
         }
@@ -196,24 +312,22 @@ class Media
      */
     public static function delete(int $id): bool
     {
-        $post = Post::get('files', $id);
-        if (! $post instanceof Post) {
+        $type     = Type::get('files');
+        $post     = Post::get('files', $id);
+        $basename = $type instanceof Type ? self::fields($type, [$id])[$id]['file'] ?? '' : '';
+        if (! $post instanceof Post || ! $post->delete()) {
             return false;
         }
 
-        if (! $post->delete()) {
-            return false;
-        }
+        if ($basename !== '') {
+            $paths = [self::DIRECTORY . $basename];
+            foreach (self::sizes() as $size) {
+                $paths[] = sprintf('%si/%dx%d/%s', EX_STORAGE, $size['width'], $size['height'], $basename);
+            }
 
-        $sizes = Patterns\Registry::get('images');
-        @unlink(sprintf('%si/original/%s', EX_STORAGE, $post->slug));
-
-        if (is_array($sizes)) {
-            foreach ($sizes as $size) {
-                $width  = Safe::absint($size['width'] ?? 0);
-                $height = Safe::absint($size['height'] ?? 0);
-                if ($width && $height) {
-                    @unlink(sprintf('%si/%sx%s/%s', EX_STORAGE, $width, $height, $post->slug));
+            foreach ($paths as $path) {
+                if (is_file($path)) {
+                    unlink($path);
                 }
             }
         }
@@ -231,17 +345,22 @@ class Media
      */
     private static function finalize(string $filepath, string $basename, string $mime): int|Error
     {
-        $sizes = Patterns\Registry::get('images');
+        $fields = [
+            'file'  => $basename,
+            'mime'  => $mime,
+            'bytes' => (string) (int) filesize($filepath),
+        ];
 
-        if (str_starts_with($mime, 'image/') && is_array($sizes)) {
-            foreach ($sizes as $size) {
-                $width  = Safe::absint($size['width'] ?? 0);
-                $height = Safe::absint($size['height'] ?? 0);
-                if (! $width || ! $height) {
-                    continue;
-                }
+        if (str_starts_with($mime, 'image/')) {
+            $dimensions = getimagesize($filepath);
+            if ($dimensions !== false) {
+                $fields['width']  = (string) $dimensions[0];
+                $fields['height'] = (string) $dimensions[1];
+            }
 
-                $resizedPath = sprintf('%si/%sx%s/%s', EX_STORAGE, $width, $height, $basename);
+            $resized = [];
+            foreach (self::sizes() as $key => $size) {
+                $resizedPath = sprintf('%si/%dx%d/%s', EX_STORAGE, $size['width'], $size['height'], $basename);
                 $resizedDir  = dirname($resizedPath);
 
                 if (! is_dir($resizedDir) && ! mkdir($resizedDir, 0755, true)) {
@@ -249,10 +368,15 @@ class Media
                 }
 
                 try {
-                    Image::load($filepath)->crop($width, $height)->save($resizedPath);
+                    Image::load($filepath)->crop($size['width'], $size['height'])->save($resizedPath);
+                    $resized[] = $key;
                 } catch (\Throwable) {
                     // A failed resize shouldn't block the upload itself - the original file is already saved.
                 }
+            }
+
+            if ($resized !== []) {
+                $fields['sizes'] = implode(',', $resized);
             }
         }
 
@@ -260,9 +384,7 @@ class Media
             'status' => 'publish',
             'title'  => pathinfo($basename, PATHINFO_FILENAME),
             'slug'   => $basename,
-            'fields' => [
-                'mime' => $mime,
-            ],
+            'fields' => $fields,
         ]);
 
         if (! $post instanceof Post) {

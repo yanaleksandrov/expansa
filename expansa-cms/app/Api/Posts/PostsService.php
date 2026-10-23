@@ -6,8 +6,9 @@ namespace App\Api\Posts;
 
 use App\Api\Files\FilesService;
 use App\Models\Post;
-use App\Query\Query;
+use App\Post\Type;
 use Expansa\Facades\Csv;
+use Expansa\Facades\Db;
 use Expansa\Facades\Json;
 use Expansa\Facades\View;
 use Expansa\Http\Request;
@@ -15,18 +16,8 @@ use Expansa\Http\Response;
 
 final class PostsService
 {
-    public function list(): array
-    {
-        return Query::apply([
-            'type'     => 'pages',
-            'page'     => 1,
-            'per_page' => 30,
-        ]);
-    }
-
     /**
-     * Returns a raw file-download response — not JSON, so the controller returns this
-     * Response object directly rather than a plain array (Kernel sends it as-is).
+     * Export the posts of the chosen types out of the trash as a JSON or CSV download.
      */
     public function export(Request $request, Response $response): Response
     {
@@ -35,23 +26,21 @@ final class PostsService
         $types  = is_array($types) ? $types : [];
         $date   = date('YmdHis');
 
-        $content = Query::apply(
-            ['type' => $types, 'per_page' => 99999999],
-            function ($posts) use ($format) {
-                if (!is_array($posts) || empty($posts)) {
-                    return $posts;
-                }
-
-                return match ($format) {
-                    'json'  => Json::encode($posts),
-                    // the BOM makes Excel read the file as UTF-8 instead of the system codepage
-                    'csv'   => "\xEF\xBB\xBF" . Csv::encode([array_keys($posts[0]), ...$posts]),
-                    default => $posts,
-                };
+        $posts = [];
+        foreach ($types as $key) {
+            $type = Type::get((string) $key);
+            if ($type instanceof Type) {
+                $rows  = Db::select($type->table, '*', $type->canTrash ? ['deleted_at' => null] : []) ?? [];
+                $posts = [...$posts, ...array_map(fn (array $row) => ['type' => $type->key, ...$row], $rows)];
             }
-        );
+        }
 
-        $response->content = is_string($content) ? $content : Json::encode($content);
+        $response->content = match (true) {
+            $posts === []    => Json::encode([]),
+            // the BOM makes Excel read the file as UTF-8 instead of the system codepage
+            $format === 'csv' => "\xEF\xBB\xBF" . Csv::encode([array_keys($posts[0]), ...$posts]),
+            default           => Json::encode($posts),
+        };
 
         return $response
             ->setHeader('Content-Type', 'application/force-download')
