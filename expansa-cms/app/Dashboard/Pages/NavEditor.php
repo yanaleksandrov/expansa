@@ -54,8 +54,7 @@ final class NavEditor
         }
 
         $fields = Menu::itemFields();
-        $items  = $current ? self::flatten($current->items, self::posts($current), $current->clicks()) : [];
-        $most   = max([1, ...array_column($items, 'clicks')]);
+        $items  = $current ? self::flatten($current->items, self::posts($current)) : [];
         $kinds  = [
             'link'      => t('Custom Link'),
             'heading'   => t('Heading'),
@@ -85,10 +84,7 @@ final class NavEditor
                 type: $item['type'] === 'post' ? $types[$item['object']] ?? (string) $item['object'] : '',
                 kind: $kinds[$item['type']] ?? '',
                 problem: $item['problem'],
-                clicks: $item['clicks'],
-                share: $item['clicks'] / $most,
             ), $items),
-            'clicks'    => array_sum(array_column($items, 'clicks')),
             'state'     => [
                 'id'        => $current->id ?? 0,
                 'title'     => $current->title ?? '',
@@ -124,16 +120,15 @@ final class NavEditor
     }
 
     /**
-     * Get the items of the editor: each with its `depth` instead of `parent_id` and its `clicks`, a post
+     * Get the items of the editor: each with its `depth` instead of `parent_id`, a post
      * item with the title of its post as `original` and `problem` when the site leaves it out, as
      * Menu::links() does: `deleted` for a missing post, `hidden` for an unpublished or trashed one.
      *
      * @param array                                           $items  Items of the menu, a parent before its subitems.
      * @param array<string, array<int, array<string, mixed>>> $posts  Posts of the items by type and ID, see posts().
-     * @param array<string, int>                              $clicks Clicks of the last 30 days by item ID.
      * @return array<int, array<string, mixed>>
      */
-    private static function flatten(array $items, array $posts, array $clicks): array
+    private static function flatten(array $items, array $posts): array
     {
         $list   = [];
         $depths = [];
@@ -153,7 +148,6 @@ final class NavEditor
                     $post['status'] !== 'publish' || $post['trashed'] => 'hidden',
                     default                                          => '',
                 },
-                'clicks'   => $clicks[$item['id']] ?? 0,
             ];
         }
 

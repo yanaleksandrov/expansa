@@ -22,7 +22,6 @@ use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Support\Error;
 use Expansa\Translation\Languages;
-use PDO;
 
 /**
  * Navigation menu of the site, edited on the `nav-editor` page: a title, the theme locations it is shown
@@ -32,7 +31,7 @@ use PDO;
  * `['id' => ..., 'parent_id' => ..., 'position' => ..., 'type' => one of TYPES, 'object' => post type,
  * 'objectId' => post ID]` and the values of the fields of itemFields() by their keys: the title, the URL,
  * the target, the relations and so on, with the fields plugins add by the `menuItemFields` filter.
- * The ID of an item stays the same while the menu is edited, its clicks are counted by it.
+ * The ID of an item stays the same while the menu is edited.
  * A link has its own URL, a post item gets the URL and, with an empty title, the title of its post when shown;
  * a heading has no URL, a separator neither title, `auth` signs in or out and `profile` opens the profile.
  *
@@ -48,9 +47,8 @@ use PDO;
  * tree('menu-primary', function (array $items) { ... $item->title, $item->url, $item->rel, $item->active ... });
  * ```
  *
- * The theme puts `$item->attributes` on the link, `data-menu-item` there counts the clicks of the item
- * (see the `menu-clicks` script). The links of the locations are cached, forgetLinks() drops them when
- * a menu or a post changes; the dates, the language and the visitor are applied on every request.
+ * The links of the locations are cached, forgetLinks() drops them when a menu or a post changes;
+ * the dates, the language and the visitor are applied on every request.
  *
  * A location the theme no longer declares stays with its menu until it is unchecked: switching back
  * to the theme shows the menu there again.
@@ -90,12 +88,7 @@ class Menu extends Model
     ];
 
     /**
-     * Days the clicks of the items are kept, the editor shows the last 30 of them.
-     */
-    public const int CLICK_DAYS = 90;
-
-    /**
-     * Types of the items that link somewhere: their clicks are counted, the link fields are for them.
+     * Types of the items that link somewhere: the link fields are for them.
      */
     private const array LINKS = ['link', 'post', 'auth', 'profile'];
 
@@ -320,7 +313,7 @@ class Menu extends Model
 
         $export = function (array $items) use (&$export): array {
             return array_map(fn (Tree\Item $item) => [
-                ...array_diff_key($item->data, array_flip(['parent_id', 'position', 'capabilities', 'attributes'])),
+                ...array_diff_key($item->data, array_flip(['parent_id', 'position', 'capabilities'])),
                 'active'   => $item->active,
                 'children' => $export($item->children),
             ], $items);
@@ -367,61 +360,6 @@ class Menu extends Model
     public static function forgetLinks(): void
     {
         Cache::forget('', 'menus');
-    }
-
-    /**
-     * Count a click of an item on the site.
-     *
-     * @param string $item `<menu ID>:<item ID>` of `data-menu-item`.
-     * @return bool False for an item of no menu.
-     */
-    public static function click(string $item): bool
-    {
-        [$menuId, $itemId] = explode(':', $item, 2) + [1 => ''];
-
-        $menu = self::find((int) $menuId);
-        if ($menu instanceof Error || ! array_any($menu->items, fn (array $entry) => $entry['id'] === $itemId)) {
-            return false;
-        }
-
-        return Db::query(
-            'INSERT INTO <menu_clicks> (menu_id, item_id, day, count) VALUES (:menu, :item, :day, 1)
-            ON DUPLICATE KEY UPDATE count = count + 1',
-            [
-                ':menu' => $menu->id,
-                ':item' => $itemId,
-                ':day'  => date('Y-m-d'),
-            ]
-        ) !== null;
-    }
-
-    /**
-     * Get the clicks of the items of the menu over the last days.
-     *
-     * @param int $days
-     * @return array<string, int> Clicks by item ID, an item without clicks is left out.
-     */
-    public function clicks(int $days = 30): array
-    {
-        $clicks = Db::query(
-            'SELECT item_id, SUM(count) FROM <menu_clicks> WHERE menu_id = :menu AND day > :from GROUP BY item_id',
-            [
-                ':menu' => $this->id,
-                ':from' => date('Y-m-d', strtotime("-$days days")),
-            ]
-        )?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
-
-        return array_map(intval(...), $clicks);
-    }
-
-    /**
-     * Delete the clicks older than CLICK_DAYS, run by the scheduler.
-     *
-     * @return void
-     */
-    public static function pruneClicks(): void
-    {
-        Db::delete('menu_clicks', ['day[<]' => date('Y-m-d', strtotime('-' . self::CLICK_DAYS . ' days'))]);
     }
 
     /**
@@ -520,7 +458,7 @@ class Menu extends Model
 
     /**
      * Get the items to show: a post item gets the URL and the title of its post, `rel` becomes a string,
-     * `visibility` the capabilities of Tree, a link the `data-menu-item` attribute; an item of a missing,
+     * `visibility` the capabilities of Tree; an item of a missing,
      * unpublished or trashed post is left out, its subitems take its place.
      *
      * @return array<int, array<string, mixed>>
@@ -569,9 +507,6 @@ class Menu extends Model
                 'url'          => $post['url'] ?? $item['url'] ?? '',
                 'rel'          => implode(' ', $rel),
                 'capabilities' => $item['type'] === 'profile' ? ['read'] : self::VISIBILITY[$item['visibility'] ?? 'all'] ?? [],
-                'attributes'   => in_array($item['type'], self::LINKS, true)
-                    ? ['data-menu-item' => $this->id . ':' . $item['id']]
-                    : [],
             ];
         }
 

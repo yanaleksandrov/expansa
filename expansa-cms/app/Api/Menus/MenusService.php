@@ -66,17 +66,6 @@ final class MenusService
     }
 
     /**
-     * Count a click of an item on the site.
-     *
-     * @param string $item `<menu ID>:<item ID>`.
-     * @return bool False for an item of no menu.
-     */
-    public function click(string $item): bool
-    {
-        return Menu::click($item);
-    }
-
-    /**
      * Answer the menu of a theme location as the visitor of the request sees it.
      *
      * @param Response $response
@@ -169,7 +158,7 @@ final class MenusService
         $stack = [];
         $taken = [];
         foreach (array_values(array_filter($items, is_array(...))) as $item) {
-            // the ID of the editor stays, the clicks are counted by it; a new or a repeated one is generated
+            // the ID of the editor stays; a new or a repeated one is generated
             $id = (string) ($item['id'] ?? '');
             if (! preg_match('/^[A-Za-z0-9_-]{1,36}$/', $id) || isset($taken[$id])) {
                 $id = bin2hex(random_bytes(6));

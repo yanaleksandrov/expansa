@@ -43,15 +43,5 @@ final readonly class MenuItem
          * Why the site leaves the item out: `deleted` or `hidden` (an unpublished post), empty if shown.
          */
         public string $problem = '',
-
-        /**
-         * Clicks of the item on the site over the last 30 days.
-         */
-        public int $clicks = 0,
-
-        /**
-         * Its clicks as a part of the clicks of the most clicked item of the menu, from 0 to 1.
-         */
-        public float $share = 0,
     ) {}
 }

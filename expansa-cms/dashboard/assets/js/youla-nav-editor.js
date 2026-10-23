@@ -14,13 +14,12 @@ document.addEventListener('youla:init', () => {
             ...Object.fromEntries(Object.entries(fields).map(([name, field]) => [ name, structuredClone(field.default ?? '') ])),
             original: '',
             problem: '',
-            clicks: 0,
             depth: 0,
             ...values,
             id: values.id || newId(),
             key: ++lastKey
         });
-        const serialize = items => JSON.stringify(items.map(({key, original, problem, clicks, ...values}) => values));
+        const serialize = items => JSON.stringify(items.map(({key, original, problem, ...values}) => values));
         const snapshot = ({title, locations, items}) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
         const blank = item(Object.fromEntries(Object.keys(fields).map(name => [ name, Array.isArray(fields[name].default) ? [] : '' ])));
         const data = {
@@ -44,12 +43,6 @@ document.addEventListener('youla:init', () => {
             saved: '',
             label(entry) {
                 return entry.title || entry.original || entry.url || kinds[entry.type] || '—';
-            },
-            share(entry) {
-                return entry.clicks / Math.max(1, ...this.items.map(other => other.clicks || 0));
-            },
-            totalClicks() {
-                return this.items.reduce((total, entry) => total + (entry.clicks || 0), 0);
             },
             isChanged() {
                 return snapshot(this) !== this.saved;
@@ -373,10 +366,6 @@ document.addEventListener('youla:init', () => {
             rowKind: {
                 'u-show': 'item.type !== \'post\'',
                 'u-text': 'kinds[item.type]'
-            },
-            rowClicks: {
-                'u-show': 'item.clicks',
-                ':style': '\'--share: \' + share(item)'
             },
             kind(type) {
                 return {

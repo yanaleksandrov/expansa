@@ -49,17 +49,6 @@ final readonly class MenusController
     }
 
     /**
-     * Count a click of a menu item on the site, sent by the `menu-clicks` script; public, see RequireAuth.
-     *
-     * @param Request $request `item`, the `data-menu-item` of the link.
-     * @return array{counted: bool}
-     */
-    public function click(Request $request): array
-    {
-        return ['counted' => $this->service->click($request->getString('item'))];
-    }
-
-    /**
      * Menu of a theme location as a tree, for a headless site: `GET /api/menus/<location>`, public.
      *
      * @param Response $response

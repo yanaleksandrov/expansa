@@ -30,7 +30,6 @@ final class RequireAuth
         '/api/user/two-factor',
         '/api/user/email-link',
         '/api/comments/submit',
-        '/api/menus/click',
     ];
 
     /**

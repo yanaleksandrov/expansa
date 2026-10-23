@@ -674,10 +674,6 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
         }, id: 'security-cleanup')->daily(3);
     });
 
-    // the clicks of the menu items are kept for Menu::CLICK_DAYS
-    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
-        $scheduler->call(fn () => App\Models\Menu::pruneClicks(), id: 'menu-clicks-prune')->daily(4);
-    });
 
     // the scheduled posts are published once their date has come
     Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
@@ -849,15 +845,6 @@ Lifecycle::context('web', true, function () {
     // the menus of the theme locations are the `menu-<location>` trees, their items linking to this page are active
     Expansa\Builders\Tree::setCurrent((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), $_GET);
     App\Models\Menu::register();
-
-    // counts the clicks of the menu items, the links of which the theme gives `$item->attributes`
-    Asset::enqueue(
-        'menu-clicks',
-        url('/dashboard/assets/js/menu-clicks' . (Is::debug() ? '' : '.min') . '.js'),
-        'js',
-        data: ['url' => url('/api/menus/click')],
-        defer: true,
-    );
 
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
