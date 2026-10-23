@@ -36,26 +36,26 @@ class Builder extends AbstractBuilder
         $this->charset   = $options['charset'] ?? '';
         $this->collation = $options['collation'] ?? '';
 
+        // the test mode builds the SQL of the driver too, e.g. MATCH only for MySQL
+        $options['type'] = $options['type'] ?? $options['driver'] ?? null;
+        if (isset($options['type'])) {
+            $this->type = strtolower($options['type']);
+
+            if ($this->type === 'mariadb') {
+                $this->type = 'mysql';
+            }
+        }
+
         if (isset($options['testMode']) && $options['testMode'] === true) {
             $this->testMode = true;
             return;
         }
-
-        $options['type'] = $options['type'] ?? $options['driver'];
 
         if (!isset($options['pdo'])) {
             $options['database'] = $options['database'] ?? $options['database_name'];
 
             if (!isset($options['socket'])) {
                 $options['host'] = $options['host'] ?? $options['server'] ?? false;
-            }
-        }
-
-        if (isset($options['type'])) {
-            $this->type = strtolower($options['type']);
-
-            if ($this->type === 'mariadb') {
-                $this->type = 'mysql';
             }
         }
 

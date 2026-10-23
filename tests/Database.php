@@ -26,20 +26,22 @@ $sql = function (string $method, mixed ...$args) use ($db): string {
 };
 
 check('select with conditions and a limit', $sql('select', 'posts', ['id', 'title'], ['status' => 'publish', 'id[>]' => 5, 'LIMIT' => 10])
-    === 'SELECT "id","title" FROM "x_posts" WHERE "status" = \'publish\' AND "id" > 5 LIMIT 10');
-check('insert', $sql('insert', 'posts', ['title' => 'a']) === 'INSERT INTO "x_posts" ("title") VALUES (\'a\')');
-check('update', $sql('update', 'posts', ['title' => 'x'], ['id' => 3]) === 'UPDATE "x_posts" SET "title" = \'x\' WHERE "id" = 3');
-check('delete by a list of ids', $sql('delete', 'posts', ['id' => [1, 2]]) === 'DELETE FROM "x_posts" WHERE "id" IN (1, 2)');
-check('like', $sql('select', 'posts', '*', ['title[~]' => '%x']) === 'SELECT * FROM "x_posts" WHERE ("title" LIKE \'%x\')');
-check('has() selects the constant 1', $sql('has', 'posts', ['id' => 1]) === 'SELECT EXISTS(SELECT 1 FROM "x_posts" WHERE "id" = 1)');
+    === 'SELECT `id`,`title` FROM `x_posts` WHERE `status` = \'publish\' AND `id` > 5 LIMIT 10');
+check('insert', $sql('insert', 'posts', ['title' => 'a']) === 'INSERT INTO `x_posts` (`title`) VALUES (\'a\')');
+check('update', $sql('update', 'posts', ['title' => 'x'], ['id' => 3]) === 'UPDATE `x_posts` SET `title` = \'x\' WHERE `id` = 3');
+check('delete by a list of ids', $sql('delete', 'posts', ['id' => [1, 2]]) === 'DELETE FROM `x_posts` WHERE `id` IN (1, 2)');
+check('like', $sql('select', 'posts', '*', ['title[~]' => '%x']) === 'SELECT * FROM `x_posts` WHERE (`title` LIKE \'%x\')');
+check('has() selects the constant 1', $sql('has', 'posts', ['id' => 1]) === 'SELECT EXISTS(SELECT 1 FROM `x_posts` WHERE `id` = 1)');
+check('the test mode builds MATCH of MySQL', $sql('select', 'posts', ['id'], ['MATCH' => ['columns' => ['title', 'content'], 'keyword' => '+photo*', 'mode' => 'boolean']])
+    === 'SELECT `id` FROM `x_posts` WHERE MATCH (`title`, `content`) AGAINST (\'+photo*\' IN BOOLEAN MODE)');
 check('a raw foreign key prefixes both tables', $sql('query', 'ALTER TABLE <posts_fields> ADD CONSTRAINT `fk` FOREIGN KEY (`post_id`) REFERENCES <posts> (`id`)')
-    === 'ALTER TABLE "x_posts_fields" ADD CONSTRAINT `fk` FOREIGN KEY (`post_id`) REFERENCES "x_posts" (`id`)');
+    === 'ALTER TABLE `x_posts_fields` ADD CONSTRAINT `fk` FOREIGN KEY (`post_id`) REFERENCES `x_posts` (`id`)');
 
 // values and identifiers can't break out of the query
 check('a quote in a value is escaped', $sql('select', 'posts', '*', ['title' => "x' OR '1'='1"])
-    === 'SELECT * FROM "x_posts" WHERE "title" = \'x\'\' OR \'\'1\'\'=\'\'1\'');
+    === 'SELECT * FROM `x_posts` WHERE `title` = \'x\\\' OR \\\'1\\\'=\\\'1\'');
 check('an injected column name is reduced to the identifier', $sql('select', 'posts', '*', ['id" OR 1=1 --' => 1])
-    === 'SELECT * FROM "x_posts" WHERE "id" = 1');
+    === 'SELECT * FROM `x_posts` WHERE `id` = 1');
 
 // schema: the CREATE TABLE of a table without indexes is the last statement
 $schema = new Expansa\Database\Schema\Builder($db);
@@ -48,9 +50,9 @@ $schema->create('items', function (Expansa\Database\Schema\Table $table) {
     $table->int('count')->unsigned();
     $table->timestamps();
 });
-check('a string without a length is varchar(255)', str_contains($db->queryString, '"name" varchar(255) NOT NULL'));
-check('integers have no display width', str_contains($db->queryString, '"count" int UNSIGNED NOT NULL'));
-check('timestamps() are DATETIME', str_contains($db->queryString, '"created_at" datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'));
+check('a string without a length is varchar(255)', str_contains($db->queryString, '`name` varchar(255) NOT NULL'));
+check('integers have no display width', str_contains($db->queryString, '`count` int UNSIGNED NOT NULL'));
+check('timestamps() are DATETIME', str_contains($db->queryString, '`created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'));
 $schema->create('pairs', function (Expansa\Database\Schema\Table $table) {
     $table->int('a');
     $table->int('b');
@@ -134,7 +136,7 @@ check('the soft delete column', $row->deletedAtColumn === 'deleted_at');
 
 Post::get(9);
 check('get() by id goes through the cache', array_key_exists('posts:9', $cache));
-check('the soft delete scope', Db::instance()->queryString === 'SELECT * FROM "posts" WHERE "id" = 9 AND "deleted_at" IS NULL LIMIT 1');
+check('the soft delete scope', Db::instance()->queryString === 'SELECT * FROM `posts` WHERE `id` = 9 AND `deleted_at` IS NULL LIMIT 1');
 check('an unknown method throws', throws(fn () => Post::nope(), BadMethodCallException::class));
 
 // UUIDs come from PHP, not from a trigger the host may refuse
@@ -143,7 +145,7 @@ check('uuid7() is a version 7 UUID with the RFC variant', array_all($uuids, fn (
 check('uuid7() starts with the time in milliseconds', hexdec(str_replace('-', '', substr($uuids[0], 0, 13))) - (int) (microtime(true) * 1000) <= 0);
 
 new Member(['name' => 'a'])->save();
-check('save() of a new model with HasUuid fills the UUID', (bool) preg_match('/^INSERT INTO "members" \("name", "uuid"\) VALUES \(\'a\', \'[0-9a-f-]{36}\'\)$/', Db::instance()->queryString));
+check('save() of a new model with HasUuid fills the UUID', (bool) preg_match('/^INSERT INTO `members` \(`name`, `uuid`\) VALUES \(\'a\', \'[0-9a-f-]{36}\'\)$/', Db::instance()->queryString));
 
 new Member(['name' => 'b', 'uuid' => 'kept'])->save();
 check('save() keeps a UUID that is set', str_contains(Db::instance()->queryString, "'kept'"));
@@ -153,7 +155,7 @@ $note->setAttribute('id', 3)->setAttribute('updated_at', '2020-01-01 00:00:00')-
 $note->text = 'b';
 $note->save();
 check('save() of a changed model with HasTimestamps stamps the update time', (bool) preg_match(
-    '/^UPDATE "notes" SET "text" = \'b\', "updated_at" = \'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\' WHERE "id" = 3$/',
+    '/^UPDATE `notes` SET `text` = \'b\', `updated_at` = \'\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\' WHERE `id` = 3$/',
     Db::instance()->queryString
 ));
 
