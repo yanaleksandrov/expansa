@@ -177,7 +177,7 @@ and `wrapper` sets of the `dialog` component. A nested dialog lies over the one 
 The template describes its dialog by attributes, so a call names only the template and its data:
 
 ```html
-<template id="tmpl-post-editor" title="<?php echo t_attr('Post Editor'); ?>" size="lg" position="right" guarded>
+<template id="tmpl-email-editor" title="<?php echo t_attr('Email Settings'); ?>" size="xl" position="right" guarded>
 ```
 
 | Attribute  | Values                       | Default  |
@@ -240,7 +240,7 @@ The outer dialog writes its template ID to `?dialog=` in the URL. A template tha
 after a reload or from a shared link restores itself; the callback gives the data of the dialog:
 
 ```html
-<template id="tmpl-post-editor" title="Post Editor" @load="$dialog.restore($el)">
+<template id="tmpl-email-editor" title="Email Settings" @load="$dialog.restore($el)">
 <template id="tmpl-media-editor" size="xl" @load="$dialog.restore($el, () => $ajax.post('media/get'))">
 ```
 
