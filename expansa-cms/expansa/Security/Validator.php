@@ -177,7 +177,8 @@ final class Validator
                     $comparisonValue = implode(', ', $comparison);
                 }
 
-                $key = sprintf('%s:%s', $field, $method);
+                $key   = sprintf('%s:%s', $field, $method);
+                $error = null;
                 if (method_exists($this, $method)) {
                     $error = call_user_func([ $this, $method ], $value, $comparison);
                 } else {
