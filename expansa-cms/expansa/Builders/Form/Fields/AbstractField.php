@@ -136,4 +136,51 @@ abstract class AbstractField implements Field
 
         return trim(implode('|', array_filter(['required', $rule])), '|');
     }
+
+    /**
+     * Rules of a text with `minlength` and `maxlength`: as in the browser, an empty optional value
+     * passes the minimum, only the maximum checks it.
+     *
+     * @param array<string, mixed> $field
+     * @param string               $rule  Rule of the value besides the length, e.g. `email`.
+     * @return string
+     */
+    protected function withLength(array $field, string $rule = ''): string
+    {
+        $min = Sanitizer::absint($field['attributes']['minlength'] ?? 0);
+        $max = Sanitizer::absint($field['attributes']['maxlength'] ?? 0);
+
+        $rules = $this->withRequired($field, implode('|', array_filter([
+            $rule,
+            $min > 0 ? 'lengthMin:' . $min : '',
+            $max > 0 ? 'lengthMax:' . $max : '',
+        ])));
+
+        return $rules !== '' || $max === 0 ? $rules : 'lengthMax:' . $max;
+    }
+
+    /**
+     * Settings of the length limits of a text, `minlength` and `maxlength` of its input.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function lengthSettings(): array
+    {
+        return [
+            [
+                'type'       => 'number',
+                'name'       => 'attributes.minlength',
+                'error'      => 'attributes.minlength',
+                'label'      => t('Minimum Length'),
+                'attributes' => ['min' => 0],
+            ],
+            [
+                'type'       => 'number',
+                'name'       => 'attributes.maxlength',
+                'error'      => 'attributes.maxlength',
+                'label'      => t('Maximum Length'),
+                'attributes' => ['min' => 0],
+            ],
+        ];
+    }
 }

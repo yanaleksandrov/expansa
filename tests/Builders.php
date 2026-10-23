@@ -243,4 +243,25 @@ $created = $table->queries;
 $rows    = [$table->getData(), $table->getData()];
 check('table rows are got on the first read, once', $created === 0 && $table->queries === 1 && $rows[1] === [['title' => 'First']]);
 
+// Form: the length limits of a text, the counter and the rules of a textarea and an input
+$text = new Form\Data(['attributes' => ['maxlength' => '160', 'minlength' => '0', 'value' => 'Привет']]);
+check('form length limit becomes a number', $text->attributes['maxlength'] === 160 && str_contains($text->htmlAttributes, 'maxlength="160"'));
+check('form zero length limit is dropped', ! isset($text->attributes['minlength']));
+check('form counter shows the length and the maximum', $text->counter === '6 / 160');
+check('form counter shows the length without the maximum', new Form\Data(['attributes' => ['minlength' => 3]])->counter === '0');
+check('form field without a limit has no counter', new Form\Data(['attributes' => ['value' => 'x']])->counter === '');
+
+$textarea = new Form\Fields\Textarea();
+$rules    = fn (array $attributes) => $textarea->validate(['name' => 'bio', 'attributes' => $attributes])['bio'];
+check('form required textarea checks both limits', $rules(['required' => true, 'minlength' => 10, 'maxlength' => 200]) === 'required|lengthMin:10|lengthMax:200');
+check('form optional textarea checks only the maximum', $rules(['minlength' => 10, 'maxlength' => 200]) === 'lengthMax:200');
+check('form optional textarea without a maximum has no rules', $rules(['minlength' => 10]) === '');
+
+$input = new Form\Fields\Input();
+check(
+    'form required email keeps its rule with the limit',
+    $input->validate(['name' => 'mail', 'attributes' => ['type' => 'email', 'required' => true, 'maxlength' => 80]]) === ['mail' => 'required|email|lengthMax:80'],
+);
+check('form date ignores the length limits', $input->validate(['name' => 'day', 'attributes' => ['type' => 'date', 'maxlength' => 5]]) === ['day' => '']);
+
 exit($failures ? 1 : 0);

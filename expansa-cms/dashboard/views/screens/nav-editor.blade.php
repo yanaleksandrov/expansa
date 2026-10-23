@@ -2,7 +2,7 @@
 /**
  * Editor of the navigation menus: the menus, the sources of the items, the items sorted by `u-sortable`,
  * the fields of the selected item and the theme locations. The data comes from
- * App\Dashboard\Pages\NavEditor, the bindings of the markup are `u-bind` sets of `navEditor` in youla-expansa.js
+ * App\Dashboard\Pages\NavEditor, the bindings of the markup are `u-bind` sets of `navEditor` in youla-nav-editor.js
  * and short single directives; the fields of an item are App\Models\Menu::itemFields(), a field added there
  * is shown here by its control type.
  *

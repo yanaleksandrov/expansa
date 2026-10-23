@@ -19,7 +19,7 @@ defined('EX_PATH') || exit;
 	@endif
 	<label class="field-item">
 		{!! $field->before !!}
-		<input{!! $field->htmlAttributes !!}>
+		<input{!! $field->htmlAttributes !!}@if($field->counter !== '') u-counter@endif>
 		{!! $field->after !!}
 		@if($field->copy)
 			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy($el.parentElement.querySelector('input').value)"></i>
@@ -28,6 +28,9 @@ defined('EX_PATH') || exit;
 			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif
 	</label>
+	@if($field->counter !== '')
+		<div class="field-counter" aria-live="polite">{{ $field->counter }}</div>
+	@endif
 	@if($field->invalid)
 		<div class="field-error">{!! $field->invalid !!}</div>
 	@endif

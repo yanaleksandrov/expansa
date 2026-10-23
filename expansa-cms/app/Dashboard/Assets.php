@@ -39,6 +39,19 @@ final class Assets
     ];
 
     /**
+     * Styles and scripts of a dashboard page, from dashboard/assets: loaded on that page only, after
+     * the ones of the whole panel.
+     *
+     * @var array<string, array{styles?: string[], scripts?: string[]}>
+     */
+    private const array SCREENS = [
+        'nav-editor' => [
+            'styles'  => ['nav-editor'],
+            'scripts' => ['youla-nav-editor'],
+        ],
+    ];
+
+    /**
      * Tokens of the PHP date format and their air-datepicker equivalents; the other letters have none
      * and are dropped.
      */
@@ -79,8 +92,10 @@ final class Assets
         // vendor JS of a form field loads only on the pages that render that field
         AssetManager::configure(resolver: self::structure(...));
 
+        $screen = self::SCREENS[self::screen()] ?? [];
+
         self::enqueue(
-            ['phosphor', 'expansa', 'dialog', 'controls', 'utility', 'nav-editor', 'chat'],
+            ['phosphor', 'expansa', 'dialog', 'controls', 'utility', 'chat', ...$screen['styles'] ?? []],
             [
                 'youla'         => ['data' => self::data()],
                 'youla-ajax',
@@ -90,6 +105,7 @@ final class Assets
                 'youla-chat',
                 // global, not co-located: the media library must be reachable from any field on any page
                 'youla-storage',
+                ...$screen['scripts'] ?? [],
             ]
         );
     }
@@ -395,6 +411,21 @@ final class Assets
         }
 
         return trim(preg_replace('/\s+/', ' ', $result));
+    }
+
+    /**
+     * Get the slug of the requested dashboard page, the segment after the dashboard slug; empty for
+     * the dashboard root.
+     *
+     * @return string
+     */
+    private static function screen(): string
+    {
+        $path     = trim((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), '/');
+        $segments = explode('/', $path);
+        $root     = array_search(trim((string) Hook::call('dashboardRootSlug', 'dashboard'), '/'), $segments, true);
+
+        return $root === false ? '' : (string) ($segments[$root + 1] ?? '');
     }
 
     /**

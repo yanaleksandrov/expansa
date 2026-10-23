@@ -1778,5 +1778,7 @@
     "Clicks in the last 30 days": "Клики за последние 30 дней",
     "Menu copied to the clipboard": "Меню скопировано в буфер обмена",
     "Menu items pasted": "Пункты меню вставлены",
-    "The clipboard has no menu items.": "В буфере обмена нет пунктов меню."
+    "The clipboard has no menu items.": "В буфере обмена нет пунктов меню.",
+    "Minimum Length": "Минимальная длина",
+    "Maximum Length": "Максимальная длина"
 }

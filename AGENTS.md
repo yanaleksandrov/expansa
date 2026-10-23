@@ -6,7 +6,7 @@
 ## Правила кодинга
 
 - CSS и JS правь в `src/`; `expansa-cms/dashboard/assets/` перезаписывается при билде.
-- youla.js и youla-*.js (кроме youla-expansa.js, youla-chat.js и youla-storage.js) не меняй; если проблема в нём —
+- youla.js и youla-*.js (кроме youla-expansa.js, youla-chat.js, youla-storage.js и youla-nav-editor.js) не меняй; если проблема в нём —
   напиши промпт для фикса в его проекте.
 - PHP 8.4+, но производительность в приоритете.
 - Бенчмаркай ключевые части, оставляй самый быстрый вариант без потери читаемости.

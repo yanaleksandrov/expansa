@@ -95,6 +95,16 @@ echo form('order-editor', EX_PLUGINS . 'ecommerce/core/order.php');
 Атрибуты дополняются по типу: `type` и `name`, виджет youla.js (`u-select`,
 `u-pickadate` с опциями по типу), у `select` и `textarea` нет `type`, у `date`, `datetime-local`, `time` и `month` он `text`; `week` остаётся нативным.
 
+`minlength` и `maxlength` у `textarea` и текстовых типов (`text`, `email`, `search`, `tel`, `url`) — положительные
+числа, ноль и пустое значение убираются. Поле с ними получает счётчик под собой: `12 / 160` или `12` без максимума,
+его обновляет директива `u-counter` из youla-expansa.js. У счётчика класс `is-short`, пока введённый текст короче
+минимума, и `is-full` на максимуме. Правила проверки `validate()` поля — `lengthMin` и `lengthMax`; пустое
+необязательное поле, как и в браузере, проверяется только по максимуму:
+
+```php
+['type' => 'textarea', 'name' => 'excerpt', 'label' => t('Excerpt'), 'attributes' => ['maxlength' => 160]],
+```
+
 `tab`, `step` и `group` — обёртки: их поля выводятся внутрь, шаблон — `layout-<type>`. Перед первой
 вкладкой уровня выводится общее меню вкладок `layout-tab-menu`, шаги нумеруются по порядку.
 

@@ -10,13 +10,11 @@
     "watch": "webpack --mode development --watch",
     "build": "webpack --config webpack.config.js --mode production & webpack --config webpack.config.min.js --mode production"
   },
-  "license": "MIT",
+  "license": "FSL-1.1-ALv2",
   "dependencies": {
     "air-datepicker": "^3.6.0",
-    "choices.js": "^11.1.0",
     "croppr": "^2.3.1",
-    "slim-select": "^2.12.1",
-    "sortablejs": "^1.15.3"
+    "slim-select": "^2.12.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",

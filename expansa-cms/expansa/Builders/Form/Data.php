@@ -28,7 +28,13 @@ final class Data
         'required'       => true,
         'htmlAttributes' => true,
         'checked'        => true,
+        'counter'        => true,
     ];
+
+    /**
+     * Attributes of a length limit: a positive number, `maxlength="0"` would block the input.
+     */
+    private const array LENGTHS = ['minlength', 'maxlength'];
 
     /**
      * Name attribute of the field.
@@ -148,7 +154,7 @@ final class Data
      * HTML attributes of the input.
      */
     public array $attributes = [] {
-        set(mixed $value) => Sanitizer::array($value);
+        set(mixed $value) => self::attributes($value);
     }
 
     /**
@@ -335,6 +341,14 @@ final class Data
     }
 
     /**
+     * Counter of a text with `maxlength` or `minlength`: its length and the limit, `12 / 160` or `12`
+     * without the maximum; empty without a limit. `u-counter` of youla-expansa.js keeps it up to date.
+     */
+    public string $counter {
+        get => self::counter($this->attributes);
+    }
+
+    /**
      * Fill the data from a field array, keys without a property are dropped.
      *
      * @param array<string, mixed> $field
@@ -346,6 +360,44 @@ final class Data
                 $this->$key = $value;
             }
         }
+    }
+
+    /**
+     * Get the text of the length counter of the attributes, see $counter.
+     *
+     * @param array<string, mixed> $attributes
+     * @return string
+     */
+    private static function counter(array $attributes): string
+    {
+        if (! isset($attributes['maxlength']) && ! isset($attributes['minlength'])) {
+            return '';
+        }
+
+        $length = mb_strlen((string) ($attributes['value'] ?? ''));
+
+        return isset($attributes['maxlength']) ? $length . ' / ' . $attributes['maxlength'] : (string) $length;
+    }
+
+    /**
+     * Clean the HTML attributes: a length limit is kept only as a positive number.
+     *
+     * @param mixed $attributes
+     * @return array<string, mixed>
+     */
+    private static function attributes(mixed $attributes): array
+    {
+        $attributes = Sanitizer::array($attributes);
+        foreach (self::LENGTHS as $name) {
+            $length = Sanitizer::absint($attributes[$name] ?? 0);
+            if ($length > 0) {
+                $attributes[$name] = $length;
+            } else {
+                unset($attributes[$name]);
+            }
+        }
+
+        return $attributes;
     }
 
     /**

@@ -57,6 +57,24 @@ $item-padding: 0.8em;
     font-weight: 400;
   }
 
+  // the length of a text against its limits, see u-counter
+  &-counter {
+    justify-self: end;
+    line-height: 1.3;
+    font-size: 0.85714285714em;
+    font-variant-numeric: tabular-nums;
+    color: var(--expansa-text-muted);
+    transition: color 0.2s;
+
+    &.is-short {
+      color: var(--expansa-warning);
+    }
+
+    &.is-full {
+      color: var(--expansa-danger);
+    }
+  }
+
   &-error {
     line-height: 1.3;
     font-size: 0.92857142857em;

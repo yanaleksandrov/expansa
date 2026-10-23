@@ -11,6 +11,11 @@ namespace Expansa\Builders\Form\Fields;
  */
 final class Input extends AbstractField
 {
+    /**
+     * Subtypes of a text, `minlength` and `maxlength` work for them only.
+     */
+    private const array TEXTS = ['text', 'email', 'search', 'tel', 'url'];
+
     public function __construct()
     {
         parent::__construct(
@@ -37,6 +42,7 @@ final class Input extends AbstractField
                 'error' => 'attributes.placeholder',
                 'label' => t('Placeholder'),
             ],
+            ...$this->lengthSettings(),
         ];
     }
 
@@ -52,6 +58,8 @@ final class Input extends AbstractField
             default                    => '',
         };
 
-        return [($field['name'] ?? '') => $this->withRequired($field, $rule)];
+        $isText = in_array($field['attributes']['type'] ?? 'text', self::TEXTS, true);
+
+        return [($field['name'] ?? '') => $isText ? $this->withLength($field, $rule) : $this->withRequired($field, $rule)];
     }
 }

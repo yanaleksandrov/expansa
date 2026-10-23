@@ -22,7 +22,7 @@ unset($attributes['value']);
 	@endif
 	<label class="field-item">
 		{!! $field->before !!}
-		<textarea{!! Arr::toHtmlAttributes($attributes) !!}>{{ $value }}</textarea>
+		<textarea{!! Arr::toHtmlAttributes($attributes) !!}@if($field->counter !== '') u-counter@endif>{{ $value }}</textarea>
 		{!! $field->after !!}
 		@if($field->copy)
 			<i class="ph ph-copy" title="{{ t('Copy') }}" @click="$copy($el.parentElement.querySelector('textarea').value)"></i>
@@ -31,6 +31,9 @@ unset($attributes['value']);
 			<i class="ph ph-info" u-tooltip.click.prevent="'{!! $field->tooltip !!}'"></i>
 		@endif
 	</label>
+	@if($field->counter !== '')
+		<div class="field-counter" aria-live="polite">{{ $field->counter }}</div>
+	@endif
 	@if($field->invalid)
 		<div class="field-error">{!! $field->invalid !!}</div>
 	@endif

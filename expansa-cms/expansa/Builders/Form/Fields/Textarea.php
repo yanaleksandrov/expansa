@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Form\Fields;
 
-use Expansa\Security\Sanitizer;
-
 /**
  * Renders the `textarea` template - a multi-line free text input.
  */
@@ -37,17 +35,12 @@ final class Textarea extends AbstractField
                 'error' => 'attributes.rows',
                 'label' => t('Rows'),
             ],
+            ...$this->lengthSettings(),
         ];
     }
 
     public function validate(array $field = []): array
     {
-        $rule = match (true) {
-            isset($field['attributes']['maxlength']) => 'lengthMax:' . Sanitizer::absint($field['attributes']['maxlength']),
-            isset($field['attributes']['minlength']) => 'lengthMin:' . Sanitizer::absint($field['attributes']['minlength']),
-            default                                  => '',
-        };
-
-        return [($field['name'] ?? '') => $this->withRequired($field, $rule)];
+        return [($field['name'] ?? '') => $this->withLength($field)];
     }
 }
