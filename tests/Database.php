@@ -41,6 +41,17 @@ check('a quote in a value is escaped', $sql('select', 'posts', '*', ['title' => 
 check('an injected column name is reduced to the identifier', $sql('select', 'posts', '*', ['id" OR 1=1 --' => 1])
     === 'SELECT * FROM "x_posts" WHERE "id" = 1');
 
+// schema: the CREATE TABLE of a table without indexes is the last statement
+$schema = new Expansa\Database\Schema\Builder($db);
+$schema->create('items', function (Expansa\Database\Schema\Table $table) {
+    $table->string('name');
+    $table->int('count')->unsigned();
+    $table->timestamps();
+});
+check('a string without a length is varchar(255)', str_contains($db->queryString, '"name" varchar(255) NOT NULL'));
+check('integers have no display width', str_contains($db->queryString, '"count" int UNSIGNED NOT NULL'));
+check('timestamps() are DATETIME', str_contains($db->queryString, '"created_at" datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'));
+
 check('bad connection options throw InvalidConnection', throws(fn () => new Builder(['driver' => 'nope', 'host' => 'x', 'database' => 'x']), InvalidConnection::class));
 
 // models: the services come from configure(), here plain closures instead of the Cache and Security packages

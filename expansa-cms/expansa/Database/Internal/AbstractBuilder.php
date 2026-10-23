@@ -52,7 +52,7 @@ abstract class AbstractBuilder
     public string $charset = '';
 
     /**
-     * Connection collation, e.g. "utf8mb4_general_ci" - same sourcing as {@see self::$charset}.
+     * Connection collation, e.g. "utf8mb4_0900_ai_ci" - same sourcing as {@see self::$charset}.
      *
      * @var string
      */

@@ -13,18 +13,18 @@ use Expansa\Database\Schema\Traits\Commands;
  *
  * @method Column id(string $column = 'id') Add an auto-incrementing primary key column
  * @method Column uuid(string $column = 'uuid') Add a UUID column
- * @method Column tinyInt(string $column, int $precision = 3) Add a TINYINT column
- * @method Column smallInt(string $column, int $precision = 5) Add a SMALLINT column
- * @method Column mediumInt(string $column, int $precision = 8) Add a MEDIUMINT column
- * @method Column int(string $column, int $precision = 10) Add an INT column
- * @method Column bigInt(string $column, int $precision = 20) Add a BIGINT column
+ * @method Column tinyInt(string $column) Add a TINYINT column
+ * @method Column smallInt(string $column) Add a SMALLINT column
+ * @method Column mediumInt(string $column) Add a MEDIUMINT column
+ * @method Column int(string $column) Add an INT column
+ * @method Column bigInt(string $column) Add a BIGINT column
  * @method Column decimal(string $column, ?int $precision = null, ?int $scale = null) Add a DECIMAL column
  * @method Column float(string $column) Add a FLOAT column
  * @method Column double(string $column) Add a DOUBLE column
  * @method Column bool(string $column) Add a BOOLEAN column
  * @method Column blob(string $column) Add a BLOB column
- * @method Column string(string $column, ?int $length = null) Add a STRING column
- * @method Column char(string $column, ?int $length = null) Add a CHAR column
+ * @method Column string(string $column, int $length = 255) Add a STRING column
+ * @method Column char(string $column, int $length = 255) Add a CHAR column
  * @method Column tinyText(string $column) Add a TINYTEXT column
  * @method Column mediumText(string $column) Add a MEDIUMTEXT column
  * @method Column text(string $column) Add a TEXT column

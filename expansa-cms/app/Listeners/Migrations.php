@@ -46,19 +46,20 @@ final class Migrations
             $table->text('content');
             $table->bigInt('author_id')->unsigned()->default(0);
             $table->bigInt('parent_id')->unsigned()->default(0);
-            $table->smallInt('comments')->unsigned()->default(0);
-            $table->smallInt('views')->unsigned()->default(0);
+            $table->int('comments')->unsigned()->default(0);
+            $table->int('views')->unsigned()->default(0);
             $table->mediumInt('position')->unsigned()->default(0);
             $table->enum('status', self::VISIBILITY_STATUSES)->default('pending');
             $table->enum('discussion', self::DISCUSSIONS_STATUSES)->default('open');
             $table->string('password', 255);
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->datetime('deleted_at')->nullable();
 
             // indexes
             $table->index('author_id');
             $table->index('parent_id');
-            $table->index('status');
+            $table->index(['status', 'created_at']);
+            $table->index('created_at');
             $table->index('deleted_at');
             $table->fulltext(['title', 'content']);
         });
@@ -127,7 +128,7 @@ final class Migrations
 
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->mediumText('value');
 
             // indexes
@@ -152,7 +153,7 @@ final class Migrations
         Schema::create($name . '_fields_int', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->bigInt('value');
 
             $table->index([$column, 'key']);
@@ -163,7 +164,7 @@ final class Migrations
         Schema::create($name . '_fields_decimal', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->decimal('value', 20, 6);
 
             $table->index([$column, 'key']);
@@ -174,7 +175,7 @@ final class Migrations
         Schema::create($name . '_fields_datetime', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->datetime('value');
 
             $table->index([$column, 'key']);
@@ -189,7 +190,7 @@ final class Migrations
         Schema::create($name . '_fields_varchar', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->string('value', Builder::MAX_INDEXABLE_LENGTH);
 
             $table->index([$column, 'key']);
@@ -200,7 +201,7 @@ final class Migrations
         Schema::create($name . '_fields_text', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->mediumText('value');
 
             $table->index([$column, 'key']);
@@ -266,7 +267,7 @@ final class Migrations
             $table->string('firstname', 60)->nullable();
             $table->string('lastname', 60)->nullable();
             $table->string('showname', 255)->nullable();
-            $table->string('email', 100)->unique();
+            $table->string('email', 254)->unique();
             $table->string('locale', 10)->nullable()->default(null);
 
             // status and verification
@@ -275,17 +276,19 @@ final class Migrations
             $table->bool('is_verified')->default(0);
 
             // tokens for email verification and password reset
-            $table->string('verification_token', 100)->nullable();
-            $table->timestamp('verification_token_expires_at')->nullable();
-            $table->string('password_reset_token', 100)->nullable();
-            $table->timestamp('password_reset_expires_at')->nullable();
+            $table->char('verification_token', 64)->nullable();
+            $table->datetime('verification_token_expires_at')->nullable();
+            $table->char('password_reset_token', 64)->nullable();
+            $table->datetime('password_reset_expires_at')->nullable();
 
             // activity tracking
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->datetime('deleted_at')->nullable();
 
             // indexes
             $table->index('nicename');
+            $table->index('verification_token');
+            $table->index('password_reset_token');
             $table->index('deleted_at');
         });
 
@@ -311,7 +314,7 @@ final class Migrations
 
             $table->string('name', 100)->default('');
             $table->timestamps();
-            $table->timestamp('used_at')->nullable();
+            $table->datetime('used_at')->nullable();
 
             $table->index('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
@@ -345,10 +348,11 @@ final class Migrations
             $table->string('user_agent', 255)->default('');
             $table->string('ip', 45)->default('');
             $table->timestamps();
-            $table->timestamp('used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->datetime('used_at')->nullable();
+            $table->datetime('expires_at')->nullable();
 
             $table->index('user_id');
+            $table->index('expires_at');
             $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
         });
     }
@@ -396,29 +400,24 @@ final class Migrations
             $table->bigInt('author_id')->unsigned()->default(0);
             $table->string('author_name', 64)->default('');
             $table->string('author_email', 255)->default('');
-            $table->string('author_ip', 39)->default('');
+            $table->string('author_ip', 45)->default('');
             $table->string('author_agent', 255)->default('');
             $table->string('locale', 10)->nullable()->default(null);
             $table->enum('status', ['pending', 'approved', 'spam', 'rejected'])->default('pending');
             $table->text('content');
-            $table->smallInt('likes')->unsigned()->default(0);
-            $table->smallInt('dislikes')->unsigned()->default(0);
+            $table->int('likes')->unsigned()->default(0);
+            $table->int('dislikes')->unsigned()->default(0);
             $table->smallInt('rating')->unsigned()->nullable()->default(null);
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->datetime('deleted_at')->nullable();
 
             // indexes
-            $table->index('post_id');
-            $table->index('post_type');
+            $table->index(['post_id', 'post_type']);
             $table->index('parent_id');
             $table->index('author_id');
-            $table->index('locale');
-            $table->index('status');
-            $table->index('likes');
-            $table->index('dislikes');
-            $table->index('rating');
+            $table->index('author_email');
+            $table->index(['status', 'created_at']);
             $table->index('created_at');
-            $table->index('updated_at');
             $table->index('deleted_at');
         });
     }
@@ -471,7 +470,7 @@ final class Migrations
             $table->string('alt')->nullable();
 
             // Ownership
-            $table->bigInt('user_id')->nullable();
+            $table->bigInt('user_id')->unsigned()->nullable();
 
             // File status
             $table->enum('status', self::VISIBILITY_STATUSES)->default('publish');
@@ -519,19 +518,18 @@ final class Migrations
 
             $table->string('name');
             $table->string('prefix', 12);
-            $table->string('key_hash', 64)->unique();
+            $table->char('key_hash', 64)->unique();
 
             $table->bool('active')->default(true);
 
             $table->json('abilities')->nullable();
 
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->datetime('last_used_at')->nullable();
+            $table->datetime('expires_at')->nullable();
 
             $table->timestamps();
 
             $table->index('user_id');
-            $table->index('active');
         });
     }
 }

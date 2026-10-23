@@ -73,15 +73,10 @@ trait Columns
     {
         if (isset($column->type)) {
             return match ($column->type) {
-                'tinyint',
-                'smallint',
-                'mediumint',
-                'int',
-                'bigint',
                 'binary',
                 'varbinary',
                 'char',
-                'varchar'    => sprintf('%s(%d)', $column->type, $column->precision ?? $column->length ?? ''),
+                'varchar'    => sprintf('%s(%d)', $column->type, $column->length),
                 'float',
                 'decimal',
                 'double'     => sprintf(
