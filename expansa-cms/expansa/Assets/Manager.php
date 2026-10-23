@@ -87,7 +87,7 @@ final class Manager
      * can teach the manager new kinds of assets without modifying it.
      *
      * @param string                 $extension     e.g. 'css', 'js', or a custom key such as 'font'.
-     * @param class-string<AbstractProvider> $providerClass Must extend {@see AbstractProvider}.
+     * @param class-string           $providerClass Must extend {@see AbstractProvider}.
      */
     public static function provider(string $extension, string $providerClass): void
     {

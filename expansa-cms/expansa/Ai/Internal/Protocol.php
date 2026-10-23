@@ -178,7 +178,7 @@ final class Protocol
             throw new InvalidResponse("The {$field} field must be an array of strings.");
         }
 
-        return array_values(array_filter(array_map(trim(...), $values), strlen(...)));
+        return array_values(array_filter(array_map(trim(...), $values), fn (string $value): bool => $value !== ''));
     }
 
     /**

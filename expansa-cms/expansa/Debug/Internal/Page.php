@@ -231,7 +231,7 @@ final class Page
     private function arguments(TypeError $e): array
     {
         $arguments = [];
-        foreach (array_values($e->getTrace()[0]['args'] ?? []) as $i => $value) {
+        foreach ($e->getTrace()[0]['args'] ?? [] as $i => $value) {
             $arguments[] = [
                 'position' => $i + 1,
                 'type'     => get_debug_type($value),

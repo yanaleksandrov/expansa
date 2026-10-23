@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\Menus;
 
 use App\Models\Menu;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use Expansa\Facades\Db;
 use Expansa\Facades\Json;
@@ -66,17 +67,6 @@ final class MenusService
     }
 
     /**
-     * Count a click of an item on the site.
-     *
-     * @param string $item `<menu ID>:<item ID>`.
-     * @return bool False for an item of no menu.
-     */
-    public function click(string $item): bool
-    {
-        return Menu::click($item);
-    }
-
-    /**
      * Answer the menu of a theme location as the visitor of the request sees it.
      *
      * @param Response $response
@@ -94,20 +84,23 @@ final class MenusService
     }
 
     /**
-     * Find published posts by the title, the newest first: of a public type shown in the menus,
-     * or of every such type without one; without text the newest ones of the type.
+     * Find the entries of a source of the editor: published posts by the title, the newest first, of a public
+     * type shown in the menus, or the terms by the name of such a taxonomy, `term:<key>`; every source without one.
+     * Without text the newest posts or the first terms of the source. `type` of a found entry is its source,
+     * `kind` the type of its item and `object` the post type or the taxonomy.
      *
-     * @param string $type  Key of the post type, empty for every type.
+     * @param string $type  Key of the source, empty for every one.
      * @param string $query
-     * @return array<int, array{id: int, title: string, type: string}>
+     * @return array<int, array{id: int, title: string, type: string, kind: string, object: string}>
      */
     public function posts(string $type, string $query): array
     {
         $query = trim($query);
-        $types = $type === '' ? Type::fetch(['public' => true, 'showInNavMenus' => true]) : array_filter([Type::get($type)]);
         if ($type === '' && $query === '') {
             return [];
         }
+
+        $types = $type === '' ? Type::filter(['public' => true, 'showInNavMenus' => true]) : array_filter([Type::get($type)]);
 
         $posts = [];
         foreach ($types as $postType) {
@@ -128,7 +121,37 @@ final class MenusService
             }
 
             foreach (Db::select($postType->table, ['id [Int]', 'title'], $where) ?: [] as $row) {
-                $posts[] = [...$row, 'type' => $postType->key];
+                $posts[] = [...$row, 'type' => $postType->key, 'kind' => 'post', 'object' => $postType->key];
+            }
+        }
+
+        $taxonomies = match (true) {
+            $type === ''                    => Taxonomy::filter(),
+            str_starts_with($type, 'term:') => array_filter([Taxonomy::get(substr($type, 5))]),
+            default                         => [],
+        };
+        foreach ($taxonomies as $taxonomy) {
+            if (! $taxonomy->public || ! $taxonomy->showInNavMenus) {
+                continue;
+            }
+
+            $where = [
+                'taxonomy' => $taxonomy->key,
+                'ORDER'    => ['name' => 'ASC'],
+                'LIMIT'    => self::LIMIT,
+            ];
+            if ($query !== '') {
+                $where['name[~]'] = $query;
+            }
+
+            foreach (Db::select('terms', ['id [Int]', 'name'], $where) ?: [] as $row) {
+                $posts[] = [
+                    'id'     => $row['id'],
+                    'title'  => $row['name'],
+                    'type'   => "term:$taxonomy->key",
+                    'kind'   => 'term',
+                    'object' => $taxonomy->key,
+                ];
             }
         }
 
@@ -169,7 +192,7 @@ final class MenusService
         $stack = [];
         $taken = [];
         foreach (array_values(array_filter($items, is_array(...))) as $item) {
-            // the ID of the editor stays, the clicks are counted by it; a new or a repeated one is generated
+            // the ID of the editor stays; a new or a repeated one is generated
             $id = (string) ($item['id'] ?? '');
             if (! preg_match('/^[A-Za-z0-9_-]{1,36}$/', $id) || isset($taken[$id])) {
                 $id = bin2hex(random_bytes(6));

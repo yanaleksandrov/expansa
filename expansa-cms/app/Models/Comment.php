@@ -329,7 +329,7 @@ class Comment extends Model
     public static function submit(array $data, ?User $user): Comment|Error
     {
         $post = Post::get((string) ($data['post_type'] ?? ''), (int) ($data['post_id'] ?? 0));
-        if (! $post instanceof Post || $post->status !== 'publish' || ! (Type::get($post->type)?->public ?? false)) {
+        if (! $post instanceof Post || $post->status !== 'publish' || ! (Type::get($post->type)->public ?? false)) {
             return error('comment-submit', t('Item not found'));
         }
 

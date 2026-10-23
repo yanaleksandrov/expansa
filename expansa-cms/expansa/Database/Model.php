@@ -9,8 +9,6 @@ use Closure;
 use Expansa\Database\Internal\Cache;
 use Expansa\Database\Traits\HasAttributes;
 use Expansa\Database\Traits\HasGuardAttributes;
-use Expansa\Database\Traits\HasReadonlyAttributes;
-use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Support\Str;
 use JsonSerializable;
 use LogicException;
@@ -24,7 +22,9 @@ use stdClass;
  * @method static static[]    find()                                    Get the models matching the where conditions.
  * @method static static|null first()                                   Get the first model matching the where conditions.
  * @method static static[]    all()                                     Get every model.
- * @method static Query       where(array $args)                        Start a query with where conditions.
+ * @method static Query<static> where(array $args)                     Start a query with where conditions.
+ * @method static Query<static> withTrashed()                          Start a query that includes soft-deleted rows.
+ * @method static Query<static> onlyTrashed()                          Start a query of soft-deleted rows only.
  * @method static bool        exists(array $data)                       Whether a row matches any of the fields.
  * @method null|static        save()                                    Insert or update the row.
  * @method int                delete()                                  Delete the row, or soft-delete it.
@@ -163,11 +163,11 @@ abstract class Model implements JsonSerializable
     {
         $snakeKey = Str::snake($key);
 
-        if ($this->usesTrait(HasReadonlyAttributes::class) && $this->isReadonly($snakeKey) && isset($this->attributes[$snakeKey])) {
+        if ($this->isReadonly($snakeKey) && isset($this->attributes[$snakeKey])) {
             return $this;
         }
 
-        $rule = $this->usesTrait(HasSanitizing::class) ? $this->sanitizerRules()[$snakeKey] ?? '' : '';
+        $rule = $this->sanitizerRules()[$snakeKey] ?? '';
         if ($rule !== '') {
             $sanitizer = self::$sanitizer ?? throw new LogicException('Sanitizing rules of ' . static::class . ' need Model::configure(sanitizer: ...).');
 
@@ -176,6 +176,27 @@ abstract class Model implements JsonSerializable
         }
 
         return $this->traitSetAttribute($key, $value);
+    }
+
+    /**
+     * Whether a set attribute keeps its value; HasReadonlyAttributes overrides it.
+     *
+     * @param string $key Attribute name in snake_case.
+     * @return bool
+     */
+    protected function isReadonly(string $key): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get the sanitizer rules by attribute; HasSanitizing overrides it.
+     *
+     * @return array<string, string>
+     */
+    protected function sanitizerRules(): array
+    {
+        return [];
     }
 
     /**

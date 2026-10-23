@@ -102,7 +102,7 @@ final class Job
     /**
      * Email settings: `subject`, `body` and `ignore_empty_output`.
      *
-     * @var string[]
+     * @var array{subject?: string, body?: string, ignore_empty_output?: bool}
      */
     private array $email = [];
 

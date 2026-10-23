@@ -347,8 +347,8 @@ final class FieldEavTyped extends FieldEav
      * {@see FieldEav::import()} — grouped by routed table first so each gets its own chunked
      * SELECT/INSERT/UPDATE pass (skipped when find()'s cache is already warm).
      *
-     * @param array<string, mixed> $fields
-     * @param int                  $chunkSize
+     * @param array<array-key, mixed> $fields
+     * @param int                     $chunkSize
      * @return array{deleted: int, inserted: int, updated: int}
      */
     public function import(array $fields, int $chunkSize = 1000): array

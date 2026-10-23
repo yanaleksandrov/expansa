@@ -11,10 +11,10 @@ use Expansa\Patterns\Fluent;
  * It provides methods for setting the referenced table, columns, and actions to be performed
  * on update or delete operations.
  *
- * @method CommandForeign on(string $table) Specify the referenced table
- * @method CommandForeign references(string|array $columns) Specify the referenced column(s)
- * @method CommandForeign onUpdate(string $action)
- * @method CommandForeign onDelete(string $action)
+ * @method $this on(string $table) Specify the referenced table
+ * @method $this references(string|array $columns) Specify the referenced column(s)
+ * @method $this onUpdate(string $action)
+ * @method $this onDelete(string $action)
  */
 class CommandForeign extends Fluent
 {

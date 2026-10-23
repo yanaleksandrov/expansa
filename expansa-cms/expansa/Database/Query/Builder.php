@@ -36,26 +36,26 @@ class Builder extends AbstractBuilder
         $this->charset   = $options['charset'] ?? '';
         $this->collation = $options['collation'] ?? '';
 
+        // the test mode builds the SQL of the driver too, e.g. MATCH only for MySQL
+        $options['type'] = $options['type'] ?? $options['driver'] ?? null;
+        if (isset($options['type'])) {
+            $this->type = strtolower($options['type']);
+
+            if ($this->type === 'mariadb') {
+                $this->type = 'mysql';
+            }
+        }
+
         if (isset($options['testMode']) && $options['testMode'] === true) {
             $this->testMode = true;
             return;
         }
-
-        $options['type'] = $options['type'] ?? $options['driver'];
 
         if (!isset($options['pdo'])) {
             $options['database'] = $options['database'] ?? $options['database_name'];
 
             if (!isset($options['socket'])) {
                 $options['host'] = $options['host'] ?? $options['server'] ?? false;
-            }
-        }
-
-        if (isset($options['type'])) {
-            $this->type = strtolower($options['type']);
-
-            if ($this->type === 'mariadb') {
-                $this->type = 'mysql';
             }
         }
 
@@ -381,8 +381,6 @@ class Builder extends AbstractBuilder
             }
 
             $tableOption = ' ' . implode(', ', $optionStack);
-        } elseif (is_string($options)) {
-            $tableOption = ' ' . $options;
         }
 
         $command = 'CREATE TABLE';
@@ -799,7 +797,7 @@ class Builder extends AbstractBuilder
         }
         $result = $query->fetchColumn();
 
-        return $result === '1' || $result === 1 || $result === true;
+        return $result === '1' || $result === 1;
     }
 
     /**
@@ -910,21 +908,19 @@ class Builder extends AbstractBuilder
      */
     public function action(callable $actions): void
     {
-        if (is_callable($actions)) {
-            $this->pdo->beginTransaction();
+        $this->pdo->beginTransaction();
 
-            try {
-                $result = $actions($this);
+        try {
+            $result = $actions($this);
 
-                if ($result === false) {
-                    $this->pdo->rollBack();
-                } else {
-                    $this->pdo->commit();
-                }
-            } catch (\Exception $e) {
+            if ($result === false) {
                 $this->pdo->rollBack();
-                throw $e;
+            } else {
+                $this->pdo->commit();
             }
+        } catch (\Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
         }
     }
 

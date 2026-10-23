@@ -52,7 +52,7 @@ abstract class AbstractBuilder
     public string $charset = '';
 
     /**
-     * Connection collation, e.g. "utf8mb4_general_ci" - same sourcing as {@see self::$charset}.
+     * Connection collation, e.g. "utf8mb4_0900_ai_ci" - same sourcing as {@see self::$charset}.
      *
      * @var string
      */
@@ -843,7 +843,7 @@ abstract class AbstractBuilder
      * @param array|string      $join
      * @param null|array|string $columns
      * @param null|array        $where
-     * @param null|string       $columnFn
+     * @param null|Raw|string   $columnFn
      * @return string
      */
     protected function selectContext(
@@ -852,7 +852,7 @@ abstract class AbstractBuilder
         array|string $join,
         array|string|null &$columns = null,
         ?array $where = null,
-        ?string $columnFn = null
+        Raw|string|null $columnFn = null
     ): string {
         preg_match("/(?<table>" . $this::TABLE_PATTERN . ")\s*\((?<alias>" . $this::ALIAS_PATTERN . ")\)/u", $table, $tableMatch);
 
@@ -1032,7 +1032,7 @@ abstract class AbstractBuilder
                 $stack[$key] = isset($keyMatch['type']) ?
                     [$columnKey, $keyMatch['type']] :
                     [$columnKey];
-            } elseif (!is_int($key) && is_array($value)) {
+            } elseif (is_array($value)) {
                 if ($root && count($columns) === 1) {
                     $stack[$key] = [$key, 'String'];
                 }

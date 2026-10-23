@@ -151,16 +151,7 @@ class Type
             throw new InvalidArgumentException(t('Post type key must be between 1 and 20 characters long.'));
         }
 
-        $this->labelName       ??= t('Page');
-        $this->labelNamePlural ??= t('Pages');
-        $this->labelAllItems   ??= t('All Pages');
-        $this->labelAdd        ??= t('Add Page');
-        $this->labelEdit       ??= t('Edit Page');
-        $this->labelUpdate     ??= t('Update Page');
-        $this->labelView       ??= t('View Page');
-        $this->labelSearch     ??= t('Search Page');
-        $this->labelSave       ??= t('Save');
-        $this->table             = Safe::tablename($key);
+        $this->table = Safe::tablename($key);
 
         /**
          * Show in dashboard menu.
@@ -195,9 +186,6 @@ class Type
         $table = EX_DB['prefix'] . $type;
         if (! Db::hasTable($table)) {
             Hook::run('createPostsTable', $type);
-        } elseif ($this->canTrash && ! isset(Db::schema($table)['deleted_at'])) {
-            // the columns are already loaded by hasTable(), so the check costs no query
-            Hook::run('addSoftDeletes', $type);
         }
     }
 
@@ -246,21 +234,15 @@ class Type
     }
 
     /**
-     * Retrieves data (objects) of registered record types.
-     * Not the records themselves, but the record type registration data.
-     * You can filter the output by a variety of criteria.
+     * Get the registered types whose properties have the given values, see Arr::filter().
      *
-     * @param array $args      Array of criteria by which posts types will be selected.
-     *                         For the value of each parameter, see the description of the "Type::register" method.
-     * @param string $operator Optional. The logical operation to perform. 'or' means only one
-     *                         element from the array needs to match; 'and' means all elements
-     *                         must match; 'not' means no elements may match. Default 'and'.
-     *
-     * @return array
+     * @param array<string, mixed> $args     Values by property, e.g. `['public' => true]`.
+     * @param string               $operator `and`: every value matches, `or`: one of them, `not`: none.
+     * @return array<string, Type>
      */
-    public static function fetch(array $args = [], string $operator = 'and'): array
+    public static function filter(array $args = [], string $operator = 'and'): array
     {
-        return Arr::filter(self::$items ?? [], $args, $operator);
+        return Arr::filter(self::$items, $args, $operator);
     }
 
     /**
@@ -268,7 +250,7 @@ class Type
      */
     public static function options(array $filters = []): array
     {
-        $types = Arr::filter(self::$items ?? [], $filters, 'and');
+        $types = Arr::filter(self::$items, $filters, 'and');
         foreach ($types as $type) {
             $types[ $type->key ] = sprintf('%s (%s)', $type->labelName, $type->key);
         }

@@ -51,7 +51,13 @@ trait Indexes
         $existsColumns  = array_column($existsColumns, 'type', 'name');
         $indexedColumns = (array) ($command->attributes['columns'] ?? []);
 
-        $columns = array_intersect_key($existsColumns, array_flip($indexedColumns));
+        // the order of the index, not of the table: (status, created_at) differs from (created_at, status)
+        $columns = [];
+        foreach ($indexedColumns as $column) {
+            if (isset($existsColumns[$column])) {
+                $columns[$column] = $existsColumns[$column];
+            }
+        }
 
         $keys = [];
 

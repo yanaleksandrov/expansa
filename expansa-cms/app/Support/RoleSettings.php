@@ -27,12 +27,6 @@ final class RoleSettings
     private const array ADMIN_PERMISSIONS = ['manage_options', 'users_edit'];
 
     /**
-     * Permissions added to the code after the roles became editable: a role saved before them
-     * gets them from the code, as a role saved after them gets every permission it has not seen.
-     */
-    private const array INTRODUCED = ['manage_menus'];
-
-    /**
      * Permissions of the roles of the code, read before the saved roles replace them.
      *
      * @var string[]
@@ -54,7 +48,7 @@ final class RoleSettings
             }
 
             // a permission the role was saved without knowing comes from the role of the code
-            $known       = isset($role['known']) ? (array) $role['known'] : array_diff(self::$known, self::INTRODUCED);
+            $known       = (array) ($role['known'] ?? self::$known);
             $unseen      = array_diff(Role::get($key)['permissions'] ?? [], $known);
             $checked     = array_keys(array_filter((array) ($role['permissions'] ?? [])));
             $permissions = array_values(array_unique([...$checked, ...$unseen]));

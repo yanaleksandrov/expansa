@@ -386,7 +386,7 @@ class User extends Model implements Fieldable, Identity, Subject
     {
         $reassigned = 0;
 
-        foreach (Type::fetch() as $type) {
+        foreach (Type::filter() as $type) {
             $result = Db::update($type->table, ['author_id' => $newUserId], ['author_id' => $this->id]);
 
             $reassigned += $result && $result->rowCount() ? 1 : 0;

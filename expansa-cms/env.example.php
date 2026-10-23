@@ -19,7 +19,7 @@ define('EX_DB', [
     'host'       => getenv('EX_DB_HOST') ?: 'db.host',
     'prefix'     => getenv('EX_DB_PREFIX') ?: 'db.prefix',
     'charset'    => 'utf8mb4',
-    'collation'  => 'utf8mb4_general_ci',
+    'collation'  => 'utf8mb4_0900_ai_ci',
     'port'       => (int) (getenv('EX_DB_PORT') ?: 3306),
     // keeps the connection open between requests served by the same PHP worker
     'persistent' => false,

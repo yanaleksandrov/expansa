@@ -4,525 +4,583 @@ declare(strict_types=1);
 
 namespace Expansa\Security;
 
-use Dom\Element;
-use Dom\HTMLDocument;
-use Dom\XPath;
 use InvalidArgumentException;
+use LogicException;
 
 /**
- * HTML filter against XSS: keeps only the allowed elements, attributes and URL protocols.
- *
- * The fragment is parsed by the HTML5 parser the way a browser parses it, the tree is filtered by the rules
- * and serialized back, so a browser builds the same tree from the result. The behavior is specified
- * in documentation/Markup.md.
+ * HTML filter: keeps only allowed elements, attributes and URL protocols, disarms everything else.
  *
  * @package Expansa\Security
  */
 final class Markup
 {
     /**
-     * URL protocols allowed in links and sources.
+     * Allowed elements and their attributes, in alphabetical order. A listed attribute takes any value,
+     * `name => [check => value]` takes a value that passes one of the checks, see checkAttrVal().
+     * The `*` element holds attributes of every element, a name ending with `*` is a prefix.
      */
-    public const array PROTOCOLS = ['ftp', 'http', 'https', 'irc', 'mailto', 'sftp', 'sms', 'tel', 'webcal'];
-
-    /**
-     * Allowed elements and their attributes with checks, `*` holds the attributes of every element.
-     */
-    public const array RULES = [
-        '*'          => [
-            'aria-*' => 'text',
-            'class'  => 'text',
-            'data-*' => 'text',
-            'dir'    => ['auto', 'ltr', 'rtl'],
-            'lang'   => 'text',
-            'role'   => 'text',
-            'title'  => 'text',
-        ],
-        'a'          => [
-            'download' => 'text',
-            'href'     => 'url',
-            'hreflang' => 'text',
-            'rel'      => 'text',
-            'target'   => ['_blank', '_parent', '_self', '_top'],
-            'type'     => 'text',
-        ],
+    public const array ALLOWED_HTML = [
+        '*'          => ['aria-*', 'class', 'data-*', 'dir', 'lang', 'role', 'title'],
+        'a'          => ['download' => ['valueless' => 'y'], 'href', 'id', 'name', 'rel', 'rev', 'target'],
         'abbr'       => [],
         'address'    => [],
         'article'    => [],
         'aside'      => [],
-        'audio'      => [
-            'autoplay' => 'text',
-            'controls' => 'text',
-            'loop'     => 'text',
-            'muted'    => 'text',
-            'preload'  => ['', 'auto', 'metadata', 'none'],
-            'src'      => 'url',
-        ],
+        'audio'      => self::MEDIA,
         'b'          => [],
         'bdi'        => [],
         'bdo'        => [],
-        'blockquote' => ['cite' => 'url'],
+        'blockquote' => ['cite', 'id'],
         'br'         => [],
-        'button'     => [
-            'disabled' => 'text',
-            'type'     => ['button'],
-            'value'    => 'text',
-        ],
-        'caption'    => [],
+        'button'     => ['disabled', 'id', 'name', 'type', 'value'],
+        'caption'    => ['align'],
         'cite'       => [],
         'code'       => [],
-        'col'        => ['span' => 'number'],
-        'colgroup'   => ['span' => 'number'],
-        'data'       => ['value' => 'text'],
+        'col'        => ['span'],
+        'colgroup'   => ['span'],
+        'data'       => ['value'],
         'dd'         => [],
-        'del'        => [
-            'cite'     => 'url',
-            'datetime' => 'text',
-        ],
-        'details'    => [
-            'name' => 'text',
-            'open' => 'text',
-        ],
+        'del'        => ['datetime'],
+        'details'    => ['open'],
         'dfn'        => [],
-        'div'        => [],
+        'div'        => ['id'],
         'dl'         => [],
         'dt'         => [],
         'em'         => [],
-        'fieldset'   => ['disabled' => 'text'],
-        'figcaption' => [],
-        'figure'     => [],
+        'fieldset'   => ['id'],
+        'figcaption' => self::ALIGNED,
+        'figure'     => self::ALIGNED,
         'footer'     => [],
-        'h1'         => [],
-        'h2'         => [],
-        'h3'         => [],
-        'h4'         => [],
-        'h5'         => [],
-        'h6'         => [],
+        'h1'         => self::ALIGNED,
+        'h2'         => self::ALIGNED,
+        'h3'         => self::ALIGNED,
+        'h4'         => self::ALIGNED,
+        'h5'         => self::ALIGNED,
+        'h6'         => self::ALIGNED,
         'header'     => [],
         'hgroup'     => [],
-        'hr'         => [],
-        'i'          => [],
-        'iframe'     => [
-            'allow'           => 'text',
-            'allowfullscreen' => 'text',
-            'height'          => 'number',
-            'loading'         => ['eager', 'lazy'],
-            'referrerpolicy'  => 'text',
-            'sandbox'         => 'text',
-            'src'             => 'url',
-            'width'           => 'number',
-        ],
-        'img'        => [
-            'alt'      => 'text',
-            'decoding' => ['async', 'auto', 'sync'],
-            'height'   => 'number',
-            'loading'  => ['eager', 'lazy'],
-            'sizes'    => 'text',
-            'src'      => 'url',
-            'srcset'   => 'url',
-            'width'    => 'number',
-        ],
-        'ins'        => [
-            'cite'     => 'url',
-            'datetime' => 'text',
-        ],
-        'kbd'        => [],
-        'label'      => ['for' => 'text'],
-        'legend'     => [],
-        'li'         => ['value' => 'number'],
+        'hr'         => [...self::ALIGNED, 'noshade', 'size', 'width'],
+        'i'          => ['id'],
+        'iframe'     => ['allow', 'allowfullscreen', 'frameborder', 'height', 'id', 'loading', 'marginheight', 'marginwidth', 'referrerpolicy', 'sandbox', 'scrolling', 'src', 'width'],
+        'img'        => ['align', 'alt', 'border', 'decoding', 'height', 'id', 'loading', 'sizes', 'src', 'srcset', 'width'],
+        'ins'        => ['cite', 'datetime', 'id'],
+        'kbd'        => ['id'],
+        'label'      => ['for', 'id'],
+        'legend'     => self::ALIGNED,
+        'li'         => ['id', 'value'],
         'main'       => [],
         'mark'       => [],
-        'meter'      => [
-            'high'    => 'number',
-            'low'     => 'number',
-            'max'     => 'number',
-            'min'     => 'number',
-            'optimum' => 'number',
-            'value'   => 'number',
-        ],
-        'nav'        => [],
-        'ol'         => [
-            'reversed' => 'text',
-            'start'    => 'number',
-            'type'     => ['1', 'a', 'A', 'i', 'I'],
-        ],
-        'optgroup'   => [
-            'disabled' => 'text',
-            'label'    => 'text',
-        ],
-        'option'     => [
-            'disabled' => 'text',
-            'label'    => 'text',
-            'selected' => 'text',
-            'value'    => 'text',
-        ],
+        'meter'      => ['id'],
+        'nav'        => self::ALIGNED,
+        'ol'         => ['id', 'reversed', 'start', 'type'],
+        'optgroup'   => ['label', 'selected', 'value'],
+        'option'     => ['selected', 'value'],
         'p'          => [],
         'picture'    => [],
         'pre'        => [],
-        'progress'   => [
-            'max'   => 'number',
-            'value' => 'number',
-        ],
-        'q'          => ['cite' => 'url'],
+        'progress'   => ['id'],
+        'q'          => ['cite', 'id'],
         'rp'         => [],
         'rt'         => [],
         'ruby'       => [],
         's'          => [],
         'samp'       => [],
-        'section'    => [],
-        'select'     => [
-            'disabled' => 'text',
-            'multiple' => 'text',
-            'size'     => 'number',
-        ],
+        'section'    => self::ALIGNED,
+        'select'     => [],
         'small'      => [],
-        'source'     => [
-            'height' => 'number',
-            'media'  => 'text',
-            'sizes'  => 'text',
-            'src'    => 'url',
-            'srcset' => 'url',
-            'type'   => 'text',
-            'width'  => 'number',
-        ],
-        'span'       => [],
+        'source'     => ['media', 'sizes', 'src', 'srcset', 'type'],
+        'span'       => ['align'],
         'strong'     => [],
         'sub'        => [],
         'summary'    => [],
         'sup'        => [],
-        'table'      => [],
-        'tbody'      => [],
-        'td'         => [
-            'colspan' => 'number',
-            'headers' => 'text',
-            'rowspan' => 'number',
-        ],
-        'tfoot'      => [],
-        'th'         => [
-            'abbr'    => 'text',
-            'colspan' => 'number',
-            'headers' => 'text',
-            'rowspan' => 'number',
-            'scope'   => ['col', 'colgroup', 'row', 'rowgroup'],
-        ],
-        'thead'      => [],
-        'time'       => ['datetime' => 'text'],
-        'tr'         => [],
-        'track'      => [
-            'default' => 'text',
-            'kind'    => ['captions', 'chapters', 'descriptions', 'metadata', 'subtitles'],
-            'label'   => 'text',
-            'src'     => 'url',
-            'srclang' => 'text',
-        ],
+        'table'      => ['align', 'bgcolor', 'border', 'cellpadding', 'cellspacing', 'id', 'rules', 'summary', 'width'],
+        'tbody'      => self::TABLE_SECTION,
+        'td'         => self::TABLE_CELL,
+        'tfoot'      => self::TABLE_SECTION,
+        'th'         => self::TABLE_CELL,
+        'thead'      => self::TABLE_SECTION,
+        'time'       => ['datetime'],
+        'title'      => [],
+        'tr'         => [...self::TABLE_SECTION, 'bgcolor'],
+        'track'      => ['default', 'id', 'kind', 'label', 'src', 'srclang'],
         'u'          => [],
-        'ul'         => [],
+        'ul'         => ['id'],
         'var'        => [],
-        'video'      => [
-            'autoplay'    => 'text',
-            'controls'    => 'text',
-            'height'      => 'number',
-            'loop'        => 'text',
-            'muted'       => 'text',
-            'playsinline' => 'text',
-            'poster'      => 'url',
-            'preload'     => ['', 'auto', 'metadata', 'none'],
-            'src'         => 'url',
-            'width'       => 'number',
-        ],
-        'wbr'        => [],
+        'video'      => [...self::MEDIA, 'height', 'playsinline', 'poster', 'width'],
+        'wbr'        => ['id'],
     ];
 
     /**
-     * Elements that can not be allowed: their content is code or raw text,
-     * or they change the page outside the fragment.
+     * Attributes of headings and sections in ALLOWED_HTML.
      */
-    private const array FORBIDDEN = [
-        'base'      => true,
-        'link'      => true,
-        'meta'      => true,
-        'noembed'   => true,
-        'noframes'  => true,
-        'noscript'  => true,
-        'plaintext' => true,
-        'script'    => true,
-        'style'     => true,
-        'template'  => true,
-        'xmp'       => true,
+    private const array ALIGNED = ['align', 'id'];
+
+    /**
+     * Attributes of audio and video in ALLOWED_HTML.
+     */
+    private const array MEDIA = ['autoplay', 'controls', 'id', 'loop', 'muted', 'preload', 'src'];
+
+    /**
+     * Attributes of table rows and row groups in ALLOWED_HTML.
+     */
+    private const array TABLE_SECTION = ['align', 'char', 'charoff', 'id', 'valign'];
+
+    /**
+     * Attributes of table cells in ALLOWED_HTML.
+     */
+    private const array TABLE_CELL = [
+        ...self::TABLE_SECTION,
+        'abbr',
+        'axis',
+        'bgcolor',
+        'colspan',
+        'headers',
+        'height',
+        'nowrap',
+        'rowspan',
+        'scope',
+        'width',
     ];
 
     /**
-     * Elements removed with their content when they are not allowed, the others are replaced by their content.
+     * URL protocols allowed at the start of attribute values.
      */
-    private const array DROPPED = self::FORBIDDEN + [
-        'applet'   => true,
-        'embed'    => true,
-        'frame'    => true,
-        'frameset' => true,
-        'head'     => true,
-        'iframe'   => true,
-        'math'     => true,
-        'object'   => true,
-        'param'    => true,
-        'svg'      => true,
-        'textarea' => true,
-        'title'    => true,
+    public const array ALLOWED_PROTOCOLS = [
+        'ftp',
+        'http',
+        'https',
+        'irc',
+        'mailto',
+        'news',
+        'nntp',
+        'rtsp',
+        'sftp',
+        'ssh',
+        'tel',
+        'telnet',
+        'webcal',
     ];
 
     /**
-     * Attributes that can not be allowed, besides `on*` event handlers.
+     * Pieces of markup: a lone `<`, a comment, a tag up to `>` or the end, or a lone `>`.
      */
-    private const array FORBIDDEN_ATTRIBUTES = [
-        'formaction' => true,
-        'srcdoc'     => true,
-        'style'      => true,
-    ];
+    private const string MARKUP = '%(<(?=[^a-zA-Z!/])|<!--.*?-->|<[^>]*(>|$)|>)%';
 
     /**
-     * Attributes holding a URL, checked as `url` whatever their rule says.
+     * Characters of an attribute name: letters and `-`, also `:`, `@` and `.` of framework directives like `v-on:click`.
      */
-    private const array URL_ATTRIBUTES = [
-        'action'      => true,
-        'background'  => true,
-        'cite'        => true,
-        'codebase'    => true,
-        'data'        => true,
-        'dynsrc'      => true,
-        'href'        => true,
-        'imagesrcset' => true,
-        'longdesc'    => true,
-        'lowsrc'      => true,
-        'manifest'    => true,
-        'poster'      => true,
-        'src'         => true,
-        'srcset'      => true,
-        'xlink:href'  => true,
-    ];
-
-    private const string HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
+    private const string NAME = '[-a-zA-Z:@.]';
 
     /**
-     * Context element of the parsed fragments, shared by all filters.
+     * Well-formed attributes in a row: `name="value"`, `name='value'`, `name=value` or a valueless `name`,
+     * the same pieces combineAttributes() parses step by step.
      */
-    private static ?Element $body = null;
+    private const string ATTRIBUTES = '/\G(' . self::NAME . '++)(?:\s*+=\s*+(?:"([^"]*+)"|\'([^\']*+)\'|([^\s"\']++))(?:\s++|$)|\s++(?!=)|$)/';
 
     /**
-     * Attributes of each element with their compiled checks: `true` for any value, `url`, `number`
-     * or a set of values; `*` holds the attributes of every element.
+     * An attribute name at the current offset.
+     */
+    private const string ATTRIBUTE_NAME = '/\G' . self::NAME . '+/';
+
+    /**
+     * An attribute value: double-quoted, single quoted or unquoted, followed by whitespace or the end.
+     */
+    private const string VALUE = '/\G(?:"([^"]*)"|\'([^\']*)\'|([^\s"\']+))(?:\s+|$)/';
+
+    /**
+     * Characters of an element name.
+     */
+    private const string NAME_CHARS = '-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+    /**
+     * Characters of a plainly written lower case protocol.
+     */
+    private const string PROTOCOL_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
+    /**
+     * Longest markup piece, in bytes, whose result is cached, so the cache stays small.
+     */
+    private const int CACHE_KEY_LENGTH = 256;
+
+    /**
+     * Max number of cached markup pieces per filter.
+     */
+    private const int CACHE_SIZE = 1024;
+
+    /**
+     * A protocol at the start of a value: letters, whitespace and entities followed by a colon in any encoding.
+     */
+    private const string PROTOCOL = '/^((&[^;]*;|[\sA-Za-z0-9])*)(:|&#0*58;|&#[Xx]0*3[Aa];|&colon;)\s*/';
+
+    /**
+     * Filtered markup pieces by their source, valid because the rules of a filter never change.
      *
-     * @var array<string, array<string, true|string|array<string, true>>>
+     * @var array
      */
-    private readonly array $attributes;
+    private array $cache = [];
 
     /**
-     * Attribute prefixes of each element with their checks, the element's own before the ones of `*`.
-     *
-     * @var array<string, array<string, true|string|array<string, true>>>
-     */
-    private readonly array $prefixes;
-
-    /**
-     * Allowed protocols as keys.
-     *
-     * @var array<string, true>
-     */
-    private readonly array $schemes;
-
-    /**
-     * Compile the rules once, the filter is reused for any number of fragments.
-     *
-     * @throws InvalidArgumentException If the rules allow a forbidden element or attribute, every attribute
-     *                                  or have an unknown check.
+     * @throws InvalidArgumentException For a rule with a bare `*` attribute or a check of a wrong type.
+     * @throws LogicException           When the rules are set again.
      */
     public function __construct(
 
         /**
-         * Allowed elements and their attributes, in the format of RULES.
-         *
-         * @var array<string, array<int|string, string|array<int, string>>>
+         * Elements and attributes, see ALLOWED_HTML; stored compiled: keyed by the lower case element name,
+         * with the attributes of `*` added to every element and the prefixes of an element under its `*` key,
+         * e.g. `['data-' => 1]`. Set only once.
          */
-        public readonly array $rules = self::RULES,
+        public private(set) array $allowedHtml = self::ALLOWED_HTML {
+            set {
+                // the tag cache relies on rules that never change
+                if (isset($this->allowedHtml)) {
+                    throw new LogicException('The rules of a filter can not be changed, create another filter.');
+                }
+
+                // the default rules are compiled once per process, they are the same for every filter
+                static $defaults = self::compile(self::ALLOWED_HTML);
+
+                $this->allowedHtml = $value === self::ALLOWED_HTML ? $defaults : self::compile($value);
+            }
+        },
 
         /**
-         * Allowed URL protocols, lower cased.
+         * Lower case protocols, see ALLOWED_PROTOCOLS; stored as keys for isset() lookups.
          *
          * @var string[]
          */
-        public readonly array $protocols = self::PROTOCOLS,
-    ) {
-        $attributes = [];
-        $prefixes   = [];
-
-        foreach ($rules as $element => $list) {
-            if (isset(self::FORBIDDEN[$element])) {
-                throw new InvalidArgumentException("The <$element> element can not be allowed.");
-            }
-
-            $attributes[$element] = [];
-            foreach ($list as $key => $value) {
-                [$name, $check] = is_int($key) ? [$value, 'text'] : [$key, $value];
-
-                if ($name === '*') {
-                    throw new InvalidArgumentException("A bare `*` attribute of <$element> would allow every attribute.");
-                }
-                if (str_starts_with($name, 'on') || isset(self::FORBIDDEN_ATTRIBUTES[$name])) {
-                    throw new InvalidArgumentException("The `$name` attribute can not be allowed.");
-                }
-
-                $check = self::compile($name, $check);
-                if (str_ends_with($name, '*')) {
-                    $prefixes[$element][substr($name, 0, -1)] = $check;
-                } else {
-                    $attributes[$element][$name] = $check;
-                }
-            }
-        }
-
-        $common = $prefixes['*'] ?? [];
-        foreach ($prefixes as $element => $list) {
-            $prefixes[$element] = $list + $common;
-        }
-
-        $this->attributes = $attributes;
-        $this->prefixes   = $prefixes;
-        $this->schemes    = array_fill_keys($protocols, true);
-    }
+        private array $allowedProtocols = self::ALLOWED_PROTOCOLS {
+            set => array_fill_keys($value, true);
+        },
+    ) {}
 
     /**
-     * Get the rules with the elements and attributes added, e.g. Youla directives of a trusted page.
+     * Get rules with more elements and attributes, e.g. directives of a trusted page.
      *
-     * @param array $rules Elements and their attributes to add, in the format of RULES.
-     * @param array $base  Rules to add them to.
+     * @param array $allowedHtml Elements and attributes to add, see ALLOWED_HTML.
+     * @param array $rules       Rules to extend, the default ones by default.
      * @return array
      */
-    public static function extend(array $rules, array $base = self::RULES): array
+    public static function extend(array $allowedHtml, array $rules = self::ALLOWED_HTML): array
     {
-        foreach ($rules as $element => $attributes) {
-            $base[$element] = [...$base[$element] ?? [], ...$attributes];
+        foreach ($allowedHtml as $element => $attributes) {
+            $rules[$element] = [...$rules[$element] ?? [], ...$attributes];
         }
 
-        return $base;
+        return $rules;
     }
 
     /**
-     * Keep only the allowed elements, attributes and URL protocols of the HTML fragment.
+     * Compile rules: add the attributes of `*` to every element and move its prefixes under its own `*` key.
+     *
+     * @param array $allowedHtml
+     * @return array Attributes by element, `*` of an element holds its prefixes, e.g. `['data-' => 1]`.
+     * @throws InvalidArgumentException For a bare `*`: an empty prefix would allow every attribute, event handlers too.
+     */
+    private static function compile(array $allowedHtml): array
+    {
+        $global = self::attributes($allowedHtml['*'] ?? []);
+
+        unset($allowedHtml['*']);
+
+        foreach ($allowedHtml as $element => $attributes) {
+            $attributes = [...$global, ...self::attributes($attributes)];
+
+            $prefixes = [];
+            foreach ($attributes as $name => $rules) {
+                $name = (string) $name;
+
+                if (str_ends_with($name, '*')) {
+                    if ($name === '*') {
+                        throw new InvalidArgumentException(
+                            "The attribute `*` of <$element> would allow every attribute, use a prefix like `data-*`"
+                        );
+                    }
+
+                    $prefixes[substr($name, 0, -1)] = $rules;
+
+                    unset($attributes[$name]);
+                }
+            }
+
+            // parsed attribute names never contain "*", so the key can not clash with an attribute
+            if ($prefixes !== []) {
+                $attributes['*'] = $prefixes;
+            }
+
+            $allowedHtml[$element] = $attributes;
+        }
+
+        return $allowedHtml;
+    }
+
+    /**
+     * Turn listed attributes into `name => 1`, keeping the ones with checks; a later entry of a name wins.
+     *
+     * @param array $attributes E.g. `['href', 'download' => ['valueless' => 'y']]`.
+     * @return array<string, mixed>
+     */
+    private static function attributes(array $attributes): array
+    {
+        $rules = [];
+
+        foreach ($attributes as $name => $checks) {
+            if (is_int($name)) {
+                $rules[$checks] = 1;
+            } else {
+                $rules[$name] = $checks;
+            }
+        }
+
+        return $rules;
+    }
+
+    /**
+     * Allowed protocols.
+     *
+     * @var string[]
+     */
+    public array $protocols {
+        get => array_keys($this->allowedProtocols);
+    }
+
+    /**
+     * Filter HTML: only allowed elements, attributes, protocols and valid entities remain.
      *
      * @param string $html
-     * @return string Empty for invalid UTF-8.
+     * @return string Safe HTML, an empty string for invalid UTF-8.
      */
     public function sanitize(string $html): string
     {
-        if (! mb_check_encoding($html, 'UTF-8')) {
+        if ($html === '' || ! mb_check_encoding($html, 'UTF-8')) {
             return '';
         }
 
-        // without markup and entities there is nothing to parse
-        if (strpbrk($html, "<>&\r\0") === false) {
+        // plain text without markup, entities and NUL characters is already safe
+        if (strpbrk($html, "<>&\0") === false) {
             return $html;
         }
 
-        $body = self::$body ??= self::createBody();
+        $html = str_replace("\0", '', $html);
 
-        $body->innerHTML = $html;
-        if (str_contains($html, '<')) {
-            $this->filter($body, $html);
+        if (str_contains($html, '&')) {
+            // Netscape 4 JavaScript entities, e.g. &{alert(1)};
+            if (str_contains($html, '{')) {
+                $html = preg_replace('%&\s*\{[^}]*(\}\s*;?|$)%', '', $html) ?? '';
+            }
+
+            $html = self::normalizeEntities($html);
         }
 
-        return $body->innerHTML;
+        if (strpbrk($html, '<>') === false) {
+            return $html;
+        }
+
+        return (string) preg_replace_callback(self::MARKUP, $this->filterMarkup(...), $html);
     }
 
     /**
-     * Remove the comments and filter every element of the parsed fragment.
+     * Filter one piece of markup, reusing the result for a piece this filter has seen before.
      *
-     * @param Element $body
-     * @param string  $html Source of the fragment, to skip the passes it does not need.
-     * @return void
+     * @param array $match
+     * @return string
      */
-    private function filter(Element $body, string $html): void
+    private function filterMarkup(array $match): string
     {
-        // comments come only from "<!", "<?" and "</" not followed by a letter
-        if (preg_match('~<[!?]|</[^a-z]~i', $html) === 1) {
-            foreach (new XPath($body->ownerDocument)->query('.//comment()', $body) as $comment) {
-                $comment->remove();
+        $markup = $match[0];
+
+        if (isset($this->cache[$markup])) {
+            return $this->cache[$markup];
+        }
+
+        $result = $this->stripTags($markup);
+
+        if (strlen($markup) <= self::CACHE_KEY_LENGTH && count($this->cache) < self::CACHE_SIZE) {
+            $this->cache[$markup] = $result;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Filter one piece of markup: disarm a lone `<` or `>`, drop a malformed or not allowed element.
+     *
+     * @param string $markup
+     * @return string
+     */
+    private function stripTags(string $markup): string
+    {
+        if ($markup[0] !== '<') {
+            return '&gt;';
+        }
+
+        if ($markup === '<') {
+            return '&lt;';
+        }
+
+        // a tag without attributes and spaces, e.g. <p> or </p>, needs no parsing
+        if ($markup[-1] === '>') {
+            $closing = $markup[1] === '/';
+            $tag     = substr($markup, $closing ? 2 : 1, -1);
+
+            if ($tag !== '' && strspn($tag, self::NAME_CHARS) === strlen($tag)) {
+                if (! isset($this->allowedHtml[strtolower($tag)])) {
+                    return '';
+                }
+
+                return $closing ? "</{$tag}>" : "<{$tag}>";
             }
         }
 
-        // elements of other namespaces come only from <svg> and <math>
-        $foreign    = stripos($html, '<svg') !== false || stripos($html, '<math') !== false;
-        $attributes = $this->attributes;
-        $common     = $attributes['*'] ?? [];
+        if (! preg_match('%^<\s*(/\s*)?([-a-zA-Z0-9]+)\s*([^>]*)>?|(<!--.*?-->)$%', $markup, $matches)) {
+            return '';
+        }
 
-        // a copy of the live list: removed elements stay in it, their descendants are filtered in vain but harmlessly
-        foreach (iterator_to_array($body->getElementsByTagName('*'), false) as $element) {
-            $name = $element->localName;
+        $comment = $matches[4] ?? '';
+        $tag     = $comment !== '' ? '!--' : $matches[2];
+        $element = strtolower($tag);
 
-            if ($foreign && $element->namespaceURI !== self::HTML_NAMESPACE) {
-                $name = strtolower($name);
-                if (! isset($attributes[$name])) {
-                    $element->remove();
+        if (! isset($this->allowedHtml[$element])) {
+            return '';
+        }
+
+        if ($comment !== '') {
+            return $comment;
+        }
+
+        // closing tags lose all attributes
+        if (trim($matches[1]) !== '') {
+            return "</{$tag}>";
+        }
+
+        return $this->stripAttributes($tag, $element, $matches[3]);
+    }
+
+    /**
+     * Rebuild an opening tag with its allowed attributes only, keeping the XHTML closing slash.
+     *
+     * @param string $tag     Element name as written.
+     * @param string $element Lower case element name.
+     * @param string $attr    Attributes as written.
+     * @return string
+     */
+    private function stripAttributes(string $tag, string $element, string $attr): string
+    {
+        $slash   = str_contains($attr, '/') && preg_match('%\s/\s*$%', $attr) ? ' /' : '';
+        $allowed = $this->allowedHtml[$element];
+
+        if ($allowed === [] || $attr === '') {
+            return "<{$tag}{$slash}>";
+        }
+
+        $list = $this->combineAttributes($attr, $allowed);
+
+        return '<' . $tag . (strpbrk($list, '<>') === false ? $list : str_replace(['<', '>'], '', $list)) . $slash . '>';
+    }
+
+    /**
+     * Parse attributes even from broken markup and keep the allowed ones: unquoted values get quotes,
+     * values lose disallowed protocols, unparsable pieces are skipped.
+     *
+     * @param string $attr
+     * @param array  $allowed Attribute rules of the element, prefixes under `*`.
+     * @return string Allowed attributes, each one preceded by a space.
+     */
+    private function combineAttributes(string $attr, array $allowed): string
+    {
+        $list   = '';
+        $mode   = 0;
+        $name   = '';
+        $offset = 0;
+        $length = strlen($attr);
+
+        // 0: attribute name, 1: equals sign or a valueless attribute, 2: value
+        while ($offset < $length) {
+            $matched = false;
+
+            if ($mode === 0) {
+                // well-formed attributes are taken in one call, the steps below handle only the broken part
+                if (preg_match_all(self::ATTRIBUTES, $attr, $sets, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL, $offset)) {
+                    foreach ($sets as $set) {
+                        $offset += strlen($set[0]);
+                        $name    = strtolower($set[1]);
+                        $rules   = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
+
+                        if ($rules !== null) {
+                            $list .= isset($set[3])
+                                ? $this->attribute($rules, $name, $set[3], "'")
+                                : $this->attribute($rules, $name, $set[2] ?? $set[4], '"');
+                        }
+                    }
+
                     continue;
                 }
-            }
 
-            $allowed = $attributes[$name] ?? null;
-            if ($allowed === null) {
-                if (isset(self::DROPPED[$name])) {
-                    $element->remove();
-                } else {
-                    $element->replaceWith(...$element->childNodes);
+                if (preg_match(self::ATTRIBUTE_NAME, $attr, $match, 0, $offset)) {
+                    $matched = true;
+                    $mode    = 1;
+                    $name    = strtolower($match[0]);
+                    $offset += strlen($match[0]);
                 }
-                continue;
-            }
+            } elseif ($mode === 1) {
+                if (preg_match('/\G\s*=\s*/', $attr, $match, 0, $offset)) {
+                    $matched = true;
+                    $mode    = 2;
+                    $offset += strlen($match[0]);
+                } elseif (preg_match('/\G\s+/', $attr, $match, 0, $offset)) {
+                    $matched = true;
+                    $mode    = 0;
+                    $offset += strlen($match[0]);
+                    $rules   = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
 
-            foreach ($element->getAttributeNames() as $attribute) {
-                $check = $allowed[$attribute] ?? $common[$attribute] ?? $this->prefixed($name, $attribute);
-                if ($check === true) {
-                    continue;
-                }
-                if ($check === null) {
-                    $element->removeAttribute($attribute);
-                    continue;
-                }
-
-                $value = $element->getAttribute($attribute);
-
-                // most links are relative or start with an allowed protocol as is: no scheme before "/"
-                if ($check === 'url' && $attribute !== 'srcset' && $attribute !== 'imagesrcset') {
-                    $colon = strcspn($value, ':/?#');
-                    $next  = $value[$colon] ?? '';
-                    if ($next === '/' || $next === ':' && isset($this->schemes[substr($value, 0, $colon)])) {
-                        continue;
+                    if ($rules !== null) {
+                        $list .= $this->attribute($rules, $name, null, '');
                     }
                 }
+            } elseif (preg_match(self::VALUE, $attr, $match, PREG_UNMATCHED_AS_NULL, $offset)) {
+                $matched = true;
+                $mode    = 0;
+                $offset += strlen($match[0]);
+                $rules   = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
 
-                if (! $this->passes($check, $attribute, $value)) {
-                    $element->removeAttribute($attribute);
+                if ($rules !== null) {
+                    $list .= $match[2] !== null
+                        ? $this->attribute($rules, $name, $match[2], "'")
+                        : $this->attribute($rules, $name, $match[1] ?? $match[3], '"');
                 }
             }
 
-            // the content of an iframe is raw text that a browser does not show
-            if ($name === 'iframe' && $element->firstChild !== null) {
-                $element->textContent = '';
+            if (! $matched) {
+                $offset = self::skipMalformed($attr, $offset);
+                $mode   = 0;
             }
         }
+
+        // a valueless attribute at the very end, e.g. "selected"
+        if ($mode === 1) {
+            $rules = $allowed[$name] ?? (isset($allowed['*']) ? self::prefixRules($allowed['*'], $name) : null);
+
+            if ($rules !== null) {
+                $list .= $this->attribute($rules, $name, null, '');
+            }
+        }
+
+        return $list;
     }
 
     /**
-     * Get the check of an attribute allowed by a prefix like `data-*`.
+     * Get the rules of the first prefix an attribute name starts with, e.g. `data-` for `data-id`.
      *
-     * @param string $element
-     * @param string $attribute
-     * @return true|string|array<string, true>|null Null when the attribute is not allowed.
+     * @param array  $prefixes
+     * @param string $name
+     * @return mixed `null` if no prefix matches.
      */
-    private function prefixed(string $element, string $attribute): true|string|array|null
+    private static function prefixRules(array $prefixes, string $name): mixed
     {
-        if (str_starts_with($attribute, 'on') || isset(self::FORBIDDEN_ATTRIBUTES[$attribute])) {
-            return null;
-        }
-
-        foreach ($this->prefixes[$element] ?? $this->prefixes['*'] ?? [] as $prefix => $check) {
-            if (str_starts_with($attribute, $prefix) && $attribute !== $prefix) {
-                return isset(self::URL_ATTRIBUTES[$attribute]) && ! is_array($check) ? 'url' : $check;
+        foreach ($prefixes as $prefix => $rules) {
+            if (str_starts_with($name, (string) $prefix) && $name !== $prefix) {
+                return $rules;
             }
         }
 
@@ -530,89 +588,171 @@ final class Markup
     }
 
     /**
-     * Whether the value passes the check: `url`, `number` or a set of values.
+     * Build an allowed attribute if its value passes the rules.
      *
-     * @param string|array<string, true> $check
-     * @param string                     $attribute
-     * @param string                     $value
-     * @return bool
+     * @param mixed       $rules `1` for any value, or checks, see checkAttrVal().
+     * @param string      $name
+     * @param string|null $value `null` for a valueless attribute.
+     * @param string      $quote Quote of the rebuilt value, unquoted values get double quotes.
+     * @return string The attribute preceded by a space, or an empty string.
      */
-    private function passes(string|array $check, string $attribute, string $value): bool
+    private function attribute(mixed $rules, string $name, ?string $value, string $quote): string
     {
+        if ($value === null) {
+            [$value, $valueless, $whole] = ['', 'y', $name];
+        } else {
+            $value     = $this->badProtocol($value);
+            $valueless = 'n';
+            $whole     = $name . '=' . $quote . $value . $quote;
+        }
+
+        if (! is_array($rules)) {
+            return ' ' . $whole;
+        }
+
+        foreach ($rules as $check => $expected) {
+            if (self::checkAttrVal($value, $valueless, $check, $expected)) {
+                return ' ' . $whole;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Check an attribute value against a rule of ALLOWED_HTML.
+     *
+     * @param string $value
+     * @param string $valueless `y` if the attribute has no value, `n` otherwise.
+     * @param string $check     `maxlen`, `minlen`, `maxval`, `minval`, `valueless` or `content`; others always pass.
+     * @param mixed  $expected
+     * @return bool
+     * @throws InvalidArgumentException For an expected value of a wrong type.
+     */
+    private static function checkAttrVal(string $value, string $valueless, string $check, mixed $expected): bool
+    {
+        $type = match ($check) {
+            'maxlen', 'minlen', 'maxval', 'minval' => is_numeric($expected) ? null : 'numeric',
+            'valueless'                            => is_string($expected) ? null : 'string',
+            'content'                              => is_array($expected) ? null : 'array',
+            default                                => null,
+        };
+
+        if ($type !== null) {
+            throw new InvalidArgumentException("$check must be of type $type, " . get_debug_type($expected) . ' given');
+        }
+
+        // maxval and minval accept only a short non-negative integer, so a huge number can not be passed
         return match ($check) {
-            'url'    => $attribute === 'srcset' || $attribute === 'imagesrcset' ? $this->isSrcset($value) : $this->isUrl($value),
-            'number' => preg_match('/^-?\d+(?:\.\d+)?$/', $value) === 1,
-            default  => isset($check[$value]) || isset($check[strtolower($value)]),
+            'maxlen'    => strlen($value) <= $expected,
+            'minlen'    => strlen($value) >= $expected,
+            'maxval'    => preg_match('/^\s{0,6}\d{1,6}\s{0,6}$/', $value) === 1 && (int) trim($value) <= $expected,
+            'minval'    => preg_match('/^\s{0,6}\d{1,6}\s{0,6}$/', $value) === 1 && (int) trim($value) >= $expected,
+            'valueless' => strtolower($expected) === $valueless,
+            'content'   => self::matchesContent($value, $expected),
+            default     => true,
         };
     }
 
     /**
-     * Whether the URL is relative or has an allowed protocol.
+     * Check if a value contains one of the patterns, `%` matches any text.
      *
-     * @param string $url
+     * @param string   $value
+     * @param string[] $patterns
      * @return bool
      */
-    private function isUrl(string $url): bool
+    private static function matchesContent(string $value, array $patterns): bool
     {
-        // a browser drops controls and spaces around a URL, tabs and newlines inside it
-        $url   = str_replace(["\t", "\n", "\r"], '', trim($url, "\x00..\x20"));
-        $colon = strcspn($url, ':/?#');
-
-        return ($url[$colon] ?? '') !== ':' || isset($this->schemes[strtolower(substr($url, 0, $colon))]);
-    }
-
-    /**
-     * Whether the URL of every candidate of the srcset is relative or has an allowed protocol.
-     *
-     * @param string $srcset
-     * @return bool
-     */
-    private function isSrcset(string $srcset): bool
-    {
-        foreach (explode(',', $srcset) as $candidate) {
-            $candidate = ltrim($candidate);
-            if (! $this->isUrl(substr($candidate, 0, strcspn($candidate, " \t\n\f\r")))) {
-                return false;
+        foreach ($patterns as $pattern) {
+            if (preg_match('/' . strtr(preg_quote($pattern, '/'), ['%' => '.*']) . '/', $value)) {
+                return true;
             }
         }
 
-        return true;
+        return false;
     }
 
     /**
-     * Compile the check of an attribute rule, URL attributes are always checked as URLs.
+     * Remove disallowed protocols from the start of a value, repeatedly, so that `javascript:javascript:` is caught.
+     * Whitespace, case and entities in the protocol are understood.
      *
-     * @param string $attribute
-     * @param mixed  $check `text`, `url`, `number` or a list of values.
-     * @return true|string|array<string, true>
-     * @throws InvalidArgumentException If the check is unknown.
+     * @param string $value
+     * @return string
      */
-    private static function compile(string $attribute, mixed $check): true|string|array
+    private function badProtocol(string $value): string
     {
-        if (is_array($check)) {
-            return array_fill_keys([...$check, ...array_map(strtolower(...), $check)], true);
+        $colon = strpos($value, ':');
+
+        // every other encoding of the colon is an entity: &#58; &#x3A; &colon;
+        if ($colon === false && ! str_contains($value, '&#') && ! str_contains($value, '&colon;')) {
+            return $value;
         }
 
-        if (! in_array($check, ['text', 'url', 'number'], true)) {
-            throw new InvalidArgumentException(
-                "Unknown check of the `$attribute` attribute, expected text, url, number or a list of values."
-            );
+        // an allowed protocol written plainly, e.g. "https://x", is kept by the search as is,
+        // unless whitespace follows the colon: the search removes it
+        if (
+            $colon > 0
+            &&
+            strspn($value, self::PROTOCOL_CHARS) === $colon
+            &&
+            isset($this->allowedProtocols[substr($value, 0, $colon)])
+            &&
+            strspn($value, " \t\n\v\f\r", $colon + 1, 1) === 0
+        ) {
+            return $value;
         }
 
-        return isset(self::URL_ATTRIBUTES[rtrim($attribute, '*')]) ? 'url' : ($check === 'text' ? true : $check);
+        do {
+            $previous = $value;
+            $value    = preg_replace_callback(self::PROTOCOL, $this->badProtocolOnce(...), $value) ?? '';
+        } while ($value !== $previous);
+
+        return $value;
     }
 
     /**
-     * Create the context element in which fragments are parsed, as a browser parses markup inserted into a page.
+     * Keep a found protocol if it is allowed, drop it otherwise.
      *
-     * @return Element
+     * @param array $match
+     * @return string
      */
-    private static function createBody(): Element
+    private function badProtocolOnce(array $match): string
     {
-        $document = HTMLDocument::createEmpty();
-        $body     = $document->createElement('body');
-        $document->append($body);
+        // numeric entities and the invisible soft hyphen could hide a protocol
+        $protocol = preg_replace(['/&#\d+;/', '/&#[Xx][0-9A-Fa-f]+;/', '/\s/', '/\xad+/'], '', $match[1]) ?? '';
+        $protocol = strtolower($protocol);
 
-        return $body;
+        return isset($this->allowedProtocols[$protocol]) ? "$protocol:" : '';
+    }
+
+    /**
+     * Skip a piece that combineAttributes() can not parse: up to whitespace, with quoted parts.
+     *
+     * @param string $attr
+     * @param int    $offset
+     * @return int Offset after the piece.
+     */
+    private static function skipMalformed(string $attr, int $offset): int
+    {
+        preg_match('/\G("[^"]*("|$)|\'[^\']*(\'|$)||\S)*\s*/', $attr, $match, 0, $offset);
+
+        return $offset + max(1, strlen($match[0] ?? ''));
+    }
+
+    /**
+     * Disarm `&` that does not start a valid entity: `AT&T` becomes `AT&amp;T`, `&#x0041;` becomes `&#x41;`.
+     *
+     * @param string $html
+     * @return string
+     */
+    private static function normalizeEntities(string $html): string
+    {
+        $html = preg_replace('/&(?!#\d+;|#[Xx]0*(?:[0-9A-Fa-f]{2})+;|[A-Za-z][A-Za-z0-9]*;)/', '&amp;', $html) ?? '';
+
+        if (! str_contains($html, '&#x') && ! str_contains($html, '&#X')) {
+            return $html;
+        }
+
+        return preg_replace('/&#[Xx]0*((?:[0-9A-Fa-f]{2})+;)/', '&#x\1', $html) ?? '';
     }
 }

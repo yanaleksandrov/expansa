@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Values\Field;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use App\Support\Permalinks;
 use Closure;
@@ -22,18 +23,18 @@ use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Support\Error;
 use Expansa\Translation\Languages;
-use PDO;
 
 /**
  * Navigation menu of the site, edited on the `nav-editor` page: a title, the theme locations it is shown
  * in and its items. A location belongs to one menu at a time.
  *
  * The items are stored as the items of Expansa\Builders\Tree, flat in the order of the editor:
- * `['id' => ..., 'parent_id' => ..., 'position' => ..., 'type' => one of TYPES, 'object' => post type,
- * 'objectId' => post ID]` and the values of the fields of itemFields() by their keys: the title, the URL,
+ * `['id' => ..., 'parent_id' => ..., 'position' => ..., 'type' => one of TYPES, 'object' => post type or taxonomy,
+ * 'objectId' => post or term ID]` and the values of the fields of itemFields() by their keys: the title, the URL,
  * the target, the relations and so on, with the fields plugins add by the `menuItemFields` filter.
- * The ID of an item stays the same while the menu is edited, its clicks are counted by it.
- * A link has its own URL, a post item gets the URL and, with an empty title, the title of its post when shown;
+ * The ID of an item stays the same while the menu is edited.
+ * A link has its own URL, a post or a term item gets the URL and, with an empty title, the title of its post
+ * or the name of its term when shown;
  * a heading has no URL, a separator neither title, `auth` signs in or out and `profile` opens the profile.
  *
  * register() attaches the menu of each location as the `menu-<location>` tree. The active theme declares
@@ -48,9 +49,8 @@ use PDO;
  * tree('menu-primary', function (array $items) { ... $item->title, $item->url, $item->rel, $item->active ... });
  * ```
  *
- * The theme puts `$item->attributes` on the link, `data-menu-item` there counts the clicks of the item
- * (see the `menu-clicks` script). The links of the locations are cached, forgetLinks() drops them when
- * a menu or a post changes; the dates, the language and the visitor are applied on every request.
+ * The links of the locations are cached, forgetLinks() drops them when a menu or a post changes;
+ * the dates, the language and the visitor are applied on every request.
  *
  * A location the theme no longer declares stays with its menu until it is unchecked: switching back
  * to the theme shows the menu there again.
@@ -76,7 +76,12 @@ class Menu extends Model
     /**
      * Types of the items, see the description of the class.
      */
-    public const array TYPES = ['link', 'post', 'heading', 'separator', 'auth', 'profile'];
+    public const array TYPES = ['link', 'post', 'term', 'heading', 'separator', 'auth', 'profile'];
+
+    /**
+     * Types of the items of an entry of the site: `object` and `objectId` address it.
+     */
+    public const array ENTRIES = ['post', 'term'];
 
     /**
      * Capabilities that show an item by its `visibility`, checked by Tree::configure() in bootstrap.php;
@@ -90,14 +95,9 @@ class Menu extends Model
     ];
 
     /**
-     * Days the clicks of the items are kept, the editor shows the last 30 of them.
+     * Types of the items that link somewhere: the link fields are for them.
      */
-    public const int CLICK_DAYS = 90;
-
-    /**
-     * Types of the items that link somewhere: their clicks are counted, the link fields are for them.
-     */
-    private const array LINKS = ['link', 'post', 'auth', 'profile'];
+    private const array LINKS = ['link', 'post', 'term', 'auth', 'profile'];
 
     public protected(set) string $table = 'menus';
 
@@ -225,7 +225,7 @@ class Menu extends Model
         $empty   = t('Empty');
         $classes = self::classes(...);
 
-        $labeled = ['link', 'post', 'heading', 'profile'];
+        $labeled = ['link', 'post', 'term', 'heading', 'profile'];
         $fields  = [
             'title'          => new Field(
                 t('Label', context: 'menu'),
@@ -258,19 +258,19 @@ class Menu extends Model
             'target'         => new Field(t('Open In'), 'select', 'ph ph-crosshair-simple', [
                 ''       => t('Same Tab'),
                 '_blank' => t('New Tab'),
-            ], types: ['link', 'post', 'profile']),
+            ], types: ['link', 'post', 'term', 'profile']),
             'visibility'     => new Field(t('Visibility'), 'select', 'ph ph-eye', [
                 'all'    => t('Everyone'),
                 'guests' => t('Guests'),
                 'users'  => t('Logged-In Users'),
                 'admins' => t('Administrators'),
-            ], 'all', types: ['link', 'post', 'heading', 'separator']),
+            ], 'all', types: ['link', 'post', 'term', 'heading', 'separator']),
             // `noopener noreferrer` are added to a link opened in a new tab, see links()
             'rel'            => new Field(t('Link Relations'), 'multiselect', 'ph ph-link-simple', [
                 'nofollow'  => 'nofollow',
                 'sponsored' => 'sponsored',
                 'ugc'       => 'ugc',
-            ], [], t('None'), types: ['link', 'post']),
+            ], [], t('None'), types: ['link', 'post', 'term']),
             // the dates of the site timezone, both included, see shown()
             'starts'         => new Field(t('Show From'), 'date', 'ph ph-calendar-blank', placeholder: t('Now')),
             'ends'           => new Field(t('Show Until'), 'date', 'ph ph-calendar-x', placeholder: t('Never')),
@@ -320,7 +320,7 @@ class Menu extends Model
 
         $export = function (array $items) use (&$export): array {
             return array_map(fn (Tree\Item $item) => [
-                ...array_diff_key($item->data, array_flip(['parent_id', 'position', 'capabilities', 'attributes'])),
+                ...array_diff_key($item->data, array_flip(['parent_id', 'position', 'capabilities'])),
                 'active'   => $item->active,
                 'children' => $export($item->children),
             ], $items);
@@ -360,68 +360,13 @@ class Menu extends Model
     }
 
     /**
-     * Drop the cached links of the locations: a menu, a post or the permalinks changed.
+     * Drop the cached links of the locations: a menu, a post, a term or the permalinks changed.
      *
      * @return void
      */
     public static function forgetLinks(): void
     {
         Cache::forget('', 'menus');
-    }
-
-    /**
-     * Count a click of an item on the site.
-     *
-     * @param string $item `<menu ID>:<item ID>` of `data-menu-item`.
-     * @return bool False for an item of no menu.
-     */
-    public static function click(string $item): bool
-    {
-        [$menuId, $itemId] = explode(':', $item, 2) + [1 => ''];
-
-        $menu = self::find((int) $menuId);
-        if ($menu instanceof Error || ! array_any($menu->items, fn (array $entry) => $entry['id'] === $itemId)) {
-            return false;
-        }
-
-        return Db::query(
-            'INSERT INTO <menu_clicks> (menu_id, item_id, day, count) VALUES (:menu, :item, :day, 1)
-            ON DUPLICATE KEY UPDATE count = count + 1',
-            [
-                ':menu' => $menu->id,
-                ':item' => $itemId,
-                ':day'  => date('Y-m-d'),
-            ]
-        ) !== null;
-    }
-
-    /**
-     * Get the clicks of the items of the menu over the last days.
-     *
-     * @param int $days
-     * @return array<string, int> Clicks by item ID, an item without clicks is left out.
-     */
-    public function clicks(int $days = 30): array
-    {
-        $clicks = Db::query(
-            'SELECT item_id, SUM(count) FROM <menu_clicks> WHERE menu_id = :menu AND day > :from GROUP BY item_id',
-            [
-                ':menu' => $this->id,
-                ':from' => date('Y-m-d', strtotime("-$days days")),
-            ]
-        )?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
-
-        return array_map(intval(...), $clicks);
-    }
-
-    /**
-     * Delete the clicks older than CLICK_DAYS, run by the scheduler.
-     *
-     * @return void
-     */
-    public static function pruneClicks(): void
-    {
-        Db::delete('menu_clicks', ['day[<]' => date('Y-m-d', strtotime('-' . self::CLICK_DAYS . ' days'))]);
     }
 
     /**
@@ -434,6 +379,23 @@ class Menu extends Model
         $ids = [];
         foreach ($this->items as $item) {
             if ($item['type'] === 'post') {
+                $ids[$item['object']][] = $item['objectId'];
+            }
+        }
+
+        return $ids;
+    }
+
+    /**
+     * Get the IDs of the terms the items link to, by taxonomy.
+     *
+     * @return array<string, int[]>
+     */
+    public function terms(): array
+    {
+        $ids = [];
+        foreach ($this->items as $item) {
+            if ($item['type'] === 'term') {
                 $ids[$item['object']][] = $item['objectId'];
             }
         }
@@ -519,15 +481,15 @@ class Menu extends Model
     }
 
     /**
-     * Get the items to show: a post item gets the URL and the title of its post, `rel` becomes a string,
-     * `visibility` the capabilities of Tree, a link the `data-menu-item` attribute; an item of a missing,
-     * unpublished or trashed post is left out, its subitems take its place.
+     * Get the items to show: a post item gets the URL and the title of its post, a term item those of its term,
+     * `rel` becomes a string, `visibility` the capabilities of Tree; an item of a missing, unpublished or trashed post
+     * or of a missing term is left out, its subitems take its place.
      *
      * @return array<int, array<string, mixed>>
      */
     private function links(): array
     {
-        $posts = [];
+        $entries = ['post' => [], 'term' => []];
         foreach ($this->posts() as $key => $ids) {
             $type = Type::get($key);
             if (! $type instanceof Type || ! $type->public) {
@@ -538,9 +500,25 @@ class Menu extends Model
             $where = ['id' => $ids, 'status' => 'publish'] + ($type->canTrash ? ['deleted_at' => null] : []);
             foreach (Db::select($type->table, ['id [Int]', 'title'], $where) ?: [] as $row) {
                 if (isset($paths[$row['id']])) {
-                    $posts[$key][$row['id']] = [
+                    $entries['post'][$key][$row['id']] = [
                         'title' => (string) $row['title'],
                         'url'   => url(Permalinks::post($paths[$row['id']], $row['id'], $key)),
+                    ];
+                }
+            }
+        }
+
+        foreach ($this->terms() as $key => $ids) {
+            if (! (Taxonomy::get($key)->public ?? false)) {
+                continue;
+            }
+
+            $paths = Term::paths($key, $ids);
+            foreach (Db::select('terms', ['id [Int]', 'name'], ['id' => $ids, 'taxonomy' => $key]) ?: [] as $row) {
+                if (isset($paths[$row['id']])) {
+                    $entries['term'][$key][$row['id']] = [
+                        'title' => (string) $row['name'],
+                        'url'   => url(Permalinks::term($paths[$row['id']], $key)),
                     ];
                 }
             }
@@ -549,9 +527,10 @@ class Menu extends Model
         $links   = [];
         $parents = [];
         foreach ($this->items as $item) {
-            $parent = $parents[$item['parent_id']] ?? $item['parent_id'];
-            $post   = $item['type'] === 'post' ? $posts[$item['object']][$item['objectId']] ?? null : null;
-            if ($item['type'] === 'post' && $post === null) {
+            $parent  = $parents[$item['parent_id']] ?? $item['parent_id'];
+            $isEntry = in_array($item['type'], self::ENTRIES, true);
+            $entry   = $isEntry ? $entries[$item['type']][$item['object']][$item['objectId']] ?? null : null;
+            if ($isEntry && $entry === null) {
                 $parents[$item['id']] = $parent;
                 continue;
             }
@@ -565,13 +544,10 @@ class Menu extends Model
             $links[] = [
                 ...$item,
                 'parent_id'    => $parent,
-                'title'        => $title !== '' ? $title : (string) ($post['title'] ?? ''),
-                'url'          => $post['url'] ?? $item['url'] ?? '',
+                'title'        => $title !== '' ? $title : (string) ($entry['title'] ?? ''),
+                'url'          => $entry['url'] ?? $item['url'] ?? '',
                 'rel'          => implode(' ', $rel),
                 'capabilities' => $item['type'] === 'profile' ? ['read'] : self::VISIBILITY[$item['visibility'] ?? 'all'] ?? [],
-                'attributes'   => in_array($item['type'], self::LINKS, true)
-                    ? ['data-menu-item' => $this->id . ':' . $item['id']]
-                    : [],
             ];
         }
 
@@ -658,8 +634,8 @@ class Menu extends Model
                 'parent_id' => $parent,
                 'position'  => count($list),
                 'type'      => $type,
-                'object'    => $type === 'post' ? (string) ($item['object'] ?? '') : '',
-                'objectId'  => $type === 'post' ? max(0, (int) ($item['objectId'] ?? 0)) : 0,
+                'object'    => in_array($type, self::ENTRIES, true) ? (string) ($item['object'] ?? '') : '',
+                'objectId'  => in_array($type, self::ENTRIES, true) ? max(0, (int) ($item['objectId'] ?? 0)) : 0,
             ];
             foreach ($fields as $key => $field) {
                 $isFor      = $field->types === [] || in_array($type, $field->types, true);
@@ -667,9 +643,9 @@ class Menu extends Model
             }
 
             $isEmpty = match ($type) {
-                'post'  => $node['object'] === '' || $node['objectId'] === 0,
-                'link'  => ($node['url'] ?? '') === '',
-                default => false,
+                'post', 'term' => $node['object'] === '' || $node['objectId'] === 0,
+                'link'         => ($node['url'] ?? '') === '',
+                default        => false,
             };
             if ($isEmpty) {
                 continue;

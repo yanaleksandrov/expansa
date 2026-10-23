@@ -77,7 +77,7 @@ class Db extends Facade
         string $host,
         string $prefix = '',
         string $charset = 'utf8mb4',
-        string $collation = 'utf8mb4_general_ci',
+        string $collation = 'utf8mb4_0900_ai_ci',
         int|string $port = 3306,
         bool $persistent = false,
         bool $logging = false,

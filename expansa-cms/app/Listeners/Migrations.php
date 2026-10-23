@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use Expansa\Database\Query\Builder;
-use Expansa\Facades\Db;
 use Expansa\Database\Schema;
 use Expansa\Database\Schema\Table;
 use Expansa\Support\Str;
@@ -29,13 +28,11 @@ final class Migrations
         $this->createUserTwoFactorTable();
         $this->createOptionsTable();
         $this->createCommentsTable();
-        $this->createTaxonomiesTable();
         $this->createMediaTable();
         $this->createApiKeysTable();
         $this->createFieldGroupsTable();
         $this->createActivityTable();
         $this->createMenusTable();
-        $this->createMenuClicksTable();
     }
 
     public function createPostsTable(string $postType): void
@@ -47,19 +44,20 @@ final class Migrations
             $table->text('content');
             $table->bigInt('author_id')->unsigned()->default(0);
             $table->bigInt('parent_id')->unsigned()->default(0);
-            $table->smallInt('comments')->unsigned()->default(0);
-            $table->smallInt('views')->unsigned()->default(0);
+            $table->int('comments')->unsigned()->default(0);
+            $table->int('views')->unsigned()->default(0);
             $table->mediumInt('position')->unsigned()->default(0);
             $table->enum('status', self::VISIBILITY_STATUSES)->default('pending');
             $table->enum('discussion', self::DISCUSSIONS_STATUSES)->default('open');
             $table->string('password', 255);
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->datetime('deleted_at')->nullable();
 
             // indexes
             $table->index('author_id');
             $table->index('parent_id');
-            $table->index('status');
+            $table->index(['status', 'created_at']);
+            $table->index('created_at');
             $table->index('deleted_at');
             $table->fulltext(['title', 'content']);
         });
@@ -68,12 +66,11 @@ final class Migrations
     }
 
     /**
-     * Create the activity log of the entities, see App\Support\Activity; also on the sites
-     * installed before the log.
+     * Create the activity log of the entities, see App\Support\Activity.
      *
      * @return void
      */
-    public function createActivityTable(): void
+    private function createActivityTable(): void
     {
         Schema::create('activity', function (Table $table) {
             $table->id();
@@ -86,16 +83,14 @@ final class Migrations
 
             $table->index(['entity_table', 'entity_id']);
         });
-        Db::updateSchema();
     }
 
     /**
-     * Create the navigation menus of the site, see App\Models\Menu; also on the sites installed before
-     * the menus.
+     * Create the navigation menus of the site, see App\Models\Menu.
      *
      * @return void
      */
-    public function createMenusTable(): void
+    private function createMenusTable(): void
     {
         Schema::create('menus', function (Table $table) {
             $table->id();
@@ -104,52 +99,6 @@ final class Migrations
             $table->json('items')->nullable();
             $table->timestamps();
         });
-        Db::updateSchema();
-    }
-
-    /**
-     * Create the clicks of the menu items by day, see Menu::click(); also on the sites installed before them.
-     *
-     * @return void
-     */
-    public function createMenuClicksTable(): void
-    {
-        Schema::create('menu_clicks', function (Table $table) {
-            $table->bigInt('menu_id')->unsigned();
-            $table->string('item_id', 36);
-            $table->date('day');
-            $table->int('count')->unsigned()->default(0);
-
-            $table->unique(['menu_id', 'item_id', 'day']);
-            $table->index('day');
-        });
-        Db::updateSchema();
-    }
-
-    /**
-     * Add the `deleted_at` column of the trash to a posts table created without it.
-     *
-     * @param string $postType
-     * @return void
-     */
-    public function addSoftDeletes(string $postType): void
-    {
-        Db::query("ALTER TABLE <$postType> ADD COLUMN deleted_at TIMESTAMP NULL DEFAULT NULL, ADD INDEX deleted_at (deleted_at)");
-        Db::updateSchema();
-    }
-
-    /**
-     * Make the `deleted_at` column of a table created NOT NULL take NULL: the database stamped every new row
-     * with a zero date there, so soft-deleting models took the rows for deleted. The zero dates become NULL.
-     *
-     * @param string $table Table name without the prefix.
-     * @return void
-     */
-    public function repairSoftDeletes(string $table): void
-    {
-        Db::query("ALTER TABLE <$table> MODIFY deleted_at TIMESTAMP NULL DEFAULT NULL");
-        Db::query("UPDATE <$table> SET deleted_at = NULL WHERE deleted_at < '1971-01-01'");
-        Db::updateSchema();
     }
 
     private function createFieldsTable(string $name, ?string $idColumnName = null): void
@@ -159,7 +108,7 @@ final class Migrations
 
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->mediumText('value');
 
             // indexes
@@ -184,7 +133,7 @@ final class Migrations
         Schema::create($name . '_fields_int', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->bigInt('value');
 
             $table->index([$column, 'key']);
@@ -195,7 +144,7 @@ final class Migrations
         Schema::create($name . '_fields_decimal', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->decimal('value', 20, 6);
 
             $table->index([$column, 'key']);
@@ -206,7 +155,7 @@ final class Migrations
         Schema::create($name . '_fields_datetime', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->datetime('value');
 
             $table->index([$column, 'key']);
@@ -221,7 +170,7 @@ final class Migrations
         Schema::create($name . '_fields_varchar', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->string('value', Builder::MAX_INDEXABLE_LENGTH);
 
             $table->index([$column, 'key']);
@@ -232,7 +181,7 @@ final class Migrations
         Schema::create($name . '_fields_text', function (Table $table) use ($name, $column) {
             $table->id();
             $table->bigInt($column)->unsigned()->default(0);
-            $table->string('key', 255)->default(null);
+            $table->string('key', 255);
             $table->mediumText('value');
 
             $table->index([$column, 'key']);
@@ -258,9 +207,8 @@ final class Migrations
         Schema::create('slugs', function (Table $table) {
             $table->id();
             $table->bigInt('entity_id')->unsigned();
-            $table->string('entity_table', 255);
+            $table->string('entity_table', 64);
             $table->string('slug', 255);
-            //$table->string('locale', 10)->nullable()->default(null);
 
             // indexes
             $table->unique(['slug']);
@@ -268,20 +216,44 @@ final class Migrations
         });
     }
 
+    /**
+     * Create the terms of every taxonomy and their links to the posts, see App\Models\Term.
+     *
+     * @return void
+     */
     private function createTermsTable(): void
     {
         Schema::create('terms', function (Table $table) {
             $table->id();
+            $table->string('taxonomy', 32);
             $table->string('name', 255)->default('');
             $table->string('slug', 255)->default('');
-            $table->bigInt('term_group')->unsigned()->default(0);
+            $table->text('description');
+            $table->bigInt('parent_id')->unsigned()->default(0);
+            $table->mediumInt('position')->unsigned()->default(0);
+            $table->bigInt('count')->unsigned()->default(0);
+            $table->timestamps();
 
             // indexes
-            $table->index('slug', 'slug_index');
-            $table->index('name', 'name_index');
+            $table->unique(['taxonomy', 'slug']);
+            $table->index(['taxonomy', 'parent_id', 'position']);
+            $table->index(['taxonomy', 'name']);
         });
 
         $this->createFieldsTable('terms');
+
+        // a post is addressed as in `slugs`: by its table and ID
+        Schema::create('term_relations', function (Table $table) {
+            $table->id();
+            $table->bigInt('term_id')->unsigned();
+            $table->string('entity_table', 64);
+            $table->bigInt('entity_id')->unsigned();
+
+            // indexes
+            $table->unique(['term_id', 'entity_table', 'entity_id']);
+            $table->index(['entity_table', 'entity_id']);
+            $table->foreign('term_id')->references('id')->on('terms')->onDeleteCascade();
+        });
     }
 
     private function createUsersTable(): void
@@ -299,8 +271,8 @@ final class Migrations
             $table->string('firstname', 60)->nullable();
             $table->string('lastname', 60)->nullable();
             $table->string('showname', 255)->nullable();
-            $table->string('email', 100)->unique();
-            $table->string('locale', 10)->nullable()->default(null);
+            $table->string('email', 254)->unique();
+            $table->string('locale', 10)->nullable();
 
             // status and verification
             $table->json('roles')->nullable();
@@ -308,17 +280,19 @@ final class Migrations
             $table->bool('is_verified')->default(0);
 
             // tokens for email verification and password reset
-            $table->string('verification_token', 100)->nullable();
-            $table->timestamp('verification_token_expires_at')->nullable();
-            $table->string('password_reset_token', 100)->nullable();
-            $table->timestamp('password_reset_expires_at')->nullable();
+            $table->char('verification_token', 64)->nullable();
+            $table->datetime('verification_token_expires_at')->nullable();
+            $table->char('password_reset_token', 64)->nullable();
+            $table->datetime('password_reset_expires_at')->nullable();
 
             // activity tracking
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->datetime('deleted_at')->nullable();
 
             // indexes
             $table->index('nicename');
+            $table->index('verification_token');
+            $table->index('password_reset_token');
             $table->index('deleted_at');
         });
 
@@ -344,7 +318,7 @@ final class Migrations
 
             $table->string('name', 100)->default('');
             $table->timestamps();
-            $table->timestamp('used_at')->nullable();
+            $table->datetime('used_at')->nullable();
 
             $table->index('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
@@ -378,10 +352,11 @@ final class Migrations
             $table->string('user_agent', 255)->default('');
             $table->string('ip', 45)->default('');
             $table->timestamps();
-            $table->timestamp('used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->datetime('used_at')->nullable();
+            $table->datetime('expires_at')->nullable();
 
             $table->index('user_id');
+            $table->index('expires_at');
             $table->foreign('user_id')->references('id')->on('users')->onDeleteCascade();
         });
     }
@@ -408,8 +383,7 @@ final class Migrations
     {
         // the encrypted TOTP secret, keyed hashes of the recovery codes, the last accepted time step
         Schema::create('users_two_factor', function (Table $table) {
-            $table->id();
-            $table->bigInt('user_id')->unsigned()->unique();
+            $table->bigInt('user_id')->unsigned()->primary();
             $table->text('secret');
             $table->text('recovery_codes');
             $table->bigInt('last_step')->unsigned()->default(0);
@@ -429,29 +403,24 @@ final class Migrations
             $table->bigInt('author_id')->unsigned()->default(0);
             $table->string('author_name', 64)->default('');
             $table->string('author_email', 255)->default('');
-            $table->string('author_ip', 39)->default('');
+            $table->string('author_ip', 45)->default('');
             $table->string('author_agent', 255)->default('');
-            $table->string('locale', 10)->nullable()->default(null);
+            $table->string('locale', 10)->nullable();
             $table->enum('status', ['pending', 'approved', 'spam', 'rejected'])->default('pending');
             $table->text('content');
-            $table->smallInt('likes')->unsigned()->default(0);
-            $table->smallInt('dislikes')->unsigned()->default(0);
-            $table->smallInt('rating')->unsigned()->nullable()->default(null);
+            $table->int('likes')->unsigned()->default(0);
+            $table->int('dislikes')->unsigned()->default(0);
+            $table->smallInt('rating')->unsigned()->nullable();
             $table->timestamps();
-            $table->timestamp('deleted_at')->nullable();
+            $table->datetime('deleted_at')->nullable();
 
             // indexes
-            $table->index('post_id');
-            $table->index('post_type');
+            $table->index(['post_id', 'post_type']);
             $table->index('parent_id');
             $table->index('author_id');
-            $table->index('locale');
-            $table->index('status');
-            $table->index('likes');
-            $table->index('dislikes');
-            $table->index('rating');
+            $table->index('author_email');
+            $table->index(['status', 'created_at']);
             $table->index('created_at');
-            $table->index('updated_at');
             $table->index('deleted_at');
         });
     }
@@ -462,19 +431,6 @@ final class Migrations
             $table->id();
             $table->string('key', 191)->unique()->default('');
             $table->text('value');
-        });
-    }
-
-    private function createTaxonomiesTable(): void
-    {
-        Schema::create('taxonomies', function (Table $table) {
-            $table->id();
-            $table->bigInt('term_id')->unsigned()->default(0);
-            $table->bigInt('count')->unsigned()->default(0);
-            $table->bigInt('parent')->unsigned()->default(0);
-
-            // indexes
-            $table->index('term_id');
         });
     }
 
@@ -504,7 +460,7 @@ final class Migrations
             $table->string('alt')->nullable();
 
             // Ownership
-            $table->bigInt('user_id')->nullable();
+            $table->bigInt('user_id')->unsigned()->nullable();
 
             // File status
             $table->enum('status', self::VISIBILITY_STATUSES)->default('publish');
@@ -537,9 +493,6 @@ final class Migrations
             $table->mediumInt('position')->unsigned()->default(0);
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
-
-            // indexes
-            $table->index('status');
         });
     }
 
@@ -552,19 +505,18 @@ final class Migrations
 
             $table->string('name');
             $table->string('prefix', 12);
-            $table->string('key_hash', 64)->unique();
+            $table->char('key_hash', 64)->unique();
 
             $table->bool('active')->default(true);
 
             $table->json('abilities')->nullable();
 
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->datetime('last_used_at')->nullable();
+            $table->datetime('expires_at')->nullable();
 
             $table->timestamps();
 
             $table->index('user_id');
-            $table->index('active');
         });
     }
 }

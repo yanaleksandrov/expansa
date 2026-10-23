@@ -10,8 +10,9 @@ require_once __DIR__ . '/bootstrap.php';
 require_once EX_PATH . 'expansa/functions.php';
 
 check('empty structures take the defaults', Permalinks::normalize([]) === Permalinks::DEFAULTS);
-check('slashes at the ends and doubled ones are dropped, the case is lowered', Permalinks::normalize(['single' => '/Blog//%type%/%slug%/', 'categories' => 'topics/%slug%'])['single'] === 'blog/%type%/%slug%');
+check('slashes at the ends and doubled ones are dropped, the case is lowered', Permalinks::normalize(['single' => '/Blog//%type%/%slug%/', 'categories' => 'topics/%taxonomy%/%slug%'])['single'] === 'blog/%type%/%slug%');
 check('a structure without %slug% is refused', throws(fn () => Permalinks::normalize(['single' => 'post/%id%']), ValidationFailed::class));
+check('a structure of the terms without %taxonomy% is refused: two taxonomies would share a URL', throws(fn () => Permalinks::normalize(['categories' => 'topics/%slug%']), ValidationFailed::class));
 check('a tag of another structure is refused', throws(fn () => Permalinks::normalize(['categories' => '%type%/%slug%']), ValidationFailed::class));
 check('an unknown tag is refused', throws(fn () => Permalinks::normalize(['single' => '%year%/%slug%']), ValidationFailed::class));
 check('a lone percent sign is refused', throws(fn () => Permalinks::normalize(['single' => '100%/%slug%']), ValidationFailed::class));

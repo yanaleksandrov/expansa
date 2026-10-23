@@ -175,6 +175,7 @@ final class PluralRule
             '*'  => fn (int $n): int => (int) $left($n) * (int) $right($n),
             '/'  => fn (int $n): int => ($divisor = (int) $right($n)) === 0 ? 0 : intdiv((int) $left($n), $divisor),
             '%'  => fn (int $n): int => ($divisor = (int) $right($n)) === 0 ? 0 : (int) $left($n) % $divisor,
+            default => throw new InvalidArgumentException("Unknown operator \"$operator\" in a plural rule."),
         };
     }
 

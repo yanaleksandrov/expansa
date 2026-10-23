@@ -18,6 +18,7 @@ use Expansa\Support\Str;
  * Usually created by the model itself for a Query method called on it: `User::get(1)`, `$user->save()`.
  * Only get() by id is cached, the other methods always query the database.
  *
+ * @template TModel of Model
  * @package Expansa\Database
  */
 final class Query
@@ -47,6 +48,8 @@ final class Query
 
         /**
          * The model instance this query is scoped to.
+         *
+         * @var TModel
          */
         private readonly Model $model,
     ) {}
@@ -57,7 +60,7 @@ final class Query
      *
      * @param int|string $value
      * @param string     $by
-     * @return Model|null
+     * @return TModel|null
      */
     public function get(int|string $value, string $by = 'id'): ?Model
     {
@@ -73,7 +76,7 @@ final class Query
     /**
      * Get all matching records, hydrated as model instances.
      *
-     * @return array<int, Model>
+     * @return array<int, TModel>
      */
     public function find(): array
     {
@@ -85,7 +88,7 @@ final class Query
     /**
      * Get the first matching record, hydrated as a model instance.
      *
-     * @return null|Model
+     * @return TModel|null
      */
     public function first(): ?Model
     {
@@ -97,7 +100,7 @@ final class Query
     /**
      * Get every record for the model, ignoring any where conditions applied to this instance.
      *
-     * @return array<int, Model>
+     * @return array<int, TModel>
      */
     public function all(): array
     {
@@ -198,7 +201,7 @@ final class Query
      * An update only writes attributes that actually changed since the model
      * was loaded (or last saved); a save with nothing dirty is a no-op.
      *
-     * @return null|Model
+     * @return TModel|null
      */
     public function save(): ?Model
     {

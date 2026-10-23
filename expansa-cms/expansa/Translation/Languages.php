@@ -1331,7 +1331,7 @@ final class Languages
      * Get the languages: `name`, `native`, `rtl`, `iso_639_1`, `iso_639_2`, `locale`, `country`,
      * `nplurals` and `plural`.
      *
-     * @return array<int, array<string, string|int>>
+     * @return array<int, array<string, string|int|null>>
      */
     public static function all(): array
     {

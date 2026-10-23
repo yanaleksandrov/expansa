@@ -22,6 +22,7 @@ $parents      = array_slice($parents, 0, Page::OPTIONS_LIMIT + 1, true);
 $authors      = Page::authors();
 $authorSearch = count($authors) > Page::OPTIONS_LIMIT;
 $authors      = array_slice($authors, 0, Page::OPTIONS_LIMIT, true);
+$terms        = Page::terms($post);
 if (! isset($authors[$post->authorId])) {
     $name    = Page::author($post);
     $authors = ($name !== '' ? [$post->authorId => $name] : ['' => t('No author')]) + $authors;
@@ -367,7 +368,7 @@ return Form::enqueue(
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',
-                    'callback' => function () use ($post, $type, $parents, $parentSearch, $authors, $authorSearch, $select) {
+                    'callback' => function () use ($post, $type, $parents, $parentSearch, $authors, $authorSearch, $select, $terms) {
                         $statuses = Status::getStatuses();
                         $options  = function (array $options, int|string $value): void {
                             foreach ($options as $key => $label) {
@@ -400,6 +401,25 @@ return Form::enqueue(
                                     </select>
                                 </dd>
                             <?php endif; ?>
+                            <?php foreach ($terms as $field) : ?>
+                                <?php
+                                // a search on the server when the select has not every term, a new term by its name when the viewer may add one
+                                $events = [
+                                    ...($field->search ? [sprintf("search: (text) => \$ajax.post('terms/search', {taxonomy: %s, s: text}, null, {clearErrors: false})", json_encode($field->taxonomy->key))] : []),
+                                    ...($field->canCreate ? ["addable: (text) => ({text, value: 'new:' + text})"] : []),
+                                ];
+                                $name   = 'terms[' . $field->taxonomy->key . '][]';
+                                ?>
+                                <dt><i class="ph <?php echo $field->taxonomy->hierarchical ? 'ph-folders' : 'ph-tag'; ?>"></i><?php echo htmlspecialchars($field->taxonomy->labelNamePlural); ?></dt>
+                                <dd>
+                                    <input type="hidden" name="<?php echo $name; ?>" value="">
+                                    <select class="field field--xs" name="<?php echo $name; ?>" multiple aria-label="<?php echo htmlspecialchars($field->taxonomy->labelNamePlural); ?>" u-select="<?php echo htmlspecialchars('{showSearch: true, events: {' . implode(', ', $events) . '}}'); ?>">
+                                        <?php foreach ($field->options as $id => $label) : ?>
+                                            <option value="<?php echo $id; ?>"<?php echo in_array($id, $field->selected, true) ? ' selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </dd>
+                            <?php endforeach; ?>
                             <dt><i class="ph ph-chats"></i><?php echo t('Discussion'); ?></dt>
                             <dd>
                                 <select class="post-editor-pill" name="discussion" aria-label="<?php echo t_attr('Discussion'); ?>">

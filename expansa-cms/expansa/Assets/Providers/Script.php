@@ -89,6 +89,8 @@ final class Script extends AbstractProvider
 
         /**
          * UID's (or full ids) of assets that are required before this script.
+         *
+         * @var string[]
          */
         public array $dependencies = [],
 

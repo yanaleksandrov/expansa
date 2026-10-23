@@ -32,7 +32,7 @@ final class Manager
     /**
      * Policies by resource class, an instance or a class created on first use.
      *
-     * @var array<class-string, Policy|class-string<Policy>>
+     * @var array<class-string, Policy|class-string>
      */
     private array $policies = [];
 
@@ -47,7 +47,7 @@ final class Manager
      * Set the permission source and the policies, previous configuration is dropped.
      *
      * @param Permissions|null                                $permissions
-     * @param array<class-string, Policy|class-string<Policy>> $policies    Resource class => policy.
+     * @param array<class-string, Policy|class-string>         $policies    Resource class => policy.
      * @return void
      */
     public function configure(?Permissions $permissions = null, array $policies = []): void
@@ -61,7 +61,7 @@ final class Manager
      * Set the policy of a resource class, also used for its subclasses and implementations.
      *
      * @param class-string                $class  Resource class or interface.
-     * @param Policy|class-string<Policy> $policy Instance, or a class without constructor arguments.
+     * @param Policy|class-string         $policy Instance, or a class without constructor arguments.
      * @return static
      */
     public function setPolicy(string $class, Policy|string $policy): static

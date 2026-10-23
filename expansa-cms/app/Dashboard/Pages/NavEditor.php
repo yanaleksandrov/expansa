@@ -8,6 +8,7 @@ use App\Api\Menus\MenusService;
 use App\Dashboard\Values\MenuItem;
 use App\Models\Menu;
 use App\Models\Values\Field;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use Expansa\Facades\Db;
 use Expansa\Http\Request;
@@ -22,7 +23,7 @@ final class NavEditor
 {
     /**
      * Data of the `nav-editor` page: the menus, the one of `menu` being edited (the first one by
-     * default, none with `?menu=new`), the theme locations, the public post types to add items of
+     * default, none with `?menu=new`), the theme locations, the public post types and taxonomies to add items of
      * (with `showInNavMenus`) and the fields of an item; the editor gets their defaults and the types
      * of items they are for. The rows of the items and the posts of the first type, open in the sources,
      * are rendered before the editor starts.
@@ -37,9 +38,13 @@ final class NavEditor
         $menuId  = $request->getInt('menu');
         $current = $isNew ? null : array_find($menus, fn (Menu $menu) => $menuId === 0 || $menu->id === $menuId);
 
+        // the sources of the items: the post types, then the taxonomies as `term:<key>`
         $types = [];
-        foreach (Type::fetch(['public' => true, 'showInNavMenus' => true]) as $type) {
+        foreach (Type::filter(['public' => true, 'showInNavMenus' => true]) as $type) {
             $types[$type->key] = $type->labelNamePlural;
+        }
+        foreach (Taxonomy::filter(['public' => true, 'showInNavMenus' => true]) as $taxonomy) {
+            $types["term:$taxonomy->key"] = $taxonomy->labelNamePlural;
         }
 
         $locations = Menu::themeLocations();
@@ -54,8 +59,7 @@ final class NavEditor
         }
 
         $fields = Menu::itemFields();
-        $items  = $current ? self::flatten($current->items, self::posts($current), $current->clicks()) : [];
-        $most   = max([1, ...array_column($items, 'clicks')]);
+        $items  = $current ? self::flatten($current->items, self::entries($current)) : [];
         $kinds  = [
             'link'      => t('Custom Link'),
             'heading'   => t('Heading'),
@@ -82,17 +86,18 @@ final class NavEditor
                 label: self::label($item, $kinds),
                 depth: $item['depth'],
                 icon: (string) ($item['icon'] ?? ''),
-                type: $item['type'] === 'post' ? $types[$item['object']] ?? (string) $item['object'] : '',
+                type: match ($item['type']) {
+                    'post'  => $types[$item['object']] ?? (string) $item['object'],
+                    'term'  => $types['term:' . $item['object']] ?? (string) $item['object'],
+                    default => '',
+                },
                 kind: $kinds[$item['type']] ?? '',
                 problem: $item['problem'],
-                clicks: $item['clicks'],
-                share: $item['clicks'] / $most,
             ), $items),
-            'clicks'    => array_sum(array_column($items, 'clicks')),
             'state'     => [
                 'id'        => $current->id ?? 0,
                 'title'     => $current->title ?? '',
-                'locations' => $current?->locations ?? [],
+                'locations' => $current->locations ?? [],
                 'items'     => $items,
                 'types'     => $types,
                 'kinds'     => $kinds,
@@ -124,36 +129,35 @@ final class NavEditor
     }
 
     /**
-     * Get the items of the editor: each with its `depth` instead of `parent_id` and its `clicks`, a post
-     * item with the title of its post as `original` and `problem` when the site leaves it out, as
-     * Menu::links() does: `deleted` for a missing post, `hidden` for an unpublished or trashed one.
+     * Get the items of the editor: each with its `depth` instead of `parent_id`, a post or a term
+     * item with the title of its post or the name of its term as `original` and `problem` when the site
+     * leaves it out, as Menu::links() does: `deleted` for a missing entry, `hidden` for an unpublished or trashed post.
      *
-     * @param array                                           $items  Items of the menu, a parent before its subitems.
-     * @param array<string, array<int, array<string, mixed>>> $posts  Posts of the items by type and ID, see posts().
-     * @param array<string, int>                              $clicks Clicks of the last 30 days by item ID.
+     * @param array                                                          $items   Items of the menu, parents first.
+     * @param array<string, array<string, array<int, array<string, mixed>>>> $entries Posts and terms, see entries().
      * @return array<int, array<string, mixed>>
      */
-    private static function flatten(array $items, array $posts, array $clicks): array
+    private static function flatten(array $items, array $entries): array
     {
         $list   = [];
         $depths = [];
         foreach ($items as $item) {
             $depth = $depths[$item['id']] = isset($depths[$item['parent_id']]) ? $depths[$item['parent_id']] + 1 : 0;
 
-            $post = $item['type'] === 'post' ? $posts[$item['object']][$item['objectId']] ?? null : null;
+            $isEntry = in_array($item['type'], Menu::ENTRIES, true);
+            $entry   = $isEntry ? $entries[$item['type']][$item['object']][$item['objectId']] ?? null : null;
 
             unset($item['parent_id'], $item['position']);
             $list[] = [
                 ...$item,
                 'depth'    => $depth,
-                'original' => $post['title'] ?? '',
+                'original' => $entry['title'] ?? '',
                 'problem'  => match (true) {
-                    $item['type'] !== 'post'                         => '',
-                    $post === null                                   => 'deleted',
-                    $post['status'] !== 'publish' || $post['trashed'] => 'hidden',
-                    default                                          => '',
+                    ! $isEntry                                          => '',
+                    $entry === null                                     => 'deleted',
+                    $entry['status'] !== 'publish' || $entry['trashed'] => 'hidden',
+                    default                                             => '',
                 },
-                'clicks'   => $clicks[$item['id']] ?? 0,
             ];
         }
 
@@ -174,20 +178,22 @@ final class NavEditor
     }
 
     /**
-     * Read the titles, the statuses and the trash of the posts of the items, a query per post type.
+     * Read the titles, the statuses and the trash of the posts of the items, a query per post type,
+     * and the names of the terms, a query per taxonomy; a term is always published. The entries
+     * are keyed by the type of the item, the post type or the taxonomy and the ID.
      *
      * @param Menu $menu
-     * @return array<string, array<int, array{title: string, status: string, trashed: bool}>>
+     * @return array<string, array<string, array<int, array{title: string, status: string, trashed: bool}>>>
      */
-    private static function posts(Menu $menu): array
+    private static function entries(Menu $menu): array
     {
-        $posts = [];
+        $entries = ['post' => [], 'term' => []];
         foreach ($menu->posts() as $key => $ids) {
             $type = Type::get($key);
             if ($type instanceof Type) {
                 $columns = ['id [Int]', 'title', 'status', ...($type->canTrash ? ['deleted_at'] : [])];
                 foreach (Db::select($type->table, $columns, ['id' => $ids]) ?: [] as $row) {
-                    $posts[$key][$row['id']] = [
+                    $entries['post'][$key][$row['id']] = [
                         'title'   => (string) $row['title'],
                         'status'  => (string) $row['status'],
                         'trashed' => ($row['deleted_at'] ?? null) !== null,
@@ -196,6 +202,16 @@ final class NavEditor
             }
         }
 
-        return $posts;
+        foreach ($menu->terms() as $key => $ids) {
+            foreach (Db::select('terms', ['id [Int]', 'name'], ['id' => $ids, 'taxonomy' => $key]) ?: [] as $row) {
+                $entries['term'][$key][$row['id']] = [
+                    'title'   => (string) $row['name'],
+                    'status'  => 'publish',
+                    'trashed' => false,
+                ];
+            }
+        }
+
+        return $entries;
     }
 }

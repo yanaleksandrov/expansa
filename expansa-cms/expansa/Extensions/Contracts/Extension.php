@@ -12,6 +12,27 @@ namespace Expansa\Extensions\Contracts;
 interface Extension
 {
     /**
+     * Unique identifier for the extension, set by Manager on load.
+     */
+    public string $id {
+        get;
+        set;
+    }
+
+    /**
+     * Path to root file of the extension, set by Manager on load.
+     */
+    public string $path {
+        get;
+        set;
+    }
+
+    /**
+     * Kind of the extension: `plugin` or `theme`.
+     */
+    public string $type { get; }
+
+    /**
      * Declare what the plugin provides (post types, roles, hooks), in the "extensions" lifecycle phase.
      * Runs for every active extension before any boot().
      */

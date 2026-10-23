@@ -211,8 +211,8 @@ if (! function_exists('error')) {
     /**
      * Create an error with a code, returned instead of a result.
      *
-     * @param string          $code    Error code: `user-signin`.
-     * @param string|string[] $message
+     * @param string                         $code    Error code: `user-signin`.
+     * @param string|array<array-key, mixed> $message Single message or a list, e.g. validator errors.
      * @return Expansa\Support\Error
      */
     function error(string $code, string|array $message = ''): Expansa\Support\Error

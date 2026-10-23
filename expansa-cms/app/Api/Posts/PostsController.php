@@ -22,13 +22,7 @@ final readonly class PostsController
          */
         private PostsService $service = new PostsService(),
     ) {}
-
-    #[Can('read')]
-    public function index(): array
-    {
-        return $this->service->list();
-    }
-
+
     #[Can('manage_export')]
     public function export(Request $request, Response $response): Response
     {

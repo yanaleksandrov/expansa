@@ -30,13 +30,13 @@ final class RequireAuth
         '/api/user/two-factor',
         '/api/user/email-link',
         '/api/comments/submit',
-        '/api/menus/click',
     ];
 
     /**
-     * Routes read by a visitor of the site or a headless front end: the menus of the theme locations.
+     * Routes read by a visitor of the site or a headless front end: the menus of the theme locations
+     * and the terms of the taxonomies.
      */
-    private const string PUBLIC_READ = '#^/api/menus/[a-z0-9_-]+$#';
+    private const string PUBLIC_READ = '#^/api/(menus/[a-z0-9_-]+|terms/[a-z_-]+)$#';
 
     public function handle(): void
     {

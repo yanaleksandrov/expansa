@@ -54,52 +54,47 @@ trait Columns
 
     /**
      * @param string $column
-     * @param int    $precision
      * @return Column
      */
-    public function tinyInt(string $column, int $precision = 3): Column
+    public function tinyInt(string $column): Column
     {
-        return $this->addColumn('tinyint', $column, ['precision' => $precision]);
+        return $this->addColumn('tinyint', $column);
     }
 
     /**
      * @param string $column
-     * @param int    $precision
      * @return Column
      */
-    public function smallInt(string $column, int $precision = 5): Column
+    public function smallInt(string $column): Column
     {
-        return $this->addColumn('smallint', $column, ['precision' => $precision]);
+        return $this->addColumn('smallint', $column);
     }
 
     /**
      * @param string $column
-     * @param int    $precision
      * @return Column
      */
-    public function mediumInt(string $column, int $precision = 8): Column
+    public function mediumInt(string $column): Column
     {
-        return $this->addColumn('mediumint', $column, ['precision' => $precision]);
+        return $this->addColumn('mediumint', $column);
     }
 
     /**
      * @param string $column
-     * @param int    $precision
      * @return Column
      */
-    public function int(string $column, int $precision = 10): Column
+    public function int(string $column): Column
     {
-        return $this->addColumn('int', $column, ['precision' => $precision]);
+        return $this->addColumn('int', $column);
     }
 
     /**
      * @param string $column
-     * @param int    $precision
      * @return Column
      */
-    public function bigInt(string $column, int $precision = 20): Column
+    public function bigInt(string $column): Column
     {
-        return $this->addColumn('bigint', $column, ['precision' => $precision]);
+        return $this->addColumn('bigint', $column);
     }
 
     /**
@@ -150,21 +145,21 @@ trait Columns
     }
 
     /**
-     * @param string   $column
-     * @param int|null $length
+     * @param string $column
+     * @param int    $length
      * @return Column
      */
-    public function string(string $column, ?int $length = null): Column
+    public function string(string $column, int $length = 255): Column
     {
         return $this->addColumn('varchar', $column, ['length' => $length]);
     }
 
     /**
-     * @param string   $column
-     * @param int|null $length
+     * @param string $column
+     * @param int    $length
      * @return Column
      */
-    public function char(string $column, ?int $length = null): Column
+    public function char(string $column, int $length = 255): Column
     {
         return $this->addColumn('char', $column, ['length' => $length]);
     }
@@ -261,13 +256,14 @@ trait Columns
     }
 
     /**
-     * Adds created_at/updated_at timestamp columns, both defaulting to CURRENT_TIMESTAMP.
+     * Adds created_at/updated_at DATETIME columns, both defaulting to CURRENT_TIMESTAMP:
+     * unlike TIMESTAMP, they hold dates after 2038 and are not converted by the session time zone.
      *
      * @return void
      */
     public function timestamps(): void
     {
-        $this->timestamp('created_at')->useCurrent();
-        $this->timestamp('updated_at')->useCurrent();
+        $this->datetime('created_at')->useCurrent();
+        $this->datetime('updated_at')->useCurrent();
     }
 }

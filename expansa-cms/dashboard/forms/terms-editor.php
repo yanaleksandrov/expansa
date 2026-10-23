@@ -1,125 +1,176 @@
 <?php
+
+use App\Dashboard\Pages\Term as Page;
+use App\Dashboard\Values\Crumb;
+use App\Post\Taxonomy;
+use Expansa\Builders\Form;
+
+$term     = Page::term(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0, (string) filter_input(INPUT_GET, 'taxonomy'));
+$taxonomy = Taxonomy::get($term->taxonomy);
+$type     = (string) filter_input(INPUT_GET, 'type');
+$list     = url('dashboard/' . $taxonomy->url($type));
+
 /**
- * Form for terms editor
+ * Term form: a new term beside the list of the terms of a taxonomy, or the saved term on its own page,
+ * with the way back to the list and the button deleting it.
  *
  * @since 2027.1
  */
-return \Expansa\Builders\Form::enqueue(
-	'terms-editor',
-	[
-		'class'           => 'dg g-6',
-		'@submit.prevent' => '$ajax.post("posts/filter")',
-		'u-sticky'        => '',
-	],
-	[
-		[
-			'name'     => 'instructions',
-			'type'     => 'custom',
-			'callback' => function() {
-				?>
-				<h6><?php echo t( 'Add New Category' ); ?></h6>
-				<?php
-			},
-			'attributes'  => [ 'u-prop' => 'instructions' ],
-		],
-		[
-			'type'        => 'text',
-			'label'       => t( 'Name' ),
-			'name'        => 'title',
-			'error'       => 'title',
-			'value'       => '',
-			'placeholder' => '',
-			'class'       => 'field field--raised',
-			'label_class' => '',
-			'reset'       => 0,
-			'required'    => 1,
-			'copy'        => 0,
-			'before'      => '',
-			'after'       => '',
-			'tooltip'     => '',
-			'instruction' => t( 'The name is how it appears on your site.' ),
-			'attributes'  => [
-				'u-prop' => 'title',
-			],
-			'conditions'  => [],
-		],
-		[
-			'type'        => 'text',
-			'label'       => t( 'Slug' ),
-			'name'        => 'slug',
-			'error'       => 'slug',
-			'value'       => '',
-			'placeholder' => '',
-			'class'       => 'field field--raised',
-			'label_class' => '',
-			'reset'       => 0,
-			'required'    => 1,
-			'copy'        => 0,
-			'before'      => '',
-			'after'       => '',
-			'tooltip'     => '',
-			'instruction' => t( 'The “slug” is the URL-friendly version of the name. It is usually all lowercase and contains only letters, numbers, and hyphens.' ),
-			'attributes'  => [ 'u-prop' => 'slug' ],
-			'conditions'  => [],
-		],
-		[
-			'type'        => 'select',
-			'label'       => t( 'Parent Category' ),
-			'name'        => 'parent',
-			'error'       => 'parent',
-			'value'       => '',
-			'placeholder' => '',
-			'class'       => 'field field--raised',
-			'label_class' => '',
-			'reset'       => 0,
-			'required'    => 0,
-			'copy'        => 0,
-			'before'      => '',
-			'after'       => '',
-			'tooltip'     => '',
-			'instruction' => t( 'Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.' ),
-			'attributes'  => [ 'u-prop' => 'parent' ],
-			'conditions'  => [],
-			'options' => [
-				'' => t( 'None' ),
-			],
-		],
-		[
-			'type'        => 'textarea',
-			'label'       => t( 'Short Description' ),
-			'name'        => 'description',
-			'error'       => 'description',
-			'value'       => '',
-			'placeholder' => '',
-			'class'       => 'field field--raised',
-			'label_class' => '',
-			'reset'       => 0,
-			'required'    => 1,
-			'copy'        => 0,
-			'before'      => '',
-			'after'       => '',
-			'tooltip'     => '',
-			'instruction' => t( 'The description is not prominent by default; however, some themes may show it.' ),
-			'attributes'  => [ 'u-prop' => 'description' ],
-			'conditions'  => [],
-		],
-		[
-			'type'        => 'submit',
-			'name'        => 'add',
-			'label'       => t( 'Add New Category' ),
-			'class'       => '',
-			'label_class' => '',
-			'reset'       => 0,
-			'before'      => '',
-			'after'       => '',
-			'instruction' => '',
-			'tooltip'     => '',
-			'copy'        => 0,
-			'validator'   => '',
-			'conditions'  => [],
-			'attributes'  => [
-				'class' => 'btn btn--primary',
-			],
-		],
-	]
+return Form::enqueue(
+    'terms-editor',
+    [
+        'class'           => 'dg g-6',
+        '@submit.prevent' => sprintf('$ajax.post("%s")', $term->id === 0 ? 'terms/create' : 'terms/update'),
+    ],
+    [
+        [
+            'type'       => 'hidden',
+            'name'       => 'id',
+            'attributes' => ['type' => 'hidden', 'name' => 'id', 'value' => $term->id],
+        ],
+        [
+            'type'       => 'hidden',
+            'name'       => 'taxonomy',
+            'attributes' => ['type' => 'hidden', 'name' => 'taxonomy', 'value' => $taxonomy->key],
+        ],
+        [
+            'type'       => 'hidden',
+            'name'       => 'type',
+            'attributes' => ['type' => 'hidden', 'name' => 'type', 'value' => $type],
+        ],
+        [
+            'name'     => 'header',
+            'type'     => 'custom',
+            'callback' => function () use ($term, $taxonomy, $list) {
+                if ($term->id === 0) {
+                    ?>
+                    <h6><?php echo htmlspecialchars($taxonomy->labelAdd); ?></h6>
+                    <?php
+                    return;
+                }
+
+                $url = $term->url();
+                ?>
+                <div class="post-editor-head">
+                    <a class="btn btn--icon btn--xs" href="<?php echo $list; ?>" title="<?php echo t_attr('Back to :items', $taxonomy->labelNamePlural); ?>">
+                        <i class="ph ph-arrow-left"></i>
+                    </a>
+                    <?php
+                    echo view('parts/breadcrumbs', [
+                        'items' => [
+                            new Crumb($taxonomy->labelNamePlural, $list),
+                            new Crumb(
+                                label: $term->name,
+                                url: $url,
+                                attributes: $url !== '' ? ['target' => '_blank', 'title' => t('View')] : [],
+                            ),
+                        ],
+                    ]);
+                    ?>
+                </div>
+                <?php
+            },
+        ],
+        [
+            'type'        => 'text',
+            'name'        => 'name',
+            'error'       => 'name',
+            'label'       => t('Name'),
+            'class'       => 'field field--raised',
+            'label_class' => '',
+            'reset'       => 0,
+            'before'      => '',
+            'after'       => '',
+            'instruction' => t('The name is how it appears on your site.'),
+            'tooltip'     => '',
+            'copy'        => 0,
+            'validator'   => '',
+            'conditions'  => [],
+            'attributes'  => [
+                'u-prop'   => 'name',
+                'value'    => $term->name,
+                'required' => true,
+            ],
+        ],
+        [
+            'type'        => 'text',
+            'name'        => 'slug',
+            'error'       => 'slug',
+            'label'       => t('Slug'),
+            'class'       => 'field field--raised',
+            'label_class' => '',
+            'reset'       => 0,
+            'before'      => '',
+            'after'       => '',
+            'instruction' => t('The address of the term: letters, numbers and hyphens. Leave it empty to make it from the name.'),
+            'tooltip'     => '',
+            'copy'        => 0,
+            'validator'   => '',
+            'conditions'  => [],
+            'attributes'  => [
+                'u-prop' => 'slug',
+                'value'  => $term->slug,
+            ],
+        ],
+        ...($taxonomy->hierarchical ? [
+            [
+                'type'        => 'select',
+                'name'        => 'parent_id',
+                'error'       => 'parent_id',
+                'label'       => t('Parent'),
+                'class'       => 'field field--raised',
+                'label_class' => '',
+                'reset'       => 0,
+                'before'      => '',
+                'after'       => '',
+                'instruction' => t('Assign a parent term to create a hierarchy. The term Jazz, for example, would be the parent of Bebop and Big Band.'),
+                'tooltip'     => '',
+                'copy'        => 0,
+                'validator'   => '',
+                'conditions'  => [],
+                'options'     => Page::parents($term),
+                'attributes'  => [
+                    'u-prop' => 'parent_id',
+                    'value'  => (string) $term->parentId,
+                ],
+            ],
+        ] : []),
+        [
+            'type'        => 'textarea',
+            'name'        => 'description',
+            'error'       => 'description',
+            'label'       => t('Description'),
+            'class'       => 'field field--raised',
+            'label_class' => '',
+            'reset'       => 0,
+            'before'      => '',
+            'after'       => '',
+            'instruction' => t('The description is not prominent by default; however, some themes may show it.'),
+            'tooltip'     => '',
+            'copy'        => 0,
+            'validator'   => '',
+            'conditions'  => [],
+            'attributes'  => [
+                'u-prop' => 'description',
+                'value'  => $term->description,
+            ],
+        ],
+        [
+            'name'     => 'actions',
+            'type'     => 'custom',
+            'callback' => function () use ($term, $taxonomy, $type) {
+                $item = htmlspecialchars(json_encode(['id' => $term->id, 'type' => $type]));
+                ?>
+                <div class="df aic g-2">
+                    <button class="btn btn--primary" type="submit"><?php echo htmlspecialchars($term->id === 0 ? $taxonomy->labelAdd : t('Save')); ?></button>
+                    <?php if ($term->id > 0) : ?>
+                        <button class="btn btn--outline t-red ml-auto" type="button" @click="$dialog.confirm(texts.deleteItem, { action: texts.deletePermanently, danger: true }).then(ok => ok && $ajax.post('terms/delete', <?php echo $item; ?>))">
+                            <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
+                        </button>
+                    <?php endif; ?>
+                </div>
+                <?php
+            },
+        ],
+    ]
 );

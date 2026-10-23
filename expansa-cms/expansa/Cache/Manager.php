@@ -28,7 +28,7 @@ final class Manager implements Provider
     /**
      * Store configs by name, each with a `driver` key.
      *
-     * @var array<string, array{driver: string}&array<string, mixed>>
+     * @var array<string, array<string, mixed>>
      */
     private array $config = [
         'memory' => ['driver' => 'memory'],

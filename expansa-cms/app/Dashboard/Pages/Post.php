@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace App\Dashboard\Pages;
 
+use App\Dashboard\Pages\Values\TermSelect;
 use App\Models\Post as Entry;
+use App\Models\Term;
 use App\Models\User;
+use App\Post\Taxonomy;
 use App\Post\Type;
+use Expansa\Facades\Access;
 use Expansa\Facades\Db;
 use Expansa\Facades\Role;
 use Expansa\Http\Exceptions\NotFound;
 use Expansa\Http\Request;
 
 /**
- * Editor of a single post: its title, content and slug, the status, parent and discussion in the side panel.
+ * Editor of a single post: its title, content and slug, the status, parent, terms and discussion in the side panel.
  *
  * @package App\Dashboard
  */
@@ -180,6 +184,65 @@ final class Post
         }
 
         return $authors;
+    }
+
+    /**
+     * Get the selects of the terms of the post, one per taxonomy of its type shown in the editor, when the viewer
+     * may assign terms. A select has the chosen terms and the first ones, of a hierarchical taxonomy as a tree;
+     * a new post has the default term chosen.
+     *
+     * @param Entry $post
+     * @param int   $limit Terms a select has besides the chosen ones; with more it searches on the server.
+     * @return TermSelect[]
+     */
+    public static function terms(Entry $post, int $limit = self::OPTIONS_LIMIT): array
+    {
+        $user = User::current();
+        if ($user === null || ! Access::allows($user, 'assign_terms')) {
+            return [];
+        }
+
+        $chosen = [];
+        foreach ($post->terms() as $term) {
+            $chosen[$term->taxonomy][$term->id] = $term->name;
+        }
+
+        $selects = [];
+        foreach (Taxonomy::forType($post->type) as $taxonomy) {
+            if (! $taxonomy->showInEditor) {
+                continue;
+            }
+
+            $where = [
+                'taxonomy' => $taxonomy->key,
+                'ORDER'    => ['name' => 'ASC'],
+                'LIMIT'    => $limit + 1,
+            ];
+            $rows  = $taxonomy->hierarchical
+                ? Term::tree($taxonomy->key)
+                : (Db::select('terms', ['id [Int]', 'name'], $where) ?: []);
+
+            $options = [];
+            foreach (array_slice($rows, 0, $limit) as $row) {
+                $options[$row['id']] = str_repeat('— ', $row['depth'] ?? 0) . $row['name'];
+            }
+
+            $default  = $post->id === 0 ? Term::defaultId($taxonomy->key) : 0;
+            $selected = $chosen[$taxonomy->key] ?? [];
+            if ($default > 0 && isset($options[$default])) {
+                $selected = [$default => $options[$default]];
+            }
+
+            $selects[] = new TermSelect(
+                taxonomy: $taxonomy,
+                options: $options + $selected,
+                selected: array_keys($selected),
+                search: count($rows) > $limit,
+                canCreate: $taxonomy->canManage($user),
+            );
+        }
+
+        return $selects;
     }
 
     /**

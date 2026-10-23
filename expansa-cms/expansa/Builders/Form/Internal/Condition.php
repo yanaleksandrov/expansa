@@ -6,6 +6,7 @@ namespace Expansa\Builders\Form\Internal;
 
 use Expansa\Codecs\Json;
 use Expansa\Security\Sanitizer;
+use InvalidArgumentException;
 
 /**
  * A condition on another field's value that shows or hides a field. The browser checks it
@@ -52,6 +53,7 @@ final class Condition
             '!=', '!=='          => is_array($this->value) ? "!$includes" : $compare,
             'contains'           => $includes,
             'pattern'            => "$patterns.some(pattern => new RegExp(pattern, 'u').test($prop))",
+            default              => throw new InvalidArgumentException("Unknown condition operator [{$this->operator}]."),
         };
     }
 
@@ -74,6 +76,7 @@ final class Condition
             '!=='      => $current !== $this->value,
             'contains' => in_array($current, $this->value, true),
             'pattern'  => $this->matchesPattern($current),
+            default    => throw new InvalidArgumentException("Unknown condition operator [{$this->operator}]."),
         };
     }
 

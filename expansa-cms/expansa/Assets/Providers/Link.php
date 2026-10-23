@@ -103,6 +103,8 @@ final class Link extends AbstractProvider
 
         /**
          * uid's (or full ids) of assets that must be output before this one.
+         *
+         * @var string[]
          */
         public array $dependencies = [],
 

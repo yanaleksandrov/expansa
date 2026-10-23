@@ -90,6 +90,7 @@ check('a one-time token is replaced after the check', rejects(fn () => $csrf->ch
 $validator = new Validator(['email' => 'nope', 'age' => '7', 'name' => ''], ['email' => 'email', 'age' => 'numeric|min:18', 'name' => 'required'])->apply();
 check('invalid fields get errors', ! $validator->isValid() && array_keys($validator->errors) === ['email', 'age', 'name']);
 check('messages get the comparison value', $validator->errors['age'] === ['Must be at least 18.']);
+check('a rule without a check adds no error after a failed one', new Validator(['a' => 'nope'], ['a' => 'email|custom'])->extend('custom', 'Custom failed.')->apply()->errors['a'] === ['Is not a valid email address.']);
 check('valid data has no errors', new Validator(['age' => '20'], ['age' => 'numeric|min:18'])->apply()->errors === []);
 check('slug rule takes what slug() makes', new Validator(['a' => 'привет-мир', 'b' => '你好-世界', 'c' => 'foo_bar-2'], ['a' => 'slug', 'b' => 'slug', 'c' => 'slug'])->apply()->errors === []);
 check('slug rule refuses separators', count(new Validator(['a' => 'a/b', 'b' => 'a b', 'c' => ''], ['a' => 'slug', 'b' => 'slug', 'c' => 'slug'])->apply()->errors) === 3);

@@ -111,7 +111,7 @@ final class Scheduler
      */
     public function php(string $script, ?string $bin = null, array $args = [], ?string $id = null): Job
     {
-        $bin = $bin !== null && is_file($bin) ? $bin : (PHP_BINARY ?: '/usr/bin/php');
+        $bin = $bin !== null && is_file($bin) ? $bin : PHP_BINARY;
         $job = new Job(escapeshellarg($bin) . ' ' . escapeshellarg($script), $args, $id);
 
         if (! is_file($script)) {

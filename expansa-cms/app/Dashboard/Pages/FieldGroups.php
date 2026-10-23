@@ -6,6 +6,7 @@ namespace App\Dashboard\Pages;
 
 use App\Dashboard\Pages\Values\Choices;
 use App\Models\FieldGroup;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use Expansa\Facades\Role;
 use Expansa\Http\Request;
@@ -115,8 +116,13 @@ final class FieldGroups
     private static function locations(): array
     {
         $postTypes = [];
-        foreach (Type::fetch() as $type) {
+        foreach (Type::filter() as $type) {
             $postTypes[$type->key] = $type->labelName;
+        }
+
+        $taxonomies = [];
+        foreach (Taxonomy::filter() as $taxonomy) {
+            $taxonomies[$taxonomy->key] = $taxonomy->labelName;
         }
 
         return [
@@ -129,6 +135,7 @@ final class FieldGroups
                 'private'   => t('Private'),
                 'future'    => t('Scheduled'),
             ]],
+            'taxonomy'    => ['label' => t('Taxonomy'), 'options' => $taxonomies],
             'user_role'   => ['label' => t('User Role'), 'options' => array_map(static fn ($role) => $role['name'], Role::all())],
         ];
     }

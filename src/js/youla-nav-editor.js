@@ -18,7 +18,7 @@ document.addEventListener('youla:init', () => {
         const select   = state.select && typeof state.select === 'object' ? state.select : {};
 
         // a key tells the items apart in the page only, the proxies of the same item are not equal;
-        // the ID stays with the item while the menu is edited, the clicks of the site are counted by it
+        // the ID stays with the item while the menu is edited
         let lastKey = 0;
         const newId = () => Math.random().toString(36).slice(2, 14);
         const item = (values) => ({
@@ -28,15 +28,14 @@ document.addEventListener('youla:init', () => {
             ...Object.fromEntries(Object.entries(fields).map(([name, field]) => [ name, structuredClone(field.default ?? '') ])),
             original: '',
             problem: '',
-            clicks: 0,
             depth: 0,
             ...values,
             id: values.id || newId(),
             key: ++lastKey,
         });
 
-        // the title of the post, why the site leaves the item out and the clicks come from the server, they are not saved
-        const serialize = (items) => JSON.stringify(items.map(({ key, original, problem, clicks, ...values }) => values));
+        // the title of the post and why the site leaves the item out come from the server, they are not saved
+        const serialize = (items) => JSON.stringify(items.map(({ key, original, problem, ...values }) => values));
 
         // what is saved: the order of the checked locations does not matter
         const snapshot = ({ title, locations, items }) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
@@ -68,13 +67,6 @@ document.addEventListener('youla:init', () => {
 
             label(entry) {
                 return entry.title || entry.original || entry.url || kinds[entry.type] || '—';
-            },
-            // the clicks of an item as a part of the clicks of the most clicked one
-            share(entry) {
-                return entry.clicks / Math.max(1, ...this.items.map(other => other.clicks || 0));
-            },
-            totalClicks() {
-                return this.items.reduce((total, entry) => total + (entry.clicks || 0), 0);
             },
             isChanged() {
                 return snapshot(this) !== this.saved;
@@ -227,8 +219,9 @@ document.addEventListener('youla:init', () => {
                 this.select(this.items.length - 1);
                 this.revealActive();
             },
+            // a found entry is a post or a term: its item type and its post type or taxonomy come with it
             addPost(key, post) {
-                this.add({ type: 'post', object: key, objectId: post.id, original: post.title });
+                this.add({ type: post.kind || 'post', object: post.object || key, objectId: post.id, original: post.title });
             },
             addLink() {
                 const url = this.link.url.trim();
@@ -395,17 +388,14 @@ document.addEventListener('youla:init', () => {
                 ':class': 'item.icon',
                 'u-show': 'item.icon',
             },
+            // the sources of the terms are keyed as `term:<taxonomy>`
             rowType: {
-                'u-show': "item.type === 'post'",
-                'u-text': 'types[item.object] || item.object',
+                'u-show': "item.type === 'post' || item.type === 'term'",
+                'u-text': "types[item.type === 'term' ? 'term:' + item.object : item.object] || item.object",
             },
             rowKind: {
-                'u-show': "item.type !== 'post'",
+                'u-show': "item.type !== 'post' && item.type !== 'term'",
                 'u-text': 'kinds[item.type]',
-            },
-            rowClicks: {
-                'u-show': 'item.clicks',
-                ':style': "'--share: ' + share(item)",
             },
             // the items that are not posts or links, a heading gets its label in the panel
             kind(type) {

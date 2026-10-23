@@ -17,8 +17,6 @@ final class Html
 
     private int $pos = 0;
 
-    private string $token = '';
-
     private string $currentMode = 'CONTENT';
 
     private array $tags = [];
@@ -129,7 +127,6 @@ final class Html
         $this->jsBeautify = ($jsBeautify && is_callable($jsBeautify)) ? $jsBeautify : false;
 
         $this->pos = 0; // Parser position
-        $this->token = '';
         $this->currentMode = 'CONTENT'; // reflects the current Parser mode: TAG/CONTENT
 
         // An object to hold tags, their position, and their parent-tags, initiated with default values
@@ -231,7 +228,6 @@ final class Html
                 case 'TK_TAG_END':
                     // Print new line only if the tag has no content and has child
                     if ($this->lastToken === 'TK_CONTENT' && $this->lastText === '') {
-                        $skipTags = false;
                         $matches = [];
                         preg_match('/\w+/', $this->tokenText, $matches);
                         $tagName = $matches[0] ?? null;
@@ -252,13 +248,12 @@ final class Html
                         if ($this->prevTagType === 'TK_TAG_START') {
                             preg_match('/<([a-zA-Z0-9]+)[^>]*>/', $this->prevTagText, $openingMatches);
                             preg_match('/<\/([a-zA-Z0-9]+)[^>]*>/', $this->tokenText, $closingMatches);
-                            if (($openingMatches[1] ?? null) === ($closingMatches[1] ?? null) && $this->lastText === '') {
+                            if (($openingMatches[1] ?? null) === ($closingMatches[1] ?? null)) {
                                 $isTagWithContent = false;
                             }
                         }
 
                         if (
-                            ! $skipTags &&
                             $isTagWithContent &&
                             ($tagExtractedFromLastOutput === null || $tagExtractedFromLastOutput[1] !== $tagName)
                         ) {
@@ -874,13 +869,8 @@ final class Html
 
     private function getFullIndent(int $level): string
     {
-        // NOTE: `||` (not `?:`) is intentional here, byte-for-byte matching the
-        // pre-existing vendor code - it makes $level collapse to a bool (0 or 1),
-        // so this only ever returns '' or a single indent unit. Left unchanged to
-        // avoid silently changing behavior; not something this optimization pass
-        // was asked to fix. Cast to int so strict_types doesn't turn this existing
-        // quirk into a TypeError when it reaches str_repeat() below.
-        $level = (int) ($this->indentLevel + $level || 0);
+        // the vendor code had `$level || 0`: any level gives one indent unit at most
+        $level = (int) ($this->indentLevel + $level !== 0);
         if ($level < 1) {
             return '';
         }
@@ -922,7 +912,7 @@ final class Html
     private function printNewline(bool $force, array &$arr): void
     {
         $this->lineCharCount = 0;
-        if (! $arr || ! count($arr)) {
+        if (! $arr) {
             return;
         }
         if ($force || ($arr[count($arr) - 1] !== "\n")) { // we might want the extra line

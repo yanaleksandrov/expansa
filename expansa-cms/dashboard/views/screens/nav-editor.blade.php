@@ -14,12 +14,11 @@
  * @var array<string, string>                  $owners    Titles of the menus shown in the locations, by location.
  * @var array<int, string>                     $places    Labels of the locations of each menu, by menu ID.
  * @var string[]                               $orphans   Locations of the menu the theme no longer declares.
- * @var array<string, string>                  $types     Labels of the public post types by key.
+ * @var array<string, string>                  $types     Labels of the public post types by key, then of the taxonomies by `term:<key>`.
  * @var array<string, string>                  $kinds     Labels of the items that are neither posts nor links, by type.
- * @var int                                    $clicks    Clicks of the items of the menu over the last 30 days.
  * @var array<string, App\Models\Values\Field> $fields    Fields of an item by key.
  * @var App\Dashboard\Values\MenuItem[]        $rows      Rows of the items until u-each of the editor replaces them.
- * @var string                                 $source    Key of the post type open in the sources, the first one.
+ * @var string                                 $source    Key of the source open in the sources, the first one.
  * @var string[]                               $posts     Titles of its posts until u-each of the editor replaces them.
  * @var array<string, mixed>                   $state     Menu being edited, its items as a flat list with `depth`,
  *                                                        the post types, the fields and the deepest level for the editor.
@@ -101,9 +100,6 @@ defined('EX_PATH') || exit;
                 <h6 class="nav-editor-eyebrow">
                     {{ t('Menu Structure') }}
                     <span class="badge badge--xs" u-bind="count"@if(! $rows) hidden@endif>{{ count($rows) }}</span>
-                    <span class="badge badge--xs badge--green-lt" title="{{ t_attr('Clicks in the last 30 days') }}" u-show="totalClicks()"@if(! $clicks) hidden@endif>
-                        <i class="ph ph-cursor-click"></i> <span u-text="totalClicks()">{{ $clicks }}</span>
-                    </span>
                 </h6>
                 <div class="nav-editor-clipboard">
                     <button type="button" class="btn btn--xs btn--icon" title="{{ t_attr('Copy Menu') }}" @click="copyMenu()"><i class="ph ph-copy"></i></button>
@@ -120,7 +116,6 @@ defined('EX_PATH') || exit;
                         <small class="badge badge--xs badge--orange-lt" title="{{ t_attr('The post is not published, the item is not shown on the site.') }}" u-bind="rowHidden">{{ t('Not Published') }}</small>
                         <small class="badge badge--xs" u-bind="rowType"></small>
                         <small class="badge badge--xs badge--blue-lt" u-bind="rowKind"></small>
-                        <span class="nav-editor-item-clicks" title="{{ t_attr('Clicks in the last 30 days') }}" u-bind="rowClicks"><span u-text="item.clicks"></span></span>
                     </button>
                     <div class="nav-editor-item-actions">
                         <button type="button" class="btn btn--xs btn--icon nav-editor-remove" title="{{ t_attr('Remove') }}" @click="remove(i)"><i class="ph ph-trash"></i></button>
@@ -141,9 +136,6 @@ defined('EX_PATH') || exit;
                                 <small class="badge badge--xs">{{ $row->type }}</small>
                             @else
                                 <small class="badge badge--xs badge--blue-lt">{{ $row->kind }}</small>
-                            @endif
-                            @if($row->clicks)
-                                <span class="nav-editor-item-clicks" title="{{ t_attr('Clicks in the last 30 days') }}" style="--share: {{ $row->share }}"><span>{{ $row->clicks }}</span></span>
                             @endif
                         </button>
                         <div class="nav-editor-item-actions">

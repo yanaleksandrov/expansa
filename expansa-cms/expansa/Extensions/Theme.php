@@ -32,7 +32,7 @@ abstract class Theme extends AbstractExtension implements Extension
     /**
      * Sets the menu locations of the theme, replacing the declared ones.
      *
-     * @param array<string, string> $menus Labels by key.
+     * @param array<array-key, string> $menus Labels by key.
      * @return static
      * @throws InvalidArgumentException When a key is not a valid location key.
      */

@@ -37,7 +37,7 @@ final class SiteHealth
                 $count[Checks::RECOMMENDED] > 0 => Checks::RECOMMENDED,
                 default                         => Checks::GOOD,
             },
-            'open'    => array_find($groups, fn (Section $group) => $group->status !== Checks::GOOD)?->id ?? '',
+            'open'    => array_find($groups, fn (Section $group) => $group->status !== Checks::GOOD)->id ?? '',
         ];
     }
 }

@@ -6,6 +6,7 @@ namespace App\Api\Search;
 
 use App\Dashboard\Menus;
 use App\Models\User;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use Expansa\Builders\Tree;
 use Expansa\Builders\Tree\Item;
@@ -15,7 +16,8 @@ use Expansa\Facades\Hook;
 
 /**
  * Search of the dashboard: its pages from the menus the user sees, the items of the searchable post types
- * the user may edit and, with `users_edit`, the users. Plugins add their sections with the `dashboardSearch` filter.
+ * and the terms of the taxonomies the user may edit and, with `users_edit`, the users. Plugins add their
+ * sections with the `dashboardSearch` filter.
  *
  * @package App\Api
  */
@@ -58,6 +60,7 @@ final class SearchService
                 'links' => $this->pages($query),
             ],
             ...$this->posts($query, $user),
+            ...$this->terms($query, $user),
             'users'     => [
                 'title' => t('Users'),
                 'links' => $user !== null && Access::allows($user, 'users_edit') ? $this->users($query) : [],
@@ -138,7 +141,7 @@ final class SearchService
     private function posts(string $query, ?User $user): array
     {
         $sections = [];
-        foreach (Type::fetch(['searchable' => true]) as $type) {
+        foreach (Type::filter(['searchable' => true]) as $type) {
             $isAllowed = fn (string $capability) => $user !== null && Access::allows($user, $capability);
             if (! array_all($type->capabilities, $isAllowed)) {
                 continue;
@@ -159,6 +162,40 @@ final class SearchService
                     'url'  => url('dashboard/post?type=' . $type->key . '&id=' . $post['id']),
                     'text' => (string) $post['title'],
                 ], Db::select($type->table, ['id [Int]', 'title'], $where) ?? []),
+            ];
+        }
+
+        return $sections;
+    }
+
+    /**
+     * Terms of the taxonomies the user may change by the name: a section per taxonomy.
+     *
+     * @param string    $query
+     * @param User|null $user
+     * @return array<string, array{title: string, links: array<int, array{url: string, text: string}>}>
+     */
+    private function terms(string $query, ?User $user): array
+    {
+        $sections = [];
+        foreach (Taxonomy::filter() as $taxonomy) {
+            if (! $taxonomy->canManage($user)) {
+                continue;
+            }
+
+            $terms = Db::select('terms', ['id [Int]', 'name'], [
+                'taxonomy' => $taxonomy->key,
+                'name[~]'  => $query,
+                'ORDER'    => ['name' => 'ASC'],
+                'LIMIT'    => self::LIMIT,
+            ]) ?? [];
+
+            $sections["taxonomy-$taxonomy->key"] = [
+                'title' => $taxonomy->labelNamePlural,
+                'links' => array_map(fn (array $term) => [
+                    'url'  => url('dashboard/term?id=' . $term['id']),
+                    'text' => (string) $term['name'],
+                ], $terms),
             ];
         }
 

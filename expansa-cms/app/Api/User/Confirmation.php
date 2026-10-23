@@ -74,7 +74,13 @@ final class Confirmation
     {
         Auth::limit("confirm:$user->id", self::MAX_ATTEMPTS, self::TTL);
 
-        return password_verify($password, $user->password) && self::remember($user);
+        if (! password_verify($password, $user->password)) {
+            return false;
+        }
+
+        self::remember($user);
+
+        return true;
     }
 
     /**
@@ -92,7 +98,13 @@ final class Confirmation
             return false;
         }
 
-        return $owner->id === $user->id && self::remember($user);
+        if ($owner->id !== $user->id) {
+            return false;
+        }
+
+        self::remember($user);
+
+        return true;
     }
 
     /**
@@ -111,13 +123,11 @@ final class Confirmation
      * Mark the session confirmed for TTL seconds.
      *
      * @param User $user
-     * @return true
+     * @return void
      */
-    private static function remember(User $user): bool
+    private static function remember(User $user): void
     {
         self::startSession();
         Session::set(self::SESSION_KEY, ['user' => $user->id, 'until' => time() + self::TTL]);
-
-        return true;
     }
 }
