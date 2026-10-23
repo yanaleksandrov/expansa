@@ -296,16 +296,6 @@
     }
   }
 
-  .nav-editor-item-flags {
-    display: flex;
-    gap: 0.25rem;
-    color: var(--expansa-text-muted);
-
-    &:not(:has(> :not([hidden]))) {
-      display: none;
-    }
-  }
-
   .nav-editor-clipboard {
     display: flex;
     gap: 2px;

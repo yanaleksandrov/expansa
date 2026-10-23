@@ -54,19 +54,6 @@ document.addEventListener('youla:init', () => {
             totalClicks() {
                 return this.items.reduce((total, entry) => total + (entry.clicks || 0), 0);
             },
-            flags(entry) {
-                return Object.entries(fields).flatMap(([name, field]) => {
-                    const value = entry[name] ?? field.default;
-                    if (![ 'select', 'multiselect', 'date' ].includes(field.type) || field.types?.length && !field.types.includes(entry.type) || JSON.stringify(value) === JSON.stringify(field.default) || Array.isArray(value) && value.length === 0) {
-                        return [];
-                    }
-                    const texts = [ value ].flat().map(key => field.options?.[key] ?? key);
-                    return [ {
-                        icon: field.icon,
-                        title: `${field.label}: ${texts.join(', ')}`
-                    } ];
-                });
-            },
             isChanged() {
                 return snapshot(this) !== this.saved;
             },
@@ -425,12 +412,6 @@ document.addEventListener('youla:init', () => {
             },
             rowHidden: {
                 'u-show': 'item.problem === \'hidden\''
-            },
-            rowFlag: {
-                'u-each': 'flag in flags(item)',
-                ':hidden': 'false',
-                ':class': 'flag.icon',
-                ':title': 'flag.title'
             },
             panel: {
                 ':class': 'activeKey && \'is-active\''

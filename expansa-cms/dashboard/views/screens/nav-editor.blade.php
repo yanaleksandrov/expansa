@@ -150,7 +150,6 @@ defined('EX_PATH') || exit;
                     <button type="button" class="nav-editor-item-head" u-bind="rowHead">
                         <i u-bind="rowIcon"></i>
                         <span u-text="label(item)"></span>
-                        <span class="nav-editor-item-flags"><i u-bind="rowFlag" hidden></i></span>
                         <small class="badge badge--xs badge--red-lt" title="{{ t_attr('The post was deleted, the item is not shown on the site.') }}" u-bind="rowDeleted">{{ t('Deleted') }}</small>
                         <small class="badge badge--xs badge--orange-lt" title="{{ t_attr('The post is not published, the item is not shown on the site.') }}" u-bind="rowHidden">{{ t('Not Published') }}</small>
                         <small class="badge badge--xs" u-bind="rowType"></small>
@@ -167,13 +166,6 @@ defined('EX_PATH') || exit;
                         <button type="button" class="nav-editor-item-head">
                             @if($row->icon)<i class="{{ $row->icon }}"></i>@endif
                             <span>{{ $row->label }}</span>
-                            @if($row->flags)
-                                <span class="nav-editor-item-flags">
-                                    @foreach($row->flags as $flag)
-                                        <i class="{{ $flag->icon }}" title="{{ $flag->title }}"></i>
-                                    @endforeach
-                                </span>
-                            @endif
                             @if($row->problem === 'deleted')
                                 <small class="badge badge--xs badge--red-lt" title="{{ t_attr('The post was deleted, the item is not shown on the site.') }}">{{ t('Deleted') }}</small>
                             @elseif($row->problem === 'hidden')

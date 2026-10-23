@@ -45,13 +45,6 @@ final readonly class MenuItem
         public string $problem = '',
 
         /**
-         * Settings of the item that differ from their defaults.
-         *
-         * @var Flag[]
-         */
-        public array $flags = [],
-
-        /**
          * Clicks of the item on the site over the last 30 days.
          */
         public int $clicks = 0,

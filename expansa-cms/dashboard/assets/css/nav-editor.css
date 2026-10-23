@@ -261,14 +261,6 @@
 .nav-editor .nav-editor-item-head > i {
   color: var(--expansa-text-muted);
 }
-.nav-editor .nav-editor-item-flags {
-  display: flex;
-  gap: 0.25rem;
-  color: var(--expansa-text-muted);
-}
-.nav-editor .nav-editor-item-flags:not(:has(> :not([hidden]))) {
-  display: none;
-}
 .nav-editor .nav-editor-clipboard {
   display: flex;
   gap: 2px;

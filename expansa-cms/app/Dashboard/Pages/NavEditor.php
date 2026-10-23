@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Dashboard\Pages;
 
 use App\Api\Menus\MenusService;
-use App\Dashboard\Values\Flag;
 use App\Dashboard\Values\MenuItem;
 use App\Models\Menu;
 use App\Models\Values\Field;
@@ -86,7 +85,6 @@ final class NavEditor
                 type: $item['type'] === 'post' ? $types[$item['object']] ?? (string) $item['object'] : '',
                 kind: $kinds[$item['type']] ?? '',
                 problem: $item['problem'],
-                flags: self::flags($item, $fields),
                 clicks: $item['clicks'],
                 share: $item['clicks'] / $most,
             ), $items),
@@ -172,35 +170,6 @@ final class NavEditor
     private static function label(array $item, array $kinds): string
     {
         return (string) (($item['title'] ?? '') ?: $item['original'] ?: ($item['url'] ?? '') ?: ($kinds[$item['type']] ?? '—'));
-    }
-
-    /**
-     * Get the settings of an item that differ from their defaults: the choices and dates of a field for
-     * its type, as the icon of the field with its name and value; the editor finds them the same way.
-     *
-     * @param array<string, mixed> $item
-     * @param array<string, Field> $fields
-     * @return Flag[]
-     */
-    private static function flags(array $item, array $fields): array
-    {
-        $flags = [];
-        foreach ($fields as $name => $field) {
-            $value = $item[$name] ?? $field->default;
-            if (
-                ! in_array($field->type, ['select', 'multiselect', 'date'], true)
-                || ($field->types && ! in_array($item['type'], $field->types, true))
-                || $value === $field->default
-                || $value === []
-            ) {
-                continue;
-            }
-
-            $texts   = array_map(fn (mixed $key) => (string) ($field->options[$key] ?? $key), (array) $value);
-            $flags[] = new Flag($field->icon, $field->label . ': ' . implode(', ', $texts));
-        }
-
-        return $flags;
     }
 
     /**
