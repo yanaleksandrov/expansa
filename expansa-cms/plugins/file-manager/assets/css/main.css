@@ -258,15 +258,6 @@
     margin: 0;
 }
 
-.fm-dialog-names {
-    max-height: 12rem;
-    margin: 0;
-    padding: 0 0 0 1.25rem;
-    overflow-y: auto;
-    font-family: var(--expansa-font-code);
-    overflow-wrap: anywhere;
-}
-
 .fm-dialog .dialog-footer {
     justify-content: flex-end;
     gap: 0.5rem;

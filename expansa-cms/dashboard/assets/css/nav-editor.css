@@ -445,10 +445,3 @@
   gap: 0.5rem;
   border-top: 1px solid var(--expansa-border);
 }
-
-.nav-editor-confirm {
-  margin: 0;
-  padding: 1rem;
-  font-size: 0.875rem;
-  color: var(--expansa-text-muted);
-}

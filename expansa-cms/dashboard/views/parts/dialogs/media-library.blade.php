@@ -3,14 +3,10 @@
  * Media library dialog - a WordPress-style media picker/manager that can be opened from
  * anywhere in the dashboard with:
  *
- *     $dialog.xl.open('tmpl-media-library', {
- *         title: 'Media Library',
+ *     $dialog.open('tmpl-media-library', {
  *         multiple: false,   // or true for a gallery-style multi-select
  *         type: 'image',     // optional mime-family filter: image | video | audio | application
- *         onSelect(items) {  // `items` is a single post object, or an array when multiple
- *             ...
- *         },
- *     })
+ *     }).then(items => ...)  // a single post object, an array when multiple, undefined when closed
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/dialogs/media-library.php
  *
@@ -19,6 +15,6 @@
 defined('EX_PATH') || exit;
 ?>
 <!-- media library dialog start -->
-<template id="tmpl-media-library">
+<template id="tmpl-media-library" title="<?php echo t_attr('Media Library'); ?>" size="xl">
     <?php echo view('parts/media-library'); ?>
 </template>

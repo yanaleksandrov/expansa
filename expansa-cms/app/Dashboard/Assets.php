@@ -274,33 +274,23 @@ final class Assets
             'showMenu'            => false,
             'flagsUrl'            => url('/dashboard/assets/sprites/flags.svg'),
             'texts'               => [
-                'deleteItem'    => t('Delete this item permanently?'),
-                'deleteItems'   => t('Delete the selected items permanently?'),
-                'emptyTrash'    => t('Delete all items in the trash permanently?'),
-                'deleteComment' => t('Delete this comment? Its replies stay.'),
-                'and'           => t('and'),
-                'where'         => t('Where'),
-                'is'            => t('is'),
-                'isNot'         => t('is not'),
-                'selected'      => t(':count selected'),
+                'confirm'           => t('Confirm'),
+                'delete'            => t('Delete'),
+                'deletePermanently' => t('Delete Permanently'),
+                'discardChanges'    => t('Close without saving the changes?'),
+                'discard'           => t('Close Without Saving'),
+                'deleteItem'        => t('Delete this item permanently?'),
+                'deleteItems'       => t('Delete the selected items permanently?'),
+                'emptyTrash'        => t('Delete all items in the trash permanently?'),
+                'deleteComment'     => t('Delete this comment? Its replies stay.'),
+                'and'               => t('and'),
+                'where'             => t('Where'),
+                'is'                => t('is'),
+                'isNot'             => t('is not'),
+                'selected'          => t(':count selected'),
             ],
             'notifications'       => [
                 'ctrlS' => t_attr('Expansa saves your changes automatically, so there\'s no need to press ⌘ + S.'),
-            ],
-            'uploaderDialog'      => [
-                'title' => t('Upload Files'),
-            ],
-            'emailDialog'         => [
-                'title' => t('Email Settings'),
-            ],
-            'postEditorDialog'    => [
-                'title' => t('Post Editor'),
-            ],
-            'takeSelfieDialog'    => [
-                'title' => t('Take a Selfie'),
-            ],
-            'mediaLibraryDialog'  => [
-                'title' => t('Media Library'),
             ],
         ]);
     }

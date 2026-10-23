@@ -313,6 +313,13 @@ document.addEventListener('youla:init', ()=> {
      * current one, so a template can raise its own (e.g. a confirm) from within another. Only
      * the outermost dialog syncs to "?dialog=" in the URL — nested ones are transient.
      *
+     * open() returns a promise of the value the dialog is closed with: `$dialog.close(value)` in the
+     * template, undefined for the close button, Escape or a click outside. confirm() and prompt()
+     * open the `tmpl-dialog-confirm` and `tmpl-dialog-prompt` templates of welcome.blade.php.
+     *
+     * The template describes its dialog by attributes, the options of open() and the data win over them:
+     * `<template id="tmpl-post-editor" title="Post Editor" size="lg" position="right" guarded>`.
+     *
      * @since 2027.1
      */
     (() => {
@@ -321,7 +328,8 @@ document.addEventListener('youla:init', ()=> {
 
         /**
          * The size and position of the next dialog as modifiers: `$dialog.lg.right.open(...)`, the last
-         * one of a kind wins. open() and init() get them as their options, the rest of `$dialog` is as is.
+         * one of a kind wins; `guarded` asks before a dialog with changed fields is dismissed.
+         * open() and restore() get them as their options, the rest of `$dialog` is as is.
          */
         const chain = (dialog, options = {}) => new Proxy(dialog, {
             get(target, name) {
@@ -331,8 +339,11 @@ document.addEventListener('youla:init', ()=> {
                 if (POSITIONS.includes(name)) {
                     return chain(target, { ...options, position: name });
                 }
-                if (name === 'open' || name === 'init') {
-                    return (templateID, data) => target[name](templateID, data, options);
+                if (name === 'guarded') {
+                    return chain(target, { ...options, guarded: true });
+                }
+                if (name === 'open' || name === 'restore') {
+                    return (first, second) => target[name](first, second, options);
                 }
                 const value = target[name];
                 return typeof value === 'function' ? value.bind(target) : value;
@@ -360,6 +371,14 @@ document.addEventListener('youla:init', ()=> {
 
         let uid     = 0;
         let scrollY = 0;
+
+        // the promises of open() by the ID of the dialog, outside the reactive stack
+        const resolvers = new Map();
+
+        // the dialogs whose fields the user changed, by ID: only the user fires `input` and `change`,
+        // a submitted form counts as saved
+        const changed = new Set();
+        const idOf    = (element) => Number(element.closest('.dialog-wrapper')?.id.replace('dialog-', '')) || 0;
 
         /**
          * Freezes body at its current scroll offset — plain overflow:hidden alone doesn't
@@ -400,54 +419,100 @@ document.addEventListener('youla:init', ()=> {
                     return this.stack.length ? 'is-active' : '';
                 },
                 '@keydown.esc.window'() {
-                    this.close();
+                    if (this.stack.length) {
+                        this.dismiss(this.stack.at(-1));
+                    }
+                },
+                '@input'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@change'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@submit'(event) {
+                    changed.delete(idOf(event.target));
                 },
             },
             wrapper: {
                 'u-each': 'entry in stack',
+                ':id': "'dialog-' + entry.id",
                 ':class': 'entry.modifiers',
-                '@click.outside': 'close(entry.id)',
+                '@click.outside': 'dismiss(entry, $event)',
+            },
+            // the buttons of confirm(): one with Cancel, or the choices; the last one is focused for Enter
+            confirmButton: {
+                'u-each': 'button in entry.buttons',
+                ':class': "button.danger ? 'btn--danger' : (entry.cancel ? 'btn--primary' : 'btn--outline')",
+                'u-text': 'button.label || texts.confirm',
+                '@click': 'close(button.value)',
+                '@load': 'setTimeout(() => $el.focus(), 50)',
             },
 
-            // options: `size` xs|sm|md|lg|xl and `position` center|left|right, usually set by the modifiers of `$dialog`
-            open(templateID, data = {}, { size = 'md', position = 'center' } = {}) {
+            /**
+             * Open the template as a dialog on top of the others; options: `size` xs|sm|md|lg|xl,
+             * `position` center|left|right and `guarded`, usually set by the modifiers of `$dialog`,
+             * by default the attributes of the template.
+             *
+             * @return {Promise<*>} The value of close(), undefined when the dialog is dismissed.
+             */
+            open(templateID, data = {}, options = {}) {
+                const template = document.getElementById(templateID);
+                if (!template) {
+                    console.warn(`Youla.js: no dialog template '${templateID}'.`);
+                    return Promise.resolve(undefined);
+                }
+
+                const {
+                    size = template.getAttribute('size') ?? 'md',
+                    position = template.getAttribute('position') ?? 'center',
+                    guarded = template.hasAttribute('guarded'),
+                } = options;
+
                 if (!SIZES.includes(size) || !POSITIONS.includes(position)) {
                     console.warn(`Youla.js: unknown dialog size '${size}' or position '${position}'.`);
                 }
 
-                setTimeout(() => {
-                    let template = document.getElementById(templateID);
-                    if (!template) {
-                        return;
-                    }
+                const isBase = this.stack.length === 0;
+                const id     = ++uid;
 
-                    const isBase    = this.stack.length === 0;
-                    const modifiers = `dialog-wrapper--${size} dialog-wrapper--${position}`;
+                // "id"/"content"/"modifiers"/"opened"/"guarded" go last so they always win: a caller's own data can freely
+                // include a same-named field (e.g. opening with a Post - which always has its
+                // own "id" and "content" - would otherwise silently clobber this entry's real
+                // id and, worse, wipe out the dialog's actual markup with the post's own,
+                // usually-empty "content" field).
+                // u-each (parts/footer.html) initializes each entry itself, wiring up the template's own "@click".
+                this.stack.push({
+                    title: template.getAttribute('title') ?? '',
+                    ...data,
+                    id,
+                    content: template.innerHTML,
+                    modifiers: `dialog-wrapper--${size} dialog-wrapper--${position}`,
+                    opened: performance.now(),
+                    guarded,
+                });
 
-                    // "id"/"content"/"modifiers" go last so they always win: a caller's own data can freely
-                    // include a same-named field (e.g. opening with a Post - which always has its
-                    // own "id" and "content" - would otherwise silently clobber this entry's real
-                    // id and, worse, wipe out the dialog's actual markup with the post's own,
-                    // usually-empty "content" field).
-                    // u-each (parts/footer.html) initializes each entry itself, wiring up the template's own "@click".
-                    this.stack.push({ ...data, id: ++uid, content: template.innerHTML, modifiers });
+                // Only the base dialog locks scroll — a nested call would read scrollY as 0 (already frozen).
+                if (isBase) {
+                    lockScroll();
+                    searchParamsHandler('dialog', templateID, false);
+                }
 
-                    // Only the base dialog locks scroll — a nested call would read scrollY as 0 (already frozen).
-                    if (isBase) {
-                        lockScroll();
-                    }
+                root.dispatchEvent(new Event('open', { bubbles: true }));
 
-                    root.dispatchEvent(new Event('open', { bubbles: true }));
-
-                    if (isBase) {
-                        searchParamsHandler('dialog', templateID, false);
-                    }
-                }, 25);
+                return new Promise(resolve => resolvers.set(id, resolve));
             },
-            // No "id" closes the top dialog; an explicit one (the backdrop's own click) closes that entry.
-            close(id) {
-                const target = id ?? this.stack.at(-1)?.id;
-                this.stack   = this.stack.filter(dialog => dialog.id !== target);
+            // Closes the top dialog, its open() resolves with the value.
+            close(value) {
+                const entry = this.stack.at(-1);
+                if (!entry) {
+                    return;
+                }
+
+                this.stack = this.stack.slice(0, -1);
+
+                resolvers.get(entry.id)?.(value);
+                resolvers.delete(entry.id);
+                changed.delete(entry.id);
 
                 root.dispatchEvent(new Event('close', { bubbles: true }));
 
@@ -456,20 +521,75 @@ document.addEventListener('youla:init', ()=> {
                     searchParamsHandler('dialog', null, true);
                 }
             },
-            // Snapshot first: close() reassigns "stack" on every call, so iterating the live array would skip entries.
-            clear() {
-                [...this.stack].forEach(entry => this.close(entry.id));
+            /**
+             * Close the dialog and the ones on top of it without a value: its close button, Escape or a click
+             * outside the top one; a `guarded` one with changed fields asks first. The click that opened
+             * a dialog reaches the document after it, so the clicks before the dialog opened are skipped.
+             */
+            async dismiss(entry, event) {
+                if (event && (entry.id !== this.stack.at(-1)?.id || event.timeStamp < entry.opened)) {
+                    return;
+                }
+
+                const index = this.stack.findIndex(dialog => dialog.id === entry.id);
+                if (index < 0) {
+                    return;
+                }
+
+                const unsaved = this.stack.slice(index).some(dialog => dialog.guarded && changed.has(dialog.id));
+                if (unsaved && !await this.confirm(this.texts.discardChanges, { action: this.texts.discard, danger: true })) {
+                    return;
+                }
+
+                while (this.stack.some(dialog => dialog.id === entry.id)) {
+                    this.close();
+                }
             },
-            // Reopens the base dialog from a shared URL, e.g. via "@load" on the element matching templateID.
-            async init(templateID, callback, options = {}) {
-                const params = new URLSearchParams(window.location.search);
+            clear() {
+                while (this.stack.length) {
+                    this.close();
+                }
+            },
+            /**
+             * Ask to confirm an action: `if (await $dialog.confirm(texts.deleteItem, { danger: true })) ...`.
+             * Options: `title`, `action` the label of the button, `danger` a red button, `items` a list
+             * under the message. With `choices`, the labels by value, it asks to choose one of them instead,
+             * without Cancel; `danger` is then the value of the red one.
+             *
+             * @return {Promise<boolean|string|undefined>} Confirmed or not; with `choices` the chosen value,
+             *                                             undefined when the dialog is dismissed.
+             */
+            confirm(message, { title = '', action = '', danger = false, items = [], choices = null } = {}) {
+                const buttons = choices
+                    ? Object.entries(choices).map(([value, label]) => ({ value, label, danger: danger === value }))
+                    : [ { value: true, label: action, danger: danger === true } ];
 
-                if (templateID && params.get('dialog') === templateID && callback) {
-                    const data = await callback();
+                return this.open('tmpl-dialog-confirm', { message, title, items, buttons, cancel: !choices })
+                    .then(value => choices ? value : value === true);
+            },
+            /**
+             * Ask for a line of text: `const name = await $dialog.prompt('File name', { value: 'new.txt' })`.
+             * Options: `title`, `value` the initial text, `action` the label of the button.
+             *
+             * @return {Promise<string|undefined>} The trimmed text, undefined when the dialog is dismissed.
+             */
+            prompt(label, { title = '', value = '', action = '' } = {}) {
+                return this.open('tmpl-dialog-prompt', { label, title, value, action });
+            },
+            /**
+             * Reopen the dialog of the template left open in a reloaded or shared `?dialog=` URL:
+             * `<template id="..." @load="$dialog.restore($el)">`; the callback gives its data, nothing to skip it.
+             *
+             * @return {Promise<*>|undefined} The promise of open(), undefined when the URL has another dialog.
+             */
+            async restore(template, callback = () => ({}), options = {}) {
+                if (new URLSearchParams(window.location.search).get('dialog') !== template.id) {
+                    return;
+                }
 
-                    if (data) {
-                        this.open(templateID, data, options);
-                    }
+                const data = await callback();
+                if (data) {
+                    return this.open(template.id, data, options);
                 }
             },
         }));
@@ -668,14 +788,16 @@ document.addEventListener('youla:init', ()=> {
             },
             // the API route of `action` gets the IDs of the checked rows, the `data-confirm` actions ask first
             bulkForm: {
-                '@submit.prevent'() {
-                    const form = this.$el;
-                    if (parse(form.dataset.confirm, []).includes(this.action) && !confirm(this.texts.deleteItems)) {
+                async '@submit.prevent'() {
+                    // the helpers are read before the dialog: after it, the handler is out of its evaluation
+                    const { $el: form, $ajax } = this;
+                    if (parse(form.dataset.confirm, []).includes(this.action)
+                        && !await this.$dialog.confirm(this.texts.deleteItems, { action: this.texts.deletePermanently, danger: true })) {
                         return;
                     }
 
                     const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
-                    this.$ajax.post(form.getAttribute('action'), { ids });
+                    $ajax.post(form.getAttribute('action'), { ids });
                 },
             },
             // the `data-password` actions of the form need the current password
@@ -691,27 +813,29 @@ document.addEventListener('youla:init', ()=> {
             },
             uploader: {
                 '@click'() {
-                    this.$dialog.md.open('tmpl-media-uploader', this.uploaderDialog);
+                    this.$dialog.open('tmpl-media-uploader');
                 },
             },
             emptyTrash: {
-                '@click'() {
-                    const { endpoint, payload } = this.$el.dataset;
-                    if (confirm(this.texts.emptyTrash)) {
-                        this.$ajax.post(endpoint, parse(payload, {}));
+                async '@click'() {
+                    const { $el, $ajax } = this;
+                    const { endpoint, payload } = $el.dataset;
+                    if (await this.$dialog.confirm(this.texts.emptyTrash, { action: this.texts.deletePermanently, danger: true })) {
+                        $ajax.post(endpoint, parse(payload, {}));
                     }
                 },
             },
             // a link of a row, see Table::action(): `data-confirm` is the key of the text asking first,
             // `data-refresh` shows the rows again after the response
             rowAction: {
-                '@click.prevent'() {
-                    const { endpoint, payload, confirm: question, refresh } = this.$el.dataset;
-                    if (question && !confirm(this.texts[question] ?? question)) {
+                async '@click.prevent'() {
+                    const { $el, $ajax } = this;
+                    const { endpoint, payload, confirm: question, refresh } = $el.dataset;
+                    if (question && !await this.$dialog.confirm(this.texts[question] ?? question, { danger: true })) {
                         return;
                     }
 
-                    this.$ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
+                    $ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
                 },
             },
             // the badge "+N more" of a cell shows the links hidden before it

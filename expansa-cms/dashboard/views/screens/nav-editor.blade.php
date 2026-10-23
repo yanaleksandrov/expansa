@@ -225,12 +225,4 @@ defined('EX_PATH') || exit;
             @endif
         </footer>
     </aside>
-
-    <template id="tmpl-menu-delete">
-        <p class="nav-editor-confirm">{{ t('The menu and its items will be deleted permanently.') }}</p>
-        <div class="dialog-footer">
-            <button type="button" class="btn btn--outline" @click="$dialog.close()">{{ t('Cancel') }}</button>
-            <button type="button" class="btn btn--danger" @click="$ajax.post('menus/delete', { id: entry.id }), $dialog.close()">{{ t('Delete Permanently') }}</button>
-        </div>
-    </template>
 </div>

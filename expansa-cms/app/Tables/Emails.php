@@ -65,7 +65,7 @@ final class Emails extends Table
             'buttons'     => [
                 new Link(
                     title: t('Add Email Template'),
-                    attributes: ['@click' => "\$dialog.xl.right.open('tmpl-email-editor', emailDialog)"],
+                    attributes: ['@click' => "\$dialog.open('tmpl-email-editor')"],
                 ),
             ],
         ];

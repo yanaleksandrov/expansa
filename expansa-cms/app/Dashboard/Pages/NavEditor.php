@@ -113,9 +113,11 @@ final class NavEditor
                     'searchText'        => t('Nothing found'),
                 ],
                 'texts'     => [
-                    'copied'      => t('Menu copied to the clipboard'),
-                    'pasted'      => t('Menu items pasted'),
-                    'pasteFailed' => t('The clipboard has no menu items.'),
+                    'copied'        => t('Menu copied to the clipboard'),
+                    'pasted'        => t('Menu items pasted'),
+                    'pasteFailed'   => t('The clipboard has no menu items.'),
+                    'deleteMessage' => t('The menu and its items will be deleted permanently.'),
+                    'deleteAction'  => t('Delete Permanently'),
                 ],
             ],
         ];

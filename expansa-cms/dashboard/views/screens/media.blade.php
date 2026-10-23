@@ -23,7 +23,7 @@ Hook::add('renderDashboardFooter', function () {
     </div>
 
     <div class="storage__items">
-        <div class="storage__item" :class="selected.includes(item.id) && 'is-active'" :data-id="item.id" u-each.lazy="(item, i) in items" @click="$dialog.xl.open('tmpl-media-editor', item)">
+        <div class="storage__item" :class="selected.includes(item.id) && 'is-active'" :data-id="item.id" u-each.lazy="(item, i) in items" @click="$dialog.open('tmpl-media-editor', item)">
             <img class="storage__image" u-show="item.url || item.icon" :src="item.sizes?.thumbnail?.url || item.url || item.icon || ''" width="200" height="200" alt>
             <div class="storage__meta" u-show="item.url || item.icon">
                 <div class="storage__data" u-text="item.sizeHumanize ?? ''"></div>

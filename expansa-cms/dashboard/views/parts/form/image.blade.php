@@ -30,7 +30,7 @@ Hook::add('renderDashboardFooter', function () {
 						<span u-bind="initials"></span>
 					</span>
 				</label>
-				<span class="image__action" @click="$dialog.sm.open('take-selfie', takeSelfieDialog)" title="{{ t('You can also take a selfie. Allow your browser to access the camera.') }}"><i class="ph ph-webcam"></i></span>
+				<span class="image__action" @click="$dialog.open('tmpl-selfie-maker')" title="{{ t('You can also take a selfie. Allow your browser to access the camera.') }}"><i class="ph ph-webcam"></i></span>
 			</div>
 		</div>
 		<div class="dg g-1 mw50x9">
@@ -42,7 +42,7 @@ Hook::add('renderDashboardFooter', function () {
 					<a @click.prevent="$refs.input.click()">{!! $field->instruction ?: t('Upload a photo') !!}</a>
 					<span>{!! t('WEBP, PNG, JPG or GIF (max. 400×400px)') !!}</span>
 				</div>
-				<a class="btn btn--outline" @click.prevent="$dialog.xl.open('tmpl-media-library', { ...mediaLibraryDialog, multiple: false, type: 'image', onSelect(item) { if (item) { image = item.sizes?.thumbnail?.url || item.url; } } })">
+				<a class="btn btn--outline" @click.prevent="$dialog.open('tmpl-media-library', { multiple: false, type: 'image' }).then(item => { if (item) { image = item.sizes?.thumbnail?.url || item.url; } })">
 					{!! t('Or choose from the media library') !!}
 				</a>
 			</div>

@@ -443,7 +443,7 @@ return Form::enqueue(
                                     <button class="btn btn--sm btn--outline" type="button" @click="$ajax.post('post/restore', <?php echo $item; ?>)">
                                         <i class="ph ph-arrow-counter-clockwise"></i> <?php echo t('Restore'); ?>
                                     </button>
-                                    <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(texts.deleteItem) && $ajax.post('post/delete', <?php echo $item; ?>)">
+                                    <button class="btn btn--sm btn--outline t-red" type="button" @click="$dialog.confirm(texts.deleteItem, { action: texts.deletePermanently, danger: true }).then(ok => ok && $ajax.post('post/delete', <?php echo $item; ?>))">
                                         <i class="ph ph-trash"></i> <?php echo t('Delete Permanently'); ?>
                                     </button>
                                 <?php else : ?>
@@ -455,7 +455,7 @@ return Form::enqueue(
                                             <i class="ph ph-trash"></i> <?php echo t('Move to Trash'); ?>
                                         </button>
                                     <?php else : ?>
-                                        <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(texts.deleteItem) && $ajax.post('post/delete', <?php echo $item; ?>)">
+                                        <button class="btn btn--sm btn--outline t-red" type="button" @click="$dialog.confirm(texts.deleteItem, { action: texts.deletePermanently, danger: true }).then(ok => ok && $ajax.post('post/delete', <?php echo $item; ?>))">
                                             <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
                                         </button>
                                     <?php endif; ?>

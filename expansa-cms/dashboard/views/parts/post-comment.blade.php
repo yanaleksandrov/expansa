@@ -53,7 +53,7 @@ $payload  = json_encode([
                     <a class="btn btn--xs btn--icon t-muted" href="{{ url('dashboard/comment?id=' . $comment->id . '&from=post') }}" title="{{ t('Edit Comment') }}" target="_blank">
                         <i class="ph ph-pencil-simple"></i>
                     </a>
-                    <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ t('Delete Comment') }}" @click="confirm(texts.deleteComment) && $ajax.post('comments/delete', {id: {{ $comment->id }}, stay: 1})">
+                    <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ t('Delete Comment') }}" @click="$dialog.confirm(texts.deleteComment, { action: texts.delete, danger: true }).then(ok => ok && $ajax.post('comments/delete', {id: {{ $comment->id }}, stay: 1}))">
                         <i class="ph ph-trash"></i>
                     </button>
                 </span>

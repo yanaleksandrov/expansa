@@ -283,8 +283,14 @@ document.addEventListener('youla:init', () => {
                         position: name
                     });
                 }
-                if (name === 'open' || name === 'init') {
-                    return (templateID, data) => target[name](templateID, data, options);
+                if (name === 'guarded') {
+                    return chain(target, {
+                        ...options,
+                        guarded: true
+                    });
+                }
+                if (name === 'open' || name === 'restore') {
+                    return (first, second) => target[name](first, second, options);
                 }
                 const value = target[name];
                 return typeof value === 'function' ? value.bind(target) : value;
@@ -307,6 +313,9 @@ document.addEventListener('youla:init', () => {
         };
         let uid = 0;
         let scrollY = 0;
+        const resolvers = new Map;
+        const changed = new Set;
+        const idOf = element => Number(element.closest('.dialog-wrapper')?.id.replace('dialog-', '')) || 0;
         function lockScroll() {
             scrollY = window.scrollY;
             Object.assign(document.body.style, {
@@ -336,45 +345,72 @@ document.addEventListener('youla:init', () => {
                     return this.stack.length ? 'is-active' : '';
                 },
                 '@keydown.esc.window'() {
-                    this.close();
+                    if (this.stack.length) {
+                        this.dismiss(this.stack.at(-1));
+                    }
+                },
+                '@input'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@change'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@submit'(event) {
+                    changed.delete(idOf(event.target));
                 }
             },
             wrapper: {
                 'u-each': 'entry in stack',
+                ':id': '\'dialog-\' + entry.id',
                 ':class': 'entry.modifiers',
-                '@click.outside': 'close(entry.id)'
+                '@click.outside': 'dismiss(entry, $event)'
             },
-            open(templateID, data = {}, {size = 'md', position = 'center'} = {}) {
+            confirmButton: {
+                'u-each': 'button in entry.buttons',
+                ':class': 'button.danger ? \'btn--danger\' : (entry.cancel ? \'btn--primary\' : \'btn--outline\')',
+                'u-text': 'button.label || texts.confirm',
+                '@click': 'close(button.value)',
+                '@load': 'setTimeout(() => $el.focus(), 50)'
+            },
+            open(templateID, data = {}, options = {}) {
+                const template = document.getElementById(templateID);
+                if (!template) {
+                    console.warn(`Youla.js: no dialog template '${templateID}'.`);
+                    return Promise.resolve(undefined);
+                }
+                const {size = template.getAttribute('size') ?? 'md', position = template.getAttribute('position') ?? 'center', guarded = template.hasAttribute('guarded')} = options;
                 if (!SIZES.includes(size) || !POSITIONS.includes(position)) {
                     console.warn(`Youla.js: unknown dialog size '${size}' or position '${position}'.`);
                 }
-                setTimeout(() => {
-                    let template = document.getElementById(templateID);
-                    if (!template) {
-                        return;
-                    }
-                    const isBase = this.stack.length === 0;
-                    const modifiers = `dialog-wrapper--${size} dialog-wrapper--${position}`;
-                    this.stack.push({
-                        ...data,
-                        id: ++uid,
-                        content: template.innerHTML,
-                        modifiers
-                    });
-                    if (isBase) {
-                        lockScroll();
-                    }
-                    root.dispatchEvent(new Event('open', {
-                        bubbles: true
-                    }));
-                    if (isBase) {
-                        searchParamsHandler('dialog', templateID, false);
-                    }
-                }, 25);
+                const isBase = this.stack.length === 0;
+                const id = ++uid;
+                this.stack.push({
+                    title: template.getAttribute('title') ?? '',
+                    ...data,
+                    id,
+                    content: template.innerHTML,
+                    modifiers: `dialog-wrapper--${size} dialog-wrapper--${position}`,
+                    opened: performance.now(),
+                    guarded
+                });
+                if (isBase) {
+                    lockScroll();
+                    searchParamsHandler('dialog', templateID, false);
+                }
+                root.dispatchEvent(new Event('open', {
+                    bubbles: true
+                }));
+                return new Promise(resolve => resolvers.set(id, resolve));
             },
-            close(id) {
-                const target = id ?? this.stack.at(-1)?.id;
-                this.stack = this.stack.filter(dialog => dialog.id !== target);
+            close(value) {
+                const entry = this.stack.at(-1);
+                if (!entry) {
+                    return;
+                }
+                this.stack = this.stack.slice(0, -1);
+                resolvers.get(entry.id)?.(value);
+                resolvers.delete(entry.id);
+                changed.delete(entry.id);
                 root.dispatchEvent(new Event('close', {
                     bubbles: true
                 }));
@@ -383,16 +419,63 @@ document.addEventListener('youla:init', () => {
                     searchParamsHandler('dialog', null, true);
                 }
             },
-            clear() {
-                [ ...this.stack ].forEach(entry => this.close(entry.id));
+            async dismiss(entry, event) {
+                if (event && (entry.id !== this.stack.at(-1)?.id || event.timeStamp < entry.opened)) {
+                    return;
+                }
+                const index = this.stack.findIndex(dialog => dialog.id === entry.id);
+                if (index < 0) {
+                    return;
+                }
+                const unsaved = this.stack.slice(index).some(dialog => dialog.guarded && changed.has(dialog.id));
+                if (unsaved && !await this.confirm(this.texts.discardChanges, {
+                    action: this.texts.discard,
+                    danger: true
+                })) {
+                    return;
+                }
+                while (this.stack.some(dialog => dialog.id === entry.id)) {
+                    this.close();
+                }
             },
-            async init(templateID, callback, options = {}) {
-                const params = new URLSearchParams(window.location.search);
-                if (templateID && params.get('dialog') === templateID && callback) {
-                    const data = await callback();
-                    if (data) {
-                        this.open(templateID, data, options);
-                    }
+            clear() {
+                while (this.stack.length) {
+                    this.close();
+                }
+            },
+            confirm(message, {title = '', action = '', danger = false, items = [], choices = null} = {}) {
+                const buttons = choices ? Object.entries(choices).map(([value, label]) => ({
+                    value,
+                    label,
+                    danger: danger === value
+                })) : [ {
+                    value: true,
+                    label: action,
+                    danger: danger === true
+                } ];
+                return this.open('tmpl-dialog-confirm', {
+                    message,
+                    title,
+                    items,
+                    buttons,
+                    cancel: !choices
+                }).then(value => choices ? value : value === true);
+            },
+            prompt(label, {title = '', value = '', action = ''} = {}) {
+                return this.open('tmpl-dialog-prompt', {
+                    label,
+                    title,
+                    value,
+                    action
+                });
+            },
+            async restore(template, callback = () => ({}), options = {}) {
+                if (new URLSearchParams(window.location.search).get('dialog') !== template.id) {
+                    return;
+                }
+                const data = await callback();
+                if (data) {
+                    return this.open(template.id, data, options);
                 }
             }
         }));
@@ -552,13 +635,16 @@ document.addEventListener('youla:init', () => {
                 }
             },
             bulkForm: {
-                '@submit.prevent'() {
-                    const form = this.$el;
-                    if (parse(form.dataset.confirm, []).includes(this.action) && !confirm(this.texts.deleteItems)) {
+                async '@submit.prevent'() {
+                    const {$el: form, $ajax} = this;
+                    if (parse(form.dataset.confirm, []).includes(this.action) && !await this.$dialog.confirm(this.texts.deleteItems, {
+                        action: this.texts.deletePermanently,
+                        danger: true
+                    })) {
                         return;
                     }
                     const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
-                    this.$ajax.post(form.getAttribute('action'), {
+                    $ajax.post(form.getAttribute('action'), {
                         ids
                     });
                 }
@@ -575,24 +661,31 @@ document.addEventListener('youla:init', () => {
             },
             uploader: {
                 '@click'() {
-                    this.$dialog.md.open('tmpl-media-uploader', this.uploaderDialog);
+                    this.$dialog.open('tmpl-media-uploader');
                 }
             },
             emptyTrash: {
-                '@click'() {
-                    const {endpoint, payload} = this.$el.dataset;
-                    if (confirm(this.texts.emptyTrash)) {
-                        this.$ajax.post(endpoint, parse(payload, {}));
+                async '@click'() {
+                    const {$el, $ajax} = this;
+                    const {endpoint, payload} = $el.dataset;
+                    if (await this.$dialog.confirm(this.texts.emptyTrash, {
+                        action: this.texts.deletePermanently,
+                        danger: true
+                    })) {
+                        $ajax.post(endpoint, parse(payload, {}));
                     }
                 }
             },
             rowAction: {
-                '@click.prevent'() {
-                    const {endpoint, payload, confirm: question, refresh} = this.$el.dataset;
-                    if (question && !confirm(this.texts[question] ?? question)) {
+                async '@click.prevent'() {
+                    const {$el, $ajax} = this;
+                    const {endpoint, payload, confirm: question, refresh} = $el.dataset;
+                    if (question && !await this.$dialog.confirm(this.texts[question] ?? question, {
+                        danger: true
+                    })) {
                         return;
                     }
-                    this.$ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
+                    $ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
                 }
             },
             moreLinks: {

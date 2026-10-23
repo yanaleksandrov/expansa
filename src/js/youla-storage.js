@@ -255,9 +255,10 @@ document.addEventListener('youla:init', () => {
      *
      * Works both as the standalone `/dashboard/media` page and, unmodified, as the content of
      * the `tmpl-media-library` dialog (see `dialogs/media-library.blade.php`) - a caller opens
-     * it with `$dialog.xl.open('tmpl-media-library', { multiple, type, onSelect(items) {...} })`
+     * it with `$dialog.open('tmpl-media-library', { multiple, type }).then(items => ...)`
      * and this component reads that config off `entry` (the dialog stack entry it was mounted
-     * inside of) in the `@load` of `self`, which also loads the first page.
+     * inside of) in the `@load` of `self`, which also loads the first page. The chosen items
+     * come back as the value of the dialog: a post object, an array when `multiple`.
      *
      * Two things every method here has to respect:
      *
@@ -299,9 +300,9 @@ document.addEventListener('youla:init', () => {
 
         // Picker configuration - only set once this component is mounted inside a dialog
         // stack entry (see the class docblock above). Standalone page usage (media.blade.php)
-        // never calls this, so `multiple`/`onSelect` simply keep their page-mode defaults.
+        // never calls this, so `multiple`/`picker` simply keep their page-mode defaults.
         multiple: true,
-        onSelect: null,
+        picker: false,
 
         // a string, not a method: `entry` is a loop variable of the dialog, seen only by an expression
         self: {
@@ -314,7 +315,7 @@ document.addEventListener('youla:init', () => {
             }
             this.multiple = entry.multiple ?? this.multiple;
             this.type     = entry.type ?? '';
-            this.onSelect = typeof entry.onSelect === 'function' ? entry.onSelect : null;
+            this.picker   = true;
         },
 
         // The only place `visible` is written - every method below that changes `items` or
@@ -411,10 +412,9 @@ document.addEventListener('youla:init', () => {
             this.anchor   = null;
         },
 
-        confirm() {
-            if (typeof this.onSelect === 'function') {
-                this.onSelect(this.multiple ? this.selectedItems() : this.selectedItems()[0]);
-            }
+        // the value the picker dialog is closed with
+        selection() {
+            return this.multiple ? this.selectedItems() : this.selectedItems()[0];
         },
 
         // Called with a `media/upload` or `media/grab` response - newly added files land first

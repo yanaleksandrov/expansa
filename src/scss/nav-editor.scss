@@ -525,11 +525,3 @@
     border-top: 1px solid var(--expansa-border);
   }
 }
-
-// the dialog of deleting a menu is shown outside the editor
-.nav-editor-confirm {
-  margin: 0;
-  padding: 1rem;
-  font-size: 0.875rem;
-  color: var(--expansa-text-muted);
-}

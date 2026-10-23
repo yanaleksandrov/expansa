@@ -9,7 +9,7 @@
 defined('EX_PATH') || exit;
 ?>
 <!-- selfie maker start -->
-<template id="take-selfie">
+<template id="tmpl-selfie-maker" title="<?php echo t_attr('Take a Selfie'); ?>" size="sm">
 	<div class="p-7 t-center" u-data="stream">
 		<div @load="start()" style="position: relative; overflow: hidden;">
 			<video u-ref="video" class="db mw" autoplay style="object-fit: cover; aspect-ratio: 4/3;"></video>

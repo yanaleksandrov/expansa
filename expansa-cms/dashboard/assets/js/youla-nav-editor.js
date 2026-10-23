@@ -429,11 +429,18 @@ document.addEventListener('youla:init', () => {
                 return bindings;
             },
             deleter: {
-                '@click'() {
-                    this.$dialog.sm.open('tmpl-menu-delete', {
-                        id: this.id,
-                        title: this.$el.textContent.trim()
-                    });
+                async '@click'() {
+                    const {$el, $ajax} = this;
+                    const options = {
+                        title: $el.textContent.trim(),
+                        action: texts.deleteAction,
+                        danger: true
+                    };
+                    if (await this.$dialog.confirm(texts.deleteMessage, options)) {
+                        $ajax.post('menus/delete', {
+                            id: this.id
+                        });
+                    }
                 }
             }
         };
