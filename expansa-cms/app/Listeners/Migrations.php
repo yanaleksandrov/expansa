@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use Expansa\Database\Query\Builder;
-use Expansa\Facades\Db;
 use Expansa\Database\Schema;
 use Expansa\Database\Schema\Table;
 use Expansa\Support\Str;
@@ -68,12 +67,11 @@ final class Migrations
     }
 
     /**
-     * Create the activity log of the entities, see App\Support\Activity; also on the sites
-     * installed before the log.
+     * Create the activity log of the entities, see App\Support\Activity.
      *
      * @return void
      */
-    public function createActivityTable(): void
+    private function createActivityTable(): void
     {
         Schema::create('activity', function (Table $table) {
             $table->id();
@@ -86,16 +84,14 @@ final class Migrations
 
             $table->index(['entity_table', 'entity_id']);
         });
-        Db::updateSchema();
     }
 
     /**
-     * Create the navigation menus of the site, see App\Models\Menu; also on the sites installed before
-     * the menus.
+     * Create the navigation menus of the site, see App\Models\Menu.
      *
      * @return void
      */
-    public function createMenusTable(): void
+    private function createMenusTable(): void
     {
         Schema::create('menus', function (Table $table) {
             $table->id();
@@ -104,15 +100,14 @@ final class Migrations
             $table->json('items')->nullable();
             $table->timestamps();
         });
-        Db::updateSchema();
     }
 
     /**
-     * Create the clicks of the menu items by day, see Menu::click(); also on the sites installed before them.
+     * Create the clicks of the menu items by day, see Menu::click().
      *
      * @return void
      */
-    public function createMenuClicksTable(): void
+    private function createMenuClicksTable(): void
     {
         Schema::create('menu_clicks', function (Table $table) {
             $table->bigInt('menu_id')->unsigned();
@@ -123,33 +118,6 @@ final class Migrations
             $table->unique(['menu_id', 'item_id', 'day']);
             $table->index('day');
         });
-        Db::updateSchema();
-    }
-
-    /**
-     * Add the `deleted_at` column of the trash to a posts table created without it.
-     *
-     * @param string $postType
-     * @return void
-     */
-    public function addSoftDeletes(string $postType): void
-    {
-        Db::query("ALTER TABLE <$postType> ADD COLUMN deleted_at TIMESTAMP NULL DEFAULT NULL, ADD INDEX deleted_at (deleted_at)");
-        Db::updateSchema();
-    }
-
-    /**
-     * Make the `deleted_at` column of a table created NOT NULL take NULL: the database stamped every new row
-     * with a zero date there, so soft-deleting models took the rows for deleted. The zero dates become NULL.
-     *
-     * @param string $table Table name without the prefix.
-     * @return void
-     */
-    public function repairSoftDeletes(string $table): void
-    {
-        Db::query("ALTER TABLE <$table> MODIFY deleted_at TIMESTAMP NULL DEFAULT NULL");
-        Db::query("UPDATE <$table> SET deleted_at = NULL WHERE deleted_at < '1971-01-01'");
-        Db::updateSchema();
     }
 
     private function createFieldsTable(string $name, ?string $idColumnName = null): void

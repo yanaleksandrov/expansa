@@ -186,9 +186,6 @@ class Type
         $table = EX_DB['prefix'] . $type;
         if (! Db::hasTable($table)) {
             Hook::run('createPostsTable', $type);
-        } elseif ($this->canTrash && ! isset(Db::schema($table)['deleted_at'])) {
-            // the columns are already loaded by hasTable(), so the check costs no query
-            Hook::run('addSoftDeletes', $type);
         }
     }
 
