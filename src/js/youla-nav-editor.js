@@ -6,11 +6,11 @@ document.addEventListener('youla:init', () => {
      * an item moves together with its subitems and is sorted by `u-sortable`. The fields of an item come
      * from the server with their defaults and the types of items they are for, see App\Models\Menu::itemFields();
      * a field added there needs nothing here. The server turns the depths into parents, see App\Api\Menus\MenusService.
-     * The state comes as the argument: `u-data="navEditor({{ json_encode($state) }})"`.
+     * The state comes as the argument: `u-data="menu({{ json_encode($state) }})"`.
      *
      * @since 2027.1
      */
-    Youla.data('navEditor', (root) => (state = {}) => {
+    Youla.data('menu', (root) => (state = {}) => {
         const maxDepth = state.maxDepth ?? 5;
         const fields   = state.fields && typeof state.fields === 'object' ? state.fields : {};
         const texts    = state.texts && typeof state.texts === 'object' ? state.texts : {};
@@ -37,10 +37,6 @@ document.addEventListener('youla:init', () => {
 
         // the title of the post, why the site leaves the item out and the clicks come from the server, they are not saved
         const serialize = (items) => JSON.stringify(items.map(({ key, original, problem, clicks, ...values }) => values));
-
-        // a removed item can be brought back for a while
-        const UNDO_TIME = 7000;
-        let undoTimer   = 0;
 
         // what is saved: the order of the checked locations does not matter
         const snapshot = ({ title, locations, items }) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
@@ -69,8 +65,6 @@ document.addEventListener('youla:init', () => {
             activeKey: 0,
             // the snapshot of the last save, taken after the items get their defaults
             saved: '',
-            // the label of the removed item and the items before it was removed
-            removed: null,
 
             label(entry) {
                 return entry.title || entry.original || entry.url || kinds[entry.type] || '—';
@@ -179,10 +173,6 @@ document.addEventListener('youla:init', () => {
             },
             // the subitems take the place of the removed item
             remove(index) {
-                this.removed = { label: this.label(this.items[index]), items: this.items.map(entry => ({ ...entry })) };
-                clearTimeout(undoTimer);
-                undoTimer = setTimeout(() => this.removed = null, UNDO_TIME);
-
                 const items = [ ...this.items ];
                 const end   = this.end(index);
                 for (let i = index + 1; i < end; i++) {
@@ -191,13 +181,6 @@ document.addEventListener('youla:init', () => {
                 items.splice(index, 1);
                 this.normalize(items);
                 this.select(-1);
-            },
-            undo() {
-                clearTimeout(undoTimer);
-                if (this.removed) {
-                    this.items   = this.removed.items;
-                    this.removed = null;
-                }
             },
             // the block moved by u-sortable: its first item, its size, its place in the list without it, its depth
             sort({ from, count, to, depth }) {

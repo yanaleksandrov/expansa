@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   opacity: 0;
-  z-index: 9989;
+  z-index: 9999;
   top: 0;
   overflow: hidden;
   overflow-y: auto;
@@ -23,7 +23,7 @@
     backdrop-filter: blur(5px);
 
     .dialog-wrapper {
-      top: -1.25rem;
+      top: -1rem;
       animation: openTop 0.25s forwards;
     }
   }
@@ -72,7 +72,7 @@
     background-clip: padding-box;
     border-radius: var(--expansa-border-radius--lg);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-    width: calc(100% - 3rem);
+    width: calc(100% - 2rem);
     //min-height: calc(100% - 3rem);
     //margin: 1.5rem auto;
     margin: auto;
@@ -106,8 +106,8 @@
     border-top-left-radius: var(--expansa-border-radius--lg);
     border-top-right-radius: var(--expansa-border-radius--lg);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-    height: 3.5rem;
-    padding: 0 0 0 1.5rem;
+    height: 3rem;
+    padding: 0 0 0 1rem;
     cursor: initial;
     background-color: #fff;
 
@@ -121,8 +121,8 @@
   }
 
   &-close {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 3rem;
+    height: 3rem;
     margin: 0;
     padding: 0;
     z-index: 10;
@@ -134,7 +134,7 @@
     border: 0;
     border-radius: var(--expansa-border-radius--lg);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
-    opacity: .3;
+    opacity: 0.3;
     outline: none;
     cursor: pointer;
     transition: all 0.2s;
@@ -151,7 +151,7 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.75rem;
+    padding: 1rem;
     border-bottom-right-radius: var(--expansa-border-radius--lg);
     border-bottom-left-radius: var(--expansa-border-radius--lg);
     corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
@@ -162,7 +162,7 @@
 @keyframes openTop {
   from {
     opacity: 0;
-    top: 1.25rem;
+    top: 1rem;
   }
   to {
     opacity: 1;
@@ -173,7 +173,7 @@
 @keyframes openLeft {
   from {
     opacity: 0;
-    left: -1.25rem;
+    left: -1rem;
   }
   50% {
     opacity: 1;
@@ -186,7 +186,7 @@
 @keyframes openRight {
   from {
     opacity: 0;
-    right: -1.25rem;
+    right: -1rem;
   }
   50% {
     opacity: 1;

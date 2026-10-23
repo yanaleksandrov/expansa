@@ -1,5 +1,5 @@
 document.addEventListener('youla:init', () => {
-    Youla.data('navEditor', root => (state = {}) => {
+    Youla.data('menu', root => (state = {}) => {
         const maxDepth = state.maxDepth ?? 5;
         const fields = state.fields && typeof state.fields === 'object' ? state.fields : {};
         const texts = state.texts && typeof state.texts === 'object' ? state.texts : {};
@@ -21,8 +21,6 @@ document.addEventListener('youla:init', () => {
             key: ++lastKey
         });
         const serialize = items => JSON.stringify(items.map(({key, original, problem, clicks, ...values}) => values));
-        const UNDO_TIME = 7e3;
-        let undoTimer = 0;
         const snapshot = ({title, locations, items}) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
         const blank = item(Object.fromEntries(Object.keys(fields).map(name => [ name, Array.isArray(fields[name].default) ? [] : '' ])));
         const data = {
@@ -44,7 +42,6 @@ document.addEventListener('youla:init', () => {
             active: blank,
             activeKey: 0,
             saved: '',
-            removed: null,
             label(entry) {
                 return entry.title || entry.original || entry.url || kinds[entry.type] || '—';
             },
@@ -148,14 +145,6 @@ document.addEventListener('youla:init', () => {
                 this.normalize(items);
             },
             remove(index) {
-                this.removed = {
-                    label: this.label(this.items[index]),
-                    items: this.items.map(entry => ({
-                        ...entry
-                    }))
-                };
-                clearTimeout(undoTimer);
-                undoTimer = setTimeout(() => this.removed = null, UNDO_TIME);
                 const items = [ ...this.items ];
                 const end = this.end(index);
                 for (let i = index + 1; i < end; i++) {
@@ -164,13 +153,6 @@ document.addEventListener('youla:init', () => {
                 items.splice(index, 1);
                 this.normalize(items);
                 this.select(-1);
-            },
-            undo() {
-                clearTimeout(undoTimer);
-                if (this.removed) {
-                    this.items = this.removed.items;
-                    this.removed = null;
-                }
             },
             sort({from, count, to, depth}) {
                 const items = [ ...this.items ];

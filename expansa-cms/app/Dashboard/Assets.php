@@ -30,24 +30,19 @@ final class Assets
     private const array VENDOR_STYLES = ['youla-pickadate' => 'air-datepicker'];
 
     /**
-     * Vendor scripts of the page templates that bind form controls themselves instead of rendering
-     * the field templates, e.g. `u-select` on a plain `<select>`.
-     */
-    private const array SCREEN_SCRIPTS = [
-        'field-groups' => 'youla-select',
-        'nav-editor'   => 'youla-select',
-    ];
-
-    /**
      * Styles and scripts of a dashboard page, from dashboard/assets: loaded on that page only, after
-     * the ones of the whole panel.
+     * the ones of the whole panel. Includes the vendor scripts of controls the page binds itself
+     * instead of rendering the field templates, e.g. `u-select` on a plain `<select>`.
      *
      * @var array<string, array{styles?: string[], scripts?: string[]}>
      */
     private const array SCREENS = [
-        'nav-editor' => [
+        'field-groups' => [
+            'scripts' => ['youla-select'],
+        ],
+        'nav-editor'   => [
             'styles'  => ['air-datepicker', 'nav-editor'],
-            'scripts' => ['youla-pickadate', 'youla-nav-editor'],
+            'scripts' => ['youla-select', 'youla-pickadate', 'youla-nav-editor'],
         ],
     ];
 
@@ -216,9 +211,8 @@ final class Assets
 
     /**
      * Assets of a template for Assets\Manager::discover(): a form field gets the vendor JS of its type
-     * and its stylesheet from VENDOR_STYLES, a page template its SCREEN_SCRIPTS, the rest the co-located
-     * files. date/range/color share form/input.blade.php, so Renderer::render() passes the original
-     * subtype as `$context['type']`.
+     * and its stylesheet from VENDOR_STYLES, the rest the co-located files. date/range/color share
+     * form/input.blade.php, so Renderer::render() passes the original subtype as `$context['type']`.
      *
      * @param string               $file
      * @param array<string, mixed> $context
@@ -226,17 +220,13 @@ final class Assets
      */
     private static function structure(string $file, array $context = []): array
     {
-        $file     = str_replace('\\', '/', $file);
-        $template = basename($file, '.blade.php');
-
-        if (str_contains($file, '/dashboard/views/screens/') && isset(self::SCREEN_SCRIPTS[$template])) {
-            return ['js' => EX_PATH . 'dashboard/assets/js/' . self::SCREEN_SCRIPTS[$template] . self::suffix() . '.js'];
-        }
+        $file = str_replace('\\', '/', $file);
 
         if (! str_contains($file, '/dashboard/views/parts/form/')) {
             return AssetManager::defaultStructure($file);
         }
 
+        $template      = basename($file, '.blade.php');
         $inputType     = $context['type'] ?? '';
         $dateTimeTypes = ['date', 'datetime-local', 'time', 'month', 'week'];
 

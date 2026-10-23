@@ -2,7 +2,7 @@
 /**
  * Editor of the navigation menus: the menus, the sources of the items, the items sorted by `u-sortable`,
  * the fields of the selected item and the theme locations. The data comes from
- * App\Dashboard\Pages\NavEditor, the bindings of the markup are `u-bind` sets of `navEditor` in youla-nav-editor.js
+ * App\Dashboard\Pages\NavEditor, the bindings of the markup are `u-bind` sets of `menu` in youla-nav-editor.js
  * and short single directives; the fields of an item are App\Models\Menu::itemFields(), a field added there
  * is shown here by its control type.
  *
@@ -28,7 +28,7 @@
  */
 defined('EX_PATH') || exit;
 ?>
-<div class="nav-editor" u-data="navEditor({{ json_encode($state) }})">
+<div class="nav-editor" u-data="menu({{ json_encode($state) }})">
     <aside class="nav-editor-side">
         <section class="nav-editor-section">
             <header class="nav-editor-header">
@@ -110,11 +110,6 @@ defined('EX_PATH') || exit;
                     <button type="button" class="btn btn--xs btn--icon" title="{{ t_attr('Paste Menu Items') }}" @click="pasteItems()"><i class="ph ph-clipboard-text"></i></button>
                 </div>
             </header>
-            <div class="nav-editor-undo" u-show="removed" hidden>
-                <i class="ph ph-trash"></i>
-                <span>{{ t('Menu item removed') }} <strong u-text="removed?.label"></strong></span>
-                <button type="button" class="btn btn--xs btn--outline" @click="undo()">{{ t('Undo') }}</button>
-            </div>
             <ul class="nav-editor-list" u-bind="list">
                 <li class="nav-editor-item" u-bind="row" hidden>
                     <i class="ph ph-dots-six-vertical sortable-handle"></i>
@@ -166,10 +161,7 @@ defined('EX_PATH') || exit;
 
     <aside class="nav-editor-tools">
         <section class="description-list nav-editor-panel" u-bind="panel">
-            <header class="nav-editor-header">
-                <h6 class="description-title">{{ t('Menu Item') }}</h6>
-                <button type="button" class="btn btn--xs btn--icon nav-editor-close" title="{{ t_attr('Close') }}" @click="select(-1)"><i class="ph ph-x"></i></button>
-            </header>
+            <h6 class="description-title">{{ t('Menu Item') }}</h6>
             <dl class="description-items">
                 @foreach($fields as $name => $field)
                     <div class="nav-editor-field" u-bind="field('{{ $name }}')">
