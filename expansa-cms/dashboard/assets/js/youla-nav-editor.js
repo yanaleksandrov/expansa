@@ -28,7 +28,7 @@ document.addEventListener('youla:init', () => {
         const data = {
             id: state.id || 0,
             title: state.title || '',
-            locations: Array.isArray(state.locations) ? state.locations : [],
+            locations: [],
             items: (Array.isArray(state.items) ? state.items : []).map(values => item(values)),
             types: state.types || {},
             kinds,
@@ -60,6 +60,21 @@ document.addEventListener('youla:init', () => {
             select(index) {
                 this.active = this.items[index] || blank;
                 this.activeKey = this.active.key === blank.key ? 0 : this.active.key;
+                this.showDates();
+            },
+            showDates() {
+                Object.keys(fields).filter(name => fields[name].type === 'date').forEach(name => {
+                    const picker = document.getElementById(`nav-item-${name}`)?._x_pickadate;
+                    const value = this.active[name] || '';
+                    if (!picker) {
+                        return;
+                    }
+                    value ? picker.selectDate(new Date(`${value}T00:00`), {
+                        silent: true
+                    }) : picker.clear({
+                        silent: true
+                    });
+                });
             },
             isFor(name) {
                 const types = fields[name]?.types || [];
@@ -166,30 +181,32 @@ document.addEventListener('youla:init', () => {
                 this.normalize(items);
             },
             openSource(key, el) {
-                this.source = this.source === key ? '' : key;
-                if (this.source === key && key in this.types && !this.posts[key]) {
-                    this.$ajax.post('menus/posts', {
-                        type: key
-                    }, null, {
-                        el
-                    }).then(result => {
-                        this.posts = {
-                            ...this.posts,
-                            [key]: Array.isArray(result?.posts) ? result.posts : []
-                        };
-                    }).catch(() => {});
+                if (this.source === key || !(key in this.types) || this.posts[key]) {
+                    this.source = this.source === key ? '' : key;
+                    return;
                 }
+                this.$ajax.post('menus/posts', {
+                    type: key
+                }, null, {
+                    el
+                }).then(result => {
+                    this.posts = {
+                        ...this.posts,
+                        [key]: Array.isArray(result?.posts) ? result.posts : []
+                    };
+                    setTimeout(() => this.source = key);
+                }).catch(() => {});
             },
             search(query) {
                 this.query = query.trim();
-                this.found = null;
                 if (this.query === '') {
+                    this.found = null;
                     return;
                 }
                 this.$ajax.post('menus/posts', {
                     query: this.query
                 }, null, {
-                    el: this.$el?.closest('.field')
+                    el: this.$el?.closest('.nav-editor-search')
                 }).then(result => {
                     this.found = Array.isArray(result?.posts) ? result.posts : [];
                 }).catch(() => {});
@@ -249,18 +266,6 @@ document.addEventListener('youla:init', () => {
                     this.$notice.success(texts.pasted);
                 }).catch(() => this.$notice.error(texts.pasteFailed));
             },
-            create(name) {
-                if (name.trim() === '') {
-                    return;
-                }
-                this.$ajax.post('menus/create', {
-                    title: name.trim(),
-                    locations: '[]',
-                    items: '[]'
-                }, null, {
-                    el: root.querySelector('.nav-editor-menus')
-                }).catch(() => {});
-            },
             save() {
                 const current = snapshot(this);
                 this.$ajax.post(this.id ? 'menus/update' : 'menus/create', {
@@ -278,14 +283,7 @@ document.addEventListener('youla:init', () => {
                 'u-select'() {
                     return {
                         showSearch: true,
-                        ...select,
-                        addableText: (select.addableText || '').replace(':name', '{value}'),
-                        events: {
-                            addable: name => {
-                                this.create(name);
-                                return false;
-                            }
-                        }
+                        ...select
                     };
                 },
                 '@change'() {
@@ -307,6 +305,7 @@ document.addEventListener('youla:init', () => {
             },
             result: {
                 'u-each': 'post in found || []',
+                ':hidden': 'false',
                 '@click': 'addPost(post.type, post)'
             },
             postType: {
@@ -315,13 +314,10 @@ document.addEventListener('youla:init', () => {
             noResults: {
                 'u-show': 'found && found.length === 0'
             },
-            sources: {
-                'u-show': '! query || (found && found.length === 0)'
-            },
             sourceTitle(key) {
                 return {
                     '@click'() {
-                        this.openSource(key, this.$el.closest('.accordion-item'));
+                        this.openSource(key, this.$el);
                     },
                     ':class'() {
                         return this.source === key && 'is-active';
@@ -338,6 +334,8 @@ document.addEventListener('youla:init', () => {
             sourcePost(key) {
                 return {
                     'u-each': `post in posts[${JSON.stringify(key)}]`,
+                    ':hidden': 'false',
+                    'u-text': 'post.title',
                     '@click': `addPost(${JSON.stringify(key)}, post)`
                 };
             },
@@ -425,9 +423,15 @@ document.addEventListener('youla:init', () => {
             },
             control(name) {
                 const bindings = {
-                    'u-prop': `active.${name}`,
                     ':disabled': '! activeKey'
                 };
+                if (fields[name]?.type === 'date') {
+                    bindings['@change'] = function() {
+                        this.active[name] = this.$el.nextElementSibling?.value || '';
+                    };
+                    return bindings;
+                }
+                bindings['u-prop'] = `active.${name}`;
                 if (this.$el.tagName === 'SELECT') {
                     bindings['u-select'] = function() {
                         return {
@@ -451,7 +455,11 @@ document.addEventListener('youla:init', () => {
                 }
             }
         };
-        data.saved = snapshot(data);
+        data.saved = snapshot({
+            title: data.title,
+            locations: Array.isArray(state.locations) ? state.locations : [],
+            items: data.items
+        });
         window.addEventListener('beforeunload', event => {
             if (snapshot(data) !== data.saved) {
                 event.preventDefault();

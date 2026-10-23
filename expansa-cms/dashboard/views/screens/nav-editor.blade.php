@@ -33,97 +33,68 @@ defined('EX_PATH') || exit;
         <section class="nav-editor-section">
             <header class="nav-editor-header">
                 <h6 class="nav-editor-eyebrow">{{ t('Menus') }}</h6>
-                <a class="btn btn--xs btn--icon" href="{{ url('/dashboard/nav-editor?menu=new') }}" title="{{ t_attr('Create a New Menu') }}"><i class="ph ph-plus"></i></a>
+                <a class="btn btn--xs btn--icon nav-editor-create @if(! $current) is-active @endif" href="{{ url('/dashboard/nav-editor?menu=new') }}" title="{{ t_attr('Create a New Menu') }}"@if(! $current) aria-current="page"@endif><i class="ph ph-plus"></i></a>
             </header>
-            <div class="field field--sm field--raised nav-editor-menus">
-                <label class="field-item">
-                    <select aria-label="{{ t_attr('Menus') }}" u-bind="menuSelect">
-                        @if(! $current)
-                            <option value="" selected>{{ t('Create a New Menu') }}</option>
-                        @endif
-                        @foreach($menus as $menu)
-                            <option value="{{ url('/dashboard/nav-editor?menu=' . $menu->id) }}" data-description="{{ $places[$menu->id] ?? '' }}" @selected($menu->id === $current?->id)>{{ $menu->title }}</option>
-                        @endforeach
-                    </select>
-                </label>
+            <div class="nav-editor-menus">
+                <select aria-label="{{ t_attr('Menus') }}" u-bind="menuSelect">
+                    @if(! $current)
+                        <option value="" data-placeholder="true" selected>{{ t('Select a Menu to Edit') }}</option>
+                    @endif
+                    @foreach($menus as $menu)
+                        <option value="{{ url('/dashboard/nav-editor?menu=' . $menu->id) }}" data-description="{{ $places[$menu->id] ?? '' }}" @selected($menu->id === $current?->id)>{{ $menu->title }}</option>
+                    @endforeach
+                </select>
             </div>
         </section>
 
         <section class="nav-editor-section">
             <h6 class="nav-editor-eyebrow">{{ t('Add Menu Items') }}</h6>
             <form class="nav-editor-link" u-bind="linkForm">
-                <div class="field field--sm field--raised">
-                    <label class="field-item">
-                        <input type="text" placeholder="https://" required u-prop="link.url">
-                    </label>
-                </div>
-                <div class="field field--sm field--raised">
-                    <label class="field-item">
-                        <input type="text" placeholder="{{ t_attr('Link Text') }}" u-prop="link.title">
-                        <button type="submit" class="btn btn--sm btn--outline"><i class="ph ph-plus"></i></button>
-                    </label>
-                </div>
+                <input type="text" class="nav-editor-input" placeholder="https://" aria-label="URL" required u-prop="link.url">
+                <input type="text" class="nav-editor-input" placeholder="{{ t_attr('Link Text') }}" aria-label="{{ t_attr('Link Text') }}" u-prop="link.title">
+                <button type="submit" class="btn btn--sm btn--outline"><i class="ph ph-plus"></i> {{ t('Add') }}</button>
             </form>
-            <div class="field field--sm field--raised">
-                <label class="field-item">
-                    <i class="ph ph-magnifying-glass"></i>
-                    <input type="search" placeholder="{{ t_attr('Search') }}" u-bind="searchInput">
-                </label>
-            </div>
+            <label class="nav-editor-search">
+                <i class="ph ph-magnifying-glass"></i>
+                <input type="search" placeholder="{{ t_attr('Search') }}" u-bind="searchInput">
+            </label>
             <div class="nav-editor-posts" u-show="query" hidden>
                 <p class="nav-editor-note" u-bind="noResults" hidden>{{ t('Nothing found') }}</p>
-                <button type="button" class="nav-editor-post" u-bind="result">
+                <button type="button" class="nav-editor-post" u-bind="result" hidden>
                     <span u-text="post.title"></span>
                     <small u-bind="postType"></small>
                     <i class="ph ph-plus"></i>
                 </button>
             </div>
-            <div class="accordion nav-editor-sources" u-bind="sources">
+            <div class="nav-editor-sources" u-show="! query">
                 @foreach($types as $key => $label)
-                    <div class="accordion-item">
-                        <button type="button" class="accordion-title @if($key === $source) is-active @endif" u-bind="sourceTitle('{{ $key }}')">
-                            <i class="ph ph-file-text"></i> <span>{{ $label }}</span> <i class="ph ph-caret-down"></i>
-                        </button>
-                        <div class="accordion-panel nav-editor-posts" u-bind="sourcePanel('{{ $key }}')"@if($key !== $source) hidden@endif>
-                            <p class="nav-editor-note" u-bind="sourceEmpty('{{ $key }}')"@if($key !== $source || $posts) hidden@endif>{{ t('Nothing found') }}</p>
-                            <button type="button" class="nav-editor-post" u-bind="sourcePost('{{ $key }}')">
-                                <span u-text="post.title"></span>
-                                <i class="ph ph-plus"></i>
-                            </button>
-                            @if($key === $source)
-                                @foreach($posts as $title)
-                                    <button type="button" class="nav-editor-post">
-                                        <span>{{ $title }}</span>
-                                        <i class="ph ph-plus"></i>
-                                    </button>
-                                @endforeach
-                            @endif
-                        </div>
+                    <button type="button" class="nav-editor-source @if($key === $source) is-active @endif" u-bind="sourceTitle('{{ $key }}')">
+                        <i class="ph ph-file-text"></i> <span>{{ $label }}</span> <i class="ph ph-caret-down"></i>
+                    </button>
+                    <div class="nav-editor-posts" u-bind="sourcePanel('{{ $key }}')"@if($key !== $source) hidden@endif>
+                        <p class="nav-editor-note" u-bind="sourceEmpty('{{ $key }}')"@if($key !== $source || $posts) hidden@endif>{{ t('Nothing found') }}</p>
+                        <button type="button" class="nav-editor-post" u-bind="sourcePost('{{ $key }}')" hidden></button>
+                        @if($key === $source)
+                            @foreach($posts as $title)
+                                <button type="button" class="nav-editor-post">{{ $title }}</button>
+                            @endforeach
+                        @endif
                     </div>
                 @endforeach
-                <div class="accordion-item">
-                    <button type="button" class="accordion-title" u-bind="sourceTitle('kinds')">
-                        <i class="ph ph-shapes"></i> <span>{{ t('Special Items') }}</span> <i class="ph ph-caret-down"></i>
-                    </button>
-                    <div class="accordion-panel nav-editor-posts" u-bind="sourcePanel('kinds')" hidden>
-                        @foreach($kinds as $type => $label)
-                            <button type="button" class="nav-editor-post" u-bind="kind('{{ $type }}')">
-                                <span>{{ $label }}</span>
-                                <i class="ph ph-plus"></i>
-                            </button>
-                        @endforeach
-                    </div>
+                <button type="button" class="nav-editor-source" u-bind="sourceTitle('kinds')">
+                    <i class="ph ph-shapes"></i> <span>{{ t('Special Items') }}</span> <i class="ph ph-caret-down"></i>
+                </button>
+                <div class="nav-editor-posts" u-bind="sourcePanel('kinds')" hidden>
+                    @foreach($kinds as $type => $label)
+                        <button type="button" class="nav-editor-post" u-bind="kind('{{ $type }}')">{{ $label }}</button>
+                    @endforeach
                 </div>
             </div>
         </section>
     </aside>
 
     <form class="nav-editor-main" id="nav-editor-form" u-bind="editor">
-        <div class="field field--raised field--xl">
-            <label class="field-item">
-                <input type="text" value="{{ $current->title ?? '' }}" placeholder="{{ t_attr('Menu Name') }}" aria-label="{{ t_attr('Menu Name') }}" required u-prop="title">
-            </label>
-        </div>
+        <input type="text" class="nav-editor-input nav-editor-input--xl" value="{{ $current->title ?? '' }}" placeholder="{{ t_attr('Menu Name') }}" aria-label="{{ t_attr('Menu Name') }}" required u-prop="title">
 
         <div class="nav-editor-box">
             <header class="nav-editor-header">
@@ -211,7 +182,7 @@ defined('EX_PATH') || exit;
                                     @endforeach
                                 </select>
                             @elseif($field->type === 'date')
-                                <input type="date" u-bind="control('{{ $name }}')" disabled>
+                                <input type="text" id="nav-item-{{ $name }}" placeholder="{{ $field->placeholder }}" autocomplete="off" u-pickadate="{ autoClose: true, buttons: ['clear'] }" u-bind="control('{{ $name }}')" disabled>
                             @elseif($field->type === 'textarea')
                                 <textarea rows="2" placeholder="{{ $field->placeholder }}" u-bind="control('{{ $name }}')" disabled></textarea>
                             @else
@@ -223,25 +194,25 @@ defined('EX_PATH') || exit;
             </dl>
         </section>
 
-        <section class="field nav-editor-locations">
+        <section class="nav-editor-locations">
             <h6 class="nav-editor-eyebrow">{{ t('Display Location') }}</h6>
             @foreach($locations as $key => $label)
-                <label class="field-item">
+                <label class="nav-editor-location">
                     <input type="checkbox" value="{{ $key }}" u-prop="locations" @checked(in_array($key, $current->locations ?? [], true))>
-                    <span class="field-label">
+                    <span>
                         {{ $label }}
                         @if(isset($owners[$key]) && $owners[$key] !== ($current->title ?? ''))
-                            <span class="field-instruction">{{ t('Currently set to: :menu', $owners[$key]) }}</span>
+                            <small>{{ t('Currently set to: :menu', $owners[$key]) }}</small>
                         @endif
                     </span>
                 </label>
             @endforeach
             @foreach($orphans as $key)
-                <label class="field-item nav-editor-orphan">
+                <label class="nav-editor-location nav-editor-orphan">
                     <input type="checkbox" value="{{ $key }}" u-prop="locations" checked>
-                    <span class="field-label">
+                    <span>
                         {{ $key }}
-                        <span class="field-instruction">{{ t('The current theme has no such location, the menu is not shown there.') }}</span>
+                        <small>{{ t('The current theme has no such location, the menu is not shown there.') }}</small>
                     </span>
                 </label>
             @endforeach

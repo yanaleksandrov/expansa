@@ -51,7 +51,8 @@ document.addEventListener('youla:init', () => {
         const data = {
             id: state.id || 0,
             title: state.title || '',
-            locations: Array.isArray(state.locations) ? state.locations : [],
+            // the checked boxes of the locations fill it on start, the locations of the state would be doubled
+            locations: [],
             items: (Array.isArray(state.items) ? state.items : []).map(values => item(values)),
             types: state.types || {},
             kinds,
@@ -59,7 +60,7 @@ document.addEventListener('youla:init', () => {
             // the first post type is open on load, its posts come with the state
             source: state.source || '',
             query: '',
-            // null while the search is running
+            // null until the first search ends
             found: null,
             posts: state.posts && typeof state.posts === 'object' ? state.posts : {},
             link: { url: '', title: '' },
@@ -87,6 +88,18 @@ document.addEventListener('youla:init', () => {
             select(index) {
                 this.active    = this.items[index] || blank;
                 this.activeKey = this.active.key === blank.key ? 0 : this.active.key;
+                this.showDates();
+            },
+            // a datepicker keeps its own date, it gets the one of the selected item; a date is an ISO day
+            showDates() {
+                Object.keys(fields).filter(name => fields[name].type === 'date').forEach(name => {
+                    const picker = document.getElementById(`nav-item-${name}`)?._x_pickadate;
+                    const value  = this.active[name] || '';
+                    if (!picker) {
+                        return;
+                    }
+                    value ? picker.selectDate(new Date(`${value}T00:00`), { silent: true }) : picker.clear({ silent: true });
+                });
             },
             // whether a field is for the type of the selected item, every field is shown without one
             isFor(name) {
@@ -197,24 +210,30 @@ document.addEventListener('youla:init', () => {
                 this.normalize(items);
             },
 
+            // a panel opens with its posts loaded, so it slides open to its full height at once;
+            // the title shows the loading, a new click on it repeats the request
             openSource(key, el) {
-                this.source = this.source === key ? '' : key;
-                if (this.source === key && key in this.types && !this.posts[key]) {
-                    this.$ajax.post('menus/posts', { type: key }, null, { el })
-                        .then(result => {
-                            this.posts = { ...this.posts, [key]: Array.isArray(result?.posts) ? result.posts : [] };
-                        })
-                        .catch(() => {});
-                }
-            },
-            // the text is looked for in every post type at once
-            search(query) {
-                this.query = query.trim();
-                this.found = null;
-                if (this.query === '') {
+                if (this.source === key || !(key in this.types) || this.posts[key]) {
+                    this.source = this.source === key ? '' : key;
                     return;
                 }
-                this.$ajax.post('menus/posts', { query: this.query }, null, { el: this.$el?.closest('.field') })
+                this.$ajax.post('menus/posts', { type: key }, null, { el })
+                    .then(result => {
+                        this.posts = { ...this.posts, [key]: Array.isArray(result?.posts) ? result.posts : [] };
+                        // the panel measures its height as it opens, so it opens after the render of the posts
+                        setTimeout(() => this.source = key);
+                    })
+                    .catch(() => {});
+            },
+            // the text is looked for in every post type at once; the results stay until the next ones come,
+            // a new request on the field cancels the previous one
+            search(query) {
+                this.query = query.trim();
+                if (this.query === '') {
+                    this.found = null;
+                    return;
+                }
+                this.$ajax.post('menus/posts', { query: this.query }, null, { el: this.$el?.closest('.nav-editor-search') })
                     .then(result => {
                         this.found = Array.isArray(result?.posts) ? result.posts : [];
                     })
@@ -267,18 +286,6 @@ document.addEventListener('youla:init', () => {
                     .catch(() => this.$notice.error(texts.pasteFailed));
             },
 
-            // a menu named in the select is created at once, the server opens it
-            create(name) {
-                if (name.trim() === '') {
-                    return;
-                }
-                this.$ajax.post('menus/create', {
-                    title: name.trim(),
-                    locations: '[]',
-                    items: '[]',
-                }, null, { el: root.querySelector('.nav-editor-menus') }).catch(() => {});
-            },
-
             save() {
                 const current = snapshot(this);
                 this.$ajax.post(this.id ? 'menus/update' : 'menus/create', {
@@ -291,20 +298,12 @@ document.addEventListener('youla:init', () => {
                 }).catch(() => {});
             },
 
-            // the menus: choosing one opens it, a name that is not in the list creates a new one
+            // the menus: choosing one opens it, a new one is created by the button above
             menuSelect: {
                 'u-select'() {
                     return {
                         showSearch: true,
                         ...select,
-                        // the text comes with `:name` of t(), the select puts the typed name in place of `{value}`
-                        addableText: (select.addableText || '').replace(':name', '{value}'),
-                        events: {
-                            addable: name => {
-                                this.create(name);
-                                return false;
-                            },
-                        },
                     };
                 },
                 '@change'() {
@@ -327,8 +326,10 @@ document.addEventListener('youla:init', () => {
                     this.$el.reset();
                 },
             },
+            // the rows of the markup are hidden until the script starts, the copies are shown
             result: {
                 'u-each': 'post in found || []',
+                ':hidden': 'false',
                 '@click': 'addPost(post.type, post)',
             },
             postType: {
@@ -337,14 +338,10 @@ document.addEventListener('youla:init', () => {
             noResults: {
                 'u-show': 'found && found.length === 0',
             },
-            // the posts by type stay when the search finds nothing
-            sources: {
-                'u-show': '! query || (found && found.length === 0)',
-            },
             sourceTitle(key) {
                 return {
                     '@click'() {
-                        this.openSource(key, this.$el.closest('.accordion-item'));
+                        this.openSource(key, this.$el);
                     },
                     ':class'() {
                         return this.source === key && 'is-active';
@@ -361,6 +358,8 @@ document.addEventListener('youla:init', () => {
             sourcePost(key) {
                 return {
                     'u-each': `post in posts[${JSON.stringify(key)}]`,
+                    ':hidden': 'false',
+                    'u-text': 'post.title',
                     '@click': `addPost(${JSON.stringify(key)}, post)`,
                 };
             },
@@ -451,12 +450,19 @@ document.addEventListener('youla:init', () => {
                     },
                 };
             },
-            // the control of a field: a select gets u-select, the title shows the title of the post while it is empty
+            // the control of a field: a select gets u-select, the title shows the title of the post while it is empty;
+            // a date takes the ISO day of u-pickadate from its hidden input, the text input shows it formatted
             control(name) {
                 const bindings = {
-                    'u-prop': `active.${name}`,
                     ':disabled': '! activeKey',
                 };
+                if (fields[name]?.type === 'date') {
+                    bindings['@change'] = function () {
+                        this.active[name] = this.$el.nextElementSibling?.value || '';
+                    };
+                    return bindings;
+                }
+                bindings['u-prop'] = `active.${name}`;
                 if (this.$el.tagName === 'SELECT') {
                     bindings['u-select'] = function () {
                         return { placeholderText: fields[name]?.placeholder || '' };
@@ -477,7 +483,11 @@ document.addEventListener('youla:init', () => {
             },
         };
 
-        data.saved = snapshot(data);
+        data.saved = snapshot({
+            title: data.title,
+            locations: Array.isArray(state.locations) ? state.locations : [],
+            items: data.items,
+        });
 
         // the raw data: the component writes through its proxy into this object
         window.addEventListener('beforeunload', event => {

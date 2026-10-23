@@ -111,7 +111,6 @@ final class NavEditor
                 'select'    => [
                     'searchPlaceholder' => t('Search'),
                     'searchText'        => t('Nothing found'),
-                    'addableText'       => t('Press Enter to create the :name menu.'),
                 ],
                 'texts'     => [
                     'copied'      => t('Menu copied to the clipboard'),

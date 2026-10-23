@@ -270,10 +270,10 @@ class Menu extends Model
                 'nofollow'  => 'nofollow',
                 'sponsored' => 'sponsored',
                 'ugc'       => 'ugc',
-            ], [], $empty, types: ['link', 'post']),
+            ], [], t('None'), types: ['link', 'post']),
             // the dates of the site timezone, both included, see shown()
-            'starts'         => new Field(t('Show From'), 'date', 'ph ph-calendar-blank'),
-            'ends'           => new Field(t('Show Until'), 'date', 'ph ph-calendar-x'),
+            'starts'         => new Field(t('Show From'), 'date', 'ph ph-calendar-blank', placeholder: t('Now')),
+            'ends'           => new Field(t('Show Until'), 'date', 'ph ph-calendar-x', placeholder: t('Never')),
         ];
 
         $languages = self::languages();

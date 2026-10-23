@@ -46,8 +46,8 @@ final class Assets
      */
     private const array SCREENS = [
         'nav-editor' => [
-            'styles'  => ['nav-editor'],
-            'scripts' => ['youla-nav-editor'],
+            'styles'  => ['air-datepicker', 'nav-editor'],
+            'scripts' => ['youla-pickadate', 'youla-nav-editor'],
         ],
     ];
 

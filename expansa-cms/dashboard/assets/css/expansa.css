@@ -4012,19 +4012,27 @@ body.is-unsaved .search .search-btn {
 .description-list .description-items {
   display: grid;
   grid-template-columns: 8rem minmax(0, 1fr);
-  align-items: baseline;
+  gap: 2px 0.75rem;
+  align-items: start;
   margin: 0;
   font-size: 0.8125rem;
 }
 .description-list .description-items dt {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.4375rem;
-  height: 1.75rem;
+  min-height: 1.75rem;
+  padding-block: 0.3125rem;
   margin: 0;
+  line-height: 1.125rem;
+  text-wrap: pretty;
   color: var(--expansa-text-muted);
 }
 .description-list .description-items dt i {
+  flex: none;
+  height: 1.125rem;
+  display: inline-flex;
+  align-items: center;
   font-size: 0.8125rem;
   opacity: 0.7;
 }
@@ -4040,17 +4048,21 @@ body.is-unsaved .search .search-btn {
 .description-list .description-items dd input,
 .description-list .description-items dd select,
 .description-list .description-items dd textarea {
-  border: 1px solid transparent;
-  cursor: pointer;
-  field-sizing: content;
-  max-width: 100%;
+  flex: 0 1 auto;
   width: auto;
+  max-width: 100%;
+  field-sizing: content;
+  padding-inline: 0.5rem;
+  border: 1px solid transparent;
   border-radius: var(--expansa-border-radius);
   corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  cursor: pointer;
+  min-width: 8rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-.description-list .description-items dd input:hover,
-.description-list .description-items dd select:hover,
-.description-list .description-items dd textarea:hover {
+.description-list .description-items dd input:hover:not(:disabled, :focus),
+.description-list .description-items dd select:hover:not(:disabled, :focus),
+.description-list .description-items dd textarea:hover:not(:disabled, :focus) {
   background-color: var(--expansa-bg-universal);
   -webkit-background-clip: initial;
 }
@@ -4058,19 +4070,43 @@ body.is-unsaved .search .search-btn {
 .description-list .description-items dd select:focus,
 .description-list .description-items dd textarea:focus {
   background-color: var(--expansa-bg-white);
+  -webkit-background-clip: initial;
   border-color: var(--expansa-primary);
   box-shadow: 0 0 0 1px var(--expansa-primary) !important;
 }
+.description-list .description-items dd input[u-pickadate],
+.description-list .description-items dd select[u-pickadate],
+.description-list .description-items dd textarea[u-pickadate] {
+  padding-inline-end: 1.75rem !important;
+  background-position: right 0.5rem center;
+}
+.description-list .description-items dd input:disabled,
+.description-list .description-items dd select:disabled,
+.description-list .description-items dd textarea:disabled {
+  background-color: transparent;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
 .description-list .description-items dd select + .ss-main {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+  padding-inline: 0.5rem 1.75rem;
+  background-position: right 0.5rem top 54%;
   border: 0;
   min-height: 1.675rem;
 }
 .description-list .description-items dd select + .ss-main .ss-value {
   height: 1.675rem;
 }
-.description-list .description-items dd select + .ss-main:hover {
+.description-list .description-items dd select + .ss-main:hover:not(.ss-disabled, .ss-open-below, .ss-open-above) {
   background-color: var(--expansa-bg-universal);
   -webkit-background-clip: initial;
+}
+.description-list .description-items dd select + .ss-main.ss-disabled {
+  background-color: transparent;
+  cursor: default;
 }
 .description-list .description-items dd select[multiple] + .ss-main {
   padding-block: 0;
