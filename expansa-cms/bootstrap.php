@@ -552,26 +552,6 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
     // roles changed or added in the Settings replace the defaults above
     App\Support\RoleSettings::apply();
 
-    // the columns are loaded once per request anyway, so the check costs no query
-    if (Db::isNullable(EX_DB['prefix'] . 'comments', 'deleted_at') === false) {
-        Hook::run('repairSoftDeletes', 'comments');
-    }
-
-    // the sites installed before the activity log get its table, the check costs no query either
-    if (! Db::hasTable(EX_DB['prefix'] . 'activity')) {
-        Hook::run('createActivityTable');
-    }
-
-    // the sites installed before the navigation menus get their table
-    if (! Db::hasTable(EX_DB['prefix'] . 'menus')) {
-        Hook::run('createMenusTable');
-    }
-
-    // and the clicks of the menu items
-    if (! Db::hasTable(EX_DB['prefix'] . 'menu_clicks')) {
-        Hook::run('createMenuClicksTable');
-    }
-
     // post types
     App\Post\Type::register(
         key: 'pages',
