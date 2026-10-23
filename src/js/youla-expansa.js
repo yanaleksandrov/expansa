@@ -318,7 +318,7 @@ document.addEventListener('youla:init', ()=> {
      * open the `tmpl-dialog-confirm` and `tmpl-dialog-prompt` templates of welcome.blade.php.
      *
      * The template describes its dialog by attributes, the options of open() and the data win over them:
-     * `<template id="tmpl-post-editor" title="Post Editor" size="lg" position="right" guarded>`.
+     * `<template id="tmpl-email-editor" title="Email Settings" size="xl" position="right" guarded>`.
      *
      * @since 2027.1
      */
