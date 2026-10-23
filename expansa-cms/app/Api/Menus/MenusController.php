@@ -18,19 +18,19 @@ final readonly class MenusController
         private MenusService $service = new MenusService(),
     ) {}
 
-    #[Can('manage_options')]
+    #[Can('manage_menus')]
     public function create(Request $request, Response $response): Response
     {
         return $this->service->create($request, $response);
     }
 
-    #[Can('manage_options')]
+    #[Can('manage_menus')]
     public function update(Request $request, Response $response): Response
     {
         return $this->service->update($request, $response);
     }
 
-    #[Can('manage_options')]
+    #[Can('manage_menus')]
     public function delete(Request $request, Response $response): Response
     {
         return $this->service->delete($request, $response);
@@ -42,7 +42,7 @@ final readonly class MenusController
      * @param Request $request `type`, the key of the post type or nothing for every type, and `query`, the typed text.
      * @return array{posts: array<int, array{id: int, title: string, type: string}>}
      */
-    #[Can('manage_options')]
+    #[Can('manage_menus')]
     public function posts(Request $request): array
     {
         return ['posts' => $this->service->posts($request->getString('type'), $request->getString('query'))];

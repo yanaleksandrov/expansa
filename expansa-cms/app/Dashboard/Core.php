@@ -63,7 +63,7 @@ final class Core
         );
         Dashboard::page(
             slug: 'nav-editor',
-            can: 'manage_options',
+            can: 'manage_menus',
             title: fn () => t('Menus'),
             surface: Surface::Muted,
         );

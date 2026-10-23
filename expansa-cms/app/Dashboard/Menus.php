@@ -23,6 +23,10 @@ final class Menus
      */
     public static function register(): void
     {
+        // the appearance opens the themes, for whoever edits only the menus it opens them
+        $canOptions = User::current()?->can('manage_options') ?? false;
+        $canMenus   = User::current()?->can('manage_menus') ?? false;
+
         Tree::attach('dashboard-panel-menu', static fn (Tree $tree) => $tree->append(
             [
                 [
@@ -182,9 +186,9 @@ final class Menus
                 ],
                 [
                     'id'           => 'appearance',
-                    'url'          => 'themes',
+                    'url'          => $canOptions || ! $canMenus ? 'themes' : 'nav-editor',
                     'title'        => t('Appearance'),
-                    'capabilities' => ['manage_options'],
+                    'capabilities' => $canOptions || ! $canMenus ? ['manage_options'] : ['manage_menus'],
                     'icon'         => 'ph ph-paint-bucket',
                     'position'     => 400,
                 ],
@@ -201,7 +205,7 @@ final class Menus
                     'id'           => 'menus',
                     'url'          => 'nav-editor',
                     'title'        => t('Menus'),
-                    'capabilities' => ['manage_options'],
+                    'capabilities' => ['manage_menus'],
                     'icon'         => '',
                     'position'     => 10,
                     'parent_id'    => 'appearance',

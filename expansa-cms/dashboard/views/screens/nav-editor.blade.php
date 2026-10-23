@@ -51,6 +51,19 @@ defined('EX_PATH') || exit;
 
         <section class="nav-editor-section">
             <h6 class="nav-editor-eyebrow">{{ t('Add Menu Items') }}</h6>
+            <form class="nav-editor-link" u-bind="linkForm">
+                <div class="field field--sm field--raised">
+                    <label class="field-item">
+                        <input type="text" placeholder="https://" required u-prop="link.url">
+                    </label>
+                </div>
+                <div class="field field--sm field--raised">
+                    <label class="field-item">
+                        <input type="text" placeholder="{{ t_attr('Link Text') }}" u-prop="link.title">
+                        <button type="submit" class="btn btn--sm btn--outline"><i class="ph ph-plus"></i></button>
+                    </label>
+                </div>
+            </form>
             <div class="field field--sm field--raised">
                 <label class="field-item">
                     <i class="ph ph-magnifying-glass"></i>
@@ -65,19 +78,6 @@ defined('EX_PATH') || exit;
                     <i class="ph ph-plus"></i>
                 </button>
             </div>
-            <form class="nav-editor-link" u-bind="linkForm">
-                <div class="field field--sm field--raised">
-                    <label class="field-item">
-                        <input type="text" placeholder="https://" required u-prop="link.url">
-                    </label>
-                </div>
-                <div class="field field--sm field--raised">
-                    <label class="field-item">
-                        <input type="text" placeholder="{{ t_attr('Link Text') }}" u-prop="link.title">
-                        <button type="submit" class="btn btn--sm btn--outline"><i class="ph ph-plus"></i></button>
-                    </label>
-                </div>
-            </form>
             <div class="accordion nav-editor-sources" u-bind="sources">
                 @foreach($types as $key => $label)
                     <div class="accordion-item">
