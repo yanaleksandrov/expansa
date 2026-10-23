@@ -205,7 +205,7 @@ final class Posts extends Table implements Queried
      * Duplicate and move to the trash, or restore and delete permanently in the trash; a type without
      * a trash deletes at once.
      *
-     * @return array<string, mixed>
+     * @return Bulk
      */
     public function bulk(): Bulk
     {

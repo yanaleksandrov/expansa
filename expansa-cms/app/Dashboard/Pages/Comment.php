@@ -63,6 +63,6 @@ final class Comment
      */
     public static function postTitle(Entry $comment): string
     {
-        return $comment->getPost()?->title ?? '';
+        return $comment->getPost()->title ?? '';
     }
 }

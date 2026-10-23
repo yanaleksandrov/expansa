@@ -18,7 +18,7 @@ final class PluginsInstall extends Table
                 description: $plugin['description'],
                 screenshot: $plugin['screenshot'],
                 authors: array_map(static fn (array $author) => new Link($author['title'], $author['href']), $plugin['author']),
-                category: $plugin['categories'][0]['title'] ?? '',
+                category: $plugin['categories'][0]['title'],
                 version: $plugin['version'],
                 installed: $plugin['installed'],
                 active: $plugin['active'],

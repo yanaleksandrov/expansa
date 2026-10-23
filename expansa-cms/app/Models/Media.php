@@ -42,14 +42,15 @@ class Media
                 $filepath = sprintf('%si/original/%s', EX_STORAGE, $post['slug'] ?? '');
                 if (file_exists($filepath)) {
                     $file      = Disk::file($filepath);
-                    $iconPath  = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?? 'default');
+                    $image     = getimagesize($filepath) ?: [null, null];
+                    $iconPath  = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?: 'default');
                     $posts[$i] = [
                         ...$post,
                         ...[
                             'url'          => Url::toUrl($filepath),
                             'icon'         => Url::toUrl($iconPath),
-                            'height'       => $file->height,
-                            'width'        => $file->width,
+                            'height'       => $image[1],
+                            'width'        => $image[0],
                             'path'         => $file->path,
                             'extension'    => $file->extension,
                             'basename'     => $file->basename,
@@ -74,7 +75,7 @@ class Media
                     $filepath = sprintf('%si/%sx%s/%s', EX_STORAGE, $width, $height, $post['slug'] ?? '');
                     if (file_exists($filepath)) {
                         $file     = Disk::file($filepath);
-                        $iconPath = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?? 'default');
+                        $iconPath = sprintf('%sassets/images/files/%s.svg', EX_DASHBOARD, $file->type ?: 'default');
 
                         $posts[$i]['sizes'][$key] = [
                             'url'          => Url::toUrl($filepath),

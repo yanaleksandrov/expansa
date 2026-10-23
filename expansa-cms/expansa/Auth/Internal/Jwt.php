@@ -25,7 +25,7 @@ final class Jwt
      * Verify the signature and get the claims.
      *
      * @param string                           $token Compact serialization `header.payload.signature`.
-     * @param array<int, array<string, mixed>> $keys  The `keys` of the issuer's JWK set.
+     * @param array<mixed>                     $keys  The `keys` of the issuer's JWK set.
      * @return array<string, mixed> Claims.
      * @throws InvalidToken If the token is malformed, signed by an unknown key or the signature is invalid.
      */

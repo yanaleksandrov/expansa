@@ -266,8 +266,8 @@ class FieldEav
      * inserted, changed values updated. Default chunk size 1000 measured fastest for a 30,000-key
      * sync — below ~300 too many round trips, above ~2000 payloads slow parsing down.
      *
-     * @param array<string, mixed> $fields
-     * @param int                  $chunkSize
+     * @param array<array-key, mixed> $fields
+     * @param int                     $chunkSize
      * @return array{deleted: int, inserted: int, updated: int}
      */
     public function import(array $fields, int $chunkSize = 1000): array

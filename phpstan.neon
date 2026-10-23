@@ -3,7 +3,7 @@ includes:
     - phpstan-baseline.neon
 
 parameters:
-    level: 0
+    level: 5
     paths:
         - expansa-cms/expansa
         - expansa-cms/app
@@ -14,3 +14,60 @@ parameters:
             - expansa-cms/expansa/Images/Spatie
     bootstrapFiles:
         - tests/phpstan/bootstrap.php
+    # values of env.php differ per installation, the bootstrap only declares them
+    dynamicConstantNames:
+        - EX_DB
+        - EX_CACHE
+        - EX_KEYS
+        - EX_DEBUG
+        - EX_AI
+    # attribute bags: a model row and schema definitions are read through __get()
+    universalObjectCratesClasses:
+        - Expansa\Database\Model
+        - Expansa\Patterns\Fluent
+    ignoreErrors:
+        # a set hook of a promoted parameter throws while the constructor runs, PHPStan does not see it
+        -
+            identifier: throws.unusedType
+            paths:
+                - expansa-cms/expansa/Ai/Completion.php
+                - expansa-cms/expansa/Ai/Generation.php
+                - expansa-cms/expansa/Ai/Limits.php
+                - expansa-cms/expansa/Security/Kses.php
+        # the set hook of $allowedHtml: isset() checks an uninitialized property, compile() is called from it,
+        # the hook of $allowedProtocols stores the list as keys
+        -
+            identifiers:
+                - isset.property
+                - deadCode.unreachable
+                - assign.propertyType
+                - method.unused
+            path: expansa-cms/expansa/Security/Kses.php
+        # rules are called by name from the rules string: 'required|email'
+        -
+            identifier: method.unused
+            path: expansa-cms/expansa/Security/Validator.php
+        # tokenized only for the ParseError of invalid code
+        -
+            identifier: function.resultUnused
+            path: expansa-cms/expansa/Ai/Validators/Php.php
+        # the optional trailing group is missing from $matches when it does not match
+        -
+            identifiers:
+                - identical.alwaysFalse
+                - nullCoalesce.offset
+            path: expansa-cms/expansa/Translation/Manager.php
+        # $flush() changes $buffer by reference
+        -
+            identifier: notIdentical.alwaysFalse
+            path: expansa-cms/expansa/View/Internal/HtmlDom.php
+        # public API without users yet, kept as groundwork
+        -
+            identifier: trait.unused
+            paths:
+                - expansa-cms/expansa/Database/Traits/HasFieldEavTyped.php
+                - expansa-cms/expansa/Patterns/Singleton.php
+        # tables of HasFieldEavTyped, created together with the first model that uses it
+        -
+            identifier: method.unused
+            path: expansa-cms/app/Listeners/Migrations.php

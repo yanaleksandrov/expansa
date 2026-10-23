@@ -56,9 +56,7 @@ final class Terminal
          */
         public readonly string $version = '',
     ) {
-        global $argv;
-
-        $this->parse($argv ?? []);
+        $this->parse($_SERVER['argv'] ?? []);
 
         foreach ([Index::class, Help::class, Env::class, AutoloadDump::class] as $command) {
             $this->addCommand($command);

@@ -443,7 +443,7 @@ final class Markup
         // comments come only from "<!", "<?" and "</" not followed by a letter
         if (preg_match('~<[!?]|</[^a-z]~i', $html) === 1) {
             foreach (new XPath($body->ownerDocument)->query('.//comment()', $body) as $comment) {
-                $comment->remove();
+                $comment->parentNode->removeChild($comment);
             }
         }
 

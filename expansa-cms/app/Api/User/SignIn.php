@@ -42,9 +42,9 @@ final class SignIn
 
         try {
             $isValid = Auth::attempt(
-                $user?->identifier ?? $loginOrEmail,
+                $user->identifier ?? $loginOrEmail,
                 (string) ($_SERVER['REMOTE_ADDR'] ?? ''),
-                fn () => password_verify($password, $user?->password ?? self::DUMMY_HASH) && $user !== null,
+                fn () => password_verify($password, $user->password ?? self::DUMMY_HASH) && $user !== null,
             );
         } catch (TooManyAttempts $e) {
             if ($user !== null) {

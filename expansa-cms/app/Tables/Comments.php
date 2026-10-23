@@ -237,7 +237,7 @@ final class Comments extends Table implements Queried
     /**
      * Set a status or move to the trash, or restore and delete permanently in the trash.
      *
-     * @return array<string, mixed>
+     * @return Bulk
      */
     public function bulk(): Bulk
     {

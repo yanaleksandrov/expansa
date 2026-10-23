@@ -300,15 +300,10 @@ final class Router
 
         // If getallheaders() is available, use that
         if (function_exists('getallheaders')) {
-            $headers = getallheaders();
-
-            // getallheaders() can return false if something went wrong
-            if ($headers !== false) {
-                return $headers;
-            }
+            return getallheaders();
         }
 
-        // Method getallheaders() not available or went wrong: manually extract 'm
+        // Method getallheaders() not available: manually extract 'm
         foreach ($_SERVER as $name => $value) {
             if (str_starts_with($name, 'HTTP_') || $name === 'CONTENT_TYPE' || $name === 'CONTENT_LENGTH') {
                 $formattedName = str_replace(

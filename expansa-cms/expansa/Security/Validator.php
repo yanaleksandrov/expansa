@@ -347,7 +347,7 @@ final class Validator
     /**
      * Validate the date is after a given date
      *
-     * @param mixed $value
+     * @param string|DateTime $value
      * @param string|DateTime $compare
      * @return bool
      */
@@ -361,7 +361,7 @@ final class Validator
     /**
      * Validate the date is before a given date
      *
-     * @param mixed $value
+     * @param string|DateTime $value
      * @param string|DateTime $compare
      * @return bool
      */

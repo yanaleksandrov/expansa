@@ -92,7 +92,7 @@ final class NavEditor
             'state'     => [
                 'id'        => $current->id ?? 0,
                 'title'     => $current->title ?? '',
-                'locations' => $current?->locations ?? [],
+                'locations' => $current->locations ?? [],
                 'items'     => $items,
                 'types'     => $types,
                 'kinds'     => $kinds,

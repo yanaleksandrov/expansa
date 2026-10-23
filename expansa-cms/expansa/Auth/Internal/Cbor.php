@@ -57,6 +57,7 @@ final class Cbor
      *
      * @param string $data
      * @param int    $length Receives the number of bytes the item took.
+     * @param-out int $length
      * @return mixed
      * @throws InvalidCredential If the data is malformed.
      */

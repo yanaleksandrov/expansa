@@ -461,7 +461,7 @@ final class Sanitizer
         // if the string contains the `<` character
         if (str_contains($value, '<')) {
             // escape `<` unless it starts a tag: a letter, a closing tag, a comment or a processing instruction
-            $value = preg_replace_callback('/<(?![a-zA-Z\/!?])/', fn($matches) => htmlspecialchars($matches[0] ?? ''), $value);
+            $value = preg_replace_callback('/<(?![a-zA-Z\/!?])/', fn($matches) => htmlspecialchars($matches[0]), $value);
             // remove all HTML tags
             $value = strip_tags($value);
             // replace `<\n` with a safe HTML entity
@@ -736,10 +736,8 @@ final class Sanitizer
 
             if (0 === $j) {
                 $emailNoSpamAddress .= '&#' . ord($value[ $i ]) . ';';
-            } elseif (1 === $j) {
+            } else {
                 $emailNoSpamAddress .= $value[ $i ];
-            } elseif (2 === $j) {
-                $emailNoSpamAddress .= sprintf('%%%02X', ord($value[$i]));
             }
         }
         return str_replace('@', '&#64;', $emailNoSpamAddress);
@@ -945,7 +943,7 @@ final class Sanitizer
     /**
      * Sanitize a login.
      *
-     * @param  mixed  $value Incoming login.
+     * @param  string $value Incoming login.
      * @return string
      */
     public static function login(string $value): string
@@ -973,7 +971,7 @@ final class Sanitizer
      * Safe::accents("ªºÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïñòóôõöøùúûüýÿØ");
      *          echo: ooAAAAAACEEEEIIIINOOOOOUUUUYaaaaaaceeeeiiiinoooooouuuuyyO
      *
-     * @param  mixed  $value Incoming login.
+     * @param  string $value Incoming string.
      * @return string
      */
     public static function accents(string $value): string

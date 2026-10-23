@@ -37,7 +37,13 @@ final class Manager
     /**
      * Options of the registered pages by slug.
      *
-     * @var array<string, array{view?: string|Closure(Request): string, can?: string, title?: string|Closure(array<string, mixed>): string, surface?: Surface}>
+     * @var array<string, array{
+     *     view?: string|Closure(Request): string,
+     *     can?: string,
+     *     title?: string|Closure(array<string, mixed>): string,
+     *     surface?: Surface,
+     *     menu?: string|Closure(Request): string,
+     * }>
      */
     private array $pages = [];
 
@@ -248,8 +254,9 @@ final class Manager
         foreach (['dashboard-main-menu', 'dashboard-panel-menu', 'dashboard-user-menu'] as $menu) {
             Tree::walk($menu, function (array $items) use ($url, &$title) {
                 foreach ($items as $item) {
-                    if ($item->url === $url && is_string($item->title) && $item->title !== '') {
-                        $title ??= $item->title;
+                    $label = $item->data['title'] ?? null;
+                    if (($item->data['url'] ?? null) === $url && is_string($label) && $label !== '') {
+                        $title ??= $label;
                     }
                     Tree::walk($item->children);
                 }

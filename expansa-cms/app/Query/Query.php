@@ -36,7 +36,7 @@ class Query
     /**
      * Parse a query string and set query type booleans.
      *
-     * @param array $query {
+     * @param array $args {
      *     Optional. Array or string of Query parameters.
      *
      *     @type string|string[]  $type            A post type slug (string) or array of post type slugs.
@@ -218,7 +218,7 @@ class Query
 
             $values   = implode(',', array_map('intval', array_unique($values)));
             $operator = str_contains($field, 'not') ? 'NOT IN' : 'IN';
-            if ($column && $values) {
+            if ($values) {
                 $where[] = sprintf('t.%s %s (%s)', $column, $operator, $values);
             }
         }
@@ -248,7 +248,7 @@ class Query
         }
 
         // the union of the tables has the column only when every type has a trash
-        if (array_all($postTypes, fn ($postType) => Type::get(Safe::trim($postType))?->canTrash ?? false)) {
+        if (array_all($postTypes, fn ($postType) => Type::get(Safe::trim($postType))->canTrash ?? false)) {
             $where[] = 't.deleted_at IS NULL';
         }
 
@@ -348,11 +348,11 @@ class Query
 
             $foundRows = Db::query('SELECT FOUND_ROWS()')->fetchAll(\PDO::FETCH_NUM);
             if ($foundRows) {
-                self::$foundRows = intval($found_posts[0][0] ?? 0);
+                self::$foundRows = intval($foundRows[0][0] ?? 0);
             }
 
             if (is_callable($callback)) {
-                $items = call_user_func($callback, $query, $items);
+                $items = call_user_func($callback, $items, $query);
             }
 
             return $items;
@@ -415,6 +415,7 @@ class Query
         $relation    = 'OR' === strtoupper($dateQuery['relation'] ?? 'AND') ? 'OR' : 'AND';
         $comparisons = [ '=', '!=', '>', '>=', '<', '<=', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN' ];
 
+        $values = [];
         foreach ($dateQuery as $clause) {
             $comparison    = strtoupper(strval(! empty($clause['compare']) ? $clause['compare'] : '='));
             $column        = strtolower(strval(! empty($clause['column']) ? $clause['column'] : 'created'));
@@ -437,18 +438,17 @@ class Query
                 'dayofweek'       => 'WEEKDAY',
             ];
             foreach (array_keys($fields) as $field) {
-                $the_fields = (array) ( $clause[ $field ] ?? '' );
-                $callback   = ( $field === 'human_date_time' ) ? fn($v) => strtotime(strval($v)) : 'intval';
-                $$field     = array_map($callback, $the_fields);
+                $callback       = ( $field === 'human_date_time' ) ? fn($v) => strtotime(strval($v)) : 'intval';
+                $values[$field] = array_map($callback, (array) ( $clause[ $field ] ?? '' ));
 
-                if (! empty($clause[ $field ]) && $$field) {
-                    sort($$field);
+                if (! empty($clause[ $field ]) && $values[$field]) {
+                    sort($values[$field]);
 
                     /**
                      * Validate & sanitize time and dates values
                      */
-                    $year      = $year ?? [ intval($date->format('Y')) ];
-                    $month     = $month ?? [ intval($date->format('m')) ];
+                    $year      = $values['year'] ?? [ intval($date->format('Y')) ];
+                    $month     = $values['month'] ?? [ intval($date->format('m')) ];
                     $the_year  = intval(( $year[0] > 999 ) ? $year[0] : $date->format('Y'));
                     $the_month = intval(( $month[0] > 0 ) ? $month[0] : $date->format('m'));
                     $value     = match ($field) {
@@ -456,68 +456,66 @@ class Query
                             function ($v) use ($date) {
                                 return $date->setTimestamp($v)->modify('midnight')->format('Y-m-d H:i:s');
                             },
-                            $human_date_time
+                            $values[$field]
                         ),
                         // ensure the year is between 1000 and 9999
                         'year' => array_map(
                             fn($v) => min(max($v, 1000), 9999),
-                            $year
+                            $values[$field]
                         ),
                         // ensure the month is between 1 and 12
                         'month' => array_map(
                             fn($v) => min(max($v, 1), 12),
-                            $month
+                            $values[$field]
                         ),
                         // ensure the week is between 1 and the number of weeks in the year.
                         'week' => array_map(
                             function ($v) use ($the_year) {
                                 return min(max($v, 1), intval(( new \DateTime("$the_year-12-28") )->format('W')));
                             },
-                            $week
+                            $values[$field]
                         ),
                         // ensure the day of the year is between 1 and the number of days in the year.
                         'dayofyear' => array_map(
                             function ($v) use ($the_year) {
                                 return min(max($v, 1), (int) ( new \DateTime("$the_year-12-31") )->format('z') + 1);
                             },
-                            $dayofyear
+                            $values[$field]
                         ),
                         // ensure the day is between 1 and the number of days in the month.
                         'dayofmonth' => array_map(
                             function ($v) use ($the_year, $the_month) {
                                 return min(max($v, 1), intval(( new \DateTime("$the_year-$the_month-1") )->format('t')));
                             },
-                            $dayofmonth
+                            $values[$field]
                         ),
                         // ensure the day of the week is between 1 and 7.
                         'dayofweek' => array_map(
                             fn($v) => min(max($v, 1), 7),
-                            $dayofweek
+                            $values[$field]
                         ),
                     };
 
                     /**
                      * Builds and validates a value string based on the comparison operator.
                      */
-                    if (is_array($value) && ! empty($value)) {
-                        $part = sprintf("{$fields[ $field ]}%s $comparison", $field === 'human_date_time' ? "t.$column" : "(t.$column)");
-                        switch ($comparison) {
-                            case 'IN':
-                            case 'NOT IN':
-                                $where[] = sprintf("($part (%s))", implode(',', array_map('intval', $value)));
-                                break;
-                            case 'BETWEEN':
-                            case 'NOT BETWEEN':
-                                if (count($value) === 1) {
-                                    $value = [ $value[0], $value[0] ];
-                                }
+                    $part = sprintf("{$fields[ $field ]}%s $comparison", $field === 'human_date_time' ? "t.$column" : "(t.$column)");
+                    switch ($comparison) {
+                        case 'IN':
+                        case 'NOT IN':
+                            $where[] = sprintf("($part (%s))", implode(',', array_map('intval', $value)));
+                            break;
+                        case 'BETWEEN':
+                        case 'NOT BETWEEN':
+                            if (count($value) === 1) {
+                                $value = [ $value[0], $value[0] ];
+                            }
 
-                                $where[] = sprintf("($part %s)", implode(' AND ', array_map('intval', $value)));
-                                break;
-                            default:
-                                $where[] = "($part '$value[0]')";
-                                break;
-                        }
+                            $where[] = sprintf("($part %s)", implode(' AND ', array_map('intval', $value)));
+                            break;
+                        default:
+                            $where[] = "($part '$value[0]')";
+                            break;
                     }
                 }
             }
@@ -670,7 +668,7 @@ class Query
     /**
      * Parse an 'order' query variable and cast it to ASC or DESC as necessary.
      *
-     * @param  string $order The 'order' query variable.
+     * @param  mixed  $order The 'order' query variable.
      * @return string        The sanitized 'order' query variable.
      */
     protected static function parseOrder($order): string
@@ -685,17 +683,17 @@ class Query
     /**
      * Converts the given order by alias (if allowed) to a properly-prefixed value.
      *
-     * @param  string $orderby Alias for the field to order by.
+     * @param  string|array<string, mixed> $orderby Alias for the field to order by, or aliases with their orders.
      * @param  array  $args
      * @param  string $order
      * @return string          Table-prefixed value to used in the ORDER clause.
      */
-    protected static function parseOrderBy(string $orderby, array $args, string $order = 'DESC'): string
+    protected static function parseOrderBy(string|array $orderby, array $args, string $order = 'DESC'): string
     {
         if (is_array($orderby)) {
             $the_order_by = [];
             foreach ($orderby as $field => $order) {
-                $the_order_by[] = self::parseOrderBy($field, $args, $order);
+                $the_order_by[] = self::parseOrderBy((string) $field, $args, self::parseOrder($order));
             }
             return implode(', ', $the_order_by);
         }

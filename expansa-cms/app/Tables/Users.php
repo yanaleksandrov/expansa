@@ -215,7 +215,7 @@ final class Users extends Table implements Queried
      * Turn the accounts on or off, sign them out, send a password reset link or give a role, for those
      * who manage the users; the current password is asked unless the session is confirmed.
      *
-     * @return array<string, mixed>
+     * @return Bulk|null
      */
     public function bulk(): ?Bulk
     {

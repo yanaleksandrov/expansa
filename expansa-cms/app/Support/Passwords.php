@@ -51,6 +51,7 @@ final class Passwords
     public static function configure(?Closure $transport = null): void
     {
         self::$transport = $transport;
+        self::$failure   = '';
     }
 
     /**
@@ -98,8 +99,6 @@ final class Passwords
      */
     public static function checkService(): ?string
     {
-        self::$failure = '';
-
         $body = (self::$transport ?? self::fetch(...))('00000');
 
         return match (true) {

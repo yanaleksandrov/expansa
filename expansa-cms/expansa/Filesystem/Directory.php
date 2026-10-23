@@ -195,7 +195,7 @@ final class Directory extends AbstractEntry implements DirectoryContract
     /**
      * Iterate over the contents recursively, an empty list for a missing directory.
      *
-     * @param int $mode RecursiveIteratorIterator mode.
+     * @param int<0, 2> $mode RecursiveIteratorIterator mode.
      * @return iterable<SplFileInfo>
      */
     private function iterate(int $mode = RecursiveIteratorIterator::LEAVES_ONLY): iterable

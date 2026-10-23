@@ -70,16 +70,20 @@ function declareModel(string $name, string $namespace): string
     return $name;
 }
 
-if (method_exists(Expansa\Database\Model::class, 'configure')) {
-    Expansa\Database\Model::configure(
-        cache: Cache::get(...),
-        forgetCache: Cache::forget(...),
-        sanitizer: fn (array $data, array $rules) => Safe::data($data, $rules)->apply(),
-    );
-}
-
 $old = declareModel('BaselinePost', 'DatabaseBaseline');
 $new = declareModel('CurrentPost', 'Expansa\Database');
+
+// both variants sanitize with the same rules
+foreach ([$old, $new] as $class) {
+    $model = get_parent_class($class);
+    if (method_exists($model, 'configure')) {
+        $model::configure(
+            cache: Cache::get(...),
+            forgetCache: Cache::forget(...),
+            sanitizer: fn (array $data, array $rules) => Safe::data($data, $rules)->apply(),
+        );
+    }
+}
 
 $rows = [];
 for ($i = 1; $i <= 20; $i++) {

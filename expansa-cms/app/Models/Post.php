@@ -9,6 +9,7 @@ use App\Post\Type;
 use App\Support\Activity;
 use App\Support\Permalinks;
 use DateTimeImmutable;
+use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSoftDeletes;
@@ -25,7 +26,7 @@ use LogicException;
  * restore() clears it. A type registered with `canTrash: false` turns soft deletes off, so delete()
  * removes its entries at once.
  */
-class Post
+class Post implements Fieldable
 {
     use HasSoftDeletes;
 
@@ -129,7 +130,7 @@ class Post
         /**
          * Custom fields of the entry.
          */
-        public ?Field $field = null,
+        public ?FieldEav $field = null,
 
         /**
          * Date and time the entry was moved to the trash, null outside the trash.
@@ -137,7 +138,7 @@ class Post
         public ?string $deletedAt = null,
     ) {
         $this->table      = Safe::tablename($this->type);
-        $this->softDelete = Type::get($this->type)?->canTrash ?? false;
+        $this->softDelete = Type::get($this->type)->canTrash ?? false;
     }
 
     /**
@@ -497,6 +498,21 @@ class Post
         return $copy;
     }
 
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get the foreign key column of the fields table: entries of every type share "post_id".
+     *
+     * @return string
+     */
+    public function getFieldColumn(): string
+    {
+        return 'post_id';
+    }
+
     /**
      * Whether the post takes new comments: its discussion is not closed, and the post is not older
      * than the days of the Discussions settings when they close the comments on old posts.
@@ -630,7 +646,7 @@ class Post
             return true;
         }
 
-        if (! (Type::get($this->type)?->hierarchical ?? false)) {
+        if (! (Type::get($this->type)->hierarchical ?? false)) {
             return false;
         }
 

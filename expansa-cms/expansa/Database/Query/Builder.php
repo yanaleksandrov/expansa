@@ -381,8 +381,6 @@ class Builder extends AbstractBuilder
             }
 
             $tableOption = ' ' . implode(', ', $optionStack);
-        } elseif (is_string($options)) {
-            $tableOption = ' ' . $options;
         }
 
         $command = 'CREATE TABLE';
@@ -799,7 +797,7 @@ class Builder extends AbstractBuilder
         }
         $result = $query->fetchColumn();
 
-        return $result === '1' || $result === 1 || $result === true;
+        return $result === '1' || $result === 1;
     }
 
     /**
@@ -910,21 +908,19 @@ class Builder extends AbstractBuilder
      */
     public function action(callable $actions): void
     {
-        if (is_callable($actions)) {
-            $this->pdo->beginTransaction();
+        $this->pdo->beginTransaction();
 
-            try {
-                $result = $actions($this);
+        try {
+            $result = $actions($this);
 
-                if ($result === false) {
-                    $this->pdo->rollBack();
-                } else {
-                    $this->pdo->commit();
-                }
-            } catch (\Exception $e) {
+            if ($result === false) {
                 $this->pdo->rollBack();
-                throw $e;
+            } else {
+                $this->pdo->commit();
             }
+        } catch (\Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
         }
     }
 

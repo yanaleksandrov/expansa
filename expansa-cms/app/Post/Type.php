@@ -151,16 +151,7 @@ class Type
             throw new InvalidArgumentException(t('Post type key must be between 1 and 20 characters long.'));
         }
 
-        $this->labelName       ??= t('Page');
-        $this->labelNamePlural ??= t('Pages');
-        $this->labelAllItems   ??= t('All Pages');
-        $this->labelAdd        ??= t('Add Page');
-        $this->labelEdit       ??= t('Edit Page');
-        $this->labelUpdate     ??= t('Update Page');
-        $this->labelView       ??= t('View Page');
-        $this->labelSearch     ??= t('Search Page');
-        $this->labelSave       ??= t('Save');
-        $this->table             = Safe::tablename($key);
+        $this->table = Safe::tablename($key);
 
         /**
          * Show in dashboard menu.
@@ -260,7 +251,7 @@ class Type
      */
     public static function fetch(array $args = [], string $operator = 'and'): array
     {
-        return Arr::filter(self::$items ?? [], $args, $operator);
+        return Arr::filter(self::$items, $args, $operator);
     }
 
     /**
@@ -268,7 +259,7 @@ class Type
      */
     public static function options(array $filters = []): array
     {
-        $types = Arr::filter(self::$items ?? [], $filters, 'and');
+        $types = Arr::filter(self::$items, $filters, 'and');
         foreach ($types as $type) {
             $types[ $type->key ] = sprintf('%s (%s)', $type->labelName, $type->key);
         }
