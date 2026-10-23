@@ -227,7 +227,7 @@ final class Migrations
         Schema::create('slugs', function (Table $table) {
             $table->id();
             $table->bigInt('entity_id')->unsigned();
-            $table->string('entity_table', 255);
+            $table->string('entity_table', 64);
             $table->string('slug', 255);
 
             // indexes
@@ -268,7 +268,7 @@ final class Migrations
             $table->string('lastname', 60)->nullable();
             $table->string('showname', 255)->nullable();
             $table->string('email', 254)->unique();
-            $table->string('locale', 10)->nullable()->default(null);
+            $table->string('locale', 10)->nullable();
 
             // status and verification
             $table->json('roles')->nullable();
@@ -379,8 +379,7 @@ final class Migrations
     {
         // the encrypted TOTP secret, keyed hashes of the recovery codes, the last accepted time step
         Schema::create('users_two_factor', function (Table $table) {
-            $table->id();
-            $table->bigInt('user_id')->unsigned()->unique();
+            $table->bigInt('user_id')->unsigned()->primary();
             $table->text('secret');
             $table->text('recovery_codes');
             $table->bigInt('last_step')->unsigned()->default(0);
@@ -402,12 +401,12 @@ final class Migrations
             $table->string('author_email', 255)->default('');
             $table->string('author_ip', 45)->default('');
             $table->string('author_agent', 255)->default('');
-            $table->string('locale', 10)->nullable()->default(null);
+            $table->string('locale', 10)->nullable();
             $table->enum('status', ['pending', 'approved', 'spam', 'rejected'])->default('pending');
             $table->text('content');
             $table->int('likes')->unsigned()->default(0);
             $table->int('dislikes')->unsigned()->default(0);
-            $table->smallInt('rating')->unsigned()->nullable()->default(null);
+            $table->smallInt('rating')->unsigned()->nullable();
             $table->timestamps();
             $table->datetime('deleted_at')->nullable();
 
@@ -503,9 +502,6 @@ final class Migrations
             $table->mediumInt('position')->unsigned()->default(0);
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
-
-            // indexes
-            $table->index('status');
         });
     }
 
