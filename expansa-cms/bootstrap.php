@@ -437,9 +437,9 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
             'uploader'       => Expansa\Builders\Form\Fields\Uploader::class,
 
             'editor'         => Expansa\Builders\Form\Fields\Editor::class,
-            'gallery'         => Expansa\Builders\Form\Fields\Gallery::class,
-            'repeater'        => Expansa\Builders\Form\Fields\Repeater::class,
-            'message'         => Expansa\Builders\Form\Fields\Message::class,
+            'gallery'        => Expansa\Builders\Form\Fields\Gallery::class,
+            'repeater'       => Expansa\Builders\Form\Fields\Repeater::class,
+            'message'        => Expansa\Builders\Form\Fields\Message::class,
         ],
         view: fn (string $template, array $data) => (string) View::create("parts/form/$template", $data),
         assets: fn (string $template, string $uid) => Asset::discover(
