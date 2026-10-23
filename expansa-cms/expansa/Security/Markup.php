@@ -12,7 +12,7 @@ use LogicException;
  *
  * @package Expansa\Security
  */
-final class Kses
+final class Markup
 {
     /**
      * Allowed elements and their attributes, in alphabetical order. A listed attribute takes any value,
@@ -337,13 +337,12 @@ final class Kses
     }
 
     /**
-     * Get the allowed protocols.
+     * Allowed protocols.
      *
-     * @return string[]
+     * @var string[]
      */
-    public function getAllowedProtocols(): array
-    {
-        return array_keys($this->allowedProtocols);
+    public array $protocols {
+        get => array_keys($this->allowedProtocols);
     }
 
     /**
@@ -352,7 +351,7 @@ final class Kses
      * @param string $html
      * @return string Safe HTML, an empty string for invalid UTF-8.
      */
-    public function apply(string $html): string
+    public function sanitize(string $html): string
     {
         if ($html === '' || ! mb_check_encoding($html, 'UTF-8')) {
             return '';

@@ -454,7 +454,7 @@ hook `set { }` в сигнатуре конструктора (`Generic.WhiteSpa
 
 **Бенчмарки** — `tests/benchmarks/<Package>.php`, текущий код против `--baseline` на одних данных. Общий код —
 в `tests/benchmarks/bootstrap.php` (пока дублируется): опции `--baseline=<ref или файл>` (несколько) и
-`--iterations=N`; загрузка базы из git — переименованием класса (`Kses` → `KsesBaseline`) или namespace
+`--iterations=N`; загрузка базы из git — переименованием класса (`Markup` → `MarkupBaseline`) или namespace
 (`Expansa\Log` → `LogBaseline`) во временную папку с `mtime` в прошлом для opcache;
 `measure(callable $callback, int $iterations, int $rounds = 5): float` — лучший раунд после прогрева;
 таблица: вариант, время на операцию, разница в %. Бенчмарк пакета — ~20 строк данных и вызовов; особые

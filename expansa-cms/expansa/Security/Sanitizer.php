@@ -324,7 +324,7 @@ final class Sanitizer
     }
 
     /**
-     * Keep only the allowed HTML elements, attributes and URL protocols, see Kses::ALLOWED_HTML.
+     * Keep only the allowed HTML elements, attributes and URL protocols, see Markup::ALLOWED_HTML.
      *
      * @param mixed $value Value to change
      * @param array $rules Elements and attributes added to the default ones, e.g. Youla directives of a trusted page.
@@ -337,9 +337,9 @@ final class Sanitizer
 
         $key = $rules === [] ? '' : serialize($rules);
 
-        $filters[$key] ??= new Kses($rules === [] ? Kses::ALLOWED_HTML : Kses::extend($rules));
+        $filters[$key] ??= new Markup($rules === [] ? Markup::ALLOWED_HTML : Markup::extend($rules));
 
-        return $filters[$key]->apply((string) $value);
+        return $filters[$key]->sanitize((string) $value);
     }
 
     /**

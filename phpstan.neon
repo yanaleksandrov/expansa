@@ -33,7 +33,7 @@ parameters:
                 - expansa-cms/expansa/Ai/Completion.php
                 - expansa-cms/expansa/Ai/Generation.php
                 - expansa-cms/expansa/Ai/Limits.php
-                - expansa-cms/expansa/Security/Kses.php
+                - expansa-cms/expansa/Security/Markup.php
         # the set hook of $allowedHtml: isset() checks an uninitialized property, compile() is called from it,
         # the hook of $allowedProtocols stores the list as keys
         -
@@ -42,7 +42,7 @@ parameters:
                 - deadCode.unreachable
                 - assign.propertyType
                 - method.unused
-            path: expansa-cms/expansa/Security/Kses.php
+            path: expansa-cms/expansa/Security/Markup.php
         # rules are called by name from the rules string: 'required|email'
         -
             identifier: method.unused

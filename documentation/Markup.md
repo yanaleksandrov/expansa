@@ -1,8 +1,8 @@
 # Введение
 
-`Expansa\Security\Kses` — фильтр HTML от XSS: оставляет только разрешённые элементы, атрибуты
-и протоколы ссылок, всё остальное удаляет или обезвреживает. Это порт
-[kses](https://sourceforge.net/projects/kses), на котором построен `wp_kses()` в WordPress.
+`Expansa\Security\Markup` — фильтр HTML от XSS: оставляет только разрешённые элементы, атрибуты
+и протоколы ссылок, всё остальное удаляет или обезвреживает. Начинался как порт
+[kses](https://sourceforge.net/projects/kses) (коммит `4492a8a`), затем переписан для Expansa.
 
 Обычно фильтр вызывается через `Sanitizer::markup()` (фасад `Safe`):
 
@@ -55,8 +55,8 @@ Safe::markup('<a href="HTTPS&colon;//example.com">x</a>');         // <a href="h
 
 ## Правила по умолчанию
 
-Разрешённые элементы и атрибуты — в `Kses::ALLOWED_HTML` (по алфавиту), протоколы — в
-`Kses::ALLOWED_PROTOCOLS`.
+Разрешённые элементы и атрибуты — в `Markup::ALLOWED_HTML` (по алфавиту), протоколы — в
+`Markup::ALLOWED_PROTOCOLS`.
 
 **Атрибуты любого элемента** (псевдоэлемент `*`): `class`, `title`, `lang`, `dir`, `role`,
 `aria-*`, `data-*`. Поэтому `<p class="lead">`, `<code class="language-php">`, `<abbr title="…">`
@@ -121,13 +121,13 @@ Vue, или внутри `<div v-pre>` — тогда Vue не компилир�
 Safe::markup($html, ['select' => ['u-select']]);
 ```
 
-**Для своего фильтра** — `Kses::extend()`, который возвращает правила по умолчанию или переданные
+**Для своего фильтра** — `Markup::extend()`, который возвращает правила по умолчанию или переданные
 вторым аргументом с добавленными элементами и атрибутами:
 
 ```php
-use Expansa\Security\Kses;
+use Expansa\Security\Markup;
 
-$kses = new Kses(Kses::extend(['x-card' => ['id']]));
+$markup = new Markup(Markup::extend(['x-card' => ['id']]));
 ```
 
 `Safe::markup()` держит отдельный фильтр для каждого набора дополнительных правил, так что повторные
@@ -138,7 +138,7 @@ $kses = new Kses(Kses::extend(['x-card' => ['id']]));
 Чтобы заменить правила целиком, передайте их в конструктор:
 
 ```php
-$kses = new Kses(
+$markup = new Markup(
     allowedHtml: [
         '*'    => ['class', 'data-*'],
         'a'    => ['href', 'title' => ['maxlen' => 100]],
@@ -148,7 +148,7 @@ $kses = new Kses(
     allowedProtocols: ['https', 'mailto'],
 );
 
-$kses->apply($html);
+$markup->sanitize($html);
 ```
 
 Ключ — имя элемента в нижнем регистре, значение — его атрибуты. Пустой массив разрешает элемент без
@@ -178,7 +178,7 @@ $kses->apply($html);
 
 ## Проверка на векторах атак
 
-`tests/Kses.php` прогоняет через фильтр 149 векторов из
+`tests/Markup.php` прогоняет через фильтр 149 векторов из
 [OWASP XSS Filter Evasion Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/XSS_Filter_Evasion_Cheat_Sheet.html)
 и PortSwigger (`tests/fixtures/xss-vectors.txt`, по одному на строку). Результат разбирается
 HTML5-парсером PHP (`Dom\HTMLDocument`) так, как его разобрал бы браузер: в `body` и внутри строки
@@ -205,12 +205,12 @@ HTML5-парсером PHP (`Dom\HTMLDocument`) так, как его разоб
   `minval` сравнивали строку с пробелами вместо числа.
 
 Во всём остальном результат побайтно совпадает с прежней версией: это проверено на 1.5 млн
-случайных входов, включая битую разметку и невалидный UTF-8, а `tests/Kses.php` хранит эталонные
+случайных входов, включая битую разметку и невалидный UTF-8, а `tests/Markup.php` хранит эталонные
 ответы прежней версии на 60 сложных случаях.
 
 ## Производительность
 
-`php tests/benchmarks/Kses.php [--baseline=<git ref или файл>]` сравнивает с версией из коммита,
+`php tests/benchmarks/Markup.php [--baseline=<git ref или файл>]` сравнивает с версией из коммита,
 по умолчанию `HEAD`, и показывает, совпадает ли вывод. Исходный порт kses — коммит `4492a8a`.
 
 Кэш тегов у каждого фильтра свой, поэтому бенчмарк считает два случая:

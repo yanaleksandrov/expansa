@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Expansa\Security\Kses;
+use Expansa\Security\Markup;
 
-// run: php tests/benchmarks/Kses.php [--baseline=<git ref or file>] [--iterations=N], the original kses is 4492a8a
-// the baseline, Kses of a commit or a file, is loaded as KsesBaseline and measured on the same input
+// run: php tests/benchmarks/Markup.php [--baseline=<git ref or file>] [--iterations=N], the original kses is 4492a8a
+// the baseline, Markup (Kses before) of a commit or a file, is loaded as MarkupBaseline and measured on the same input
 const EX_PATH = __DIR__ . '/../../expansa-cms/';
 
 require_once EX_PATH . 'autoload.php';
@@ -17,8 +17,8 @@ $ref        = $options['baseline'] ?? 'HEAD';
 if (is_file($ref)) {
     $source = file_get_contents($ref);
 } else {
-    // Kses was in Security/Xss/ before it moved to the package root
-    foreach (['Security/Kses.php', 'Security/Xss/Kses.php'] as $path) {
+    // Markup was Kses, in Security/Xss/ before it moved to the package root
+    foreach (['Security/Markup.php', 'Security/Kses.php', 'Security/Xss/Kses.php'] as $path) {
         $object = escapeshellarg($ref . ':expansa-cms/expansa/' . $path);
         $source = shell_exec('git -C ' . escapeshellarg(dirname(__DIR__, 2)) . ' show ' . $object . ' 2>&1');
         if (is_string($source) && str_starts_with($source, '<?php')) {
@@ -32,9 +32,9 @@ if (! is_string($source) || ! str_starts_with($source, '<?php')) {
 }
 
 // eval() and fresh files (opcache.file_update_protection) skip opcache, the baseline would look slower
-$file = tempnam(sys_get_temp_dir(), 'kses');
+$file = tempnam(sys_get_temp_dir(), 'markup');
 $source = preg_replace('/^namespace [^;]+;/m', 'namespace Expansa\Security;', $source, 1);
-file_put_contents($file, preg_replace('/^(final )?class Kses\b/m', 'class KsesBaseline', $source, 1));
+file_put_contents($file, preg_replace('/^(final )?class (Markup|Kses)\b/m', 'class MarkupBaseline', $source, 1));
 touch($file, time() - 60);
 require $file;
 unlink($file);
@@ -72,34 +72,36 @@ function measure(callable $callback, int $iterations): float
 
 // the original kses gets the current rules, so only the speed of the algorithm is compared;
 // a rewritten baseline has its own read-only rules
-$rules    = new Kses()->allowedHtml;
-$property = new ReflectionProperty(Expansa\Security\KsesBaseline::class, 'allowedHtml');
+$rules    = new Markup()->allowedHtml;
+$property = new ReflectionProperty(Expansa\Security\MarkupBaseline::class, 'allowedHtml');
 $settable = $property->isPublic() && ! $property->isReadOnly() && ! $property->isPrivateSet() && ! $property->hasHooks();
 $baseline = function () use ($rules, $settable) {
-    $kses = new Expansa\Security\KsesBaseline();
+    $filter = new Expansa\Security\MarkupBaseline();
     if ($settable) {
-        $kses->allowedHtml = $rules;
+        $filter->allowedHtml = $rules;
     }
 
-    return $kses;
+    return $filter;
 };
-$old = fn (string $html) => $baseline()->apply($html);
-$new = fn (string $html) => new Kses()->apply($html);
+// a baseline before the rename filters with apply()
+$filter = fn (object $markup, string $html) => method_exists($markup, 'sanitize') ? $markup->sanitize($html) : $markup->apply($html);
+$old    = fn (string $html) => $filter($baseline(), $html);
+$new    = fn (string $html) => new Markup()->sanitize($html);
 
 // Sanitizer::markup() created a filter per call, now it keeps one and its cache
 $title      = $inputs['short title'];
 $markupWarm = measure(fn () => Expansa\Security\Sanitizer::markup($title), $iterations * 10);
 
 // cold: a new filter per call has an empty cache; warm: one filter filters the same text again
-$warm = new Kses();
+$warm = new Markup();
 
 printf("%-16s %12s %12s %12s %8s %8s %s\n", 'input', "$ref, µs", 'cold, µs', 'warm, µs', 'cold', 'warm', 'same output');
 foreach ($inputs as $name => $html) {
     $a = measure(fn () => $old($html), $iterations);
     $b = measure(fn () => $new($html), $iterations);
-    $c = measure(fn () => $warm->apply($html), $iterations);
+    $c = measure(fn () => $warm->sanitize($html), $iterations);
     printf("%-16s %12.2f %12.2f %12.2f %7.1fx %7.1fx %s\n", $name, $a, $b, $c, $a / $b, $a / $c, $old($html) === $new($html) ? 'yes' : 'NO');
 }
 
-$a = measure(fn () => $baseline()->apply($title), $iterations * 10);
+$a = measure(fn () => $filter($baseline(), $title), $iterations * 10);
 printf("%-16s %12.2f %12s %12.2f %8s %7.1fx\n", 'markup() call', $a, '', $markupWarm, '', $a / $markupWarm);

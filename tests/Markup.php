@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Expansa\Security\Kses;
+use Expansa\Security\Markup;
 
-// run: php tests/Kses.php
+// run: php tests/Markup.php
 require_once __DIR__ . '/bootstrap.php';
 
-$kses = new Kses();
+$markup = new Markup();
 
 // outputs of the original kses port with the current rules, the rewrite must keep them byte for byte
 $golden = [
@@ -76,7 +76,7 @@ $golden = [
 
 $differ = [];
 foreach ($golden as [$input, $expected]) {
-    if ($kses->apply($input) !== $expected) {
+    if ($markup->sanitize($input) !== $expected) {
         $differ[] = $input;
     }
 }
@@ -93,49 +93,49 @@ $links = [
     '<a href="data:text/html;base64,PHNjcmlwdD4=">x</a>',
     '<a href="vbscript:msgbox(1)">x</a>',
 ];
-check('every encoding of a disallowed protocol is removed', array_filter($links, fn ($html) => preg_match('/(java|vb)script|data:/i', $kses->apply($html))) === []);
-check('&colon; is understood as a colon', $kses->apply('<a href="javascript&colon;alert(1)">x</a>') === '<a href="alert(1)">x</a>');
-check('allowed protocols are kept and normalized', $kses->apply('<a href="HTTPS&colon;//example.com">x</a>') === '<a href="https://example.com">x</a>'
-    && $kses->apply('<a href="mailto:me@example.com">x</a>') === '<a href="mailto:me@example.com">x</a>');
-check('relative URLs are kept', $kses->apply('<a href="/page?a=1&amp;b=2#top">x</a>') === '<a href="/page?a=1&amp;b=2#top">x</a>');
+check('every encoding of a disallowed protocol is removed', array_filter($links, fn ($html) => preg_match('/(java|vb)script|data:/i', $markup->sanitize($html))) === []);
+check('&colon; is understood as a colon', $markup->sanitize('<a href="javascript&colon;alert(1)">x</a>') === '<a href="alert(1)">x</a>');
+check('allowed protocols are kept and normalized', $markup->sanitize('<a href="HTTPS&colon;//example.com">x</a>') === '<a href="https://example.com">x</a>'
+    && $markup->sanitize('<a href="mailto:me@example.com">x</a>') === '<a href="mailto:me@example.com">x</a>');
+check('relative URLs are kept', $markup->sanitize('<a href="/page?a=1&amp;b=2#top">x</a>') === '<a href="/page?a=1&amp;b=2#top">x</a>');
 
 // elements and attributes
-check('disallowed elements are removed with their attributes, the text stays', $kses->apply('<script>alert(1)</script><style>x</style>') === 'alert(1)x');
-check('event handlers and style are removed', $kses->apply('<img src="a.png" onerror="alert(1)" style="x" alt="A">') === '<img src="a.png" alt="A">');
-check('closing tags lose attributes', $kses->apply('</div onclick="x">') === '</div>');
-check('element case is kept, attribute names are lower cased', $kses->apply('<DIV CLASS="a">') === '<DIV class="a">');
-check('unquoted values get quotes', $kses->apply('<td colspan=2 width=50%>') === '<td colspan="2" width="50%">');
-check('XHTML slash is kept after attributes, as in the original', $kses->apply('<img src="a" />') === '<img src="a" />' && $kses->apply('<br />') === '<br>');
-check('lone angle brackets are escaped', $kses->apply('1 < 2 > 0') === '1 &lt; 2 &gt; 0');
-check('comments are removed', $kses->apply('a<!-- secret -->b') === 'ab');
+check('disallowed elements are removed with their attributes, the text stays', $markup->sanitize('<script>alert(1)</script><style>x</style>') === 'alert(1)x');
+check('event handlers and style are removed', $markup->sanitize('<img src="a.png" onerror="alert(1)" style="x" alt="A">') === '<img src="a.png" alt="A">');
+check('closing tags lose attributes', $markup->sanitize('</div onclick="x">') === '</div>');
+check('element case is kept, attribute names are lower cased', $markup->sanitize('<DIV CLASS="a">') === '<DIV class="a">');
+check('unquoted values get quotes', $markup->sanitize('<td colspan=2 width=50%>') === '<td colspan="2" width="50%">');
+check('XHTML slash is kept after attributes, as in the original', $markup->sanitize('<img src="a" />') === '<img src="a" />' && $markup->sanitize('<br />') === '<br>');
+check('lone angle brackets are escaped', $markup->sanitize('1 < 2 > 0') === '1 &lt; 2 &gt; 0');
+check('comments are removed', $markup->sanitize('a<!-- secret -->b') === 'ab');
 
 // entities and encoding
-check('invalid entities are disarmed', $kses->apply('AT&T &#xZZ; &unknown') === 'AT&amp;T &amp;#xZZ; &amp;unknown');
-check('valid entities are kept, hex ones lose leading zeros', $kses->apply('&amp; &#169; &#x000A9; &copy;') === '&amp; &#169; &#xA9; &copy;');
-check('Netscape JavaScript entities are removed', $kses->apply('a&{alert(1)};b') === 'ab');
-check('NUL characters are removed', $kses->apply("<b>a\0b</b>") === '<b>ab</b>');
-check('invalid UTF-8 gives an empty string', $kses->apply("ok\xFFok") === '' && $kses->apply("\xED\xA0\x80") === '');
-check('plain text is returned as is', $kses->apply('Привет, мир') === 'Привет, мир');
+check('invalid entities are disarmed', $markup->sanitize('AT&T &#xZZ; &unknown') === 'AT&amp;T &amp;#xZZ; &amp;unknown');
+check('valid entities are kept, hex ones lose leading zeros', $markup->sanitize('&amp; &#169; &#x000A9; &copy;') === '&amp; &#169; &#xA9; &copy;');
+check('Netscape JavaScript entities are removed', $markup->sanitize('a&{alert(1)};b') === 'ab');
+check('NUL characters are removed', $markup->sanitize("<b>a\0b</b>") === '<b>ab</b>');
+check('invalid UTF-8 gives an empty string', $markup->sanitize("ok\xFFok") === '' && $markup->sanitize("\xED\xA0\x80") === '');
+check('plain text is returned as is', $markup->sanitize('Привет, мир') === 'Привет, мир');
 
 // custom rules
-$custom = new Kses([
+$custom = new Markup([
     'a'      => ['href' => 1, 'title' => ['maxlen' => 5], 'download' => ['valueless' => 'y']],
     'input'  => ['size' => ['maxval' => 50, 'minval' => 1], 'name' => ['minlen' => 2]],
     'span'   => ['class' => ['content' => ['icon-%']]],
 ], ['https']);
-check('custom protocols', $custom->apply('<a href="http://x">x</a>') === '<a href="//x">x</a>' && $custom->getAllowedProtocols() === ['https']);
-check('maxlen and valueless checks', $custom->apply('<a title="short" download>') === '<a title="short" download>'
-    && $custom->apply('<a title="too long" download="x">') === '<a>');
-check('maxval, minval and minlen checks', $custom->apply('<input size=10 name=ab>') === '<input size="10" name="ab">'
-    && $custom->apply('<input size=0 name=a>') === '<input size="0">'
-    && $custom->apply('<input size=1000000 name=a>') === '<input>');
-check('content check', $custom->apply('<span class="icon-home">') === '<span class="icon-home">' && $custom->apply('<span class="evil">') === '<span>');
-check('elements outside a custom list are removed', $custom->apply('<b>x</b>') === 'x');
+check('custom protocols', $custom->sanitize('<a href="http://x">x</a>') === '<a href="//x">x</a>' && $custom->protocols === ['https']);
+check('maxlen and valueless checks', $custom->sanitize('<a title="short" download>') === '<a title="short" download>'
+    && $custom->sanitize('<a title="too long" download="x">') === '<a>');
+check('maxval, minval and minlen checks', $custom->sanitize('<input size=10 name=ab>') === '<input size="10" name="ab">'
+    && $custom->sanitize('<input size=0 name=a>') === '<input size="0">'
+    && $custom->sanitize('<input size=1000000 name=a>') === '<input>');
+check('content check', $custom->sanitize('<span class="icon-home">') === '<span class="icon-home">' && $custom->sanitize('<span class="evil">') === '<span>');
+check('elements outside a custom list are removed', $custom->sanitize('<b>x</b>') === 'x');
 
 $html  = '<p><a href="https://x.y" class=link onclick="x()">a</a></p>';
-$first = $kses->apply($html);
-check('a cached tag gives the same result', $kses->apply($html) === $first && $first === '<p><a href="https://x.y" class="link">a</a></p>');
-check('each filter caches with its own rules', $custom->apply($html) === '<a href="https://x.y">a</a>' && $kses->apply($html) === $first);
+$first = $markup->sanitize($html);
+check('a cached tag gives the same result', $markup->sanitize($html) === $first && $first === '<p><a href="https://x.y" class="link">a</a></p>');
+check('each filter caches with its own rules', $custom->sanitize($html) === '<a href="https://x.y">a</a>' && $markup->sanitize($html) === $first);
 
 /**
  * Find what could run script in a browser: parse the HTML as a browser does, in a body and in a table row.
@@ -153,7 +153,7 @@ function dangers(string $html): array
         foreach ($document->getElementsByTagName('*') as $element) {
             $tag = strtolower($element->localName);
 
-            if (! in_array($tag, $implicit, true) && ($element->namespaceURI !== 'http://www.w3.org/1999/xhtml' || ! isset(Kses::ALLOWED_HTML[$tag]))) {
+            if (! in_array($tag, $implicit, true) && ($element->namespaceURI !== 'http://www.w3.org/1999/xhtml' || ! isset(Markup::ALLOWED_HTML[$tag]))) {
                 $problems[] = "<$tag>";
             }
 
@@ -167,7 +167,7 @@ function dangers(string $html): array
                 // the URL parser strips controls and spaces around the URL, tabs and newlines inside it
                 $url = str_replace(["\t", "\n", "\r"], '', trim($attribute->value, "\x00..\x20"));
                 if (in_array($name, $urls, true) && preg_match('/^([a-z][a-z0-9+.\-]*):/i', $url, $scheme)
-                    && ! in_array(strtolower($scheme[1]), Kses::ALLOWED_PROTOCOLS, true)) {
+                    && ! in_array(strtolower($scheme[1]), Markup::ALLOWED_PROTOCOLS, true)) {
                     $problems[] = $tag . '[' . $name . ']=' . strtolower($scheme[1]) . ':';
                 }
             }
@@ -187,15 +187,15 @@ check('the XSS check itself recognizes ' . count($flagged) . ' of ' . count($vec
 
 $passed = [];
 foreach ($vectors as $vector) {
-    if ($problems = dangers($kses->apply($vector))) {
+    if ($problems = dangers($markup->sanitize($vector))) {
         $passed[] = $vector . ' => ' . implode(', ', $problems);
     }
 }
 check('no XSS vector survives the filter' . ($passed ? ': ' . implode(' | ', $passed) : ''), $passed === []);
 
-$broken = new Kses(['a' => ['title' => ['maxlen' => 'many']]]);
+$broken = new Markup(['a' => ['title' => ['maxlen' => 'many']]]);
 try {
-    $broken->apply('<a title="x">');
+    $broken->sanitize('<a title="x">');
     $thrown = false;
 } catch (InvalidArgumentException $e) {
     $thrown = $e->getMessage() === 'maxlen must be of type numeric, string given';
@@ -203,11 +203,11 @@ try {
 check('a rule with a wrong type throws', $thrown);
 
 // attributes of every element and prefixes
-check('class, title, lang, dir and role are allowed on every element', $kses->apply('<p class="lead" title="t" lang="en" dir="ltr" role="note">x</p>') === '<p class="lead" title="t" lang="en" dir="ltr" role="note">x</p>');
-check('data-* and aria-* are allowed on every element', $kses->apply('<code data-lang="php" aria-label="Code" class="language-php">x</code>') === '<code data-lang="php" aria-label="Code" class="language-php">x</code>');
+check('class, title, lang, dir and role are allowed on every element', $markup->sanitize('<p class="lead" title="t" lang="en" dir="ltr" role="note">x</p>') === '<p class="lead" title="t" lang="en" dir="ltr" role="note">x</p>');
+check('data-* and aria-* are allowed on every element', $markup->sanitize('<code data-lang="php" aria-label="Code" class="language-php">x</code>') === '<code data-lang="php" aria-label="Code" class="language-php">x</code>');
 $emptyPrefix = function (array $rules): bool {
     try {
-        new Kses($rules);
+        new Markup($rules);
     } catch (InvalidArgumentException $e) {
         return str_contains($e->getMessage(), 'would allow every attribute');
     }
@@ -215,57 +215,57 @@ $emptyPrefix = function (array $rules): bool {
     return false;
 };
 check('a bare `*` attribute is rejected, it would allow every attribute', $emptyPrefix(['b' => ['*']]) && $emptyPrefix(['*' => ['*'], 'b' => []])
-    && $emptyPrefix(Kses::extend(['b' => ['*']])) && $emptyPrefix(Kses::extend(['*' => ['*']])));
-check('a bare prefix is not an attribute', $kses->apply('<b data- aria-=1 data-x=1>x</b>') === '<b data-x="1">x</b>');
-check('prefixes do not allow event handlers or directives', $kses->apply('<b onclick="x" data-onclick="y" u-text="z" style="w">x</b>') === '<b data-onclick="y">x</b>');
-check('the protocol check applies to data-* values', $kses->apply('<b data-url="javascript:alert(1)">x</b>') === '<b data-url="alert(1)">x</b>');
+    && $emptyPrefix(Markup::extend(['b' => ['*']])) && $emptyPrefix(Markup::extend(['*' => ['*']])));
+check('a bare prefix is not an attribute', $markup->sanitize('<b data- aria-=1 data-x=1>x</b>') === '<b data-x="1">x</b>');
+check('prefixes do not allow event handlers or directives', $markup->sanitize('<b onclick="x" data-onclick="y" u-text="z" style="w">x</b>') === '<b data-onclick="y">x</b>');
+check('the protocol check applies to data-* values', $markup->sanitize('<b data-url="javascript:alert(1)">x</b>') === '<b data-url="alert(1)">x</b>');
 
 // framework directives: names with ":", "@" and "."
-check('directives with ":", "@" and "." are removed by default', $kses->apply('<b v-on:click="x()" :href="y" @click="z" .prop="w" v-if="ok">b</b>') === '<b>b</b>');
-$vue = new Kses(Kses::extend(['*' => ['v-*', ':*', '@*']]));
-check('Vue directives pass once their prefixes are allowed', $vue->apply('<b v-on:click.prevent="x()" :href="y" @click="z" v-if="ok" onclick="w">b</b>')
+check('directives with ":", "@" and "." are removed by default', $markup->sanitize('<b v-on:click="x()" :href="y" @click="z" .prop="w" v-if="ok">b</b>') === '<b>b</b>');
+$vue = new Markup(Markup::extend(['*' => ['v-*', ':*', '@*']]));
+check('Vue directives pass once their prefixes are allowed', $vue->sanitize('<b v-on:click.prevent="x()" :href="y" @click="z" v-if="ok" onclick="w">b</b>')
     === '<b v-on:click.prevent="x()" :href="y" @click="z" v-if="ok">b</b>');
-check('a bare ":" or "@" is not an attribute', $vue->apply('<b : @ :x="1">b</b>') === '<b :x="1">b</b>');
+check('a bare ":" or "@" is not an attribute', $vue->sanitize('<b : @ :x="1">b</b>') === '<b :x="1">b</b>');
 
 // new elements and attributes
-check('HTML5 sections, details and time', $kses->apply('<article><header><h2>T</h2></header><details open><summary>S</summary>D</details><time datetime="2025-01-31">today</time></article>')
+check('HTML5 sections, details and time', $markup->sanitize('<article><header><h2>T</h2></header><details open><summary>S</summary>D</details><time datetime="2025-01-31">today</time></article>')
     === '<article><header><h2>T</h2></header><details open><summary>S</summary>D</details><time datetime="2025-01-31">today</time></article>');
-check('picture, source and responsive images', $kses->apply('<picture><source srcset="a.avif" type="image/avif"><img src="a.jpg" srcset="a2.jpg 2x" sizes="50vw" loading="lazy" decoding="async"></picture>')
+check('picture, source and responsive images', $markup->sanitize('<picture><source srcset="a.avif" type="image/avif"><img src="a.jpg" srcset="a2.jpg 2x" sizes="50vw" loading="lazy" decoding="async"></picture>')
     === '<picture><source srcset="a.avif" type="image/avif"><img src="a.jpg" srcset="a2.jpg 2x" sizes="50vw" loading="lazy" decoding="async"></picture>');
-check('video with a source', $kses->apply('<video controls playsinline><source src="v.mp4" type="video/mp4"></video>') === '<video controls playsinline><source src="v.mp4" type="video/mp4"></video>');
-check('list and table attributes', $kses->apply('<ol start="3" reversed type="a"><li value="5">x</li></ol><table><colgroup span="2"><col span="1"></colgroup></table>')
+check('video with a source', $markup->sanitize('<video controls playsinline><source src="v.mp4" type="video/mp4"></video>') === '<video controls playsinline><source src="v.mp4" type="video/mp4"></video>');
+check('list and table attributes', $markup->sanitize('<ol start="3" reversed type="a"><li value="5">x</li></ol><table><colgroup span="2"><col span="1"></colgroup></table>')
     === '<ol start="3" reversed type="a"><li value="5">x</li></ol><table><colgroup span="2"><col span="1"></colgroup></table>');
-check('iframe embeds keep allow, loading and referrerpolicy', $kses->apply('<iframe src="https://www.youtube.com/embed/x" allow="autoplay; fullscreen" loading="lazy" referrerpolicy="strict-origin" srcdoc="x"></iframe>')
+check('iframe embeds keep allow, loading and referrerpolicy', $markup->sanitize('<iframe src="https://www.youtube.com/embed/x" allow="autoplay; fullscreen" loading="lazy" referrerpolicy="strict-origin" srcdoc="x"></iframe>')
     === '<iframe src="https://www.youtube.com/embed/x" allow="autoplay; fullscreen" loading="lazy" referrerpolicy="strict-origin"></iframe>');
-check('default elements are in alphabetical order', array_keys(Kses::ALLOWED_HTML) === (function () {
-    $keys = array_keys(Kses::ALLOWED_HTML);
+check('default elements are in alphabetical order', array_keys(Markup::ALLOWED_HTML) === (function () {
+    $keys = array_keys(Markup::ALLOWED_HTML);
     sort($keys, SORT_STRING);
 
     return $keys;
 })());
 
-$listed = new Kses(['a' => ['href', 'title' => ['maxlen' => 3], 'rel' => 1], 'b' => ['class']]);
-check('attributes may be listed, mixed with checks and the `=> 1` form', $listed->apply('<a href="/x" title="abc" rel="n" id="i"><b class="c">x</b></a>') === '<a href="/x" title="abc" rel="n"><b class="c">x</b></a>'
-    && $listed->apply('<a title="long">x</a>') === '<a>x</a>');
-check('extend() accepts listed attributes', new Kses(Kses::extend(['b' => ['data-x', 'onclick' => ['maxlen' => 0]]]))->apply('<b id="i" data-x="1">x</b>') === '<b data-x="1">x</b>');
+$listed = new Markup(['a' => ['href', 'title' => ['maxlen' => 3], 'rel' => 1], 'b' => ['class']]);
+check('attributes may be listed, mixed with checks and the `=> 1` form', $listed->sanitize('<a href="/x" title="abc" rel="n" id="i"><b class="c">x</b></a>') === '<a href="/x" title="abc" rel="n"><b class="c">x</b></a>'
+    && $listed->sanitize('<a title="long">x</a>') === '<a>x</a>');
+check('extend() accepts listed attributes', new Markup(Markup::extend(['b' => ['data-x', 'onclick' => ['maxlen' => 0]]]))->sanitize('<b id="i" data-x="1">x</b>') === '<b data-x="1">x</b>');
 
 // Youla directives run JavaScript, so they are never allowed by default, only as extra rules of a trusted page
-check('Youla directives are removed by default', $kses->apply('<select u-select="fetch(1)" class="a"><option value="1" selected>1</option></select>') === '<select class="a"><option value="1" selected>1</option></select>');
-$extended = Kses::extend(['select' => ['u-select' => 1], 'x-box' => ['id' => 1]]);
+check('Youla directives are removed by default', $markup->sanitize('<select u-select="fetch(1)" class="a"><option value="1" selected>1</option></select>') === '<select class="a"><option value="1" selected>1</option></select>');
+$extended = Markup::extend(['select' => ['u-select' => 1], 'x-box' => ['id' => 1]]);
 check('extend() adds attributes and elements to the default rules', $extended['select'] === ['u-select' => 1] && $extended['x-box'] === ['id' => 1] && $extended['p'] === [] && isset($extended['*']));
-$filter  = new Kses();
-$rewrite = Closure::bind(fn () => $this->allowedHtml = ['script' => []], $filter, Kses::class);
+$filter  = new Markup();
+$rewrite = Closure::bind(fn () => $this->allowedHtml = ['script' => []], $filter, Markup::class);
 try {
     $rewrite();
     $locked = false;
 } catch (LogicException) {
     $locked = true;
 }
-check('rules can not be changed after the filter is created, even from inside', $locked && count($filter->allowedHtml) === count(Kses::ALLOWED_HTML) - 1);
+check('rules can not be changed after the filter is created, even from inside', $locked && count($filter->allowedHtml) === count(Markup::ALLOWED_HTML) - 1);
 
 $directive = '<select u-select="fetch(2)">';
-check('the shared cache never gives the result of other rules', new Kses(Kses::extend(['select' => ['u-select']]))->apply($directive) === $directive
-    && new Kses()->apply($directive) === '<select>'
-    && new Kses(Kses::ALLOWED_HTML, ['https'])->apply('<a href="http://x">') === '<a href="//x">');
+check('the shared cache never gives the result of other rules', new Markup(Markup::extend(['select' => ['u-select']]))->sanitize($directive) === $directive
+    && new Markup()->sanitize($directive) === '<select>'
+    && new Markup(Markup::ALLOWED_HTML, ['https'])->sanitize('<a href="http://x">') === '<a href="//x">');
 
 exit($failures > 0 ? 1 : 0);

@@ -54,7 +54,7 @@ CSS и JS правятся только в `src/`: `dashboard/assets/` пере�
 |--------------|-----------------------------------------------------------------------------------------------------|
 | Основа       | [Lifecycle](documentation/Lifecycle.md), [Hooks](documentation/Hooks.md), [Http](documentation/Http.md), [View](documentation/View.md), [Debug](documentation/Debug.md), [Log](documentation/Log.md) |
 | Данные       | [Database](documentation/Database.md), [Cache](documentation/Cache.md), [Filesystem](documentation/Filesystem.md), [Session](documentation/Session.md), [Cookie](documentation/Cookie.md) |
-| Безопасность | [Auth](documentation/Auth.md), [Access](documentation/Access.md), [Xss](documentation/Xss.md)      |
+| Безопасность | [Auth](documentation/Auth.md), [Access](documentation/Access.md), [Markup](documentation/Markup.md)      |
 | Интерфейс    | [Dashboard](documentation/Dashboard.md), [Builders](documentation/Builders.md), [Asset](documentation/Asset.md), [Translation](documentation/Translation.md), [Ldml](documentation/Ldml.md) |
 | Расширения   | [Extensions](documentation/Extensions.md), [Ai](documentation/Ai.md), [Scheduler](documentation/Scheduler.md), [Mail](documentation/Mail.md) |
 | Форматы      | [Codecs](documentation/Codecs.md), [Json](documentation/Json.md), [Csv](documentation/Csv.md), [Base64](documentation/Base64.md), [Marshal](documentation/Marshal.md) |
