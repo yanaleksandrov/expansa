@@ -306,6 +306,33 @@
     }
   }
 
+  .nav-editor-clipboard {
+    display: flex;
+    gap: 2px;
+  }
+
+  // a bar of the clicks of the item against the most clicked one, the number after it
+  .nav-editor-item-clicks {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.6875rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--expansa-text-muted);
+
+    &::before {
+      content: '';
+      width: 2.5rem;
+      height: 0.25rem;
+      border-radius: 1rem;
+      background: linear-gradient(to right, var(--expansa-success) calc(var(--share, 0) * 100%), var(--expansa-bg-universal) 0);
+    }
+
+    &[hidden] {
+      display: none;
+    }
+  }
+
   // the removed item can be brought back until the bar hides
   .nav-editor-undo {
     padding: 0.375rem 0.375rem 0.375rem 0.75rem;

@@ -15,6 +15,8 @@
  * @var array<int, string>                     $places    Labels of the locations of each menu, by menu ID.
  * @var string[]                               $orphans   Locations of the menu the theme no longer declares.
  * @var array<string, string>                  $types     Labels of the public post types by key.
+ * @var array<string, string>                  $kinds     Labels of the items that are neither posts nor links, by type.
+ * @var int                                    $clicks    Clicks of the items of the menu over the last 30 days.
  * @var array<string, App\Models\Values\Field> $fields    Fields of an item by key.
  * @var App\Dashboard\Values\MenuItem[]        $rows      Rows of the items until u-each of the editor replaces them.
  * @var string                                 $source    Key of the post type open in the sources, the first one.
@@ -99,6 +101,19 @@ defined('EX_PATH') || exit;
                         </div>
                     </div>
                 @endforeach
+                <div class="accordion-item">
+                    <button type="button" class="accordion-title" u-bind="sourceTitle('kinds')">
+                        <i class="ph ph-shapes"></i> <span>{{ t('Special Items') }}</span> <i class="ph ph-caret-down"></i>
+                    </button>
+                    <div class="accordion-panel nav-editor-posts" u-bind="sourcePanel('kinds')" hidden>
+                        @foreach($kinds as $type => $label)
+                            <button type="button" class="nav-editor-post" u-bind="kind('{{ $type }}')">
+                                <span>{{ $label }}</span>
+                                <i class="ph ph-plus"></i>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
             </div>
         </section>
     </aside>
@@ -111,7 +126,19 @@ defined('EX_PATH') || exit;
         </div>
 
         <div class="nav-editor-box">
-            <h6 class="nav-editor-eyebrow">{{ t('Menu Structure') }} <span class="badge badge--xs" u-bind="count"@if(! $rows) hidden@endif>{{ count($rows) }}</span></h6>
+            <header class="nav-editor-header">
+                <h6 class="nav-editor-eyebrow">
+                    {{ t('Menu Structure') }}
+                    <span class="badge badge--xs" u-bind="count"@if(! $rows) hidden@endif>{{ count($rows) }}</span>
+                    <span class="badge badge--xs badge--green-lt" title="{{ t_attr('Clicks in the last 30 days') }}" u-show="totalClicks()"@if(! $clicks) hidden@endif>
+                        <i class="ph ph-cursor-click"></i> <span u-text="totalClicks()">{{ $clicks }}</span>
+                    </span>
+                </h6>
+                <div class="nav-editor-clipboard">
+                    <button type="button" class="btn btn--xs btn--icon" title="{{ t_attr('Copy Menu') }}" @click="copyMenu()"><i class="ph ph-copy"></i></button>
+                    <button type="button" class="btn btn--xs btn--icon" title="{{ t_attr('Paste Menu Items') }}" @click="pasteItems()"><i class="ph ph-clipboard-text"></i></button>
+                </div>
+            </header>
             <div class="nav-editor-undo" u-show="removed" hidden>
                 <i class="ph ph-trash"></i>
                 <span>{{ t('Menu item removed') }} <strong u-text="removed?.label"></strong></span>
@@ -127,7 +154,8 @@ defined('EX_PATH') || exit;
                         <small class="badge badge--xs badge--red-lt" title="{{ t_attr('The post was deleted, the item is not shown on the site.') }}" u-bind="rowDeleted">{{ t('Deleted') }}</small>
                         <small class="badge badge--xs badge--orange-lt" title="{{ t_attr('The post is not published, the item is not shown on the site.') }}" u-bind="rowHidden">{{ t('Not Published') }}</small>
                         <small class="badge badge--xs" u-bind="rowType"></small>
-                        <small class="badge badge--xs badge--blue-lt" u-bind="rowLink">{{ t('Custom Link') }}</small>
+                        <small class="badge badge--xs badge--blue-lt" u-bind="rowKind"></small>
+                        <span class="nav-editor-item-clicks" title="{{ t_attr('Clicks in the last 30 days') }}" u-bind="rowClicks"><span u-text="item.clicks"></span></span>
                     </button>
                     <div class="nav-editor-item-actions">
                         <button type="button" class="btn btn--xs btn--icon nav-editor-remove" title="{{ t_attr('Remove') }}" @click="remove(i)"><i class="ph ph-trash"></i></button>
@@ -154,7 +182,10 @@ defined('EX_PATH') || exit;
                             @if($row->type !== '')
                                 <small class="badge badge--xs">{{ $row->type }}</small>
                             @else
-                                <small class="badge badge--xs badge--blue-lt">{{ t('Custom Link') }}</small>
+                                <small class="badge badge--xs badge--blue-lt">{{ $row->kind }}</small>
+                            @endif
+                            @if($row->clicks)
+                                <span class="nav-editor-item-clicks" title="{{ t_attr('Clicks in the last 30 days') }}" style="--share: {{ $row->share }}"><span>{{ $row->clicks }}</span></span>
                             @endif
                         </button>
                         <div class="nav-editor-item-actions">
@@ -187,6 +218,8 @@ defined('EX_PATH') || exit;
                                         <option value="{{ $value }}">{{ $text }}</option>
                                     @endforeach
                                 </select>
+                            @elseif($field->type === 'date')
+                                <input type="date" u-bind="control('{{ $name }}')" disabled>
                             @elseif($field->type === 'textarea')
                                 <textarea rows="2" placeholder="{{ $field->placeholder }}" u-bind="control('{{ $name }}')" disabled></textarea>
                             @else

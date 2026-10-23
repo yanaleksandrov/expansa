@@ -53,6 +53,22 @@ return new class extends Expansa\Extensions\Theme {
 
 Ключ — строчные латинские буквы, цифры, `-` и `_`, иначе `setMenus()` бросает `InvalidArgumentException`. Пакет только хранит области в `$theme->menus`. Меню к ним привязывает приложение: `bootstrap.php` передаёт области активной темы в `App\Models\Menu::setThemeLocations()`, а меню области выводится деревом `menu-<ключ>`: `tree('menu-primary', ...)`. Без активной темы есть области `primary` и `footer`. Плагин добавляет свои фильтром `menuLocations`.
 
+Пункт дерева несёт `type`: `link`, `post`, `heading` (заголовок без ссылки), `separator`, `auth` (вход или выход по посетителю) и `profile`. Атрибуты ссылки — в `$item->attributes`: тема выводит их, и клики по пункту считаются для статистики редактора меню.
+
+```php
+tree('menu-primary', function (array $items) {
+    foreach ($items as $item) {
+        echo match ($item->type) {
+            'separator' => '<hr>',
+            'heading'   => '<span>' . htmlspecialchars($item->title) . '</span>',
+            default     => '<a href="' . htmlspecialchars($item->url) . '"' . Expansa\Support\Arr::toHtmlAttributes($item->attributes) . '>' . htmlspecialchars($item->title) . '</a>',
+        };
+    }
+});
+```
+
+Для headless-сайта меню области отдаёт `GET /api/menus/<ключ>`: `{"location": "primary", "items": [{"title", "url", "type", ..., "active", "children": []}]}`. Ответ публичный и учитывает посетителя запроса: его вход, язык страницы и даты показа пунктов.
+
 ## Установленные и активные
 
 Пакет не хранит, какие расширения активны: список id передаёт приложение. В Expansa это опция `extensions.active`, её читает `bootstrap.php` и меняет `App\Api\Extensions\ExtensionsService` (эндпоинты `extensions/activate` и `extensions/deactivate` с `id` в теле, право `plugins_activate`).

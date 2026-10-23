@@ -30,9 +30,14 @@ final readonly class MenuItem
         public string $icon = '',
 
         /**
-         * Label of the post type of the item, empty for a custom link.
+         * Label of the post type of a post item, empty for another one.
          */
         public string $type = '',
+
+        /**
+         * Label of the type of an item that is not a post: a custom link, a heading and so on.
+         */
+        public string $kind = '',
 
         /**
          * Why the site leaves the item out: `deleted` or `hidden` (an unpublished post), empty if shown.
@@ -45,5 +50,15 @@ final readonly class MenuItem
          * @var Flag[]
          */
         public array $flags = [],
+
+        /**
+         * Clicks of the item on the site over the last 30 days.
+         */
+        public int $clicks = 0,
+
+        /**
+         * Its clicks as a part of the clicks of the most clicked item of the menu, from 0 to 1.
+         */
+        public float $share = 0,
     ) {}
 }

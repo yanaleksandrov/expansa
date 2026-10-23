@@ -1147,9 +1147,13 @@ document.addEventListener('youla:init', ()=> {
         const maxDepth = state.maxDepth ?? 5;
         const fields   = state.fields && typeof state.fields === 'object' ? state.fields : {};
         const texts    = state.texts && typeof state.texts === 'object' ? state.texts : {};
+        const kinds    = state.kinds && typeof state.kinds === 'object' ? state.kinds : {};
+        const select   = state.select && typeof state.select === 'object' ? state.select : {};
 
-        // a key tells the items apart in the page only, the proxies of the same item are not equal
+        // a key tells the items apart in the page only, the proxies of the same item are not equal;
+        // the ID stays with the item while the menu is edited, the clicks of the site are counted by it
         let lastKey = 0;
+        const newId = () => Math.random().toString(36).slice(2, 14);
         const item = (values) => ({
             type: 'link',
             object: '',
@@ -1157,13 +1161,15 @@ document.addEventListener('youla:init', ()=> {
             ...Object.fromEntries(Object.entries(fields).map(([name, field]) => [ name, structuredClone(field.default ?? '') ])),
             original: '',
             problem: '',
+            clicks: 0,
             depth: 0,
             ...values,
+            id: values.id || newId(),
             key: ++lastKey,
         });
 
-        // the title of the post and why the site leaves the item out come from the server, they are not saved
-        const serialize = (items) => JSON.stringify(items.map(({ key, original, problem, ...values }) => values));
+        // the title of the post, why the site leaves the item out and the clicks come from the server, they are not saved
+        const serialize = (items) => JSON.stringify(items.map(({ key, original, problem, clicks, ...values }) => values));
 
         // a removed item can be brought back for a while
         const UNDO_TIME = 7000;
@@ -1181,6 +1187,7 @@ document.addEventListener('youla:init', ()=> {
             locations: Array.isArray(state.locations) ? state.locations : [],
             items: (Array.isArray(state.items) ? state.items : []).map(values => item(values)),
             types: state.types || {},
+            kinds,
             maxDepth,
             // the first post type is open on load, its posts come with the state
             source: state.source || '',
@@ -1198,14 +1205,21 @@ document.addEventListener('youla:init', ()=> {
             removed: null,
 
             label(entry) {
-                return entry.title || entry.original || entry.url || '—';
+                return entry.title || entry.original || entry.url || kinds[entry.type] || '—';
+            },
+            // the clicks of an item as a part of the clicks of the most clicked one
+            share(entry) {
+                return entry.clicks / Math.max(1, ...this.items.map(other => other.clicks || 0));
+            },
+            totalClicks() {
+                return this.items.reduce((total, entry) => total + (entry.clicks || 0), 0);
             },
             // the choices of an item that differ from their defaults, the server finds them the same way
             flags(entry) {
                 return Object.entries(fields).flatMap(([name, field]) => {
                     const value = entry[name] ?? field.default;
                     if (
-                        ![ 'select', 'multiselect' ].includes(field.type)
+                        ![ 'select', 'multiselect', 'date' ].includes(field.type)
                         || (field.types?.length && !field.types.includes(entry.type))
                         || JSON.stringify(value) === JSON.stringify(field.default)
                         || (Array.isArray(value) && value.length === 0)
@@ -1334,7 +1348,7 @@ document.addEventListener('youla:init', ()=> {
 
             openSource(key, el) {
                 this.source = this.source === key ? '' : key;
-                if (this.source === key && !this.posts[key]) {
+                if (this.source === key && key in this.types && !this.posts[key]) {
                     this.$ajax.post('menus/posts', { type: key }, null, { el })
                         .then(result => {
                             this.posts = { ...this.posts, [key]: Array.isArray(result?.posts) ? result.posts : [] };
@@ -1372,6 +1386,36 @@ document.addEventListener('youla:init', ()=> {
                 this.link = { url: '', title: '' };
             },
 
+            // the menu goes to the clipboard as JSON, its items can be pasted into another menu or site
+            copyMenu() {
+                const menu = { expansa: 'menu', title: this.title, items: JSON.parse(serialize(this.items)) };
+                navigator.clipboard?.writeText(JSON.stringify(menu, null, 2))
+                    .then(() => this.$notice.success(texts.copied))
+                    .catch(() => {});
+            },
+            // pasted items get their own IDs, a post of another site shows as deleted after saving
+            pasteItems() {
+                navigator.clipboard?.readText()
+                    .then(text => {
+                        let menu = null;
+                        try {
+                            menu = JSON.parse(text);
+                        } catch {}
+                        if (menu?.expansa !== 'menu' || !Array.isArray(menu.items) || menu.items.length === 0) {
+                            this.$notice.error(texts.pasteFailed);
+                            return;
+                        }
+                        const pasted = menu.items
+                            .filter(values => values && typeof values === 'object')
+                            .map(({ id, key, ...values }) => item({ ...values, depth: +values.depth || 0 }));
+                        this.normalize([ ...this.items, ...pasted ]);
+                        this.select(this.items.length - pasted.length);
+                        this.revealActive();
+                        this.$notice.success(texts.pasted);
+                    })
+                    .catch(() => this.$notice.error(texts.pasteFailed));
+            },
+
             // a menu named in the select is created at once, the server opens it
             create(name) {
                 if (name.trim() === '') {
@@ -1401,9 +1445,9 @@ document.addEventListener('youla:init', ()=> {
                 'u-select'() {
                     return {
                         showSearch: true,
-                        ...texts,
+                        ...select,
                         // the text comes with `:name` of t(), the select puts the typed name in place of `{value}`
-                        addableText: (texts.addableText || '').replace(':name', '{value}'),
+                        addableText: (select.addableText || '').replace(':name', '{value}'),
                         events: {
                             addable: name => {
                                 this.create(name);
@@ -1522,8 +1566,21 @@ document.addEventListener('youla:init', ()=> {
                 'u-show': "item.type === 'post'",
                 'u-text': 'types[item.object] || item.object',
             },
-            rowLink: {
-                'u-show': "item.type === 'link'",
+            rowKind: {
+                'u-show': "item.type !== 'post'",
+                'u-text': 'kinds[item.type]',
+            },
+            rowClicks: {
+                'u-show': 'item.clicks',
+                ':style': "'--share: ' + share(item)",
+            },
+            // the items that are not posts or links, a heading gets its label in the panel
+            kind(type) {
+                return {
+                    '@click'() {
+                        this.add({ type });
+                    },
+                };
             },
             rowDeleted: {
                 'u-show': "item.problem === 'deleted'",

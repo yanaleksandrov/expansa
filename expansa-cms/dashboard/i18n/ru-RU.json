@@ -1765,5 +1765,18 @@
     "The post is not published, the item is not shown on the site.": "Запись не опубликована, пункт не показывается на сайте.",
     "Menu item removed": "Пункт меню удалён",
     "Undo": "Отменить",
-    "The current theme has no such location, the menu is not shown there.": "В текущей теме нет такой области, меню там не показывается."
+    "The current theme has no such location, the menu is not shown there.": "В текущей теме нет такой области, меню там не показывается.",
+    "Separator": "Разделитель",
+    "Sign In / Sign Out": "Вход / выход",
+    "Guests": "Гости",
+    "All Languages": "Все языки",
+    "Show From": "Показывать с",
+    "Show Until": "Показывать до",
+    "Special Items": "Особые пункты",
+    "Copy Menu": "Копировать меню",
+    "Paste Menu Items": "Вставить пункты меню",
+    "Clicks in the last 30 days": "Клики за последние 30 дней",
+    "Menu copied to the clipboard": "Меню скопировано в буфер обмена",
+    "Menu items pasted": "Пункты меню вставлены",
+    "The clipboard has no menu items.": "В буфере обмена нет пунктов меню."
 }

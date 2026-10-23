@@ -35,6 +35,7 @@ final class Migrations
         $this->createFieldGroupsTable();
         $this->createActivityTable();
         $this->createMenusTable();
+        $this->createMenuClicksTable();
     }
 
     public function createPostsTable(string $postType): void
@@ -102,6 +103,25 @@ final class Migrations
             $table->json('locations')->nullable();
             $table->json('items')->nullable();
             $table->timestamps();
+        });
+        Db::updateSchema();
+    }
+
+    /**
+     * Create the clicks of the menu items by day, see Menu::click(); also on the sites installed before them.
+     *
+     * @return void
+     */
+    public function createMenuClicksTable(): void
+    {
+        Schema::create('menu_clicks', function (Table $table) {
+            $table->bigInt('menu_id')->unsigned();
+            $table->string('item_id', 36);
+            $table->date('day');
+            $table->int('count')->unsigned()->default(0);
+
+            $table->unique(['menu_id', 'item_id', 'day']);
+            $table->index('day');
         });
         Db::updateSchema();
     }

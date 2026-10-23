@@ -967,7 +967,10 @@ document.addEventListener('youla:init', () => {
         const maxDepth = state.maxDepth ?? 5;
         const fields = state.fields && typeof state.fields === 'object' ? state.fields : {};
         const texts = state.texts && typeof state.texts === 'object' ? state.texts : {};
+        const kinds = state.kinds && typeof state.kinds === 'object' ? state.kinds : {};
+        const select = state.select && typeof state.select === 'object' ? state.select : {};
         let lastKey = 0;
+        const newId = () => Math.random().toString(36).slice(2, 14);
         const item = values => ({
             type: 'link',
             object: '',
@@ -975,11 +978,13 @@ document.addEventListener('youla:init', () => {
             ...Object.fromEntries(Object.entries(fields).map(([name, field]) => [ name, structuredClone(field.default ?? '') ])),
             original: '',
             problem: '',
+            clicks: 0,
             depth: 0,
             ...values,
+            id: values.id || newId(),
             key: ++lastKey
         });
-        const serialize = items => JSON.stringify(items.map(({key, original, problem, ...values}) => values));
+        const serialize = items => JSON.stringify(items.map(({key, original, problem, clicks, ...values}) => values));
         const UNDO_TIME = 7e3;
         let undoTimer = 0;
         const snapshot = ({title, locations, items}) => JSON.stringify([ title, [ ...locations ].sort(), serialize(items) ]);
@@ -990,6 +995,7 @@ document.addEventListener('youla:init', () => {
             locations: Array.isArray(state.locations) ? state.locations : [],
             items: (Array.isArray(state.items) ? state.items : []).map(values => item(values)),
             types: state.types || {},
+            kinds,
             maxDepth,
             source: state.source || '',
             query: '',
@@ -1004,12 +1010,18 @@ document.addEventListener('youla:init', () => {
             saved: '',
             removed: null,
             label(entry) {
-                return entry.title || entry.original || entry.url || '—';
+                return entry.title || entry.original || entry.url || kinds[entry.type] || '—';
+            },
+            share(entry) {
+                return entry.clicks / Math.max(1, ...this.items.map(other => other.clicks || 0));
+            },
+            totalClicks() {
+                return this.items.reduce((total, entry) => total + (entry.clicks || 0), 0);
             },
             flags(entry) {
                 return Object.entries(fields).flatMap(([name, field]) => {
                     const value = entry[name] ?? field.default;
-                    if (![ 'select', 'multiselect' ].includes(field.type) || field.types?.length && !field.types.includes(entry.type) || JSON.stringify(value) === JSON.stringify(field.default) || Array.isArray(value) && value.length === 0) {
+                    if (![ 'select', 'multiselect', 'date' ].includes(field.type) || field.types?.length && !field.types.includes(entry.type) || JSON.stringify(value) === JSON.stringify(field.default) || Array.isArray(value) && value.length === 0) {
                         return [];
                     }
                     const texts = [ value ].flat().map(key => field.options?.[key] ?? key);
@@ -1132,7 +1144,7 @@ document.addEventListener('youla:init', () => {
             },
             openSource(key, el) {
                 this.source = this.source === key ? '' : key;
-                if (this.source === key && !this.posts[key]) {
+                if (this.source === key && key in this.types && !this.posts[key]) {
                     this.$ajax.post('menus/posts', {
                         type: key
                     }, null, {
@@ -1186,6 +1198,34 @@ document.addEventListener('youla:init', () => {
                     title: ''
                 };
             },
+            copyMenu() {
+                const menu = {
+                    expansa: 'menu',
+                    title: this.title,
+                    items: JSON.parse(serialize(this.items))
+                };
+                navigator.clipboard?.writeText(JSON.stringify(menu, null, 2)).then(() => this.$notice.success(texts.copied)).catch(() => {});
+            },
+            pasteItems() {
+                navigator.clipboard?.readText().then(text => {
+                    let menu = null;
+                    try {
+                        menu = JSON.parse(text);
+                    } catch {}
+                    if (menu?.expansa !== 'menu' || !Array.isArray(menu.items) || menu.items.length === 0) {
+                        this.$notice.error(texts.pasteFailed);
+                        return;
+                    }
+                    const pasted = menu.items.filter(values => values && typeof values === 'object').map(({id, key, ...values}) => item({
+                        ...values,
+                        depth: +values.depth || 0
+                    }));
+                    this.normalize([ ...this.items, ...pasted ]);
+                    this.select(this.items.length - pasted.length);
+                    this.revealActive();
+                    this.$notice.success(texts.pasted);
+                }).catch(() => this.$notice.error(texts.pasteFailed));
+            },
             create(name) {
                 if (name.trim() === '') {
                     return;
@@ -1215,8 +1255,8 @@ document.addEventListener('youla:init', () => {
                 'u-select'() {
                     return {
                         showSearch: true,
-                        ...texts,
-                        addableText: (texts.addableText || '').replace(':name', '{value}'),
+                        ...select,
+                        addableText: (select.addableText || '').replace(':name', '{value}'),
                         events: {
                             addable: name => {
                                 this.create(name);
@@ -1327,8 +1367,22 @@ document.addEventListener('youla:init', () => {
                 'u-show': 'item.type === \'post\'',
                 'u-text': 'types[item.object] || item.object'
             },
-            rowLink: {
-                'u-show': 'item.type === \'link\''
+            rowKind: {
+                'u-show': 'item.type !== \'post\'',
+                'u-text': 'kinds[item.type]'
+            },
+            rowClicks: {
+                'u-show': 'item.clicks',
+                ':style': '\'--share: \' + share(item)'
+            },
+            kind(type) {
+                return {
+                    '@click'() {
+                        this.add({
+                            type
+                        });
+                    }
+                };
             },
             rowDeleted: {
                 'u-show': 'item.problem === \'deleted\''

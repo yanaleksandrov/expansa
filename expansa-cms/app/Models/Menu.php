@@ -14,21 +14,27 @@ use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSanitizing;
 use Expansa\Database\Traits\HasTimestamps;
 use Expansa\Database\Traits\HasValidation;
+use Expansa\Facades\Auth;
+use Expansa\Facades\Cache;
 use Expansa\Facades\Db;
 use Expansa\Facades\Hook;
 use Expansa\Facades\Json;
 use Expansa\Facades\Safe;
 use Expansa\Support\Error;
+use Expansa\Translation\Languages;
+use PDO;
 
 /**
  * Navigation menu of the site, edited on the `nav-editor` page: a title, the theme locations it is shown
  * in and its items. A location belongs to one menu at a time.
  *
  * The items are stored as the items of Expansa\Builders\Tree, flat in the order of the editor:
- * `['id' => ..., 'parent_id' => ..., 'position' => ..., 'type' => 'link'|'post', 'object' => post type,
+ * `['id' => ..., 'parent_id' => ..., 'position' => ..., 'type' => one of TYPES, 'object' => post type,
  * 'objectId' => post ID]` and the values of the fields of itemFields() by their keys: the title, the URL,
  * the target, the relations and so on, with the fields plugins add by the `menuItemFields` filter.
- * A link has its own URL, a post item gets the URL and, with an empty title, the title of its post when shown.
+ * The ID of an item stays the same while the menu is edited, its clicks are counted by it.
+ * A link has its own URL, a post item gets the URL and, with an empty title, the title of its post when shown;
+ * a heading has no URL, a separator neither title, `auth` signs in or out and `profile` opens the profile.
  *
  * register() attaches the menu of each location as the `menu-<location>` tree. The active theme declares
  * its locations with Theme::setMenus(), bootstrap.php passes them to setThemeLocations(); a plugin adds its own
@@ -41,6 +47,10 @@ use Expansa\Support\Error;
  *
  * tree('menu-primary', function (array $items) { ... $item->title, $item->url, $item->rel, $item->active ... });
  * ```
+ *
+ * The theme puts `$item->attributes` on the link, `data-menu-item` there counts the clicks of the item
+ * (see the `menu-clicks` script). The links of the locations are cached, forgetLinks() drops them when
+ * a menu or a post changes; the dates, the language and the visitor are applied on every request.
  *
  * A location the theme no longer declares stays with its menu until it is unchecked: switching back
  * to the theme shows the menu there again.
@@ -64,13 +74,30 @@ class Menu extends Model
     public const int MAX_DEPTH = 5;
 
     /**
-     * Capabilities that show an item by its `visibility`, checked by Tree::configure() in bootstrap.php.
+     * Types of the items, see the description of the class.
+     */
+    public const array TYPES = ['link', 'post', 'heading', 'separator', 'auth', 'profile'];
+
+    /**
+     * Capabilities that show an item by its `visibility`, checked by Tree::configure() in bootstrap.php;
+     * `guests` is checked by shown(), a capability can not tell a guest.
      */
     public const array VISIBILITY = [
         'all'    => [],
+        'guests' => [],
         'users'  => ['read'],
         'admins' => ['manage_options'],
     ];
+
+    /**
+     * Days the clicks of the items are kept, the editor shows the last 30 of them.
+     */
+    public const int CLICK_DAYS = 90;
+
+    /**
+     * Types of the items that link somewhere: their clicks are counted, the link fields are for them.
+     */
+    private const array LINKS = ['link', 'post', 'auth', 'profile'];
 
     public protected(set) string $table = 'menus';
 
@@ -78,6 +105,11 @@ class Menu extends Model
      * Locations of the active theme, null without a theme; see setThemeLocations().
      */
     private static ?Closure $declared = null;
+
+    /**
+     * Locale of the requested page, null on a site with one language; see setLanguage().
+     */
+    private static ?Closure $language = null;
 
     /**
      * Fields allowed for mass assignment.
@@ -141,6 +173,32 @@ class Menu extends Model
     }
 
     /**
+     * Set how the locale of the requested page is found: an item for another language is not shown.
+     *
+     * @param Closure(): (string|null) $language Null shows the items of every language.
+     * @return void
+     */
+    public static function setLanguage(Closure $language): void
+    {
+        self::$language = $language;
+    }
+
+    /**
+     * Get the languages of a multilingual site, empty for a site with one language.
+     *
+     * @return array<string, string> Names by locale.
+     */
+    public static function languages(): array
+    {
+        $names = array_column(Languages::all(), 'name', 'locale');
+        $codes = (array) Option::get('multilingual.languages', []);
+
+        $locales = array_keys($codes);
+
+        return array_combine($locales, array_map(fn (string $locale) => (string) ($names[$locale] ?? $locale), $locales));
+    }
+
+    /**
      * Get the locations a menu can be shown in, by key: those of the active theme, `primary` and `footer`
      * without a theme; plugins change them with the `menuLocations` filter.
      *
@@ -167,8 +225,14 @@ class Menu extends Model
         $empty   = t('Empty');
         $classes = self::classes(...);
 
-        return array_filter((array) Hook::call('menuItemFields', [
-            'title'          => new Field(t('Label', context: 'menu'), icon: 'ph ph-text-aa', placeholder: $empty),
+        $labeled = ['link', 'post', 'heading', 'profile'];
+        $fields  = [
+            'title'          => new Field(
+                t('Label', context: 'menu'),
+                icon: 'ph ph-text-aa',
+                placeholder: $empty,
+                types: $labeled,
+            ),
             'url'            => new Field(
                 'URL',
                 icon: 'ph ph-link',
@@ -176,48 +240,188 @@ class Menu extends Model
                 types: ['link'],
                 sanitizer: fn (mixed $value) => is_scalar($value) ? Safe::href(trim((string) $value)) : '',
             ),
-            'titleAttribute' => new Field(t('Title Attribute'), icon: 'ph ph-anchor-simple', placeholder: $empty),
-            'description'    => new Field(t('Description'), icon: 'ph ph-text-a-underline', placeholder: $empty),
-            'icon'           => new Field(t('Icon'), icon: 'ph ph-shapes', placeholder: 'ph ph-house', sanitizer: $classes),
+            'titleAttribute' => new Field(
+                t('Title Attribute'),
+                icon: 'ph ph-anchor-simple',
+                placeholder: $empty,
+                types: self::LINKS,
+            ),
+            'description'    => new Field(t('Description'), icon: 'ph ph-text-a-underline', placeholder: $empty, types: $labeled),
+            'icon'           => new Field(
+                t('Icon'),
+                icon: 'ph ph-shapes',
+                placeholder: 'ph ph-house',
+                types: [...$labeled, 'auth'],
+                sanitizer: $classes,
+            ),
             'classes'        => new Field(t('CSS Classes'), icon: 'ph ph-code', placeholder: $empty, sanitizer: $classes),
             'target'         => new Field(t('Open In'), 'select', 'ph ph-crosshair-simple', [
                 ''       => t('Same Tab'),
                 '_blank' => t('New Tab'),
-            ]),
+            ], types: ['link', 'post', 'profile']),
             'visibility'     => new Field(t('Visibility'), 'select', 'ph ph-eye', [
                 'all'    => t('Everyone'),
+                'guests' => t('Guests'),
                 'users'  => t('Logged-In Users'),
                 'admins' => t('Administrators'),
-            ], 'all'),
+            ], 'all', types: ['link', 'post', 'heading', 'separator']),
             // `noopener noreferrer` are added to a link opened in a new tab, see links()
             'rel'            => new Field(t('Link Relations'), 'multiselect', 'ph ph-link-simple', [
                 'nofollow'  => 'nofollow',
                 'sponsored' => 'sponsored',
                 'ugc'       => 'ugc',
-            ], [], $empty),
-        ]), fn (mixed $field) => $field instanceof Field);
+            ], [], $empty, types: ['link', 'post']),
+            // the dates of the site timezone, both included, see shown()
+            'starts'         => new Field(t('Show From'), 'date', 'ph ph-calendar-blank'),
+            'ends'           => new Field(t('Show Until'), 'date', 'ph ph-calendar-x'),
+        ];
+
+        $languages = self::languages();
+        if ($languages) {
+            $fields['language'] = new Field(t('Language'), 'select', 'ph ph-translate', [
+                '' => t('All Languages'),
+                ...$languages,
+            ]);
+        }
+
+        return array_filter((array) Hook::call('menuItemFields', $fields), fn (mixed $field) => $field instanceof Field);
     }
 
     /**
-     * Attach the menu of each theme location as the `menu-<location>` tree, for the site: the URLs and
-     * titles of the post items are read in a query per post type.
+     * Attach the menu of each theme location as the `menu-<location>` tree, for the site.
      *
      * @return void
      */
     public static function register(): void
     {
+        foreach (self::locationLinks() as $location => $links) {
+            $shown = self::shown($links);
+            Tree::attach('menu-' . $location, fn (Tree $tree) => $tree->append($shown));
+        }
+    }
+
+    /**
+     * Get the menu of a location as nested arrays for the API: what the requesting visitor sees, the keys
+     * a theme reads from the items and `children`.
+     *
+     * @param string $location
+     * @return array<int, array<string, mixed>>|null Null for a location of no menu.
+     */
+    public static function nested(string $location): ?array
+    {
+        $links = self::locationLinks()[$location] ?? null;
+        if ($links === null) {
+            return null;
+        }
+
+        $name  = 'menu-api-' . $location;
+        $shown = self::shown($links);
+        Tree::attach($name, fn (Tree $tree) => $tree->append($shown));
+
+        $export = function (array $items) use (&$export): array {
+            return array_map(fn (Tree\Item $item) => [
+                ...array_diff_key($item->data, array_flip(['parent_id', 'position', 'capabilities', 'attributes'])),
+                'active'   => $item->active,
+                'children' => $export($item->children),
+            ], $items);
+        };
+
+        return $export(Tree::get($name));
+    }
+
+    /**
+     * Get the links of the menus by location, cached until forgetLinks(): the URLs and titles of the post
+     * items are read in a query per post type.
+     *
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public static function locationLinks(): array
+    {
         $locations = array_keys(self::themeLocations());
+        $key       = 'links:' . implode(',', $locations);
+        $cached    = Cache::get($key, 'menus');
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $links = [];
         foreach (self::all() ?: [] as $menu) {
             $shown = array_intersect($menu->locations, $locations);
-            if ($shown === []) {
-                continue;
-            }
-
-            $links = $menu->links();
-            foreach ($shown as $location) {
-                Tree::attach('menu-' . $location, fn (Tree $tree) => $tree->append($links));
+            if ($shown !== []) {
+                $items = $menu->links();
+                foreach ($shown as $location) {
+                    $links[$location] = $items;
+                }
             }
         }
+        Cache::add($key, $links, 'menus', '+1 day');
+
+        return $links;
+    }
+
+    /**
+     * Drop the cached links of the locations: a menu, a post or the permalinks changed.
+     *
+     * @return void
+     */
+    public static function forgetLinks(): void
+    {
+        Cache::forget('', 'menus');
+    }
+
+    /**
+     * Count a click of an item on the site.
+     *
+     * @param string $item `<menu ID>:<item ID>` of `data-menu-item`.
+     * @return bool False for an item of no menu.
+     */
+    public static function click(string $item): bool
+    {
+        [$menuId, $itemId] = explode(':', $item, 2) + [1 => ''];
+
+        $menu = self::find((int) $menuId);
+        if ($menu instanceof Error || ! array_any($menu->items, fn (array $entry) => $entry['id'] === $itemId)) {
+            return false;
+        }
+
+        return Db::query(
+            'INSERT INTO <menu_clicks> (menu_id, item_id, day, count) VALUES (:menu, :item, :day, 1)
+            ON DUPLICATE KEY UPDATE count = count + 1',
+            [
+                ':menu' => $menu->id,
+                ':item' => $itemId,
+                ':day'  => date('Y-m-d'),
+            ]
+        ) !== null;
+    }
+
+    /**
+     * Get the clicks of the items of the menu over the last days.
+     *
+     * @param int $days
+     * @return array<string, int> Clicks by item ID, an item without clicks is left out.
+     */
+    public function clicks(int $days = 30): array
+    {
+        $clicks = Db::query(
+            'SELECT item_id, SUM(count) FROM <menu_clicks> WHERE menu_id = :menu AND day > :from GROUP BY item_id',
+            [
+                ':menu' => $this->id,
+                ':from' => date('Y-m-d', strtotime("-$days days")),
+            ]
+        )?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
+
+        return array_map(intval(...), $clicks);
+    }
+
+    /**
+     * Delete the clicks older than CLICK_DAYS, run by the scheduler.
+     *
+     * @return void
+     */
+    public static function pruneClicks(): void
+    {
+        Db::delete('menu_clicks', ['day[<]' => date('Y-m-d', strtotime('-' . self::CLICK_DAYS . ' days'))]);
     }
 
     /**
@@ -309,14 +513,15 @@ class Menu extends Model
                 $menu->save();
             }
         }
+        self::forgetLinks();
 
         return $this;
     }
 
     /**
      * Get the items to show: a post item gets the URL and the title of its post, `rel` becomes a string,
-     * `visibility` the capabilities of Tree; an item of a missing or unpublished post is left out, its
-     * subitems take its place.
+     * `visibility` the capabilities of Tree, a link the `data-menu-item` attribute; an item of a missing,
+     * unpublished or trashed post is left out, its subitems take its place.
      *
      * @return array<int, array<string, mixed>>
      */
@@ -330,7 +535,8 @@ class Menu extends Model
             }
 
             $paths = Post::paths($key, $ids);
-            foreach (Db::select($type->table, ['id [Int]', 'title'], ['id' => $ids, 'status' => 'publish']) ?: [] as $row) {
+            $where = ['id' => $ids, 'status' => 'publish'] + ($type->canTrash ? ['deleted_at' => null] : []);
+            foreach (Db::select($type->table, ['id [Int]', 'title'], $where) ?: [] as $row) {
                 if (isset($paths[$row['id']])) {
                     $posts[$key][$row['id']] = [
                         'title' => (string) $row['title'],
@@ -355,17 +561,64 @@ class Menu extends Model
                 $rel = [...$rel, 'noopener', 'noreferrer'];
             }
 
+            $title   = $item['type'] === 'separator' ? '' : ($item['title'] ?? '');
             $links[] = [
                 ...$item,
                 'parent_id'    => $parent,
-                'title'        => $item['title'] !== '' ? $item['title'] : (string) ($post['title'] ?? ''),
-                'url'          => $post['url'] ?? $item['url'],
+                'title'        => $title !== '' ? $title : (string) ($post['title'] ?? ''),
+                'url'          => $post['url'] ?? $item['url'] ?? '',
                 'rel'          => implode(' ', $rel),
-                'capabilities' => self::VISIBILITY[$item['visibility'] ?? 'all'] ?? [],
+                'capabilities' => $item['type'] === 'profile' ? ['read'] : self::VISIBILITY[$item['visibility'] ?? 'all'] ?? [],
+                'attributes'   => in_array($item['type'], self::LINKS, true)
+                    ? ['data-menu-item' => $this->id . ':' . $item['id']]
+                    : [],
             ];
         }
 
         return $links;
+    }
+
+    /**
+     * Get the links the requested page shows: an item out of its dates, for another language or, with
+     * the `guests` visibility, for a signed-in visitor is left out, its subitems take its place; `auth`
+     * and `profile` get their title and URL by the visitor.
+     *
+     * @param array<int, array<string, mixed>> $links
+     * @return array<int, array<string, mixed>>
+     */
+    private static function shown(array $links): array
+    {
+        $today    = date('Y-m-d');
+        $language = self::$language ? (self::$language)() : null;
+        $guest    = ! Auth::isLoggedIn();
+
+        $shown   = [];
+        $parents = [];
+        foreach ($links as $link) {
+            $parent = $parents[$link['parent_id']] ?? $link['parent_id'];
+            $hidden = (($link['starts'] ?? '') !== '' && $link['starts'] > $today)
+                || (($link['ends'] ?? '') !== '' && $link['ends'] < $today)
+                || ($language !== null && ($link['language'] ?? '') !== '' && $link['language'] !== $language)
+                || (($link['visibility'] ?? 'all') === 'guests' && ! $guest);
+            if ($hidden) {
+                $parents[$link['id']] = $parent;
+                continue;
+            }
+
+            $account = match ($link['type']) {
+                'auth'    => $guest
+                    ? ['title' => t('Sign In'), 'url' => url('sign-in')]
+                    : ['title' => t('Sign Out'), 'url' => url('sign-out')],
+                'profile' => [
+                    'title' => $link['title'] ?: t('Profile'),
+                    'url'   => url(Hook::call('dashboardRootSlug', 'dashboard') . '/profile'),
+                ],
+                default   => [],
+            };
+            $shown[] = [...$link, 'parent_id' => $parent, ...$account];
+        }
+
+        return $shown;
     }
 
     /**
@@ -399,7 +652,7 @@ class Menu extends Model
             }
             $parents[$id] = $parent;
 
-            $type = ($item['type'] ?? '') === 'post' ? 'post' : 'link';
+            $type = in_array($item['type'] ?? '', self::TYPES, true) ? $item['type'] : 'link';
             $node = [
                 'id'        => $id,
                 'parent_id' => $parent,
@@ -413,7 +666,12 @@ class Menu extends Model
                 $node[$key] = $isFor ? $field->sanitize($item[$key] ?? null) : $field->default;
             }
 
-            if ($type === 'post' ? $node['object'] === '' || $node['objectId'] === 0 : ($node['url'] ?? '') === '') {
+            $isEmpty = match ($type) {
+                'post'  => $node['object'] === '' || $node['objectId'] === 0,
+                'link'  => ($node['url'] ?? '') === '',
+                default => false,
+            };
+            if ($isEmpty) {
                 continue;
             }
 

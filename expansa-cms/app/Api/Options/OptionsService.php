@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\Options;
 
+use App\Models\Menu;
 use App\Models\Option;
 use App\Models\User;
 use App\Support\Llms;
@@ -71,6 +72,11 @@ final class OptionsService
             }
 
             Option::update($option, $value);
+        }
+
+        // the URLs of the post items of the menus follow the permalinks and the site address
+        if (isset($options['permalinks']) || isset($options['site'])) {
+            Menu::forgetLinks();
         }
 
         // llms.txt follows the SEO settings at once, not at the next weekly rebuild

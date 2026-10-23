@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models\Values;
 
 use Closure;
+use DateTimeImmutable;
 
 /**
  * Field of a menu item, see Menu::itemFields(): the editor shows it in the settings of the item,
@@ -22,7 +23,7 @@ final readonly class Field
         public string $label,
 
         /**
-         * Control of the field: `text`, `textarea`, `select` or `multiselect`.
+         * Control of the field: `text`, `textarea`, `select`, `multiselect` or `date`, a `Y-m-d` date.
          */
         public string $type = 'text',
 
@@ -49,7 +50,7 @@ final readonly class Field
         public string $placeholder = '',
 
         /**
-         * Types of the items the field is for, `link` and `post`; empty for every one.
+         * Types of the items the field is for, see Menu::TYPES; empty for every one.
          *
          * @var string[]
          */
@@ -80,7 +81,21 @@ final readonly class Field
         return match ($this->type) {
             'select'      => is_scalar($value) && in_array((string) $value, $options, true) ? (string) $value : $this->default,
             'multiselect' => array_values(array_intersect($options, $chosen)),
+            'date'        => is_string($value) && self::isDate($value) ? $value : '',
             default       => is_scalar($value) ? trim((string) $value) : $this->default,
         };
+    }
+
+    /**
+     * Whether the value is a day of the calendar as `Y-m-d`.
+     *
+     * @param string $value
+     * @return bool
+     */
+    private static function isDate(string $value): bool
+    {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $value);
+
+        return $date !== false && $date->format('Y-m-d') === $value;
     }
 }

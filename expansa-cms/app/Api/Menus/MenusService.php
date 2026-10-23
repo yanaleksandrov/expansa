@@ -60,8 +60,37 @@ final class MenusService
         }
 
         $menu->delete();
+        Menu::forgetLinks();
 
         return $response->notify(t('Menu deleted'), Notice::Success)->redirect('?', 600);
+    }
+
+    /**
+     * Count a click of an item on the site.
+     *
+     * @param string $item `<menu ID>:<item ID>`.
+     * @return bool False for an item of no menu.
+     */
+    public function click(string $item): bool
+    {
+        return Menu::click($item);
+    }
+
+    /**
+     * Answer the menu of a theme location as the visitor of the request sees it.
+     *
+     * @param Response $response
+     * @param string   $location
+     * @return Response
+     */
+    public function location(Response $response, string $location): Response
+    {
+        $items = Menu::nested($location);
+        if ($items === null) {
+            return $response->json(['message' => t('Menu not found')], 404);
+        }
+
+        return $response->json(['location' => $location, 'items' => $items]);
     }
 
     /**
@@ -138,9 +167,17 @@ final class MenusService
     {
         $list  = [];
         $stack = [];
-        foreach (array_values(array_filter($items, is_array(...))) as $index => $item) {
+        $taken = [];
+        foreach (array_values(array_filter($items, is_array(...))) as $item) {
+            // the ID of the editor stays, the clicks are counted by it; a new or a repeated one is generated
+            $id = (string) ($item['id'] ?? '');
+            if (! preg_match('/^[A-Za-z0-9_-]{1,36}$/', $id) || isset($taken[$id])) {
+                $id = bin2hex(random_bytes(6));
+            }
+            $taken[$id] = true;
+
             $depth = min(max(0, (int) ($item['depth'] ?? 0)), count($stack));
-            $stack = [...array_slice($stack, 0, $depth), (string) ($index + 1)];
+            $stack = [...array_slice($stack, 0, $depth), $id];
 
             unset($item['depth']);
             $list[] = [
