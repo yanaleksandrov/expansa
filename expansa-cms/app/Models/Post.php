@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Post\Status;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use App\Support\Activity;
 use App\Support\Permalinks;
@@ -212,6 +213,11 @@ class Post implements Fieldable
             if ($fields) {
                 ( new FieldEav($post) )->import($fields);
             }
+
+            // a taxonomy without the given terms gives its default one
+            foreach (Taxonomy::forType($type->key) as $taxonomy) {
+                $post->setTerms($taxonomy->key, (array) ($args['terms'][$taxonomy->key] ?? []));
+            }
         }
 
         return $post;
@@ -241,7 +247,7 @@ class Post implements Fieldable
     public static function publishScheduled(): int
     {
         $count = 0;
-        foreach (Type::fetch() as $type) {
+        foreach (Type::filter() as $type) {
             $where = [
                 'status'         => 'future',
                 'created_at[<=]' => date('Y-m-d H:i:s'),
@@ -259,6 +265,7 @@ class Post implements Fieldable
             foreach ($ids as $id) {
                 Activity::changes($type->table, $id, ['status' => 'future'], ['status' => 'publish']);
             }
+            Term::recountPosts($type->table, $ids);
             $count += count($ids);
 
             Hook::run('postsChanged', $type->key);
@@ -457,6 +464,11 @@ class Post implements Fieldable
 
         Db::update($type->table, [...$data, 'updated_at' => date('Y-m-d H:i:s')], ['id' => $this->id]);
 
+        // the terms count only the published posts
+        if (isset($data['status']) && $data['status'] !== $this->status) {
+            Term::recountPosts($this->table, [$this->id]);
+        }
+
         foreach ($data as $key => $value) {
             $this->{Safe::camelcase($key)} = $value;
         }
@@ -468,13 +480,18 @@ class Post implements Fieldable
     }
 
     /**
-     * Create a draft copy of the post: the same content, parent, discussion and fields,
+     * Create a draft copy of the post: the same content, parent, discussion, terms and fields,
      * the title with "(copy)" and a new slug made from it.
      *
      * @return Post|null Null when the copy was not saved.
      */
     public function duplicate(): ?Post
     {
+        $terms = [];
+        foreach ($this->terms() as $term) {
+            $terms[$term->taxonomy][] = $term->id;
+        }
+
         $copy = self::add($this->type, [
             'title'      => t(':title (copy)', $this->title),
             'content'    => $this->content,
@@ -483,6 +500,7 @@ class Post implements Fieldable
             'status'     => 'draft',
             'discussion' => $this->discussion,
             'password'   => $this->password,
+            'terms'      => $terms,
         ]);
         if (! $copy instanceof Post) {
             return null;
@@ -496,6 +514,61 @@ class Post implements Fieldable
         Activity::record($this->table, $this->id, 'duplicated', ['id' => $copy->id, 'title' => $copy->title]);
 
         return $copy;
+    }
+
+    /**
+     * Get the terms of the post, by name.
+     *
+     * @param string|null $taxonomy Key of a taxonomy, null for the terms of every one.
+     * @return Term[]
+     */
+    public function terms(?string $taxonomy = null): array
+    {
+        return $this->id > 0 ? Term::getByPosts($this->table, [$this->id], $taxonomy)[$this->id] ?? [] : [];
+    }
+
+    /**
+     * Set the terms of the post in a taxonomy of its type, the terms of the other taxonomies stay;
+     * without terms the post gets the default one of the taxonomy, see Term::defaultId(). The terms
+     * whose links changed are counted again.
+     *
+     * @param string $taxonomy
+     * @param int[]  $ids IDs of the terms; those of another taxonomy are skipped.
+     * @return bool False for a post not saved yet or a taxonomy not of its type.
+     */
+    public function setTerms(string $taxonomy, array $ids): bool
+    {
+        $registered = Taxonomy::get($taxonomy);
+        if ($this->id === 0 || ! $registered instanceof Taxonomy || ! in_array($this->type, $registered->types, true)) {
+            return false;
+        }
+
+        $ids = array_values(array_unique(array_filter(array_map(intval(...), $ids))));
+        if ($ids === []) {
+            $ids = array_filter([Term::defaultId($taxonomy)]);
+        }
+        $ids = $ids === [] ? [] : (Db::select('terms', 'id [Int]', ['id' => $ids, 'taxonomy' => $taxonomy]) ?: []);
+
+        $saved   = array_column(Term::relations($this->table, [$this->id], $taxonomy), 'term_id');
+        $removed = array_values(array_diff($saved, $ids));
+        $added   = array_values(array_diff($ids, $saved));
+        if ($removed !== []) {
+            Db::delete('term_relations', ['term_id' => $removed, 'entity_table' => $this->table, 'entity_id' => $this->id]);
+        }
+
+        if ($added !== []) {
+            Db::insert('term_relations', array_map(fn (int $id) => [
+                'term_id'      => $id,
+                'entity_table' => $this->table,
+                'entity_id'    => $this->id,
+            ], $added));
+        }
+
+        if ($removed !== [] || $added !== []) {
+            Term::recount([...$removed, ...$added]);
+        }
+
+        return true;
     }
 
     public function getId(): int
@@ -567,6 +640,7 @@ class Post implements Fieldable
         $updated   = Db::update($this->table, [$this->deletedAtColumn => $deletedAt], ['id' => $this->id])?->rowCount() > 0;
         if ($updated) {
             $this->deletedAt = $deletedAt;
+            Term::recountPosts($this->table, [$this->id]);
             Activity::record($this->table, $this->id, 'trashed');
             Hook::run('postsChanged', $this->type);
         }
@@ -588,6 +662,7 @@ class Post implements Fieldable
         $restored = Db::update($this->table, [$this->deletedAtColumn => null], ['id' => $this->id])?->rowCount() > 0;
         if ($restored) {
             $this->deletedAt = null;
+            Term::recountPosts($this->table, [$this->id]);
             Activity::record($this->table, $this->id, 'restored');
             Hook::run('postsChanged', $this->type);
         }
@@ -596,7 +671,7 @@ class Post implements Fieldable
     }
 
     /**
-     * Delete the post permanently with its slug and comments, bypassing the trash; its fields go with it by
+     * Delete the post permanently with its slug, terms and comments, bypassing the trash; its fields go with it by
      * the foreign key, its children move up to its parent. Comments point at a post of any type, so no foreign
      * key can delete them.
      *
@@ -607,6 +682,11 @@ class Post implements Fieldable
         $deleted = Db::delete($this->table, ['id' => $this->id])?->rowCount() > 0;
         if ($deleted) {
             Db::delete('slugs', ['entity_id' => $this->id, 'entity_table' => $this->table]);
+            $terms = array_column(Term::relations($this->table, [$this->id]), 'term_id');
+            if ($terms !== []) {
+                Db::delete('term_relations', ['entity_table' => $this->table, 'entity_id' => $this->id]);
+                Term::recount($terms);
+            }
             $comments = Db::select('comments', 'id [Int]', ['post_type' => $this->type, 'post_id' => $this->id]) ?? [];
             if ($comments !== []) {
                 Db::delete('comments', ['id' => $comments]);

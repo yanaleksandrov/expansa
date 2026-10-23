@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use App\Models\Post;
+use App\Models\Term;
 use App\Models\User;
 use App\Post\Status;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use App\Support\Dates;
 use App\Support\Permalinks;
@@ -28,7 +30,7 @@ use PDO;
 
 /**
  * Items of a post type, the newest first: the title with the view, duplicate and delete actions,
- * the author, the status and the date; filtered by the status, the author, the month and the search,
+ * the author, the terms, the status and the date; filtered by the status, the author, the terms, the month and the search,
  * sorted and read by pages in the database. A type with a trash shows it as a separate list, see Models\Post::delete().
  *
  * @package App\Tables
@@ -75,12 +77,22 @@ final class Posts extends Table implements Queried
         $slugs    = Post::paths($this->type->key, array_column($posts, 'id'));
         $authors  = User::options();
         $statuses = Status::getStatuses();
+        $terms    = $this->taxonomies() !== [] ? Term::getByPosts($this->type->table, array_column($posts, 'id')) : [];
 
-        return array_map(function (array $post) use ($slugs, $authors, $statuses) {
+        return array_map(function (array $post) use ($slugs, $authors, $statuses, $terms) {
             $url    = url('dashboard/post?type=' . $this->type->key . '&id=' . $post['id']);
             $author = $authors[$post['author_id']] ?? '';
 
+            // a column per taxonomy: the names of the terms as badges
+            $badges = array_fill_keys(array_keys($this->taxonomies()), []);
+            foreach ($terms[$post['id']] ?? [] as $term) {
+                if (isset($badges[$term->taxonomy])) {
+                    $badges[$term->taxonomy][] = new Badge($term->name);
+                }
+            }
+
             return [
+                ...$badges,
                 'id'          => $post['id'],
                 'title'       => new Title(
                     text: $post['title'] !== '' ? $post['title'] : t('(no title)'),
@@ -146,6 +158,10 @@ final class Posts extends Table implements Queried
                 ->title(t('Author'))
                 ->fixedWidth('14rem')
                 ->view('author'),
+            ...array_values(array_map(fn (Taxonomy $taxonomy) => $this->cell($taxonomy->key)
+                ->title($taxonomy->labelNamePlural)
+                ->flexibleWidth('8rem')
+                ->view('badges'), $this->taxonomies())),
             $this->cell('status')
                 ->title(t('Status'))
                 ->fixedWidth('7rem')
@@ -272,7 +288,22 @@ final class Posts extends Table implements Queried
                 options: $this->months(),
                 icon: 'ph ph-timer',
             ),
+            ...array_map(fn (Taxonomy $taxonomy) => new Filter(
+                label: $taxonomy->labelNamePlural,
+                options: array_column(Term::tree($taxonomy->key), 'name', 'id'),
+                icon: $taxonomy->hierarchical ? 'ph ph-folders' : 'ph ph-tag',
+            ), $this->taxonomies()),
         ];
+    }
+
+    /**
+     * Get the taxonomies of the type shown in the table.
+     *
+     * @return array<string, Taxonomy>
+     */
+    private function taxonomies(): array
+    {
+        return array_filter(Taxonomy::forType($this->type->key), fn (Taxonomy $taxonomy) => $taxonomy->showInTable);
     }
 
     /**
@@ -286,6 +317,16 @@ final class Posts extends Table implements Queried
      */
     protected function filterWhere(string $field, string $operator, array $values): array
     {
+        // the items of the terms are read first: they are in another table
+        if (isset($this->taxonomies()[$field])) {
+            $ids = Db::select('term_relations', 'entity_id [Int]', [
+                'entity_table' => $this->type->table,
+                'term_id'      => array_map(intval(...), $values),
+            ]) ?: [];
+
+            return ['id' . ($operator === 'not' ? '[!]' : '') => $ids !== [] ? array_values(array_unique($ids)) : [0]];
+        }
+
         if ($field !== 'months') {
             return parent::filterWhere($field, $operator, $values);
         }

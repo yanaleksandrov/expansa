@@ -2336,6 +2336,19 @@ body.is-unsaved .search .search-btn {
   flex: 1;
   min-width: 66.6666666%;
 }
+.terms-note {
+  padding: 1rem 1.5rem;
+  color: var(--expansa-text-muted);
+  font-size: 0.75rem;
+}
+
+.term-editor {
+  max-width: 40rem;
+  padding: 1.75rem;
+}
+.term-editor .post-editor-head {
+  padding: 0;
+}
 
 .media-editor {
   display: grid;

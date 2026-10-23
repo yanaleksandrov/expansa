@@ -234,19 +234,13 @@ class Type
     }
 
     /**
-     * Retrieves data (objects) of registered record types.
-     * Not the records themselves, but the record type registration data.
-     * You can filter the output by a variety of criteria.
+     * Get the registered types whose properties have the given values, see Arr::filter().
      *
-     * @param array $args      Array of criteria by which posts types will be selected.
-     *                         For the value of each parameter, see the description of the "Type::register" method.
-     * @param string $operator Optional. The logical operation to perform. 'or' means only one
-     *                         element from the array needs to match; 'and' means all elements
-     *                         must match; 'not' means no elements may match. Default 'and'.
-     *
-     * @return array
+     * @param array<string, mixed> $args     Values by property, e.g. `['public' => true]`.
+     * @param string               $operator `and`: every value matches, `or`: one of them, `not`: none.
+     * @return array<string, Type>
      */
-    public static function fetch(array $args = [], string $operator = 'and'): array
+    public static function filter(array $args = [], string $operator = 'and'): array
     {
         return Arr::filter(self::$items, $args, $operator);
     }

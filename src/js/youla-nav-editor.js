@@ -219,8 +219,9 @@ document.addEventListener('youla:init', () => {
                 this.select(this.items.length - 1);
                 this.revealActive();
             },
+            // a found entry is a post or a term: its item type and its post type or taxonomy come with it
             addPost(key, post) {
-                this.add({ type: 'post', object: key, objectId: post.id, original: post.title });
+                this.add({ type: post.kind || 'post', object: post.object || key, objectId: post.id, original: post.title });
             },
             addLink() {
                 const url = this.link.url.trim();
@@ -387,12 +388,13 @@ document.addEventListener('youla:init', () => {
                 ':class': 'item.icon',
                 'u-show': 'item.icon',
             },
+            // the sources of the terms are keyed as `term:<taxonomy>`
             rowType: {
-                'u-show': "item.type === 'post'",
-                'u-text': 'types[item.object] || item.object',
+                'u-show': "item.type === 'post' || item.type === 'term'",
+                'u-text': "types[item.type === 'term' ? 'term:' + item.object : item.object] || item.object",
             },
             rowKind: {
-                'u-show': "item.type !== 'post'",
+                'u-show': "item.type !== 'post' && item.type !== 'term'",
                 'u-text': 'kinds[item.type]',
             },
             // the items that are not posts or links, a heading gets its label in the panel

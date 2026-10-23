@@ -37,10 +37,10 @@ final readonly class MenusController
     }
 
     /**
-     * Posts to add to a menu, see MenusService::posts().
+     * Posts and terms to add to a menu, see MenusService::posts().
      *
-     * @param Request $request `type`, the key of the post type or nothing for every type, and `query`, the typed text.
-     * @return array{posts: array<int, array{id: int, title: string, type: string}>}
+     * @param Request $request `type`, the key of the source or nothing for every one, and `query`, the typed text.
+     * @return array{posts: array<int, array{id: int, title: string, type: string, kind: string, object: string}>}
      */
     #[Can('manage_menus')]
     public function posts(Request $request): array

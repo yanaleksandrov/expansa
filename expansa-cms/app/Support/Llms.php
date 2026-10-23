@@ -77,7 +77,7 @@ final class Llms
         $text    = '# ' . self::line($site->name) . "\n" . ($tagline === '' ? '' : "\n> $tagline\n");
 
         $sections = [t('Pages') => self::pages()];
-        foreach (Type::fetch(['public' => true, 'searchable' => true]) as $type) {
+        foreach (Type::filter(['public' => true, 'searchable' => true]) as $type) {
             if ($type->key !== 'pages') {
                 $sections[$type->labelNamePlural] = self::latest($type->table);
             }

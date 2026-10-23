@@ -28,7 +28,6 @@ final class Migrations
         $this->createUserTwoFactorTable();
         $this->createOptionsTable();
         $this->createCommentsTable();
-        $this->createTaxonomiesTable();
         $this->createMediaTable();
         $this->createApiKeysTable();
         $this->createFieldGroupsTable();
@@ -217,20 +216,44 @@ final class Migrations
         });
     }
 
+    /**
+     * Create the terms of every taxonomy and their links to the posts, see App\Models\Term.
+     *
+     * @return void
+     */
     private function createTermsTable(): void
     {
         Schema::create('terms', function (Table $table) {
             $table->id();
+            $table->string('taxonomy', 32);
             $table->string('name', 255)->default('');
             $table->string('slug', 255)->default('');
-            $table->bigInt('term_group')->unsigned()->default(0);
+            $table->text('description');
+            $table->bigInt('parent_id')->unsigned()->default(0);
+            $table->mediumInt('position')->unsigned()->default(0);
+            $table->bigInt('count')->unsigned()->default(0);
+            $table->timestamps();
 
             // indexes
-            $table->index('slug', 'slug_index');
-            $table->index('name', 'name_index');
+            $table->unique(['taxonomy', 'slug']);
+            $table->index(['taxonomy', 'parent_id', 'position']);
+            $table->index(['taxonomy', 'name']);
         });
 
         $this->createFieldsTable('terms');
+
+        // a post is addressed as in `slugs`: by its table and ID
+        Schema::create('term_relations', function (Table $table) {
+            $table->id();
+            $table->bigInt('term_id')->unsigned();
+            $table->string('entity_table', 64);
+            $table->bigInt('entity_id')->unsigned();
+
+            // indexes
+            $table->unique(['term_id', 'entity_table', 'entity_id']);
+            $table->index(['entity_table', 'entity_id']);
+            $table->foreign('term_id')->references('id')->on('terms')->onDeleteCascade();
+        });
     }
 
     private function createUsersTable(): void
@@ -408,19 +431,6 @@ final class Migrations
             $table->id();
             $table->string('key', 191)->unique()->default('');
             $table->text('value');
-        });
-    }
-
-    private function createTaxonomiesTable(): void
-    {
-        Schema::create('taxonomies', function (Table $table) {
-            $table->id();
-            $table->bigInt('term_id')->unsigned()->default(0);
-            $table->bigInt('count')->unsigned()->default(0);
-            $table->bigInt('parent')->unsigned()->default(0);
-
-            // indexes
-            $table->index('term_id');
         });
     }
 

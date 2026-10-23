@@ -14,11 +14,11 @@
  * @var array<string, string>                  $owners    Titles of the menus shown in the locations, by location.
  * @var array<int, string>                     $places    Labels of the locations of each menu, by menu ID.
  * @var string[]                               $orphans   Locations of the menu the theme no longer declares.
- * @var array<string, string>                  $types     Labels of the public post types by key.
+ * @var array<string, string>                  $types     Labels of the public post types by key, then of the taxonomies by `term:<key>`.
  * @var array<string, string>                  $kinds     Labels of the items that are neither posts nor links, by type.
  * @var array<string, App\Models\Values\Field> $fields    Fields of an item by key.
  * @var App\Dashboard\Values\MenuItem[]        $rows      Rows of the items until u-each of the editor replaces them.
- * @var string                                 $source    Key of the post type open in the sources, the first one.
+ * @var string                                 $source    Key of the source open in the sources, the first one.
  * @var string[]                               $posts     Titles of its posts until u-each of the editor replaces them.
  * @var array<string, mixed>                   $state     Menu being edited, its items as a flat list with `depth`,
  *                                                        the post types, the fields and the deepest level for the editor.

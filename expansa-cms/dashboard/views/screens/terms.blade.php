@@ -1,21 +1,25 @@
 <?php
 /**
- * Terms list template can be overridden by copying it to themes/yourtheme/dashboard/views/screens/terms.php
+ * Terms of a taxonomy: the form of a new term aside, the list of the terms with its header; the data comes
+ * from App\Dashboard\Pages\Tables, the fields from the `terms-editor` form.
+ *
+ * This template can be overridden by copying it to themes/yourtheme/dashboard/views/screens/terms.blade.php
  *
  * @var App\Tables\Terms $table
  *
  * @package Expansa\Templates
  */
+defined('EX_PATH') || exit;
 ?>
-<?php echo view('parts/table/table-header', $table->headData()); ?>
-
 <div class="terms">
     <div class="terms-side">
-        <?php echo form('terms-editor'); ?>
+        {!! form('terms-editor') !!}
     </div>
     <div class="terms-main">
-        <?php echo view('parts/table/table', ['table' => $table, 'header' => false]); ?>
+        <?php echo view('parts/table/table', ['table' => $table]); ?>
 
-        <p>{{ t('Deleting a category does not delete the posts in that category. Instead, posts that were only assigned to the deleted category are set to the default category Uncategorized. The default category cannot be deleted.') }}</p>
+        @if ($table->taxonomy->hierarchical)
+            <p class="terms-note">{{ t('Deleting a term does not delete the posts that have it. Posts left without terms get the default one, which cannot be deleted.') }}</p>
+        @endif
     </div>
 </div>

@@ -6,10 +6,14 @@ namespace App\Api\Post;
 
 use App\Dashboard\Pages\Post as Page;
 use App\Models\Post;
+use App\Models\Term;
+use App\Models\User;
 use App\Post\Status;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use App\Support\Permalinks;
 use App\Tables\Posts;
+use Expansa\Facades\Access;
 use Expansa\Facades\Db;
 use Expansa\Facades\Safe;
 use Expansa\Http\Enums\Notice;
@@ -44,6 +48,7 @@ final class PostService
             ...$data,
             'title'  => trim((string) ($data['title'] ?? '')) ?: t('Untitled'),
             'status' => array_key_exists($status, Status::getStatuses()) ? $status : 'draft',
+            'terms'  => self::terms($type, $request),
         ]);
         if (! $post instanceof Post) {
             return $response->notify(t('Failed to create the item.'), Notice::Error);
@@ -109,10 +114,10 @@ final class PostService
     }
 
     /**
-     * Save a post from its editor: the title, content, slug, parent, author, status, discussion, password
-     * and the date of creation.
+     * Save a post from its editor: the title, content, slug, parent, author, status, discussion, password,
+     * the date of creation and the terms.
      *
-     * @param Request  $request  POST: `post-type`, `id` and the changed columns.
+     * @param Request  $request  POST: `post-type`, `id`, the changed columns and `terms`, see terms().
      * @param Response $response
      * @return Response
      */
@@ -125,6 +130,10 @@ final class PostService
 
         if (! $post->update(array_intersect_key($request->post, array_flip(self::FIELDS)))) {
             return $response->notify(t('Failed to save the item.'), Notice::Error);
+        }
+
+        foreach (self::terms(Type::get($post->type), $request) as $taxonomy => $ids) {
+            $post->setTerms($taxonomy, $ids);
         }
 
         // the slug the editor shows becomes the saved one: made from the title or with a suffix of a taken one
@@ -277,6 +286,34 @@ final class PostService
         return $response
             ->notify(t('Items changed: :count', $count), $count > 0 ? Notice::Success : Notice::Info)
             ->reload(600);
+    }
+
+    /**
+     * Get the terms of the editor the current user may assign: of each taxonomy of the type the editor shows.
+     * A name of a new term, `new:Name`, makes the term when the user may change the terms of the taxonomy.
+     *
+     * @param Type    $type
+     * @param Request $request POST: `terms`, IDs by taxonomy; a taxonomy without the key keeps its terms.
+     * @return array<string, int[]> IDs by taxonomy.
+     */
+    private static function terms(Type $type, Request $request): array
+    {
+        $user  = User::current();
+        $input = $request->post['terms'] ?? [];
+        if ($user === null || ! is_array($input) || ! Access::allows($user, 'assign_terms')) {
+            return [];
+        }
+
+        $terms = [];
+        foreach (Taxonomy::forType($type->key) as $taxonomy) {
+            if ($taxonomy->showInEditor && isset($input[$taxonomy->key])) {
+                $values = array_filter((array) $input[$taxonomy->key], is_scalar(...));
+
+                $terms[$taxonomy->key] = Term::ids($taxonomy->key, $values, $taxonomy->canManage($user));
+            }
+        }
+
+        return $terms;
     }
 
     /**

@@ -69,7 +69,7 @@ $pages = [ '' => t( 'Select a page' ) ] + $pages;
 // all public post types are in the sitemap until they are chosen
 $sitemapTypes = Option::get( 'seo.sitemap.types', null );
 $sitemap      = [];
-foreach ( Type::fetch( [ 'public' => true ] ) as $type ) {
+foreach ( Type::filter( [ 'public' => true ] ) as $type ) {
 	if ( $type->key !== 'files' ) {
 		$sitemap[ "seo[sitemap][types][$type->key]" ] = [
 			'content' => $type->labelNamePlural,
@@ -1171,13 +1171,13 @@ return Expansa\Builders\Form::enqueue(
 							'type'        => 'text',
 							'name'        => 'permalinks[pages][categories]',
 							'error'       => 'permalinks.pages.categories',
-							'label'       => t( 'Categories and tags' ),
+							'label'       => t( 'Categories and Tags' ),
 							'class'       => '',
 							'label_class' => '',
 							'reset'       => 0,
 							'before'      => sprintf( '<code><i class="ph ph-link"></i> %s</code>', url() ),
 							'after'       => '',
-							'instruction' => t( 'Tags: :tags. :slug is required.', '%slug%, %taxonomy%', '%slug%' ),
+							'instruction' => t( 'Tags: :tags. :slug and :taxonomy are required.', '%slug%, %taxonomy%', '%slug%', '%taxonomy%' ),
 							'tooltip'     => '',
 							'copy'        => 0,
 							'validator'   => '',

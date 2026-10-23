@@ -81,12 +81,12 @@ final class Permalinks
     }
 
     /**
-     * Check the structures of the form: lower case, no slashes at the ends, only known tags and
-     * `%slug%` in each, so that two entries never get one URL.
+     * Check the structures of the form: lower case, no slashes at the ends, only known tags,
+     * `%slug%` in each and `%taxonomy%` in the one of the terms, so that two entries never get one URL.
      *
      * @param array<string, mixed> $pages Form values by structure.
      * @return array<string, string>
-     * @throws ValidationFailed When a structure has no `%slug%`, an unknown tag or other characters.
+     * @throws ValidationFailed When a structure has no required tag, an unknown tag or other characters.
      */
     public static function normalize(array $pages): array
     {
@@ -99,10 +99,21 @@ final class Permalinks
 
             $isValid = preg_match('#^[a-z0-9_%/-]+$#', $structure) === 1
                 && str_contains($structure, '%slug%')
+                && ($key !== 'categories' || str_contains($structure, '%taxonomy%'))
                 && array_diff($tags[0], self::TAGS[$key]) === []
                 && substr_count($structure, '%') === 2 * count($tags[0]);
             if (! $isValid) {
-                throw ValidationFailed::field("permalinks.pages.$key", t('Use Latin letters, digits, hyphens, slashes and the tags :tags; :slug is required.', implode(', ', self::TAGS[$key]), '%slug%'));
+                $tags    = implode(', ', self::TAGS[$key]);
+                $message = $key === 'categories'
+                    ? t(
+                        'Use Latin letters, digits, hyphens, slashes and the tags :tags; :slug and :taxonomy are required.',
+                        $tags,
+                        '%slug%',
+                        '%taxonomy%',
+                    )
+                    : t('Use Latin letters, digits, hyphens, slashes and the tags :tags; :slug is required.', $tags, '%slug%');
+
+                throw ValidationFailed::field("permalinks.pages.$key", $message);
             }
 
             $result[$key] = $structure;

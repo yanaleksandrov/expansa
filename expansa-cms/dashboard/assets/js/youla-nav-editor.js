@@ -193,8 +193,8 @@ document.addEventListener('youla:init', () => {
             },
             addPost(key, post) {
                 this.add({
-                    type: 'post',
-                    object: key,
+                    type: post.kind || 'post',
+                    object: post.object || key,
                     objectId: post.id,
                     original: post.title
                 });
@@ -360,11 +360,11 @@ document.addEventListener('youla:init', () => {
                 'u-show': 'item.icon'
             },
             rowType: {
-                'u-show': 'item.type === \'post\'',
-                'u-text': 'types[item.object] || item.object'
+                'u-show': 'item.type === \'post\' || item.type === \'term\'',
+                'u-text': 'types[item.type === \'term\' ? \'term:\' + item.object : item.object] || item.object'
             },
             rowKind: {
-                'u-show': 'item.type !== \'post\'',
+                'u-show': 'item.type !== \'post\' && item.type !== \'term\'',
                 'u-text': 'kinds[item.type]'
             },
             kind(type) {

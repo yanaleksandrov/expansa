@@ -297,8 +297,9 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
         return (string) (array_search($code, $languages, true) ?: I18n::locale());
     });
 
-    // the cached links of the menus show the titles, statuses and URLs of the posts
+    // the cached links of the menus show the titles, statuses and URLs of the posts and the terms
     Hook::add('postsChanged', fn () => App\Models\Menu::forgetLinks());
+    Hook::add('termsChanged', fn () => App\Models\Menu::forgetLinks());
 
     // menu items and their pages need every capability of the item
     Expansa\Builders\Tree::configure(
@@ -349,7 +350,7 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
         filter: EX_DASHBOARD . 'forms/items-filter.php',
         cellView: 'parts/table/cell',
         perPage: fn () => (int) App\Models\Option::get('table-per-page', 20),
-        reserved: ['table', 'view', 'status', 's', 'orderby', 'order', 'project'],
+        reserved: ['table', 'view', 'status', 's', 'orderby', 'order', 'project', 'taxonomy', 'type'],
     );
 
     // validation error messages in the site language
@@ -455,8 +456,8 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
  * 3. register · installed only: needs env.php and the database.
  *
  * Sends requests to other hosts to the site address, then registers the default roles
- * (owner, admin, editor, author, subscriber) and post types (pages, files); post types create
- * their missing tables.
+ * (owner, admin, editor, author, subscriber), post types (pages, files) and taxonomies (categories, tags);
+ * post types create their missing tables.
  */
 Lifecycle::phase('register', fn () => Is::installed(), function () {
     // a foreign Host header must not get into the links of the site
@@ -487,6 +488,8 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_delete',
             'manage_comments',
             'manage_menus',
+            'manage_terms',
+            'assign_terms',
             'translate',
             'manage_options',
             'manage_update',
@@ -523,6 +526,8 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_delete',
             'manage_comments',
             'manage_menus',
+            'manage_terms',
+            'assign_terms',
             'translate',
         ],
     );
@@ -538,6 +543,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'types_publish',
             'types_edit',
             'types_delete',
+            'assign_terms',
         ],
     );
 
@@ -600,6 +606,43 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         canTrash: false,
         capabilities: ['types_edit'],
         menuIcon: 'ph ph-dropbox-logo',
+        menuPosition: 30,
+    );
+
+    // taxonomies; for the pages until the site has a type of posts
+    App\Post\Taxonomy::register(
+        key: 'categories',
+        labelName: t('Category'),
+        labelNamePlural: t('Categories'),
+        labelAdd: t('Add New Category'),
+        labelEdit: t('Edit Category'),
+        labelSearch: t('Search Categories'),
+        types: ['pages'],
+        public: true,
+        hierarchical: true,
+        showInMenu: true,
+        showInEditor: true,
+        showInTable: true,
+        showInNavMenus: true,
+        capabilities: ['manage_terms'],
+        menuPosition: 20,
+    );
+
+    App\Post\Taxonomy::register(
+        key: 'tags',
+        labelName: t('Tag'),
+        labelNamePlural: t('Tags'),
+        labelAdd: t('Add New Tag'),
+        labelEdit: t('Edit Tag'),
+        labelSearch: t('Search Tags'),
+        types: ['pages'],
+        public: true,
+        hierarchical: false,
+        showInMenu: true,
+        showInEditor: true,
+        showInTable: true,
+        showInNavMenus: false,
+        capabilities: ['manage_terms'],
         menuPosition: 30,
     );
 });
@@ -727,6 +770,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
                 App\Api\Search\SearchController::class,
                 App\Api\Slugs\SlugsController::class,
                 App\Api\Tables\TablesController::class,
+                App\Api\Terms\TermsController::class,
                 App\Api\Translations\TranslationsController::class,
                 App\Api\User\UserController::class,
             ] as $class
@@ -744,8 +788,9 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
             }
         }
 
-        // the menu of a theme location for a headless site, public, see RequireAuth
+        // the menu of a theme location and the terms of a taxonomy for a headless site, public, see RequireAuth
         Route::get('/menus/([a-z0-9_-]+)', fn (...$params) => App\Http\Kernel::dispatch(App\Api\Menus\MenusController::class, 'location', $params));
+        Route::get('/terms/([a-z_-]+)', fn (...$params) => App\Http\Kernel::dispatch(App\Api\Terms\TermsController::class, 'tree', $params));
     });
 });
 

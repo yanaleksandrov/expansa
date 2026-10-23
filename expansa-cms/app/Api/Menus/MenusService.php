@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Api\Menus;
 
 use App\Models\Menu;
+use App\Post\Taxonomy;
 use App\Post\Type;
 use Expansa\Facades\Db;
 use Expansa\Facades\Json;
@@ -83,20 +84,23 @@ final class MenusService
     }
 
     /**
-     * Find published posts by the title, the newest first: of a public type shown in the menus,
-     * or of every such type without one; without text the newest ones of the type.
+     * Find the entries of a source of the editor: published posts by the title, the newest first, of a public
+     * type shown in the menus, or the terms by the name of such a taxonomy, `term:<key>`; every source without one.
+     * Without text the newest posts or the first terms of the source. `type` of a found entry is its source,
+     * `kind` the type of its item and `object` the post type or the taxonomy.
      *
-     * @param string $type  Key of the post type, empty for every type.
+     * @param string $type  Key of the source, empty for every one.
      * @param string $query
-     * @return array<int, array{id: int, title: string, type: string}>
+     * @return array<int, array{id: int, title: string, type: string, kind: string, object: string}>
      */
     public function posts(string $type, string $query): array
     {
         $query = trim($query);
-        $types = $type === '' ? Type::fetch(['public' => true, 'showInNavMenus' => true]) : array_filter([Type::get($type)]);
         if ($type === '' && $query === '') {
             return [];
         }
+
+        $types = $type === '' ? Type::filter(['public' => true, 'showInNavMenus' => true]) : array_filter([Type::get($type)]);
 
         $posts = [];
         foreach ($types as $postType) {
@@ -117,7 +121,37 @@ final class MenusService
             }
 
             foreach (Db::select($postType->table, ['id [Int]', 'title'], $where) ?: [] as $row) {
-                $posts[] = [...$row, 'type' => $postType->key];
+                $posts[] = [...$row, 'type' => $postType->key, 'kind' => 'post', 'object' => $postType->key];
+            }
+        }
+
+        $taxonomies = match (true) {
+            $type === ''                    => Taxonomy::filter(),
+            str_starts_with($type, 'term:') => array_filter([Taxonomy::get(substr($type, 5))]),
+            default                         => [],
+        };
+        foreach ($taxonomies as $taxonomy) {
+            if (! $taxonomy->public || ! $taxonomy->showInNavMenus) {
+                continue;
+            }
+
+            $where = [
+                'taxonomy' => $taxonomy->key,
+                'ORDER'    => ['name' => 'ASC'],
+                'LIMIT'    => self::LIMIT,
+            ];
+            if ($query !== '') {
+                $where['name[~]'] = $query;
+            }
+
+            foreach (Db::select('terms', ['id [Int]', 'name'], $where) ?: [] as $row) {
+                $posts[] = [
+                    'id'     => $row['id'],
+                    'title'  => $row['name'],
+                    'type'   => "term:$taxonomy->key",
+                    'kind'   => 'term',
+                    'object' => $taxonomy->key,
+                ];
             }
         }
 

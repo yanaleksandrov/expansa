@@ -13,12 +13,13 @@ use App\Dashboard\Pages\Profile;
 use App\Dashboard\Pages\SignIn;
 use App\Dashboard\Pages\SiteHealth;
 use App\Dashboard\Pages\Tables;
+use App\Dashboard\Pages\Term;
 use App\Dashboard\Pages\Updates;
 use App\Facades\Dashboard;
 use App\Models\User;
+use App\Post\Taxonomy;
 use App\Tables\Plugins;
 use App\Tables\PluginsInstall;
-use App\Tables\Terms;
 use App\Tables\Themes;
 use App\Tables\Users;
 use Expansa\Http\Request;
@@ -78,6 +79,18 @@ final class Core
             surface: Surface::Muted,
             menu: fn (Request $request) => 'edit?table=' . ($request->getString('type') ?: 'pages'),
         );
+        Dashboard::page(
+            slug: 'term',
+            can: 'manage_terms',
+            title: fn (array $data) => $data['term']->name !== '' ? $data['term']->name : $data['taxonomy']->labelEdit,
+            surface: Surface::Muted,
+            // the list of the terms under the menu of the post type it was opened from
+            menu: function (Request $request) {
+                $taxonomy = Taxonomy::get(Term::term($request->getInt('id'), '')->taxonomy);
+
+                return $taxonomy?->url($request->getString('type') ?: ($taxonomy->types[0] ?? '')) ?? 'edit';
+            },
+        );
         Dashboard::page('edit', view: Tables::view(...));
         Dashboard::page('users', view: 'screens/edit');
         Dashboard::page('plugins-install', surface: Surface::Muted);
@@ -88,6 +101,7 @@ final class Core
         Dashboard::data('profile', Profile::data(...));
         Dashboard::data('comment', Comment::data(...));
         Dashboard::data('post', Post::data(...));
+        Dashboard::data('term', Term::data(...));
         Dashboard::data('field-groups', FieldGroups::data(...));
         Dashboard::data('nav-editor', NavEditor::data(...));
         Dashboard::data('site-health', SiteHealth::data(...));
@@ -97,6 +111,5 @@ final class Core
         Dashboard::data('plugins', fn () => ['table' => new Plugins()]);
         Dashboard::data('plugins-install', fn () => ['table' => new PluginsInstall()]);
         Dashboard::data('themes', fn () => ['table' => new Themes()]);
-        Dashboard::data('terms', fn () => ['table' => new Terms()]);
     }
 }
