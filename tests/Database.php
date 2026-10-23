@@ -51,6 +51,12 @@ $schema->create('items', function (Expansa\Database\Schema\Table $table) {
 check('a string without a length is varchar(255)', str_contains($db->queryString, '"name" varchar(255) NOT NULL'));
 check('integers have no display width', str_contains($db->queryString, '"count" int UNSIGNED NOT NULL'));
 check('timestamps() are DATETIME', str_contains($db->queryString, '"created_at" datetime NOT NULL DEFAULT CURRENT_TIMESTAMP'));
+$schema->create('pairs', function (Expansa\Database\Schema\Table $table) {
+    $table->int('a');
+    $table->int('b');
+    $table->index(['b', 'a']);
+});
+check('a composite index keeps its own column order', str_ends_with($db->queryString, '(`b`, `a`)'));
 
 check('bad connection options throw InvalidConnection', throws(fn () => new Builder(['driver' => 'nope', 'host' => 'x', 'database' => 'x']), InvalidConnection::class));
 
