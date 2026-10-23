@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
+use App\Api\User\Values\Passkey as Card;
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Dates;
 use Expansa\Auth\Exceptions\InvalidCredential;
 use Expansa\Auth\Passkey as RelyingParty;
 use Expansa\Auth\Passkey\Assertion;
@@ -74,14 +76,22 @@ final class Passkey
      * Get the passkeys of a user for the profile, newest first.
      *
      * @param User $user Credentials owner.
-     * @return array<int, array{id: int, name: string, backed_up: bool, created_at: string, used_at: ?string}>
+     * @return Card[]
      */
     public static function all(User $user): array
     {
-        return Db::select('passkeys', ['id', 'name', 'backed_up [Bool]', 'created_at', 'used_at'], [
+        $rows = Db::select('passkeys', ['id [Int]', 'name', 'backed_up [Bool]', 'created_at', 'used_at'], [
             'user_id' => $user->id,
             'ORDER'   => ['id' => 'DESC'],
         ]) ?? [];
+
+        return array_map(fn (array $row) => new Card(
+            id: $row['id'],
+            name: $row['name'],
+            added: Dates::format($row['created_at']),
+            used: Dates::format($row['used_at']),
+            synced: $row['backed_up'],
+        ), $rows);
     }
 
     /**
@@ -125,10 +135,10 @@ final class Passkey
      * @param User   $user
      * @param string $json Browser credential.
      * @param string $name Label shown in the profile.
-     * @return array{id: int, name: string, backed_up: bool, created_at: string, used_at: null} Stored passkey.
+     * @return Card Stored passkey.
      * @throws InvalidCredential|RuntimeException If the challenge expired or the response is invalid.
      */
-    public function create(User $user, string $json, string $name): array
+    public function create(User $user, string $json, string $name): Card
     {
         $attestation = Attestation::parse($json);
         $credential  = $this->rp->register($attestation, $this->consume('create', $attestation->challenge), $user->uuid);
@@ -147,13 +157,12 @@ final class Passkey
             'name'            => $name,
         ]);
 
-        return [
-            'id'         => (int) Db::id(),
-            'name'       => $name,
-            'backed_up'  => $credential->backedUp,
-            'created_at' => date('Y-m-d H:i:s'),
-            'used_at'    => null,
-        ];
+        return new Card(
+            id: (int) Db::id(),
+            name: $name,
+            added: Dates::format(time()),
+            synced: $credential->backedUp,
+        );
     }
 
     /**

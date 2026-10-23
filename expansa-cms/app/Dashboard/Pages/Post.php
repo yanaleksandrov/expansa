@@ -32,11 +32,11 @@ final class Post
     private static array $posts = [];
 
     /**
-     * Data of the `post` page: the post of `id` and its type from `type`, pages by default;
-     * without `id` a new post, saved on the first submit.
+     * Data of the `post` page: the post of `id` and its type from `type`, pages by default,
+     * without `id` a new post, saved on the first submit; and whether the viewer can add a comment to it.
      *
      * @param Request $request
-     * @return array{post: Entry, type: Type}
+     * @return array{post: Entry, type: Type, canComment: bool}
      * @throws NotFound When there is no such type or post.
      */
     public static function data(Request $request): array
@@ -44,8 +44,9 @@ final class Post
         $post = self::post($request->getString('type') ?: 'pages', $request->getInt('id'));
 
         return [
-            'post' => $post,
-            'type' => Type::get($post->type),
+            'post'       => $post,
+            'type'       => Type::get($post->type),
+            'canComment' => $post->id > 0 && $post->isDiscussionOpen() && (User::current()?->can('manage_comments') ?? false),
         ];
     }
 

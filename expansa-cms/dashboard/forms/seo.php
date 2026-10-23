@@ -31,7 +31,7 @@ $image = static fn ( string $name, string $option, string $label, string $instru
 				<i class="ph ph-upload-simple"></i> <?php echo t( 'Upload' ); ?>
 				<input type="file" accept="image/*" hidden @change="$ajax.post('media/upload', $el.files).then(({posts}) => { image = posts?.[0]?.url || image; $el.value = ''; })">
 			</label>
-			<button type="button" class="btn btn--outline dif aic g-1" @click="$dialog.open('tmpl-media-library', { ...mediaLibraryDialog, multiple: false, type: 'image', onSelect(item) { if (item) { image = item.url; } } })">
+			<button type="button" class="btn btn--outline dif aic g-1" @click="$dialog.open('tmpl-media-library', { multiple: false, type: 'image' }).then(item => { if (item) { image = item.url; } })">
 				<i class="ph ph-image"></i> <?php echo t( 'Choose from Library' ); ?>
 			</button>
 		</div>

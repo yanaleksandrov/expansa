@@ -7,6 +7,7 @@ namespace App\Dashboard;
 use App\Dashboard\Enums\Surface;
 use App\Dashboard\Pages\Comment;
 use App\Dashboard\Pages\FieldGroups;
+use App\Dashboard\Pages\NavEditor;
 use App\Dashboard\Pages\Post;
 use App\Dashboard\Pages\Profile;
 use App\Dashboard\Pages\SignIn;
@@ -61,6 +62,12 @@ final class Core
             menu: 'edit?table=comments',
         );
         Dashboard::page(
+            slug: 'nav-editor',
+            can: 'manage_menus',
+            title: fn () => t('Menus'),
+            surface: Surface::Muted,
+        );
+        Dashboard::page(
             slug: 'post',
             can: 'types_edit',
             title: fn (array $data) => match (true) {
@@ -82,6 +89,7 @@ final class Core
         Dashboard::data('comment', Comment::data(...));
         Dashboard::data('post', Post::data(...));
         Dashboard::data('field-groups', FieldGroups::data(...));
+        Dashboard::data('nav-editor', NavEditor::data(...));
         Dashboard::data('site-health', SiteHealth::data(...));
         Dashboard::data('updates', Updates::data(...));
         Dashboard::data('edit', Tables::data(...));

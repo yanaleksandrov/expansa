@@ -150,52 +150,98 @@ work, not just one window at a time.
 <div u-data>
   <button type="button" @click="$dialog.open('dialog-window-content')">Open dialog</button>
 
-  <template id="dialog-window-content">
-    <h3>Window title</h3>
+  <template id="dialog-window-content" title="Window title" size="sm">
     <p>Close it by clicking the backdrop, pressing Escape, or the button below.</p>
     <button type="button" @click="$dialog.close()">Close</button>
   </template>
 </div>
 ```
 
-The shell lives once, site-wide, in `parts/footer.html`:
-
-```html
-<div class="dialog" u-data="dialog" @keydown.esc.window="close()">
-  <div u-each="entry in stack" class="dialog-backdrop" @click="close(entry.id)">
-    <div class="dialog-window" role="dialog" aria-modal="true" @click.stop="null" u-html="entry.content"></div>
-  </div>
-</div>
-```
-
-`@click.stop` on `.dialog-window` stops a click inside the dialog from bubbling to the backdrop
-and closing it by accident. Because each dialog covers the full screen, only the topmost one's
-backdrop is ever actually clickable.
+The shell lives once in the dashboard, in `welcome.blade.php`; its markup binds to the `self`
+and `wrapper` sets of the `dialog` component. A nested dialog lies over the one it was opened from.
 
 ### `$dialog` reference
 
 | Method | When to call it |
 | --- | --- |
-| `$dialog.open(templateID, data?)` | Opens a window on top of anything already open: copies `<template id="templateID">` into a new stack entry |
-| `$dialog.close()` | Closes the top dialog of the stack — same call already wired to the Close button, Escape, and backdrop click |
+| `$dialog.open(templateID, data?, options?)` | Opens a window on top of anything already open: copies `<template id="templateID">` into a new stack entry; returns a promise of the value it is closed with |
+| `$dialog.close(value?)` | Closes the top dialog, its `open()` resolves with `value` |
+| `$dialog.dismiss(entry)` | Closes the dialog and the ones above it without a value — the Close button, Escape and a click outside |
+| `$dialog.confirm(message, options?)` | Asks to confirm an action or to choose one of `choices` |
+| `$dialog.prompt(label, options?)` | Asks for a line of text, resolves with the trimmed text or `undefined` |
 | `$dialog.clear()` | Closes the whole stack at once (e.g. on navigation or logout) |
-| `$dialog.init(templateID, callback)` | Re-opens the outer dialog if it was left open in a reloaded/shared `?dialog=` URL |
+| `$dialog.restore(template, callback?, options?)` | Reopens the dialog of the template left open in a reloaded or shared `?dialog=` URL |
 
-The second argument to `open()` is merged straight into the stack entry and is readable inside the
-`<template>` as `entry` (the same loop variable `u-each="entry in stack"` provides):
-`open('confirm-delete', { order })` reads as `entry.order`.
+### Title, size and position
+
+The template describes its dialog by attributes, so a call names only the template and its data:
 
 ```html
-<button type="button" @click="$dialog.open('confirm-delete', { order: 'Order #42' })">
-  Delete order #42
+<template id="tmpl-post-editor" title="<?php echo t_attr('Post Editor'); ?>" size="lg" position="right" guarded>
+```
+
+| Attribute  | Values                       | Default  |
+| ---------- | ---------------------------- | -------- |
+| `title`    | Title of the dialog          | none     |
+| `size`     | `xs`, `sm`, `md`, `lg`, `xl` | `md`     |
+| `position` | `center`, `left`, `right`    | `center` |
+| `guarded`  | without a value              | off      |
+
+`left` and `right` dock the dialog to that edge at full height. A `guarded` dialog whose fields the user
+changed asks before it is dismissed; submitting its form counts as saving them. Each dialog of the stack
+keeps its own size, so a small confirm opened over a wide panel does not resize it.
+
+A call changes them for one dialog: `title` in the data (`{ title: item.name }`), the rest by modifiers
+before `open()` or `restore()` — `$dialog.lg.right.open(...)`, in any order, the last one of a kind wins —
+or by the third argument when they come as data: `$dialog.open(id, data, { size: 'lg' })`.
+
+### Data and result
+
+The second argument to `open()` is merged straight into the stack entry and is readable inside the
+`<template>` as `entry`: `open('choose-size', { sizes })` reads as `entry.sizes`. The template
+closes the dialog with its result, `open()` resolves with it:
+
+```html
+<button type="button" @click="$dialog.open('choose-size', { sizes }).then(size => size && resize(size))">
+  Resize
 </button>
 
-<template id="confirm-delete">
-  <h3>Delete <span u-text="entry.order"></span>?</h3>
-  <p>This can't be undone.</p>
-  <button type="button" @click="$dialog.close()">Cancel</button>
-  <button type="button" @click="$notice.success(entry.order + ' deleted'); $dialog.close()">Delete</button>
+<template id="choose-size" size="sm">
+  <button type="button" u-each="size in entry.sizes" u-text="size" @click="$dialog.close(size)"></button>
 </template>
+```
+
+`confirm()` and `prompt()` are built-in dialogs of this kind, small and on top of the others:
+
+```js
+if (await $dialog.confirm(texts.deleteItem, { action: texts.deletePermanently, danger: true })) { ... }
+const name = await $dialog.prompt('Folder name', { title: 'Add Folder', value: 'new' });
+const choice = await $dialog.confirm('These names are taken:', {
+    items: taken,
+    choices: { skip: 'Skip', keep: 'Keep both', replace: 'Replace' },
+    danger: 'replace',
+});
+```
+
+| `confirm()` option | What it does |
+| --- | --- |
+| `title` | Title of the dialog |
+| `action` | Label of the button, `texts.confirm` by default |
+| `danger` | A red button for an action that can not be undone; with `choices`, the value of the red one |
+| `items` | A list under the message, e.g. the names of the files to delete |
+| `choices` | Labels of the buttons by value instead of the button and Cancel: resolves with the chosen value |
+
+Without `choices`, `confirm()` resolves with `true` or `false`; with them, with the value or `undefined`
+when the dialog is dismissed. `prompt()` takes `title`, `value` (the initial text) and `action`.
+
+### Reopening from the URL
+
+The outer dialog writes its template ID to `?dialog=` in the URL. A template that should open again
+after a reload or from a shared link restores itself; the callback gives the data of the dialog:
+
+```html
+<template id="tmpl-post-editor" title="Post Editor" @load="$dialog.restore($el)">
+<template id="tmpl-media-editor" size="xl" @load="$dialog.restore($el, () => $ajax.post('media/get'))">
 ```
 
 Every open/close also dispatches a bubbling `open`/`close` DOM event, regardless of which
@@ -542,6 +588,46 @@ examples of what a custom directive can look like:
 - **`u-sticky`** — keeps an element pinned within its `position: relative` parent's bounds while
   scrolling past it, instead of sticking to the viewport; a sidebar taller than the viewport
   scrolls internally rather than running off-screen.
+
+## `u-sortable` (sorting by dragging)
+
+Sorts the direct children of a list by dragging with a mouse, pen or finger: the dragged item
+follows the pointer, the others slide apart to make room, on drop it lands in its slot. The
+directive moves the items in the page itself and dispatches `sort` on the list, so a list rendered
+by `u-each` updates its data from the event and a static one simply stays sorted.
+
+```html
+<ul u-sortable="{ handle: '.sortable-handle' }" @sort="reorder($event.detail)">
+  <li u-each="(page, i) in pages">
+    <i class="ph ph-dots-six-vertical sortable-handle"></i> <span u-text="page.title"></span>
+  </li>
+</ul>
+```
+
+```js
+reorder({ from, count, to }) {
+    const pages = [ ...this.pages ];
+    pages.splice(to, 0, ...pages.splice(from, count));
+    this.pages = pages;
+    this.$ajax.post('posts/reorder', { ids: pages.map(page => page.id).join(',') });
+},
+```
+
+| Option | Meaning | Default |
+| --- | --- | --- |
+| `handle` | Selector of the part that starts dragging. Without it the whole item does, except fields; touch then can't scroll the list | none |
+| `nested` | Items have depths in `--depth` of their style (`:style="'--depth: ' + item.depth"`); an item moves with the deeper items after it, a horizontal offset changes its depth | `false` |
+| `indent` | Pixels of the horizontal offset per level of a nested list | `24` |
+| `maxDepth` | Deepest level of a nested list, 0 for the top one | none |
+
+`sort` detail: `from` — index of the first moved item, `count` — number of moved items (more than
+one in a nested list), `to` — their index in the list without them, `depth` — the new depth of the
+first one (the others shift by the same amount). The event comes only when the order or the depth
+changed; the click after dragging is swallowed.
+
+While dragging the list has `is-sorting`, the moved items `is-dragging`; `.sortable-handle` gets
+`cursor: grab` and `touch-action: none` from `interface/sortable.scss`. The scrolling parent of the
+list scrolls by itself near its edges; with `prefers-reduced-motion` nothing is animated.
 
 ## `u-progress` (progress-bar animation directive)
 

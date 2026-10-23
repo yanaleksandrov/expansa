@@ -1,8 +1,4 @@
 <?php
-
-use App\Models\Comment;
-use App\Models\User;
-
 /**
  * Comment of the post editor: the avatar with the initials, the author, the date, the status
  * when it is not approved, the quick moderation actions, the text and its replies below; shared by the Comments tab and the API
@@ -11,10 +7,12 @@ use App\Models\User;
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/post-comment.blade.php
  *
- * @var Comment                  $comment
- * @var array<int, Comment[]>    $replies Replies by the parent ID, see Comment::groupByParent().
- * @var bool                     $isOpen  Whether the discussion of the post is open, no Reply when it is closed.
- * @var int                      $depth   Level of the comment in its thread, no Reply at Comment::maxDepth().
+ * @var App\Models\Comment                $comment
+ * @var array<int, App\Models\Comment[]> $replies  Replies by the parent ID, see Comment::groupByParent().
+ * @var bool                             $isOpen   Whether the discussion of the post is open, no Reply when it is closed.
+ * @var bool                             $canEdit  Whether the viewer moderates comments: the tools and Reply, false by default.
+ * @var int                              $depth    Level of the comment in its thread.
+ * @var int                              $maxDepth Deepest level of a thread, see Comment::maxDepth(); no Reply at it.
  *
  * @package Expansa\Templates
  */
@@ -22,11 +20,12 @@ defined('EX_PATH') || exit;
 
 $replies  ??= [];
 $isOpen   ??= true;
+$canEdit  ??= false;
 $depth    ??= 1;
+$maxDepth ??= 1;
 $color    = $comment->getColor();
-$date     = App\Support\Dates::format($comment->createdAt);
-$statuses = Comment::statuses();
-$canEdit  = User::current()?->can('manage_comments') ?? false;
+$date     = $comment->getDate();
+$status   = $comment->getStatusNote();
 $payload  = json_encode([
     'post-type' => $comment->postType,
     'id'        => $comment->postId,
@@ -41,27 +40,27 @@ $payload  = json_encode([
             @if ($date)
                 <time datetime="{{ $comment->createdAt->format('c') }}">{{ $date }}</time>
             @endif
-            @if ($comment->status !== Comment::STATUS_APPROVED)
-                <span class="badge">{{ $statuses[$comment->status] ?? $comment->status }}</span>
+            @if ($status)
+                <span class="badge">{{ $status }}</span>
             @endif
             @if ($canEdit)
                 <span class="post-comment-tools">
-                    @foreach (Comment::moderationActions($comment->status) as $status => $action)
-                        <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ $action['label'] }}" @click="$ajax.post('comments/status', {id: {{ $comment->id }}, status: '{{ $status }}', stay: 1})">
-                            <i class="{{ $action['icon'] }}"></i>
+                    @foreach ($comment->getModerationActions() as $value => $action)
+                        <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ $action->label }}" @click="$ajax.post('comments/status', {id: {{ $comment->id }}, status: '{{ $value }}', stay: 1})">
+                            <i class="{{ $action->icon }}"></i>
                         </button>
                     @endforeach
                     <a class="btn btn--xs btn--icon t-muted" href="{{ url('dashboard/comment?id=' . $comment->id . '&from=post') }}" title="{{ t('Edit Comment') }}" target="_blank">
                         <i class="ph ph-pencil-simple"></i>
                     </a>
-                    <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ t('Delete Comment') }}" @click="confirm(texts.deleteComment) && $ajax.post('comments/delete', {id: {{ $comment->id }}, stay: 1})">
+                    <button class="btn btn--xs btn--icon t-muted" type="button" title="{{ t('Delete Comment') }}" @click="$dialog.confirm(texts.deleteComment, { action: texts.delete, danger: true }).then(ok => ok && $ajax.post('comments/delete', {id: {{ $comment->id }}, stay: 1}))">
                         <i class="ph ph-trash"></i>
                     </button>
                 </span>
             @endif
         </div>
         <div class="post-comment-text">{{ $comment->content }}</div>
-        @if ($canEdit && $isOpen && $depth < Comment::maxDepth())
+        @if ($canEdit && $isOpen && $depth < $maxDepth)
             <div class="post-comment-actions">
                 <button class="post-editor-pill" type="button" @click="$dispatch('comment-reply', replying ? 0 : {{ $comment->id }})">
                     <i class="ph ph-arrow-bend-up-left"></i> {{ t('Reply', context: 'action') }}
@@ -77,7 +76,16 @@ $payload  = json_encode([
         @endif
         <div class="post-comment-replies" id="post-comment-replies-{{ $comment->id }}">
             @foreach ($replies[$comment->id] ?? [] as $reply)
-                <?php echo view('parts/post-comment', ['comment' => $reply, 'replies' => $replies, 'isOpen' => $isOpen, 'depth' => $depth + 1]); ?>
+                <?php
+                echo view('parts/post-comment', [
+                    'comment'  => $reply,
+                    'replies'  => $replies,
+                    'isOpen'   => $isOpen,
+                    'canEdit'  => $canEdit,
+                    'depth'    => $depth + 1,
+                    'maxDepth' => $maxDepth,
+                ]);
+                ?>
             @endforeach
         </div>
     </div>

@@ -314,7 +314,7 @@ h4,
 h5,
 h6 {
   --expansa-multiplier: 1.05;
-  font-size: calc(var(--expansa-font-ratio) * 1rem);
+  font-size: calc(var(--expansa-font-ratio) * 0.875rem);
   line-height: 1.2em;
   font-weight: 600;
   margin: 0;
@@ -355,7 +355,7 @@ textarea {
   position: relative;
   outline: 0;
   background-color: var(--expansa-bg-white);
-  transition: color, box-shadow 0.2s ease;
+  transition: color, background-color, box-shadow 0.2s ease;
   overflow: auto;
   height: calc(1.875rem - 2px);
   padding: 0.325rem 0.875em;
@@ -408,6 +408,7 @@ select {
   cursor: pointer;
   width: auto;
   line-height: 1.5;
+  padding-inline-end: 2.25em;
 }
 select:not([multiple]) {
   background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 55%;
@@ -1607,7 +1608,7 @@ img:after {
 .expansa-main--canvas {
   background-color: var(--expansa-bg-universal);
 }
-.expansa-main:has(.state) {
+.expansa-main:has(> .state) {
   place-content: center;
 }
 .expansa-board {
@@ -3111,7 +3112,6 @@ body.is-unsaved .search .search-btn {
   margin: auto;
   padding: 1.5rem;
   text-align: center;
-  transform: translateY(-42px);
 }
 @media (max-width: 1024px) {
   .state {
@@ -3616,7 +3616,7 @@ body.is-unsaved .search .search-btn {
 }
 .post-editor .post-editor-eyebrow {
   margin: 0;
-  font-size: 0.6875rem;
+  font-size: 0.625rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3997,6 +3997,148 @@ body.is-unsaved .search .search-btn {
   color: var(--expansa-text-muted);
 }
 
+.description-list {
+  display: grid;
+  gap: 1.5rem;
+}
+.description-list .description-title {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--expansa-text-muted);
+}
+.description-list .description-items {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 2px 0.75rem;
+  align-items: start;
+  margin: 0;
+  font-size: 0.8125rem;
+}
+.description-list .description-items dt {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4375rem;
+  min-height: 1.75rem;
+  padding-block: 0.3125rem;
+  margin: 0;
+  line-height: 1.125rem;
+  text-wrap: pretty;
+  color: var(--expansa-text-muted);
+}
+.description-list .description-items dt i {
+  flex: none;
+  height: 1.125rem;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  opacity: 0.7;
+}
+.description-list .description-items dd {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  min-width: 0;
+  min-height: 1.75rem;
+  margin: 0;
+}
+.description-list .description-items dd input,
+.description-list .description-items dd select,
+.description-list .description-items dd textarea {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+  field-sizing: content;
+  padding-inline: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--expansa-border-radius);
+  corner-shape: superellipse(var(--expansa-corner-shape-superellipse));
+  cursor: pointer;
+  min-width: 8rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.description-list .description-items dd input:hover:not(:disabled, :focus),
+.description-list .description-items dd select:hover:not(:disabled, :focus),
+.description-list .description-items dd textarea:hover:not(:disabled, :focus) {
+  background-color: var(--expansa-bg-universal);
+  -webkit-background-clip: initial;
+}
+.description-list .description-items dd input:focus,
+.description-list .description-items dd select:focus,
+.description-list .description-items dd textarea:focus {
+  background-color: var(--expansa-bg-white);
+  -webkit-background-clip: initial;
+  border-color: var(--expansa-primary);
+  box-shadow: 0 0 0 1px var(--expansa-primary) !important;
+}
+.description-list .description-items dd input[u-pickadate],
+.description-list .description-items dd select[u-pickadate],
+.description-list .description-items dd textarea[u-pickadate] {
+  padding-inline-end: 1.75rem !important;
+  background-position: right 0.5rem center;
+}
+.description-list .description-items dd input:disabled,
+.description-list .description-items dd select:disabled,
+.description-list .description-items dd textarea:disabled {
+  background-color: transparent;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+.description-list .description-items dd select + .ss-main {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 100%;
+  padding-inline: 0.5rem 1.75rem;
+  background-position: right 0.5rem top 54%;
+  border: 0;
+  min-height: 1.675rem;
+}
+.description-list .description-items dd select + .ss-main .ss-value {
+  height: 1.675rem;
+}
+.description-list .description-items dd select + .ss-main:hover:not(.ss-disabled, .ss-open-below, .ss-open-above) {
+  background-color: var(--expansa-bg-universal);
+  -webkit-background-clip: initial;
+}
+.description-list .description-items dd select + .ss-main.ss-disabled {
+  background-color: transparent;
+  cursor: default;
+}
+.description-list .description-items dd select[multiple] + .ss-main {
+  padding-block: 0;
+  margin-inline-start: 2px;
+}
+
+[u-sortable].is-sorting {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+[u-sortable].is-sorting > * {
+  transition: transform 0.15s ease;
+}
+[u-sortable].is-sorting > .is-dragging {
+  position: relative;
+  z-index: 1;
+  transition: none;
+  cursor: grabbing;
+  box-shadow: var(--expansa-box-shadow);
+}
+
+.sortable-handle {
+  cursor: grab;
+  touch-action: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [u-sortable].is-sorting > * {
+    transition: none;
+  }
+}
 @keyframes shake {
   0% {
     transform: translateX(0);

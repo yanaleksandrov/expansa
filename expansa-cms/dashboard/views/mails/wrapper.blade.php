@@ -2,14 +2,15 @@
 /**
  * Email wrapper template can be overridden by copying it to themes/yourtheme/dashboard/views/mails/wrapper.php
  *
- * @var App\Support\Site $site Settings of the site: name, language, charset, addresses, version; shared with every view.
+ * @var string           $body_template Template of the body, e.g. `mails/reset-password`; it gets the same data.
+ * @var App\Support\Site $site          Settings of the site: name, language, charset, addresses, version; shared with every view.
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-$template = trim($__data['body_template'] ?? '');
-if (empty($template) || ! $__env->exists($template)) {
+$template = $body_template ?? '';
+if ($template === '' || ! $__env->exists($template)) {
     return false;
 }
 ?>

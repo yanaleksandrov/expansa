@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http;
 
 use Expansa\Facades\Auth;
+use Expansa\Facades\Route;
 use Expansa\Http\Response;
 use Expansa\Security\Csrf;
 use Expansa\Security\Csrf\Providers\Cookie;
@@ -52,13 +53,19 @@ final class VerifyCsrfToken
     public const string HEADER = 'X-CSRF-Token';
 
     /**
+     * Routes without the check: a click of a menu item is sent by sendBeacon(), which can not add a header;
+     * a forged request can only add a click.
+     */
+    private const array EXCEPT = ['/api/menus/click'];
+
+    /**
      * Route "before" middleware. Ends the request with a 403 JSON response on failure —
      * unlike the previous version, a failed check no longer lets the request continue.
      */
     public function handle(): void
     {
         // a bearer token can't be sent by a forged cross-site request, and with it no cookie is read
-        if (Auth::isBearer()) {
+        if (Auth::isBearer() || in_array(Route::uri(), self::EXCEPT, true)) {
             return;
         }
 

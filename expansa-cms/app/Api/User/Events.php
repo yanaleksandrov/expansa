@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
+use App\Api\User\Values\Event;
 use App\Models\Option;
 use App\Models\User;
+use App\Support\Dates;
 use Expansa\Facades\Db;
 use Expansa\Facades\Hook;
 
@@ -99,7 +101,7 @@ final class Events
      *
      * @param User $user
      * @param int  $limit
-     * @return array<int, array{event: string, details: array<string, mixed>, ip: string, device: string, created_at: string}>
+     * @return Event[]
      */
     public static function all(User $user, int $limit = 20): array
     {
@@ -109,13 +111,15 @@ final class Events
             'LIMIT'   => $limit,
         ]) ?? [];
 
-        return array_map(fn (array $row) => [
-            'event'      => $row['event'],
-            'details'    => (array) json_decode((string) $row['details'], true),
-            'ip'         => $row['ip'],
-            'device'     => Sessions::describe($row['user_agent']),
-            'created_at' => $row['created_at'],
-        ], $rows);
+        return array_map(fn (array $row) => new Event(
+            label: self::label($row['event']),
+            icon: self::icon($row['event']),
+            by: (string) (((array) json_decode((string) $row['details'], true))['by'] ?? ''),
+            device: Sessions::describe($row['user_agent']),
+            ip: $row['ip'],
+            at: $row['created_at'],
+            date: Dates::format($row['created_at']),
+        ), $rows);
     }
 
     /**

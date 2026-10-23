@@ -1962,7 +1962,7 @@
     }
     window.SlimSelect = SlimSelect;
     document.addEventListener("youla:init", () => {
-        Youla.directive("select", (el, output) => {
+        Youla.directive("select", (el, output, attribute, component) => {
             const settings = {
                 showSearch: false,
                 hideSelected: false,
@@ -1982,6 +1982,16 @@
                 const search = events.search;
                 events.search = (...args) => Promise.resolve(search(...args)).then(response => Array.isArray(response) ? response : response?.options ?? [], error => error?.name === "AbortError" ? new Promise(() => {}) : Promise.reject(error));
             }
+            const selectedValues = () => [ ...el.selectedOptions ].map(o => o.value);
+            const silently = fn => {
+                const initialValue = selectedValues().join("\n");
+                el.dispatchEvent = event => event.type === "change" && selectedValues().join("\n") === initialValue || EventTarget.prototype.dispatchEvent.call(el, event);
+                try {
+                    return fn();
+                } finally {
+                    delete el.dispatchEvent;
+                }
+            };
             const settingsKey = JSON.stringify(settings);
             if (el._x_slimSelect && el._x_slimSelectSettings === settingsKey) {
                 Object.assign(el._x_slimSelect.events, events);
@@ -2026,30 +2036,27 @@
                 return acc;
             }, []);
             try {
-                const selectedValues = () => [ ...el.selectedOptions ].map(o => o.value).join("\n");
-                const initialValue = selectedValues();
-                el.dispatchEvent = event => event.type === "change" && selectedValues() === initialValue || EventTarget.prototype.dispatchEvent.call(el, event);
-                let slim;
-                try {
-                    slim = el._x_slimSelect = new SlimSelect({
-                        settings: settings,
-                        select: el,
-                        data: data,
-                        events: events
-                    });
-                } finally {
-                    delete el.dispatchEvent;
-                }
+                const slim = el._x_slimSelect = silently(() => new SlimSelect({
+                    settings: settings,
+                    select: el,
+                    data: data,
+                    events: events
+                }));
                 const form = el.form;
-                if (form) {
-                    const onReset = () => setTimeout(() => slim.setSelected([ ...el.selectedOptions ].map(o => o.value), false));
-                    const destroy = slim.destroy.bind(slim);
-                    form.addEventListener("reset", onReset);
-                    slim.destroy = () => {
-                        form.removeEventListener("reset", onReset);
-                        destroy();
-                    };
-                }
+                const destroy = slim.destroy.bind(slim);
+                let unwatch;
+                unwatch = component?.watch(() => el.isConnected ? selectedValues() : unwatch?.(), values => {
+                    if (values && values.join("\n") !== slim.getSelected().join("\n")) {
+                        silently(() => slim.setSelected(values, false));
+                    }
+                });
+                const onReset = () => setTimeout(() => slim.setSelected(selectedValues(), false));
+                form?.addEventListener("reset", onReset);
+                slim.destroy = () => {
+                    unwatch?.();
+                    form?.removeEventListener("reset", onReset);
+                    destroy();
+                };
             } catch {
                 console.error('Youla.js: "SlimSelect" is not defined — u-select requires SlimSelect to be loaded.');
             }

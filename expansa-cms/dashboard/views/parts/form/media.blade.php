@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Builders\Form\Data;
-use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -13,9 +12,9 @@ use Expansa\Support\Arr;
 defined('EX_PATH') || exit;
 
 // the name is also the variable of u-data
-$name       = Safe::id($field->name);
+$name       = $field->name;
 $attributes = $field->attributes;
-$multiple   = Safe::bool($attributes['multiple'] ?? false);
+$multiple   = ! empty($attributes['multiple']);
 
 $attributes['type'] = 'file';
 unset($attributes['multiple']);
@@ -55,7 +54,7 @@ $appendSelected = $multiple
             <i class="ph ph-upload-simple"></i> {!! t('Upload') !!}
             <input{!! Arr::toHtmlAttributes($attributes) !!} hidden @change="$ajax.post('media/upload', $el.files).then(({posts}) => { {!! $appendUploaded !!}; $el.value = ''; })">
         </label>
-        <button type="button" class="btn btn--outline dif aic g-1" @click="$dialog.open('tmpl-media-library', { ...mediaLibraryDialog, multiple: {!! $multiple ? 'true' : 'false' !!}, onSelect(items) { items = Array.isArray(items) ? items : (items ? [items] : []); {!! $appendSelected !!}; } })">
+        <button type="button" class="btn btn--outline dif aic g-1" @click="$dialog.open('tmpl-media-library', { multiple: {!! $multiple ? 'true' : 'false' !!} }).then(items => { if (items) { items = Array.isArray(items) ? items : [items]; {!! $appendSelected !!}; } })">
             <i class="ph ph-image"></i> {!! t('Choose from Library') !!}
         </button>
     </div>

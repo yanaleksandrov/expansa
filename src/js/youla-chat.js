@@ -18,8 +18,9 @@ document.addEventListener('youla:init', () => {
         return match ? decodeURIComponent(match[1]) : null;
     };
 
-    Youla.data('chat', () => ({
-        labels: {},
+    // the texts come as the argument: `u-data="chat({{ json_encode($labels) }})"`
+    Youla.data('chat', () => (labels = {}) => ({
+        labels,
         tasks: [],
         task: null,
         messages: [],
@@ -36,7 +37,7 @@ document.addEventListener('youla:init', () => {
         snapshot: '',
         self: {
             '@load'() {
-                this.init(this.$el);
+                this.init();
             },
         },
 
@@ -47,12 +48,7 @@ document.addEventListener('youla:init', () => {
             return this.task?.status === 'questions';
         },
 
-        init(root) {
-            try {
-                this.labels = JSON.parse(root.dataset.labels || '{}');
-            } catch {
-                this.labels = {};
-            }
+        init() {
             this.tickTimer = setInterval(() => {
                 if (this.isRunning) {
                     this.now = Date.now() / 1000;

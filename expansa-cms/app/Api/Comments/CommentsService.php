@@ -94,9 +94,11 @@ final class CommentsService
         $isOpen  = Post::get($comment->postType, (int) $comment->postId)?->isDiscussionOpen() ?? false;
         $replies = array_map(
             fn (Comment $reply) => view('parts/post-comment', [
-                'comment' => $reply,
-                'replies' => $threads,
-                'isOpen'  => $isOpen,
+                'comment'  => $reply,
+                'replies'  => $threads,
+                'isOpen'   => $isOpen,
+                'canEdit'  => true,
+                'maxDepth' => Comment::maxDepth(),
             ])->render(),
             $threads[$comment->id] ?? []
         );
@@ -153,7 +155,12 @@ final class CommentsService
             throw ValidationFailed::from($comment, t('Could not add the comment. Check the text.'));
         }
 
-        $html = view('parts/post-comment', ['comment' => $comment, 'depth' => $parent instanceof Comment ? $parent->depth() + 1 : 1])->render();
+        $html = view('parts/post-comment', [
+            'comment'  => $comment,
+            'canEdit'  => true,
+            'depth'    => $parent instanceof Comment ? $parent->depth() + 1 : 1,
+            'maxDepth' => Comment::maxDepth(),
+        ])->render();
         $response = $response->update('#post-comments-count', self::count($post->type, $post->id));
         if ($parent !== null) {
             return $response
@@ -277,10 +284,12 @@ final class CommentsService
         }
 
         $html = view('parts/post-comment', [
-            'comment' => $updated,
-            'replies' => Comment::groupByParent(Comment::getByPost($updated->postType, (int) $updated->postId)),
-            'isOpen'  => Post::get($updated->postType, (int) $updated->postId)?->isDiscussionOpen() ?? false,
-            'depth'   => $updated->depth(),
+            'comment'  => $updated,
+            'replies'  => Comment::groupByParent(Comment::getByPost($updated->postType, (int) $updated->postId)),
+            'isOpen'   => Post::get($updated->postType, (int) $updated->postId)?->isDiscussionOpen() ?? false,
+            'canEdit'  => true,
+            'depth'    => $updated->depth(),
+            'maxDepth' => Comment::maxDepth(),
         ])->render();
 
         return $response

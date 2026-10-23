@@ -8,13 +8,14 @@
  *
  * @var App\Models\Post $post
  * @var App\Post\Type   $type
+ * @var bool            $canComment Whether the viewer can add a comment to the saved post.
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 ?>
 {!! form('post-editor') !!}
-@if ($post->id > 0 && $post->isDiscussionOpen() && (App\Models\User::current()?->can('manage_comments') ?? false))
+@if ($canComment)
     <form id="post-comment" @submit.prevent="$ajax.post('comments/add')">
         <input type="hidden" name="post-type" value="{{ $post->type }}">
         <input type="hidden" name="id" value="{{ $post->id }}">

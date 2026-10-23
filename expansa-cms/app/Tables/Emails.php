@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Link;
+use Expansa\Builders\Table\Values\Title;
 
 final class Emails extends Table
 {
@@ -14,7 +16,8 @@ final class Emails extends Table
             [
                 'id'         => 1,
                 'image'      => url('dashboard/assets/images/placeholder.svg'),
-                'title'      => 'Post title',
+                'title'      => new Title('Post title'),
+                'recipients' => new Title(''),
                 'status'     => t('Draft'),
                 'author'     => 'Yan Aleksandrov',
                 'categories' => [],
@@ -42,7 +45,7 @@ final class Emails extends Table
             $this->cell('event')
                 ->title(t('Event'))
                 ->fixedWidth('9rem')
-                ->view('date'),
+                ->view('raw'),
         ];
     }
 
@@ -60,10 +63,10 @@ final class Emails extends Table
             'title'       => t('No email templates found'),
             'description' => t('Emails the site sends are made from these templates.'),
             'buttons'     => [
-                [
-                    'label' => t('Add Email Template'),
-                    'click' => "\$dialog.open('tmpl-email-editor')",
-                ],
+                new Link(
+                    title: t('Add Email Template'),
+                    attributes: ['@click' => "\$dialog.open('tmpl-email-editor')"],
+                ),
             ],
         ];
     }

@@ -13,6 +13,7 @@ use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
 use Expansa\Database\Traits\HasSoftDeletes;
 use Expansa\Facades\Db;
+use Expansa\Facades\Hook;
 use Expansa\Facades\Safe;
 use Expansa\Support\Str;
 use LogicException;
@@ -258,6 +259,8 @@ class Post
                 Activity::changes($type->table, $id, ['status' => 'future'], ['status' => 'publish']);
             }
             $count += count($ids);
+
+            Hook::run('postsChanged', $type->key);
         }
 
         return $count;
@@ -458,6 +461,7 @@ class Post
         }
 
         Activity::changes($this->table, $this->id, $before, [...$data, 'slug' => $this->slug]);
+        Hook::run('postsChanged', $this->type);
 
         return true;
     }
@@ -548,6 +552,7 @@ class Post
         if ($updated) {
             $this->deletedAt = $deletedAt;
             Activity::record($this->table, $this->id, 'trashed');
+            Hook::run('postsChanged', $this->type);
         }
 
         return $updated;
@@ -568,6 +573,7 @@ class Post
         if ($restored) {
             $this->deletedAt = null;
             Activity::record($this->table, $this->id, 'restored');
+            Hook::run('postsChanged', $this->type);
         }
 
         return $restored;
@@ -592,6 +598,7 @@ class Post
             }
             Db::update($this->table, ['parent_id' => $this->parentId], ['parent_id' => $this->id]);
             Activity::forget($this->table, $this->id);
+            Hook::run('postsChanged', $this->type);
         }
 
         return $deleted;

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
+use App\Api\User\Values\Session;
 use App\Models\User;
+use App\Support\Dates;
 use Expansa\Auth\Contracts\Identity;
 use Expansa\Auth\Contracts\Sessions as SessionStore;
 use Expansa\Facades\Auth;
@@ -90,7 +92,7 @@ final class Sessions implements SessionStore
      * Get the devices a user is signed in on for the profile, the current one first.
      *
      * @param User $user
-     * @return array<int, array{id: int, device: string, ip: string, created_at: string, used_at: string, current: bool}>
+     * @return Session[]
      */
     public static function all(User $user): array
     {
@@ -101,16 +103,20 @@ final class Sessions implements SessionStore
             'ORDER'          => ['used_at' => 'DESC'],
         ]) ?? [];
 
-        $sessions = array_map(fn (array $row) => [
-            'id'         => $row['id'],
-            'device'     => self::describe($row['user_agent']),
-            'ip'         => $row['ip'],
-            'created_at' => $row['created_at'],
-            'used_at'    => $row['used_at'],
-            'current'    => hash_equals($row['token'], $current),
-        ], $rows);
+        $sessions = array_map(function (array $row) use ($current) {
+            $device = self::describe($row['user_agent']);
 
-        usort($sessions, fn (array $a, array $b) => $b['current'] <=> $a['current']);
+            return new Session(
+                id: $row['id'],
+                device: $device,
+                ip: $row['ip'],
+                active: Dates::format($row['used_at'] ?: $row['created_at']),
+                mobile: (bool) preg_match('/iPhone|Android/', $device),
+                current: hash_equals($row['token'], $current),
+            );
+        }, $rows);
+
+        usort($sessions, fn (Session $a, Session $b) => $b->current <=> $a->current);
 
         return $sessions;
     }

@@ -26,8 +26,9 @@ $items = $table->getData();
                     $cell->view,
                     [
                         'cell'  => $cell,
+                        'id'    => $item['id'] ?? '',
                         'item'  => $item,
-                        'value' => $item[$cell->key] ?? null
+                        'value' => $item[$cell->key] ?? null,
                     ]
                 );
                 ?>

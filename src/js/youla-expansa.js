@@ -313,10 +313,47 @@ document.addEventListener('youla:init', ()=> {
      * current one, so a template can raise its own (e.g. a confirm) from within another. Only
      * the outermost dialog syncs to "?dialog=" in the URL — nested ones are transient.
      *
+     * open() returns a promise of the value the dialog is closed with: `$dialog.close(value)` in the
+     * template, undefined for the close button, Escape or a click outside. confirm() and prompt()
+     * open the `tmpl-dialog-confirm` and `tmpl-dialog-prompt` templates of welcome.blade.php.
+     *
+     * The template describes its dialog by attributes, the options of open() and the data win over them:
+     * `<template id="tmpl-post-editor" title="Post Editor" size="lg" position="right" guarded>`.
+     *
      * @since 2027.1
      */
     (() => {
-        Youla.variable('dialog', () => document.querySelector('[u-data="dialog"]')?.__x?.data);
+        const SIZES     = ['xs', 'sm', 'md', 'lg', 'xl'];
+        const POSITIONS = ['center', 'left', 'right'];
+
+        /**
+         * The size and position of the next dialog as modifiers: `$dialog.lg.right.open(...)`, the last
+         * one of a kind wins; `guarded` asks before a dialog with changed fields is dismissed.
+         * open() and restore() get them as their options, the rest of `$dialog` is as is.
+         */
+        const chain = (dialog, options = {}) => new Proxy(dialog, {
+            get(target, name) {
+                if (SIZES.includes(name)) {
+                    return chain(target, { ...options, size: name });
+                }
+                if (POSITIONS.includes(name)) {
+                    return chain(target, { ...options, position: name });
+                }
+                if (name === 'guarded') {
+                    return chain(target, { ...options, guarded: true });
+                }
+                if (name === 'open' || name === 'restore') {
+                    return (first, second) => target[name](first, second, options);
+                }
+                const value = target[name];
+                return typeof value === 'function' ? value.bind(target) : value;
+            },
+        });
+
+        Youla.variable('dialog', () => {
+            const dialog = document.querySelector('[u-data="dialog"]')?.__x?.data;
+            return dialog && chain(dialog);
+        });
 
         const searchParamsHandler = (param, value, isRemove) => {
             const url    = new URL(window.location.href);
@@ -334,6 +371,14 @@ document.addEventListener('youla:init', ()=> {
 
         let uid     = 0;
         let scrollY = 0;
+
+        // the promises of open() by the ID of the dialog, outside the reactive stack
+        const resolvers = new Map();
+
+        // the dialogs whose fields the user changed, by ID: only the user fires `input` and `change`,
+        // a submitted form counts as saved
+        const changed = new Set();
+        const idOf    = (element) => Number(element.closest('.dialog-wrapper')?.id.replace('dialog-', '')) || 0;
 
         /**
          * Freezes body at its current scroll offset — plain overflow:hidden alone doesn't
@@ -368,49 +413,106 @@ document.addEventListener('youla:init', ()=> {
         // injectDataProviders() reruns this factory per u-data element; "root" only matters for this one's own component.
         Youla.data('dialog', (root) => ({
             stack: [],
-            // the class of the top dialog shows on the container, Esc closes the top one
+            // each dialog of the stack has its own size and position, Esc closes the top one
             self: {
                 ':class'() {
-                    return this.stack.length ? ['is-active', this.stack.at(-1)?.class].filter(Boolean).join(' ') : '';
+                    return this.stack.length ? 'is-active' : '';
                 },
                 '@keydown.esc.window'() {
-                    this.close();
+                    if (this.stack.length) {
+                        this.dismiss(this.stack.at(-1));
+                    }
+                },
+                '@input'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@change'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@submit'(event) {
+                    changed.delete(idOf(event.target));
                 },
             },
-
-            open(templateID, data = {}) {
-                setTimeout(() => {
-                    let template = document.getElementById(templateID);
-                    if (!template) {
-                        return;
-                    }
-
-                    const isBase = this.stack.length === 0;
-
-                    // "id"/"content" go last so they always win: a caller's own data can freely
-                    // include a same-named field (e.g. opening with a Post - which always has its
-                    // own "id" and "content" - would otherwise silently clobber this entry's real
-                    // id and, worse, wipe out the dialog's actual markup with the post's own,
-                    // usually-empty "content" field).
-                    // u-each (parts/footer.html) initializes each entry itself, wiring up the template's own "@click".
-                    this.stack.push({ ...data, id: ++uid, content: template.innerHTML });
-
-                    // Only the base dialog locks scroll — a nested call would read scrollY as 0 (already frozen).
-                    if (isBase) {
-                        lockScroll();
-                    }
-
-                    root.dispatchEvent(new Event('open', { bubbles: true }));
-
-                    if (isBase) {
-                        searchParamsHandler('dialog', templateID, false);
-                    }
-                }, 25);
+            wrapper: {
+                'u-each': 'entry in stack',
+                ':id': "'dialog-' + entry.id",
+                ':class': 'entry.modifiers',
+                '@click.outside': 'dismiss(entry, $event)',
             },
-            // No "id" closes the top dialog; an explicit one (the backdrop's own click) closes that entry.
-            close(id) {
-                const target = id ?? this.stack.at(-1)?.id;
-                this.stack   = this.stack.filter(dialog => dialog.id !== target);
+            // the buttons of confirm(): one with Cancel, or the choices; the last one is focused for Enter
+            confirmButton: {
+                'u-each': 'button in entry.buttons',
+                ':class': "button.danger ? 'btn--danger' : (entry.cancel ? 'btn--primary' : 'btn--outline')",
+                'u-text': 'button.label || texts.confirm',
+                '@click': 'close(button.value)',
+                '@load': 'setTimeout(() => $el.focus(), 50)',
+            },
+
+            /**
+             * Open the template as a dialog on top of the others; options: `size` xs|sm|md|lg|xl,
+             * `position` center|left|right and `guarded`, usually set by the modifiers of `$dialog`,
+             * by default the attributes of the template.
+             *
+             * @return {Promise<*>} The value of close(), undefined when the dialog is dismissed.
+             */
+            open(templateID, data = {}, options = {}) {
+                const template = document.getElementById(templateID);
+                if (!template) {
+                    console.warn(`Youla.js: no dialog template '${templateID}'.`);
+                    return Promise.resolve(undefined);
+                }
+
+                const {
+                    size = template.getAttribute('size') ?? 'md',
+                    position = template.getAttribute('position') ?? 'center',
+                    guarded = template.hasAttribute('guarded'),
+                } = options;
+
+                if (!SIZES.includes(size) || !POSITIONS.includes(position)) {
+                    console.warn(`Youla.js: unknown dialog size '${size}' or position '${position}'.`);
+                }
+
+                const isBase = this.stack.length === 0;
+                const id     = ++uid;
+
+                // "id"/"content"/"modifiers"/"opened"/"guarded" go last so they always win: a caller's own data can freely
+                // include a same-named field (e.g. opening with a Post - which always has its
+                // own "id" and "content" - would otherwise silently clobber this entry's real
+                // id and, worse, wipe out the dialog's actual markup with the post's own,
+                // usually-empty "content" field).
+                // u-each (parts/footer.html) initializes each entry itself, wiring up the template's own "@click".
+                this.stack.push({
+                    title: template.getAttribute('title') ?? '',
+                    ...data,
+                    id,
+                    content: template.innerHTML,
+                    modifiers: `dialog-wrapper--${size} dialog-wrapper--${position}`,
+                    opened: performance.now(),
+                    guarded,
+                });
+
+                // Only the base dialog locks scroll — a nested call would read scrollY as 0 (already frozen).
+                if (isBase) {
+                    lockScroll();
+                    searchParamsHandler('dialog', templateID, false);
+                }
+
+                root.dispatchEvent(new Event('open', { bubbles: true }));
+
+                return new Promise(resolve => resolvers.set(id, resolve));
+            },
+            // Closes the top dialog, its open() resolves with the value.
+            close(value) {
+                const entry = this.stack.at(-1);
+                if (!entry) {
+                    return;
+                }
+
+                this.stack = this.stack.slice(0, -1);
+
+                resolvers.get(entry.id)?.(value);
+                resolvers.delete(entry.id);
+                changed.delete(entry.id);
 
                 root.dispatchEvent(new Event('close', { bubbles: true }));
 
@@ -419,20 +521,75 @@ document.addEventListener('youla:init', ()=> {
                     searchParamsHandler('dialog', null, true);
                 }
             },
-            // Snapshot first: close() reassigns "stack" on every call, so iterating the live array would skip entries.
-            clear() {
-                [...this.stack].forEach(entry => this.close(entry.id));
+            /**
+             * Close the dialog and the ones on top of it without a value: its close button, Escape or a click
+             * outside the top one; a `guarded` one with changed fields asks first. The click that opened
+             * a dialog reaches the document after it, so the clicks before the dialog opened are skipped.
+             */
+            async dismiss(entry, event) {
+                if (event && (entry.id !== this.stack.at(-1)?.id || event.timeStamp < entry.opened)) {
+                    return;
+                }
+
+                const index = this.stack.findIndex(dialog => dialog.id === entry.id);
+                if (index < 0) {
+                    return;
+                }
+
+                const unsaved = this.stack.slice(index).some(dialog => dialog.guarded && changed.has(dialog.id));
+                if (unsaved && !await this.confirm(this.texts.discardChanges, { action: this.texts.discard, danger: true })) {
+                    return;
+                }
+
+                while (this.stack.some(dialog => dialog.id === entry.id)) {
+                    this.close();
+                }
             },
-            // Reopens the base dialog from a shared URL, e.g. via "@load" on the element matching templateID.
-            async init(templateID, callback) {
-                const params = new URLSearchParams(window.location.search);
+            clear() {
+                while (this.stack.length) {
+                    this.close();
+                }
+            },
+            /**
+             * Ask to confirm an action: `if (await $dialog.confirm(texts.deleteItem, { danger: true })) ...`.
+             * Options: `title`, `action` the label of the button, `danger` a red button, `items` a list
+             * under the message. With `choices`, the labels by value, it asks to choose one of them instead,
+             * without Cancel; `danger` is then the value of the red one.
+             *
+             * @return {Promise<boolean|string|undefined>} Confirmed or not; with `choices` the chosen value,
+             *                                             undefined when the dialog is dismissed.
+             */
+            confirm(message, { title = '', action = '', danger = false, items = [], choices = null } = {}) {
+                const buttons = choices
+                    ? Object.entries(choices).map(([value, label]) => ({ value, label, danger: danger === value }))
+                    : [ { value: true, label: action, danger: danger === true } ];
 
-                if (templateID && params.get('dialog') === templateID && callback) {
-                    const data = await callback();
+                return this.open('tmpl-dialog-confirm', { message, title, items, buttons, cancel: !choices })
+                    .then(value => choices ? value : value === true);
+            },
+            /**
+             * Ask for a line of text: `const name = await $dialog.prompt('File name', { value: 'new.txt' })`.
+             * Options: `title`, `value` the initial text, `action` the label of the button.
+             *
+             * @return {Promise<string|undefined>} The trimmed text, undefined when the dialog is dismissed.
+             */
+            prompt(label, { title = '', value = '', action = '' } = {}) {
+                return this.open('tmpl-dialog-prompt', { label, title, value, action });
+            },
+            /**
+             * Reopen the dialog of the template left open in a reloaded or shared `?dialog=` URL:
+             * `<template id="..." @load="$dialog.restore($el)">`; the callback gives its data, nothing to skip it.
+             *
+             * @return {Promise<*>|undefined} The promise of open(), undefined when the URL has another dialog.
+             */
+            async restore(template, callback = () => ({}), options = {}) {
+                if (new URLSearchParams(window.location.search).get('dialog') !== template.id) {
+                    return;
+                }
 
-                    if (data) {
-                        this.open(templateID, data);
-                    }
+                const data = await callback();
+                if (data) {
+                    return this.open(template.id, data, options);
                 }
             },
         }));
@@ -631,14 +788,16 @@ document.addEventListener('youla:init', ()=> {
             },
             // the API route of `action` gets the IDs of the checked rows, the `data-confirm` actions ask first
             bulkForm: {
-                '@submit.prevent'() {
-                    const form = this.$el;
-                    if (parse(form.dataset.confirm, []).includes(this.action) && !confirm(this.texts.deleteItems)) {
+                async '@submit.prevent'() {
+                    // the helpers are read before the dialog: after it, the handler is out of its evaluation
+                    const { $el: form, $ajax } = this;
+                    if (parse(form.dataset.confirm, []).includes(this.action)
+                        && !await this.$dialog.confirm(this.texts.deleteItems, { action: this.texts.deletePermanently, danger: true })) {
                         return;
                     }
 
                     const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
-                    this.$ajax.post(form.getAttribute('action'), { ids });
+                    $ajax.post(form.getAttribute('action'), { ids });
                 },
             },
             // the `data-password` actions of the form need the current password
@@ -654,27 +813,29 @@ document.addEventListener('youla:init', ()=> {
             },
             uploader: {
                 '@click'() {
-                    this.$dialog.open('tmpl-media-uploader', this.uploaderDialog);
+                    this.$dialog.open('tmpl-media-uploader');
                 },
             },
             emptyTrash: {
-                '@click'() {
-                    const { endpoint, payload } = this.$el.dataset;
-                    if (confirm(this.texts.emptyTrash)) {
-                        this.$ajax.post(endpoint, parse(payload, {}));
+                async '@click'() {
+                    const { $el, $ajax } = this;
+                    const { endpoint, payload } = $el.dataset;
+                    if (await this.$dialog.confirm(this.texts.emptyTrash, { action: this.texts.deletePermanently, danger: true })) {
+                        $ajax.post(endpoint, parse(payload, {}));
                     }
                 },
             },
             // a link of a row, see Table::action(): `data-confirm` is the key of the text asking first,
             // `data-refresh` shows the rows again after the response
             rowAction: {
-                '@click.prevent'() {
-                    const { endpoint, payload, confirm: question, refresh } = this.$el.dataset;
-                    if (question && !confirm(this.texts[question] ?? question)) {
+                async '@click.prevent'() {
+                    const { $el, $ajax } = this;
+                    const { endpoint, payload, confirm: question, refresh } = $el.dataset;
+                    if (question && !await this.$dialog.confirm(this.texts[question] ?? question, { danger: true })) {
                         return;
                     }
 
-                    this.$ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
+                    $ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
                 },
             },
             // the badge "+N more" of a cell shows the links hidden before it
@@ -1023,23 +1184,12 @@ document.addEventListener('youla:init', ()=> {
      * (dashboard/views/field-groups.blade.php): title/status, its location rule groups
      * (ORed together, rules within a group ANDed - see `form/builder.blade.php`, embedded
      * as a plain markup partial rather than its own component) and its field rows.
+     * The group and the values of the location rules come as the arguments:
+     * `u-data="builder(<?php echo escape(Json::encode($state)); ?>, <?php echo escape(Json::encode($valueOptions)); ?>)"`.
      *
      * @since 2027.1
      */
-    Youla.data('builder', (root) => {
-        let state;
-        try {
-            state = JSON.parse(root.dataset.state || '{}');
-        } catch {
-            state = {};
-        }
-
-        let valueOptions = {};
-        try {
-            valueOptions = JSON.parse(root.dataset.valueOptions || '{}');
-        } catch {
-            valueOptions = {};
-        }
+    Youla.data('builder', () => (state = {}, valueOptions = {}) => {
 
         const defaultRule = () => ({
             location: Object.keys(valueOptions)[0] || 'post_type',
@@ -1535,11 +1685,12 @@ document.addEventListener('youla:init', ()=> {
     /**
      * Details aside the post editor: the status follows the date as Status::byDate() on the server does,
      * a published post dated ahead is scheduled, a scheduled one dated now or before is published.
+     * The saved status comes as the argument: `u-data="postDetails(<?php echo htmlspecialchars(json_encode($post->status)); ?>)"`.
      *
      * @since 2027.1
      */
-    Youla.data('postDetails', (root) => ({
-        status: root.dataset.status || '',
+    Youla.data('postDetails', (root) => (saved = '') => ({
+        status: saved,
         // a field changed or reset by the form goes through the status rule
         self: {
             '@change'() {
@@ -1565,7 +1716,7 @@ document.addEventListener('youla:init', ()=> {
         // a reset of the form brings the select back, the data of the status follows it
         restore(form) {
             if (form === root.closest('form')) {
-                this.status = root.dataset.status || '';
+                this.status = saved;
             }
         },
     }));
@@ -1753,6 +1904,40 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
+     * Length counter of a text with `maxlength` or `minlength`: `u-counter` on the input or textarea,
+     * the `.field-counter` of its field shows `12 / 160` (or `12` without the maximum) as the text is typed.
+     * The counter gets `is-short` while a typed text is shorter than the minimum and `is-full` at the maximum.
+     * The length is counted as the browser counts it for the limits, in UTF-16 units.
+     *
+     * @since 2027.1
+     */
+    Youla.directive('counter', (el) => {
+        const counter = el.closest('.field')?.querySelector('.field-counter');
+        if (!counter) {
+            return;
+        }
+
+        const update = () => {
+            const length = el.value.length;
+            const min    = +el.getAttribute('minlength') || 0;
+            const max    = +el.getAttribute('maxlength') || 0;
+
+            counter.textContent = max ? `${length} / ${max}` : `${length}`;
+            counter.classList.toggle('is-short', length > 0 && length < min);
+            counter.classList.toggle('is-full', max > 0 && length >= max);
+        };
+
+        update();
+
+        // listens once: a later call only brings the text up to date, e.g. after u-prop wrote the value
+        if (!el._x_counter) {
+            el._x_counter = true;
+            el.addEventListener('input', update);
+            el.addEventListener('change', update);
+        }
+    });
+
+    /**
      * Disable autofill, reliably — the readonly-until-focus trick stops
      * autofill from prefilling the field before the user interacts with it,
      * even when the browser ignores `autocomplete="off"`.
@@ -1834,6 +2019,224 @@ document.addEventListener('youla:init', ()=> {
     });
 
     /**
+     * Sorting by dragging: the direct children of the list are its items, the dragged one follows the
+     * pointer, the others make room for it. On drop the items are moved in the page and the list gets
+     * a `sort` event: `{ from, count, to, depth }`, the first moved item, the number of moved items,
+     * their place in the list without them and the depth of the first one. Mouse, pen and touch.
+     *
+     * `u-sortable="{ handle: '.sortable-handle', nested: true, indent: 24, maxDepth: 5 }"`, all optional:
+     * the handle starts dragging (the whole item without it, then touch can't scroll the list); a nested
+     * list reads the depths of the items from `--depth` of their style, an item moves with the deeper items after it
+     * and the horizontal offset changes the depth by `indent` pixels per level.
+     *
+     * @since 2027.1
+     */
+    (() => {
+        // pointer offset that tells dragging from a click
+        const THRESHOLD = 4;
+        // edge of the scroller where it scrolls by itself, and the fastest step
+        const EDGE  = 48;
+        const SPEED = 16;
+        const LANDING = 150;
+
+        const itemsOf = list => [ ...list.children ].filter(el => !el.hasAttribute('u-each') && !el.hidden && el.tagName !== 'TEMPLATE');
+        const depthOf = el => +(el.style.getPropertyValue('--depth') || 0);
+
+        function scrollerOf(el) {
+            for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+                const { overflowY } = getComputedStyle(node);
+                if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+                    return node;
+                }
+            }
+            return document.scrollingElement;
+        }
+
+        function start(list, event) {
+            const options = list._x_sortable;
+            const row     = itemsOf(list).find(item => item.contains(event.target));
+            if (!row || event.button !== 0 || (options.handle ? !event.target.closest(options.handle) : event.target.closest('input, textarea, select, [contenteditable]'))) {
+                return;
+            }
+
+            const startX = event.clientX;
+            const startY = event.clientY;
+            let drag = null;
+
+            const move = event => {
+                if (!drag) {
+                    if (Math.hypot(event.clientX - startX, event.clientY - startY) < THRESHOLD) {
+                        return;
+                    }
+                    drag = begin(list, row, startX, startY);
+                }
+                event.preventDefault();
+                drag.pointer = event;
+                update(drag);
+            };
+            const stop = () => {
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup', stop);
+                document.removeEventListener('pointercancel', stop);
+                if (drag) {
+                    // the click after dragging would select or open the item
+                    const swallow = event => event.stopPropagation();
+                    window.addEventListener('click', swallow, { capture: true, once: true });
+                    setTimeout(() => window.removeEventListener('click', swallow, { capture: true }), 0);
+                    finish(drag);
+                }
+            };
+
+            document.addEventListener('pointermove', move, { passive: false });
+            document.addEventListener('pointerup', stop);
+            document.addEventListener('pointercancel', stop);
+        }
+
+        function begin(list, row, startX, startY) {
+            const options  = list._x_sortable;
+            const rows     = itemsOf(list);
+            const from     = rows.indexOf(row);
+            let count      = 1;
+            while (options.nested && from + count < rows.length && depthOf(rows[from + count]) > depthOf(row)) {
+                count++;
+            }
+
+            const scroller = scrollerOf(list);
+            const offset   = scroller.scrollTop;
+            // tops and bottoms in the coordinates of the scrolled content
+            const rects    = rows.map(el => {
+                const rect = el.getBoundingClientRect();
+                return { top: rect.top + offset, bottom: rect.bottom + offset };
+            });
+            const block    = rows.slice(from, from + count);
+            const others   = rows.filter(el => !block.includes(el)).map(el => ({ el, rect: rects[rows.indexOf(el)] }));
+            const gap      = rows.length > 1 ? Math.max(0, rects[1].top - rects[0].bottom) : 0;
+            const top      = rects[from].top;
+            const bottom   = rects[from + count - 1].bottom;
+            const deepest  = Math.max(...block.map(depthOf)) - depthOf(row);
+
+            list.classList.add('is-sorting');
+            block.forEach(el => el.classList.add('is-dragging'));
+
+            const drag = {
+                list, rows, block, others, from, count, top, bottom, scroller, startX, startY, offset,
+                shift: bottom - top + gap,
+                depth: depthOf(row),
+                maxDepth: Math.max(depthOf(row), (options.maxDepth ?? Infinity) - deepest),
+                to: from,
+                pointer: null,
+            };
+            autoscroll(drag);
+
+            return drag;
+        }
+
+        function update(drag) {
+            const { list, block, others, top, bottom, scroller, pointer } = drag;
+            const options = list._x_sortable;
+            const dx      = pointer.clientX - drag.startX;
+            const dy      = pointer.clientY - drag.startY + scroller.scrollTop - drag.offset;
+            const center  = (top + bottom) / 2 + dy;
+
+            // the block goes before the first item whose middle is below its middle
+            const to = others.filter(({ rect }) => (rect.top + rect.bottom) / 2 < center).length;
+            others.forEach(({ el }, index) => {
+                const before = drag.rows.indexOf(el) < drag.from;
+                const y      = before && index >= to ? drag.shift : !before && index < to ? -drag.shift : 0;
+                el.style.transform = y ? `translateY(${y}px)` : '';
+            });
+
+            let depth = depthOf(drag.rows[drag.from]);
+            if (options.nested) {
+                // at most one level deeper than the item above, at least as deep as the item below:
+                // between a parent and its subitem the block joins the subitems instead of taking them
+                const above = others[to - 1]?.el;
+                const below = others[to]?.el;
+                const limit = Math.min(above ? depthOf(above) + 1 : 0, drag.maxDepth);
+                const lower = below ? Math.min(depthOf(below), limit) : 0;
+                depth = Math.max(lower, Math.min(depth + Math.round(dx / (options.indent || 24)), limit));
+            }
+
+            drag.to    = to;
+            drag.depth = depth;
+            drag.x     = (depth - depthOf(drag.rows[drag.from])) * (options.indent || 24);
+            block.forEach(el => el.style.transform = `translate(${drag.x}px, ${dy}px)`);
+        }
+
+        // scrolls the scroller while the pointer is near its edge
+        function autoscroll(drag) {
+            const step = () => {
+                if (drag.done) {
+                    return;
+                }
+                if (drag.pointer) {
+                    const area  = drag.scroller === document.scrollingElement
+                        ? { top: 0, bottom: window.innerHeight }
+                        : drag.scroller.getBoundingClientRect();
+                    const { clientY } = drag.pointer;
+                    const speed = clientY < area.top + EDGE ? -SPEED * (1 - (clientY - area.top) / EDGE)
+                        : clientY > area.bottom - EDGE ? SPEED * (1 - (area.bottom - clientY) / EDGE) : 0;
+                    if (speed) {
+                        drag.scroller.scrollTop += Math.round(speed);
+                        update(drag);
+                    }
+                }
+                requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        }
+
+        function finish(drag) {
+            const { list, rows, block, others, from, count, to, top, bottom } = drag;
+            drag.done = true;
+
+            // the slot of the block: where the item it takes the place of was
+            const landing = to < from ? others[to].rect.top - top
+                : to > from ? others[to - 1].rect.bottom - bottom : 0;
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            block.forEach(el => {
+                el.style.transition = reduced ? '' : `transform ${LANDING}ms ease`;
+                el.style.transform  = `translate(${drag.x || 0}px, ${landing}px)`;
+            });
+
+            setTimeout(() => {
+                const depth   = drag.depth;
+                const shift   = depth - depthOf(rows[from]);
+                const changed = to !== from || shift !== 0;
+
+                // the items move in the page too: a list without u-each stays sorted
+                if (to !== from) {
+                    const anchor = to < others.length ? others[to].el : others[others.length - 1].el.nextSibling;
+                    block.forEach(el => list.insertBefore(el, anchor));
+                }
+                if (list._x_sortable.nested && shift !== 0) {
+                    block.forEach(el => el.style.setProperty('--depth', depthOf(el) + shift));
+                }
+
+                list.classList.remove('is-sorting');
+                rows.forEach(el => {
+                    el.classList.remove('is-dragging');
+                    el.style.transform  = '';
+                    el.style.transition = '';
+                });
+
+                if (changed) {
+                    list.dispatchEvent(new CustomEvent('sort', { detail: { from, count, to, depth }, bubbles: true }));
+                }
+            }, reduced ? 0 : LANDING);
+        }
+
+        Youla.directive('sortable', (el, output) => {
+            el._x_sortable = output && typeof output === 'object' ? output : {};
+            if (!el._x_sortableBound) {
+                el._x_sortableBound = true;
+                el.addEventListener('pointerdown', event => start(el, event));
+            }
+        });
+    })();
+
+    /**
      * Expands or collapses an element with a smooth slide animation, driven by the
      * directive's truthiness (`u-collapse="open"`) rather than a CSS class.
      *
@@ -1877,9 +2280,8 @@ document.addEventListener('youla:init', ()=> {
             if (elapsed < duration) {
                 requestAnimationFrame(step);
             } else {
-                if (!isOpen) {
-                    el.style.display = 'none';
-                }
+                // an open panel gets its display from CSS again, e.g. grid instead of block
+                el.style.display = isOpen ? '' : 'none';
                 [...props, 'overflow'].forEach(prop => el.style[prop] = '');
             }
         }

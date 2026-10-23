@@ -7,6 +7,7 @@ namespace App\Dashboard\Pages;
 use App\Api\User\EmailLink;
 use App\Api\User\Identities;
 use App\Api\User\TwoFactor;
+use App\Dashboard\Pages\Values\Provider;
 use App\Models\Option;
 use Expansa\Facades\Auth;
 use Expansa\Http\Request;
@@ -50,11 +51,11 @@ final class SignIn
             'challenged' => $request->getString('step') === 'two-factor' && TwoFactor::getChallengedUser() !== null,
             'emailLink'  => EmailLink::isEnabled(),
             'membership' => (bool) Option::get('users.membership'),
-            'providers'  => array_map(fn (string $provider) => [
-                'id'    => $provider,
-                'label' => Identities::label($provider),
-                'url'   => url("oauth/$provider?$query"),
-            ], Auth::getProviders()),
+            'providers'  => array_map(fn (string $provider) => new Provider(
+                id: $provider,
+                label: Identities::label($provider),
+                url: url("oauth/$provider?$query"),
+            ), Auth::getProviders()),
         ];
     }
 }

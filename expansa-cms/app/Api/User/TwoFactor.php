@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
+use App\Api\User\Values\Setup;
 use App\Models\Option;
 use App\Models\User;
 use App\Support\Secrets;
@@ -43,6 +44,21 @@ final class TwoFactor
     private const int RECOVERY_CODES = 10;
 
     /**
+     * Get the state of the profile section: whether it is on and whether a role of the user requires it,
+     * the data of parts/two-factor.
+     *
+     * @param User $user
+     * @return array{enabled: bool, required: bool}
+     */
+    public static function status(User $user): array
+    {
+        return [
+            'enabled'  => self::isEnabled($user),
+            'required' => self::isRequired($user),
+        ];
+    }
+
+    /**
      * Whether the user has turned two-factor authentication on.
      *
      * @param User $user
@@ -70,9 +86,9 @@ final class TwoFactor
      * Start setting up: a new secret waits in the session until a code from the app proves it was added.
      *
      * @param User $user
-     * @return array{secret: string, qr: string} The secret for typing and its QR code as SVG.
+     * @return Setup The secret for typing and its QR code as SVG.
      */
-    public static function setup(User $user): array
+    public static function setup(User $user): Setup
     {
         self::startSession();
         $secret = Totp::createSecret();
@@ -80,10 +96,10 @@ final class TwoFactor
 
         $issuer = (string) Option::get('site.name') ?: 'Expansa';
 
-        return [
-            'secret' => trim(chunk_split($secret, 4, ' ')),
-            'qr'     => new QrCode()->render(Totp::getUri($secret, $user->login, $issuer), 4),
-        ];
+        return new Setup(
+            secret: trim(chunk_split($secret, 4, ' ')),
+            qr: new QrCode()->render(Totp::getUri($secret, $user->login, $issuer), 4),
+        );
     }
 
     /**

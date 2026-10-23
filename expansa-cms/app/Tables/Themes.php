@@ -5,12 +5,23 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Extension;
 
 final class Themes extends Table
 {
     public function data(): array
     {
-        return [
+        return array_map(static fn (array $theme) => [
+            'theme' => new Extension(
+                title: $theme['title'],
+                description: $theme['description'],
+                screenshot: $theme['screenshot'],
+                version: $theme['version'],
+                installed: $theme['installed'],
+                rating: (float) $theme['rating'],
+                reviews: $theme['reviews'],
+            ),
+        ], [
             [
                 'title'       => 'Rgbcode',
                 'description' => 'Multipurpose theme for blog, startup, portfolio, business & e-commerce.',
@@ -56,7 +67,7 @@ final class Themes extends Table
                 'rating'      => 3.75,
                 'installed'   => true,
             ],
-        ];
+        ]);
     }
 
     public function cells(): array

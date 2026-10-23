@@ -6,6 +6,9 @@ namespace App\Tables;
 
 use App\Models\Option;
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Badge;
+use Expansa\Builders\Table\Values\Extension;
+use Expansa\Builders\Table\Values\Link;
 use Expansa\Facades\Extensions;
 
 final class Plugins extends Table
@@ -25,22 +28,22 @@ final class Plugins extends Table
 
             $rows[] = [
                 'id'          => $id,
-                'title'       => $plugin->name,
+                'plugin'      => new Extension(
+                    title: $plugin->name,
+                    authors: $plugin->author !== '' ? [new Link($plugin->author)] : [],
+                    version: $plugin->version,
+                    installed: true,
+                    active: $is_active,
+                ),
                 'description' => $plugin->description,
-                'author'      => $plugin->author,
                 'image'       => url('dashboard/assets/images/placeholder.svg'),
-                'active'      => $is_active,
-                'version'     => [
-                    'class' => '',
-                    'icon'  => '',
-                    'value' => $plugin->version,
-                ],
-                'status'      => [
-                    'class'      => 'badge' . ($is_active ? ' badge--green-lt' : ''),
-                    'icon'       => 'ph' . ($is_active ? ' ph-check' : ' ph-circle-half'),
-                    'value'      => $is_active ? t('Active', context: 'plugin') : t('Inactive', context: 'plugin'),
-                    'attributes' => self::action($is_active ? 'extensions/deactivate' : 'extensions/activate', ['id' => $id]),
-                ],
+                'version'     => new Badge($plugin->version),
+                'status'      => new Badge(
+                    text: $is_active ? t('Active', context: 'plugin') : t('Inactive', context: 'plugin'),
+                    class: 'badge' . ($is_active ? ' badge--green-lt' : ''),
+                    icon: 'ph' . ($is_active ? ' ph-check' : ' ph-circle-half'),
+                    attributes: self::action($is_active ? 'extensions/deactivate' : 'extensions/activate', ['id' => $id]),
+                ),
             ];
         }
 
@@ -89,10 +92,11 @@ final class Plugins extends Table
             'title'       => t('No plugins installed yet'),
             'description' => t('You can upload them manually or install them from the repository.'),
             'buttons'     => [
-                [
-                    'label' => '<i class="ph ph-plus"></i> ' . t('Add New Plugin'),
-                    'url'   => url('/dashboard/plugins-install'),
-                ],
+                new Link(
+                    title: t('Add New Plugin'),
+                    url: url('/dashboard/plugins-install'),
+                    icon: 'ph ph-plus',
+                ),
             ],
         ];
     }

@@ -158,8 +158,9 @@ final class Manager
         // the layout keys win: `page` is the template the layout includes
         $content = view($layout, [...$data, 'page' => $view, 'title' => $title, 'surface' => $page['surface'] ?? Surface::Plain]);
 
-        // co-located CSS/JS of the page template, see Assets\Manager::discover()
+        // co-located CSS/JS of the layout and the page template, see Assets\Manager::discover()
         Asset::discover($content->path);
+        Asset::discover(View::create($view)->path);
 
         // indenting the whole page costs up to a third of the response, so only to read the source in debug
         return (Is::debug() ? $content->beautify() : $content)->render();

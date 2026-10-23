@@ -8,10 +8,12 @@ use App\Api\User\Passkey;
 use App\Api\User\Sessions;
 use App\Api\User\Tokens;
 use App\Api\User\TwoFactor;
+use App\Api\User\Values\Event;
 use App\Dashboard\Pages\Profile;
 use App\Models\Option;
 use App\Models\User;
 use App\Support\Passwords;
+use App\Support\Values\Line;
 use Expansa\Facades\Access;
 use Expansa\Facades\Auth;
 use Expansa\Builders\Form;
@@ -482,7 +484,7 @@ $uid = Form::enqueue(
                                 <?php if (TwoFactor::isRequired($user) && ! TwoFactor::isEnabled($user)) : ?>
                                     <div class="df aic g-1 t-red fs-13 mb-2"><i class="ph ph-warning-circle"></i> <?php echo t('Your role requires two-factor authentication: set it up to use the dashboard.'); ?></div>
                                 <?php endif; ?>
-                                <div id="two-factor"><?php echo view('parts/two-factor', ['user' => $user]); ?></div>
+                                <div id="two-factor"><?php echo view('parts/two-factor', TwoFactor::status($user)); ?></div>
                                 <?php
                             },
                         ],
@@ -754,13 +756,12 @@ $uid = Form::enqueue(
 				    'name'     => 'activity',
 				    'type'     => 'custom',
 				    'callback' => function () use ($user) {
-					    $lines = array_map(fn (array $event) => [
-						    'icon' => Events::icon($event['event']),
-						    'user' => '',
-						    'text' => Events::label($event['event']),
-						    'note' => $event['device'] . ' · ' . $event['ip'],
-						    'at'   => $event['created_at'],
-					    ], Events::all($user));
+					    $lines = array_map(fn (Event $event) => new Line(
+						    icon: $event->icon,
+						    text: $event->label,
+						    note: $event->device . ' · ' . $event->ip,
+						    at: $event->at,
+					    ), Events::all($user));
 					    ?>
 					    <div class="dg g-4 ga-4">
 						    <div><?php echo t('Sign-ins and security changes of your account. Something you did not do? Sign out of other devices and change the password.'); ?></div>

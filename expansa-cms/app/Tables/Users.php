@@ -11,6 +11,13 @@ use App\Support\Dates;
 use Expansa\Builders\Table;
 use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Queried;
+use Expansa\Builders\Table\Values\Badge;
+use Expansa\Builders\Table\Values\Bulk;
+use Expansa\Builders\Table\Values\Date;
+use Expansa\Builders\Table\Values\Filter;
+use Expansa\Builders\Table\Values\Part;
+use Expansa\Builders\Table\Values\Person;
+use Expansa\Builders\Table\Values\Link;
 use Expansa\Database\Query\Raw;
 use Expansa\Facades\Access;
 use Expansa\Facades\Db;
@@ -61,15 +68,27 @@ final class Users extends Table implements Queried
             )?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
         }
 
-        return array_map(fn (array $user) => [
-            'id'     => $user['id'],
-            'name'   => $user['showname'] ?: $user['login'],
-            'login'  => $user['login'],
-            'email'  => $user['email'],
-            'status' => self::statuses()[$user['status']] ?? $user['status'],
-            'role'   => ((array) json_decode((string) $user['roles'], true))[0] ?? '',
-            'visit'  => isset($visits[$user['id']]) ? Dates::format((string) $visits[$user['id']]) : t('Never'),
-        ], $users);
+        return array_map(function (array $user) use ($visits) {
+            $role  = ((array) json_decode((string) $user['roles'], true))[0] ?? '';
+            $visit = (string) ($visits[$user['id']] ?? '');
+
+            return [
+                'id'     => $user['id'],
+                'name'   => new Person(
+                    name: $user['showname'] ?: $user['login'],
+                    url: url('dashboard/profile?id=' . $user['id']),
+                    email: $user['email'],
+                    login: $user['login'],
+                ),
+                'status' => self::statuses()[$user['status']] ?? $user['status'],
+                'role'   => new Badge(
+                    text: Role::get($role)['name'] ?? '',
+                    class: in_array($role, [User::ROLE_OWNER, 'admin'], true) ? 'badge badge--green-lt' : 'badge',
+                    icon: 'ph ph-person-simple-run',
+                ),
+                'visit'  => new Date($visit !== '' ? Dates::format($visit) : t('Never'), $visit),
+            ];
+        }, $users);
     }
 
     public function count(): int
@@ -155,11 +174,11 @@ final class Users extends Table implements Queried
             $this->cell('visit')
                 ->title(t('Last Visit'))
                 ->fixedWidth('7rem')
-                ->view('raw'),
+                ->view('date'),
             $this->cell('role')
                 ->title(t('Role'))
                 ->fixedWidth('7rem')
-                ->view('role'),
+                ->view('badge'),
         ];
     }
 
@@ -169,17 +188,17 @@ final class Users extends Table implements Queried
         $counts    = Db::query('SELECT status, COUNT(*) FROM <users> GROUP BY status')
             ?->fetchAll(PDO::FETCH_KEY_PAIR) ?? [];
         $parts     = [
-            '' => [
-                'label' => t('All') . ' (' . array_sum($counts) . ')',
-                'query' => [],
-            ],
+            '' => new Part(
+                label: t('All') . ' (' . array_sum($counts) . ')',
+                query: [],
+            ),
         ];
 
         foreach (self::statuses() as $key => $label) {
-            $parts[$key] = [
-                'label' => $label . ' (' . (int) ($counts[$key] ?? 0) . ')',
-                'query' => ['status' => $key],
-            ];
+            $parts[$key] = new Part(
+                label: $label . ' (' . (int) ($counts[$key] ?? 0) . ')',
+                query: ['status' => $key],
+            );
         }
 
         return [
@@ -198,11 +217,11 @@ final class Users extends Table implements Queried
      *
      * @return array<string, mixed>
      */
-    public function bulk(): array
+    public function bulk(): ?Bulk
     {
         $admin = User::current();
         if (! Access::allows($admin, 'users_edit')) {
-            return [];
+            return null;
         }
 
         $roles = [];
@@ -210,9 +229,9 @@ final class Users extends Table implements Queried
             $roles["role:$role"] = $name;
         }
 
-        return [
-            'endpoint' => 'user/bulk',
-            'actions'  => [
+        return new Bulk(
+            endpoint: 'user/bulk',
+            actions: [
                 'activate'       => t('Turn On'),
                 'disable'        => t('Disable'),
                 'sign-out'       => t('Sign Out Everywhere'),
@@ -222,19 +241,19 @@ final class Users extends Table implements Queried
                     'options' => $roles,
                 ],
             ],
-            'confirm'  => ['disable', 'sign-out'],
-            'password' => Confirmation::isConfirmed($admin) ? [] : ['activate', 'disable', 'sign-out'],
-        ];
+            confirm: ['disable', 'sign-out'],
+            password: Confirmation::isConfirmed($admin) ? [] : ['activate', 'disable', 'sign-out'],
+        );
     }
 
     public function filters(): array
     {
         return [
-            'role' => [
-                'label'   => t('Role'),
-                'icon'    => 'ph ph-person-simple-run',
-                'options' => array_map(static fn (array $role) => $role['name'], Role::all()),
-            ],
+            'role' => new Filter(
+                label: t('Role'),
+                options: array_map(static fn (array $role) => $role['name'], Role::all()),
+                icon: 'ph ph-person-simple-run',
+            ),
         ];
     }
 
@@ -258,20 +277,20 @@ final class Users extends Table implements Queried
                 'title'       => t('No users found'),
                 'description' => t('Nothing matches the filter.'),
                 'buttons'     => [
-                    [
-                        'label' => t('Show All Users'),
-                        'url'   => url('dashboard/edit?table=users'),
-                    ],
+                    new Link(
+                        title: t('Show All Users'),
+                        url: url('dashboard/edit?table=users'),
+                    ),
                 ],
             ];
         }
 
         $create = Access::allows(User::current(), 'users_edit')
             ? [
-                [
-                    'label' => t('Add New User'),
-                    'url'   => url('/dashboard/profile?new'),
-                ],
+                new Link(
+                    title: t('Add New User'),
+                    url: url('/dashboard/profile?new'),
+                ),
             ]
             : [];
 
@@ -280,10 +299,10 @@ final class Users extends Table implements Queried
             'description' => t("You don't have any users yet. Add them manually or import them from a CSV file."),
             'buttons'     => [
                 ...$create,
-                [
-                    'label' => t('Import'),
-                    'url'   => url('/dashboard/import'),
-                ],
+                new Link(
+                    title: t('Import'),
+                    url: url('/dashboard/import'),
+                ),
             ],
         ];
     }

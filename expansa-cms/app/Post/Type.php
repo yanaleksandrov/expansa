@@ -98,6 +98,11 @@ class Type
         public bool $showInBar = true,
 
         /**
+         * Whether posts of the type can be added as items of the navigation menus.
+         */
+        public bool $showInNavMenus = true,
+
+        /**
          * Whether items can be exported.
          */
         public bool $canExport = true,

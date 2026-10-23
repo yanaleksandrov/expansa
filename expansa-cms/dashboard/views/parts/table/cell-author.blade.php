@@ -6,31 +6,22 @@
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-author.blade.php
  *
  * @var Expansa\Builders\Table\Cell $cell
- * @var array<string, mixed>        $item
- * @var mixed                       $value
+ * @var Expansa\Builders\Table\Values\Person $value
  *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
-
-$name      = is_scalar($value) ? (string) $value : '';
-$color     = $item['color'] ?? 'blue';
-$initials  = $item['initials'] ?? '';
-$author_id = $item['author_id'] ?? 0;
-$email     = $item['email'] ?? '';
 ?>
-@if ($name !== '')
-    <div class="df aic g-3">
-        <span class="avatar avatar--rounded bg-{{ $color }}-lt t-{{ $color }}">{{ $initials }}</span>
-        <div>
-            @if ($author_id)
-                <a href="{{ url("dashboard/profile?id=$author_id") }}" class="fw-500 t-dark">{{ $name }}</a>
-            @else
-                <strong>{{ $name }}</strong>
-            @endif
-            @if ($email)
-                <div class="fs-12 t-muted mt-1">{{ $email }}</div>
-            @endif
-        </div>
+<div class="df aic g-3">
+    <span class="avatar avatar--rounded bg-{{ $value->color }}-lt t-{{ $value->color }}">{{ $value->initials }}</span>
+    <div>
+        @if ($value->url)
+            <a href="{{ $value->url }}" class="fw-500 t-dark">{{ $value->name }}</a>
+        @else
+            <strong>{{ $value->name ?: '-' }}</strong>
+        @endif
+        @if ($value->email)
+            <div class="fs-12 t-muted mt-1">{{ $value->email }}</div>
+        @endif
     </div>
-@endif
+</div>

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Values\Action;
 use App\Post\Type;
 use App\Support\Activity;
+use App\Support\Dates;
 use App\Support\Secrets;
 use DateTime;
 use Expansa\Auth\Exceptions\TooManyAttempts;
@@ -206,18 +208,38 @@ class Comment extends Model
      * any other one is approved.
      *
      * @param string $status Current status.
-     * @return array<string, array{label: string, icon: string}> Actions by the status they set.
+     * @return array<string, Action> Actions by the status they set.
      */
     public static function moderationActions(string $status): array
     {
         if ($status !== self::STATUS_APPROVED) {
-            return [self::STATUS_APPROVED => ['label' => t('Approve'), 'icon' => 'ph ph-check']];
+            return [self::STATUS_APPROVED => new Action(t('Approve'), 'ph ph-check')];
         }
 
         return [
-            self::STATUS_REJECTED => ['label' => t('Reject'), 'icon' => 'ph ph-prohibit'],
-            self::STATUS_SPAM     => ['label' => t('Spam', context: 'action'), 'icon' => 'ph ph-warning-octagon'],
+            self::STATUS_REJECTED => new Action(t('Reject'), 'ph ph-prohibit'),
+            self::STATUS_SPAM     => new Action(t('Spam', context: 'action'), 'ph ph-warning-octagon'),
         ];
+    }
+
+    /**
+     * Get the quick moderation actions of the comment, see moderationActions().
+     *
+     * @return array<string, Action> Actions by the status they set.
+     */
+    public function getModerationActions(): array
+    {
+        return self::moderationActions($this->status);
+    }
+
+    /**
+     * Get the name of the status shown beside the author, empty for an approved comment.
+     *
+     * @return string
+     */
+    public function getStatusNote(): string
+    {
+        return $this->status === self::STATUS_APPROVED ? '' : (self::statuses()[$this->status] ?? $this->status);
     }
 
     /**
@@ -699,6 +721,16 @@ class Comment extends Model
     public function getColor(): string
     {
         return User::color($this->getAuthorName());
+    }
+
+    /**
+     * Get the creation time formatted by the settings, empty without one.
+     *
+     * @return string
+     */
+    public function getDate(): string
+    {
+        return Dates::format($this->createdAt);
     }
 
     /**

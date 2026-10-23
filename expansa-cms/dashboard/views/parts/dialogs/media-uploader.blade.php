@@ -8,6 +8,6 @@
 defined('EX_PATH') || exit;
 ?>
 <!-- media uploader template start -->
-<template id="tmpl-media-uploader">
+<template id="tmpl-media-uploader" title="<?php echo t_attr('Upload Files'); ?>">
     <?php echo form('files-uploader'); ?>
 </template>

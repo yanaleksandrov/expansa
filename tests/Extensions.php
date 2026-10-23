@@ -107,6 +107,29 @@ check(
     $code !== 0 && str_contains($quarantined['plugins/fatal']['error'] ?? '', 'fatal_twice'),
 );
 
+// a theme declares its menu locations, a key that can not be a tree name is refused
+$lifecycle = implode(' ', array_map(
+    fn (string $name): string => "public function {$name}(): void {}",
+    ['register', 'boot', 'activate', 'deactivate', 'install', 'uninstall'],
+));
+mkdir("{$root}themes/aurora", recursive: true);
+file_put_contents("{$root}themes/aurora/index.php", "<?php\nreturn new class extends Expansa\\Extensions\\Theme {\n"
+    . "public function __construct() { \$this->setName('Aurora')->setDescription('Test')->setVersion('1.0')"
+    . "->setMenus(['primary' => 'Header', 'footer-links' => '<b>Footer</b>']); }\n{$lifecycle}\n};\n");
+$themes = new Manager();
+$themes->configure($root, $quarantine);
+$themes->load(['themes/aurora']);
+$aurora = array_find($themes->get('theme'), fn (object $theme) => $theme instanceof Expansa\Extensions\Theme);
+check('Extensions keep the menu locations of a theme', $aurora?->menus === ['primary' => 'Header', 'footer-links' => 'Footer']);
+
+$invalid = "{$root}themes/invalid.php";
+file_put_contents($invalid, "<?php\nreturn new class extends Expansa\\Extensions\\Theme {\n"
+    . "public function __construct() { \$this->setMenus(['Main Menu' => 'Main']); }\n{$lifecycle}\n};\n");
+check(
+    'Extensions refuse a menu location key with other characters',
+    throws(fn () => require $invalid, InvalidArgumentException::class),
+);
+
 $remove = function (string $path) use (&$remove): void {
     foreach (glob($path . '/{,.}[!.,!..]*', GLOB_BRACE) ?: [] as $file) {
         is_dir($file) ? $remove($file) : unlink($file);

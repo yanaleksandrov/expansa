@@ -16,6 +16,7 @@ $requirements = [
 	'pdo'        => t('PDO PHP Extension'),
 	'curl'       => t('cURL PHP Extension'),
 	'mbstring'   => t('Mbstring PHP Extension'),
+	'dom'        => t('DOM PHP Extension'),
 	'gd'         => t('GD PHP Extension'),
 	'memory'     => t('At least 128MB of memory'),
 	'php'        => t('PHP version %s or higher', EX_REQUIRED_PHP_VERSION),

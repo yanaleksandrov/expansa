@@ -277,6 +277,29 @@ Lifecycle::phase('configure', true, function () use ($isLogged) {
         policies: [App\Models\Post::class => App\Post\Policy::class],
     );
 
+    // the menu locations are those of the active theme, read after the extensions are loaded
+    App\Models\Menu::setThemeLocations(
+        fn () => array_find(Extensions::get('theme'), fn (object $theme) => $theme instanceof Expansa\Extensions\Theme)?->menus,
+    );
+
+    // the language of the page is the code in its URL, see "Language in URLs" of the SEO settings;
+    // a page without one is in the language of the site
+    App\Models\Menu::setLanguage(function (): ?string {
+        $languages = (array) App\Models\Option::get('multilingual.languages', []);
+        if ($languages === []) {
+            return null;
+        }
+
+        $code = App\Models\Option::get('permalinks.language', 'directory') === 'subdomain'
+            ? explode('.', (string) ($_SERVER['HTTP_HOST'] ?? ''))[0]
+            : explode('/', trim((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), '/'))[0];
+
+        return (string) (array_search($code, $languages, true) ?: I18n::locale());
+    });
+
+    // the cached links of the menus show the titles, statuses and URLs of the posts
+    Hook::add('postsChanged', fn () => App\Models\Menu::forgetLinks());
+
     // menu items and their pages need every capability of the item
     Expansa\Builders\Tree::configure(
         allows: fn (array $capabilities) => array_all($capabilities, fn (string $capability) => Access::allows(App\Models\User::current(), $capability)),
@@ -463,6 +486,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_edit',
             'private_types_delete',
             'manage_comments',
+            'manage_menus',
             'translate',
             'manage_options',
             'manage_update',
@@ -498,6 +522,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
             'private_types_edit',
             'private_types_delete',
             'manage_comments',
+            'manage_menus',
             'translate',
         ],
     );
@@ -537,6 +562,16 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         Hook::run('createActivityTable');
     }
 
+    // the sites installed before the navigation menus get their table
+    if (! Db::hasTable(EX_DB['prefix'] . 'menus')) {
+        Hook::run('createMenusTable');
+    }
+
+    // and the clicks of the menu items
+    if (! Db::hasTable(EX_DB['prefix'] . 'menu_clicks')) {
+        Hook::run('createMenuClicksTable');
+    }
+
     // post types
     App\Post\Type::register(
         key: 'pages',
@@ -554,6 +589,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         searchable: true,
         showInMenu: true,
         showInBar: true,
+        showInNavMenus: true,
         canExport: true,
         canImport: true,
         canCreate: true,
@@ -578,6 +614,7 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         searchable: false,
         showInMenu: true,
         showInBar: false,
+        showInNavMenus: false,
         canExport: true,
         canImport: true,
         canTrash: false,
@@ -657,6 +694,11 @@ Lifecycle::context('cli', PHP_SAPI === 'cli', function () {
         }, id: 'security-cleanup')->daily(3);
     });
 
+    // the clicks of the menu items are kept for Menu::CLICK_DAYS
+    Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
+        $scheduler->call(fn () => App\Models\Menu::pruneClicks(), id: 'menu-clicks-prune')->daily(4);
+    });
+
     // the scheduled posts are published once their date has come
     Hook::add('schedule', function (Expansa\Scheduler\Scheduler $scheduler) {
         $scheduler->call(fn () => App\Models\Post::publishScheduled(), id: 'posts-publish')->everyMinute()->onlyOne();
@@ -702,6 +744,7 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
                 App\Api\FieldGroups\FieldGroupsController::class,
                 App\Api\Files\FilesController::class,
                 App\Api\Media\MediaController::class,
+                App\Api\Menus\MenusController::class,
                 App\Api\Options\OptionsController::class,
                 App\Api\Post\PostController::class,
                 App\Api\Posts\PostsController::class,
@@ -724,6 +767,9 @@ Lifecycle::context('api', fn (string $uri) => str_starts_with($uri, '/api/'), fu
                 Route::post("/$prefix/$endpoint", fn (...$params) => App\Http\Kernel::dispatch($class, $method, $params));
             }
         }
+
+        // the menu of a theme location for a headless site, public, see RequireAuth
+        Route::get('/menus/([a-z0-9_-]+)', fn (...$params) => App\Http\Kernel::dispatch(App\Api\Menus\MenusController::class, 'location', $params));
     });
 });
 
@@ -820,6 +866,19 @@ Lifecycle::context('dashboard', fn (string $uri) => str_starts_with(trim($uri, '
  * The public site: the home page and /installed through Web::index(), otherwise 404.
  */
 Lifecycle::context('web', true, function () {
+    // the menus of the theme locations are the `menu-<location>` trees, their items linking to this page are active
+    Expansa\Builders\Tree::setCurrent((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), $_GET);
+    App\Models\Menu::register();
+
+    // counts the clicks of the menu items, the links of which the theme gives `$item->attributes`
+    Asset::enqueue(
+        'menu-clicks',
+        url('/dashboard/assets/js/menu-clicks' . (Is::debug() ? '' : '.min') . '.js'),
+        'js',
+        data: ['url' => url('/api/menus/click')],
+        defer: true,
+    );
+
     Route::get('/(.*)', [App\Controllers\Web::class, 'index']);
 });
 

@@ -17,7 +17,7 @@ $labels = [
 	'notConfigured' => t_attr( 'The AI service is not configured: set it on the AI tab of the settings.' ),
 ];
 ?>
-<div class="chat" u-data="chat" data-labels="{{ json_encode( $labels, JSON_UNESCAPED_UNICODE ) }}">
+<div class="chat" u-data="chat({{ json_encode( $labels, JSON_UNESCAPED_UNICODE ) }})">
 	<section class="chat-main">
 		<div class="chat-progress" u-bind="progressBar">
 			<div class="chat-progress-bar"></div>
@@ -85,17 +85,17 @@ $labels = [
 
 		<div class="chat-composer">
 			<textarea class="chat-composer-input" rows="1" u-bind="composerInput"></textarea>
-			<button type="button" class="btn btn--primary chat-composer-send" u-bind="sendButton">
+			<button type="button" class="btn btn--primary btn--icon btn--sm" u-bind="sendButton" disabled>
 				<i class="ph ph-paper-plane-tilt"></i>
 			</button>
-			<button type="button" class="btn btn--outline chat-composer-stop" u-bind="stopButton">
+			<button type="button" class="btn btn--outline btn--icon btn--sm" u-bind="stopButton" hidden>
 				<i class="ph ph-stop"></i>
 			</button>
 		</div>
 	</section>
 
 	<aside class="chat-sidebar">
-		<button type="button" class="btn btn--primary chat-sidebar-new" u-bind="newProcessButton">
+		<button type="button" class="btn btn--primary" u-bind="newProcessButton">
 			<i class="ph ph-plus"></i> <?php echo t( 'New Process' ); ?>
 		</button>
 

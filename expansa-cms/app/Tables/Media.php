@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Link;
 
 final class Media extends Table
 {
@@ -45,10 +46,11 @@ final class Media extends Table
             'title'       => t('No files found in the library'),
             'description' => t('Either nothing has been uploaded yet or no files match the current filters.'),
             'buttons'     => [
-                [
-                    'label' => '<i class="ph ph-plus"></i> ' . t('Add new files'),
-                    'url'   => url('/dashboard/import'),
-                ],
+                new Link(
+                    title: t('Add new files'),
+                    url: url('/dashboard/import'),
+                    icon: 'ph ph-plus',
+                ),
             ],
         ];
     }

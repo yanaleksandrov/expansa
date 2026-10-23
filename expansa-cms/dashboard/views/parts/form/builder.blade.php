@@ -14,9 +14,8 @@ use Expansa\Builders\Form\Data;
  * label}` lookup) on its own reactive state, plus the addGroup()/removeGroup()/addRule()/
  * removeRule() methods used below.
  *
- * @param array $locations Location key => {label, options} - only used here to render the
- *                          "location" select; `valueOptions` (same options, keyed the same
- *                          way) is what actually drives the reactive "value" select.
+ * `$field->locations` render the "location" select; `valueOptions` (the same options, keyed the same
+ * way) drives the reactive "value" select.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/form/builder.php
  *
@@ -33,8 +32,8 @@ defined('EX_PATH') || exit;
 					<div class="builder__rules" u-each="(rule, i) in group.rules">
 						<div class="dg g-1">
 							<select class="field" u-prop="rule.location" u-select>
-								@foreach($field->locations as $key => $location)
-									<option value="{!! $key !!}">{!! $location['label'] !!}</option>
+								@foreach($field->locations as $location)
+									<option value="{{ $location->value }}">{!! $location->content !!}</option>
 								@endforeach
 							</select>
 						</div>

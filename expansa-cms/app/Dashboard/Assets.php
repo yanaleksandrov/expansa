@@ -10,6 +10,7 @@ use Expansa\Assets\Manager as AssetManager;
 use Expansa\Facades\Asset;
 use Expansa\Facades\Hook;
 use Expansa\Facades\I18n;
+use Expansa\Hooks\Attributes\Priority;
 use Expansa\Support\Is;
 use IntlDateFormatter;
 
@@ -27,6 +28,23 @@ final class Assets
      * themselves (youla-filler.js) or are styled by controls.css (youla-select.js).
      */
     private const array VENDOR_STYLES = ['youla-pickadate' => 'air-datepicker'];
+
+    /**
+     * Styles and scripts of a dashboard page, from dashboard/assets: loaded on that page only, after
+     * the ones of the whole panel. Includes the vendor scripts of controls the page binds itself
+     * instead of rendering the field templates, e.g. `u-select` on a plain `<select>`.
+     *
+     * @var array<string, array{styles?: string[], scripts?: string[]}>
+     */
+    private const array SCREENS = [
+        'field-groups' => [
+            'scripts' => ['youla-select'],
+        ],
+        'nav-editor'   => [
+            'styles'  => ['air-datepicker', 'nav-editor'],
+            'scripts' => ['youla-select', 'youla-pickadate', 'youla-nav-editor'],
+        ],
+    ];
 
     /**
      * Tokens of the PHP date format and their air-datepicker equivalents; the other letters have none
@@ -69,8 +87,10 @@ final class Assets
         // vendor JS of a form field loads only on the pages that render that field
         AssetManager::configure(resolver: self::structure(...));
 
+        $screen = self::SCREENS[self::screen()] ?? [];
+
         self::enqueue(
-            ['phosphor', 'expansa', 'dialog', 'controls', 'utility', 'nav-editor', 'chat'],
+            ['phosphor', 'expansa', 'dialog', 'controls', 'utility', 'chat', ...$screen['styles'] ?? []],
             [
                 'youla'         => ['data' => self::data()],
                 'youla-ajax',
@@ -80,6 +100,7 @@ final class Assets
                 'youla-chat',
                 // global, not co-located: the media library must be reachable from any field on any page
                 'youla-storage',
+                ...$screen['scripts'] ?? [],
             ]
         );
     }
@@ -160,7 +181,7 @@ final class Assets
         if (! self::$notifications) {
             self::$notifications = true;
 
-            Hook::add('renderDashboardFooter', static function () {
+            Hook::add('renderDashboardAfter', static function () {
                 echo view('parts/notifications');
             });
         }
@@ -199,7 +220,9 @@ final class Assets
      */
     private static function structure(string $file, array $context = []): array
     {
-        if (! str_contains(str_replace('\\', '/', $file), '/dashboard/views/parts/form/')) {
+        $file = str_replace('\\', '/', $file);
+
+        if (! str_contains($file, '/dashboard/views/parts/form/')) {
             return AssetManager::defaultStructure($file);
         }
 
@@ -251,38 +274,23 @@ final class Assets
             'showMenu'            => false,
             'flagsUrl'            => url('/dashboard/assets/sprites/flags.svg'),
             'texts'               => [
-                'deleteItem'    => t('Delete this item permanently?'),
-                'deleteItems'   => t('Delete the selected items permanently?'),
-                'emptyTrash'    => t('Delete all items in the trash permanently?'),
-                'deleteComment' => t('Delete this comment? Its replies stay.'),
-                'and'           => t('and'),
-                'where'         => t('Where'),
-                'is'            => t('is'),
-                'isNot'         => t('is not'),
-                'selected'      => t(':count selected'),
+                'confirm'           => t('Confirm'),
+                'delete'            => t('Delete'),
+                'deletePermanently' => t('Delete Permanently'),
+                'discardChanges'    => t('Close without saving the changes?'),
+                'discard'           => t('Close Without Saving'),
+                'deleteItem'        => t('Delete this item permanently?'),
+                'deleteItems'       => t('Delete the selected items permanently?'),
+                'emptyTrash'        => t('Delete all items in the trash permanently?'),
+                'deleteComment'     => t('Delete this comment? Its replies stay.'),
+                'and'               => t('and'),
+                'where'             => t('Where'),
+                'is'                => t('is'),
+                'isNot'             => t('is not'),
+                'selected'          => t(':count selected'),
             ],
             'notifications'       => [
                 'ctrlS' => t_attr('Expansa saves your changes automatically, so there\'s no need to press ⌘ + S.'),
-            ],
-            'uploaderDialog'      => [
-                'title' => t('Upload Files'),
-                'class' => 'dialog--md',
-            ],
-            'emailDialog'         => [
-                'title' => t('Email Settings'),
-                'class' => 'dialog--xl dialog--right',
-            ],
-            'postEditorDialog'    => [
-                'title' => t('Post Editor'),
-                'class' => 'dialog--lg dialog--right',
-            ],
-            'takeSelfieDialog'    => [
-                'title' => t('Take a Selfie'),
-                'class' => 'dialog--sm',
-            ],
-            'mediaLibraryDialog'  => [
-                'title' => t('Media Library'),
-                'class' => 'dialog--xl',
             ],
         ]);
     }
@@ -378,6 +386,21 @@ final class Assets
         }
 
         return trim(preg_replace('/\s+/', ' ', $result));
+    }
+
+    /**
+     * Get the slug of the requested dashboard page, the segment after the dashboard slug; empty for
+     * the dashboard root.
+     *
+     * @return string
+     */
+    private static function screen(): string
+    {
+        $path     = trim((string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH), '/');
+        $segments = explode('/', $path);
+        $root     = array_search(trim((string) Hook::call('dashboardRootSlug', 'dashboard'), '/'), $segments, true);
+
+        return $root === false ? '' : (string) ($segments[$root + 1] ?? '');
     }
 
     /**

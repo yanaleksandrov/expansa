@@ -7,8 +7,12 @@ namespace Expansa\Builders;
 use Closure;
 use Expansa\Builders\Table\Cell;
 use Expansa\Builders\Table\Queried;
+use Expansa\Builders\Table\Values\Bulk;
+use Expansa\Builders\Table\Values\Filter;
+use Expansa\Builders\Table\Values\Sorting;
 use Expansa\Database\Query\Raw;
 use LogicException;
+use Stringable;
 
 /**
  * Base of a dashboard table: a subclass returns the rows in data() and describes the columns
@@ -63,7 +67,7 @@ abstract class Table
     /**
      * Fields of filters(), read once: they may come from the database, e.g. the options of the authors.
      *
-     * @var array<string, array<string, mixed>>|null
+     * @var array<string, Filter>|null
      */
     private ?array $fields = null;
 
@@ -193,7 +197,7 @@ abstract class Table
 
         return [
             ...$this->filtered($where),
-            'ORDER' => $cell === null ? $order : $this->orderBy($cell, strtoupper($this->sorting()['order']), $order),
+            'ORDER' => $cell === null ? $order : $this->orderBy($cell, strtoupper($this->sorting()->order), $order),
             ...($perPage > 0 ? ['LIMIT' => [($this->page() - 1) * $perPage, $perPage]] : []),
         ];
     }
@@ -225,7 +229,7 @@ abstract class Table
      */
     protected function filterWhere(string $field, string $operator, array $values): array
     {
-        $column = (string) ($this->fields()[$field]['column'] ?? $field);
+        $column = ($this->fields()[$field] ?? null)?->column ?: $field;
 
         return [$column . ($operator === 'not' ? '[!]' : '') => $values];
     }
@@ -233,7 +237,7 @@ abstract class Table
     /**
      * Get the fields of filters(), read once.
      *
-     * @return array<string, array<string, mixed>>
+     * @return array<string, Filter>
      */
     private function fields(): array
     {
@@ -311,17 +315,17 @@ abstract class Table
      * Get the sorting of the query: `orderby`, the key of a sortable column, and `order`, `asc` or `desc` by default;
      * without a known column the rows keep the order of data().
      *
-     * @return array{by: string, order: string}
+     * @return Sorting
      */
-    public function sorting(): array
+    public function sorting(): Sorting
     {
         $query = $this->input ?? $_GET;
         $by    = is_string($query['orderby'] ?? null) ? $query['orderby'] : '';
 
-        return [
-            'by'    => array_any($this->cells, fn (Cell $cell) => $cell->sortable && $cell->key === $by) ? $by : '',
-            'order' => ($query['order'] ?? '') === 'asc' ? 'asc' : 'desc',
-        ];
+        return new Sorting(
+            by: array_any($this->cells, fn (Cell $cell) => $cell->sortable && $cell->key === $by) ? $by : '',
+            order: ($query['order'] ?? '') === 'asc' ? 'asc' : 'desc',
+        );
     }
 
     /**
@@ -334,7 +338,7 @@ abstract class Table
     private function sort(array $rows): array
     {
         $cell  = $this->sortedCell();
-        $order = $this->sorting()['order'];
+        $order = $this->sorting()->order;
         if ($cell === null) {
             return $rows;
         }
@@ -357,9 +361,9 @@ abstract class Table
     }
 
     /**
-     * Get the value a row is sorted by in PHP: the value of Cell::$sortBy, of a cell array its `value`;
-     * a number stays a number, text is compared without case. A table overrides it to sort by something else,
-     * e.g. a name made of several values of the row.
+     * Get the value a row is sorted by in PHP: the value of Cell::$sortBy, a value object of Table\Values as its text;
+     * a number or a numeric text, e.g. of Values\Money, is compared as a number, other text without case.
+     * A table overrides it to sort by something else, e.g. a name made of several values of the row.
      *
      * @param array<string, mixed> $row
      * @param Cell                 $cell Sorted column.
@@ -368,9 +372,13 @@ abstract class Table
     protected function sortValue(array $row, Cell $cell): int|float|string
     {
         $value = $row[$cell->sortBy] ?? '';
-        $value = is_array($value) ? ($value['value'] ?? '') : $value;
+        if (is_int($value) || is_float($value)) {
+            return $value;
+        }
 
-        return is_int($value) || is_float($value) ? $value : mb_strtolower((string) $value);
+        $value = (string) $value;
+
+        return is_numeric($value) ? +$value : mb_strtolower($value);
     }
 
     /**
@@ -380,7 +388,7 @@ abstract class Table
      */
     private function sortedCell(): ?Cell
     {
-        $by = $this->sorting()['by'];
+        $by = $this->sorting()->by;
         foreach ($this->cells as $cell) {
             if ($by !== '' && $cell->key === $by) {
                 return $cell;
@@ -391,11 +399,9 @@ abstract class Table
     }
 
     /**
-     * Describe the fields the rows can be filtered by, keyed by the row key: `label`, `icon`, `options`
-     * as value => label, `param`, the query parameter, the key by default, and `column` of the query
-     * of a Table\Queried table, the key by default. Without fields the table has no filter.
+     * Describe the fields the rows can be filtered by, keyed by the row key. Without fields the table has no filter.
      *
-     * @return array<string, array{label: string, icon?: string, param?: string, column?: string, options: array<string|int, string>}>
+     * @return array<string, Filter>
      */
     public function filters(): array
     {
@@ -435,12 +441,12 @@ abstract class Table
 
         $this->active = [];
         foreach ($this->fields() as $field => $filter) {
-            $param = (string) ($filter['param'] ?? $field);
+            $param = $filter->param ?: $field;
             if (in_array($param, self::$reserved, true)) {
                 throw new LogicException(sprintf('The filter "%s" of %s takes the reserved query parameter "%s".', $field, static::class, $param));
             }
 
-            $options = array_map('strval', array_keys($filter['options'] ?? []));
+            $options = array_map('strval', array_keys($filter->options));
             foreach (['is' => $param, 'not' => "$param!"] as $operator => $name) {
                 $raw    = $query[$name] ?? '';
                 $values = is_string($raw) ? array_values(array_intersect(explode(',', $raw), $options)) : [];
@@ -488,7 +494,8 @@ abstract class Table
      */
     protected function matchesFilter(array $row, string $field, string $operator, array $values): bool
     {
-        $found = array_intersect(array_map('strval', (array) ($row[$field] ?? [])), $values) !== [];
+        $value = $row[$field] ?? [];
+        $found = array_intersect(array_map('strval', $value instanceof Stringable ? [$value] : (array) $value), $values) !== [];
 
         return $found !== ($operator === 'not');
     }
@@ -501,10 +508,9 @@ abstract class Table
     abstract public function cells(): array;
 
     /**
-     * Get the data of the header above the table: title, badge and the tools to show, e.g. `empty`, the `endpoint`
-     * and the `data` of the button emptying the trash; `parts` are the parts
-     * of the list for the select of the filter by key, each a `label` and the `query` parameters that open it,
-     * the parameters of the other parts are dropped; `part` is the key of the current one.
+     * Get the variables of parts/table/table-header above the table: title, badge and the tools to show, e.g. `empty`,
+     * the Values\Action of the button emptying the trash; `parts` are the Values\Part of the list for the select
+     * of the filter by key, `part` is the key of the current one.
      *
      * @return array<string, mixed>
      */
@@ -514,21 +520,13 @@ abstract class Table
     }
 
     /**
-     * Get the bulk actions of the selected rows, none by default: `endpoint` of the API they are posted to,
-     * `actions` labels by value or groups of a select, `confirm` the values that ask first, `password`
-     * the values that need the current password, `data` the fields sent with the IDs.
+     * Get the bulk actions of the selected rows, none by default.
      *
-     * @return array{
-     *     endpoint?: string,
-     *     actions?: array<string, mixed>,
-     *     confirm?: string[],
-     *     password?: string[],
-     *     data?: array<string, scalar>,
-     * }
+     * @return Bulk|null
      */
-    public function bulk(): array
+    public function bulk(): ?Bulk
     {
-        return [];
+        return null;
     }
 
     /**

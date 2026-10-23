@@ -30,15 +30,6 @@ Hook::add('renderDashboardFooter', function () {
             </div>
             <img class="storage__image" u-show="!item.url && !item.icon" src="{{ url('/dashboard/assets/images/files/broken.svg') }}" title="{{ t('Broken image') }}" width="40" height="40" alt>
         </div>
-
-        @foreach($table->getData() as $item)
-            <div class="storage__item" @click="$dialog.open('tmpl-media-editor', item)">
-                <img class="storage__image" src="{{ $item['sizes']['thumbnail']['url'] ?? $item['url'] ?? $item['icon'] ?? '' }}" width="200" height="200" alt>
-                <div class="storage__meta">
-                    <div class="storage__data">{{ $item['sizeHumanize'] ?? '' }}</div>
-                </div>
-            </div>
-        @endforeach
     </div>
 
     <div u-show="items.length === 0" @load="console.log(items.length)">

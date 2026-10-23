@@ -1,10 +1,12 @@
 <?php
 
 use App\Dashboard\Pages\Comment as Page;
+use App\Dashboard\Values\Crumb;
 use App\Models\Comment;
 use App\Post\Type;
 use App\Support\Activity;
 use App\Support\Dates;
+use App\Support\Values\Line;
 use Expansa\Builders\Form;
 
 $comment = Page::comment(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0);
@@ -47,32 +49,23 @@ return Form::enqueue(
                     </a>
                     <?php
                     $parents = $from === 'post' && $postUrl !== '' ? [
-                        [
-                            'label' => $type->labelNamePlural,
-                            'url'   => url('dashboard/edit?table=' . $type->key),
-                        ],
-                        [
-                            'label' => $title !== '' ? $title : t('Post #:id', $comment->postId),
-                            'url'   => $postUrl,
-                        ],
+                        new Crumb($type->labelNamePlural, url('dashboard/edit?table=' . $type->key)),
+                        new Crumb($title !== '' ? $title : t('Post #:id', $comment->postId), $postUrl),
                     ] : [
-                        [
-                            'label' => t('Comments'),
-                            'url'   => $list,
-                        ],
+                        new Crumb(t('Comments'), $list),
                     ];
 
                     echo view('parts/breadcrumbs', [
                         'items' => [
                             ...$parents,
-                            [
-                                'label'      => t('Comment #:id', $comment->id),
-                                'url'        => $url,
-                                'attributes' => $url !== '' ? [
+                            new Crumb(
+                                label: t('Comment #:id', $comment->id),
+                                url: $url,
+                                attributes: $url !== '' ? [
                                     'target' => '_blank',
                                     'title'  => t('View comment'),
                                 ] : [],
-                            ],
+                            ),
                         ],
                     ]);
                     ?>
@@ -228,25 +221,24 @@ return Form::enqueue(
                     'type'     => 'custom',
                     'callback' => function () use ($comment) {
                         $lines = [
-                            [
-                                'icon' => 'ph ph-paper-plane-tilt',
-                                'user' => $comment->getAuthorName(),
-                                'text' => t('Submitted'),
-                                'note' => '',
-                                'at'   => $comment->createdAt?->format('Y-m-d H:i:s') ?? '',
-                            ],
+                            new Line(
+                                icon: 'ph ph-paper-plane-tilt',
+                                text: t('Submitted'),
+                                user: $comment->getAuthorName(),
+                                at: $comment->createdAt?->format('Y-m-d H:i:s') ?? '',
+                            ),
                         ];
                         foreach (Comment::getByPost($comment->postType, (int) $comment->postId) as $reply) {
                             if ((int) $reply->parentId !== (int) $comment->id) {
                                 continue;
                             }
-                            $lines[] = [
-                                'icon' => 'ph ph-arrow-bend-up-left',
-                                'user' => $reply->getAuthorName(),
-                                'text' => t('Replied'),
-                                'note' => mb_strimwidth(trim(strip_tags($reply->content)), 0, 80, '…'),
-                                'at'   => $reply->createdAt?->format('Y-m-d H:i:s') ?? '',
-                            ];
+                            $lines[] = new Line(
+                                icon: 'ph ph-arrow-bend-up-left',
+                                text: t('Replied'),
+                                user: $reply->getAuthorName(),
+                                note: mb_strimwidth(trim(strip_tags($reply->content)), 0, 80, '…'),
+                                at: $reply->createdAt?->format('Y-m-d H:i:s') ?? '',
+                            );
                         }
                         echo view('parts/activity', ['lines' => Activity::timeline($comment->table, (int) $comment->id, $lines)]);
                     },
@@ -322,7 +314,7 @@ return Form::enqueue(
                     'callback' => function () use ($comment, $from) {
                         ?>
                         <div class="post-editor-actions">
-                            <button class="btn btn--sm btn--outline t-red" type="button" @click="confirm(texts.deleteComment) && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>, from: '<?php echo $from; ?>'})">
+                            <button class="btn btn--sm btn--outline t-red" type="button" @click="$dialog.confirm(texts.deleteComment, { action: texts.delete, danger: true }).then(ok => ok && $ajax.post('comments/delete', {id: <?php echo $comment->id; ?>, from: '<?php echo $from; ?>'}))">
                                 <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
                             </button>
                         </div>

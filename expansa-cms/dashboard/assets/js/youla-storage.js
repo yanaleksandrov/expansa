@@ -207,7 +207,7 @@ document.addEventListener('youla:init', () => {
         percent: 0,
         errors: [],
         multiple: true,
-        onSelect: null,
+        picker: false,
         self: {
             '@load': 'configure(typeof entry === \'undefined\' ? null : entry); $ajax.post(\'media/get\', {page: 1}).then(({posts}) => setItems(posts, true))'
         },
@@ -217,7 +217,7 @@ document.addEventListener('youla:init', () => {
             }
             this.multiple = entry.multiple ?? this.multiple;
             this.type = entry.type ?? '';
-            this.onSelect = typeof entry.onSelect === 'function' ? entry.onSelect : null;
+            this.picker = true;
         },
         recomputeVisible() {
             this.visible = this.type ? this.items.filter(item => (item.mime || '').startsWith(`${this.type}/`)) : this.items;
@@ -287,10 +287,8 @@ document.addEventListener('youla:init', () => {
             this.selected = [];
             this.anchor = null;
         },
-        confirm() {
-            if (typeof this.onSelect === 'function') {
-                this.onSelect(this.multiple ? this.selectedItems() : this.selectedItems()[0]);
-            }
+        selection() {
+            return this.multiple ? this.selectedItems() : this.selectedItems()[0];
         },
         addUploaded(posts, errors) {
             posts = Array.isArray(posts) ? posts : [];

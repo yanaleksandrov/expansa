@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Code;
+use Expansa\Builders\Table\Values\Link;
+use Expansa\Builders\Table\Values\Title;
 
 final class Terms extends Table
 {
@@ -14,16 +17,16 @@ final class Terms extends Table
             [
                 'id'    => 1,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
-                'title' => 'Hello World',
-                'slug'  => 'hello-world',
-                'count' => 23,
+                'title' => new Title('Hello World'),
+                'slug'  => new Code('hello-world'),
+                'count' => new Link('23'),
             ],
             [
                 'id'    => 2,
                 'image' => url('dashboard/assets/images/placeholder.svg'),
-                'title' => 'Uncategorized',
-                'slug'  => 'uncategorized',
-                'count' => 5,
+                'title' => new Title('Uncategorized'),
+                'slug'  => new Code('uncategorized'),
+                'count' => new Link('5'),
             ],
         ];
     }
@@ -44,11 +47,11 @@ final class Terms extends Table
                 ->view('title'),
             $this->cell('slug')
                 ->title(t('Slug'))
-                ->view('raw'),
+                ->view('code'),
             $this->cell('count')
                 ->title(t('Count'))
                 ->fixedWidth('2rem')
-                ->view('raw'),
+                ->view('count'),
         ];
     }
 
@@ -65,10 +68,10 @@ final class Terms extends Table
             'title'       => t('No pages found'),
             'description' => t("You don't have any pages yet. Add them manually or import them from a CSV file."),
             'buttons'     => [
-                [
-                    'label' => t('Import'),
-                    'url'   => url('/dashboard/import'),
-                ],
+                new Link(
+                    title: t('Import'),
+                    url: url('/dashboard/import'),
+                ),
             ],
         ];
     }

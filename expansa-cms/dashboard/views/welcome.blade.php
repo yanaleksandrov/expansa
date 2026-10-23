@@ -35,7 +35,16 @@ use Expansa\Facades\Hook;
     ?>
 </head>
 <body u-data="youla" @keydown.window.prevent.ctrl.s="$notice.add(notifications.ctrlS)">
-    <?php echo view('parts/impersonation'); ?>
+    <?php
+    /**
+     * Prints before body on the dashboard.
+     *
+     * @since 2027.1
+     */
+    Hook::run( 'renderDashboardBody' );
+
+    echo view('parts/impersonation');
+    ?>
     <div class="expansa" :class="showMenu && 'is-active'">
         <div class="expansa-bar">
             <div class="expansa-bar-burger" :class="showMenu && 'is-active'" @click="showMenu = !showMenu">
@@ -78,14 +87,44 @@ use Expansa\Facades\Hook;
 
     <!-- dialog windows start -->
     <div class="dialog" u-data="dialog" id="expansa-dialog">
-        <div u-each="entry in stack" class="dialog-wrapper" @click.outside="close(entry.id)">
+        <div class="dialog-wrapper" u-bind="wrapper">
             <div class="dialog-header">
                 <h6 class="dialog-title" u-show="entry.title" u-text="entry.title ?? ''" hidden></h6>
-                <button class="dialog-close" type="button" @click="close(entry.id)"></button>
+                <button class="dialog-close" type="button" @click="dismiss(entry)"></button>
             </div>
             <div class="dialog-content" u-html="entry.content"></div>
         </div>
     </div>
+
+    <template id="tmpl-dialog-confirm" size="sm">
+        <div class="dialog-body">
+            <p class="dialog-message" u-text="entry.message"></p>
+            <ul class="dialog-items" u-show="entry.items.length">
+                <li u-each="item in entry.items" u-text="item"></li>
+            </ul>
+        </div>
+        <div class="dialog-footer">
+            <button class="btn btn--outline" type="button" u-show="entry.cancel" @click="close(false)"><?php echo t('Cancel'); ?></button>
+            <button class="btn" type="button" u-bind="confirmButton"></button>
+        </div>
+    </template>
+
+    <template id="tmpl-dialog-prompt" size="sm">
+        <form @submit.prevent="close($el.elements.value.value.trim())">
+            <div class="dialog-body">
+                <div class="field field--raised">
+                    <div class="field-label" u-text="entry.label"></div>
+                    <label class="field-item">
+                        <input type="text" name="value" required :value="entry.value" @load="setTimeout(() => $el.select(), 50)">
+                    </label>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn btn--outline" type="button" @click="close()"><?php echo t('Cancel'); ?></button>
+                <button class="btn btn--primary" type="submit" u-text="entry.action || texts.confirm"></button>
+            </div>
+        </form>
+    </template>
 
     <?php
     /**
@@ -95,6 +134,13 @@ use Expansa\Facades\Hook;
      * @since 2027.1
      */
     echo view('parts/dialogs/media-library');
+
+    /**
+     * Prints before scripts on the dashboard.
+     *
+     * @since 2027.1
+     */
+    Hook::run( 'renderDashboardAfter' );
 
     /**
      * Prints scripts or data before the closing body tag on the dashboard.

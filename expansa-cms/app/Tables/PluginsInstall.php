@@ -5,12 +5,29 @@ declare(strict_types=1);
 namespace App\Tables;
 
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Extension;
+use Expansa\Builders\Table\Values\Link;
 
 final class PluginsInstall extends Table
 {
     public function data(): array
     {
-        return [
+        return array_map(static fn (array $plugin) => [
+            'extension' => new Extension(
+                title: $plugin['title'],
+                description: $plugin['description'],
+                screenshot: $plugin['screenshot'],
+                authors: array_map(static fn (array $author) => new Link($author['title'], $author['href']), $plugin['author']),
+                category: $plugin['categories'][0]['title'] ?? '',
+                version: $plugin['version'],
+                installed: $plugin['installed'],
+                active: $plugin['active'],
+                installations: $plugin['installations'],
+                date: $plugin['date'],
+                rating: (float) $plugin['rating'],
+                reviews: $plugin['reviews'],
+            ),
+        ], [
             [
                 'title'           => 'Classic Editor 1',
                 'description'     => 'Customize WordPress with powerful, professional and intuitive fields.',
@@ -301,7 +318,7 @@ final class PluginsInstall extends Table
                 'expansa_version' => '2027.1',
                 'version'         => '1.3.5',
             ],
-        ];
+        ]);
     }
 
     public function cells(): array

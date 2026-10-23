@@ -22,16 +22,18 @@ $list = static fn (string $path, string $then = 'show(data)'): string => "\$ajax
 
 $details = "\$ajax.post('file-manager/details', {path, name: selected[0]}).then(data => describe(data))";
 
-$ask = static fn (string $title, string $label, string $value, string $request, string $then = 'show(data)'): string => "\$dialog.open('tmpl-file-manager-name', {"
-    . "class: 'dialog--sm', title: {$js($title)}, label: {$js($label)}, action: {$js($title)}, value: $value, "
-    . "submit: name => $request.then(data => { $then; })})";
+$ask = static fn (string $title, string $label, string $value, string $request, string $then = 'show(data)'): string => "\$dialog.prompt({$js($label)}, {"
+    . "title: {$js($title)}, action: {$js($title)}, value: $value"
+    . "}).then(name => name && $request.then(data => { $then; }))";
 
-$confirm = static fn (string $title, string $message, string $names, string $request, string $then = 'show(data)'): string => "\$dialog.open('tmpl-file-manager-confirm', {"
-    . "class: 'dialog--sm', title: {$js($title)}, message: {$js($message)}, names: $names, action: {$js($title)}, "
-    . "submit: () => $request.then(data => { $then; })})";
+$confirm = static fn (string $title, string $message, string $names, string $request, string $then = 'show(data)'): string => "\$dialog.confirm({$js($message)}, {"
+    . "title: {$js($title)}, action: {$js($title)}, danger: true, items: $names"
+    . "}).then(confirmed => confirmed && $request.then(data => { $then; }))";
 
-$conflict = static fn (string $run): string => "(run => taken.length ? \$dialog.open('tmpl-file-manager-conflict', {"
-    . "class: 'dialog--sm', title: {$js('Some names are taken')}, names: taken, submit: run}) : run('keep'))($run)";
+$conflict = static fn (string $run): string => "(run => taken.length ? \$dialog.confirm({$js('The target folder already has entries with these names:')}, {"
+    . "title: {$js('Some names are taken')}, items: taken, danger: 'replace', "
+    . "choices: {skip: {$js('Skip')}, keep: {$js('Keep both')}, replace: {$js('Replace')}}"
+    . "}).then(choice => choice && run(choice)) : run('keep'))($run)";
 
 $upload = static fn (string $files, string $to): string => "(files => \$ajax.post('file-manager/conflicts', {to: $to, names: fileNames(files)}).then(({names: taken}) => "
     . $conflict("conflict => \$ajax.post('file-manager/upload', {path, to: $to, conflict, ...uploadPayload(files)}, event => progress(event)).then(data => show(data)).finally(() => progress(null))")
@@ -46,8 +48,8 @@ $drop = static fn (string $to): string => "editable() && (\$event.dataTransfer.f
     . " : dragging.length && " . $transfer('path', 'JSON.stringify(dragging)', $to, '1') . ")";
 
 $preview = "kind(item.name) === 'text' "
-    . "? \$ajax.post('file-manager/read', {path, name: item.name}).then(({text}) => \$dialog.open('tmpl-file-manager-preview', {class: 'dialog--lg', title: item.name, kind: 'text', text})) "
-    . ": \$dialog.open('tmpl-file-manager-preview', {class: 'dialog--lg', title: item.name, kind: kind(item.name), url: previewUrl(item.name)})";
+    . "? \$ajax.post('file-manager/read', {path, name: item.name}).then(({text}) => \$dialog.open('tmpl-file-manager-preview', {title: item.name, kind: 'text', text})) "
+    . ": \$dialog.open('tmpl-file-manager-preview', {title: item.name, kind: kind(item.name), url: previewUrl(item.name)})";
 
 $open = "mode === 'trash' ? null : (searching "
     . "? (item.folder ? " . $list('join(item.dir, item.name)') . " : " . $list('item.dir', 'show(data), setSelected([item.name])') . ") "
@@ -195,11 +197,11 @@ $config = ['readonly' => $settings->readonly, 'trash' => $settings->trash];
                 <i class="ph ph-sidebar-simple"></i>
             </button>
             <button class="btn btn--icon btn--outline btn--xs" type="button" title="<?php echo t_attr('Activity'); ?>"
-                    @click="$ajax.post('file-manager/log').then(({items}) => $dialog.open('tmpl-file-manager-log', {class: 'dialog--lg', title: <?php echo $js('Activity'); ?>, items}))">
+                    @click="$ajax.post('file-manager/log').then(({items}) => $dialog.open('tmpl-file-manager-log', {items}))">
                 <i class="ph ph-clock-counter-clockwise"></i>
             </button>
             <button class="btn btn--icon btn--outline btn--xs" type="button" title="<?php echo t_attr('Settings'); ?>"
-                    @click="$dialog.open('tmpl-file-manager-settings', {class: 'dialog--md', title: <?php echo $js('File manager settings'); ?>})">
+                    @click="$dialog.open('tmpl-file-manager-settings')">
                 <i class="ph ph-gear-six"></i>
             </button>
         </div>
@@ -325,55 +327,7 @@ $config = ['readonly' => $settings->readonly, 'trash' => $settings->trash];
     </div>
 </div>
 
-<template id="tmpl-file-manager-name">
-    <form class="fm-dialog" @submit.prevent="entry.submit($el.elements.name.value.trim()).then(() => close(entry.id))">
-        <div class="fm-dialog-body">
-            <div class="field field--raised">
-                <div class="field-label" u-text="entry.label"></div>
-                <label class="field-item">
-                    <input type="text" name="name" required :value="entry.value" @load="setTimeout(() => $el.select(), 50)">
-                </label>
-            </div>
-        </div>
-        <div class="dialog-footer">
-            <button class="btn btn--outline" type="button" @click="close(entry.id)"><?php echo t('Cancel'); ?></button>
-            <button class="btn btn--primary" type="submit" u-text="entry.action"></button>
-        </div>
-    </form>
-</template>
-
-<template id="tmpl-file-manager-confirm">
-    <div class="fm-dialog">
-        <div class="fm-dialog-body">
-            <p u-text="entry.message"></p>
-            <ul class="fm-dialog-names">
-                <li u-each="name in entry.names" u-text="name"></li>
-            </ul>
-        </div>
-        <div class="dialog-footer">
-            <button class="btn btn--outline" type="button" @click="close(entry.id)"><?php echo t('Cancel'); ?></button>
-            <button class="btn btn--danger" type="button" @click="entry.submit().then(() => close(entry.id))" @load="setTimeout(() => $el.focus(), 50)" u-text="entry.action"></button>
-        </div>
-    </div>
-</template>
-
-<template id="tmpl-file-manager-conflict">
-    <div class="fm-dialog">
-        <div class="fm-dialog-body">
-            <p><?php echo t('The target folder already has entries with these names:'); ?></p>
-            <ul class="fm-dialog-names">
-                <li u-each="name in entry.names" u-text="name"></li>
-            </ul>
-        </div>
-        <div class="dialog-footer">
-            <button class="btn btn--outline" type="button" @click="entry.submit('skip'); close(entry.id)"><?php echo t('Skip'); ?></button>
-            <button class="btn btn--outline" type="button" @click="entry.submit('keep'); close(entry.id)"><?php echo t('Keep both'); ?></button>
-            <button class="btn btn--danger" type="button" @click="entry.submit('replace'); close(entry.id)"><?php echo t('Replace'); ?></button>
-        </div>
-    </div>
-</template>
-
-<template id="tmpl-file-manager-preview">
+<template id="tmpl-file-manager-preview" size="lg">
     <div class="fm-preview">
         <img u-show="entry.kind === 'image'" :src="entry.kind === 'image' ? entry.url : ''" alt>
         <video u-show="entry.kind === 'video'" controls :src="entry.kind === 'video' ? entry.url : ''"></video>
@@ -383,7 +337,7 @@ $config = ['readonly' => $settings->readonly, 'trash' => $settings->trash];
     </div>
 </template>
 
-<template id="tmpl-file-manager-log">
+<template id="tmpl-file-manager-log" title="<?php echo t_attr('Activity'); ?>" size="lg">
     <div class="fm-dialog-body">
         <p u-show="!entry.items.length"><?php echo t('No actions yet.'); ?></p>
         <table class="fm-log" u-show="entry.items.length">
@@ -407,7 +361,7 @@ $config = ['readonly' => $settings->readonly, 'trash' => $settings->trash];
     </div>
 </template>
 
-<template id="tmpl-file-manager-settings">
+<template id="tmpl-file-manager-settings" title="<?php echo t_attr('File manager settings'); ?>">
     <form class="fm-dialog" @submit.prevent="$ajax.post('file-manager/settings')">
         <div class="fm-dialog-body">
             <div class="field field--raised">
@@ -443,7 +397,7 @@ $config = ['readonly' => $settings->readonly, 'trash' => $settings->trash];
             </div>
         </div>
         <div class="dialog-footer">
-            <button class="btn btn--outline" type="button" @click="close(entry.id)"><?php echo t('Cancel'); ?></button>
+            <button class="btn btn--outline" type="button" @click="close()"><?php echo t('Cancel'); ?></button>
             <button class="btn btn--primary" type="submit"><?php echo t('Save'); ?></button>
         </div>
     </form>

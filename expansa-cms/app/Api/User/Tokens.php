@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Api\User;
 
+use App\Api\User\Values\Token;
 use App\Models\User;
 use Expansa\Facades\Access;
 use Expansa\Facades\Db;
@@ -61,7 +62,7 @@ final class Tokens
      * Get the tokens of a user for the profile, newest first.
      *
      * @param User $user
-     * @return array<int, array<string, mixed>> `id`, `name`, `prefix`, `scopes`, `last_used_at`, `expires_at`.
+     * @return Token[]
      */
     public static function all(User $user): array
     {
@@ -70,7 +71,14 @@ final class Tokens
             'ORDER'   => ['id' => 'DESC'],
         ]) ?? [];
 
-        return array_map(fn (array $row) => ['scopes' => (array) json_decode((string) $row['abilities'], true)] + $row, $rows);
+        return array_map(fn (array $row) => new Token(
+            id: $row['id'],
+            name: $row['name'],
+            prefix: $row['prefix'],
+            scopes: (array) json_decode((string) $row['abilities'], true),
+            used: (string) $row['last_used_at'],
+            expires: (string) $row['expires_at'],
+        ), $rows);
     }
 
     /**

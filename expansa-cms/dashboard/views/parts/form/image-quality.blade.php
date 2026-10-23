@@ -1,7 +1,6 @@
 <?php
 
 use Expansa\Builders\Form\Data;
-use Expansa\Facades\Safe;
 use Expansa\Support\Arr;
 
 /**
@@ -14,10 +13,10 @@ defined('EX_PATH') || exit;
 
 // the curve is measured for qualities 40-100
 $attributes = $field->attributes;
-$min        = max(40, Safe::absint($attributes['min'] ?? 40));
-$max        = min(100, Safe::absint($attributes['max'] ?? 100));
-$from       = Safe::absint($attributes['data-optimal-from'] ?? 0);
-$to         = Safe::absint($attributes['data-optimal-to'] ?? 0);
+$min        = max(40, (int) ($attributes['min'] ?? 40));
+$max        = min(100, (int) ($attributes['max'] ?? 100));
+$from       = (int) ($attributes['data-optimal-from'] ?? 0);
+$to         = (int) ($attributes['data-optimal-to'] ?? 0);
 $range      = $max - $min;
 $prop       = $field->prop;
 
@@ -29,7 +28,7 @@ $attributes = [
     'class' => 'quality-chart-range',
     'min'   => $min,
     'max'   => $max,
-    'value' => Safe::absint($attributes['value'] ?? 0) ?: $from ?: $max,
+    'value' => (int) ($attributes['value'] ?? 0) ?: $from ?: $max,
 ];
 
 // file size in % of the size at quality 100, one value per quality from 40: 19.35 + 0.302 × (q - 40) + 62.4 × e^(0.139 × (q - 100)),
@@ -83,9 +82,9 @@ $size = "[19.4,19.7,20,20.3,20.6,20.9,21.2,21.5,21.8,22.1,22.4,22.7,23.1,23.4,23
 				</tr>
 				@foreach($field->options as $option)
 					<tr>
-						<td>{!! Safe::trim($option['content'] ?? '') !!}</td>
-						<td>{!! t('%s KB', Safe::absint($option['size'] ?? 0)) !!}</td>
-						<td>~<span u-text="Math.round({{ Safe::absint($option['size'] ?? 0) }} * {{ $size }} / 100)"></span> {!! t('KB') !!}</td>
+						<td>{!! $option->content !!}</td>
+						<td>{!! t('%s KB', $option->size) !!}</td>
+						<td>~<span u-text="Math.round({{ $option->size }} * {{ $size }} / 100)"></span> {!! t('KB') !!}</td>
 					</tr>
 				@endforeach
 			</table>

@@ -2,11 +2,11 @@
 
 use Expansa\Builders\Form;
 use Expansa\Builders\Table;
+use Expansa\Builders\Table\Values\Part;
 use Expansa\Extensions\Plugin;
 use Expansa\Extensions\Theme;
 use Expansa\Facades\Extensions;
 use Expansa\Facades\I18n;
-use Expansa\Facades\Safe;
 
 /**
  * Header of a table: the bar with the title and a badge, the tools, the bulk actions shown while rows are selected
@@ -16,52 +16,57 @@ use Expansa\Facades\Safe;
  * stays as it is, with the search being typed and the popover open. Screens without a table show only the bar.
  *
  * Bar: `create` is the label of the button leading to the `link` URL, e.g. of the page of a new item;
- * `empty` is the button emptying the trash: its `endpoint` and the `data` posted to it. The bulk actions of Table::bulk() are posted
- * to its `endpoint` with the IDs of the checked rows and the `data` fields; the `confirm` actions ask first,
- * the `password` actions show the field of the current password.
+ * `empty` is the request of the button emptying the trash. The bulk actions of Table::bulk() are posted
+ * to its endpoint with the IDs of the checked rows; the confirm actions ask first, the password actions show
+ * the field of the current password.
  *
  * Pagination, as in WordPress: the range of the shown rows, the first and the previous page, the field of the current
  * page number out of all, the next and the last page; a link or the field opens the page by the `table` component
  * without a reload. Nothing is shown on a single page. `query` is the query the links keep, `$_GET` by default.
  *
  * Filter: the search with the `find` placeholder, applied with the filters 500ms after the typing as the `s` parameter
- * and shown as a chip; the select of the `parts` of the list, see Table::headData(), `part` the current one;
+ * and shown as a chip; the select of the `parts` of the list, `part` the current one;
  * the button with the number of active filters of Table::filters() and the popover with rows "field is/is not values".
  * The state and the instant apply are in the `table` component; the popover is anchored to the button by CSS,
  * its selects open inside it, so a click on them does not close it.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/table-header.blade.php
  *
+ * @var Table|null                                     $table
+ * @var string                                         $title
+ * @var string                                         $badge       Badge after the title, may contain HTML.
+ * @var bool                                           $uploader
+ * @var bool                                           $translation
+ * @var string                                         $project
+ * @var string                                         $create
+ * @var string                                         $link
+ * @var Expansa\Builders\Table\Values\Action|null     $empty
+ * @var array<string, Expansa\Builders\Table\Values\Part> $parts
+ * @var string                                         $part
+ * @var string                                         $find
+ * @var bool                                           $filter      Whether to show the filter, true by default.
+ * @var array<string, mixed>                           $query
+ *
  * @package Expansa\Templates
  */
 defined('EX_PATH') || exit;
 
-[$title, $badge, $uploader, $translation, $project, $create, $link, $empty, $parts, $part, $find, $filter] = Safe::data($__data ?? [], [
-    'title'       => 'trim',
-    'badge'       => 'trim',
-    'uploader'    => 'bool:false',
-    'translation' => 'bool:false',
-    'project'     => 'trim',
-    'create'      => 'trim',
-    'link'        => 'trim',
-    'empty'       => 'array',
-    'parts'       => 'array',
-    'part'        => 'trim',
-    'find'        => 'trim',
-    'filter'      => 'bool:true',
-])->values();
+$table       ??= null;
+$title       ??= '';
+$badge       ??= '';
+$uploader    ??= false;
+$translation ??= false;
+$project     ??= '';
+$create      ??= '';
+$link        ??= '';
+$empty       ??= null;
+$parts       ??= [];
+$part        ??= '';
+$find        ??= '';
+$filters     = $table?->filters() ?? [];
+$filter      = ($filter ?? true) && ($filters || $parts || $find);
 
-$table   = ($__data['table'] ?? null) instanceof Table ? $__data['table'] : null;
-$filters = $table?->filters() ?? [];
-$filter  = $filter && ($filters || $parts || $find);
-
-[$endpoint, $actions, $confirm, $password, $data] = Safe::data($table?->bulk() ?? [], [
-    'endpoint' => 'trim',
-    'actions'  => 'array',
-    'confirm'  => 'array',
-    'password' => 'array',
-    'data'     => 'array',
-])->values();
+$bulk = $table?->bulk();
 
 $progress = static fn (string $name) => [
     'content'     => $name,
@@ -72,7 +77,7 @@ $pages   = $table?->pages() ?? 1;
 $page    = $table?->page() ?? 1;
 $perPage = $table?->perPage() ?? 0;
 $total   = $table?->total() ?? 0;
-$query   = is_array($__data['query'] ?? null) ? $__data['query'] : $_GET;
+$query   ??= $_GET;
 // the separators of the filters stay readable, see Table::activeFilters()
 $href    = static fn (int $number) => '?' . str_replace(['%2C', '%21'], [',', '!'], http_build_query([...$query, 'page' => $number]));
 $before  = [
@@ -116,7 +121,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
             @endif
         </h5>
     @endif
-    @if ($uploader || ! empty($empty['endpoint']) || ($create && $link) || $translation)
+    @if ($uploader || $empty || ($create && $link) || $translation)
         <div class="table-header-group" u-bind="tools">
             @if ($uploader)
                 <button class="btn btn--outline btn--xs" type="button" u-bind="uploader">
@@ -124,8 +129,8 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                 </button>
             @endif
 
-            @if (! empty($empty['endpoint']))
-                <button class="btn btn--outline btn--xs t-red" type="button" u-bind="emptyTrash" data-endpoint="{{ $empty['endpoint'] }}" data-payload="{{ json_encode((object) ($empty['data'] ?? [])) }}">
+            @if ($empty)
+                <button class="btn btn--outline btn--xs t-red" type="button" u-bind="emptyTrash" data-endpoint="{{ $empty->endpoint }}" data-payload="{{ json_encode((object) $empty->data) }}">
                     <i class="ph ph-trash"></i> {{ t('Empty Trash') }}
                 </button>
             @endif
@@ -185,10 +190,10 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
         </div>
     @endif
 
-    @if ($actions)
+    @if ($bulk)
         <div class="table-header-group" u-bind="bulkGroup" hidden>
-            <form class="df g-1" method="POST" action="{{ $endpoint }}" u-bind="bulkForm"@if ($confirm) data-confirm="{{ json_encode(array_values($confirm)) }}"@endif@if ($password) data-password="{{ json_encode(array_values($password)) }}"@endif>
-                @foreach ($data as $name => $value)
+            <form class="df g-1" method="POST" action="{{ $bulk->endpoint }}" u-bind="bulkForm"@if ($bulk->confirm) data-confirm="{{ json_encode(array_values($bulk->confirm)) }}"@endif@if ($bulk->password) data-password="{{ json_encode(array_values($bulk->password)) }}"@endif>
+                @foreach ($bulk->data as $name => $value)
                     <input type="hidden" name="{{ $name }}" value="{{ $value }}">
                 @endforeach
                 <?php
@@ -201,10 +206,10 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                         'u-prop'   => 'action',
                         'u-select' => '',
                     ],
-                    'options'    => ['' => t('Bulk Actions'), ...$actions],
+                    'options'    => ['' => t('Bulk Actions'), ...$bulk->actions],
                 ]);
                 ?>
-                @if ($password)
+                @if ($bulk->password)
                     <div class="field field--xs field--raised" u-bind="bulkPassword" hidden>
                         <div class="field-item">
                             <input type="password" name="password" autocomplete="current-password" placeholder="{{ t_attr('Your current password') }}">
@@ -277,7 +282,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                     'u-bind'   => 'partSelect',
                     'value'    => $part,
                 ],
-                'options'    => array_map(fn (array $item) => (string) ($item['label'] ?? ''), $parts),
+                'options'    => array_map(fn (Part $item) => $item->label, $parts),
             ]);
         }
         ?>
@@ -295,7 +300,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                 <strong>{{ t('Filters') }}:</strong>
                 <div class="table-filter-add">
                     @foreach ($filters as $key => $field)
-                        <button class="badge" type="button" u-bind="filterAdd" data-field="{{ $key }}"><i class="{{ $field['icon'] ?: 'ph ph-circle-half-tilt' }}"></i> {{ $field['label'] }}</button>
+                        <button class="badge" type="button" u-bind="filterAdd" data-field="{{ $key }}"><i class="{{ $field->icon ?: 'ph ph-circle-half-tilt' }}"></i> {{ $field->label }}</button>
                     @endforeach
                 </div>
                 <button class="btn btn--xs t-red" type="button" u-bind="filterClear">{{ t('Clear all') }}</button>
@@ -306,7 +311,7 @@ $popover = 'table-filter-' . bin2hex(random_bytes(4));
                     <span class="table-filter-conjunction" u-bind="filterConjunction"></span>
                     <select class="field field--xs" u-bind="filterField">
                         @foreach ($filters as $key => $field)
-                            <option value="{{ $key }}">{{ $field['label'] }}</option>
+                            <option value="{{ $key }}">{{ $field->label }}</option>
                         @endforeach
                     </select>
                     <select class="field field--xs" u-bind="filterOperator">

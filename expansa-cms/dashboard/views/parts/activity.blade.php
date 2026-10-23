@@ -1,6 +1,4 @@
 <?php
-
-
 /**
  * Activity tab: the timeline of an entity, newest first, in the card of an editor or, with `card` off,
  * on its own, e.g. in the profile; the lines of an editor come from App\Support\Activity::timeline(),
@@ -8,9 +6,9 @@
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/activity.blade.php
  *
- * @var array<int, array{icon: string, user: string, text: string, note: string, changes?: array<int, array{field: string, from: string, to: string}>, at: string}> $lines
- * @var bool   $card  Show the timeline in the card with the heading, true by default.
- * @var string $empty Text without lines.
+ * @var App\Support\Values\Line[] $lines
+ * @var bool                      $card  Show the timeline in the card with the heading, true by default.
+ * @var string                    $empty Text without lines.
  *
  * @package Expansa\Templates
  */
@@ -32,28 +30,28 @@ $empty ??= t('Save the item to start its history.');
             <ol class="post-activity">
                 @foreach ($lines as $line)
                     <li>
-                        <span class="post-activity-icon"><i class="{{ $line['icon'] }}"></i></span>
+                        <span class="post-activity-icon"><i class="{{ $line->icon }}"></i></span>
                         <span class="post-activity-text">
-                            @if ($line['user'] !== '')
-                                <b>{{ $line['user'] }}</b>
+                            @if ($line->user)
+                                <b>{{ $line->user }}</b>
                             @endif
-                            {{ $line['text'] }}
-                            @if ($line['note'] !== '')
-                                <span class="post-activity-note">{{ $line['note'] }}</span>
+                            {{ $line->text }}
+                            @if ($line->note)
+                                <span class="post-activity-note">{{ $line->note }}</span>
                             @endif
-                            @foreach ($line['changes'] ?? [] as $change)
+                            @foreach ($line->changes as $change)
                                 <span class="post-activity-note post-activity-change">
-                                    @if (count($line['changes']) > 1)
-                                        <em>{{ $change['field'] }}</em>
+                                    @if (count($line->changes) > 1)
+                                        <em>{{ $change->field }}</em>
                                     @endif
-                                    <del>{{ $change['from'] !== '' ? $change['from'] : '—' }}</del>
+                                    <del>{{ $change->from !== '' ? $change->from : '—' }}</del>
                                     <i class="ph ph-arrow-right"></i>
-                                    <ins>{{ $change['to'] !== '' ? $change['to'] : '—' }}</ins>
+                                    <ins>{{ $change->to !== '' ? $change->to : '—' }}</ins>
                                 </span>
                             @endforeach
                         </span>
-                        @if ($line['at'] !== '')
-                            <time datetime="{{ date('c', strtotime($line['at'])) }}">{{ App\Support\Dates::format($line['at']) }}</time>
+                        @if ($line->at)
+                            <time datetime="{{ $line->datetime }}">{{ $line->date }}</time>
                         @endif
                     </li>
                 @endforeach

@@ -267,7 +267,39 @@ document.addEventListener('youla:init', () => {
         }));
     })();
     (() => {
-        Youla.variable('dialog', () => document.querySelector('[u-data="dialog"]')?.__x?.data);
+        const SIZES = [ 'xs', 'sm', 'md', 'lg', 'xl' ];
+        const POSITIONS = [ 'center', 'left', 'right' ];
+        const chain = (dialog, options = {}) => new Proxy(dialog, {
+            get(target, name) {
+                if (SIZES.includes(name)) {
+                    return chain(target, {
+                        ...options,
+                        size: name
+                    });
+                }
+                if (POSITIONS.includes(name)) {
+                    return chain(target, {
+                        ...options,
+                        position: name
+                    });
+                }
+                if (name === 'guarded') {
+                    return chain(target, {
+                        ...options,
+                        guarded: true
+                    });
+                }
+                if (name === 'open' || name === 'restore') {
+                    return (first, second) => target[name](first, second, options);
+                }
+                const value = target[name];
+                return typeof value === 'function' ? value.bind(target) : value;
+            }
+        });
+        Youla.variable('dialog', () => {
+            const dialog = document.querySelector('[u-data="dialog"]')?.__x?.data;
+            return dialog && chain(dialog);
+        });
         const searchParamsHandler = (param, value, isRemove) => {
             const url = new URL(window.location.href);
             const params = new URLSearchParams(url.search);
@@ -281,6 +313,9 @@ document.addEventListener('youla:init', () => {
         };
         let uid = 0;
         let scrollY = 0;
+        const resolvers = new Map;
+        const changed = new Set;
+        const idOf = element => Number(element.closest('.dialog-wrapper')?.id.replace('dialog-', '')) || 0;
         function lockScroll() {
             scrollY = window.scrollY;
             Object.assign(document.body.style, {
@@ -307,38 +342,75 @@ document.addEventListener('youla:init', () => {
             stack: [],
             self: {
                 ':class'() {
-                    return this.stack.length ? [ 'is-active', this.stack.at(-1)?.class ].filter(Boolean).join(' ') : '';
+                    return this.stack.length ? 'is-active' : '';
                 },
                 '@keydown.esc.window'() {
-                    this.close();
+                    if (this.stack.length) {
+                        this.dismiss(this.stack.at(-1));
+                    }
+                },
+                '@input'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@change'(event) {
+                    changed.add(idOf(event.target));
+                },
+                '@submit'(event) {
+                    changed.delete(idOf(event.target));
                 }
             },
-            open(templateID, data = {}) {
-                setTimeout(() => {
-                    let template = document.getElementById(templateID);
-                    if (!template) {
-                        return;
-                    }
-                    const isBase = this.stack.length === 0;
-                    this.stack.push({
-                        ...data,
-                        id: ++uid,
-                        content: template.innerHTML
-                    });
-                    if (isBase) {
-                        lockScroll();
-                    }
-                    root.dispatchEvent(new Event('open', {
-                        bubbles: true
-                    }));
-                    if (isBase) {
-                        searchParamsHandler('dialog', templateID, false);
-                    }
-                }, 25);
+            wrapper: {
+                'u-each': 'entry in stack',
+                ':id': '\'dialog-\' + entry.id',
+                ':class': 'entry.modifiers',
+                '@click.outside': 'dismiss(entry, $event)'
             },
-            close(id) {
-                const target = id ?? this.stack.at(-1)?.id;
-                this.stack = this.stack.filter(dialog => dialog.id !== target);
+            confirmButton: {
+                'u-each': 'button in entry.buttons',
+                ':class': 'button.danger ? \'btn--danger\' : (entry.cancel ? \'btn--primary\' : \'btn--outline\')',
+                'u-text': 'button.label || texts.confirm',
+                '@click': 'close(button.value)',
+                '@load': 'setTimeout(() => $el.focus(), 50)'
+            },
+            open(templateID, data = {}, options = {}) {
+                const template = document.getElementById(templateID);
+                if (!template) {
+                    console.warn(`Youla.js: no dialog template '${templateID}'.`);
+                    return Promise.resolve(undefined);
+                }
+                const {size = template.getAttribute('size') ?? 'md', position = template.getAttribute('position') ?? 'center', guarded = template.hasAttribute('guarded')} = options;
+                if (!SIZES.includes(size) || !POSITIONS.includes(position)) {
+                    console.warn(`Youla.js: unknown dialog size '${size}' or position '${position}'.`);
+                }
+                const isBase = this.stack.length === 0;
+                const id = ++uid;
+                this.stack.push({
+                    title: template.getAttribute('title') ?? '',
+                    ...data,
+                    id,
+                    content: template.innerHTML,
+                    modifiers: `dialog-wrapper--${size} dialog-wrapper--${position}`,
+                    opened: performance.now(),
+                    guarded
+                });
+                if (isBase) {
+                    lockScroll();
+                    searchParamsHandler('dialog', templateID, false);
+                }
+                root.dispatchEvent(new Event('open', {
+                    bubbles: true
+                }));
+                return new Promise(resolve => resolvers.set(id, resolve));
+            },
+            close(value) {
+                const entry = this.stack.at(-1);
+                if (!entry) {
+                    return;
+                }
+                this.stack = this.stack.slice(0, -1);
+                resolvers.get(entry.id)?.(value);
+                resolvers.delete(entry.id);
+                changed.delete(entry.id);
                 root.dispatchEvent(new Event('close', {
                     bubbles: true
                 }));
@@ -347,16 +419,63 @@ document.addEventListener('youla:init', () => {
                     searchParamsHandler('dialog', null, true);
                 }
             },
-            clear() {
-                [ ...this.stack ].forEach(entry => this.close(entry.id));
+            async dismiss(entry, event) {
+                if (event && (entry.id !== this.stack.at(-1)?.id || event.timeStamp < entry.opened)) {
+                    return;
+                }
+                const index = this.stack.findIndex(dialog => dialog.id === entry.id);
+                if (index < 0) {
+                    return;
+                }
+                const unsaved = this.stack.slice(index).some(dialog => dialog.guarded && changed.has(dialog.id));
+                if (unsaved && !await this.confirm(this.texts.discardChanges, {
+                    action: this.texts.discard,
+                    danger: true
+                })) {
+                    return;
+                }
+                while (this.stack.some(dialog => dialog.id === entry.id)) {
+                    this.close();
+                }
             },
-            async init(templateID, callback) {
-                const params = new URLSearchParams(window.location.search);
-                if (templateID && params.get('dialog') === templateID && callback) {
-                    const data = await callback();
-                    if (data) {
-                        this.open(templateID, data);
-                    }
+            clear() {
+                while (this.stack.length) {
+                    this.close();
+                }
+            },
+            confirm(message, {title = '', action = '', danger = false, items = [], choices = null} = {}) {
+                const buttons = choices ? Object.entries(choices).map(([value, label]) => ({
+                    value,
+                    label,
+                    danger: danger === value
+                })) : [ {
+                    value: true,
+                    label: action,
+                    danger: danger === true
+                } ];
+                return this.open('tmpl-dialog-confirm', {
+                    message,
+                    title,
+                    items,
+                    buttons,
+                    cancel: !choices
+                }).then(value => choices ? value : value === true);
+            },
+            prompt(label, {title = '', value = '', action = ''} = {}) {
+                return this.open('tmpl-dialog-prompt', {
+                    label,
+                    title,
+                    value,
+                    action
+                });
+            },
+            async restore(template, callback = () => ({}), options = {}) {
+                if (new URLSearchParams(window.location.search).get('dialog') !== template.id) {
+                    return;
+                }
+                const data = await callback();
+                if (data) {
+                    return this.open(template.id, data, options);
                 }
             }
         }));
@@ -516,13 +635,16 @@ document.addEventListener('youla:init', () => {
                 }
             },
             bulkForm: {
-                '@submit.prevent'() {
-                    const form = this.$el;
-                    if (parse(form.dataset.confirm, []).includes(this.action) && !confirm(this.texts.deleteItems)) {
+                async '@submit.prevent'() {
+                    const {$el: form, $ajax} = this;
+                    if (parse(form.dataset.confirm, []).includes(this.action) && !await this.$dialog.confirm(this.texts.deleteItems, {
+                        action: this.texts.deletePermanently,
+                        danger: true
+                    })) {
                         return;
                     }
                     const ids = this.items(root).filter(input => input.checked).map(input => input.value).join(',');
-                    this.$ajax.post(form.getAttribute('action'), {
+                    $ajax.post(form.getAttribute('action'), {
                         ids
                     });
                 }
@@ -539,24 +661,31 @@ document.addEventListener('youla:init', () => {
             },
             uploader: {
                 '@click'() {
-                    this.$dialog.open('tmpl-media-uploader', this.uploaderDialog);
+                    this.$dialog.open('tmpl-media-uploader');
                 }
             },
             emptyTrash: {
-                '@click'() {
-                    const {endpoint, payload} = this.$el.dataset;
-                    if (confirm(this.texts.emptyTrash)) {
-                        this.$ajax.post(endpoint, parse(payload, {}));
+                async '@click'() {
+                    const {$el, $ajax} = this;
+                    const {endpoint, payload} = $el.dataset;
+                    if (await this.$dialog.confirm(this.texts.emptyTrash, {
+                        action: this.texts.deletePermanently,
+                        danger: true
+                    })) {
+                        $ajax.post(endpoint, parse(payload, {}));
                     }
                 }
             },
             rowAction: {
-                '@click.prevent'() {
-                    const {endpoint, payload, confirm: question, refresh} = this.$el.dataset;
-                    if (question && !confirm(this.texts[question] ?? question)) {
+                async '@click.prevent'() {
+                    const {$el, $ajax} = this;
+                    const {endpoint, payload, confirm: question, refresh} = $el.dataset;
+                    if (question && !await this.$dialog.confirm(this.texts[question] ?? question, {
+                        danger: true
+                    })) {
                         return;
                     }
-                    this.$ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
+                    $ajax.post(endpoint, parse(payload, {})).then(() => refresh && this.applyFilters());
                 }
             },
             moreLinks: {
@@ -873,19 +1002,7 @@ document.addEventListener('youla:init', () => {
             }
         };
     });
-    Youla.data('builder', root => {
-        let state;
-        try {
-            state = JSON.parse(root.dataset.state || '{}');
-        } catch {
-            state = {};
-        }
-        let valueOptions = {};
-        try {
-            valueOptions = JSON.parse(root.dataset.valueOptions || '{}');
-        } catch {
-            valueOptions = {};
-        }
+    Youla.data('builder', () => (state = {}, valueOptions = {}) => {
         const defaultRule = () => ({
             location: Object.keys(valueOptions)[0] || 'post_type',
             operator: '==',
@@ -1298,8 +1415,8 @@ document.addEventListener('youla:init', () => {
             }
         }
     }));
-    Youla.data('postDetails', root => ({
-        status: root.dataset.status || '',
+    Youla.data('postDetails', root => (saved = '') => ({
+        status: saved,
         self: {
             '@change'() {
                 this.schedule(this.$event.target);
@@ -1321,7 +1438,7 @@ document.addEventListener('youla:init', () => {
         },
         restore(form) {
             if (form === root.closest('form')) {
-                this.status = root.dataset.status || '';
+                this.status = saved;
             }
         }
     }));
@@ -1441,6 +1558,26 @@ document.addEventListener('youla:init', () => {
         el.setAttribute('data-lang', lang.toUpperCase());
         el.replaceChildren(wrapper);
     });
+    Youla.directive('counter', el => {
+        const counter = el.closest('.field')?.querySelector('.field-counter');
+        if (!counter) {
+            return;
+        }
+        const update = () => {
+            const length = el.value.length;
+            const min = +el.getAttribute('minlength') || 0;
+            const max = +el.getAttribute('maxlength') || 0;
+            counter.textContent = max ? `${length} / ${max}` : `${length}`;
+            counter.classList.toggle('is-short', length > 0 && length < min);
+            counter.classList.toggle('is-full', max > 0 && length >= max);
+        };
+        update();
+        if (!el._x_counter) {
+            el._x_counter = true;
+            el.addEventListener('input', update);
+            el.addEventListener('change', update);
+        }
+    });
     Youla.directive('noautofill', el => {
         if (el._x_noautofill) {
             return;
@@ -1489,6 +1626,207 @@ document.addEventListener('youla:init', () => {
             reposition();
         });
     });
+    (() => {
+        const THRESHOLD = 4;
+        const EDGE = 48;
+        const SPEED = 16;
+        const LANDING = 150;
+        const itemsOf = list => [ ...list.children ].filter(el => !el.hasAttribute('u-each') && !el.hidden && el.tagName !== 'TEMPLATE');
+        const depthOf = el => +(el.style.getPropertyValue('--depth') || 0);
+        function scrollerOf(el) {
+            for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+                const {overflowY} = getComputedStyle(node);
+                if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
+                    return node;
+                }
+            }
+            return document.scrollingElement;
+        }
+        function start(list, event) {
+            const options = list._x_sortable;
+            const row = itemsOf(list).find(item => item.contains(event.target));
+            if (!row || event.button !== 0 || (options.handle ? !event.target.closest(options.handle) : event.target.closest('input, textarea, select, [contenteditable]'))) {
+                return;
+            }
+            const startX = event.clientX;
+            const startY = event.clientY;
+            let drag = null;
+            const move = event => {
+                if (!drag) {
+                    if (Math.hypot(event.clientX - startX, event.clientY - startY) < THRESHOLD) {
+                        return;
+                    }
+                    drag = begin(list, row, startX, startY);
+                }
+                event.preventDefault();
+                drag.pointer = event;
+                update(drag);
+            };
+            const stop = () => {
+                document.removeEventListener('pointermove', move);
+                document.removeEventListener('pointerup', stop);
+                document.removeEventListener('pointercancel', stop);
+                if (drag) {
+                    const swallow = event => event.stopPropagation();
+                    window.addEventListener('click', swallow, {
+                        capture: true,
+                        once: true
+                    });
+                    setTimeout(() => window.removeEventListener('click', swallow, {
+                        capture: true
+                    }), 0);
+                    finish(drag);
+                }
+            };
+            document.addEventListener('pointermove', move, {
+                passive: false
+            });
+            document.addEventListener('pointerup', stop);
+            document.addEventListener('pointercancel', stop);
+        }
+        function begin(list, row, startX, startY) {
+            const options = list._x_sortable;
+            const rows = itemsOf(list);
+            const from = rows.indexOf(row);
+            let count = 1;
+            while (options.nested && from + count < rows.length && depthOf(rows[from + count]) > depthOf(row)) {
+                count++;
+            }
+            const scroller = scrollerOf(list);
+            const offset = scroller.scrollTop;
+            const rects = rows.map(el => {
+                const rect = el.getBoundingClientRect();
+                return {
+                    top: rect.top + offset,
+                    bottom: rect.bottom + offset
+                };
+            });
+            const block = rows.slice(from, from + count);
+            const others = rows.filter(el => !block.includes(el)).map(el => ({
+                el,
+                rect: rects[rows.indexOf(el)]
+            }));
+            const gap = rows.length > 1 ? Math.max(0, rects[1].top - rects[0].bottom) : 0;
+            const top = rects[from].top;
+            const bottom = rects[from + count - 1].bottom;
+            const deepest = Math.max(...block.map(depthOf)) - depthOf(row);
+            list.classList.add('is-sorting');
+            block.forEach(el => el.classList.add('is-dragging'));
+            const drag = {
+                list,
+                rows,
+                block,
+                others,
+                from,
+                count,
+                top,
+                bottom,
+                scroller,
+                startX,
+                startY,
+                offset,
+                shift: bottom - top + gap,
+                depth: depthOf(row),
+                maxDepth: Math.max(depthOf(row), (options.maxDepth ?? Infinity) - deepest),
+                to: from,
+                pointer: null
+            };
+            autoscroll(drag);
+            return drag;
+        }
+        function update(drag) {
+            const {list, block, others, top, bottom, scroller, pointer} = drag;
+            const options = list._x_sortable;
+            const dx = pointer.clientX - drag.startX;
+            const dy = pointer.clientY - drag.startY + scroller.scrollTop - drag.offset;
+            const center = (top + bottom) / 2 + dy;
+            const to = others.filter(({rect}) => (rect.top + rect.bottom) / 2 < center).length;
+            others.forEach(({el}, index) => {
+                const before = drag.rows.indexOf(el) < drag.from;
+                const y = before && index >= to ? drag.shift : !before && index < to ? -drag.shift : 0;
+                el.style.transform = y ? `translateY(${y}px)` : '';
+            });
+            let depth = depthOf(drag.rows[drag.from]);
+            if (options.nested) {
+                const above = others[to - 1]?.el;
+                const below = others[to]?.el;
+                const limit = Math.min(above ? depthOf(above) + 1 : 0, drag.maxDepth);
+                const lower = below ? Math.min(depthOf(below), limit) : 0;
+                depth = Math.max(lower, Math.min(depth + Math.round(dx / (options.indent || 24)), limit));
+            }
+            drag.to = to;
+            drag.depth = depth;
+            drag.x = (depth - depthOf(drag.rows[drag.from])) * (options.indent || 24);
+            block.forEach(el => el.style.transform = `translate(${drag.x}px, ${dy}px)`);
+        }
+        function autoscroll(drag) {
+            const step = () => {
+                if (drag.done) {
+                    return;
+                }
+                if (drag.pointer) {
+                    const area = drag.scroller === document.scrollingElement ? {
+                        top: 0,
+                        bottom: window.innerHeight
+                    } : drag.scroller.getBoundingClientRect();
+                    const {clientY} = drag.pointer;
+                    const speed = clientY < area.top + EDGE ? -SPEED * (1 - (clientY - area.top) / EDGE) : clientY > area.bottom - EDGE ? SPEED * (1 - (area.bottom - clientY) / EDGE) : 0;
+                    if (speed) {
+                        drag.scroller.scrollTop += Math.round(speed);
+                        update(drag);
+                    }
+                }
+                requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+        }
+        function finish(drag) {
+            const {list, rows, block, others, from, count, to, top, bottom} = drag;
+            drag.done = true;
+            const landing = to < from ? others[to].rect.top - top : to > from ? others[to - 1].rect.bottom - bottom : 0;
+            const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            block.forEach(el => {
+                el.style.transition = reduced ? '' : `transform ${LANDING}ms ease`;
+                el.style.transform = `translate(${drag.x || 0}px, ${landing}px)`;
+            });
+            setTimeout(() => {
+                const depth = drag.depth;
+                const shift = depth - depthOf(rows[from]);
+                const changed = to !== from || shift !== 0;
+                if (to !== from) {
+                    const anchor = to < others.length ? others[to].el : others[others.length - 1].el.nextSibling;
+                    block.forEach(el => list.insertBefore(el, anchor));
+                }
+                if (list._x_sortable.nested && shift !== 0) {
+                    block.forEach(el => el.style.setProperty('--depth', depthOf(el) + shift));
+                }
+                list.classList.remove('is-sorting');
+                rows.forEach(el => {
+                    el.classList.remove('is-dragging');
+                    el.style.transform = '';
+                    el.style.transition = '';
+                });
+                if (changed) {
+                    list.dispatchEvent(new CustomEvent('sort', {
+                        detail: {
+                            from,
+                            count,
+                            to,
+                            depth
+                        },
+                        bubbles: true
+                    }));
+                }
+            }, reduced ? 0 : LANDING);
+        }
+        Youla.directive('sortable', (el, output) => {
+            el._x_sortable = output && typeof output === 'object' ? output : {};
+            if (!el._x_sortableBound) {
+                el._x_sortableBound = true;
+                el.addEventListener('pointerdown', event => start(el, event));
+            }
+        });
+    })();
     Youla.directive('collapse', (el, output) => {
         const isOpen = !!output;
         const duration = 200;
@@ -1517,9 +1855,7 @@ document.addEventListener('youla:init', () => {
             if (elapsed < duration) {
                 requestAnimationFrame(step);
             } else {
-                if (!isOpen) {
-                    el.style.display = 'none';
-                }
+                el.style.display = isOpen ? '' : 'none';
                 [ ...props, 'overflow' ].forEach(prop => el.style[prop] = '');
             }
         }

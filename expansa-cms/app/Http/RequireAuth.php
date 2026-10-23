@@ -30,11 +30,21 @@ final class RequireAuth
         '/api/user/two-factor',
         '/api/user/email-link',
         '/api/comments/submit',
+        '/api/menus/click',
     ];
+
+    /**
+     * Routes read by a visitor of the site or a headless front end: the menus of the theme locations.
+     */
+    private const string PUBLIC_READ = '#^/api/menus/[a-z0-9_-]+$#';
 
     public function handle(): void
     {
         if (in_array(Route::uri(), self::PUBLIC_ROUTES, true)) {
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'GET' && preg_match(self::PUBLIC_READ, Route::uri())) {
             return;
         }
 

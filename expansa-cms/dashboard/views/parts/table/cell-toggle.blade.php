@@ -6,8 +6,8 @@
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/parts/table/cell-toggle.blade.php
  *
  * @var Expansa\Builders\Table\Cell $cell
- * @var array<string, mixed>        $item
- * @var mixed                       $value
+ * @var int|string                  $id    Row id.
+ * @var bool                        $value
  *
  * @package Expansa\Templates
  */
@@ -15,6 +15,6 @@ defined('EX_PATH') || exit;
 ?>
 <div class="field">
     <div class="field-item">
-        <input type="checkbox" name="{{ $cell->key }}[]" value="{{ $item['id'] ?? '' }}"{{ $value === true ? ' checked' : '' }}>
+        <input type="checkbox" name="{{ $cell->key }}[]" value="{{ $id }}"{{ $value ? ' checked' : '' }}>
     </div>
 </div>

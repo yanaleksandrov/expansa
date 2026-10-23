@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Expansa\Builders\Form;
 
+use Expansa\Builders\Form\Values\Option;
+use Expansa\Builders\Form\Values\Tab;
 use Expansa\Security\Sanitizer;
 use Expansa\Support\Arr;
 
@@ -11,8 +13,8 @@ use Expansa\Support\Arr;
  * Data of a field template, `$field` in it: Form::view() fills it from the field array, each property
  * cleans its value in a set hook. A key means the same in every template, so one class serves them all;
  * default classes differ by template and stay in its markup (`$field->class ?: 'field'`).
- * Keys without a property (`type`, `error`) are dropped; `prop`, `required`
- * and `htmlAttributes` are computed.
+ * Keys without a property (`type`, `error`) are dropped; `prop`, `required`, `checked`
+ * and `htmlAttributes` are computed. Options and tabs become value objects, see Form\Values.
  *
  * @package Expansa\Builders
  */
@@ -25,7 +27,14 @@ final class Data
         'prop'           => true,
         'required'       => true,
         'htmlAttributes' => true,
+        'checked'        => true,
+        'counter'        => true,
     ];
+
+    /**
+     * Attributes of a length limit: a positive number, `maxlength="0"` would block the input.
+     */
+    private const array LENGTHS = ['minlength', 'maxlength'];
 
     /**
      * Name attribute of the field.
@@ -145,44 +154,84 @@ final class Data
      * HTML attributes of the input.
      */
     public array $attributes = [] {
-        set(mixed $value) => Sanitizer::array($value);
+        set(mixed $value) => self::attributes($value);
     }
 
     /**
-     * Options of a select, checkboxes or radios.
+     * Options of a select, checkboxes, radios or buttons in their order.
+     *
+     * @var Option[]
      */
     public array $options = [] {
-        set(mixed $value) => Sanitizer::array($value);
+        set(mixed $value) => self::options($value);
     }
 
     /**
      * Tabs of a level, rendered together: the menu buttons and the panels with rendered nested fields.
      * `active` marks the tab shown when the page opens, `condition` and `visible` come from its conditions.
      *
-     * @var array<int, array{prop: string, label: string, icon: string, caption: string, description: string,
-     *     content: string, condition: string, visible: bool, active: bool}>
+     * @var Tab[]
      */
     public array $tabs = [] {
         set(mixed $value) => array_map(
-            fn (array $tab) => [
-                'prop'        => Sanitizer::prop($tab['name'] ?? '') ?: 'tab',
-                'label'       => Sanitizer::trim($tab['label'] ?? ''),
-                'icon'        => Sanitizer::attribute($tab['icon'] ?? ''),
-                'caption'     => Sanitizer::ucfirst($tab['caption'] ?? ''),
-                'description' => Sanitizer::trim($tab['description'] ?? ''),
-                'content'     => Sanitizer::trim($tab['content'] ?? ''),
-                'condition'   => (string) ($tab['conditions']['u-show'] ?? ''),
-                'visible'     => empty($tab['conditions']['hidden']),
-                'active'      => ! empty($tab['active']),
-            ],
+            fn (array $tab) => new Tab(
+                prop: Sanitizer::prop($tab['name'] ?? '') ?: 'tab',
+                label: Sanitizer::trim($tab['label'] ?? ''),
+                icon: Sanitizer::attribute($tab['icon'] ?? ''),
+                caption: Sanitizer::ucfirst($tab['caption'] ?? ''),
+                description: Sanitizer::trim($tab['description'] ?? ''),
+                content: Sanitizer::trim($tab['content'] ?? ''),
+                condition: (string) ($tab['conditions']['u-show'] ?? ''),
+                visible: empty($tab['conditions']['hidden']),
+                active: ! empty($tab['active']),
+            ),
             array_values(Sanitizer::array($value)),
         );
     }
 
     /**
-     * Locations of the rule builder: key => {label, options}.
+     * Locations of the rule builder, each a group: `label` and the `options` of its values.
+     *
+     * @var Option[]
      */
     public array $locations = [] {
+        set(mixed $value) => self::options($value);
+    }
+
+    /**
+     * Name of the field a slug is made from, empty for none.
+     */
+    public string $from = '' {
+        set(mixed $value) => Sanitizer::name($value);
+    }
+
+    /**
+     * URL before a slug, the site URL when null.
+     */
+    public ?string $base = null {
+        set(mixed $value) => $value === null ? null : Sanitizer::trim($value);
+    }
+
+    /**
+     * Part of the URL after a slug.
+     */
+    public string $suffix = '' {
+        set(mixed $value) => Sanitizer::trim($value);
+    }
+
+    /**
+     * Name of the field the base of a slug follows, empty for none.
+     */
+    public string $parent = '' {
+        set(mixed $value) => Sanitizer::name($value);
+    }
+
+    /**
+     * Bases of a slug by the values of the `parent` field.
+     *
+     * @var array<int|string, string>
+     */
+    public array $bases = [] {
         set(mixed $value) => Sanitizer::array($value);
     }
 
@@ -278,10 +327,25 @@ final class Data
     }
 
     /**
+     * Whether the input is checked by its attribute, the default of the options without `checked`.
+     */
+    public bool $checked {
+        get => Sanitizer::bool($this->attributes['checked'] ?? false);
+    }
+
+    /**
      * HTML attributes of the input as a string, with a leading space.
      */
     public string $htmlAttributes {
         get => Arr::toHtmlAttributes($this->attributes);
+    }
+
+    /**
+     * Counter of a text with `maxlength` or `minlength`: its length and the limit, `12 / 160` or `12`
+     * without the maximum; empty without a limit. `u-counter` of youla-expansa.js keeps it up to date.
+     */
+    public string $counter {
+        get => self::counter($this->attributes);
     }
 
     /**
@@ -296,5 +360,93 @@ final class Data
                 $this->$key = $value;
             }
         }
+    }
+
+    /**
+     * Get the text of the length counter of the attributes, see $counter.
+     *
+     * @param array<string, mixed> $attributes
+     * @return string
+     */
+    private static function counter(array $attributes): string
+    {
+        if (! isset($attributes['maxlength']) && ! isset($attributes['minlength'])) {
+            return '';
+        }
+
+        $length = mb_strlen((string) ($attributes['value'] ?? ''));
+
+        return isset($attributes['maxlength']) ? $length . ' / ' . $attributes['maxlength'] : (string) $length;
+    }
+
+    /**
+     * Clean the HTML attributes: a length limit is kept only as a positive number.
+     *
+     * @param mixed $attributes
+     * @return array<string, mixed>
+     */
+    private static function attributes(mixed $attributes): array
+    {
+        $attributes = Sanitizer::array($attributes);
+        foreach (self::LENGTHS as $name) {
+            $length = Sanitizer::absint($attributes[$name] ?? 0);
+            if ($length > 0) {
+                $attributes[$name] = $length;
+            } else {
+                unset($attributes[$name]);
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Build the options of a field array in their order, the keys become the values.
+     *
+     * @param mixed $options Labels or arrays by key, see Values\Option.
+     * @return Option[]
+     */
+    private static function options(mixed $options): array
+    {
+        $result = [];
+        foreach (Sanitizer::array($options) as $key => $option) {
+            $result[] = self::option((string) $key, $option);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Build an option from its key and its label or array; a group gets its `label` as the content.
+     *
+     * @param string $value  Key of the option.
+     * @param mixed  $option Label or array.
+     * @return Option
+     */
+    private static function option(string $value, mixed $option): Option
+    {
+        if (! is_array($option)) {
+            return new Option(value: $value, content: Sanitizer::trim($option));
+        }
+
+        $data = [];
+        foreach ($option as $key => $item) {
+            if ($key !== 'content' && $key !== 'options' && is_scalar($item)) {
+                $data["data-$key"] = trim((string) $item);
+            }
+        }
+
+        return new Option(
+            value: $value,
+            content: Sanitizer::trim($option['content'] ?? $option['label'] ?? ''),
+            description: Sanitizer::trim($option['description'] ?? ''),
+            icon: Sanitizer::attribute($option['icon'] ?? ''),
+            class: Sanitizer::attribute($option['class'] ?? ''),
+            checked: isset($option['checked']) ? Sanitizer::bool($option['checked']) : null,
+            size: Sanitizer::absint($option['size'] ?? 0),
+            attributes: Sanitizer::array($option['attributes'] ?? []),
+            data: $data,
+            options: empty($option['options']) ? [] : self::options($option['options']),
+        );
     }
 }

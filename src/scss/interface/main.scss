@@ -198,7 +198,7 @@ h4,
 h5,
 h6 {
   --expansa-multiplier: 1.05;
-  font-size: calc(var(--expansa-font-ratio) * 1rem);
+  font-size: calc(var(--expansa-font-ratio) * 0.875rem);
   line-height: 1.2em;
   font-weight: 600;
   margin: 0;
@@ -233,7 +233,7 @@ textarea {
   position: relative;
   outline: 0;
   background-color: var(--expansa-bg-white);
-  transition: color, box-shadow 0.2s ease;
+  transition: color, background-color, box-shadow 0.2s ease;
   overflow: auto;
   height: calc(#{constants.rem(constants.$height-md)} - 2px);
   padding: 0.325rem 0.875em;
@@ -278,6 +278,7 @@ select {
   cursor: pointer;
   width: auto;
   line-height: 1.5;
+  padding-inline-end: 2.25em;
 
   &:not([multiple]) {
     background: var(--expansa-bg) url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2371777F' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.85em top 55%;

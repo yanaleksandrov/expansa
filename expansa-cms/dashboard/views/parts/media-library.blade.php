@@ -45,7 +45,7 @@ defined('EX_PATH') || exit;
         <div class="storage media-library-grid" u-dragselect="applyDragSelection($event.detail)">
             <div class="storage__item" :class="isSelected(item.id) && 'is-active'" :data-id="item.id"
                  u-each.lazy="(item, i) in visible"
-                 @click="toggle(item, $event)" @dblclick="confirm(); $dialog.close()">
+                 @click="toggle(item, $event)" @dblclick="picker && $dialog.close(selection())">
                 <img class="storage__image" u-show="item.url || item.icon" :src="item.sizes?.thumbnail?.url || item.url || item.icon || ''" width="200" height="200" alt loading="lazy">
                 <div class="storage__meta" u-show="item.url || item.icon">
                     <div class="storage__data" u-text="item.filename"></div>
@@ -82,9 +82,9 @@ defined('EX_PATH') || exit;
         </div>
     </div>
 
-    <div class="dialog-footer media-library-footer" u-show="onSelect">
+    <div class="dialog-footer media-library-footer" u-show="picker">
         <span class="fs-13 t-muted" u-show="selected.length"><span u-text="selected.length"></span> <?php echo t('selected'); ?></span>
-        <button type="button" class="btn btn--primary" :disabled="!selected.length" @click="confirm(); $dialog.close()">
+        <button type="button" class="btn btn--primary" :disabled="!selected.length" @click="$dialog.close(selection())">
             <?php echo t('Select'); ?>
         </button>
     </div>

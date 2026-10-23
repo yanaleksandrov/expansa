@@ -34,6 +34,8 @@ final class Migrations
         $this->createApiKeysTable();
         $this->createFieldGroupsTable();
         $this->createActivityTable();
+        $this->createMenusTable();
+        $this->createMenuClicksTable();
     }
 
     public function createPostsTable(string $postType): void
@@ -83,6 +85,43 @@ final class Migrations
             $table->timestamps();
 
             $table->index(['entity_table', 'entity_id']);
+        });
+        Db::updateSchema();
+    }
+
+    /**
+     * Create the navigation menus of the site, see App\Models\Menu; also on the sites installed before
+     * the menus.
+     *
+     * @return void
+     */
+    public function createMenusTable(): void
+    {
+        Schema::create('menus', function (Table $table) {
+            $table->id();
+            $table->string('title', 255);
+            $table->json('locations')->nullable();
+            $table->json('items')->nullable();
+            $table->timestamps();
+        });
+        Db::updateSchema();
+    }
+
+    /**
+     * Create the clicks of the menu items by day, see Menu::click(); also on the sites installed before them.
+     *
+     * @return void
+     */
+    public function createMenuClicksTable(): void
+    {
+        Schema::create('menu_clicks', function (Table $table) {
+            $table->bigInt('menu_id')->unsigned();
+            $table->string('item_id', 36);
+            $table->date('day');
+            $table->int('count')->unsigned()->default(0);
+
+            $table->unique(['menu_id', 'item_id', 'day']);
+            $table->index('day');
         });
         Db::updateSchema();
     }

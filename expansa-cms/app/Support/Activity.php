@@ -8,6 +8,8 @@ use App\Models\Comment;
 use App\Models\User;
 use App\Post\Status;
 use App\Post\Type;
+use App\Support\Values\Change;
+use App\Support\Values\Line;
 use Expansa\Facades\Db;
 use Expansa\Facades\Hook;
 
@@ -175,13 +177,13 @@ final class Activity
     /**
      * Get the timeline of an entity for its Activity tab, newest first: the recorded events
      * and the lines the editor adds, such as its creation or the comments of a post; an edit has
-     * the `changes` of its short columns: the name, what the value was and what it became.
+     * the changes of its short columns.
      *
-     * @param string                                                                    $table
-     * @param int                                                                       $id
-     * @param array<int, array{icon: string, user: string, text: string, note: string, at: string}> $lines
-     * @param int                                                                       $limit Events read from the log.
-     * @return array<int, array{icon: string, user: string, text: string, note: string, changes?: array<int, array{field: string, from: string, to: string}>, at: string}>
+     * @param string $table
+     * @param int    $id
+     * @param Line[] $lines Lines of the editor.
+     * @param int    $limit Events read from the log.
+     * @return Line[]
      */
     public static function timeline(string $table, int $id, array $lines = [], int $limit = 50): array
     {
@@ -201,32 +203,23 @@ final class Activity
             if ($row['event'] === 'status_changed') {
                 $from      = (string) ($details['from'] ?? '');
                 $to        = (string) ($details['to'] ?? '');
-                $changes[] = [
-                    'field' => t('Status'),
-                    'from'  => $statuses[$from] ?? $from,
-                    'to'    => $statuses[$to] ?? $to,
-                ];
+                $changes[] = new Change(t('Status'), $statuses[$from] ?? $from, $statuses[$to] ?? $to);
             }
 
             foreach ((array) ($details['changes'] ?? []) as $column => [$from, $to]) {
-                $changes[] = [
-                    'field' => self::field($column),
-                    'from'  => self::value($column, (string) $from, $parents),
-                    'to'    => self::value($column, (string) $to, $parents),
-                ];
+                $changes[] = new Change(self::field($column), self::value($column, (string) $from, $parents), self::value($column, (string) $to, $parents));
             }
 
-            $lines[] = [
-                'icon'    => self::icon($row['event']),
-                'user'    => $names[$row['user_id']] ?? '',
-                'text'    => self::label($table, $row['event'], $details),
-                'note'    => '',
-                'changes' => $changes,
-                'at'      => $row['created_at'],
-            ];
+            $lines[] = new Line(
+                icon: self::icon($row['event']),
+                text: self::label($table, $row['event'], $details),
+                user: $names[$row['user_id']] ?? '',
+                changes: $changes,
+                at: $row['created_at'],
+            );
         }
 
-        usort($lines, fn (array $a, array $b) => strcmp($b['at'], $a['at']));
+        usort($lines, fn (Line $a, Line $b) => strcmp($b->at, $a->at));
 
         return $lines;
     }
