@@ -34,7 +34,7 @@ final class SiteHealth
     /**
      * Extensions the dashboard and the installer need.
      */
-    private const array EXTENSIONS = ['pdo', 'curl', 'mbstring', 'gd', 'json', 'openssl'];
+    private const array EXTENSIONS = ['pdo', 'curl', 'mbstring', 'dom', 'gd', 'json', 'openssl'];
 
     /**
      * Extensions some features use: plugin archives, upload types, photo metadata, translations, encryption.

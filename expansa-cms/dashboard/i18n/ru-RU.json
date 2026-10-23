@@ -492,6 +492,7 @@
     "Do not reply with your password or verification codes. Expansa will never ask you for them by email.": "Не отправляйте в ответ пароль или коды подтверждения. Expansa никогда не запрашивает их по почте.",
     "Documents": "Документы",
     "Does not expire": "Бессрочный",
+    "DOM PHP Extension": "Расширение PHP DOM",
     "Domain": "Домен",
     "Don't have an account yet? [Sign Up](:signUpLink)": "Ещё нет аккаунта? [Зарегистрироваться](:signUpLink)",
     "Don't import": "Не импортировать",

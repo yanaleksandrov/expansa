@@ -12,6 +12,7 @@
         "ext-pdo": "*",
         "ext-fileinfo": "*",
         "ext-curl": "*",
+        "ext-dom": "*",
         "ext-intl": "*",
         "ext-iconv": "*",
         "ext-openssl": "*",

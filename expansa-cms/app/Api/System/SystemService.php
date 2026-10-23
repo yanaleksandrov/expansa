@@ -28,7 +28,7 @@ use Expansa\Support\Arr;
  */
 final class SystemService
 {
-    private const REQUIREMENTS = ['connection', 'pdo', 'curl', 'mbstring', 'gd', 'memory', 'php', 'mysql'];
+    private const REQUIREMENTS = ['connection', 'pdo', 'curl', 'mbstring', 'dom', 'gd', 'memory', 'php', 'mysql'];
 
     /**
      * Checks the server + a candidate database connection against the minimum requirements.

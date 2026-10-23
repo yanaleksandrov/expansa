@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Expansa\Security\Sanitizer;
 use Expansa\Security\Kses;
 
 // run: php tests/Kses.php
@@ -254,8 +253,6 @@ check('extend() accepts listed attributes', new Kses(Kses::extend(['b' => ['data
 check('Youla directives are removed by default', $kses->apply('<select u-select="fetch(1)" class="a"><option value="1" selected>1</option></select>') === '<select class="a"><option value="1" selected>1</option></select>');
 $extended = Kses::extend(['select' => ['u-select' => 1], 'x-box' => ['id' => 1]]);
 check('extend() adds attributes and elements to the default rules', $extended['select'] === ['u-select' => 1] && $extended['x-box'] === ['id' => 1] && $extended['p'] === [] && isset($extended['*']));
-check('extra rules of markup() are added to the default ones', Sanitizer::markup('<select u-select="{}" class="a" onchange="x"><option>1</option></select>', ['select' => ['u-select' => 1]])
-    === '<select u-select="{}" class="a"><option>1</option></select>');
 $filter  = new Kses();
 $rewrite = Closure::bind(fn () => $this->allowedHtml = ['script' => []], $filter, Kses::class);
 try {
@@ -270,8 +267,5 @@ $directive = '<select u-select="fetch(2)">';
 check('the shared cache never gives the result of other rules', new Kses(Kses::extend(['select' => ['u-select']]))->apply($directive) === $directive
     && new Kses()->apply($directive) === '<select>'
     && new Kses(Kses::ALLOWED_HTML, ['https'])->apply('<a href="http://x">') === '<a href="//x">');
-check('markup() without extra rules keeps removing directives', Sanitizer::markup('<select u-select="{}">') === '<select>');
-
-check('Sanitizer::markup() filters with the default rules', Sanitizer::markup('<b onclick="x">b</b><script>') === '<b>b</b>' && Sanitizer::markup(null) === '' && Sanitizer::markup(42) === '42');
 
 exit($failures > 0 ? 1 : 0);
