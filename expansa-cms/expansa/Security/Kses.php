@@ -9,7 +9,6 @@ use LogicException;
 
 /**
  * HTML filter: keeps only allowed elements, attributes and URL protocols, disarms everything else.
- * Port of kses (https://sourceforge.net/projects/kses).
  *
  * @package Expansa\Security
  */
