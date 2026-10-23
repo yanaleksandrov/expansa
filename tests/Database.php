@@ -54,9 +54,10 @@ check('timestamps() are DATETIME', str_contains($db->queryString, '"created_at" 
 $schema->create('pairs', function (Expansa\Database\Schema\Table $table) {
     $table->int('a');
     $table->int('b');
+    $table->int('c');
     $table->index(['b', 'a']);
 });
-check('a composite index keeps its own column order', str_ends_with($db->queryString, '(`b`, `a`)'));
+check('a composite index keeps its own column order and only its columns', str_ends_with($db->queryString, '(`b`, `a`)'));
 
 check('bad connection options throw InvalidConnection', throws(fn () => new Builder(['driver' => 'nope', 'host' => 'x', 'database' => 'x']), InvalidConnection::class));
 
