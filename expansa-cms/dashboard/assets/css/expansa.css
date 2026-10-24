@@ -614,7 +614,7 @@ img:after {
 }
 .form-group .form-group-content {
   display: grid;
-  gap: 1.5rem;
+  gap: 1rem;
   min-width: 0;
 }
 .form-group--row {
@@ -3113,10 +3113,14 @@ body.is-unsaved .search .search-btn {
   display: grid;
   justify-items: center;
   width: 100%;
-  max-width: 20rem;
+  max-width: 28rem;
   margin: auto;
   padding: 1.5rem;
   text-align: center;
+  text-wrap: balance;
+}
+.expansa-main > .state {
+  transform: translateY(-42px);
 }
 @media (max-width: 1024px) {
   .state {

@@ -43,6 +43,41 @@ foreach ($parents as $id => $title) {
     $bases[$id] = Permalinks::around($paths[$id] ?? '', $post->id, $post->type)[0];
 }
 
+// a card of each taxonomy aside, under the details: a search on the server when the select has not every term,
+// a new term by its name when the viewer may add one
+$taxonomies = [];
+foreach ($terms as $field) {
+    $events       = [
+        ...($field->search ? [sprintf("search: (text) => \$ajax.post('terms/search', {taxonomy: %s, s: text}, null, {clearErrors: false})", json_encode($field->taxonomy->key))] : []),
+        ...($field->canCreate ? ["addable: (text) => ({text, value: 'new:' + text})"] : []),
+    ];
+    $taxonomies[] = [
+        'type'   => 'group',
+        'name'   => 'terms-' . $field->taxonomy->key,
+        'label'  => '',
+        'layout' => 'plain',
+        'class'  => 'post-editor-terms',
+        'fields' => [
+            [
+                'name'     => 'terms-' . $field->taxonomy->key,
+                'type'     => 'custom',
+                'callback' => function () use ($field, $events) {
+                    $name = 'terms[' . $field->taxonomy->key . '][]';
+                    ?>
+                    <h4 class="post-editor-eyebrow"><?php echo htmlspecialchars($field->taxonomy->labelNamePlural); ?></h4>
+                    <input type="hidden" name="<?php echo $name; ?>" value="">
+                    <select class="field" name="<?php echo $name; ?>" multiple aria-label="<?php echo htmlspecialchars($field->taxonomy->labelNamePlural); ?>" u-select="<?php echo htmlspecialchars('{showSearch: true, events: {' . implode(', ', $events) . '}}'); ?>">
+                        <?php foreach ($field->options as $id => $label) : ?>
+                            <option value="<?php echo $id; ?>"<?php echo in_array($id, $field->selected, true) ? ' selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <?php
+                },
+            ],
+        ],
+    ];
+}
+
 // the discussion and the activity tabs show the same comments
 $comments = Comment::getByPost($post->type, $post->id);
 
@@ -52,7 +87,8 @@ Form::assets('input', 'datetime-local');
 
 /**
  * Post editor: the bar with the way back and the public page over the tabs, the title, slug and content
- * in the main tab, the discussion in its own one, the publishing options and details aside.
+ * in the main tab, the discussion in its own one, the publishing options and details aside with a card
+ * of the terms of each taxonomy.
  *
  * @since 2027.1
  */
@@ -368,7 +404,7 @@ return Form::enqueue(
                 [
                     'name'     => 'properties',
                     'type'     => 'custom',
-                    'callback' => function () use ($post, $type, $parents, $parentSearch, $authors, $authorSearch, $select, $terms) {
+                    'callback' => function () use ($post, $type, $parents, $parentSearch, $authors, $authorSearch, $select) {
                         $statuses = Status::getStatuses();
                         $options  = function (array $options, int|string $value): void {
                             foreach ($options as $key => $label) {
@@ -401,25 +437,6 @@ return Form::enqueue(
                                     </select>
                                 </dd>
                             <?php endif; ?>
-                            <?php foreach ($terms as $field) : ?>
-                                <?php
-                                // a search on the server when the select has not every term, a new term by its name when the viewer may add one
-                                $events = [
-                                    ...($field->search ? [sprintf("search: (text) => \$ajax.post('terms/search', {taxonomy: %s, s: text}, null, {clearErrors: false})", json_encode($field->taxonomy->key))] : []),
-                                    ...($field->canCreate ? ["addable: (text) => ({text, value: 'new:' + text})"] : []),
-                                ];
-                                $name   = 'terms[' . $field->taxonomy->key . '][]';
-                                ?>
-                                <dt><i class="ph <?php echo $field->taxonomy->hierarchical ? 'ph-folders' : 'ph-tag'; ?>"></i><?php echo htmlspecialchars($field->taxonomy->labelNamePlural); ?></dt>
-                                <dd>
-                                    <input type="hidden" name="<?php echo $name; ?>" value="">
-                                    <select class="field field--xs" name="<?php echo $name; ?>" multiple aria-label="<?php echo htmlspecialchars($field->taxonomy->labelNamePlural); ?>" u-select="<?php echo htmlspecialchars('{showSearch: true, events: {' . implode(', ', $events) . '}}'); ?>">
-                                        <?php foreach ($field->options as $id => $label) : ?>
-                                            <option value="<?php echo $id; ?>"<?php echo in_array($id, $field->selected, true) ? ' selected' : ''; ?>><?php echo htmlspecialchars($label); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </dd>
-                            <?php endforeach; ?>
                             <dt><i class="ph ph-chats"></i><?php echo t('Discussion'); ?></dt>
                             <dd>
                                 <select class="post-editor-pill" name="discussion" aria-label="<?php echo t_attr('Discussion'); ?>">
@@ -450,6 +467,7 @@ return Form::enqueue(
                         <?php
                     },
                 ],
+                ...$taxonomies,
                 ...($post->id > 0 ? [
                     [
                         'name'     => 'manage',

@@ -188,7 +188,7 @@ return Form::enqueue(
                             new Line(
                                 icon: 'ph ph-plus',
                                 text: t('Created'),
-                                at: $term->createdAt,
+                                at: $term->createdAt?->format('Y-m-d H:i:s') ?? '',
                             ),
                         ];
                         echo view('parts/activity', ['lines' => Activity::timeline($term->table, $term->id, $lines)]);

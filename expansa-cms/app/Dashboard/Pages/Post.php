@@ -17,7 +17,8 @@ use Expansa\Http\Exceptions\NotFound;
 use Expansa\Http\Request;
 
 /**
- * Editor of a single post: its title, content and slug, the status, parent, terms and discussion in the side panel.
+ * Editor of a single post: its title, content and slug, the status, parent, discussion and a card
+ * of the terms of each taxonomy in the side panel.
  *
  * @package App\Dashboard
  */

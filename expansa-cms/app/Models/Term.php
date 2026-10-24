@@ -8,6 +8,7 @@ use App\Post\Taxonomy;
 use App\Post\Type;
 use App\Support\Activity;
 use App\Support\Permalinks;
+use DateTime;
 use Expansa\Database\Contracts\Fieldable;
 use Expansa\Database\FieldEav;
 use Expansa\Database\Model;
@@ -33,17 +34,17 @@ use PDO;
  *
  * Changes run the `termsChanged` hook with the key of the taxonomy.
  *
- * @property int      $id
- * @property string   $taxonomy    Key of the taxonomy.
- * @property string   $name
- * @property string   $slug
- * @property string   $description
- * @property int      $parentId    ID of the parent term, 0 for a top-level one.
- * @property int      $position    Order among the terms of the same parent.
- * @property int      $count       Number of the published posts with the term.
- * @property string   $createdAt
- * @property string   $updatedAt
- * @property FieldEav $field       Custom fields of the term.
+ * @property int           $id
+ * @property string        $taxonomy    Key of the taxonomy.
+ * @property string        $name
+ * @property string        $slug
+ * @property string        $description
+ * @property int           $parentId    ID of the parent term, 0 for a top-level one.
+ * @property int           $position    Order among the terms of the same parent.
+ * @property int           $count       Number of the published posts with the term.
+ * @property DateTime|null $createdAt
+ * @property DateTime|null $updatedAt
+ * @property FieldEav      $field       Custom fields of the term.
  *
  * @package App\Models
  */

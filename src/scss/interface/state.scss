@@ -2,11 +2,15 @@
   display: grid;
   justify-items: center;
   width: 100%;
-  max-width: 20rem;
+  max-width: 28rem;
   margin: auto;
   padding: 1.5rem;
   text-align: center;
-  //transform: translateY(-42px);
+  text-wrap: balance;
+
+  .expansa-main > & {
+    transform: translateY(-42px);
+  }
 
   @media (max-width: 1024px) {
     padding: 1rem;

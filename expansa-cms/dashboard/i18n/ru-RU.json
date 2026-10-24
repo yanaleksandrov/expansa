@@ -1800,5 +1800,10 @@
     "The address of the term: letters, numbers and hyphens. Leave it empty to make it from the name.": "Адрес термина: буквы, цифры и дефисы. Оставьте пустым, чтобы создать его из названия.",
     "The default term cannot be deleted.": "Термин по умолчанию удалить нельзя.",
     "Default": "По умолчанию",
+    "All Emails": "Все письма",
+    "Edit Email": "Редактировать письмо",
+    "Update Email": "Обновить письмо",
+    "View Email": "Просмотреть письмо",
+    "Save Email": "Сохранить письмо",
     "Use Latin letters, digits, hyphens, slashes and the tags :tags; :slug and :taxonomy are required.": "Используйте латинские буквы, цифры, дефисы, косые черты и теги :tags; :slug и :taxonomy обязательны."
 }

@@ -609,6 +609,31 @@ Lifecycle::phase('register', fn () => Is::installed(), function () {
         menuPosition: 30,
     );
 
+    // templates of the emails the site sends; the list is in the user panel menu, not in the main one
+    App\Post\Type::register(
+        key: 'emails',
+        labelName: t('Email'),
+        labelNamePlural: t('Emails'),
+        labelAllItems: t('All Emails'),
+        labelAdd: t('Add Email Template'),
+        labelEdit: t('Edit Email'),
+        labelUpdate: t('Update Email'),
+        labelView: t('View Email'),
+        labelSearch: t('Search emails'),
+        labelSave: t('Save Email'),
+        public: false,
+        hierarchical: false,
+        searchable: false,
+        showInMenu: false,
+        showInBar: false,
+        showInNavMenus: false,
+        canExport: true,
+        canImport: true,
+        canCreate: true,
+        capabilities: ['manage_options'],
+        menuIcon: 'ph ph-mailbox',
+    );
+
     // taxonomies; for the pages until the site has a type of posts
     App\Post\Taxonomy::register(
         key: 'categories',

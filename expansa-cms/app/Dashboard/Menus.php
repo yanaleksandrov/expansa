@@ -39,7 +39,7 @@ final class Menus
                 ],
                 [
                     'id'           => 'emails',
-                    'url'          => "edit?table=email",
+                    'url'          => 'edit?table=emails',
                     'title'        => t('Emails'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-mailbox',
