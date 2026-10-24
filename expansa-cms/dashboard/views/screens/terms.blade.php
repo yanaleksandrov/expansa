@@ -1,7 +1,7 @@
 <?php
 /**
  * Terms of a taxonomy: the form of a new term aside, the list of the terms with its header; the data comes
- * from App\Dashboard\Pages\Tables, the fields from the `terms-editor` form.
+ * from App\Dashboard\Pages\Tables, the fields from the `terms-creator` form.
  *
  * This template can be overridden by copying it to themes/yourtheme/dashboard/views/screens/terms.blade.php
  *
@@ -13,7 +13,7 @@ defined('EX_PATH') || exit;
 ?>
 <div class="terms">
     <div class="terms-side">
-        {!! form('terms-editor') !!}
+        {!! form('terms-creator') !!}
     </div>
     <div class="terms-main">
         <?php echo view('parts/table/table', ['table' => $table]); ?>

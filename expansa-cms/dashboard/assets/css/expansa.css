@@ -2342,14 +2342,6 @@ body.is-unsaved .search .search-btn {
   font-size: 0.75rem;
 }
 
-.term-editor {
-  max-width: 40rem;
-  padding: 1.5rem;
-}
-.term-editor .post-editor-head {
-  padding: 0;
-}
-
 .media-editor {
   display: grid;
   height: 100%;

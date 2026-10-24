@@ -1,33 +1,25 @@
 <?php
 
 use App\Dashboard\Pages\Term as Page;
-use App\Dashboard\Values\Crumb;
 use App\Post\Taxonomy;
 use Expansa\Builders\Form;
 
-$term     = Page::term(filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: 0, (string) filter_input(INPUT_GET, 'taxonomy'));
+$term     = Page::term(0, (string) filter_input(INPUT_GET, 'taxonomy'));
 $taxonomy = Taxonomy::get($term->taxonomy);
 $type     = (string) filter_input(INPUT_GET, 'type');
-$list     = url('dashboard/' . $taxonomy->url($type));
 
 /**
- * Term form: a new term beside the list of the terms of a taxonomy, or the saved term on its own page,
- * with the way back to the list and the button deleting it.
+ * Form of a new term beside the list of the terms of a taxonomy; a saved term opens in the `term-editor`.
  *
  * @since 2027.1
  */
 return Form::enqueue(
-    'terms-editor',
+    'terms-creator',
     [
         'class'           => 'dg g-6',
-        '@submit.prevent' => sprintf('$ajax.post("%s")', $term->id === 0 ? 'terms/create' : 'terms/update'),
+        '@submit.prevent' => '$ajax.post("terms/create")',
     ],
     [
-        [
-            'type'       => 'hidden',
-            'name'       => 'id',
-            'attributes' => ['type' => 'hidden', 'name' => 'id', 'value' => $term->id],
-        ],
         [
             'type'       => 'hidden',
             'name'       => 'taxonomy',
@@ -41,33 +33,9 @@ return Form::enqueue(
         [
             'name'     => 'header',
             'type'     => 'custom',
-            'callback' => function () use ($term, $taxonomy, $list) {
-                if ($term->id === 0) {
-                    ?>
-                    <h6><?php echo htmlspecialchars($taxonomy->labelAdd); ?></h6>
-                    <?php
-                    return;
-                }
-
-                $url = $term->url();
+            'callback' => function () use ($taxonomy) {
                 ?>
-                <div class="post-editor-head">
-                    <a class="btn btn--icon btn--xs" href="<?php echo $list; ?>" title="<?php echo t_attr('Back to :items', $taxonomy->labelNamePlural); ?>">
-                        <i class="ph ph-arrow-left"></i>
-                    </a>
-                    <?php
-                    echo view('parts/breadcrumbs', [
-                        'items' => [
-                            new Crumb($taxonomy->labelNamePlural, $list),
-                            new Crumb(
-                                label: $term->name,
-                                url: $url,
-                                attributes: $url !== '' ? ['target' => '_blank', 'title' => t('View')] : [],
-                            ),
-                        ],
-                    ]);
-                    ?>
-                </div>
+                <h6><?php echo htmlspecialchars($taxonomy->labelAdd); ?></h6>
                 <?php
             },
         ],
@@ -158,16 +126,10 @@ return Form::enqueue(
         [
             'name'     => 'actions',
             'type'     => 'custom',
-            'callback' => function () use ($term, $taxonomy, $type) {
-                $item = htmlspecialchars(json_encode(['id' => $term->id, 'type' => $type]));
+            'callback' => function () use ($taxonomy) {
                 ?>
                 <div class="df aic g-2">
-                    <button class="btn btn--primary" type="submit"><?php echo htmlspecialchars($term->id === 0 ? $taxonomy->labelAdd : t('Save')); ?></button>
-                    <?php if ($term->id > 0) : ?>
-                        <button class="btn btn--outline t-red ml-auto" type="button" @click="$dialog.confirm(texts.deleteItem, { action: texts.deletePermanently, danger: true }).then(ok => ok && $ajax.post('terms/delete', <?php echo $item; ?>))">
-                            <i class="ph ph-trash"></i> <?php echo t('Delete'); ?>
-                        </button>
-                    <?php endif; ?>
+                    <button class="btn btn--primary" type="submit"><?php echo htmlspecialchars($taxonomy->labelAdd); ?></button>
                 </div>
                 <?php
             },

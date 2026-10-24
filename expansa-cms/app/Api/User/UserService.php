@@ -781,7 +781,7 @@ final class UserService
             return $response->notify(t('You are not signed in as another user.'));
         }
 
-        return $response->redirect(url('dashboard/users'));
+        return $response->redirect(url('dashboard/edit?table=users'));
     }
 
     /**

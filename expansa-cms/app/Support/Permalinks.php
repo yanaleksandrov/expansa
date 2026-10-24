@@ -81,6 +81,23 @@ final class Permalinks
     }
 
     /**
+     * Get the URL of a term around its slug, for the slug field: up to the slug with the paths
+     * of the parents, and the rest after it.
+     *
+     * @param string $parents  Path of the parent, empty without one.
+     * @param string $taxonomy Key of the taxonomy.
+     * @return array{string, string}
+     */
+    public static function termAround(string $parents, string $taxonomy): array
+    {
+        $marker = "\x1A";
+
+        [$before, $after] = explode($marker, self::term(ltrim("$parents/$marker", '/'), $taxonomy), 2);
+
+        return [url($before), $after];
+    }
+
+    /**
      * Check the structures of the form: lower case, no slashes at the ends, only known tags,
      * `%slug%` in each and `%taxonomy%` in the one of the terms, so that two entries never get one URL.
      *

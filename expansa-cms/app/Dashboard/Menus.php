@@ -31,7 +31,7 @@ final class Menus
             [
                 [
                     'id'           => 'users',
-                    'url'          => 'users',
+                    'url'          => 'edit?table=users',
                     'title'        => t('Users'),
                     'capabilities' => ['manage_options'],
                     'icon'         => 'ph ph-users-three',

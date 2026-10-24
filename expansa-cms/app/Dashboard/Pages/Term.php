@@ -19,7 +19,7 @@ use Expansa\Http\Request;
 final class Term
 {
     /**
-     * Terms read in the request by ID: the page data and the `terms-editor` form ask for the same one.
+     * Terms read in the request by ID: the page data and the `term-editor` form ask for the same one.
      *
      * @var array<int, Entry>
      */

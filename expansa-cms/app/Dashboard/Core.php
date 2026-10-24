@@ -21,7 +21,6 @@ use App\Post\Taxonomy;
 use App\Tables\Plugins;
 use App\Tables\PluginsInstall;
 use App\Tables\Themes;
-use App\Tables\Users;
 use Expansa\Http\Request;
 
 /**
@@ -53,7 +52,7 @@ final class Core
                 default         => $data['user']->showname ?: $data['user']->login,
             },
             // the account of another user is one of the users
-            menu: fn (Request $request) => isset($request->query['new']) || ($request->getInt('id') > 0 && $request->getInt('id') !== User::current()?->id) ? 'users' : 'profile',
+            menu: fn (Request $request) => isset($request->query['new']) || ($request->getInt('id') > 0 && $request->getInt('id') !== User::current()?->id) ? 'edit?table=users' : 'profile',
         );
         Dashboard::page(
             slug: 'comment',
@@ -92,7 +91,6 @@ final class Core
             },
         );
         Dashboard::page('edit', view: Tables::view(...));
-        Dashboard::page('users', view: 'screens/edit');
         Dashboard::page('plugins-install', surface: Surface::Muted);
         Dashboard::page('site-health', surface: Surface::Muted);
         Dashboard::page('updates', surface: Surface::Muted);
@@ -107,7 +105,6 @@ final class Core
         Dashboard::data('site-health', SiteHealth::data(...));
         Dashboard::data('updates', Updates::data(...));
         Dashboard::data('edit', Tables::data(...));
-        Dashboard::data('users', fn () => ['table' => new Users()]);
         Dashboard::data('plugins', fn () => ['table' => new Plugins()]);
         Dashboard::data('plugins-install', fn () => ['table' => new PluginsInstall()]);
         Dashboard::data('themes', fn () => ['table' => new Themes()]);
