@@ -2318,25 +2318,25 @@ body.is-unsaved .search .search-btn {
   flex-wrap: wrap;
   height: 100%;
 }
-.terms-side {
+.terms .terms-side {
   flex: 1;
   min-width: 20rem;
   position: relative;
   background-color: var(--expansa-bg);
   border-inline-end: 1px solid var(--expansa-border);
   margin-inline-end: -1px;
-  padding: 1.75rem 1.75rem 1.5rem;
+  padding: 1.5rem;
 }
 @media (max-width: 1024px) {
-  .terms-side {
-    padding: 1.25rem;
+  .terms .terms-side {
+    padding: 1rem;
   }
 }
-.terms-main {
+.terms .terms-main {
   flex: 1;
   min-width: 66.6666666%;
 }
-.terms-note {
+.terms .terms-note {
   padding: 1rem 1.5rem;
   color: var(--expansa-text-muted);
   font-size: 0.75rem;
@@ -2344,7 +2344,7 @@ body.is-unsaved .search .search-btn {
 
 .term-editor {
   max-width: 40rem;
-  padding: 1.75rem;
+  padding: 1.5rem;
 }
 .term-editor .post-editor-head {
   padding: 0;

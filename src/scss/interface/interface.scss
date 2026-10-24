@@ -938,26 +938,26 @@
   flex-wrap: wrap;
   height: 100%;
 
-  &-side {
+  .terms-side {
     flex: 1;
     min-width: 20rem;
     position: relative;
     background-color: var(--expansa-bg);
     border-inline-end: 1px solid var(--expansa-border);
     margin-inline-end: -1px;
-    padding: 1.75rem 1.75rem 1.5rem;
+    padding: 1.5rem;
     
     @media (max-width: 1024px) {
-      padding: 1.25rem;
+      padding: 1rem;
     }
   }
 
-  &-main {
+  .terms-main {
     flex: 1;
     min-width: 66.6666666%;
   }
 
-  &-note {
+  .terms-note {
     padding: 1rem 1.5rem;
     color: var(--expansa-text-muted);
     font-size: 0.75rem;
@@ -966,7 +966,7 @@
 
 .term-editor {
   max-width: 40rem;
-  padding: 1.75rem;
+  padding: 1.5rem;
 
   .post-editor-head {
     padding: 0;
